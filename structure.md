@@ -6,7 +6,6 @@ Markdown powered task manager tool.
 
 Start Date: 2025-08-17
 Working Days: 7
-Last Updated: 2026-01-24T22:32:15.764Z
 
 Assignees:
 - Alice
@@ -21,7 +20,9 @@ Tags:
 - Frontend
 - Infrastructure
 
-<!-- Notes -->
+Links:
+- [studiowebux.com](https://studiowebux.com)
+
 # Notes
 
 ## Is it trully cleaner ?

@@ -6,6 +6,7 @@ import {
   Note,
   ProjectConfig,
   ProjectInfo,
+  ProjectLink,
   StickyNote,
   Task,
   TaskConfig,
@@ -1094,6 +1095,14 @@ export class MarkdownParser {
       content += "\n";
     }
 
+    if (config.links && config.links.length > 0) {
+      content += "Links:\n";
+      config.links.forEach((link) => {
+        content += `- [${link.title}](${link.url})\n`;
+      });
+      content += "\n";
+    }
+
     // Add notes section
     content += "<!-- Notes -->\n# Notes\n\n";
     for (const note of projectInfo.notes) {
@@ -1391,6 +1400,7 @@ export class MarkdownParser {
       workingDaysPerWeek: 5,
       assignees: [],
       tags: [],
+      links: [],
     };
 
     let inConfigSection = false;
@@ -1420,12 +1430,20 @@ export class MarkdownParser {
           currentSection = "assignees";
         } else if (line === "Tags:") {
           currentSection = "tags";
+        } else if (line === "Links:") {
+          currentSection = "links";
         } else if (line.startsWith("- ") && currentSection) {
           const value = line.substring(2).trim();
           if (currentSection === "assignees") {
             config.assignees!.push(value);
           } else if (currentSection === "tags") {
             config.tags!.push(value);
+          } else if (currentSection === "links") {
+            // Parse markdown link format: [Title](URL)
+            const linkMatch = value.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+            if (linkMatch) {
+              config.links!.push({ title: linkMatch[1], url: linkMatch[2] });
+            }
           }
         } else if (line === "") {
           currentSection = "";
@@ -1631,6 +1649,14 @@ export class MarkdownParser {
           result.push("");
         }
 
+        if (config.links && config.links.length > 0) {
+          result.push("Links:");
+          config.links.forEach((link) => {
+            result.push(`- [${link.title}](${link.url})`);
+          });
+          result.push("");
+        }
+
         configInserted = true;
 
         // Skip existing config content
@@ -1670,6 +1696,14 @@ export class MarkdownParser {
           const uniqueTags = [...new Set(config.tags)].sort();
           uniqueTags.forEach((tag) => {
             result.push(`- ${tag}`);
+          });
+          result.push("");
+        }
+
+        if (config.links && config.links.length > 0) {
+          result.push("Links:");
+          config.links.forEach((link) => {
+            result.push(`- [${link.title}](${link.url})`);
           });
           result.push("");
         }
@@ -2124,6 +2158,14 @@ export class MarkdownParser {
       content += `- ${tag}\n`;
     });
     content += "\n";
+
+    if (config.links && config.links.length > 0) {
+      content += "Links:\n";
+      config.links.forEach((link) => {
+        content += `- [${link.title}](${link.url})\n`;
+      });
+      content += "\n";
+    }
 
     // Add notes section
     content += "<!-- Notes -->\n# Notes\n\n";

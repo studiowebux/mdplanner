@@ -112,10 +112,16 @@ export interface ProjectInfo {
   c4Components?: C4Component[];
 }
 
+export interface ProjectLink {
+  title: string;
+  url: string;
+}
+
 export interface ProjectConfig {
   startDate?: string;
   workingDaysPerWeek?: number;
   assignees?: string[];
   tags?: string[];
   lastUpdated?: string;
+  links?: ProjectLink[];
 }

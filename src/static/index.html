@@ -817,13 +817,47 @@
         <div id="summaryView" class="hidden pb-16">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
                 <!-- Project Info -->
-                <div class="lg:col-span-2">
+                <div class="lg:col-span-2 space-y-4">
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6">
                         <h2 id="projectName" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Project Name</h2>
                         <div id="projectDescription" class="prose prose-gray dark:prose-invert max-w-none">
                             <p class="text-gray-600 dark:text-gray-400">Loading project description...</p>
                         </div>
-                        <div id="projectLastUpdated" class="mt-4 text-xs text-gray-500 dark:text-gray-400"></div>
+
+                        <!-- Project Dates -->
+                        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
+                            <div>
+                                <span class="font-medium">Started:</span>
+                                <span id="summaryStartDate">-</span>
+                            </div>
+                            <div>
+                                <span class="font-medium">Last Updated:</span>
+                                <span id="summaryLastUpdated">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Useful Links -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Useful Links</h3>
+                            <button id="addLinkBtn" class="text-sm text-primary hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">+ Add Link</button>
+                        </div>
+                        <div id="projectLinks" class="space-y-2">
+                            <p class="text-sm text-gray-500 dark:text-gray-400 italic">No links added yet.</p>
+                        </div>
+
+                        <!-- Add Link Form (hidden by default) -->
+                        <div id="addLinkForm" class="hidden mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <input type="text" id="linkTitle" placeholder="Title" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <input type="url" id="linkUrl" placeholder="https://..." class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+                            <div class="flex justify-end gap-2 mt-3">
+                                <button id="cancelLinkBtn" type="button" class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">Cancel</button>
+                                <button id="saveLinkBtn" type="button" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md hover:bg-blue-600">Save</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

@@ -249,6 +249,17 @@ class TaskManager {
       .getElementById("saveProjectConfig")
       .addEventListener("click", () => this.saveProjectConfig());
 
+    // Project links events
+    document
+      .getElementById("addLinkBtn")
+      .addEventListener("click", () => this.toggleAddLinkForm());
+    document
+      .getElementById("cancelLinkBtn")
+      .addEventListener("click", () => this.toggleAddLinkForm());
+    document
+      .getElementById("saveLinkBtn")
+      .addEventListener("click", () => this.addLink());
+
     // Dependency autocomplete events
     document
       .getElementById("taskBlockedBy")
@@ -778,14 +789,94 @@ class TaskManager {
       `${progressPercent}%`;
     document.getElementById("progressBar").style.width = `${progressPercent}%`;
 
-    // Update last updated timestamp
-    const lastUpdatedEl = document.getElementById("projectLastUpdated");
+    // Update project dates in summary view
+    const startDateEl = document.getElementById("summaryStartDate");
+    const lastUpdatedEl = document.getElementById("summaryLastUpdated");
+
+    if (this.projectConfig && this.projectConfig.startDate) {
+      const date = new Date(this.projectConfig.startDate);
+      startDateEl.textContent = date.toLocaleDateString();
+    } else {
+      startDateEl.textContent = "-";
+    }
+
     if (this.projectConfig && this.projectConfig.lastUpdated) {
       const date = new Date(this.projectConfig.lastUpdated);
-      lastUpdatedEl.textContent = `Last updated: ${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+      lastUpdatedEl.textContent = `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
     } else {
-      lastUpdatedEl.textContent = "";
+      lastUpdatedEl.textContent = "-";
     }
+
+    // Render project links
+    this.renderProjectLinks();
+  }
+
+  renderProjectLinks() {
+    const container = document.getElementById("projectLinks");
+    const links = this.projectConfig?.links || [];
+
+    if (links.length === 0) {
+      container.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400 italic">No links added yet.</p>';
+      return;
+    }
+
+    container.innerHTML = links.map((link, index) => `
+      <div class="flex items-center justify-between group">
+        <a href="${link.url}" target="_blank" rel="noopener noreferrer"
+           class="text-sm text-primary hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 truncate flex-1">
+          ${link.title}
+        </a>
+        <button onclick="taskManager.removeLink(${index})"
+                class="ml-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                title="Remove link">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    `).join("");
+  }
+
+  toggleAddLinkForm() {
+    const form = document.getElementById("addLinkForm");
+    form.classList.toggle("hidden");
+    if (!form.classList.contains("hidden")) {
+      document.getElementById("linkTitle").focus();
+    }
+  }
+
+  async addLink() {
+    const titleInput = document.getElementById("linkTitle");
+    const urlInput = document.getElementById("linkUrl");
+    const title = titleInput.value.trim();
+    const url = urlInput.value.trim();
+
+    if (!title || !url) {
+      this.showToast("Please enter both title and URL", true);
+      return;
+    }
+
+    if (!this.projectConfig.links) {
+      this.projectConfig.links = [];
+    }
+    this.projectConfig.links.push({ title, url });
+
+    await this.saveProjectConfig();
+    this.renderProjectLinks();
+
+    // Reset form
+    titleInput.value = "";
+    urlInput.value = "";
+    document.getElementById("addLinkForm").classList.add("hidden");
+    this.showToast("Link added");
+  }
+
+  async removeLink(index) {
+    if (!this.projectConfig.links) return;
+    this.projectConfig.links.splice(index, 1);
+    await this.saveProjectConfig();
+    this.renderProjectLinks();
+    this.showToast("Link removed");
   }
 
   renderDynamicSectionCounts(allTasks) {
@@ -2296,13 +2387,15 @@ class TaskManager {
   }
 
   async saveProjectConfig() {
+    const startDateInput = document.getElementById("projectStartDate");
+    const workingDaysInput = document.getElementById("workingDays");
+
     const config = {
-      startDate: document.getElementById("projectStartDate").value,
-      workingDaysPerWeek: parseInt(
-        document.getElementById("workingDays").value,
-      ),
+      startDate: startDateInput ? startDateInput.value : this.projectConfig?.startDate,
+      workingDaysPerWeek: workingDaysInput ? parseInt(workingDaysInput.value) : this.projectConfig?.workingDaysPerWeek || 5,
       assignees: this.projectConfig?.assignees || [],
       tags: this.projectConfig?.tags || [],
+      links: this.projectConfig?.links || [],
     };
 
     console.log("Saving config:", config);
