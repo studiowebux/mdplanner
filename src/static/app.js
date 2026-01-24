@@ -54,8 +54,23 @@ class TaskManager {
     this.bindEvents();
     await this.loadProjectConfig(); // Load config first
     await this.loadSections(); // Load sections from board
-    this.switchView("summary"); // Open on summary page
-    this.loadTasks();
+    const savedView = localStorage.getItem("mdplanner_current_view") || "summary";
+    this.switchView(savedView); // Restore last view or default to summary
+    await this.loadTasks();
+    this.checkTaskHashOnLoad();
+  }
+
+  checkTaskHashOnLoad() {
+    const hash = window.location.hash;
+    if (hash.startsWith("#task=")) {
+      const taskId = hash.substring(6); // Remove "#task="
+      const task = this.findTaskById(taskId);
+      if (task) {
+        // Switch to list view for better task visibility
+        this.switchView("list");
+        this.openTaskModal(task);
+      }
+    }
   }
 
   bindEvents() {
@@ -510,6 +525,13 @@ class TaskManager {
       }
     });
 
+    // Close modals on ESC key
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        this.closeAllModals();
+      }
+    });
+
     // Setup drag and drop for board view
     this.setupDragAndDrop();
   }
@@ -548,6 +570,7 @@ class TaskManager {
 
   async switchView(view) {
     this.currentView = view;
+    localStorage.setItem("mdplanner_current_view", view);
     // Set data attribute on body for CSS targeting
     document.body.setAttribute('data-current-view', view);
 
@@ -754,6 +777,15 @@ class TaskManager {
     document.getElementById("progressPercent").textContent =
       `${progressPercent}%`;
     document.getElementById("progressBar").style.width = `${progressPercent}%`;
+
+    // Update last updated timestamp
+    const lastUpdatedEl = document.getElementById("projectLastUpdated");
+    if (this.projectConfig && this.projectConfig.lastUpdated) {
+      const date = new Date(this.projectConfig.lastUpdated);
+      lastUpdatedEl.textContent = `Last updated: ${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+    } else {
+      lastUpdatedEl.textContent = "";
+    }
   }
 
   renderDynamicSectionCounts(allTasks) {
@@ -933,6 +965,19 @@ class TaskManager {
     const container = document.getElementById("listContainer");
     container.innerHTML = "";
 
+    // Show no results message when search is active but no tasks match
+    if (this.searchQuery && this.filteredTasks.length === 0) {
+      container.innerHTML = `
+        <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+          <svg class="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <p class="text-lg font-medium">No tasks found</p>
+          <p class="text-sm mt-1">No tasks match "${this.searchQuery}"</p>
+        </div>`;
+      return;
+    }
+
     // Group tasks by section
     const sections = this.sections || [];
 
@@ -1062,8 +1107,14 @@ class TaskManager {
                     `
                         : ""
                     }
+                    <button onclick="taskManager.copyTaskLink('${task.id}')"
+                            class="text-gray-400 hover:text-purple-500 transition-colors" title="Copy Link">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                        </svg>
+                    </button>
                     <button onclick="taskManager.editTask('${task.id}')"
-                            class="text-gray-400 hover:text-primary transition-colors">
+                            class="text-gray-400 hover:text-primary transition-colors" title="Edit">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                         </svg>
@@ -1084,6 +1135,20 @@ class TaskManager {
   renderBoardView() {
     const sections = this.sections || [];
     const container = document.getElementById("boardContainer");
+
+    // Show no results message when search is active but no tasks match
+    if (this.searchQuery && this.filteredTasks.length === 0) {
+      container.className = "flex items-center justify-center h-64";
+      container.innerHTML = `
+        <div class="text-center text-gray-500 dark:text-gray-400">
+          <svg class="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <p class="text-lg font-medium">No tasks found</p>
+          <p class="text-sm mt-1">No tasks match "${this.searchQuery}"</p>
+        </div>`;
+      return;
+    }
 
     if (sections.length === 0) {
       container.className = "flex items-center justify-center h-64";
@@ -1160,14 +1225,20 @@ class TaskManager {
                     `
                         : ""
                     }
+                    <button onclick="taskManager.copyTaskLink('${task.id}')"
+                            class="text-gray-400 hover:text-purple-500 transition-colors" title="Copy Link">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                        </svg>
+                    </button>
                     <button onclick="taskManager.editTask('${task.id}')"
-                            class="text-gray-400 hover:text-primary transition-colors">
+                            class="text-gray-400 hover:text-primary transition-colors" title="Edit">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                         </svg>
                     </button>
                     <button onclick="taskManager.deleteTask('${task.id}')"
-                            class="text-gray-400 hover:text-red-500 transition-colors">
+                            class="text-gray-400 hover:text-red-500 transition-colors" title="Delete">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
@@ -1456,6 +1527,36 @@ class TaskManager {
     modal.classList.remove("flex");
     this.editingTask = null;
     this.parentTaskId = null;
+    // Clear task hash from URL
+    if (window.location.hash.startsWith("#task=")) {
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+  }
+
+  closeAllModals() {
+    const modals = [
+      "taskModal",
+      "noteModal",
+      "goalModal",
+      "stickyNoteModal",
+      "mindmapModal",
+      "c4ComponentModal",
+      "customSectionModal",
+      "descriptionModal"
+    ];
+    modals.forEach(id => {
+      const modal = document.getElementById(id);
+      if (modal && !modal.classList.contains("hidden")) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+    });
+    // Clear any modal state
+    this.editingTask = null;
+    this.parentTaskId = null;
+    if (window.location.hash.startsWith("#task=")) {
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
   }
 
   async handleTaskSubmit(e) {
@@ -1522,8 +1623,41 @@ class TaskManager {
   async editTask(taskId) {
     const task = this.findTaskById(taskId);
     if (task) {
+      history.replaceState(null, "", `#task=${taskId}`);
       await this.openTaskModal(task);
     }
+  }
+
+  copyTaskLink(taskId) {
+    const url = `${window.location.origin}${window.location.pathname}#task=${taskId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      this.showToast("Link copied to clipboard");
+    }).catch(err => {
+      console.error("Failed to copy link:", err);
+      this.showToast("Failed to copy link", true);
+    });
+  }
+
+  showToast(message, isError = false) {
+    // Remove existing toast if any
+    const existing = document.getElementById("toast-notification");
+    if (existing) existing.remove();
+
+    const toast = document.createElement("div");
+    toast.id = "toast-notification";
+    toast.className = `fixed bottom-16 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-md text-sm font-medium z-50 transition-opacity duration-300 ${
+      isError
+        ? "bg-red-600 text-white"
+        : "bg-gray-800 dark:bg-gray-700 text-white"
+    }`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // Fade out and remove after 2 seconds
+    setTimeout(() => {
+      toast.style.opacity = "0";
+      setTimeout(() => toast.remove(), 300);
+    }, 2000);
   }
 
   async addSubtask(parentTaskId) {
@@ -2880,6 +3014,11 @@ class TaskManager {
       this.filteredTasks = this.tasks;
     } else {
       this.filteredTasks = this.filterTasksRecursive(this.tasks);
+      // Auto-switch to list view when searching from non-task pages
+      if (!["list", "board"].includes(this.currentView)) {
+        this.switchView("list");
+        return; // switchView will call renderTasks
+      }
     }
     this.renderTasks();
   }
@@ -2992,6 +3131,22 @@ class TaskManager {
 
     activeContent.classList.remove("hidden");
     document.getElementById("activeNoteTitle").value = activeNote.title;
+
+    // Display note metadata
+    const formatDate = (isoString) => {
+      if (!isoString) return "";
+      const date = new Date(isoString);
+      return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    };
+    document.getElementById("noteCreatedAt").textContent = activeNote.createdAt
+      ? `Created: ${formatDate(activeNote.createdAt)}`
+      : "";
+    document.getElementById("noteUpdatedAt").textContent = activeNote.updatedAt
+      ? `Updated: ${formatDate(activeNote.updatedAt)}`
+      : "";
+    document.getElementById("noteRevision").textContent = activeNote.revision
+      ? `Rev: ${activeNote.revision}`
+      : "";
 
     // Check if we should use enhanced mode
     const isEnhanced = this.enhancedMode && activeNote.mode === 'enhanced';

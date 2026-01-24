@@ -685,7 +685,7 @@
                         
                         <!-- Search - compact -->
                         <div class="relative hidden lg:block">
-                            <input type="text" id="searchInput" placeholder="Search..." class="w-40 pl-8 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <input type="text" id="searchInput" placeholder="Search tasks..." class="w-40 pl-8 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                             <svg class="absolute left-2.5 top-2 w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
@@ -807,14 +807,14 @@
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
+    <main class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8 pb-16">
         <!-- Loading State -->
         <div id="loading" class="flex justify-center items-center h-64">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
 
         <!-- Summary View -->
-        <div id="summaryView" class="hidden">
+        <div id="summaryView" class="hidden pb-16">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
                 <!-- Project Info -->
                 <div class="lg:col-span-2">
@@ -823,6 +823,7 @@
                         <div id="projectDescription" class="prose prose-gray dark:prose-invert max-w-none">
                             <p class="text-gray-600 dark:text-gray-400">Loading project description...</p>
                         </div>
+                        <div id="projectLastUpdated" class="mt-4 text-xs text-gray-500 dark:text-gray-400"></div>
                     </div>
                 </div>
 
@@ -876,7 +877,7 @@
         </div>
 
         <!-- List View -->
-        <div id="listView" class="hidden">
+        <div id="listView" class="hidden pb-16">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Tasks</h2>
@@ -888,14 +889,14 @@
         </div>
 
         <!-- Board View -->
-        <div id="boardView" class="hidden">
+        <div id="boardView" class="hidden pb-16">
             <div id="boardContainer" class="grid gap-4 lg:gap-6 auto-cols-min grid-flow-col overflow-x-auto pb-4">
                 <!-- Columns will be generated dynamically -->
             </div>
         </div>
 
         <!-- Config View -->
-        <div id="configView" class="hidden">
+        <div id="configView" class="hidden pb-16">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Project Configuration</h2>
@@ -997,7 +998,7 @@
         </div>
 
         <!-- Notes View -->
-        <div id="notesView" class="hidden">
+        <div id="notesView" class="hidden pb-16">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Notes</h2>
@@ -1052,7 +1053,14 @@
                                     </button>
                                 </div>
                             </div>
-                            
+
+                            <!-- Note metadata -->
+                            <div id="noteMetadata" class="text-xs text-gray-500 dark:text-gray-400 mb-4 flex flex-wrap gap-4">
+                                <span id="noteCreatedAt"></span>
+                                <span id="noteUpdatedAt"></span>
+                                <span id="noteRevision"></span>
+                            </div>
+
                             <!-- Enhanced Editor Mode -->
                             <div id="enhancedNoteEditor" class="hidden">
                                 <div class="flex justify-between items-center mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -1105,7 +1113,7 @@
         </div>
 
         <!-- Goals View -->
-        <div id="goalsView" class="hidden">
+        <div id="goalsView" class="hidden pb-16">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Goals</h2>
@@ -1145,7 +1153,7 @@
         </div>
 
         <!-- Canvas View -->
-        <div id="canvasView" class="hidden">
+        <div id="canvasView" class="hidden pb-16">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Canvas</h2>
@@ -1182,7 +1190,7 @@
         </div>
 
         <!-- Mindmap View -->
-        <div id="mindmapView" class="hidden">
+        <div id="mindmapView" class="hidden pb-16">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Mindmap</h2>
@@ -1239,7 +1247,7 @@
         </div>
 
         <!-- C4 Architecture View -->
-        <div id="c4View" class="hidden">
+        <div id="c4View" class="hidden pb-16">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                     <div class="flex items-center space-x-4">
@@ -1326,7 +1334,7 @@
         </div>
 
         <!-- Timeline View -->
-        <div id="timelineView" class="hidden">
+        <div id="timelineView" class="hidden pb-16">
 
             <!-- Timeline Configuration -->
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-6 p-4 sm:p-6">
@@ -1410,23 +1418,25 @@
 
     <!-- Note Modal -->
     <div id="noteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <h3 id="noteModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Add Note</h3>
             </div>
-            <form id="noteForm" class="p-6 space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
-                    <input type="text" id="noteTitle" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content</label>
-                    <textarea id="noteContent" rows="10" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Write your note content here... (Markdown supported)"></textarea>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">You can use Markdown formatting</p>
+            <form id="noteForm" class="flex flex-col flex-1 overflow-hidden">
+                <div class="p-6 space-y-4 overflow-y-auto flex-1">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                        <input type="text" id="noteTitle" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content</label>
+                        <textarea id="noteContent" rows="10" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Write your note content here... (Markdown supported)"></textarea>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">You can use Markdown formatting</p>
+                    </div>
                 </div>
 
-                <div class="flex justify-end space-x-3 pt-4">
+                <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex-shrink-0">
                     <button type="button" id="cancelNoteBtn" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                         Cancel
                     </button>
@@ -1440,59 +1450,61 @@
 
     <!-- Goal Modal -->
     <div id="goalModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <h3 id="goalModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Add Goal</h3>
             </div>
-            <form id="goalForm" class="p-6 space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
-                    <input type="text" id="goalTitle" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4">
+            <form id="goalForm" class="flex flex-col flex-1 overflow-hidden">
+                <div class="p-6 space-y-4 overflow-y-auto flex-1">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
-                        <select id="goalType" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                            <option value="project">Project</option>
-                            <option value="enterprise">Enterprise</option>
-                        </select>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                        <input type="text" id="goalTitle" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                     </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+                            <select id="goalType" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="project">Project</option>
+                                <option value="enterprise">Enterprise</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                            <select id="goalStatus" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="planning">Planning</option>
+                                <option value="on-track">On Track</option>
+                                <option value="at-risk">At Risk</option>
+                                <option value="late">Late</option>
+                                <option value="success">Success</option>
+                                <option value="failed">Failed</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-                        <select id="goalStatus" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                            <option value="planning">Planning</option>
-                            <option value="on-track">On Track</option>
-                            <option value="at-risk">At Risk</option>
-                            <option value="late">Late</option>
-                            <option value="success">Success</option>
-                            <option value="failed">Failed</option>
-                        </select>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">KPI (Key Performance Indicator)</label>
+                        <input type="text" id="goalKpi" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g., 25% increase in sales, 100% feature completion">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
+                            <input type="date" id="goalStartDate" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
+                            <input type="date" id="goalEndDate" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                        <textarea id="goalDescription" rows="4" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Describe the goal and what success looks like..."></textarea>
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">KPI (Key Performance Indicator)</label>
-                    <input type="text" id="goalKpi" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g., 25% increase in sales, 100% feature completion">
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
-                        <input type="date" id="goalStartDate" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
-                        <input type="date" id="goalEndDate" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                    </div>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                    <textarea id="goalDescription" rows="4" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Describe the goal and what success looks like..."></textarea>
-                </div>
-
-                <div class="flex justify-end space-x-3 pt-4">
+                <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex-shrink-0">
                     <button type="button" id="cancelGoalBtn" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                         Cancel
                     </button>
@@ -1506,23 +1518,25 @@
 
     <!-- Mindmap Modal -->
     <div id="mindmapModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <h3 id="mindmapModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Add Mindmap</h3>
             </div>
-            <form id="mindmapForm" class="p-6 space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
-                    <input type="text" id="mindmapTitle" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Enter mindmap title...">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Structure (as bullet points)</label>
-                    <textarea id="mindmapStructure" required rows="8" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="- Main Topic&#10;  - Subtopic 1&#10;  - Subtopic 2&#10;    - Detail 1&#10;    - Detail 2"></textarea>
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Use bullet points (-) and indentation to create hierarchy</p>
+            <form id="mindmapForm" class="flex flex-col flex-1 overflow-hidden">
+                <div class="p-6 space-y-4 overflow-y-auto flex-1">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                        <input type="text" id="mindmapTitle" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Enter mindmap title...">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Structure (as bullet points)</label>
+                        <textarea id="mindmapStructure" required rows="8" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="- Main Topic&#10;  - Subtopic 1&#10;  - Subtopic 2&#10;    - Detail 1&#10;    - Detail 2"></textarea>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Use bullet points (-) and indentation to create hierarchy</p>
+                    </div>
                 </div>
 
-                <div class="flex justify-end space-x-3 pt-4">
+                <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex-shrink-0">
                     <button type="button" id="cancelMindmapBtn" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                         Cancel
                     </button>
@@ -1536,29 +1550,31 @@
 
     <!-- Sticky Note Modal -->
     <div id="stickyNoteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <h3 id="stickyNoteModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Add Sticky Note</h3>
             </div>
-            <form id="stickyNoteForm" class="p-6 space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content</label>
-                    <textarea id="stickyNoteContent" required rows="4" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Enter sticky note content..."></textarea>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
-                    <div class="flex space-x-2">
-                        <button type="button" class="color-option w-8 h-8 rounded border-2 border-gray-300" data-color="yellow" style="background-color: #fef3c7;"></button>
-                        <button type="button" class="color-option w-8 h-8 rounded border-2 border-gray-300" data-color="pink" style="background-color: #fce7f3;"></button>
-                        <button type="button" class="color-option w-8 h-8 rounded border-2 border-gray-300" data-color="blue" style="background-color: #dbeafe;"></button>
-                        <button type="button" class="color-option w-8 h-8 rounded border-2 border-gray-300" data-color="green" style="background-color: #d1fae5;"></button>
-                        <button type="button" class="color-option w-8 h-8 rounded border-2 border-gray-300" data-color="purple" style="background-color: #e9d5ff;"></button>
-                        <button type="button" class="color-option w-8 h-8 rounded border-2 border-gray-300" data-color="orange" style="background-color: #fed7aa;"></button>
+            <form id="stickyNoteForm" class="flex flex-col flex-1 overflow-hidden">
+                <div class="p-6 space-y-4 overflow-y-auto flex-1">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content</label>
+                        <textarea id="stickyNoteContent" required rows="4" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Enter sticky note content..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
+                        <div class="flex space-x-2">
+                            <button type="button" class="color-option w-8 h-8 rounded border-2 border-gray-300" data-color="yellow" style="background-color: #fef3c7;"></button>
+                            <button type="button" class="color-option w-8 h-8 rounded border-2 border-gray-300" data-color="pink" style="background-color: #fce7f3;"></button>
+                            <button type="button" class="color-option w-8 h-8 rounded border-2 border-gray-300" data-color="blue" style="background-color: #dbeafe;"></button>
+                            <button type="button" class="color-option w-8 h-8 rounded border-2 border-gray-300" data-color="green" style="background-color: #d1fae5;"></button>
+                            <button type="button" class="color-option w-8 h-8 rounded border-2 border-gray-300" data-color="purple" style="background-color: #e9d5ff;"></button>
+                            <button type="button" class="color-option w-8 h-8 rounded border-2 border-gray-300" data-color="orange" style="background-color: #fed7aa;"></button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex justify-end space-x-3 pt-4">
+                <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex-shrink-0">
                     <button type="button" id="cancelStickyNoteBtn" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                         Cancel
                     </button>
@@ -1647,11 +1663,12 @@
 
     <!-- Task Modal -->
     <div id="taskModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <h3 id="modalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Add Task</h3>
             </div>
-            <form id="taskForm" class="p-6 space-y-4">
+            <form id="taskForm" class="flex flex-col flex-1 overflow-hidden">
+            <div class="p-6 space-y-4 overflow-y-auto flex-1">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
                     <input type="text" id="taskTitle" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
@@ -1727,8 +1744,9 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
                     <textarea id="taskDescription" rows="3" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
                 </div>
+            </div>
 
-                <div class="flex justify-end space-x-3 pt-4">
+                <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex-shrink-0">
                     <button type="button" id="cancelBtn" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                         Cancel
                     </button>
@@ -1739,6 +1757,12 @@
             </form>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer id="app-footer" class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-2 px-4 text-xs text-gray-500 dark:text-gray-400 flex justify-between items-center z-40">
+        <span>MD Planner v0.1.0</span>
+        <a href="https://github.com/studiowebux/mdplanner" target="_blank" rel="noopener noreferrer" class="hover:text-primary dark:hover:text-blue-400 transition-colors">GitHub</a>
+    </footer>
 
     <script src="app.js"></script>
 </body>

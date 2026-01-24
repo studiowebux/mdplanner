@@ -489,24 +489,42 @@ export class MarkdownParser {
           i++;
         }
 
-        // Check for existing ID in comment format <!-- id: note_xxx -->
+        // Check for existing ID and metadata in comment format
+        // Format: <!-- id: note_xxx | created: ISO | updated: ISO | rev: N -->
         let noteId = this.generateNoteId();
+        let createdAt = new Date().toISOString();
+        let updatedAt = new Date().toISOString();
+        let revision = 1;
         let actualContent = noteContent.join("\n").trim();
 
-        const idMatch = actualContent.match(/<!-- id: (note_\d+) -->/);
-        if (idMatch) {
-          noteId = idMatch[1];
-          // Remove the ID comment from content
-          actualContent = actualContent.replace(/<!-- id: note_\d+ -->\s*/, "")
+        // Try new format with metadata first
+        const metadataMatch = actualContent.match(
+          /<!-- id: (note_\d+) \| created: ([^|]+) \| updated: ([^|]+) \| rev: (\d+) -->/
+        );
+        if (metadataMatch) {
+          noteId = metadataMatch[1];
+          createdAt = metadataMatch[2].trim();
+          updatedAt = metadataMatch[3].trim();
+          revision = parseInt(metadataMatch[4], 10);
+          actualContent = actualContent
+            .replace(/<!-- id: note_\d+ \| created: [^|]+ \| updated: [^|]+ \| rev: \d+ -->\s*/, "")
             .trim();
+        } else {
+          // Fall back to old format (id only)
+          const idMatch = actualContent.match(/<!-- id: (note_\d+) -->/);
+          if (idMatch) {
+            noteId = idMatch[1];
+            actualContent = actualContent.replace(/<!-- id: note_\d+ -->\s*/, "").trim();
+          }
         }
 
         notes.push({
           id: noteId,
           title,
           content: actualContent,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          createdAt,
+          updatedAt,
+          revision,
         });
         continue;
       }
@@ -1020,6 +1038,9 @@ export class MarkdownParser {
     const config = this.parseProjectConfig(existingContent);
     const projectInfo = this.parseProjectInfo(existingContent);
 
+    // Update lastUpdated timestamp
+    config.lastUpdated = new Date().toISOString();
+
     let content = `# ${projectInfo.name}\n\n`;
 
     // Add project description
@@ -1052,6 +1073,7 @@ export class MarkdownParser {
     if (config.workingDaysPerWeek && config.workingDaysPerWeek !== 5) {
       content += `Working Days: ${config.workingDaysPerWeek}\n`;
     }
+    content += `Last Updated: ${config.lastUpdated}\n`;
     content += "\n";
 
     if (config.assignees && config.assignees.length > 0) {
@@ -1076,7 +1098,7 @@ export class MarkdownParser {
     content += "<!-- Notes -->\n# Notes\n\n";
     for (const note of projectInfo.notes) {
       content += `## ${note.title}\n\n`;
-      content += `<!-- id: ${note.id} -->\n`;
+      content += `<!-- id: ${note.id} | created: ${note.createdAt} | updated: ${note.updatedAt} | rev: ${note.revision || 1} -->\n`;
       content += `${note.content}\n\n`;
     }
 
@@ -1392,6 +1414,8 @@ export class MarkdownParser {
           config.startDate = line.substring(12).trim();
         } else if (line.startsWith("Working Days: ")) {
           config.workingDaysPerWeek = parseInt(line.substring(14).trim()) || 5;
+        } else if (line.startsWith("Last Updated: ")) {
+          config.lastUpdated = line.substring(14).trim();
         } else if (line === "Assignees:") {
           currentSection = "assignees";
         } else if (line === "Tags:") {
@@ -1662,7 +1686,7 @@ export class MarkdownParser {
   }
 
   async addNote(
-    note: Omit<Note, "id" | "createdAt" | "updatedAt">,
+    note: Omit<Note, "id" | "createdAt" | "updatedAt" | "revision">,
   ): Promise<string> {
     const projectInfo = await this.readProjectInfo();
     const newNote: Note = {
@@ -1670,6 +1694,7 @@ export class MarkdownParser {
       id: this.generateNoteId(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      revision: 1,
     };
 
     projectInfo.notes.push(newNote);
@@ -1679,17 +1704,19 @@ export class MarkdownParser {
 
   async updateNote(
     noteId: string,
-    updates: Partial<Omit<Note, "id" | "createdAt">>,
+    updates: Partial<Omit<Note, "id" | "createdAt" | "revision">>,
   ): Promise<boolean> {
     const projectInfo = await this.readProjectInfo();
     const noteIndex = projectInfo.notes.findIndex((note) => note.id === noteId);
 
     if (noteIndex === -1) return false;
 
+    const currentNote = projectInfo.notes[noteIndex];
     projectInfo.notes[noteIndex] = {
-      ...projectInfo.notes[noteIndex],
+      ...currentNote,
       ...updates,
       updatedAt: new Date().toISOString(),
+      revision: (currentNote.revision || 1) + 1,
     };
 
     await this.saveProjectInfo(projectInfo);
@@ -2061,6 +2088,9 @@ export class MarkdownParser {
     const config = this.parseProjectConfig(existingContent);
     const tasks = await this.readTasks();
 
+    // Update lastUpdated timestamp
+    config.lastUpdated = new Date().toISOString();
+
     // Update the content with new project info
     let content = `# ${projectInfo.name}\n`;
 
@@ -2078,6 +2108,7 @@ export class MarkdownParser {
       config.startDate || new Date().toISOString().split("T")[0]
     }\n`;
     content += `Working Days: ${config.workingDaysPerWeek ?? 5}\n`;
+    content += `Last Updated: ${config.lastUpdated}\n`;
     content += "\n";
 
     content += "Assignees:\n";
@@ -2098,7 +2129,7 @@ export class MarkdownParser {
     content += "<!-- Notes -->\n# Notes\n\n";
     for (const note of projectInfo.notes) {
       content += `## ${note.title}\n\n`;
-      content += `<!-- id: ${note.id} -->\n`;
+      content += `<!-- id: ${note.id} | created: ${note.createdAt} | updated: ${note.updatedAt} | rev: ${note.revision || 1} -->\n`;
       if (note.content && note.content.trim()) {
         content += `${note.content}\n\n`;
       } else {

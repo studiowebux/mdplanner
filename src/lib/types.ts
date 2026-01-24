@@ -52,6 +52,7 @@ export interface Note {
   customSections?: CustomSection[];
   createdAt: string;
   updatedAt: string;
+  revision: number;
   mode?: "simple" | "enhanced"; // Simple uses content, enhanced uses paragraphs
 }
 
@@ -116,4 +117,5 @@ export interface ProjectConfig {
   workingDaysPerWeek?: number;
   assignees?: string[];
   tags?: string[];
+  lastUpdated?: string;
 }
