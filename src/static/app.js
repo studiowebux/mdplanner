@@ -35,6 +35,16 @@ class TaskManager {
     this.isFullscreen = false;
     this.resizableEvents = [];
     this.notesLoaded = false;
+    this.c4Components = [];
+    this.c4Zoom = 1;
+    this.c4Offset = { x: 0, y: 0 };
+    this.c4NavigationStack = [];
+    this.currentC4Level = 'context';
+    this.editingC4Component = null;
+    this.c4PanningInitialized = false;
+    this.c4ForceSimulation = null;
+    this.c4AnimationFrame = null;
+    this.c4PhysicsEnabled = true;
     this.init();
   }
 
@@ -77,6 +87,9 @@ class TaskManager {
     document
       .getElementById("mindmapViewBtn")
       .addEventListener("click", () => this.switchView("mindmap"));
+    document
+      .getElementById("c4ViewBtn")
+      .addEventListener("click", () => this.switchView("c4"));
 
     // Mobile menu toggle
     document
@@ -136,6 +149,12 @@ class TaskManager {
       .getElementById("mindmapViewBtnMobile")
       .addEventListener("click", () => {
         this.switchView("mindmap");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("c4ViewBtnMobile")
+      .addEventListener("click", () => {
+        this.switchView("c4");
         this.closeMobileMenu();
       });
 
@@ -406,6 +425,47 @@ class TaskManager {
     document
       .getElementById("mindmapZoom")
       .addEventListener("input", (e) => this.updateMindmapZoom(e.target.value));
+
+    // C4 Architecture events
+    document
+      .getElementById("addC4ComponentBtn")
+      .addEventListener("click", () => this.openC4ComponentModal());
+    document
+      .getElementById("cancelC4ComponentBtn")
+      .addEventListener("click", () => this.closeC4ComponentModal());
+    document
+      .getElementById("c4ComponentForm")
+      .addEventListener("submit", (e) => this.handleC4ComponentSubmit(e));
+    document
+      .getElementById("c4Zoom")
+      .addEventListener("input", (e) => this.updateC4Zoom(e.target.value));
+    document
+      .getElementById("c4LevelSelector")
+      .addEventListener("change", (e) => this.changeC4Level(e.target.value));
+    document
+      .getElementById("c4BackBtn")
+      .addEventListener("click", () => this.navigateC4Back());
+    document
+      .getElementById("addC4ConnectionBtn")
+      .addEventListener("click", () => this.addC4ConnectionInput());
+    document
+      .getElementById("c4ResetViewBtn")
+      .addEventListener("click", () => this.resetC4View());
+    
+    document
+      .getElementById("c4AutoLayoutBtn")
+      .addEventListener("click", () => this.triggerC4AutoLayout());
+    document
+      .getElementById("c4PhysicsToggle")
+      .addEventListener("change", (e) => {
+        this.c4PhysicsEnabled = e.target.checked;
+        if (this.c4PhysicsEnabled) {
+          const currentComponents = this.getCurrentLevelComponents();
+          this.initializeC4ForceLayout(currentComponents);
+        } else {
+          this.stopC4ForceLayout();
+        }
+      });
     document
       .getElementById("mindmapLayout")
       .addEventListener("change", (e) =>
@@ -468,8 +528,28 @@ class TaskManager {
     }
   }
 
+  activateViewButton(view) {
+    // Get both desktop and mobile buttons
+    const desktopBtn = document.getElementById(`${view}ViewBtn`);
+    const mobileBtn = document.getElementById(`${view}ViewBtnMobile`);
+    
+    // Activate desktop button
+    if (desktopBtn) {
+      desktopBtn.classList.add("bg-white", "dark:bg-gray-600", "text-gray-900", "dark:text-gray-100", "shadow-sm");
+      desktopBtn.classList.remove("text-gray-600", "dark:text-gray-300", "hover:text-gray-900", "dark:hover:text-gray-100");
+    }
+    
+    // Activate mobile button
+    if (mobileBtn) {
+      mobileBtn.classList.add("bg-white", "dark:bg-gray-600", "text-gray-900", "dark:text-gray-100", "shadow-sm");
+      mobileBtn.classList.remove("text-gray-600", "dark:text-gray-300", "hover:text-gray-900", "dark:hover:text-gray-100");
+    }
+  }
+
   async switchView(view) {
     this.currentView = view;
+    // Set data attribute on body for CSS targeting
+    document.body.setAttribute('data-current-view', view);
 
     // Disable multi-select mode when switching views
     if (this.multiSelectMode) {
@@ -488,7 +568,20 @@ class TaskManager {
     const goalsBtn = document.getElementById("goalsViewBtn");
     const canvasBtn = document.getElementById("canvasViewBtn");
     const mindmapBtn = document.getElementById("mindmapViewBtn");
+    const c4Btn = document.getElementById("c4ViewBtn");
     const configBtn = document.getElementById("configViewBtn");
+
+    // Mobile buttons
+    const summaryBtnMobile = document.getElementById("summaryViewBtnMobile");
+    const listBtnMobile = document.getElementById("listViewBtnMobile");
+    const boardBtnMobile = document.getElementById("boardViewBtnMobile");
+    const timelineBtnMobile = document.getElementById("timelineViewBtnMobile");
+    const notesBtnMobile = document.getElementById("notesViewBtnMobile");
+    const goalsBtnMobile = document.getElementById("goalsViewBtnMobile");
+    const canvasBtnMobile = document.getElementById("canvasViewBtnMobile");
+    const mindmapBtnMobile = document.getElementById("mindmapViewBtnMobile");
+    const c4BtnMobile = document.getElementById("c4ViewBtnMobile");
+    const configBtnMobile = document.getElementById("configViewBtnMobile");
 
     // Reset all buttons
     [
@@ -500,21 +593,34 @@ class TaskManager {
       goalsBtn,
       canvasBtn,
       mindmapBtn,
+      c4Btn,
       configBtn,
+      summaryBtnMobile,
+      listBtnMobile,
+      boardBtnMobile,
+      timelineBtnMobile,
+      notesBtnMobile,
+      goalsBtnMobile,
+      canvasBtnMobile,
+      mindmapBtnMobile,
+      c4BtnMobile,
+      configBtnMobile,
     ].forEach((btn) => {
-      btn.classList.remove(
-        "bg-white",
-        "dark:bg-gray-600",
-        "text-gray-900",
-        "dark:text-gray-100",
-        "shadow-sm",
-      );
-      btn.classList.add(
-        "text-gray-600",
-        "dark:text-gray-300",
-        "hover:text-gray-900",
-        "dark:hover:text-gray-100",
-      );
+      if (btn) {
+        btn.classList.remove(
+          "bg-white",
+          "dark:bg-gray-600",
+          "text-gray-900",
+          "dark:text-gray-100",
+          "shadow-sm",
+        );
+        btn.classList.add(
+          "text-gray-600",
+          "dark:text-gray-300",
+          "hover:text-gray-900",
+          "dark:hover:text-gray-100",
+        );
+      }
     });
 
     // Hide all views
@@ -526,150 +632,61 @@ class TaskManager {
     document.getElementById("goalsView").classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
     document.getElementById("mindmapView").classList.add("hidden");
+    document.getElementById("c4View").classList.add("hidden");
     document.getElementById("configView").classList.add("hidden");
+    
+    // Clear C4 connections SVG when switching away from C4 view
+    const c4Svg = document.getElementById('c4Connections');
+    if (c4Svg && view !== 'c4') {
+      // Clear all connections but keep the arrow marker definition
+      c4Svg.innerHTML = `
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                  refX="10" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280" />
+          </marker>
+        </defs>
+      `;
+    }
 
     // Activate current view
     if (view === "summary") {
-      summaryBtn.classList.add(
-        "bg-white",
-        "dark:bg-gray-600",
-        "text-gray-900",
-        "dark:text-gray-100",
-        "shadow-sm",
-      );
-      summaryBtn.classList.remove(
-        "text-gray-600",
-        "dark:text-gray-300",
-        "hover:text-gray-900",
-        "dark:hover:text-gray-100",
-      );
+      this.activateViewButton("summary");
       document.getElementById("summaryView").classList.remove("hidden");
       this.loadProjectInfo();
     } else if (view === "list") {
-      listBtn.classList.add(
-        "bg-white",
-        "dark:bg-gray-600",
-        "text-gray-900",
-        "dark:text-gray-100",
-        "shadow-sm",
-      );
-      listBtn.classList.remove(
-        "text-gray-600",
-        "dark:text-gray-300",
-        "hover:text-gray-900",
-        "dark:hover:text-gray-100",
-      );
+      this.activateViewButton("list");
       document.getElementById("listView").classList.remove("hidden");
     } else if (view === "board") {
-      boardBtn.classList.add(
-        "bg-white",
-        "dark:bg-gray-600",
-        "text-gray-900",
-        "dark:text-gray-100",
-        "shadow-sm",
-      );
-      boardBtn.classList.remove(
-        "text-gray-600",
-        "dark:text-gray-300",
-        "hover:text-gray-900",
-        "dark:hover:text-gray-100",
-      );
+      this.activateViewButton("board");
       document.getElementById("boardView").classList.remove("hidden");
     } else if (view === "timeline") {
-      timelineBtn.classList.add(
-        "bg-white",
-        "dark:bg-gray-600",
-        "text-gray-900",
-        "dark:text-gray-100",
-        "shadow-sm",
-      );
-      timelineBtn.classList.remove(
-        "text-gray-600",
-        "dark:text-gray-300",
-        "hover:text-gray-900",
-        "dark:hover:text-gray-100",
-      );
+      this.activateViewButton("timeline");
       document.getElementById("timelineView").classList.remove("hidden");
       this.renderTimelineView();
     } else if (view === "notes") {
-      notesBtn.classList.add(
-        "bg-white",
-        "dark:bg-gray-600",
-        "text-gray-900",
-        "dark:text-gray-100",
-        "shadow-sm",
-      );
-      notesBtn.classList.remove(
-        "text-gray-600",
-        "dark:text-gray-300",
-        "hover:text-gray-900",
-        "dark:hover:text-gray-100",
-      );
+      this.activateViewButton("notes");
       document.getElementById("notesView").classList.remove("hidden");
       this.loadNotes();
     } else if (view === "goals") {
-      goalsBtn.classList.add(
-        "bg-white",
-        "dark:bg-gray-600",
-        "text-gray-900",
-        "dark:text-gray-100",
-        "shadow-sm",
-      );
-      goalsBtn.classList.remove(
-        "text-gray-600",
-        "dark:text-gray-300",
-        "hover:text-gray-900",
-        "dark:hover:text-gray-100",
-      );
+      this.activateViewButton("goals");
       document.getElementById("goalsView").classList.remove("hidden");
       this.loadGoals();
     } else if (view === "canvas") {
-      canvasBtn.classList.add(
-        "bg-white",
-        "dark:bg-gray-600",
-        "text-gray-900",
-        "dark:text-gray-100",
-        "shadow-sm",
-      );
-      canvasBtn.classList.remove(
-        "text-gray-600",
-        "dark:text-gray-300",
-        "hover:text-gray-900",
-        "dark:hover:text-gray-100",
-      );
+      this.activateViewButton("canvas");
       document.getElementById("canvasView").classList.remove("hidden");
       await this.loadCanvas();
       this.notesLoaded = true;
     } else if (view === "mindmap") {
-      mindmapBtn.classList.add(
-        "bg-white",
-        "dark:bg-gray-600",
-        "text-gray-900",
-        "dark:text-gray-100",
-        "shadow-sm",
-      );
-      mindmapBtn.classList.remove(
-        "text-gray-600",
-        "dark:text-gray-300",
-        "hover:text-gray-900",
-        "dark:hover:text-gray-100",
-      );
+      this.activateViewButton("mindmap");
       document.getElementById("mindmapView").classList.remove("hidden");
       this.loadMindmaps();
+    } else if (view === "c4") {
+      this.activateViewButton("c4");
+      document.getElementById("c4View").classList.remove("hidden");
+      this.loadC4Components();
     } else if (view === "config") {
-      configBtn.classList.add(
-        "bg-white",
-        "dark:bg-gray-600",
-        "text-gray-900",
-        "dark:text-gray-100",
-        "shadow-sm",
-      );
-      configBtn.classList.remove(
-        "text-gray-600",
-        "dark:text-gray-300",
-        "hover:text-gray-900",
-        "dark:hover:text-gray-100",
-      );
+      this.activateViewButton("config");
       document.getElementById("configView").classList.remove("hidden");
       this.renderConfigView();
     }
@@ -6250,6 +6267,1024 @@ class TaskManager {
       reader.onerror = (e) => reject(e);
       reader.readAsText(file);
     });
+  }
+
+  // C4 Architecture Methods
+  async loadC4Components() {
+    try {
+      const response = await fetch('/api/c4');
+      if (response.ok) {
+        const data = await response.json();
+        this.c4Components = data.components || [];
+      } else {
+        this.c4Components = this.getDefaultC4Components();
+      }
+    } catch (error) {
+      console.error('Failed to load C4 components:', error);
+      this.c4Components = this.getDefaultC4Components();
+    }
+    this.renderC4Components();
+    
+    // Ensure reset button is properly bound
+    setTimeout(() => {
+      const resetBtn = document.getElementById('c4ResetViewBtn');
+      if (resetBtn && !resetBtn.hasAttribute('data-listener-bound')) {
+        resetBtn.addEventListener('click', () => this.resetC4View());
+        resetBtn.setAttribute('data-listener-bound', 'true');
+      }
+    }, 100);
+  }
+
+  getDefaultC4Components() {
+    return [
+      {
+        id: '1',
+        name: 'Web Application',
+        level: 'context',
+        type: 'System',
+        technology: 'React, Node.js',
+        description: 'Main web application for task management',
+        position: { x: 300, y: 200 },
+        connections: [],
+        children: ['2', '3', '4']
+      },
+      {
+        id: '2',
+        name: 'Frontend',
+        level: 'container',
+        type: 'Container',
+        technology: 'React',
+        description: 'User interface layer',
+        position: { x: 200, y: 100 },
+        connections: [{ target: 'Backend API', label: 'API calls' }],
+        parent: '1',
+        children: []
+      },
+      {
+        id: '3',
+        name: 'Backend API',
+        level: 'container',
+        type: 'Container',
+        technology: 'Node.js, Deno',
+        description: 'REST API for data management',
+        position: { x: 400, y: 100 },
+        connections: [{ target: 'Database', label: 'reads/writes' }],
+        parent: '1',
+        children: []
+      },
+      {
+        id: '4',
+        name: 'Database',
+        level: 'container',
+        type: 'Container',
+        technology: 'File System',
+        description: 'Data storage layer',
+        position: { x: 300, y: 300 },
+        connections: [],
+        parent: '1',
+        children: []
+      }
+    ];
+  }
+
+  renderC4Components() {
+    const container = document.getElementById('c4ComponentsContainer');
+    const emptyState = document.getElementById('c4EmptyState');
+    
+    // Filter components by current navigation level
+    const currentComponents = this.getCurrentLevelComponents();
+    
+    if (!this.c4Components || this.c4Components.length === 0 || currentComponents.length === 0) {
+      emptyState.classList.remove('hidden');
+      container.classList.add('hidden');
+      
+      // Make empty state clickable to add first component
+      emptyState.style.cursor = 'pointer';
+      emptyState.onclick = () => this.openC4ComponentModalWithLevel();
+      
+      this.updateC4Breadcrumb();
+      return;
+    }
+
+    emptyState.classList.add('hidden');
+    container.classList.remove('hidden');
+    container.innerHTML = '';
+
+    // Make container clickable for adding components
+    container.onclick = (e) => {
+      if (e.target === container) {
+        const rect = container.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / this.c4Zoom - this.c4Offset.x;
+        const y = (e.clientY - rect.top) / this.c4Zoom - this.c4Offset.y;
+        this.openC4ComponentModalWithLevel(x, y);
+      }
+    };
+
+    // Render components
+    currentComponents.forEach(component => {
+      this.createC4ComponentElement(component, container);
+    });
+
+    // Update breadcrumb
+    this.updateC4Breadcrumb();
+    
+    // Draw connections
+    setTimeout(() => this.drawC4Connections(currentComponents), 100);
+    
+    // Initialize panning if not already done
+    if (!this.c4PanningInitialized) {
+      this.initializeC4Panning();
+      this.c4PanningInitialized = true;
+    }
+    
+    // Initialize force layout
+    setTimeout(() => this.initializeC4ForceLayout(currentComponents), 200);
+  }
+
+  getCurrentLevelComponents() {
+    if (this.c4NavigationStack.length === 0) {
+      // Show top-level components for current level
+      return this.c4Components.filter(comp => 
+        comp.level === this.currentC4Level && !comp.parent
+      );
+    } else {
+      // Show children of current parent
+      const currentParent = this.c4NavigationStack[this.c4NavigationStack.length - 1];
+      return this.c4Components.filter(comp => comp.parent === currentParent.id);
+    }
+  }
+
+  createC4ComponentElement(component, container) {
+    const element = document.createElement('div');
+    element.className = `c4-component ${component.level}`;
+    element.style.left = `${component.position.x}px`;
+    element.style.top = `${component.position.y}px`;
+    element.setAttribute('data-c4-id', component.id);
+
+    const hasChildren = component.children && component.children.length > 0;
+    const canDrillDown = this.canComponentBeDrilledDown(component);
+    
+    element.innerHTML = `
+      <div class="c4-component-type">${component.type}</div>
+      <div class="c4-component-title">${component.name}</div>
+      ${component.technology ? `<div class="c4-component-description">${component.technology}</div>` : ''}
+      <div class="c4-component-description">${component.description}</div>
+      ${canDrillDown ? '<div class="c4-component-drilldown">></div>' : ''}
+    `;
+
+    // Add drag functionality (includes click handling)
+    this.makeC4ComponentDraggable(element, component);
+
+    container.appendChild(element);
+  }
+
+  canComponentBeDrilledDown(component) {
+    // Can drill down if component has children OR if it's not at the deepest level
+    const levels = ['context', 'container', 'component', 'code'];
+    const currentIndex = levels.indexOf(component.level);
+    return (component.children && component.children.length > 0) || currentIndex < levels.length - 1;
+  }
+
+  drillDownC4Component(component) {
+    // Stop any ongoing physics simulation
+    this.stopC4ForceLayout();
+    
+    this.c4NavigationStack.push(component);
+    document.getElementById('c4BackBtn').classList.remove('hidden');
+    this.renderC4Components();
+    
+    // Reset cursor for the container
+    document.getElementById('c4Container').style.cursor = 'grab';
+  }
+
+  navigateC4Back() {
+    if (this.c4NavigationStack.length > 0) {
+      // Stop any ongoing physics simulation
+      this.stopC4ForceLayout();
+      
+      this.c4NavigationStack.pop();
+      if (this.c4NavigationStack.length === 0) {
+        document.getElementById('c4BackBtn').classList.add('hidden');
+      }
+      this.renderC4Components();
+      
+      // Reset cursor for the container
+      document.getElementById('c4Container').style.cursor = 'grab';
+    }
+  }
+
+  updateC4Breadcrumb() {
+    const breadcrumb = document.getElementById('c4Breadcrumb');
+    let html = `<span class="c4-breadcrumb-item" onclick="taskManager.navigateToC4Root()">${this.currentC4Level}</span>`;
+    
+    this.c4NavigationStack.forEach((component, index) => {
+      html += `<span class="c4-breadcrumb-separator">/</span>`;
+      html += `<span class="c4-breadcrumb-item" onclick="taskManager.navigateToC4Level(${index})">${component.name}</span>`;
+    });
+    
+    breadcrumb.innerHTML = html;
+  }
+
+  navigateToC4Root() {
+    this.stopC4ForceLayout();
+    this.c4NavigationStack = [];
+    document.getElementById('c4BackBtn').classList.add('hidden');
+    this.renderC4Components();
+    document.getElementById('c4Container').style.cursor = 'grab';
+  }
+
+  navigateToC4Level(index) {
+    this.stopC4ForceLayout();
+    this.c4NavigationStack = this.c4NavigationStack.slice(0, index + 1);
+    if (this.c4NavigationStack.length === 0) {
+      document.getElementById('c4BackBtn').classList.add('hidden');
+    }
+    this.renderC4Components();
+    document.getElementById('c4Container').style.cursor = 'grab';
+  }
+
+  drawC4Connections(components) {
+    const svg = document.getElementById('c4Connections');
+    svg.innerHTML = `
+      <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                refX="10" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280" />
+        </marker>
+      </defs>
+    `;
+
+    components.forEach(component => {
+      component.connections?.forEach(connection => {
+        // Find target by name or id
+        const targetComponent = components.find(c => 
+          c.id === connection.target || c.name === connection.target
+        );
+        if (targetComponent) {
+          this.drawC4Connection(svg, component, targetComponent, connection.label);
+        }
+      });
+    });
+  }
+
+  drawC4Connection(svg, fromComponent, toComponent, label) {
+    // Component dimensions
+    const componentWidth = 160;
+    const componentHeight = 100;
+    
+    // Component centers
+    const fromCenterX = fromComponent.position.x + componentWidth / 2;
+    const fromCenterY = fromComponent.position.y + componentHeight / 2;
+    const toCenterX = toComponent.position.x + componentWidth / 2;
+    const toCenterY = toComponent.position.y + componentHeight / 2;
+    
+    // Calculate edge points
+    const dx = toCenterX - fromCenterX;
+    const dy = toCenterY - fromCenterY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    if (distance === 0) return; // Avoid division by zero
+    
+    // Normalize direction vector
+    const dirX = dx / distance;
+    const dirY = dy / distance;
+    
+    // Calculate edge points (subtract half component size from each end)
+    const fromX = fromCenterX + dirX * (componentWidth / 2);
+    const fromY = fromCenterY + dirY * (componentHeight / 2);
+    const toX = toCenterX - dirX * (componentWidth / 2);
+    const toY = toCenterY - dirY * (componentHeight / 2);
+
+    // Draw line
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', fromX);
+    line.setAttribute('y1', fromY);
+    line.setAttribute('x2', toX);
+    line.setAttribute('y2', toY);
+    line.setAttribute('class', 'c4-connection');
+    svg.appendChild(line);
+
+    // Draw label
+    if (label) {
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', (fromX + toX) / 2);
+      text.setAttribute('y', (fromY + toY) / 2 - 5);
+      text.setAttribute('class', 'c4-connection-label');
+      text.textContent = label;
+      svg.appendChild(text);
+    }
+  }
+
+  changeC4Level(level) {
+    this.currentC4Level = level;
+    this.c4NavigationStack = [];
+    document.getElementById('c4BackBtn').classList.add('hidden');
+    this.renderC4Components();
+  }
+
+  updateC4Zoom(value) {
+    this.c4Zoom = parseFloat(value);
+    document.getElementById('c4ZoomLevel').textContent = `${Math.round(this.c4Zoom * 100)}%`;
+    this.updateC4ViewTransform();
+  }
+
+  makeC4ComponentDraggable(element, component) {
+    let isDragging = false;
+    let dragStarted = false;
+    let startX, startY, initialX, initialY;
+    const dragThreshold = 5; // Minimum distance to consider it a drag
+
+    element.addEventListener('mousedown', (e) => {
+      if (e.target.classList.contains('c4-component-drilldown')) return;
+      
+      isDragging = true;
+      dragStarted = false;
+      startX = e.clientX;
+      startY = e.clientY;
+      initialX = component.position.x;
+      initialY = component.position.y;
+      
+      e.preventDefault();
+      e.stopPropagation(); // Prevent panning when dragging components
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      
+      const deltaX = (e.clientX - startX) / this.c4Zoom;
+      const deltaY = (e.clientY - startY) / this.c4Zoom;
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      
+      // Only start dragging if moved beyond threshold
+      if (!dragStarted && distance > dragThreshold) {
+        dragStarted = true;
+        element.style.cursor = 'grabbing';
+        
+        // Fix component position during drag to prevent physics interference
+        if (component.physics) {
+          component.physics.fx = component.position.x;
+          component.physics.fy = component.position.y;
+        }
+      }
+      
+      if (dragStarted) {
+        component.position.x = initialX + deltaX;
+        component.position.y = initialY + deltaY;
+        
+        // Update fixed position for physics
+        if (component.physics) {
+          component.physics.fx = component.position.x;
+          component.physics.fy = component.position.y;
+        }
+        
+        element.style.left = `${component.position.x}px`;
+        element.style.top = `${component.position.y}px`;
+        
+        // Redraw connections if not using physics simulation
+        if (!this.c4ForceSimulation) {
+          setTimeout(() => this.drawC4Connections(this.getCurrentLevelComponents()), 0);
+        }
+      }
+    });
+
+    document.addEventListener('mouseup', (e) => {
+      if (isDragging) {
+        isDragging = false;
+        element.style.cursor = 'pointer';
+        
+        // If we didn't drag, it's a click - trigger drill down
+        if (!dragStarted && this.canComponentBeDrilledDown(component)) {
+          e.stopPropagation();
+          this.drillDownC4Component(component);
+          return;
+        }
+        
+        // Release component from fixed position to allow physics
+        if (component.physics) {
+          component.physics.fx = null;
+          component.physics.fy = null;
+          // Give it a small push to restart physics if simulation is running
+          if (this.c4ForceSimulation) {
+            component.physics.vx = (Math.random() - 0.5) * 5; // Smaller push
+            component.physics.vy = (Math.random() - 0.5) * 5;
+          }
+        }
+        
+        if (dragStarted) {
+          this.saveC4Components();
+        }
+        
+        // Always redraw connections after any mouse interaction
+        setTimeout(() => this.drawC4Connections(this.getCurrentLevelComponents()), 0);
+        
+        dragStarted = false;
+      }
+    });
+  }
+
+  // C4 Modal Methods
+  openC4ComponentModal() {
+    this.editingC4Component = null;
+    document.getElementById('c4ComponentModalTitle').textContent = 'Add C4 Component';
+    document.getElementById('c4ComponentForm').reset();
+    document.getElementById('c4ComponentLevel').value = this.currentC4Level;
+    document.getElementById('c4ComponentType').value = this.getDefaultTypeForLevel(this.currentC4Level);
+    
+    // Auto-update type when level changes
+    document.getElementById('c4ComponentLevel').addEventListener('change', (e) => {
+      document.getElementById('c4ComponentType').value = this.getDefaultTypeForLevel(e.target.value);
+    });
+    document.getElementById('c4ComponentModal').classList.remove('hidden');
+    document.getElementById('c4ComponentModal').classList.add('flex');
+    
+    // Setup autocomplete for existing target inputs
+    setTimeout(() => {
+      document.querySelectorAll('.c4-target-input').forEach(input => {
+        if (!input.hasAttribute('data-autocomplete-setup')) {
+          this.setupC4TargetAutocomplete(input);
+          input.setAttribute('data-autocomplete-setup', 'true');
+        }
+      });
+    }, 0);
+  }
+
+  openC4ComponentModalWithLevel(x = 300, y = 200) {
+    this.editingC4Component = null;
+    document.getElementById('c4ComponentModalTitle').textContent = 'Add C4 Component';
+    document.getElementById('c4ComponentForm').reset();
+    
+    // Determine the correct level based on current context
+    const levels = ['context', 'container', 'component', 'code'];
+    let targetLevel = this.currentC4Level;
+    
+    if (this.c4NavigationStack.length > 0) {
+      // If we're drilled down, add components at the next level down from the current parent
+      const currentParent = this.c4NavigationStack[this.c4NavigationStack.length - 1];
+      const currentIndex = levels.indexOf(currentParent.level);
+      if (currentIndex < levels.length - 1) {
+        targetLevel = levels[currentIndex + 1];
+      } else {
+        // If already at the deepest level, stay at code level
+        targetLevel = 'code';
+      }
+    }
+    
+    document.getElementById('c4ComponentLevel').value = targetLevel;
+    document.getElementById('c4ComponentType').value = this.getDefaultTypeForLevel(targetLevel);
+    document.getElementById('c4ComponentX').value = Math.round(x);
+    document.getElementById('c4ComponentY').value = Math.round(y);
+    document.getElementById('c4ComponentModal').classList.remove('hidden');
+    document.getElementById('c4ComponentModal').classList.add('flex');
+    
+    // Setup autocomplete for existing target inputs
+    setTimeout(() => {
+      document.querySelectorAll('.c4-target-input').forEach(input => {
+        if (!input.hasAttribute('data-autocomplete-setup')) {
+          this.setupC4TargetAutocomplete(input);
+          input.setAttribute('data-autocomplete-setup', 'true');
+        }
+      });
+    }, 0);
+  }
+
+  closeC4ComponentModal() {
+    document.getElementById('c4ComponentModal').classList.add('hidden');
+    document.getElementById('c4ComponentModal').classList.remove('flex');
+  }
+
+  handleC4ComponentSubmit(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const component = {
+      id: this.editingC4Component?.id || Date.now().toString(),
+      name: document.getElementById('c4ComponentName').value,
+      level: document.getElementById('c4ComponentLevel').value,
+      type: document.getElementById('c4ComponentType').value,
+      technology: document.getElementById('c4ComponentTechnology').value,
+      description: document.getElementById('c4ComponentDescription').value,
+      position: {
+        x: parseInt(document.getElementById('c4ComponentX').value),
+        y: parseInt(document.getElementById('c4ComponentY').value)
+      },
+      connections: this.getC4ConnectionsFromForm(),
+      children: []
+    };
+
+    if (this.editingC4Component) {
+      const index = this.c4Components.findIndex(c => c.id === this.editingC4Component.id);
+      if (index !== -1) {
+        this.c4Components[index] = { ...this.c4Components[index], ...component };
+      }
+    } else {
+      // Set parent if we're in a drill-down view
+      if (this.c4NavigationStack.length > 0) {
+        component.parent = this.c4NavigationStack[this.c4NavigationStack.length - 1].id;
+        // Add to parent's children
+        const parent = this.c4Components.find(c => c.id === component.parent);
+        if (parent) {
+          if (!parent.children) {
+            parent.children = [];
+          }
+          if (!parent.children.includes(component.id)) {
+            parent.children.push(component.id);
+          }
+        }
+      }
+      
+      this.c4Components.push(component);
+    }
+
+    this.closeC4ComponentModal();
+    this.renderC4Components();
+    this.saveC4Components();
+  }
+
+  getDefaultTypeForLevel(level) {
+    switch (level) {
+      case 'context':
+        return 'System';
+      case 'container':
+        return 'Container';
+      case 'component':
+        return 'Component';
+      case 'code':
+        return 'Class';
+      default:
+        return 'System';
+    }
+  }
+
+  getC4ConnectionsFromForm() {
+    const connections = [];
+    const connectionRows = document.querySelectorAll('#c4ConnectionsForm .flex');
+    
+    connectionRows.forEach(row => {
+      const targetInput = row.querySelector('.c4-target-input');
+      const labelInput = row.querySelector('input[placeholder="Relationship label"]');
+      const target = targetInput ? targetInput.value : '';
+      const label = labelInput ? labelInput.value : '';
+      if (target && label) {
+        connections.push({ target, label });
+      }
+    });
+    
+    return connections;
+  }
+
+  addC4ConnectionInput() {
+    const container = document.getElementById('c4ConnectionsForm');
+    const div = document.createElement('div');
+    div.className = 'flex space-x-2';
+    div.innerHTML = `
+      <div class="flex-1 relative">
+        <input type="text" placeholder="Target component name" class="c4-target-input w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 text-sm" autocomplete="off">
+        <div class="c4-target-dropdown hidden absolute top-full left-0 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-b-md max-h-32 overflow-y-auto z-50"></div>
+      </div>
+      <input type="text" placeholder="Relationship label" class="flex-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 text-sm">
+      <button type="button" class="px-2 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm" onclick="this.parentElement.remove()">×</button>
+    `;
+    container.appendChild(div);
+    
+    // Add autocomplete functionality to the new input
+    this.setupC4TargetAutocomplete(div.querySelector('.c4-target-input'));
+  }
+
+  setupC4TargetAutocomplete(input) {
+    const dropdown = input.nextElementSibling;
+    
+    input.addEventListener('input', (e) => {
+      const value = e.target.value.toLowerCase();
+      const components = this.getCurrentLevelComponents();
+      const matches = components.filter(comp => 
+        comp.name.toLowerCase().includes(value) && value.length > 0
+      );
+      
+      if (matches.length > 0 && value.length > 0) {
+        dropdown.innerHTML = matches.map(comp => 
+          `<div class="c4-target-dropdown-item" data-name="${comp.name}">${comp.name}</div>`
+        ).join('');
+        dropdown.classList.remove('hidden');
+      } else {
+        dropdown.classList.add('hidden');
+      }
+    });
+    
+    input.addEventListener('blur', () => {
+      // Delay hiding to allow clicking on dropdown items
+      setTimeout(() => dropdown.classList.add('hidden'), 150);
+    });
+    
+    dropdown.addEventListener('click', (e) => {
+      if (e.target.classList.contains('c4-target-dropdown-item')) {
+        input.value = e.target.dataset.name;
+        dropdown.classList.add('hidden');
+        input.focus();
+      }
+    });
+  }
+
+  async saveC4Components() {
+    try {
+      await fetch('/api/c4', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ components: this.c4Components }),
+      });
+    } catch (error) {
+      console.error('Failed to save C4 components:', error);
+    }
+  }
+
+  initializeC4Panning() {
+    const viewport = document.getElementById('c4Viewport');
+    const content = document.getElementById('c4Content');
+    const container = document.getElementById('c4Container');
+    
+    let isPanning = false;
+    let startX, startY, initialOffsetX, initialOffsetY;
+
+    container.addEventListener('mousedown', (e) => {
+      // Only pan if clicking on the container itself or viewport, not on components
+      if (e.target === container || e.target === viewport || e.target === content || e.target.id === 'c4Connections') {
+        isPanning = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        initialOffsetX = this.c4Offset.x;
+        initialOffsetY = this.c4Offset.y;
+        
+        container.style.cursor = 'grabbing';
+        e.preventDefault();
+      }
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isPanning) return;
+      
+      const deltaX = (e.clientX - startX) / this.c4Zoom;
+      const deltaY = (e.clientY - startY) / this.c4Zoom;
+      
+      this.c4Offset.x = initialOffsetX + deltaX;
+      this.c4Offset.y = initialOffsetY + deltaY;
+      
+      this.updateC4ViewTransform();
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isPanning) {
+        isPanning = false;
+        container.style.cursor = 'grab';
+      }
+    });
+
+    // Wheel zoom
+    container.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const rect = container.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      
+      const oldZoom = this.c4Zoom;
+      const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+      this.c4Zoom = Math.max(0.25, Math.min(3, this.c4Zoom * zoomFactor));
+      
+      // Adjust offset to zoom towards mouse position
+      const zoomChange = this.c4Zoom / oldZoom;
+      this.c4Offset.x = (this.c4Offset.x + mouseX / oldZoom) * zoomChange - mouseX / this.c4Zoom;
+      this.c4Offset.y = (this.c4Offset.y + mouseY / oldZoom) * zoomChange - mouseY / this.c4Zoom;
+      
+      document.getElementById('c4ZoomLevel').textContent = `${Math.round(this.c4Zoom * 100)}%`;
+      document.getElementById('c4Zoom').value = this.c4Zoom;
+      this.updateC4ViewTransform();
+    });
+  }
+
+  updateC4ViewTransform() {
+    const content = document.getElementById('c4Content');
+    content.style.transform = `translate(${this.c4Offset.x}px, ${this.c4Offset.y}px) scale(${this.c4Zoom})`;
+  }
+
+  resetC4View() {
+    this.c4Zoom = 1;
+    this.c4Offset = { x: 0, y: 0 };
+    document.getElementById('c4ZoomLevel').textContent = '100%';
+    document.getElementById('c4Zoom').value = 1;
+    this.updateC4ViewTransform();
+  }
+
+  triggerC4AutoLayout() {
+    const currentComponents = this.getCurrentLevelComponents();
+    if (currentComponents.length > 0) {
+      this.applyHierarchicalLayout(currentComponents);
+      this.updateC4ComponentPositions(currentComponents);
+      this.drawC4Connections(currentComponents);
+      this.saveC4Components();
+    }
+  }
+
+  // Force-directed layout implementation
+  initializeC4ForceLayout(components) {
+    if (!this.c4PhysicsEnabled || components.length === 0) return;
+    
+    // Stop any existing simulation
+    this.stopC4ForceLayout();
+    
+    // Use hierarchical layout first, then fine-tune with forces
+    this.applyHierarchicalLayout(components);
+    
+    // Initialize physics properties for each component
+    components.forEach(component => {
+      if (!component.physics) {
+        component.physics = {
+          vx: 0, // velocity x
+          vy: 0, // velocity y
+          fx: null, // fixed x (null means not fixed)
+          fy: null  // fixed y (null means not fixed)
+        };
+      }
+    });
+    
+    this.c4ForceSimulation = {
+      components: components,
+      alpha: 0.15, // Lower initial energy after hierarchical layout
+      alphaMin: 0.001, // Much lower minimum to stop completely
+      alphaDecay: 0.1, // Faster decay to settle very quickly
+      velocityDecay: 0.9, // Very high damping for rigid behavior
+      velocityThreshold: 0.05 // Stop movement below this velocity
+    };
+    
+    this.runC4ForceSimulation();
+  }
+
+  applyHierarchicalLayout(components) {
+    const levelSpacing = 350; // Increased vertical spacing between levels
+    const nodeSpacing = 300; // Increased horizontal spacing between nodes at same level
+    const containerWidth = 1200; // Increased available width for layout
+    
+    // Group components by level and parent
+    const componentsByLevel = {
+      context: [],
+      container: [],
+      component: [],
+      code: []
+    };
+    
+    const componentsByParent = new Map();
+    
+    components.forEach(comp => {
+      // Group by level
+      if (componentsByLevel[comp.level]) {
+        componentsByLevel[comp.level].push(comp);
+      }
+      
+      // Group by parent
+      if (comp.parent) {
+        if (!componentsByParent.has(comp.parent)) {
+          componentsByParent.set(comp.parent, []);
+        }
+        componentsByParent.get(comp.parent).push(comp);
+      }
+    });
+    
+    // Layout root level components (context level or components without parents)
+    const rootComponents = components.filter(c => !c.parent);
+    this.layoutComponentsInRow(rootComponents, 100, containerWidth, nodeSpacing);
+    
+    // Layout each level hierarchically
+    const levels = ['context', 'container', 'component', 'code'];
+    levels.forEach((level, levelIndex) => {
+      const levelComponents = componentsByLevel[level];
+      if (!levelComponents || levelComponents.length === 0) return;
+      
+      // For each component at this level, layout its children below it
+      levelComponents.forEach(parent => {
+        const children = componentsByParent.get(parent.id) || [];
+        if (children.length > 0) {
+          const parentY = parent.position.y + levelSpacing;
+          const startX = parent.position.x - (children.length - 1) * nodeSpacing / 2;
+          
+          children.forEach((child, index) => {
+            child.position.x = startX + index * nodeSpacing;
+            child.position.y = parentY;
+          });
+        }
+      });
+    });
+    
+    // Apply final adjustments to prevent overlaps
+    this.adjustForOverlaps(components);
+  }
+  
+  layoutComponentsInRow(components, y, containerWidth, spacing) {
+    if (components.length === 0) return;
+    
+    const totalWidth = (components.length - 1) * spacing;
+    const startX = (containerWidth - totalWidth) / 2;
+    
+    components.forEach((comp, index) => {
+      comp.position.x = startX + index * spacing;
+      comp.position.y = y;
+    });
+  }
+  
+  adjustForOverlaps(components) {
+    const componentWidth = 160;
+    const componentHeight = 100;
+    const minGap = 50; // Increased minimum gap
+    
+    // Sort by y position to process top to bottom
+    const sortedComponents = [...components].sort((a, b) => a.position.y - b.position.y);
+    
+    sortedComponents.forEach((comp1, i) => {
+      sortedComponents.slice(i + 1).forEach(comp2 => {
+        const dx = Math.abs(comp1.position.x - comp2.position.x);
+        const dy = Math.abs(comp1.position.y - comp2.position.y);
+        
+        const minDx = componentWidth + minGap;
+        const minDy = componentHeight + minGap;
+        
+        // Check for overlap
+        if (dx < minDx && dy < minDy) {
+          // Move comp2 to resolve overlap
+          if (dx < dy) {
+            // Move horizontally
+            const direction = comp2.position.x > comp1.position.x ? 1 : -1;
+            comp2.position.x = comp1.position.x + direction * minDx;
+          } else {
+            // Move vertically
+            comp2.position.y = comp1.position.y + minDy;
+          }
+        }
+      });
+    });
+  }
+  
+  runC4ForceSimulation() {
+    if (!this.c4ForceSimulation || this.c4ForceSimulation.alpha < this.c4ForceSimulation.alphaMin) {
+      return;
+    }
+    
+    const sim = this.c4ForceSimulation;
+    const components = sim.components;
+    
+    // Apply forces
+    this.applyC4RepulsionForce(components, sim.alpha);
+    this.applyC4AttractionForce(components, sim.alpha);
+    this.applyC4CenteringForce(components, sim.alpha);
+    
+    // Update positions based on velocities
+    components.forEach(component => {
+      if (component.physics.fx == null) {
+        component.physics.vx *= sim.velocityDecay;
+        
+        // Stop movement if velocity is below threshold
+        if (Math.abs(component.physics.vx) < sim.velocityThreshold) {
+          component.physics.vx = 0;
+        } else {
+          component.position.x += component.physics.vx;
+        }
+      } else {
+        component.position.x = component.physics.fx;
+        component.physics.vx = 0;
+      }
+      
+      if (component.physics.fy == null) {
+        component.physics.vy *= sim.velocityDecay;
+        
+        // Stop movement if velocity is below threshold
+        if (Math.abs(component.physics.vy) < sim.velocityThreshold) {
+          component.physics.vy = 0;
+        } else {
+          component.position.y += component.physics.vy;
+        }
+      } else {
+        component.position.y = component.physics.fy;
+        component.physics.vy = 0;
+      }
+    });
+    
+    // Update visual positions
+    this.updateC4ComponentPositions(components);
+    
+    // Decrease alpha for cooling
+    sim.alpha += (sim.alphaMin - sim.alpha) * sim.alphaDecay;
+    
+    // Continue simulation
+    this.c4AnimationFrame = requestAnimationFrame(() => this.runC4ForceSimulation());
+  }
+  
+  applyC4RepulsionForce(components, alpha) {
+    const strength = -800; // Stronger repulsion for better spacing
+    const minDistance = 180; // Minimum distance between components
+    
+    for (let i = 0; i < components.length; i++) {
+      for (let j = i + 1; j < components.length; j++) {
+        const a = components[i];
+        const b = components[j];
+        
+        let dx = a.position.x - b.position.x;
+        let dy = a.position.y - b.position.y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance === 0) {
+          dx = Math.random() - 0.5;
+          dy = Math.random() - 0.5;
+          distance = 1;
+        }
+        
+        // Only apply repulsion if components are too close
+        if (distance < minDistance) {
+          const force = strength * alpha / (distance * distance); // Quadratic falloff for stronger close-range repulsion
+          const fx = (dx / distance) * force;
+          const fy = (dy / distance) * force;
+          
+          a.physics.vx += fx;
+          a.physics.vy += fy;
+          b.physics.vx -= fx;
+          b.physics.vy -= fy;
+        }
+      }
+    }
+  }
+  
+  applyC4AttractionForce(components, alpha) {
+    const strength = 0.3; // Weaker attraction
+    const idealDistance = 200; // Ideal distance between connected components
+    const maxDistance = 400; // Only attract if farther than this
+    
+    components.forEach(component => {
+      component.connections?.forEach(connection => {
+        const target = components.find(c => 
+          c.id === connection.target || c.name === connection.target
+        );
+        
+        if (target) {
+          let dx = target.position.x - component.position.x;
+          let dy = target.position.y - component.position.y;
+          let dist = Math.sqrt(dx * dx + dy * dy);
+          
+          // Only attract if they're too far apart
+          if (dist > maxDistance) {
+            const force = strength * alpha * (dist - idealDistance) / dist;
+            const fx = dx * force * 0.5; // Reduce force
+            const fy = dy * force * 0.5;
+            
+            component.physics.vx += fx;
+            component.physics.vy += fy;
+            target.physics.vx -= fx;
+            target.physics.vy -= fy;
+          }
+        }
+      });
+    });
+  }
+  
+  applyC4CenteringForce(components, alpha) {
+    const strength = 0.02; // Much weaker centering force
+    const centerX = 400;
+    const centerY = 300;
+    
+    components.forEach(component => {
+      const fx = (centerX - component.position.x) * strength * alpha;
+      const fy = (centerY - component.position.y) * strength * alpha;
+      
+      component.physics.vx += fx;
+      component.physics.vy += fy;
+    });
+  }
+  
+  updateC4ComponentPositions(components) {
+    components.forEach(component => {
+      const element = document.querySelector(`[data-c4-id="${component.id}"]`);
+      if (element) {
+        element.style.left = `${component.position.x}px`;
+        element.style.top = `${component.position.y}px`;
+      }
+    });
+    
+    // Redraw connections
+    this.drawC4Connections(components);
+  }
+  
+  stopC4ForceLayout() {
+    if (this.c4AnimationFrame) {
+      cancelAnimationFrame(this.c4AnimationFrame);
+      this.c4AnimationFrame = null;
+    }
+    this.c4ForceSimulation = null;
+  }
+  
+  toggleC4Physics() {
+    this.c4PhysicsEnabled = !this.c4PhysicsEnabled;
+    
+    if (this.c4PhysicsEnabled) {
+      const currentComponents = this.getCurrentLevelComponents();
+      this.initializeC4ForceLayout(currentComponents);
+    } else {
+      this.stopC4ForceLayout();
+    }
   }
 }
 

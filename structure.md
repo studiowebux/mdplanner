@@ -148,6 +148,49 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
     - John Doe
     - Jane Doe
 
+<!-- C4 Architecture -->
+# C4 Architecture
+
+## Context 1 {level: context; type: System; position: {x: 437.6716849737579, y: 151.65365683470662}; children: [1755646468112, 1755646474823]}
+
+<!-- id: c4_component_1 -->
+
+
+## Context 2 {level: context; type: System; position: {x: 696.9821798727231, y: 51.438754358443845}; connections: [{target: Context 1, label: Intertwined}]}
+
+<!-- id: c4_component_2 -->
+
+
+## Container 1 {level: container; type: Container; position: {x: 0, y: 0}; children: [1755646496023, 1755647114580, 1755647158026, 1755647175051]; parent: c4_component_1}
+
+<!-- id: c4_component_3 -->
+<!-- id: 1755646468112 -->
+
+## Container 2 {level: context; type: System; position: {x: 0, y: 0}; parent: c4_component_1}
+
+<!-- id: c4_component_3 -->
+<!-- id: 1755646474823 -->
+
+## Component 1 {level: component; type: Container; position: {x: 0, y: 0}; parent: 1755646468112}
+
+<!-- id: c4_component_3 -->
+<!-- id: 1755646496023 -->
+
+## Component 1 {level: component; type: Component; position: {x: 0, y: 0}; parent: c4_component_3}
+
+<!-- id: c4_component_4 -->
+<!-- id: 1755647114580 -->
+
+## Component 2 {level: component; type: Component; position: {x: 0, y: 0}; parent: c4_component_3}
+
+<!-- id: c4_component_5 -->
+<!-- id: 1755647158026 -->
+
+## Component 3 {level: component; type: Component; position: {x: 0, y: 0}; connections: [{target: Component 2, label: TEST}]; parent: c4_component_3}
+
+<!-- id: c4_component_5 -->
+<!-- id: 1755647175051 -->
+
 <!-- Board -->
 # Board
 

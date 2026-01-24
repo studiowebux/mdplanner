@@ -88,6 +88,19 @@ export interface Mindmap {
   nodes: MindmapNode[];
 }
 
+export interface C4Component {
+  id: string;
+  name: string;
+  level: "context" | "container" | "component" | "code";
+  type: string;
+  technology?: string;
+  description: string;
+  position: { x: number; y: number };
+  connections?: { target: string; label: string }[];
+  children?: string[];
+  parent?: string;
+}
+
 export interface ProjectInfo {
   name: string;
   description: string[];
@@ -95,6 +108,7 @@ export interface ProjectInfo {
   goals: Goal[];
   stickyNotes: StickyNote[];
   mindmaps: Mindmap[];
+  c4Components?: C4Component[];
 }
 
 export interface ProjectConfig {

@@ -1,4 +1,5 @@
 import {
+  C4Component,
   Goal,
   Mindmap,
   MindmapNode,
@@ -140,6 +141,7 @@ export class MarkdownParser {
         goals: [],
         stickyNotes: [],
         mindmaps: [],
+        c4Components: [],
       };
     }
   }
@@ -152,6 +154,7 @@ export class MarkdownParser {
     const goals: Goal[] = [];
     const stickyNotes: StickyNote[] = [];
     const mindmaps: Mindmap[] = [];
+    let c4Components: C4Component[] = [];
     let i = 0;
     let foundFirstHeader = false;
     let inConfigSection = false;
@@ -159,6 +162,7 @@ export class MarkdownParser {
     let inGoalsSection = false;
     let inCanvasSection = false;
     let inMindmapSection = false;
+    let inC4Section = false;
 
     while (i < lines.length) {
       const line = lines[i].trim();
@@ -215,6 +219,18 @@ export class MarkdownParser {
         inNotesSection = false;
         inGoalsSection = false;
         inCanvasSection = false;
+        inC4Section = false;
+        i++;
+        continue;
+      }
+
+      if (line.trim() === "<!-- C4 Architecture -->") {
+        inC4Section = true;
+        inMindmapSection = false;
+        inConfigSection = false;
+        inNotesSection = false;
+        inGoalsSection = false;
+        inCanvasSection = false;
         i++;
         continue;
       }
@@ -265,6 +281,18 @@ export class MarkdownParser {
         inNotesSection = false;
         inGoalsSection = false;
         inCanvasSection = false;
+        inC4Section = false;
+        i++;
+        continue;
+      }
+
+      if (line === "# C4 Architecture") {
+        inC4Section = true;
+        inMindmapSection = false;
+        inConfigSection = false;
+        inNotesSection = false;
+        inGoalsSection = false;
+        inCanvasSection = false;
         i++;
         continue;
       }
@@ -273,7 +301,7 @@ export class MarkdownParser {
       if (
         (line.startsWith("## ") ||
           (line.startsWith("# ") &&
-            !["# Configurations", "# Notes", "# Goals", "# Canvas", "# Mindmap"]
+            !["# Configurations", "# Notes", "# Goals", "# Canvas", "# Mindmap", "# C4 Architecture"]
               .includes(line))) && foundFirstHeader
       ) {
         if (inNotesSection) {
@@ -302,6 +330,13 @@ export class MarkdownParser {
           mindmaps.push(...mindmapResult.mindmaps);
           i = mindmapResult.nextIndex;
           inMindmapSection = false;
+          continue;
+        }
+        if (inC4Section) {
+          const c4Result = this.parseC4ComponentsSection(lines, i);
+          c4Components.push(...c4Result.components);
+          i = c4Result.nextIndex;
+          inC4Section = false;
           continue;
         }
         break;
@@ -339,10 +374,18 @@ export class MarkdownParser {
         continue;
       }
 
+      // Parse C4 components in C4 section
+      if (inC4Section && line.startsWith("## ")) {
+        const c4Result = this.parseC4ComponentsSection(lines, i);
+        c4Components.push(...c4Result.components);
+        i = c4Result.nextIndex;
+        continue;
+      }
+
       // Skip configuration section content for description
       if (
         inConfigSection || inNotesSection || inGoalsSection ||
-        inCanvasSection || inMindmapSection
+        inCanvasSection || inMindmapSection || inC4Section
       ) {
         i++;
         continue;
@@ -351,13 +394,13 @@ export class MarkdownParser {
       // Collect description lines (skip empty lines at the start)
       if (
         foundFirstHeader && line && !inConfigSection && !inNotesSection &&
-        !inGoalsSection && !inCanvasSection && !inMindmapSection
+        !inGoalsSection && !inCanvasSection && !inMindmapSection && !inC4Section
       ) {
         description.push(line);
       } else if (
         foundFirstHeader && !line && description.length > 0 &&
         !inConfigSection && !inNotesSection && !inGoalsSection &&
-        !inCanvasSection && !inMindmapSection
+        !inCanvasSection && !inMindmapSection && !inC4Section
       ) {
         // Keep empty lines if we already have content
         description.push("");
@@ -373,6 +416,7 @@ export class MarkdownParser {
       goals,
       stickyNotes,
       mindmaps,
+      c4Components,
     };
   }
 
@@ -1080,6 +1124,28 @@ export class MarkdownParser {
         content += this.mindmapNodeToMarkdown(rootNode, mindmap.nodes, 0);
       }
       content += "\n";
+    }
+
+    // Add C4 Architecture section
+    content += "<!-- C4 Architecture -->\n# C4 Architecture\n\n";
+    for (const component of projectInfo.c4Components || []) {
+      content += `## ${component.name} {level: ${component.level}; type: ${component.type}`;
+      if (component.technology) {
+        content += `; technology: ${component.technology}`;
+      }
+      content += `; position: {x: ${component.position.x}, y: ${component.position.y}}`;
+      if (component.connections && component.connections.length > 0) {
+        content += `; connections: [${component.connections.map(c => `{target: ${c.target}, label: ${c.label}}`).join(', ')}]`;
+      }
+      if (component.children && component.children.length > 0) {
+        content += `; children: [${component.children.join(', ')}]`;
+      }
+      if (component.parent) {
+        content += `; parent: ${component.parent}`;
+      }
+      content += "}\n\n";
+      content += `<!-- id: ${component.id} -->\n`;
+      content += `${component.description}\n\n`;
     }
 
     content += "<!-- Board -->\n# Board\n\n";
@@ -1823,6 +1889,173 @@ export class MarkdownParser {
     return result;
   }
 
+  private parseC4ComponentsSection(
+    lines: string[],
+    startIndex: number,
+  ): { components: C4Component[]; nextIndex: number } {
+    const components: C4Component[] = [];
+    let i = startIndex;
+
+    while (i < lines.length) {
+      const line = lines[i].trim();
+
+      // Stop at next major section
+      if (line.startsWith("# ") && !line.startsWith("## ")) {
+        break;
+      }
+
+      // Parse component (## Component Name {level: context; type: system; ...})
+      if (line.startsWith("## ")) {
+        const componentMatch = line.match(/^## (.+?)\s*\{(.+)\}$/);
+        if (componentMatch) {
+          const [, name, configStr] = componentMatch;
+          const componentDescription: string[] = [];
+          i++;
+
+          // Collect component description until next ## or # or boundary comment
+          while (i < lines.length) {
+            const contentLine = lines[i];
+            const trimmedLine = contentLine.trim();
+
+            // Stop at next component, section, or boundary comment
+            if (
+              trimmedLine.startsWith("## ") ||
+              trimmedLine.startsWith("# ") ||
+              trimmedLine.match(/<!-- (Board|Goals|Configurations|Notes|Canvas|Mindmap|C4 Architecture) -->/)
+            ) {
+              break;
+            }
+
+            if (trimmedLine) {
+              componentDescription.push(trimmedLine);
+            }
+            i++;
+          }
+
+          // Check for existing ID in comment format <!-- id: component_xxx -->
+          let componentId = this.generateC4ComponentId();
+          let actualDescription = componentDescription.join("\n");
+
+          const idMatch = actualDescription.match(/<!-- id: (c4_component_\d+) -->/);
+          if (idMatch) {
+            componentId = idMatch[1];
+            // Remove the ID comment from description
+            actualDescription = actualDescription.replace(
+              /<!-- id: c4_component_\d+ -->\s*/,
+              "",
+            ).trim();
+          }
+
+          // Parse component config
+          const component: C4Component = {
+            id: componentId,
+            name,
+            level: "context",
+            type: "",
+            description: actualDescription,
+            position: { x: 0, y: 0 },
+          };
+
+          // Parse config string
+          const configPairs = this.parseConfigString(configStr);
+          for (const [key, value] of configPairs) {
+            if (key && value) {
+              switch (key) {
+                case "level":
+                  component.level = value as C4Component["level"];
+                  break;
+                case "type":
+                  component.type = value;
+                  break;
+                case "technology":
+                  component.technology = value;
+                  break;
+                case "position":
+                  try {
+                    const posMatch = value.match(
+                      /\{\s*x:\s*([+-]?\d+),\s*y:\s*([+-]?\d+)\s*\}/,
+                    );
+                    if (posMatch) {
+                      component.position = {
+                        x: parseInt(posMatch[1]),
+                        y: parseInt(posMatch[2]),
+                      };
+                    }
+                  } catch (e) {
+                    console.error("Error parsing position:", e);
+                  }
+                  break;
+                case "connections":
+                  try {
+                    // Parse array of connections: [{target: name, label: label}, ...]
+                    const connectionsMatch = value.match(/\[(.+)\]/);
+                    if (connectionsMatch) {
+                      const connectionsStr = connectionsMatch[1];
+                      const connections: { target: string; label: string }[] = [];
+                      // Simple parsing for now - can be improved
+                      const connectionParts = connectionsStr.split(/\},\s*\{/);
+                      for (const part of connectionParts) {
+                        const cleanPart = part.replace(/[{}]/g, '');
+                        const targetMatch = cleanPart.match(/target:\s*([^,]+)/);
+                        const labelMatch = cleanPart.match(/label:\s*(.+)/);
+                        if (targetMatch && labelMatch) {
+                          connections.push({
+                            target: targetMatch[1].trim(),
+                            label: labelMatch[1].trim()
+                          });
+                        }
+                      }
+                      component.connections = connections;
+                    }
+                  } catch (e) {
+                    console.error("Error parsing connections:", e);
+                  }
+                  break;
+                case "children":
+                  try {
+                    const childrenMatch = value.match(/\[(.+)\]/);
+                    if (childrenMatch) {
+                      component.children = childrenMatch[1].split(',').map(c => c.trim());
+                    }
+                  } catch (e) {
+                    console.error("Error parsing children:", e);
+                  }
+                  break;
+                case "parent":
+                  component.parent = value;
+                  break;
+              }
+            }
+          }
+
+          components.push(component);
+          continue;
+        }
+      }
+
+      i++;
+    }
+
+    return { components, nextIndex: i };
+  }
+
+  generateC4ComponentId(): string {
+    try {
+      const content = Deno.readTextFileSync(this.filePath);
+      const componentIdMatches = content.match(/<!-- id: c4_component_(\d+) -->/g) || [];
+      const maxId = Math.max(
+        0,
+        ...componentIdMatches.map((match) => {
+          const idMatch = match.match(/c4_component_(\d+)/);
+          return idMatch ? parseInt(idMatch[1]) : 0;
+        }),
+      );
+      return `c4_component_${maxId + 1}`;
+    } catch {
+      return "c4_component_1";
+    }
+  }
+
   private async saveProjectInfo(projectInfo: ProjectInfo): Promise<void> {
     const existingContent = await Deno.readTextFile(this.filePath);
     const config = this.parseProjectConfig(existingContent);
@@ -1921,6 +2154,28 @@ export class MarkdownParser {
         content += this.mindmapNodeToMarkdown(rootNode, mindmap.nodes, 0);
       }
       content += "\n";
+    }
+
+    // Add C4 Architecture section
+    content += "<!-- C4 Architecture -->\n# C4 Architecture\n\n";
+    for (const component of projectInfo.c4Components || []) {
+      content += `## ${component.name} {level: ${component.level}; type: ${component.type}`;
+      if (component.technology) {
+        content += `; technology: ${component.technology}`;
+      }
+      content += `; position: {x: ${component.position.x}, y: ${component.position.y}}`;
+      if (component.connections && component.connections.length > 0) {
+        content += `; connections: [${component.connections.map(c => `{target: ${c.target}, label: ${c.label}}`).join(', ')}]`;
+      }
+      if (component.children && component.children.length > 0) {
+        content += `; children: [${component.children.join(', ')}]`;
+      }
+      if (component.parent) {
+        content += `; parent: ${component.parent}`;
+      }
+      content += "}\n\n";
+      content += `<!-- id: ${component.id} -->\n`;
+      content += `${component.description}\n\n`;
     }
 
     // Add board section

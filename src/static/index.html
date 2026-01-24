@@ -429,6 +429,180 @@
         .auto-save-indicator.show {
             opacity: 1;
         }
+        
+        /* C4 Architecture Styles */
+        .c4-component {
+            position: absolute;
+            background: white;
+            border: 2px solid #3b82f6;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+            min-width: 160px;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .c4-component:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            border-color: #1d4ed8;
+        }
+        
+        .c4-component.context {
+            background: #eff6ff;
+            border-color: #3b82f6;
+        }
+        
+        .c4-component.container {
+            background: #f0f9ff;
+            border-color: #0ea5e9;
+        }
+        
+        .c4-component.component {
+            background: #ecfdf5;
+            border-color: #10b981;
+        }
+        
+        .c4-component.code {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+        
+        .dark .c4-component {
+            background: #1f2937;
+            color: white;
+        }
+        
+        .dark .c4-component.context {
+            background: #1e3a8a;
+            border-color: #60a5fa;
+        }
+        
+        .dark .c4-component.container {
+            background: #0c4a6e;
+            border-color: #38bdf8;
+        }
+        
+        .dark .c4-component.component {
+            background: #064e3b;
+            border-color: #34d399;
+        }
+        
+        .dark .c4-component.code {
+            background: #451a03;
+            border-color: #fbbf24;
+        }
+        
+        .c4-component-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        
+        .c4-component-type {
+            font-size: 11px;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .c4-component-description {
+            font-size: 12px;
+            opacity: 0.9;
+            line-height: 1.3;
+        }
+        
+        .c4-component-drilldown {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        
+        .c4-connection {
+            stroke: #6b7280;
+            stroke-width: 2;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+        
+        .c4-connection-label {
+            font-size: 11px;
+            fill: #6b7280;
+            text-anchor: middle;
+        }
+        
+        .dark .c4-connection {
+            stroke: #9ca3af;
+        }
+        
+        .dark .c4-connection-label {
+            fill: #9ca3af;
+        }
+        
+        /* Hide C4 connections when not in C4 view */
+        body:not([data-current-view="c4"]) #c4Connections {
+            display: none !important;
+        }
+        
+        .c4-breadcrumb-item {
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .c4-breadcrumb-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .c4-breadcrumb-separator {
+            margin: 0 4px;
+        }
+        
+        .c4-target-dropdown {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .c4-target-dropdown-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .dark .c4-target-dropdown-item {
+            border-bottom-color: #4b5563;
+        }
+        
+        .c4-target-dropdown-item:hover {
+            background: #f3f4f6;
+        }
+        
+        .dark .c4-target-dropdown-item:hover {
+            background: #4b5563;
+        }
+        
+        .c4-target-dropdown-item:last-child {
+            border-bottom: none;
+        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 min-h-screen transition-colors">
@@ -436,7 +610,7 @@
     <header class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 transition-colors">
         <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
             <!-- Mobile header -->
-            <div class="flex justify-between items-center h-16 md:hidden">
+            <div class="flex justify-between items-center h-16 lg:hidden">
                 <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100">MD Planner</h1>
                 <div class="flex items-center space-x-2">
                     <button id="mobileMenuToggle" class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 transition-colors">
@@ -448,7 +622,7 @@
             </div>
             
             <!-- Desktop header -->
-            <div class="hidden md:flex justify-between items-center h-16">
+            <div class="hidden lg:flex justify-between items-center h-16">
                 <div class="flex items-center space-x-4">
                     <h1 class="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100">MD Planner</h1>
                 </div>
@@ -478,6 +652,9 @@
                         </button>
                         <button id="mindmapViewBtn" class="hidden xl:block px-1.5 lg:px-2 py-1 rounded-md text-xs font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">
                             Mindmap
+                        </button>
+                        <button id="c4ViewBtn" class="hidden xl:block px-1.5 lg:px-2 py-1 rounded-md text-xs font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">
+                            C4
                         </button>
                         <button id="configViewBtn" class="hidden lg:block px-1.5 lg:px-2 py-1 rounded-md text-xs font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">
                             Config
@@ -557,7 +734,7 @@
         </div>
         
         <!-- Mobile navigation menu -->
-        <div id="mobileMenu" class="hidden md:hidden bg-gray-50 dark:bg-gray-700 border-t dark:border-gray-600">
+        <div id="mobileMenu" class="hidden lg:hidden bg-gray-50 dark:bg-gray-700 border-t dark:border-gray-600">
             <div class="px-2 py-3 space-y-2">
                 <!-- Mobile view toggle -->
                 <div class="grid grid-cols-3 gap-2 mb-3">
@@ -589,6 +766,11 @@
                     <button id="mindmapViewBtnMobile" class="px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 text-center">
                         Mindmap
                     </button>
+                    <button id="c4ViewBtnMobile" class="px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 text-center">
+                        C4
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 gap-2">
                     <button id="configViewBtnMobile" class="px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 text-center">
                         Config
                     </button>
@@ -1056,6 +1238,93 @@
             </div>
         </div>
 
+        <!-- C4 Architecture View -->
+        <div id="c4View" class="hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <div class="flex items-center space-x-4">
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">C4 Architecture</h2>
+                        <div id="c4Breadcrumb" class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                            <!-- Breadcrumb will be populated here -->
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button id="c4BackBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors hidden">
+                            ← Back
+                        </button>
+                        <button id="c4AutoLayoutBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            Auto Layout
+                        </button>
+                        <button id="addC4ComponentBtn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
+                            + Add Component
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- C4 Controls -->
+                <div class="px-6 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center space-x-2">
+                                <label class="text-sm text-gray-600 dark:text-gray-400">Level:</label>
+                                <select id="c4LevelSelector" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-2 py-1">
+                                    <option value="context">Context</option>
+                                    <option value="container">Container</option>
+                                    <option value="component">Component</option>
+                                    <option value="code">Code</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <label class="text-sm text-gray-600 dark:text-gray-400">Zoom:</label>
+                                <input type="range" id="c4Zoom" min="0.5" max="2" step="0.1" value="1" class="w-20">
+                                <span id="c4ZoomLevel" class="text-sm text-gray-600 dark:text-gray-400">100%</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <label class="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                                <input type="checkbox" id="c4PhysicsToggle" checked class="rounded">
+                                <span>Physics</span>
+                            </label>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">
+                                Click components to drill down
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- C4 Container -->
+                <div id="c4Container" class="relative overflow-hidden bg-white dark:bg-gray-900 canvas-height cursor-grab">
+                    <div id="c4Viewport" class="absolute inset-0">
+                        <div id="c4Content" class="relative w-full h-full">
+                            <div id="c4EmptyState" class="flex items-center justify-center h-full">
+                                <div class="text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012 2v2M7 7h10" />
+                                    </svg>
+                                    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No C4 components</h3>
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Add components to start building your architecture diagram.</p>
+                                </div>
+                            </div>
+                            <div id="c4ComponentsContainer" class="hidden">
+                                <!-- C4 components will be rendered here -->
+                            </div>
+                            <!-- Connections canvas -->
+                            <svg id="c4Connections" class="absolute inset-0 pointer-events-none w-full h-full" style="z-index: 1;">
+                                <!-- Connection lines will be drawn here -->
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Reset View Button - Outside the viewport -->
+                    <button id="c4ResetViewBtn" class="absolute top-4 right-4 bg-gray-600 text-white p-2 rounded-full hover:bg-gray-700 transition-colors z-20" title="Reset View">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0V9a8 8 0 1115.356 2M15 15v5h.582"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Timeline View -->
         <div id="timelineView" class="hidden">
 
@@ -1295,6 +1564,81 @@
                     </button>
                     <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
                         Add Sticky Note
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- C4 Component Modal -->
+    <div id="c4ComponentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 id="c4ComponentModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Add C4 Component</h3>
+            </div>
+            <form id="c4ComponentForm" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Component Name</label>
+                    <input type="text" id="c4ComponentName" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g., Web Application, Database, API Gateway">
+                </div>
+                
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Level</label>
+                        <select id="c4ComponentLevel" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="context">Context</option>
+                            <option value="container">Container</option>
+                            <option value="component">Component</option>
+                            <option value="code">Code</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+                        <input type="text" id="c4ComponentType" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g., System, Container, Component">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Technology</label>
+                        <input type="text" id="c4ComponentTechnology" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g., React, PostgreSQL, Node.js">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                    <textarea id="c4ComponentDescription" rows="3" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Brief description of what this component does..."></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">X Position</label>
+                        <input type="number" id="c4ComponentX" value="100" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Y Position</label>
+                        <input type="number" id="c4ComponentY" value="100" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Connections</label>
+                    <div class="space-y-2" id="c4ConnectionsForm">
+                        <div class="flex space-x-2">
+                            <div class="flex-1 relative">
+                                <input type="text" placeholder="Target component name" class="c4-target-input w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 text-sm" autocomplete="off">
+                                <div class="c4-target-dropdown hidden absolute top-full left-0 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-b-md max-h-32 overflow-y-auto z-50"></div>
+                            </div>
+                            <input type="text" placeholder="Relationship label" class="flex-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 text-sm">
+                            <button type="button" class="px-2 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm">×</button>
+                        </div>
+                    </div>
+                    <button type="button" id="addC4ConnectionBtn" class="mt-2 px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm">+ Add Connection</button>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" id="cancelC4ComponentBtn" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
+                        Add Component
                     </button>
                 </div>
             </form>

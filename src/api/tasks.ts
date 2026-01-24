@@ -580,6 +580,39 @@ export class TaskAPI {
         });
       }
 
+      // C4 Architecture API endpoints
+      // GET /api/c4
+      if (
+        method === "GET" && pathParts.length === 2 && pathParts[1] === "c4"
+      ) {
+        const projectInfo = await this.parser.readProjectInfo();
+        const c4Components = projectInfo.c4Components || [];
+        return new Response(JSON.stringify({ components: c4Components }), { headers });
+      }
+
+      // POST /api/c4
+      if (
+        method === "POST" && pathParts.length === 2 && pathParts[1] === "c4"
+      ) {
+        const body = await req.json();
+        const projectInfo = await this.parser.readProjectInfo();
+        projectInfo.c4Components = body.components || [];
+        
+        try {
+          await this.parser.saveProjectInfo(projectInfo);
+          return new Response(JSON.stringify({ success: true }), { headers });
+        } catch (error) {
+          console.error("Failed to save C4 components:", error);
+          return new Response(
+            JSON.stringify({ error: "Failed to save C4 components" }),
+            {
+              status: 500,
+              headers,
+            },
+          );
+        }
+      }
+
       return new Response(JSON.stringify({ error: "Not found" }), {
         status: 404,
         headers,
