@@ -691,6 +691,35 @@
                             </svg>
                         </div>
                         
+                        <!-- Pomodoro Timer -->
+                        <div class="relative">
+                            <button id="pomodoroBtn" class="bg-gray-600 text-white p-1.5 rounded-md hover:bg-gray-700 transition-colors flex items-center gap-1" title="Pomodoro Timer">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span id="pomodoroDisplay" class="text-xs font-mono hidden">25:00</span>
+                            </button>
+                            <div id="pomodoroDropdown" class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-700 rounded-lg shadow-lg hidden z-50 p-4">
+                                <div class="text-center mb-4">
+                                    <div id="pomodoroTimer" class="text-4xl font-mono font-bold text-gray-900 dark:text-gray-100">25:00</div>
+                                    <div id="pomodoroLabel" class="text-sm text-gray-500 dark:text-gray-400 mt-1">Focus Time</div>
+                                </div>
+                                <div class="flex justify-center gap-2 mb-4">
+                                    <button id="pomodoroStartBtn" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors text-sm">Start</button>
+                                    <button id="pomodoroPauseBtn" class="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition-colors text-sm hidden">Pause</button>
+                                    <button id="pomodoroResetBtn" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors text-sm">Reset</button>
+                                </div>
+                                <div class="flex justify-center gap-2 mb-3">
+                                    <button id="pomodoroFocusBtn" class="px-3 py-1 rounded text-xs font-medium bg-primary text-white">Focus</button>
+                                    <button id="pomodoroShortBtn" class="px-3 py-1 rounded text-xs font-medium bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300">Short</button>
+                                    <button id="pomodoroLongBtn" class="px-3 py-1 rounded text-xs font-medium bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300">Long</button>
+                                </div>
+                                <div class="text-center text-xs text-gray-500 dark:text-gray-400">
+                                    <span id="pomodoroCount">0</span> pomodoros completed
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Import/Export Button - compact -->
                         <div class="relative">
                             <button id="importExportBtn" class="bg-gray-600 text-white p-1.5 rounded-md hover:bg-gray-700 transition-colors" title="Import/Export">
