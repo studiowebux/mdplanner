@@ -424,12 +424,14 @@
             border-radius: 6px;
             font-size: 14px;
             opacity: 0;
+            pointer-events: none;
             transition: opacity 0.3s ease;
             z-index: 1000;
         }
-        
+
         .auto-save-indicator.show {
             opacity: 1;
+            pointer-events: auto;
         }
         
         /* C4 Architecture Styles */
@@ -615,8 +617,8 @@
             <div class="flex justify-between items-center h-16 lg:hidden">
                 <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100">MD Planner</h1>
                 <div class="flex items-center space-x-2">
-                    <button id="mobileMenuToggle" class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button id="mobileMenuToggle" class="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
                     </button>
@@ -632,16 +634,16 @@
                     <nav class="flex items-center space-x-1">
                         <!-- Tasks group -->
                         <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-md p-0.5">
-                            <button id="summaryViewBtn" class="px-3 py-1.5 rounded text-sm font-medium transition-colors bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm">
+                            <button id="summaryViewBtn" class="cursor-pointer px-3 py-1.5 rounded text-sm font-medium transition-colors bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm">
                                 Summary
                             </button>
-                            <button id="listViewBtn" class="px-3 py-1.5 rounded text-sm font-medium transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">
+                            <button id="listViewBtn" class="cursor-pointer px-3 py-1.5 rounded text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600">
                                 List
                             </button>
-                            <button id="boardViewBtn" class="px-3 py-1.5 rounded text-sm font-medium transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">
+                            <button id="boardViewBtn" class="cursor-pointer px-3 py-1.5 rounded text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600">
                                 Board
                             </button>
-                            <button id="timelineViewBtn" class="px-3 py-1.5 rounded text-sm font-medium transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">
+                            <button id="timelineViewBtn" class="cursor-pointer px-3 py-1.5 rounded text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600">
                                 Timeline
                             </button>
                         </div>
@@ -650,23 +652,23 @@
                         <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
 
                         <!-- Content views -->
-                        <button id="notesViewBtn" class="px-3 py-1.5 rounded text-sm font-medium transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <button id="notesViewBtn" class="cursor-pointer px-3 py-1.5 rounded text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
                             Notes
                         </button>
-                        <button id="goalsViewBtn" class="px-3 py-1.5 rounded text-sm font-medium transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <button id="goalsViewBtn" class="cursor-pointer px-3 py-1.5 rounded text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
                             Goals
                         </button>
 
                         <!-- More dropdown -->
                         <div class="relative">
-                            <button id="moreViewsBtn" class="px-3 py-1.5 rounded text-sm font-medium transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-1">
+                            <button id="moreViewsBtn" class="cursor-pointer px-3 py-1.5 rounded text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-1">
                                 More
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                             </button>
                             <div id="moreViewsDropdown" class="absolute left-0 mt-1 w-40 bg-white dark:bg-gray-700 rounded-md shadow-lg hidden z-50 py-1">
-                                <button id="canvasViewBtn" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">Canvas</button>
-                                <button id="mindmapViewBtn" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">Mindmap</button>
-                                <button id="c4ViewBtn" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">C4 Architecture</button>
+                                <button id="canvasViewBtn" class="cursor-pointer w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">Canvas</button>
+                                <button id="mindmapViewBtn" class="cursor-pointer w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">Mindmap</button>
+                                <button id="c4ViewBtn" class="cursor-pointer w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">C4 Architecture</button>
                             </div>
                         </div>
                     </nav>
@@ -795,40 +797,40 @@
             <div class="px-2 py-3 space-y-2">
                 <!-- Mobile view toggle -->
                 <div class="grid grid-cols-3 gap-2 mb-3">
-                    <button id="summaryViewBtnMobile" class="px-3 py-2 rounded-md text-sm font-medium transition-colors bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm text-center">
+                    <button id="summaryViewBtnMobile" class="cursor-pointer px-3 py-2 rounded-md text-sm font-medium transition-colors bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm text-center">
                         Summary
                     </button>
-                    <button id="listViewBtnMobile" class="px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 text-center">
+                    <button id="listViewBtnMobile" class="cursor-pointer px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-600 text-center">
                         List
                     </button>
-                    <button id="boardViewBtnMobile" class="px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 text-center">
+                    <button id="boardViewBtnMobile" class="cursor-pointer px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-600 text-center">
                         Board
                     </button>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                    <button id="timelineViewBtnMobile" class="px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 text-center">
+                    <button id="timelineViewBtnMobile" class="cursor-pointer px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-600 text-center">
                         Timeline
                     </button>
-                    <button id="notesViewBtnMobile" class="px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 text-center">
+                    <button id="notesViewBtnMobile" class="cursor-pointer px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-600 text-center">
                         Notes
                     </button>
-                    <button id="goalsViewBtnMobile" class="px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 text-center">
+                    <button id="goalsViewBtnMobile" class="cursor-pointer px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-600 text-center">
                         Goals
                     </button>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                    <button id="canvasViewBtnMobile" class="px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 text-center">
+                    <button id="canvasViewBtnMobile" class="cursor-pointer px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-600 text-center">
                         Canvas
                     </button>
-                    <button id="mindmapViewBtnMobile" class="px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 text-center">
+                    <button id="mindmapViewBtnMobile" class="cursor-pointer px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-600 text-center">
                         Mindmap
                     </button>
-                    <button id="c4ViewBtnMobile" class="px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 text-center">
+                    <button id="c4ViewBtnMobile" class="cursor-pointer px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-600 text-center">
                         C4
                     </button>
                 </div>
                 <div class="grid grid-cols-1 gap-2">
-                    <button id="configViewBtnMobile" class="px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 text-center">
+                    <button id="configViewBtnMobile" class="cursor-pointer px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-600 text-center">
                         Config
                     </button>
                 </div>
@@ -844,22 +846,22 @@
                 
                 <!-- Mobile import/export buttons -->
                 <div class="grid grid-cols-2 gap-2 mt-3">
-                    <button id="exportTasksBtnMobile" class="bg-gray-600 text-white px-3 py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm flex items-center justify-center gap-1">
+                    <button id="exportTasksBtnMobile" class="cursor-pointer bg-gray-600 text-white px-3 py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm flex items-center justify-center gap-1">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         Export CSV
                     </button>
-                    <button id="exportReportBtnMobile" class="bg-gray-600 text-white px-3 py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm flex items-center justify-center gap-1">
+                    <button id="exportReportBtnMobile" class="cursor-pointer bg-gray-600 text-white px-3 py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm flex items-center justify-center gap-1">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                         Export PDF
                     </button>
                 </div>
-                <button id="importTasksBtnMobile" class="w-full bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors mt-2 flex items-center justify-center gap-1">
+                <button id="importTasksBtnMobile" class="cursor-pointer w-full bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors mt-2 flex items-center justify-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                     Import Tasks CSV
                 </button>
-                
+
                 <!-- Mobile add task -->
-                <button id="addTaskBtnMobile" class="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
+                <button id="addTaskBtnMobile" class="cursor-pointer w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
                     + Add Task
                 </button>
             </div>

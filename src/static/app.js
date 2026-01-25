@@ -672,17 +672,26 @@ class TaskManager {
     // Get both desktop and mobile buttons
     const desktopBtn = document.getElementById(`${view}ViewBtn`);
     const mobileBtn = document.getElementById(`${view}ViewBtnMobile`);
-    
+
     // Activate desktop button
     if (desktopBtn) {
       desktopBtn.classList.add("bg-white", "dark:bg-gray-600", "text-gray-900", "dark:text-gray-100", "shadow-sm");
-      desktopBtn.classList.remove("text-gray-600", "dark:text-gray-300", "hover:text-gray-900", "dark:hover:text-gray-100");
+      desktopBtn.classList.remove(
+        "text-gray-600", "dark:text-gray-300",
+        "hover:text-gray-900", "dark:hover:text-gray-100",
+        "hover:bg-gray-100", "dark:hover:bg-gray-700",
+        "hover:bg-gray-200", "dark:hover:bg-gray-600"
+      );
     }
-    
+
     // Activate mobile button
     if (mobileBtn) {
       mobileBtn.classList.add("bg-white", "dark:bg-gray-600", "text-gray-900", "dark:text-gray-100", "shadow-sm");
-      mobileBtn.classList.remove("text-gray-600", "dark:text-gray-300", "hover:text-gray-900", "dark:hover:text-gray-100");
+      mobileBtn.classList.remove(
+        "text-gray-600", "dark:text-gray-300",
+        "hover:text-gray-900", "dark:hover:text-gray-100",
+        "hover:bg-gray-100", "dark:hover:bg-gray-600"
+      );
     }
   }
 
@@ -724,29 +733,9 @@ class TaskManager {
     const c4BtnMobile = document.getElementById("c4ViewBtnMobile");
     const configBtnMobile = document.getElementById("configViewBtnMobile");
 
-    // Reset all buttons
-    [
-      summaryBtn,
-      listBtn,
-      boardBtn,
-      timelineBtn,
-      notesBtn,
-      goalsBtn,
-      canvasBtn,
-      mindmapBtn,
-      c4Btn,
-      configBtn,
-      summaryBtnMobile,
-      listBtnMobile,
-      boardBtnMobile,
-      timelineBtnMobile,
-      notesBtnMobile,
-      goalsBtnMobile,
-      canvasBtnMobile,
-      mindmapBtnMobile,
-      c4BtnMobile,
-      configBtnMobile,
-    ].forEach((btn) => {
+    // Reset grouped buttons (inside the gray container - need darker hover)
+    const groupedBtns = [summaryBtn, listBtn, boardBtn, timelineBtn];
+    groupedBtns.forEach((btn) => {
       if (btn) {
         btn.classList.remove(
           "bg-white",
@@ -760,6 +749,76 @@ class TaskManager {
           "dark:text-gray-300",
           "hover:text-gray-900",
           "dark:hover:text-gray-100",
+          "hover:bg-gray-200",
+          "dark:hover:bg-gray-600",
+        );
+      }
+    });
+
+    // Reset standalone desktop buttons (need lighter hover)
+    const standaloneDesktopBtns = [notesBtn, goalsBtn];
+    standaloneDesktopBtns.forEach((btn) => {
+      if (btn) {
+        btn.classList.remove(
+          "bg-white",
+          "dark:bg-gray-600",
+          "text-gray-900",
+          "dark:text-gray-100",
+          "shadow-sm",
+        );
+        btn.classList.add(
+          "text-gray-600",
+          "dark:text-gray-300",
+          "hover:text-gray-900",
+          "dark:hover:text-gray-100",
+          "hover:bg-gray-100",
+          "dark:hover:bg-gray-700",
+        );
+      }
+    });
+
+    // Reset mobile buttons
+    const mobileBtns = [
+      summaryBtnMobile,
+      listBtnMobile,
+      boardBtnMobile,
+      timelineBtnMobile,
+      notesBtnMobile,
+      goalsBtnMobile,
+      canvasBtnMobile,
+      mindmapBtnMobile,
+      c4BtnMobile,
+      configBtnMobile,
+    ];
+    mobileBtns.forEach((btn) => {
+      if (btn) {
+        btn.classList.remove(
+          "bg-white",
+          "dark:bg-gray-600",
+          "text-gray-900",
+          "dark:text-gray-100",
+          "shadow-sm",
+        );
+        btn.classList.add(
+          "text-gray-600",
+          "dark:text-gray-300",
+          "hover:text-gray-900",
+          "dark:hover:text-gray-100",
+          "hover:bg-gray-100",
+          "dark:hover:bg-gray-600",
+        );
+      }
+    });
+
+    // Dropdown buttons (canvas, mindmap, c4) - don't need hover reset, they stay in dropdown
+    [canvasBtn, mindmapBtn, c4Btn, configBtn].forEach((btn) => {
+      if (btn) {
+        btn.classList.remove(
+          "bg-white",
+          "dark:bg-gray-600",
+          "text-gray-900",
+          "dark:text-gray-100",
+          "shadow-sm",
         );
       }
     });
@@ -8185,5 +8244,12 @@ class TaskManager {
   }
 }
 
-// Initialize the app
-const taskManager = new TaskManager();
+// Initialize the app when DOM is ready
+let taskManager;
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
+    taskManager = new TaskManager();
+  });
+} else {
+  taskManager = new TaskManager();
+}
