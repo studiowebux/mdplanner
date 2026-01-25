@@ -1223,7 +1223,7 @@ class TaskManager {
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-2">
                         <div class="w-3 h-3 bg-${color}-400 rounded-full"></div>
-                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">🏁 ${milestone}</span>
+                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg>${milestone}</span>
                     </div>
                     <span class="text-sm font-medium text-gray-900 dark:text-gray-100">${data.incomplete} remaining</span>
                 </div>
@@ -1651,18 +1651,18 @@ class TaskManager {
                     : ""
                 }
 
-                <div class="text-xs text-gray-500 dark:text-gray-400">🔗 ID: ${task.id}</div>
-                ${task.config.assignee ? `<div class="text-xs text-gray-500 dark:text-gray-400">👤 ${task.config.assignee}</div>` : ""}
-                ${task.config.due_date ? `<div class="text-xs text-gray-500 dark:text-gray-400">📅 ${this.formatDate(task.config.due_date)}</div>` : ""}
-                ${task.config.effort ? `<div class="text-xs text-gray-500 dark:text-gray-400">⏱️ ${task.config.effort} days</div>` : ""}
-                ${task.config.milestone ? `<div class="text-xs text-gray-500 dark:text-gray-400">🏁 ${task.config.milestone}</div>` : ""}
-                ${task.config.blocked_by && task.config.blocked_by.length > 0 ? `<div class="text-xs text-gray-500 dark:text-gray-400">🚫 Blocked by: ${task.config.blocked_by.join(", ")}</div>` : ""}
+                <div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg> ID: ${task.id}</div>
+                ${task.config.assignee ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> ${task.config.assignee}</div>` : ""}
+                ${task.config.due_date ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> ${this.formatDate(task.config.due_date)}</div>` : ""}
+                ${task.config.effort ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ${task.config.effort} days</div>` : ""}
+                ${task.config.milestone ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg> ${task.config.milestone}</div>` : ""}
+                ${task.config.blocked_by && task.config.blocked_by.length > 0 ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg> Blocked by: ${task.config.blocked_by.join(", ")}</div>` : ""}
 
                 ${
                   task.children && task.children.length > 0
                     ? `
                     <div class="mt-3 pt-2 border-t border-gray-100 dark:border-gray-600">
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">📋 Subtasks (${task.children.length})</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg> Subtasks (${task.children.length})</div>
                         <div class="space-y-1">
                             ${task.children
                               .map(
@@ -3064,7 +3064,7 @@ class TaskManager {
         const isOverdue = task.endDate > dueDate;
         html += ` • Due: ${dueDate.toLocaleDateString()}`;
         if (isOverdue) {
-          html += ` <span class="text-red-600 dark:text-red-400 font-medium">⚠️ OVERDUE</span>`;
+          html += ` <span class="text-red-600 dark:text-red-400 font-medium inline-flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> OVERDUE</span>`;
         }
       }
       if (task.config.blocked_by && task.config.blocked_by.length > 0) {
@@ -3126,7 +3126,7 @@ class TaskManager {
 
           if (dueDatePercent >= 0 && dueDatePercent <= 100) {
             html += `<div class="absolute w-0.5 bg-orange-500 dark:bg-orange-400" style="left: ${dueDatePercent}%; height: 100%; top: 0; z-index: 25;">`;
-            html += `<div class="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs text-orange-600 dark:text-orange-400 font-medium whitespace-nowrap bg-white dark:bg-gray-800 px-1 rounded">📅 ${dueDate.toLocaleDateString()}</div>`;
+            html += `<div class="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs text-orange-600 dark:text-orange-400 font-medium whitespace-nowrap bg-white dark:bg-gray-800 px-1 rounded flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>${dueDate.toLocaleDateString()}</div>`;
             html += `</div>`;
           }
         }
