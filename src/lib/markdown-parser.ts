@@ -13,7 +13,7 @@ import {
 } from "./types.ts";
 
 export class MarkdownParser {
-  private filePath: string;
+  public filePath: string;
   private maxBackups: number;
   private backupDir: string;
   private lastContentHash: string | null = null;
@@ -2117,7 +2117,7 @@ export class MarkdownParser {
     }
   }
 
-  private async saveProjectInfo(projectInfo: ProjectInfo): Promise<void> {
+  async saveProjectInfo(projectInfo: ProjectInfo): Promise<void> {
     const existingContent = await Deno.readTextFile(this.filePath);
     const config = this.parseProjectConfig(existingContent);
     const tasks = await this.readTasks();

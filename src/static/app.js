@@ -69,12 +69,68 @@ class TaskManager {
     this.initDarkMode();
     this.initFullscreenMode();
     this.bindEvents();
-    await this.loadProjectConfig(); // Load config first
-    await this.loadSections(); // Load sections from board
+    await this.loadProjects(); // Load projects first
+    await this.loadProjectConfig();
+    await this.loadSections();
     const savedView = localStorage.getItem("mdplanner_current_view") || "summary";
-    this.switchView(savedView); // Restore last view or default to summary
+    this.switchView(savedView);
     await this.loadTasks();
     this.checkTaskHashOnLoad();
+  }
+
+  async loadProjects() {
+    try {
+      const response = await fetch("/api/projects");
+      const projects = await response.json();
+
+      const activeResponse = await fetch("/api/projects/active");
+      const activeData = await activeResponse.json();
+
+      const selector = document.getElementById("projectSelector");
+      if (selector) {
+        selector.innerHTML = projects.map(p =>
+          `<option value="${p.filename}" ${p.filename === activeData.filename ? "selected" : ""}>${p.name}</option>`
+        ).join("");
+
+        selector.addEventListener("change", (e) => this.switchProject(e.target.value));
+      }
+    } catch (error) {
+      console.error("Error loading projects:", error);
+    }
+  }
+
+  async switchProject(filename) {
+    try {
+      const response = await fetch("/api/projects/switch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename }),
+      });
+
+      if (response.ok) {
+        // Reload all data for new project
+        this.tasks = [];
+        this.filteredTasks = [];
+        this.projectInfo = null;
+        this.projectConfig = null;
+
+        await this.loadProjectConfig();
+        await this.loadSections();
+        await this.loadTasks();
+
+        if (this.currentView === "summary") {
+          this.loadProjectInfo();
+        } else if (this.currentView === "notes") {
+          this.loadNotes();
+        } else if (this.currentView === "goals") {
+          this.loadGoals();
+        }
+
+        this.renderTasks();
+      }
+    } catch (error) {
+      console.error("Error switching project:", error);
+    }
   }
 
   checkTaskHashOnLoad() {

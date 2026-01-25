@@ -675,7 +675,17 @@
                 </div>
 
                 <div class="flex items-center space-x-2">
-                    
+
+                    <!-- Project Selector -->
+                    <div class="relative">
+                        <select id="projectSelector" class="cursor-pointer appearance-none bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 text-sm rounded-md pl-3 pr-8 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary max-w-[180px]">
+                            <option value="">Loading...</option>
+                        </select>
+                        <svg class="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+
                     <!-- Compact action buttons -->
                     <div class="flex items-center space-x-1">
                         <!-- Dark Mode Toggle -->

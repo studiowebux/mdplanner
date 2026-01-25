@@ -1,12 +1,16 @@
-import { join } from "@std/path";
 import { MarkdownParser } from "../lib/markdown-parser.ts";
+import { ProjectManager } from "../lib/project-manager.ts";
 import { Task } from "../lib/types.ts";
 
 export class TaskAPI {
-  private parser: MarkdownParser;
+  private projectManager: ProjectManager;
 
-  constructor(markdownFile: string = join(Deno.cwd(), "structure.md")) {
-    this.parser = new MarkdownParser(join(markdownFile));
+  constructor(projectManager: ProjectManager) {
+    this.projectManager = projectManager;
+  }
+
+  private get parser(): MarkdownParser {
+    return this.projectManager.getActiveParser();
   }
 
   async handle(req: Request): Promise<Response> {
@@ -29,6 +33,37 @@ export class TaskAPI {
     }
 
     try {
+      // GET /api/projects - list all projects
+      if (method === "GET" && pathParts.length === 2 && pathParts[1] === "projects") {
+        const projects = await this.projectManager.scanProjects();
+        return new Response(JSON.stringify(projects), { headers });
+      }
+
+      // GET /api/projects/active - get active project
+      if (method === "GET" && pathParts.length === 3 && pathParts[1] === "projects" && pathParts[2] === "active") {
+        const activeFile = this.projectManager.getActiveFile();
+        const projects = await this.projectManager.scanProjects();
+        const active = projects.find(p => p.filename === activeFile);
+        return new Response(JSON.stringify({ filename: activeFile, project: active }), { headers });
+      }
+
+      // POST /api/projects/switch - switch project
+      if (method === "POST" && pathParts.length === 3 && pathParts[1] === "projects" && pathParts[2] === "switch") {
+        const body = await req.json();
+        const success = await this.projectManager.switchProject(body.filename);
+        if (success) {
+          return new Response(JSON.stringify({ success: true, filename: body.filename }), { headers });
+        }
+        return new Response(JSON.stringify({ error: "Project not found" }), { status: 404, headers });
+      }
+
+      // POST /api/projects/create - create new project
+      if (method === "POST" && pathParts.length === 3 && pathParts[1] === "projects" && pathParts[2] === "create") {
+        const body = await req.json();
+        const filename = await this.projectManager.createProject(body.name);
+        return new Response(JSON.stringify({ success: true, filename }), { status: 201, headers });
+      }
+
       // GET /api/tasks
       if (
         method === "GET" && pathParts.length === 2 && pathParts[1] === "tasks"
