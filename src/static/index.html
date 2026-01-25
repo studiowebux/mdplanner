@@ -819,7 +819,20 @@
                 <!-- Project Info -->
                 <div class="lg:col-span-2 space-y-4">
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6">
-                        <h2 id="projectName" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Project Name</h2>
+                        <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+                            <h2 id="projectName" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Project Name</h2>
+                            <select id="projectStatus" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="active">Active</option>
+                                <option value="on-track">On Track</option>
+                                <option value="at-risk">At Risk</option>
+                                <option value="late">Late</option>
+                                <option value="on-hold">On Hold</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div id="projectStatusComment" class="hidden mb-4">
+                            <textarea id="statusCommentText" rows="2" placeholder="Status comment (optional)" class="w-full text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+                        </div>
                         <div id="projectDescription" class="prose prose-gray dark:prose-invert max-w-none">
                             <p class="text-gray-600 dark:text-gray-400">Loading project description...</p>
                         </div>
@@ -857,6 +870,14 @@
                                 <button id="cancelLinkBtn" type="button" class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">Cancel</button>
                                 <button id="saveLinkBtn" type="button" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md hover:bg-blue-600">Save</button>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Task Deadlines -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Task Deadlines</h3>
+                        <div id="taskDeadlines" class="space-y-4">
+                            <p class="text-sm text-gray-500 dark:text-gray-400 italic">No upcoming deadlines.</p>
                         </div>
                     </div>
                 </div>
@@ -914,7 +935,32 @@
         <div id="listView" class="hidden pb-16">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Tasks</h2>
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Tasks</h2>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <select id="filterSection" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-2 py-1">
+                                <option value="">All Sections</option>
+                            </select>
+                            <select id="filterAssignee" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-2 py-1">
+                                <option value="">All Assignees</option>
+                            </select>
+                            <select id="filterMilestone" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-2 py-1">
+                                <option value="">All Milestones</option>
+                            </select>
+                            <select id="filterStatus" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-2 py-1">
+                                <option value="">All Status</option>
+                                <option value="incomplete">Incomplete</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                            <select id="sortTasks" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-2 py-1">
+                                <option value="default">Default Order</option>
+                                <option value="due_date">Due Date</option>
+                                <option value="priority">Priority</option>
+                                <option value="title">Title (A-Z)</option>
+                            </select>
+                            <button id="clearFilters" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hidden">Clear</button>
+                        </div>
+                    </div>
                 </div>
                 <div class="divide-y divide-gray-200 dark:divide-gray-700">
                     <div id="listContainer"></div>
@@ -1360,7 +1406,7 @@
                     <!-- Reset View Button - Outside the viewport -->
                     <button id="c4ResetViewBtn" class="absolute top-4 right-4 bg-gray-600 text-white p-2 rounded-full hover:bg-gray-700 transition-colors z-20" title="Reset View">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0V9a8 8 0 1115.356 2M15 15v5h.582"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
                         </svg>
                     </button>
                 </div>

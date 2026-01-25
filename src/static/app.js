@@ -45,6 +45,13 @@ class TaskManager {
     this.c4ForceSimulation = null;
     this.c4AnimationFrame = null;
     this.c4PhysicsEnabled = true;
+    this.listFilters = {
+      section: "",
+      assignee: "",
+      milestone: "",
+      status: "",
+      sort: "default",
+    };
     this.init();
   }
 
@@ -259,6 +266,34 @@ class TaskManager {
     document
       .getElementById("saveLinkBtn")
       .addEventListener("click", () => this.addLink());
+
+    // Project status events
+    document
+      .getElementById("projectStatus")
+      .addEventListener("change", (e) => this.updateProjectStatus(e.target.value));
+    document
+      .getElementById("statusCommentText")
+      .addEventListener("blur", () => this.saveStatusComment());
+
+    // List filter/sort events
+    document
+      .getElementById("filterSection")
+      .addEventListener("change", () => this.applyListFilters());
+    document
+      .getElementById("filterAssignee")
+      .addEventListener("change", () => this.applyListFilters());
+    document
+      .getElementById("filterMilestone")
+      .addEventListener("change", () => this.applyListFilters());
+    document
+      .getElementById("filterStatus")
+      .addEventListener("change", () => this.applyListFilters());
+    document
+      .getElementById("sortTasks")
+      .addEventListener("change", () => this.applyListFilters());
+    document
+      .getElementById("clearFilters")
+      .addEventListener("click", () => this.clearListFilters());
 
     // Dependency autocomplete events
     document
@@ -809,6 +844,125 @@ class TaskManager {
 
     // Render project links
     this.renderProjectLinks();
+
+    // Render project status
+    this.renderProjectStatus();
+
+    // Render task deadlines
+    this.renderTaskDeadlines(stats.allTasks);
+  }
+
+  renderTaskDeadlines(allTasks) {
+    const container = document.getElementById("taskDeadlines");
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const nextWeek = new Date(today);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+
+    const tasksWithDueDate = allTasks
+      .filter((task) => task.config.due_date && !task.completed)
+      .map((task) => {
+        let dueDate = new Date(task.config.due_date);
+        if (isNaN(dueDate.getTime())) {
+          if (task.config.due_date.match(/^\d{4}-\d{2}-\d{2}T\d{1,2}$/)) {
+            dueDate = new Date(task.config.due_date + ":00:00");
+          } else if (task.config.due_date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            dueDate = new Date(task.config.due_date + "T00:00:00");
+          }
+        }
+        dueDate.setHours(0, 0, 0, 0);
+        return { ...task, dueDateParsed: dueDate };
+      })
+      .filter((task) => !isNaN(task.dueDateParsed.getTime()))
+      .sort((a, b) => a.dueDateParsed - b.dueDateParsed);
+
+    const overdue = tasksWithDueDate.filter((t) => t.dueDateParsed < today);
+    const dueToday = tasksWithDueDate.filter((t) => t.dueDateParsed.getTime() === today.getTime());
+    const dueSoon = tasksWithDueDate.filter((t) => t.dueDateParsed > today && t.dueDateParsed <= nextWeek);
+
+    if (overdue.length === 0 && dueToday.length === 0 && dueSoon.length === 0) {
+      container.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400 italic">No upcoming deadlines.</p>';
+      return;
+    }
+
+    let html = "";
+
+    if (overdue.length > 0) {
+      html += `
+        <div>
+          <h4 class="text-sm font-medium text-red-600 dark:text-red-400 mb-2">Overdue (${overdue.length})</h4>
+          <div class="space-y-2">
+            ${overdue.map((task) => this.renderDeadlineTask(task, "red")).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    if (dueToday.length > 0) {
+      html += `
+        <div>
+          <h4 class="text-sm font-medium text-orange-600 dark:text-orange-400 mb-2">Due Today (${dueToday.length})</h4>
+          <div class="space-y-2">
+            ${dueToday.map((task) => this.renderDeadlineTask(task, "orange")).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    if (dueSoon.length > 0) {
+      html += `
+        <div>
+          <h4 class="text-sm font-medium text-yellow-600 dark:text-yellow-500 mb-2">Due This Week (${dueSoon.length})</h4>
+          <div class="space-y-2">
+            ${dueSoon.map((task) => this.renderDeadlineTask(task, "yellow")).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    container.innerHTML = html;
+  }
+
+  renderDeadlineTask(task, color) {
+    const colorClasses = {
+      red: "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20",
+      orange: "border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20",
+      yellow: "border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20",
+    };
+    const dateStr = task.dueDateParsed.toLocaleDateString();
+    return `
+      <div class="p-2 rounded border ${colorClasses[color]} cursor-pointer hover:opacity-80 transition-opacity"
+           onclick="taskManager.openTaskModal('${task.id}')">
+        <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">${task.title}</div>
+        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">${dateStr} · ${task.section || "No section"}</div>
+      </div>
+    `;
+  }
+
+  renderProjectStatus() {
+    const select = document.getElementById("projectStatus");
+    const commentContainer = document.getElementById("projectStatusComment");
+    const commentText = document.getElementById("statusCommentText");
+
+    const status = this.projectConfig?.status || "active";
+    select.value = status;
+
+    if (status !== "active" && this.projectConfig?.statusComment) {
+      commentContainer.classList.remove("hidden");
+      commentText.value = this.projectConfig.statusComment;
+    } else if (status !== "active") {
+      commentContainer.classList.remove("hidden");
+      commentText.value = "";
+    } else {
+      commentContainer.classList.add("hidden");
+      commentText.value = "";
+    }
+
+    this.updateStatusDropdownStyle();
   }
 
   renderProjectLinks() {
@@ -877,6 +1031,39 @@ class TaskManager {
     await this.saveProjectConfig();
     this.renderProjectLinks();
     this.showToast("Link removed");
+  }
+
+  async updateProjectStatus(status) {
+    this.projectConfig.status = status;
+    const commentContainer = document.getElementById("projectStatusComment");
+    if (status !== "active") {
+      commentContainer.classList.remove("hidden");
+    } else {
+      commentContainer.classList.add("hidden");
+    }
+    await this.saveProjectConfig();
+    this.updateStatusDropdownStyle();
+    this.showToast("Status updated");
+  }
+
+  async saveStatusComment() {
+    const comment = document.getElementById("statusCommentText").value.trim();
+    this.projectConfig.statusComment = comment || undefined;
+    await this.saveProjectConfig();
+  }
+
+  updateStatusDropdownStyle() {
+    const select = document.getElementById("projectStatus");
+    const status = select.value;
+    const styles = {
+      active: "border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-600 dark:bg-blue-900/30 dark:text-blue-300",
+      "on-track": "border-green-300 bg-green-50 text-green-700 dark:border-green-600 dark:bg-green-900/30 dark:text-green-300",
+      "at-risk": "border-yellow-300 bg-yellow-50 text-yellow-700 dark:border-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-300",
+      late: "border-red-300 bg-red-50 text-red-700 dark:border-red-600 dark:bg-red-900/30 dark:text-red-300",
+      "on-hold": "border-gray-300 bg-gray-50 text-gray-700 dark:border-gray-600 dark:bg-gray-900/30 dark:text-gray-300",
+      completed: "border-purple-300 bg-purple-50 text-purple-700 dark:border-purple-600 dark:bg-purple-900/30 dark:text-purple-300",
+    };
+    select.className = `text-sm border rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${styles[status] || ""}`;
   }
 
   renderDynamicSectionCounts(allTasks) {
@@ -1052,9 +1239,95 @@ class TaskManager {
     });
   }
 
+  populateListFilters() {
+    const sections = this.sections || [];
+    const assignees = this.projectConfig?.assignees || [];
+    const milestones = this.projectConfig?.milestones || [];
+
+    const sectionSelect = document.getElementById("filterSection");
+    sectionSelect.innerHTML = '<option value="">All Sections</option>' +
+      sections.map((s) => `<option value="${s}">${s}</option>`).join("");
+
+    const assigneeSelect = document.getElementById("filterAssignee");
+    assigneeSelect.innerHTML = '<option value="">All Assignees</option>' +
+      assignees.map((a) => `<option value="${a}">${a}</option>`).join("");
+
+    const milestoneSelect = document.getElementById("filterMilestone");
+    milestoneSelect.innerHTML = '<option value="">All Milestones</option>' +
+      milestones.map((m) => `<option value="${m}">${m}</option>`).join("");
+  }
+
+  applyListFilters() {
+    this.listFilters.section = document.getElementById("filterSection").value;
+    this.listFilters.assignee = document.getElementById("filterAssignee").value;
+    this.listFilters.milestone = document.getElementById("filterMilestone").value;
+    this.listFilters.status = document.getElementById("filterStatus").value;
+    this.listFilters.sort = document.getElementById("sortTasks").value;
+
+    const hasFilters = this.listFilters.section || this.listFilters.assignee ||
+      this.listFilters.milestone || this.listFilters.status || this.listFilters.sort !== "default";
+    document.getElementById("clearFilters").classList.toggle("hidden", !hasFilters);
+
+    this.renderListView();
+  }
+
+  clearListFilters() {
+    document.getElementById("filterSection").value = "";
+    document.getElementById("filterAssignee").value = "";
+    document.getElementById("filterMilestone").value = "";
+    document.getElementById("filterStatus").value = "";
+    document.getElementById("sortTasks").value = "default";
+    this.listFilters = { section: "", assignee: "", milestone: "", status: "", sort: "default" };
+    document.getElementById("clearFilters").classList.add("hidden");
+    this.renderListView();
+  }
+
+  getFilteredAndSortedTasks(tasks) {
+    let result = [...tasks];
+
+    // Apply filters
+    if (this.listFilters.section) {
+      result = result.filter((t) => t.section === this.listFilters.section);
+    }
+    if (this.listFilters.assignee) {
+      result = result.filter((t) => t.config.assignee === this.listFilters.assignee);
+    }
+    if (this.listFilters.milestone) {
+      result = result.filter((t) => t.config.milestone === this.listFilters.milestone);
+    }
+    if (this.listFilters.status === "completed") {
+      result = result.filter((t) => t.completed);
+    } else if (this.listFilters.status === "incomplete") {
+      result = result.filter((t) => !t.completed);
+    }
+
+    // Apply sort
+    if (this.listFilters.sort === "due_date") {
+      result.sort((a, b) => {
+        const dateA = a.config.due_date ? new Date(a.config.due_date) : new Date("9999-12-31");
+        const dateB = b.config.due_date ? new Date(b.config.due_date) : new Date("9999-12-31");
+        return dateA - dateB;
+      });
+    } else if (this.listFilters.sort === "priority") {
+      const priorityOrder = { high: 0, medium: 1, low: 2 };
+      result.sort((a, b) => {
+        const pA = priorityOrder[a.config.priority] ?? 3;
+        const pB = priorityOrder[b.config.priority] ?? 3;
+        return pA - pB;
+      });
+    } else if (this.listFilters.sort === "title") {
+      result.sort((a, b) => a.title.localeCompare(b.title));
+    }
+
+    return result;
+  }
+
   renderListView() {
     const container = document.getElementById("listContainer");
     container.innerHTML = "";
+
+    // Populate filter dropdowns
+    this.populateListFilters();
 
     // Show no results message when search is active but no tasks match
     if (this.searchQuery && this.filteredTasks.length === 0) {
@@ -1070,7 +1343,7 @@ class TaskManager {
     }
 
     // Group tasks by section
-    const sections = this.sections || [];
+    let sections = this.sections || [];
 
     if (sections.length === 0) {
       container.innerHTML =
@@ -1078,9 +1351,29 @@ class TaskManager {
       return;
     }
 
+    // If section filter is active, only show that section
+    if (this.listFilters.section) {
+      sections = sections.filter((s) => s === this.listFilters.section);
+    }
+
+    const allTasks = this.getFilteredAndSortedTasks(this.getTasksToRender());
+
+    // Check if all filtered sections are empty
+    const hasAnyTasks = sections.some((section) =>
+      allTasks.some((task) => task.section === section && !task.parentId)
+    );
+
+    if (!hasAnyTasks && (this.listFilters.assignee || this.listFilters.milestone || this.listFilters.status)) {
+      container.innerHTML = `
+        <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+          <p class="text-lg font-medium">No tasks match filters</p>
+          <button onclick="taskManager.clearListFilters()" class="mt-2 text-sm text-primary hover:text-blue-700">Clear filters</button>
+        </div>`;
+      return;
+    }
+
     sections.forEach((section) => {
-      const tasksToRender = this.getTasksToRender();
-      const sectionTasks = tasksToRender.filter(
+      const sectionTasks = allTasks.filter(
         (task) => task.section === section && !task.parentId,
       );
 
@@ -1552,6 +1845,10 @@ class TaskManager {
   }
 
   async openTaskModal(task = null, parentTaskId = null) {
+    // If task is a string (ID), find the actual task object
+    if (typeof task === "string") {
+      task = this.findTaskById(task);
+    }
     this.editingTask = task;
     this.parentTaskId = parentTaskId;
     const modal = document.getElementById("taskModal");

@@ -6,6 +6,7 @@ Markdown powered task manager tool.
 
 Start Date: 2025-08-17
 Working Days: 7
+Last Updated: 2026-01-24T22:55:53.265Z
 
 Assignees:
 - Alice
@@ -23,6 +24,7 @@ Tags:
 Links:
 - [studiowebux.com](https://studiowebux.com)
 
+<!-- Notes -->
 # Notes
 
 ## Is it trully cleaner ?
@@ -207,10 +209,10 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 ## In Progress
 
 - [ ] (1) backup {tag: [Backend]; due_date: 2025-08-27T13; assignee: Jane Doe; priority: 2}
+- [ ] (test1) Simple Test Task {tag: [Test]; due_date: 2025-08-22; assignee: Test User; priority: 1; effort: 1; milestone: Test}
+  Test description
 
 ## Done
 
-- [ ] (test1) Simple Test Task {tag: [Test]; due_date: 2025-08-22; assignee: Test User; priority: 1; effort: 1; milestone: Test}
-  Test description
 - [ ] (3) Almost ready ! {tag: [Bug]; assignee: Bob; priority: 1}
 
