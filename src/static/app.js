@@ -56,10 +56,12 @@ class TaskManager {
       duration: 25 * 60,
       timeLeft: 25 * 60,
       isRunning: false,
-      interval: null,
+      worker: null,
       mode: "focus",
       count: 0,
+      endTime: null,
     };
+    this.initPomodoroWorker();
     this.init();
   }
 
@@ -113,13 +115,35 @@ class TaskManager {
       .addEventListener("click", () => this.switchView("config"));
     document
       .getElementById("canvasViewBtn")
-      .addEventListener("click", () => this.switchView("canvas"));
+      .addEventListener("click", () => {
+        this.switchView("canvas");
+        document.getElementById("moreViewsDropdown")?.classList.add("hidden");
+      });
     document
       .getElementById("mindmapViewBtn")
-      .addEventListener("click", () => this.switchView("mindmap"));
+      .addEventListener("click", () => {
+        this.switchView("mindmap");
+        document.getElementById("moreViewsDropdown")?.classList.add("hidden");
+      });
     document
       .getElementById("c4ViewBtn")
-      .addEventListener("click", () => this.switchView("c4"));
+      .addEventListener("click", () => {
+        this.switchView("c4");
+        document.getElementById("moreViewsDropdown")?.classList.add("hidden");
+      });
+
+    // More views dropdown
+    document.getElementById("moreViewsBtn")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      document.getElementById("moreViewsDropdown")?.classList.toggle("hidden");
+    });
+    document.addEventListener("click", (e) => {
+      const dropdown = document.getElementById("moreViewsDropdown");
+      const btn = document.getElementById("moreViewsBtn");
+      if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
+        dropdown.classList.add("hidden");
+      }
+    });
 
     // Mobile menu toggle
     document
@@ -309,16 +333,14 @@ class TaskManager {
       .addEventListener("click", (e) => {
         e.stopPropagation();
         document.getElementById("pomodoroDropdown").classList.toggle("hidden");
+        this.updateNotificationStatus();
       });
     document
       .getElementById("pomodoroStartBtn")
       .addEventListener("click", () => this.startPomodoro());
     document
-      .getElementById("pomodoroPauseBtn")
-      .addEventListener("click", () => this.pausePomodoro());
-    document
-      .getElementById("pomodoroResetBtn")
-      .addEventListener("click", () => this.resetPomodoro());
+      .getElementById("pomodoroStopBtn")
+      .addEventListener("click", () => this.stopPomodoro());
     document
       .getElementById("pomodoroFocusBtn")
       .addEventListener("click", () => this.setPomodoroMode("focus"));
@@ -328,11 +350,20 @@ class TaskManager {
     document
       .getElementById("pomodoroLongBtn")
       .addEventListener("click", () => this.setPomodoroMode("long"));
+    document
+      .getElementById("pomodoroDebugBtn")
+      .addEventListener("click", () => this.setPomodoroMode("debug"));
     document.addEventListener("click", (e) => {
       const dropdown = document.getElementById("pomodoroDropdown");
       const btn = document.getElementById("pomodoroBtn");
       if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
         dropdown.classList.add("hidden");
+      }
+    });
+    // Catch up pomodoro when tab becomes visible again
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && this.pomodoro.isRunning) {
+        this.tickPomodoro();
       }
     });
 
@@ -1323,50 +1354,141 @@ class TaskManager {
     this.renderListView();
   }
 
-  // Pomodoro Timer
+  // Pomodoro Timer with Web Worker for background execution
+  initPomodoroWorker() {
+    const workerCode = `
+      let endTime = null;
+      let interval = null;
+
+      self.onmessage = function(e) {
+        if (e.data.command === 'start') {
+          endTime = e.data.endTime;
+          if (interval) clearInterval(interval);
+          interval = setInterval(() => {
+            const remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+            self.postMessage({ type: 'tick', remaining });
+            if (remaining <= 0) {
+              clearInterval(interval);
+              self.postMessage({ type: 'complete' });
+            }
+          }, 1000);
+        } else if (e.data.command === 'stop') {
+          if (interval) clearInterval(interval);
+          endTime = null;
+        }
+      };
+    `;
+
+    try {
+      const blob = new Blob([workerCode], { type: "application/javascript" });
+      this.pomodoro.worker = new Worker(URL.createObjectURL(blob));
+
+      this.pomodoro.worker.onmessage = (e) => {
+        if (e.data.type === "tick") {
+          this.pomodoro.timeLeft = e.data.remaining;
+          this.updatePomodoroDisplay();
+        } else if (e.data.type === "complete") {
+          this.pomodoroComplete();
+        }
+      };
+    } catch (err) {
+      console.warn("Web Worker not supported, falling back to setInterval");
+      this.pomodoro.worker = null;
+    }
+  }
+
+  updateNotificationStatus() {
+    const statusEl = document.getElementById("pomodoroNotifStatus");
+    if (!statusEl) return;
+
+    if (!("Notification" in window)) {
+      statusEl.innerHTML = '<span class="text-gray-400">Notifications not supported</span>';
+    } else if (Notification.permission === "granted") {
+      statusEl.innerHTML = '<span class="text-green-600 dark:text-green-400">Notifications enabled</span>';
+    } else if (Notification.permission === "denied") {
+      statusEl.innerHTML = '<span class="text-red-600 dark:text-red-400">Notifications blocked - enable in browser settings</span>';
+    } else {
+      statusEl.innerHTML = '<button id="enableNotifBtn" class="text-primary hover:underline">Enable notifications</button>';
+      document.getElementById("enableNotifBtn")?.addEventListener("click", () => {
+        Notification.requestPermission().then(() => this.updateNotificationStatus());
+      });
+    }
+  }
+
   startPomodoro() {
     if (this.pomodoro.isRunning) return;
 
+    // Clean up any leftover state from previous run
+    this.stopPomodoroSound();
+
     // Request notification permission on first start
     if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission();
+      Notification.requestPermission().then(() => this.updateNotificationStatus());
     }
 
     this.pomodoro.isRunning = true;
+    this.pomodoro.endTime = Date.now() + this.pomodoro.timeLeft * 1000;
+
     document.getElementById("pomodoroStartBtn").classList.add("hidden");
-    document.getElementById("pomodoroPauseBtn").classList.remove("hidden");
+    document.getElementById("pomodoroStopBtn").classList.remove("hidden");
     document.getElementById("pomodoroDisplay").classList.remove("hidden");
 
-    this.pomodoro.interval = setInterval(() => {
-      this.pomodoro.timeLeft--;
-      this.updatePomodoroDisplay();
-
-      if (this.pomodoro.timeLeft <= 0) {
-        this.pomodoroComplete();
-      }
-    }, 1000);
+    if (this.pomodoro.worker) {
+      this.pomodoro.worker.postMessage({ command: "start", endTime: this.pomodoro.endTime });
+    } else {
+      this.pomodoro.interval = setInterval(() => this.tickPomodoro(), 1000);
+    }
+    this.tickPomodoro();
   }
 
-  pausePomodoro() {
+  tickPomodoro() {
+    if (!this.pomodoro.isRunning || !this.pomodoro.endTime) return;
+
+    const remaining = Math.max(0, Math.ceil((this.pomodoro.endTime - Date.now()) / 1000));
+    this.pomodoro.timeLeft = remaining;
+    this.updatePomodoroDisplay();
+
+    if (remaining <= 0) {
+      this.pomodoroComplete();
+    }
+  }
+
+  stopPomodoro() {
+    // Stop the timer
     this.pomodoro.isRunning = false;
-    clearInterval(this.pomodoro.interval);
-    document.getElementById("pomodoroStartBtn").classList.remove("hidden");
-    document.getElementById("pomodoroPauseBtn").classList.add("hidden");
-  }
+    this.pomodoro.endTime = null;
 
-  resetPomodoro() {
-    this.pausePomodoro();
+    if (this.pomodoro.worker) {
+      this.pomodoro.worker.postMessage({ command: "stop" });
+    } else {
+      clearInterval(this.pomodoro.interval);
+    }
+
+    // Stop any alarm
+    this.stopPomodoroSound();
+    try {
+      if (this.pomodoroNotification) {
+        this.pomodoroNotification.close();
+        this.pomodoroNotification = null;
+      }
+    } catch (e) {}
+
+    // Reset timer
     this.pomodoro.timeLeft = this.pomodoro.duration;
     this.updatePomodoroDisplay();
+
+    // Update UI
+    document.getElementById("pomodoroStartBtn").classList.remove("hidden");
+    document.getElementById("pomodoroStopBtn").classList.add("hidden");
     document.getElementById("pomodoroDisplay").classList.add("hidden");
   }
 
   setPomodoroMode(mode) {
-    this.pausePomodoro();
+    this.stopPomodoro();
     this.pomodoro.mode = mode;
 
-    const durations = { focus: 25 * 60, short: 5 * 60, long: 15 * 60 };
-    const labels = { focus: "Focus Time", short: "Short Break", long: "Long Break" };
+    const durations = { focus: 25 * 60, short: 5 * 60, long: 15 * 60, debug: 5 };
+    const labels = { focus: "Focus Time", short: "Short Break", long: "Long Break", debug: "Debug (5s)" };
 
     this.pomodoro.duration = durations[mode];
     this.pomodoro.timeLeft = durations[mode];
@@ -1375,8 +1497,9 @@ class TaskManager {
     document.getElementById("pomodoroDisplay").classList.add("hidden");
 
     // Update button styles
-    ["Focus", "Short", "Long"].forEach((m) => {
+    ["Focus", "Short", "Long", "Debug"].forEach((m) => {
       const btn = document.getElementById(`pomodoro${m}Btn`);
+      if (!btn) return;
       if (m.toLowerCase() === mode) {
         btn.className = "px-3 py-1 rounded text-xs font-medium bg-primary text-white";
       } else {
@@ -1397,75 +1520,117 @@ class TaskManager {
   }
 
   pomodoroComplete() {
-    this.pausePomodoro();
+    // Stop the worker/interval but keep UI showing Stop button
+    this.pomodoro.isRunning = false;
+    this.pomodoro.endTime = null;
+
+    if (this.pomodoro.worker) {
+      this.pomodoro.worker.postMessage({ command: "stop" });
+    } else {
+      clearInterval(this.pomodoro.interval);
+    }
 
     let title, body;
-    if (this.pomodoro.mode === "focus") {
-      this.pomodoro.count++;
-      document.getElementById("pomodoroCount").textContent = this.pomodoro.count;
+    if (this.pomodoro.mode === "focus" || this.pomodoro.mode === "debug") {
+      if (this.pomodoro.mode === "focus") {
+        this.pomodoro.count++;
+        document.getElementById("pomodoroCount").textContent = this.pomodoro.count;
+      }
       title = "Pomodoro Complete!";
       body = "Great work! Time for a break.";
       this.showToast("Pomodoro complete! Take a break.");
-
-      // Auto-switch to short break after every focus, long break after 4
-      if (this.pomodoro.count % 4 === 0) {
-        this.setPomodoroMode("long");
-      } else {
-        this.setPomodoroMode("short");
-      }
     } else {
       title = "Break Over!";
       body = "Ready for another focus session?";
       this.showToast("Break over! Ready for another focus session?");
-      this.setPomodoroMode("focus");
+    }
+
+    // Play alarm sound if enabled
+    if (document.getElementById("pomodoroSoundToggle")?.checked) {
+      this.playPomodoroSound();
     }
 
     // Show browser notification
     this.showPomodoroNotification(title, body);
-
-    // Play notification sound
-    this.playPomodoroSound();
   }
 
   showPomodoroNotification(title, body) {
+    this.pomodoroNotification = null;
+
     if ("Notification" in window && Notification.permission === "granted") {
-      const notification = new Notification(title, {
-        body: body,
-        icon: "/favicon.ico",
-        tag: "pomodoro",
-        requireInteraction: true,
-      });
+      try {
+        this.pomodoroNotification = new Notification("MD Planner - " + title, {
+          body: body + "\nClick to open app and stop alarm.",
+          icon: "/favicon.ico",
+          tag: "pomodoro-" + Date.now(),
+          requireInteraction: true,
+          silent: false,
+        });
 
-      notification.onclick = () => {
-        window.focus();
-        notification.close();
-      };
+        this.pomodoroNotification.onclick = () => {
+          window.focus();
+          this.stopPomodoro();
+        };
 
-      // Auto-close after 10 seconds
-      setTimeout(() => notification.close(), 10000);
+        this.pomodoroNotification.onclose = () => {
+          this.stopPomodoro();
+        };
+      } catch (e) {
+        console.warn("Failed to show notification:", e);
+      }
     }
+  }
+
+  stopPomodoroSound() {
+    if (this.pomodoroAlarmInterval) {
+      clearInterval(this.pomodoroAlarmInterval);
+      this.pomodoroAlarmInterval = null;
+    }
+    try {
+      if (this.pomodoroAudioContext && this.pomodoroAudioContext.state !== "closed") {
+        this.pomodoroAudioContext.close();
+      }
+    } catch (e) {
+      // Already closed
+    }
+    this.pomodoroAudioContext = null;
   }
 
   playPomodoroSound() {
     try {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
+      this.pomodoroAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+      this.pomodoroAlarmInterval = null;
 
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
+      const playAlarmPattern = () => {
+        const ctx = this.pomodoroAudioContext;
+        if (!ctx || ctx.state === "closed") return;
 
-      oscillator.frequency.value = 800;
-      oscillator.type = "sine";
-      gainNode.gain.value = 0.3;
+        // Alarm pattern: high-low-high beeps
+        const frequencies = [880, 660, 880, 660, 880];
+        const startTime = ctx.currentTime;
 
-      oscillator.start();
-      setTimeout(() => {
-        oscillator.stop();
-        audioContext.close();
-      }, 200);
+        frequencies.forEach((freq, i) => {
+          const oscillator = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+
+          oscillator.connect(gainNode);
+          gainNode.connect(ctx.destination);
+
+          oscillator.frequency.value = freq;
+          oscillator.type = "square";
+          gainNode.gain.value = 0.3;
+
+          oscillator.start(startTime + i * 0.15);
+          oscillator.stop(startTime + i * 0.15 + 0.12);
+        });
+      };
+
+      // Play immediately and repeat every 2 seconds
+      playAlarmPattern();
+      this.pomodoroAlarmInterval = setInterval(playAlarmPattern, 2000);
+
     } catch (e) {
-      // Audio not supported
+      console.warn("Audio not supported", e);
     }
   }
 
