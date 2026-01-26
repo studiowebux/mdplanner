@@ -658,6 +658,9 @@
                         <button id="goalsViewBtn" class="cursor-pointer px-3 py-1.5 rounded text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
                             Goals
                         </button>
+                        <button id="milestonesViewBtn" class="cursor-pointer px-3 py-1.5 rounded text-sm font-medium transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            Milestones
+                        </button>
 
                         <!-- More dropdown -->
                         <div class="relative">
@@ -1304,6 +1307,29 @@
             </div>
         </div>
 
+        <!-- Milestones View -->
+        <div id="milestonesView" class="hidden pb-16">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Milestones</h2>
+                    <button id="addMilestoneBtn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
+                        + Add Milestone
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div id="emptyMilestonesState" class="text-center py-12 hidden">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No milestones</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating a new milestone.</p>
+                    </div>
+                    <div id="milestonesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Canvas View -->
         <div id="canvasView" class="hidden pb-16">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
@@ -1662,6 +1688,46 @@
                     </button>
                     <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
                         Save Goal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Milestone Modal -->
+    <div id="milestoneModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 id="milestoneModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Add Milestone</h3>
+            </div>
+            <form id="milestoneForm">
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                        <input type="text" id="milestoneName" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Date</label>
+                        <input type="date" id="milestoneTarget" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                        <select id="milestoneStatus" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="open">Open</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                        <textarea id="milestoneDescription" rows="3" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                    <button type="button" id="cancelMilestoneBtn" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
+                        Save
                     </button>
                 </div>
             </form>

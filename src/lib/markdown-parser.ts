@@ -1,6 +1,7 @@
 import {
   C4Component,
   Goal,
+  Milestone,
   Mindmap,
   MindmapNode,
   Note,
@@ -2427,5 +2428,121 @@ export class MarkdownParser {
   async safeWriteFile(content: string): Promise<void> {
     await this.createBackup();
     await Deno.writeTextFile(this.filePath, content);
+  }
+
+  async readMilestones(): Promise<Milestone[]> {
+    const milestoneMap = new Map<string, Milestone>();
+
+    // First, read from dedicated Milestones section if it exists
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    let inMilestonesSection = false;
+    let currentMilestone: Partial<Milestone> | null = null;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      if (line.startsWith("# Milestones") || line.includes("<!-- Milestones -->")) {
+        inMilestonesSection = true;
+        continue;
+      }
+
+      if (inMilestonesSection && line.startsWith("# ") && !line.startsWith("# Milestones")) {
+        if (currentMilestone?.name) {
+          milestoneMap.set(currentMilestone.name, currentMilestone as Milestone);
+        }
+        break;
+      }
+
+      if (!inMilestonesSection) continue;
+
+      if (line.startsWith("## ")) {
+        if (currentMilestone?.name) {
+          milestoneMap.set(currentMilestone.name, currentMilestone as Milestone);
+        }
+        const name = line.substring(3).trim();
+        currentMilestone = {
+          id: name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+          name,
+          status: "open",
+        };
+      } else if (currentMilestone) {
+        if (line.startsWith("Target:")) {
+          currentMilestone.target = line.substring(7).trim();
+        } else if (line.startsWith("Status:")) {
+          const status = line.substring(7).trim().toLowerCase();
+          currentMilestone.status = status === "completed" ? "completed" : "open";
+        } else if (line.trim() && !line.startsWith("<!--")) {
+          currentMilestone.description = (currentMilestone.description || "") + line.trim() + " ";
+        }
+      }
+    }
+
+    if (currentMilestone?.name) {
+      milestoneMap.set(currentMilestone.name, currentMilestone as Milestone);
+    }
+
+    // Second, extract unique milestones from tasks
+    const tasks = await this.readTasks();
+    const extractFromTasks = (taskList: Task[]) => {
+      for (const task of taskList) {
+        if (task.config.milestone && !milestoneMap.has(task.config.milestone)) {
+          const name = task.config.milestone;
+          milestoneMap.set(name, {
+            id: name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+            name,
+            status: "open",
+          });
+        }
+        if (task.children) extractFromTasks(task.children);
+      }
+    };
+    extractFromTasks(tasks);
+
+    return Array.from(milestoneMap.values());
+  }
+
+  async saveMilestones(milestones: Milestone[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    let startIndex = -1;
+    let endIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].includes("<!-- Milestones -->") || lines[i].startsWith("# Milestones")) {
+        startIndex = i;
+      } else if (startIndex !== -1 && lines[i].startsWith("# ") && !lines[i].startsWith("# Milestones")) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    let milestonesContent = "<!-- Milestones -->\n# Milestones\n\n";
+    for (const m of milestones) {
+      milestonesContent += `## ${m.name}\n`;
+      if (m.target) milestonesContent += `Target: ${m.target}\n`;
+      milestonesContent += `Status: ${m.status}\n`;
+      if (m.description) milestonesContent += `${m.description.trim()}\n`;
+      milestonesContent += "\n";
+    }
+
+    if (startIndex === -1) {
+      // Add before Board section
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.startsWith("# Board"));
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, milestonesContent);
+      } else {
+        lines.push(milestonesContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, milestonesContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
   }
 }

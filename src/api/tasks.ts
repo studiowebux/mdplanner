@@ -64,6 +64,55 @@ export class TaskAPI {
         return new Response(JSON.stringify({ success: true, filename }), { status: 201, headers });
       }
 
+      // GET /api/milestones
+      if (method === "GET" && pathParts.length === 2 && pathParts[1] === "milestones") {
+        const milestones = await this.parser.readMilestones();
+        const tasks = await this.parser.readTasks();
+        const result = milestones.map(m => {
+          const linkedTasks = this.getTasksByMilestone(tasks, m.name);
+          const completedCount = linkedTasks.filter(t => t.completed).length;
+          return {
+            ...m,
+            taskCount: linkedTasks.length,
+            completedCount,
+            progress: linkedTasks.length > 0 ? Math.round((completedCount / linkedTasks.length) * 100) : 0,
+          };
+        });
+        return new Response(JSON.stringify(result), { headers });
+      }
+
+      // POST /api/milestones
+      if (method === "POST" && pathParts.length === 2 && pathParts[1] === "milestones") {
+        const body = await req.json();
+        const milestones = await this.parser.readMilestones();
+        const id = body.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        milestones.push({ id, name: body.name, target: body.target, status: body.status || "open", description: body.description });
+        await this.parser.saveMilestones(milestones);
+        return new Response(JSON.stringify({ success: true, id }), { status: 201, headers });
+      }
+
+      // PUT /api/milestones/:id
+      if (method === "PUT" && pathParts.length === 3 && pathParts[1] === "milestones") {
+        const id = pathParts[2];
+        const body = await req.json();
+        const milestones = await this.parser.readMilestones();
+        const index = milestones.findIndex(m => m.id === id);
+        if (index === -1) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        milestones[index] = { ...milestones[index], ...body };
+        await this.parser.saveMilestones(milestones);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // DELETE /api/milestones/:id
+      if (method === "DELETE" && pathParts.length === 3 && pathParts[1] === "milestones") {
+        const id = pathParts[2];
+        const milestones = await this.parser.readMilestones();
+        const filtered = milestones.filter(m => m.id !== id);
+        if (filtered.length === milestones.length) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        await this.parser.saveMilestones(filtered);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
       // GET /api/tasks
       if (
         method === "GET" && pathParts.length === 2 && pathParts[1] === "tasks"
@@ -672,6 +721,18 @@ export class TaskAPI {
       }
     }
     return null;
+  }
+
+  private getTasksByMilestone(tasks: Task[], milestone: string): Task[] {
+    const result: Task[] = [];
+    const collect = (taskList: Task[]) => {
+      for (const task of taskList) {
+        if (task.config.milestone === milestone) result.push(task);
+        if (task.children) collect(task.children);
+      }
+    };
+    collect(tasks);
+    return result;
   }
 
   private convertTasksToCSV(tasks: Task[]): string {

@@ -575,6 +575,20 @@ class TaskManager {
       .getElementById("projectGoalsFilter")
       .addEventListener("click", () => this.filterGoals("project"));
 
+    // Milestones events
+    document
+      .getElementById("milestonesViewBtn")
+      .addEventListener("click", () => this.switchView("milestones"));
+    document
+      .getElementById("addMilestoneBtn")
+      .addEventListener("click", () => this.openMilestoneModal());
+    document
+      .getElementById("cancelMilestoneBtn")
+      .addEventListener("click", () => this.closeMilestoneModal());
+    document
+      .getElementById("milestoneForm")
+      .addEventListener("submit", (e) => this.saveMilestone(e));
+
     // Canvas events
     document
       .getElementById("addStickyNoteBtn")
@@ -772,6 +786,7 @@ class TaskManager {
     const timelineBtn = document.getElementById("timelineViewBtn");
     const notesBtn = document.getElementById("notesViewBtn");
     const goalsBtn = document.getElementById("goalsViewBtn");
+    const milestonesBtn = document.getElementById("milestonesViewBtn");
     const canvasBtn = document.getElementById("canvasViewBtn");
     const mindmapBtn = document.getElementById("mindmapViewBtn");
     const c4Btn = document.getElementById("c4ViewBtn");
@@ -812,7 +827,7 @@ class TaskManager {
     });
 
     // Reset standalone desktop buttons (need lighter hover)
-    const standaloneDesktopBtns = [notesBtn, goalsBtn];
+    const standaloneDesktopBtns = [notesBtn, goalsBtn, milestonesBtn];
     standaloneDesktopBtns.forEach((btn) => {
       if (btn) {
         btn.classList.remove(
@@ -886,6 +901,7 @@ class TaskManager {
     document.getElementById("timelineView").classList.add("hidden");
     document.getElementById("notesView").classList.add("hidden");
     document.getElementById("goalsView").classList.add("hidden");
+    document.getElementById("milestonesView").classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
     document.getElementById("mindmapView").classList.add("hidden");
     document.getElementById("c4View").classList.add("hidden");
@@ -928,6 +944,10 @@ class TaskManager {
       this.activateViewButton("goals");
       document.getElementById("goalsView").classList.remove("hidden");
       this.loadGoals();
+    } else if (view === "milestones") {
+      this.activateViewButton("milestones");
+      document.getElementById("milestonesView").classList.remove("hidden");
+      this.loadMilestones();
     } else if (view === "canvas") {
       this.activateViewButton("canvas");
       document.getElementById("canvasView").classList.remove("hidden");
@@ -2393,6 +2413,7 @@ class TaskManager {
       "taskModal",
       "noteModal",
       "goalModal",
+      "milestoneModal",
       "stickyNoteModal",
       "mindmapModal",
       "c4ComponentModal",
@@ -6313,6 +6334,123 @@ class TaskManager {
       await this.loadGoals();
     } catch (error) {
       console.error("Error deleting goal:", error);
+    }
+  }
+
+  // Milestones functionality
+  async loadMilestones() {
+    try {
+      const response = await fetch("/api/milestones");
+      this.milestones = await response.json();
+      this.renderMilestonesView();
+    } catch (error) {
+      console.error("Error loading milestones:", error);
+    }
+  }
+
+  renderMilestonesView() {
+    const container = document.getElementById("milestonesContainer");
+    const emptyState = document.getElementById("emptyMilestonesState");
+
+    if (!this.milestones || this.milestones.length === 0) {
+      emptyState.classList.remove("hidden");
+      container.innerHTML = "";
+      return;
+    }
+
+    emptyState.classList.add("hidden");
+    container.innerHTML = this.milestones.map(m => `
+      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+        <div class="flex justify-between items-start mb-2">
+          <h3 class="font-medium text-gray-900 dark:text-gray-100">${m.name}</h3>
+          <span class="px-2 py-1 text-xs rounded ${m.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'}">${m.status}</span>
+        </div>
+        ${m.target ? `<p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Target: ${new Date(m.target).toLocaleDateString()}</p>` : ''}
+        <div class="mb-2">
+          <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+            <span>${m.completedCount}/${m.taskCount} tasks</span>
+            <span>${m.progress}%</span>
+          </div>
+          <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+            <div class="bg-primary h-2 rounded-full" style="width: ${m.progress}%"></div>
+          </div>
+        </div>
+        ${m.description ? `<p class="text-sm text-gray-600 dark:text-gray-300 mt-2">${m.description}</p>` : ''}
+        <div class="flex justify-end space-x-2 mt-3">
+          <button onclick="taskManager.openMilestoneModal('${m.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">Edit</button>
+          <button onclick="taskManager.deleteMilestone('${m.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200">Delete</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  openMilestoneModal(id = null) {
+    this.editingMilestoneId = id;
+    const modal = document.getElementById("milestoneModal");
+    const title = document.getElementById("milestoneModalTitle");
+    const form = document.getElementById("milestoneForm");
+
+    form.reset();
+    title.textContent = id ? "Edit Milestone" : "Add Milestone";
+
+    if (id && this.milestones) {
+      const m = this.milestones.find(x => x.id === id);
+      if (m) {
+        document.getElementById("milestoneName").value = m.name;
+        document.getElementById("milestoneTarget").value = m.target || "";
+        document.getElementById("milestoneStatus").value = m.status;
+        document.getElementById("milestoneDescription").value = m.description || "";
+      }
+    }
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  closeMilestoneModal() {
+    const modal = document.getElementById("milestoneModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    this.editingMilestoneId = null;
+  }
+
+  async saveMilestone(e) {
+    e.preventDefault();
+    const data = {
+      name: document.getElementById("milestoneName").value,
+      target: document.getElementById("milestoneTarget").value || null,
+      status: document.getElementById("milestoneStatus").value,
+      description: document.getElementById("milestoneDescription").value || null,
+    };
+
+    try {
+      if (this.editingMilestoneId) {
+        await fetch(`/api/milestones/${this.editingMilestoneId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      } else {
+        await fetch("/api/milestones", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      }
+      this.closeMilestoneModal();
+      await this.loadMilestones();
+    } catch (error) {
+      console.error("Error saving milestone:", error);
+    }
+  }
+
+  async deleteMilestone(id) {
+    if (!confirm("Delete this milestone?")) return;
+    try {
+      await fetch(`/api/milestones/${id}`, { method: "DELETE" });
+      await this.loadMilestones();
+    } catch (error) {
+      console.error("Error deleting milestone:", error);
     }
   }
 

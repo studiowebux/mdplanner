@@ -125,3 +125,11 @@ export interface ProjectConfig {
   lastUpdated?: string;
   links?: ProjectLink[];
 }
+
+export interface Milestone {
+  id: string;
+  name: string;
+  target?: string;
+  status: "open" | "completed";
+  description?: string;
+}
