@@ -1,3 +1,11 @@
+export interface TimeEntry {
+  id: string;
+  date: string;
+  hours: number;
+  person?: string;
+  description?: string;
+}
+
 export interface TaskConfig {
   tag?: string[];
   due_date?: string;
@@ -6,6 +14,9 @@ export interface TaskConfig {
   effort?: number;
   blocked_by?: string[];
   milestone?: string;
+  planned_start?: string;
+  planned_end?: string;
+  time_entries?: TimeEntry[];
 }
 
 export interface Task {
@@ -132,4 +143,23 @@ export interface Milestone {
   target?: string;
   status: "open" | "completed";
   description?: string;
+}
+
+export interface Idea {
+  id: string;
+  title: string;
+  status: "new" | "considering" | "planned" | "rejected";
+  category?: string;
+  created: string;
+  description?: string;
+}
+
+export interface Retrospective {
+  id: string;
+  title: string;
+  date: string;
+  status: "open" | "closed";
+  continue: string[];
+  stop: string[];
+  start: string[];
 }

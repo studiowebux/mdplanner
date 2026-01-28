@@ -672,6 +672,9 @@
                                 <button id="canvasViewBtn" class="cursor-pointer w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">Canvas</button>
                                 <button id="mindmapViewBtn" class="cursor-pointer w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">Mindmap</button>
                                 <button id="c4ViewBtn" class="cursor-pointer w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">C4 Architecture</button>
+                                <button id="ideasViewBtn" class="cursor-pointer w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">Ideas</button>
+                                <button id="retrospectivesViewBtn" class="cursor-pointer w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">Retrospectives</button>
+                                <button id="timeTrackingViewBtn" class="cursor-pointer w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">Time Tracking</button>
                             </div>
                         </div>
                     </nav>
@@ -1330,6 +1333,88 @@
             </div>
         </div>
 
+        <!-- Ideas View -->
+        <div id="ideasView" class="hidden pb-16">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Ideas</h2>
+                    <button id="addIdeaBtn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
+                        + Add Idea
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div id="emptyIdeasState" class="text-center py-12 hidden">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No ideas yet</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Start collecting your ideas.</p>
+                    </div>
+                    <div id="ideasContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Retrospectives View -->
+        <div id="retrospectivesView" class="hidden pb-16">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Retrospectives</h2>
+                    <button id="addRetrospectiveBtn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
+                        + Add Retrospective
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div id="emptyRetrospectivesState" class="text-center py-12 hidden">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No retrospectives yet</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Start reflecting on your sprints.</p>
+                    </div>
+                    <div id="retrospectivesContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Tracking View -->
+        <div id="timeTrackingView" class="hidden pb-16">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-6">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Time Tracking</h2>
+                    <div class="flex items-center gap-4">
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            Total Hours: <span id="globalTotalHours" class="font-semibold text-gray-900 dark:text-gray-100">0</span>h
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
+                            <div class="text-sm text-blue-600 dark:text-blue-400">This Week</div>
+                            <div class="text-2xl font-bold text-blue-700 dark:text-blue-300" id="weeklyHours">0h</div>
+                        </div>
+                        <div class="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
+                            <div class="text-sm text-green-600 dark:text-green-400">This Month</div>
+                            <div class="text-2xl font-bold text-green-700 dark:text-green-300" id="monthlyHours">0h</div>
+                        </div>
+                        <div class="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-4">
+                            <div class="text-sm text-purple-600 dark:text-purple-400">By Person</div>
+                            <div id="hoursByPerson" class="text-sm text-purple-700 dark:text-purple-300 mt-1"></div>
+                        </div>
+                    </div>
+                    <div id="emptyTimeTrackingState" class="text-center py-12 hidden">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No time entries yet</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Log time on tasks to see your tracking data.</p>
+                    </div>
+                    <div id="timeTrackingContainer" class="space-y-4"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- Canvas View -->
         <div id="canvasView" class="hidden pb-16">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
@@ -1734,6 +1819,92 @@
         </div>
     </div>
 
+    <!-- Idea Modal -->
+    <div id="ideaModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 id="ideaModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Add Idea</h3>
+            </div>
+            <form id="ideaForm">
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                        <input type="text" id="ideaTitle" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                            <select id="ideaStatus" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="new">New</option>
+                                <option value="considering">Considering</option>
+                                <option value="planned">Planned</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                            <input type="text" id="ideaCategory" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g. feature, bug">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                        <textarea id="ideaDescription" rows="4" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                    <button type="button" id="cancelIdeaBtn" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Retrospective Modal -->
+    <div id="retrospectiveModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 id="retrospectiveModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Add Retrospective</h3>
+            </div>
+            <form id="retrospectiveForm" class="flex flex-col flex-1 overflow-hidden">
+                <div class="p-6 space-y-4 overflow-y-auto flex-1">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                            <input type="text" id="retrospectiveTitle" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g., Sprint 1 Retrospective">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                            <input type="date" id="retrospectiveDate" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                        <select id="retrospectiveStatus" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="open">Open</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-green-700 dark:text-green-400 mb-1">Continue (what went well)</label>
+                        <textarea id="retrospectiveContinue" rows="3" class="w-full border border-green-300 dark:border-green-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="One item per line"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-red-700 dark:text-red-400 mb-1">Stop (what should stop)</label>
+                        <textarea id="retrospectiveStop" rows="3" class="w-full border border-red-300 dark:border-red-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" placeholder="One item per line"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-blue-700 dark:text-blue-400 mb-1">Start (what to start doing)</label>
+                        <textarea id="retrospectiveStart" rows="3" class="w-full border border-blue-300 dark:border-blue-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="One item per line"></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                    <button type="button" id="cancelRetrospectiveBtn" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Mindmap Modal -->
     <div id="mindmapModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 flex flex-col max-h-[90vh]">
@@ -1929,6 +2100,41 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Due Date</label>
                     <input type="datetime-local" id="taskDueDate" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Planned Start</label>
+                        <input type="date" id="taskPlannedStart" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Planned End</label>
+                        <input type="date" id="taskPlannedEnd" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                </div>
+
+                <div id="timeEntriesSection" class="hidden border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Time Entries</label>
+                        <button type="button" id="addTimeEntryBtn" class="text-sm text-primary hover:text-blue-700 dark:hover:text-blue-400">+ Add Entry</button>
+                    </div>
+                    <div id="timeEntriesList" class="space-y-2 max-h-40 overflow-y-auto">
+                    </div>
+                    <div id="addTimeEntryForm" class="hidden mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+                        <div class="grid grid-cols-4 gap-2 mb-2">
+                            <input type="date" id="timeEntryDate" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded px-2 py-1 text-sm">
+                            <input type="number" id="timeEntryHours" step="0.5" min="0" placeholder="Hours" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded px-2 py-1 text-sm">
+                            <input type="text" id="timeEntryPerson" placeholder="Person" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded px-2 py-1 text-sm">
+                            <input type="text" id="timeEntryDescription" placeholder="Description" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded px-2 py-1 text-sm">
+                        </div>
+                        <div class="flex justify-end gap-2">
+                            <button type="button" id="cancelTimeEntryBtn" class="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Cancel</button>
+                            <button type="button" id="saveTimeEntryBtn" class="text-xs text-primary hover:text-blue-700">Save</button>
+                        </div>
+                    </div>
+                    <div id="totalHoursDisplay" class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                        Total: <span id="totalHoursValue">0</span>h logged
+                    </div>
                 </div>
 
                 <div>

@@ -35,6 +35,9 @@ class TaskManager {
     this.isFullscreen = false;
     this.resizableEvents = [];
     this.notesLoaded = false;
+    this.retrospectives = [];
+    this.editingRetrospectiveId = null;
+    this.timeEntries = {};
     this.c4Components = [];
     this.c4Zoom = 1;
     this.c4Offset = { x: 0, y: 0 };
@@ -589,6 +592,57 @@ class TaskManager {
       .getElementById("milestoneForm")
       .addEventListener("submit", (e) => this.saveMilestone(e));
 
+    // Ideas events
+    document
+      .getElementById("ideasViewBtn")
+      .addEventListener("click", () => {
+        this.switchView("ideas");
+        document.getElementById("moreViewsDropdown")?.classList.add("hidden");
+      });
+    document
+      .getElementById("addIdeaBtn")
+      .addEventListener("click", () => this.openIdeaModal());
+    document
+      .getElementById("cancelIdeaBtn")
+      .addEventListener("click", () => this.closeIdeaModal());
+    document
+      .getElementById("ideaForm")
+      .addEventListener("submit", (e) => this.saveIdea(e));
+
+    // Retrospectives events
+    document
+      .getElementById("retrospectivesViewBtn")
+      .addEventListener("click", () => {
+        this.switchView("retrospectives");
+        document.getElementById("moreViewsDropdown")?.classList.add("hidden");
+      });
+    document
+      .getElementById("addRetrospectiveBtn")
+      .addEventListener("click", () => this.openRetrospectiveModal());
+    document
+      .getElementById("cancelRetrospectiveBtn")
+      .addEventListener("click", () => this.closeRetrospectiveModal());
+    document
+      .getElementById("retrospectiveForm")
+      .addEventListener("submit", (e) => this.saveRetrospective(e));
+
+    // Time Tracking events
+    document
+      .getElementById("timeTrackingViewBtn")
+      .addEventListener("click", () => {
+        this.switchView("timeTracking");
+        document.getElementById("moreViewsDropdown")?.classList.add("hidden");
+      });
+    document
+      .getElementById("addTimeEntryBtn")
+      .addEventListener("click", () => this.showTimeEntryForm());
+    document
+      .getElementById("cancelTimeEntryBtn")
+      .addEventListener("click", () => this.hideTimeEntryForm());
+    document
+      .getElementById("saveTimeEntryBtn")
+      .addEventListener("click", () => this.saveTimeEntry());
+
     // Canvas events
     document
       .getElementById("addStickyNoteBtn")
@@ -902,6 +956,9 @@ class TaskManager {
     document.getElementById("notesView").classList.add("hidden");
     document.getElementById("goalsView").classList.add("hidden");
     document.getElementById("milestonesView").classList.add("hidden");
+    document.getElementById("ideasView").classList.add("hidden");
+    document.getElementById("retrospectivesView").classList.add("hidden");
+    document.getElementById("timeTrackingView").classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
     document.getElementById("mindmapView").classList.add("hidden");
     document.getElementById("c4View").classList.add("hidden");
@@ -948,6 +1005,18 @@ class TaskManager {
       this.activateViewButton("milestones");
       document.getElementById("milestonesView").classList.remove("hidden");
       this.loadMilestones();
+    } else if (view === "ideas") {
+      this.activateViewButton("ideas");
+      document.getElementById("ideasView").classList.remove("hidden");
+      this.loadIdeas();
+    } else if (view === "retrospectives") {
+      this.activateViewButton("retrospectives");
+      document.getElementById("retrospectivesView").classList.remove("hidden");
+      this.loadRetrospectives();
+    } else if (view === "timeTracking") {
+      this.activateViewButton("timeTracking");
+      document.getElementById("timeTrackingView").classList.remove("hidden");
+      this.loadTimeTracking();
     } else if (view === "canvas") {
       this.activateViewButton("canvas");
       document.getElementById("canvasView").classList.remove("hidden");
@@ -2364,6 +2433,14 @@ class TaskManager {
         this.formatDateForInput(task.config.due_date) || "";
       document.getElementById("taskMilestone").value =
         task.config.milestone || "";
+      document.getElementById("taskPlannedStart").value =
+        task.config.planned_start || "";
+      document.getElementById("taskPlannedEnd").value =
+        task.config.planned_end || "";
+
+      // Show time entries section for existing tasks
+      document.getElementById("timeEntriesSection").classList.remove("hidden");
+      this.loadTaskTimeEntries(task.id);
 
       // Set selected tags
       const tagSelect = document.getElementById("taskTags");
@@ -2385,12 +2462,18 @@ class TaskManager {
       form.reset();
       this.selectedDependencies = [];
       this.updateSelectedDependencies();
+      // Hide time entries section for new tasks
+      document.getElementById("timeEntriesSection").classList.add("hidden");
+      document.getElementById("timeEntriesList").innerHTML = "";
       // If creating a subtask, inherit parent's section
       if (parentTaskId) {
         const parentTask = this.findTaskById(parentTaskId);
         document.getElementById("taskSection").value = parentTask.section;
       }
     }
+
+    // Hide time entry form on modal open
+    this.hideTimeEntryForm();
 
     modal.classList.remove("hidden");
     modal.classList.add("flex");
@@ -2418,7 +2501,8 @@ class TaskManager {
       "mindmapModal",
       "c4ComponentModal",
       "customSectionModal",
-      "descriptionModal"
+      "descriptionModal",
+      "ideaModal"
     ];
     modals.forEach(id => {
       const modal = document.getElementById(id);
@@ -2452,6 +2536,8 @@ class TaskManager {
           : undefined,
         due_date: document.getElementById("taskDueDate").value || undefined,
         milestone: document.getElementById("taskMilestone").value || undefined,
+        planned_start: document.getElementById("taskPlannedStart").value || undefined,
+        planned_end: document.getElementById("taskPlannedEnd").value || undefined,
         tag: this.getSelectedTags(),
         blocked_by:
           this.selectedDependencies.length > 0
@@ -6451,6 +6537,481 @@ class TaskManager {
       await this.loadMilestones();
     } catch (error) {
       console.error("Error deleting milestone:", error);
+    }
+  }
+
+  // Ideas functionality
+  async loadIdeas() {
+    try {
+      const response = await fetch("/api/ideas");
+      this.ideas = await response.json();
+      this.renderIdeasView();
+    } catch (error) {
+      console.error("Error loading ideas:", error);
+    }
+  }
+
+  renderIdeasView() {
+    const container = document.getElementById("ideasContainer");
+    const emptyState = document.getElementById("emptyIdeasState");
+
+    if (!this.ideas || this.ideas.length === 0) {
+      emptyState.classList.remove("hidden");
+      container.innerHTML = "";
+      return;
+    }
+
+    emptyState.classList.add("hidden");
+    const statusColors = {
+      new: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+      considering: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+      planned: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+      rejected: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+    };
+
+    container.innerHTML = this.ideas.map(idea => `
+      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+        <div class="flex justify-between items-start mb-2">
+          <h3 class="font-medium text-gray-900 dark:text-gray-100">${idea.title}</h3>
+          <span class="px-2 py-1 text-xs rounded ${statusColors[idea.status] || statusColors.new}">${idea.status}</span>
+        </div>
+        ${idea.category ? `<span class="inline-block px-2 py-0.5 text-xs bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded mb-2">${idea.category}</span>` : ""}
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Created: ${idea.created}</p>
+        ${idea.description ? `<p class="text-sm text-gray-600 dark:text-gray-300">${idea.description}</p>` : ""}
+        <div class="flex justify-end space-x-2 mt-3">
+          <button onclick="taskManager.openIdeaModal('${idea.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">Edit</button>
+          <button onclick="taskManager.deleteIdea('${idea.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200">Delete</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  openIdeaModal(id = null) {
+    this.editingIdeaId = id;
+    const modal = document.getElementById("ideaModal");
+    const title = document.getElementById("ideaModalTitle");
+    const form = document.getElementById("ideaForm");
+
+    form.reset();
+    title.textContent = id ? "Edit Idea" : "Add Idea";
+
+    if (id && this.ideas) {
+      const idea = this.ideas.find(i => i.id === id);
+      if (idea) {
+        document.getElementById("ideaTitle").value = idea.title;
+        document.getElementById("ideaStatus").value = idea.status;
+        document.getElementById("ideaCategory").value = idea.category || "";
+        document.getElementById("ideaDescription").value = idea.description || "";
+      }
+    }
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  closeIdeaModal() {
+    const modal = document.getElementById("ideaModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    this.editingIdeaId = null;
+  }
+
+  async saveIdea(e) {
+    e.preventDefault();
+    const data = {
+      title: document.getElementById("ideaTitle").value,
+      status: document.getElementById("ideaStatus").value,
+      category: document.getElementById("ideaCategory").value || null,
+      description: document.getElementById("ideaDescription").value || null,
+    };
+
+    try {
+      if (this.editingIdeaId) {
+        await fetch(`/api/ideas/${this.editingIdeaId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      } else {
+        await fetch("/api/ideas", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      }
+      this.closeIdeaModal();
+      await this.loadIdeas();
+    } catch (error) {
+      console.error("Error saving idea:", error);
+    }
+  }
+
+  async deleteIdea(id) {
+    if (!confirm("Delete this idea?")) return;
+    try {
+      await fetch(`/api/ideas/${id}`, { method: "DELETE" });
+      await this.loadIdeas();
+    } catch (error) {
+      console.error("Error deleting idea:", error);
+    }
+  }
+
+  // Retrospectives functionality
+  async loadRetrospectives() {
+    try {
+      const response = await fetch("/api/retrospectives");
+      this.retrospectives = await response.json();
+      this.renderRetrospectivesView();
+    } catch (error) {
+      console.error("Error loading retrospectives:", error);
+    }
+  }
+
+  renderRetrospectivesView() {
+    const container = document.getElementById("retrospectivesContainer");
+    const emptyState = document.getElementById("emptyRetrospectivesState");
+
+    if (!this.retrospectives || this.retrospectives.length === 0) {
+      emptyState?.classList.remove("hidden");
+      container.innerHTML = "";
+      return;
+    }
+
+    emptyState?.classList.add("hidden");
+    container.innerHTML = this.retrospectives.map(retro => {
+      const statusColor = retro.status === "open" ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300";
+      return `
+      <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden">
+        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600 flex justify-between items-center">
+          <div>
+            <h3 class="font-medium text-gray-900 dark:text-gray-100">${retro.title}</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">${retro.date}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-1 text-xs rounded-full ${statusColor}">${retro.status}</span>
+            <button onclick="taskManager.openRetrospectiveModal('${retro.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">Edit</button>
+          </div>
+        </div>
+        <div class="p-4 space-y-3">
+          <div>
+            <h4 class="text-sm font-medium text-green-700 dark:text-green-400 mb-1">Continue</h4>
+            <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+              ${retro.continue.length > 0 ? retro.continue.map(item => `<li class="flex items-start"><span class="text-green-500 mr-2">+</span>${item}</li>`).join("") : '<li class="text-gray-400 italic">No items</li>'}
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-sm font-medium text-red-700 dark:text-red-400 mb-1">Stop</h4>
+            <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+              ${retro.stop.length > 0 ? retro.stop.map(item => `<li class="flex items-start"><span class="text-red-500 mr-2">-</span>${item}</li>`).join("") : '<li class="text-gray-400 italic">No items</li>'}
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-sm font-medium text-blue-700 dark:text-blue-400 mb-1">Start</h4>
+            <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+              ${retro.start.length > 0 ? retro.start.map(item => `<li class="flex items-start"><span class="text-blue-500 mr-2">*</span>${item}</li>`).join("") : '<li class="text-gray-400 italic">No items</li>'}
+            </ul>
+          </div>
+        </div>
+        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-600 flex justify-end">
+          <button onclick="taskManager.deleteRetrospective('${retro.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200">Delete</button>
+        </div>
+      </div>
+    `}).join("");
+  }
+
+  openRetrospectiveModal(id = null) {
+    this.editingRetrospectiveId = id;
+    const modal = document.getElementById("retrospectiveModal");
+    const title = document.getElementById("retrospectiveModalTitle");
+    const form = document.getElementById("retrospectiveForm");
+
+    form.reset();
+    document.getElementById("retrospectiveDate").value = new Date().toISOString().split("T")[0];
+
+    if (id) {
+      title.textContent = "Edit Retrospective";
+      const retro = this.retrospectives.find(r => r.id === id);
+      if (retro) {
+        document.getElementById("retrospectiveTitle").value = retro.title;
+        document.getElementById("retrospectiveDate").value = retro.date;
+        document.getElementById("retrospectiveStatus").value = retro.status;
+        document.getElementById("retrospectiveContinue").value = retro.continue.join("\n");
+        document.getElementById("retrospectiveStop").value = retro.stop.join("\n");
+        document.getElementById("retrospectiveStart").value = retro.start.join("\n");
+      }
+    } else {
+      title.textContent = "Add Retrospective";
+    }
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  closeRetrospectiveModal() {
+    const modal = document.getElementById("retrospectiveModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    this.editingRetrospectiveId = null;
+  }
+
+  async saveRetrospective(e) {
+    e.preventDefault();
+    const parseItems = (text) => text.split("\n").map(s => s.trim()).filter(s => s);
+    const data = {
+      title: document.getElementById("retrospectiveTitle").value,
+      date: document.getElementById("retrospectiveDate").value,
+      status: document.getElementById("retrospectiveStatus").value,
+      continue: parseItems(document.getElementById("retrospectiveContinue").value),
+      stop: parseItems(document.getElementById("retrospectiveStop").value),
+      start: parseItems(document.getElementById("retrospectiveStart").value),
+    };
+
+    try {
+      if (this.editingRetrospectiveId) {
+        await fetch(`/api/retrospectives/${this.editingRetrospectiveId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      } else {
+        await fetch("/api/retrospectives", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      }
+      this.closeRetrospectiveModal();
+      await this.loadRetrospectives();
+    } catch (error) {
+      console.error("Error saving retrospective:", error);
+    }
+  }
+
+  async deleteRetrospective(id) {
+    if (!confirm("Delete this retrospective?")) return;
+    try {
+      await fetch(`/api/retrospectives/${id}`, { method: "DELETE" });
+      await this.loadRetrospectives();
+    } catch (error) {
+      console.error("Error deleting retrospective:", error);
+    }
+  }
+
+  // Time Tracking functionality
+  async loadTimeTracking() {
+    try {
+      const response = await fetch("/api/time-entries");
+      this.timeEntries = await response.json();
+      this.renderTimeTrackingView();
+    } catch (error) {
+      console.error("Error loading time entries:", error);
+    }
+  }
+
+  renderTimeTrackingView() {
+    const container = document.getElementById("timeTrackingContainer");
+    const emptyState = document.getElementById("emptyTimeTrackingState");
+
+    const allEntries = [];
+    const taskIds = Object.keys(this.timeEntries || {});
+
+    for (const taskId of taskIds) {
+      const entries = this.timeEntries[taskId] || [];
+      for (const entry of entries) {
+        allEntries.push({ ...entry, taskId });
+      }
+    }
+
+    if (allEntries.length === 0) {
+      emptyState?.classList.remove("hidden");
+      container.innerHTML = "";
+      document.getElementById("globalTotalHours").textContent = "0";
+      document.getElementById("weeklyHours").textContent = "0h";
+      document.getElementById("monthlyHours").textContent = "0h";
+      document.getElementById("hoursByPerson").textContent = "No data";
+      return;
+    }
+
+    emptyState?.classList.add("hidden");
+
+    // Calculate totals
+    const totalHours = allEntries.reduce((sum, e) => sum + e.hours, 0);
+    document.getElementById("globalTotalHours").textContent = totalHours.toFixed(1);
+
+    // Weekly hours
+    const now = new Date();
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - now.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+    const weeklyTotal = allEntries
+      .filter(e => new Date(e.date) >= weekStart)
+      .reduce((sum, e) => sum + e.hours, 0);
+    document.getElementById("weeklyHours").textContent = weeklyTotal.toFixed(1) + "h";
+
+    // Monthly hours
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthlyTotal = allEntries
+      .filter(e => new Date(e.date) >= monthStart)
+      .reduce((sum, e) => sum + e.hours, 0);
+    document.getElementById("monthlyHours").textContent = monthlyTotal.toFixed(1) + "h";
+
+    // Hours by person
+    const byPerson = {};
+    for (const entry of allEntries) {
+      const person = entry.person || "Unassigned";
+      byPerson[person] = (byPerson[person] || 0) + entry.hours;
+    }
+    const personList = Object.entries(byPerson)
+      .map(([name, hours]) => `${name}: ${hours.toFixed(1)}h`)
+      .join(", ");
+    document.getElementById("hoursByPerson").textContent = personList || "No data";
+
+    // Group entries by task
+    const groupedByTask = {};
+    for (const entry of allEntries) {
+      if (!groupedByTask[entry.taskId]) {
+        groupedByTask[entry.taskId] = [];
+      }
+      groupedByTask[entry.taskId].push(entry);
+    }
+
+    // Find task names
+    const taskMap = {};
+    const findTask = (tasks, id) => {
+      for (const task of tasks) {
+        if (task.id === id) return task;
+        if (task.children) {
+          const found = findTask(task.children, id);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+    for (const taskId of Object.keys(groupedByTask)) {
+      const task = findTask(this.tasks, taskId);
+      taskMap[taskId] = task?.title || taskId;
+    }
+
+    container.innerHTML = Object.entries(groupedByTask).map(([taskId, entries]) => {
+      const taskTotal = entries.reduce((sum, e) => sum + e.hours, 0);
+      return `
+      <div class="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
+        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
+          <span class="font-medium text-gray-900 dark:text-gray-100">${taskMap[taskId]}</span>
+          <span class="text-sm text-gray-600 dark:text-gray-400">${taskTotal.toFixed(1)}h total</span>
+        </div>
+        <div class="divide-y divide-gray-100 dark:divide-gray-600">
+          ${entries.map(e => `
+            <div class="px-4 py-2 flex justify-between items-center text-sm">
+              <div>
+                <span class="text-gray-900 dark:text-gray-100">${e.date}</span>
+                <span class="text-gray-500 dark:text-gray-400 ml-2">${e.hours}h</span>
+                ${e.person ? `<span class="text-gray-400 dark:text-gray-500 ml-2">by ${e.person}</span>` : ""}
+              </div>
+              <div class="flex items-center gap-2">
+                ${e.description ? `<span class="text-gray-500 dark:text-gray-400">${e.description}</span>` : ""}
+                <button onclick="taskManager.deleteTimeEntryFromView('${taskId}', '${e.id}')" class="text-red-500 hover:text-red-700 text-xs">Delete</button>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `}).join("");
+  }
+
+  async deleteTimeEntryFromView(taskId, entryId) {
+    if (!confirm("Delete this time entry?")) return;
+    try {
+      await fetch(`/api/time-entries/${taskId}/${entryId}`, { method: "DELETE" });
+      await this.loadTimeTracking();
+    } catch (error) {
+      console.error("Error deleting time entry:", error);
+    }
+  }
+
+  showTimeEntryForm() {
+    document.getElementById("addTimeEntryForm").classList.remove("hidden");
+    document.getElementById("timeEntryDate").value = new Date().toISOString().split("T")[0];
+    document.getElementById("timeEntryHours").value = "";
+    document.getElementById("timeEntryPerson").value = "";
+    document.getElementById("timeEntryDescription").value = "";
+  }
+
+  hideTimeEntryForm() {
+    document.getElementById("addTimeEntryForm").classList.add("hidden");
+  }
+
+  async saveTimeEntry() {
+    if (!this.editingTask?.id) return;
+
+    const date = document.getElementById("timeEntryDate").value;
+    const hours = parseFloat(document.getElementById("timeEntryHours").value);
+    const person = document.getElementById("timeEntryPerson").value.trim();
+    const description = document.getElementById("timeEntryDescription").value.trim();
+
+    if (!date || !hours || hours <= 0) {
+      alert("Please enter a valid date and hours");
+      return;
+    }
+
+    try {
+      await fetch(`/api/time-entries/${this.editingTask.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date, hours, person, description }),
+      });
+      this.hideTimeEntryForm();
+      await this.loadTaskTimeEntries(this.editingTask.id);
+    } catch (error) {
+      console.error("Error saving time entry:", error);
+    }
+  }
+
+  async loadTaskTimeEntries(taskId) {
+    try {
+      const response = await fetch(`/api/time-entries/${taskId}`);
+      const entries = await response.json();
+      this.renderTaskTimeEntries(entries);
+    } catch (error) {
+      console.error("Error loading task time entries:", error);
+    }
+  }
+
+  renderTaskTimeEntries(entries) {
+    const container = document.getElementById("timeEntriesList");
+    const totalDisplay = document.getElementById("totalHoursValue");
+
+    if (!entries || entries.length === 0) {
+      container.innerHTML = '<div class="text-sm text-gray-500 dark:text-gray-400">No time entries yet</div>';
+      totalDisplay.textContent = "0";
+      return;
+    }
+
+    const total = entries.reduce((sum, e) => sum + e.hours, 0);
+    totalDisplay.textContent = total.toFixed(1);
+
+    container.innerHTML = entries.map(e => `
+      <div class="flex justify-between items-center text-sm bg-gray-50 dark:bg-gray-700 rounded px-2 py-1">
+        <div>
+          <span>${e.date}</span>
+          <span class="font-medium ml-2">${e.hours}h</span>
+          ${e.person ? `<span class="text-gray-500 ml-2">by ${e.person}</span>` : ""}
+        </div>
+        <div class="flex items-center gap-2">
+          ${e.description ? `<span class="text-gray-400 truncate max-w-32">${e.description}</span>` : ""}
+          <button type="button" onclick="taskManager.deleteTaskTimeEntry('${e.id}')" class="text-red-500 hover:text-red-700">x</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  async deleteTaskTimeEntry(entryId) {
+    if (!this.editingTask?.id) return;
+    try {
+      await fetch(`/api/time-entries/${this.editingTask.id}/${entryId}`, { method: "DELETE" });
+      await this.loadTaskTimeEntries(this.editingTask.id);
+    } catch (error) {
+      console.error("Error deleting time entry:", error);
     }
   }
 

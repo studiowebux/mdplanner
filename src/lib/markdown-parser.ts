@@ -1,6 +1,7 @@
 import {
   C4Component,
   Goal,
+  Idea,
   Milestone,
   Mindmap,
   MindmapNode,
@@ -8,9 +9,11 @@ import {
   ProjectConfig,
   ProjectInfo,
   ProjectLink,
+  Retrospective,
   StickyNote,
   Task,
   TaskConfig,
+  TimeEntry,
 } from "./types.ts";
 
 export class MarkdownParser {
@@ -988,6 +991,12 @@ export class MarkdownParser {
             case "milestone":
               config.milestone = value;
               break;
+            case "planned_start":
+              config.planned_start = value;
+              break;
+            case "planned_end":
+              config.planned_end = value;
+              break;
           }
         }
       }
@@ -1229,6 +1238,12 @@ export class MarkdownParser {
       }
       if (task.config.milestone) {
         configParts.push(`milestone: ${task.config.milestone}`);
+      }
+      if (task.config.planned_start) {
+        configParts.push(`planned_start: ${task.config.planned_start}`);
+      }
+      if (task.config.planned_end) {
+        configParts.push(`planned_end: ${task.config.planned_end}`);
       }
       if (configParts.length > 0) {
         configStr = ` {${configParts.join("; ")}}`;
@@ -2511,7 +2526,7 @@ export class MarkdownParser {
     let endIndex = -1;
 
     for (let i = 0; i < lines.length; i++) {
-      if (lines[i].includes("<!-- Milestones -->") || lines[i].startsWith("# Milestones")) {
+      if (startIndex === -1 && (lines[i].includes("<!-- Milestones -->") || lines[i].startsWith("# Milestones"))) {
         startIndex = i;
       } else if (startIndex !== -1 && lines[i].startsWith("# ") && !lines[i].startsWith("# Milestones")) {
         endIndex = i;
@@ -2544,5 +2559,356 @@ export class MarkdownParser {
     }
 
     await this.safeWriteFile(lines.join("\n"));
+  }
+
+  async readIdeas(): Promise<Idea[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const ideas: Idea[] = [];
+
+    let inIdeasSection = false;
+    let currentIdea: Partial<Idea> | null = null;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      if (line.startsWith("# Ideas") || line.includes("<!-- Ideas -->")) {
+        inIdeasSection = true;
+        continue;
+      }
+
+      if (inIdeasSection && line.startsWith("# ") && !line.startsWith("# Ideas")) {
+        if (currentIdea?.title) ideas.push(currentIdea as Idea);
+        break;
+      }
+
+      if (!inIdeasSection) continue;
+
+      if (line.startsWith("## ")) {
+        if (currentIdea?.title) ideas.push(currentIdea as Idea);
+        const title = line.substring(3).trim();
+        currentIdea = {
+          id: crypto.randomUUID().substring(0, 8),
+          title,
+          status: "new",
+          created: new Date().toISOString().split("T")[0],
+        };
+      } else if (currentIdea) {
+        if (line.startsWith("Status:")) {
+          const s = line.substring(7).trim().toLowerCase();
+          if (["new", "considering", "planned", "rejected"].includes(s)) {
+            currentIdea.status = s as Idea["status"];
+          }
+        } else if (line.startsWith("Category:")) {
+          currentIdea.category = line.substring(9).trim();
+        } else if (line.startsWith("Created:")) {
+          currentIdea.created = line.substring(8).trim();
+        } else if (line.startsWith("<!-- id:")) {
+          const match = line.match(/<!-- id: ([^ ]+)/);
+          if (match) currentIdea.id = match[1];
+        } else if (line.trim() && !line.startsWith("<!--")) {
+          currentIdea.description = (currentIdea.description || "") + line.trim() + "\n";
+        }
+      }
+    }
+
+    if (currentIdea?.title) ideas.push(currentIdea as Idea);
+    return ideas;
+  }
+
+  async saveIdeas(ideas: Idea[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    let startIndex = -1;
+    let endIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (startIndex === -1 && (lines[i].includes("<!-- Ideas -->") || lines[i].startsWith("# Ideas"))) {
+        startIndex = i;
+      } else if (startIndex !== -1 && lines[i].startsWith("# ") && !lines[i].startsWith("# Ideas")) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    let ideasContent = "<!-- Ideas -->\n# Ideas\n\n";
+    for (const idea of ideas) {
+      ideasContent += `## ${idea.title}\n`;
+      ideasContent += `<!-- id: ${idea.id} -->\n`;
+      ideasContent += `Status: ${idea.status}\n`;
+      if (idea.category) ideasContent += `Category: ${idea.category}\n`;
+      ideasContent += `Created: ${idea.created}\n`;
+      if (idea.description) ideasContent += `\n${idea.description.trim()}\n`;
+      ideasContent += "\n";
+    }
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.startsWith("# Board"));
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, ideasContent);
+      } else {
+        lines.push(ideasContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, ideasContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  async readRetrospectives(): Promise<Retrospective[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const retrospectives: Retrospective[] = [];
+
+    let inRetrospectivesSection = false;
+    let currentRetro: Partial<Retrospective> | null = null;
+    let currentSubsection: "continue" | "stop" | "start" | null = null;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      if (line.startsWith("# Retrospectives") || line.includes("<!-- Retrospectives -->")) {
+        inRetrospectivesSection = true;
+        continue;
+      }
+
+      if (inRetrospectivesSection && line.startsWith("# ") && !line.startsWith("# Retrospectives")) {
+        if (currentRetro?.title) retrospectives.push(currentRetro as Retrospective);
+        currentRetro = null;
+        break;
+      }
+
+      if (!inRetrospectivesSection) continue;
+
+      if (line.startsWith("## ")) {
+        if (currentRetro?.title) retrospectives.push(currentRetro as Retrospective);
+        const title = line.substring(3).trim();
+        currentRetro = {
+          id: crypto.randomUUID().substring(0, 8),
+          title,
+          date: new Date().toISOString().split("T")[0],
+          status: "open",
+          continue: [],
+          stop: [],
+          start: [],
+        };
+        currentSubsection = null;
+      } else if (currentRetro) {
+        if (line.startsWith("Date:")) {
+          currentRetro.date = line.substring(5).trim();
+        } else if (line.startsWith("Status:")) {
+          const s = line.substring(7).trim().toLowerCase();
+          if (["open", "closed"].includes(s)) {
+            currentRetro.status = s as Retrospective["status"];
+          }
+        } else if (line.startsWith("<!-- id:")) {
+          const match = line.match(/<!-- id: ([^ ]+)/);
+          if (match) currentRetro.id = match[1];
+        } else if (line.startsWith("### Continue")) {
+          currentSubsection = "continue";
+        } else if (line.startsWith("### Stop")) {
+          currentSubsection = "stop";
+        } else if (line.startsWith("### Start")) {
+          currentSubsection = "start";
+        } else if (line.trim().startsWith("- ") && currentSubsection) {
+          const item = line.trim().substring(2).trim();
+          if (item) {
+            currentRetro[currentSubsection]!.push(item);
+          }
+        }
+      }
+    }
+
+    if (currentRetro?.title) retrospectives.push(currentRetro as Retrospective);
+    return retrospectives;
+  }
+
+  async saveRetrospectives(retrospectives: Retrospective[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    let startIndex = -1;
+    let endIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (startIndex === -1 && (lines[i].includes("<!-- Retrospectives -->") || lines[i].startsWith("# Retrospectives"))) {
+        startIndex = i;
+      } else if (startIndex !== -1 && lines[i].startsWith("# ") && !lines[i].startsWith("# Retrospectives")) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    let retrospectivesContent = "<!-- Retrospectives -->\n# Retrospectives\n\n";
+    for (const retro of retrospectives) {
+      retrospectivesContent += `## ${retro.title}\n`;
+      retrospectivesContent += `<!-- id: ${retro.id} -->\n`;
+      retrospectivesContent += `Date: ${retro.date}\n`;
+      retrospectivesContent += `Status: ${retro.status}\n\n`;
+
+      retrospectivesContent += `### Continue\n`;
+      for (const item of retro.continue) {
+        retrospectivesContent += `- ${item}\n`;
+      }
+      retrospectivesContent += `\n`;
+
+      retrospectivesContent += `### Stop\n`;
+      for (const item of retro.stop) {
+        retrospectivesContent += `- ${item}\n`;
+      }
+      retrospectivesContent += `\n`;
+
+      retrospectivesContent += `### Start\n`;
+      for (const item of retro.start) {
+        retrospectivesContent += `- ${item}\n`;
+      }
+      retrospectivesContent += `\n`;
+    }
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.startsWith("# Board"));
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, retrospectivesContent);
+      } else {
+        lines.push(retrospectivesContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, retrospectivesContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  async readTimeEntries(): Promise<Map<string, TimeEntry[]>> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const timeEntries = new Map<string, TimeEntry[]>();
+
+    let inTimeTrackingSection = false;
+    let currentTaskId: string | null = null;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      if (line.startsWith("# Time Tracking") || line.includes("<!-- Time Tracking -->")) {
+        inTimeTrackingSection = true;
+        continue;
+      }
+
+      if (inTimeTrackingSection && line.startsWith("# ") && !line.startsWith("# Time Tracking")) {
+        break;
+      }
+
+      if (!inTimeTrackingSection) continue;
+
+      if (line.startsWith("## ")) {
+        currentTaskId = line.substring(3).trim();
+        if (!timeEntries.has(currentTaskId)) {
+          timeEntries.set(currentTaskId, []);
+        }
+      } else if (currentTaskId && line.trim().startsWith("- ")) {
+        // Format: - 2025-01-20: 2h by John - Description
+        const entryMatch = line.trim().match(/^- (\d{4}-\d{2}-\d{2}): ([\d.]+)h(?: by ([^-]+))?(?: - (.+))?$/);
+        if (entryMatch) {
+          const [, date, hours, person, description] = entryMatch;
+          const entries = timeEntries.get(currentTaskId)!;
+          entries.push({
+            id: `te_${Date.now()}_${entries.length}`,
+            date,
+            hours: parseFloat(hours),
+            person: person?.trim(),
+            description: description?.trim(),
+          });
+        }
+      }
+    }
+
+    return timeEntries;
+  }
+
+  async saveTimeEntries(timeEntries: Map<string, TimeEntry[]>): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    let startIndex = -1;
+    let endIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (startIndex === -1 && (lines[i].includes("<!-- Time Tracking -->") || lines[i].startsWith("# Time Tracking"))) {
+        startIndex = i;
+      } else if (startIndex !== -1 && lines[i].startsWith("# ") && !lines[i].startsWith("# Time Tracking")) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    let timeTrackingContent = "<!-- Time Tracking -->\n# Time Tracking\n\n";
+    for (const [taskId, entries] of timeEntries) {
+      if (entries.length === 0) continue;
+      timeTrackingContent += `## ${taskId}\n`;
+      for (const entry of entries) {
+        let line = `- ${entry.date}: ${entry.hours}h`;
+        if (entry.person) line += ` by ${entry.person}`;
+        if (entry.description) line += ` - ${entry.description}`;
+        timeTrackingContent += line + "\n";
+      }
+      timeTrackingContent += "\n";
+    }
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.startsWith("# Board"));
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, timeTrackingContent);
+      } else {
+        lines.push(timeTrackingContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, timeTrackingContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  async addTimeEntry(taskId: string, entry: Omit<TimeEntry, "id">): Promise<string> {
+    const timeEntries = await this.readTimeEntries();
+    const entries = timeEntries.get(taskId) || [];
+    const newEntry: TimeEntry = {
+      ...entry,
+      id: `te_${Date.now()}`,
+    };
+    entries.push(newEntry);
+    timeEntries.set(taskId, entries);
+    await this.saveTimeEntries(timeEntries);
+    return newEntry.id;
+  }
+
+  async deleteTimeEntry(taskId: string, entryId: string): Promise<boolean> {
+    const timeEntries = await this.readTimeEntries();
+    const entries = timeEntries.get(taskId);
+    if (!entries) return false;
+    const index = entries.findIndex(e => e.id === entryId);
+    if (index === -1) return false;
+    entries.splice(index, 1);
+    if (entries.length === 0) {
+      timeEntries.delete(taskId);
+    }
+    await this.saveTimeEntries(timeEntries);
+    return true;
+  }
+
+  async getTimeEntriesForTask(taskId: string): Promise<TimeEntry[]> {
+    const timeEntries = await this.readTimeEntries();
+    return timeEntries.get(taskId) || [];
   }
 }

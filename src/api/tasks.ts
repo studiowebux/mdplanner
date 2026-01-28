@@ -113,6 +113,129 @@ export class TaskAPI {
         return new Response(JSON.stringify({ success: true }), { headers });
       }
 
+      // GET /api/ideas
+      if (method === "GET" && pathParts.length === 2 && pathParts[1] === "ideas") {
+        const ideas = await this.parser.readIdeas();
+        return new Response(JSON.stringify(ideas), { headers });
+      }
+
+      // POST /api/ideas
+      if (method === "POST" && pathParts.length === 2 && pathParts[1] === "ideas") {
+        const body = await req.json();
+        const ideas = await this.parser.readIdeas();
+        const id = crypto.randomUUID().substring(0, 8);
+        ideas.push({ id, title: body.title, status: body.status || "new", category: body.category, created: new Date().toISOString().split("T")[0], description: body.description });
+        await this.parser.saveIdeas(ideas);
+        return new Response(JSON.stringify({ success: true, id }), { status: 201, headers });
+      }
+
+      // PUT /api/ideas/:id
+      if (method === "PUT" && pathParts.length === 3 && pathParts[1] === "ideas") {
+        const id = pathParts[2];
+        const body = await req.json();
+        const ideas = await this.parser.readIdeas();
+        const index = ideas.findIndex(i => i.id === id);
+        if (index === -1) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        ideas[index] = { ...ideas[index], ...body };
+        await this.parser.saveIdeas(ideas);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // DELETE /api/ideas/:id
+      if (method === "DELETE" && pathParts.length === 3 && pathParts[1] === "ideas") {
+        const id = pathParts[2];
+        const ideas = await this.parser.readIdeas();
+        const filtered = ideas.filter(i => i.id !== id);
+        if (filtered.length === ideas.length) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        await this.parser.saveIdeas(filtered);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // GET /api/retrospectives
+      if (method === "GET" && pathParts.length === 2 && pathParts[1] === "retrospectives") {
+        const retrospectives = await this.parser.readRetrospectives();
+        return new Response(JSON.stringify(retrospectives), { headers });
+      }
+
+      // POST /api/retrospectives
+      if (method === "POST" && pathParts.length === 2 && pathParts[1] === "retrospectives") {
+        const body = await req.json();
+        const retrospectives = await this.parser.readRetrospectives();
+        const id = crypto.randomUUID().substring(0, 8);
+        retrospectives.push({
+          id,
+          title: body.title,
+          date: body.date || new Date().toISOString().split("T")[0],
+          status: body.status || "open",
+          continue: body.continue || [],
+          stop: body.stop || [],
+          start: body.start || [],
+        });
+        await this.parser.saveRetrospectives(retrospectives);
+        return new Response(JSON.stringify({ success: true, id }), { status: 201, headers });
+      }
+
+      // PUT /api/retrospectives/:id
+      if (method === "PUT" && pathParts.length === 3 && pathParts[1] === "retrospectives") {
+        const id = pathParts[2];
+        const body = await req.json();
+        const retrospectives = await this.parser.readRetrospectives();
+        const index = retrospectives.findIndex(r => r.id === id);
+        if (index === -1) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        retrospectives[index] = { ...retrospectives[index], ...body };
+        await this.parser.saveRetrospectives(retrospectives);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // DELETE /api/retrospectives/:id
+      if (method === "DELETE" && pathParts.length === 3 && pathParts[1] === "retrospectives") {
+        const id = pathParts[2];
+        const retrospectives = await this.parser.readRetrospectives();
+        const filtered = retrospectives.filter(r => r.id !== id);
+        if (filtered.length === retrospectives.length) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        await this.parser.saveRetrospectives(filtered);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // GET /api/time-entries - get all time entries
+      if (method === "GET" && pathParts.length === 2 && pathParts[1] === "time-entries") {
+        const timeEntries = await this.parser.readTimeEntries();
+        const result: Record<string, unknown[]> = {};
+        for (const [taskId, entries] of timeEntries) {
+          result[taskId] = entries;
+        }
+        return new Response(JSON.stringify(result), { headers });
+      }
+
+      // GET /api/time-entries/:taskId - get time entries for a specific task
+      if (method === "GET" && pathParts.length === 3 && pathParts[1] === "time-entries") {
+        const taskId = pathParts[2];
+        const entries = await this.parser.getTimeEntriesForTask(taskId);
+        return new Response(JSON.stringify(entries), { headers });
+      }
+
+      // POST /api/time-entries/:taskId - add time entry to a task
+      if (method === "POST" && pathParts.length === 3 && pathParts[1] === "time-entries") {
+        const taskId = pathParts[2];
+        const body = await req.json();
+        const id = await this.parser.addTimeEntry(taskId, {
+          date: body.date || new Date().toISOString().split("T")[0],
+          hours: body.hours || 0,
+          person: body.person,
+          description: body.description,
+        });
+        return new Response(JSON.stringify({ success: true, id }), { status: 201, headers });
+      }
+
+      // DELETE /api/time-entries/:taskId/:entryId - delete a time entry
+      if (method === "DELETE" && pathParts.length === 4 && pathParts[1] === "time-entries") {
+        const taskId = pathParts[2];
+        const entryId = pathParts[3];
+        const success = await this.parser.deleteTimeEntry(taskId, entryId);
+        if (!success) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
       // GET /api/tasks
       if (
         method === "GET" && pathParts.length === 2 && pathParts[1] === "tasks"

@@ -195,7 +195,28 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 <!-- id: c4_component_5 -->
 <!-- id: 1755647175051 -->
 
-<!-- Board -->
+<!-- Ideas -->
+# Ideas
+
+## Got an Idea !
+<!-- id: 2af6e1b6 -->
+Status: new
+Category: Innovation
+Created: 2026-01-26
+
+
+<!-- Retrospectives -->
+# Retrospectives
+
+
+<!-- Time Tracking -->
+# Time Tracking
+
+## demo1
+- 2026-01-27: 2.5h by John - Initial work
+- 2026-01-28: 3h by Jane - Follow-up work
+
+
 # Board
 
 ## Todo
