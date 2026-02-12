@@ -21,12 +21,43 @@ export class MarkdownParser {
   private maxBackups: number;
   private backupDir: string;
   private lastContentHash: string | null = null;
+  private writeLock: Promise<void> = Promise.resolve();
 
   constructor(filePath: string) {
     this.filePath = filePath;
     // Default to keep 10 backups, configurable via environment variable
     this.maxBackups = parseInt(Deno.env.get("MD_PLANNER_MAX_BACKUPS") || "10");
     this.backupDir = Deno.env.get("MD_PLANNER_BACKUP_DIR") || "./backups";
+  }
+
+  /**
+   * Acquires a write lock and executes the operation.
+   * Ensures sequential writes to prevent race conditions.
+   */
+  private async withWriteLock<T>(operation: () => Promise<T>): Promise<T> {
+    // Wait for any pending write to complete
+    const previousLock = this.writeLock;
+    let releaseLock: () => void;
+    this.writeLock = new Promise<void>((resolve) => {
+      releaseLock = resolve;
+    });
+
+    try {
+      await previousLock;
+      return await operation();
+    } finally {
+      releaseLock!();
+    }
+  }
+
+  /**
+   * Atomically writes content using temp file + rename pattern.
+   * Prevents file corruption if process crashes during write.
+   */
+  private async atomicWriteFile(content: string): Promise<void> {
+    const tempPath = this.filePath + ".tmp";
+    await Deno.writeTextFile(tempPath, content);
+    await Deno.rename(tempPath, this.filePath);
   }
 
   /**
@@ -1208,8 +1239,7 @@ export class MarkdownParser {
       content += "\n";
     }
 
-    await this.createBackup();
-    await Deno.writeTextFile(this.filePath, content);
+    await this.safeWriteFile(content);
   }
 
   private taskToMarkdown(task: Task, indentLevel: number): string {
@@ -1617,8 +1647,7 @@ export class MarkdownParser {
         config,
       );
       console.log("Updated content length:", updatedContent.length);
-      await this.createBackup();
-      await Deno.writeTextFile(this.filePath, updatedContent);
+      await this.safeWriteFile(updatedContent);
       console.log("File written successfully");
       return true;
     } catch (error) {
@@ -1896,8 +1925,7 @@ export class MarkdownParser {
     ];
 
     lines.splice(insertIndex, 0, ...stickyNoteLines);
-    await this.createBackup();
-    await Deno.writeTextFile(this.filePath, lines.join("\n"));
+    await this.safeWriteFile(lines.join("\n"));
   }
 
   private async updateStickyNoteInFile(
@@ -1958,8 +1986,7 @@ export class MarkdownParser {
       stickyNoteEnd - stickyNoteStart,
       ...newStickyNoteLines,
     );
-    await this.createBackup();
-    await Deno.writeTextFile(this.filePath, lines.join("\n"));
+    await this.safeWriteFile(lines.join("\n"));
   }
 
   private mindmapNodeToMarkdown(
@@ -2301,8 +2328,7 @@ export class MarkdownParser {
       content += "\n";
     }
 
-    await this.createBackup();
-    await Deno.writeTextFile(this.filePath, content);
+    await this.safeWriteFile(content);
   }
 
   async addStickyNote(stickyNote: Omit<StickyNote, "id">): Promise<string> {
@@ -2452,11 +2478,14 @@ export class MarkdownParser {
   }
 
   /**
-   * Safely writes content to the markdown file with backup
+   * Safely writes content to the markdown file with backup.
+   * Uses write lock to prevent race conditions and atomic writes to prevent corruption.
    */
   async safeWriteFile(content: string): Promise<void> {
-    await this.createBackup();
-    await Deno.writeTextFile(this.filePath, content);
+    await this.withWriteLock(async () => {
+      await this.createBackup();
+      await this.atomicWriteFile(content);
+    });
   }
 
   async readMilestones(): Promise<Milestone[]> {
