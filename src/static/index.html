@@ -912,6 +912,64 @@
         .bg-primary { background-color: var(--color-bg-primary); }
         .bg-secondary { background-color: var(--color-bg-secondary); }
 
+        /* Help Tooltip */
+        .help-tip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: var(--color-bg-tertiary);
+            color: var(--color-text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: help;
+            position: relative;
+            margin-left: 4px;
+            flex-shrink: 0;
+        }
+        .help-tip:hover {
+            background-color: var(--color-border-strong);
+            color: var(--color-text-primary);
+        }
+        .help-tip::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--color-bg-inverse);
+            color: var(--color-bg-primary);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 400;
+            white-space: nowrap;
+            max-width: 250px;
+            white-space: normal;
+            text-align: left;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            line-height: 1.4;
+        }
+        .help-tip:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+        .help-tip.tip-left::after {
+            left: auto;
+            right: 0;
+            transform: none;
+        }
+        .help-tip.tip-right::after {
+            left: 0;
+            transform: none;
+        }
+
         /* Project Status Select Colors */
         .status-select-active { background-color: #f3f4f6; border-color: #9ca3af; }
         .status-select-on-track { background-color: #d1fae5; border-color: #059669; color: #065f46; }
@@ -1001,6 +1059,9 @@
                             <span id="pomodoroDisplay" class="text-xs font-mono hidden">25:00</span>
                         </button>
                         <div id="pomodoroDropdown" class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden z-50 p-4">
+                            <div class="flex justify-center mb-2">
+                                <span class="help-tip" data-tip="Pomodoro: 25 min focus, then 5 min short break. After 4 cycles, take a 15 min long break.">?</span>
+                            </div>
                             <div class="text-center mb-4">
                                 <div id="pomodoroTimer" class="text-3xl font-mono font-bold text-gray-900 dark:text-gray-100">25:00</div>
                                 <div id="pomodoroLabel" class="text-xs text-gray-500 dark:text-gray-400 mt-1">Focus Time</div>
@@ -1118,14 +1179,17 @@
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6">
                         <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
                             <h2 id="projectName" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Project Name</h2>
-                            <select id="projectStatus" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent">
-                                <option value="active">Active</option>
-                                <option value="on-track">On Track</option>
-                                <option value="at-risk">At Risk</option>
-                                <option value="late">Late</option>
-                                <option value="on-hold">On Hold</option>
-                                <option value="completed">Completed</option>
-                            </select>
+                            <div class="flex items-center gap-1">
+                                <select id="projectStatus" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent">
+                                    <option value="active">Active</option>
+                                    <option value="on-track">On Track</option>
+                                    <option value="at-risk">At Risk</option>
+                                    <option value="late">Late</option>
+                                    <option value="on-hold">On Hold</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                                <span class="help-tip" data-tip="Track your project health. On Track = progressing well, At Risk = potential issues, Late = behind schedule.">?</span>
+                            </div>
                         </div>
                         <div id="projectStatusComment" class="hidden mb-4">
                             <textarea id="statusCommentText" rows="2" placeholder="Status comment (optional)" class="w-full text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"></textarea>
@@ -1292,7 +1356,10 @@
                                 <input type="date" id="projectStartDate" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Working Days per Week</label>
+                                <label class="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Working Days per Week
+                                    <span class="help-tip" data-tip="Used for timeline calculations. Effort is measured in working days, not calendar days.">?</span>
+                                </label>
                                 <select id="workingDays" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent">
                                     <option value="5">5 days (Mon-Fri)</option>
                                     <option value="6">6 days (Mon-Sat)</option>
@@ -1737,7 +1804,8 @@
                         <div class="flex items-center space-x-2">
                             <label class="text-sm text-gray-600 dark:text-gray-400">Layout:</label>
                             <select id="mindmapLayout" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-2 py-1">
-                                <option value="tree" selected>Tree</option>
+                                <option value="horizontal" selected>Left to Right</option>
+                                <option value="vertical">Top to Bottom</option>
                             </select>
                         </div>
                     </div>
@@ -1790,12 +1858,19 @@
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4">
                             <div class="flex items-center space-x-2">
+                                <label class="text-sm text-gray-600 dark:text-gray-400">View:</label>
+                                <select id="c4ViewMode" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-md px-2 py-1">
+                                    <option value="diagram">Diagram</option>
+                                    <option value="list">List</option>
+                                </select>
+                            </div>
+                            <div id="c4DiagramControls" class="flex items-center space-x-2">
                                 <label class="text-sm text-gray-600 dark:text-gray-400">Zoom:</label>
                                 <input type="range" id="c4Zoom" min="0.5" max="2" step="0.1" value="1" class="w-20">
                                 <span id="c4ZoomLevel" class="text-sm text-gray-600 dark:text-gray-400">100%</span>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-4">
+                        <div id="c4DiagramOptions" class="flex items-center space-x-4">
                             <label class="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                                 <input type="checkbox" id="c4PhysicsToggle" class="rounded">
                                 <span>Physics</span>
@@ -1836,6 +1911,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
                         </svg>
                     </button>
+                </div>
+
+                <!-- C4 List View -->
+                <div id="c4ListView" class="hidden p-6 max-h-[600px] overflow-y-auto">
+                    <div id="c4ListContent">
+                        <!-- List view will be rendered here -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -2159,7 +2241,7 @@
 
     <!-- Mindmap Modal -->
     <div id="mindmapModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 flex flex-col max-h-[90vh]">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full mx-4 flex flex-col max-h-[90vh]">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <h3 id="mindmapModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Add Mindmap</h3>
             </div>
@@ -2170,10 +2252,61 @@
                         <input type="text" id="mindmapTitle" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent" placeholder="Enter mindmap title...">
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Structure (as bullet points)</label>
-                        <textarea id="mindmapStructure" required rows="8" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent" placeholder="- Main Topic&#10;  - Subtopic 1&#10;  - Subtopic 2&#10;    - Detail 1&#10;    - Detail 2"></textarea>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Use bullet points (-) and indentation to create hierarchy</p>
+                    <div class="flex gap-4">
+                        <!-- Editor Panel -->
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Structure</label>
+
+                            <!-- Toolbar -->
+                            <div class="flex flex-wrap gap-1 mb-2 p-2 bg-gray-50 dark:bg-gray-900 rounded-t-md border border-b-0 border-gray-300 dark:border-gray-600">
+                                <button type="button" id="mmAddRootBtn" class="px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-600" title="Add root node">
+                                    + Root
+                                </button>
+                                <button type="button" id="mmAddChildBtn" class="px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-600" title="Add child node (Tab)">
+                                    + Child
+                                </button>
+                                <button type="button" id="mmAddSiblingBtn" class="px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-600" title="Add sibling node (Enter)">
+                                    + Sibling
+                                </button>
+                                <div class="w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                                <button type="button" id="mmIndentBtn" class="px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-600" title="Indent (Tab)">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+                                </button>
+                                <button type="button" id="mmUnindentBtn" class="px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-600" title="Unindent (Shift+Tab)">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7M19 19l-7-7 7-7"/></svg>
+                                </button>
+                                <div class="w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                                <button type="button" id="mmMoveUpBtn" class="px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-600" title="Move line up (Alt+Up)">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                                </button>
+                                <button type="button" id="mmMoveDownBtn" class="px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-600" title="Move line down (Alt+Down)">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                </button>
+                                <button type="button" id="mmDeleteLineBtn" class="px-2 py-1 text-xs font-medium text-red-600 dark:text-red-400 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-red-50 dark:hover:bg-red-900/20" title="Delete current line">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </div>
+
+                            <textarea id="mindmapStructure" required rows="10" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-b-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent font-mono text-sm" placeholder="- Main Topic&#10;  - Subtopic 1&#10;  - Subtopic 2&#10;    - Detail 1&#10;    - Detail 2"></textarea>
+
+                            <!-- Keyboard shortcuts -->
+                            <div class="mt-2 text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                                <div class="flex flex-wrap gap-x-4 gap-y-1">
+                                    <span><kbd class="px-1 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-[10px]">Tab</kbd> Indent</span>
+                                    <span><kbd class="px-1 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-[10px]">Shift+Tab</kbd> Unindent</span>
+                                    <span><kbd class="px-1 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-[10px]">Enter</kbd> New sibling</span>
+                                    <span><kbd class="px-1 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-[10px]">Alt+Up/Down</kbd> Move line</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preview Panel -->
+                        <div class="w-48 flex-shrink-0">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Preview</label>
+                            <div id="mindmapPreview" class="h-64 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-900 p-2 overflow-auto text-xs">
+                                <div class="text-gray-400 dark:text-gray-500 italic">Enter structure to see preview</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -2182,7 +2315,7 @@
                         Cancel
                     </button>
                     <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500 transition-colors">
-                        Add Mindmap
+                        Save Mindmap
                     </button>
                 </div>
             </form>
@@ -2323,7 +2456,10 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
+                        <label class="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Priority
+                            <span class="help-tip" data-tip="P1 (red) = Critical/Blocker. P2 (orange) = High priority. P3 (yellow) = Normal. P4 (blue) = Low. P5 (gray) = Nice to have.">?</span>
+                        </label>
                         <select id="taskPriority" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent">
                             <option value="">Select Priority</option>
                             <option value="1">1 - Highest</option>
@@ -2344,7 +2480,10 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Effort (days)</label>
+                        <label class="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Effort (days)
+                            <span class="help-tip" data-tip="Estimated working days to complete. Used for timeline calculations.">?</span>
+                        </label>
                         <input type="number" id="taskEffort" min="1" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent">
                     </div>
                 </div>
@@ -2402,7 +2541,10 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Blocked By</label>
+                    <label class="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Blocked By
+                        <span class="help-tip" data-tip="Tasks that must be completed before this one can start. Used for timeline scheduling.">?</span>
+                    </label>
                     <div class="space-y-2">
                         <div class="relative">
                             <input type="text" id="taskBlockedBy" placeholder="Type to search tasks..." class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent" autocomplete="off">

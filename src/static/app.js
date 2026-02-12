@@ -61,7 +61,7 @@ class TaskManager {
     this.mindmapOffset = { x: 0, y: 0 };
     this.selectedMindmap = null;
     this.editingMindmap = null;
-    this.currentLayout = "tree";
+    this.currentLayout = "horizontal";
     this.isFullscreen = false;
     this.resizableEvents = [];
     this.notesLoaded = false;
@@ -771,6 +771,36 @@ class TaskManager {
       .getElementById("mindmapStructure")
       .addEventListener("keydown", (e) => this.handleMindmapKeyDown(e));
     document
+      .getElementById("mindmapStructure")
+      .addEventListener("input", () => this.updateMindmapPreview());
+
+    // Mindmap toolbar buttons
+    document
+      .getElementById("mmAddRootBtn")
+      .addEventListener("click", () => this.mmAddRoot());
+    document
+      .getElementById("mmAddChildBtn")
+      .addEventListener("click", () => this.mmAddChild());
+    document
+      .getElementById("mmAddSiblingBtn")
+      .addEventListener("click", () => this.mmAddSibling());
+    document
+      .getElementById("mmIndentBtn")
+      .addEventListener("click", () => this.mmIndent());
+    document
+      .getElementById("mmUnindentBtn")
+      .addEventListener("click", () => this.mmUnindent());
+    document
+      .getElementById("mmMoveUpBtn")
+      .addEventListener("click", () => this.mmMoveLine(-1));
+    document
+      .getElementById("mmMoveDownBtn")
+      .addEventListener("click", () => this.mmMoveLine(1));
+    document
+      .getElementById("mmDeleteLineBtn")
+      .addEventListener("click", () => this.mmDeleteLine());
+
+    document
       .getElementById("editMindmapBtn")
       .addEventListener("click", () => this.editSelectedMindmap());
     document
@@ -817,6 +847,9 @@ class TaskManager {
           this.stopC4ForceLayout();
         }
       });
+    document
+      .getElementById("c4ViewMode")
+      .addEventListener("change", (e) => this.toggleC4ViewMode(e.target.value));
     document
       .getElementById("mindmapLayout")
       .addEventListener("change", (e) =>
@@ -7555,23 +7588,41 @@ class TaskManager {
   }
 
   renderTreeLayout(rootNodes, content) {
-    const startX = 400;
-    const startY = 200;
-    const levelSpacing = 200;
-    const nodeSpacing = 100;
+    const isVertical = this.currentLayout === "vertical";
+    const levelSpacing = 150;
+    const nodeSpacing = 120;
 
-    // Position each root node and its children
-    rootNodes.forEach((rootNode, rootIndex) => {
-      const rootY = startY + rootIndex * 300;
-      this.positionNodeAndChildren(
-        rootNode,
-        startX,
-        rootY,
-        levelSpacing,
-        nodeSpacing,
-        content,
-      );
-    });
+    if (isVertical) {
+      // Top to bottom layout
+      const startX = 400;
+      const startY = 100;
+      rootNodes.forEach((rootNode, rootIndex) => {
+        const rootX = startX + rootIndex * 300;
+        this.positionNodeAndChildren(
+          rootNode,
+          rootX,
+          startY,
+          levelSpacing,
+          nodeSpacing,
+          content,
+        );
+      });
+    } else {
+      // Left to right layout (default)
+      const startX = 100;
+      const startY = 250;
+      rootNodes.forEach((rootNode, rootIndex) => {
+        const rootY = startY + rootIndex * 300;
+        this.positionNodeAndChildren(
+          rootNode,
+          startX,
+          rootY,
+          levelSpacing,
+          nodeSpacing,
+          content,
+        );
+      });
+    }
   }
 
   createNodeElement(node, x, y, container) {
@@ -7590,6 +7641,8 @@ class TaskManager {
   }
 
   positionNodeAndChildren(node, x, y, levelSpacing, nodeSpacing, container) {
+    const isVertical = this.currentLayout === "vertical";
+
     // Create and position the node element
     const element = document.createElement("div");
     element.className = `mindmap-node level-${node.level}`;
@@ -7613,20 +7666,37 @@ class TaskManager {
       (n) => n.parent === node.id,
     );
     if (children.length > 0) {
-      const childStartY = y - ((children.length - 1) * nodeSpacing) / 2;
-
-      children.forEach((child, index) => {
-        const childX = x + levelSpacing;
-        const childY = childStartY + index * nodeSpacing;
-        this.positionNodeAndChildren(
-          child,
-          childX,
-          childY,
-          levelSpacing,
-          nodeSpacing,
-          container,
-        );
-      });
+      if (isVertical) {
+        // Top to bottom: children spread horizontally, move down
+        const childStartX = x - ((children.length - 1) * nodeSpacing) / 2;
+        children.forEach((child, index) => {
+          const childX = childStartX + index * nodeSpacing;
+          const childY = y + levelSpacing;
+          this.positionNodeAndChildren(
+            child,
+            childX,
+            childY,
+            levelSpacing,
+            nodeSpacing,
+            container,
+          );
+        });
+      } else {
+        // Left to right: children spread vertically, move right
+        const childStartY = y - ((children.length - 1) * nodeSpacing) / 2;
+        children.forEach((child, index) => {
+          const childX = x + levelSpacing;
+          const childY = childStartY + index * nodeSpacing;
+          this.positionNodeAndChildren(
+            child,
+            childX,
+            childY,
+            levelSpacing,
+            nodeSpacing,
+            container,
+          );
+        });
+      }
     }
   }
 
@@ -7793,6 +7863,8 @@ class TaskManager {
       document.getElementById("mindmapTitle").value = "";
       document.getElementById("mindmapStructure").value = "";
     }
+    // Update preview after modal opens
+    setTimeout(() => this.updateMindmapPreview(), 0);
   }
 
   closeMindmapModal() {
@@ -7803,23 +7875,23 @@ class TaskManager {
   }
 
   handleMindmapKeyDown(e) {
+    const textarea = e.target;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const value = textarea.value;
+
     if (e.key === 'Tab') {
       e.preventDefault();
-      
-      const textarea = e.target;
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const value = textarea.value;
-      
+
       if (e.shiftKey) {
         // Shift+Tab: Remove indentation
         const lines = value.split('\n');
         const startLine = value.substring(0, start).split('\n').length - 1;
         const endLine = value.substring(0, end).split('\n').length - 1;
-        
+
         let newValue = '';
         let cursorOffset = 0;
-        
+
         for (let i = 0; i < lines.length; i++) {
           if (i >= startLine && i <= endLine) {
             // Remove 2 spaces from the beginning if they exist
@@ -7830,7 +7902,7 @@ class TaskManager {
           }
           newValue += lines[i] + (i < lines.length - 1 ? '\n' : '');
         }
-        
+
         textarea.value = newValue;
         textarea.selectionStart = Math.max(0, start + cursorOffset);
         textarea.selectionEnd = Math.max(0, end + cursorOffset);
@@ -7846,10 +7918,10 @@ class TaskManager {
           const lines = value.split('\n');
           const startLine = value.substring(0, start).split('\n').length - 1;
           const endLine = value.substring(0, end).split('\n').length - 1;
-          
+
           let newValue = '';
           let cursorOffset = 0;
-          
+
           for (let i = 0; i < lines.length; i++) {
             if (i >= startLine && i <= endLine) {
               lines[i] = '  ' + lines[i];
@@ -7857,13 +7929,199 @@ class TaskManager {
             }
             newValue += lines[i] + (i < lines.length - 1 ? '\n' : '');
           }
-          
+
           textarea.value = newValue;
           textarea.selectionStart = start + cursorOffset;
           textarea.selectionEnd = end + (cursorOffset * (endLine - startLine + 1));
         }
       }
+      this.updateMindmapPreview();
+    } else if (e.key === 'Enter' && !e.shiftKey) {
+      // Enter: Add new sibling at same indentation level
+      e.preventDefault();
+      const lines = value.split('\n');
+      const currentLineIndex = value.substring(0, start).split('\n').length - 1;
+      const currentLine = lines[currentLineIndex];
+      const indent = currentLine.match(/^(\s*)/)[1];
+      const newLine = indent + '- ';
+
+      // Insert after current line
+      const lineEnd = value.indexOf('\n', start);
+      const insertPos = lineEnd === -1 ? value.length : lineEnd;
+      const newValue = value.substring(0, insertPos) + '\n' + newLine + value.substring(insertPos);
+      textarea.value = newValue;
+      textarea.selectionStart = textarea.selectionEnd = insertPos + 1 + newLine.length;
+      this.updateMindmapPreview();
+    } else if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+      // Alt+Up/Down: Move line up/down
+      e.preventDefault();
+      this.mmMoveLine(e.key === 'ArrowUp' ? -1 : 1);
     }
+  }
+
+  // Mindmap toolbar methods
+  mmGetCurrentLineInfo() {
+    const textarea = document.getElementById('mindmapStructure');
+    const value = textarea.value;
+    const start = textarea.selectionStart;
+    const lines = value.split('\n');
+    const lineIndex = value.substring(0, start).split('\n').length - 1;
+    const currentLine = lines[lineIndex];
+    const indent = currentLine.match(/^(\s*)/)?.[1] || '';
+    return { textarea, value, start, lines, lineIndex, currentLine, indent };
+  }
+
+  mmAddRoot() {
+    const textarea = document.getElementById('mindmapStructure');
+    const value = textarea.value;
+    const newLine = '- New Node';
+    const newValue = value ? value + '\n' + newLine : newLine;
+    textarea.value = newValue;
+    textarea.focus();
+    textarea.selectionStart = newValue.length - 8;
+    textarea.selectionEnd = newValue.length;
+    this.updateMindmapPreview();
+  }
+
+  mmAddChild() {
+    const { textarea, value, lines, lineIndex, indent } = this.mmGetCurrentLineInfo();
+    if (lines.length === 0 || !lines[lineIndex].trim()) {
+      this.mmAddRoot();
+      return;
+    }
+    const newIndent = indent + '  ';
+    const newLine = newIndent + '- New Child';
+    const lineEnd = value.split('\n').slice(0, lineIndex + 1).join('\n').length;
+    const newValue = value.substring(0, lineEnd) + '\n' + newLine + value.substring(lineEnd);
+    textarea.value = newValue;
+    textarea.focus();
+    const cursorStart = lineEnd + 1 + newIndent.length + 2;
+    textarea.selectionStart = cursorStart;
+    textarea.selectionEnd = cursorStart + 9;
+    this.updateMindmapPreview();
+  }
+
+  mmAddSibling() {
+    const { textarea, value, lines, lineIndex, indent } = this.mmGetCurrentLineInfo();
+    if (lines.length === 0 || !lines[lineIndex].trim()) {
+      this.mmAddRoot();
+      return;
+    }
+    const newLine = indent + '- New Sibling';
+    const lineEnd = value.split('\n').slice(0, lineIndex + 1).join('\n').length;
+    const newValue = value.substring(0, lineEnd) + '\n' + newLine + value.substring(lineEnd);
+    textarea.value = newValue;
+    textarea.focus();
+    const cursorStart = lineEnd + 1 + indent.length + 2;
+    textarea.selectionStart = cursorStart;
+    textarea.selectionEnd = cursorStart + 11;
+    this.updateMindmapPreview();
+  }
+
+  mmIndent() {
+    const { textarea, value, start, end, lines, lineIndex } = this.mmGetCurrentLineInfo();
+    if (lines[lineIndex].startsWith('  ') || lines[lineIndex].trim().startsWith('-')) {
+      lines[lineIndex] = '  ' + lines[lineIndex];
+      textarea.value = lines.join('\n');
+      textarea.selectionStart = start + 2;
+      textarea.selectionEnd = (textarea.selectionEnd || start) + 2;
+      this.updateMindmapPreview();
+    }
+    textarea.focus();
+  }
+
+  mmUnindent() {
+    const { textarea, value, start, lines, lineIndex } = this.mmGetCurrentLineInfo();
+    if (lines[lineIndex].startsWith('  ')) {
+      lines[lineIndex] = lines[lineIndex].substring(2);
+      textarea.value = lines.join('\n');
+      textarea.selectionStart = Math.max(0, start - 2);
+      textarea.selectionEnd = Math.max(0, (textarea.selectionEnd || start) - 2);
+      this.updateMindmapPreview();
+    }
+    textarea.focus();
+  }
+
+  mmMoveLine(direction) {
+    const { textarea, lines, lineIndex } = this.mmGetCurrentLineInfo();
+    const targetIndex = lineIndex + direction;
+    if (targetIndex < 0 || targetIndex >= lines.length) return;
+
+    // Swap lines
+    const temp = lines[lineIndex];
+    lines[lineIndex] = lines[targetIndex];
+    lines[targetIndex] = temp;
+
+    // Calculate new cursor position
+    const beforeLines = lines.slice(0, targetIndex);
+    const newStart = beforeLines.join('\n').length + (beforeLines.length > 0 ? 1 : 0);
+
+    textarea.value = lines.join('\n');
+    textarea.focus();
+    textarea.selectionStart = newStart;
+    textarea.selectionEnd = newStart + lines[targetIndex].length;
+    this.updateMindmapPreview();
+  }
+
+  mmDeleteLine() {
+    const { textarea, lines, lineIndex } = this.mmGetCurrentLineInfo();
+    if (lines.length === 0) return;
+
+    lines.splice(lineIndex, 1);
+    const newValue = lines.join('\n');
+    textarea.value = newValue;
+
+    // Position cursor at start of next line (or previous if deleted last)
+    const newLineIndex = Math.min(lineIndex, lines.length - 1);
+    if (newLineIndex >= 0) {
+      const beforeLines = lines.slice(0, newLineIndex);
+      const newStart = beforeLines.join('\n').length + (beforeLines.length > 0 ? 1 : 0);
+      textarea.selectionStart = textarea.selectionEnd = newStart;
+    }
+    textarea.focus();
+    this.updateMindmapPreview();
+  }
+
+  updateMindmapPreview() {
+    const structure = document.getElementById('mindmapStructure').value;
+    const preview = document.getElementById('mindmapPreview');
+
+    if (!structure.trim()) {
+      preview.innerHTML = '<div class="text-gray-400 dark:text-gray-500 italic">Enter structure to see preview</div>';
+      return;
+    }
+
+    const nodes = this.parseMindmapStructure(structure);
+    if (nodes.length === 0) {
+      preview.innerHTML = '<div class="text-gray-400 dark:text-gray-500 italic">Enter structure to see preview</div>';
+      return;
+    }
+
+    // Build tree HTML
+    const buildTree = (parentId = undefined, level = 0) => {
+      const children = nodes.filter(n => n.parent === parentId);
+      if (children.length === 0) return '';
+
+      let html = '<ul class="pl-3 border-l border-gray-300 dark:border-gray-600">';
+      for (const node of children) {
+        html += `<li class="py-0.5"><span class="text-gray-800 dark:text-gray-200">${this.escapeHtml(node.text)}</span>`;
+        html += buildTree(node.id, level + 1);
+        html += '</li>';
+      }
+      html += '</ul>';
+      return html;
+    };
+
+    // Find root nodes (no parent)
+    const roots = nodes.filter(n => !n.parent);
+    let html = '<div class="space-y-1">';
+    for (const root of roots) {
+      html += `<div class="font-medium text-gray-900 dark:text-gray-100">${this.escapeHtml(root.text)}</div>`;
+      html += buildTree(root.id, 1);
+    }
+    html += '</div>';
+
+    preview.innerHTML = html;
   }
 
   async handleMindmapSubmit(e) {
@@ -8980,6 +9238,147 @@ class TaskManager {
     document.getElementById('c4ZoomLevel').textContent = '100%';
     document.getElementById('c4Zoom').value = 1;
     this.updateC4ViewTransform();
+  }
+
+  toggleC4ViewMode(mode) {
+    const diagramContainer = document.getElementById('c4Container');
+    const listContainer = document.getElementById('c4ListView');
+    const diagramControls = document.getElementById('c4DiagramControls');
+    const diagramOptions = document.getElementById('c4DiagramOptions');
+
+    if (mode === 'list') {
+      diagramContainer.classList.add('hidden');
+      listContainer.classList.remove('hidden');
+      diagramControls.classList.add('hidden');
+      diagramOptions.classList.add('hidden');
+      this.renderC4ListView();
+    } else {
+      diagramContainer.classList.remove('hidden');
+      listContainer.classList.add('hidden');
+      diagramControls.classList.remove('hidden');
+      diagramOptions.classList.remove('hidden');
+    }
+  }
+
+  renderC4ListView() {
+    const container = document.getElementById('c4ListContent');
+
+    if (!this.c4Components || this.c4Components.length === 0) {
+      container.innerHTML = `
+        <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+          <p>No C4 components yet. Add components to see them here.</p>
+        </div>
+      `;
+      return;
+    }
+
+    // Build hierarchical structure
+    const rootComponents = this.c4Components.filter(c => !c.parent);
+    container.innerHTML = this.renderC4ListItems(rootComponents, 0);
+
+    // Add click handlers for expand/collapse
+    container.querySelectorAll('.c4-list-toggle').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const item = btn.closest('.c4-list-item');
+        const children = item.querySelector('.c4-list-children');
+        const icon = btn.querySelector('svg');
+        if (children) {
+          children.classList.toggle('hidden');
+          icon.classList.toggle('rotate-90');
+        }
+      });
+    });
+
+    // Add click handlers for edit
+    container.querySelectorAll('.c4-list-edit').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const componentId = btn.dataset.componentId;
+        const component = this.c4Components.find(c => c.id === componentId);
+        if (component) {
+          this.openC4EditModal(component);
+        }
+      });
+    });
+
+    // Add click handlers for delete
+    container.querySelectorAll('.c4-list-delete').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const componentId = btn.dataset.componentId;
+        const component = this.c4Components.find(c => c.id === componentId);
+        if (component && confirm(`Delete "${component.name}"?`)) {
+          this.deleteC4Component(componentId);
+          this.renderC4ListView();
+        }
+      });
+    });
+  }
+
+  renderC4ListItems(components, level) {
+    if (!components || components.length === 0) return '';
+
+    const levelColors = {
+      context: 'border-l-gray-800 dark:border-l-gray-200',
+      container: 'border-l-gray-600 dark:border-l-gray-400',
+      component: 'border-l-gray-400 dark:border-l-gray-500',
+      code: 'border-l-gray-300 dark:border-l-gray-600'
+    };
+
+    const levelBadgeColors = {
+      context: 'bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-800',
+      container: 'bg-gray-600 text-white dark:bg-gray-400 dark:text-gray-800',
+      component: 'bg-gray-400 text-white dark:bg-gray-500 dark:text-gray-100',
+      code: 'bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200'
+    };
+
+    return components.map(component => {
+      const children = this.c4Components.filter(c => c.parent === component.id);
+      const hasChildren = children.length > 0;
+      const borderColor = levelColors[component.level] || levelColors.context;
+      const badgeColor = levelBadgeColors[component.level] || levelBadgeColors.context;
+
+      return `
+        <div class="c4-list-item border-l-4 ${borderColor} mb-2" style="margin-left: ${level * 20}px;">
+          <div class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-r-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+            ${hasChildren ? `
+              <button class="c4-list-toggle p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded">
+                <svg class="w-4 h-4 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
+            ` : '<div class="w-6"></div>'}
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="font-medium text-gray-900 dark:text-gray-100">${component.name}</span>
+                <span class="px-2 py-0.5 text-xs rounded ${badgeColor}">${component.level}</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">${component.type}</span>
+              </div>
+              ${component.description ? `<p class="text-sm text-gray-600 dark:text-gray-400 truncate">${component.description}</p>` : ''}
+              ${component.connections && component.connections.length > 0 ? `
+                <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                  Connects to: ${component.connections.map(c => c.target).join(', ')}
+                </div>
+              ` : ''}
+            </div>
+            <div class="flex items-center gap-1">
+              <button class="c4-list-edit p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded" data-component-id="${component.id}" title="Edit">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+              </button>
+              <button class="c4-list-delete p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-200 dark:hover:bg-gray-600 rounded" data-component-id="${component.id}" title="Delete">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          ${hasChildren ? `<div class="c4-list-children">${this.renderC4ListItems(children, level + 1)}</div>` : ''}
+        </div>
+      `;
+    }).join('');
   }
 
   triggerC4AutoLayout() {
