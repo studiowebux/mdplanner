@@ -19,6 +19,9 @@ A modern task management system that uses markdown files as the database, built 
   - SWOT Analysis boards (2x2 grid: Strengths, Weaknesses, Opportunities, Threats)
   - Risk Analysis boards (2x2 grid: Impact vs Probability quadrants)
   - Lean Canvas (12-section startup planning board)
+  - Business Model Canvas (9-section business model board)
+  - Project Value Board (4-section value mapping: Customer Segments, Problem, Solution, Benefit)
+  - Brief (11-section RACI-based project brief: Summary, Mission, RACI matrix, Budget, Timeline, Culture, Change Capacity, Guiding Principles)
   - Canvas view for visual brainstorming with sticky notes
   - Mindmap view with toolbar, live preview, and layout options (horizontal/vertical)
   - C4 Architecture diagrams with drill-down navigation and list view
@@ -633,6 +636,144 @@ Date: 2026-02-12
 - Enterprise support
 ```
 
+### Business Model Canvas Configuration
+
+```markdown
+<!-- Business Model Canvas -->
+# Business Model Canvas
+
+## SaaS Business Model
+<!-- id: bmc_001 -->
+Date: 2026-02-12
+
+### Key Partners
+- Cloud providers
+- Payment processors
+
+### Key Activities
+- Software development
+- Customer support
+
+### Key Resources
+- Development team
+- Cloud infrastructure
+
+### Value Proposition
+- Easy task management
+- No database setup required
+
+### Customer Relationships
+- Self-service
+- Community support
+
+### Channels
+- Website
+- GitHub
+
+### Customer Segments
+- Small teams
+- Developers
+
+### Cost Structure
+- Development salaries
+- Hosting costs
+
+### Revenue Streams
+- Subscription fees
+- Enterprise licenses
+```
+
+### Project Value Board Configuration
+
+```markdown
+<!-- Project Value Board -->
+# Project Value Board
+
+## Product Value Analysis
+<!-- id: pvb_001 -->
+Date: 2026-02-12
+
+### Customer Segments
+- Small development teams
+- Independent developers
+- Startup founders
+
+### Problem
+- Existing tools require complex setup
+- Data stored in proprietary formats
+- Difficult to migrate between tools
+
+### Solution
+- Markdown-based storage
+- No database required
+- Human-readable files
+
+### Benefit
+- Full data ownership
+- Easy backup and version control
+- Works with existing workflows
+```
+
+### Brief Configuration
+
+```markdown
+<!-- Brief -->
+# Brief
+
+## Project Kickoff Brief
+<!-- id: brief_001 -->
+Date: 2026-02-12
+
+### Summary
+- New product development initiative
+- Target launch Q3 2026
+
+### Mission
+- Deliver a user-friendly task management solution
+- Enable teams to work more efficiently
+
+### Responsible
+- Product Manager: Feature requirements
+- Development Lead: Technical implementation
+
+### Accountable
+- Project Sponsor: Overall project success
+
+### Consulted
+- UX Team: User experience guidance
+- Security Team: Compliance review
+
+### Informed
+- Stakeholders: Monthly progress updates
+- Executive Team: Quarterly reviews
+
+### High Level Budget
+- Development: $150,000
+- Infrastructure: $25,000
+- Marketing: $50,000
+
+### High Level Timeline
+- Phase 1 (Planning): 4 weeks
+- Phase 2 (Development): 12 weeks
+- Phase 3 (Testing): 4 weeks
+- Phase 4 (Launch): 2 weeks
+
+### Culture
+- Agile methodology
+- Collaborative decision-making
+- Continuous improvement mindset
+
+### Change Capacity
+- Team has moderate capacity for change
+- Training budget allocated
+- Phased rollout planned
+
+### Guiding Principles
+- User-first design
+- Simplicity over complexity
+- Data transparency
+```
+
 ### C4 Architecture Configuration
 
 ```markdown
@@ -884,6 +1025,24 @@ GET    /api/lean-canvas        # Retrieve all lean canvases
 POST   /api/lean-canvas        # Create new lean canvas
 PUT    /api/lean-canvas/:id    # Update lean canvas
 DELETE /api/lean-canvas/:id    # Delete lean canvas
+
+# Business Model Canvas
+GET    /api/business-model     # Retrieve all business model canvases
+POST   /api/business-model     # Create new business model canvas
+PUT    /api/business-model/:id # Update business model canvas
+DELETE /api/business-model/:id # Delete business model canvas
+
+# Project Value Board
+GET    /api/project-value-board     # Retrieve all project value boards
+POST   /api/project-value-board     # Create new project value board
+PUT    /api/project-value-board/:id # Update project value board
+DELETE /api/project-value-board/:id # Delete project value board
+
+# Brief
+GET    /api/brief                   # Retrieve all briefs
+POST   /api/brief                   # Create new brief
+PUT    /api/brief/:id               # Update brief
+DELETE /api/brief/:id               # Delete brief
 
 # Time Tracking
 GET    /api/time-entries       # Get all time entries

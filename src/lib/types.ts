@@ -202,3 +202,45 @@ export interface LeanCanvas {
   costStructure: string[];
   revenueStreams: string[];
 }
+
+export interface BusinessModelCanvas {
+  id: string;
+  title: string;
+  date: string;
+  keyPartners: string[];
+  keyActivities: string[];
+  keyResources: string[];
+  valueProposition: string[];
+  customerRelationships: string[];
+  channels: string[];
+  customerSegments: string[];
+  costStructure: string[];
+  revenueStreams: string[];
+}
+
+export interface ProjectValueBoard {
+  id: string;
+  title: string;
+  date: string;
+  customerSegments: string[];
+  problem: string[];
+  solution: string[];
+  benefit: string[];
+}
+
+export interface Brief {
+  id: string;
+  title: string;
+  date: string;
+  summary: string[];
+  mission: string[];
+  responsible: string[];
+  accountable: string[];
+  consulted: string[];
+  informed: string[];
+  highLevelBudget: string[];
+  highLevelTimeline: string[];
+  culture: string[];
+  changeCapacity: string[];
+  guidingPrinciples: string[];
+}

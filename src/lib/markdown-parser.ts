@@ -1,4 +1,6 @@
 import {
+  Brief,
+  BusinessModelCanvas,
   C4Component,
   Goal,
   Idea,
@@ -10,6 +12,7 @@ import {
   ProjectConfig,
   ProjectInfo,
   ProjectLink,
+  ProjectValueBoard,
   Retrospective,
   RiskAnalysis,
   StickyNote,
@@ -3364,6 +3367,431 @@ export class MarkdownParser {
       const after = endIndex !== -1 ? lines.slice(endIndex) : [];
       lines.length = 0;
       lines.push(...before, leanContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  async readBusinessModelCanvases(): Promise<BusinessModelCanvas[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const canvases: BusinessModelCanvas[] = [];
+
+    let inSection = false;
+    let currentCanvas: Partial<BusinessModelCanvas> | null = null;
+    let currentSubsection: keyof Omit<BusinessModelCanvas, "id" | "title" | "date"> | null = null;
+
+    const sectionMap: Record<string, keyof Omit<BusinessModelCanvas, "id" | "title" | "date">> = {
+      "### Key Partners": "keyPartners",
+      "### Key Activities": "keyActivities",
+      "### Key Resources": "keyResources",
+      "### Value Proposition": "valueProposition",
+      "### Customer Relationships": "customerRelationships",
+      "### Channels": "channels",
+      "### Customer Segments": "customerSegments",
+      "### Cost Structure": "costStructure",
+      "### Revenue Streams": "revenueStreams",
+    };
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      if (line.startsWith("# Business Model Canvas") || line.includes("<!-- Business Model Canvas -->")) {
+        inSection = true;
+        continue;
+      }
+
+      if (inSection && line.startsWith("# ") && !line.startsWith("# Business Model Canvas")) {
+        if (currentCanvas?.title) canvases.push(currentCanvas as BusinessModelCanvas);
+        currentCanvas = null;
+        break;
+      }
+
+      if (!inSection) continue;
+
+      if (line.startsWith("## ")) {
+        if (currentCanvas?.title) canvases.push(currentCanvas as BusinessModelCanvas);
+        const title = line.substring(3).trim();
+        currentCanvas = {
+          id: crypto.randomUUID().substring(0, 8),
+          title,
+          date: new Date().toISOString().split("T")[0],
+          keyPartners: [],
+          keyActivities: [],
+          keyResources: [],
+          valueProposition: [],
+          customerRelationships: [],
+          channels: [],
+          customerSegments: [],
+          costStructure: [],
+          revenueStreams: [],
+        };
+        currentSubsection = null;
+      } else if (currentCanvas) {
+        if (line.startsWith("Date:")) {
+          currentCanvas.date = line.substring(5).trim();
+        } else if (line.startsWith("<!-- id:")) {
+          const match = line.match(/<!-- id: ([^ ]+)/);
+          if (match) currentCanvas.id = match[1];
+        } else {
+          for (const [header, key] of Object.entries(sectionMap)) {
+            if (line.startsWith(header)) {
+              currentSubsection = key;
+              break;
+            }
+          }
+          if (line.trim().startsWith("- ") && currentSubsection) {
+            const item = line.trim().substring(2).trim();
+            if (item) {
+              (currentCanvas[currentSubsection] as string[]).push(item);
+            }
+          }
+        }
+      }
+    }
+
+    if (currentCanvas?.title) canvases.push(currentCanvas as BusinessModelCanvas);
+    return canvases;
+  }
+
+  async saveBusinessModelCanvases(canvases: BusinessModelCanvas[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    let startIndex = -1;
+    let endIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (startIndex === -1 && (lines[i].includes("<!-- Business Model Canvas -->") || lines[i].startsWith("# Business Model Canvas"))) {
+        startIndex = i;
+      } else if (startIndex !== -1 && lines[i].startsWith("# ") && !lines[i].startsWith("# Business Model Canvas")) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    let bmcContent = "<!-- Business Model Canvas -->\n# Business Model Canvas\n\n";
+    for (const canvas of canvases) {
+      bmcContent += `## ${canvas.title}\n`;
+      bmcContent += `<!-- id: ${canvas.id} -->\n`;
+      bmcContent += `Date: ${canvas.date}\n\n`;
+
+      const sections: Array<{ header: string; key: keyof Omit<BusinessModelCanvas, "id" | "title" | "date"> }> = [
+        { header: "Key Partners", key: "keyPartners" },
+        { header: "Key Activities", key: "keyActivities" },
+        { header: "Key Resources", key: "keyResources" },
+        { header: "Value Proposition", key: "valueProposition" },
+        { header: "Customer Relationships", key: "customerRelationships" },
+        { header: "Channels", key: "channels" },
+        { header: "Customer Segments", key: "customerSegments" },
+        { header: "Cost Structure", key: "costStructure" },
+        { header: "Revenue Streams", key: "revenueStreams" },
+      ];
+
+      for (const { header, key } of sections) {
+        bmcContent += `### ${header}\n`;
+        for (const item of canvas[key]) {
+          bmcContent += `- ${item}\n`;
+        }
+        bmcContent += `\n`;
+      }
+    }
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.startsWith("# Board"));
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, bmcContent);
+      } else {
+        lines.push(bmcContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, bmcContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  async readProjectValueBoards(): Promise<ProjectValueBoard[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const boards: ProjectValueBoard[] = [];
+
+    let inSection = false;
+    let currentBoard: Partial<ProjectValueBoard> | null = null;
+    let currentSubsection: keyof Omit<ProjectValueBoard, "id" | "title" | "date"> | null = null;
+
+    const sectionMap: Record<string, keyof Omit<ProjectValueBoard, "id" | "title" | "date">> = {
+      "### Customer Segments": "customerSegments",
+      "### Problem": "problem",
+      "### Solution": "solution",
+      "### Benefit": "benefit",
+    };
+
+    for (const line of lines) {
+      if (line.includes("<!-- Project Value Board -->") || line.startsWith("# Project Value Board")) {
+        inSection = true;
+        continue;
+      }
+
+      if (inSection && line.startsWith("# ") && !line.startsWith("# Project Value Board")) {
+        if (currentBoard?.title) boards.push(currentBoard as ProjectValueBoard);
+        currentBoard = null;
+        break;
+      }
+
+      if (!inSection) continue;
+
+      if (line.startsWith("## ")) {
+        if (currentBoard?.title) boards.push(currentBoard as ProjectValueBoard);
+        const title = line.substring(3).trim();
+        currentBoard = {
+          id: crypto.randomUUID(),
+          title,
+          date: new Date().toISOString().split("T")[0],
+          customerSegments: [],
+          problem: [],
+          solution: [],
+          benefit: [],
+        };
+        currentSubsection = null;
+        continue;
+      }
+
+      if (!currentBoard) continue;
+
+      const idMatch = line.match(/<!--\s*id:\s*([^\s]+)\s*-->/);
+      if (idMatch) {
+        currentBoard.id = idMatch[1];
+        continue;
+      }
+
+      if (line.startsWith("Date:")) {
+        currentBoard.date = line.substring(5).trim();
+        continue;
+      }
+
+      for (const [header, key] of Object.entries(sectionMap)) {
+        if (line.startsWith(header)) {
+          currentSubsection = key;
+          break;
+        }
+      }
+
+      if (currentSubsection && line.startsWith("- ")) {
+        const item = line.substring(2).trim();
+        if (item) currentBoard[currentSubsection]?.push(item);
+      }
+    }
+
+    if (currentBoard?.title) boards.push(currentBoard as ProjectValueBoard);
+    return boards;
+  }
+
+  async saveProjectValueBoards(boards: ProjectValueBoard[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    let startIndex = -1;
+    let endIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (startIndex === -1 && (lines[i].includes("<!-- Project Value Board -->") || lines[i].startsWith("# Project Value Board"))) {
+        startIndex = i;
+      } else if (startIndex !== -1 && lines[i].startsWith("# ") && !lines[i].startsWith("# Project Value Board")) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    let pvbContent = "<!-- Project Value Board -->\n# Project Value Board\n\n";
+    for (const board of boards) {
+      pvbContent += `## ${board.title}\n`;
+      pvbContent += `<!-- id: ${board.id} -->\n`;
+      pvbContent += `Date: ${board.date}\n\n`;
+
+      const sections: Array<{ header: string; key: keyof Omit<ProjectValueBoard, "id" | "title" | "date"> }> = [
+        { header: "Customer Segments", key: "customerSegments" },
+        { header: "Problem", key: "problem" },
+        { header: "Solution", key: "solution" },
+        { header: "Benefit", key: "benefit" },
+      ];
+
+      for (const { header, key } of sections) {
+        pvbContent += `### ${header}\n`;
+        for (const item of board[key]) {
+          pvbContent += `- ${item}\n`;
+        }
+        pvbContent += `\n`;
+      }
+    }
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.startsWith("# Board"));
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, pvbContent);
+      } else {
+        lines.push(pvbContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, pvbContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  async readBriefs(): Promise<Brief[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const briefs: Brief[] = [];
+
+    let inSection = false;
+    let currentBrief: Partial<Brief> | null = null;
+    let currentSubsection: keyof Omit<Brief, "id" | "title" | "date"> | null = null;
+
+    const sectionMap: Record<string, keyof Omit<Brief, "id" | "title" | "date">> = {
+      "### Summary": "summary",
+      "### Mission": "mission",
+      "### Responsible": "responsible",
+      "### Accountable": "accountable",
+      "### Consulted": "consulted",
+      "### Informed": "informed",
+      "### High Level Budget": "highLevelBudget",
+      "### High Level Timeline": "highLevelTimeline",
+      "### Culture": "culture",
+      "### Change Capacity": "changeCapacity",
+      "### Guiding Principles": "guidingPrinciples",
+    };
+
+    for (const line of lines) {
+      if (line.includes("<!-- Brief -->") || line.startsWith("# Brief")) {
+        inSection = true;
+        continue;
+      }
+
+      if (inSection && line.startsWith("# ") && !line.startsWith("# Brief")) {
+        if (currentBrief?.title) briefs.push(currentBrief as Brief);
+        currentBrief = null;
+        break;
+      }
+
+      if (!inSection) continue;
+
+      if (line.startsWith("## ")) {
+        if (currentBrief?.title) briefs.push(currentBrief as Brief);
+        const title = line.substring(3).trim();
+        currentBrief = {
+          id: crypto.randomUUID().substring(0, 8),
+          title,
+          date: new Date().toISOString().split("T")[0],
+          summary: [],
+          mission: [],
+          responsible: [],
+          accountable: [],
+          consulted: [],
+          informed: [],
+          highLevelBudget: [],
+          highLevelTimeline: [],
+          culture: [],
+          changeCapacity: [],
+          guidingPrinciples: [],
+        };
+        currentSubsection = null;
+        continue;
+      }
+
+      if (!currentBrief) continue;
+
+      const idMatch = line.match(/<!--\s*id:\s*([^\s]+)\s*-->/);
+      if (idMatch) {
+        currentBrief.id = idMatch[1];
+        continue;
+      }
+
+      if (line.startsWith("Date:")) {
+        currentBrief.date = line.substring(5).trim();
+        continue;
+      }
+
+      for (const [header, key] of Object.entries(sectionMap)) {
+        if (line.startsWith(header)) {
+          currentSubsection = key;
+          break;
+        }
+      }
+
+      if (currentSubsection && line.startsWith("- ")) {
+        const item = line.substring(2).trim();
+        if (item) currentBrief[currentSubsection]?.push(item);
+      }
+    }
+
+    if (currentBrief?.title) briefs.push(currentBrief as Brief);
+    return briefs;
+  }
+
+  async saveBriefs(briefs: Brief[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    let startIndex = -1;
+    let endIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (startIndex === -1 && (lines[i].includes("<!-- Brief -->") || lines[i].startsWith("# Brief"))) {
+        startIndex = i;
+      } else if (startIndex !== -1 && lines[i].startsWith("# ") && !lines[i].startsWith("# Brief")) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    let briefContent = "<!-- Brief -->\n# Brief\n\n";
+    for (const brief of briefs) {
+      briefContent += `## ${brief.title}\n`;
+      briefContent += `<!-- id: ${brief.id} -->\n`;
+      briefContent += `Date: ${brief.date}\n\n`;
+
+      const sections: Array<{ header: string; key: keyof Omit<Brief, "id" | "title" | "date"> }> = [
+        { header: "Summary", key: "summary" },
+        { header: "Mission", key: "mission" },
+        { header: "Responsible", key: "responsible" },
+        { header: "Accountable", key: "accountable" },
+        { header: "Consulted", key: "consulted" },
+        { header: "Informed", key: "informed" },
+        { header: "High Level Budget", key: "highLevelBudget" },
+        { header: "High Level Timeline", key: "highLevelTimeline" },
+        { header: "Culture", key: "culture" },
+        { header: "Change Capacity", key: "changeCapacity" },
+        { header: "Guiding Principles", key: "guidingPrinciples" },
+      ];
+
+      for (const { header, key } of sections) {
+        briefContent += `### ${header}\n`;
+        for (const item of brief[key]) {
+          briefContent += `- ${item}\n`;
+        }
+        briefContent += `\n`;
+      }
+    }
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.startsWith("# Board"));
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, briefContent);
+      } else {
+        lines.push(briefContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, briefContent, ...after);
     }
 
     await this.safeWriteFile(lines.join("\n"));

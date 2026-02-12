@@ -79,6 +79,18 @@ class TaskManager {
     this.selectedLeanCanvasId = null;
     this.editingLeanCanvasId = null;
     this.leanCanvasSection = null;
+    this.businessModelCanvases = [];
+    this.selectedBusinessModelId = null;
+    this.editingBusinessModelId = null;
+    this.businessModelSection = null;
+    this.projectValueBoards = [];
+    this.selectedProjectValueId = null;
+    this.editingProjectValueId = null;
+    this.projectValueSection = null;
+    this.briefs = [];
+    this.selectedBriefId = null;
+    this.editingBriefId = null;
+    this.briefSection = null;
     this.timeEntries = {};
     this.c4Components = [];
     this.c4Zoom = 1;
@@ -379,6 +391,24 @@ class TaskManager {
       .getElementById("leanCanvasViewBtnMobile")
       ?.addEventListener("click", () => {
         this.switchView("leanCanvas");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("businessModelViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("businessModel");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("projectValueViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("projectValue");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("briefViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("brief");
         this.closeMobileMenu();
       });
     document
@@ -858,6 +888,111 @@ class TaskManager {
       btn.addEventListener("click", () => this.openLeanCanvasItemModal(btn.dataset.section));
     });
 
+    // Business Model Canvas events
+    document
+      .getElementById("businessModelViewBtn")
+      .addEventListener("click", () => {
+        this.switchView("businessModel");
+        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+      });
+    document
+      .getElementById("addBusinessModelBtn")
+      .addEventListener("click", () => this.openBusinessModelModal());
+    document
+      .getElementById("cancelBusinessModelBtn")
+      .addEventListener("click", () => this.closeBusinessModelModal());
+    document
+      .getElementById("businessModelForm")
+      .addEventListener("submit", (e) => this.saveBusinessModel(e));
+    document
+      .getElementById("businessModelSelector")
+      .addEventListener("change", (e) => this.selectBusinessModel(e.target.value));
+    document
+      .getElementById("editBusinessModelBtn")
+      .addEventListener("click", () => this.editSelectedBusinessModel());
+    document
+      .getElementById("deleteBusinessModelBtn")
+      .addEventListener("click", () => this.deleteSelectedBusinessModel());
+    document
+      .getElementById("cancelBusinessModelItemBtn")
+      .addEventListener("click", () => this.closeBusinessModelItemModal());
+    document
+      .getElementById("businessModelItemForm")
+      .addEventListener("submit", (e) => this.saveBusinessModelItem(e));
+    document.querySelectorAll(".bmc-add-btn").forEach(btn => {
+      btn.addEventListener("click", () => this.openBusinessModelItemModal(btn.dataset.section));
+    });
+
+    // Project Value Board events
+    document
+      .getElementById("projectValueViewBtn")
+      .addEventListener("click", () => {
+        this.switchView("projectValue");
+        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+      });
+    document
+      .getElementById("addProjectValueBtn")
+      .addEventListener("click", () => this.openProjectValueModal());
+    document
+      .getElementById("cancelProjectValueBtn")
+      .addEventListener("click", () => this.closeProjectValueModal());
+    document
+      .getElementById("projectValueForm")
+      .addEventListener("submit", (e) => this.saveProjectValue(e));
+    document
+      .getElementById("projectValueSelector")
+      .addEventListener("change", (e) => this.selectProjectValue(e.target.value));
+    document
+      .getElementById("editProjectValueBtn")
+      .addEventListener("click", () => this.editSelectedProjectValue());
+    document
+      .getElementById("deleteProjectValueBtn")
+      .addEventListener("click", () => this.deleteSelectedProjectValue());
+    document
+      .getElementById("cancelProjectValueItemBtn")
+      .addEventListener("click", () => this.closeProjectValueItemModal());
+    document
+      .getElementById("projectValueItemForm")
+      .addEventListener("submit", (e) => this.saveProjectValueItem(e));
+    document.querySelectorAll(".pvb-add-btn").forEach(btn => {
+      btn.addEventListener("click", () => this.openProjectValueItemModal(btn.dataset.section));
+    });
+
+    // Brief events
+    document
+      .getElementById("briefViewBtn")
+      .addEventListener("click", () => {
+        this.switchView("brief");
+        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+      });
+    document
+      .getElementById("addBriefBtn")
+      .addEventListener("click", () => this.openBriefModal());
+    document
+      .getElementById("cancelBriefBtn")
+      .addEventListener("click", () => this.closeBriefModal());
+    document
+      .getElementById("briefForm")
+      .addEventListener("submit", (e) => this.saveBrief(e));
+    document
+      .getElementById("briefSelector")
+      .addEventListener("change", (e) => this.selectBrief(e.target.value));
+    document
+      .getElementById("editBriefBtn")
+      .addEventListener("click", () => this.editBrief());
+    document
+      .getElementById("deleteBriefBtn")
+      .addEventListener("click", () => this.deleteBrief());
+    document
+      .getElementById("cancelBriefItemBtn")
+      .addEventListener("click", () => this.closeBriefItemModal());
+    document
+      .getElementById("briefItemForm")
+      .addEventListener("submit", (e) => this.saveBriefItem(e));
+    document.querySelectorAll(".brief-add-btn").forEach(btn => {
+      btn.addEventListener("click", () => this.openBriefItemModal(btn.dataset.section));
+    });
+
     // Time Tracking events
     document
       .getElementById("timeTrackingViewBtn")
@@ -1072,7 +1207,7 @@ class TaskManager {
       summary: "Summary", list: "List", board: "Board", timeline: "Timeline",
       notes: "Notes", goals: "Goals", milestones: "Milestones", ideas: "Ideas",
       canvas: "Canvas", mindmap: "Mindmap", c4: "C4 Architecture",
-      retrospectives: "Retrospectives", swot: "SWOT Analysis", riskAnalysis: "Risk Analysis", leanCanvas: "Lean Canvas", timeTracking: "Time Tracking", config: "Settings"
+      retrospectives: "Retrospectives", swot: "SWOT Analysis", riskAnalysis: "Risk Analysis", leanCanvas: "Lean Canvas", businessModel: "Business Model", brief: "Brief", timeTracking: "Time Tracking", config: "Settings"
     };
     const label = document.getElementById("currentViewLabel");
     if (label) label.textContent = viewLabels[view] || view;
@@ -1110,7 +1245,7 @@ class TaskManager {
     this.notesLoaded = false;
 
     // Reset all desktop nav buttons in dropdown
-    const desktopNavBtns = ["summaryViewBtn", "listViewBtn", "boardViewBtn", "timelineViewBtn", "notesViewBtn", "goalsViewBtn", "milestonesViewBtn", "ideasViewBtn", "canvasViewBtn", "mindmapViewBtn", "c4ViewBtn", "retrospectivesViewBtn", "swotViewBtn", "riskAnalysisViewBtn", "leanCanvasViewBtn", "timeTrackingViewBtn"];
+    const desktopNavBtns = ["summaryViewBtn", "listViewBtn", "boardViewBtn", "timelineViewBtn", "notesViewBtn", "goalsViewBtn", "milestonesViewBtn", "ideasViewBtn", "canvasViewBtn", "mindmapViewBtn", "c4ViewBtn", "retrospectivesViewBtn", "swotViewBtn", "riskAnalysisViewBtn", "leanCanvasViewBtn", "businessModelViewBtn", "projectValueViewBtn", "briefViewBtn", "timeTrackingViewBtn"];
     desktopNavBtns.forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) {
@@ -1120,7 +1255,7 @@ class TaskManager {
     });
 
     // Reset mobile buttons
-    const mobileBtnIds = ["summaryViewBtnMobile", "listViewBtnMobile", "boardViewBtnMobile", "timelineViewBtnMobile", "notesViewBtnMobile", "goalsViewBtnMobile", "milestonesViewBtnMobile", "canvasViewBtnMobile", "mindmapViewBtnMobile", "c4ViewBtnMobile", "ideasViewBtnMobile", "retrospectivesViewBtnMobile", "swotViewBtnMobile", "riskAnalysisViewBtnMobile", "leanCanvasViewBtnMobile", "timeTrackingViewBtnMobile", "configViewBtnMobile"];
+    const mobileBtnIds = ["summaryViewBtnMobile", "listViewBtnMobile", "boardViewBtnMobile", "timelineViewBtnMobile", "notesViewBtnMobile", "goalsViewBtnMobile", "milestonesViewBtnMobile", "canvasViewBtnMobile", "mindmapViewBtnMobile", "c4ViewBtnMobile", "ideasViewBtnMobile", "retrospectivesViewBtnMobile", "swotViewBtnMobile", "riskAnalysisViewBtnMobile", "leanCanvasViewBtnMobile", "businessModelViewBtnMobile", "projectValueViewBtnMobile", "briefViewBtnMobile", "timeTrackingViewBtnMobile", "configViewBtnMobile"];
     mobileBtnIds.forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) {
@@ -1142,6 +1277,9 @@ class TaskManager {
     document.getElementById("swotView").classList.add("hidden");
     document.getElementById("riskAnalysisView").classList.add("hidden");
     document.getElementById("leanCanvasView").classList.add("hidden");
+    document.getElementById("businessModelView").classList.add("hidden");
+    document.getElementById("projectValueView").classList.add("hidden");
+    document.getElementById("briefView").classList.add("hidden");
     document.getElementById("timeTrackingView").classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
     document.getElementById("mindmapView").classList.add("hidden");
@@ -1202,6 +1340,18 @@ class TaskManager {
       this.activateViewButton("leanCanvas");
       document.getElementById("leanCanvasView").classList.remove("hidden");
       this.loadLeanCanvases();
+    } else if (view === "businessModel") {
+      this.activateViewButton("businessModel");
+      document.getElementById("businessModelView").classList.remove("hidden");
+      this.loadBusinessModelCanvases();
+    } else if (view === "projectValue") {
+      this.activateViewButton("projectValue");
+      document.getElementById("projectValueView").classList.remove("hidden");
+      this.loadProjectValueBoards();
+    } else if (view === "brief") {
+      this.activateViewButton("brief");
+      document.getElementById("briefView").classList.remove("hidden");
+      this.loadBriefs();
     } else if (view === "timeTracking") {
       this.activateViewButton("timeTracking");
       document.getElementById("timeTrackingView").classList.remove("hidden");
@@ -7754,6 +7904,719 @@ class TaskManager {
       this.renderLeanCanvasView(canvas);
     } catch (error) {
       console.error("Error removing lean canvas item:", error);
+    }
+  }
+
+  // Business Model Canvas functionality
+  async loadBusinessModelCanvases() {
+    try {
+      const response = await fetch("/api/business-model");
+      this.businessModelCanvases = await response.json();
+      this.renderBusinessModelSelector();
+      if (this.businessModelCanvases.length > 0 && !this.selectedBusinessModelId) {
+        this.selectBusinessModel(this.businessModelCanvases[0].id);
+      } else if (this.selectedBusinessModelId) {
+        this.selectBusinessModel(this.selectedBusinessModelId);
+      } else {
+        this.renderBusinessModelView(null);
+      }
+    } catch (error) {
+      console.error("Error loading business model canvases:", error);
+    }
+  }
+
+  renderBusinessModelSelector() {
+    const selector = document.getElementById("businessModelSelector");
+    selector.innerHTML = '<option value="">Select Canvas</option>';
+    this.businessModelCanvases.forEach(canvas => {
+      const option = document.createElement("option");
+      option.value = canvas.id;
+      option.textContent = `${canvas.title} (${canvas.date})`;
+      selector.appendChild(option);
+    });
+  }
+
+  selectBusinessModel(canvasId) {
+    this.selectedBusinessModelId = canvasId;
+    const selector = document.getElementById("businessModelSelector");
+    selector.value = canvasId || "";
+
+    const canvas = this.businessModelCanvases.find(c => c.id === canvasId);
+    this.renderBusinessModelView(canvas);
+
+    const editBtn = document.getElementById("editBusinessModelBtn");
+    const deleteBtn = document.getElementById("deleteBusinessModelBtn");
+    if (canvas) {
+      editBtn.classList.remove("hidden");
+      deleteBtn.classList.remove("hidden");
+    } else {
+      editBtn.classList.add("hidden");
+      deleteBtn.classList.add("hidden");
+    }
+  }
+
+  renderBusinessModelView(canvas) {
+    const emptyState = document.getElementById("emptyBusinessModelState");
+    const grid = document.getElementById("businessModelGrid");
+
+    if (!canvas) {
+      emptyState.classList.remove("hidden");
+      grid.classList.add("hidden");
+      return;
+    }
+
+    emptyState.classList.add("hidden");
+    grid.classList.remove("hidden");
+
+    const sections = [
+      { key: "keyPartners", el: "bmcKeyPartners" },
+      { key: "keyActivities", el: "bmcKeyActivities" },
+      { key: "keyResources", el: "bmcKeyResources" },
+      { key: "valueProposition", el: "bmcValueProposition" },
+      { key: "customerRelationships", el: "bmcCustomerRelationships" },
+      { key: "channels", el: "bmcChannels" },
+      { key: "customerSegments", el: "bmcCustomerSegments" },
+      { key: "costStructure", el: "bmcCostStructure" },
+      { key: "revenueStreams", el: "bmcRevenueStreams" },
+    ];
+
+    sections.forEach(({ key, el }) => {
+      const ul = document.getElementById(el);
+      ul.innerHTML = (canvas[key] || []).map((item, idx) => `
+        <li class="flex justify-between items-start group">
+          <span class="break-words flex-1">${item}</span>
+          <button onclick="app.removeBusinessModelItem('${key}', ${idx})" class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 ml-1 flex-shrink-0">
+            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </li>
+      `).join("");
+    });
+  }
+
+  openBusinessModelModal(id = null) {
+    this.editingBusinessModelId = id;
+    const modal = document.getElementById("businessModelModal");
+    const title = document.getElementById("businessModelModalTitle");
+    document.getElementById("businessModelTitle").value = "";
+    document.getElementById("businessModelDate").value = new Date().toISOString().split("T")[0];
+
+    if (id) {
+      title.textContent = "Edit Business Model Canvas";
+      const canvas = this.businessModelCanvases.find(c => c.id === id);
+      if (canvas) {
+        document.getElementById("businessModelTitle").value = canvas.title;
+        document.getElementById("businessModelDate").value = canvas.date;
+      }
+    } else {
+      title.textContent = "New Business Model Canvas";
+    }
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    document.getElementById("businessModelTitle").focus();
+  }
+
+  closeBusinessModelModal() {
+    const modal = document.getElementById("businessModelModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    this.editingBusinessModelId = null;
+  }
+
+  async saveBusinessModel(e) {
+    e.preventDefault();
+    const title = document.getElementById("businessModelTitle").value.trim();
+    const date = document.getElementById("businessModelDate").value;
+
+    if (!title) return;
+
+    try {
+      if (this.editingBusinessModelId) {
+        const canvas = this.businessModelCanvases.find(c => c.id === this.editingBusinessModelId);
+        await fetch(`/api/business-model/${this.editingBusinessModelId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...canvas, title, date }),
+        });
+      } else {
+        await fetch("/api/business-model", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, date }),
+        });
+      }
+      this.closeBusinessModelModal();
+      await this.loadBusinessModelCanvases();
+    } catch (error) {
+      console.error("Error saving business model canvas:", error);
+    }
+  }
+
+  editSelectedBusinessModel() {
+    if (this.selectedBusinessModelId) {
+      this.openBusinessModelModal(this.selectedBusinessModelId);
+    }
+  }
+
+  async deleteSelectedBusinessModel() {
+    if (!this.selectedBusinessModelId) return;
+    if (!confirm("Delete this Business Model Canvas?")) return;
+    try {
+      await fetch(`/api/business-model/${this.selectedBusinessModelId}`, { method: "DELETE" });
+      this.selectedBusinessModelId = null;
+      await this.loadBusinessModelCanvases();
+    } catch (error) {
+      console.error("Error deleting business model canvas:", error);
+    }
+  }
+
+  openBusinessModelItemModal(section) {
+    this.businessModelSection = section;
+    const modal = document.getElementById("businessModelItemModal");
+    const title = document.getElementById("businessModelItemModalTitle");
+    const sectionNames = {
+      keyPartners: "Key Partners",
+      keyActivities: "Key Activities",
+      keyResources: "Key Resources",
+      valueProposition: "Value Proposition",
+      customerRelationships: "Customer Relationships",
+      channels: "Channels",
+      customerSegments: "Customer Segments",
+      costStructure: "Cost Structure",
+      revenueStreams: "Revenue Streams"
+    };
+    title.textContent = `Add ${sectionNames[section]}`;
+    document.getElementById("businessModelItemText").value = "";
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    document.getElementById("businessModelItemText").focus();
+  }
+
+  closeBusinessModelItemModal() {
+    const modal = document.getElementById("businessModelItemModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    this.businessModelSection = null;
+  }
+
+  async saveBusinessModelItem(e) {
+    e.preventDefault();
+    if (!this.selectedBusinessModelId || !this.businessModelSection) return;
+
+    const text = document.getElementById("businessModelItemText").value.trim();
+    if (!text) return;
+
+    const canvas = this.businessModelCanvases.find(c => c.id === this.selectedBusinessModelId);
+    if (!canvas) return;
+
+    canvas[this.businessModelSection].push(text);
+
+    try {
+      await fetch(`/api/business-model/${this.selectedBusinessModelId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(canvas),
+      });
+      this.closeBusinessModelItemModal();
+      this.renderBusinessModelView(canvas);
+    } catch (error) {
+      console.error("Error saving business model item:", error);
+    }
+  }
+
+  async removeBusinessModelItem(section, index) {
+    if (!this.selectedBusinessModelId) return;
+    const canvas = this.businessModelCanvases.find(c => c.id === this.selectedBusinessModelId);
+    if (!canvas) return;
+
+    canvas[section].splice(index, 1);
+
+    try {
+      await fetch(`/api/business-model/${this.selectedBusinessModelId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(canvas),
+      });
+      this.renderBusinessModelView(canvas);
+    } catch (error) {
+      console.error("Error removing business model item:", error);
+    }
+  }
+
+  // Project Value Board functionality
+  async loadProjectValueBoards() {
+    try {
+      const response = await fetch("/api/project-value-board");
+      this.projectValueBoards = await response.json();
+      this.renderProjectValueSelector();
+      if (this.projectValueBoards.length > 0 && !this.selectedProjectValueId) {
+        this.selectProjectValue(this.projectValueBoards[0].id);
+      } else if (this.selectedProjectValueId) {
+        this.selectProjectValue(this.selectedProjectValueId);
+      } else {
+        this.renderProjectValueView(null);
+      }
+    } catch (error) {
+      console.error("Error loading project value boards:", error);
+    }
+  }
+
+  renderProjectValueSelector() {
+    const selector = document.getElementById("projectValueSelector");
+    selector.innerHTML = '<option value="">Select Board</option>';
+    this.projectValueBoards.forEach(board => {
+      const option = document.createElement("option");
+      option.value = board.id;
+      option.textContent = `${board.title} (${board.date})`;
+      selector.appendChild(option);
+    });
+  }
+
+  selectProjectValue(boardId) {
+    this.selectedProjectValueId = boardId;
+    const selector = document.getElementById("projectValueSelector");
+    selector.value = boardId || "";
+
+    const board = this.projectValueBoards.find(b => b.id === boardId);
+    this.renderProjectValueView(board);
+
+    const editBtn = document.getElementById("editProjectValueBtn");
+    const deleteBtn = document.getElementById("deleteProjectValueBtn");
+    if (board) {
+      editBtn.classList.remove("hidden");
+      deleteBtn.classList.remove("hidden");
+    } else {
+      editBtn.classList.add("hidden");
+      deleteBtn.classList.add("hidden");
+    }
+  }
+
+  renderProjectValueView(board) {
+    const emptyState = document.getElementById("emptyProjectValueState");
+    const grid = document.getElementById("projectValueGrid");
+
+    if (!board) {
+      emptyState.classList.remove("hidden");
+      grid.classList.add("hidden");
+      return;
+    }
+
+    emptyState.classList.add("hidden");
+    grid.classList.remove("hidden");
+
+    const sections = [
+      { key: "customerSegments", el: "pvbCustomerSegments" },
+      { key: "problem", el: "pvbProblem" },
+      { key: "solution", el: "pvbSolution" },
+      { key: "benefit", el: "pvbBenefit" },
+    ];
+
+    sections.forEach(({ key, el }) => {
+      const ul = document.getElementById(el);
+      ul.innerHTML = (board[key] || []).map((item, idx) => `
+        <li class="flex justify-between items-start group">
+          <span class="break-words flex-1">${item}</span>
+          <button onclick="app.removeProjectValueItem('${key}', ${idx})" class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 ml-1 flex-shrink-0">
+            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </li>
+      `).join("");
+    });
+  }
+
+  openProjectValueModal(id = null) {
+    this.editingProjectValueId = id;
+    const modal = document.getElementById("projectValueModal");
+    const title = document.getElementById("projectValueModalTitle");
+    document.getElementById("projectValueTitle").value = "";
+    document.getElementById("projectValueDate").value = new Date().toISOString().split("T")[0];
+
+    if (id) {
+      title.textContent = "Edit Project Value Board";
+      const board = this.projectValueBoards.find(b => b.id === id);
+      if (board) {
+        document.getElementById("projectValueTitle").value = board.title;
+        document.getElementById("projectValueDate").value = board.date;
+      }
+    } else {
+      title.textContent = "New Project Value Board";
+    }
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    document.getElementById("projectValueTitle").focus();
+  }
+
+  closeProjectValueModal() {
+    const modal = document.getElementById("projectValueModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    this.editingProjectValueId = null;
+  }
+
+  async saveProjectValue(e) {
+    e.preventDefault();
+    const title = document.getElementById("projectValueTitle").value.trim();
+    const date = document.getElementById("projectValueDate").value;
+
+    if (!title) return;
+
+    try {
+      if (this.editingProjectValueId) {
+        const board = this.projectValueBoards.find(b => b.id === this.editingProjectValueId);
+        await fetch(`/api/project-value-board/${this.editingProjectValueId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...board, title, date }),
+        });
+      } else {
+        await fetch("/api/project-value-board", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, date }),
+        });
+      }
+      this.closeProjectValueModal();
+      await this.loadProjectValueBoards();
+    } catch (error) {
+      console.error("Error saving project value board:", error);
+    }
+  }
+
+  editSelectedProjectValue() {
+    if (this.selectedProjectValueId) {
+      this.openProjectValueModal(this.selectedProjectValueId);
+    }
+  }
+
+  async deleteSelectedProjectValue() {
+    if (!this.selectedProjectValueId) return;
+    if (!confirm("Delete this Project Value Board?")) return;
+    try {
+      await fetch(`/api/project-value-board/${this.selectedProjectValueId}`, { method: "DELETE" });
+      this.selectedProjectValueId = null;
+      await this.loadProjectValueBoards();
+    } catch (error) {
+      console.error("Error deleting project value board:", error);
+    }
+  }
+
+  openProjectValueItemModal(section) {
+    this.projectValueSection = section;
+    const modal = document.getElementById("projectValueItemModal");
+    const title = document.getElementById("projectValueItemModalTitle");
+    const sectionNames = {
+      customerSegments: "Customer Segments",
+      problem: "Problem",
+      solution: "Solution",
+      benefit: "Benefit"
+    };
+    title.textContent = `Add ${sectionNames[section]}`;
+    document.getElementById("projectValueItemText").value = "";
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    document.getElementById("projectValueItemText").focus();
+  }
+
+  closeProjectValueItemModal() {
+    const modal = document.getElementById("projectValueItemModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    this.projectValueSection = null;
+  }
+
+  async saveProjectValueItem(e) {
+    e.preventDefault();
+    if (!this.selectedProjectValueId || !this.projectValueSection) return;
+
+    const text = document.getElementById("projectValueItemText").value.trim();
+    if (!text) return;
+
+    const board = this.projectValueBoards.find(b => b.id === this.selectedProjectValueId);
+    if (!board) return;
+
+    board[this.projectValueSection].push(text);
+
+    try {
+      await fetch(`/api/project-value-board/${this.selectedProjectValueId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(board),
+      });
+      this.closeProjectValueItemModal();
+      this.renderProjectValueView(board);
+    } catch (error) {
+      console.error("Error saving project value item:", error);
+    }
+  }
+
+  async removeProjectValueItem(section, index) {
+    if (!this.selectedProjectValueId) return;
+    const board = this.projectValueBoards.find(b => b.id === this.selectedProjectValueId);
+    if (!board) return;
+
+    board[section].splice(index, 1);
+
+    try {
+      await fetch(`/api/project-value-board/${this.selectedProjectValueId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(board),
+      });
+      this.renderProjectValueView(board);
+    } catch (error) {
+      console.error("Error removing project value item:", error);
+    }
+  }
+
+  // Brief functionality
+  async loadBriefs() {
+    try {
+      const response = await fetch("/api/brief");
+      this.briefs = await response.json();
+      this.renderBriefSelector();
+      if (this.briefs.length > 0 && !this.selectedBriefId) {
+        this.selectBrief(this.briefs[0].id);
+      } else if (this.selectedBriefId) {
+        this.selectBrief(this.selectedBriefId);
+      }
+    } catch (error) {
+      console.error("Error loading briefs:", error);
+    }
+  }
+
+  renderBriefSelector() {
+    const selector = document.getElementById("briefSelector");
+    if (!selector) return;
+    selector.innerHTML = '<option value="">Select Brief</option>';
+    this.briefs.forEach(brief => {
+      const option = document.createElement("option");
+      option.value = brief.id;
+      option.textContent = `${brief.title} (${brief.date})`;
+      if (brief.id === this.selectedBriefId) option.selected = true;
+      selector.appendChild(option);
+    });
+  }
+
+  selectBrief(briefId) {
+    this.selectedBriefId = briefId;
+    const selector = document.getElementById("briefSelector");
+    if (selector) selector.value = briefId || "";
+
+    const brief = this.briefs.find(b => b.id === briefId);
+    const editBtn = document.getElementById("editBriefBtn");
+    const deleteBtn = document.getElementById("deleteBriefBtn");
+
+    if (brief) {
+      editBtn?.classList.remove("hidden");
+      deleteBtn?.classList.remove("hidden");
+      this.renderBriefGrid(brief);
+    } else {
+      editBtn?.classList.add("hidden");
+      deleteBtn?.classList.add("hidden");
+      document.getElementById("briefGrid")?.classList.add("hidden");
+      document.getElementById("emptyBriefState")?.classList.remove("hidden");
+    }
+  }
+
+  renderBriefGrid(brief) {
+    const grid = document.getElementById("briefGrid");
+    const emptyState = document.getElementById("emptyBriefState");
+
+    if (!brief) {
+      grid?.classList.add("hidden");
+      emptyState?.classList.remove("hidden");
+      return;
+    }
+
+    grid?.classList.remove("hidden");
+    emptyState?.classList.add("hidden");
+
+    const sectionMapping = {
+      summary: "briefSummary",
+      mission: "briefMission",
+      responsible: "briefResponsible",
+      accountable: "briefAccountable",
+      consulted: "briefConsulted",
+      informed: "briefInformed",
+      highLevelBudget: "briefBudget",
+      highLevelTimeline: "briefTimeline",
+      culture: "briefCulture",
+      changeCapacity: "briefChangeCapacity",
+      guidingPrinciples: "briefGuidingPrinciples",
+    };
+
+    for (const [key, elementId] of Object.entries(sectionMapping)) {
+      const ul = document.getElementById(elementId);
+      if (!ul) continue;
+      ul.innerHTML = "";
+      const items = brief[key] || [];
+      items.forEach((item, idx) => {
+        const li = document.createElement("li");
+        li.className = "group flex items-start gap-2 py-1";
+        li.innerHTML = `
+          <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">${this.escapeHtml(item)}</span>
+          <button onclick="app.removeBriefItem('${key}', ${idx})" class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 ml-1 flex-shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        `;
+        ul.appendChild(li);
+      });
+    }
+  }
+
+  openBriefModal(editId = null) {
+    this.editingBriefId = editId;
+    const modal = document.getElementById("briefModal");
+    const title = document.getElementById("briefModalTitle");
+    const titleInput = document.getElementById("briefTitle");
+    const dateInput = document.getElementById("briefDate");
+
+    if (editId) {
+      const brief = this.briefs.find(b => b.id === editId);
+      if (brief) {
+        title.textContent = "Edit Brief";
+        titleInput.value = brief.title;
+        dateInput.value = brief.date;
+      }
+    } else {
+      title.textContent = "New Brief";
+      titleInput.value = "";
+      dateInput.value = new Date().toISOString().split("T")[0];
+    }
+    modal?.classList.remove("hidden");
+  }
+
+  closeBriefModal() {
+    document.getElementById("briefModal")?.classList.add("hidden");
+    this.editingBriefId = null;
+  }
+
+  async saveBrief(e) {
+    e.preventDefault();
+    const title = document.getElementById("briefTitle").value.trim();
+    const date = document.getElementById("briefDate").value;
+
+    if (!title) return;
+
+    try {
+      if (this.editingBriefId) {
+        const brief = this.briefs.find(b => b.id === this.editingBriefId);
+        if (brief) {
+          brief.title = title;
+          brief.date = date;
+          await fetch(`/api/brief/${this.editingBriefId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(brief),
+          });
+        }
+      } else {
+        const response = await fetch("/api/brief", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, date }),
+        });
+        const newBrief = await response.json();
+        this.selectedBriefId = newBrief.id;
+      }
+      this.closeBriefModal();
+      await this.loadBriefs();
+    } catch (error) {
+      console.error("Error saving brief:", error);
+    }
+  }
+
+  editBrief() {
+    if (this.selectedBriefId) {
+      this.openBriefModal(this.selectedBriefId);
+    }
+  }
+
+  async deleteBrief() {
+    if (!this.selectedBriefId) return;
+    if (!confirm("Are you sure you want to delete this brief?")) return;
+    try {
+      await fetch(`/api/brief/${this.selectedBriefId}`, { method: "DELETE" });
+      this.selectedBriefId = null;
+      await this.loadBriefs();
+    } catch (error) {
+      console.error("Error deleting brief:", error);
+    }
+  }
+
+  openBriefItemModal(section) {
+    this.briefSection = section;
+    const modal = document.getElementById("briefItemModal");
+    const sectionTitle = document.getElementById("briefItemSectionTitle");
+    const input = document.getElementById("briefItemText");
+
+    const sectionNames = {
+      summary: "Summary",
+      mission: "Mission",
+      responsible: "Responsible",
+      accountable: "Accountable",
+      consulted: "Consulted",
+      informed: "Informed",
+      highLevelBudget: "High Level Budget",
+      highLevelTimeline: "High Level Timeline",
+      culture: "Culture",
+      changeCapacity: "Change Capacity",
+      guidingPrinciples: "Guiding Principles",
+    };
+
+    sectionTitle.textContent = sectionNames[section] || section;
+    input.value = "";
+    modal?.classList.remove("hidden");
+    input.focus();
+  }
+
+  closeBriefItemModal() {
+    document.getElementById("briefItemModal")?.classList.add("hidden");
+    this.briefSection = null;
+  }
+
+  async saveBriefItem(e) {
+    e.preventDefault();
+    if (!this.selectedBriefId || !this.briefSection) return;
+
+    const text = document.getElementById("briefItemText").value.trim();
+    if (!text) return;
+
+    const brief = this.briefs.find(b => b.id === this.selectedBriefId);
+    if (!brief) return;
+
+    brief[this.briefSection].push(text);
+
+    try {
+      await fetch(`/api/brief/${this.selectedBriefId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(brief),
+      });
+      this.closeBriefItemModal();
+      this.renderBriefGrid(brief);
+    } catch (error) {
+      console.error("Error saving brief item:", error);
+    }
+  }
+
+  async removeBriefItem(section, index) {
+    if (!this.selectedBriefId) return;
+    const brief = this.briefs.find(b => b.id === this.selectedBriefId);
+    if (!brief) return;
+
+    brief[section].splice(index, 1);
+
+    try {
+      await fetch(`/api/brief/${this.selectedBriefId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(brief),
+      });
+      this.renderBriefGrid(brief);
+    } catch (error) {
+      console.error("Error removing brief item:", error);
     }
   }
 

@@ -227,6 +227,79 @@ Date: 2026-02-12
 ### Low Impact / Low Probability
 
 
+<!-- Business Model Canvas -->
+# Business Model Canvas
+
+## Test
+<!-- id: fd1947c5 -->
+Date: 2026-02-12
+
+### Key Partners
+
+### Key Activities
+
+### Key Resources
+
+### Value Proposition
+
+### Customer Relationships
+
+### Channels
+
+### Customer Segments
+
+### Cost Structure
+
+### Revenue Streams
+
+
+<!-- Lean Canvas -->
+# Lean Canvas
+
+## Test
+<!-- id: 41c9fb81 -->
+Date: 2026-02-12
+
+### Problem
+
+### Solution
+
+### Unique Value Proposition
+
+### Unfair Advantage
+
+### Customer Segments
+
+### Existing Alternatives
+
+### Key Metrics
+
+### High-Level Concept
+
+### Channels
+
+### Early Adopters
+
+### Cost Structure
+
+### Revenue Streams
+
+
+<!-- Retrospectives -->
+# Retrospectives
+
+## Test
+<!-- id: 80d76c17 -->
+Date: 2026-02-12
+Status: open
+
+### Continue
+
+### Stop
+
+### Start
+
+
 # Board
 
 ## Todo

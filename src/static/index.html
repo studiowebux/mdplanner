@@ -1037,6 +1037,9 @@
                             <button id="swotViewBtn" data-view="swot" class="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">SWOT Analysis</button>
                             <button id="riskAnalysisViewBtn" data-view="riskAnalysis" class="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Risk Analysis</button>
                             <button id="leanCanvasViewBtn" data-view="leanCanvas" class="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Lean Canvas</button>
+                            <button id="businessModelViewBtn" data-view="businessModel" class="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Business Model</button>
+                            <button id="projectValueViewBtn" data-view="projectValue" class="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Value Board</button>
+                            <button id="briefViewBtn" data-view="brief" class="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Brief</button>
                             <button id="timeTrackingViewBtn" data-view="timeTracking" class="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Time Tracking</button>
                         </div>
                     </div>
@@ -1163,6 +1166,9 @@
                     <button id="swotViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">SWOT Analysis</button>
                     <button id="riskAnalysisViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Risk Analysis</button>
                     <button id="leanCanvasViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Lean Canvas</button>
+                    <button id="businessModelViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Business Model</button>
+                    <button id="projectValueViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Value Board</button>
+                    <button id="briefViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Brief</button>
                     <button id="timeTrackingViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Time Tracking</button>
                     <button id="configViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Settings</button>
                 </div>
@@ -1844,38 +1850,38 @@
                         <!-- High Probability Row -->
                         <div class="relative">
                             <span class="absolute -left-6 top-1/2 -translate-y-1/2 -rotate-90 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">High Prob</span>
-                            <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 border border-amber-200 dark:border-amber-800 h-full">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600 h-full">
                                 <div class="flex justify-between items-center mb-3">
-                                    <h3 class="font-medium text-amber-800 dark:text-amber-300 text-sm">Low Impact / High Probability</h3>
-                                    <button data-quadrant="lowImpactHighProb" class="risk-add-btn text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 text-sm">+ Add</button>
+                                    <h3 class="font-medium text-gray-700 dark:text-gray-300 text-sm">Low Impact / High Probability</h3>
+                                    <button data-quadrant="lowImpactHighProb" class="risk-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm">+ Add</button>
                                 </div>
-                                <ul id="riskLowImpactHighProb" class="space-y-2 text-sm text-amber-900 dark:text-amber-100"></ul>
+                                <ul id="riskLowImpactHighProb" class="space-y-2 text-sm text-gray-700 dark:text-gray-300"></ul>
                             </div>
                         </div>
-                        <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 border border-red-200 dark:border-red-800">
+                        <div class="bg-gray-100 dark:bg-gray-600/50 rounded-lg p-4 border-2 border-gray-300 dark:border-gray-500">
                             <div class="flex justify-between items-center mb-3">
-                                <h3 class="font-medium text-red-800 dark:text-red-300 text-sm">High Impact / High Probability</h3>
-                                <button data-quadrant="highImpactHighProb" class="risk-add-btn text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 text-sm">+ Add</button>
+                                <h3 class="font-medium text-gray-800 dark:text-gray-200 text-sm">High Impact / High Probability</h3>
+                                <button data-quadrant="highImpactHighProb" class="risk-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm">+ Add</button>
                             </div>
-                            <ul id="riskHighImpactHighProb" class="space-y-2 text-sm text-red-900 dark:text-red-100"></ul>
+                            <ul id="riskHighImpactHighProb" class="space-y-2 text-sm text-gray-800 dark:text-gray-200"></ul>
                         </div>
                         <!-- Low Probability Row -->
                         <div class="relative">
                             <span class="absolute -left-6 top-1/2 -translate-y-1/2 -rotate-90 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">Low Prob</span>
-                            <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800 h-full">
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 h-full">
                                 <div class="flex justify-between items-center mb-3">
-                                    <h3 class="font-medium text-green-800 dark:text-green-300 text-sm">Low Impact / Low Probability</h3>
-                                    <button data-quadrant="lowImpactLowProb" class="risk-add-btn text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200 text-sm">+ Add</button>
+                                    <h3 class="font-medium text-gray-600 dark:text-gray-400 text-sm">Low Impact / Low Probability</h3>
+                                    <button data-quadrant="lowImpactLowProb" class="risk-add-btn text-gray-500 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-300 text-sm">+ Add</button>
                                 </div>
-                                <ul id="riskLowImpactLowProb" class="space-y-2 text-sm text-green-900 dark:text-green-100"></ul>
+                                <ul id="riskLowImpactLowProb" class="space-y-2 text-sm text-gray-600 dark:text-gray-400"></ul>
                             </div>
                         </div>
-                        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
                             <div class="flex justify-between items-center mb-3">
-                                <h3 class="font-medium text-blue-800 dark:text-blue-300 text-sm">High Impact / Low Probability</h3>
-                                <button data-quadrant="highImpactLowProb" class="risk-add-btn text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 text-sm">+ Add</button>
+                                <h3 class="font-medium text-gray-700 dark:text-gray-300 text-sm">High Impact / Low Probability</h3>
+                                <button data-quadrant="highImpactLowProb" class="risk-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm">+ Add</button>
                             </div>
-                            <ul id="riskHighImpactLowProb" class="space-y-2 text-sm text-blue-900 dark:text-blue-100"></ul>
+                            <ul id="riskHighImpactLowProb" class="space-y-2 text-sm text-gray-700 dark:text-gray-300"></ul>
                         </div>
                     </div>
                 </div>
@@ -1955,95 +1961,95 @@
                     <div id="leanCanvasGrid" class="hidden">
                         <!-- Row 1: Problem, Solution, UVP, Unfair Advantage, Customer Segments -->
                         <div class="grid grid-cols-5 gap-2 mb-2">
-                            <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-3 border border-red-200 dark:border-red-800 min-h-[140px]">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[140px]">
                                 <div class="flex justify-between items-center mb-2">
-                                    <h3 class="font-medium text-red-800 dark:text-red-300 text-xs">Problem</h3>
-                                    <button data-section="problem" class="lean-add-btn text-red-600 dark:text-red-400 hover:text-red-800 text-xs">+</button>
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Problem</h3>
+                                    <button data-section="problem" class="lean-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
                                 </div>
-                                <ul id="leanProblem" class="space-y-1 text-xs text-red-900 dark:text-red-100"></ul>
+                                <ul id="leanProblem" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
                             </div>
-                            <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200 dark:border-green-800 min-h-[140px]">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[140px]">
                                 <div class="flex justify-between items-center mb-2">
-                                    <h3 class="font-medium text-green-800 dark:text-green-300 text-xs">Solution</h3>
-                                    <button data-section="solution" class="lean-add-btn text-green-600 dark:text-green-400 hover:text-green-800 text-xs">+</button>
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Solution</h3>
+                                    <button data-section="solution" class="lean-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
                                 </div>
-                                <ul id="leanSolution" class="space-y-1 text-xs text-green-900 dark:text-green-100"></ul>
+                                <ul id="leanSolution" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
                             </div>
-                            <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-800 min-h-[140px]">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[140px]">
                                 <div class="flex justify-between items-center mb-2">
-                                    <h3 class="font-medium text-purple-800 dark:text-purple-300 text-xs">Unique Value</h3>
-                                    <button data-section="uniqueValueProp" class="lean-add-btn text-purple-600 dark:text-purple-400 hover:text-purple-800 text-xs">+</button>
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Unique Value</h3>
+                                    <button data-section="uniqueValueProp" class="lean-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
                                 </div>
-                                <ul id="leanUniqueValueProp" class="space-y-1 text-xs text-purple-900 dark:text-purple-100"></ul>
+                                <ul id="leanUniqueValueProp" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
                             </div>
-                            <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-3 border border-indigo-200 dark:border-indigo-800 min-h-[140px]">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[140px]">
                                 <div class="flex justify-between items-center mb-2">
-                                    <h3 class="font-medium text-indigo-800 dark:text-indigo-300 text-xs">Unfair Advantage</h3>
-                                    <button data-section="unfairAdvantage" class="lean-add-btn text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 text-xs">+</button>
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Unfair Advantage</h3>
+                                    <button data-section="unfairAdvantage" class="lean-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
                                 </div>
-                                <ul id="leanUnfairAdvantage" class="space-y-1 text-xs text-indigo-900 dark:text-indigo-100"></ul>
+                                <ul id="leanUnfairAdvantage" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
                             </div>
-                            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800 min-h-[140px]">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[140px]">
                                 <div class="flex justify-between items-center mb-2">
-                                    <h3 class="font-medium text-blue-800 dark:text-blue-300 text-xs">Customer Segments</h3>
-                                    <button data-section="customerSegments" class="lean-add-btn text-blue-600 dark:text-blue-400 hover:text-blue-800 text-xs">+</button>
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Customer Segments</h3>
+                                    <button data-section="customerSegments" class="lean-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
                                 </div>
-                                <ul id="leanCustomerSegments" class="space-y-1 text-xs text-blue-900 dark:text-blue-100"></ul>
+                                <ul id="leanCustomerSegments" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
                             </div>
                         </div>
                         <!-- Row 2: Existing Alternatives, Key Metrics, High-Level Concept, Channels, Early Adopters -->
                         <div class="grid grid-cols-5 gap-2 mb-2">
-                            <div class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-200 dark:border-orange-800 min-h-[140px]">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[140px]">
                                 <div class="flex justify-between items-center mb-2">
-                                    <h3 class="font-medium text-orange-800 dark:text-orange-300 text-xs">Existing Alternatives</h3>
-                                    <button data-section="existingAlternatives" class="lean-add-btn text-orange-600 dark:text-orange-400 hover:text-orange-800 text-xs">+</button>
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Existing Alternatives</h3>
+                                    <button data-section="existingAlternatives" class="lean-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
                                 </div>
-                                <ul id="leanExistingAlternatives" class="space-y-1 text-xs text-orange-900 dark:text-orange-100"></ul>
+                                <ul id="leanExistingAlternatives" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
                             </div>
-                            <div class="bg-teal-50 dark:bg-teal-900/20 rounded-lg p-3 border border-teal-200 dark:border-teal-800 min-h-[140px]">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[140px]">
                                 <div class="flex justify-between items-center mb-2">
-                                    <h3 class="font-medium text-teal-800 dark:text-teal-300 text-xs">Key Metrics</h3>
-                                    <button data-section="keyMetrics" class="lean-add-btn text-teal-600 dark:text-teal-400 hover:text-teal-800 text-xs">+</button>
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Key Metrics</h3>
+                                    <button data-section="keyMetrics" class="lean-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
                                 </div>
-                                <ul id="leanKeyMetrics" class="space-y-1 text-xs text-teal-900 dark:text-teal-100"></ul>
+                                <ul id="leanKeyMetrics" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
                             </div>
-                            <div class="bg-pink-50 dark:bg-pink-900/20 rounded-lg p-3 border border-pink-200 dark:border-pink-800 min-h-[140px]">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[140px]">
                                 <div class="flex justify-between items-center mb-2">
-                                    <h3 class="font-medium text-pink-800 dark:text-pink-300 text-xs">High-Level Concept</h3>
-                                    <button data-section="highLevelConcept" class="lean-add-btn text-pink-600 dark:text-pink-400 hover:text-pink-800 text-xs">+</button>
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">High-Level Concept</h3>
+                                    <button data-section="highLevelConcept" class="lean-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
                                 </div>
-                                <ul id="leanHighLevelConcept" class="space-y-1 text-xs text-pink-900 dark:text-pink-100"></ul>
+                                <ul id="leanHighLevelConcept" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
                             </div>
-                            <div class="bg-cyan-50 dark:bg-cyan-900/20 rounded-lg p-3 border border-cyan-200 dark:border-cyan-800 min-h-[140px]">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[140px]">
                                 <div class="flex justify-between items-center mb-2">
-                                    <h3 class="font-medium text-cyan-800 dark:text-cyan-300 text-xs">Channels</h3>
-                                    <button data-section="channels" class="lean-add-btn text-cyan-600 dark:text-cyan-400 hover:text-cyan-800 text-xs">+</button>
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Channels</h3>
+                                    <button data-section="channels" class="lean-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
                                 </div>
-                                <ul id="leanChannels" class="space-y-1 text-xs text-cyan-900 dark:text-cyan-100"></ul>
+                                <ul id="leanChannels" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
                             </div>
-                            <div class="bg-sky-50 dark:bg-sky-900/20 rounded-lg p-3 border border-sky-200 dark:border-sky-800 min-h-[140px]">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[140px]">
                                 <div class="flex justify-between items-center mb-2">
-                                    <h3 class="font-medium text-sky-800 dark:text-sky-300 text-xs">Early Adopters</h3>
-                                    <button data-section="earlyAdopters" class="lean-add-btn text-sky-600 dark:text-sky-400 hover:text-sky-800 text-xs">+</button>
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Early Adopters</h3>
+                                    <button data-section="earlyAdopters" class="lean-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
                                 </div>
-                                <ul id="leanEarlyAdopters" class="space-y-1 text-xs text-sky-900 dark:text-sky-100"></ul>
+                                <ul id="leanEarlyAdopters" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
                             </div>
                         </div>
-                        <!-- Row 3: Cost Structure, Revenue Streams (span full width) -->
+                        <!-- Row 3: Cost Structure, Revenue Streams -->
                         <div class="grid grid-cols-2 gap-2">
-                            <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3 border border-amber-200 dark:border-amber-800 min-h-[100px]">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[100px]">
                                 <div class="flex justify-between items-center mb-2">
-                                    <h3 class="font-medium text-amber-800 dark:text-amber-300 text-xs">Cost Structure</h3>
-                                    <button data-section="costStructure" class="lean-add-btn text-amber-600 dark:text-amber-400 hover:text-amber-800 text-xs">+</button>
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Cost Structure</h3>
+                                    <button data-section="costStructure" class="lean-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
                                 </div>
-                                <ul id="leanCostStructure" class="space-y-1 text-xs text-amber-900 dark:text-amber-100"></ul>
+                                <ul id="leanCostStructure" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
                             </div>
-                            <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3 border border-emerald-200 dark:border-emerald-800 min-h-[100px]">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[100px]">
                                 <div class="flex justify-between items-center mb-2">
-                                    <h3 class="font-medium text-emerald-800 dark:text-emerald-300 text-xs">Revenue Streams</h3>
-                                    <button data-section="revenueStreams" class="lean-add-btn text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 text-xs">+</button>
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Revenue Streams</h3>
+                                    <button data-section="revenueStreams" class="lean-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
                                 </div>
-                                <ul id="leanRevenueStreams" class="space-y-1 text-xs text-emerald-900 dark:text-emerald-100"></ul>
+                                <ul id="leanRevenueStreams" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
                             </div>
                         </div>
                     </div>
@@ -2091,6 +2097,431 @@
                     </div>
                     <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                         <button type="button" id="cancelLeanCanvasItemBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
+                        <button type="submit" class="btn-primary py-2 rounded-md">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Business Model Canvas View -->
+        <div id="businessModelView" class="hidden pb-16">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Business Model Canvas</h2>
+                        <select id="businessModelSelector" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                            <option value="">Select Canvas</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="editBusinessModelBtn" class="btn-secondary py-1.5 rounded hidden">Edit</button>
+                        <button id="deleteBusinessModelBtn" class="btn-danger py-1.5 rounded hidden">Delete</button>
+                        <button id="addBusinessModelBtn" class="btn-primary py-2 rounded-lg">+ New Canvas</button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div id="emptyBusinessModelState" class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No Business Model Canvas yet</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Create a Business Model Canvas to map your business.</p>
+                    </div>
+                    <div id="businessModelGrid" class="hidden">
+                        <!-- Row 1: Key Partners, Key Activities, Value Proposition, Customer Relationships, Customer Segments -->
+                        <div class="grid grid-cols-5 gap-2 mb-2">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[120px]">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Key Partners</h3>
+                                    <button data-section="keyPartners" class="bmc-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
+                                </div>
+                                <ul id="bmcKeyPartners" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[120px]">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Key Activities</h3>
+                                    <button data-section="keyActivities" class="bmc-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
+                                </div>
+                                <ul id="bmcKeyActivities" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[120px]">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Value Proposition</h3>
+                                    <button data-section="valueProposition" class="bmc-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
+                                </div>
+                                <ul id="bmcValueProposition" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[120px]">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Customer Relationships</h3>
+                                    <button data-section="customerRelationships" class="bmc-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
+                                </div>
+                                <ul id="bmcCustomerRelationships" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[120px]">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Customer Segments</h3>
+                                    <button data-section="customerSegments" class="bmc-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
+                                </div>
+                                <ul id="bmcCustomerSegments" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                        </div>
+                        <!-- Row 2: Key Resources, Channels -->
+                        <div class="grid grid-cols-5 gap-2 mb-2">
+                            <div class="col-span-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[100px]">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Key Resources</h3>
+                                    <button data-section="keyResources" class="bmc-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
+                                </div>
+                                <ul id="bmcKeyResources" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[100px]"></div>
+                            <div class="col-span-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[100px]">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Channels</h3>
+                                    <button data-section="channels" class="bmc-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
+                                </div>
+                                <ul id="bmcChannels" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                        </div>
+                        <!-- Row 3: Cost Structure, Revenue Streams -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[100px]">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Cost Structure</h3>
+                                    <button data-section="costStructure" class="bmc-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
+                                </div>
+                                <ul id="bmcCostStructure" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 min-h-[100px]">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-xs">Revenue Streams</h3>
+                                    <button data-section="revenueStreams" class="bmc-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-xs">+</button>
+                                </div>
+                                <ul id="bmcRevenueStreams" class="space-y-1 text-xs text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Model Canvas Modal -->
+        <div id="businessModelModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 id="businessModelModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">New Business Model Canvas</h3>
+                </div>
+                <form id="businessModelForm">
+                    <div class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                            <input type="text" id="businessModelTitle" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="e.g., SaaS Business Model">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                            <input type="date" id="businessModelDate" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <button type="button" id="cancelBusinessModelBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
+                        <button type="submit" class="btn-primary py-2 rounded-md">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Business Model Canvas Item Modal -->
+        <div id="businessModelItemModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 id="businessModelItemModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Add Item</h3>
+                </div>
+                <form id="businessModelItemForm">
+                    <div class="p-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Item</label>
+                            <input type="text" id="businessModelItemText" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="Enter item...">
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <button type="button" id="cancelBusinessModelItemBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
+                        <button type="submit" class="btn-primary py-2 rounded-md">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Project Value Board View -->
+        <div id="projectValueView" class="hidden pb-16">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Project Value Board</h2>
+                        <select id="projectValueSelector" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                            <option value="">Select Board</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="editProjectValueBtn" class="btn-secondary py-1.5 rounded hidden">Edit</button>
+                        <button id="deleteProjectValueBtn" class="btn-danger py-1.5 rounded hidden">Delete</button>
+                        <button id="addProjectValueBtn" class="btn-primary py-2 rounded-lg">+ New Board</button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div id="emptyProjectValueState" class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No Project Value Board yet</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Create a board to map customer value.</p>
+                    </div>
+                    <div id="projectValueGrid" class="hidden">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600 min-h-[180px]">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-sm">Customer Segments</h3>
+                                    <button data-section="customerSegments" class="pvb-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm">+</button>
+                                </div>
+                                <ul id="pvbCustomerSegments" class="space-y-2 text-sm text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600 min-h-[180px]">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-sm">Problem</h3>
+                                    <button data-section="problem" class="pvb-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm">+</button>
+                                </div>
+                                <ul id="pvbProblem" class="space-y-2 text-sm text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600 min-h-[180px]">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-sm">Solution</h3>
+                                    <button data-section="solution" class="pvb-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm">+</button>
+                                </div>
+                                <ul id="pvbSolution" class="space-y-2 text-sm text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600 min-h-[180px]">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-sm">Benefit</h3>
+                                    <button data-section="benefit" class="pvb-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm">+</button>
+                                </div>
+                                <ul id="pvbBenefit" class="space-y-2 text-sm text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Value Board Modal -->
+        <div id="projectValueModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 id="projectValueModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">New Project Value Board</h3>
+                </div>
+                <form id="projectValueForm">
+                    <div class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                            <input type="text" id="projectValueTitle" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="e.g., Product Value Analysis">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                            <input type="date" id="projectValueDate" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <button type="button" id="cancelProjectValueBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
+                        <button type="submit" class="btn-primary py-2 rounded-md">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Project Value Board Item Modal -->
+        <div id="projectValueItemModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 id="projectValueItemModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Add Item</h3>
+                </div>
+                <form id="projectValueItemForm">
+                    <div class="p-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Item</label>
+                            <input type="text" id="projectValueItemText" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="Enter item...">
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <button type="button" id="cancelProjectValueItemBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
+                        <button type="submit" class="btn-primary py-2 rounded-md">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Brief View -->
+        <div id="briefView" class="hidden pb-16">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Brief</h2>
+                        <select id="briefSelector" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                            <option value="">Select Brief</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="editBriefBtn" class="btn-secondary py-1.5 rounded hidden">Edit</button>
+                        <button id="deleteBriefBtn" class="btn-danger py-1.5 rounded hidden">Delete</button>
+                        <button id="addBriefBtn" class="btn-primary py-2 rounded-lg">+ New Brief</button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div id="emptyBriefState" class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No Brief yet</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Create a brief to document project scope and RACI.</p>
+                    </div>
+                    <div id="briefGrid" class="hidden space-y-6">
+                        <!-- Row 1: Summary -->
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="font-medium text-gray-800 dark:text-gray-200 text-sm">Summary</h3>
+                                <button data-section="summary" class="brief-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm">+</button>
+                            </div>
+                            <ul id="briefSummary" class="space-y-2 text-sm text-gray-700 dark:text-gray-300"></ul>
+                        </div>
+
+                        <!-- Row 2: Mission -->
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="font-medium text-gray-800 dark:text-gray-200 text-sm">Mission</h3>
+                                <button data-section="mission" class="brief-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm">+</button>
+                            </div>
+                            <ul id="briefMission" class="space-y-2 text-sm text-gray-700 dark:text-gray-300"></ul>
+                        </div>
+
+                        <!-- Row 3: RACI -->
+                        <div class="grid grid-cols-4 gap-4">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600 min-h-[140px]">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-sm">Responsible</h3>
+                                    <button data-section="responsible" class="brief-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm">+</button>
+                                </div>
+                                <ul id="briefResponsible" class="space-y-2 text-sm text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600 min-h-[140px]">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-sm">Accountable</h3>
+                                    <button data-section="accountable" class="brief-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm">+</button>
+                                </div>
+                                <ul id="briefAccountable" class="space-y-2 text-sm text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600 min-h-[140px]">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-sm">Consulted</h3>
+                                    <button data-section="consulted" class="brief-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm">+</button>
+                                </div>
+                                <ul id="briefConsulted" class="space-y-2 text-sm text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600 min-h-[140px]">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-sm">Informed</h3>
+                                    <button data-section="informed" class="brief-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm">+</button>
+                                </div>
+                                <ul id="briefInformed" class="space-y-2 text-sm text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                        </div>
+
+                        <!-- Row 4: Budget & Timeline -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600 min-h-[140px]">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-sm">High Level Budget</h3>
+                                    <button data-section="highLevelBudget" class="brief-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm">+</button>
+                                </div>
+                                <ul id="briefBudget" class="space-y-2 text-sm text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600 min-h-[140px]">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-sm">High Level Timeline</h3>
+                                    <button data-section="highLevelTimeline" class="brief-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm">+</button>
+                                </div>
+                                <ul id="briefTimeline" class="space-y-2 text-sm text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                        </div>
+
+                        <!-- Row 5: Culture & Change Capacity -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600 min-h-[140px]">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-sm">Culture</h3>
+                                    <button data-section="culture" class="brief-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm">+</button>
+                                </div>
+                                <ul id="briefCulture" class="space-y-2 text-sm text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600 min-h-[140px]">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-medium text-gray-800 dark:text-gray-200 text-sm">Change Capacity</h3>
+                                    <button data-section="changeCapacity" class="brief-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm">+</button>
+                                </div>
+                                <ul id="briefChangeCapacity" class="space-y-2 text-sm text-gray-700 dark:text-gray-300"></ul>
+                            </div>
+                        </div>
+
+                        <!-- Row 6: Guiding Principles -->
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="font-medium text-gray-800 dark:text-gray-200 text-sm">Guiding Principles</h3>
+                                <button data-section="guidingPrinciples" class="brief-add-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm">+</button>
+                            </div>
+                            <ul id="briefGuidingPrinciples" class="space-y-2 text-sm text-gray-700 dark:text-gray-300"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Brief Modal -->
+        <div id="briefModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 id="briefModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">New Brief</h3>
+                </div>
+                <form id="briefForm">
+                    <div class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                            <input type="text" id="briefTitle" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="e.g., Q1 Project Brief">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                            <input type="date" id="briefDate" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <button type="button" id="cancelBriefBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
+                        <button type="submit" class="btn-primary py-2 rounded-md">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Brief Item Modal -->
+        <div id="briefItemModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Add to <span id="briefItemSectionTitle"></span></h3>
+                </div>
+                <form id="briefItemForm">
+                    <div class="p-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Item</label>
+                            <input type="text" id="briefItemText" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="Enter item...">
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <button type="button" id="cancelBriefItemBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
                         <button type="submit" class="btn-primary py-2 rounded-md">Add</button>
                     </div>
                 </form>

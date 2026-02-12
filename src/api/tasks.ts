@@ -379,6 +379,156 @@ export class TaskAPI {
         return new Response(JSON.stringify({ success: true }), { headers });
       }
 
+      // GET /api/business-model
+      if (method === "GET" && pathParts.length === 2 && pathParts[1] === "business-model") {
+        const canvases = await this.parser.readBusinessModelCanvases();
+        return new Response(JSON.stringify(canvases), { headers });
+      }
+
+      // POST /api/business-model
+      if (method === "POST" && pathParts.length === 2 && pathParts[1] === "business-model") {
+        const body = await req.json();
+        const canvases = await this.parser.readBusinessModelCanvases();
+        const newCanvas = {
+          id: crypto.randomUUID().substring(0, 8),
+          title: body.title,
+          date: body.date || new Date().toISOString().split("T")[0],
+          keyPartners: body.keyPartners || [],
+          keyActivities: body.keyActivities || [],
+          keyResources: body.keyResources || [],
+          valueProposition: body.valueProposition || [],
+          customerRelationships: body.customerRelationships || [],
+          channels: body.channels || [],
+          customerSegments: body.customerSegments || [],
+          costStructure: body.costStructure || [],
+          revenueStreams: body.revenueStreams || [],
+        };
+        canvases.push(newCanvas);
+        await this.parser.saveBusinessModelCanvases(canvases);
+        return new Response(JSON.stringify(newCanvas), { status: 201, headers });
+      }
+
+      // PUT /api/business-model/:id
+      if (method === "PUT" && pathParts.length === 3 && pathParts[1] === "business-model") {
+        const id = pathParts[2];
+        const body = await req.json();
+        const canvases = await this.parser.readBusinessModelCanvases();
+        const index = canvases.findIndex(c => c.id === id);
+        if (index === -1) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        canvases[index] = { ...canvases[index], ...body };
+        await this.parser.saveBusinessModelCanvases(canvases);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // DELETE /api/business-model/:id
+      if (method === "DELETE" && pathParts.length === 3 && pathParts[1] === "business-model") {
+        const id = pathParts[2];
+        const canvases = await this.parser.readBusinessModelCanvases();
+        const filtered = canvases.filter(c => c.id !== id);
+        if (filtered.length === canvases.length) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        await this.parser.saveBusinessModelCanvases(filtered);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // GET /api/project-value-board - get all project value boards
+      if (method === "GET" && pathParts.length === 2 && pathParts[1] === "project-value-board") {
+        const boards = await this.parser.readProjectValueBoards();
+        return new Response(JSON.stringify(boards), { headers });
+      }
+
+      // POST /api/project-value-board - create new project value board
+      if (method === "POST" && pathParts.length === 2 && pathParts[1] === "project-value-board") {
+        const boards = await this.parser.readProjectValueBoards();
+        const body = await req.json();
+        const newBoard = {
+          id: crypto.randomUUID(),
+          title: body.title || "New Board",
+          date: body.date || new Date().toISOString().split("T")[0],
+          customerSegments: body.customerSegments || [],
+          problem: body.problem || [],
+          solution: body.solution || [],
+          benefit: body.benefit || [],
+        };
+        boards.push(newBoard);
+        await this.parser.saveProjectValueBoards(boards);
+        return new Response(JSON.stringify(newBoard), { status: 201, headers });
+      }
+
+      // PUT /api/project-value-board/:id - update project value board
+      if (method === "PUT" && pathParts.length === 3 && pathParts[1] === "project-value-board") {
+        const id = pathParts[2];
+        const boards = await this.parser.readProjectValueBoards();
+        const index = boards.findIndex(b => b.id === id);
+        if (index === -1) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        const body = await req.json();
+        boards[index] = { ...boards[index], ...body };
+        await this.parser.saveProjectValueBoards(boards);
+        return new Response(JSON.stringify(boards[index]), { headers });
+      }
+
+      // DELETE /api/project-value-board/:id - delete project value board
+      if (method === "DELETE" && pathParts.length === 3 && pathParts[1] === "project-value-board") {
+        const id = pathParts[2];
+        const boards = await this.parser.readProjectValueBoards();
+        const filtered = boards.filter(b => b.id !== id);
+        if (filtered.length === boards.length) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        await this.parser.saveProjectValueBoards(filtered);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // GET /api/brief - get all briefs
+      if (method === "GET" && pathParts.length === 2 && pathParts[1] === "brief") {
+        const briefs = await this.parser.readBriefs();
+        return new Response(JSON.stringify(briefs), { headers });
+      }
+
+      // POST /api/brief - create new brief
+      if (method === "POST" && pathParts.length === 2 && pathParts[1] === "brief") {
+        const briefs = await this.parser.readBriefs();
+        const body = await req.json();
+        const newBrief = {
+          id: crypto.randomUUID().substring(0, 8),
+          title: body.title || "New Brief",
+          date: body.date || new Date().toISOString().split("T")[0],
+          summary: body.summary || [],
+          mission: body.mission || [],
+          responsible: body.responsible || [],
+          accountable: body.accountable || [],
+          consulted: body.consulted || [],
+          informed: body.informed || [],
+          highLevelBudget: body.highLevelBudget || [],
+          highLevelTimeline: body.highLevelTimeline || [],
+          culture: body.culture || [],
+          changeCapacity: body.changeCapacity || [],
+          guidingPrinciples: body.guidingPrinciples || [],
+        };
+        briefs.push(newBrief);
+        await this.parser.saveBriefs(briefs);
+        return new Response(JSON.stringify(newBrief), { status: 201, headers });
+      }
+
+      // PUT /api/brief/:id - update brief
+      if (method === "PUT" && pathParts.length === 3 && pathParts[1] === "brief") {
+        const id = pathParts[2];
+        const briefs = await this.parser.readBriefs();
+        const index = briefs.findIndex(b => b.id === id);
+        if (index === -1) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        const body = await req.json();
+        briefs[index] = { ...briefs[index], ...body };
+        await this.parser.saveBriefs(briefs);
+        return new Response(JSON.stringify(briefs[index]), { headers });
+      }
+
+      // DELETE /api/brief/:id - delete brief
+      if (method === "DELETE" && pathParts.length === 3 && pathParts[1] === "brief") {
+        const id = pathParts[2];
+        const briefs = await this.parser.readBriefs();
+        const filtered = briefs.filter(b => b.id !== id);
+        if (filtered.length === briefs.length) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        await this.parser.saveBriefs(filtered);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
       // GET /api/time-entries - get all time entries
       if (method === "GET" && pathParts.length === 2 && pathParts[1] === "time-entries") {
         const timeEntries = await this.parser.readTimeEntries();
