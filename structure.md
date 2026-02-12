@@ -180,6 +180,36 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 <!-- id: c4_component_5 -->
 
 
+<!-- SWOT Analysis -->
+# SWOT Analysis
+
+## MD Planner Product
+<!-- id: swot_001 -->
+Date: 2026-02-12
+
+### Strengths
+- Single markdown file storage
+- No database required
+- Human-readable data format
+- Lightweight and portable
+- Full offline capability
+
+### Weaknesses
+- Limited concurrent user support
+- No real-time collaboration
+- File-based storage limits scalability
+
+### Opportunities
+- Obsidian plugin integration
+- SQLite backend option
+- Team collaboration features
+- Mobile app development
+
+### Threats
+- Established competitors (Notion, Linear)
+- Users preferring cloud-based solutions
+- Markdown format limitations for complex data
+
 <!-- Board -->
 # Board
 

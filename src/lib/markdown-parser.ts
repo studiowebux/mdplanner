@@ -11,6 +11,7 @@ import {
   ProjectLink,
   Retrospective,
   StickyNote,
+  SwotAnalysis,
   Task,
   TaskConfig,
   TimeEntry,
@@ -2953,5 +2954,134 @@ export class MarkdownParser {
   async getTimeEntriesForTask(taskId: string): Promise<TimeEntry[]> {
     const timeEntries = await this.readTimeEntries();
     return timeEntries.get(taskId) || [];
+  }
+
+  async readSwotAnalyses(): Promise<SwotAnalysis[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const swotAnalyses: SwotAnalysis[] = [];
+
+    let inSwotSection = false;
+    let currentSwot: Partial<SwotAnalysis> | null = null;
+    let currentSubsection: "strengths" | "weaknesses" | "opportunities" | "threats" | null = null;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      if (line.startsWith("# SWOT Analysis") || line.includes("<!-- SWOT Analysis -->")) {
+        inSwotSection = true;
+        continue;
+      }
+
+      if (inSwotSection && line.startsWith("# ") && !line.startsWith("# SWOT Analysis")) {
+        if (currentSwot?.title) swotAnalyses.push(currentSwot as SwotAnalysis);
+        currentSwot = null;
+        break;
+      }
+
+      if (!inSwotSection) continue;
+
+      if (line.startsWith("## ")) {
+        if (currentSwot?.title) swotAnalyses.push(currentSwot as SwotAnalysis);
+        const title = line.substring(3).trim();
+        currentSwot = {
+          id: crypto.randomUUID().substring(0, 8),
+          title,
+          date: new Date().toISOString().split("T")[0],
+          strengths: [],
+          weaknesses: [],
+          opportunities: [],
+          threats: [],
+        };
+        currentSubsection = null;
+      } else if (currentSwot) {
+        if (line.startsWith("Date:")) {
+          currentSwot.date = line.substring(5).trim();
+        } else if (line.startsWith("<!-- id:")) {
+          const match = line.match(/<!-- id: ([^ ]+)/);
+          if (match) currentSwot.id = match[1];
+        } else if (line.startsWith("### Strengths")) {
+          currentSubsection = "strengths";
+        } else if (line.startsWith("### Weaknesses")) {
+          currentSubsection = "weaknesses";
+        } else if (line.startsWith("### Opportunities")) {
+          currentSubsection = "opportunities";
+        } else if (line.startsWith("### Threats")) {
+          currentSubsection = "threats";
+        } else if (line.trim().startsWith("- ") && currentSubsection) {
+          const item = line.trim().substring(2).trim();
+          if (item) {
+            currentSwot[currentSubsection]!.push(item);
+          }
+        }
+      }
+    }
+
+    if (currentSwot?.title) swotAnalyses.push(currentSwot as SwotAnalysis);
+    return swotAnalyses;
+  }
+
+  async saveSwotAnalyses(swotAnalyses: SwotAnalysis[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    let startIndex = -1;
+    let endIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (startIndex === -1 && (lines[i].includes("<!-- SWOT Analysis -->") || lines[i].startsWith("# SWOT Analysis"))) {
+        startIndex = i;
+      } else if (startIndex !== -1 && lines[i].startsWith("# ") && !lines[i].startsWith("# SWOT Analysis")) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    let swotContent = "<!-- SWOT Analysis -->\n# SWOT Analysis\n\n";
+    for (const swot of swotAnalyses) {
+      swotContent += `## ${swot.title}\n`;
+      swotContent += `<!-- id: ${swot.id} -->\n`;
+      swotContent += `Date: ${swot.date}\n\n`;
+
+      swotContent += `### Strengths\n`;
+      for (const item of swot.strengths) {
+        swotContent += `- ${item}\n`;
+      }
+      swotContent += `\n`;
+
+      swotContent += `### Weaknesses\n`;
+      for (const item of swot.weaknesses) {
+        swotContent += `- ${item}\n`;
+      }
+      swotContent += `\n`;
+
+      swotContent += `### Opportunities\n`;
+      for (const item of swot.opportunities) {
+        swotContent += `- ${item}\n`;
+      }
+      swotContent += `\n`;
+
+      swotContent += `### Threats\n`;
+      for (const item of swot.threats) {
+        swotContent += `- ${item}\n`;
+      }
+      swotContent += `\n`;
+    }
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.startsWith("# Board"));
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, swotContent);
+      } else {
+        lines.push(swotContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, swotContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
   }
 }

@@ -164,3 +164,13 @@ export interface Retrospective {
   stop: string[];
   start: string[];
 }
+
+export interface SwotAnalysis {
+  id: string;
+  title: string;
+  date: string;
+  strengths: string[];
+  weaknesses: string[];
+  opportunities: string[];
+  threats: string[];
+}

@@ -233,6 +233,52 @@ export class TaskAPI {
         return new Response(JSON.stringify({ success: true }), { headers });
       }
 
+      // GET /api/swot
+      if (method === "GET" && pathParts.length === 2 && pathParts[1] === "swot") {
+        const swotAnalyses = await this.parser.readSwotAnalyses();
+        return new Response(JSON.stringify(swotAnalyses), { headers });
+      }
+
+      // POST /api/swot
+      if (method === "POST" && pathParts.length === 2 && pathParts[1] === "swot") {
+        const body = await req.json();
+        const swotAnalyses = await this.parser.readSwotAnalyses();
+        const id = crypto.randomUUID().substring(0, 8);
+        swotAnalyses.push({
+          id,
+          title: body.title,
+          date: body.date || new Date().toISOString().split("T")[0],
+          strengths: body.strengths || [],
+          weaknesses: body.weaknesses || [],
+          opportunities: body.opportunities || [],
+          threats: body.threats || [],
+        });
+        await this.parser.saveSwotAnalyses(swotAnalyses);
+        return new Response(JSON.stringify({ success: true, id }), { status: 201, headers });
+      }
+
+      // PUT /api/swot/:id
+      if (method === "PUT" && pathParts.length === 3 && pathParts[1] === "swot") {
+        const id = pathParts[2];
+        const body = await req.json();
+        const swotAnalyses = await this.parser.readSwotAnalyses();
+        const index = swotAnalyses.findIndex(s => s.id === id);
+        if (index === -1) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        swotAnalyses[index] = { ...swotAnalyses[index], ...body };
+        await this.parser.saveSwotAnalyses(swotAnalyses);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // DELETE /api/swot/:id
+      if (method === "DELETE" && pathParts.length === 3 && pathParts[1] === "swot") {
+        const id = pathParts[2];
+        const swotAnalyses = await this.parser.readSwotAnalyses();
+        const filtered = swotAnalyses.filter(s => s.id !== id);
+        if (filtered.length === swotAnalyses.length) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        await this.parser.saveSwotAnalyses(filtered);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
       // GET /api/time-entries - get all time entries
       if (method === "GET" && pathParts.length === 2 && pathParts[1] === "time-entries") {
         const timeEntries = await this.parser.readTimeEntries();

@@ -67,6 +67,10 @@ class TaskManager {
     this.notesLoaded = false;
     this.retrospectives = [];
     this.editingRetrospectiveId = null;
+    this.swotAnalyses = [];
+    this.selectedSwotId = null;
+    this.editingSwotId = null;
+    this.swotItemQuadrant = null;
     this.timeEntries = {};
     this.c4Components = [];
     this.c4Zoom = 1;
@@ -349,6 +353,12 @@ class TaskManager {
       .getElementById("retrospectivesViewBtnMobile")
       ?.addEventListener("click", () => {
         this.switchView("retrospectives");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("swotViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("swot");
         this.closeMobileMenu();
       });
     document
@@ -723,6 +733,41 @@ class TaskManager {
       .getElementById("retrospectiveForm")
       .addEventListener("submit", (e) => this.saveRetrospective(e));
 
+    // SWOT Analysis events
+    document
+      .getElementById("swotViewBtn")
+      .addEventListener("click", () => {
+        this.switchView("swot");
+        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+      });
+    document
+      .getElementById("addSwotBtn")
+      .addEventListener("click", () => this.openSwotModal());
+    document
+      .getElementById("cancelSwotBtn")
+      .addEventListener("click", () => this.closeSwotModal());
+    document
+      .getElementById("swotForm")
+      .addEventListener("submit", (e) => this.saveSwot(e));
+    document
+      .getElementById("swotSelector")
+      .addEventListener("change", (e) => this.selectSwot(e.target.value));
+    document
+      .getElementById("editSwotBtn")
+      .addEventListener("click", () => this.editSelectedSwot());
+    document
+      .getElementById("deleteSwotBtn")
+      .addEventListener("click", () => this.deleteSelectedSwot());
+    document
+      .getElementById("cancelSwotItemBtn")
+      .addEventListener("click", () => this.closeSwotItemModal());
+    document
+      .getElementById("swotItemForm")
+      .addEventListener("submit", (e) => this.saveSwotItem(e));
+    document.querySelectorAll(".swot-add-btn").forEach(btn => {
+      btn.addEventListener("click", () => this.openSwotItemModal(btn.dataset.quadrant));
+    });
+
     // Time Tracking events
     document
       .getElementById("timeTrackingViewBtn")
@@ -894,6 +939,18 @@ class TaskManager {
       }
     });
 
+    document.getElementById("swotModal").addEventListener("click", (e) => {
+      if (e.target.id === "swotModal") {
+        this.closeSwotModal();
+      }
+    });
+
+    document.getElementById("swotItemModal").addEventListener("click", (e) => {
+      if (e.target.id === "swotItemModal") {
+        this.closeSwotItemModal();
+      }
+    });
+
     // Close modals on ESC key
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
@@ -925,7 +982,7 @@ class TaskManager {
       summary: "Summary", list: "List", board: "Board", timeline: "Timeline",
       notes: "Notes", goals: "Goals", milestones: "Milestones", ideas: "Ideas",
       canvas: "Canvas", mindmap: "Mindmap", c4: "C4 Architecture",
-      retrospectives: "Retrospectives", timeTracking: "Time Tracking", config: "Settings"
+      retrospectives: "Retrospectives", swot: "SWOT Analysis", timeTracking: "Time Tracking", config: "Settings"
     };
     const label = document.getElementById("currentViewLabel");
     if (label) label.textContent = viewLabels[view] || view;
@@ -963,7 +1020,7 @@ class TaskManager {
     this.notesLoaded = false;
 
     // Reset all desktop nav buttons in dropdown
-    const desktopNavBtns = ["summaryViewBtn", "listViewBtn", "boardViewBtn", "timelineViewBtn", "notesViewBtn", "goalsViewBtn", "milestonesViewBtn", "ideasViewBtn", "canvasViewBtn", "mindmapViewBtn", "c4ViewBtn", "retrospectivesViewBtn", "timeTrackingViewBtn"];
+    const desktopNavBtns = ["summaryViewBtn", "listViewBtn", "boardViewBtn", "timelineViewBtn", "notesViewBtn", "goalsViewBtn", "milestonesViewBtn", "ideasViewBtn", "canvasViewBtn", "mindmapViewBtn", "c4ViewBtn", "retrospectivesViewBtn", "swotViewBtn", "timeTrackingViewBtn"];
     desktopNavBtns.forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) {
@@ -973,7 +1030,7 @@ class TaskManager {
     });
 
     // Reset mobile buttons
-    const mobileBtnIds = ["summaryViewBtnMobile", "listViewBtnMobile", "boardViewBtnMobile", "timelineViewBtnMobile", "notesViewBtnMobile", "goalsViewBtnMobile", "milestonesViewBtnMobile", "canvasViewBtnMobile", "mindmapViewBtnMobile", "c4ViewBtnMobile", "ideasViewBtnMobile", "retrospectivesViewBtnMobile", "timeTrackingViewBtnMobile", "configViewBtnMobile"];
+    const mobileBtnIds = ["summaryViewBtnMobile", "listViewBtnMobile", "boardViewBtnMobile", "timelineViewBtnMobile", "notesViewBtnMobile", "goalsViewBtnMobile", "milestonesViewBtnMobile", "canvasViewBtnMobile", "mindmapViewBtnMobile", "c4ViewBtnMobile", "ideasViewBtnMobile", "retrospectivesViewBtnMobile", "swotViewBtnMobile", "timeTrackingViewBtnMobile", "configViewBtnMobile"];
     mobileBtnIds.forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) {
@@ -992,6 +1049,7 @@ class TaskManager {
     document.getElementById("milestonesView").classList.add("hidden");
     document.getElementById("ideasView").classList.add("hidden");
     document.getElementById("retrospectivesView").classList.add("hidden");
+    document.getElementById("swotView").classList.add("hidden");
     document.getElementById("timeTrackingView").classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
     document.getElementById("mindmapView").classList.add("hidden");
@@ -1040,6 +1098,10 @@ class TaskManager {
       this.activateViewButton("retrospectives");
       document.getElementById("retrospectivesView").classList.remove("hidden");
       this.loadRetrospectives();
+    } else if (view === "swot") {
+      this.activateViewButton("swot");
+      document.getElementById("swotView").classList.remove("hidden");
+      this.loadSwotAnalyses();
     } else if (view === "timeTracking") {
       this.activateViewButton("timeTracking");
       document.getElementById("timeTrackingView").classList.remove("hidden");
@@ -2539,7 +2601,9 @@ class TaskManager {
       "c4ComponentModal",
       "customSectionModal",
       "descriptionModal",
-      "ideaModal"
+      "ideaModal",
+      "swotModal",
+      "swotItemModal"
     ];
     modals.forEach(id => {
       const modal = document.getElementById(id);
@@ -6901,6 +6965,227 @@ class TaskManager {
       await this.loadRetrospectives();
     } catch (error) {
       console.error("Error deleting retrospective:", error);
+    }
+  }
+
+  // SWOT Analysis functionality
+  async loadSwotAnalyses() {
+    try {
+      const response = await fetch("/api/swot");
+      this.swotAnalyses = await response.json();
+      this.renderSwotSelector();
+      if (this.swotAnalyses.length > 0 && !this.selectedSwotId) {
+        this.selectSwot(this.swotAnalyses[0].id);
+      } else if (this.selectedSwotId) {
+        this.selectSwot(this.selectedSwotId);
+      } else {
+        this.renderSwotView(null);
+      }
+    } catch (error) {
+      console.error("Error loading SWOT analyses:", error);
+    }
+  }
+
+  renderSwotSelector() {
+    const selector = document.getElementById("swotSelector");
+    selector.innerHTML = '<option value="">Select Analysis</option>';
+    this.swotAnalyses.forEach(swot => {
+      const option = document.createElement("option");
+      option.value = swot.id;
+      option.textContent = `${swot.title} (${swot.date})`;
+      selector.appendChild(option);
+    });
+  }
+
+  selectSwot(swotId) {
+    this.selectedSwotId = swotId;
+    const selector = document.getElementById("swotSelector");
+    selector.value = swotId || "";
+
+    const swot = this.swotAnalyses.find(s => s.id === swotId);
+    this.renderSwotView(swot);
+
+    const editBtn = document.getElementById("editSwotBtn");
+    const deleteBtn = document.getElementById("deleteSwotBtn");
+    if (swot) {
+      editBtn.classList.remove("hidden");
+      deleteBtn.classList.remove("hidden");
+    } else {
+      editBtn.classList.add("hidden");
+      deleteBtn.classList.add("hidden");
+    }
+  }
+
+  renderSwotView(swot) {
+    const emptyState = document.getElementById("emptySwotState");
+    const grid = document.getElementById("swotGrid");
+
+    if (!swot) {
+      emptyState.classList.remove("hidden");
+      grid.classList.add("hidden");
+      return;
+    }
+
+    emptyState.classList.add("hidden");
+    grid.classList.remove("hidden");
+
+    const renderItems = (items, quadrant) => {
+      if (!items || items.length === 0) {
+        return '<li class="text-gray-400 dark:text-gray-500 italic">No items yet</li>';
+      }
+      return items.map((item, idx) => `
+        <li class="flex justify-between items-start group">
+          <span>${this.escapeHtml(item)}</span>
+          <button onclick="taskManager.removeSwotItem('${quadrant}', ${idx})" class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 ml-2">x</button>
+        </li>
+      `).join("");
+    };
+
+    document.getElementById("swotStrengths").innerHTML = renderItems(swot.strengths, "strengths");
+    document.getElementById("swotWeaknesses").innerHTML = renderItems(swot.weaknesses, "weaknesses");
+    document.getElementById("swotOpportunities").innerHTML = renderItems(swot.opportunities, "opportunities");
+    document.getElementById("swotThreats").innerHTML = renderItems(swot.threats, "threats");
+  }
+
+  openSwotModal(id = null) {
+    this.editingSwotId = id;
+    const modal = document.getElementById("swotModal");
+    const title = document.getElementById("swotModalTitle");
+    const form = document.getElementById("swotForm");
+
+    form.reset();
+    document.getElementById("swotDate").value = new Date().toISOString().split("T")[0];
+
+    if (id) {
+      title.textContent = "Edit SWOT Analysis";
+      const swot = this.swotAnalyses.find(s => s.id === id);
+      if (swot) {
+        document.getElementById("swotTitle").value = swot.title;
+        document.getElementById("swotDate").value = swot.date;
+      }
+    } else {
+      title.textContent = "New SWOT Analysis";
+    }
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  closeSwotModal() {
+    const modal = document.getElementById("swotModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    this.editingSwotId = null;
+  }
+
+  async saveSwot(e) {
+    e.preventDefault();
+    const data = {
+      title: document.getElementById("swotTitle").value,
+      date: document.getElementById("swotDate").value,
+    };
+
+    try {
+      if (this.editingSwotId) {
+        await fetch(`/api/swot/${this.editingSwotId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      } else {
+        const response = await fetch("/api/swot", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        const result = await response.json();
+        this.selectedSwotId = result.id;
+      }
+      this.closeSwotModal();
+      await this.loadSwotAnalyses();
+    } catch (error) {
+      console.error("Error saving SWOT:", error);
+    }
+  }
+
+  editSelectedSwot() {
+    if (this.selectedSwotId) {
+      this.openSwotModal(this.selectedSwotId);
+    }
+  }
+
+  async deleteSelectedSwot() {
+    if (!this.selectedSwotId) return;
+    if (!confirm("Delete this SWOT analysis?")) return;
+    try {
+      await fetch(`/api/swot/${this.selectedSwotId}`, { method: "DELETE" });
+      this.selectedSwotId = null;
+      await this.loadSwotAnalyses();
+    } catch (error) {
+      console.error("Error deleting SWOT:", error);
+    }
+  }
+
+  openSwotItemModal(quadrant) {
+    this.swotItemQuadrant = quadrant;
+    const modal = document.getElementById("swotItemModal");
+    const title = document.getElementById("swotItemModalTitle");
+    const quadrantNames = { strengths: "Strength", weaknesses: "Weakness", opportunities: "Opportunity", threats: "Threat" };
+    title.textContent = `Add ${quadrantNames[quadrant]}`;
+    document.getElementById("swotItemText").value = "";
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    document.getElementById("swotItemText").focus();
+  }
+
+  closeSwotItemModal() {
+    const modal = document.getElementById("swotItemModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    this.swotItemQuadrant = null;
+  }
+
+  async saveSwotItem(e) {
+    e.preventDefault();
+    if (!this.selectedSwotId || !this.swotItemQuadrant) return;
+
+    const text = document.getElementById("swotItemText").value.trim();
+    if (!text) return;
+
+    const swot = this.swotAnalyses.find(s => s.id === this.selectedSwotId);
+    if (!swot) return;
+
+    swot[this.swotItemQuadrant].push(text);
+
+    try {
+      await fetch(`/api/swot/${this.selectedSwotId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(swot),
+      });
+      this.closeSwotItemModal();
+      this.renderSwotView(swot);
+    } catch (error) {
+      console.error("Error saving SWOT item:", error);
+    }
+  }
+
+  async removeSwotItem(quadrant, index) {
+    if (!this.selectedSwotId) return;
+    const swot = this.swotAnalyses.find(s => s.id === this.selectedSwotId);
+    if (!swot) return;
+
+    swot[quadrant].splice(index, 1);
+
+    try {
+      await fetch(`/api/swot/${this.selectedSwotId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(swot),
+      });
+      this.renderSwotView(swot);
+    } catch (error) {
+      console.error("Error removing SWOT item:", error);
     }
   }
 
