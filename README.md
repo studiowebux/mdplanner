@@ -4,26 +4,36 @@ A modern task management system that uses markdown files as the database, built 
 
 ## Features
 
-- **Markdown-Based Database**: All tasks and project configuration stored in a single markdown file
+- **Markdown-Based Storage**: All data stored in human-readable markdown files, no database required
+- **Multi-Project Support**: Load multiple markdown files as separate projects, switch between them via dropdown
 - **Multiple Views**:
-  - Summary view with project overview and statistics
-  - List view with drag-and-drop task organization
+  - Summary view with project overview, statistics, tasks due today/late/soon
+  - List view with drag-and-drop task organization and advanced filtering
   - Kanban board view with customizable sections
   - Timeline view for project scheduling
-  - Notes section with tabbed note-taking interface
+  - Notes section with simple and enhanced modes (tabs, split-view, timeline)
   - Goals tracking with enterprise and project goals
+  - Milestones management with status tracking
+  - Ideas collection with status workflow (new, considering, planned, rejected)
+  - Retrospectives (Continue/Stop/Start format)
+  - SWOT Analysis boards (2x2 grid: Strengths, Weaknesses, Opportunities, Threats)
   - Canvas view for visual brainstorming with sticky notes
-  - Mindmap view for hierarchical idea organization
+  - Mindmap view with toolbar, live preview, and layout options (horizontal/vertical)
+  - C4 Architecture diagrams with drill-down navigation and list view
+  - Time Tracking with per-task time entries and reporting
   - Configuration management interface
 - **Rich Task Management**:
   - Task creation, editing, and deletion
   - Subtask support with nested hierarchies
   - Task dependencies (blocked_by relationships)
-  - Priority levels (1-5 scale)
-  - Due dates and effort estimation
+  - Priority levels (1-5) with color-coded badges
+  - Due dates with planned start/end dates
+  - Effort estimation in days
   - Tags and assignee management
   - Markdown description support
-  - Milestone support
+  - Milestone assignment
+  - Time entry logging per task
+  - Shareable task URLs (e.g., `#task=task-id`)
 - **Notes Management**:
   - **Tabbed Interface**: Clean tab-based navigation for organizing multiple notes
   - **Horizontal Scrolling**: Automatic horizontal scroll when you have many note tabs
@@ -53,17 +63,30 @@ A modern task management system that uses markdown files as the database, built 
   - **PDF Reports**: Generate single-page project reports for printing/sharing
   - **Data Safety**: Smart duplicate prevention and data integrity protection
   - **Batch Operations**: Import multiple tasks while preserving existing data
-- **Dynamic Configuration**:
+- **Project Management**:
+  - Project status tracking (active, on-track, at-risk, late, completed)
+  - Project start date and last updated timestamp
+  - Useful links section
   - Customizable board sections
-  - Project team members management
+  - Project team members (assignees) management
   - Tag system for categorization
-  - Working days and project timeline settings
+  - Custom working days schedule (select specific days)
+- **Built-in Tools**:
+  - Pomodoro timer with configurable duration
+  - Version checker (shows update badge when new version available)
+  - In-app help tooltips throughout the UI
 - **Advanced UI Features**:
-  - **Responsive Design**: Optimized for desktop devices
-  - **Compact Navigation**: Space-efficient navbar that fits standard screens
-  - **Dark Mode Support**: Complete dark theme with automatic system detection
-  - **Search Functionality**: Real-time task search across all views
-  - **Keyboard Shortcuts**: Efficient navigation and task management
+  - Responsive design optimized for desktop
+  - Dark mode with system preference detection
+  - Real-time task search with results display
+  - Keyboard shortcuts (Tab/Shift+Tab in mindmap editor, ESC to close modals)
+  - Page state preserved on refresh (F5 stays on current view)
+  - Fullscreen mode
+- **Data Safety**:
+  - Automatic backups before each save (configurable retention)
+  - Atomic writes (temp file + rename) to prevent corruption
+  - Write locking to prevent race conditions
+  - Hash-based backup deduplication
 - **Drag & Drop**: Intuitive task movement between sections and reordering
 
 ## Quick Start
@@ -427,10 +450,134 @@ The Mindmap view enables hierarchical idea organization:
 
 **Mindmap Features:**
 - **Hierarchical Structure**: Nested bullet points create mind map nodes
-- **Multiple Layouts**: Tree and circular layout options
-- **Interactive Navigation**: Click and drag to explore large maps
+- **Multiple Layouts**: Horizontal (left-to-right) and vertical (top-to-bottom) options
+- **Interactive Editor**: Toolbar with add/indent/move/delete buttons and live preview
+- **Keyboard Shortcuts**: Tab/Shift+Tab for indent, Enter for sibling, Alt+Up/Down to move
 - **Zoom Controls**: Scale view for detailed or overview perspectives
-- **Export Support**: CSV export for external tools
+
+### Milestones Configuration
+
+```markdown
+<!-- Milestones -->
+# Milestones
+
+## Sprint 1
+<!-- id: milestone_1 -->
+Target: 2026-03-01
+Status: open
+First sprint with core features
+
+## MVP Release
+<!-- id: milestone_2 -->
+Target: 2026-06-01
+Status: open
+Minimum viable product release
+```
+
+### Ideas Configuration
+
+```markdown
+<!-- Ideas -->
+# Ideas
+
+## Mobile App
+<!-- id: idea_1 -->
+Status: considering
+Category: Product
+Created: 2026-02-12
+Build a mobile companion app for on-the-go task management
+
+## AI Integration
+<!-- id: idea_2 -->
+Status: new
+Category: Feature
+Created: 2026-02-12
+Add AI-powered task suggestions
+```
+
+### Retrospectives Configuration
+
+```markdown
+<!-- Retrospectives -->
+# Retrospectives
+
+## Sprint 1 Retro
+<!-- id: retro_1 -->
+Date: 2026-02-12
+Status: open
+
+### Continue
+- Daily standups
+- Code reviews
+
+### Stop
+- Long meetings
+- Scope creep
+
+### Start
+- Documentation
+- Automated testing
+```
+
+### SWOT Analysis Configuration
+
+```markdown
+<!-- SWOT Analysis -->
+# SWOT Analysis
+
+## Product Launch
+<!-- id: swot_001 -->
+Date: 2026-02-12
+
+### Strengths
+- Strong brand recognition
+- Experienced team
+
+### Weaknesses
+- Limited budget
+- Small market share
+
+### Opportunities
+- Growing market
+- New partnerships
+
+### Threats
+- Established competitors
+- Economic uncertainty
+```
+
+### C4 Architecture Configuration
+
+```markdown
+<!-- C4 Architecture -->
+# C4 Architecture
+
+## Web Application {level: context; type: System; position: {x: 200, y: 100}}
+<!-- id: c4_component_1 -->
+Main web application for users
+
+## API Server {level: container; type: Container; position: {x: 100, y: 200}; parent: c4_component_1; connections: [{target: Database, label: Reads/Writes}]}
+<!-- id: c4_component_2 -->
+REST API backend
+
+## Database {level: container; type: Database; position: {x: 300, y: 200}; parent: c4_component_1}
+<!-- id: c4_component_3 -->
+PostgreSQL database
+```
+
+### Time Tracking Configuration
+
+```markdown
+<!-- Time Tracking -->
+# Time Tracking
+
+## task-1
+- 2026-02-12: 2h by John - Initial implementation
+- 2026-02-13: 1.5h by Jane - Code review and fixes
+
+## task-2
+- 2026-02-12: 3h by John - Feature development
+```
 
 ## Development
 
@@ -570,44 +717,83 @@ PATCH  /api/tasks/:id/move     # Move task to different section
 
 # Import/Export
 GET    /api/export/csv/tasks   # Export tasks as CSV
-POST   /api/import/csv/tasks   # Import tasks from CSV (Content-Type: text/plain)
+POST   /api/import/csv/tasks   # Import tasks from CSV
 GET    /api/export/csv/canvas  # Export canvas sticky notes as CSV
-POST   /api/import/csv/canvas  # Import canvas sticky notes from CSV
 GET    /api/export/csv/mindmaps # Export mindmaps as CSV
 GET    /api/export/pdf/report  # Generate PDF project report
 
 # Project Management
-GET    /api/project            # Retrieve project info (name, description, notes, goals)
+GET    /api/projects           # List all projects in directory
+GET    /api/projects/active    # Get active project filename
+POST   /api/projects/switch    # Switch to different project
+POST   /api/projects           # Create new project
+GET    /api/project            # Retrieve project info
 GET    /api/project/config     # Retrieve project configuration
 POST   /api/project/config     # Update project configuration
 GET    /api/project/sections   # Retrieve board sections
-POST   /api/project/rewrite    # Rewrite tasks with custom sections
 
 # Notes
 GET    /api/notes              # Retrieve all notes
-GET    /api/notes/:id          # Retrieve specific note
 POST   /api/notes              # Create new note
 PUT    /api/notes/:id          # Update existing note
 DELETE /api/notes/:id          # Delete note
 
 # Goals
 GET    /api/goals              # Retrieve all goals
-GET    /api/goals/:id          # Retrieve specific goal
 POST   /api/goals              # Create new goal
 PUT    /api/goals/:id          # Update existing goal
 DELETE /api/goals/:id          # Delete goal
 
 # Canvas
-GET    /api/canvas             # Retrieve all canvas sticky notes
-POST   /api/canvas             # Create new sticky note
-PUT    /api/canvas/:id         # Update existing sticky note
-DELETE /api/canvas/:id         # Delete sticky note
+GET    /api/canvas/sticky_notes # Retrieve all sticky notes
+POST   /api/canvas/sticky_notes # Create new sticky note
+PUT    /api/canvas/sticky_notes/:id # Update sticky note
+DELETE /api/canvas/sticky_notes/:id # Delete sticky note
 
 # Mindmaps
 GET    /api/mindmaps           # Retrieve all mindmaps
 POST   /api/mindmaps           # Create new mindmap
 PUT    /api/mindmaps/:id       # Update existing mindmap
 DELETE /api/mindmaps/:id       # Delete mindmap
+
+# C4 Architecture
+GET    /api/c4                 # Retrieve all C4 components
+POST   /api/c4                 # Create new component
+PUT    /api/c4/:id             # Update component
+DELETE /api/c4/:id             # Delete component
+
+# Milestones
+GET    /api/milestones         # Retrieve all milestones
+POST   /api/milestones         # Create new milestone
+PUT    /api/milestones/:id     # Update milestone
+DELETE /api/milestones/:id     # Delete milestone
+
+# Ideas
+GET    /api/ideas              # Retrieve all ideas
+POST   /api/ideas              # Create new idea
+PUT    /api/ideas/:id          # Update idea
+DELETE /api/ideas/:id          # Delete idea
+
+# Retrospectives
+GET    /api/retrospectives     # Retrieve all retrospectives
+POST   /api/retrospectives     # Create new retrospective
+PUT    /api/retrospectives/:id # Update retrospective
+DELETE /api/retrospectives/:id # Delete retrospective
+
+# SWOT Analysis
+GET    /api/swot               # Retrieve all SWOT analyses
+POST   /api/swot               # Create new SWOT analysis
+PUT    /api/swot/:id           # Update SWOT analysis
+DELETE /api/swot/:id           # Delete SWOT analysis
+
+# Time Tracking
+GET    /api/time-entries       # Get all time entries
+GET    /api/time-entries/:taskId # Get entries for task
+POST   /api/time-entries/:taskId # Add time entry to task
+DELETE /api/time-entries/:taskId/:entryId # Delete time entry
+
+# Version Check
+GET    /api/version            # Get current version info
 ```
 
 **UI Features:**
