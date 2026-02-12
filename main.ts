@@ -4,6 +4,9 @@ import { join } from "@std/path";
 import { TaskAPI } from "./src/api/tasks.ts";
 import { ProjectManager } from "./src/lib/project-manager.ts";
 
+export const VERSION = "0.1.0";
+export const GITHUB_REPO = "studiowebux/mdplanner";
+
 // Get directory from command line args or default to current directory
 const directory = Deno.args[0] || ".";
 const projectManager = new ProjectManager(directory);

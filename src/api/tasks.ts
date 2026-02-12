@@ -1,6 +1,7 @@
 import { MarkdownParser } from "../lib/markdown-parser.ts";
 import { ProjectManager } from "../lib/project-manager.ts";
 import { Task } from "../lib/types.ts";
+import { VERSION, GITHUB_REPO } from "../../main.ts";
 
 export class TaskAPI {
   private projectManager: ProjectManager;
@@ -33,6 +34,41 @@ export class TaskAPI {
     }
 
     try {
+      // GET /api/version - get current version and check for updates
+      if (method === "GET" && pathParts.length === 2 && pathParts[1] === "version") {
+        let latestVersion = null;
+        let updateAvailable = false;
+        try {
+          const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`, {
+            headers: { "Accept": "application/vnd.github.v3+json" }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            latestVersion = data.tag_name?.replace(/^v/, "") || null;
+            if (latestVersion && latestVersion !== VERSION) {
+              const current = VERSION.split(".").map(Number);
+              const latest = latestVersion.split(".").map(Number);
+              for (let i = 0; i < 3; i++) {
+                if ((latest[i] || 0) > (current[i] || 0)) {
+                  updateAvailable = true;
+                  break;
+                } else if ((latest[i] || 0) < (current[i] || 0)) {
+                  break;
+                }
+              }
+            }
+          }
+        } catch {
+          // Ignore fetch errors - just return current version
+        }
+        return new Response(JSON.stringify({
+          current: VERSION,
+          latest: latestVersion,
+          updateAvailable,
+          repo: GITHUB_REPO
+        }), { headers });
+      }
+
       // GET /api/projects - list all projects
       if (method === "GET" && pathParts.length === 2 && pathParts[1] === "projects") {
         const projects = await this.projectManager.scanProjects();

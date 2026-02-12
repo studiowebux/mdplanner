@@ -1439,7 +1439,15 @@ export class MarkdownParser {
         if (line.startsWith("Start Date: ")) {
           config.startDate = line.substring(12).trim();
         } else if (line.startsWith("Working Days: ")) {
-          config.workingDaysPerWeek = parseInt(line.substring(14).trim()) || 5;
+          const value = line.substring(14).trim();
+          // Check if it's a number or a list of days
+          if (/^\d+$/.test(value)) {
+            config.workingDaysPerWeek = parseInt(value) || 5;
+          } else {
+            // Parse comma-separated days like "Mon, Tue, Wed, Thu, Fri"
+            config.workingDays = value.split(",").map(d => d.trim()).filter(d => d);
+            config.workingDaysPerWeek = config.workingDays.length;
+          }
         } else if (line.startsWith("Last Updated: ")) {
           config.lastUpdated = line.substring(14).trim();
         } else if (line === "Assignees:") {
@@ -1640,7 +1648,9 @@ export class MarkdownParser {
             config.startDate || new Date().toISOString().split("T")[0]
           }`,
         );
-        if (config.workingDaysPerWeek && config.workingDaysPerWeek !== 5) {
+        if (config.workingDays && config.workingDays.length > 0) {
+          result.push(`Working Days: ${config.workingDays.join(", ")}`);
+        } else if (config.workingDaysPerWeek && config.workingDaysPerWeek !== 5) {
           result.push(`Working Days: ${config.workingDaysPerWeek}`);
         }
         result.push("");
@@ -1691,7 +1701,9 @@ export class MarkdownParser {
             config.startDate || new Date().toISOString().split("T")[0]
           }`,
         );
-        if (config.workingDaysPerWeek && config.workingDaysPerWeek !== 5) {
+        if (config.workingDays && config.workingDays.length > 0) {
+          result.push(`Working Days: ${config.workingDays.join(", ")}`);
+        } else if (config.workingDaysPerWeek && config.workingDaysPerWeek !== 5) {
           result.push(`Working Days: ${config.workingDaysPerWeek}`);
         }
         result.push("");
@@ -2009,19 +2021,19 @@ export class MarkdownParser {
             i++;
           }
 
-          // Check for existing ID in comment format <!-- id: component_xxx -->
-          let componentId = this.generateC4ComponentId();
+          // Check for existing ID in comment format <!-- id: c4_component_xxx -->
+          let componentId = this.generateC4ComponentId(components);
           let actualDescription = componentDescription.join("\n");
 
           const idMatch = actualDescription.match(/<!-- id: (c4_component_\d+) -->/);
           if (idMatch) {
             componentId = idMatch[1];
-            // Remove the ID comment from description
-            actualDescription = actualDescription.replace(
-              /<!-- id: c4_component_\d+ -->\s*/,
-              "",
-            ).trim();
           }
+          // Remove all ID comments from description (both new and old formats)
+          actualDescription = actualDescription
+            .replace(/<!-- id: c4_component_\d+ -->\s*/g, "")
+            .replace(/<!-- id: \d+ -->\s*/g, "")
+            .trim();
 
           // Parse component config
           const component: C4Component = {
@@ -2116,21 +2128,19 @@ export class MarkdownParser {
     return { components, nextIndex: i };
   }
 
-  generateC4ComponentId(): string {
-    try {
-      const content = Deno.readTextFileSync(this.filePath);
-      const componentIdMatches = content.match(/<!-- id: c4_component_(\d+) -->/g) || [];
-      const maxId = Math.max(
-        0,
-        ...componentIdMatches.map((match) => {
-          const idMatch = match.match(/c4_component_(\d+)/);
-          return idMatch ? parseInt(idMatch[1]) : 0;
-        }),
-      );
-      return `c4_component_${maxId + 1}`;
-    } catch {
-      return "c4_component_1";
-    }
+  generateC4ComponentId(existingComponents: C4Component[] = []): string {
+    // Find max ID from existing components without needing to read file
+    let maxId = 0;
+    existingComponents.forEach((comp) => {
+      const match = comp.id.match(/c4_component_(\d+)/);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (num > maxId) {
+          maxId = num;
+        }
+      }
+    });
+    return `c4_component_${maxId + 1}`;
   }
 
   async saveProjectInfo(projectInfo: ProjectInfo): Promise<void> {
@@ -2157,7 +2167,11 @@ export class MarkdownParser {
     content += `Start Date: ${
       config.startDate || new Date().toISOString().split("T")[0]
     }\n`;
-    content += `Working Days: ${config.workingDaysPerWeek ?? 5}\n`;
+    if (config.workingDays && config.workingDays.length > 0) {
+      content += `Working Days: ${config.workingDays.join(", ")}\n`;
+    } else {
+      content += `Working Days: ${config.workingDaysPerWeek ?? 5}\n`;
+    }
     content += `Last Updated: ${config.lastUpdated}\n`;
     content += "\n";
 

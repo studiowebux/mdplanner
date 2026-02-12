@@ -7,7 +7,7 @@ Markdown powered task manager tool.
 
 Start Date: 2025-08-17
 Working Days: 7
-Last Updated: 2026-01-25T21:06:13.654Z
+Last Updated: 2026-02-12T05:31:19.673Z
 
 Assignees:
 - Alice
@@ -155,68 +155,32 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 <!-- C4 Architecture -->
 # C4 Architecture
 
-## Context 1 {level: context; type: System; position: {x: 437.6716849737579, y: 151.65365683470662}; children: [1755646468112, 1755646474823]}
+## Context 1 {level: context; type: System; position: {x: 263, y: 243}}
 
 <!-- id: c4_component_1 -->
 
 
-## Context 2 {level: context; type: System; position: {x: 870.0111771625619, y: 24.653656834706624}; connections: [{target: Context 1, label: Intertwined}]}
+## Context 2 {level: context; type: System; position: {x: 536, y: 172}; connections: [{target: Context 1, label: Intertwined}]}
 
 <!-- id: c4_component_2 -->
 
 
-## Container 1 {level: container; type: Container; position: {x: 0, y: 0}; children: [1755646496023, 1755647114580, 1755647158026, 1755647175051]; parent: c4_component_1}
+## Container 1 {level: container; type: Container; position: {x: 31, y: 304}; parent: c4_component_1}
 
 <!-- id: c4_component_3 -->
-<!-- id: 1755646468112 -->
 
-## Container 2 {level: context; type: System; position: {x: 0, y: 0}; parent: c4_component_1}
 
-<!-- id: c4_component_3 -->
-<!-- id: 1755646474823 -->
-
-## Component 1 {level: component; type: Container; position: {x: 0, y: 0}; parent: 1755646468112}
-
-<!-- id: c4_component_3 -->
-<!-- id: 1755646496023 -->
-
-## Component 1 {level: component; type: Component; position: {x: 0, y: 0}; parent: c4_component_3}
+## Component 1 {level: component; type: Component; position: {x: 100, y: 100}; parent: c4_component_3}
 
 <!-- id: c4_component_4 -->
-<!-- id: 1755647114580 -->
 
-## Component 2 {level: component; type: Component; position: {x: 0, y: 0}; parent: c4_component_3}
 
-<!-- id: c4_component_5 -->
-<!-- id: 1755647158026 -->
-
-## Component 3 {level: component; type: Component; position: {x: 0, y: 0}; connections: [{target: Component 2, label: TEST}]; parent: c4_component_3}
+## Component 2 {level: component; type: Component; position: {x: 121, y: 275}; parent: c4_component_3}
 
 <!-- id: c4_component_5 -->
-<!-- id: 1755647175051 -->
-
-<!-- Ideas -->
-# Ideas
-
-## Got an Idea !
-<!-- id: 2af6e1b6 -->
-Status: new
-Category: Innovation
-Created: 2026-01-26
 
 
-<!-- Retrospectives -->
-# Retrospectives
-
-
-<!-- Time Tracking -->
-# Time Tracking
-
-## demo1
-- 2026-01-27: 2.5h by John - Initial work
-- 2026-01-28: 3h by Jane - Follow-up work
-
-
+<!-- Board -->
 # Board
 
 ## Todo

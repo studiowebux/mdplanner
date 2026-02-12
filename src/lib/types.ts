@@ -131,6 +131,7 @@ export interface ProjectLink {
 export interface ProjectConfig {
   startDate?: string;
   workingDaysPerWeek?: number;
+  workingDays?: string[]; // e.g., ["Mon", "Tue", "Wed", "Thu", "Fri"]
   assignees?: string[];
   tags?: string[];
   lastUpdated?: string;

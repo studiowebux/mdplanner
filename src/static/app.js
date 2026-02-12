@@ -1,3 +1,33 @@
+// Static class mappings for Tailwind JIT compatibility
+const PRIORITY_CLASSES = {
+  1: { badge: 'bg-red-600 text-white border border-red-700 dark:bg-red-500 dark:border-red-400' },
+  2: { badge: 'bg-orange-500 text-white border border-orange-600 dark:bg-orange-400 dark:text-orange-900 dark:border-orange-300' },
+  3: { badge: 'bg-yellow-400 text-yellow-900 border border-yellow-500 dark:bg-yellow-300 dark:text-yellow-900 dark:border-yellow-400' },
+  4: { badge: 'bg-blue-500 text-white border border-blue-600 dark:bg-blue-400 dark:text-blue-900 dark:border-blue-300' },
+  5: { badge: 'bg-gray-200 text-gray-700 border border-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:border-gray-500' }
+};
+
+const STATUS_CLASSES = {
+  active: 'border-l-4 border-l-gray-400 bg-gray-50 text-gray-700 dark:border-l-gray-500 dark:bg-gray-800 dark:text-gray-300',
+  'on-track': 'border-l-4 border-l-emerald-600 bg-emerald-50/50 text-gray-800 dark:border-l-emerald-400 dark:bg-emerald-900/20 dark:text-gray-200',
+  'at-risk': 'border-l-4 border-l-amber-500 bg-amber-50/50 text-gray-700 dark:border-l-amber-400 dark:bg-amber-900/20 dark:text-gray-300',
+  late: 'border-l-4 border-l-red-600 bg-red-50/50 text-gray-900 dark:border-l-red-400 dark:bg-red-900/20 dark:text-gray-100',
+  'on-hold': 'border-l-4 border-l-gray-300 bg-gray-50 text-gray-500 dark:border-l-gray-600 dark:bg-gray-800 dark:text-gray-400',
+  completed: 'border-l-4 border-l-gray-400 bg-gray-100 text-gray-600 dark:border-l-gray-500 dark:bg-gray-700 dark:text-gray-300'
+};
+
+const TAG_CLASSES = 'badge badge-tag';
+
+const DEADLINE_CLASSES = {
+  overdue: 'border-l-4 border-l-red-600 border border-red-200 bg-red-50/50 dark:border-l-red-400 dark:border-red-800 dark:bg-red-900/20',
+  today: 'border-l-4 border-l-amber-500 border border-amber-200 bg-amber-50/50 dark:border-l-amber-400 dark:border-amber-700 dark:bg-amber-900/20',
+  soon: 'border-l-4 border-l-gray-400 border border-gray-200 bg-gray-50 dark:border-l-gray-500 dark:border-gray-600 dark:bg-gray-800'
+};
+
+const SECTION_COLORS = [
+  'gray-900', 'gray-700', 'gray-600', 'gray-500', 'gray-400', 'gray-800', 'gray-300', 'gray-200'
+];
+
 class TaskManager {
   constructor() {
     this.tasks = [];
@@ -47,7 +77,7 @@ class TaskManager {
     this.c4PanningInitialized = false;
     this.c4ForceSimulation = null;
     this.c4AnimationFrame = null;
-    this.c4PhysicsEnabled = true;
+    this.c4PhysicsEnabled = false; // Disabled by default - causes jumping issues
     this.listFilters = {
       section: "",
       assignee: "",
@@ -79,6 +109,21 @@ class TaskManager {
     this.switchView(savedView);
     await this.loadTasks();
     this.checkTaskHashOnLoad();
+    this.checkVersion();
+  }
+
+  async checkVersion() {
+    try {
+      const response = await fetch("/api/version");
+      const data = await response.json();
+      document.getElementById("versionDisplay").textContent = `MD Planner v${data.current}`;
+      if (data.updateAvailable) {
+        document.getElementById("updateBadge").classList.remove("hidden");
+        document.getElementById("updateBadge").textContent = `v${data.latest} available`;
+      }
+    } catch (error) {
+      console.error("Error checking version:", error);
+    }
   }
 
   async loadProjects() {
@@ -89,13 +134,31 @@ class TaskManager {
       const activeResponse = await fetch("/api/projects/active");
       const activeData = await activeResponse.json();
 
+      const optionsHtml = projects.map(p =>
+        `<option value="${p.filename}" ${p.filename === activeData.filename ? "selected" : ""}>${p.name}</option>`
+      ).join("");
+
+      // Desktop selector
       const selector = document.getElementById("projectSelector");
       if (selector) {
-        selector.innerHTML = projects.map(p =>
-          `<option value="${p.filename}" ${p.filename === activeData.filename ? "selected" : ""}>${p.name}</option>`
-        ).join("");
+        selector.innerHTML = optionsHtml;
+        selector.addEventListener("change", (e) => {
+          this.switchProject(e.target.value);
+          // Sync mobile selector
+          const mobile = document.getElementById("projectSelectorMobile");
+          if (mobile) mobile.value = e.target.value;
+        });
+      }
 
-        selector.addEventListener("change", (e) => this.switchProject(e.target.value));
+      // Mobile selector
+      const selectorMobile = document.getElementById("projectSelectorMobile");
+      if (selectorMobile) {
+        selectorMobile.innerHTML = optionsHtml;
+        selectorMobile.addEventListener("change", (e) => {
+          this.switchProject(e.target.value);
+          // Sync desktop selector
+          if (selector) selector.value = e.target.value;
+        });
       }
     } catch (error) {
       console.error("Error loading projects:", error);
@@ -176,29 +239,29 @@ class TaskManager {
       .getElementById("canvasViewBtn")
       .addEventListener("click", () => {
         this.switchView("canvas");
-        document.getElementById("moreViewsDropdown")?.classList.add("hidden");
+        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
       });
     document
       .getElementById("mindmapViewBtn")
       .addEventListener("click", () => {
         this.switchView("mindmap");
-        document.getElementById("moreViewsDropdown")?.classList.add("hidden");
+        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
       });
     document
       .getElementById("c4ViewBtn")
       .addEventListener("click", () => {
         this.switchView("c4");
-        document.getElementById("moreViewsDropdown")?.classList.add("hidden");
+        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
       });
 
-    // More views dropdown
-    document.getElementById("moreViewsBtn")?.addEventListener("click", (e) => {
+    // View selector dropdown
+    document.getElementById("viewSelectorBtn")?.addEventListener("click", (e) => {
       e.stopPropagation();
-      document.getElementById("moreViewsDropdown")?.classList.toggle("hidden");
+      document.getElementById("viewSelectorDropdown")?.classList.toggle("hidden");
     });
     document.addEventListener("click", (e) => {
-      const dropdown = document.getElementById("moreViewsDropdown");
-      const btn = document.getElementById("moreViewsBtn");
+      const dropdown = document.getElementById("viewSelectorDropdown");
+      const btn = document.getElementById("viewSelectorBtn");
       if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
         dropdown.classList.add("hidden");
       }
@@ -270,6 +333,30 @@ class TaskManager {
         this.switchView("c4");
         this.closeMobileMenu();
       });
+    document
+      .getElementById("milestonesViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("milestones");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("ideasViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("ideas");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("retrospectivesViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("retrospectives");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("timeTrackingViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("timeTracking");
+        this.closeMobileMenu();
+      });
 
     // Dark mode toggle
     document
@@ -304,22 +391,22 @@ class TaskManager {
       .getElementById("exportReportBtn")
       .addEventListener("click", () => this.exportPDFReport());
 
-    // Mobile import/export
+    // Mobile import/export (optional - may not exist in new layout)
     document
       .getElementById("exportTasksBtnMobile")
-      .addEventListener("click", () => {
+      ?.addEventListener("click", () => {
         this.exportTasksCSV();
         this.closeMobileMenu();
       });
     document
       .getElementById("importTasksBtnMobile")
-      .addEventListener("click", () => {
+      ?.addEventListener("click", () => {
         this.importTasksCSV();
         this.closeMobileMenu();
       });
     document
       .getElementById("exportReportBtnMobile")
-      .addEventListener("click", () => {
+      ?.addEventListener("click", () => {
         this.exportPDFReport();
         this.closeMobileMenu();
       });
@@ -346,6 +433,16 @@ class TaskManager {
     document
       .getElementById("saveProjectConfig")
       .addEventListener("click", () => this.saveProjectConfig());
+    document
+      .getElementById("workingDays")
+      .addEventListener("change", (e) => {
+        const customContainer = document.getElementById("customDaysContainer");
+        if (e.target.value === "custom") {
+          customContainer.classList.remove("hidden");
+        } else {
+          customContainer.classList.add("hidden");
+        }
+      });
 
     // Project links events
     document
@@ -597,7 +694,7 @@ class TaskManager {
       .getElementById("ideasViewBtn")
       .addEventListener("click", () => {
         this.switchView("ideas");
-        document.getElementById("moreViewsDropdown")?.classList.add("hidden");
+        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
       });
     document
       .getElementById("addIdeaBtn")
@@ -614,7 +711,7 @@ class TaskManager {
       .getElementById("retrospectivesViewBtn")
       .addEventListener("click", () => {
         this.switchView("retrospectives");
-        document.getElementById("moreViewsDropdown")?.classList.add("hidden");
+        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
       });
     document
       .getElementById("addRetrospectiveBtn")
@@ -631,7 +728,7 @@ class TaskManager {
       .getElementById("timeTrackingViewBtn")
       .addEventListener("click", () => {
         this.switchView("timeTracking");
-        document.getElementById("moreViewsDropdown")?.classList.add("hidden");
+        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
       });
     document
       .getElementById("addTimeEntryBtn")
@@ -696,9 +793,6 @@ class TaskManager {
     document
       .getElementById("c4Zoom")
       .addEventListener("input", (e) => this.updateC4Zoom(e.target.value));
-    document
-      .getElementById("c4LevelSelector")
-      .addEventListener("change", (e) => this.changeC4Level(e.target.value));
     document
       .getElementById("c4BackBtn")
       .addEventListener("click", () => this.navigateC4Back());
@@ -793,29 +887,31 @@ class TaskManager {
   }
 
   activateViewButton(view) {
-    // Get both desktop and mobile buttons
-    const desktopBtn = document.getElementById(`${view}ViewBtn`);
-    const mobileBtn = document.getElementById(`${view}ViewBtnMobile`);
+    // Update the view selector label
+    const viewLabels = {
+      summary: "Summary", list: "List", board: "Board", timeline: "Timeline",
+      notes: "Notes", goals: "Goals", milestones: "Milestones", ideas: "Ideas",
+      canvas: "Canvas", mindmap: "Mindmap", c4: "C4 Architecture",
+      retrospectives: "Retrospectives", timeTracking: "Time Tracking", config: "Settings"
+    };
+    const label = document.getElementById("currentViewLabel");
+    if (label) label.textContent = viewLabels[view] || view;
 
-    // Activate desktop button
+    // Close dropdown
+    document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+
+    // Activate desktop button in dropdown
+    const desktopBtn = document.getElementById(`${view}ViewBtn`);
     if (desktopBtn) {
-      desktopBtn.classList.add("bg-white", "dark:bg-gray-600", "text-gray-900", "dark:text-gray-100", "shadow-sm");
-      desktopBtn.classList.remove(
-        "text-gray-600", "dark:text-gray-300",
-        "hover:text-gray-900", "dark:hover:text-gray-100",
-        "hover:bg-gray-100", "dark:hover:bg-gray-700",
-        "hover:bg-gray-200", "dark:hover:bg-gray-600"
-      );
+      desktopBtn.classList.add("text-gray-900", "dark:text-white", "bg-gray-100", "dark:bg-gray-700");
+      desktopBtn.classList.remove("text-gray-600", "dark:text-gray-300");
     }
 
     // Activate mobile button
+    const mobileBtn = document.getElementById(`${view}ViewBtnMobile`);
     if (mobileBtn) {
-      mobileBtn.classList.add("bg-white", "dark:bg-gray-600", "text-gray-900", "dark:text-gray-100", "shadow-sm");
-      mobileBtn.classList.remove(
-        "text-gray-600", "dark:text-gray-300",
-        "hover:text-gray-900", "dark:hover:text-gray-100",
-        "hover:bg-gray-100", "dark:hover:bg-gray-600"
-      );
+      mobileBtn.classList.add("text-gray-900", "dark:text-white", "bg-gray-100", "dark:bg-gray-800");
+      mobileBtn.classList.remove("text-gray-600", "dark:text-gray-300");
     }
   }
 
@@ -833,118 +929,23 @@ class TaskManager {
     this.resizableEvents.forEach((elem) => elem.disconnect());
     this.notesLoaded = false;
 
-    // Update button states
-    const summaryBtn = document.getElementById("summaryViewBtn");
-    const listBtn = document.getElementById("listViewBtn");
-    const boardBtn = document.getElementById("boardViewBtn");
-    const timelineBtn = document.getElementById("timelineViewBtn");
-    const notesBtn = document.getElementById("notesViewBtn");
-    const goalsBtn = document.getElementById("goalsViewBtn");
-    const milestonesBtn = document.getElementById("milestonesViewBtn");
-    const canvasBtn = document.getElementById("canvasViewBtn");
-    const mindmapBtn = document.getElementById("mindmapViewBtn");
-    const c4Btn = document.getElementById("c4ViewBtn");
-    const configBtn = document.getElementById("configViewBtn");
-
-    // Mobile buttons
-    const summaryBtnMobile = document.getElementById("summaryViewBtnMobile");
-    const listBtnMobile = document.getElementById("listViewBtnMobile");
-    const boardBtnMobile = document.getElementById("boardViewBtnMobile");
-    const timelineBtnMobile = document.getElementById("timelineViewBtnMobile");
-    const notesBtnMobile = document.getElementById("notesViewBtnMobile");
-    const goalsBtnMobile = document.getElementById("goalsViewBtnMobile");
-    const canvasBtnMobile = document.getElementById("canvasViewBtnMobile");
-    const mindmapBtnMobile = document.getElementById("mindmapViewBtnMobile");
-    const c4BtnMobile = document.getElementById("c4ViewBtnMobile");
-    const configBtnMobile = document.getElementById("configViewBtnMobile");
-
-    // Reset grouped buttons (inside the gray container - need darker hover)
-    const groupedBtns = [summaryBtn, listBtn, boardBtn, timelineBtn];
-    groupedBtns.forEach((btn) => {
+    // Reset all desktop nav buttons in dropdown
+    const desktopNavBtns = ["summaryViewBtn", "listViewBtn", "boardViewBtn", "timelineViewBtn", "notesViewBtn", "goalsViewBtn", "milestonesViewBtn", "ideasViewBtn", "canvasViewBtn", "mindmapViewBtn", "c4ViewBtn", "retrospectivesViewBtn", "timeTrackingViewBtn"];
+    desktopNavBtns.forEach((id) => {
+      const btn = document.getElementById(id);
       if (btn) {
-        btn.classList.remove(
-          "bg-white",
-          "dark:bg-gray-600",
-          "text-gray-900",
-          "dark:text-gray-100",
-          "shadow-sm",
-        );
-        btn.classList.add(
-          "text-gray-600",
-          "dark:text-gray-300",
-          "hover:text-gray-900",
-          "dark:hover:text-gray-100",
-          "hover:bg-gray-200",
-          "dark:hover:bg-gray-600",
-        );
-      }
-    });
-
-    // Reset standalone desktop buttons (need lighter hover)
-    const standaloneDesktopBtns = [notesBtn, goalsBtn, milestonesBtn];
-    standaloneDesktopBtns.forEach((btn) => {
-      if (btn) {
-        btn.classList.remove(
-          "bg-white",
-          "dark:bg-gray-600",
-          "text-gray-900",
-          "dark:text-gray-100",
-          "shadow-sm",
-        );
-        btn.classList.add(
-          "text-gray-600",
-          "dark:text-gray-300",
-          "hover:text-gray-900",
-          "dark:hover:text-gray-100",
-          "hover:bg-gray-100",
-          "dark:hover:bg-gray-700",
-        );
+        btn.classList.remove("text-gray-900", "dark:text-white", "bg-gray-100", "dark:bg-gray-700");
+        btn.classList.add("text-gray-600", "dark:text-gray-300");
       }
     });
 
     // Reset mobile buttons
-    const mobileBtns = [
-      summaryBtnMobile,
-      listBtnMobile,
-      boardBtnMobile,
-      timelineBtnMobile,
-      notesBtnMobile,
-      goalsBtnMobile,
-      canvasBtnMobile,
-      mindmapBtnMobile,
-      c4BtnMobile,
-      configBtnMobile,
-    ];
-    mobileBtns.forEach((btn) => {
+    const mobileBtnIds = ["summaryViewBtnMobile", "listViewBtnMobile", "boardViewBtnMobile", "timelineViewBtnMobile", "notesViewBtnMobile", "goalsViewBtnMobile", "milestonesViewBtnMobile", "canvasViewBtnMobile", "mindmapViewBtnMobile", "c4ViewBtnMobile", "ideasViewBtnMobile", "retrospectivesViewBtnMobile", "timeTrackingViewBtnMobile", "configViewBtnMobile"];
+    mobileBtnIds.forEach((id) => {
+      const btn = document.getElementById(id);
       if (btn) {
-        btn.classList.remove(
-          "bg-white",
-          "dark:bg-gray-600",
-          "text-gray-900",
-          "dark:text-gray-100",
-          "shadow-sm",
-        );
-        btn.classList.add(
-          "text-gray-600",
-          "dark:text-gray-300",
-          "hover:text-gray-900",
-          "dark:hover:text-gray-100",
-          "hover:bg-gray-100",
-          "dark:hover:bg-gray-600",
-        );
-      }
-    });
-
-    // Dropdown buttons (canvas, mindmap, c4) - don't need hover reset, they stay in dropdown
-    [canvasBtn, mindmapBtn, c4Btn, configBtn].forEach((btn) => {
-      if (btn) {
-        btn.classList.remove(
-          "bg-white",
-          "dark:bg-gray-600",
-          "text-gray-900",
-          "dark:text-gray-100",
-          "shadow-sm",
-        );
+        btn.classList.remove("text-gray-900", "dark:text-white", "bg-gray-100", "dark:bg-gray-800");
+        btn.classList.add("text-gray-600", "dark:text-gray-300");
       }
     });
 
@@ -967,15 +968,8 @@ class TaskManager {
     // Clear C4 connections SVG when switching away from C4 view
     const c4Svg = document.getElementById('c4Connections');
     if (c4Svg && view !== 'c4') {
-      // Clear all connections but keep the arrow marker definition
-      c4Svg.innerHTML = `
-        <defs>
-          <marker id="arrowhead" markerWidth="10" markerHeight="7" 
-                  refX="10" refY="3.5" orient="auto">
-            <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280" />
-          </marker>
-        </defs>
-      `;
+      // Clear all connections when leaving C4 view
+      c4Svg.innerHTML = '';
     }
 
     // Activate current view
@@ -1170,9 +1164,9 @@ class TaskManager {
     if (overdue.length > 0) {
       html += `
         <div>
-          <h4 class="text-sm font-medium text-red-600 dark:text-red-400 mb-2">Overdue (${overdue.length})</h4>
+          <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Overdue (${overdue.length})</h4>
           <div class="space-y-2">
-            ${overdue.map((task) => this.renderDeadlineTask(task, "red")).join("")}
+            ${overdue.map((task) => this.renderDeadlineTask(task, "overdue")).join("")}
           </div>
         </div>
       `;
@@ -1181,9 +1175,9 @@ class TaskManager {
     if (dueToday.length > 0) {
       html += `
         <div>
-          <h4 class="text-sm font-medium text-orange-600 dark:text-orange-400 mb-2">Due Today (${dueToday.length})</h4>
+          <h4 class="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Due Today (${dueToday.length})</h4>
           <div class="space-y-2">
-            ${dueToday.map((task) => this.renderDeadlineTask(task, "orange")).join("")}
+            ${dueToday.map((task) => this.renderDeadlineTask(task, "today")).join("")}
           </div>
         </div>
       `;
@@ -1192,9 +1186,9 @@ class TaskManager {
     if (dueSoon.length > 0) {
       html += `
         <div>
-          <h4 class="text-sm font-medium text-yellow-600 dark:text-yellow-500 mb-2">Due This Week (${dueSoon.length})</h4>
+          <h4 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Due This Week (${dueSoon.length})</h4>
           <div class="space-y-2">
-            ${dueSoon.map((task) => this.renderDeadlineTask(task, "yellow")).join("")}
+            ${dueSoon.map((task) => this.renderDeadlineTask(task, "soon")).join("")}
           </div>
         </div>
       `;
@@ -1203,18 +1197,16 @@ class TaskManager {
     container.innerHTML = html;
   }
 
-  renderDeadlineTask(task, color) {
-    const colorClasses = {
-      red: "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20",
-      orange: "border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20",
-      yellow: "border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20",
-    };
+  renderDeadlineTask(task, urgency) {
     const dateStr = task.dueDateParsed.toLocaleDateString();
     return `
-      <div class="p-2 rounded border ${colorClasses[color]} cursor-pointer hover:opacity-80 transition-opacity"
+      <div class="p-2 rounded border ${DEADLINE_CLASSES[urgency]} cursor-pointer hover:opacity-80 transition-opacity"
            onclick="taskManager.openTaskModal('${task.id}')">
         <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">${task.title}</div>
-        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">${dateStr} · ${task.section || "No section"}</div>
+        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          ${dateStr} · ${task.section || "No section"}
+        </div>
       </div>
     `;
   }
@@ -1253,11 +1245,11 @@ class TaskManager {
     container.innerHTML = links.map((link, index) => `
       <div class="flex items-center justify-between group">
         <a href="${link.url}" target="_blank" rel="noopener noreferrer"
-           class="text-sm text-primary hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 truncate flex-1">
+           class="text-sm text-gray-900 hover:text-gray-600 dark:text-gray-100 dark:hover:text-gray-300 truncate flex-1 underline">
           ${link.title}
         </a>
         <button onclick="taskManager.removeLink(${index})"
-                class="ml-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                class="ml-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity"
                 title="Remove link">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -1331,15 +1323,8 @@ class TaskManager {
   updateStatusDropdownStyle() {
     const select = document.getElementById("projectStatus");
     const status = select.value;
-    const styles = {
-      active: "border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-600 dark:bg-blue-900/30 dark:text-blue-300",
-      "on-track": "border-green-300 bg-green-50 text-green-700 dark:border-green-600 dark:bg-green-900/30 dark:text-green-300",
-      "at-risk": "border-yellow-300 bg-yellow-50 text-yellow-700 dark:border-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-300",
-      late: "border-red-300 bg-red-50 text-red-700 dark:border-red-600 dark:bg-red-900/30 dark:text-red-300",
-      "on-hold": "border-gray-300 bg-gray-50 text-gray-700 dark:border-gray-600 dark:bg-gray-900/30 dark:text-gray-300",
-      completed: "border-purple-300 bg-purple-50 text-purple-700 dark:border-purple-600 dark:bg-purple-900/30 dark:text-purple-300",
-    };
-    select.className = `text-sm border rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${styles[status] || ""}`;
+    const statusClass = `status-select-${status}`;
+    select.className = `text-sm border-2 rounded-md px-2 py-1 font-medium focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent ${statusClass}`;
   }
 
   renderDynamicSectionCounts(allTasks) {
@@ -1347,28 +1332,17 @@ class TaskManager {
     container.innerHTML = "";
 
     const sections = this.sections || [];
-    const colors = [
-      "blue",
-      "orange",
-      "purple",
-      "indigo",
-      "pink",
-      "yellow",
-      "red",
-      "gray",
-    ];
 
     sections.forEach((section, index) => {
       const sectionTasks = allTasks.filter(
         (task) => task.section === section && !task.completed,
       );
-      const color = colors[index % colors.length];
 
       const div = document.createElement("div");
       div.className = "flex justify-between items-center";
       div.innerHTML = `
                 <span class="text-sm text-gray-600 dark:text-gray-400">${section}</span>
-                <span class="text-lg font-semibold text-${color}-600 dark:text-${color}-400">${sectionTasks.length}</span>
+                <span class="text-lg font-semibold text-gray-900 dark:text-gray-100">${sectionTasks.length}</span>
             `;
       container.appendChild(div);
     });
@@ -1399,16 +1373,6 @@ class TaskManager {
   renderSectionBreakdown() {
     const container = document.getElementById("sectionBreakdown");
     const sections = this.sections || [];
-    const colors = [
-      "purple",
-      "orange",
-      "blue",
-      "green",
-      "indigo",
-      "pink",
-      "yellow",
-      "red",
-    ];
 
     // Get all tasks including children
     let allTasks = [];
@@ -1425,14 +1389,15 @@ class TaskManager {
     container.innerHTML = "";
 
     sections.forEach((section, index) => {
-      const color = colors[index % colors.length];
       const count = allTasks.filter((task) => task.section === section).length;
+      // Alternate between different grey shades for visual distinction
+      const dotShade = index % 2 === 0 ? 'bg-gray-800 dark:bg-gray-200' : 'bg-gray-500 dark:bg-gray-400';
 
       const div = document.createElement("div");
       div.className = "flex items-center justify-between";
       div.innerHTML = `
                 <div class="flex items-center space-x-2">
-                    <div class="w-3 h-3 bg-${color}-400 rounded-full"></div>
+                    <div class="w-3 h-3 ${dotShade} rounded-full"></div>
                     <span class="text-sm text-gray-600 dark:text-gray-400">${section}</span>
                 </div>
                 <span class="text-sm font-medium text-gray-900 dark:text-gray-100">${count}</span>
@@ -1475,30 +1440,20 @@ class TaskManager {
     milestonesSection.classList.remove("hidden");
     container.innerHTML = "";
 
-    const colors = [
-      "green",
-      "blue",
-      "purple",
-      "orange",
-      "indigo",
-      "pink",
-      "yellow",
-      "red",
-    ];
-
     milestones.sort().forEach((milestone, index) => {
       const data = milestoneData[milestone];
-      const color = colors[index % colors.length];
       const completedCount = data.total - data.incomplete;
       const progressPercent =
         data.total > 0 ? Math.round((completedCount / data.total) * 100) : 0;
+      // Alternate between different grey shades for visual distinction
+      const dotShade = index % 2 === 0 ? 'bg-gray-800 dark:bg-gray-200' : 'bg-gray-500 dark:bg-gray-400';
 
       const div = document.createElement("div");
       div.className = "space-y-2";
       div.innerHTML = `
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-2">
-                        <div class="w-3 h-3 bg-${color}-400 rounded-full"></div>
+                        <div class="w-3 h-3 ${dotShade} rounded-full"></div>
                         <span class="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg>${milestone}</span>
                     </div>
                     <span class="text-sm font-medium text-gray-900 dark:text-gray-100">${data.incomplete} remaining</span>
@@ -1506,7 +1461,7 @@ class TaskManager {
                 <div class="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
                     <span>${completedCount}/${data.total} completed</span>
                     <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                        <div class="bg-${color}-400 h-1.5 rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
+                        <div class="bg-gray-900 dark:bg-gray-100 h-1.5 rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
                     </div>
                     <span>${progressPercent}%</span>
                 </div>
@@ -1612,7 +1567,7 @@ class TaskManager {
     } else if (Notification.permission === "denied") {
       statusEl.innerHTML = '<span class="text-red-600 dark:text-red-400">Notifications blocked - enable in browser settings</span>';
     } else {
-      statusEl.innerHTML = '<button id="enableNotifBtn" class="text-primary hover:underline">Enable notifications</button>';
+      statusEl.innerHTML = '<button id="enableNotifBtn" class="text-gray-900 dark:text-gray-100 hover:underline">Enable notifications</button>';
       document.getElementById("enableNotifBtn")?.addEventListener("click", () => {
         Notification.requestPermission().then(() => this.updateNotificationStatus());
       });
@@ -1705,7 +1660,7 @@ class TaskManager {
       const btn = document.getElementById(`pomodoro${m}Btn`);
       if (!btn) return;
       if (m.toLowerCase() === mode) {
-        btn.className = "px-3 py-1 rounded text-xs font-medium bg-primary text-white";
+        btn.className = "px-3 py-1 rounded text-xs font-medium bg-gray-900 text-white dark:bg-gray-600 dark:text-white";
       } else {
         btn.className = "px-3 py-1 rounded text-xs font-medium bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300";
       }
@@ -1923,7 +1878,7 @@ class TaskManager {
       container.innerHTML = `
         <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
           <p class="text-lg font-medium">No tasks match filters</p>
-          <button onclick="taskManager.clearListFilters()" class="mt-2 text-sm text-primary hover:text-blue-700">Clear filters</button>
+          <button onclick="taskManager.clearListFilters()" class="mt-2 text-sm text-gray-900 dark:text-gray-100 hover:underline">Clear filters</button>
         </div>`;
       return;
     }
@@ -1994,7 +1949,7 @@ class TaskManager {
     div.draggable = !isChild; // Only allow parent tasks to be dragged
     div.dataset.taskId = task.id;
 
-    const priorityColor = this.getPriorityColor(task.config.priority);
+    const priorityBadgeClasses = this.getPriorityBadgeClasses(task.config.priority);
     const priorityText = this.getPriorityText(task.config.priority);
 
     div.innerHTML = `
@@ -2002,23 +1957,23 @@ class TaskManager {
                 <div class="flex items-center space-x-3">
                     <input type="checkbox" ${task.completed ? "checked" : ""}
                            onchange="taskManager.toggleTask('${task.id}')"
-                           class="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary dark:bg-gray-700">
+                           class="rounded border-gray-300 dark:border-gray-600 text-gray-900 focus:ring-gray-500 dark:bg-gray-700">
                     <div>
-                        <div class="flex items-center space-x-2">
+                        <div class="flex items-center space-x-2 flex-wrap gap-1">
                             <span class="${task.completed ? "line-through text-gray-500 dark:text-gray-400" : "text-gray-900 dark:text-gray-100"} font-medium">
                                 ${task.title}
                             </span>
-                            ${task.config.priority ? `<span class="px-2 py-1 text-xs rounded-full bg-${priorityColor}-100 dark:bg-${priorityColor}-900 text-${priorityColor}-800 dark:text-${priorityColor}-200">${priorityText}</span>` : ""}
-                            ${task.config.tag ? task.config.tag.map((tag) => `<span class="px-2 py-1 text-xs rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">${tag}</span>`).join("") : ""}
+                            ${task.config.priority ? `<span class="px-2 py-0.5 text-xs font-medium rounded ${priorityBadgeClasses}">${priorityText}</span>` : ""}
+                            ${task.config.tag ? task.config.tag.map((tag) => `<span class="px-2 py-0.5 text-xs font-medium rounded border ${TAG_CLASSES}">${tag}</span>`).join("") : ""}
                         </div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            ID: ${task.id} •
-                            ${task.config.assignee ? `Assigned to: ${task.config.assignee} • ` : ""}
-                            ${task.config.due_date ? `Due: ${this.formatDate(task.config.due_date)} • ` : ""}
-                            ${task.config.effort ? `${task.config.effort} days • ` : ""}
-                            ${task.config.milestone ? `Milestone: ${task.config.milestone} • ` : ""}
-                            ${task.config.blocked_by && task.config.blocked_by.length > 0 ? `Blocked by: ${task.config.blocked_by.join(", ")} • ` : ""}
-                            Section: ${task.section}
+                        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                            <span class="text-xs font-mono text-gray-400">#${task.id}</span>
+                            ${task.config.assignee ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>${task.config.assignee}</span>` : ""}
+                            ${task.config.due_date ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>${this.formatDate(task.config.due_date)}</span>` : ""}
+                            ${task.config.effort ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>${task.config.effort}d</span>` : ""}
+                            ${task.config.milestone ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg>${task.config.milestone}</span>` : ""}
+                            ${task.config.blocked_by && task.config.blocked_by.length > 0 ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>${task.config.blocked_by.join(", ")}</span>` : ""}
+                            <span class="text-gray-400">${task.section}</span>
                         </div>
                     </div>
                 </div>
@@ -2027,7 +1982,7 @@ class TaskManager {
                       !isChild
                         ? `
                         <button onclick="taskManager.addSubtask('${task.id}')"
-                                class="text-gray-400 hover:text-green-500 transition-colors" title="Add Subtask">
+                                class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="Add Subtask">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
@@ -2039,7 +1994,7 @@ class TaskManager {
                       task.description && task.description.length > 0
                         ? `
                         <button onclick="taskManager.toggleDescription('${task.id}')"
-                                class="text-gray-400 hover:text-blue-500 transition-colors" title="View Description">
+                                class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="View Description">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
@@ -2048,19 +2003,19 @@ class TaskManager {
                         : ""
                     }
                     <button onclick="taskManager.copyTaskLink('${task.id}')"
-                            class="text-gray-400 hover:text-purple-500 transition-colors" title="Copy Link">
+                            class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="Copy Link">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
                         </svg>
                     </button>
                     <button onclick="taskManager.editTask('${task.id}')"
-                            class="text-gray-400 hover:text-primary transition-colors" title="Edit">
+                            class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="Edit">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                         </svg>
                     </button>
                     <button onclick="taskManager.deleteTask('${task.id}')"
-                            class="text-gray-400 hover:text-red-500 transition-colors">
+                            class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
@@ -2138,7 +2093,7 @@ class TaskManager {
     div.draggable = true;
     div.dataset.taskId = task.id;
 
-    const priorityColor = this.getPriorityColor(task.config.priority);
+    const priorityBadgeClasses = this.getPriorityBadgeClasses(task.config.priority);
     const priorityText = this.getPriorityText(task.config.priority);
 
     div.innerHTML = `
@@ -2148,7 +2103,7 @@ class TaskManager {
                 </h4>
                 <div class="flex space-x-1">
                     <button onclick="taskManager.addSubtask('${task.id}')"
-                            class="text-gray-400 hover:text-green-500 transition-colors" title="Add Subtask">
+                            class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="Add Subtask">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                         </svg>
@@ -2157,7 +2112,7 @@ class TaskManager {
                       task.description && task.description.length > 0
                         ? `
                         <button onclick="taskManager.toggleDescription('${task.id}')"
-                                class="text-gray-400 hover:text-blue-500 transition-colors" title="View Description">
+                                class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="View Description">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
@@ -2166,19 +2121,19 @@ class TaskManager {
                         : ""
                     }
                     <button onclick="taskManager.copyTaskLink('${task.id}')"
-                            class="text-gray-400 hover:text-purple-500 transition-colors" title="Copy Link">
+                            class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="Copy Link">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
                         </svg>
                     </button>
                     <button onclick="taskManager.editTask('${task.id}')"
-                            class="text-gray-400 hover:text-primary transition-colors" title="Edit">
+                            class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="Edit">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                         </svg>
                     </button>
                     <button onclick="taskManager.deleteTask('${task.id}')"
-                            class="text-gray-400 hover:text-red-500 transition-colors" title="Delete">
+                            class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="Delete">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
@@ -2190,29 +2145,30 @@ class TaskManager {
                 <div class="flex items-center space-x-1">
                     <input type="checkbox" ${task.completed ? "checked" : ""}
                            onchange="taskManager.toggleTask('${task.id}')"
-                           class="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary dark:bg-gray-600 text-xs">
+                           class="rounded border-gray-300 dark:border-gray-600 text-gray-900 focus:ring-gray-500 dark:bg-gray-600 text-xs">
                     <span class="text-xs text-gray-500 dark:text-gray-400">Complete</span>
                 </div>
 
-                ${task.config.priority ? `<span class="inline-block px-2 py-1 text-xs rounded-full bg-${priorityColor}-100 dark:bg-${priorityColor}-900 text-${priorityColor}-800 dark:text-${priorityColor}-200">${priorityText}</span>` : ""}
+                <div class="flex flex-wrap gap-1">
+                    ${task.config.priority ? `<span class="inline-block px-2 py-0.5 text-xs font-medium rounded ${priorityBadgeClasses}">${priorityText}</span>` : ""}
+                    ${
+                      task.config.tag
+                        ? task.config.tag
+                            .map(
+                              (tag) =>
+                                `<span class="inline-block px-2 py-0.5 text-xs font-medium rounded border ${TAG_CLASSES}">${tag}</span>`,
+                            )
+                            .join("")
+                        : ""
+                    }
+                </div>
 
-                ${
-                  task.config.tag
-                    ? task.config.tag
-                        .map(
-                          (tag) =>
-                            `<span class="inline-block px-2 py-1 text-xs rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 mr-1">${tag}</span>`,
-                        )
-                        .join("")
-                    : ""
-                }
-
-                <div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg> ID: ${task.id}</div>
+                <div class="text-xs font-mono text-gray-400">#${task.id}</div>
                 ${task.config.assignee ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> ${task.config.assignee}</div>` : ""}
                 ${task.config.due_date ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> ${this.formatDate(task.config.due_date)}</div>` : ""}
-                ${task.config.effort ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ${task.config.effort} days</div>` : ""}
+                ${task.config.effort ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ${task.config.effort}d</div>` : ""}
                 ${task.config.milestone ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg> ${task.config.milestone}</div>` : ""}
-                ${task.config.blocked_by && task.config.blocked_by.length > 0 ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg> Blocked by: ${task.config.blocked_by.join(", ")}</div>` : ""}
+                ${task.config.blocked_by && task.config.blocked_by.length > 0 ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg> ${task.config.blocked_by.join(", ")}</div>` : ""}
 
                 ${
                   task.children && task.children.length > 0
@@ -2226,7 +2182,7 @@ class TaskManager {
                                 <div class="flex items-center space-x-2 text-xs">
                                     <input type="checkbox" ${child.completed ? "checked" : ""}
                                            onchange="taskManager.toggleTask('${child.id}')"
-                                           class="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary dark:bg-gray-600" style="transform: scale(0.8);">
+                                           class="rounded border-gray-300 dark:border-gray-600 text-gray-900 focus:ring-gray-500 dark:bg-gray-600" style="transform: scale(0.8);">
                                     <span class="${child.completed ? "line-through text-gray-400 dark:text-gray-500" : "text-gray-600 dark:text-gray-300"}">${child.title}</span>
                                 </div>
                             `,
@@ -2366,22 +2322,70 @@ class TaskManager {
   async toggleTask(taskId) {
     const task = this.findTaskById(taskId);
     if (task) {
+      // Optimistic update - update local state immediately
+      const newCompleted = !task.completed;
+      task.completed = newCompleted;
+
+      // Update UI immediately without full re-render
+      this.updateTaskInView(taskId, task);
+
       try {
         const response = await fetch(`/api/tasks/${taskId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ completed: !task.completed }),
+          body: JSON.stringify({ completed: newCompleted }),
         });
 
-        if (response.ok) {
-          await this.loadTasks();
-        } else {
+        if (!response.ok) {
+          // Revert on failure
+          task.completed = !newCompleted;
+          this.updateTaskInView(taskId, task);
           console.error("Failed to toggle task");
         }
       } catch (error) {
+        // Revert on error
+        task.completed = !newCompleted;
+        this.updateTaskInView(taskId, task);
         console.error("Error toggling task:", error);
+      }
+    }
+  }
+
+  updateTaskInView(taskId, task) {
+    // Update checkbox state
+    const checkboxes = document.querySelectorAll(`input[onchange*="toggleTask('${taskId}')"]`);
+    checkboxes.forEach(cb => {
+      cb.checked = task.completed;
+    });
+
+    // Update task card styling (board view uses h4, list view uses different structure)
+    const card = document.querySelector(`[data-task-id="${taskId}"]`);
+    if (card) {
+      // Board view - h4 title
+      const h4Title = card.querySelector('h4');
+      if (h4Title) {
+        if (task.completed) {
+          h4Title.classList.add('line-through');
+          h4Title.classList.remove('text-gray-900', 'dark:text-gray-100');
+          h4Title.classList.add('text-gray-500', 'dark:text-gray-400');
+        } else {
+          h4Title.classList.remove('line-through', 'text-gray-500', 'dark:text-gray-400');
+          h4Title.classList.add('text-gray-900', 'dark:text-gray-100');
+        }
+      }
+
+      // List view - task-title span
+      const titleSpan = card.querySelector('.task-title');
+      if (titleSpan) {
+        if (task.completed) {
+          titleSpan.classList.add('line-through', 'text-gray-400', 'dark:text-gray-500');
+          titleSpan.classList.remove('text-gray-900', 'dark:text-gray-100');
+        } else {
+          titleSpan.classList.remove('line-through', 'text-gray-400', 'dark:text-gray-500');
+          titleSpan.classList.add('text-gray-900', 'dark:text-gray-100');
+        }
       }
     }
   }
@@ -2701,20 +2705,25 @@ class TaskManager {
   }
 
   getPriorityColor(priority) {
+    // Now returns grey scale colors (darker = higher priority)
     switch (priority) {
       case 1:
-        return "red";
+        return "gray-900";
       case 2:
-        return "orange";
+        return "gray-700";
       case 3:
-        return "yellow";
+        return "gray-500";
       case 4:
-        return "blue";
+        return "gray-400";
       case 5:
-        return "gray";
+        return "gray-300";
       default:
-        return "gray";
+        return "gray-400";
     }
+  }
+
+  getPriorityBadgeClasses(priority) {
+    return PRIORITY_CLASSES[priority]?.badge || PRIORITY_CLASSES[5].badge;
   }
 
   getPriorityText(priority) {
@@ -2961,7 +2970,7 @@ class TaskManager {
     // Links
     html = html.replace(
       /\[([^\]]+)\]\(([^)]+)\)/g,
-      '<a href="$2" class="text-blue-600 dark:text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">$1</a>',
+      '<a href="$2" class="text-gray-900 dark:text-gray-100 underline hover:no-underline" target="_blank" rel="noopener noreferrer">$1</a>',
     );
 
     // Simple line processing for better text wrapping
@@ -3149,10 +3158,10 @@ class TaskManager {
       const task = this.findTaskById(taskId);
       const chip = document.createElement("div");
       chip.className =
-        "inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200";
+        "inline-flex items-center px-2 py-1 rounded-full text-xs border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700 text-gray-800 dark:text-gray-200";
       chip.innerHTML = `
                 <span>${task ? task.title : taskId}</span>
-                <button type="button" class="ml-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200" onclick="taskManager.removeDependency('${taskId}')">
+                <button type="button" class="ml-1 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200" onclick="taskManager.removeDependency('${taskId}')">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -3223,8 +3232,20 @@ class TaskManager {
       // Update UI with loaded config
       document.getElementById("projectStartDate").value =
         this.projectConfig.startDate || "";
-      document.getElementById("workingDays").value =
-        this.projectConfig.workingDaysPerWeek || 5;
+
+      // Handle working days - check if custom schedule
+      if (this.projectConfig.workingDays && this.projectConfig.workingDays.length > 0) {
+        document.getElementById("workingDays").value = "custom";
+        document.getElementById("customDaysContainer").classList.remove("hidden");
+        // Set checkboxes
+        document.querySelectorAll(".working-day-checkbox").forEach(cb => {
+          cb.checked = this.projectConfig.workingDays.includes(cb.value);
+        });
+      } else {
+        document.getElementById("workingDays").value =
+          this.projectConfig.workingDaysPerWeek || 5;
+        document.getElementById("customDaysContainer").classList.add("hidden");
+      }
 
       // Render config UI if in config or timeline view
       if (this.currentView === "config") {
@@ -3244,6 +3265,7 @@ class TaskManager {
         this.projectConfig.startDate;
       document.getElementById("workingDays").value =
         this.projectConfig.workingDaysPerWeek;
+      document.getElementById("customDaysContainer").classList.add("hidden");
     }
   }
 
@@ -3261,9 +3283,24 @@ class TaskManager {
     const startDateInput = document.getElementById("projectStartDate");
     const workingDaysInput = document.getElementById("workingDays");
 
+    // Get custom working days if selected
+    let workingDays = null;
+    let workingDaysPerWeek = 5;
+
+    if (workingDaysInput.value === "custom") {
+      workingDays = [];
+      document.querySelectorAll(".working-day-checkbox:checked").forEach(cb => {
+        workingDays.push(cb.value);
+      });
+      workingDaysPerWeek = workingDays.length;
+    } else {
+      workingDaysPerWeek = parseInt(workingDaysInput.value) || 5;
+    }
+
     const config = {
       startDate: startDateInput ? startDateInput.value : this.projectConfig?.startDate,
-      workingDaysPerWeek: workingDaysInput ? parseInt(workingDaysInput.value) : this.projectConfig?.workingDaysPerWeek || 5,
+      workingDaysPerWeek,
+      workingDays,
       assignees: this.projectConfig?.assignees || [],
       tags: this.projectConfig?.tags || [],
       links: this.projectConfig?.links || [],
@@ -3794,10 +3831,10 @@ class TaskManager {
     assignees.forEach((assignee, index) => {
       const chip = document.createElement("div");
       chip.className =
-        "inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200";
+        "inline-flex items-center px-3 py-1 rounded-full text-sm border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700 text-gray-800 dark:text-gray-200";
       chip.innerHTML = `
                 <span>${assignee}</span>
-                <button onclick="taskManager.removeAssignee(${index})" class="ml-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200">
+                <button onclick="taskManager.removeAssignee(${index})" class="ml-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -4067,7 +4104,7 @@ class TaskManager {
             <button class="py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
               (this.activeNote === null && index === 0) ||
               this.activeNote === index
-                ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                ? "border-gray-900 text-gray-900 dark:border-gray-100 dark:text-gray-100"
                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
             }" onclick="taskManager.selectNote(${index})">
                 ${note.title}
@@ -4114,7 +4151,24 @@ class TaskManager {
 
     // Check if we should use enhanced mode
     const isEnhanced = this.enhancedMode && activeNote.mode === 'enhanced';
-    
+
+    // Update toggle button state
+    const btn = document.getElementById('toggleModeBtn');
+    const btnText = document.getElementById('toggleModeText');
+    if (btn && btnText) {
+      if (isEnhanced) {
+        btn.classList.add('bg-purple-200', 'dark:bg-purple-800');
+        btn.classList.remove('bg-purple-100', 'dark:bg-purple-900');
+        btn.title = 'Switch to Simple Mode';
+        btnText.textContent = 'Simple';
+      } else {
+        btn.classList.remove('bg-purple-200', 'dark:bg-purple-800');
+        btn.classList.add('bg-purple-100', 'dark:bg-purple-900');
+        btn.title = 'Switch to Enhanced Mode';
+        btnText.textContent = 'Enhanced';
+      }
+    }
+
     // Show/hide appropriate editors
     const enhancedEditor = document.getElementById('enhancedNoteEditor');
     const simpleEditor = document.getElementById('activeNoteBodyContainer');
@@ -4184,7 +4238,7 @@ class TaskManager {
         ` : ''}
         <div class="flex gap-2">
           <button onclick="taskManager.duplicateParagraph('${paragraph.id}')" 
-                  class="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600" title="Duplicate">Copy</button>
+                  class="px-2 py-1 text-xs bg-gray-900 text-white rounded hover:bg-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500" title="Duplicate">Copy</button>
           <button onclick="taskManager.toggleParagraphType('${paragraph.id}')" 
                   class="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600" title="Toggle Type">${isCodeBlock ? 'Text' : 'Code'}</button>
           <button onclick="taskManager.deleteParagraph('${paragraph.id}')" 
@@ -4294,7 +4348,7 @@ class TaskManager {
           sectionHtml += `
             <button class="py-2 px-1 border-b-2 font-medium text-sm ${
               isActive 
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400' 
+                ? 'border-gray-900 text-gray-900 dark:border-gray-100 dark:text-gray-100' 
                 : 'border-transparent text-gray-500'
             }" onclick="taskManager.switchPreviewTab('${section.id}', '${tab.id}')">
               ${tab.title}
@@ -4322,7 +4376,7 @@ class TaskManager {
           : item.status === 'failed' ? 'text-red-600 dark:text-red-400' 
           : 'text-yellow-600 dark:text-yellow-400';
         sectionHtml += `
-          <div class="mb-4 p-3 border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900/20">
+          <div class="mb-4 p-3 border-l-4 border-gray-500 bg-gray-50 dark:bg-gray-800">
             <h3 class="font-semibold ${statusClass}">${item.title} (${item.status})</h3>
             ${item.date ? `<p class="text-sm text-gray-600 dark:text-gray-400">Date: ${item.date}</p>` : ''}
             <div class="mt-2">`;
@@ -4374,13 +4428,13 @@ class TaskManager {
     
     // Update tab button states in this section only
     sectionElement.querySelectorAll('button[onclick*="switchPreviewTab"]').forEach(btn => {
-      btn.classList.remove('border-blue-500', 'text-blue-600', 'dark:text-blue-400');
+      btn.classList.remove('border-gray-900', 'text-gray-900', 'dark:border-gray-100', 'dark:text-gray-100');
       btn.classList.add('border-transparent', 'text-gray-500');
     });
     
     const activeBtn = sectionElement.querySelector(`[onclick*="${tabId}"]`);
     if (activeBtn) {
-      activeBtn.classList.add('border-blue-500', 'text-blue-600', 'dark:text-blue-400');
+      activeBtn.classList.add('border-gray-900', 'text-gray-900', 'dark:border-gray-100', 'dark:text-gray-100');
       activeBtn.classList.remove('border-transparent', 'text-gray-500');
     }
   }
@@ -4492,6 +4546,11 @@ class TaskManager {
 
   selectNote(noteIndex) {
     this.activeNote = noteIndex;
+    // Sync enhancedMode with the selected note's mode
+    const note = this.notes[noteIndex];
+    if (note) {
+      this.enhancedMode = note.mode === 'enhanced';
+    }
     this.renderNotesView();
   }
 
@@ -4500,6 +4559,7 @@ class TaskManager {
     document.getElementById("noteModalTitle").textContent = "Add Note";
     document.getElementById("noteTitle").value = "";
     document.getElementById("noteContent").value = "";
+    document.getElementById("noteEnhancedMode").checked = false;
     document.getElementById("noteModal").classList.remove("hidden");
     document.getElementById("noteModal").classList.add("flex");
   }
@@ -4514,6 +4574,7 @@ class TaskManager {
 
     const title = document.getElementById("noteTitle").value;
     const content = document.getElementById("noteContent").value;
+    const enhancedMode = document.getElementById("noteEnhancedMode").checked;
 
     try {
       if (this.editingNote !== null) {
@@ -4526,15 +4587,28 @@ class TaskManager {
         });
       } else {
         // Create new note
+        const noteData = { title, content };
+        if (enhancedMode) {
+          noteData.mode = "enhanced";
+          noteData.paragraphs = content ? [{ id: `p-${Date.now()}`, type: "text", content }] : [];
+        }
         await fetch("/api/notes", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, content }),
+          body: JSON.stringify(noteData),
         });
       }
 
       this.closeNoteModal();
       await this.loadNotes();
+
+      // If enhanced mode was selected, select the new note and enable enhanced mode
+      if (enhancedMode && this.editingNote === null) {
+        const newNoteIndex = this.notes.length - 1;
+        this.activeNote = newNoteIndex;
+        this.enhancedMode = true;
+        this.renderNotesView();
+      }
     } catch (error) {
       console.error("Error saving note:", error);
     }
@@ -4915,7 +4989,7 @@ class TaskManager {
       actionBar.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3 flex space-x-2 z-50';
       actionBar.innerHTML = `
         <button onclick="taskManager.deleteSelectedParagraphs()" class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">Delete Selected</button>
-        <button onclick="taskManager.duplicateSelectedParagraphs()" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">Duplicate Selected</button>
+        <button onclick="taskManager.duplicateSelectedParagraphs()" class="bg-gray-900 text-white px-3 py-1 rounded text-sm hover:bg-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500">Duplicate Selected</button>
         <button onclick="taskManager.moveSelectedParagraphs('up')" class="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700">Move Up</button>
         <button onclick="taskManager.moveSelectedParagraphs('down')" class="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700">Move Down</button>
       `;
@@ -5191,7 +5265,7 @@ class TaskManager {
         <button onclick="taskManager.switchTab('${section.id}', '${tab.id}')" 
                 class="py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                   isActive 
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-400' 
+                    ? 'border-gray-900 text-gray-900 dark:border-gray-100 dark:text-gray-100' 
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
                 }" 
                 data-tab-id="${tab.id}">
@@ -5201,7 +5275,7 @@ class TaskManager {
     });
     tabNavHtml += `
       <button onclick="taskManager.addTab('${section.id}')" 
-              class="py-2 px-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+              class="py-2 px-1 text-sm text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100">
         + Add Tab
       </button>
     </nav></div>`;
@@ -5214,11 +5288,11 @@ class TaskManager {
           <div class="mb-2">
             <input type="text" value="${tab.title}" 
                    onblur="taskManager.updateTabTitle('${section.id}', '${tab.id}', this.value)"
-                   class="text-sm font-medium border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 py-1">
+                   class="text-sm font-medium border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-gray-500 rounded px-2 py-1">
           </div>
           <div class="space-y-2">
             <button onclick="taskManager.addContentToTab('${section.id}', '${tab.id}', 'text')" 
-                    class="mr-2 px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600">+ Text</button>
+                    class="mr-2 px-3 py-1 text-xs bg-gray-900 text-white rounded hover:bg-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500">+ Text</button>
             <button onclick="taskManager.addContentToTab('${section.id}', '${tab.id}', 'code')" 
                     class="mr-2 px-3 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600">+ Code</button>
             <button onclick="taskManager.deleteTab('${section.id}', '${tab.id}')" 
@@ -5258,7 +5332,7 @@ class TaskManager {
           <div class="flex items-center justify-between mb-2">
             <input type="text" value="${item.title}" 
                    onblur="taskManager.updateTimelineItemTitle('${section.id}', '${item.id}', this.value)"
-                   class="font-medium text-sm border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-gray-900 dark:text-gray-100">
+                   class="font-medium text-sm border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-gray-500 rounded px-2 py-1 text-gray-900 dark:text-gray-100">
             <div class="flex items-center space-x-2">
               <input type="date" value="${item.date}" 
                      onchange="taskManager.updateTimelineItemDate('${section.id}', '${item.id}', this.value)"
@@ -5275,7 +5349,7 @@ class TaskManager {
           </div>
           <div class="space-y-2">
             <button onclick="taskManager.addContentToTimeline('${section.id}', '${item.id}', 'text')" 
-                    class="mr-2 px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600">+ Text</button>
+                    class="mr-2 px-3 py-1 text-xs bg-gray-900 text-white rounded hover:bg-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500">+ Text</button>
             <button onclick="taskManager.addContentToTimeline('${section.id}', '${item.id}', 'code')" 
                     class="px-3 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600">+ Code</button>
           </div>
@@ -5312,7 +5386,7 @@ class TaskManager {
           </div>
           <div class="space-y-2 mb-4">
             <button onclick="taskManager.addContentToSplitView('${section.id}', ${columnIndex}, 'text')" 
-                    class="mr-2 px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600">+ Text</button>
+                    class="mr-2 px-3 py-1 text-xs bg-gray-900 text-white rounded hover:bg-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500">+ Text</button>
             <button onclick="taskManager.addContentToSplitView('${section.id}', ${columnIndex}, 'code')" 
                     class="px-3 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600">+ Code</button>
           </div>
@@ -5826,13 +5900,13 @@ class TaskManager {
 
     // Update tab navigation
     section.querySelectorAll('[data-tab-id]').forEach(btn => {
-      btn.classList.remove('border-blue-500', 'text-blue-600', 'dark:text-blue-400');
+      btn.classList.remove('border-gray-900', 'text-gray-900', 'dark:border-gray-100', 'dark:text-gray-100');
       btn.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'dark:text-gray-400', 'dark:hover:text-gray-300');
     });
     
     const activeTab = section.querySelector(`button[data-tab-id="${tabId}"]`);
     if (activeTab) {
-      activeTab.classList.add('border-blue-500', 'text-blue-600', 'dark:text-blue-400');
+      activeTab.classList.add('border-gray-900', 'text-gray-900', 'dark:border-gray-100', 'dark:text-gray-100');
       activeTab.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'dark:text-gray-400', 'dark:hover:text-gray-300');
     }
 
@@ -6260,7 +6334,7 @@ class TaskManager {
                         </div>
                     </div>
                     <div class="flex space-x-2 ml-4">
-                        <button onclick="taskManager.editGoal(${this.goals.indexOf(goal)})" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                        <button onclick="taskManager.editGoal(${this.goals.indexOf(goal)})" class="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
@@ -6287,8 +6361,8 @@ class TaskManager {
 
   getTypeStyle(type) {
     return type === "enterprise"
-      ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-      : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+      ? "bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-900"
+      : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600";
   }
 
   getStatusStyle(status) {
@@ -6324,7 +6398,7 @@ class TaskManager {
         (filterId === "projectGoalsFilter" && type === "project")
       ) {
         btn.className =
-          "px-3 py-1 rounded-md text-sm font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200";
+          "px-3 py-1 rounded-md text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-600";
       } else {
         btn.className =
           "px-3 py-1 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100";
@@ -6449,7 +6523,7 @@ class TaskManager {
       <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
         <div class="flex justify-between items-start mb-2">
           <h3 class="font-medium text-gray-900 dark:text-gray-100">${m.name}</h3>
-          <span class="px-2 py-1 text-xs rounded ${m.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'}">${m.status}</span>
+          <span class="px-2 py-1 text-xs rounded ${m.status === 'completed' ? 'bg-gray-900 text-white dark:bg-gray-600 dark:text-white' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600'}">${m.status}</span>
         </div>
         ${m.target ? `<p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Target: ${new Date(m.target).toLocaleDateString()}</p>` : ''}
         <div class="mb-2">
@@ -6458,13 +6532,13 @@ class TaskManager {
             <span>${m.progress}%</span>
           </div>
           <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-            <div class="bg-primary h-2 rounded-full" style="width: ${m.progress}%"></div>
+            <div class="bg-gray-900 dark:bg-gray-100 h-2 rounded-full" style="width: ${m.progress}%"></div>
           </div>
         </div>
         ${m.description ? `<p class="text-sm text-gray-600 dark:text-gray-300 mt-2">${m.description}</p>` : ''}
         <div class="flex justify-end space-x-2 mt-3">
           <button onclick="taskManager.openMilestoneModal('${m.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">Edit</button>
-          <button onclick="taskManager.deleteMilestone('${m.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200">Delete</button>
+          <button onclick="taskManager.deleteMilestone('${m.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">Delete</button>
         </div>
       </div>
     `).join("");
@@ -6563,10 +6637,10 @@ class TaskManager {
 
     emptyState.classList.add("hidden");
     const statusColors = {
-      new: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-      considering: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-      planned: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-      rejected: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+      new: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600",
+      considering: "bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200",
+      planned: "bg-gray-900 text-white dark:bg-gray-600 dark:text-white",
+      rejected: "bg-gray-400 text-gray-800 dark:bg-gray-500 dark:text-gray-200",
     };
 
     container.innerHTML = this.ideas.map(idea => `
@@ -6679,7 +6753,7 @@ class TaskManager {
 
     emptyState?.classList.add("hidden");
     container.innerHTML = this.retrospectives.map(retro => {
-      const statusColor = retro.status === "open" ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300";
+      const statusColor = retro.status === "open" ? "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600" : "bg-gray-900 text-white dark:bg-gray-600 dark:text-white";
       return `
       <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden">
         <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600 flex justify-between items-center">
@@ -6694,26 +6768,26 @@ class TaskManager {
         </div>
         <div class="p-4 space-y-3">
           <div>
-            <h4 class="text-sm font-medium text-green-700 dark:text-green-400 mb-1">Continue</h4>
+            <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Continue</h4>
             <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-              ${retro.continue.length > 0 ? retro.continue.map(item => `<li class="flex items-start"><span class="text-green-500 mr-2">+</span>${item}</li>`).join("") : '<li class="text-gray-400 italic">No items</li>'}
+              ${retro.continue.length > 0 ? retro.continue.map(item => `<li class="flex items-start"><span class="text-gray-900 dark:text-gray-100 mr-2">+</span>${item}</li>`).join("") : '<li class="text-gray-400 italic">No items</li>'}
             </ul>
           </div>
           <div>
-            <h4 class="text-sm font-medium text-red-700 dark:text-red-400 mb-1">Stop</h4>
+            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stop</h4>
             <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-              ${retro.stop.length > 0 ? retro.stop.map(item => `<li class="flex items-start"><span class="text-red-500 mr-2">-</span>${item}</li>`).join("") : '<li class="text-gray-400 italic">No items</li>'}
+              ${retro.stop.length > 0 ? retro.stop.map(item => `<li class="flex items-start"><span class="text-gray-500 mr-2">-</span>${item}</li>`).join("") : '<li class="text-gray-400 italic">No items</li>'}
             </ul>
           </div>
           <div>
-            <h4 class="text-sm font-medium text-blue-700 dark:text-blue-400 mb-1">Start</h4>
+            <h4 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Start</h4>
             <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-              ${retro.start.length > 0 ? retro.start.map(item => `<li class="flex items-start"><span class="text-blue-500 mr-2">*</span>${item}</li>`).join("") : '<li class="text-gray-400 italic">No items</li>'}
+              ${retro.start.length > 0 ? retro.start.map(item => `<li class="flex items-start"><span class="text-gray-400 mr-2">*</span>${item}</li>`).join("") : '<li class="text-gray-400 italic">No items</li>'}
             </ul>
           </div>
         </div>
         <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-600 flex justify-end">
-          <button onclick="taskManager.deleteRetrospective('${retro.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200">Delete</button>
+          <button onclick="taskManager.deleteRetrospective('${retro.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">Delete</button>
         </div>
       </div>
     `}).join("");
@@ -7994,6 +8068,9 @@ class TaskManager {
       console.error('Failed to load C4 components:', error);
       this.c4Components = this.getDefaultC4Components();
     }
+    // Validate and clean up orphaned references, then save if changes were made
+    this.validateC4Components();
+    this.saveC4Components();
     this.renderC4Components();
     
     // Ensure reset button is properly bound
@@ -8061,24 +8138,50 @@ class TaskManager {
   renderC4Components() {
     const container = document.getElementById('c4ComponentsContainer');
     const emptyState = document.getElementById('c4EmptyState');
-    
+    const svg = document.getElementById('c4Connections');
+
+    // Always clear SVG connections first
+    if (svg) {
+      const isDark = document.documentElement.classList.contains('dark');
+      const arrowColor = isDark ? '#9ca3af' : '#6b7280';
+      svg.innerHTML = `
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7"
+                  refX="10" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="${arrowColor}" />
+          </marker>
+        </defs>
+      `;
+    }
+
     // Filter components by current navigation level
     const currentComponents = this.getCurrentLevelComponents();
-    
+
     if (!this.c4Components || this.c4Components.length === 0 || currentComponents.length === 0) {
       emptyState.classList.remove('hidden');
       container.classList.add('hidden');
-      
+
+      // Clean up old event listeners
+      container.querySelectorAll('[data-c4-id]').forEach(el => {
+        if (el._c4Cleanup) el._c4Cleanup();
+      });
+      container.innerHTML = '';
+
       // Make empty state clickable to add first component
       emptyState.style.cursor = 'pointer';
       emptyState.onclick = () => this.openC4ComponentModalWithLevel();
-      
+
       this.updateC4Breadcrumb();
       return;
     }
 
     emptyState.classList.add('hidden');
     container.classList.remove('hidden');
+
+    // Clean up old event listeners before clearing container
+    container.querySelectorAll('[data-c4-id]').forEach(el => {
+      if (el._c4Cleanup) el._c4Cleanup();
+    });
     container.innerHTML = '';
 
     // Make container clickable for adding components
@@ -8098,30 +8201,33 @@ class TaskManager {
 
     // Update breadcrumb
     this.updateC4Breadcrumb();
-    
-    // Draw connections
-    setTimeout(() => this.drawC4Connections(currentComponents), 100);
-    
-    // Initialize panning if not already done
+
+    // Draw connections after layout settles
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.drawC4Connections(currentComponents);
+      });
+    });
+
+    // Initialize panning and drag handlers if not already done
     if (!this.c4PanningInitialized) {
       this.initializeC4Panning();
+      this.initializeC4DragHandlers();
       this.c4PanningInitialized = true;
     }
-    
-    // Initialize force layout
-    setTimeout(() => this.initializeC4ForceLayout(currentComponents), 200);
+
+    // Only initialize force layout if physics is enabled
+    if (this.c4PhysicsEnabled) {
+      setTimeout(() => this.initializeC4ForceLayout(currentComponents), 200);
+    }
   }
 
   getCurrentLevelComponents() {
     if (this.c4NavigationStack.length === 0) {
-      // Show top-level components for current level
-      return this.c4Components.filter(comp => 
-        comp.level === this.currentC4Level && !comp.parent
-      );
+      return this.c4Components.filter(comp => !comp.parent);
     } else {
-      // Show children of current parent
-      const currentParent = this.c4NavigationStack[this.c4NavigationStack.length - 1];
-      return this.c4Components.filter(comp => comp.parent === currentParent.id);
+      const currentParentId = this.c4NavigationStack[this.c4NavigationStack.length - 1];
+      return this.c4Components.filter(comp => comp.parent === currentParentId);
     }
   }
 
@@ -8132,16 +8238,41 @@ class TaskManager {
     element.style.top = `${component.position.y}px`;
     element.setAttribute('data-c4-id', component.id);
 
-    const hasChildren = component.children && component.children.length > 0;
     const canDrillDown = this.canComponentBeDrilledDown(component);
-    
+
     element.innerHTML = `
+      <div class="c4-component-controls" style="position: absolute; top: 4px; right: 4px; display: none; gap: 2px; z-index: 10;">
+        <button class="c4-edit-btn" title="Edit" style="background: rgba(0,0,0,0.6); border: none; color: white; width: 20px; height: 20px; border-radius: 3px; cursor: pointer; font-size: 10px;">E</button>
+        <button class="c4-delete-btn" title="Delete" style="background: rgba(0,0,0,0.6); border: none; color: white; width: 20px; height: 20px; border-radius: 3px; cursor: pointer; font-size: 10px;">X</button>
+      </div>
       <div class="c4-component-type">${component.type}</div>
       <div class="c4-component-title">${component.name}</div>
       ${component.technology ? `<div class="c4-component-description">${component.technology}</div>` : ''}
       <div class="c4-component-description">${component.description}</div>
       ${canDrillDown ? '<div class="c4-component-drilldown">></div>' : ''}
     `;
+
+    // Show/hide controls on hover
+    element.addEventListener('mouseenter', () => {
+      element.querySelector('.c4-component-controls').style.display = 'flex';
+    });
+    element.addEventListener('mouseleave', () => {
+      element.querySelector('.c4-component-controls').style.display = 'none';
+    });
+
+    // Edit button handler
+    element.querySelector('.c4-edit-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.openC4EditModal(component);
+    });
+
+    // Delete button handler
+    element.querySelector('.c4-delete-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (confirm(`Delete "${component.name}"? This will also remove any children and connections.`)) {
+        this.deleteC4Component(component.id);
+      }
+    });
 
     // Add drag functionality (includes click handling)
     this.makeC4ComponentDraggable(element, component);
@@ -8157,15 +8288,17 @@ class TaskManager {
   }
 
   drillDownC4Component(component) {
-    // Stop any ongoing physics simulation
     this.stopC4ForceLayout();
-    
-    this.c4NavigationStack.push(component);
+    this.c4NavigationStack.push(component.id);
     document.getElementById('c4BackBtn').classList.remove('hidden');
     this.renderC4Components();
-    
-    // Reset cursor for the container
     document.getElementById('c4Container').style.cursor = 'grab';
+  }
+
+  // Helper to get component from navigation stack by index
+  getC4NavigationComponent(index) {
+    const id = this.c4NavigationStack[index];
+    return this.c4Components.find(c => c.id === id);
   }
 
   navigateC4Back() {
@@ -8186,13 +8319,16 @@ class TaskManager {
 
   updateC4Breadcrumb() {
     const breadcrumb = document.getElementById('c4Breadcrumb');
-    let html = `<span class="c4-breadcrumb-item" onclick="taskManager.navigateToC4Root()">${this.currentC4Level}</span>`;
-    
-    this.c4NavigationStack.forEach((component, index) => {
-      html += `<span class="c4-breadcrumb-separator">/</span>`;
-      html += `<span class="c4-breadcrumb-item" onclick="taskManager.navigateToC4Level(${index})">${component.name}</span>`;
+    let html = `<span class="c4-breadcrumb-item" onclick="taskManager.navigateToC4Root()">Root</span>`;
+
+    this.c4NavigationStack.forEach((componentId, index) => {
+      const component = this.c4Components.find(c => c.id === componentId);
+      if (component) {
+        html += `<span class="c4-breadcrumb-separator">/</span>`;
+        html += `<span class="c4-breadcrumb-item" onclick="taskManager.navigateToC4Level(${index})">${component.name}</span>`;
+      }
     });
-    
+
     breadcrumb.innerHTML = html;
   }
 
@@ -8216,11 +8352,13 @@ class TaskManager {
 
   drawC4Connections(components) {
     const svg = document.getElementById('c4Connections');
+    const isDark = document.documentElement.classList.contains('dark');
+    const arrowColor = isDark ? '#9ca3af' : '#6b7280';
     svg.innerHTML = `
       <defs>
-        <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+        <marker id="arrowhead" markerWidth="10" markerHeight="7"
                 refX="10" refY="3.5" orient="auto">
-          <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280" />
+          <polygon points="0 0, 10 3.5, 0 7" fill="${arrowColor}" />
         </marker>
       </defs>
     `;
@@ -8275,22 +8413,22 @@ class TaskManager {
     line.setAttribute('class', 'c4-connection');
     svg.appendChild(line);
 
-    // Draw label
+    // Draw label with perpendicular offset for better readability
     if (label) {
+      const midX = (fromX + toX) / 2;
+      const midY = (fromY + toY) / 2;
+      // Calculate perpendicular offset based on line angle
+      const angle = Math.atan2(toY - fromY, toX - fromX);
+      const offsetX = Math.sin(angle) * 12;
+      const offsetY = -Math.cos(angle) * 12;
+
       const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      text.setAttribute('x', (fromX + toX) / 2);
-      text.setAttribute('y', (fromY + toY) / 2 - 5);
+      text.setAttribute('x', midX + offsetX);
+      text.setAttribute('y', midY + offsetY);
       text.setAttribute('class', 'c4-connection-label');
       text.textContent = label;
       svg.appendChild(text);
     }
-  }
-
-  changeC4Level(level) {
-    this.currentC4Level = level;
-    this.c4NavigationStack = [];
-    document.getElementById('c4BackBtn').classList.add('hidden');
-    this.renderC4Components();
   }
 
   updateC4Zoom(value) {
@@ -8300,95 +8438,102 @@ class TaskManager {
   }
 
   makeC4ComponentDraggable(element, component) {
-    let isDragging = false;
     let dragStarted = false;
     let startX, startY, initialX, initialY;
-    const dragThreshold = 5; // Minimum distance to consider it a drag
+    const dragThreshold = 5;
 
-    element.addEventListener('mousedown', (e) => {
-      if (e.target.classList.contains('c4-component-drilldown')) return;
-      
-      isDragging = true;
-      dragStarted = false;
-      startX = e.clientX;
-      startY = e.clientY;
-      initialX = component.position.x;
-      initialY = component.position.y;
-      
+    const onMouseDown = (e) => {
+      // Ignore clicks on control buttons
+      if (e.target.classList.contains('c4-component-drilldown') ||
+          e.target.classList.contains('c4-edit-btn') ||
+          e.target.classList.contains('c4-delete-btn')) return;
+
+      // Set this component as the active drag target
+      this._c4ActiveDrag = {
+        element,
+        component,
+        startX: e.clientX,
+        startY: e.clientY,
+        initialX: component.position.x,
+        initialY: component.position.y,
+        dragStarted: false
+      };
+
+      // Stop physics immediately when starting to interact
+      this.stopC4ForceLayout();
+
       e.preventDefault();
-      e.stopPropagation(); // Prevent panning when dragging components
-    });
+      e.stopPropagation();
+    };
+
+    element.addEventListener('mousedown', onMouseDown);
+
+    // Store cleanup function on element
+    element._c4Cleanup = () => {
+      element.removeEventListener('mousedown', onMouseDown);
+    };
+  }
+
+  // Initialize global C4 drag handlers (call once)
+  initializeC4DragHandlers() {
+    if (this._c4DragHandlersInitialized) return;
+    this._c4DragHandlersInitialized = true;
 
     document.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      
-      const deltaX = (e.clientX - startX) / this.c4Zoom;
-      const deltaY = (e.clientY - startY) / this.c4Zoom;
+      if (!this._c4ActiveDrag) return;
+
+      const drag = this._c4ActiveDrag;
+      const deltaX = (e.clientX - drag.startX) / this.c4Zoom;
+      const deltaY = (e.clientY - drag.startY) / this.c4Zoom;
       const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-      
-      // Only start dragging if moved beyond threshold
-      if (!dragStarted && distance > dragThreshold) {
-        dragStarted = true;
-        element.style.cursor = 'grabbing';
-        
-        // Fix component position during drag to prevent physics interference
-        if (component.physics) {
-          component.physics.fx = component.position.x;
-          component.physics.fy = component.position.y;
-        }
+
+      if (!drag.dragStarted && distance > 5) {
+        drag.dragStarted = true;
+        drag.element.style.cursor = 'grabbing';
+        drag.element.classList.add('dragging');
+        // Disable transition during drag so box and arrow move together
+        drag.element.style.transition = 'none';
       }
-      
-      if (dragStarted) {
-        component.position.x = initialX + deltaX;
-        component.position.y = initialY + deltaY;
-        
-        // Update fixed position for physics
-        if (component.physics) {
-          component.physics.fx = component.position.x;
-          component.physics.fy = component.position.y;
+
+      if (drag.dragStarted) {
+        drag.component.position.x = drag.initialX + deltaX;
+        drag.component.position.y = drag.initialY + deltaY;
+        drag.element.style.left = `${drag.component.position.x}px`;
+        drag.element.style.top = `${drag.component.position.y}px`;
+        // Use requestAnimationFrame to sync connection drawing with visual update
+        if (this._c4ConnectionFrame) {
+          cancelAnimationFrame(this._c4ConnectionFrame);
         }
-        
-        element.style.left = `${component.position.x}px`;
-        element.style.top = `${component.position.y}px`;
-        
-        // Redraw connections if not using physics simulation
-        if (!this.c4ForceSimulation) {
-          setTimeout(() => this.drawC4Connections(this.getCurrentLevelComponents()), 0);
-        }
+        this._c4ConnectionFrame = requestAnimationFrame(() => {
+          this.drawC4Connections(this.getCurrentLevelComponents());
+        });
       }
     });
 
     document.addEventListener('mouseup', (e) => {
-      if (isDragging) {
-        isDragging = false;
-        element.style.cursor = 'pointer';
-        
-        // If we didn't drag, it's a click - trigger drill down
-        if (!dragStarted && this.canComponentBeDrilledDown(component)) {
-          e.stopPropagation();
-          this.drillDownC4Component(component);
-          return;
-        }
-        
-        // Release component from fixed position to allow physics
-        if (component.physics) {
-          component.physics.fx = null;
-          component.physics.fy = null;
-          // Give it a small push to restart physics if simulation is running
-          if (this.c4ForceSimulation) {
-            component.physics.vx = (Math.random() - 0.5) * 5; // Smaller push
-            component.physics.vy = (Math.random() - 0.5) * 5;
-          }
-        }
-        
-        if (dragStarted) {
-          this.saveC4Components();
-        }
-        
-        // Always redraw connections after any mouse interaction
-        setTimeout(() => this.drawC4Connections(this.getCurrentLevelComponents()), 0);
-        
-        dragStarted = false;
+      if (!this._c4ActiveDrag) return;
+
+      const drag = this._c4ActiveDrag;
+      const wasDragging = drag.dragStarted;
+      const component = drag.component;
+
+      // Clean up drag state
+      drag.element.style.cursor = 'pointer';
+      drag.element.classList.remove('dragging');
+      // Restore transition after drag
+      drag.element.style.transition = '';
+      this._c4ActiveDrag = null;
+
+      // If we didn't drag, it's a click - trigger drill down
+      if (!wasDragging && this.canComponentBeDrilledDown(component)) {
+        e.stopPropagation();
+        this.drillDownC4Component(component);
+        return;
+      }
+
+      if (wasDragging) {
+        this.saveC4Components();
+        this.drawC4Connections(this.getCurrentLevelComponents());
       }
     });
   }
@@ -8400,14 +8545,21 @@ class TaskManager {
     document.getElementById('c4ComponentForm').reset();
     document.getElementById('c4ComponentLevel').value = this.currentC4Level;
     document.getElementById('c4ComponentType').value = this.getDefaultTypeForLevel(this.currentC4Level);
-    
-    // Auto-update type when level changes
-    document.getElementById('c4ComponentLevel').addEventListener('change', (e) => {
-      document.getElementById('c4ComponentType').value = this.getDefaultTypeForLevel(e.target.value);
-    });
+
+    // Clear connections form
+    document.getElementById('c4ConnectionsForm').innerHTML = '';
+
+    // Auto-update type when level changes (only bind once)
+    const levelSelect = document.getElementById('c4ComponentLevel');
+    if (!levelSelect.hasAttribute('data-change-bound')) {
+      levelSelect.addEventListener('change', (e) => {
+        document.getElementById('c4ComponentType').value = this.getDefaultTypeForLevel(e.target.value);
+      });
+      levelSelect.setAttribute('data-change-bound', 'true');
+    }
     document.getElementById('c4ComponentModal').classList.remove('hidden');
     document.getElementById('c4ComponentModal').classList.add('flex');
-    
+
     // Setup autocomplete for existing target inputs
     setTimeout(() => {
       document.querySelectorAll('.c4-target-input').forEach(input => {
@@ -8430,13 +8582,16 @@ class TaskManager {
     
     if (this.c4NavigationStack.length > 0) {
       // If we're drilled down, add components at the next level down from the current parent
-      const currentParent = this.c4NavigationStack[this.c4NavigationStack.length - 1];
-      const currentIndex = levels.indexOf(currentParent.level);
-      if (currentIndex < levels.length - 1) {
-        targetLevel = levels[currentIndex + 1];
-      } else {
-        // If already at the deepest level, stay at code level
-        targetLevel = 'code';
+      const currentParentId = this.c4NavigationStack[this.c4NavigationStack.length - 1];
+      const currentParent = this.c4Components.find(c => c.id === currentParentId);
+      if (currentParent) {
+        const currentIndex = levels.indexOf(currentParent.level);
+        if (currentIndex < levels.length - 1) {
+          targetLevel = levels[currentIndex + 1];
+        } else {
+          // If already at the deepest level, stay at code level
+          targetLevel = 'code';
+        }
       }
     }
     
@@ -8465,10 +8620,9 @@ class TaskManager {
 
   handleC4ComponentSubmit(e) {
     e.preventDefault();
-    
-    const formData = new FormData(e.target);
+
     const component = {
-      id: this.editingC4Component?.id || Date.now().toString(),
+      id: this.editingC4Component?.id || this.generateC4ComponentId(),
       name: document.getElementById('c4ComponentName').value,
       level: document.getElementById('c4ComponentLevel').value,
       type: document.getElementById('c4ComponentType').value,
@@ -8479,18 +8633,20 @@ class TaskManager {
         y: parseInt(document.getElementById('c4ComponentY').value)
       },
       connections: this.getC4ConnectionsFromForm(),
-      children: []
+      children: this.editingC4Component?.children || []
     };
 
     if (this.editingC4Component) {
       const index = this.c4Components.findIndex(c => c.id === this.editingC4Component.id);
       if (index !== -1) {
-        this.c4Components[index] = { ...this.c4Components[index], ...component };
+        // Preserve parent reference when editing
+        component.parent = this.c4Components[index].parent;
+        this.c4Components[index] = component;
       }
     } else {
-      // Set parent if we're in a drill-down view
+      // Set parent if we're in a drill-down view (navigation stack now stores IDs directly)
       if (this.c4NavigationStack.length > 0) {
-        component.parent = this.c4NavigationStack[this.c4NavigationStack.length - 1].id;
+        component.parent = this.c4NavigationStack[this.c4NavigationStack.length - 1];
         // Add to parent's children
         const parent = this.c4Components.find(c => c.id === component.parent);
         if (parent) {
@@ -8502,7 +8658,7 @@ class TaskManager {
           }
         }
       }
-      
+
       this.c4Components.push(component);
     }
 
@@ -8566,14 +8722,14 @@ class TaskManager {
     
     input.addEventListener('input', (e) => {
       const value = e.target.value.toLowerCase();
-      const components = this.getCurrentLevelComponents();
-      const matches = components.filter(comp => 
+      // Show all components regardless of level for better connectivity
+      const matches = this.c4Components.filter(comp =>
         comp.name.toLowerCase().includes(value) && value.length > 0
       );
-      
+
       if (matches.length > 0 && value.length > 0) {
-        dropdown.innerHTML = matches.map(comp => 
-          `<div class="c4-target-dropdown-item" data-name="${comp.name}">${comp.name}</div>`
+        dropdown.innerHTML = matches.map(comp =>
+          `<div class="c4-target-dropdown-item" data-id="${comp.id}" data-name="${comp.name}">${comp.name} <span style="opacity:0.6;font-size:10px">(${comp.level})</span></div>`
         ).join('');
         dropdown.classList.remove('hidden');
       } else {
@@ -8587,8 +8743,11 @@ class TaskManager {
     });
     
     dropdown.addEventListener('click', (e) => {
-      if (e.target.classList.contains('c4-target-dropdown-item')) {
-        input.value = e.target.dataset.name;
+      const item = e.target.closest('.c4-target-dropdown-item');
+      if (item) {
+        // Store the ID as the value for reliable connection lookup
+        input.value = item.dataset.id;
+        input.setAttribute('data-display-name', item.dataset.name);
         dropdown.classList.add('hidden');
         input.focus();
       }
@@ -8607,6 +8766,144 @@ class TaskManager {
     } catch (error) {
       console.error('Failed to save C4 components:', error);
     }
+  }
+
+  deleteC4Component(componentId) {
+    // Recursively collect all children to delete
+    const idsToDelete = new Set();
+    const collectChildren = (id) => {
+      idsToDelete.add(id);
+      const comp = this.c4Components.find(c => c.id === id);
+      if (comp && comp.children) {
+        comp.children.forEach(childId => collectChildren(childId));
+      }
+    };
+    collectChildren(componentId);
+
+    // Remove the component from its parent's children array
+    const component = this.c4Components.find(c => c.id === componentId);
+    if (component && component.parent) {
+      const parent = this.c4Components.find(c => c.id === component.parent);
+      if (parent && parent.children) {
+        parent.children = parent.children.filter(id => id !== componentId);
+      }
+    }
+
+    // Remove connections pointing to deleted components
+    this.c4Components.forEach(comp => {
+      if (comp.connections) {
+        comp.connections = comp.connections.filter(conn =>
+          !idsToDelete.has(conn.target) && !idsToDelete.has(conn.target)
+        );
+      }
+    });
+
+    // Remove all collected components
+    this.c4Components = this.c4Components.filter(c => !idsToDelete.has(c.id));
+
+    this.saveC4Components();
+    this.renderC4Components();
+  }
+
+  openC4EditModal(component) {
+    this.editingC4Component = component;
+    document.getElementById('c4ComponentModalTitle').textContent = 'Edit C4 Component';
+
+    // Populate form fields
+    document.getElementById('c4ComponentName').value = component.name;
+    document.getElementById('c4ComponentLevel').value = component.level;
+    document.getElementById('c4ComponentType').value = component.type;
+    document.getElementById('c4ComponentTechnology').value = component.technology || '';
+    document.getElementById('c4ComponentDescription').value = component.description || '';
+    document.getElementById('c4ComponentX').value = component.position.x;
+    document.getElementById('c4ComponentY').value = component.position.y;
+
+    // Populate connections
+    const connectionsContainer = document.getElementById('c4ConnectionsForm');
+    connectionsContainer.innerHTML = '';
+
+    if (component.connections && component.connections.length > 0) {
+      component.connections.forEach(conn => {
+        const div = document.createElement('div');
+        div.className = 'flex space-x-2';
+        div.innerHTML = `
+          <div class="flex-1 relative">
+            <input type="text" placeholder="Target component name" class="c4-target-input w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 text-sm" autocomplete="off" value="${conn.target}">
+            <div class="c4-target-dropdown hidden absolute top-full left-0 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-b-md max-h-32 overflow-y-auto z-50"></div>
+          </div>
+          <input type="text" placeholder="Relationship label" class="flex-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 text-sm" value="${conn.label}">
+          <button type="button" class="px-2 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm" onclick="this.parentElement.remove()">X</button>
+        `;
+        connectionsContainer.appendChild(div);
+        this.setupC4TargetAutocomplete(div.querySelector('.c4-target-input'));
+      });
+    }
+
+    document.getElementById('c4ComponentModal').classList.remove('hidden');
+    document.getElementById('c4ComponentModal').classList.add('flex');
+  }
+
+  generateC4ComponentId() {
+    // Find the maximum ID number in existing components
+    let maxId = 0;
+    this.c4Components.forEach(comp => {
+      const match = comp.id.match(/c4_component_(\d+)/);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (num > maxId) {
+          maxId = num;
+        }
+      }
+    });
+    return `c4_component_${maxId + 1}`;
+  }
+
+  validateC4Components() {
+    // Remove duplicate IDs - keep only the first occurrence
+    const seenIds = new Set();
+    this.c4Components = this.c4Components.filter(comp => {
+      if (seenIds.has(comp.id)) {
+        console.warn(`Removing duplicate C4 component with ID: ${comp.id}`);
+        return false;
+      }
+      seenIds.add(comp.id);
+      return true;
+    });
+
+    // Remove invalid child references
+    this.c4Components.forEach(comp => {
+      if (comp.children) {
+        comp.children = comp.children.filter(childId =>
+          this.c4Components.some(c => c.id === childId)
+        );
+      }
+      // Remove connections to non-existent components
+      if (comp.connections) {
+        comp.connections = comp.connections.filter(conn =>
+          this.c4Components.some(c => c.id === conn.target || c.name === conn.target)
+        );
+      }
+      // Validate parent reference
+      if (comp.parent && !this.c4Components.some(c => c.id === comp.parent)) {
+        console.warn(`Removing invalid parent reference ${comp.parent} from ${comp.id}`);
+        delete comp.parent;
+      }
+    });
+
+    // Auto-position components that are at 0,0 to prevent stacking
+    let offsetX = 100;
+    let offsetY = 100;
+    this.c4Components.forEach(comp => {
+      if (comp.position.x === 0 && comp.position.y === 0) {
+        comp.position.x = offsetX;
+        comp.position.y = offsetY;
+        offsetX += 200;
+        if (offsetX > 800) {
+          offsetX = 100;
+          offsetY += 150;
+        }
+      }
+    });
   }
 
   initializeC4Panning() {
