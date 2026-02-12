@@ -2,6 +2,7 @@ import {
   C4Component,
   Goal,
   Idea,
+  LeanCanvas,
   Milestone,
   Mindmap,
   MindmapNode,
@@ -10,6 +11,7 @@ import {
   ProjectInfo,
   ProjectLink,
   Retrospective,
+  RiskAnalysis,
   StickyNote,
   SwotAnalysis,
   Task,
@@ -3080,6 +3082,288 @@ export class MarkdownParser {
       const after = endIndex !== -1 ? lines.slice(endIndex) : [];
       lines.length = 0;
       lines.push(...before, swotContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  async readRiskAnalyses(): Promise<RiskAnalysis[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const riskAnalyses: RiskAnalysis[] = [];
+
+    let inRiskSection = false;
+    let currentRisk: Partial<RiskAnalysis> | null = null;
+    let currentSubsection: "highImpactHighProb" | "highImpactLowProb" | "lowImpactHighProb" | "lowImpactLowProb" | null = null;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      if (line.startsWith("# Risk Analysis") || line.includes("<!-- Risk Analysis -->")) {
+        inRiskSection = true;
+        continue;
+      }
+
+      if (inRiskSection && line.startsWith("# ") && !line.startsWith("# Risk Analysis")) {
+        if (currentRisk?.title) riskAnalyses.push(currentRisk as RiskAnalysis);
+        currentRisk = null;
+        break;
+      }
+
+      if (!inRiskSection) continue;
+
+      if (line.startsWith("## ")) {
+        if (currentRisk?.title) riskAnalyses.push(currentRisk as RiskAnalysis);
+        const title = line.substring(3).trim();
+        currentRisk = {
+          id: crypto.randomUUID().substring(0, 8),
+          title,
+          date: new Date().toISOString().split("T")[0],
+          highImpactHighProb: [],
+          highImpactLowProb: [],
+          lowImpactHighProb: [],
+          lowImpactLowProb: [],
+        };
+        currentSubsection = null;
+      } else if (currentRisk) {
+        if (line.startsWith("Date:")) {
+          currentRisk.date = line.substring(5).trim();
+        } else if (line.startsWith("<!-- id:")) {
+          const match = line.match(/<!-- id: ([^ ]+)/);
+          if (match) currentRisk.id = match[1];
+        } else if (line.startsWith("### High Impact / High Probability")) {
+          currentSubsection = "highImpactHighProb";
+        } else if (line.startsWith("### High Impact / Low Probability")) {
+          currentSubsection = "highImpactLowProb";
+        } else if (line.startsWith("### Low Impact / High Probability")) {
+          currentSubsection = "lowImpactHighProb";
+        } else if (line.startsWith("### Low Impact / Low Probability")) {
+          currentSubsection = "lowImpactLowProb";
+        } else if (line.trim().startsWith("- ") && currentSubsection) {
+          const item = line.trim().substring(2).trim();
+          if (item) {
+            currentRisk[currentSubsection]!.push(item);
+          }
+        }
+      }
+    }
+
+    if (currentRisk?.title) riskAnalyses.push(currentRisk as RiskAnalysis);
+    return riskAnalyses;
+  }
+
+  async saveRiskAnalyses(riskAnalyses: RiskAnalysis[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    let startIndex = -1;
+    let endIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (startIndex === -1 && (lines[i].includes("<!-- Risk Analysis -->") || lines[i].startsWith("# Risk Analysis"))) {
+        startIndex = i;
+      } else if (startIndex !== -1 && lines[i].startsWith("# ") && !lines[i].startsWith("# Risk Analysis")) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    let riskContent = "<!-- Risk Analysis -->\n# Risk Analysis\n\n";
+    for (const risk of riskAnalyses) {
+      riskContent += `## ${risk.title}\n`;
+      riskContent += `<!-- id: ${risk.id} -->\n`;
+      riskContent += `Date: ${risk.date}\n\n`;
+
+      riskContent += `### High Impact / High Probability\n`;
+      for (const item of risk.highImpactHighProb) {
+        riskContent += `- ${item}\n`;
+      }
+      riskContent += `\n`;
+
+      riskContent += `### High Impact / Low Probability\n`;
+      for (const item of risk.highImpactLowProb) {
+        riskContent += `- ${item}\n`;
+      }
+      riskContent += `\n`;
+
+      riskContent += `### Low Impact / High Probability\n`;
+      for (const item of risk.lowImpactHighProb) {
+        riskContent += `- ${item}\n`;
+      }
+      riskContent += `\n`;
+
+      riskContent += `### Low Impact / Low Probability\n`;
+      for (const item of risk.lowImpactLowProb) {
+        riskContent += `- ${item}\n`;
+      }
+      riskContent += `\n`;
+    }
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.startsWith("# Board"));
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, riskContent);
+      } else {
+        lines.push(riskContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, riskContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  async readLeanCanvases(): Promise<LeanCanvas[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const leanCanvases: LeanCanvas[] = [];
+
+    let inLeanSection = false;
+    let currentCanvas: Partial<LeanCanvas> | null = null;
+    let currentSubsection: keyof Omit<LeanCanvas, "id" | "title" | "date"> | null = null;
+
+    const sectionMap: Record<string, keyof Omit<LeanCanvas, "id" | "title" | "date">> = {
+      "### Problem": "problem",
+      "### Solution": "solution",
+      "### Unique Value Proposition": "uniqueValueProp",
+      "### Unfair Advantage": "unfairAdvantage",
+      "### Customer Segments": "customerSegments",
+      "### Existing Alternatives": "existingAlternatives",
+      "### Key Metrics": "keyMetrics",
+      "### High-Level Concept": "highLevelConcept",
+      "### Channels": "channels",
+      "### Early Adopters": "earlyAdopters",
+      "### Cost Structure": "costStructure",
+      "### Revenue Streams": "revenueStreams",
+    };
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      if (line.startsWith("# Lean Canvas") || line.includes("<!-- Lean Canvas -->")) {
+        inLeanSection = true;
+        continue;
+      }
+
+      if (inLeanSection && line.startsWith("# ") && !line.startsWith("# Lean Canvas")) {
+        if (currentCanvas?.title) leanCanvases.push(currentCanvas as LeanCanvas);
+        currentCanvas = null;
+        break;
+      }
+
+      if (!inLeanSection) continue;
+
+      if (line.startsWith("## ")) {
+        if (currentCanvas?.title) leanCanvases.push(currentCanvas as LeanCanvas);
+        const title = line.substring(3).trim();
+        currentCanvas = {
+          id: crypto.randomUUID().substring(0, 8),
+          title,
+          date: new Date().toISOString().split("T")[0],
+          problem: [],
+          solution: [],
+          uniqueValueProp: [],
+          unfairAdvantage: [],
+          customerSegments: [],
+          existingAlternatives: [],
+          keyMetrics: [],
+          highLevelConcept: [],
+          channels: [],
+          earlyAdopters: [],
+          costStructure: [],
+          revenueStreams: [],
+        };
+        currentSubsection = null;
+      } else if (currentCanvas) {
+        if (line.startsWith("Date:")) {
+          currentCanvas.date = line.substring(5).trim();
+        } else if (line.startsWith("<!-- id:")) {
+          const match = line.match(/<!-- id: ([^ ]+)/);
+          if (match) currentCanvas.id = match[1];
+        } else {
+          // Check for section headers
+          for (const [header, key] of Object.entries(sectionMap)) {
+            if (line.startsWith(header)) {
+              currentSubsection = key;
+              break;
+            }
+          }
+          // Add items to current section
+          if (line.trim().startsWith("- ") && currentSubsection) {
+            const item = line.trim().substring(2).trim();
+            if (item) {
+              (currentCanvas[currentSubsection] as string[]).push(item);
+            }
+          }
+        }
+      }
+    }
+
+    if (currentCanvas?.title) leanCanvases.push(currentCanvas as LeanCanvas);
+    return leanCanvases;
+  }
+
+  async saveLeanCanvases(leanCanvases: LeanCanvas[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    let startIndex = -1;
+    let endIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (startIndex === -1 && (lines[i].includes("<!-- Lean Canvas -->") || lines[i].startsWith("# Lean Canvas"))) {
+        startIndex = i;
+      } else if (startIndex !== -1 && lines[i].startsWith("# ") && !lines[i].startsWith("# Lean Canvas")) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    let leanContent = "<!-- Lean Canvas -->\n# Lean Canvas\n\n";
+    for (const canvas of leanCanvases) {
+      leanContent += `## ${canvas.title}\n`;
+      leanContent += `<!-- id: ${canvas.id} -->\n`;
+      leanContent += `Date: ${canvas.date}\n\n`;
+
+      const sections: Array<{ header: string; key: keyof Omit<LeanCanvas, "id" | "title" | "date"> }> = [
+        { header: "Problem", key: "problem" },
+        { header: "Solution", key: "solution" },
+        { header: "Unique Value Proposition", key: "uniqueValueProp" },
+        { header: "Unfair Advantage", key: "unfairAdvantage" },
+        { header: "Customer Segments", key: "customerSegments" },
+        { header: "Existing Alternatives", key: "existingAlternatives" },
+        { header: "Key Metrics", key: "keyMetrics" },
+        { header: "High-Level Concept", key: "highLevelConcept" },
+        { header: "Channels", key: "channels" },
+        { header: "Early Adopters", key: "earlyAdopters" },
+        { header: "Cost Structure", key: "costStructure" },
+        { header: "Revenue Streams", key: "revenueStreams" },
+      ];
+
+      for (const { header, key } of sections) {
+        leanContent += `### ${header}\n`;
+        for (const item of canvas[key]) {
+          leanContent += `- ${item}\n`;
+        }
+        leanContent += `\n`;
+      }
+    }
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.startsWith("# Board"));
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, leanContent);
+      } else {
+        lines.push(leanContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, leanContent, ...after);
     }
 
     await this.safeWriteFile(lines.join("\n"));

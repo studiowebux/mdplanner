@@ -71,6 +71,14 @@ class TaskManager {
     this.selectedSwotId = null;
     this.editingSwotId = null;
     this.swotItemQuadrant = null;
+    this.riskAnalyses = [];
+    this.selectedRiskId = null;
+    this.editingRiskId = null;
+    this.riskItemQuadrant = null;
+    this.leanCanvases = [];
+    this.selectedLeanCanvasId = null;
+    this.editingLeanCanvasId = null;
+    this.leanCanvasSection = null;
     this.timeEntries = {};
     this.c4Components = [];
     this.c4Zoom = 1;
@@ -359,6 +367,18 @@ class TaskManager {
       .getElementById("swotViewBtnMobile")
       ?.addEventListener("click", () => {
         this.switchView("swot");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("riskAnalysisViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("riskAnalysis");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("leanCanvasViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("leanCanvas");
         this.closeMobileMenu();
       });
     document
@@ -768,6 +788,76 @@ class TaskManager {
       btn.addEventListener("click", () => this.openSwotItemModal(btn.dataset.quadrant));
     });
 
+    // Risk Analysis events
+    document
+      .getElementById("riskAnalysisViewBtn")
+      .addEventListener("click", () => {
+        this.switchView("riskAnalysis");
+        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+      });
+    document
+      .getElementById("addRiskAnalysisBtn")
+      .addEventListener("click", () => this.openRiskAnalysisModal());
+    document
+      .getElementById("cancelRiskAnalysisBtn")
+      .addEventListener("click", () => this.closeRiskAnalysisModal());
+    document
+      .getElementById("riskAnalysisForm")
+      .addEventListener("submit", (e) => this.saveRiskAnalysis(e));
+    document
+      .getElementById("riskAnalysisSelector")
+      .addEventListener("change", (e) => this.selectRiskAnalysis(e.target.value));
+    document
+      .getElementById("editRiskAnalysisBtn")
+      .addEventListener("click", () => this.editSelectedRiskAnalysis());
+    document
+      .getElementById("deleteRiskAnalysisBtn")
+      .addEventListener("click", () => this.deleteSelectedRiskAnalysis());
+    document
+      .getElementById("cancelRiskAnalysisItemBtn")
+      .addEventListener("click", () => this.closeRiskAnalysisItemModal());
+    document
+      .getElementById("riskAnalysisItemForm")
+      .addEventListener("submit", (e) => this.saveRiskAnalysisItem(e));
+    document.querySelectorAll(".risk-add-btn").forEach(btn => {
+      btn.addEventListener("click", () => this.openRiskAnalysisItemModal(btn.dataset.quadrant));
+    });
+
+    // Lean Canvas events
+    document
+      .getElementById("leanCanvasViewBtn")
+      .addEventListener("click", () => {
+        this.switchView("leanCanvas");
+        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+      });
+    document
+      .getElementById("addLeanCanvasBtn")
+      .addEventListener("click", () => this.openLeanCanvasModal());
+    document
+      .getElementById("cancelLeanCanvasBtn")
+      .addEventListener("click", () => this.closeLeanCanvasModal());
+    document
+      .getElementById("leanCanvasForm")
+      .addEventListener("submit", (e) => this.saveLeanCanvas(e));
+    document
+      .getElementById("leanCanvasSelector")
+      .addEventListener("change", (e) => this.selectLeanCanvas(e.target.value));
+    document
+      .getElementById("editLeanCanvasBtn")
+      .addEventListener("click", () => this.editSelectedLeanCanvas());
+    document
+      .getElementById("deleteLeanCanvasBtn")
+      .addEventListener("click", () => this.deleteSelectedLeanCanvas());
+    document
+      .getElementById("cancelLeanCanvasItemBtn")
+      .addEventListener("click", () => this.closeLeanCanvasItemModal());
+    document
+      .getElementById("leanCanvasItemForm")
+      .addEventListener("submit", (e) => this.saveLeanCanvasItem(e));
+    document.querySelectorAll(".lean-add-btn").forEach(btn => {
+      btn.addEventListener("click", () => this.openLeanCanvasItemModal(btn.dataset.section));
+    });
+
     // Time Tracking events
     document
       .getElementById("timeTrackingViewBtn")
@@ -982,7 +1072,7 @@ class TaskManager {
       summary: "Summary", list: "List", board: "Board", timeline: "Timeline",
       notes: "Notes", goals: "Goals", milestones: "Milestones", ideas: "Ideas",
       canvas: "Canvas", mindmap: "Mindmap", c4: "C4 Architecture",
-      retrospectives: "Retrospectives", swot: "SWOT Analysis", timeTracking: "Time Tracking", config: "Settings"
+      retrospectives: "Retrospectives", swot: "SWOT Analysis", riskAnalysis: "Risk Analysis", leanCanvas: "Lean Canvas", timeTracking: "Time Tracking", config: "Settings"
     };
     const label = document.getElementById("currentViewLabel");
     if (label) label.textContent = viewLabels[view] || view;
@@ -1020,7 +1110,7 @@ class TaskManager {
     this.notesLoaded = false;
 
     // Reset all desktop nav buttons in dropdown
-    const desktopNavBtns = ["summaryViewBtn", "listViewBtn", "boardViewBtn", "timelineViewBtn", "notesViewBtn", "goalsViewBtn", "milestonesViewBtn", "ideasViewBtn", "canvasViewBtn", "mindmapViewBtn", "c4ViewBtn", "retrospectivesViewBtn", "swotViewBtn", "timeTrackingViewBtn"];
+    const desktopNavBtns = ["summaryViewBtn", "listViewBtn", "boardViewBtn", "timelineViewBtn", "notesViewBtn", "goalsViewBtn", "milestonesViewBtn", "ideasViewBtn", "canvasViewBtn", "mindmapViewBtn", "c4ViewBtn", "retrospectivesViewBtn", "swotViewBtn", "riskAnalysisViewBtn", "leanCanvasViewBtn", "timeTrackingViewBtn"];
     desktopNavBtns.forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) {
@@ -1030,7 +1120,7 @@ class TaskManager {
     });
 
     // Reset mobile buttons
-    const mobileBtnIds = ["summaryViewBtnMobile", "listViewBtnMobile", "boardViewBtnMobile", "timelineViewBtnMobile", "notesViewBtnMobile", "goalsViewBtnMobile", "milestonesViewBtnMobile", "canvasViewBtnMobile", "mindmapViewBtnMobile", "c4ViewBtnMobile", "ideasViewBtnMobile", "retrospectivesViewBtnMobile", "swotViewBtnMobile", "timeTrackingViewBtnMobile", "configViewBtnMobile"];
+    const mobileBtnIds = ["summaryViewBtnMobile", "listViewBtnMobile", "boardViewBtnMobile", "timelineViewBtnMobile", "notesViewBtnMobile", "goalsViewBtnMobile", "milestonesViewBtnMobile", "canvasViewBtnMobile", "mindmapViewBtnMobile", "c4ViewBtnMobile", "ideasViewBtnMobile", "retrospectivesViewBtnMobile", "swotViewBtnMobile", "riskAnalysisViewBtnMobile", "leanCanvasViewBtnMobile", "timeTrackingViewBtnMobile", "configViewBtnMobile"];
     mobileBtnIds.forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) {
@@ -1050,6 +1140,8 @@ class TaskManager {
     document.getElementById("ideasView").classList.add("hidden");
     document.getElementById("retrospectivesView").classList.add("hidden");
     document.getElementById("swotView").classList.add("hidden");
+    document.getElementById("riskAnalysisView").classList.add("hidden");
+    document.getElementById("leanCanvasView").classList.add("hidden");
     document.getElementById("timeTrackingView").classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
     document.getElementById("mindmapView").classList.add("hidden");
@@ -1102,6 +1194,14 @@ class TaskManager {
       this.activateViewButton("swot");
       document.getElementById("swotView").classList.remove("hidden");
       this.loadSwotAnalyses();
+    } else if (view === "riskAnalysis") {
+      this.activateViewButton("riskAnalysis");
+      document.getElementById("riskAnalysisView").classList.remove("hidden");
+      this.loadRiskAnalyses();
+    } else if (view === "leanCanvas") {
+      this.activateViewButton("leanCanvas");
+      document.getElementById("leanCanvasView").classList.remove("hidden");
+      this.loadLeanCanvases();
     } else if (view === "timeTracking") {
       this.activateViewButton("timeTracking");
       document.getElementById("timeTrackingView").classList.remove("hidden");
@@ -7186,6 +7286,474 @@ class TaskManager {
       this.renderSwotView(swot);
     } catch (error) {
       console.error("Error removing SWOT item:", error);
+    }
+  }
+
+  // Risk Analysis functionality
+  async loadRiskAnalyses() {
+    try {
+      const response = await fetch("/api/risk-analysis");
+      this.riskAnalyses = await response.json();
+      this.renderRiskAnalysisSelector();
+      if (this.riskAnalyses.length > 0 && !this.selectedRiskId) {
+        this.selectRiskAnalysis(this.riskAnalyses[0].id);
+      } else if (this.selectedRiskId) {
+        this.selectRiskAnalysis(this.selectedRiskId);
+      } else {
+        this.renderRiskAnalysisView(null);
+      }
+    } catch (error) {
+      console.error("Error loading risk analyses:", error);
+    }
+  }
+
+  renderRiskAnalysisSelector() {
+    const selector = document.getElementById("riskAnalysisSelector");
+    selector.innerHTML = '<option value="">Select Analysis</option>';
+    this.riskAnalyses.forEach(risk => {
+      const option = document.createElement("option");
+      option.value = risk.id;
+      option.textContent = `${risk.title} (${risk.date})`;
+      selector.appendChild(option);
+    });
+  }
+
+  selectRiskAnalysis(riskId) {
+    this.selectedRiskId = riskId;
+    const selector = document.getElementById("riskAnalysisSelector");
+    selector.value = riskId || "";
+
+    const risk = this.riskAnalyses.find(r => r.id === riskId);
+    this.renderRiskAnalysisView(risk);
+
+    const editBtn = document.getElementById("editRiskAnalysisBtn");
+    const deleteBtn = document.getElementById("deleteRiskAnalysisBtn");
+    if (risk) {
+      editBtn.classList.remove("hidden");
+      deleteBtn.classList.remove("hidden");
+    } else {
+      editBtn.classList.add("hidden");
+      deleteBtn.classList.add("hidden");
+    }
+  }
+
+  renderRiskAnalysisView(risk) {
+    const emptyState = document.getElementById("emptyRiskAnalysisState");
+    const grid = document.getElementById("riskAnalysisGrid");
+
+    if (!risk) {
+      emptyState.classList.remove("hidden");
+      grid.classList.add("hidden");
+      return;
+    }
+
+    emptyState.classList.add("hidden");
+    grid.classList.remove("hidden");
+
+    const quadrants = [
+      { id: "highImpactHighProb", el: "riskHighImpactHighProb" },
+      { id: "highImpactLowProb", el: "riskHighImpactLowProb" },
+      { id: "lowImpactHighProb", el: "riskLowImpactHighProb" },
+      { id: "lowImpactLowProb", el: "riskLowImpactLowProb" },
+    ];
+
+    quadrants.forEach(({ id, el }) => {
+      const ul = document.getElementById(el);
+      ul.innerHTML = (risk[id] || []).map((item, idx) => `
+        <li class="flex justify-between items-start group">
+          <span>${item}</span>
+          <button onclick="app.removeRiskAnalysisItem('${id}', ${idx})" class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 ml-2">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </li>
+      `).join("");
+    });
+  }
+
+  openRiskAnalysisModal(id = null) {
+    this.editingRiskId = id;
+    const modal = document.getElementById("riskAnalysisModal");
+    const title = document.getElementById("riskAnalysisModalTitle");
+    document.getElementById("riskAnalysisTitle").value = "";
+    document.getElementById("riskAnalysisDate").value = new Date().toISOString().split("T")[0];
+
+    if (id) {
+      title.textContent = "Edit Risk Analysis";
+      const risk = this.riskAnalyses.find(r => r.id === id);
+      if (risk) {
+        document.getElementById("riskAnalysisTitle").value = risk.title;
+        document.getElementById("riskAnalysisDate").value = risk.date;
+      }
+    } else {
+      title.textContent = "New Risk Analysis";
+    }
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    document.getElementById("riskAnalysisTitle").focus();
+  }
+
+  closeRiskAnalysisModal() {
+    const modal = document.getElementById("riskAnalysisModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    this.editingRiskId = null;
+  }
+
+  async saveRiskAnalysis(e) {
+    e.preventDefault();
+    const title = document.getElementById("riskAnalysisTitle").value.trim();
+    const date = document.getElementById("riskAnalysisDate").value;
+
+    if (!title) return;
+
+    try {
+      if (this.editingRiskId) {
+        const risk = this.riskAnalyses.find(r => r.id === this.editingRiskId);
+        await fetch(`/api/risk-analysis/${this.editingRiskId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...risk, title, date }),
+        });
+      } else {
+        await fetch("/api/risk-analysis", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, date }),
+        });
+      }
+      this.closeRiskAnalysisModal();
+      await this.loadRiskAnalyses();
+    } catch (error) {
+      console.error("Error saving risk analysis:", error);
+    }
+  }
+
+  editSelectedRiskAnalysis() {
+    if (this.selectedRiskId) {
+      this.openRiskAnalysisModal(this.selectedRiskId);
+    }
+  }
+
+  async deleteSelectedRiskAnalysis() {
+    if (!this.selectedRiskId) return;
+    if (!confirm("Delete this risk analysis?")) return;
+    try {
+      await fetch(`/api/risk-analysis/${this.selectedRiskId}`, { method: "DELETE" });
+      this.selectedRiskId = null;
+      await this.loadRiskAnalyses();
+    } catch (error) {
+      console.error("Error deleting risk analysis:", error);
+    }
+  }
+
+  openRiskAnalysisItemModal(quadrant) {
+    this.riskItemQuadrant = quadrant;
+    const modal = document.getElementById("riskAnalysisItemModal");
+    const title = document.getElementById("riskAnalysisItemModalTitle");
+    const quadrantNames = {
+      highImpactHighProb: "High Impact / High Probability",
+      highImpactLowProb: "High Impact / Low Probability",
+      lowImpactHighProb: "Low Impact / High Probability",
+      lowImpactLowProb: "Low Impact / Low Probability"
+    };
+    title.textContent = `Add Risk: ${quadrantNames[quadrant]}`;
+    document.getElementById("riskAnalysisItemText").value = "";
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    document.getElementById("riskAnalysisItemText").focus();
+  }
+
+  closeRiskAnalysisItemModal() {
+    const modal = document.getElementById("riskAnalysisItemModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    this.riskItemQuadrant = null;
+  }
+
+  async saveRiskAnalysisItem(e) {
+    e.preventDefault();
+    if (!this.selectedRiskId || !this.riskItemQuadrant) return;
+
+    const text = document.getElementById("riskAnalysisItemText").value.trim();
+    if (!text) return;
+
+    const risk = this.riskAnalyses.find(r => r.id === this.selectedRiskId);
+    if (!risk) return;
+
+    risk[this.riskItemQuadrant].push(text);
+
+    try {
+      await fetch(`/api/risk-analysis/${this.selectedRiskId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(risk),
+      });
+      this.closeRiskAnalysisItemModal();
+      this.renderRiskAnalysisView(risk);
+    } catch (error) {
+      console.error("Error saving risk item:", error);
+    }
+  }
+
+  async removeRiskAnalysisItem(quadrant, index) {
+    if (!this.selectedRiskId) return;
+    const risk = this.riskAnalyses.find(r => r.id === this.selectedRiskId);
+    if (!risk) return;
+
+    risk[quadrant].splice(index, 1);
+
+    try {
+      await fetch(`/api/risk-analysis/${this.selectedRiskId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(risk),
+      });
+      this.renderRiskAnalysisView(risk);
+    } catch (error) {
+      console.error("Error removing risk item:", error);
+    }
+  }
+
+  // Lean Canvas functionality
+  async loadLeanCanvases() {
+    try {
+      const response = await fetch("/api/lean-canvas");
+      this.leanCanvases = await response.json();
+      this.renderLeanCanvasSelector();
+      if (this.leanCanvases.length > 0 && !this.selectedLeanCanvasId) {
+        this.selectLeanCanvas(this.leanCanvases[0].id);
+      } else if (this.selectedLeanCanvasId) {
+        this.selectLeanCanvas(this.selectedLeanCanvasId);
+      } else {
+        this.renderLeanCanvasView(null);
+      }
+    } catch (error) {
+      console.error("Error loading lean canvases:", error);
+    }
+  }
+
+  renderLeanCanvasSelector() {
+    const selector = document.getElementById("leanCanvasSelector");
+    selector.innerHTML = '<option value="">Select Canvas</option>';
+    this.leanCanvases.forEach(canvas => {
+      const option = document.createElement("option");
+      option.value = canvas.id;
+      option.textContent = `${canvas.title} (${canvas.date})`;
+      selector.appendChild(option);
+    });
+  }
+
+  selectLeanCanvas(canvasId) {
+    this.selectedLeanCanvasId = canvasId;
+    const selector = document.getElementById("leanCanvasSelector");
+    selector.value = canvasId || "";
+
+    const canvas = this.leanCanvases.find(c => c.id === canvasId);
+    this.renderLeanCanvasView(canvas);
+
+    const editBtn = document.getElementById("editLeanCanvasBtn");
+    const deleteBtn = document.getElementById("deleteLeanCanvasBtn");
+    if (canvas) {
+      editBtn.classList.remove("hidden");
+      deleteBtn.classList.remove("hidden");
+    } else {
+      editBtn.classList.add("hidden");
+      deleteBtn.classList.add("hidden");
+    }
+  }
+
+  renderLeanCanvasView(canvas) {
+    const emptyState = document.getElementById("emptyLeanCanvasState");
+    const grid = document.getElementById("leanCanvasGrid");
+
+    if (!canvas) {
+      emptyState.classList.remove("hidden");
+      grid.classList.add("hidden");
+      return;
+    }
+
+    emptyState.classList.add("hidden");
+    grid.classList.remove("hidden");
+
+    const sections = [
+      { key: "problem", el: "leanProblem" },
+      { key: "solution", el: "leanSolution" },
+      { key: "uniqueValueProp", el: "leanUniqueValueProp" },
+      { key: "unfairAdvantage", el: "leanUnfairAdvantage" },
+      { key: "customerSegments", el: "leanCustomerSegments" },
+      { key: "existingAlternatives", el: "leanExistingAlternatives" },
+      { key: "keyMetrics", el: "leanKeyMetrics" },
+      { key: "highLevelConcept", el: "leanHighLevelConcept" },
+      { key: "channels", el: "leanChannels" },
+      { key: "earlyAdopters", el: "leanEarlyAdopters" },
+      { key: "costStructure", el: "leanCostStructure" },
+      { key: "revenueStreams", el: "leanRevenueStreams" },
+    ];
+
+    sections.forEach(({ key, el }) => {
+      const ul = document.getElementById(el);
+      ul.innerHTML = (canvas[key] || []).map((item, idx) => `
+        <li class="flex justify-between items-start group">
+          <span class="break-words flex-1">${item}</span>
+          <button onclick="app.removeLeanCanvasItem('${key}', ${idx})" class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 ml-1 flex-shrink-0">
+            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </li>
+      `).join("");
+    });
+  }
+
+  openLeanCanvasModal(id = null) {
+    this.editingLeanCanvasId = id;
+    const modal = document.getElementById("leanCanvasModal");
+    const title = document.getElementById("leanCanvasModalTitle");
+    document.getElementById("leanCanvasTitle").value = "";
+    document.getElementById("leanCanvasDate").value = new Date().toISOString().split("T")[0];
+
+    if (id) {
+      title.textContent = "Edit Lean Canvas";
+      const canvas = this.leanCanvases.find(c => c.id === id);
+      if (canvas) {
+        document.getElementById("leanCanvasTitle").value = canvas.title;
+        document.getElementById("leanCanvasDate").value = canvas.date;
+      }
+    } else {
+      title.textContent = "New Lean Canvas";
+    }
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    document.getElementById("leanCanvasTitle").focus();
+  }
+
+  closeLeanCanvasModal() {
+    const modal = document.getElementById("leanCanvasModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    this.editingLeanCanvasId = null;
+  }
+
+  async saveLeanCanvas(e) {
+    e.preventDefault();
+    const title = document.getElementById("leanCanvasTitle").value.trim();
+    const date = document.getElementById("leanCanvasDate").value;
+
+    if (!title) return;
+
+    try {
+      if (this.editingLeanCanvasId) {
+        const canvas = this.leanCanvases.find(c => c.id === this.editingLeanCanvasId);
+        await fetch(`/api/lean-canvas/${this.editingLeanCanvasId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...canvas, title, date }),
+        });
+      } else {
+        await fetch("/api/lean-canvas", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, date }),
+        });
+      }
+      this.closeLeanCanvasModal();
+      await this.loadLeanCanvases();
+    } catch (error) {
+      console.error("Error saving lean canvas:", error);
+    }
+  }
+
+  editSelectedLeanCanvas() {
+    if (this.selectedLeanCanvasId) {
+      this.openLeanCanvasModal(this.selectedLeanCanvasId);
+    }
+  }
+
+  async deleteSelectedLeanCanvas() {
+    if (!this.selectedLeanCanvasId) return;
+    if (!confirm("Delete this Lean Canvas?")) return;
+    try {
+      await fetch(`/api/lean-canvas/${this.selectedLeanCanvasId}`, { method: "DELETE" });
+      this.selectedLeanCanvasId = null;
+      await this.loadLeanCanvases();
+    } catch (error) {
+      console.error("Error deleting lean canvas:", error);
+    }
+  }
+
+  openLeanCanvasItemModal(section) {
+    this.leanCanvasSection = section;
+    const modal = document.getElementById("leanCanvasItemModal");
+    const title = document.getElementById("leanCanvasItemModalTitle");
+    const sectionNames = {
+      problem: "Problem",
+      solution: "Solution",
+      uniqueValueProp: "Unique Value Proposition",
+      unfairAdvantage: "Unfair Advantage",
+      customerSegments: "Customer Segments",
+      existingAlternatives: "Existing Alternatives",
+      keyMetrics: "Key Metrics",
+      highLevelConcept: "High-Level Concept",
+      channels: "Channels",
+      earlyAdopters: "Early Adopters",
+      costStructure: "Cost Structure",
+      revenueStreams: "Revenue Streams"
+    };
+    title.textContent = `Add ${sectionNames[section]}`;
+    document.getElementById("leanCanvasItemText").value = "";
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    document.getElementById("leanCanvasItemText").focus();
+  }
+
+  closeLeanCanvasItemModal() {
+    const modal = document.getElementById("leanCanvasItemModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    this.leanCanvasSection = null;
+  }
+
+  async saveLeanCanvasItem(e) {
+    e.preventDefault();
+    if (!this.selectedLeanCanvasId || !this.leanCanvasSection) return;
+
+    const text = document.getElementById("leanCanvasItemText").value.trim();
+    if (!text) return;
+
+    const canvas = this.leanCanvases.find(c => c.id === this.selectedLeanCanvasId);
+    if (!canvas) return;
+
+    canvas[this.leanCanvasSection].push(text);
+
+    try {
+      await fetch(`/api/lean-canvas/${this.selectedLeanCanvasId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(canvas),
+      });
+      this.closeLeanCanvasItemModal();
+      this.renderLeanCanvasView(canvas);
+    } catch (error) {
+      console.error("Error saving lean canvas item:", error);
+    }
+  }
+
+  async removeLeanCanvasItem(section, index) {
+    if (!this.selectedLeanCanvasId) return;
+    const canvas = this.leanCanvases.find(c => c.id === this.selectedLeanCanvasId);
+    if (!canvas) return;
+
+    canvas[section].splice(index, 1);
+
+    try {
+      await fetch(`/api/lean-canvas/${this.selectedLeanCanvasId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(canvas),
+      });
+      this.renderLeanCanvasView(canvas);
+    } catch (error) {
+      console.error("Error removing lean canvas item:", error);
     }
   }
 

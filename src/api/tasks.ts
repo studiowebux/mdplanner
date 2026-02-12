@@ -279,6 +279,106 @@ export class TaskAPI {
         return new Response(JSON.stringify({ success: true }), { headers });
       }
 
+      // GET /api/risk-analysis
+      if (method === "GET" && pathParts.length === 2 && pathParts[1] === "risk-analysis") {
+        const riskAnalyses = await this.parser.readRiskAnalyses();
+        return new Response(JSON.stringify(riskAnalyses), { headers });
+      }
+
+      // POST /api/risk-analysis
+      if (method === "POST" && pathParts.length === 2 && pathParts[1] === "risk-analysis") {
+        const body = await req.json();
+        const riskAnalyses = await this.parser.readRiskAnalyses();
+        const newRisk = {
+          id: crypto.randomUUID().substring(0, 8),
+          title: body.title,
+          date: body.date || new Date().toISOString().split("T")[0],
+          highImpactHighProb: body.highImpactHighProb || [],
+          highImpactLowProb: body.highImpactLowProb || [],
+          lowImpactHighProb: body.lowImpactHighProb || [],
+          lowImpactLowProb: body.lowImpactLowProb || [],
+        };
+        riskAnalyses.push(newRisk);
+        await this.parser.saveRiskAnalyses(riskAnalyses);
+        return new Response(JSON.stringify(newRisk), { status: 201, headers });
+      }
+
+      // PUT /api/risk-analysis/:id
+      if (method === "PUT" && pathParts.length === 3 && pathParts[1] === "risk-analysis") {
+        const id = pathParts[2];
+        const body = await req.json();
+        const riskAnalyses = await this.parser.readRiskAnalyses();
+        const index = riskAnalyses.findIndex(r => r.id === id);
+        if (index === -1) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        riskAnalyses[index] = { ...riskAnalyses[index], ...body };
+        await this.parser.saveRiskAnalyses(riskAnalyses);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // DELETE /api/risk-analysis/:id
+      if (method === "DELETE" && pathParts.length === 3 && pathParts[1] === "risk-analysis") {
+        const id = pathParts[2];
+        const riskAnalyses = await this.parser.readRiskAnalyses();
+        const filtered = riskAnalyses.filter(r => r.id !== id);
+        if (filtered.length === riskAnalyses.length) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        await this.parser.saveRiskAnalyses(filtered);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // GET /api/lean-canvas
+      if (method === "GET" && pathParts.length === 2 && pathParts[1] === "lean-canvas") {
+        const leanCanvases = await this.parser.readLeanCanvases();
+        return new Response(JSON.stringify(leanCanvases), { headers });
+      }
+
+      // POST /api/lean-canvas
+      if (method === "POST" && pathParts.length === 2 && pathParts[1] === "lean-canvas") {
+        const body = await req.json();
+        const leanCanvases = await this.parser.readLeanCanvases();
+        const newCanvas = {
+          id: crypto.randomUUID().substring(0, 8),
+          title: body.title,
+          date: body.date || new Date().toISOString().split("T")[0],
+          problem: body.problem || [],
+          solution: body.solution || [],
+          uniqueValueProp: body.uniqueValueProp || [],
+          unfairAdvantage: body.unfairAdvantage || [],
+          customerSegments: body.customerSegments || [],
+          existingAlternatives: body.existingAlternatives || [],
+          keyMetrics: body.keyMetrics || [],
+          highLevelConcept: body.highLevelConcept || [],
+          channels: body.channels || [],
+          earlyAdopters: body.earlyAdopters || [],
+          costStructure: body.costStructure || [],
+          revenueStreams: body.revenueStreams || [],
+        };
+        leanCanvases.push(newCanvas);
+        await this.parser.saveLeanCanvases(leanCanvases);
+        return new Response(JSON.stringify(newCanvas), { status: 201, headers });
+      }
+
+      // PUT /api/lean-canvas/:id
+      if (method === "PUT" && pathParts.length === 3 && pathParts[1] === "lean-canvas") {
+        const id = pathParts[2];
+        const body = await req.json();
+        const leanCanvases = await this.parser.readLeanCanvases();
+        const index = leanCanvases.findIndex(c => c.id === id);
+        if (index === -1) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        leanCanvases[index] = { ...leanCanvases[index], ...body };
+        await this.parser.saveLeanCanvases(leanCanvases);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // DELETE /api/lean-canvas/:id
+      if (method === "DELETE" && pathParts.length === 3 && pathParts[1] === "lean-canvas") {
+        const id = pathParts[2];
+        const leanCanvases = await this.parser.readLeanCanvases();
+        const filtered = leanCanvases.filter(c => c.id !== id);
+        if (filtered.length === leanCanvases.length) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        await this.parser.saveLeanCanvases(filtered);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
       // GET /api/time-entries - get all time entries
       if (method === "GET" && pathParts.length === 2 && pathParts[1] === "time-entries") {
         const timeEntries = await this.parser.readTimeEntries();

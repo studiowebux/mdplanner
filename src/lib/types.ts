@@ -174,3 +174,31 @@ export interface SwotAnalysis {
   opportunities: string[];
   threats: string[];
 }
+
+export interface RiskAnalysis {
+  id: string;
+  title: string;
+  date: string;
+  highImpactHighProb: string[];
+  highImpactLowProb: string[];
+  lowImpactHighProb: string[];
+  lowImpactLowProb: string[];
+}
+
+export interface LeanCanvas {
+  id: string;
+  title: string;
+  date: string;
+  problem: string[];
+  solution: string[];
+  uniqueValueProp: string[];
+  unfairAdvantage: string[];
+  customerSegments: string[];
+  existingAlternatives: string[];
+  keyMetrics: string[];
+  highLevelConcept: string[];
+  channels: string[];
+  earlyAdopters: string[];
+  costStructure: string[];
+  revenueStreams: string[];
+}

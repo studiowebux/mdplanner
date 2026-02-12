@@ -17,6 +17,8 @@ A modern task management system that uses markdown files as the database, built 
   - Ideas collection with status workflow (new, considering, planned, rejected)
   - Retrospectives (Continue/Stop/Start format)
   - SWOT Analysis boards (2x2 grid: Strengths, Weaknesses, Opportunities, Threats)
+  - Risk Analysis boards (2x2 grid: Impact vs Probability quadrants)
+  - Lean Canvas (12-section startup planning board)
   - Canvas view for visual brainstorming with sticky notes
   - Mindmap view with toolbar, live preview, and layout options (horizontal/vertical)
   - C4 Architecture diagrams with drill-down navigation and list view
@@ -546,6 +548,91 @@ Date: 2026-02-12
 - Economic uncertainty
 ```
 
+### Risk Analysis Configuration
+
+```markdown
+<!-- Risk Analysis -->
+# Risk Analysis
+
+## Product Launch Risks
+<!-- id: risk_001 -->
+Date: 2026-02-12
+
+### High Impact / High Probability
+- Critical vendor dependency
+- Key resource unavailability
+
+### High Impact / Low Probability
+- Major regulatory change
+- Natural disaster affecting operations
+
+### Low Impact / High Probability
+- Minor schedule delays
+- Budget overruns under 5%
+
+### Low Impact / Low Probability
+- Office relocation
+- Minor tool changes
+```
+
+### Lean Canvas Configuration
+
+```markdown
+<!-- Lean Canvas -->
+# Lean Canvas
+
+## Product MVP
+<!-- id: lean_001 -->
+Date: 2026-02-12
+
+### Problem
+- Users struggle with task management
+- Existing tools are too complex
+
+### Solution
+- Simple markdown-based planning
+- Visual board layouts
+
+### Unique Value Proposition
+- No database required
+- Human-readable storage
+
+### Unfair Advantage
+- Open source community
+- Developer-friendly
+
+### Customer Segments
+- Small teams
+- Individual developers
+
+### Existing Alternatives
+- Notion
+- Trello
+
+### Key Metrics
+- Daily active users
+- Task completion rate
+
+### High-Level Concept
+- Markdown meets Kanban
+
+### Channels
+- GitHub
+- Developer communities
+
+### Early Adopters
+- Solo developers
+- Indie hackers
+
+### Cost Structure
+- Hosting costs
+- Development time
+
+### Revenue Streams
+- Premium features
+- Enterprise support
+```
+
 ### C4 Architecture Configuration
 
 ```markdown
@@ -785,6 +872,18 @@ GET    /api/swot               # Retrieve all SWOT analyses
 POST   /api/swot               # Create new SWOT analysis
 PUT    /api/swot/:id           # Update SWOT analysis
 DELETE /api/swot/:id           # Delete SWOT analysis
+
+# Risk Analysis
+GET    /api/risk-analysis      # Retrieve all risk analyses
+POST   /api/risk-analysis      # Create new risk analysis
+PUT    /api/risk-analysis/:id  # Update risk analysis
+DELETE /api/risk-analysis/:id  # Delete risk analysis
+
+# Lean Canvas
+GET    /api/lean-canvas        # Retrieve all lean canvases
+POST   /api/lean-canvas        # Create new lean canvas
+PUT    /api/lean-canvas/:id    # Update lean canvas
+DELETE /api/lean-canvas/:id    # Delete lean canvas
 
 # Time Tracking
 GET    /api/time-entries       # Get all time entries
