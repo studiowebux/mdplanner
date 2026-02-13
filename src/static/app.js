@@ -91,7 +91,25 @@ class TaskManager {
     this.selectedBriefId = null;
     this.editingBriefId = null;
     this.briefSection = null;
+    this.capacityPlans = [];
+    this.selectedCapacityPlanId = null;
+    this.editingCapacityPlanId = null;
+    this.capacityTab = "team";
+    this.allocWeekOffset = 0;
+    this.editingAllocationId = null;
+    this.editingAllocationMemberId = null;
+    this.editingAllocationWeek = null;
+    this.editingTeamMemberId = null;
+    this.autoAssignSuggestions = [];
     this.timeEntries = {};
+    this.strategicLevelsBuilders = [];
+    this.selectedStrategicBuilderId = null;
+    this.editingStrategicBuilderId = null;
+    this.editingStrategicLevelId = null;
+    this.strategicLevelParentId = null;
+    this.strategicLevelType = null;
+    this.linkingStrategicLevelId = null;
+    this.strategicViewMode = "tree";
     this.c4Components = [];
     this.c4Zoom = 1;
     this.c4Offset = { x: 0, y: 0 };
@@ -415,6 +433,18 @@ class TaskManager {
       .getElementById("timeTrackingViewBtnMobile")
       ?.addEventListener("click", () => {
         this.switchView("timeTracking");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("capacityViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("capacity");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("strategicLevelsViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("strategicLevels");
         this.closeMobileMenu();
       });
 
@@ -766,6 +796,49 @@ class TaskManager {
       .getElementById("ideaForm")
       .addEventListener("submit", (e) => this.saveIdea(e));
 
+    // Idea link picker events
+    document.getElementById("openIdeaLinkPickerBtn")?.addEventListener("click", () => this.openIdeaLinkPicker());
+    document.getElementById("cancelIdeaLinkPickerBtn")?.addEventListener("click", () => this.closeIdeaLinkPicker());
+    document.getElementById("saveIdeaLinksBtn")?.addEventListener("click", () => this.saveIdeaLinks());
+    document.getElementById("ideaLinkSearch")?.addEventListener("input", (e) => this.filterIdeaLinkList(e.target.value));
+
+    // Billing events
+    document.getElementById("billingViewBtn")?.addEventListener("click", () => {
+      this.switchView("billing");
+      document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+    });
+    // Billing tab navigation
+    document.querySelectorAll(".billing-tab").forEach(tab => {
+      tab.addEventListener("click", (e) => this.switchBillingTab(e.target.dataset.billingTab));
+    });
+    // Customer events
+    document.getElementById("addCustomerBtn")?.addEventListener("click", () => this.openCustomerModal());
+    document.getElementById("cancelCustomerBtn")?.addEventListener("click", () => this.closeCustomerModal());
+    document.getElementById("customerForm")?.addEventListener("submit", (e) => this.saveCustomer(e));
+    // Billing Rate events
+    document.getElementById("addBillingRateBtn")?.addEventListener("click", () => this.openBillingRateModal());
+    document.getElementById("cancelBillingRateBtn")?.addEventListener("click", () => this.closeBillingRateModal());
+    document.getElementById("billingRateForm")?.addEventListener("submit", (e) => this.saveBillingRate(e));
+    // Quote events
+    document.getElementById("addQuoteBtn")?.addEventListener("click", () => this.openQuoteModal());
+    document.getElementById("cancelQuoteBtn")?.addEventListener("click", () => this.closeQuoteModal());
+    document.getElementById("quoteForm")?.addEventListener("submit", (e) => this.saveQuote(e));
+    document.getElementById("addQuoteLineBtn")?.addEventListener("click", () => this.addQuoteLineItem());
+    document.getElementById("quoteTaxRate")?.addEventListener("input", () => this.updateQuoteTotals());
+    // Invoice events
+    document.getElementById("addInvoiceBtn")?.addEventListener("click", () => this.openInvoiceModal());
+    document.getElementById("cancelInvoiceBtn")?.addEventListener("click", () => this.closeInvoiceModal());
+    document.getElementById("invoiceForm")?.addEventListener("submit", (e) => this.saveInvoice(e));
+    document.getElementById("addInvoiceLineBtn")?.addEventListener("click", () => this.addInvoiceLineItem());
+    document.getElementById("invoiceTaxRate")?.addEventListener("input", () => this.updateInvoiceTotals());
+    // Generate Invoice events
+    document.getElementById("generateInvoiceBtn")?.addEventListener("click", () => this.openGenerateInvoiceModal());
+    document.getElementById("cancelGenerateInvoiceBtn")?.addEventListener("click", () => this.closeGenerateInvoiceModal());
+    document.getElementById("generateInvoiceForm")?.addEventListener("submit", (e) => this.generateInvoice(e));
+    // Payment events
+    document.getElementById("cancelPaymentBtn")?.addEventListener("click", () => this.closePaymentModal());
+    document.getElementById("paymentForm")?.addEventListener("submit", (e) => this.savePayment(e));
+
     // Retrospectives events
     document
       .getElementById("retrospectivesViewBtn")
@@ -1010,6 +1083,112 @@ class TaskManager {
       .getElementById("saveTimeEntryBtn")
       .addEventListener("click", () => this.saveTimeEntry());
 
+    // Capacity Planning events
+    document
+      .getElementById("capacityViewBtn")
+      ?.addEventListener("click", () => {
+        this.switchView("capacity");
+        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+      });
+    document
+      .getElementById("addCapacityPlanBtn")
+      ?.addEventListener("click", () => this.openCapacityPlanModal());
+    document
+      .getElementById("cancelCapacityPlanBtn")
+      ?.addEventListener("click", () => this.closeCapacityPlanModal());
+    document
+      .getElementById("capacityPlanForm")
+      ?.addEventListener("submit", (e) => this.saveCapacityPlan(e));
+    document
+      .getElementById("capacityPlanSelector")
+      ?.addEventListener("change", (e) => this.selectCapacityPlan(e.target.value));
+    document
+      .getElementById("editCapacityPlanBtn")
+      ?.addEventListener("click", () => this.editCapacityPlan());
+    document
+      .getElementById("deleteCapacityPlanBtn")
+      ?.addEventListener("click", () => this.deleteCapacityPlan());
+    document
+      .getElementById("addTeamMemberBtn")
+      ?.addEventListener("click", () => this.openTeamMemberModal());
+    document
+      .getElementById("cancelTeamMemberBtn")
+      ?.addEventListener("click", () => this.closeTeamMemberModal());
+    document
+      .getElementById("teamMemberForm")
+      ?.addEventListener("submit", (e) => this.saveTeamMember(e));
+    document
+      .getElementById("cancelAllocationBtn")
+      ?.addEventListener("click", () => this.closeAllocationModal());
+    document
+      .getElementById("deleteAllocationBtn")
+      ?.addEventListener("click", () => this.deleteAllocation());
+    document
+      .getElementById("allocationForm")
+      ?.addEventListener("submit", (e) => this.saveAllocation(e));
+    document
+      .getElementById("capacityTeamTab")
+      ?.addEventListener("click", () => this.switchCapacityTab("team"));
+    document
+      .getElementById("capacityAllocTab")
+      ?.addEventListener("click", () => this.switchCapacityTab("alloc"));
+    document
+      .getElementById("capacityUtilTab")
+      ?.addEventListener("click", () => this.switchCapacityTab("util"));
+    document
+      .getElementById("allocPrevWeek")
+      ?.addEventListener("click", () => this.changeAllocWeek(-1));
+    document
+      .getElementById("allocNextWeek")
+      ?.addEventListener("click", () => this.changeAllocWeek(1));
+    document
+      .getElementById("autoAssignBtn")
+      ?.addEventListener("click", () => this.openAutoAssignModal());
+    document
+      .getElementById("cancelAutoAssignBtn")
+      ?.addEventListener("click", () => this.closeAutoAssignModal());
+    document
+      .getElementById("applyAutoAssignBtn")
+      ?.addEventListener("click", () => this.applyAutoAssign());
+
+    // Strategic Levels events
+    document
+      .getElementById("strategicLevelsViewBtn")
+      ?.addEventListener("click", () => {
+        this.switchView("strategicLevels");
+        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+      });
+    document
+      .getElementById("addStrategicLevelsBtn")
+      ?.addEventListener("click", () => this.openStrategicLevelsModal());
+    document
+      .getElementById("cancelStrategicLevelsBtn")
+      ?.addEventListener("click", () => this.closeStrategicLevelsModal());
+    document
+      .getElementById("strategicLevelsForm")
+      ?.addEventListener("submit", (e) => this.saveStrategicLevelsBuilder(e));
+    document
+      .getElementById("strategicLevelsSelector")
+      ?.addEventListener("change", (e) => this.selectStrategicBuilder(e.target.value));
+    document
+      .getElementById("editStrategicLevelsBtn")
+      ?.addEventListener("click", () => this.editStrategicBuilder());
+    document
+      .getElementById("deleteStrategicLevelsBtn")
+      ?.addEventListener("click", () => this.deleteStrategicBuilder());
+    document
+      .getElementById("cancelStrategicLevelBtn")
+      ?.addEventListener("click", () => this.closeStrategicLevelModal());
+    document
+      .getElementById("strategicLevelForm")
+      ?.addEventListener("submit", (e) => this.saveStrategicLevel(e));
+    document
+      .getElementById("cancelStrategicLinkBtn")
+      ?.addEventListener("click", () => this.closeStrategicLinkModal());
+    document
+      .getElementById("saveStrategicLinkBtn")
+      ?.addEventListener("click", () => this.saveStrategicLinks());
+
     // Canvas events
     document
       .getElementById("addStickyNoteBtn")
@@ -1207,7 +1386,7 @@ class TaskManager {
       summary: "Summary", list: "List", board: "Board", timeline: "Timeline",
       notes: "Notes", goals: "Goals", milestones: "Milestones", ideas: "Ideas",
       canvas: "Canvas", mindmap: "Mindmap", c4: "C4 Architecture",
-      retrospectives: "Retrospectives", swot: "SWOT Analysis", riskAnalysis: "Risk Analysis", leanCanvas: "Lean Canvas", businessModel: "Business Model", brief: "Brief", timeTracking: "Time Tracking", config: "Settings"
+      retrospectives: "Retrospectives", swot: "SWOT Analysis", riskAnalysis: "Risk Analysis", leanCanvas: "Lean Canvas", businessModel: "Business Model", brief: "Brief", timeTracking: "Time Tracking", capacity: "Capacity", strategicLevels: "Strategic Levels", config: "Settings"
     };
     const label = document.getElementById("currentViewLabel");
     if (label) label.textContent = viewLabels[view] || view;
@@ -1245,7 +1424,7 @@ class TaskManager {
     this.notesLoaded = false;
 
     // Reset all desktop nav buttons in dropdown
-    const desktopNavBtns = ["summaryViewBtn", "listViewBtn", "boardViewBtn", "timelineViewBtn", "notesViewBtn", "goalsViewBtn", "milestonesViewBtn", "ideasViewBtn", "canvasViewBtn", "mindmapViewBtn", "c4ViewBtn", "retrospectivesViewBtn", "swotViewBtn", "riskAnalysisViewBtn", "leanCanvasViewBtn", "businessModelViewBtn", "projectValueViewBtn", "briefViewBtn", "timeTrackingViewBtn"];
+    const desktopNavBtns = ["summaryViewBtn", "listViewBtn", "boardViewBtn", "timelineViewBtn", "notesViewBtn", "goalsViewBtn", "milestonesViewBtn", "ideasViewBtn", "canvasViewBtn", "mindmapViewBtn", "c4ViewBtn", "retrospectivesViewBtn", "swotViewBtn", "riskAnalysisViewBtn", "leanCanvasViewBtn", "businessModelViewBtn", "projectValueViewBtn", "briefViewBtn", "timeTrackingViewBtn", "capacityViewBtn", "strategicLevelsViewBtn", "billingViewBtn"];
     desktopNavBtns.forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) {
@@ -1255,7 +1434,7 @@ class TaskManager {
     });
 
     // Reset mobile buttons
-    const mobileBtnIds = ["summaryViewBtnMobile", "listViewBtnMobile", "boardViewBtnMobile", "timelineViewBtnMobile", "notesViewBtnMobile", "goalsViewBtnMobile", "milestonesViewBtnMobile", "canvasViewBtnMobile", "mindmapViewBtnMobile", "c4ViewBtnMobile", "ideasViewBtnMobile", "retrospectivesViewBtnMobile", "swotViewBtnMobile", "riskAnalysisViewBtnMobile", "leanCanvasViewBtnMobile", "businessModelViewBtnMobile", "projectValueViewBtnMobile", "briefViewBtnMobile", "timeTrackingViewBtnMobile", "configViewBtnMobile"];
+    const mobileBtnIds = ["summaryViewBtnMobile", "listViewBtnMobile", "boardViewBtnMobile", "timelineViewBtnMobile", "notesViewBtnMobile", "goalsViewBtnMobile", "milestonesViewBtnMobile", "canvasViewBtnMobile", "mindmapViewBtnMobile", "c4ViewBtnMobile", "ideasViewBtnMobile", "retrospectivesViewBtnMobile", "swotViewBtnMobile", "riskAnalysisViewBtnMobile", "leanCanvasViewBtnMobile", "businessModelViewBtnMobile", "projectValueViewBtnMobile", "briefViewBtnMobile", "timeTrackingViewBtnMobile", "capacityViewBtnMobile", "strategicLevelsViewBtnMobile", "billingViewBtnMobile", "configViewBtnMobile"];
     mobileBtnIds.forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) {
@@ -1281,6 +1460,9 @@ class TaskManager {
     document.getElementById("projectValueView").classList.add("hidden");
     document.getElementById("briefView").classList.add("hidden");
     document.getElementById("timeTrackingView").classList.add("hidden");
+    document.getElementById("capacityView").classList.add("hidden");
+    document.getElementById("strategicLevelsView").classList.add("hidden");
+    document.getElementById("billingView")?.classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
     document.getElementById("mindmapView").classList.add("hidden");
     document.getElementById("c4View").classList.add("hidden");
@@ -1356,6 +1538,18 @@ class TaskManager {
       this.activateViewButton("timeTracking");
       document.getElementById("timeTrackingView").classList.remove("hidden");
       this.loadTimeTracking();
+    } else if (view === "capacity") {
+      this.activateViewButton("capacity");
+      document.getElementById("capacityView").classList.remove("hidden");
+      this.loadCapacityPlans();
+    } else if (view === "strategicLevels") {
+      this.activateViewButton("strategicLevels");
+      document.getElementById("strategicLevelsView").classList.remove("hidden");
+      this.loadStrategicLevelsBuilders();
+    } else if (view === "billing") {
+      this.activateViewButton("billing");
+      document.getElementById("billingView").classList.remove("hidden");
+      this.loadBillingData();
     } else if (view === "canvas") {
       this.activateViewButton("canvas");
       document.getElementById("canvasView").classList.remove("hidden");
@@ -6990,7 +7184,10 @@ class TaskManager {
       rejected: "bg-gray-400 text-gray-800 dark:bg-gray-500 dark:text-gray-200",
     };
 
-    container.innerHTML = this.ideas.map(idea => `
+    container.innerHTML = this.ideas.map(idea => {
+      const linkedIdeas = (idea.links || []).map(id => this.ideas.find(i => i.id === id)).filter(Boolean);
+      const backlinkedIdeas = (idea.backlinks || []).map(id => this.ideas.find(i => i.id === id)).filter(Boolean);
+      return `
       <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
         <div class="flex justify-between items-start mb-2">
           <h3 class="font-medium text-gray-900 dark:text-gray-100">${idea.title}</h3>
@@ -6998,13 +7195,29 @@ class TaskManager {
         </div>
         ${idea.category ? `<span class="inline-block px-2 py-0.5 text-xs bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded mb-2">${idea.category}</span>` : ""}
         <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Created: ${idea.created}</p>
-        ${idea.description ? `<p class="text-sm text-gray-600 dark:text-gray-300">${idea.description}</p>` : ""}
+        ${idea.description ? `<p class="text-sm text-gray-600 dark:text-gray-300 mb-2">${idea.description}</p>` : ""}
+        ${linkedIdeas.length > 0 ? `
+          <div class="mb-2">
+            <span class="text-xs text-gray-500 dark:text-gray-400">Links:</span>
+            <div class="flex flex-wrap gap-1 mt-1">
+              ${linkedIdeas.map(li => `<span class="inline-block px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800" onclick="taskManager.openIdeaModal('${li.id}')">${li.title}</span>`).join("")}
+            </div>
+          </div>
+        ` : ""}
+        ${backlinkedIdeas.length > 0 ? `
+          <div class="mb-2">
+            <span class="text-xs text-gray-500 dark:text-gray-400">Backlinks:</span>
+            <div class="flex flex-wrap gap-1 mt-1">
+              ${backlinkedIdeas.map(bi => `<span class="inline-block px-2 py-0.5 text-xs bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded cursor-pointer hover:bg-purple-200 dark:hover:bg-purple-800" onclick="taskManager.openIdeaModal('${bi.id}')">${bi.title}</span>`).join("")}
+            </div>
+          </div>
+        ` : ""}
         <div class="flex justify-end space-x-2 mt-3">
           <button onclick="taskManager.openIdeaModal('${idea.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">Edit</button>
           <button onclick="taskManager.deleteIdea('${idea.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200">Delete</button>
         </div>
       </div>
-    `).join("");
+    `;}).join("");
   }
 
   openIdeaModal(id = null) {
@@ -7012,9 +7225,11 @@ class TaskManager {
     const modal = document.getElementById("ideaModal");
     const title = document.getElementById("ideaModalTitle");
     const form = document.getElementById("ideaForm");
+    const linksSection = document.getElementById("ideaLinksSection");
 
     form.reset();
     title.textContent = id ? "Edit Idea" : "Add Idea";
+    this.tempIdeaLinks = [];
 
     if (id && this.ideas) {
       const idea = this.ideas.find(i => i.id === id);
@@ -7023,7 +7238,12 @@ class TaskManager {
         document.getElementById("ideaStatus").value = idea.status;
         document.getElementById("ideaCategory").value = idea.category || "";
         document.getElementById("ideaDescription").value = idea.description || "";
+        this.tempIdeaLinks = [...(idea.links || [])];
+        linksSection?.classList.remove("hidden");
+        this.updateIdeaLinksDisplay();
       }
+    } else {
+      linksSection?.classList.add("hidden");
     }
 
     modal.classList.remove("hidden");
@@ -7044,6 +7264,7 @@ class TaskManager {
       status: document.getElementById("ideaStatus").value,
       category: document.getElementById("ideaCategory").value || null,
       description: document.getElementById("ideaDescription").value || null,
+      links: this.tempIdeaLinks && this.tempIdeaLinks.length > 0 ? this.tempIdeaLinks : null,
     };
 
     try {
@@ -8617,6 +8838,590 @@ class TaskManager {
       this.renderBriefGrid(brief);
     } catch (error) {
       console.error("Error removing brief item:", error);
+    }
+  }
+
+  // Capacity Planning functionality
+  async loadCapacityPlans() {
+    try {
+      const response = await fetch("/api/capacity");
+      this.capacityPlans = await response.json();
+      this.renderCapacityPlanSelector();
+      if (this.capacityPlans.length > 0 && !this.selectedCapacityPlanId) {
+        this.selectCapacityPlan(this.capacityPlans[0].id);
+      } else if (this.selectedCapacityPlanId) {
+        this.selectCapacityPlan(this.selectedCapacityPlanId);
+      }
+    } catch (error) {
+      console.error("Error loading capacity plans:", error);
+    }
+  }
+
+  renderCapacityPlanSelector() {
+    const selector = document.getElementById("capacityPlanSelector");
+    if (!selector) return;
+    selector.innerHTML = '<option value="">Select Plan</option>';
+    for (const plan of this.capacityPlans) {
+      const option = document.createElement("option");
+      option.value = plan.id;
+      option.textContent = plan.title;
+      if (plan.id === this.selectedCapacityPlanId) option.selected = true;
+      selector.appendChild(option);
+    }
+  }
+
+  selectCapacityPlan(id) {
+    this.selectedCapacityPlanId = id;
+    const plan = this.capacityPlans.find(p => p.id === id);
+    const emptyState = document.getElementById("emptyCapacityState");
+    const teamContent = document.getElementById("capacityTeamContent");
+    const allocContent = document.getElementById("capacityAllocContent");
+    const utilContent = document.getElementById("capacityUtilContent");
+    const editBtn = document.getElementById("editCapacityPlanBtn");
+    const deleteBtn = document.getElementById("deleteCapacityPlanBtn");
+
+    if (!plan) {
+      emptyState?.classList.remove("hidden");
+      teamContent?.classList.add("hidden");
+      allocContent?.classList.add("hidden");
+      utilContent?.classList.add("hidden");
+      editBtn?.classList.add("hidden");
+      deleteBtn?.classList.add("hidden");
+      return;
+    }
+
+    emptyState?.classList.add("hidden");
+    editBtn?.classList.remove("hidden");
+    deleteBtn?.classList.remove("hidden");
+    this.switchCapacityTab(this.capacityTab);
+  }
+
+  switchCapacityTab(tab) {
+    this.capacityTab = tab;
+    const teamTab = document.getElementById("capacityTeamTab");
+    const allocTab = document.getElementById("capacityAllocTab");
+    const utilTab = document.getElementById("capacityUtilTab");
+    const teamContent = document.getElementById("capacityTeamContent");
+    const allocContent = document.getElementById("capacityAllocContent");
+    const utilContent = document.getElementById("capacityUtilContent");
+
+    [teamTab, allocTab, utilTab].forEach(t => {
+      t?.classList.remove("border-gray-900", "dark:border-gray-100", "text-gray-900", "dark:text-gray-100");
+      t?.classList.add("border-transparent", "text-gray-500", "dark:text-gray-400");
+    });
+    [teamContent, allocContent, utilContent].forEach(c => c?.classList.add("hidden"));
+
+    if (tab === "team") {
+      teamTab?.classList.add("border-gray-900", "dark:border-gray-100", "text-gray-900", "dark:text-gray-100");
+      teamTab?.classList.remove("border-transparent", "text-gray-500", "dark:text-gray-400");
+      teamContent?.classList.remove("hidden");
+      this.renderTeamMembers();
+    } else if (tab === "alloc") {
+      allocTab?.classList.add("border-gray-900", "dark:border-gray-100", "text-gray-900", "dark:text-gray-100");
+      allocTab?.classList.remove("border-transparent", "text-gray-500", "dark:text-gray-400");
+      allocContent?.classList.remove("hidden");
+      this.renderAllocationsGrid();
+    } else if (tab === "util") {
+      utilTab?.classList.add("border-gray-900", "dark:border-gray-100", "text-gray-900", "dark:text-gray-100");
+      utilTab?.classList.remove("border-transparent", "text-gray-500", "dark:text-gray-400");
+      utilContent?.classList.remove("hidden");
+      this.renderUtilization();
+    }
+  }
+
+  renderTeamMembers() {
+    const plan = this.capacityPlans.find(p => p.id === this.selectedCapacityPlanId);
+    const grid = document.getElementById("teamMembersGrid");
+    if (!grid || !plan) return;
+
+    if (plan.teamMembers.length === 0) {
+      grid.innerHTML = '<div class="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">No team members yet. Click "+ Add Member" to add one.</div>';
+      return;
+    }
+
+    grid.innerHTML = plan.teamMembers.map(member => `
+      <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+        <div class="flex justify-between items-start mb-2">
+          <div>
+            <h4 class="font-medium text-gray-900 dark:text-gray-100">${this.escapeHtml(member.name)}</h4>
+            ${member.role ? `<p class="text-sm text-gray-500 dark:text-gray-400">${this.escapeHtml(member.role)}</p>` : ''}
+          </div>
+          <div class="flex gap-1">
+            <button onclick="taskManager.editTeamMember('${member.id}')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm">Edit</button>
+            <button onclick="taskManager.deleteTeamMember('${member.id}')" class="text-red-400 hover:text-red-600 text-sm">Del</button>
+          </div>
+        </div>
+        <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+          <div>${member.hoursPerDay}h/day</div>
+          <div>${member.workingDays.join(", ")}</div>
+          <div class="text-xs text-gray-500 dark:text-gray-500">${member.hoursPerDay * member.workingDays.length}h/week capacity</div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  getWeekStart(offset = 0) {
+    const now = new Date();
+    const monday = new Date(now);
+    monday.setDate(monday.getDate() - monday.getDay() + 1 + (offset * 7));
+    return monday.toISOString().split("T")[0];
+  }
+
+  getWeekDates(weekStart) {
+    const start = new Date(weekStart);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    const format = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
+    return `${format(start)} - ${format(end)}`;
+  }
+
+  changeAllocWeek(delta) {
+    this.allocWeekOffset += delta;
+    this.renderAllocationsGrid();
+  }
+
+  renderAllocationsGrid() {
+    const plan = this.capacityPlans.find(p => p.id === this.selectedCapacityPlanId);
+    const header = document.getElementById("allocationsHeader");
+    const body = document.getElementById("allocationsBody");
+    const weekRange = document.getElementById("allocWeekRange");
+    if (!header || !body || !plan) return;
+
+    // Generate 4 weeks of columns
+    const weeks = [];
+    for (let i = 0; i < 4; i++) {
+      weeks.push(this.getWeekStart(this.allocWeekOffset + i));
+    }
+
+    const currentWeek = this.getWeekStart(this.allocWeekOffset);
+    weekRange.textContent = this.getWeekDates(currentWeek);
+
+    header.innerHTML = `
+      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Member</th>
+      ${weeks.map(w => `<th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">${this.getWeekDates(w)}</th>`).join("")}
+    `;
+
+    if (plan.teamMembers.length === 0) {
+      body.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">No team members. Add members in the Team tab first.</td></tr>';
+      return;
+    }
+
+    body.innerHTML = plan.teamMembers.map(member => {
+      const weeklyCapacity = member.hoursPerDay * member.workingDays.length;
+      return `
+        <tr>
+          <td class="px-4 py-3 whitespace-nowrap">
+            <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${this.escapeHtml(member.name)}</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">${weeklyCapacity}h/week</div>
+          </td>
+          ${weeks.map(week => {
+            const allocs = plan.allocations.filter(a => a.memberId === member.id && a.weekStart === week);
+            const totalHours = allocs.reduce((sum, a) => sum + a.allocatedHours, 0);
+            const utilPct = weeklyCapacity > 0 ? (totalHours / weeklyCapacity) * 100 : 0;
+            let bgClass = "bg-green-100 dark:bg-green-900/30 border-green-300 dark:border-green-700";
+            if (utilPct >= 100) bgClass = "bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700";
+            else if (utilPct >= 80) bgClass = "bg-yellow-100 dark:bg-yellow-900/30 border-yellow-300 dark:border-yellow-700";
+
+            return `
+              <td class="px-4 py-3 text-center">
+                <button onclick="taskManager.openAllocationModal('${member.id}', '${week}')"
+                  class="inline-block min-w-[60px] px-3 py-2 rounded border ${bgClass} text-sm font-medium text-gray-700 dark:text-gray-300 hover:opacity-80">
+                  ${totalHours}h
+                </button>
+              </td>
+            `;
+          }).join("")}
+        </tr>
+      `;
+    }).join("");
+  }
+
+  async renderUtilization() {
+    const plan = this.capacityPlans.find(p => p.id === this.selectedCapacityPlanId);
+    const container = document.getElementById("utilizationBars");
+    if (!container || !plan) return;
+
+    try {
+      const response = await fetch(`/api/capacity/${plan.id}/utilization`);
+      const utilization = await response.json();
+
+      if (utilization.length === 0) {
+        container.innerHTML = '<div class="text-center py-8 text-gray-500 dark:text-gray-400">No team members to show utilization.</div>';
+        return;
+      }
+
+      container.innerHTML = utilization.map(u => {
+        const maxHours = Math.max(u.weeklyCapacity * 4, u.totalAllocated, u.actualHours);
+        const capacityPct = maxHours > 0 ? (u.weeklyCapacity * 4 / maxHours) * 100 : 0;
+        const allocPct = maxHours > 0 ? (u.totalAllocated / maxHours) * 100 : 0;
+        const actualPct = maxHours > 0 ? (u.actualHours / maxHours) * 100 : 0;
+
+        return `
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">${this.escapeHtml(u.memberName)}</span>
+              <span class="text-sm text-gray-500 dark:text-gray-400">${u.utilizationPercent}% utilization</span>
+            </div>
+            <div class="relative h-6 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden">
+              <div class="absolute inset-y-0 left-0 bg-gray-400 dark:bg-gray-500 opacity-30" style="width: ${capacityPct}%"></div>
+              <div class="absolute inset-y-0 left-0 bg-blue-500 dark:bg-blue-600" style="width: ${allocPct}%"></div>
+              <div class="absolute inset-y-0 left-0 bg-green-500 dark:bg-green-600" style="width: ${actualPct}%"></div>
+            </div>
+            <div class="flex gap-4 text-xs text-gray-500 dark:text-gray-400">
+              <span>Available: ${u.weeklyCapacity * 4}h (4 weeks)</span>
+              <span class="text-blue-600 dark:text-blue-400">Allocated: ${u.totalAllocated}h</span>
+              <span class="text-green-600 dark:text-green-400">Actual: ${u.actualHours}h</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+    } catch (error) {
+      console.error("Error loading utilization:", error);
+      container.innerHTML = '<div class="text-center py-8 text-red-500">Error loading utilization data.</div>';
+    }
+  }
+
+  openCapacityPlanModal(editId = null) {
+    this.editingCapacityPlanId = editId;
+    const modal = document.getElementById("capacityPlanModal");
+    const title = document.getElementById("capacityPlanModalTitle");
+    const titleInput = document.getElementById("capacityPlanTitle");
+    const dateInput = document.getElementById("capacityPlanDate");
+    const budgetInput = document.getElementById("capacityPlanBudget");
+
+    if (editId) {
+      const plan = this.capacityPlans.find(p => p.id === editId);
+      if (plan) {
+        title.textContent = "Edit Capacity Plan";
+        titleInput.value = plan.title;
+        dateInput.value = plan.date;
+        budgetInput.value = plan.budgetHours || "";
+      }
+    } else {
+      title.textContent = "New Capacity Plan";
+      titleInput.value = "";
+      dateInput.value = new Date().toISOString().split("T")[0];
+      budgetInput.value = "";
+    }
+    modal?.classList.remove("hidden");
+    modal?.classList.add("flex");
+  }
+
+  closeCapacityPlanModal() {
+    const modal = document.getElementById("capacityPlanModal");
+    modal?.classList.add("hidden");
+    modal?.classList.remove("flex");
+    this.editingCapacityPlanId = null;
+  }
+
+  async saveCapacityPlan(e) {
+    e.preventDefault();
+    const title = document.getElementById("capacityPlanTitle").value;
+    const date = document.getElementById("capacityPlanDate").value;
+    const budget = document.getElementById("capacityPlanBudget").value;
+
+    const data = { title, date, budgetHours: budget ? parseInt(budget) : undefined };
+
+    try {
+      if (this.editingCapacityPlanId) {
+        await fetch(`/api/capacity/${this.editingCapacityPlanId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      } else {
+        const response = await fetch("/api/capacity", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        const newPlan = await response.json();
+        this.selectedCapacityPlanId = newPlan.id;
+      }
+      this.closeCapacityPlanModal();
+      await this.loadCapacityPlans();
+    } catch (error) {
+      console.error("Error saving capacity plan:", error);
+    }
+  }
+
+  editCapacityPlan() {
+    if (this.selectedCapacityPlanId) {
+      this.openCapacityPlanModal(this.selectedCapacityPlanId);
+    }
+  }
+
+  async deleteCapacityPlan() {
+    if (!this.selectedCapacityPlanId) return;
+    if (!confirm("Are you sure you want to delete this capacity plan?")) return;
+    try {
+      await fetch(`/api/capacity/${this.selectedCapacityPlanId}`, { method: "DELETE" });
+      this.selectedCapacityPlanId = null;
+      await this.loadCapacityPlans();
+    } catch (error) {
+      console.error("Error deleting capacity plan:", error);
+    }
+  }
+
+  openTeamMemberModal(editId = null) {
+    this.editingTeamMemberId = editId;
+    const modal = document.getElementById("teamMemberModal");
+    const title = document.getElementById("teamMemberModalTitle");
+    const nameInput = document.getElementById("teamMemberName");
+    const roleInput = document.getElementById("teamMemberRole");
+    const hoursInput = document.getElementById("teamMemberHours");
+
+    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    days.forEach(day => {
+      document.getElementById(`work${day}`).checked = false;
+    });
+
+    if (editId) {
+      const plan = this.capacityPlans.find(p => p.id === this.selectedCapacityPlanId);
+      const member = plan?.teamMembers.find(m => m.id === editId);
+      if (member) {
+        title.textContent = "Edit Team Member";
+        nameInput.value = member.name;
+        roleInput.value = member.role || "";
+        hoursInput.value = member.hoursPerDay;
+        member.workingDays.forEach(day => {
+          const checkbox = document.getElementById(`work${day}`);
+          if (checkbox) checkbox.checked = true;
+        });
+      }
+    } else {
+      title.textContent = "Add Team Member";
+      nameInput.value = "";
+      roleInput.value = "";
+      hoursInput.value = 8;
+      ["Mon", "Tue", "Wed", "Thu", "Fri"].forEach(day => {
+        document.getElementById(`work${day}`).checked = true;
+      });
+    }
+    modal?.classList.remove("hidden");
+    modal?.classList.add("flex");
+  }
+
+  closeTeamMemberModal() {
+    const modal = document.getElementById("teamMemberModal");
+    modal?.classList.add("hidden");
+    modal?.classList.remove("flex");
+    this.editingTeamMemberId = null;
+  }
+
+  async saveTeamMember(e) {
+    e.preventDefault();
+    const name = document.getElementById("teamMemberName").value;
+    const role = document.getElementById("teamMemberRole").value;
+    const hoursPerDay = parseInt(document.getElementById("teamMemberHours").value) || 8;
+
+    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const workingDays = days.filter(day => document.getElementById(`work${day}`)?.checked);
+
+    const data = { name, role: role || undefined, hoursPerDay, workingDays };
+
+    try {
+      if (this.editingTeamMemberId) {
+        await fetch(`/api/capacity/${this.selectedCapacityPlanId}/members/${this.editingTeamMemberId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      } else {
+        await fetch(`/api/capacity/${this.selectedCapacityPlanId}/members`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      }
+      this.closeTeamMemberModal();
+      await this.loadCapacityPlans();
+      this.renderTeamMembers();
+    } catch (error) {
+      console.error("Error saving team member:", error);
+    }
+  }
+
+  editTeamMember(id) {
+    this.openTeamMemberModal(id);
+  }
+
+  async deleteTeamMember(id) {
+    if (!confirm("Delete this team member? Their allocations will also be removed.")) return;
+    try {
+      await fetch(`/api/capacity/${this.selectedCapacityPlanId}/members/${id}`, { method: "DELETE" });
+      await this.loadCapacityPlans();
+      this.renderTeamMembers();
+    } catch (error) {
+      console.error("Error deleting team member:", error);
+    }
+  }
+
+  openAllocationModal(memberId, weekStart) {
+    this.editingAllocationMemberId = memberId;
+    this.editingAllocationWeek = weekStart;
+
+    const plan = this.capacityPlans.find(p => p.id === this.selectedCapacityPlanId);
+    const member = plan?.teamMembers.find(m => m.id === memberId);
+    const allocs = plan?.allocations.filter(a => a.memberId === memberId && a.weekStart === weekStart) || [];
+
+    const modal = document.getElementById("allocationModal");
+    const title = document.getElementById("allocationModalTitle");
+    const hoursInput = document.getElementById("allocationHours");
+    const typeSelect = document.getElementById("allocationTargetType");
+    const targetInput = document.getElementById("allocationTargetId");
+    const notesInput = document.getElementById("allocationNotes");
+    const deleteBtn = document.getElementById("deleteAllocationBtn");
+
+    title.textContent = `Allocation: ${member?.name || "Member"} - ${this.getWeekDates(weekStart)}`;
+
+    if (allocs.length > 0) {
+      // Edit first allocation (simplified - could be improved to handle multiple)
+      const alloc = allocs[0];
+      this.editingAllocationId = alloc.id;
+      hoursInput.value = allocs.reduce((sum, a) => sum + a.allocatedHours, 0);
+      typeSelect.value = alloc.targetType;
+      targetInput.value = alloc.targetId || "";
+      notesInput.value = alloc.notes || "";
+      deleteBtn?.classList.remove("hidden");
+    } else {
+      this.editingAllocationId = null;
+      hoursInput.value = "";
+      typeSelect.value = "project";
+      targetInput.value = "";
+      notesInput.value = "";
+      deleteBtn?.classList.add("hidden");
+    }
+
+    modal?.classList.remove("hidden");
+    modal?.classList.add("flex");
+  }
+
+  closeAllocationModal() {
+    const modal = document.getElementById("allocationModal");
+    modal?.classList.add("hidden");
+    modal?.classList.remove("flex");
+    this.editingAllocationId = null;
+    this.editingAllocationMemberId = null;
+    this.editingAllocationWeek = null;
+  }
+
+  async saveAllocation(e) {
+    e.preventDefault();
+    const hours = parseInt(document.getElementById("allocationHours").value) || 0;
+    const targetType = document.getElementById("allocationTargetType").value;
+    const targetId = document.getElementById("allocationTargetId").value;
+    const notes = document.getElementById("allocationNotes").value;
+
+    const data = {
+      memberId: this.editingAllocationMemberId,
+      weekStart: this.editingAllocationWeek,
+      allocatedHours: hours,
+      targetType,
+      targetId: targetId || undefined,
+      notes: notes || undefined,
+    };
+
+    try {
+      if (this.editingAllocationId) {
+        // Delete existing and create new (simplified approach)
+        await fetch(`/api/capacity/${this.selectedCapacityPlanId}/allocations/${this.editingAllocationId}`, { method: "DELETE" });
+      }
+      if (hours > 0) {
+        await fetch(`/api/capacity/${this.selectedCapacityPlanId}/allocations`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      }
+      this.closeAllocationModal();
+      await this.loadCapacityPlans();
+      this.renderAllocationsGrid();
+    } catch (error) {
+      console.error("Error saving allocation:", error);
+    }
+  }
+
+  async deleteAllocation() {
+    if (!this.editingAllocationId) return;
+    try {
+      await fetch(`/api/capacity/${this.selectedCapacityPlanId}/allocations/${this.editingAllocationId}`, { method: "DELETE" });
+      this.closeAllocationModal();
+      await this.loadCapacityPlans();
+      this.renderAllocationsGrid();
+    } catch (error) {
+      console.error("Error deleting allocation:", error);
+    }
+  }
+
+  async openAutoAssignModal() {
+    const plan = this.capacityPlans.find(p => p.id === this.selectedCapacityPlanId);
+    if (!plan) return;
+
+    const modal = document.getElementById("autoAssignModal");
+    const list = document.getElementById("autoAssignList");
+    const empty = document.getElementById("autoAssignEmpty");
+
+    try {
+      const response = await fetch(`/api/capacity/${plan.id}/suggest-assignments`);
+      this.autoAssignSuggestions = await response.json();
+
+      if (this.autoAssignSuggestions.length === 0) {
+        empty?.classList.remove("hidden");
+        list?.classList.add("hidden");
+      } else {
+        empty?.classList.add("hidden");
+        list?.classList.remove("hidden");
+        list.innerHTML = this.autoAssignSuggestions.map((s, i) => `
+          <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+            <input type="checkbox" checked data-index="${i}" class="auto-assign-checkbox rounded">
+            <div class="flex-1">
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${this.escapeHtml(s.taskTitle)}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Assign to <span class="font-medium">${this.escapeHtml(s.memberName)}</span> for ${s.hours}h
+              </div>
+            </div>
+          </label>
+        `).join("");
+      }
+
+      modal?.classList.remove("hidden");
+      modal?.classList.add("flex");
+    } catch (error) {
+      console.error("Error loading suggestions:", error);
+    }
+  }
+
+  closeAutoAssignModal() {
+    const modal = document.getElementById("autoAssignModal");
+    modal?.classList.add("hidden");
+    modal?.classList.remove("flex");
+    this.autoAssignSuggestions = [];
+  }
+
+  async applyAutoAssign() {
+    const checkboxes = document.querySelectorAll(".auto-assign-checkbox:checked");
+    const selectedSuggestions = Array.from(checkboxes).map(cb => {
+      const index = parseInt(cb.dataset.index);
+      return this.autoAssignSuggestions[index];
+    });
+
+    if (selectedSuggestions.length === 0) {
+      this.closeAutoAssignModal();
+      return;
+    }
+
+    try {
+      await fetch(`/api/capacity/${this.selectedCapacityPlanId}/apply-assignments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ suggestions: selectedSuggestions }),
+      });
+      this.closeAutoAssignModal();
+      await this.loadCapacityPlans();
+      this.renderAllocationsGrid();
+    } catch (error) {
+      console.error("Error applying assignments:", error);
     }
   }
 
@@ -11401,12 +12206,1521 @@ class TaskManager {
   
   toggleC4Physics() {
     this.c4PhysicsEnabled = !this.c4PhysicsEnabled;
-    
+
     if (this.c4PhysicsEnabled) {
       const currentComponents = this.getCurrentLevelComponents();
       this.initializeC4ForceLayout(currentComponents);
     } else {
       this.stopC4ForceLayout();
+    }
+  }
+
+  // Strategic Levels Builder functionality
+  async loadStrategicLevelsBuilders() {
+    try {
+      const response = await fetch("/api/strategic-levels");
+      this.strategicLevelsBuilders = await response.json();
+      this.renderStrategicLevelsSelector();
+      if (this.strategicLevelsBuilders.length > 0 && !this.selectedStrategicBuilderId) {
+        this.selectStrategicBuilder(this.strategicLevelsBuilders[0].id);
+      } else if (this.selectedStrategicBuilderId) {
+        this.selectStrategicBuilder(this.selectedStrategicBuilderId);
+      } else {
+        this.renderStrategicLevelsView(null);
+      }
+    } catch (error) {
+      console.error("Error loading strategic levels builders:", error);
+    }
+  }
+
+  renderStrategicLevelsSelector() {
+    const selector = document.getElementById("strategicLevelsSelector");
+    if (!selector) return;
+    selector.innerHTML = '<option value="">Select Strategy</option>';
+    this.strategicLevelsBuilders.forEach(builder => {
+      const option = document.createElement("option");
+      option.value = builder.id;
+      option.textContent = builder.title;
+      if (builder.id === this.selectedStrategicBuilderId) option.selected = true;
+      selector.appendChild(option);
+    });
+  }
+
+  selectStrategicBuilder(builderId) {
+    this.selectedStrategicBuilderId = builderId;
+    const selector = document.getElementById("strategicLevelsSelector");
+    if (selector) selector.value = builderId;
+    const builder = this.strategicLevelsBuilders.find(b => b.id === builderId);
+    this.renderStrategicLevelsView(builder);
+
+    const editBtn = document.getElementById("editStrategicLevelsBtn");
+    const deleteBtn = document.getElementById("deleteStrategicLevelsBtn");
+    if (builder) {
+      editBtn?.classList.remove("hidden");
+      deleteBtn?.classList.remove("hidden");
+    } else {
+      editBtn?.classList.add("hidden");
+      deleteBtn?.classList.add("hidden");
+    }
+  }
+
+  renderStrategicLevelsView(builder) {
+    const emptyState = document.getElementById("emptyStrategicLevelsState");
+    const treeContainer = document.getElementById("strategicLevelsTree");
+
+    if (!builder) {
+      emptyState?.classList.remove("hidden");
+      treeContainer?.classList.add("hidden");
+      return;
+    }
+
+    emptyState?.classList.add("hidden");
+    treeContainer?.classList.remove("hidden");
+
+    if (this.strategicViewMode === "pyramid") {
+      this.renderStrategicLevelsPyramid(builder, treeContainer);
+    } else {
+      this.renderStrategicLevelsTree(builder, treeContainer);
+    }
+  }
+
+  setStrategicViewMode(mode) {
+    this.strategicViewMode = mode;
+    const builder = this.strategicLevelsBuilders.find(b => b.id === this.selectedStrategicBuilderId);
+    this.renderStrategicLevelsView(builder);
+
+    document.querySelectorAll(".strategic-view-toggle").forEach(btn => {
+      btn.classList.remove("bg-gray-200", "dark:bg-gray-600");
+      if (btn.dataset.mode === mode) {
+        btn.classList.add("bg-gray-200", "dark:bg-gray-600");
+      }
+    });
+  }
+
+  buildStrategicTree(levels) {
+    const levelOrder = ["vision", "mission", "goals", "objectives", "strategies", "tactics"];
+    const roots = [];
+    const nodeMap = new Map();
+
+    levels.forEach(level => {
+      nodeMap.set(level.id, { ...level, children: [] });
+    });
+
+    levels.forEach(level => {
+      const node = nodeMap.get(level.id);
+      if (level.parentId && nodeMap.has(level.parentId)) {
+        nodeMap.get(level.parentId).children.push(node);
+      } else {
+        roots.push(node);
+      }
+    });
+
+    roots.sort((a, b) => levelOrder.indexOf(a.level) - levelOrder.indexOf(b.level));
+    const sortChildren = (node) => {
+      node.children.sort((a, b) => (a.order || 0) - (b.order || 0));
+      node.children.forEach(sortChildren);
+    };
+    roots.forEach(sortChildren);
+
+    return roots;
+  }
+
+  renderStrategicNode(node, allLevels, depth = 0, isLast = true, prefix = "") {
+    const levelLabels = {
+      vision: "Vision", mission: "Mission", goals: "Goal",
+      objectives: "Objective", strategies: "Strategy", tactics: "Tactic"
+    };
+    const levelColors = {
+      vision: "border-l-purple-500", mission: "border-l-blue-500", goals: "border-l-green-500",
+      objectives: "border-l-yellow-500", strategies: "border-l-orange-500", tactics: "border-l-red-500"
+    };
+
+    const progress = this.calculateStrategicLevelProgress(node, allLevels);
+    const childLevelType = this.getChildLevelType(node.level);
+    const linkedCount = (node.linkedTasks?.length || 0) + (node.linkedMilestones?.length || 0);
+    const hasChildren = node.children && node.children.length > 0;
+
+    let html = `
+      <div class="strategic-tree-node" style="margin-left: ${depth * 24}px;">
+        ${depth > 0 ? `<div class="strategic-tree-connector">${isLast ? "\\u2514" : "\\u251C"}\\u2500</div>` : ""}
+        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border-l-4 ${levelColors[node.level]} border border-gray-200 dark:border-gray-600 mb-2">
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300">${levelLabels[node.level]}</span>
+                <span class="font-medium text-gray-900 dark:text-gray-100">${this.escapeHtml(node.title)}</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">(${Math.round(progress)}%)</span>
+              </div>
+              ${node.description ? `<p class="text-sm text-gray-600 dark:text-gray-400 mt-1">${this.escapeHtml(node.description)}</p>` : ""}
+              ${linkedCount > 0 ? `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Linked: ${node.linkedTasks?.length || 0} tasks, ${node.linkedMilestones?.length || 0} milestones</div>` : ""}
+              <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1.5 mt-2">
+                <div class="bg-gray-900 dark:bg-gray-100 h-1.5 rounded-full" style="width: ${progress}%"></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 ml-4 flex-shrink-0">
+              <button onclick="taskManager.openStrategicLevelModal('${node.level}', '${node.id}')"
+                      class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600">Edit</button>
+              <button onclick="taskManager.deleteStrategicLevel('${node.id}')"
+                      class="text-xs text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-200 px-2 py-1 rounded hover:bg-red-100 dark:hover:bg-red-900/20">Delete</button>
+              <button onclick="taskManager.openStrategicLinkModal('${node.id}')"
+                      class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600">Link</button>
+              ${childLevelType ? `
+              <button onclick="taskManager.openStrategicLevelModal('${childLevelType}', null, '${node.id}')"
+                      class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600">+ ${levelLabels[childLevelType]}</button>
+              ` : ""}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    if (hasChildren) {
+      node.children.forEach((child, idx) => {
+        const childIsLast = idx === node.children.length - 1;
+        html += this.renderStrategicNode(child, allLevels, depth + 1, childIsLast, prefix);
+      });
+    }
+
+    return html;
+  }
+
+  renderStrategicLevelsTree(builder, container) {
+    const hasVision = builder.levels.some(l => l.level === "vision");
+    let html = "";
+
+    if (!hasVision) {
+      html += `
+        <div class="flex justify-center py-4">
+          <button onclick="taskManager.openStrategicLevelModal('vision')"
+                  class="btn-primary py-2 px-4 rounded-lg">+ Add Vision</button>
+        </div>
+      `;
+    }
+
+    const tree = this.buildStrategicTree(builder.levels);
+    tree.forEach((root, idx) => {
+      html += this.renderStrategicNode(root, builder.levels, 0, idx === tree.length - 1);
+    });
+
+    container.innerHTML = html;
+  }
+
+  renderStrategicLevelsPyramid(builder, container) {
+    const levelOrder = ["vision", "mission", "goals", "objectives", "strategies", "tactics"];
+    const levelLabels = {
+      vision: "Vision", mission: "Mission", goals: "Goals",
+      objectives: "Objectives", strategies: "Strategies", tactics: "Tactics"
+    };
+    const pyramidWidths = {
+      vision: "max-w-sm", mission: "max-w-md", goals: "max-w-lg",
+      objectives: "max-w-xl", strategies: "max-w-2xl", tactics: "max-w-3xl"
+    };
+
+    const hasVision = builder.levels.some(l => l.level === "vision");
+    let html = "";
+
+    if (!hasVision) {
+      html += `
+        <div class="flex justify-center py-4">
+          <button onclick="taskManager.openStrategicLevelModal('vision')"
+                  class="btn-primary py-2 px-4 rounded-lg">+ Add Vision</button>
+        </div>
+      `;
+    }
+
+    html += '<div class="strategic-pyramid">';
+
+    for (const levelType of levelOrder) {
+      const levelsOfType = builder.levels
+        .filter(l => l.level === levelType)
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+      if (levelsOfType.length === 0) continue;
+
+      html += `
+        <div class="pyramid-row ${pyramidWidths[levelType]} mx-auto mb-3">
+          <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 text-center">${levelLabels[levelType]}</div>
+          <div class="flex flex-wrap justify-center gap-2">
+      `;
+
+      for (const level of levelsOfType) {
+        const progress = this.calculateStrategicLevelProgress(level, builder.levels);
+        const childLevelType = this.getChildLevelType(levelType);
+
+        html += `
+          <div class="pyramid-card bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 flex-1 min-w-[140px] max-w-[200px]">
+            <div class="text-center">
+              <div class="font-medium text-gray-900 dark:text-gray-100 text-sm truncate" title="${this.escapeHtml(level.title)}">${this.escapeHtml(level.title)}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">${Math.round(progress)}%</div>
+              <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1 mt-2">
+                <div class="bg-gray-900 dark:bg-gray-100 h-1 rounded-full" style="width: ${progress}%"></div>
+              </div>
+              <div class="flex justify-center gap-1 mt-2">
+                <button onclick="taskManager.openStrategicLevelModal('${levelType}', '${level.id}')"
+                        class="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Edit</button>
+                <button onclick="taskManager.openStrategicLinkModal('${level.id}')"
+                        class="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Link</button>
+                ${childLevelType ? `
+                <button onclick="taskManager.openStrategicLevelModal('${childLevelType}', null, '${level.id}')"
+                        class="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">+</button>
+                ` : ""}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      html += `
+          </div>
+        </div>
+      `;
+    }
+
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
+  getChildLevelType(parentLevel) {
+    const levelOrder = ["vision", "mission", "goals", "objectives", "strategies", "tactics"];
+    const idx = levelOrder.indexOf(parentLevel);
+    return idx < levelOrder.length - 1 ? levelOrder[idx + 1] : null;
+  }
+
+  calculateStrategicLevelProgress(level, allLevels) {
+    const linkedTasks = (level.linkedTasks || [])
+      .map(id => this.findTaskById(this.tasks, id))
+      .filter(Boolean);
+    const linkedMilestones = (level.linkedMilestones || [])
+      .map(id => this.milestones?.find(m => m.id === id))
+      .filter(Boolean);
+
+    let directProgress = 0;
+    let directCount = linkedTasks.length + linkedMilestones.length;
+
+    if (directCount > 0) {
+      const tasksDone = linkedTasks.filter(t => t.completed).length;
+      const milestonesDone = linkedMilestones.filter(m => m.status === "closed").length;
+      directProgress = (tasksDone + milestonesDone) / directCount;
+    }
+
+    // Get children progress (rollup)
+    const children = allLevels.filter(l => l.parentId === level.id);
+    if (children.length === 0) return directProgress * 100;
+
+    const childrenProgress = children.map(c => this.calculateStrategicLevelProgress(c, allLevels));
+    const avgChildProgress = childrenProgress.reduce((a, b) => a + b, 0) / children.length;
+
+    // Combine direct + children (weighted if both exist)
+    if (directCount > 0 && children.length > 0) {
+      return (directProgress * 100 * 0.3 + avgChildProgress * 0.7);
+    }
+    return directCount > 0 ? directProgress * 100 : avgChildProgress;
+  }
+
+  findTaskById(tasks, id) {
+    for (const task of tasks) {
+      if (task.id === id) return task;
+      if (task.children) {
+        const found = this.findTaskById(task.children, id);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+
+  openStrategicLevelsModal(editId = null) {
+    const modal = document.getElementById("strategicLevelsModal");
+    const title = document.getElementById("strategicLevelsModalTitle");
+    document.getElementById("strategicLevelsTitle").value = "";
+    document.getElementById("strategicLevelsDate").value = new Date().toISOString().split("T")[0];
+
+    if (editId) {
+      this.editingStrategicBuilderId = editId;
+      const builder = this.strategicLevelsBuilders.find(b => b.id === editId);
+      if (builder) {
+        document.getElementById("strategicLevelsTitle").value = builder.title;
+        document.getElementById("strategicLevelsDate").value = builder.date;
+      }
+      title.textContent = "Edit Strategy";
+    } else {
+      this.editingStrategicBuilderId = null;
+      title.textContent = "New Strategy";
+    }
+
+    modal?.classList.remove("hidden");
+    modal?.classList.add("flex");
+    document.getElementById("strategicLevelsTitle").focus();
+  }
+
+  closeStrategicLevelsModal() {
+    const modal = document.getElementById("strategicLevelsModal");
+    modal?.classList.add("hidden");
+    modal?.classList.remove("flex");
+    this.editingStrategicBuilderId = null;
+  }
+
+  async saveStrategicLevelsBuilder(e) {
+    e.preventDefault();
+    const titleEl = document.getElementById("strategicLevelsTitle");
+    const dateEl = document.getElementById("strategicLevelsDate");
+    const title = titleEl.value.trim();
+    const date = dateEl.value;
+
+    if (!title) return;
+
+    try {
+      if (this.editingStrategicBuilderId) {
+        await fetch(`/api/strategic-levels/${this.editingStrategicBuilderId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, date }),
+        });
+      } else {
+        const response = await fetch("/api/strategic-levels", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, date }),
+        });
+        const newBuilder = await response.json();
+        this.selectedStrategicBuilderId = newBuilder.id;
+      }
+      this.closeStrategicLevelsModal();
+      await this.loadStrategicLevelsBuilders();
+    } catch (error) {
+      console.error("Error saving strategic levels builder:", error);
+    }
+  }
+
+  editStrategicBuilder() {
+    if (!this.selectedStrategicBuilderId) return;
+    this.openStrategicLevelsModal(this.selectedStrategicBuilderId);
+  }
+
+  async deleteStrategicBuilder() {
+    if (!this.selectedStrategicBuilderId) return;
+    if (!confirm("Are you sure you want to delete this strategy?")) return;
+
+    try {
+      await fetch(`/api/strategic-levels/${this.selectedStrategicBuilderId}`, { method: "DELETE" });
+      this.selectedStrategicBuilderId = null;
+      await this.loadStrategicLevelsBuilders();
+    } catch (error) {
+      console.error("Error deleting strategic builder:", error);
+    }
+  }
+
+  openStrategicLevelModal(levelType, editId = null, parentId = null) {
+    const modal = document.getElementById("strategicLevelModal");
+    const title = document.getElementById("strategicLevelModalTitle");
+    const typeSelect = document.getElementById("strategicLevelType");
+    const parentGroup = document.getElementById("strategicLevelParentGroup");
+    const parentSelect = document.getElementById("strategicLevelParent");
+
+    document.getElementById("strategicLevelTitle").value = "";
+    document.getElementById("strategicLevelDescription").value = "";
+    typeSelect.value = levelType;
+
+    this.strategicLevelParentId = parentId;
+    this.strategicLevelType = levelType;
+
+    // Populate parent options
+    const builder = this.strategicLevelsBuilders.find(b => b.id === this.selectedStrategicBuilderId);
+    parentSelect.innerHTML = '<option value="">None (Root)</option>';
+
+    if (builder) {
+      const parentLevelType = this.getParentLevelType(levelType);
+      if (parentLevelType) {
+        const potentialParents = builder.levels.filter(l => l.level === parentLevelType);
+        potentialParents.forEach(p => {
+          const option = document.createElement("option");
+          option.value = p.id;
+          option.textContent = p.title;
+          if (p.id === parentId) option.selected = true;
+          parentSelect.appendChild(option);
+        });
+      }
+    }
+
+    // Show/hide parent group based on level type
+    if (levelType === "vision") {
+      parentGroup?.classList.add("hidden");
+    } else {
+      parentGroup?.classList.remove("hidden");
+    }
+
+    if (editId) {
+      this.editingStrategicLevelId = editId;
+      const level = builder?.levels.find(l => l.id === editId);
+      if (level) {
+        document.getElementById("strategicLevelTitle").value = level.title;
+        document.getElementById("strategicLevelDescription").value = level.description || "";
+        typeSelect.value = level.level;
+        parentSelect.value = level.parentId || "";
+      }
+      title.textContent = "Edit Level";
+    } else {
+      this.editingStrategicLevelId = null;
+      title.textContent = "Add Level";
+    }
+
+    modal?.classList.remove("hidden");
+    modal?.classList.add("flex");
+    document.getElementById("strategicLevelTitle").focus();
+  }
+
+  getParentLevelType(levelType) {
+    const levelOrder = ["vision", "mission", "goals", "objectives", "strategies", "tactics"];
+    const idx = levelOrder.indexOf(levelType);
+    return idx > 0 ? levelOrder[idx - 1] : null;
+  }
+
+  closeStrategicLevelModal() {
+    const modal = document.getElementById("strategicLevelModal");
+    modal?.classList.add("hidden");
+    modal?.classList.remove("flex");
+    this.editingStrategicLevelId = null;
+    this.strategicLevelParentId = null;
+    this.strategicLevelType = null;
+  }
+
+  async saveStrategicLevel(e) {
+    e.preventDefault();
+    if (!this.selectedStrategicBuilderId) return;
+
+    const title = document.getElementById("strategicLevelTitle").value.trim();
+    const description = document.getElementById("strategicLevelDescription").value.trim();
+    const level = document.getElementById("strategicLevelType").value;
+    const parentId = document.getElementById("strategicLevelParent").value || undefined;
+
+    if (!title) return;
+
+    try {
+      if (this.editingStrategicLevelId) {
+        await fetch(`/api/strategic-levels/${this.selectedStrategicBuilderId}/levels/${this.editingStrategicLevelId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, description, level, parentId }),
+        });
+      } else {
+        await fetch(`/api/strategic-levels/${this.selectedStrategicBuilderId}/levels`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, description, level, parentId }),
+        });
+      }
+      this.closeStrategicLevelModal();
+      await this.loadStrategicLevelsBuilders();
+    } catch (error) {
+      console.error("Error saving strategic level:", error);
+    }
+  }
+
+  async deleteStrategicLevel(levelId) {
+    if (!this.selectedStrategicBuilderId || !levelId) return;
+
+    const builder = this.strategicLevelsBuilders.find(b => b.id === this.selectedStrategicBuilderId);
+    if (!builder) return;
+
+    const children = builder.levels.filter(l => l.parentId === levelId);
+    if (children.length > 0) {
+      const childNames = children.map(c => c.title).join(", ");
+      if (!confirm(`This level has ${children.length} child level(s): ${childNames}.\n\nDeleting will also remove all children. Continue?`)) {
+        return;
+      }
+    } else {
+      if (!confirm("Are you sure you want to delete this level?")) return;
+    }
+
+    try {
+      await fetch(`/api/strategic-levels/${this.selectedStrategicBuilderId}/levels/${levelId}`, { method: "DELETE" });
+      await this.loadStrategicLevelsBuilders();
+    } catch (error) {
+      console.error("Error deleting strategic level:", error);
+    }
+  }
+
+  async openStrategicLinkModal(levelId) {
+    this.linkingStrategicLevelId = levelId;
+    const modal = document.getElementById("strategicLinkModal");
+    const tasksContainer = document.getElementById("strategicLinkTasks");
+    const milestonesContainer = document.getElementById("strategicLinkMilestones");
+
+    const builder = this.strategicLevelsBuilders.find(b => b.id === this.selectedStrategicBuilderId);
+    const level = builder?.levels.find(l => l.id === levelId);
+
+    // Render task checkboxes
+    const allTasks = this.flattenTasks(this.tasks);
+    tasksContainer.innerHTML = allTasks.length > 0 ? allTasks.map(task => `
+      <label class="flex items-center gap-2 p-1 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
+        <input type="checkbox" class="strategic-link-task rounded" value="${task.id}"
+               ${level?.linkedTasks?.includes(task.id) ? "checked" : ""}>
+        <span class="text-sm text-gray-700 dark:text-gray-300 ${task.completed ? "line-through" : ""}">${this.escapeHtml(task.title)}</span>
+      </label>
+    `).join("") : '<p class="text-sm text-gray-500 dark:text-gray-400 p-2">No tasks available</p>';
+
+    // Render milestone checkboxes
+    try {
+      const response = await fetch("/api/milestones");
+      const milestones = await response.json();
+      milestonesContainer.innerHTML = milestones.length > 0 ? milestones.map(m => `
+        <label class="flex items-center gap-2 p-1 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
+          <input type="checkbox" class="strategic-link-milestone rounded" value="${m.id}"
+                 ${level?.linkedMilestones?.includes(m.id) ? "checked" : ""}>
+          <span class="text-sm text-gray-700 dark:text-gray-300">${this.escapeHtml(m.name)}</span>
+        </label>
+      `).join("") : '<p class="text-sm text-gray-500 dark:text-gray-400 p-2">No milestones available</p>';
+    } catch (error) {
+      milestonesContainer.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400 p-2">Error loading milestones</p>';
+    }
+
+    modal?.classList.remove("hidden");
+    modal?.classList.add("flex");
+  }
+
+  flattenTasks(tasks) {
+    const result = [];
+    const collect = (taskList) => {
+      for (const task of taskList) {
+        result.push(task);
+        if (task.children) collect(task.children);
+      }
+    };
+    collect(tasks);
+    return result;
+  }
+
+  closeStrategicLinkModal() {
+    const modal = document.getElementById("strategicLinkModal");
+    modal?.classList.add("hidden");
+    modal?.classList.remove("flex");
+    this.linkingStrategicLevelId = null;
+  }
+
+  async saveStrategicLinks() {
+    if (!this.selectedStrategicBuilderId || !this.linkingStrategicLevelId) return;
+
+    const linkedTasks = Array.from(document.querySelectorAll(".strategic-link-task:checked"))
+      .map(cb => cb.value);
+    const linkedMilestones = Array.from(document.querySelectorAll(".strategic-link-milestone:checked"))
+      .map(cb => cb.value);
+
+    try {
+      await fetch(`/api/strategic-levels/${this.selectedStrategicBuilderId}/levels/${this.linkingStrategicLevelId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ linkedTasks, linkedMilestones }),
+      });
+      this.closeStrategicLinkModal();
+      await this.loadStrategicLevelsBuilders();
+    } catch (error) {
+      console.error("Error saving strategic links:", error);
+    }
+  }
+
+  // ================== ZETTELKASTEN IDEA LINKING ==================
+
+  openIdeaLinkPicker() {
+    if (!this.editingIdeaId) return;
+    const modal = document.getElementById("ideaLinkPickerModal");
+    this.tempIdeaLinks = [...(this.ideas.find(i => i.id === this.editingIdeaId)?.links || [])];
+    this.renderIdeaLinkList("");
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  closeIdeaLinkPicker() {
+    const modal = document.getElementById("ideaLinkPickerModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    document.getElementById("ideaLinkSearch").value = "";
+  }
+
+  renderIdeaLinkList(filter) {
+    const container = document.getElementById("ideaLinkList");
+    const currentId = this.editingIdeaId;
+    const filtered = this.ideas.filter(i =>
+      i.id !== currentId &&
+      (filter === "" || i.title.toLowerCase().includes(filter.toLowerCase()))
+    );
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm text-center">No other ideas found</p>';
+      return;
+    }
+
+    container.innerHTML = filtered.map(idea => `
+      <label class="flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer">
+        <input type="checkbox" class="idea-link-checkbox h-4 w-4 text-gray-900 border-gray-300 rounded"
+          value="${idea.id}" ${this.tempIdeaLinks.includes(idea.id) ? "checked" : ""}>
+        <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">${idea.title}</span>
+        <span class="ml-2 text-xs px-2 py-0.5 bg-gray-200 dark:bg-gray-600 rounded">${idea.status}</span>
+      </label>
+    `).join("");
+
+    container.querySelectorAll(".idea-link-checkbox").forEach(cb => {
+      cb.addEventListener("change", (e) => {
+        if (e.target.checked) {
+          if (!this.tempIdeaLinks.includes(e.target.value)) {
+            this.tempIdeaLinks.push(e.target.value);
+          }
+        } else {
+          this.tempIdeaLinks = this.tempIdeaLinks.filter(id => id !== e.target.value);
+        }
+      });
+    });
+  }
+
+  filterIdeaLinkList(filter) {
+    this.renderIdeaLinkList(filter);
+  }
+
+  saveIdeaLinks() {
+    this.closeIdeaLinkPicker();
+    this.updateIdeaLinksDisplay();
+  }
+
+  updateIdeaLinksDisplay() {
+    const container = document.getElementById("ideaLinksDisplay");
+    if (!container) return;
+
+    if (!this.tempIdeaLinks || this.tempIdeaLinks.length === 0) {
+      container.innerHTML = '<span class="text-gray-400 text-sm">No linked ideas</span>';
+      return;
+    }
+
+    container.innerHTML = this.tempIdeaLinks.map(linkId => {
+      const linkedIdea = this.ideas.find(i => i.id === linkId);
+      return linkedIdea ? `
+        <span class="inline-flex items-center px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-sm">
+          ${linkedIdea.title}
+          <button type="button" onclick="taskManager.removeIdeaLink('${linkId}')" class="ml-1 text-gray-500 hover:text-gray-700">&times;</button>
+        </span>
+      ` : "";
+    }).join("");
+  }
+
+  removeIdeaLink(linkId) {
+    this.tempIdeaLinks = this.tempIdeaLinks.filter(id => id !== linkId);
+    this.updateIdeaLinksDisplay();
+  }
+
+  // Override openIdeaModal to handle links
+  openIdeaModalWithLinks(id = null) {
+    this.editingIdeaId = id;
+    const modal = document.getElementById("ideaModal");
+    const title = document.getElementById("ideaModalTitle");
+    const form = document.getElementById("ideaForm");
+    const linksSection = document.getElementById("ideaLinksSection");
+
+    form.reset();
+    title.textContent = id ? "Edit Idea" : "Add Idea";
+    this.tempIdeaLinks = [];
+
+    if (id && this.ideas) {
+      const idea = this.ideas.find(i => i.id === id);
+      if (idea) {
+        document.getElementById("ideaTitle").value = idea.title;
+        document.getElementById("ideaStatus").value = idea.status;
+        document.getElementById("ideaCategory").value = idea.category || "";
+        document.getElementById("ideaDescription").value = idea.description || "";
+        this.tempIdeaLinks = [...(idea.links || [])];
+        linksSection?.classList.remove("hidden");
+        this.updateIdeaLinksDisplay();
+      }
+    } else {
+      linksSection?.classList.add("hidden");
+    }
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  // ================== BILLING FUNCTIONALITY ==================
+
+  async loadBillingData() {
+    try {
+      const [customers, rates, quotes, invoices, summary] = await Promise.all([
+        fetch("/api/customers").then(r => r.json()),
+        fetch("/api/billing-rates").then(r => r.json()),
+        fetch("/api/quotes").then(r => r.json()),
+        fetch("/api/invoices").then(r => r.json()),
+        fetch("/api/billing/summary").then(r => r.json()),
+      ]);
+
+      this.customers = customers;
+      this.billingRates = rates;
+      this.quotes = quotes;
+      this.invoices = invoices;
+      this.billingSummary = summary;
+
+      this.renderBillingSummary();
+      this.renderCustomersView();
+      this.renderBillingRatesView();
+      this.renderQuotesView();
+      this.renderInvoicesView();
+    } catch (error) {
+      console.error("Error loading billing data:", error);
+    }
+  }
+
+  renderBillingSummary() {
+    const s = this.billingSummary || {};
+    document.getElementById("billingSummaryOutstanding").textContent = this.formatCurrency(s.totalOutstanding || 0);
+    document.getElementById("billingSummaryOverdue").textContent = this.formatCurrency(s.totalOverdue || 0);
+    document.getElementById("billingSummaryPaid").textContent = this.formatCurrency(s.totalPaid || 0);
+    document.getElementById("billingSummaryDraft").textContent = s.draftInvoices || 0;
+  }
+
+  formatCurrency(amount) {
+    return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount);
+  }
+
+  switchBillingTab(tab) {
+    document.querySelectorAll(".billing-tab").forEach(t => {
+      t.classList.remove("text-gray-900", "dark:text-gray-100", "border-b-2", "border-gray-900", "dark:border-gray-100");
+      t.classList.add("text-gray-500", "dark:text-gray-400");
+    });
+    document.querySelector(`[data-billing-tab="${tab}"]`)?.classList.add("text-gray-900", "dark:text-gray-100", "border-b-2", "border-gray-900", "dark:border-gray-100");
+    document.querySelector(`[data-billing-tab="${tab}"]`)?.classList.remove("text-gray-500", "dark:text-gray-400");
+
+    document.querySelectorAll(".billing-tab-content").forEach(c => c.classList.add("hidden"));
+    document.getElementById(`${tab}Tab`)?.classList.remove("hidden");
+  }
+
+  // Customer methods
+  renderCustomersView() {
+    const container = document.getElementById("customersContainer");
+    const emptyState = document.getElementById("emptyCustomersState");
+
+    if (!this.customers || this.customers.length === 0) {
+      emptyState?.classList.remove("hidden");
+      container.innerHTML = "";
+      return;
+    }
+
+    emptyState?.classList.add("hidden");
+    container.innerHTML = this.customers.map(c => `
+      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+        <div class="flex justify-between items-start mb-2">
+          <h3 class="font-medium text-gray-900 dark:text-gray-100">${c.name}</h3>
+          ${c.company ? `<span class="text-xs px-2 py-0.5 bg-gray-200 dark:bg-gray-600 rounded">${c.company}</span>` : ""}
+        </div>
+        ${c.email ? `<p class="text-sm text-gray-600 dark:text-gray-400">${c.email}</p>` : ""}
+        ${c.phone ? `<p class="text-sm text-gray-600 dark:text-gray-400">${c.phone}</p>` : ""}
+        <div class="flex justify-end space-x-2 mt-3">
+          <button onclick="taskManager.openCustomerModal('${c.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900">Edit</button>
+          <button onclick="taskManager.deleteCustomer('${c.id}')" class="text-sm text-red-600 hover:text-red-800">Delete</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  openCustomerModal(id = null) {
+    this.editingCustomerId = id;
+    const modal = document.getElementById("customerModal");
+    const title = document.getElementById("customerModalTitle");
+    document.getElementById("customerForm").reset();
+
+    title.textContent = id ? "Edit Customer" : "Add Customer";
+
+    if (id) {
+      const c = this.customers.find(c => c.id === id);
+      if (c) {
+        document.getElementById("customerName").value = c.name;
+        document.getElementById("customerEmail").value = c.email || "";
+        document.getElementById("customerPhone").value = c.phone || "";
+        document.getElementById("customerCompany").value = c.company || "";
+        document.getElementById("customerStreet").value = c.billingAddress?.street || "";
+        document.getElementById("customerCity").value = c.billingAddress?.city || "";
+        document.getElementById("customerState").value = c.billingAddress?.state || "";
+        document.getElementById("customerPostalCode").value = c.billingAddress?.postalCode || "";
+        document.getElementById("customerCountry").value = c.billingAddress?.country || "";
+        document.getElementById("customerNotes").value = c.notes || "";
+      }
+    }
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  closeCustomerModal() {
+    const modal = document.getElementById("customerModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    this.editingCustomerId = null;
+  }
+
+  async saveCustomer(e) {
+    e.preventDefault();
+    const data = {
+      name: document.getElementById("customerName").value,
+      email: document.getElementById("customerEmail").value || null,
+      phone: document.getElementById("customerPhone").value || null,
+      company: document.getElementById("customerCompany").value || null,
+      billingAddress: {
+        street: document.getElementById("customerStreet").value || null,
+        city: document.getElementById("customerCity").value || null,
+        state: document.getElementById("customerState").value || null,
+        postalCode: document.getElementById("customerPostalCode").value || null,
+        country: document.getElementById("customerCountry").value || null,
+      },
+      notes: document.getElementById("customerNotes").value || null,
+    };
+
+    try {
+      if (this.editingCustomerId) {
+        await fetch(`/api/customers/${this.editingCustomerId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      } else {
+        await fetch("/api/customers", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      }
+      this.closeCustomerModal();
+      await this.loadBillingData();
+    } catch (error) {
+      console.error("Error saving customer:", error);
+    }
+  }
+
+  async deleteCustomer(id) {
+    if (!confirm("Delete this customer?")) return;
+    try {
+      await fetch(`/api/customers/${id}`, { method: "DELETE" });
+      await this.loadBillingData();
+    } catch (error) {
+      console.error("Error deleting customer:", error);
+    }
+  }
+
+  // Billing Rate methods
+  renderBillingRatesView() {
+    const container = document.getElementById("billingRatesContainer");
+    const emptyState = document.getElementById("emptyRatesState");
+
+    if (!this.billingRates || this.billingRates.length === 0) {
+      emptyState?.classList.remove("hidden");
+      container.innerHTML = "";
+      return;
+    }
+
+    emptyState?.classList.add("hidden");
+    container.innerHTML = this.billingRates.map(r => `
+      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+        <div class="flex justify-between items-start mb-2">
+          <h3 class="font-medium text-gray-900 dark:text-gray-100">${r.name}</h3>
+          ${r.isDefault ? '<span class="text-xs px-2 py-0.5 bg-gray-900 text-white rounded">Default</span>' : ""}
+        </div>
+        <p class="text-xl font-bold text-gray-900 dark:text-gray-100">${this.formatCurrency(r.hourlyRate)}/hr</p>
+        ${r.assignee ? `<p class="text-sm text-gray-600 dark:text-gray-400">Assignee: ${r.assignee}</p>` : ""}
+        <div class="flex justify-end space-x-2 mt-3">
+          <button onclick="taskManager.openBillingRateModal('${r.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900">Edit</button>
+          <button onclick="taskManager.deleteBillingRate('${r.id}')" class="text-sm text-red-600 hover:text-red-800">Delete</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  openBillingRateModal(id = null) {
+    this.editingBillingRateId = id;
+    const modal = document.getElementById("billingRateModal");
+    const title = document.getElementById("billingRateModalTitle");
+    document.getElementById("billingRateForm").reset();
+
+    title.textContent = id ? "Edit Billing Rate" : "Add Billing Rate";
+
+    if (id) {
+      const r = this.billingRates.find(r => r.id === id);
+      if (r) {
+        document.getElementById("billingRateName").value = r.name;
+        document.getElementById("billingRateHourly").value = r.hourlyRate;
+        document.getElementById("billingRateAssignee").value = r.assignee || "";
+        document.getElementById("billingRateDefault").checked = r.isDefault || false;
+      }
+    }
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  closeBillingRateModal() {
+    const modal = document.getElementById("billingRateModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    this.editingBillingRateId = null;
+  }
+
+  async saveBillingRate(e) {
+    e.preventDefault();
+    const data = {
+      name: document.getElementById("billingRateName").value,
+      hourlyRate: parseFloat(document.getElementById("billingRateHourly").value) || 0,
+      assignee: document.getElementById("billingRateAssignee").value || null,
+      isDefault: document.getElementById("billingRateDefault").checked,
+    };
+
+    try {
+      if (this.editingBillingRateId) {
+        await fetch(`/api/billing-rates/${this.editingBillingRateId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      } else {
+        await fetch("/api/billing-rates", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      }
+      this.closeBillingRateModal();
+      await this.loadBillingData();
+    } catch (error) {
+      console.error("Error saving billing rate:", error);
+    }
+  }
+
+  async deleteBillingRate(id) {
+    if (!confirm("Delete this billing rate?")) return;
+    try {
+      await fetch(`/api/billing-rates/${id}`, { method: "DELETE" });
+      await this.loadBillingData();
+    } catch (error) {
+      console.error("Error deleting billing rate:", error);
+    }
+  }
+
+  // Quote methods
+  renderQuotesView() {
+    const container = document.getElementById("quotesContainer");
+    const emptyState = document.getElementById("emptyQuotesState");
+
+    if (!this.quotes || this.quotes.length === 0) {
+      emptyState?.classList.remove("hidden");
+      container.innerHTML = "";
+      return;
+    }
+
+    emptyState?.classList.add("hidden");
+    const statusColors = {
+      draft: "bg-gray-200 text-gray-800",
+      sent: "bg-blue-100 text-blue-800",
+      accepted: "bg-green-100 text-green-800",
+      rejected: "bg-red-100 text-red-800",
+    };
+
+    container.innerHTML = this.quotes.map(q => {
+      const customer = this.customers.find(c => c.id === q.customerId);
+      return `
+        <div class="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <p class="text-xs text-gray-500 dark:text-gray-400">${q.number}</p>
+              <h3 class="font-medium text-gray-900 dark:text-gray-100">${q.title}</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400">${customer?.name || "Unknown"}</p>
+            </div>
+            <span class="px-2 py-1 text-xs rounded ${statusColors[q.status] || statusColors.draft}">${q.status}</span>
+          </div>
+          <p class="text-xl font-bold text-gray-900 dark:text-gray-100">${this.formatCurrency(q.total)}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Created: ${q.created}</p>
+          <div class="flex justify-end space-x-2 mt-3">
+            ${q.status === "draft" ? `<button onclick="taskManager.sendQuote('${q.id}')" class="text-sm text-blue-600 hover:text-blue-800">Send</button>` : ""}
+            ${q.status === "sent" ? `<button onclick="taskManager.acceptQuote('${q.id}')" class="text-sm text-green-600 hover:text-green-800">Accept</button>` : ""}
+            ${q.status === "accepted" ? `<button onclick="taskManager.convertQuoteToInvoice('${q.id}')" class="text-sm text-purple-600 hover:text-purple-800">To Invoice</button>` : ""}
+            <button onclick="taskManager.openQuoteModal('${q.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900">Edit</button>
+            <button onclick="taskManager.deleteQuote('${q.id}')" class="text-sm text-red-600 hover:text-red-800">Delete</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  openQuoteModal(id = null) {
+    this.editingQuoteId = id;
+    const modal = document.getElementById("quoteModal");
+    const title = document.getElementById("quoteModalTitle");
+    document.getElementById("quoteForm").reset();
+    this.quoteLineItems = [];
+
+    this.populateCustomerSelect("quoteCustomer");
+    title.textContent = id ? "Edit Quote" : "New Quote";
+
+    if (id) {
+      const q = this.quotes.find(q => q.id === id);
+      if (q) {
+        document.getElementById("quoteTitle").value = q.title;
+        document.getElementById("quoteCustomer").value = q.customerId;
+        document.getElementById("quoteValidUntil").value = q.validUntil || "";
+        document.getElementById("quoteTaxRate").value = q.taxRate || 0;
+        document.getElementById("quoteNotes").value = q.notes || "";
+        this.quoteLineItems = [...q.lineItems];
+      }
+    }
+
+    this.renderQuoteLineItems();
+    this.updateQuoteTotals();
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  closeQuoteModal() {
+    const modal = document.getElementById("quoteModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    this.editingQuoteId = null;
+  }
+
+  populateCustomerSelect(selectId) {
+    const select = document.getElementById(selectId);
+    select.innerHTML = '<option value="">Select customer...</option>' +
+      this.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+  }
+
+  addQuoteLineItem() {
+    const id = crypto.randomUUID().substring(0, 8);
+    this.quoteLineItems.push({ id, description: "", quantity: 1, rate: 0, amount: 0 });
+    this.renderQuoteLineItems();
+  }
+
+  renderQuoteLineItems() {
+    const container = document.getElementById("quoteLineItems");
+    container.innerHTML = this.quoteLineItems.map((item, idx) => `
+      <div class="flex gap-2 items-center" data-line-id="${item.id}">
+        <input type="text" placeholder="Description" value="${item.description}"
+          onchange="taskManager.updateQuoteLineItem('${item.id}', 'description', this.value)"
+          class="flex-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1 text-sm">
+        <input type="number" placeholder="Qty" value="${item.quantity}" step="0.01" min="0"
+          onchange="taskManager.updateQuoteLineItem('${item.id}', 'quantity', this.value)"
+          class="w-16 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1 text-sm">
+        <input type="number" placeholder="Rate" value="${item.rate}" step="0.01" min="0"
+          onchange="taskManager.updateQuoteLineItem('${item.id}', 'rate', this.value)"
+          class="w-20 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1 text-sm">
+        <span class="w-20 text-sm text-right">${this.formatCurrency(item.amount)}</span>
+        <button type="button" onclick="taskManager.removeQuoteLineItem('${item.id}')" class="text-red-600 hover:text-red-800">&times;</button>
+      </div>
+    `).join("");
+  }
+
+  updateQuoteLineItem(id, field, value) {
+    const item = this.quoteLineItems.find(i => i.id === id);
+    if (!item) return;
+    if (field === "quantity" || field === "rate") {
+      item[field] = parseFloat(value) || 0;
+      item.amount = item.quantity * item.rate;
+    } else {
+      item[field] = value;
+    }
+    this.renderQuoteLineItems();
+    this.updateQuoteTotals();
+  }
+
+  removeQuoteLineItem(id) {
+    this.quoteLineItems = this.quoteLineItems.filter(i => i.id !== id);
+    this.renderQuoteLineItems();
+    this.updateQuoteTotals();
+  }
+
+  updateQuoteTotals() {
+    const subtotal = this.quoteLineItems.reduce((sum, i) => sum + i.amount, 0);
+    const taxRate = parseFloat(document.getElementById("quoteTaxRate").value) || 0;
+    const tax = subtotal * (taxRate / 100);
+    const total = subtotal + tax;
+
+    document.getElementById("quoteSubtotal").textContent = this.formatCurrency(subtotal);
+    document.getElementById("quoteTax").textContent = this.formatCurrency(tax);
+    document.getElementById("quoteTotal").textContent = this.formatCurrency(total);
+  }
+
+  async saveQuote(e) {
+    e.preventDefault();
+    const data = {
+      title: document.getElementById("quoteTitle").value,
+      customerId: document.getElementById("quoteCustomer").value,
+      validUntil: document.getElementById("quoteValidUntil").value || null,
+      taxRate: parseFloat(document.getElementById("quoteTaxRate").value) || 0,
+      lineItems: this.quoteLineItems,
+      notes: document.getElementById("quoteNotes").value || null,
+    };
+
+    try {
+      if (this.editingQuoteId) {
+        await fetch(`/api/quotes/${this.editingQuoteId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      } else {
+        await fetch("/api/quotes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      }
+      this.closeQuoteModal();
+      await this.loadBillingData();
+    } catch (error) {
+      console.error("Error saving quote:", error);
+    }
+  }
+
+  async deleteQuote(id) {
+    if (!confirm("Delete this quote?")) return;
+    try {
+      await fetch(`/api/quotes/${id}`, { method: "DELETE" });
+      await this.loadBillingData();
+    } catch (error) {
+      console.error("Error deleting quote:", error);
+    }
+  }
+
+  async sendQuote(id) {
+    try {
+      await fetch(`/api/quotes/${id}/send`, { method: "POST" });
+      await this.loadBillingData();
+    } catch (error) {
+      console.error("Error sending quote:", error);
+    }
+  }
+
+  async acceptQuote(id) {
+    try {
+      await fetch(`/api/quotes/${id}/accept`, { method: "POST" });
+      await this.loadBillingData();
+    } catch (error) {
+      console.error("Error accepting quote:", error);
+    }
+  }
+
+  async convertQuoteToInvoice(id) {
+    try {
+      await fetch(`/api/quotes/${id}/to-invoice`, { method: "POST" });
+      await this.loadBillingData();
+      this.switchBillingTab("invoices");
+    } catch (error) {
+      console.error("Error converting quote to invoice:", error);
+    }
+  }
+
+  // Invoice methods
+  renderInvoicesView() {
+    const container = document.getElementById("invoicesContainer");
+    const emptyState = document.getElementById("emptyInvoicesState");
+
+    if (!this.invoices || this.invoices.length === 0) {
+      emptyState?.classList.remove("hidden");
+      container.innerHTML = "";
+      return;
+    }
+
+    emptyState?.classList.add("hidden");
+    const statusColors = {
+      draft: "bg-gray-200 text-gray-800",
+      sent: "bg-blue-100 text-blue-800",
+      paid: "bg-green-100 text-green-800",
+      overdue: "bg-red-100 text-red-800",
+      cancelled: "bg-gray-400 text-gray-800",
+    };
+
+    container.innerHTML = this.invoices.map(inv => {
+      const customer = this.customers.find(c => c.id === inv.customerId);
+      const balance = inv.total - inv.paidAmount;
+      return `
+        <div class="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <p class="text-xs text-gray-500 dark:text-gray-400">${inv.number}</p>
+              <h3 class="font-medium text-gray-900 dark:text-gray-100">${inv.title}</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400">${customer?.name || "Unknown"}</p>
+            </div>
+            <span class="px-2 py-1 text-xs rounded ${statusColors[inv.status] || statusColors.draft}">${inv.status}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-xl font-bold text-gray-900 dark:text-gray-100">${this.formatCurrency(inv.total)}</p>
+              ${balance > 0 ? `<p class="text-sm text-red-600">Balance: ${this.formatCurrency(balance)}</p>` : ""}
+            </div>
+            ${inv.dueDate ? `<p class="text-xs text-gray-500">Due: ${inv.dueDate}</p>` : ""}
+          </div>
+          <div class="flex justify-end space-x-2 mt-3">
+            ${inv.status === "draft" ? `<button onclick="taskManager.sendInvoice('${inv.id}')" class="text-sm text-blue-600 hover:text-blue-800">Send</button>` : ""}
+            ${(inv.status === "sent" || inv.status === "overdue") && balance > 0 ? `<button onclick="taskManager.openPaymentModal('${inv.id}')" class="text-sm text-green-600 hover:text-green-800">Record Payment</button>` : ""}
+            <button onclick="taskManager.openInvoiceModal('${inv.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900">Edit</button>
+            <button onclick="taskManager.deleteInvoice('${inv.id}')" class="text-sm text-red-600 hover:text-red-800">Delete</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  openInvoiceModal(id = null) {
+    this.editingInvoiceId = id;
+    const modal = document.getElementById("invoiceModal");
+    const title = document.getElementById("invoiceModalTitle");
+    document.getElementById("invoiceForm").reset();
+    this.invoiceLineItems = [];
+
+    this.populateCustomerSelect("invoiceCustomer");
+    title.textContent = id ? "Edit Invoice" : "New Invoice";
+
+    if (id) {
+      const inv = this.invoices.find(i => i.id === id);
+      if (inv) {
+        document.getElementById("invoiceTitle").value = inv.title;
+        document.getElementById("invoiceCustomer").value = inv.customerId;
+        document.getElementById("invoiceDueDate").value = inv.dueDate || "";
+        document.getElementById("invoiceTaxRate").value = inv.taxRate || 0;
+        document.getElementById("invoiceNotes").value = inv.notes || "";
+        this.invoiceLineItems = [...inv.lineItems];
+      }
+    }
+
+    this.renderInvoiceLineItems();
+    this.updateInvoiceTotals();
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  closeInvoiceModal() {
+    const modal = document.getElementById("invoiceModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    this.editingInvoiceId = null;
+  }
+
+  addInvoiceLineItem() {
+    const id = crypto.randomUUID().substring(0, 8);
+    this.invoiceLineItems.push({ id, description: "", quantity: 1, rate: 0, amount: 0 });
+    this.renderInvoiceLineItems();
+  }
+
+  renderInvoiceLineItems() {
+    const container = document.getElementById("invoiceLineItems");
+    container.innerHTML = this.invoiceLineItems.map((item, idx) => `
+      <div class="flex gap-2 items-center" data-line-id="${item.id}">
+        <input type="text" placeholder="Description" value="${item.description}"
+          onchange="taskManager.updateInvoiceLineItem('${item.id}', 'description', this.value)"
+          class="flex-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1 text-sm">
+        <input type="number" placeholder="Qty" value="${item.quantity}" step="0.01" min="0"
+          onchange="taskManager.updateInvoiceLineItem('${item.id}', 'quantity', this.value)"
+          class="w-16 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1 text-sm">
+        <input type="number" placeholder="Rate" value="${item.rate}" step="0.01" min="0"
+          onchange="taskManager.updateInvoiceLineItem('${item.id}', 'rate', this.value)"
+          class="w-20 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1 text-sm">
+        <span class="w-20 text-sm text-right">${this.formatCurrency(item.amount)}</span>
+        <button type="button" onclick="taskManager.removeInvoiceLineItem('${item.id}')" class="text-red-600 hover:text-red-800">&times;</button>
+      </div>
+    `).join("");
+  }
+
+  updateInvoiceLineItem(id, field, value) {
+    const item = this.invoiceLineItems.find(i => i.id === id);
+    if (!item) return;
+    if (field === "quantity" || field === "rate") {
+      item[field] = parseFloat(value) || 0;
+      item.amount = item.quantity * item.rate;
+    } else {
+      item[field] = value;
+    }
+    this.renderInvoiceLineItems();
+    this.updateInvoiceTotals();
+  }
+
+  removeInvoiceLineItem(id) {
+    this.invoiceLineItems = this.invoiceLineItems.filter(i => i.id !== id);
+    this.renderInvoiceLineItems();
+    this.updateInvoiceTotals();
+  }
+
+  updateInvoiceTotals() {
+    const subtotal = this.invoiceLineItems.reduce((sum, i) => sum + i.amount, 0);
+    const taxRate = parseFloat(document.getElementById("invoiceTaxRate").value) || 0;
+    const tax = subtotal * (taxRate / 100);
+    const total = subtotal + tax;
+
+    document.getElementById("invoiceSubtotal").textContent = this.formatCurrency(subtotal);
+    document.getElementById("invoiceTaxDisplay").textContent = this.formatCurrency(tax);
+    document.getElementById("invoiceTotal").textContent = this.formatCurrency(total);
+  }
+
+  async saveInvoice(e) {
+    e.preventDefault();
+    const data = {
+      title: document.getElementById("invoiceTitle").value,
+      customerId: document.getElementById("invoiceCustomer").value,
+      dueDate: document.getElementById("invoiceDueDate").value || null,
+      taxRate: parseFloat(document.getElementById("invoiceTaxRate").value) || 0,
+      lineItems: this.invoiceLineItems,
+      notes: document.getElementById("invoiceNotes").value || null,
+    };
+
+    try {
+      if (this.editingInvoiceId) {
+        await fetch(`/api/invoices/${this.editingInvoiceId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      } else {
+        await fetch("/api/invoices", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      }
+      this.closeInvoiceModal();
+      await this.loadBillingData();
+    } catch (error) {
+      console.error("Error saving invoice:", error);
+    }
+  }
+
+  async deleteInvoice(id) {
+    if (!confirm("Delete this invoice?")) return;
+    try {
+      await fetch(`/api/invoices/${id}`, { method: "DELETE" });
+      await this.loadBillingData();
+    } catch (error) {
+      console.error("Error deleting invoice:", error);
+    }
+  }
+
+  async sendInvoice(id) {
+    try {
+      await fetch(`/api/invoices/${id}/send`, { method: "POST" });
+      await this.loadBillingData();
+    } catch (error) {
+      console.error("Error sending invoice:", error);
+    }
+  }
+
+  // Payment methods
+  openPaymentModal(invoiceId) {
+    this.payingInvoiceId = invoiceId;
+    const modal = document.getElementById("paymentModal");
+    document.getElementById("paymentForm").reset();
+    document.getElementById("paymentDate").value = new Date().toISOString().split("T")[0];
+
+    const inv = this.invoices.find(i => i.id === invoiceId);
+    if (inv) {
+      document.getElementById("paymentAmount").value = inv.total - inv.paidAmount;
+    }
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  closePaymentModal() {
+    const modal = document.getElementById("paymentModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    this.payingInvoiceId = null;
+  }
+
+  async savePayment(e) {
+    e.preventDefault();
+    if (!this.payingInvoiceId) return;
+
+    const data = {
+      amount: parseFloat(document.getElementById("paymentAmount").value) || 0,
+      date: document.getElementById("paymentDate").value,
+      method: document.getElementById("paymentMethod").value || null,
+      reference: document.getElementById("paymentReference").value || null,
+      notes: document.getElementById("paymentNotes").value || null,
+    };
+
+    try {
+      await fetch(`/api/invoices/${this.payingInvoiceId}/payments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      this.closePaymentModal();
+      await this.loadBillingData();
+    } catch (error) {
+      console.error("Error recording payment:", error);
+    }
+  }
+
+  // Generate Invoice from Time Entries
+  openGenerateInvoiceModal() {
+    const modal = document.getElementById("generateInvoiceModal");
+    document.getElementById("generateInvoiceForm").reset();
+    this.populateCustomerSelect("generateInvoiceCustomer");
+
+    // Set default rate from billing rates
+    const defaultRate = this.billingRates.find(r => r.isDefault);
+    if (defaultRate) {
+      document.getElementById("generateInvoiceRate").value = defaultRate.hourlyRate;
+    }
+
+    // Populate tasks with time entries
+    this.renderGenerateInvoiceTasks();
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  closeGenerateInvoiceModal() {
+    const modal = document.getElementById("generateInvoiceModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
+
+  renderGenerateInvoiceTasks() {
+    const container = document.getElementById("generateInvoiceTasks");
+    const tasksWithTime = this.tasks.filter(t => t.config?.time_entries?.length > 0);
+
+    if (tasksWithTime.length === 0) {
+      container.innerHTML = '<p class="text-gray-500 text-sm">No tasks with time entries found</p>';
+      return;
+    }
+
+    container.innerHTML = tasksWithTime.map(t => {
+      const totalHours = t.config.time_entries.reduce((sum, e) => sum + e.hours, 0);
+      return `
+        <label class="flex items-center p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer">
+          <input type="checkbox" class="generate-invoice-task h-4 w-4 text-gray-900 border-gray-300 rounded" value="${t.id}">
+          <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">${t.title}</span>
+          <span class="ml-auto text-xs text-gray-500">${totalHours}h</span>
+        </label>
+      `;
+    }).join("");
+  }
+
+  async generateInvoice(e) {
+    e.preventDefault();
+
+    const taskIds = Array.from(document.querySelectorAll(".generate-invoice-task:checked")).map(cb => cb.value);
+    if (taskIds.length === 0) {
+      alert("Please select at least one task");
+      return;
+    }
+
+    const data = {
+      customerId: document.getElementById("generateInvoiceCustomer").value,
+      title: document.getElementById("generateInvoiceTitle").value || null,
+      startDate: document.getElementById("generateInvoiceStartDate").value || null,
+      endDate: document.getElementById("generateInvoiceEndDate").value || null,
+      hourlyRate: parseFloat(document.getElementById("generateInvoiceRate").value) || 0,
+      taskIds,
+    };
+
+    try {
+      await fetch("/api/invoices/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      this.closeGenerateInvoiceModal();
+      await this.loadBillingData();
+      this.switchBillingTab("invoices");
+    } catch (error) {
+      console.error("Error generating invoice:", error);
     }
   }
 }

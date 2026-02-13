@@ -14,7 +14,7 @@ A modern task management system that uses markdown files as the database, built 
   - Notes section with simple and enhanced modes (tabs, split-view, timeline)
   - Goals tracking with enterprise and project goals
   - Milestones management with status tracking
-  - Ideas collection with status workflow (new, considering, planned, rejected)
+  - Ideas collection with status workflow and Zettelkasten-style linking (backlinks computed automatically)
   - Retrospectives (Continue/Stop/Start format)
   - SWOT Analysis boards (2x2 grid: Strengths, Weaknesses, Opportunities, Threats)
   - Risk Analysis boards (2x2 grid: Impact vs Probability quadrants)
@@ -26,6 +26,9 @@ A modern task management system that uses markdown files as the database, built 
   - Mindmap view with toolbar, live preview, and layout options (horizontal/vertical)
   - C4 Architecture diagrams with drill-down navigation and list view
   - Time Tracking with per-task time entries and reporting
+  - Capacity Planning with team members, weekly allocations, utilization visualization, and auto-assignment
+  - Strategic Levels Builder with Vision to Tactics hierarchy, tree/pyramid views, and progress rollup
+  - Billing System with customers, billing rates, quotes, invoices, and payment tracking
   - Configuration management interface
 - **Rich Task Management**:
   - Task creation, editing, and deletion
@@ -487,6 +490,7 @@ Minimum viable product release
 
 ## Mobile App
 <!-- id: idea_1 -->
+<!-- links: idea_2 -->
 Status: considering
 Category: Product
 Created: 2026-02-12
@@ -499,6 +503,13 @@ Category: Feature
 Created: 2026-02-12
 Add AI-powered task suggestions
 ```
+
+**Ideas Features:**
+- **Status Workflow**: new, considering, planned, rejected
+- **Categories**: Organize ideas by type
+- **Zettelkasten Linking**: Link related ideas with `<!-- links: idea_id1,idea_id2 -->`
+- **Computed Backlinks**: Automatically shows which ideas link to the current one
+- **Interactive Navigation**: Click linked/backlinked ideas to navigate between them
 
 ### Retrospectives Configuration
 
@@ -807,6 +818,164 @@ PostgreSQL database
 - 2026-02-12: 3h by John - Feature development
 ```
 
+### Capacity Planning Configuration
+
+```markdown
+<!-- Capacity Planning -->
+# Capacity Planning
+
+## Q1 2026 Plan
+<!-- id: capacity_001 -->
+Date: 2026-02-12
+Budget Hours: 500
+
+### Team Members
+
+#### Alice
+<!-- member-id: member_001 -->
+Role: Developer
+Hours Per Day: 8
+Working Days: Mon, Tue, Wed, Thu, Fri
+
+#### Bob
+<!-- member-id: member_002 -->
+Role: Designer
+Hours Per Day: 6
+Working Days: Mon, Tue, Wed, Thu
+
+### Allocations
+
+#### 2026-02-10
+- member_001: 32h project
+- member_002: 24h task:import1 "UI work"
+
+#### 2026-02-17
+- member_001: 40h milestone:sprint1
+- member_002: 20h project
+```
+
+**Capacity Planning Features:**
+- **Team Members**: Define availability (hours/day, working days)
+- **Weekly Allocations**: Assign hours per member per week
+- **Utilization Visualization**: Compare available vs allocated vs actual hours
+- **Auto-Assignment**: Algorithm suggests task allocations based on capacity and priority
+- **Color-Coded Grid**: Green (<80%), yellow (80-100%), red (>100%) utilization
+
+### Strategic Levels Builder Configuration
+
+```markdown
+<!-- Strategic Levels -->
+# Strategic Levels
+
+## Product Strategy 2026
+<!-- id: strategy_001 -->
+Date: 2026-02-12
+
+### Vision
+#### Become the leading markdown-based planning tool
+<!-- level-id: level_001 -->
+Description: Create the most intuitive and powerful planning tool for developers
+
+### Mission
+#### Simplify project planning
+<!-- level-id: level_002; parent: level_001 -->
+Description: Make planning accessible without complex setup
+
+### Goals
+#### Reach 10k users
+<!-- level-id: level_003; parent: level_002 -->
+linked_tasks: [task-1, task-2]
+linked_milestones: [milestone_1]
+
+### Objectives
+#### Launch public beta
+<!-- level-id: level_004; parent: level_003 -->
+
+### Strategies
+#### Focus on developer experience
+<!-- level-id: level_005; parent: level_004 -->
+
+### Tactics
+#### Add keyboard shortcuts
+<!-- level-id: level_006; parent: level_005 -->
+```
+
+**Strategic Levels Builder Features:**
+- **Hierarchical Structure**: Six levels from Vision down to Tactics
+- **Parent-Child Relationships**: Link levels to form a strategic tree
+- **Task/Milestone Linking**: Connect tasks and milestones to strategic levels
+- **Progress Rollup**: Progress automatically calculates from children and linked items
+- **Tree View**: Hierarchical display with expandable nodes and connecting lines
+- **Pyramid View**: Centered pyramid visualization showing strategic alignment
+- **Delete Protection**: Warning when deleting levels with children
+
+### Billing Configuration
+
+```markdown
+<!-- Billing -->
+# Billing
+
+## Customers
+
+### Acme Corp
+<!-- customer-id: customer_001 -->
+Email: contact@acme.com
+Phone: 555-0100
+Company: Acme Corporation
+Address: 123 Main St, City, State 12345
+Notes: Primary client for Q1 projects
+
+## Billing Rates
+
+### Standard Rate
+<!-- rate-id: rate_001 -->
+Rate: 150
+Assignee: Alice Smith
+Description: Standard hourly rate
+
+## Quotes
+
+### Website Redesign Quote
+<!-- quote-id: quote_001 -->
+Quote Number: Q-2026-001
+Customer: customer_001
+Status: draft
+Date: 2026-02-12
+Valid Until: 2026-03-12
+Tax Rate: 0.13
+
+#### Line Items
+- Website Design: 20h @ $150 = $3000
+- Development: 40h @ $150 = $6000
+
+## Invoices
+
+### Website Redesign Invoice
+<!-- invoice-id: invoice_001 -->
+Invoice Number: INV-2026-001
+Customer: customer_001
+Quote: quote_001
+Status: sent
+Date: 2026-02-15
+Due Date: 2026-03-15
+Tax Rate: 0.13
+
+#### Line Items
+- Website Design: 20h @ $150 = $3000
+- Development: 40h @ $150 = $6000
+
+#### Payments
+- 2026-02-20: $5000 via bank_transfer ref:TXN123
+```
+
+**Billing Features:**
+- **Customers**: Contact info, company details, billing address, notes
+- **Billing Rates**: Hourly rates per assignee for time entry calculations
+- **Quotes**: Draft, send, accept/reject workflow with line items and tax
+- **Invoices**: Generate from quotes or time entries, payment tracking
+- **Payments**: Record payments with method and reference tracking
+- **Summary Cards**: Outstanding, overdue, and paid totals at a glance
+
 ## Development
 
 ### Available Commands
@@ -1008,6 +1177,16 @@ POST   /api/retrospectives     # Create new retrospective
 PUT    /api/retrospectives/:id # Update retrospective
 DELETE /api/retrospectives/:id # Delete retrospective
 
+# Strategic Levels
+GET    /api/strategic-levels        # Retrieve all strategic builders
+POST   /api/strategic-levels        # Create new strategic builder
+GET    /api/strategic-levels/:id    # Get single strategic builder
+PUT    /api/strategic-levels/:id    # Update strategic builder
+DELETE /api/strategic-levels/:id    # Delete strategic builder
+POST   /api/strategic-levels/:id/levels      # Add level
+PUT    /api/strategic-levels/:id/levels/:lid # Update level
+DELETE /api/strategic-levels/:id/levels/:lid # Delete level
+
 # SWOT Analysis
 GET    /api/swot               # Retrieve all SWOT analyses
 POST   /api/swot               # Create new SWOT analysis
@@ -1049,6 +1228,52 @@ GET    /api/time-entries       # Get all time entries
 GET    /api/time-entries/:taskId # Get entries for task
 POST   /api/time-entries/:taskId # Add time entry to task
 DELETE /api/time-entries/:taskId/:entryId # Delete time entry
+
+# Capacity Planning
+GET    /api/capacity                # Get all capacity plans
+POST   /api/capacity                # Create new capacity plan
+GET    /api/capacity/:id            # Get single capacity plan
+PUT    /api/capacity/:id            # Update capacity plan
+DELETE /api/capacity/:id            # Delete capacity plan
+POST   /api/capacity/:id/members    # Add team member
+PUT    /api/capacity/:id/members/:mid    # Update team member
+DELETE /api/capacity/:id/members/:mid    # Delete team member
+POST   /api/capacity/:id/allocations     # Add allocation
+PUT    /api/capacity/:id/allocations/:aid # Update allocation
+DELETE /api/capacity/:id/allocations/:aid # Delete allocation
+GET    /api/capacity/:id/utilization     # Get utilization report
+GET    /api/capacity/:id/suggest-assignments # Get auto-assign suggestions
+POST   /api/capacity/:id/apply-assignments   # Apply auto-assignments
+
+# Billing - Customers
+GET    /api/customers           # Get all customers
+POST   /api/customers           # Create customer
+PUT    /api/customers/:id       # Update customer
+DELETE /api/customers/:id       # Delete customer
+
+# Billing - Rates
+GET    /api/billing-rates       # Get all billing rates
+POST   /api/billing-rates       # Create billing rate
+PUT    /api/billing-rates/:id   # Update billing rate
+DELETE /api/billing-rates/:id   # Delete billing rate
+
+# Billing - Quotes
+GET    /api/quotes              # Get all quotes
+POST   /api/quotes              # Create quote
+PUT    /api/quotes/:id          # Update quote
+DELETE /api/quotes/:id          # Delete quote
+POST   /api/quotes/:id/send     # Mark quote as sent
+POST   /api/quotes/:id/accept   # Accept quote
+POST   /api/quotes/:id/to-invoice # Convert quote to invoice
+
+# Billing - Invoices
+GET    /api/invoices            # Get all invoices
+POST   /api/invoices            # Create invoice
+PUT    /api/invoices/:id        # Update invoice
+DELETE /api/invoices/:id        # Delete invoice
+POST   /api/invoices/:id/send   # Mark invoice as sent
+POST   /api/invoices/:id/payments # Add payment to invoice
+POST   /api/invoices/generate   # Generate invoice from time entries
 
 # Version Check
 GET    /api/version            # Get current version info

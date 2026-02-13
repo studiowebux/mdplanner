@@ -300,6 +300,62 @@ Status: open
 ### Start
 
 
+<!-- Strategic Levels -->
+# Strategic Levels
+
+
+<!-- Customers -->
+# Customers
+
+## Fresh Customer
+<!-- id: a1c2af0b -->
+Email: fresh@example.com
+Created: 2026-02-13
+
+
+<!-- Billing Rates -->
+# Billing Rates
+
+## Standard
+<!-- id: ad995b4a -->
+Hourly Rate: 100
+Default: true
+
+
+<!-- Quotes -->
+# Quotes
+
+## Test Quote
+<!-- id: 2cd50f8d -->
+Number: Q-2026-001
+Customer: a1c2af0b
+Status: draft
+Created: 2026-02-13
+
+### Line Items
+- [line1] Development | Qty: 10 | Rate: 100 | Amount: 1000
+
+
+<!-- Ideas -->
+# Ideas
+
+## Idea Alpha
+<!-- id: d803f749 -->
+<!-- links: d91cfde3,3c394ffa -->
+Status: new
+Created: 2026-02-13
+
+## Idea Beta
+<!-- id: d91cfde3 -->
+Status: considering
+Created: 2026-02-13
+
+## Idea Gamma
+<!-- id: 3c394ffa -->
+Status: planned
+Created: 2026-02-13
+
+
 # Board
 
 ## Todo

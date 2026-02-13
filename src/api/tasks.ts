@@ -149,9 +149,9 @@ export class TaskAPI {
         return new Response(JSON.stringify({ success: true }), { headers });
       }
 
-      // GET /api/ideas
+      // GET /api/ideas (returns ideas with computed backlinks)
       if (method === "GET" && pathParts.length === 2 && pathParts[1] === "ideas") {
-        const ideas = await this.parser.readIdeas();
+        const ideas = await this.parser.readIdeasWithBacklinks();
         return new Response(JSON.stringify(ideas), { headers });
       }
 
@@ -1136,7 +1136,7 @@ export class TaskAPI {
         const body = await req.json();
         const projectInfo = await this.parser.readProjectInfo();
         projectInfo.c4Components = body.components || [];
-        
+
         try {
           await this.parser.saveProjectInfo(projectInfo);
           return new Response(JSON.stringify({ success: true }), { headers });
@@ -1150,6 +1150,912 @@ export class TaskAPI {
             },
           );
         }
+      }
+
+      // Capacity Planning API endpoints
+      // GET /api/capacity - list all capacity plans
+      if (method === "GET" && pathParts.length === 2 && pathParts[1] === "capacity") {
+        const plans = await this.parser.readCapacityPlans();
+        return new Response(JSON.stringify(plans), { headers });
+      }
+
+      // POST /api/capacity - create new capacity plan
+      if (method === "POST" && pathParts.length === 2 && pathParts[1] === "capacity") {
+        const body = await req.json();
+        const plans = await this.parser.readCapacityPlans();
+        const newPlan = {
+          id: crypto.randomUUID().substring(0, 8),
+          title: body.title || "New Capacity Plan",
+          date: body.date || new Date().toISOString().split("T")[0],
+          budgetHours: body.budgetHours,
+          teamMembers: body.teamMembers || [],
+          allocations: body.allocations || [],
+        };
+        plans.push(newPlan);
+        await this.parser.saveCapacityPlans(plans);
+        return new Response(JSON.stringify(newPlan), { status: 201, headers });
+      }
+
+      // GET /api/capacity/:id - get single capacity plan
+      if (method === "GET" && pathParts.length === 3 && pathParts[1] === "capacity") {
+        const id = pathParts[2];
+        const plans = await this.parser.readCapacityPlans();
+        const plan = plans.find(p => p.id === id);
+        if (!plan) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        return new Response(JSON.stringify(plan), { headers });
+      }
+
+      // PUT /api/capacity/:id - update capacity plan
+      if (method === "PUT" && pathParts.length === 3 && pathParts[1] === "capacity") {
+        const id = pathParts[2];
+        const body = await req.json();
+        const plans = await this.parser.readCapacityPlans();
+        const index = plans.findIndex(p => p.id === id);
+        if (index === -1) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        plans[index] = { ...plans[index], ...body };
+        await this.parser.saveCapacityPlans(plans);
+        return new Response(JSON.stringify(plans[index]), { headers });
+      }
+
+      // DELETE /api/capacity/:id - delete capacity plan
+      if (method === "DELETE" && pathParts.length === 3 && pathParts[1] === "capacity") {
+        const id = pathParts[2];
+        const plans = await this.parser.readCapacityPlans();
+        const filtered = plans.filter(p => p.id !== id);
+        if (filtered.length === plans.length) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        await this.parser.saveCapacityPlans(filtered);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // POST /api/capacity/:id/members - add team member
+      if (method === "POST" && pathParts.length === 4 && pathParts[1] === "capacity" && pathParts[3] === "members") {
+        const planId = pathParts[2];
+        const body = await req.json();
+        const plans = await this.parser.readCapacityPlans();
+        const plan = plans.find(p => p.id === planId);
+        if (!plan) return new Response(JSON.stringify({ error: "Plan not found" }), { status: 404, headers });
+
+        const newMember = {
+          id: crypto.randomUUID().substring(0, 8),
+          name: body.name,
+          role: body.role,
+          hoursPerDay: body.hoursPerDay || 8,
+          workingDays: body.workingDays || ["Mon", "Tue", "Wed", "Thu", "Fri"],
+        };
+        plan.teamMembers.push(newMember);
+        await this.parser.saveCapacityPlans(plans);
+        return new Response(JSON.stringify(newMember), { status: 201, headers });
+      }
+
+      // PUT /api/capacity/:id/members/:mid - update team member
+      if (method === "PUT" && pathParts.length === 5 && pathParts[1] === "capacity" && pathParts[3] === "members") {
+        const planId = pathParts[2];
+        const memberId = pathParts[4];
+        const body = await req.json();
+        const plans = await this.parser.readCapacityPlans();
+        const plan = plans.find(p => p.id === planId);
+        if (!plan) return new Response(JSON.stringify({ error: "Plan not found" }), { status: 404, headers });
+
+        const memberIndex = plan.teamMembers.findIndex(m => m.id === memberId);
+        if (memberIndex === -1) return new Response(JSON.stringify({ error: "Member not found" }), { status: 404, headers });
+
+        plan.teamMembers[memberIndex] = { ...plan.teamMembers[memberIndex], ...body };
+        await this.parser.saveCapacityPlans(plans);
+        return new Response(JSON.stringify(plan.teamMembers[memberIndex]), { headers });
+      }
+
+      // DELETE /api/capacity/:id/members/:mid - delete team member
+      if (method === "DELETE" && pathParts.length === 5 && pathParts[1] === "capacity" && pathParts[3] === "members") {
+        const planId = pathParts[2];
+        const memberId = pathParts[4];
+        const plans = await this.parser.readCapacityPlans();
+        const plan = plans.find(p => p.id === planId);
+        if (!plan) return new Response(JSON.stringify({ error: "Plan not found" }), { status: 404, headers });
+
+        const filtered = plan.teamMembers.filter(m => m.id !== memberId);
+        if (filtered.length === plan.teamMembers.length) return new Response(JSON.stringify({ error: "Member not found" }), { status: 404, headers });
+
+        plan.teamMembers = filtered;
+        // Also remove allocations for this member
+        plan.allocations = plan.allocations.filter(a => a.memberId !== memberId);
+        await this.parser.saveCapacityPlans(plans);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // POST /api/capacity/:id/allocations - add allocation
+      if (method === "POST" && pathParts.length === 4 && pathParts[1] === "capacity" && pathParts[3] === "allocations") {
+        const planId = pathParts[2];
+        const body = await req.json();
+        const plans = await this.parser.readCapacityPlans();
+        const plan = plans.find(p => p.id === planId);
+        if (!plan) return new Response(JSON.stringify({ error: "Plan not found" }), { status: 404, headers });
+
+        const newAllocation = {
+          id: crypto.randomUUID().substring(0, 8),
+          memberId: body.memberId,
+          weekStart: body.weekStart,
+          allocatedHours: body.allocatedHours || 0,
+          targetType: body.targetType || "project",
+          targetId: body.targetId,
+          notes: body.notes,
+        };
+        plan.allocations.push(newAllocation);
+        await this.parser.saveCapacityPlans(plans);
+        return new Response(JSON.stringify(newAllocation), { status: 201, headers });
+      }
+
+      // PUT /api/capacity/:id/allocations/:aid - update allocation
+      if (method === "PUT" && pathParts.length === 5 && pathParts[1] === "capacity" && pathParts[3] === "allocations") {
+        const planId = pathParts[2];
+        const allocId = pathParts[4];
+        const body = await req.json();
+        const plans = await this.parser.readCapacityPlans();
+        const plan = plans.find(p => p.id === planId);
+        if (!plan) return new Response(JSON.stringify({ error: "Plan not found" }), { status: 404, headers });
+
+        const allocIndex = plan.allocations.findIndex(a => a.id === allocId);
+        if (allocIndex === -1) return new Response(JSON.stringify({ error: "Allocation not found" }), { status: 404, headers });
+
+        plan.allocations[allocIndex] = { ...plan.allocations[allocIndex], ...body };
+        await this.parser.saveCapacityPlans(plans);
+        return new Response(JSON.stringify(plan.allocations[allocIndex]), { headers });
+      }
+
+      // DELETE /api/capacity/:id/allocations/:aid - delete allocation
+      if (method === "DELETE" && pathParts.length === 5 && pathParts[1] === "capacity" && pathParts[3] === "allocations") {
+        const planId = pathParts[2];
+        const allocId = pathParts[4];
+        const plans = await this.parser.readCapacityPlans();
+        const plan = plans.find(p => p.id === planId);
+        if (!plan) return new Response(JSON.stringify({ error: "Plan not found" }), { status: 404, headers });
+
+        const filtered = plan.allocations.filter(a => a.id !== allocId);
+        if (filtered.length === plan.allocations.length) return new Response(JSON.stringify({ error: "Allocation not found" }), { status: 404, headers });
+
+        plan.allocations = filtered;
+        await this.parser.saveCapacityPlans(plans);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // GET /api/capacity/:id/utilization - get utilization report
+      if (method === "GET" && pathParts.length === 4 && pathParts[1] === "capacity" && pathParts[3] === "utilization") {
+        const planId = pathParts[2];
+        const plans = await this.parser.readCapacityPlans();
+        const plan = plans.find(p => p.id === planId);
+        if (!plan) return new Response(JSON.stringify({ error: "Plan not found" }), { status: 404, headers });
+
+        // Get time entries for actual hours
+        const timeEntries = await this.parser.readTimeEntries();
+
+        const utilization = plan.teamMembers.map(member => {
+          const weeklyCapacity = member.hoursPerDay * member.workingDays.length;
+          const allocatedByWeek = new Map<string, number>();
+
+          for (const alloc of plan.allocations.filter(a => a.memberId === member.id)) {
+            const current = allocatedByWeek.get(alloc.weekStart) || 0;
+            allocatedByWeek.set(alloc.weekStart, current + alloc.allocatedHours);
+          }
+
+          // Calculate actual hours from time entries
+          let actualHours = 0;
+          for (const [, entries] of timeEntries) {
+            for (const entry of entries) {
+              if (entry.person === member.name || entry.person === member.id) {
+                actualHours += entry.hours;
+              }
+            }
+          }
+
+          const totalAllocated = Array.from(allocatedByWeek.values()).reduce((a, b) => a + b, 0);
+
+          return {
+            memberId: member.id,
+            memberName: member.name,
+            weeklyCapacity,
+            allocatedByWeek: Object.fromEntries(allocatedByWeek),
+            totalAllocated,
+            actualHours,
+            utilizationPercent: weeklyCapacity > 0 ? Math.round((totalAllocated / weeklyCapacity) * 100) : 0,
+          };
+        });
+
+        return new Response(JSON.stringify(utilization), { headers });
+      }
+
+      // GET /api/capacity/:id/suggest-assignments - auto-assign suggestions
+      if (method === "GET" && pathParts.length === 4 && pathParts[1] === "capacity" && pathParts[3] === "suggest-assignments") {
+        const planId = pathParts[2];
+        const plans = await this.parser.readCapacityPlans();
+        const plan = plans.find(p => p.id === planId);
+        if (!plan) return new Response(JSON.stringify({ error: "Plan not found" }), { status: 404, headers });
+
+        const tasks = await this.parser.readTasks();
+        const unassignedTasks = this.getUnassignedTasks(tasks).sort((a, b) => (a.config.priority || 999) - (b.config.priority || 999));
+
+        // Calculate current week
+        const now = new Date();
+        const monday = new Date(now);
+        monday.setDate(monday.getDate() - monday.getDay() + 1);
+        const weekStart = monday.toISOString().split("T")[0];
+
+        // Calculate remaining capacity for each member
+        const memberCapacity = new Map<string, number>();
+        for (const member of plan.teamMembers) {
+          const weeklyCapacity = member.hoursPerDay * member.workingDays.length;
+          const allocated = plan.allocations
+            .filter(a => a.memberId === member.id && a.weekStart === weekStart)
+            .reduce((sum, a) => sum + a.allocatedHours, 0);
+          memberCapacity.set(member.id, weeklyCapacity - allocated);
+        }
+
+        const suggestions: Array<{ taskId: string; taskTitle: string; memberId: string; memberName: string; hours: number; weekStart: string }> = [];
+
+        for (const task of unassignedTasks) {
+          const effort = task.config.effort || 8;
+
+          // Find member with most available capacity
+          let bestMember: { id: string; name: string } | null = null;
+          let maxCapacity = 0;
+
+          for (const member of plan.teamMembers) {
+            const remaining = memberCapacity.get(member.id) || 0;
+            if (remaining >= effort && remaining > maxCapacity) {
+              maxCapacity = remaining;
+              bestMember = { id: member.id, name: member.name };
+            }
+          }
+
+          if (bestMember) {
+            suggestions.push({
+              taskId: task.id,
+              taskTitle: task.title,
+              memberId: bestMember.id,
+              memberName: bestMember.name,
+              hours: effort,
+              weekStart,
+            });
+            memberCapacity.set(bestMember.id, (memberCapacity.get(bestMember.id) || 0) - effort);
+          }
+        }
+
+        return new Response(JSON.stringify(suggestions), { headers });
+      }
+
+      // POST /api/capacity/:id/apply-assignments - apply auto-assign suggestions
+      if (method === "POST" && pathParts.length === 4 && pathParts[1] === "capacity" && pathParts[3] === "apply-assignments") {
+        const planId = pathParts[2];
+        const body = await req.json();
+        const suggestions = body.suggestions || [];
+
+        const plans = await this.parser.readCapacityPlans();
+        const plan = plans.find(p => p.id === planId);
+        if (!plan) return new Response(JSON.stringify({ error: "Plan not found" }), { status: 404, headers });
+
+        for (const suggestion of suggestions) {
+          // Create allocation
+          plan.allocations.push({
+            id: crypto.randomUUID().substring(0, 8),
+            memberId: suggestion.memberId,
+            weekStart: suggestion.weekStart,
+            allocatedHours: suggestion.hours,
+            targetType: "task",
+            targetId: suggestion.taskId,
+          });
+
+          // Update task assignee
+          const member = plan.teamMembers.find(m => m.id === suggestion.memberId);
+          if (member) {
+            await this.parser.updateTask(suggestion.taskId, {
+              config: { assignee: member.name }
+            });
+          }
+        }
+
+        await this.parser.saveCapacityPlans(plans);
+        return new Response(JSON.stringify({ success: true, applied: suggestions.length }), { headers });
+      }
+
+      // GET /api/strategic-levels - list all strategic levels builders
+      if (method === "GET" && pathParts.length === 2 && pathParts[1] === "strategic-levels") {
+        const builders = await this.parser.readStrategicLevelsBuilders();
+        return new Response(JSON.stringify(builders), { headers });
+      }
+
+      // POST /api/strategic-levels - create new strategic levels builder
+      if (method === "POST" && pathParts.length === 2 && pathParts[1] === "strategic-levels") {
+        const body = await req.json();
+        const builders = await this.parser.readStrategicLevelsBuilders();
+        const newBuilder = {
+          id: crypto.randomUUID().substring(0, 8),
+          title: body.title || "New Strategy",
+          date: body.date || new Date().toISOString().split("T")[0],
+          levels: body.levels || [],
+        };
+        builders.push(newBuilder);
+        await this.parser.saveStrategicLevelsBuilders(builders);
+        return new Response(JSON.stringify(newBuilder), { status: 201, headers });
+      }
+
+      // GET /api/strategic-levels/:id - get single strategic levels builder
+      if (method === "GET" && pathParts.length === 3 && pathParts[1] === "strategic-levels") {
+        const id = pathParts[2];
+        const builders = await this.parser.readStrategicLevelsBuilders();
+        const builder = builders.find(b => b.id === id);
+        if (!builder) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        return new Response(JSON.stringify(builder), { headers });
+      }
+
+      // PUT /api/strategic-levels/:id - update strategic levels builder
+      if (method === "PUT" && pathParts.length === 3 && pathParts[1] === "strategic-levels") {
+        const id = pathParts[2];
+        const body = await req.json();
+        const builders = await this.parser.readStrategicLevelsBuilders();
+        const index = builders.findIndex(b => b.id === id);
+        if (index === -1) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        builders[index] = { ...builders[index], ...body };
+        await this.parser.saveStrategicLevelsBuilders(builders);
+        return new Response(JSON.stringify(builders[index]), { headers });
+      }
+
+      // DELETE /api/strategic-levels/:id - delete strategic levels builder
+      if (method === "DELETE" && pathParts.length === 3 && pathParts[1] === "strategic-levels") {
+        const id = pathParts[2];
+        const builders = await this.parser.readStrategicLevelsBuilders();
+        const filtered = builders.filter(b => b.id !== id);
+        if (filtered.length === builders.length) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        await this.parser.saveStrategicLevelsBuilders(filtered);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // POST /api/strategic-levels/:id/levels - add level to builder
+      if (method === "POST" && pathParts.length === 4 && pathParts[1] === "strategic-levels" && pathParts[3] === "levels") {
+        const builderId = pathParts[2];
+        const body = await req.json();
+        const builders = await this.parser.readStrategicLevelsBuilders();
+        const builder = builders.find(b => b.id === builderId);
+        if (!builder) return new Response(JSON.stringify({ error: "Builder not found" }), { status: 404, headers });
+
+        const newLevel = {
+          id: crypto.randomUUID().substring(0, 8),
+          title: body.title,
+          description: body.description,
+          level: body.level,
+          parentId: body.parentId,
+          order: builder.levels.filter(l => l.level === body.level).length,
+          linkedTasks: body.linkedTasks || [],
+          linkedMilestones: body.linkedMilestones || [],
+        };
+        builder.levels.push(newLevel);
+        await this.parser.saveStrategicLevelsBuilders(builders);
+        return new Response(JSON.stringify(newLevel), { status: 201, headers });
+      }
+
+      // PUT /api/strategic-levels/:id/levels/:levelId - update level
+      if (method === "PUT" && pathParts.length === 5 && pathParts[1] === "strategic-levels" && pathParts[3] === "levels") {
+        const builderId = pathParts[2];
+        const levelId = pathParts[4];
+        const body = await req.json();
+        const builders = await this.parser.readStrategicLevelsBuilders();
+        const builder = builders.find(b => b.id === builderId);
+        if (!builder) return new Response(JSON.stringify({ error: "Builder not found" }), { status: 404, headers });
+
+        const levelIndex = builder.levels.findIndex(l => l.id === levelId);
+        if (levelIndex === -1) return new Response(JSON.stringify({ error: "Level not found" }), { status: 404, headers });
+
+        builder.levels[levelIndex] = { ...builder.levels[levelIndex], ...body };
+        await this.parser.saveStrategicLevelsBuilders(builders);
+        return new Response(JSON.stringify(builder.levels[levelIndex]), { headers });
+      }
+
+      // DELETE /api/strategic-levels/:id/levels/:levelId - delete level
+      if (method === "DELETE" && pathParts.length === 5 && pathParts[1] === "strategic-levels" && pathParts[3] === "levels") {
+        const builderId = pathParts[2];
+        const levelId = pathParts[4];
+        const builders = await this.parser.readStrategicLevelsBuilders();
+        const builder = builders.find(b => b.id === builderId);
+        if (!builder) return new Response(JSON.stringify({ error: "Builder not found" }), { status: 404, headers });
+
+        const filtered = builder.levels.filter(l => l.id !== levelId);
+        if (filtered.length === builder.levels.length) return new Response(JSON.stringify({ error: "Level not found" }), { status: 404, headers });
+
+        // Also remove this level as parent from any children
+        builder.levels = filtered.map(l => {
+          if (l.parentId === levelId) {
+            return { ...l, parentId: undefined };
+          }
+          return l;
+        });
+        await this.parser.saveStrategicLevelsBuilders(builders);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // ================== CUSTOMER BILLING API ==================
+
+      // GET /api/customers
+      if (method === "GET" && pathParts.length === 2 && pathParts[1] === "customers") {
+        const customers = await this.parser.readCustomers();
+        return new Response(JSON.stringify(customers), { headers });
+      }
+
+      // GET /api/customers/:id
+      if (method === "GET" && pathParts.length === 3 && pathParts[1] === "customers") {
+        const id = pathParts[2];
+        const customers = await this.parser.readCustomers();
+        const customer = customers.find(c => c.id === id);
+        if (!customer) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        return new Response(JSON.stringify(customer), { headers });
+      }
+
+      // POST /api/customers
+      if (method === "POST" && pathParts.length === 2 && pathParts[1] === "customers") {
+        const body = await req.json();
+        const customers = await this.parser.readCustomers();
+        const id = crypto.randomUUID().substring(0, 8);
+        const newCustomer = {
+          id,
+          name: body.name,
+          email: body.email,
+          phone: body.phone,
+          company: body.company,
+          billingAddress: body.billingAddress,
+          notes: body.notes,
+          created: new Date().toISOString().split("T")[0],
+        };
+        customers.push(newCustomer);
+        await this.parser.saveCustomers(customers);
+        return new Response(JSON.stringify(newCustomer), { status: 201, headers });
+      }
+
+      // PUT /api/customers/:id
+      if (method === "PUT" && pathParts.length === 3 && pathParts[1] === "customers") {
+        const id = pathParts[2];
+        const body = await req.json();
+        const customers = await this.parser.readCustomers();
+        const index = customers.findIndex(c => c.id === id);
+        if (index === -1) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        customers[index] = { ...customers[index], ...body };
+        await this.parser.saveCustomers(customers);
+        return new Response(JSON.stringify(customers[index]), { headers });
+      }
+
+      // DELETE /api/customers/:id
+      if (method === "DELETE" && pathParts.length === 3 && pathParts[1] === "customers") {
+        const id = pathParts[2];
+        const customers = await this.parser.readCustomers();
+        const filtered = customers.filter(c => c.id !== id);
+        if (filtered.length === customers.length) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        await this.parser.saveCustomers(filtered);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // GET /api/billing-rates
+      if (method === "GET" && pathParts.length === 2 && pathParts[1] === "billing-rates") {
+        const rates = await this.parser.readBillingRates();
+        return new Response(JSON.stringify(rates), { headers });
+      }
+
+      // POST /api/billing-rates
+      if (method === "POST" && pathParts.length === 2 && pathParts[1] === "billing-rates") {
+        const body = await req.json();
+        const rates = await this.parser.readBillingRates();
+        const id = crypto.randomUUID().substring(0, 8);
+        const newRate = {
+          id,
+          name: body.name,
+          hourlyRate: body.hourlyRate || 0,
+          assignee: body.assignee,
+          isDefault: body.isDefault,
+        };
+        rates.push(newRate);
+        await this.parser.saveBillingRates(rates);
+        return new Response(JSON.stringify(newRate), { status: 201, headers });
+      }
+
+      // PUT /api/billing-rates/:id
+      if (method === "PUT" && pathParts.length === 3 && pathParts[1] === "billing-rates") {
+        const id = pathParts[2];
+        const body = await req.json();
+        const rates = await this.parser.readBillingRates();
+        const index = rates.findIndex(r => r.id === id);
+        if (index === -1) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        rates[index] = { ...rates[index], ...body };
+        await this.parser.saveBillingRates(rates);
+        return new Response(JSON.stringify(rates[index]), { headers });
+      }
+
+      // DELETE /api/billing-rates/:id
+      if (method === "DELETE" && pathParts.length === 3 && pathParts[1] === "billing-rates") {
+        const id = pathParts[2];
+        const rates = await this.parser.readBillingRates();
+        const filtered = rates.filter(r => r.id !== id);
+        if (filtered.length === rates.length) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        await this.parser.saveBillingRates(filtered);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // GET /api/quotes
+      if (method === "GET" && pathParts.length === 2 && pathParts[1] === "quotes") {
+        const quotes = await this.parser.readQuotes();
+        return new Response(JSON.stringify(quotes), { headers });
+      }
+
+      // GET /api/quotes/:id
+      if (method === "GET" && pathParts.length === 3 && pathParts[1] === "quotes") {
+        const id = pathParts[2];
+        const quotes = await this.parser.readQuotes();
+        const quote = quotes.find(q => q.id === id);
+        if (!quote) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        return new Response(JSON.stringify(quote), { headers });
+      }
+
+      // POST /api/quotes
+      if (method === "POST" && pathParts.length === 2 && pathParts[1] === "quotes") {
+        const body = await req.json();
+        const quotes = await this.parser.readQuotes();
+        const id = crypto.randomUUID().substring(0, 8);
+        const number = await this.parser.getNextQuoteNumber();
+        const lineItems = body.lineItems || [];
+        const subtotal = lineItems.reduce((sum: number, item: { amount: number }) => sum + (item.amount || 0), 0);
+        const tax = body.taxRate ? subtotal * (body.taxRate / 100) : 0;
+        const newQuote = {
+          id,
+          number,
+          customerId: body.customerId,
+          title: body.title,
+          status: body.status || "draft",
+          validUntil: body.validUntil,
+          lineItems,
+          subtotal,
+          tax,
+          taxRate: body.taxRate,
+          total: subtotal + tax,
+          notes: body.notes,
+          created: new Date().toISOString().split("T")[0],
+        };
+        quotes.push(newQuote);
+        await this.parser.saveQuotes(quotes);
+        return new Response(JSON.stringify(newQuote), { status: 201, headers });
+      }
+
+      // PUT /api/quotes/:id
+      if (method === "PUT" && pathParts.length === 3 && pathParts[1] === "quotes") {
+        const id = pathParts[2];
+        const body = await req.json();
+        const quotes = await this.parser.readQuotes();
+        const index = quotes.findIndex(q => q.id === id);
+        if (index === -1) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+
+        const updated = { ...quotes[index], ...body };
+        // Recalculate totals if lineItems changed
+        if (body.lineItems) {
+          updated.subtotal = updated.lineItems.reduce((sum: number, item: { amount: number }) => sum + (item.amount || 0), 0);
+          updated.tax = updated.taxRate ? updated.subtotal * (updated.taxRate / 100) : 0;
+          updated.total = updated.subtotal + (updated.tax || 0);
+        }
+        quotes[index] = updated;
+        await this.parser.saveQuotes(quotes);
+        return new Response(JSON.stringify(quotes[index]), { headers });
+      }
+
+      // DELETE /api/quotes/:id
+      if (method === "DELETE" && pathParts.length === 3 && pathParts[1] === "quotes") {
+        const id = pathParts[2];
+        const quotes = await this.parser.readQuotes();
+        const filtered = quotes.filter(q => q.id !== id);
+        if (filtered.length === quotes.length) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        await this.parser.saveQuotes(filtered);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // POST /api/quotes/:id/send - mark quote as sent
+      if (method === "POST" && pathParts.length === 4 && pathParts[1] === "quotes" && pathParts[3] === "send") {
+        const id = pathParts[2];
+        const quotes = await this.parser.readQuotes();
+        const index = quotes.findIndex(q => q.id === id);
+        if (index === -1) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        quotes[index].status = "sent";
+        quotes[index].sentAt = new Date().toISOString().split("T")[0];
+        await this.parser.saveQuotes(quotes);
+        return new Response(JSON.stringify(quotes[index]), { headers });
+      }
+
+      // POST /api/quotes/:id/accept - mark quote as accepted
+      if (method === "POST" && pathParts.length === 4 && pathParts[1] === "quotes" && pathParts[3] === "accept") {
+        const id = pathParts[2];
+        const quotes = await this.parser.readQuotes();
+        const index = quotes.findIndex(q => q.id === id);
+        if (index === -1) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        quotes[index].status = "accepted";
+        quotes[index].acceptedAt = new Date().toISOString().split("T")[0];
+        await this.parser.saveQuotes(quotes);
+        return new Response(JSON.stringify(quotes[index]), { headers });
+      }
+
+      // POST /api/quotes/:id/to-invoice - convert quote to invoice
+      if (method === "POST" && pathParts.length === 4 && pathParts[1] === "quotes" && pathParts[3] === "to-invoice") {
+        const id = pathParts[2];
+        const quotes = await this.parser.readQuotes();
+        const quote = quotes.find(q => q.id === id);
+        if (!quote) return new Response(JSON.stringify({ error: "Quote not found" }), { status: 404, headers });
+
+        const invoices = await this.parser.readInvoices();
+        const invoiceId = crypto.randomUUID().substring(0, 8);
+        const invoiceNumber = await this.parser.getNextInvoiceNumber();
+        const newInvoice = {
+          id: invoiceId,
+          number: invoiceNumber,
+          customerId: quote.customerId,
+          quoteId: quote.id,
+          title: quote.title,
+          status: "draft" as const,
+          lineItems: quote.lineItems.map(item => ({
+            ...item,
+            id: crypto.randomUUID().substring(0, 8),
+          })),
+          subtotal: quote.subtotal,
+          tax: quote.tax,
+          taxRate: quote.taxRate,
+          total: quote.total,
+          paidAmount: 0,
+          notes: quote.notes,
+          created: new Date().toISOString().split("T")[0],
+        };
+        invoices.push(newInvoice);
+        await this.parser.saveInvoices(invoices);
+        return new Response(JSON.stringify(newInvoice), { status: 201, headers });
+      }
+
+      // GET /api/invoices
+      if (method === "GET" && pathParts.length === 2 && pathParts[1] === "invoices") {
+        const invoices = await this.parser.readInvoices();
+        return new Response(JSON.stringify(invoices), { headers });
+      }
+
+      // GET /api/invoices/:id
+      if (method === "GET" && pathParts.length === 3 && pathParts[1] === "invoices") {
+        const id = pathParts[2];
+        const invoices = await this.parser.readInvoices();
+        const invoice = invoices.find(inv => inv.id === id);
+        if (!invoice) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        return new Response(JSON.stringify(invoice), { headers });
+      }
+
+      // POST /api/invoices
+      if (method === "POST" && pathParts.length === 2 && pathParts[1] === "invoices") {
+        const body = await req.json();
+        const invoices = await this.parser.readInvoices();
+        const id = crypto.randomUUID().substring(0, 8);
+        const number = await this.parser.getNextInvoiceNumber();
+        const lineItems = body.lineItems || [];
+        const subtotal = lineItems.reduce((sum: number, item: { amount: number }) => sum + (item.amount || 0), 0);
+        const tax = body.taxRate ? subtotal * (body.taxRate / 100) : 0;
+        const newInvoice = {
+          id,
+          number,
+          customerId: body.customerId,
+          quoteId: body.quoteId,
+          title: body.title,
+          status: body.status || "draft",
+          dueDate: body.dueDate,
+          lineItems,
+          subtotal,
+          tax,
+          taxRate: body.taxRate,
+          total: subtotal + tax,
+          paidAmount: 0,
+          notes: body.notes,
+          created: new Date().toISOString().split("T")[0],
+        };
+        invoices.push(newInvoice);
+        await this.parser.saveInvoices(invoices);
+        return new Response(JSON.stringify(newInvoice), { status: 201, headers });
+      }
+
+      // PUT /api/invoices/:id
+      if (method === "PUT" && pathParts.length === 3 && pathParts[1] === "invoices") {
+        const id = pathParts[2];
+        const body = await req.json();
+        const invoices = await this.parser.readInvoices();
+        const index = invoices.findIndex(inv => inv.id === id);
+        if (index === -1) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+
+        const updated = { ...invoices[index], ...body };
+        // Recalculate totals if lineItems changed
+        if (body.lineItems) {
+          updated.subtotal = updated.lineItems.reduce((sum: number, item: { amount: number }) => sum + (item.amount || 0), 0);
+          updated.tax = updated.taxRate ? updated.subtotal * (updated.taxRate / 100) : 0;
+          updated.total = updated.subtotal + (updated.tax || 0);
+        }
+        invoices[index] = updated;
+        await this.parser.saveInvoices(invoices);
+        return new Response(JSON.stringify(invoices[index]), { headers });
+      }
+
+      // DELETE /api/invoices/:id
+      if (method === "DELETE" && pathParts.length === 3 && pathParts[1] === "invoices") {
+        const id = pathParts[2];
+        const invoices = await this.parser.readInvoices();
+        const filtered = invoices.filter(inv => inv.id !== id);
+        if (filtered.length === invoices.length) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        await this.parser.saveInvoices(filtered);
+        return new Response(JSON.stringify({ success: true }), { headers });
+      }
+
+      // POST /api/invoices/:id/send - mark invoice as sent
+      if (method === "POST" && pathParts.length === 4 && pathParts[1] === "invoices" && pathParts[3] === "send") {
+        const id = pathParts[2];
+        const invoices = await this.parser.readInvoices();
+        const index = invoices.findIndex(inv => inv.id === id);
+        if (index === -1) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+        invoices[index].status = "sent";
+        invoices[index].sentAt = new Date().toISOString().split("T")[0];
+        await this.parser.saveInvoices(invoices);
+        return new Response(JSON.stringify(invoices[index]), { headers });
+      }
+
+      // GET /api/invoices/:id/payments - get payments for an invoice
+      if (method === "GET" && pathParts.length === 4 && pathParts[1] === "invoices" && pathParts[3] === "payments") {
+        const invoiceId = pathParts[2];
+        const payments = await this.parser.readPayments();
+        const invoicePayments = payments.filter(p => p.invoiceId === invoiceId);
+        return new Response(JSON.stringify(invoicePayments), { headers });
+      }
+
+      // POST /api/invoices/:id/payments - add payment to invoice
+      if (method === "POST" && pathParts.length === 4 && pathParts[1] === "invoices" && pathParts[3] === "payments") {
+        const invoiceId = pathParts[2];
+        const body = await req.json();
+
+        // Verify invoice exists
+        const invoices = await this.parser.readInvoices();
+        const invoiceIndex = invoices.findIndex(inv => inv.id === invoiceId);
+        if (invoiceIndex === -1) return new Response(JSON.stringify({ error: "Invoice not found" }), { status: 404, headers });
+
+        // Add payment
+        const payments = await this.parser.readPayments();
+        const paymentId = crypto.randomUUID().substring(0, 8);
+        const newPayment = {
+          id: paymentId,
+          invoiceId,
+          amount: body.amount || 0,
+          date: body.date || new Date().toISOString().split("T")[0],
+          method: body.method,
+          reference: body.reference,
+          notes: body.notes,
+        };
+        payments.push(newPayment);
+        await this.parser.savePayments(payments);
+
+        // Update invoice paid amount and status
+        invoices[invoiceIndex].paidAmount += newPayment.amount;
+        if (invoices[invoiceIndex].paidAmount >= invoices[invoiceIndex].total) {
+          invoices[invoiceIndex].status = "paid";
+          invoices[invoiceIndex].paidAt = new Date().toISOString().split("T")[0];
+        }
+        await this.parser.saveInvoices(invoices);
+
+        return new Response(JSON.stringify(newPayment), { status: 201, headers });
+      }
+
+      // POST /api/invoices/generate - generate invoice from time entries
+      if (method === "POST" && pathParts.length === 3 && pathParts[1] === "invoices" && pathParts[2] === "generate") {
+        const body = await req.json();
+        const { customerId, taskIds, startDate, endDate, hourlyRate, title } = body;
+
+        if (!customerId || !taskIds || !Array.isArray(taskIds)) {
+          return new Response(JSON.stringify({ error: "customerId and taskIds are required" }), { status: 400, headers });
+        }
+
+        const timeEntries = await this.parser.readTimeEntries();
+        const tasks = await this.parser.readTasks();
+
+        const lineItems: { id: string; description: string; quantity: number; rate: number; amount: number; taskId: string; timeEntryIds: string[] }[] = [];
+
+        for (const taskId of taskIds) {
+          const entries = timeEntries.get(taskId) || [];
+          const task = this.findTaskById(tasks, taskId);
+
+          // Filter entries by date range
+          const filteredEntries = entries.filter(entry => {
+            if (startDate && entry.date < startDate) return false;
+            if (endDate && entry.date > endDate) return false;
+            return true;
+          });
+
+          if (filteredEntries.length > 0) {
+            const totalHours = filteredEntries.reduce((sum, e) => sum + e.hours, 0);
+            const rate = hourlyRate || 0;
+            lineItems.push({
+              id: crypto.randomUUID().substring(0, 8),
+              description: task?.title || `Task ${taskId}`,
+              quantity: totalHours,
+              rate,
+              amount: totalHours * rate,
+              taskId,
+              timeEntryIds: filteredEntries.map(e => e.id),
+            });
+          }
+        }
+
+        if (lineItems.length === 0) {
+          return new Response(JSON.stringify({ error: "No time entries found for the specified criteria" }), { status: 400, headers });
+        }
+
+        const invoices = await this.parser.readInvoices();
+        const id = crypto.randomUUID().substring(0, 8);
+        const number = await this.parser.getNextInvoiceNumber();
+        const subtotal = lineItems.reduce((sum, item) => sum + item.amount, 0);
+
+        const newInvoice = {
+          id,
+          number,
+          customerId,
+          title: title || `Time Entry Invoice - ${new Date().toISOString().split("T")[0]}`,
+          status: "draft" as const,
+          lineItems,
+          subtotal,
+          tax: 0,
+          total: subtotal,
+          paidAmount: 0,
+          created: new Date().toISOString().split("T")[0],
+        };
+
+        invoices.push(newInvoice);
+        await this.parser.saveInvoices(invoices);
+        return new Response(JSON.stringify(newInvoice), { status: 201, headers });
+      }
+
+      // GET /api/billing/summary - get billing summary
+      if (method === "GET" && pathParts.length === 3 && pathParts[1] === "billing" && pathParts[2] === "summary") {
+        const invoices = await this.parser.readInvoices();
+        const quotes = await this.parser.readQuotes();
+
+        const today = new Date().toISOString().split("T")[0];
+
+        const summary = {
+          totalOutstanding: 0,
+          totalOverdue: 0,
+          totalPaid: 0,
+          totalInvoiced: 0,
+          pendingQuotes: 0,
+          acceptedQuotes: 0,
+          draftInvoices: 0,
+          sentInvoices: 0,
+          paidInvoices: 0,
+          overdueInvoices: 0,
+        };
+
+        for (const invoice of invoices) {
+          summary.totalInvoiced += invoice.total;
+          summary.totalPaid += invoice.paidAmount;
+
+          if (invoice.status === "draft") {
+            summary.draftInvoices++;
+          } else if (invoice.status === "sent") {
+            summary.sentInvoices++;
+            summary.totalOutstanding += (invoice.total - invoice.paidAmount);
+            if (invoice.dueDate && invoice.dueDate < today) {
+              summary.overdueInvoices++;
+              summary.totalOverdue += (invoice.total - invoice.paidAmount);
+            }
+          } else if (invoice.status === "paid") {
+            summary.paidInvoices++;
+          } else if (invoice.status === "overdue") {
+            summary.overdueInvoices++;
+            summary.totalOverdue += (invoice.total - invoice.paidAmount);
+            summary.totalOutstanding += (invoice.total - invoice.paidAmount);
+          }
+        }
+
+        for (const quote of quotes) {
+          if (quote.status === "sent") {
+            summary.pendingQuotes++;
+          } else if (quote.status === "accepted") {
+            summary.acceptedQuotes++;
+          }
+        }
+
+        return new Response(JSON.stringify(summary), { headers });
       }
 
       return new Response(JSON.stringify({ error: "Not found" }), {
@@ -1183,6 +2089,20 @@ export class TaskAPI {
     const collect = (taskList: Task[]) => {
       for (const task of taskList) {
         if (task.config.milestone === milestone) result.push(task);
+        if (task.children) collect(task.children);
+      }
+    };
+    collect(tasks);
+    return result;
+  }
+
+  private getUnassignedTasks(tasks: Task[]): Task[] {
+    const result: Task[] = [];
+    const collect = (taskList: Task[]) => {
+      for (const task of taskList) {
+        if (!task.completed && !task.config.assignee) {
+          result.push(task);
+        }
         if (task.children) collect(task.children);
       }
     };

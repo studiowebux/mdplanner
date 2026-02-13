@@ -153,6 +153,7 @@ export interface Idea {
   category?: string;
   created: string;
   description?: string;
+  links?: string[];  // Zettelkasten-style linked idea IDs
 }
 
 export interface Retrospective {
@@ -243,4 +244,146 @@ export interface Brief {
   culture: string[];
   changeCapacity: string[];
   guidingPrinciples: string[];
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  role?: string;
+  hoursPerDay: number;
+  workingDays: string[];
+}
+
+export interface WeeklyAllocation {
+  id: string;
+  memberId: string;
+  weekStart: string;
+  allocatedHours: number;
+  targetType: "project" | "task" | "milestone";
+  targetId?: string;
+  notes?: string;
+}
+
+export interface CapacityPlan {
+  id: string;
+  title: string;
+  date: string;
+  budgetHours?: number;
+  teamMembers: TeamMember[];
+  allocations: WeeklyAllocation[];
+}
+
+// Strategic Levels Builder
+export const STRATEGIC_LEVEL_ORDER = ["vision", "mission", "goals", "objectives", "strategies", "tactics"] as const;
+export type StrategicLevelType = typeof STRATEGIC_LEVEL_ORDER[number];
+
+export interface StrategicLevel {
+  id: string;
+  title: string;
+  description?: string;
+  level: StrategicLevelType;
+  parentId?: string;
+  order: number;
+  linkedTasks?: string[];
+  linkedMilestones?: string[];
+}
+
+export interface StrategicLevelsBuilder {
+  id: string;
+  title: string;
+  date: string;
+  levels: StrategicLevel[];
+}
+
+// Customer Billing and Quoting
+
+export interface Customer {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  company?: string;
+  billingAddress?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+  };
+  notes?: string;
+  created: string;
+}
+
+export interface BillingRate {
+  id: string;
+  name: string;
+  hourlyRate: number;
+  assignee?: string;
+  isDefault?: boolean;
+}
+
+export interface QuoteLineItem {
+  id: string;
+  description: string;
+  quantity: number;
+  rate: number;
+  amount: number;
+}
+
+export interface Quote {
+  id: string;
+  number: string;  // Q-2026-001
+  customerId: string;
+  title: string;
+  status: "draft" | "sent" | "accepted" | "rejected";
+  validUntil?: string;
+  lineItems: QuoteLineItem[];
+  subtotal: number;
+  tax?: number;
+  taxRate?: number;
+  total: number;
+  notes?: string;
+  created: string;
+  sentAt?: string;
+  acceptedAt?: string;
+}
+
+export interface InvoiceLineItem {
+  id: string;
+  description: string;
+  quantity: number;
+  rate: number;
+  amount: number;
+  taskId?: string;
+  timeEntryIds?: string[];
+}
+
+export interface Invoice {
+  id: string;
+  number: string;  // INV-2026-001
+  customerId: string;
+  quoteId?: string;
+  title: string;
+  status: "draft" | "sent" | "paid" | "overdue" | "cancelled";
+  dueDate?: string;
+  lineItems: InvoiceLineItem[];
+  subtotal: number;
+  tax?: number;
+  taxRate?: number;
+  total: number;
+  paidAmount: number;
+  notes?: string;
+  created: string;
+  sentAt?: string;
+  paidAt?: string;
+}
+
+export interface Payment {
+  id: string;
+  invoiceId: string;
+  amount: number;
+  date: string;
+  method?: "bank" | "card" | "cash" | "other";
+  reference?: string;
+  notes?: string;
 }

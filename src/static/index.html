@@ -195,12 +195,55 @@
         }
         
         .canvas-grid {
-            background-image: 
+            background-image:
                 linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
             background-size: 20px 20px;
         }
-        
+
+        /* Strategic Tree styles */
+        .strategic-tree-node {
+            position: relative;
+        }
+        .strategic-tree-connector {
+            position: absolute;
+            left: -20px;
+            top: 12px;
+            color: #9ca3af;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1;
+        }
+        .dark .strategic-tree-connector {
+            color: #6b7280;
+        }
+
+        /* Strategic Pyramid styles */
+        .strategic-pyramid {
+            padding: 1rem 0;
+        }
+        .pyramid-row {
+            transition: all 0.2s ease;
+        }
+        .pyramid-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .pyramid-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .dark .pyramid-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Strategic level type colors */
+        .border-l-purple-500 { border-left-color: #8b5cf6; }
+        .border-l-blue-500 { border-left-color: #3b82f6; }
+        .border-l-green-500 { border-left-color: #22c55e; }
+        .border-l-yellow-500 { border-left-color: #eab308; }
+        .border-l-orange-500 { border-left-color: #f97316; }
+        .border-l-red-500 { border-left-color: #ef4444; }
+
         /* Mindmap styles */
         .mindmap-node {
             position: absolute;
@@ -1041,6 +1084,9 @@
                             <button id="projectValueViewBtn" data-view="projectValue" class="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Value Board</button>
                             <button id="briefViewBtn" data-view="brief" class="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Brief</button>
                             <button id="timeTrackingViewBtn" data-view="timeTracking" class="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Time Tracking</button>
+                            <button id="capacityViewBtn" data-view="capacity" class="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Capacity</button>
+                            <button id="strategicLevelsViewBtn" data-view="strategicLevels" class="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Strategic Levels</button>
+                            <button id="billingViewBtn" data-view="billing" class="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Billing</button>
                         </div>
                     </div>
 
@@ -1170,6 +1216,8 @@
                     <button id="projectValueViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Value Board</button>
                     <button id="briefViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Brief</button>
                     <button id="timeTrackingViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Time Tracking</button>
+                    <button id="capacityViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Capacity</button>
+                    <button id="strategicLevelsViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Strategic Levels</button>
                     <button id="configViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Settings</button>
                 </div>
             </div>
@@ -2528,6 +2576,147 @@
             </div>
         </div>
 
+        <!-- Capacity Plan Modal -->
+        <div id="capacityPlanModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 id="capacityPlanModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">New Capacity Plan</h3>
+                </div>
+                <form id="capacityPlanForm">
+                    <div class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                            <input type="text" id="capacityPlanTitle" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="e.g., Q1 2026 Capacity">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                            <input type="date" id="capacityPlanDate" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Budget Hours (optional)</label>
+                            <input type="number" id="capacityPlanBudget" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="e.g., 500">
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <button type="button" id="cancelCapacityPlanBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
+                        <button type="submit" class="btn-primary py-2 rounded-md">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Team Member Modal -->
+        <div id="teamMemberModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 id="teamMemberModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Add Team Member</h3>
+                </div>
+                <form id="teamMemberForm">
+                    <div class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                            <input type="text" id="teamMemberName" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="e.g., Alice">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role (optional)</label>
+                            <input type="text" id="teamMemberRole" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="e.g., Developer">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hours Per Day</label>
+                            <input type="number" id="teamMemberHours" value="8" min="1" max="24" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Working Days</label>
+                            <div class="flex flex-wrap gap-2">
+                                <label class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+                                    <input type="checkbox" id="workMon" checked class="rounded"> Mon
+                                </label>
+                                <label class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+                                    <input type="checkbox" id="workTue" checked class="rounded"> Tue
+                                </label>
+                                <label class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+                                    <input type="checkbox" id="workWed" checked class="rounded"> Wed
+                                </label>
+                                <label class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+                                    <input type="checkbox" id="workThu" checked class="rounded"> Thu
+                                </label>
+                                <label class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+                                    <input type="checkbox" id="workFri" checked class="rounded"> Fri
+                                </label>
+                                <label class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+                                    <input type="checkbox" id="workSat" class="rounded"> Sat
+                                </label>
+                                <label class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+                                    <input type="checkbox" id="workSun" class="rounded"> Sun
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <button type="button" id="cancelTeamMemberBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
+                        <button type="submit" class="btn-primary py-2 rounded-md">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Allocation Modal -->
+        <div id="allocationModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 id="allocationModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Set Allocation</h3>
+                </div>
+                <form id="allocationForm">
+                    <div class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hours</label>
+                            <input type="number" id="allocationHours" required min="0" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="e.g., 32">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Type</label>
+                            <select id="allocationTargetType" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                                <option value="project">Project</option>
+                                <option value="task">Task</option>
+                                <option value="milestone">Milestone</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target ID (optional)</label>
+                            <input type="text" id="allocationTargetId" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="e.g., task_001">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes (optional)</label>
+                            <input type="text" id="allocationNotes" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="e.g., Sprint 1 work">
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <button type="button" id="deleteAllocationBtn" class="btn-danger py-2 rounded-md hidden">Delete</button>
+                        <button type="button" id="cancelAllocationBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
+                        <button type="submit" class="btn-primary py-2 rounded-md">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Auto-Assign Modal -->
+        <div id="autoAssignModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Auto-Assign Suggestions</h3>
+                </div>
+                <div class="p-6">
+                    <div id="autoAssignEmpty" class="text-center py-8 text-gray-500 dark:text-gray-400">
+                        No unassigned tasks found or all team members at capacity.
+                    </div>
+                    <div id="autoAssignList" class="space-y-3 max-h-96 overflow-y-auto"></div>
+                </div>
+                <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                    <button type="button" id="cancelAutoAssignBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
+                    <button type="button" id="applyAutoAssignBtn" class="btn-primary py-2 rounded-md">Apply Selected</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Time Tracking View -->
         <div id="timeTrackingView" class="hidden pb-16">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-6">
@@ -2562,6 +2751,606 @@
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Log time on tasks to see your tracking data.</p>
                     </div>
                     <div id="timeTrackingContainer" class="space-y-4"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Capacity Planning View -->
+        <div id="capacityView" class="hidden pb-16">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Capacity Planning</h2>
+                        <select id="capacityPlanSelector" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                            <option value="">Select Plan</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="editCapacityPlanBtn" class="btn-secondary py-1.5 rounded hidden">Edit</button>
+                        <button id="deleteCapacityPlanBtn" class="btn-danger py-1.5 rounded hidden">Delete</button>
+                        <button id="addCapacityPlanBtn" class="btn-primary py-2 rounded-lg">+ New Plan</button>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="border-b border-gray-200 dark:border-gray-700">
+                    <nav class="flex px-6" aria-label="Tabs">
+                        <button id="capacityTeamTab" class="py-3 px-4 text-sm font-medium border-b-2 border-gray-900 dark:border-gray-100 text-gray-900 dark:text-gray-100">Team Members</button>
+                        <button id="capacityAllocTab" class="py-3 px-4 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Allocations</button>
+                        <button id="capacityUtilTab" class="py-3 px-4 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Utilization</button>
+                    </nav>
+                </div>
+
+                <div class="p-6">
+                    <div id="emptyCapacityState" class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No Capacity Plan yet</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Create a capacity plan to manage team allocations.</p>
+                    </div>
+
+                    <!-- Team Members Tab Content -->
+                    <div id="capacityTeamContent" class="hidden">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Team Members</h3>
+                            <button id="addTeamMemberBtn" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">+ Add Member</button>
+                        </div>
+                        <div id="teamMembersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                    </div>
+
+                    <!-- Allocations Tab Content -->
+                    <div id="capacityAllocContent" class="hidden">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex items-center gap-4">
+                                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Weekly Allocations</h3>
+                                <div class="flex items-center gap-2">
+                                    <button id="allocPrevWeek" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">&lt;</button>
+                                    <span id="allocWeekRange" class="text-sm text-gray-600 dark:text-gray-400">Week</span>
+                                    <button id="allocNextWeek" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">&gt;</button>
+                                </div>
+                            </div>
+                            <button id="autoAssignBtn" class="btn-secondary py-1.5 rounded text-sm">Auto-Assign</button>
+                        </div>
+                        <div id="allocationsGrid" class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-gray-50 dark:bg-gray-700">
+                                    <tr id="allocationsHeader">
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Member</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="allocationsBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700"></span> &lt;80%</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700"></span> 80-100%</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700"></span> &gt;100%</span>
+                        </div>
+                    </div>
+
+                    <!-- Utilization Tab Content -->
+                    <div id="capacityUtilContent" class="hidden">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Utilization Overview</h3>
+                        </div>
+                        <div id="utilizationBars" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Strategic Levels View -->
+        <div id="strategicLevelsView" class="hidden pb-16">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Strategic Levels</h2>
+                        <select id="strategicLevelsSelector" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                            <option value="">Select Strategy</option>
+                        </select>
+                        <div class="flex items-center border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden">
+                            <button onclick="taskManager.setStrategicViewMode('tree')" data-mode="tree"
+                                    class="strategic-view-toggle px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500">
+                                Tree
+                            </button>
+                            <button onclick="taskManager.setStrategicViewMode('pyramid')" data-mode="pyramid"
+                                    class="strategic-view-toggle px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500">
+                                Pyramid
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="editStrategicLevelsBtn" class="btn-secondary py-1.5 rounded hidden">Edit</button>
+                        <button id="deleteStrategicLevelsBtn" class="btn-danger py-1.5 rounded hidden">Delete</button>
+                        <button id="addStrategicLevelsBtn" class="btn-primary py-2 rounded-lg">+ New Strategy</button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div id="emptyStrategicLevelsState" class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No Strategic Levels yet</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Create a strategy to define your hierarchy from Vision to Tactics.</p>
+                    </div>
+                    <div id="strategicLevelsTree" class="hidden space-y-2">
+                        <!-- Tree will be rendered here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Billing View -->
+        <div id="billingView" class="hidden pb-16">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Billing</h2>
+                    </div>
+                    <!-- Billing Summary Cards -->
+                    <div id="billingSummaryCards" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Outstanding</p>
+                            <p id="billingSummaryOutstanding" class="text-xl font-bold text-gray-900 dark:text-gray-100">$0.00</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Overdue</p>
+                            <p id="billingSummaryOverdue" class="text-xl font-bold text-red-600 dark:text-red-400">$0.00</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Paid (YTD)</p>
+                            <p id="billingSummaryPaid" class="text-xl font-bold text-green-600 dark:text-green-400">$0.00</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Draft Invoices</p>
+                            <p id="billingSummaryDraft" class="text-xl font-bold text-gray-600 dark:text-gray-300">0</p>
+                        </div>
+                    </div>
+                    <!-- Billing Tabs -->
+                    <nav class="flex space-x-4 border-b border-gray-200 dark:border-gray-700">
+                        <button data-billing-tab="customers" class="billing-tab px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100 border-b-2 border-gray-900 dark:border-gray-100">Customers</button>
+                        <button data-billing-tab="rates" class="billing-tab px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Rates</button>
+                        <button data-billing-tab="quotes" class="billing-tab px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Quotes</button>
+                        <button data-billing-tab="invoices" class="billing-tab px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Invoices</button>
+                    </nav>
+                </div>
+                <div class="p-6">
+                    <!-- Customers Tab -->
+                    <div id="customersTab" class="billing-tab-content">
+                        <div class="flex justify-end mb-4">
+                            <button id="addCustomerBtn" class="btn-primary py-2 rounded-lg">+ Add Customer</button>
+                        </div>
+                        <div id="emptyCustomersState" class="text-center py-12 hidden">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No customers yet</h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Add your first customer to start billing.</p>
+                        </div>
+                        <div id="customersContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                    </div>
+                    <!-- Rates Tab -->
+                    <div id="ratesTab" class="billing-tab-content hidden">
+                        <div class="flex justify-end mb-4">
+                            <button id="addBillingRateBtn" class="btn-primary py-2 rounded-lg">+ Add Rate</button>
+                        </div>
+                        <div id="emptyRatesState" class="text-center py-12 hidden">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No billing rates</h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Define hourly rates for billing.</p>
+                        </div>
+                        <div id="billingRatesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                    </div>
+                    <!-- Quotes Tab -->
+                    <div id="quotesTab" class="billing-tab-content hidden">
+                        <div class="flex justify-end mb-4">
+                            <button id="addQuoteBtn" class="btn-primary py-2 rounded-lg">+ New Quote</button>
+                        </div>
+                        <div id="emptyQuotesState" class="text-center py-12 hidden">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No quotes yet</h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Create quotes for your customers.</p>
+                        </div>
+                        <div id="quotesContainer" class="space-y-4"></div>
+                    </div>
+                    <!-- Invoices Tab -->
+                    <div id="invoicesTab" class="billing-tab-content hidden">
+                        <div class="flex justify-end gap-2 mb-4">
+                            <button id="generateInvoiceBtn" class="btn-secondary py-2 rounded-lg">Generate from Time</button>
+                            <button id="addInvoiceBtn" class="btn-primary py-2 rounded-lg">+ New Invoice</button>
+                        </div>
+                        <div id="emptyInvoicesState" class="text-center py-12 hidden">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z" />
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No invoices yet</h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Create invoices to bill your customers.</p>
+                        </div>
+                        <div id="invoicesContainer" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Modal -->
+        <div id="customerModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 id="customerModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Add Customer</h3>
+                </div>
+                <form id="customerForm">
+                    <div class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name *</label>
+                            <input type="text" id="customerName" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                                <input type="email" id="customerEmail" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
+                                <input type="tel" id="customerPhone" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company</label>
+                            <input type="text" id="customerCompany" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                        </div>
+                        <fieldset class="border border-gray-300 dark:border-gray-600 rounded-md p-4">
+                            <legend class="text-sm font-medium text-gray-700 dark:text-gray-300 px-2">Billing Address</legend>
+                            <div class="space-y-3">
+                                <input type="text" id="customerStreet" placeholder="Street" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <input type="text" id="customerCity" placeholder="City" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                                    <input type="text" id="customerState" placeholder="State/Province" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <input type="text" id="customerPostalCode" placeholder="Postal Code" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                                    <input type="text" id="customerCountry" placeholder="Country" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                                </div>
+                            </div>
+                        </fieldset>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
+                            <textarea id="customerNotes" rows="2" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2"></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <button type="button" id="cancelCustomerBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
+                        <button type="submit" class="btn-primary py-2 rounded-md">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Billing Rate Modal -->
+        <div id="billingRateModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 id="billingRateModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Add Billing Rate</h3>
+                </div>
+                <form id="billingRateForm">
+                    <div class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name *</label>
+                            <input type="text" id="billingRateName" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2" placeholder="e.g., Senior Developer">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hourly Rate *</label>
+                            <input type="number" id="billingRateHourly" required step="0.01" min="0" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Assignee</label>
+                            <input type="text" id="billingRateAssignee" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2" placeholder="Person this rate applies to">
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="billingRateDefault" class="h-4 w-4 text-gray-900 border-gray-300 rounded">
+                            <label for="billingRateDefault" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Default rate</label>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <button type="button" id="cancelBillingRateBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
+                        <button type="submit" class="btn-primary py-2 rounded-md">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Quote Modal -->
+        <div id="quoteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 id="quoteModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">New Quote</h3>
+                </div>
+                <form id="quoteForm">
+                    <div class="p-6 space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>
+                                <input type="text" id="quoteTitle" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Customer *</label>
+                                <select id="quoteCustomer" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                                    <option value="">Select customer...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Valid Until</label>
+                                <input type="date" id="quoteValidUntil" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tax Rate (%)</label>
+                                <input type="number" id="quoteTaxRate" step="0.01" min="0" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2" value="0">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Line Items</label>
+                                <button type="button" id="addQuoteLineBtn" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900">+ Add Item</button>
+                            </div>
+                            <div id="quoteLineItems" class="space-y-2"></div>
+                        </div>
+                        <div class="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
+                            <div class="flex justify-between text-sm"><span class="text-gray-500">Subtotal:</span><span id="quoteSubtotal" class="font-medium">$0.00</span></div>
+                            <div class="flex justify-between text-sm"><span class="text-gray-500">Tax:</span><span id="quoteTax" class="font-medium">$0.00</span></div>
+                            <div class="flex justify-between text-base font-bold"><span>Total:</span><span id="quoteTotal">$0.00</span></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
+                            <textarea id="quoteNotes" rows="2" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2"></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <button type="button" id="cancelQuoteBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
+                        <button type="submit" class="btn-primary py-2 rounded-md">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Invoice Modal -->
+        <div id="invoiceModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 id="invoiceModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">New Invoice</h3>
+                </div>
+                <form id="invoiceForm">
+                    <div class="p-6 space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>
+                                <input type="text" id="invoiceTitle" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Customer *</label>
+                                <select id="invoiceCustomer" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                                    <option value="">Select customer...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Due Date</label>
+                                <input type="date" id="invoiceDueDate" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tax Rate (%)</label>
+                                <input type="number" id="invoiceTaxRate" step="0.01" min="0" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2" value="0">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Line Items</label>
+                                <button type="button" id="addInvoiceLineBtn" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900">+ Add Item</button>
+                            </div>
+                            <div id="invoiceLineItems" class="space-y-2"></div>
+                        </div>
+                        <div class="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
+                            <div class="flex justify-between text-sm"><span class="text-gray-500">Subtotal:</span><span id="invoiceSubtotal" class="font-medium">$0.00</span></div>
+                            <div class="flex justify-between text-sm"><span class="text-gray-500">Tax:</span><span id="invoiceTaxDisplay" class="font-medium">$0.00</span></div>
+                            <div class="flex justify-between text-base font-bold"><span>Total:</span><span id="invoiceTotal">$0.00</span></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
+                            <textarea id="invoiceNotes" rows="2" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2"></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <button type="button" id="cancelInvoiceBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
+                        <button type="submit" class="btn-primary py-2 rounded-md">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Generate Invoice Modal -->
+        <div id="generateInvoiceModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Generate Invoice from Time Entries</h3>
+                </div>
+                <form id="generateInvoiceForm">
+                    <div class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Customer *</label>
+                            <select id="generateInvoiceCustomer" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                                <option value="">Select customer...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                            <input type="text" id="generateInvoiceTitle" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2" placeholder="Time Entry Invoice">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
+                                <input type="date" id="generateInvoiceStartDate" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
+                                <input type="date" id="generateInvoiceEndDate" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hourly Rate *</label>
+                            <input type="number" id="generateInvoiceRate" required step="0.01" min="0" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Tasks *</label>
+                            <div id="generateInvoiceTasks" class="max-h-48 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md p-2 space-y-1"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <button type="button" id="cancelGenerateInvoiceBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
+                        <button type="submit" class="btn-primary py-2 rounded-md">Generate Invoice</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Payment Modal -->
+        <div id="paymentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Record Payment</h3>
+                </div>
+                <form id="paymentForm">
+                    <div class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount *</label>
+                            <input type="number" id="paymentAmount" required step="0.01" min="0" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date *</label>
+                            <input type="date" id="paymentDate" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Method</label>
+                            <select id="paymentMethod" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2">
+                                <option value="">Select...</option>
+                                <option value="bank">Bank Transfer</option>
+                                <option value="card">Card</option>
+                                <option value="cash">Cash</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Reference</label>
+                            <input type="text" id="paymentReference" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2" placeholder="Transaction ID, check number, etc.">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
+                            <textarea id="paymentNotes" rows="2" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2"></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <button type="button" id="cancelPaymentBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
+                        <button type="submit" class="btn-primary py-2 rounded-md">Record Payment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Strategic Levels Builder Modal -->
+        <div id="strategicLevelsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 id="strategicLevelsModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">New Strategy</h3>
+                </div>
+                <form id="strategicLevelsForm">
+                    <div class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                            <input type="text" id="strategicLevelsTitle" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="e.g., Product Strategy 2026">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                            <input type="date" id="strategicLevelsDate" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <button type="button" id="cancelStrategicLevelsBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
+                        <button type="submit" class="btn-primary py-2 rounded-md">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Strategic Level Item Modal -->
+        <div id="strategicLevelModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 id="strategicLevelModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Add Level</h3>
+                </div>
+                <form id="strategicLevelForm">
+                    <div class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                            <input type="text" id="strategicLevelTitle" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="e.g., Become market leader">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description (optional)</label>
+                            <textarea id="strategicLevelDescription" rows="3" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="Additional details..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Level Type</label>
+                            <select id="strategicLevelType" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                                <option value="vision">Vision</option>
+                                <option value="mission">Mission</option>
+                                <option value="goals">Goals</option>
+                                <option value="objectives">Objectives</option>
+                                <option value="strategies">Strategies</option>
+                                <option value="tactics">Tactics</option>
+                            </select>
+                        </div>
+                        <div id="strategicLevelParentGroup">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Parent</label>
+                            <select id="strategicLevelParent" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                                <option value="">None (Root)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <button type="button" id="cancelStrategicLevelBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
+                        <button type="submit" class="btn-primary py-2 rounded-md">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Strategic Level Link Modal -->
+        <div id="strategicLinkModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[80vh] flex flex-col">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 id="strategicLinkModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Link Items</h3>
+                </div>
+                <div class="p-6 space-y-4 overflow-y-auto flex-1">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tasks</h4>
+                        <div id="strategicLinkTasks" class="space-y-2 max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-md p-2">
+                            <!-- Task checkboxes will be rendered here -->
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Milestones</h4>
+                        <div id="strategicLinkMilestones" class="space-y-2 max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-md p-2">
+                            <!-- Milestone checkboxes will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                    <button type="button" id="cancelStrategicLinkBtn" class="btn-secondary py-2 rounded-md">Cancel</button>
+                    <button type="button" id="saveStrategicLinkBtn" class="btn-primary py-2 rounded-md">Save Links</button>
                 </div>
             </div>
         </div>
@@ -3015,12 +3804,32 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
                         <textarea id="ideaDescription" rows="4" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"></textarea>
                     </div>
+                    <div id="ideaLinksSection" class="hidden">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Linked Ideas</label>
+                        <div id="ideaLinksDisplay" class="flex flex-wrap gap-2 min-h-[32px] p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700"></div>
+                        <button type="button" id="openIdeaLinkPickerBtn" class="mt-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add Links</button>
+                    </div>
                 </div>
                 <div class="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                     <button type="button" id="cancelIdeaBtn" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Cancel</button>
                     <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500 transition-colors">Save</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Idea Link Picker Modal -->
+    <div id="ideaLinkPickerModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[80vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Link Ideas (Zettelkasten)</h3>
+                <input type="text" id="ideaLinkSearch" placeholder="Search ideas..." class="mt-2 w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500">
+            </div>
+            <div id="ideaLinkList" class="flex-1 overflow-y-auto p-4 space-y-2"></div>
+            <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end space-x-3">
+                <button type="button" id="cancelIdeaLinkPickerBtn" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">Cancel</button>
+                <button type="button" id="saveIdeaLinksBtn" class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500">Save Links</button>
+            </div>
         </div>
     </div>
 

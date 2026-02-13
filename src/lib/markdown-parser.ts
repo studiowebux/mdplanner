@@ -1,25 +1,39 @@
 import {
+  BillingRate,
   Brief,
   BusinessModelCanvas,
   C4Component,
+  CapacityPlan,
+  Customer,
   Goal,
   Idea,
+  Invoice,
+  InvoiceLineItem,
   LeanCanvas,
   Milestone,
   Mindmap,
   MindmapNode,
   Note,
+  Payment,
   ProjectConfig,
   ProjectInfo,
   ProjectLink,
   ProjectValueBoard,
+  Quote,
+  QuoteLineItem,
   Retrospective,
   RiskAnalysis,
   StickyNote,
+  StrategicLevel,
+  StrategicLevelsBuilder,
+  STRATEGIC_LEVEL_ORDER,
+  StrategicLevelType,
   SwotAnalysis,
   Task,
   TaskConfig,
+  TeamMember,
   TimeEntry,
+  WeeklyAllocation,
 } from "./types.ts";
 
 export class MarkdownParser {
@@ -2628,6 +2642,7 @@ export class MarkdownParser {
 
       if (inIdeasSection && line.startsWith("# ") && !line.startsWith("# Ideas")) {
         if (currentIdea?.title) ideas.push(currentIdea as Idea);
+        currentIdea = null;
         break;
       }
 
@@ -2655,6 +2670,12 @@ export class MarkdownParser {
         } else if (line.startsWith("<!-- id:")) {
           const match = line.match(/<!-- id: ([^ ]+)/);
           if (match) currentIdea.id = match[1];
+        } else if (line.startsWith("<!-- links:")) {
+          const match = line.match(/<!-- links: ([^-]+) -->/);
+          if (match) {
+            const linkIds = match[1].trim().split(",").map(id => id.trim()).filter(id => id);
+            if (linkIds.length > 0) currentIdea.links = linkIds;
+          }
         } else if (line.trim() && !line.startsWith("<!--")) {
           currentIdea.description = (currentIdea.description || "") + line.trim() + "\n";
         }
@@ -2685,6 +2706,9 @@ export class MarkdownParser {
     for (const idea of ideas) {
       ideasContent += `## ${idea.title}\n`;
       ideasContent += `<!-- id: ${idea.id} -->\n`;
+      if (idea.links && idea.links.length > 0) {
+        ideasContent += `<!-- links: ${idea.links.join(",")} -->\n`;
+      }
       ideasContent += `Status: ${idea.status}\n`;
       if (idea.category) ideasContent += `Category: ${idea.category}\n`;
       ideasContent += `Created: ${idea.created}\n`;
@@ -3795,5 +3819,1193 @@ export class MarkdownParser {
     }
 
     await this.safeWriteFile(lines.join("\n"));
+  }
+
+  async readCapacityPlans(): Promise<CapacityPlan[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const plans: CapacityPlan[] = [];
+
+    let inSection = false;
+    let currentPlan: Partial<CapacityPlan> | null = null;
+    let currentMember: Partial<TeamMember> | null = null;
+    let inMembersSection = false;
+    let inAllocationsSection = false;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trim();
+
+      if (trimmed.includes("<!-- Capacity Planning -->") || trimmed === "# Capacity Planning") {
+        inSection = true;
+        continue;
+      }
+
+      if (inSection && trimmed.startsWith("# ") && !trimmed.startsWith("# Capacity Planning")) {
+        if (currentMember?.name && currentPlan) {
+          currentPlan.teamMembers?.push(currentMember as TeamMember);
+        }
+        if (currentPlan?.title) plans.push(currentPlan as CapacityPlan);
+        break;
+      }
+
+      if (!inSection) continue;
+
+      // Plan header (## Plan Title)
+      if (trimmed.startsWith("## ")) {
+        if (currentMember?.name && currentPlan) {
+          currentPlan.teamMembers?.push(currentMember as TeamMember);
+          currentMember = null;
+        }
+        if (currentPlan?.title) plans.push(currentPlan as CapacityPlan);
+
+        currentPlan = {
+          id: crypto.randomUUID().substring(0, 8),
+          title: trimmed.substring(3).trim(),
+          date: new Date().toISOString().split("T")[0],
+          teamMembers: [],
+          allocations: [],
+        };
+        inMembersSection = false;
+        inAllocationsSection = false;
+        continue;
+      }
+
+      if (!currentPlan) continue;
+
+      // Plan ID
+      const idMatch = trimmed.match(/<!--\s*id:\s*([^\s]+)\s*-->/);
+      if (idMatch) {
+        currentPlan.id = idMatch[1];
+        continue;
+      }
+
+      // Date
+      if (trimmed.startsWith("Date:")) {
+        currentPlan.date = trimmed.substring(5).trim();
+        continue;
+      }
+
+      // Budget Hours
+      if (trimmed.startsWith("Budget Hours:")) {
+        currentPlan.budgetHours = parseInt(trimmed.substring(13).trim(), 10) || undefined;
+        continue;
+      }
+
+      // Subsections
+      if (trimmed === "### Team Members") {
+        if (currentMember?.name) {
+          currentPlan.teamMembers?.push(currentMember as TeamMember);
+          currentMember = null;
+        }
+        inMembersSection = true;
+        inAllocationsSection = false;
+        continue;
+      }
+
+      if (trimmed === "### Allocations") {
+        if (currentMember?.name) {
+          currentPlan.teamMembers?.push(currentMember as TeamMember);
+          currentMember = null;
+        }
+        inMembersSection = false;
+        inAllocationsSection = true;
+        continue;
+      }
+
+      // Team member (#### Member Name)
+      if (inMembersSection && trimmed.startsWith("#### ")) {
+        if (currentMember?.name) {
+          currentPlan.teamMembers?.push(currentMember as TeamMember);
+        }
+        currentMember = {
+          id: crypto.randomUUID().substring(0, 8),
+          name: trimmed.substring(5).trim(),
+          hoursPerDay: 8,
+          workingDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+        };
+        continue;
+      }
+
+      // Member properties
+      if (inMembersSection && currentMember) {
+        const memberIdMatch = trimmed.match(/<!--\s*member-id:\s*([^\s]+)\s*-->/);
+        if (memberIdMatch) {
+          currentMember.id = memberIdMatch[1];
+          continue;
+        }
+
+        if (trimmed.startsWith("Role:")) {
+          currentMember.role = trimmed.substring(5).trim();
+          continue;
+        }
+
+        if (trimmed.startsWith("Hours Per Day:")) {
+          currentMember.hoursPerDay = parseInt(trimmed.substring(14).trim(), 10) || 8;
+          continue;
+        }
+
+        if (trimmed.startsWith("Working Days:")) {
+          currentMember.workingDays = trimmed.substring(13).trim().split(",").map(d => d.trim());
+          continue;
+        }
+      }
+
+      // Allocations (#### 2026-02-10 for week start)
+      if (inAllocationsSection && trimmed.startsWith("#### ")) {
+        const weekStart = trimmed.substring(5).trim();
+        // Parse allocation lines until next #### or ###
+        i++;
+        while (i < lines.length) {
+          const allocLine = lines[i].trim();
+          if (allocLine.startsWith("#### ") || allocLine.startsWith("### ") || allocLine.startsWith("## ") || allocLine.startsWith("# ")) {
+            i--;
+            break;
+          }
+
+          // Parse allocation: - member_id: 32h project "notes"
+          const allocMatch = allocLine.match(/^-\s+(\S+):\s+(\d+)h\s+(project|task|milestone)(?::(\S+))?\s*(?:"([^"]*)")?$/);
+          if (allocMatch) {
+            currentPlan.allocations?.push({
+              id: crypto.randomUUID().substring(0, 8),
+              memberId: allocMatch[1],
+              weekStart,
+              allocatedHours: parseInt(allocMatch[2], 10),
+              targetType: allocMatch[3] as "project" | "task" | "milestone",
+              targetId: allocMatch[4] || undefined,
+              notes: allocMatch[5] || undefined,
+            });
+          }
+          i++;
+        }
+        continue;
+      }
+    }
+
+    // Push last items
+    if (currentMember?.name && currentPlan) {
+      currentPlan.teamMembers?.push(currentMember as TeamMember);
+    }
+    if (currentPlan?.title) plans.push(currentPlan as CapacityPlan);
+
+    return plans;
+  }
+
+  async saveCapacityPlans(plans: CapacityPlan[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    let startIndex = -1;
+    let endIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (startIndex === -1 && (lines[i].includes("<!-- Capacity Planning -->") || lines[i].trim() === "# Capacity Planning")) {
+        startIndex = i;
+      } else if (startIndex !== -1 && lines[i].trim().startsWith("# ") && !lines[i].trim().startsWith("# Capacity Planning")) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    let capacityContent = "<!-- Capacity Planning -->\n# Capacity Planning\n\n";
+    for (const plan of plans) {
+      capacityContent += `## ${plan.title}\n`;
+      capacityContent += `<!-- id: ${plan.id} -->\n`;
+      capacityContent += `Date: ${plan.date}\n`;
+      if (plan.budgetHours) {
+        capacityContent += `Budget Hours: ${plan.budgetHours}\n`;
+      }
+      capacityContent += `\n`;
+
+      // Team Members
+      capacityContent += `### Team Members\n\n`;
+      for (const member of plan.teamMembers) {
+        capacityContent += `#### ${member.name}\n`;
+        capacityContent += `<!-- member-id: ${member.id} -->\n`;
+        if (member.role) {
+          capacityContent += `Role: ${member.role}\n`;
+        }
+        capacityContent += `Hours Per Day: ${member.hoursPerDay}\n`;
+        capacityContent += `Working Days: ${member.workingDays.join(", ")}\n\n`;
+      }
+
+      // Allocations grouped by week
+      capacityContent += `### Allocations\n\n`;
+      const weekGroups = new Map<string, WeeklyAllocation[]>();
+      for (const alloc of plan.allocations) {
+        const group = weekGroups.get(alloc.weekStart) || [];
+        group.push(alloc);
+        weekGroups.set(alloc.weekStart, group);
+      }
+
+      const sortedWeeks = Array.from(weekGroups.keys()).sort();
+      for (const week of sortedWeeks) {
+        capacityContent += `#### ${week}\n`;
+        for (const alloc of weekGroups.get(week)!) {
+          let line = `- ${alloc.memberId}: ${alloc.allocatedHours}h ${alloc.targetType}`;
+          if (alloc.targetId) {
+            line += `:${alloc.targetId}`;
+          }
+          if (alloc.notes) {
+            line += ` "${alloc.notes}"`;
+          }
+          capacityContent += line + "\n";
+        }
+        capacityContent += "\n";
+      }
+    }
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.trim() === "# Board");
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, capacityContent);
+      } else {
+        lines.push(capacityContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, capacityContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  async readStrategicLevelsBuilders(): Promise<StrategicLevelsBuilder[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const builders: StrategicLevelsBuilder[] = [];
+
+    let inSection = false;
+    let currentBuilder: Partial<StrategicLevelsBuilder> | null = null;
+    let currentLevel: Partial<StrategicLevel> | null = null;
+    let currentLevelType: StrategicLevelType | null = null;
+
+    const levelHeaderMap: Record<string, StrategicLevelType> = {
+      "### Vision": "vision",
+      "### Mission": "mission",
+      "### Goals": "goals",
+      "### Objectives": "objectives",
+      "### Strategies": "strategies",
+      "### Tactics": "tactics",
+    };
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trim();
+
+      if (trimmed.includes("<!-- Strategic Levels -->") || trimmed === "# Strategic Levels") {
+        inSection = true;
+        continue;
+      }
+
+      if (inSection && trimmed.startsWith("# ") && !trimmed.startsWith("# Strategic Levels")) {
+        if (currentLevel?.title && currentBuilder) {
+          currentBuilder.levels?.push(currentLevel as StrategicLevel);
+        }
+        if (currentBuilder?.title) builders.push(currentBuilder as StrategicLevelsBuilder);
+        break;
+      }
+
+      if (!inSection) continue;
+
+      // Builder header (## Builder Title)
+      if (trimmed.startsWith("## ")) {
+        if (currentLevel?.title && currentBuilder) {
+          currentBuilder.levels?.push(currentLevel as StrategicLevel);
+          currentLevel = null;
+        }
+        if (currentBuilder?.title) builders.push(currentBuilder as StrategicLevelsBuilder);
+
+        currentBuilder = {
+          id: crypto.randomUUID().substring(0, 8),
+          title: trimmed.substring(3).trim(),
+          date: new Date().toISOString().split("T")[0],
+          levels: [],
+        };
+        currentLevelType = null;
+        continue;
+      }
+
+      if (!currentBuilder) continue;
+
+      // Builder ID
+      const idMatch = trimmed.match(/<!--\s*id:\s*([^\s]+)\s*-->/);
+      if (idMatch) {
+        currentBuilder.id = idMatch[1];
+        continue;
+      }
+
+      // Date
+      if (trimmed.startsWith("Date:")) {
+        currentBuilder.date = trimmed.substring(5).trim();
+        continue;
+      }
+
+      // Level type headers (### Vision, ### Mission, etc.)
+      for (const [header, levelType] of Object.entries(levelHeaderMap)) {
+        if (trimmed.startsWith(header)) {
+          if (currentLevel?.title && currentBuilder) {
+            currentBuilder.levels?.push(currentLevel as StrategicLevel);
+            currentLevel = null;
+          }
+          currentLevelType = levelType;
+          break;
+        }
+      }
+
+      // Level item (- Title with metadata)
+      if (currentLevelType && trimmed.startsWith("- ")) {
+        if (currentLevel?.title && currentBuilder) {
+          currentBuilder.levels?.push(currentLevel as StrategicLevel);
+        }
+
+        const levelText = trimmed.substring(2).trim();
+        currentLevel = {
+          id: crypto.randomUUID().substring(0, 8),
+          title: levelText,
+          level: currentLevelType,
+          order: (currentBuilder.levels?.filter(l => l.level === currentLevelType).length || 0),
+          linkedTasks: [],
+          linkedMilestones: [],
+        };
+        continue;
+      }
+
+      // Level metadata comments
+      if (currentLevel) {
+        const levelIdMatch = trimmed.match(/<!--\s*level-id:\s*([^,\s]+)(?:,\s*parent:\s*([^\s]+))?\s*-->/);
+        if (levelIdMatch) {
+          currentLevel.id = levelIdMatch[1];
+          if (levelIdMatch[2]) {
+            currentLevel.parentId = levelIdMatch[2];
+          }
+          continue;
+        }
+
+        const linkedTasksMatch = trimmed.match(/<!--\s*linked-tasks:\s*([^\s]+)\s*-->/);
+        if (linkedTasksMatch) {
+          currentLevel.linkedTasks = linkedTasksMatch[1].split(",").map(t => t.trim()).filter(Boolean);
+          continue;
+        }
+
+        const linkedMilestonesMatch = trimmed.match(/<!--\s*linked-milestones:\s*([^\s]+)\s*-->/);
+        if (linkedMilestonesMatch) {
+          currentLevel.linkedMilestones = linkedMilestonesMatch[1].split(",").map(m => m.trim()).filter(Boolean);
+          continue;
+        }
+
+        // Description (indented text that's not a comment or list item)
+        if (trimmed && !trimmed.startsWith("<!--") && !trimmed.startsWith("-") && !trimmed.startsWith("#") && !trimmed.startsWith("Date:")) {
+          if (!currentLevel.description) {
+            currentLevel.description = trimmed;
+          } else {
+            currentLevel.description += " " + trimmed;
+          }
+          continue;
+        }
+      }
+    }
+
+    // Push last items
+    if (currentLevel?.title && currentBuilder) {
+      currentBuilder.levels?.push(currentLevel as StrategicLevel);
+    }
+    if (currentBuilder?.title) builders.push(currentBuilder as StrategicLevelsBuilder);
+
+    return builders;
+  }
+
+  async saveStrategicLevelsBuilders(builders: StrategicLevelsBuilder[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    let startIndex = -1;
+    let endIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (startIndex === -1 && (lines[i].includes("<!-- Strategic Levels -->") || lines[i].trim() === "# Strategic Levels")) {
+        startIndex = i;
+      } else if (startIndex !== -1 && lines[i].trim().startsWith("# ") && !lines[i].trim().startsWith("# Strategic Levels")) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    let strategicContent = "<!-- Strategic Levels -->\n# Strategic Levels\n\n";
+
+    for (const builder of builders) {
+      strategicContent += `## ${builder.title}\n`;
+      strategicContent += `<!-- id: ${builder.id} -->\n`;
+      strategicContent += `Date: ${builder.date}\n\n`;
+
+      // Group levels by type and maintain hierarchy
+      for (const levelType of STRATEGIC_LEVEL_ORDER) {
+        const levelsOfType = builder.levels
+          .filter(l => l.level === levelType)
+          .sort((a, b) => a.order - b.order);
+
+        if (levelsOfType.length === 0) continue;
+
+        // Capitalize first letter for header
+        const header = levelType.charAt(0).toUpperCase() + levelType.slice(1);
+        strategicContent += `### ${header}\n`;
+
+        for (const level of levelsOfType) {
+          strategicContent += `- ${level.title}\n`;
+
+          // Add metadata comment
+          let metadata = `level-id: ${level.id}`;
+          if (level.parentId) {
+            metadata += `, parent: ${level.parentId}`;
+          }
+          strategicContent += `<!-- ${metadata} -->\n`;
+
+          // Add description if present
+          if (level.description) {
+            strategicContent += `${level.description}\n`;
+          }
+
+          // Add linked tasks
+          if (level.linkedTasks && level.linkedTasks.length > 0) {
+            strategicContent += `<!-- linked-tasks: ${level.linkedTasks.join(",")} -->\n`;
+          }
+
+          // Add linked milestones
+          if (level.linkedMilestones && level.linkedMilestones.length > 0) {
+            strategicContent += `<!-- linked-milestones: ${level.linkedMilestones.join(",")} -->\n`;
+          }
+        }
+        strategicContent += "\n";
+      }
+    }
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.trim() === "# Board");
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, strategicContent);
+      } else {
+        lines.push(strategicContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, strategicContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  // Compute backlinks for ideas (Zettelkasten-style)
+  async readIdeasWithBacklinks(): Promise<(Idea & { backlinks: string[] })[]> {
+    const ideas = await this.readIdeas();
+    return ideas.map(idea => {
+      const backlinks = ideas
+        .filter(other => other.links?.includes(idea.id))
+        .map(other => other.id);
+      return { ...idea, backlinks };
+    });
+  }
+
+  // Customer Management
+  async readCustomers(): Promise<Customer[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const customers: Customer[] = [];
+
+    let inCustomersSection = false;
+    let currentCustomer: Partial<Customer> | null = null;
+    let inAddress = false;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      if (!inCustomersSection && (line.startsWith("# Customers") || line.includes("<!-- Customers -->"))) {
+        inCustomersSection = true;
+        continue;
+      }
+
+      // Skip the # Customers header if we're already in the section (entered via comment)
+      if (inCustomersSection && line.startsWith("# Customers")) {
+        continue;
+      }
+
+      if (inCustomersSection && line.startsWith("# ") && !line.startsWith("# Customers")) {
+        if (currentCustomer?.name) {
+          customers.push(currentCustomer as Customer);
+        }
+        currentCustomer = null; // Clear to prevent double push at end
+        break;
+      }
+
+      if (!inCustomersSection) continue;
+
+      if (line.startsWith("## ")) {
+        if (currentCustomer?.name) customers.push(currentCustomer as Customer);
+        const name = line.substring(3).trim();
+        currentCustomer = {
+          id: crypto.randomUUID().substring(0, 8),
+          name,
+          created: new Date().toISOString().split("T")[0],
+        };
+        inAddress = false;
+      } else if (currentCustomer) {
+        if (line.startsWith("<!-- id:")) {
+          const match = line.match(/<!-- id: ([^ ]+)/);
+          if (match) currentCustomer.id = match[1];
+        } else if (line.startsWith("Email:")) {
+          currentCustomer.email = line.substring(6).trim();
+        } else if (line.startsWith("Phone:")) {
+          currentCustomer.phone = line.substring(6).trim();
+        } else if (line.startsWith("Company:")) {
+          currentCustomer.company = line.substring(8).trim();
+        } else if (line.startsWith("Created:")) {
+          currentCustomer.created = line.substring(8).trim();
+        } else if (line.startsWith("### Billing Address")) {
+          inAddress = true;
+          currentCustomer.billingAddress = {};
+        } else if (line.startsWith("### Notes")) {
+          inAddress = false;
+        } else if (inAddress && currentCustomer.billingAddress) {
+          if (line.startsWith("Street:")) {
+            currentCustomer.billingAddress.street = line.substring(7).trim();
+          } else if (line.startsWith("City:")) {
+            currentCustomer.billingAddress.city = line.substring(5).trim();
+          } else if (line.startsWith("State:")) {
+            currentCustomer.billingAddress.state = line.substring(6).trim();
+          } else if (line.startsWith("Postal Code:")) {
+            currentCustomer.billingAddress.postalCode = line.substring(12).trim();
+          } else if (line.startsWith("Country:")) {
+            currentCustomer.billingAddress.country = line.substring(8).trim();
+          }
+        } else if (line.trim() && !line.startsWith("<!--") && !line.startsWith("###") && !inAddress) {
+          currentCustomer.notes = (currentCustomer.notes || "") + line.trim() + "\n";
+        }
+      }
+    }
+
+    if (currentCustomer?.name) customers.push(currentCustomer as Customer);
+    return customers;
+  }
+
+  async saveCustomers(customers: Customer[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    let startIndex = -1;
+    let endIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (startIndex === -1 && (lines[i].includes("<!-- Customers -->") || lines[i].startsWith("# Customers"))) {
+        startIndex = i;
+      } else if (startIndex !== -1 && lines[i].startsWith("# ") && !lines[i].startsWith("# Customers")) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    let customersContent = "<!-- Customers -->\n# Customers\n\n";
+    for (const customer of customers) {
+      customersContent += `## ${customer.name}\n`;
+      customersContent += `<!-- id: ${customer.id} -->\n`;
+      if (customer.email) customersContent += `Email: ${customer.email}\n`;
+      if (customer.phone) customersContent += `Phone: ${customer.phone}\n`;
+      if (customer.company) customersContent += `Company: ${customer.company}\n`;
+      customersContent += `Created: ${customer.created}\n`;
+      if (customer.billingAddress) {
+        customersContent += `\n### Billing Address\n`;
+        if (customer.billingAddress.street) customersContent += `Street: ${customer.billingAddress.street}\n`;
+        if (customer.billingAddress.city) customersContent += `City: ${customer.billingAddress.city}\n`;
+        if (customer.billingAddress.state) customersContent += `State: ${customer.billingAddress.state}\n`;
+        if (customer.billingAddress.postalCode) customersContent += `Postal Code: ${customer.billingAddress.postalCode}\n`;
+        if (customer.billingAddress.country) customersContent += `Country: ${customer.billingAddress.country}\n`;
+      }
+      if (customer.notes) {
+        customersContent += `\n### Notes\n${customer.notes.trim()}\n`;
+      }
+      customersContent += "\n";
+    }
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.startsWith("# Board"));
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, customersContent);
+      } else {
+        lines.push(customersContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, customersContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  // Billing Rates
+  async readBillingRates(): Promise<BillingRate[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const rates: BillingRate[] = [];
+
+    let inRatesSection = false;
+    let currentRate: Partial<BillingRate> | null = null;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      if (!inRatesSection && (line.startsWith("# Billing Rates") || line.includes("<!-- Billing Rates -->"))) {
+        inRatesSection = true;
+        continue;
+      }
+      if (inRatesSection && line.startsWith("# Billing Rates")) {
+        continue;
+      }
+
+      if (inRatesSection && line.startsWith("# ") && !line.startsWith("# Billing Rates")) {
+        if (currentRate?.name) rates.push(currentRate as BillingRate);
+        currentRate = null;
+        break;
+      }
+
+      if (!inRatesSection) continue;
+
+      if (line.startsWith("## ")) {
+        if (currentRate?.name) rates.push(currentRate as BillingRate);
+        const name = line.substring(3).trim();
+        currentRate = {
+          id: crypto.randomUUID().substring(0, 8),
+          name,
+          hourlyRate: 0,
+        };
+      } else if (currentRate) {
+        if (line.startsWith("<!-- id:")) {
+          const match = line.match(/<!-- id: ([^ ]+)/);
+          if (match) currentRate.id = match[1];
+        } else if (line.startsWith("Hourly Rate:")) {
+          currentRate.hourlyRate = parseFloat(line.substring(12).trim()) || 0;
+        } else if (line.startsWith("Assignee:")) {
+          currentRate.assignee = line.substring(9).trim();
+        } else if (line.startsWith("Default:")) {
+          currentRate.isDefault = line.substring(8).trim().toLowerCase() === "true";
+        }
+      }
+    }
+
+    if (currentRate?.name) rates.push(currentRate as BillingRate);
+    return rates;
+  }
+
+  async saveBillingRates(rates: BillingRate[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    let startIndex = -1;
+    let endIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (startIndex === -1 && (lines[i].includes("<!-- Billing Rates -->") || lines[i].startsWith("# Billing Rates"))) {
+        startIndex = i;
+      } else if (startIndex !== -1 && lines[i].startsWith("# ") && !lines[i].startsWith("# Billing Rates")) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    let ratesContent = "<!-- Billing Rates -->\n# Billing Rates\n\n";
+    for (const rate of rates) {
+      ratesContent += `## ${rate.name}\n`;
+      ratesContent += `<!-- id: ${rate.id} -->\n`;
+      ratesContent += `Hourly Rate: ${rate.hourlyRate}\n`;
+      if (rate.assignee) ratesContent += `Assignee: ${rate.assignee}\n`;
+      if (rate.isDefault) ratesContent += `Default: true\n`;
+      ratesContent += "\n";
+    }
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.startsWith("# Board"));
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, ratesContent);
+      } else {
+        lines.push(ratesContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, ratesContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  // Quotes
+  async readQuotes(): Promise<Quote[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const quotes: Quote[] = [];
+
+    let inQuotesSection = false;
+    let currentQuote: Partial<Quote> | null = null;
+    let inLineItems = false;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      if (!inQuotesSection && (line.startsWith("# Quotes") || line.includes("<!-- Quotes -->"))) {
+        inQuotesSection = true;
+        continue;
+      }
+      if (inQuotesSection && line.startsWith("# Quotes")) {
+        continue;
+      }
+
+      if (inQuotesSection && line.startsWith("# ") && !line.startsWith("# Quotes")) {
+        if (currentQuote?.title) quotes.push(currentQuote as Quote);
+        currentQuote = null;
+        break;
+      }
+
+      if (!inQuotesSection) continue;
+
+      if (line.startsWith("## ")) {
+        if (currentQuote?.title) quotes.push(currentQuote as Quote);
+        const title = line.substring(3).trim();
+        currentQuote = {
+          id: crypto.randomUUID().substring(0, 8),
+          number: "",
+          customerId: "",
+          title,
+          status: "draft",
+          lineItems: [],
+          subtotal: 0,
+          total: 0,
+          created: new Date().toISOString().split("T")[0],
+        };
+        inLineItems = false;
+      } else if (currentQuote) {
+        if (line.startsWith("<!-- id:")) {
+          const match = line.match(/<!-- id: ([^ ]+)/);
+          if (match) currentQuote.id = match[1];
+        } else if (line.startsWith("Number:")) {
+          currentQuote.number = line.substring(7).trim();
+        } else if (line.startsWith("Customer:")) {
+          currentQuote.customerId = line.substring(9).trim();
+        } else if (line.startsWith("Status:")) {
+          const s = line.substring(7).trim().toLowerCase();
+          if (["draft", "sent", "accepted", "rejected"].includes(s)) {
+            currentQuote.status = s as Quote["status"];
+          }
+        } else if (line.startsWith("Valid Until:")) {
+          currentQuote.validUntil = line.substring(12).trim();
+        } else if (line.startsWith("Tax Rate:")) {
+          currentQuote.taxRate = parseFloat(line.substring(9).trim()) || 0;
+        } else if (line.startsWith("Created:")) {
+          currentQuote.created = line.substring(8).trim();
+        } else if (line.startsWith("Sent At:")) {
+          currentQuote.sentAt = line.substring(8).trim();
+        } else if (line.startsWith("Accepted At:")) {
+          currentQuote.acceptedAt = line.substring(12).trim();
+        } else if (line.startsWith("### Line Items")) {
+          inLineItems = true;
+        } else if (line.startsWith("### Notes")) {
+          inLineItems = false;
+        } else if (inLineItems && line.startsWith("- ")) {
+          // Format: - [item_id] Description | Qty: X | Rate: Y | Amount: Z
+          const match = line.match(/- \[([^\]]+)\] (.+) \| Qty: ([\d.]+) \| Rate: ([\d.]+) \| Amount: ([\d.]+)/);
+          if (match) {
+            currentQuote.lineItems!.push({
+              id: match[1],
+              description: match[2].trim(),
+              quantity: parseFloat(match[3]),
+              rate: parseFloat(match[4]),
+              amount: parseFloat(match[5]),
+            });
+          }
+        } else if (!inLineItems && line.trim() && !line.startsWith("<!--") && !line.startsWith("###")) {
+          currentQuote.notes = (currentQuote.notes || "") + line.trim() + "\n";
+        }
+      }
+    }
+
+    if (currentQuote?.title) quotes.push(currentQuote as Quote);
+
+    // Recalculate totals
+    for (const quote of quotes) {
+      quote.subtotal = quote.lineItems.reduce((sum, item) => sum + item.amount, 0);
+      quote.tax = quote.taxRate ? quote.subtotal * (quote.taxRate / 100) : 0;
+      quote.total = quote.subtotal + (quote.tax || 0);
+    }
+
+    return quotes;
+  }
+
+  async saveQuotes(quotes: Quote[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    let startIndex = -1;
+    let endIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (startIndex === -1 && (lines[i].includes("<!-- Quotes -->") || lines[i].startsWith("# Quotes"))) {
+        startIndex = i;
+      } else if (startIndex !== -1 && lines[i].startsWith("# ") && !lines[i].startsWith("# Quotes")) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    let quotesContent = "<!-- Quotes -->\n# Quotes\n\n";
+    for (const quote of quotes) {
+      quotesContent += `## ${quote.title}\n`;
+      quotesContent += `<!-- id: ${quote.id} -->\n`;
+      quotesContent += `Number: ${quote.number}\n`;
+      quotesContent += `Customer: ${quote.customerId}\n`;
+      quotesContent += `Status: ${quote.status}\n`;
+      if (quote.validUntil) quotesContent += `Valid Until: ${quote.validUntil}\n`;
+      if (quote.taxRate) quotesContent += `Tax Rate: ${quote.taxRate}\n`;
+      quotesContent += `Created: ${quote.created}\n`;
+      if (quote.sentAt) quotesContent += `Sent At: ${quote.sentAt}\n`;
+      if (quote.acceptedAt) quotesContent += `Accepted At: ${quote.acceptedAt}\n`;
+
+      if (quote.lineItems.length > 0) {
+        quotesContent += `\n### Line Items\n`;
+        for (const item of quote.lineItems) {
+          quotesContent += `- [${item.id}] ${item.description} | Qty: ${item.quantity} | Rate: ${item.rate} | Amount: ${item.amount}\n`;
+        }
+      }
+
+      if (quote.notes) {
+        quotesContent += `\n### Notes\n${quote.notes.trim()}\n`;
+      }
+      quotesContent += "\n";
+    }
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.startsWith("# Board"));
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, quotesContent);
+      } else {
+        lines.push(quotesContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, quotesContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  // Invoices
+  async readInvoices(): Promise<Invoice[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const invoices: Invoice[] = [];
+
+    let inInvoicesSection = false;
+    let currentInvoice: Partial<Invoice> | null = null;
+    let inLineItems = false;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      if (!inInvoicesSection && (line.startsWith("# Invoices") || line.includes("<!-- Invoices -->"))) {
+        inInvoicesSection = true;
+        continue;
+      }
+      if (inInvoicesSection && line.startsWith("# Invoices")) {
+        continue;
+      }
+
+      if (inInvoicesSection && line.startsWith("# ") && !line.startsWith("# Invoices")) {
+        if (currentInvoice?.title) invoices.push(currentInvoice as Invoice);
+        currentInvoice = null;
+        break;
+      }
+
+      if (!inInvoicesSection) continue;
+
+      if (line.startsWith("## ")) {
+        if (currentInvoice?.title) invoices.push(currentInvoice as Invoice);
+        const title = line.substring(3).trim();
+        currentInvoice = {
+          id: crypto.randomUUID().substring(0, 8),
+          number: "",
+          customerId: "",
+          title,
+          status: "draft",
+          lineItems: [],
+          subtotal: 0,
+          total: 0,
+          paidAmount: 0,
+          created: new Date().toISOString().split("T")[0],
+        };
+        inLineItems = false;
+      } else if (currentInvoice) {
+        if (line.startsWith("<!-- id:")) {
+          const match = line.match(/<!-- id: ([^ ]+)/);
+          if (match) currentInvoice.id = match[1];
+        } else if (line.startsWith("<!-- quoteId:")) {
+          const match = line.match(/<!-- quoteId: ([^ ]+)/);
+          if (match) currentInvoice.quoteId = match[1];
+        } else if (line.startsWith("Number:")) {
+          currentInvoice.number = line.substring(7).trim();
+        } else if (line.startsWith("Customer:")) {
+          currentInvoice.customerId = line.substring(9).trim();
+        } else if (line.startsWith("Status:")) {
+          const s = line.substring(7).trim().toLowerCase();
+          if (["draft", "sent", "paid", "overdue", "cancelled"].includes(s)) {
+            currentInvoice.status = s as Invoice["status"];
+          }
+        } else if (line.startsWith("Due Date:")) {
+          currentInvoice.dueDate = line.substring(9).trim();
+        } else if (line.startsWith("Tax Rate:")) {
+          currentInvoice.taxRate = parseFloat(line.substring(9).trim()) || 0;
+        } else if (line.startsWith("Paid Amount:")) {
+          currentInvoice.paidAmount = parseFloat(line.substring(12).trim()) || 0;
+        } else if (line.startsWith("Created:")) {
+          currentInvoice.created = line.substring(8).trim();
+        } else if (line.startsWith("Sent At:")) {
+          currentInvoice.sentAt = line.substring(8).trim();
+        } else if (line.startsWith("Paid At:")) {
+          currentInvoice.paidAt = line.substring(8).trim();
+        } else if (line.startsWith("### Line Items")) {
+          inLineItems = true;
+        } else if (line.startsWith("### Notes")) {
+          inLineItems = false;
+        } else if (inLineItems && line.startsWith("- ")) {
+          // Format: - [item_id] Description | Qty: X | Rate: Y | Amount: Z | Task: taskId | TimeEntries: id1,id2
+          const basicMatch = line.match(/- \[([^\]]+)\] (.+?) \| Qty: ([\d.]+) \| Rate: ([\d.]+) \| Amount: ([\d.]+)/);
+          if (basicMatch) {
+            const item: InvoiceLineItem = {
+              id: basicMatch[1],
+              description: basicMatch[2].trim(),
+              quantity: parseFloat(basicMatch[3]),
+              rate: parseFloat(basicMatch[4]),
+              amount: parseFloat(basicMatch[5]),
+            };
+            const taskMatch = line.match(/Task: ([^\s|]+)/);
+            if (taskMatch) item.taskId = taskMatch[1];
+            const timeMatch = line.match(/TimeEntries: ([^\s]+)/);
+            if (timeMatch) item.timeEntryIds = timeMatch[1].split(",");
+            currentInvoice.lineItems!.push(item);
+          }
+        } else if (!inLineItems && line.trim() && !line.startsWith("<!--") && !line.startsWith("###")) {
+          currentInvoice.notes = (currentInvoice.notes || "") + line.trim() + "\n";
+        }
+      }
+    }
+
+    if (currentInvoice?.title) invoices.push(currentInvoice as Invoice);
+
+    // Recalculate totals
+    for (const invoice of invoices) {
+      invoice.subtotal = invoice.lineItems.reduce((sum, item) => sum + item.amount, 0);
+      invoice.tax = invoice.taxRate ? invoice.subtotal * (invoice.taxRate / 100) : 0;
+      invoice.total = invoice.subtotal + (invoice.tax || 0);
+    }
+
+    return invoices;
+  }
+
+  async saveInvoices(invoices: Invoice[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    let startIndex = -1;
+    let endIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (startIndex === -1 && (lines[i].includes("<!-- Invoices -->") || lines[i].startsWith("# Invoices"))) {
+        startIndex = i;
+      } else if (startIndex !== -1 && lines[i].startsWith("# ") && !lines[i].startsWith("# Invoices")) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    let invoicesContent = "<!-- Invoices -->\n# Invoices\n\n";
+    for (const invoice of invoices) {
+      invoicesContent += `## ${invoice.title}\n`;
+      invoicesContent += `<!-- id: ${invoice.id} -->\n`;
+      if (invoice.quoteId) invoicesContent += `<!-- quoteId: ${invoice.quoteId} -->\n`;
+      invoicesContent += `Number: ${invoice.number}\n`;
+      invoicesContent += `Customer: ${invoice.customerId}\n`;
+      invoicesContent += `Status: ${invoice.status}\n`;
+      if (invoice.dueDate) invoicesContent += `Due Date: ${invoice.dueDate}\n`;
+      if (invoice.taxRate) invoicesContent += `Tax Rate: ${invoice.taxRate}\n`;
+      invoicesContent += `Paid Amount: ${invoice.paidAmount}\n`;
+      invoicesContent += `Created: ${invoice.created}\n`;
+      if (invoice.sentAt) invoicesContent += `Sent At: ${invoice.sentAt}\n`;
+      if (invoice.paidAt) invoicesContent += `Paid At: ${invoice.paidAt}\n`;
+
+      if (invoice.lineItems.length > 0) {
+        invoicesContent += `\n### Line Items\n`;
+        for (const item of invoice.lineItems) {
+          let lineStr = `- [${item.id}] ${item.description} | Qty: ${item.quantity} | Rate: ${item.rate} | Amount: ${item.amount}`;
+          if (item.taskId) lineStr += ` | Task: ${item.taskId}`;
+          if (item.timeEntryIds?.length) lineStr += ` | TimeEntries: ${item.timeEntryIds.join(",")}`;
+          invoicesContent += lineStr + "\n";
+        }
+      }
+
+      if (invoice.notes) {
+        invoicesContent += `\n### Notes\n${invoice.notes.trim()}\n`;
+      }
+      invoicesContent += "\n";
+    }
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.startsWith("# Board"));
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, invoicesContent);
+      } else {
+        lines.push(invoicesContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, invoicesContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  // Payments
+  async readPayments(): Promise<Payment[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const payments: Payment[] = [];
+
+    let inPaymentsSection = false;
+    let currentPayment: Partial<Payment> | null = null;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      if (!inPaymentsSection && (line.startsWith("# Payments") || line.includes("<!-- Payments -->"))) {
+        inPaymentsSection = true;
+        continue;
+      }
+      if (inPaymentsSection && line.startsWith("# Payments")) {
+        continue;
+      }
+
+      if (inPaymentsSection && line.startsWith("# ") && !line.startsWith("# Payments")) {
+        if (currentPayment?.invoiceId) payments.push(currentPayment as Payment);
+        currentPayment = null;
+        break;
+      }
+
+      if (!inPaymentsSection) continue;
+
+      if (line.startsWith("## ")) {
+        if (currentPayment?.invoiceId) payments.push(currentPayment as Payment);
+        currentPayment = {
+          id: crypto.randomUUID().substring(0, 8),
+          invoiceId: "",
+          amount: 0,
+          date: new Date().toISOString().split("T")[0],
+        };
+      } else if (currentPayment) {
+        if (line.startsWith("<!-- id:")) {
+          const match = line.match(/<!-- id: ([^ ]+)/);
+          if (match) currentPayment.id = match[1];
+        } else if (line.startsWith("Invoice:")) {
+          currentPayment.invoiceId = line.substring(8).trim();
+        } else if (line.startsWith("Amount:")) {
+          currentPayment.amount = parseFloat(line.substring(7).trim()) || 0;
+        } else if (line.startsWith("Date:")) {
+          currentPayment.date = line.substring(5).trim();
+        } else if (line.startsWith("Method:")) {
+          const m = line.substring(7).trim().toLowerCase();
+          if (["bank", "card", "cash", "other"].includes(m)) {
+            currentPayment.method = m as Payment["method"];
+          }
+        } else if (line.startsWith("Reference:")) {
+          currentPayment.reference = line.substring(10).trim();
+        } else if (line.trim() && !line.startsWith("<!--") && !line.startsWith("##")) {
+          currentPayment.notes = (currentPayment.notes || "") + line.trim() + "\n";
+        }
+      }
+    }
+
+    if (currentPayment?.invoiceId) payments.push(currentPayment as Payment);
+    return payments;
+  }
+
+  async savePayments(payments: Payment[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    let startIndex = -1;
+    let endIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (startIndex === -1 && (lines[i].includes("<!-- Payments -->") || lines[i].startsWith("# Payments"))) {
+        startIndex = i;
+      } else if (startIndex !== -1 && lines[i].startsWith("# ") && !lines[i].startsWith("# Payments")) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    let paymentsContent = "<!-- Payments -->\n# Payments\n\n";
+    for (const payment of payments) {
+      paymentsContent += `## Payment ${payment.id}\n`;
+      paymentsContent += `<!-- id: ${payment.id} -->\n`;
+      paymentsContent += `Invoice: ${payment.invoiceId}\n`;
+      paymentsContent += `Amount: ${payment.amount}\n`;
+      paymentsContent += `Date: ${payment.date}\n`;
+      if (payment.method) paymentsContent += `Method: ${payment.method}\n`;
+      if (payment.reference) paymentsContent += `Reference: ${payment.reference}\n`;
+      if (payment.notes) paymentsContent += `\n${payment.notes.trim()}\n`;
+      paymentsContent += "\n";
+    }
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.startsWith("# Board"));
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, paymentsContent);
+      } else {
+        lines.push(paymentsContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, paymentsContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  // Generate next quote number
+  async getNextQuoteNumber(): Promise<string> {
+    const quotes = await this.readQuotes();
+    const year = new Date().getFullYear();
+    const existingNumbers = quotes
+      .filter(q => q.number.startsWith(`Q-${year}-`))
+      .map(q => parseInt(q.number.replace(`Q-${year}-`, "")) || 0);
+    const nextNum = Math.max(0, ...existingNumbers) + 1;
+    return `Q-${year}-${nextNum.toString().padStart(3, "0")}`;
+  }
+
+  // Generate next invoice number
+  async getNextInvoiceNumber(): Promise<string> {
+    const invoices = await this.readInvoices();
+    const year = new Date().getFullYear();
+    const existingNumbers = invoices
+      .filter(inv => inv.number.startsWith(`INV-${year}-`))
+      .map(inv => parseInt(inv.number.replace(`INV-${year}-`, "")) || 0);
+    const nextNum = Math.max(0, ...existingNumbers) + 1;
+    return `INV-${year}-${nextNum.toString().padStart(3, "0")}`;
   }
 }
