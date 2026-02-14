@@ -2,7 +2,11 @@
 import { TAG_CLASSES } from '../constants.js';
 import { formatDate, getPriorityBadgeClasses, getPriorityText } from '../utils.js';
 
+/**
+ * List view with filtering, sorting, and drag-drop
+ */
 export class ListView {
+  /** @param {TaskManager} taskManager */
   constructor(taskManager) {
     this.tm = taskManager;
   }
@@ -283,5 +287,27 @@ export class ListView {
         `;
 
     return div;
+  }
+
+  bindEvents() {
+    // Filter change events
+    document
+      .getElementById("filterSection")
+      .addEventListener("change", () => this.applyFilters());
+    document
+      .getElementById("filterAssignee")
+      .addEventListener("change", () => this.applyFilters());
+    document
+      .getElementById("filterMilestone")
+      .addEventListener("change", () => this.applyFilters());
+    document
+      .getElementById("filterStatus")
+      .addEventListener("change", () => this.applyFilters());
+    document
+      .getElementById("sortTasks")
+      .addEventListener("change", () => this.applyFilters());
+    document
+      .getElementById("clearFilters")
+      .addEventListener("click", () => this.clearFilters());
   }
 }

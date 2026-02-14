@@ -1,7 +1,11 @@
 // Config View Module
 import { ProjectAPI } from '../api.js';
 
+/**
+ * Project configuration - sections, assignees, tags management
+ */
 export class ConfigView {
+  /** @param {TaskManager} taskManager */
   constructor(taskManager) {
     this.tm = taskManager;
   }
@@ -267,5 +271,63 @@ export class ConfigView {
     } catch (error) {
       console.error("Error updating sections in markdown:", error);
     }
+  }
+
+  bindEvents() {
+    // Save project config button
+    document
+      .getElementById("saveProjectConfig")
+      .addEventListener("click", () => this.tm.saveProjectConfig());
+
+    // Working days dropdown change
+    document
+      .getElementById("workingDays")
+      .addEventListener("change", (e) => {
+        const customContainer = document.getElementById("customDaysContainer");
+        if (e.target.value === "custom") {
+          customContainer.classList.remove("hidden");
+        } else {
+          customContainer.classList.add("hidden");
+        }
+      });
+
+    // Section management events
+    document
+      .getElementById("addSectionBtn")
+      .addEventListener("click", () => this.addSection());
+    document
+      .getElementById("newSectionInput")
+      .addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          this.addSection();
+        }
+      });
+
+    // Assignee management events
+    document
+      .getElementById("addAssigneeBtn")
+      .addEventListener("click", () => this.addAssignee());
+    document
+      .getElementById("newAssigneeInput")
+      .addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          this.addAssignee();
+        }
+      });
+
+    // Tag management events
+    document
+      .getElementById("addTagBtn")
+      .addEventListener("click", () => this.addTag());
+    document
+      .getElementById("newTagInput")
+      .addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          this.addTag();
+        }
+      });
   }
 }

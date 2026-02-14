@@ -1,6 +1,10 @@
-// Centralized API layer
+// Centralized API layer - All fetch calls go through here
 
-// Base API methods
+/**
+ * @param {string} url
+ * @param {RequestInit} options
+ * @returns {Promise<Response>}
+ */
 async function request(url, options = {}) {
   const { headers: optionHeaders, ...restOptions } = options;
   const response = await fetch(url, {
@@ -44,7 +48,7 @@ export async function patch(url, data) {
   });
 }
 
-// Tasks API
+/** Tasks CRUD operations */
 export const TasksAPI = {
   async fetchAll() {
     const response = await get('/api/tasks');
@@ -72,7 +76,7 @@ export const TasksAPI = {
   }
 };
 
-// Project API
+/** Project config and info operations */
 export const ProjectAPI = {
   async getInfo() {
     const response = await get('/api/project');

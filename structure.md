@@ -1,13 +1,12 @@
 # MD Planner
 
 Markdown powered task manager tool.
-
 <!-- Configurations -->
 # Configurations
 
 Start Date: 2025-08-17
 Working Days: 7
-Last Updated: 2026-02-14T04:15:02.050Z
+Last Updated: 2026-02-14T04:52:24.693Z
 
 Assignees:
 - Alice
@@ -109,7 +108,6 @@ Hello World
 ## 100 MAU {type: project; kpi: onboard 100 MAU; start: 2025-08-17; end: 2026-01-01; status: planning}
 
 <!-- id: goal_1 -->
-
 ## Maintenance plan and new release weekly {type: enterprise; kpi: Release every weeks; start: 2025-08-17; end: 2025-12-01; status: on-track}
 
 <!-- id: goal_2 -->
@@ -134,7 +132,7 @@ Done
 
 <!-- id: sticky_note_4 -->
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-## Sticky note {color: purple; position: {x: 941, y: 154}}
+## Sticky note {color: purple; position: {x: 941, y: 154}; size: {width: 0, height: 0}}
 
 <!-- id: sticky_note_5 -->
 New Sticky
@@ -197,239 +195,8 @@ New Sticky
 
 <!-- id: c4_component_5 -->
 <!-- SWOT Analysis -->
-# SWOT Analysis
 
-## All good
-<!-- id: e28523e9 -->
-Date: 2026-02-14
-
-### Strengths
-- weight
-
-### Weaknesses
-
-### Opportunities
-
-### Threats
-
-
-# Retrospectives
-
-## Test Retro
-<!-- id: 4e5ab302 -->
-Date: 2026-02-14
-Status: closed
-
-### Continue
-- - Everything
-
-### Stop
-- - STUFF
-
-### Start
-- - Define Stuff
-
-
-<!-- Risk Analysis -->
-# Risk Analysis
-
-## Risk analysis
-<!-- id: 770d1cfa -->
-Date: 2026-02-14
-
-### High Impact / High Probability
-
-### High Impact / Low Probability
-
-### Low Impact / High Probability
-- humm
-
-### Low Impact / Low Probability
-
-
-<!-- Lean Canvas -->
-# Lean Canvas
-
-## MVP
-<!-- id: 7472de8d -->
-Date: 2026-02-14
-
-### Problem
-- find a problem
-
-### Solution
-- fix a problem
-
-### Unique Value Proposition
-
-### Unfair Advantage
-
-### Customer Segments
-
-### Existing Alternatives
-
-### Key Metrics
-
-### High-Level Concept
-
-### Channels
-
-### Early Adopters
-
-### Cost Structure
-
-### Revenue Streams
-
-
-<!-- Business Model Canvas -->
-# Business Model Canvas
-
-## The perfect business
-<!-- id: 1623b966 -->
-Date: 2026-02-14
-
-### Key Partners
-- Nothing
-
-### Key Activities
-
-### Key Resources
-
-### Value Proposition
-
-### Customer Relationships
-
-### Channels
-
-### Customer Segments
-
-### Cost Structure
-
-### Revenue Streams
-
-
-<!-- Project Value Board -->
-# Project Value Board
-
-## valuable
-<!-- id: f35f3276-0801-4eb9-a8b5-6bf0621105c6 -->
-Date: 2026-02-14
-
-### Customer Segments
-- Everyone
-
-### Problem
-
-### Solution
-
-### Benefit
-
-
-<!-- Brief -->
-# Brief
-
-## hello
-<!-- id: cfd4211b -->
-Date: 2026-02-14
-
-### Summary
-
-### Mission
-
-### Responsible
-
-### Accountable
-
-### Consulted
-
-### Informed
-
-### High Level Budget
-
-### High Level Timeline
-
-### Culture
-
-### Change Capacity
-
-### Guiding Principles
-
-
-<!-- Capacity Planning -->
-# Capacity Planning
-
-## test
-<!-- id: a5c765fa -->
-Date: 2026-02-14
-Budget Hours: 100
-
-### Team Members
-
-#### John
-<!-- member-id: 15c2e001 -->
-Role: Developer
-Hours Per Day: 8
-Working Days: Mon, Tue, Wed, Thu, Fri
-
-### Allocations
-
-## test
-<!-- id: a5c765fa -->
-Date: 2026-02-14
-Budget Hours: 100
-
-### Team Members
-
-#### John
-<!-- member-id: 15c2e001 -->
-Role: Developer
-Hours Per Day: 8
-Working Days: Mon, Tue, Wed, Thu, Fri
-
-### Allocations
-
-
-<!-- Strategic Levels -->
-# Strategic Levels
-
-## Test
-<!-- id: f6b7bb39 -->
-Date: 2026-02-14
-
-### Vision
-- Become Sustainable
-<!-- level-id: 47e8cac5 -->
-Hello World
-
-### Mission
-- Help people recycle
-<!-- level-id: 3dca41fd, parent: 47e8cac5 -->
-
-## Test
-<!-- id: f6b7bb39 -->
-Date: 2026-02-14
-
-### Vision
-- Become Sustainable
-<!-- level-id: 47e8cac5 -->
-Hello World
-- Become Sustainable
-<!-- level-id: 47e8cac5 -->
-Hello World
-
-## Test
-<!-- id: f6b7bb39 -->
-Date: 2026-02-14
-
-### Vision
-- Become Sustainable
-<!-- level-id: 47e8cac5 -->
-Hello World
-- Become Sustainable
-<!-- level-id: 47e8cac5 -->
-Hello World
-
-
+<!-- Board -->
 # Board
 
 ## Todo
@@ -445,7 +212,7 @@ Hello World
 ## In Progress
 
 - [ ] (1) backup {tag: [Backend]; due_date: 2025-08-27T13; assignee: Jane Doe; priority: 2}
-- [ ] (4) Testing migration {tag: [Backend]; due_date: 2026-02-13T23; assignee: Bob; priority: 1; effort: 1; milestone: M1; planned_end: 2026-02-20}
+- [ ] (4) Testing migration {tag: [Backend]; due_date: 2026-02-13T23:00; assignee: Bob; priority: 1; effort: 1; blocked_by: [1]; milestone: M1; planned_end: 2026-02-20}
   Testing the Whole UI
 
 ## Done

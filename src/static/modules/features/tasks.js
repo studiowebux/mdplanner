@@ -3,11 +3,19 @@ import { TasksAPI } from '../api.js';
 import { formatDateForInput, markdownToHtml } from '../utils.js';
 import { showToast } from '../ui/toast.js';
 
+/**
+ * Handles task CRUD operations, search, and modal management
+ */
 export class TasksModule {
+  /** @param {TaskManager} taskManager */
   constructor(taskManager) {
     this.tm = taskManager;
   }
 
+  /**
+   * @param {string} id - Task ID
+   * @returns {Object|null} Task object or null
+   */
   findById(id) {
     const findInTasks = (tasks) => {
       for (const task of tasks) {
@@ -22,6 +30,10 @@ export class TasksModule {
     return findInTasks(this.tm.tasks);
   }
 
+  /**
+   * @param {Object|string|null} task - Task object, task ID, or null for new
+   * @param {string|null} parentTaskId - Parent task ID for subtasks
+   */
   async openModal(task = null, parentTaskId = null) {
     // If task is a string (ID), find the actual task object
     if (typeof task === "string") {
@@ -72,7 +84,7 @@ export class TasksModule {
       this.tm.selectedDependencies = config.blocked_by
         ? [...config.blocked_by]
         : [];
-      this.tm.updateSelectedDependencies();
+      this.tm.dependenciesModule.updateSelected();
 
       document.getElementById("taskDescription").value = task.description
         ? task.description.join("\n")
@@ -80,7 +92,7 @@ export class TasksModule {
     } else {
       form.reset();
       this.tm.selectedDependencies = [];
-      this.tm.updateSelectedDependencies();
+      this.tm.dependenciesModule.updateSelected();
       // Hide time entries section for new tasks
       document.getElementById("timeEntriesSection").classList.add("hidden");
       document.getElementById("timeEntriesList").innerHTML = "";
@@ -305,7 +317,7 @@ export class TasksModule {
     return selected.length > 0 ? selected : undefined;
   }
 
-  // Search functionality
+  /** @param {string} query - Filters tasks and updates view */
   handleSearch(query) {
     this.tm.searchQuery = query.toLowerCase().trim();
     if (this.tm.searchQuery === "") {
@@ -364,5 +376,99 @@ export class TasksModule {
 
   getToRender() {
     return this.tm.searchQuery ? this.tm.filteredTasks : this.tm.tasks;
+  }
+
+  /** @param {string} taskId - Toggles task completion status */
+  async toggle(taskId) {
+    const task = this.findById(taskId);
+    if (task) {
+      // Optimistic update - update local state immediately
+      const newCompleted = !task.completed;
+      task.completed = newCompleted;
+
+      // Update UI immediately without full re-render
+      this.updateInView(taskId, task);
+
+      try {
+        const response = await TasksAPI.update(taskId, { completed: newCompleted });
+        if (!response.ok) {
+          // Revert on failure
+          task.completed = !newCompleted;
+          this.updateInView(taskId, task);
+          console.error("Failed to toggle task");
+        }
+      } catch (error) {
+        // Revert on error
+        task.completed = !newCompleted;
+        this.updateInView(taskId, task);
+        console.error("Error toggling task:", error);
+      }
+    }
+  }
+
+  updateInView(taskId, task) {
+    // Update checkbox state
+    const checkboxes = document.querySelectorAll(`input[onchange*="toggleTask('${taskId}')"]`);
+    checkboxes.forEach(cb => {
+      cb.checked = task.completed;
+    });
+
+    // Update task card styling (board view uses h4, list view uses different structure)
+    const card = document.querySelector(`[data-task-id="${taskId}"]`);
+    if (card) {
+      // Board view - h4 title
+      const h4Title = card.querySelector('h4');
+      if (h4Title) {
+        if (task.completed) {
+          h4Title.classList.add('line-through');
+          h4Title.classList.remove('text-gray-900', 'dark:text-gray-100');
+          h4Title.classList.add('text-gray-500', 'dark:text-gray-400');
+        } else {
+          h4Title.classList.remove('line-through', 'text-gray-500', 'dark:text-gray-400');
+          h4Title.classList.add('text-gray-900', 'dark:text-gray-100');
+        }
+      }
+
+      // List view - task-title span
+      const titleSpan = card.querySelector('.task-title');
+      if (titleSpan) {
+        if (task.completed) {
+          titleSpan.classList.add('line-through', 'text-gray-400', 'dark:text-gray-500');
+          titleSpan.classList.remove('text-gray-900', 'dark:text-gray-100');
+        } else {
+          titleSpan.classList.remove('line-through', 'text-gray-400', 'dark:text-gray-500');
+          titleSpan.classList.add('text-gray-900', 'dark:text-gray-100');
+        }
+      }
+    }
+  }
+
+  bindEvents() {
+    // Task form submit
+    document
+      .getElementById("taskForm")
+      .addEventListener("submit", (e) => this.handleSubmit(e));
+
+    // Cancel button
+    document
+      .getElementById("cancelBtn")
+      .addEventListener("click", () => this.closeModal());
+
+    // Close modal on background click
+    document.getElementById("taskModal").addEventListener("click", (e) => {
+      if (e.target.id === "taskModal") {
+        this.closeModal();
+      }
+    });
+
+    // Search functionality - Desktop and Mobile
+    document.getElementById("searchInput").addEventListener("input", (e) => {
+      this.handleSearch(e.target.value);
+    });
+    document
+      .getElementById("searchInputMobile")
+      .addEventListener("input", (e) => {
+        this.handleSearch(e.target.value);
+      });
   }
 }

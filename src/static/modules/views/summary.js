@@ -3,11 +3,16 @@ import { DEADLINE_CLASSES } from '../constants.js';
 import { markdownToHtml } from '../utils.js';
 import { showToast } from '../ui/toast.js';
 
+/**
+ * Project summary dashboard - stats, deadlines, links, status
+ */
 export class SummaryView {
+  /** @param {TaskManager} taskManager */
   constructor(taskManager) {
     this.tm = taskManager;
   }
 
+  /** Renders the full summary view */
   render() {
     if (!this.tm.projectInfo) return;
 
@@ -423,5 +428,26 @@ export class SummaryView {
             `;
       container.appendChild(div);
     });
+  }
+
+  bindEvents() {
+    // Project links events
+    document
+      .getElementById("addLinkBtn")
+      .addEventListener("click", () => this.toggleAddLinkForm());
+    document
+      .getElementById("cancelLinkBtn")
+      .addEventListener("click", () => this.toggleAddLinkForm());
+    document
+      .getElementById("saveLinkBtn")
+      .addEventListener("click", () => this.addLink());
+
+    // Project status events
+    document
+      .getElementById("projectStatus")
+      .addEventListener("change", (e) => this.updateProjectStatus(e.target.value));
+    document
+      .getElementById("statusCommentText")
+      .addEventListener("blur", () => this.saveStatusComment());
   }
 }

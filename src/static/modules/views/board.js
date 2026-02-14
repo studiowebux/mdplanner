@@ -1,8 +1,13 @@
 // Board View Module
 import { TAG_CLASSES } from '../constants.js';
 import { formatDate, getPriorityBadgeClasses, getPriorityText } from '../utils.js';
+import { TasksAPI } from '../api.js';
 
+/**
+ * Kanban board view with drag-drop between sections
+ */
 export class BoardView {
+  /** @param {TaskManager} taskManager */
   constructor(taskManager) {
     this.tm = taskManager;
   }
@@ -202,5 +207,95 @@ export class BoardView {
     if (target) {
       target.classList.remove("drag-over");
     }
+  }
+
+  async handleDrop(e) {
+    e.preventDefault();
+    const taskId = e.dataTransfer.getData("text/plain");
+    const target = e.target.hasAttribute("data-section")
+      ? e.target
+      : e.target.closest("[data-section]");
+    const newSection = target ? target.dataset.section : null;
+
+    if (taskId && newSection) {
+      target.classList.remove("drag-over");
+      await this.moveTask(taskId, newSection);
+    }
+  }
+
+  async moveTask(taskId, newSection) {
+    try {
+      const response = await TasksAPI.move(taskId, { section: newSection });
+      if (response.ok) {
+        await this.tm.loadTasks();
+      } else {
+        console.error("Failed to move task");
+      }
+    } catch (error) {
+      console.error("Error moving task:", error);
+    }
+  }
+
+  bindEvents() {
+    // Drag event listeners for board columns and list drop zones
+    document.addEventListener("dragover", (e) => {
+      if (
+        e.target.hasAttribute("data-section") ||
+        e.target.closest("[data-section]")
+      ) {
+        this.handleDragOver(e);
+      }
+    });
+
+    document.addEventListener("drop", (e) => {
+      if (
+        e.target.hasAttribute("data-section") ||
+        e.target.closest("[data-section]")
+      ) {
+        this.handleDrop(e);
+      }
+    });
+
+    document.addEventListener("dragenter", (e) => {
+      if (
+        e.target.hasAttribute("data-section") ||
+        e.target.closest("[data-section]")
+      ) {
+        this.handleDragEnter(e);
+      }
+    });
+
+    document.addEventListener("dragleave", (e) => {
+      if (
+        e.target.hasAttribute("data-section") ||
+        e.target.closest("[data-section]")
+      ) {
+        this.handleDragLeave(e);
+      }
+    });
+
+    // Drag start/end listeners for task cards and list items
+    document.addEventListener("dragstart", (e) => {
+      if (
+        e.target.classList.contains("task-card") ||
+        e.target.classList.contains("task-list-item")
+      ) {
+        e.target.classList.add("dragging");
+        e.dataTransfer.setData("text/plain", e.target.dataset.taskId);
+      }
+    });
+
+    document.addEventListener("dragend", (e) => {
+      if (
+        e.target.classList.contains("task-card") ||
+        e.target.classList.contains("task-list-item")
+      ) {
+        e.target.classList.remove("dragging");
+        // Remove drag-over class from all elements
+        document
+          .querySelectorAll(".drag-over")
+          .forEach((el) => el.classList.remove("drag-over"));
+      }
+    });
   }
 }

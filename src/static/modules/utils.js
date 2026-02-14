@@ -1,6 +1,9 @@
 import { PRIORITY_CLASSES } from './constants.js';
 
-// Date formatting utilities
+/**
+ * @param {string} dateString - ISO date or datetime string
+ * @returns {string} Formatted date (e.g., "Jan 15, 2025")
+ */
 export function formatDate(dateString) {
   if (!dateString) return "";
 
@@ -36,6 +39,10 @@ export function formatDate(dateString) {
   }
 }
 
+/**
+ * @param {string} dateString - ISO date string
+ * @returns {string} datetime-local input format (YYYY-MM-DDTHH:MM)
+ */
 export function formatDateForInput(dateString) {
   if (!dateString) return "";
 
@@ -78,14 +85,20 @@ export function formatDateForInput(dateString) {
   }
 }
 
-// HTML escape utility
+/**
+ * @param {string} text - Raw text to escape
+ * @returns {string} HTML-safe string
+ */
 export function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
 }
 
-// Markdown to HTML converter
+/**
+ * @param {string} markdown - Markdown text
+ * @returns {string} HTML with Tailwind classes
+ */
 export function markdownToHtml(markdown) {
   if (!markdown) return "";
 

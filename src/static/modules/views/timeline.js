@@ -1,7 +1,11 @@
 // Timeline View Module
 import { getPriorityColor } from '../utils.js';
 
+/**
+ * Gantt chart view - task scheduling based on effort and dependencies
+ */
 export class TimelineView {
+  /** @param {TaskManager} taskManager */
   constructor(taskManager) {
     this.tm = taskManager;
   }
