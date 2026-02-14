@@ -7,7 +7,7 @@ Markdown powered task manager tool.
 
 Start Date: 2025-08-17
 Working Days: 7
-Last Updated: 2026-02-12T05:45:11.021Z
+Last Updated: 2026-02-14T04:15:02.050Z
 
 Assignees:
 - Alice
@@ -98,6 +98,11 @@ Enter your text here
 
 <!-- End Custom Section -->
 
+## Test Enhanced Note
+
+<!-- id: note_1 | created: 2026-02-14T04:07:09.767Z | updated: 2026-02-14T04:07:09.767Z | rev: 1 -->
+Hello World
+
 <!-- Goals -->
 # Goals
 
@@ -113,7 +118,7 @@ Enter your text here
 <!-- Canvas -->
 # Canvas
 
-## Sticky note {color: yellow; position: {x: 158, y: 100}; size: {width: 150, height: 100}}
+## Sticky note {color: yellow; position: {x: 258, y: 43}; size: {width: 150, height: 100}}
 
 <!-- id: sticky_note_1 -->
 Todos
@@ -125,10 +130,14 @@ On Going
 
 <!-- id: sticky_note_3 -->
 Done
-## Sticky note {color: purple; position: {x: 161, y: 260}; size: {width: 760, height: 124}}
+## Sticky note {color: purple; position: {x: 161, y: 260}; size: {width: 0, height: 0}}
 
 <!-- id: sticky_note_4 -->
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+## Sticky note {color: purple; position: {x: 941, y: 154}}
+
+<!-- id: sticky_note_5 -->
+New Sticky
 <!-- Mindmap -->
 # Mindmap
 
@@ -152,10 +161,19 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
     - John Doe
     - Jane Doe
 
+## Testing mm
+
+<!-- id: mindmap_3 -->
+
+- Hello
+  - World
+  - Bonjour
+    - Monde
+
 <!-- C4 Architecture -->
 # C4 Architecture
 
-## Context 1 {level: context; type: System; position: {x: 263, y: 243}}
+## Context 1 {level: context; type: System; position: {x: 839, y: 274}}
 
 <!-- id: c4_component_1 -->
 
@@ -178,91 +196,69 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 ## Component 2 {level: component; type: Component; position: {x: 121, y: 275}; parent: c4_component_3}
 
 <!-- id: c4_component_5 -->
-
-
 <!-- SWOT Analysis -->
 # SWOT Analysis
 
-## MD Planner Product
-<!-- id: swot_001 -->
-Date: 2026-02-12
+## All good
+<!-- id: e28523e9 -->
+Date: 2026-02-14
 
 ### Strengths
-- Single markdown file storage
-- No database required
-- Human-readable data format
-- Lightweight and portable
-- Full offline capability
+- weight
 
 ### Weaknesses
-- Limited concurrent user support
-- No real-time collaboration
-- File-based storage limits scalability
 
 ### Opportunities
-- Obsidian plugin integration
-- SQLite backend option
-- Team collaboration features
-- Mobile app development
 
 ### Threats
-- Established competitors (Notion, Linear)
-- Users preferring cloud-based solutions
-- Markdown format limitations for complex data
+
+
+# Retrospectives
+
+## Test Retro
+<!-- id: 4e5ab302 -->
+Date: 2026-02-14
+Status: closed
+
+### Continue
+- - Everything
+
+### Stop
+- - STUFF
+
+### Start
+- - Define Stuff
+
 
 <!-- Risk Analysis -->
 # Risk Analysis
 
-## test
-<!-- id: dbdc2be8 -->
-Date: 2026-02-12
+## Risk analysis
+<!-- id: 770d1cfa -->
+Date: 2026-02-14
 
 ### High Impact / High Probability
 
 ### High Impact / Low Probability
 
 ### Low Impact / High Probability
-- breaking the code
+- humm
 
 ### Low Impact / Low Probability
 
 
-<!-- Business Model Canvas -->
-# Business Model Canvas
-
-## Test
-<!-- id: fd1947c5 -->
-Date: 2026-02-12
-
-### Key Partners
-
-### Key Activities
-- Activity 1
-
-### Key Resources
-
-### Value Proposition
-
-### Customer Relationships
-
-### Channels
-
-### Customer Segments
-
-### Cost Structure
-
-### Revenue Streams
-
-
+<!-- Lean Canvas -->
 # Lean Canvas
 
-## Test
-<!-- id: 41c9fb81 -->
-Date: 2026-02-12
+## MVP
+<!-- id: 7472de8d -->
+Date: 2026-02-14
 
 ### Problem
+- find a problem
 
 ### Solution
+- fix a problem
 
 ### Unique Value Proposition
 
@@ -285,75 +281,153 @@ Date: 2026-02-12
 ### Revenue Streams
 
 
-<!-- Retrospectives -->
-# Retrospectives
+<!-- Business Model Canvas -->
+# Business Model Canvas
 
-## Test
-<!-- id: 80d76c17 -->
-Date: 2026-02-12
-Status: open
+## The perfect business
+<!-- id: 1623b966 -->
+Date: 2026-02-14
 
-### Continue
+### Key Partners
+- Nothing
 
-### Stop
+### Key Activities
 
-### Start
+### Key Resources
+
+### Value Proposition
+
+### Customer Relationships
+
+### Channels
+
+### Customer Segments
+
+### Cost Structure
+
+### Revenue Streams
+
+
+<!-- Project Value Board -->
+# Project Value Board
+
+## valuable
+<!-- id: f35f3276-0801-4eb9-a8b5-6bf0621105c6 -->
+Date: 2026-02-14
+
+### Customer Segments
+- Everyone
+
+### Problem
+
+### Solution
+
+### Benefit
+
+
+<!-- Brief -->
+# Brief
+
+## hello
+<!-- id: cfd4211b -->
+Date: 2026-02-14
+
+### Summary
+
+### Mission
+
+### Responsible
+
+### Accountable
+
+### Consulted
+
+### Informed
+
+### High Level Budget
+
+### High Level Timeline
+
+### Culture
+
+### Change Capacity
+
+### Guiding Principles
+
+
+<!-- Capacity Planning -->
+# Capacity Planning
+
+## test
+<!-- id: a5c765fa -->
+Date: 2026-02-14
+Budget Hours: 100
+
+### Team Members
+
+#### John
+<!-- member-id: 15c2e001 -->
+Role: Developer
+Hours Per Day: 8
+Working Days: Mon, Tue, Wed, Thu, Fri
+
+### Allocations
+
+## test
+<!-- id: a5c765fa -->
+Date: 2026-02-14
+Budget Hours: 100
+
+### Team Members
+
+#### John
+<!-- member-id: 15c2e001 -->
+Role: Developer
+Hours Per Day: 8
+Working Days: Mon, Tue, Wed, Thu, Fri
+
+### Allocations
 
 
 <!-- Strategic Levels -->
 # Strategic Levels
 
+## Test
+<!-- id: f6b7bb39 -->
+Date: 2026-02-14
 
-<!-- Customers -->
-# Customers
+### Vision
+- Become Sustainable
+<!-- level-id: 47e8cac5 -->
+Hello World
 
-## Fresh Customer
-<!-- id: a1c2af0b -->
-Email: fresh@example.com
-Created: 2026-02-13
+### Mission
+- Help people recycle
+<!-- level-id: 3dca41fd, parent: 47e8cac5 -->
 
+## Test
+<!-- id: f6b7bb39 -->
+Date: 2026-02-14
 
-<!-- Billing Rates -->
-# Billing Rates
+### Vision
+- Become Sustainable
+<!-- level-id: 47e8cac5 -->
+Hello World
+- Become Sustainable
+<!-- level-id: 47e8cac5 -->
+Hello World
 
-## Standard
-<!-- id: ad995b4a -->
-Hourly Rate: 100
-Default: true
+## Test
+<!-- id: f6b7bb39 -->
+Date: 2026-02-14
 
-
-<!-- Quotes -->
-# Quotes
-
-## Test Quote
-<!-- id: 2cd50f8d -->
-Number: Q-2026-001
-Customer: a1c2af0b
-Status: draft
-Created: 2026-02-13
-
-### Line Items
-- [line1] Development | Qty: 10 | Rate: 100 | Amount: 1000
-
-
-<!-- Ideas -->
-# Ideas
-
-## Idea Alpha
-<!-- id: d803f749 -->
-<!-- links: d91cfde3,3c394ffa -->
-Status: new
-Created: 2026-02-13
-
-## Idea Beta
-<!-- id: d91cfde3 -->
-Status: considering
-Created: 2026-02-13
-
-## Idea Gamma
-<!-- id: 3c394ffa -->
-Status: planned
-Created: 2026-02-13
+### Vision
+- Become Sustainable
+<!-- level-id: 47e8cac5 -->
+Hello World
+- Become Sustainable
+<!-- level-id: 47e8cac5 -->
+Hello World
 
 
 # Board
@@ -371,10 +445,12 @@ Created: 2026-02-13
 ## In Progress
 
 - [ ] (1) backup {tag: [Backend]; due_date: 2025-08-27T13; assignee: Jane Doe; priority: 2}
-- [ ] (test1) Simple Test Task {tag: [Test]; due_date: 2025-08-22; assignee: Test User; priority: 1; effort: 1; milestone: Test}
-  Test description
+- [ ] (4) Testing migration {tag: [Backend]; due_date: 2026-02-13T23; assignee: Bob; priority: 1; effort: 1; milestone: M1; planned_end: 2026-02-20}
+  Testing the Whole UI
 
 ## Done
 
 - [ ] (3) Almost ready ! {tag: [Bug]; assignee: Bob; priority: 1}
+- [ ] (test1) Simple Test Task {tag: [Test]; due_date: 2025-08-22; assignee: Test User; priority: 1; effort: 1; milestone: Test}
+  Test description
 

@@ -6,6 +6,42 @@ import {
   SECTION_COLORS
 } from './modules/constants.js';
 
+import {
+  formatDate,
+  formatDateForInput,
+  escapeHtml,
+  markdownToHtml,
+  getPriorityColor,
+  getPriorityBadgeClasses,
+  getPriorityText
+} from './modules/utils.js';
+
+import { showToast } from './modules/ui/toast.js';
+import { ThemeManager } from './modules/ui/theme.js';
+import { toggleMobileMenu, closeMobileMenu } from './modules/ui/mobile.js';
+import {
+  TasksAPI,
+  ProjectAPI,
+  NotesAPI,
+  GoalsAPI,
+  MilestonesAPI,
+  IdeasAPI,
+  RetrospectivesAPI,
+  SwotAPI,
+  RiskAnalysisAPI,
+  LeanCanvasAPI,
+  BusinessModelAPI,
+  ProjectValueAPI,
+  BriefAPI,
+  CapacityAPI,
+  TimeTrackingAPI,
+  CanvasAPI,
+  MindmapsAPI,
+  C4API,
+  StrategicLevelsAPI,
+  BillingAPI
+} from './modules/api.js';
+
 class TaskManager {
   constructor() {
     this.tasks = [];
@@ -40,7 +76,6 @@ class TaskManager {
     this.selectedMindmap = null;
     this.editingMindmap = null;
     this.currentLayout = "horizontal";
-    this.isFullscreen = false;
     this.resizableEvents = [];
     this.notesLoaded = false;
     this.retrospectives = [];
@@ -134,8 +169,7 @@ class TaskManager {
 
   async checkVersion() {
     try {
-      const response = await fetch("/api/version");
-      const data = await response.json();
+      const data = await ProjectAPI.getVersion();
       document.getElementById("versionDisplay").textContent = `MD Planner v${data.current}`;
       if (data.updateAvailable) {
         document.getElementById("updateBadge").classList.remove("hidden");
@@ -148,11 +182,8 @@ class TaskManager {
 
   async loadProjects() {
     try {
-      const response = await fetch("/api/projects");
-      const projects = await response.json();
-
-      const activeResponse = await fetch("/api/projects/active");
-      const activeData = await activeResponse.json();
+      const projects = await ProjectAPI.listProjects();
+      const activeData = await ProjectAPI.getActiveProject();
 
       const optionsHtml = projects.map(p =>
         `<option value="${p.filename}" ${p.filename === activeData.filename ? "selected" : ""}>${p.name}</option>`
@@ -187,12 +218,7 @@ class TaskManager {
 
   async switchProject(filename) {
     try {
-      const response = await fetch("/api/projects/switch", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename }),
-      });
-
+      const response = await ProjectAPI.switchProject(filename);
       if (response.ok) {
         // Reload all data for new project
         this.tasks = [];
@@ -1294,17 +1320,28 @@ class TaskManager {
       }
     });
 
-    // Modal close on background click
+    // Modal close on background click - track mousedown to prevent closing during text selection
+    let noteModalMouseDownTarget = null;
+    document.getElementById("noteModal").addEventListener("mousedown", (e) => {
+      noteModalMouseDownTarget = e.target;
+    });
     document.getElementById("noteModal").addEventListener("click", (e) => {
-      if (e.target.id === "noteModal") {
+      if (e.target.id === "noteModal" && noteModalMouseDownTarget?.id === "noteModal") {
         this.closeNoteModal();
       }
+      noteModalMouseDownTarget = null;
     });
 
+    // Track mousedown target to prevent closing modal during text selection
+    let goalModalMouseDownTarget = null;
+    document.getElementById("goalModal").addEventListener("mousedown", (e) => {
+      goalModalMouseDownTarget = e.target;
+    });
     document.getElementById("goalModal").addEventListener("click", (e) => {
-      if (e.target.id === "goalModal") {
+      if (e.target.id === "goalModal" && goalModalMouseDownTarget?.id === "goalModal") {
         this.closeGoalModal();
       }
+      goalModalMouseDownTarget = null;
     });
 
     document
@@ -1347,8 +1384,7 @@ class TaskManager {
   async loadTasks() {
     document.getElementById("loading").classList.remove("hidden");
     try {
-      const response = await fetch("/api/tasks");
-      this.tasks = await response.json();
+      this.tasks = await TasksAPI.fetchAll();
       this.filteredTasks = this.tasks; // Initialize filtered tasks
       this.renderTasks();
     } catch (error) {
@@ -1562,8 +1598,7 @@ class TaskManager {
 
   async loadProjectInfo() {
     try {
-      const response = await fetch("/api/project");
-      this.projectInfo = await response.json();
+      this.projectInfo = await ProjectAPI.getInfo();
       this.renderSummaryView();
     } catch (error) {
       console.error("Error loading project info:", error);
@@ -2461,13 +2496,14 @@ class TaskManager {
   }
 
   createListTaskElement(task, isChild = false) {
+    const config = task.config || {};
     const div = document.createElement("div");
     div.className = `task-list-item px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 ${isChild ? "pl-12 bg-gray-25 dark:bg-gray-800" : ""} cursor-move border-b border-gray-100 dark:border-gray-700`;
     div.draggable = !isChild; // Only allow parent tasks to be dragged
     div.dataset.taskId = task.id;
 
-    const priorityBadgeClasses = this.getPriorityBadgeClasses(task.config.priority);
-    const priorityText = this.getPriorityText(task.config.priority);
+    const priorityBadgeClasses = this.getPriorityBadgeClasses(config.priority);
+    const priorityText = this.getPriorityText(config.priority);
 
     div.innerHTML = `
             <div class="flex items-center justify-between">
@@ -2480,16 +2516,16 @@ class TaskManager {
                             <span class="${task.completed ? "line-through text-gray-500 dark:text-gray-400" : "text-gray-900 dark:text-gray-100"} font-medium">
                                 ${task.title}
                             </span>
-                            ${task.config.priority ? `<span class="px-2 py-0.5 text-xs font-medium rounded ${priorityBadgeClasses}">${priorityText}</span>` : ""}
-                            ${task.config.tag ? task.config.tag.map((tag) => `<span class="px-2 py-0.5 text-xs font-medium rounded border ${TAG_CLASSES}">${tag}</span>`).join("") : ""}
+                            ${config.priority ? `<span class="px-2 py-0.5 text-xs font-medium rounded ${priorityBadgeClasses}">${priorityText}</span>` : ""}
+                            ${config.tag ? config.tag.map((tag) => `<span class="px-2 py-0.5 text-xs font-medium rounded border ${TAG_CLASSES}">${tag}</span>`).join("") : ""}
                         </div>
                         <div class="text-sm text-gray-500 dark:text-gray-400 mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
                             <span class="text-xs font-mono text-gray-400">#${task.id}</span>
-                            ${task.config.assignee ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>${task.config.assignee}</span>` : ""}
-                            ${task.config.due_date ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>${this.formatDate(task.config.due_date)}</span>` : ""}
-                            ${task.config.effort ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>${task.config.effort}d</span>` : ""}
-                            ${task.config.milestone ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg>${task.config.milestone}</span>` : ""}
-                            ${task.config.blocked_by && task.config.blocked_by.length > 0 ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>${task.config.blocked_by.join(", ")}</span>` : ""}
+                            ${config.assignee ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>${config.assignee}</span>` : ""}
+                            ${config.due_date ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>${this.formatDate(config.due_date)}</span>` : ""}
+                            ${config.effort ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>${config.effort}d</span>` : ""}
+                            ${config.milestone ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg>${config.milestone}</span>` : ""}
+                            ${config.blocked_by && config.blocked_by.length > 0 ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>${config.blocked_by.join(", ")}</span>` : ""}
                             <span class="text-gray-400">${task.section}</span>
                         </div>
                     </div>
@@ -2604,14 +2640,15 @@ class TaskManager {
   }
 
   createBoardTaskElement(task) {
+    const config = task.config || {};
     const div = document.createElement("div");
     div.className =
       "task-card bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-3 cursor-move";
     div.draggable = true;
     div.dataset.taskId = task.id;
 
-    const priorityBadgeClasses = this.getPriorityBadgeClasses(task.config.priority);
-    const priorityText = this.getPriorityText(task.config.priority);
+    const priorityBadgeClasses = this.getPriorityBadgeClasses(config.priority);
+    const priorityText = this.getPriorityText(config.priority);
 
     div.innerHTML = `
             <div class="flex items-start justify-between mb-2">
@@ -2667,10 +2704,10 @@ class TaskManager {
                 </div>
 
                 <div class="flex flex-wrap gap-1">
-                    ${task.config.priority ? `<span class="inline-block px-2 py-0.5 text-xs font-medium rounded ${priorityBadgeClasses}">${priorityText}</span>` : ""}
+                    ${config.priority ? `<span class="inline-block px-2 py-0.5 text-xs font-medium rounded ${priorityBadgeClasses}">${priorityText}</span>` : ""}
                     ${
-                      task.config.tag
-                        ? task.config.tag
+                      config.tag
+                        ? config.tag
                             .map(
                               (tag) =>
                                 `<span class="inline-block px-2 py-0.5 text-xs font-medium rounded border ${TAG_CLASSES}">${tag}</span>`,
@@ -2681,11 +2718,11 @@ class TaskManager {
                 </div>
 
                 <div class="text-xs font-mono text-gray-400">#${task.id}</div>
-                ${task.config.assignee ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> ${task.config.assignee}</div>` : ""}
-                ${task.config.due_date ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> ${this.formatDate(task.config.due_date)}</div>` : ""}
-                ${task.config.effort ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ${task.config.effort}d</div>` : ""}
-                ${task.config.milestone ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg> ${task.config.milestone}</div>` : ""}
-                ${task.config.blocked_by && task.config.blocked_by.length > 0 ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg> ${task.config.blocked_by.join(", ")}</div>` : ""}
+                ${config.assignee ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> ${config.assignee}</div>` : ""}
+                ${config.due_date ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> ${this.formatDate(config.due_date)}</div>` : ""}
+                ${config.effort ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ${config.effort}d</div>` : ""}
+                ${config.milestone ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg> ${config.milestone}</div>` : ""}
+                ${config.blocked_by && config.blocked_by.length > 0 ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg> ${config.blocked_by.join(", ")}</div>` : ""}
 
                 ${
                   task.children && task.children.length > 0
@@ -2818,14 +2855,7 @@ class TaskManager {
 
   async moveTask(taskId, newSection) {
     try {
-      const response = await fetch(`/api/tasks/${taskId}/move`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ section: newSection }),
-      });
-
+      const response = await TasksAPI.move(taskId, { section: newSection });
       if (response.ok) {
         await this.loadTasks();
       } else {
@@ -2847,14 +2877,7 @@ class TaskManager {
       this.updateTaskInView(taskId, task);
 
       try {
-        const response = await fetch(`/api/tasks/${taskId}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ completed: newCompleted }),
-        });
-
+        const response = await TasksAPI.update(taskId, { completed: newCompleted });
         if (!response.ok) {
           // Revert on failure
           task.completed = !newCompleted;
@@ -2943,21 +2966,19 @@ class TaskManager {
     await this.populateFormOptions(task ? task.id : null);
 
     if (task) {
-      document.getElementById("taskTitle").value = task.title;
-      document.getElementById("taskSection").value = task.section;
-      document.getElementById("taskPriority").value =
-        task.config.priority || "";
-      document.getElementById("taskAssignee").value =
-        task.config.assignee || "";
-      document.getElementById("taskEffort").value = task.config.effort || "";
+      const config = task.config || {};
+      document.getElementById("taskTitle").value = task.title || "";
+      document.getElementById("taskSection").value = task.section || "";
+      document.getElementById("taskPriority").value = config.priority != null ? String(config.priority) : "";
+      document.getElementById("taskAssignee").value = config.assignee || "";
+      document.getElementById("taskEffort").value = config.effort != null ? config.effort : "";
       document.getElementById("taskDueDate").value =
-        this.formatDateForInput(task.config.due_date) || "";
-      document.getElementById("taskMilestone").value =
-        task.config.milestone || "";
+        this.formatDateForInput(config.due_date) || "";
+      document.getElementById("taskMilestone").value = config.milestone || "";
       document.getElementById("taskPlannedStart").value =
-        task.config.planned_start || "";
+        config.planned_start || "";
       document.getElementById("taskPlannedEnd").value =
-        task.config.planned_end || "";
+        config.planned_end || "";
 
       // Show time entries section for existing tasks
       document.getElementById("timeEntriesSection").classList.remove("hidden");
@@ -2966,13 +2987,12 @@ class TaskManager {
       // Set selected tags
       const tagSelect = document.getElementById("taskTags");
       Array.from(tagSelect.options).forEach((option) => {
-        option.selected =
-          task.config.tag && task.config.tag.includes(option.value);
+        option.selected = config.tag && config.tag.includes(option.value);
       });
 
       // Set selected dependencies
-      this.selectedDependencies = task.config.blocked_by
-        ? [...task.config.blocked_by]
+      this.selectedDependencies = config.blocked_by
+        ? [...config.blocked_by]
         : [];
       this.updateSelectedDependencies();
 
@@ -3077,21 +3097,9 @@ class TaskManager {
     try {
       let response;
       if (this.editingTask) {
-        response = await fetch(`/api/tasks/${this.editingTask.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        });
+        response = await TasksAPI.update(this.editingTask.id, formData);
       } else {
-        response = await fetch("/api/tasks", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        });
+        response = await TasksAPI.create(formData);
       }
 
       if (response.ok) {
@@ -3124,25 +3132,7 @@ class TaskManager {
   }
 
   showToast(message, isError = false) {
-    // Remove existing toast if any
-    const existing = document.getElementById("toast-notification");
-    if (existing) existing.remove();
-
-    const toast = document.createElement("div");
-    toast.id = "toast-notification";
-    toast.className = `fixed bottom-16 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-md text-sm font-medium z-50 transition-opacity duration-300 ${
-      isError
-        ? "bg-red-600 text-white"
-        : "bg-gray-800 dark:bg-gray-700 text-white"
-    }`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-
-    // Fade out and remove after 2 seconds
-    setTimeout(() => {
-      toast.style.opacity = "0";
-      setTimeout(() => toast.remove(), 300);
-    }, 2000);
+    showToast(message, isError);
   }
 
   async addSubtask(parentTaskId) {
@@ -3208,10 +3198,7 @@ class TaskManager {
   async deleteTask(taskId) {
     if (confirm("Are you sure you want to delete this task?")) {
       try {
-        const response = await fetch(`/api/tasks/${taskId}`, {
-          method: "DELETE",
-        });
-
+        const response = await TasksAPI.delete(taskId);
         if (response.ok) {
           await this.loadTasks();
         } else {
@@ -3224,310 +3211,55 @@ class TaskManager {
   }
 
   getPriorityColor(priority) {
-    // Now returns grey scale colors (darker = higher priority)
-    switch (priority) {
-      case 1:
-        return "gray-900";
-      case 2:
-        return "gray-700";
-      case 3:
-        return "gray-500";
-      case 4:
-        return "gray-400";
-      case 5:
-        return "gray-300";
-      default:
-        return "gray-400";
-    }
+    return getPriorityColor(priority);
   }
 
   getPriorityBadgeClasses(priority) {
-    return PRIORITY_CLASSES[priority]?.badge || PRIORITY_CLASSES[5].badge;
+    return getPriorityBadgeClasses(priority);
   }
 
   getPriorityText(priority) {
-    switch (priority) {
-      case 1:
-        return "Highest";
-      case 2:
-        return "High";
-      case 3:
-        return "Medium";
-      case 4:
-        return "Low";
-      case 5:
-        return "Lowest";
-      default:
-        return "";
-    }
+    return getPriorityText(priority);
   }
 
   formatDate(dateString) {
-    if (!dateString) return "";
-
-    try {
-      // Handle various date formats
-      let date;
-
-      // If it's just a date (YYYY-MM-DD)
-      if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-        date = new Date(dateString + "T00:00:00");
-      }
-      // If it's incomplete datetime (YYYY-MM-DDTHH)
-      else if (/^\d{4}-\d{2}-\d{2}T\d{1,2}$/.test(dateString)) {
-        date = new Date(dateString + ":00:00");
-      }
-      // If it's incomplete datetime (YYYY-MM-DDTHH:MM)
-      else if (/^\d{4}-\d{2}-\d{2}T\d{1,2}:\d{2}$/.test(dateString)) {
-        date = new Date(dateString + ":00");
-      }
-      // Otherwise try to parse as-is
-      else {
-        date = new Date(dateString);
-      }
-
-      // Check if date is valid
-      if (isNaN(date.getTime())) {
-        return dateString; // Return original string if can't parse
-      }
-
-      return date.toLocaleDateString();
-    } catch (error) {
-      console.warn("Error parsing date:", dateString, error);
-      return dateString; // Return original string on error
-    }
+    return formatDate(dateString);
   }
 
   formatDateForInput(dateString) {
-    if (!dateString) return "";
-
-    try {
-      let date;
-
-      // If it's just a date (YYYY-MM-DD), convert to datetime for input
-      if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-        return dateString + "T09:00"; // Default to 9 AM
-      }
-      // If it's incomplete datetime (YYYY-MM-DDTHH)
-      else if (/^\d{4}-\d{2}-\d{2}T\d{1,2}$/.test(dateString)) {
-        return dateString.padEnd(13, "0") + ":00"; // Pad and add minutes
-      }
-      // If it's incomplete datetime (YYYY-MM-DDTHH:MM)
-      else if (/^\d{4}-\d{2}-\d{2}T\d{1,2}:\d{2}$/.test(dateString)) {
-        return dateString; // Already in correct format
-      }
-      // If it's full datetime (YYYY-MM-DDTHH:MM:SS)
-      else if (/^\d{4}-\d{2}-\d{2}T\d{1,2}:\d{2}:\d{2}/.test(dateString)) {
-        return dateString.substring(0, 16); // Remove seconds
-      }
-      // Try to parse and format
-      else {
-        date = new Date(dateString);
-        if (!isNaN(date.getTime())) {
-          // Format as YYYY-MM-DDTHH:MM
-          const year = date.getFullYear();
-          const month = (date.getMonth() + 1).toString().padStart(2, "0");
-          const day = date.getDate().toString().padStart(2, "0");
-          const hours = date.getHours().toString().padStart(2, "0");
-          const minutes = date.getMinutes().toString().padStart(2, "0");
-          return `${year}-${month}-${day}T${hours}:${minutes}`;
-        }
-      }
-
-      return dateString; // Return original if can't process
-    } catch (error) {
-      console.warn("Error formatting date for input:", dateString, error);
-      return dateString;
-    }
+    return formatDateForInput(dateString);
   }
 
   toggleDarkMode() {
-    const html = document.documentElement;
-    const isDark = html.classList.contains("dark");
-
-    if (isDark) {
-      html.classList.remove("dark");
-      localStorage.setItem("darkMode", "false");
-    } else {
-      html.classList.add("dark");
-      localStorage.setItem("darkMode", "true");
-    }
+    ThemeManager.toggleDarkMode();
   }
 
   toggleFullscreen() {
-    this.isFullscreen = !this.isFullscreen;
-    this.applyFullscreenMode();
-    localStorage.setItem("fullscreenMode", this.isFullscreen.toString());
+    ThemeManager.toggleFullscreen();
   }
 
   applyFullscreenMode() {
-    const header = document.querySelector("header");
-    const main = document.querySelector("main");
-    const body = document.body;
-    const fullscreenIcon = document.getElementById("fullscreenIcon");
-    const exitFullscreenIcon = document.getElementById("exitFullscreenIcon");
-
-    if (this.isFullscreen) {
-      // Keep header visible but remove container constraints from main
-      main.classList.remove(
-        "max-w-7xl",
-        "mx-auto",
-        "px-2",
-        "sm:px-4",
-        "lg:px-8",
-        "py-4",
-        "sm:py-8",
-      );
-      main.classList.add("w-full", "h-screen", "p-2", "pb-16", "overflow-auto");
-
-      // Make body fill the screen
-      body.classList.add("h-screen", "overflow-hidden");
-
-      // Update button icons
-      fullscreenIcon.classList.add("hidden");
-      exitFullscreenIcon.classList.remove("hidden");
-
-      // Add escape key listener
-      this.bindEscapeKey();
-    } else {
-      // Restore container constraints
-      main.classList.add(
-        "max-w-7xl",
-        "mx-auto",
-        "px-2",
-        "sm:px-4",
-        "lg:px-8",
-        "py-4",
-        "sm:py-8",
-      );
-      main.classList.remove("w-full", "h-screen", "p-2", "pb-16", "overflow-auto");
-
-      // Restore body
-      body.classList.remove("h-screen", "overflow-hidden");
-
-      // Update button icons
-      fullscreenIcon.classList.remove("hidden");
-      exitFullscreenIcon.classList.add("hidden");
-
-      // Remove escape key listener
-      this.unbindEscapeKey();
-    }
+    ThemeManager.applyFullscreenMode();
   }
 
   bindEscapeKey() {
-    this.escapeKeyHandler = (e) => {
-      if (e.key === "Escape" && this.isFullscreen) {
-        this.toggleFullscreen();
-      }
-    };
-    document.addEventListener("keydown", this.escapeKeyHandler);
+    ThemeManager.bindEscapeKey();
   }
 
   unbindEscapeKey() {
-    if (this.escapeKeyHandler) {
-      document.removeEventListener("keydown", this.escapeKeyHandler);
-      this.escapeKeyHandler = null;
-    }
+    ThemeManager.unbindEscapeKey();
   }
 
   initDarkMode() {
-    const savedDarkMode = localStorage.getItem("darkMode");
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)",
-    ).matches;
-
-    if (savedDarkMode === "true" || (savedDarkMode === null && prefersDark)) {
-      document.documentElement.classList.add("dark");
-    }
+    ThemeManager.initDarkMode();
   }
 
   initFullscreenMode() {
-    const savedFullscreenMode = localStorage.getItem("fullscreenMode");
-    if (savedFullscreenMode === "true") {
-      this.isFullscreen = true;
-      // Apply fullscreen mode after DOM is ready
-      setTimeout(() => this.applyFullscreenMode(), 0);
-    }
+    ThemeManager.initFullscreenMode();
   }
 
   markdownToHtml(markdown) {
-    if (!markdown) return "";
-
-    // Simple markdown to HTML converter
-    let html = markdown;
-
-    // Headers
-    html = html.replace(
-      /^### (.*$)/gim,
-      '<h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">$1</h3>',
-    );
-    html = html.replace(
-      /^## (.*$)/gim,
-      '<h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">$1</h2>',
-    );
-    html = html.replace(
-      /^# (.*$)/gim,
-      '<h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">$1</h1>',
-    );
-
-    // Bold and italic
-    html = html.replace(
-      /\*\*(.*?)\*\*/g,
-      '<strong class="font-semibold text-gray-900 dark:text-gray-100">$1</strong>',
-    );
-    html = html.replace(
-      /\*(.*?)\*/g,
-      '<em class="italic text-gray-700 dark:text-gray-300">$1</em>',
-    );
-
-    // Code (inline)
-    html = html.replace(
-      /`([^`]+)`/g,
-      '<code class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-1 py-0.5 rounded text-sm font-mono">$1</code>',
-    );
-
-    // Links
-    html = html.replace(
-      /\[([^\]]+)\]\(([^)]+)\)/g,
-      '<a href="$2" class="text-gray-900 dark:text-gray-100 underline hover:no-underline" target="_blank" rel="noopener noreferrer">$1</a>',
-    );
-
-    // Simple line processing for better text wrapping
-    html = html
-      .split("\n")
-      .map((line) => {
-        const trimmed = line.trim();
-
-        // Skip empty lines
-        if (!trimmed) {
-          return "<br>";
-        }
-
-        // Handle list items
-        if (trimmed.startsWith("- ")) {
-          return `<li class="text-gray-700 dark:text-gray-300 mb-1">${trimmed.substring(2)}</li>`;
-        }
-
-        // Skip already processed HTML
-        if (trimmed.startsWith("<")) {
-          return trimmed;
-        }
-
-        // Wrap plain text in paragraphs
-        return `<p class="text-gray-700 dark:text-gray-300 mb-2">${trimmed}</p>`;
-      })
-      .join("");
-
-    // Wrap consecutive list items
-    html = html.replace(
-      /(<li[^>]*>.*?<\/li>)+/g,
-      '<ul class="list-disc list-inside mb-3">$&</ul>',
-    );
-
-    // Clean up consecutive <br> tags
-    html = html.replace(/(<br>\s*){2,}/g, "<br>");
-
-    return html;
+    return markdownToHtml(markdown);
   }
 
   async populateFormOptions(currentTaskId = null) {
@@ -3745,8 +3477,7 @@ class TaskManager {
 
   async loadProjectConfig() {
     try {
-      const response = await fetch("/api/project/config");
-      this.projectConfig = await response.json();
+      this.projectConfig = await ProjectAPI.getConfig();
 
       // Update UI with loaded config
       document.getElementById("projectStartDate").value =
@@ -3790,8 +3521,7 @@ class TaskManager {
 
   async loadSections() {
     try {
-      const response = await fetch("/api/project/sections");
-      this.sections = await response.json();
+      this.sections = await ProjectAPI.getSections();
     } catch (error) {
       console.error("Error loading sections:", error);
       this.sections = ["Ideas", "Todo", "In Progress", "Done"];
@@ -3828,14 +3558,7 @@ class TaskManager {
     console.log("Saving config:", config);
 
     try {
-      const response = await fetch("/api/project/config", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(config),
-      });
-
+      const response = await ProjectAPI.saveConfig(config);
       const result = await response.text();
       console.log("Save response:", result);
 
@@ -4271,16 +3994,7 @@ class TaskManager {
   async rewriteTasksWithUpdatedSections() {
     try {
       // Use the dedicated rewrite endpoint to update section headers
-      const response = await fetch("/api/project/rewrite", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          sections: this.sections,
-        }),
-      });
-
+      const response = await ProjectAPI.rewrite({ sections: this.sections });
       if (response.ok) {
         // Reload tasks and sections to reflect changes
         await this.loadTasks();
@@ -4514,13 +4228,7 @@ class TaskManager {
 
   async updateTask(taskId, updates) {
     try {
-      const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updates),
-      });
+      const response = await TasksAPI.update(taskId, updates);
       return response.ok;
     } catch (error) {
       console.error("Error updating task:", error);
@@ -4591,8 +4299,7 @@ class TaskManager {
   // Notes functionality
   async loadNotes() {
     try {
-      const response = await fetch("/api/project");
-      const projectInfo = await response.json();
+      const projectInfo = await ProjectAPI.getInfo();
       this.notes = projectInfo.notes || [];
       this.renderNotesView();
     } catch (error) {
@@ -4959,9 +4666,7 @@ class TaskManager {
   }
 
   escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    return escapeHtml(text);
   }
 
   toggleNoteEditMode() {
@@ -5040,12 +4745,7 @@ class TaskManager {
         customSections: activeNote.customSections
       };
 
-      const response = await fetch(`/api/notes/${activeNote.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(saveData),
-      });
-
+      const response = await NotesAPI.update(activeNote.id, saveData);
       if (response.ok) {
         // Update local data
         this.notes[this.activeNote].title = title;
@@ -5096,14 +4796,11 @@ class TaskManager {
     const enhancedMode = document.getElementById("noteEnhancedMode").checked;
 
     try {
+      let response;
       if (this.editingNote !== null) {
         // Update existing note using backend ID
         const note = this.notes[this.editingNote];
-        await fetch(`/api/notes/${note.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, content }),
-        });
+        response = await NotesAPI.update(note.id, { title, content });
       } else {
         // Create new note
         const noteData = { title, content };
@@ -5111,11 +4808,12 @@ class TaskManager {
           noteData.mode = "enhanced";
           noteData.paragraphs = content ? [{ id: `p-${Date.now()}`, type: "text", content }] : [];
         }
-        await fetch("/api/notes", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(noteData),
-        });
+        response = await NotesAPI.create(noteData);
+      }
+
+      if (!response.ok) {
+        console.error("Failed to save note:", await response.text());
+        return;
       }
 
       this.closeNoteModal();
@@ -5140,7 +4838,7 @@ class TaskManager {
 
     try {
       const note = this.notes[this.activeNote];
-      await fetch(`/api/notes/${note.id}`, { method: "DELETE" });
+      await NotesAPI.delete(note.id);
       this.activeNote = null;
       await this.loadNotes();
     } catch (error) {
@@ -5458,12 +5156,7 @@ class TaskManager {
       };
 
       // Add the note
-      const response = await fetch('/api/notes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newNote)
-      });
-
+      const response = await NotesAPI.create(newNote);
       if (response.ok) {
         await this.loadNotes();
         // Select the new note
@@ -6350,7 +6043,7 @@ class TaskManager {
   }
 
   async addFileReference(file) {
-    const fileRef = `[📎 ${file.name}](attachment:${file.name})`;
+    const fileRef = `[Attachment: ${file.name}](attachment:${file.name})`;
     this.addParagraph('text');
     const currentNote = this.notes[this.activeNote];
     const lastParagraph = currentNote.paragraphs[currentNote.paragraphs.length - 1];
@@ -6383,9 +6076,7 @@ class TaskManager {
   }
 
   escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    return escapeHtml(text);
   }
 
   // Custom Section Management Functions
@@ -6796,8 +6487,7 @@ class TaskManager {
   // Goals functionality
   async loadGoals() {
     try {
-      const response = await fetch("/api/project");
-      const projectInfo = await response.json();
+      const projectInfo = await ProjectAPI.getInfo();
       this.goals = projectInfo.goals || [];
       this.renderGoalsView();
     } catch (error) {
@@ -6964,18 +6654,10 @@ class TaskManager {
       if (this.editingGoal !== null) {
         // Update existing goal using backend ID
         const goal = this.goals[this.editingGoal];
-        await fetch(`/api/goals/${goal.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(goalData),
-        });
+        await GoalsAPI.update(goal.id, goalData);
       } else {
         // Create new goal
-        await fetch("/api/goals", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(goalData),
-        });
+        await GoalsAPI.create(goalData);
       }
 
       this.closeGoalModal();
@@ -7009,7 +6691,7 @@ class TaskManager {
 
     try {
       const goal = this.goals[goalIndex];
-      await fetch(`/api/goals/${goal.id}`, { method: "DELETE" });
+      await GoalsAPI.delete(goal.id);
       await this.loadGoals();
     } catch (error) {
       console.error("Error deleting goal:", error);
@@ -7019,8 +6701,7 @@ class TaskManager {
   // Milestones functionality
   async loadMilestones() {
     try {
-      const response = await fetch("/api/milestones");
-      this.milestones = await response.json();
+      this.milestones = await MilestonesAPI.fetchAll();
       this.renderMilestonesView();
     } catch (error) {
       console.error("Error loading milestones:", error);
@@ -7104,17 +6785,9 @@ class TaskManager {
 
     try {
       if (this.editingMilestoneId) {
-        await fetch(`/api/milestones/${this.editingMilestoneId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await MilestonesAPI.update(this.editingMilestoneId, data);
       } else {
-        await fetch("/api/milestones", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await MilestonesAPI.create(data);
       }
       this.closeMilestoneModal();
       await this.loadMilestones();
@@ -7126,7 +6799,7 @@ class TaskManager {
   async deleteMilestone(id) {
     if (!confirm("Delete this milestone?")) return;
     try {
-      await fetch(`/api/milestones/${id}`, { method: "DELETE" });
+      await MilestonesAPI.delete(id);
       await this.loadMilestones();
     } catch (error) {
       console.error("Error deleting milestone:", error);
@@ -7136,8 +6809,7 @@ class TaskManager {
   // Ideas functionality
   async loadIdeas() {
     try {
-      const response = await fetch("/api/ideas");
-      this.ideas = await response.json();
+      this.ideas = await IdeasAPI.fetchAll();
       this.renderIdeasView();
     } catch (error) {
       console.error("Error loading ideas:", error);
@@ -7247,17 +6919,9 @@ class TaskManager {
 
     try {
       if (this.editingIdeaId) {
-        await fetch(`/api/ideas/${this.editingIdeaId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await IdeasAPI.update(this.editingIdeaId, data);
       } else {
-        await fetch("/api/ideas", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await IdeasAPI.create(data);
       }
       this.closeIdeaModal();
       await this.loadIdeas();
@@ -7269,7 +6933,7 @@ class TaskManager {
   async deleteIdea(id) {
     if (!confirm("Delete this idea?")) return;
     try {
-      await fetch(`/api/ideas/${id}`, { method: "DELETE" });
+      await IdeasAPI.delete(id);
       await this.loadIdeas();
     } catch (error) {
       console.error("Error deleting idea:", error);
@@ -7279,8 +6943,7 @@ class TaskManager {
   // Retrospectives functionality
   async loadRetrospectives() {
     try {
-      const response = await fetch("/api/retrospectives");
-      this.retrospectives = await response.json();
+      this.retrospectives = await RetrospectivesAPI.fetchAll();
       this.renderRetrospectivesView();
     } catch (error) {
       console.error("Error loading retrospectives:", error);
@@ -7388,17 +7051,9 @@ class TaskManager {
 
     try {
       if (this.editingRetrospectiveId) {
-        await fetch(`/api/retrospectives/${this.editingRetrospectiveId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await RetrospectivesAPI.update(this.editingRetrospectiveId, data);
       } else {
-        await fetch("/api/retrospectives", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await RetrospectivesAPI.create(data);
       }
       this.closeRetrospectiveModal();
       await this.loadRetrospectives();
@@ -7410,7 +7065,7 @@ class TaskManager {
   async deleteRetrospective(id) {
     if (!confirm("Delete this retrospective?")) return;
     try {
-      await fetch(`/api/retrospectives/${id}`, { method: "DELETE" });
+      await RetrospectivesAPI.delete(id);
       await this.loadRetrospectives();
     } catch (error) {
       console.error("Error deleting retrospective:", error);
@@ -7420,8 +7075,7 @@ class TaskManager {
   // SWOT Analysis functionality
   async loadSwotAnalyses() {
     try {
-      const response = await fetch("/api/swot");
-      this.swotAnalyses = await response.json();
+      this.swotAnalyses = await SwotAPI.fetchAll();
       this.renderSwotSelector();
       if (this.swotAnalyses.length > 0 && !this.selectedSwotId) {
         this.selectSwot(this.swotAnalyses[0].id);
@@ -7536,17 +7190,9 @@ class TaskManager {
 
     try {
       if (this.editingSwotId) {
-        await fetch(`/api/swot/${this.editingSwotId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await SwotAPI.update(this.editingSwotId, data);
       } else {
-        const response = await fetch("/api/swot", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        const response = await SwotAPI.create(data);
         const result = await response.json();
         this.selectedSwotId = result.id;
       }
@@ -7567,7 +7213,7 @@ class TaskManager {
     if (!this.selectedSwotId) return;
     if (!confirm("Delete this SWOT analysis?")) return;
     try {
-      await fetch(`/api/swot/${this.selectedSwotId}`, { method: "DELETE" });
+      await SwotAPI.delete(this.selectedSwotId);
       this.selectedSwotId = null;
       await this.loadSwotAnalyses();
     } catch (error) {
@@ -7607,11 +7253,7 @@ class TaskManager {
     swot[this.swotItemQuadrant].push(text);
 
     try {
-      await fetch(`/api/swot/${this.selectedSwotId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(swot),
-      });
+      await SwotAPI.update(this.selectedSwotId, swot);
       this.closeSwotItemModal();
       this.renderSwotView(swot);
     } catch (error) {
@@ -7627,11 +7269,7 @@ class TaskManager {
     swot[quadrant].splice(index, 1);
 
     try {
-      await fetch(`/api/swot/${this.selectedSwotId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(swot),
-      });
+      await SwotAPI.update(this.selectedSwotId, swot);
       this.renderSwotView(swot);
     } catch (error) {
       console.error("Error removing SWOT item:", error);
@@ -7641,8 +7279,7 @@ class TaskManager {
   // Risk Analysis functionality
   async loadRiskAnalyses() {
     try {
-      const response = await fetch("/api/risk-analysis");
-      this.riskAnalyses = await response.json();
+      this.riskAnalyses = await RiskAnalysisAPI.fetchAll();
       this.renderRiskAnalysisSelector();
       if (this.riskAnalyses.length > 0 && !this.selectedRiskId) {
         this.selectRiskAnalysis(this.riskAnalyses[0].id);
@@ -7759,17 +7396,9 @@ class TaskManager {
     try {
       if (this.editingRiskId) {
         const risk = this.riskAnalyses.find(r => r.id === this.editingRiskId);
-        await fetch(`/api/risk-analysis/${this.editingRiskId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...risk, title, date }),
-        });
+        await RiskAnalysisAPI.update(this.editingRiskId, { ...risk, title, date });
       } else {
-        await fetch("/api/risk-analysis", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, date }),
-        });
+        await RiskAnalysisAPI.create({ title, date });
       }
       this.closeRiskAnalysisModal();
       await this.loadRiskAnalyses();
@@ -7788,7 +7417,7 @@ class TaskManager {
     if (!this.selectedRiskId) return;
     if (!confirm("Delete this risk analysis?")) return;
     try {
-      await fetch(`/api/risk-analysis/${this.selectedRiskId}`, { method: "DELETE" });
+      await RiskAnalysisAPI.delete(this.selectedRiskId);
       this.selectedRiskId = null;
       await this.loadRiskAnalyses();
     } catch (error) {
@@ -7833,11 +7462,7 @@ class TaskManager {
     risk[this.riskItemQuadrant].push(text);
 
     try {
-      await fetch(`/api/risk-analysis/${this.selectedRiskId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(risk),
-      });
+      await RiskAnalysisAPI.update(this.selectedRiskId, risk);
       this.closeRiskAnalysisItemModal();
       this.renderRiskAnalysisView(risk);
     } catch (error) {
@@ -7853,11 +7478,7 @@ class TaskManager {
     risk[quadrant].splice(index, 1);
 
     try {
-      await fetch(`/api/risk-analysis/${this.selectedRiskId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(risk),
-      });
+      await RiskAnalysisAPI.update(this.selectedRiskId, risk);
       this.renderRiskAnalysisView(risk);
     } catch (error) {
       console.error("Error removing risk item:", error);
@@ -7867,8 +7488,7 @@ class TaskManager {
   // Lean Canvas functionality
   async loadLeanCanvases() {
     try {
-      const response = await fetch("/api/lean-canvas");
-      this.leanCanvases = await response.json();
+      this.leanCanvases = await LeanCanvasAPI.fetchAll();
       this.renderLeanCanvasSelector();
       if (this.leanCanvases.length > 0 && !this.selectedLeanCanvasId) {
         this.selectLeanCanvas(this.leanCanvases[0].id);
@@ -7993,17 +7613,9 @@ class TaskManager {
     try {
       if (this.editingLeanCanvasId) {
         const canvas = this.leanCanvases.find(c => c.id === this.editingLeanCanvasId);
-        await fetch(`/api/lean-canvas/${this.editingLeanCanvasId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...canvas, title, date }),
-        });
+        await LeanCanvasAPI.update(this.editingLeanCanvasId, { ...canvas, title, date });
       } else {
-        await fetch("/api/lean-canvas", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, date }),
-        });
+        await LeanCanvasAPI.create({ title, date });
       }
       this.closeLeanCanvasModal();
       await this.loadLeanCanvases();
@@ -8022,7 +7634,7 @@ class TaskManager {
     if (!this.selectedLeanCanvasId) return;
     if (!confirm("Delete this Lean Canvas?")) return;
     try {
-      await fetch(`/api/lean-canvas/${this.selectedLeanCanvasId}`, { method: "DELETE" });
+      await LeanCanvasAPI.delete(this.selectedLeanCanvasId);
       this.selectedLeanCanvasId = null;
       await this.loadLeanCanvases();
     } catch (error) {
@@ -8075,11 +7687,7 @@ class TaskManager {
     canvas[this.leanCanvasSection].push(text);
 
     try {
-      await fetch(`/api/lean-canvas/${this.selectedLeanCanvasId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(canvas),
-      });
+      await LeanCanvasAPI.update(this.selectedLeanCanvasId, canvas);
       this.closeLeanCanvasItemModal();
       this.renderLeanCanvasView(canvas);
     } catch (error) {
@@ -8095,11 +7703,7 @@ class TaskManager {
     canvas[section].splice(index, 1);
 
     try {
-      await fetch(`/api/lean-canvas/${this.selectedLeanCanvasId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(canvas),
-      });
+      await LeanCanvasAPI.update(this.selectedLeanCanvasId, canvas);
       this.renderLeanCanvasView(canvas);
     } catch (error) {
       console.error("Error removing lean canvas item:", error);
@@ -8109,8 +7713,7 @@ class TaskManager {
   // Business Model Canvas functionality
   async loadBusinessModelCanvases() {
     try {
-      const response = await fetch("/api/business-model");
-      this.businessModelCanvases = await response.json();
+      this.businessModelCanvases = await BusinessModelAPI.fetchAll();
       this.renderBusinessModelSelector();
       if (this.businessModelCanvases.length > 0 && !this.selectedBusinessModelId) {
         this.selectBusinessModel(this.businessModelCanvases[0].id);
@@ -8232,17 +7835,9 @@ class TaskManager {
     try {
       if (this.editingBusinessModelId) {
         const canvas = this.businessModelCanvases.find(c => c.id === this.editingBusinessModelId);
-        await fetch(`/api/business-model/${this.editingBusinessModelId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...canvas, title, date }),
-        });
+        await BusinessModelAPI.update(this.editingBusinessModelId, { ...canvas, title, date });
       } else {
-        await fetch("/api/business-model", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, date }),
-        });
+        await BusinessModelAPI.create({ title, date });
       }
       this.closeBusinessModelModal();
       await this.loadBusinessModelCanvases();
@@ -8261,7 +7856,7 @@ class TaskManager {
     if (!this.selectedBusinessModelId) return;
     if (!confirm("Delete this Business Model Canvas?")) return;
     try {
-      await fetch(`/api/business-model/${this.selectedBusinessModelId}`, { method: "DELETE" });
+      await BusinessModelAPI.delete(this.selectedBusinessModelId);
       this.selectedBusinessModelId = null;
       await this.loadBusinessModelCanvases();
     } catch (error) {
@@ -8311,11 +7906,7 @@ class TaskManager {
     canvas[this.businessModelSection].push(text);
 
     try {
-      await fetch(`/api/business-model/${this.selectedBusinessModelId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(canvas),
-      });
+      await BusinessModelAPI.update(this.selectedBusinessModelId, canvas);
       this.closeBusinessModelItemModal();
       this.renderBusinessModelView(canvas);
     } catch (error) {
@@ -8331,11 +7922,7 @@ class TaskManager {
     canvas[section].splice(index, 1);
 
     try {
-      await fetch(`/api/business-model/${this.selectedBusinessModelId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(canvas),
-      });
+      await BusinessModelAPI.update(this.selectedBusinessModelId, canvas);
       this.renderBusinessModelView(canvas);
     } catch (error) {
       console.error("Error removing business model item:", error);
@@ -8345,8 +7932,7 @@ class TaskManager {
   // Project Value Board functionality
   async loadProjectValueBoards() {
     try {
-      const response = await fetch("/api/project-value-board");
-      this.projectValueBoards = await response.json();
+      this.projectValueBoards = await ProjectValueAPI.fetchAll();
       this.renderProjectValueSelector();
       if (this.projectValueBoards.length > 0 && !this.selectedProjectValueId) {
         this.selectProjectValue(this.projectValueBoards[0].id);
@@ -8463,17 +8049,9 @@ class TaskManager {
     try {
       if (this.editingProjectValueId) {
         const board = this.projectValueBoards.find(b => b.id === this.editingProjectValueId);
-        await fetch(`/api/project-value-board/${this.editingProjectValueId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...board, title, date }),
-        });
+        await ProjectValueAPI.update(this.editingProjectValueId, { ...board, title, date });
       } else {
-        await fetch("/api/project-value-board", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, date }),
-        });
+        await ProjectValueAPI.create({ title, date });
       }
       this.closeProjectValueModal();
       await this.loadProjectValueBoards();
@@ -8492,7 +8070,7 @@ class TaskManager {
     if (!this.selectedProjectValueId) return;
     if (!confirm("Delete this Project Value Board?")) return;
     try {
-      await fetch(`/api/project-value-board/${this.selectedProjectValueId}`, { method: "DELETE" });
+      await ProjectValueAPI.delete(this.selectedProjectValueId);
       this.selectedProjectValueId = null;
       await this.loadProjectValueBoards();
     } catch (error) {
@@ -8537,11 +8115,7 @@ class TaskManager {
     board[this.projectValueSection].push(text);
 
     try {
-      await fetch(`/api/project-value-board/${this.selectedProjectValueId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(board),
-      });
+      await ProjectValueAPI.update(this.selectedProjectValueId, board);
       this.closeProjectValueItemModal();
       this.renderProjectValueView(board);
     } catch (error) {
@@ -8557,11 +8131,7 @@ class TaskManager {
     board[section].splice(index, 1);
 
     try {
-      await fetch(`/api/project-value-board/${this.selectedProjectValueId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(board),
-      });
+      await ProjectValueAPI.update(this.selectedProjectValueId, board);
       this.renderProjectValueView(board);
     } catch (error) {
       console.error("Error removing project value item:", error);
@@ -8571,8 +8141,7 @@ class TaskManager {
   // Brief functionality
   async loadBriefs() {
     try {
-      const response = await fetch("/api/brief");
-      this.briefs = await response.json();
+      this.briefs = await BriefAPI.fetchAll();
       this.renderBriefSelector();
       if (this.briefs.length > 0 && !this.selectedBriefId) {
         this.selectBrief(this.briefs[0].id);
@@ -8684,10 +8253,13 @@ class TaskManager {
       dateInput.value = new Date().toISOString().split("T")[0];
     }
     modal?.classList.remove("hidden");
+    modal?.classList.add("flex");
   }
 
   closeBriefModal() {
-    document.getElementById("briefModal")?.classList.add("hidden");
+    const modal = document.getElementById("briefModal");
+    modal?.classList.add("hidden");
+    modal?.classList.remove("flex");
     this.editingBriefId = null;
   }
 
@@ -8704,18 +8276,10 @@ class TaskManager {
         if (brief) {
           brief.title = title;
           brief.date = date;
-          await fetch(`/api/brief/${this.editingBriefId}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(brief),
-          });
+          await BriefAPI.update(this.editingBriefId, brief);
         }
       } else {
-        const response = await fetch("/api/brief", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, date }),
-        });
+        const response = await BriefAPI.create({ title, date });
         const newBrief = await response.json();
         this.selectedBriefId = newBrief.id;
       }
@@ -8736,7 +8300,7 @@ class TaskManager {
     if (!this.selectedBriefId) return;
     if (!confirm("Are you sure you want to delete this brief?")) return;
     try {
-      await fetch(`/api/brief/${this.selectedBriefId}`, { method: "DELETE" });
+      await BriefAPI.delete(this.selectedBriefId);
       this.selectedBriefId = null;
       await this.loadBriefs();
     } catch (error) {
@@ -8788,11 +8352,7 @@ class TaskManager {
     brief[this.briefSection].push(text);
 
     try {
-      await fetch(`/api/brief/${this.selectedBriefId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(brief),
-      });
+      await BriefAPI.update(this.selectedBriefId, brief);
       this.closeBriefItemModal();
       this.renderBriefGrid(brief);
     } catch (error) {
@@ -8808,11 +8368,7 @@ class TaskManager {
     brief[section].splice(index, 1);
 
     try {
-      await fetch(`/api/brief/${this.selectedBriefId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(brief),
-      });
+      await BriefAPI.update(this.selectedBriefId, brief);
       this.renderBriefGrid(brief);
     } catch (error) {
       console.error("Error removing brief item:", error);
@@ -8822,8 +8378,7 @@ class TaskManager {
   // Capacity Planning functionality
   async loadCapacityPlans() {
     try {
-      const response = await fetch("/api/capacity");
-      this.capacityPlans = await response.json();
+      this.capacityPlans = await CapacityAPI.fetchAll();
       this.renderCapacityPlanSelector();
       if (this.capacityPlans.length > 0 && !this.selectedCapacityPlanId) {
         this.selectCapacityPlan(this.capacityPlans[0].id);
@@ -9020,8 +8575,7 @@ class TaskManager {
     if (!container || !plan) return;
 
     try {
-      const response = await fetch(`/api/capacity/${plan.id}/utilization`);
-      const utilization = await response.json();
+      const utilization = await CapacityAPI.getUtilization(plan.id);
 
       if (utilization.length === 0) {
         container.innerHTML = '<div class="text-center py-8 text-gray-500 dark:text-gray-400">No team members to show utilization.</div>';
@@ -9102,17 +8656,9 @@ class TaskManager {
 
     try {
       if (this.editingCapacityPlanId) {
-        await fetch(`/api/capacity/${this.editingCapacityPlanId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await CapacityAPI.update(this.editingCapacityPlanId, data);
       } else {
-        const response = await fetch("/api/capacity", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        const response = await CapacityAPI.create(data);
         const newPlan = await response.json();
         this.selectedCapacityPlanId = newPlan.id;
       }
@@ -9133,7 +8679,7 @@ class TaskManager {
     if (!this.selectedCapacityPlanId) return;
     if (!confirm("Are you sure you want to delete this capacity plan?")) return;
     try {
-      await fetch(`/api/capacity/${this.selectedCapacityPlanId}`, { method: "DELETE" });
+      await CapacityAPI.delete(this.selectedCapacityPlanId);
       this.selectedCapacityPlanId = null;
       await this.loadCapacityPlans();
     } catch (error) {
@@ -9200,17 +8746,9 @@ class TaskManager {
 
     try {
       if (this.editingTeamMemberId) {
-        await fetch(`/api/capacity/${this.selectedCapacityPlanId}/members/${this.editingTeamMemberId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await CapacityAPI.updateMember(this.selectedCapacityPlanId, this.editingTeamMemberId, data);
       } else {
-        await fetch(`/api/capacity/${this.selectedCapacityPlanId}/members`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await CapacityAPI.createMember(this.selectedCapacityPlanId, data);
       }
       this.closeTeamMemberModal();
       await this.loadCapacityPlans();
@@ -9227,7 +8765,7 @@ class TaskManager {
   async deleteTeamMember(id) {
     if (!confirm("Delete this team member? Their allocations will also be removed.")) return;
     try {
-      await fetch(`/api/capacity/${this.selectedCapacityPlanId}/members/${id}`, { method: "DELETE" });
+      await CapacityAPI.deleteMember(this.selectedCapacityPlanId, id);
       await this.loadCapacityPlans();
       this.renderTeamMembers();
     } catch (error) {
@@ -9303,14 +8841,10 @@ class TaskManager {
     try {
       if (this.editingAllocationId) {
         // Delete existing and create new (simplified approach)
-        await fetch(`/api/capacity/${this.selectedCapacityPlanId}/allocations/${this.editingAllocationId}`, { method: "DELETE" });
+        await CapacityAPI.deleteAllocation(this.selectedCapacityPlanId, this.editingAllocationId);
       }
       if (hours > 0) {
-        await fetch(`/api/capacity/${this.selectedCapacityPlanId}/allocations`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await CapacityAPI.createAllocation(this.selectedCapacityPlanId, data);
       }
       this.closeAllocationModal();
       await this.loadCapacityPlans();
@@ -9323,7 +8857,7 @@ class TaskManager {
   async deleteAllocation() {
     if (!this.editingAllocationId) return;
     try {
-      await fetch(`/api/capacity/${this.selectedCapacityPlanId}/allocations/${this.editingAllocationId}`, { method: "DELETE" });
+      await CapacityAPI.deleteAllocation(this.selectedCapacityPlanId, this.editingAllocationId);
       this.closeAllocationModal();
       await this.loadCapacityPlans();
       this.renderAllocationsGrid();
@@ -9341,8 +8875,7 @@ class TaskManager {
     const empty = document.getElementById("autoAssignEmpty");
 
     try {
-      const response = await fetch(`/api/capacity/${plan.id}/suggest-assignments`);
-      this.autoAssignSuggestions = await response.json();
+      this.autoAssignSuggestions = await CapacityAPI.suggestAssignments(plan.id);
 
       if (this.autoAssignSuggestions.length === 0) {
         empty?.classList.remove("hidden");
@@ -9390,11 +8923,7 @@ class TaskManager {
     }
 
     try {
-      await fetch(`/api/capacity/${this.selectedCapacityPlanId}/apply-assignments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ suggestions: selectedSuggestions }),
-      });
+      await CapacityAPI.applyAssignments(this.selectedCapacityPlanId, { suggestions: selectedSuggestions });
       this.closeAutoAssignModal();
       await this.loadCapacityPlans();
       this.renderAllocationsGrid();
@@ -9406,8 +8935,7 @@ class TaskManager {
   // Time Tracking functionality
   async loadTimeTracking() {
     try {
-      const response = await fetch("/api/time-entries");
-      this.timeEntries = await response.json();
+      this.timeEntries = await TimeTrackingAPI.fetchAll();
       this.renderTimeTrackingView();
     } catch (error) {
       console.error("Error loading time entries:", error);
@@ -9528,7 +9056,7 @@ class TaskManager {
   async deleteTimeEntryFromView(taskId, entryId) {
     if (!confirm("Delete this time entry?")) return;
     try {
-      await fetch(`/api/time-entries/${taskId}/${entryId}`, { method: "DELETE" });
+      await TimeTrackingAPI.delete(taskId, entryId);
       await this.loadTimeTracking();
     } catch (error) {
       console.error("Error deleting time entry:", error);
@@ -9561,11 +9089,7 @@ class TaskManager {
     }
 
     try {
-      await fetch(`/api/time-entries/${this.editingTask.id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date, hours, person, description }),
-      });
+      await TimeTrackingAPI.create(this.editingTask.id, { date, hours, person, description });
       this.hideTimeEntryForm();
       await this.loadTaskTimeEntries(this.editingTask.id);
     } catch (error) {
@@ -9575,8 +9099,7 @@ class TaskManager {
 
   async loadTaskTimeEntries(taskId) {
     try {
-      const response = await fetch(`/api/time-entries/${taskId}`);
-      const entries = await response.json();
+      const entries = await TimeTrackingAPI.fetchForTask(taskId);
       this.renderTaskTimeEntries(entries);
     } catch (error) {
       console.error("Error loading task time entries:", error);
@@ -9614,7 +9137,7 @@ class TaskManager {
   async deleteTaskTimeEntry(entryId) {
     if (!this.editingTask?.id) return;
     try {
-      await fetch(`/api/time-entries/${this.editingTask.id}/${entryId}`, { method: "DELETE" });
+      await TimeTrackingAPI.delete(this.editingTask.id, entryId);
       await this.loadTaskTimeEntries(this.editingTask.id);
     } catch (error) {
       console.error("Error deleting time entry:", error);
@@ -9623,30 +9146,17 @@ class TaskManager {
 
   // Mobile menu functionality
   toggleMobileMenu() {
-    const mobileMenu = document.getElementById("mobileMenu");
-    const isHidden = mobileMenu.classList.contains("hidden");
-
-    if (isHidden) {
-      mobileMenu.classList.remove("hidden");
-      // Sync search values
-      const searchInput = document.getElementById("searchInput");
-      const searchInputMobile = document.getElementById("searchInputMobile");
-      searchInputMobile.value = searchInput.value;
-    } else {
-      mobileMenu.classList.add("hidden");
-    }
+    toggleMobileMenu();
   }
 
   closeMobileMenu() {
-    const mobileMenu = document.getElementById("mobileMenu");
-    mobileMenu.classList.add("hidden");
+    closeMobileMenu();
   }
 
   // Canvas functionality
   async loadCanvas() {
     try {
-      const response = await fetch("/api/canvas/sticky_notes");
-      this.stickyNotes = await response.json();
+      this.stickyNotes = await CanvasAPI.fetchAll();
       this.renderCanvas();
     } catch (error) {
       console.error("Error loading canvas:", error);
@@ -9739,8 +9249,12 @@ class TaskManager {
     element.setAttribute("data-sticky-note-id", stickyNote.id);
     element.innerHTML = `
             <div class="sticky-note-controls">
-                <button onclick="taskManager.editStickyNote('${stickyNote.id}')">✏️</button>
-                <button onclick="taskManager.deleteStickyNote('${stickyNote.id}')">🗑️</button>
+                <button onclick="taskManager.editStickyNote('${stickyNote.id}')" title="Edit">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </button>
+                <button onclick="taskManager.deleteStickyNote('${stickyNote.id}')" title="Delete">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
             </div>
             <div contenteditable="true" onblur="taskManager.updateStickyNoteContent('${stickyNote.id}', this.innerText)">${stickyNote.content}</div>
         `;
@@ -9822,11 +9336,7 @@ class TaskManager {
         return;
       }
 
-      await fetch(`/api/canvas/sticky_notes/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ size }),
-      });
+      await CanvasAPI.update(id, { size });
     } catch (error) {
       console.error("Error updating sticky note size:", error);
     }
@@ -9872,11 +9382,7 @@ class TaskManager {
 
       console.log("Sending POST request with data:", postData);
 
-      const response = await fetch("/api/canvas/sticky_notes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(postData),
-      });
+      const response = await CanvasAPI.create(postData);
 
       console.log("Response status:", response.status);
 
@@ -9914,11 +9420,7 @@ class TaskManager {
 
   async updateStickyNoteContent(id, content) {
     try {
-      await fetch(`/api/canvas/sticky_notes/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: content.trim() }),
-      });
+      await CanvasAPI.update(id, { content: content.trim() });
     } catch (error) {
       console.error("Error updating sticky note:", error);
     }
@@ -9926,11 +9428,7 @@ class TaskManager {
 
   async updateStickyNotePosition(id, position) {
     try {
-      await fetch(`/api/canvas/sticky_notes/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ position }),
-      });
+      await CanvasAPI.update(id, { position });
     } catch (error) {
       console.error("Error updating sticky note position:", error);
     }
@@ -9939,7 +9437,7 @@ class TaskManager {
   async deleteStickyNote(id) {
     if (confirm("Delete this sticky note?")) {
       try {
-        await fetch(`/api/canvas/sticky_notes/${id}`, { method: "DELETE" });
+        await CanvasAPI.delete(id);
         this.loadCanvas();
       } catch (error) {
         console.error("Error deleting sticky note:", error);
@@ -9958,8 +9456,7 @@ class TaskManager {
   // Mindmap functionality
   async loadMindmaps(autoSelect = true) {
     try {
-      const response = await fetch("/api/mindmaps");
-      this.mindmaps = await response.json();
+      this.mindmaps = await MindmapsAPI.fetchAll();
       this.renderMindmapSelector();
       if (this.mindmaps.length > 0 && autoSelect) {
         this.selectMindmap(this.mindmaps[0].id);
@@ -10200,6 +9697,8 @@ class TaskManager {
   }
 
   drawConnections(container) {
+    const isVertical = this.currentLayout === "vertical";
+
     // Draw lines between connected nodes
     this.selectedMindmap.nodes.forEach((node) => {
       if (node.parent) {
@@ -10210,10 +9709,21 @@ class TaskManager {
           const line = document.createElement("div");
           line.className = "mindmap-connection";
 
-          const x1 = parent.x + 80; // Offset for node width
-          const y1 = parent.y + 20; // Offset for node height center
-          const x2 = node.x;
-          const y2 = node.y + 20;
+          let x1, y1, x2, y2;
+
+          if (isVertical) {
+            // Vertical layout: connect from bottom-center of parent to top-center of child
+            x1 = parent.x + 60; // Center of parent node (assuming ~120px width)
+            y1 = parent.y + 40; // Bottom of parent node
+            x2 = node.x + 60;   // Center of child node
+            y2 = node.y;        // Top of child node
+          } else {
+            // Horizontal layout: connect from right of parent to left of child
+            x1 = parent.x + 80; // Right side of parent node
+            y1 = parent.y + 20; // Center height of parent
+            x2 = node.x;        // Left side of child node
+            y2 = node.y + 20;   // Center height of child
+          }
 
           const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
           const angle = (Math.atan2(y2 - y1, x2 - x1) * 180) / Math.PI;
@@ -10298,9 +9808,7 @@ class TaskManager {
 
     if (confirm(`Delete mindmap "${this.selectedMindmap.title}"?`)) {
       try {
-        await fetch(`/api/mindmaps/${this.selectedMindmap.id}`, {
-          method: "DELETE",
-        });
+        await MindmapsAPI.delete(this.selectedMindmap.id);
         this.selectedMindmap = null;
         this.loadMindmaps(false); // Don't auto-select after deletion
         document.getElementById("mindmapSelector").value = "";
@@ -10635,31 +10143,30 @@ class TaskManager {
       let response;
       if (this.editingMindmap) {
         // Update existing mindmap
-        response = await fetch(`/api/mindmaps/${this.editingMindmap.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, nodes }),
-        });
+        response = await MindmapsAPI.update(this.editingMindmap.id, { title, nodes });
       } else {
         // Create new mindmap
-        response = await fetch("/api/mindmaps", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, nodes }),
-        });
+        response = await MindmapsAPI.create({ title, nodes });
       }
 
       if (response.ok) {
-        this.closeMindmapModal();
-        this.loadMindmaps();
+        const editingId = this.editingMindmap?.id;
+        let newId = null;
 
-        // If we were editing, reselect the mindmap
-        if (this.editingMindmap) {
-          setTimeout(() => {
-            document.getElementById("mindmapSelector").value =
-              this.editingMindmap.id;
-            this.selectMindmap(this.editingMindmap.id);
-          }, 100);
+        // Get the new mindmap ID from response if creating
+        if (!this.editingMindmap) {
+          const result = await response.json();
+          newId = result.id;
+        }
+
+        this.closeMindmapModal();
+        await this.loadMindmaps();
+
+        // Select the mindmap (either edited or newly created)
+        const selectId = editingId || newId;
+        if (selectId) {
+          document.getElementById("mindmapSelector").value = selectId;
+          this.selectMindmap(selectId);
         }
       }
     } catch (error) {
@@ -10814,13 +10321,8 @@ class TaskManager {
   // C4 Architecture Methods
   async loadC4Components() {
     try {
-      const response = await fetch('/api/c4');
-      if (response.ok) {
-        const data = await response.json();
-        this.c4Components = data.components || [];
-      } else {
-        this.c4Components = this.getDefaultC4Components();
-      }
+      const data = await C4API.fetchAll();
+      this.c4Components = data.components || [];
     } catch (error) {
       console.error('Failed to load C4 components:', error);
       this.c4Components = this.getDefaultC4Components();
@@ -11513,13 +11015,7 @@ class TaskManager {
 
   async saveC4Components() {
     try {
-      await fetch('/api/c4', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ components: this.c4Components }),
-      });
+      await C4API.save({ components: this.c4Components });
     } catch (error) {
       console.error('Failed to save C4 components:', error);
     }
@@ -12196,8 +11692,7 @@ class TaskManager {
   // Strategic Levels Builder functionality
   async loadStrategicLevelsBuilders() {
     try {
-      const response = await fetch("/api/strategic-levels");
-      this.strategicLevelsBuilders = await response.json();
+      this.strategicLevelsBuilders = await StrategicLevelsAPI.fetchAll();
       this.renderStrategicLevelsSelector();
       if (this.strategicLevelsBuilders.length > 0 && !this.selectedStrategicBuilderId) {
         this.selectStrategicBuilder(this.strategicLevelsBuilders[0].id);
@@ -12320,7 +11815,7 @@ class TaskManager {
 
     let html = `
       <div class="strategic-tree-node" style="margin-left: ${depth * 24}px;">
-        ${depth > 0 ? `<div class="strategic-tree-connector">${isLast ? "\\u2514" : "\\u251C"}\\u2500</div>` : ""}
+        ${depth > 0 ? `<div class="strategic-tree-connector">${isLast ? "\u2514" : "\u251C"}\u2500</div>` : ""}
         <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border-l-4 ${levelColors[node.level]} border border-gray-200 dark:border-gray-600 mb-2">
           <div class="flex items-start justify-between">
             <div class="flex-1">
@@ -12466,7 +11961,7 @@ class TaskManager {
 
   calculateStrategicLevelProgress(level, allLevels) {
     const linkedTasks = (level.linkedTasks || [])
-      .map(id => this.findTaskById(this.tasks, id))
+      .map(id => this.findTaskInArray(this.tasks, id))
       .filter(Boolean);
     const linkedMilestones = (level.linkedMilestones || [])
       .map(id => this.milestones?.find(m => m.id === id))
@@ -12495,11 +11990,11 @@ class TaskManager {
     return directCount > 0 ? directProgress * 100 : avgChildProgress;
   }
 
-  findTaskById(tasks, id) {
+  findTaskInArray(tasks, id) {
     for (const task of tasks) {
       if (task.id === id) return task;
       if (task.children) {
-        const found = this.findTaskById(task.children, id);
+        const found = this.findTaskInArray(task.children, id);
         if (found) return found;
       }
     }
@@ -12548,17 +12043,9 @@ class TaskManager {
 
     try {
       if (this.editingStrategicBuilderId) {
-        await fetch(`/api/strategic-levels/${this.editingStrategicBuilderId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, date }),
-        });
+        await StrategicLevelsAPI.update(this.editingStrategicBuilderId, { title, date });
       } else {
-        const response = await fetch("/api/strategic-levels", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, date }),
-        });
+        const response = await StrategicLevelsAPI.create({ title, date });
         const newBuilder = await response.json();
         this.selectedStrategicBuilderId = newBuilder.id;
       }
@@ -12579,7 +12066,7 @@ class TaskManager {
     if (!confirm("Are you sure you want to delete this strategy?")) return;
 
     try {
-      await fetch(`/api/strategic-levels/${this.selectedStrategicBuilderId}`, { method: "DELETE" });
+      await StrategicLevelsAPI.delete(this.selectedStrategicBuilderId);
       this.selectedStrategicBuilderId = null;
       await this.loadStrategicLevelsBuilders();
     } catch (error) {
@@ -12674,17 +12161,9 @@ class TaskManager {
 
     try {
       if (this.editingStrategicLevelId) {
-        await fetch(`/api/strategic-levels/${this.selectedStrategicBuilderId}/levels/${this.editingStrategicLevelId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, description, level, parentId }),
-        });
+        await StrategicLevelsAPI.updateLevel(this.selectedStrategicBuilderId, this.editingStrategicLevelId, { title, description, level, parentId });
       } else {
-        await fetch(`/api/strategic-levels/${this.selectedStrategicBuilderId}/levels`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, description, level, parentId }),
-        });
+        await StrategicLevelsAPI.createLevel(this.selectedStrategicBuilderId, { title, description, level, parentId });
       }
       this.closeStrategicLevelModal();
       await this.loadStrategicLevelsBuilders();
@@ -12710,7 +12189,7 @@ class TaskManager {
     }
 
     try {
-      await fetch(`/api/strategic-levels/${this.selectedStrategicBuilderId}/levels/${levelId}`, { method: "DELETE" });
+      await StrategicLevelsAPI.deleteLevel(this.selectedStrategicBuilderId, levelId);
       await this.loadStrategicLevelsBuilders();
     } catch (error) {
       console.error("Error deleting strategic level:", error);
@@ -12738,8 +12217,7 @@ class TaskManager {
 
     // Render milestone checkboxes
     try {
-      const response = await fetch("/api/milestones");
-      const milestones = await response.json();
+      const milestones = await MilestonesAPI.fetchAll();
       milestonesContainer.innerHTML = milestones.length > 0 ? milestones.map(m => `
         <label class="flex items-center gap-2 p-1 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
           <input type="checkbox" class="strategic-link-milestone rounded" value="${m.id}"
@@ -12783,11 +12261,7 @@ class TaskManager {
       .map(cb => cb.value);
 
     try {
-      await fetch(`/api/strategic-levels/${this.selectedStrategicBuilderId}/levels/${this.linkingStrategicLevelId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ linkedTasks, linkedMilestones }),
-      });
+      await StrategicLevelsAPI.updateLevel(this.selectedStrategicBuilderId, this.linkingStrategicLevelId, { linkedTasks, linkedMilestones });
       this.closeStrategicLinkModal();
       await this.loadStrategicLevelsBuilders();
     } catch (error) {
@@ -13047,17 +12521,9 @@ class TaskManager {
 
     try {
       if (this.editingCustomerId) {
-        await fetch(`/api/customers/${this.editingCustomerId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await BillingAPI.updateCustomer(this.editingCustomerId, data);
       } else {
-        await fetch("/api/customers", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await BillingAPI.createCustomer(data);
       }
       this.closeCustomerModal();
       await this.loadBillingData();
@@ -13069,7 +12535,7 @@ class TaskManager {
   async deleteCustomer(id) {
     if (!confirm("Delete this customer?")) return;
     try {
-      await fetch(`/api/customers/${id}`, { method: "DELETE" });
+      await BillingAPI.deleteCustomer(id);
       await this.loadBillingData();
     } catch (error) {
       console.error("Error deleting customer:", error);
@@ -13144,17 +12610,9 @@ class TaskManager {
 
     try {
       if (this.editingBillingRateId) {
-        await fetch(`/api/billing-rates/${this.editingBillingRateId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await BillingAPI.updateRate(this.editingBillingRateId, data);
       } else {
-        await fetch("/api/billing-rates", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await BillingAPI.createRate(data);
       }
       this.closeBillingRateModal();
       await this.loadBillingData();
@@ -13166,7 +12624,7 @@ class TaskManager {
   async deleteBillingRate(id) {
     if (!confirm("Delete this billing rate?")) return;
     try {
-      await fetch(`/api/billing-rates/${id}`, { method: "DELETE" });
+      await BillingAPI.deleteRate(id);
       await this.loadBillingData();
     } catch (error) {
       console.error("Error deleting billing rate:", error);
@@ -13327,17 +12785,9 @@ class TaskManager {
 
     try {
       if (this.editingQuoteId) {
-        await fetch(`/api/quotes/${this.editingQuoteId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await BillingAPI.updateQuote(this.editingQuoteId, data);
       } else {
-        await fetch("/api/quotes", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await BillingAPI.createQuote(data);
       }
       this.closeQuoteModal();
       await this.loadBillingData();
@@ -13349,7 +12799,7 @@ class TaskManager {
   async deleteQuote(id) {
     if (!confirm("Delete this quote?")) return;
     try {
-      await fetch(`/api/quotes/${id}`, { method: "DELETE" });
+      await BillingAPI.deleteQuote(id);
       await this.loadBillingData();
     } catch (error) {
       console.error("Error deleting quote:", error);
@@ -13358,7 +12808,7 @@ class TaskManager {
 
   async sendQuote(id) {
     try {
-      await fetch(`/api/quotes/${id}/send`, { method: "POST" });
+      await BillingAPI.sendQuote(id);
       await this.loadBillingData();
     } catch (error) {
       console.error("Error sending quote:", error);
@@ -13367,7 +12817,7 @@ class TaskManager {
 
   async acceptQuote(id) {
     try {
-      await fetch(`/api/quotes/${id}/accept`, { method: "POST" });
+      await BillingAPI.acceptQuote(id);
       await this.loadBillingData();
     } catch (error) {
       console.error("Error accepting quote:", error);
@@ -13376,7 +12826,7 @@ class TaskManager {
 
   async convertQuoteToInvoice(id) {
     try {
-      await fetch(`/api/quotes/${id}/to-invoice`, { method: "POST" });
+      await BillingAPI.convertQuoteToInvoice(id);
       await this.loadBillingData();
       this.switchBillingTab("invoices");
     } catch (error) {
@@ -13538,17 +12988,9 @@ class TaskManager {
 
     try {
       if (this.editingInvoiceId) {
-        await fetch(`/api/invoices/${this.editingInvoiceId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await BillingAPI.updateInvoice(this.editingInvoiceId, data);
       } else {
-        await fetch("/api/invoices", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await BillingAPI.createInvoice(data);
       }
       this.closeInvoiceModal();
       await this.loadBillingData();
@@ -13560,7 +13002,7 @@ class TaskManager {
   async deleteInvoice(id) {
     if (!confirm("Delete this invoice?")) return;
     try {
-      await fetch(`/api/invoices/${id}`, { method: "DELETE" });
+      await BillingAPI.deleteInvoice(id);
       await this.loadBillingData();
     } catch (error) {
       console.error("Error deleting invoice:", error);
@@ -13569,7 +13011,7 @@ class TaskManager {
 
   async sendInvoice(id) {
     try {
-      await fetch(`/api/invoices/${id}/send`, { method: "POST" });
+      await BillingAPI.sendInvoice(id);
       await this.loadBillingData();
     } catch (error) {
       console.error("Error sending invoice:", error);
@@ -13612,11 +13054,7 @@ class TaskManager {
     };
 
     try {
-      await fetch(`/api/invoices/${this.payingInvoiceId}/payments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      await BillingAPI.createPayment(this.payingInvoiceId, data);
       this.closePaymentModal();
       await this.loadBillingData();
     } catch (error) {
@@ -13689,11 +13127,7 @@ class TaskManager {
     };
 
     try {
-      await fetch("/api/invoices/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      await BillingAPI.generateInvoice(data);
       this.closeGenerateInvoiceModal();
       await this.loadBillingData();
       this.switchBillingTab("invoices");
