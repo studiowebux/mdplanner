@@ -237,6 +237,7 @@ Date: 2026-02-12
 ### Key Partners
 
 ### Key Activities
+- Activity 1
 
 ### Key Resources
 
@@ -253,7 +254,6 @@ Date: 2026-02-12
 ### Revenue Streams
 
 
-<!-- Lean Canvas -->
 # Lean Canvas
 
 ## Test
