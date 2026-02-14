@@ -41,6 +41,12 @@ import {
   StrategicLevelsAPI,
   BillingAPI
 } from './modules/api.js';
+import { SummaryView } from './modules/views/summary.js';
+import { ListView } from './modules/views/list.js';
+import { BoardView } from './modules/views/board.js';
+import { TimelineView } from './modules/views/timeline.js';
+import { ConfigView } from './modules/views/config.js';
+import { TasksModule } from './modules/features/tasks.js';
 
 class TaskManager {
   constructor() {
@@ -150,6 +156,17 @@ class TaskManager {
       endTime: null,
     };
     this.initPomodoroWorker();
+
+    // Initialize view modules
+    this.summaryView = new SummaryView(this);
+    this.listView = new ListView(this);
+    this.boardView = new BoardView(this);
+    this.timelineView = new TimelineView(this);
+    this.configView = new ConfigView(this);
+
+    // Initialize feature modules
+    this.tasksModule = new TasksModule(this);
+
     this.init();
   }
 
@@ -1605,464 +1622,42 @@ class TaskManager {
     }
   }
 
+  // Summary View - delegating to SummaryView module
   renderSummaryView() {
-    if (!this.projectInfo) return;
-
-    // Update project name and description
-    document.getElementById("projectName").textContent = this.projectInfo.name;
-    const descriptionEl = document.getElementById("projectDescription");
-
-    if (
-      this.projectInfo.description &&
-      this.projectInfo.description.length > 0
-    ) {
-      const markdownText = this.projectInfo.description.join("\n");
-      descriptionEl.innerHTML = this.markdownToHtml(markdownText);
-    } else {
-      descriptionEl.innerHTML =
-        '<p class="text-gray-500 dark:text-gray-400 italic">No project description available.</p>';
-    }
-
-    // Calculate task statistics
-    const stats = this.calculateTaskStats();
-
-    // Update task counts
-    document.getElementById("totalTasks").textContent = stats.total;
-    document.getElementById("completedTasks").textContent = stats.completed;
-
-    // Update dynamic section counts
-    this.renderDynamicSectionCounts(stats.allTasks);
-
-    // Update section breakdown dynamically
-    this.renderSectionBreakdown();
-
-    // Update milestone breakdown
-    this.renderMilestoneBreakdown(stats.allTasks);
-
-    // Update progress bar
-    const progressPercent =
-      stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
-    document.getElementById("progressPercent").textContent =
-      `${progressPercent}%`;
-    document.getElementById("progressBar").style.width = `${progressPercent}%`;
-
-    // Update project dates in summary view
-    const startDateEl = document.getElementById("summaryStartDate");
-    const lastUpdatedEl = document.getElementById("summaryLastUpdated");
-
-    if (this.projectConfig && this.projectConfig.startDate) {
-      const date = new Date(this.projectConfig.startDate);
-      startDateEl.textContent = date.toLocaleDateString();
-    } else {
-      startDateEl.textContent = "-";
-    }
-
-    if (this.projectConfig && this.projectConfig.lastUpdated) {
-      const date = new Date(this.projectConfig.lastUpdated);
-      lastUpdatedEl.textContent = `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-    } else {
-      lastUpdatedEl.textContent = "-";
-    }
-
-    // Render project links
-    this.renderProjectLinks();
-
-    // Render project status
-    this.renderProjectStatus();
-
-    // Render task deadlines
-    this.renderTaskDeadlines(stats.allTasks);
-  }
-
-  renderTaskDeadlines(allTasks) {
-    const container = document.getElementById("taskDeadlines");
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const nextWeek = new Date(today);
-    nextWeek.setDate(nextWeek.getDate() + 7);
-
-    const tasksWithDueDate = allTasks
-      .filter((task) => task.config.due_date && !task.completed)
-      .map((task) => {
-        let dueDate = new Date(task.config.due_date);
-        if (isNaN(dueDate.getTime())) {
-          if (task.config.due_date.match(/^\d{4}-\d{2}-\d{2}T\d{1,2}$/)) {
-            dueDate = new Date(task.config.due_date + ":00:00");
-          } else if (task.config.due_date.match(/^\d{4}-\d{2}-\d{2}$/)) {
-            dueDate = new Date(task.config.due_date + "T00:00:00");
-          }
-        }
-        dueDate.setHours(0, 0, 0, 0);
-        return { ...task, dueDateParsed: dueDate };
-      })
-      .filter((task) => !isNaN(task.dueDateParsed.getTime()))
-      .sort((a, b) => a.dueDateParsed - b.dueDateParsed);
-
-    const overdue = tasksWithDueDate.filter((t) => t.dueDateParsed < today);
-    const dueToday = tasksWithDueDate.filter((t) => t.dueDateParsed.getTime() === today.getTime());
-    const dueSoon = tasksWithDueDate.filter((t) => t.dueDateParsed > today && t.dueDateParsed <= nextWeek);
-
-    if (overdue.length === 0 && dueToday.length === 0 && dueSoon.length === 0) {
-      container.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400 italic">No upcoming deadlines.</p>';
-      return;
-    }
-
-    let html = "";
-
-    if (overdue.length > 0) {
-      html += `
-        <div>
-          <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Overdue (${overdue.length})</h4>
-          <div class="space-y-2">
-            ${overdue.map((task) => this.renderDeadlineTask(task, "overdue")).join("")}
-          </div>
-        </div>
-      `;
-    }
-
-    if (dueToday.length > 0) {
-      html += `
-        <div>
-          <h4 class="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Due Today (${dueToday.length})</h4>
-          <div class="space-y-2">
-            ${dueToday.map((task) => this.renderDeadlineTask(task, "today")).join("")}
-          </div>
-        </div>
-      `;
-    }
-
-    if (dueSoon.length > 0) {
-      html += `
-        <div>
-          <h4 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Due This Week (${dueSoon.length})</h4>
-          <div class="space-y-2">
-            ${dueSoon.map((task) => this.renderDeadlineTask(task, "soon")).join("")}
-          </div>
-        </div>
-      `;
-    }
-
-    container.innerHTML = html;
-  }
-
-  renderDeadlineTask(task, urgency) {
-    const dateStr = task.dueDateParsed.toLocaleDateString();
-    return `
-      <div class="p-2 rounded border ${DEADLINE_CLASSES[urgency]} cursor-pointer hover:opacity-80 transition-opacity"
-           onclick="taskManager.openTaskModal('${task.id}')">
-        <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">${task.title}</div>
-        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-          ${dateStr} · ${task.section || "No section"}
-        </div>
-      </div>
-    `;
-  }
-
-  renderProjectStatus() {
-    const select = document.getElementById("projectStatus");
-    const commentContainer = document.getElementById("projectStatusComment");
-    const commentText = document.getElementById("statusCommentText");
-
-    const status = this.projectConfig?.status || "active";
-    select.value = status;
-
-    if (status !== "active" && this.projectConfig?.statusComment) {
-      commentContainer.classList.remove("hidden");
-      commentText.value = this.projectConfig.statusComment;
-    } else if (status !== "active") {
-      commentContainer.classList.remove("hidden");
-      commentText.value = "";
-    } else {
-      commentContainer.classList.add("hidden");
-      commentText.value = "";
-    }
-
-    this.updateStatusDropdownStyle();
-  }
-
-  renderProjectLinks() {
-    const container = document.getElementById("projectLinks");
-    const links = this.projectConfig?.links || [];
-
-    if (links.length === 0) {
-      container.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400 italic">No links added yet.</p>';
-      return;
-    }
-
-    container.innerHTML = links.map((link, index) => `
-      <div class="flex items-center justify-between group">
-        <a href="${link.url}" target="_blank" rel="noopener noreferrer"
-           class="text-sm text-gray-900 hover:text-gray-600 dark:text-gray-100 dark:hover:text-gray-300 truncate flex-1 underline">
-          ${link.title}
-        </a>
-        <button onclick="taskManager.removeLink(${index})"
-                class="ml-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity"
-                title="Remove link">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
-    `).join("");
+    this.summaryView.render();
   }
 
   toggleAddLinkForm() {
-    const form = document.getElementById("addLinkForm");
-    form.classList.toggle("hidden");
-    if (!form.classList.contains("hidden")) {
-      document.getElementById("linkTitle").focus();
-    }
+    this.summaryView.toggleAddLinkForm();
   }
 
   async addLink() {
-    const titleInput = document.getElementById("linkTitle");
-    const urlInput = document.getElementById("linkUrl");
-    const title = titleInput.value.trim();
-    const url = urlInput.value.trim();
-
-    if (!title || !url) {
-      this.showToast("Please enter both title and URL", true);
-      return;
-    }
-
-    if (!this.projectConfig.links) {
-      this.projectConfig.links = [];
-    }
-    this.projectConfig.links.push({ title, url });
-
-    await this.saveProjectConfig();
-    this.renderProjectLinks();
-
-    // Reset form
-    titleInput.value = "";
-    urlInput.value = "";
-    document.getElementById("addLinkForm").classList.add("hidden");
-    this.showToast("Link added");
+    await this.summaryView.addLink();
   }
 
   async removeLink(index) {
-    if (!this.projectConfig.links) return;
-    this.projectConfig.links.splice(index, 1);
-    await this.saveProjectConfig();
-    this.renderProjectLinks();
-    this.showToast("Link removed");
+    await this.summaryView.removeLink(index);
   }
 
   async updateProjectStatus(status) {
-    this.projectConfig.status = status;
-    const commentContainer = document.getElementById("projectStatusComment");
-    if (status !== "active") {
-      commentContainer.classList.remove("hidden");
-    } else {
-      commentContainer.classList.add("hidden");
-    }
-    await this.saveProjectConfig();
-    this.updateStatusDropdownStyle();
-    this.showToast("Status updated");
+    await this.summaryView.updateProjectStatus(status);
   }
 
   async saveStatusComment() {
-    const comment = document.getElementById("statusCommentText").value.trim();
-    this.projectConfig.statusComment = comment || undefined;
-    await this.saveProjectConfig();
+    await this.summaryView.saveStatusComment();
   }
 
-  updateStatusDropdownStyle() {
-    const select = document.getElementById("projectStatus");
-    const status = select.value;
-    const statusClass = `status-select-${status}`;
-    select.className = `text-sm border-2 rounded-md px-2 py-1 font-medium focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent ${statusClass}`;
-  }
-
-  renderDynamicSectionCounts(allTasks) {
-    const container = document.getElementById("dynamicSectionCounts");
-    container.innerHTML = "";
-
-    const sections = this.sections || [];
-
-    sections.forEach((section, index) => {
-      const sectionTasks = allTasks.filter(
-        (task) => task.section === section && !task.completed,
-      );
-
-      const div = document.createElement("div");
-      div.className = "flex justify-between items-center";
-      div.innerHTML = `
-                <span class="text-sm text-gray-600 dark:text-gray-400">${section}</span>
-                <span class="text-lg font-semibold text-gray-900 dark:text-gray-100">${sectionTasks.length}</span>
-            `;
-      container.appendChild(div);
-    });
-  }
-
-  calculateTaskStats() {
-    // Count all tasks including children
-    let allTasks = [];
-
-    const addTasksRecursively = (tasks) => {
-      for (const task of tasks) {
-        allTasks.push(task);
-        if (task.children && task.children.length > 0) {
-          addTasksRecursively(task.children);
-        }
-      }
-    };
-
-    addTasksRecursively(this.tasks);
-
-    return {
-      total: allTasks.length,
-      completed: allTasks.filter((t) => t.completed).length,
-      allTasks: allTasks, // Return all tasks for section breakdown
-    };
-  }
-
-  renderSectionBreakdown() {
-    const container = document.getElementById("sectionBreakdown");
-    const sections = this.sections || [];
-
-    // Get all tasks including children
-    let allTasks = [];
-    const addTasksRecursively = (tasks) => {
-      for (const task of tasks) {
-        allTasks.push(task);
-        if (task.children && task.children.length > 0) {
-          addTasksRecursively(task.children);
-        }
-      }
-    };
-    addTasksRecursively(this.tasks);
-
-    container.innerHTML = "";
-
-    sections.forEach((section, index) => {
-      const count = allTasks.filter((task) => task.section === section).length;
-      // Alternate between different grey shades for visual distinction
-      const dotShade = index % 2 === 0 ? 'bg-gray-800 dark:bg-gray-200' : 'bg-gray-500 dark:bg-gray-400';
-
-      const div = document.createElement("div");
-      div.className = "flex items-center justify-between";
-      div.innerHTML = `
-                <div class="flex items-center space-x-2">
-                    <div class="w-3 h-3 ${dotShade} rounded-full"></div>
-                    <span class="text-sm text-gray-600 dark:text-gray-400">${section}</span>
-                </div>
-                <span class="text-sm font-medium text-gray-900 dark:text-gray-100">${count}</span>
-            `;
-      container.appendChild(div);
-    });
-  }
-
-  renderMilestoneBreakdown(allTasks) {
-    const milestonesSection = document.getElementById("milestonesSection");
-    const container = document.getElementById("milestoneBreakdown");
-
-    // Find all unique milestones from tasks
-    const milestoneData = {};
-
-    allTasks.forEach((task) => {
-      if (task.config.milestone) {
-        const milestone = task.config.milestone;
-        if (!milestoneData[milestone]) {
-          milestoneData[milestone] = {
-            total: 0,
-            incomplete: 0,
-          };
-        }
-        milestoneData[milestone].total++;
-        if (!task.completed) {
-          milestoneData[milestone].incomplete++;
-        }
-      }
-    });
-
-    const milestones = Object.keys(milestoneData);
-
-    // Show/hide milestones section based on whether we have milestones
-    if (milestones.length === 0) {
-      milestonesSection.classList.add("hidden");
-      return;
-    }
-
-    milestonesSection.classList.remove("hidden");
-    container.innerHTML = "";
-
-    milestones.sort().forEach((milestone, index) => {
-      const data = milestoneData[milestone];
-      const completedCount = data.total - data.incomplete;
-      const progressPercent =
-        data.total > 0 ? Math.round((completedCount / data.total) * 100) : 0;
-      // Alternate between different grey shades for visual distinction
-      const dotShade = index % 2 === 0 ? 'bg-gray-800 dark:bg-gray-200' : 'bg-gray-500 dark:bg-gray-400';
-
-      const div = document.createElement("div");
-      div.className = "space-y-2";
-      div.innerHTML = `
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-3 h-3 ${dotShade} rounded-full"></div>
-                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg>${milestone}</span>
-                    </div>
-                    <span class="text-sm font-medium text-gray-900 dark:text-gray-100">${data.incomplete} remaining</span>
-                </div>
-                <div class="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
-                    <span>${completedCount}/${data.total} completed</span>
-                    <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                        <div class="bg-gray-900 dark:bg-gray-100 h-1.5 rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
-                    </div>
-                    <span>${progressPercent}%</span>
-                </div>
-            `;
-      container.appendChild(div);
-    });
-  }
-
+  // List View - delegating to ListView module
   populateListFilters() {
-    const sections = this.sections || [];
-    const assignees = this.projectConfig?.assignees || [];
-    const milestones = this.projectConfig?.milestones || [];
-
-    const sectionSelect = document.getElementById("filterSection");
-    sectionSelect.innerHTML = '<option value="">All Sections</option>' +
-      sections.map((s) => `<option value="${s}">${s}</option>`).join("");
-
-    const assigneeSelect = document.getElementById("filterAssignee");
-    assigneeSelect.innerHTML = '<option value="">All Assignees</option>' +
-      assignees.map((a) => `<option value="${a}">${a}</option>`).join("");
-
-    const milestoneSelect = document.getElementById("filterMilestone");
-    milestoneSelect.innerHTML = '<option value="">All Milestones</option>' +
-      milestones.map((m) => `<option value="${m}">${m}</option>`).join("");
+    this.listView.populateFilters();
   }
 
   applyListFilters() {
-    this.listFilters.section = document.getElementById("filterSection").value;
-    this.listFilters.assignee = document.getElementById("filterAssignee").value;
-    this.listFilters.milestone = document.getElementById("filterMilestone").value;
-    this.listFilters.status = document.getElementById("filterStatus").value;
-    this.listFilters.sort = document.getElementById("sortTasks").value;
-
-    const hasFilters = this.listFilters.section || this.listFilters.assignee ||
-      this.listFilters.milestone || this.listFilters.status || this.listFilters.sort !== "default";
-    document.getElementById("clearFilters").classList.toggle("hidden", !hasFilters);
-
-    this.renderListView();
+    this.listView.applyFilters();
   }
 
   clearListFilters() {
-    document.getElementById("filterSection").value = "";
-    document.getElementById("filterAssignee").value = "";
-    document.getElementById("filterMilestone").value = "";
-    document.getElementById("filterStatus").value = "";
-    document.getElementById("sortTasks").value = "default";
-    this.listFilters = { section: "", assignee: "", milestone: "", status: "", sort: "default" };
-    document.getElementById("clearFilters").classList.add("hidden");
-    this.renderListView();
+    this.listView.clearFilters();
   }
 
   // Pomodoro Timer with Web Worker for background execution
@@ -2346,411 +1941,24 @@ class TaskManager {
   }
 
   getFilteredAndSortedTasks(tasks) {
-    let result = [...tasks];
-
-    // Apply filters
-    if (this.listFilters.section) {
-      result = result.filter((t) => t.section === this.listFilters.section);
-    }
-    if (this.listFilters.assignee) {
-      result = result.filter((t) => t.config.assignee === this.listFilters.assignee);
-    }
-    if (this.listFilters.milestone) {
-      result = result.filter((t) => t.config.milestone === this.listFilters.milestone);
-    }
-    if (this.listFilters.status === "completed") {
-      result = result.filter((t) => t.completed);
-    } else if (this.listFilters.status === "incomplete") {
-      result = result.filter((t) => !t.completed);
-    }
-
-    // Apply sort
-    if (this.listFilters.sort === "due_date") {
-      result.sort((a, b) => {
-        const dateA = a.config.due_date ? new Date(a.config.due_date) : new Date("9999-12-31");
-        const dateB = b.config.due_date ? new Date(b.config.due_date) : new Date("9999-12-31");
-        return dateA - dateB;
-      });
-    } else if (this.listFilters.sort === "priority") {
-      const priorityOrder = { high: 0, medium: 1, low: 2 };
-      result.sort((a, b) => {
-        const pA = priorityOrder[a.config.priority] ?? 3;
-        const pB = priorityOrder[b.config.priority] ?? 3;
-        return pA - pB;
-      });
-    } else if (this.listFilters.sort === "title") {
-      result.sort((a, b) => a.title.localeCompare(b.title));
-    }
-
-    return result;
+    return this.listView.getFilteredAndSortedTasks(tasks);
   }
 
   renderListView() {
-    const container = document.getElementById("listContainer");
-    container.innerHTML = "";
-
-    // Populate filter dropdowns
-    this.populateListFilters();
-
-    // Show no results message when search is active but no tasks match
-    if (this.searchQuery && this.filteredTasks.length === 0) {
-      container.innerHTML = `
-        <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-          <svg class="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
-          <p class="text-lg font-medium">No tasks found</p>
-          <p class="text-sm mt-1">No tasks match "${this.searchQuery}"</p>
-        </div>`;
-      return;
-    }
-
-    // Group tasks by section
-    let sections = this.sections || [];
-
-    if (sections.length === 0) {
-      container.innerHTML =
-        '<div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">No sections found. Please add sections to your markdown board with "## Section Name".</div>';
-      return;
-    }
-
-    // If section filter is active, only show that section
-    if (this.listFilters.section) {
-      sections = sections.filter((s) => s === this.listFilters.section);
-    }
-
-    const allTasks = this.getFilteredAndSortedTasks(this.getTasksToRender());
-
-    // Check if all filtered sections are empty
-    const hasAnyTasks = sections.some((section) =>
-      allTasks.some((task) => task.section === section && !task.parentId)
-    );
-
-    if (!hasAnyTasks && (this.listFilters.assignee || this.listFilters.milestone || this.listFilters.status)) {
-      container.innerHTML = `
-        <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-          <p class="text-lg font-medium">No tasks match filters</p>
-          <button onclick="taskManager.clearListFilters()" class="mt-2 text-sm text-gray-900 dark:text-gray-100 hover:underline">Clear filters</button>
-        </div>`;
-      return;
-    }
-
-    sections.forEach((section) => {
-      const sectionTasks = allTasks.filter(
-        (task) => task.section === section && !task.parentId,
-      );
-
-      // Add section separator (always show, even if empty)
-      const sectionHeader = document.createElement("div");
-      sectionHeader.className =
-        "px-6 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 list-section-header";
-      sectionHeader.dataset.section = section;
-      sectionHeader.innerHTML = `
-                <div class="flex items-center justify-between">
-                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">${section}</h3>
-                    <span class="text-xs text-gray-500 dark:text-gray-400">${sectionTasks.length} task${sectionTasks.length !== 1 ? "s" : ""}</span>
-                </div>
-            `;
-      container.appendChild(sectionHeader);
-
-      // Add empty state if no tasks
-      if (sectionTasks.length === 0) {
-        const emptyState = document.createElement("div");
-        emptyState.className =
-          "px-6 py-8 text-center text-gray-400 dark:text-gray-500 text-sm border-b border-gray-100 dark:border-gray-700 list-drop-zone";
-        emptyState.dataset.section = section;
-        emptyState.innerHTML = `
-                    <div class="border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg py-6">
-                        Drop tasks here or click + to add
-                    </div>
-                `;
-        container.appendChild(emptyState);
-      } else {
-        // Add tasks in this section
-        sectionTasks.forEach((task) => {
-          const taskElement = this.createListTaskElement(task);
-          container.appendChild(taskElement);
-
-          // Add children if any
-          if (task.children && task.children.length > 0) {
-            task.children.forEach((child) => {
-              const childElement = this.createListTaskElement(child, true);
-              container.appendChild(childElement);
-            });
-          }
-        });
-
-        // Add drop zone after existing tasks
-        const dropZone = document.createElement("div");
-        dropZone.className =
-          "px-6 py-2 text-center text-gray-400 dark:text-gray-500 text-xs border-b border-gray-100 dark:border-gray-700 list-drop-zone";
-        dropZone.dataset.section = section;
-        dropZone.innerHTML = `
-                    <div class="border border-dashed border-transparent rounded-lg py-2 transition-colors">
-                        Drop tasks here
-                    </div>
-                `;
-        container.appendChild(dropZone);
-      }
-    });
+    this.listView.render();
   }
 
   createListTaskElement(task, isChild = false) {
-    const config = task.config || {};
-    const div = document.createElement("div");
-    div.className = `task-list-item px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 ${isChild ? "pl-12 bg-gray-25 dark:bg-gray-800" : ""} cursor-move border-b border-gray-100 dark:border-gray-700`;
-    div.draggable = !isChild; // Only allow parent tasks to be dragged
-    div.dataset.taskId = task.id;
-
-    const priorityBadgeClasses = this.getPriorityBadgeClasses(config.priority);
-    const priorityText = this.getPriorityText(config.priority);
-
-    div.innerHTML = `
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <input type="checkbox" ${task.completed ? "checked" : ""}
-                           onchange="taskManager.toggleTask('${task.id}')"
-                           class="rounded border-gray-300 dark:border-gray-600 text-gray-900 focus:ring-gray-500 dark:bg-gray-700">
-                    <div>
-                        <div class="flex items-center space-x-2 flex-wrap gap-1">
-                            <span class="${task.completed ? "line-through text-gray-500 dark:text-gray-400" : "text-gray-900 dark:text-gray-100"} font-medium">
-                                ${task.title}
-                            </span>
-                            ${config.priority ? `<span class="px-2 py-0.5 text-xs font-medium rounded ${priorityBadgeClasses}">${priorityText}</span>` : ""}
-                            ${config.tag ? config.tag.map((tag) => `<span class="px-2 py-0.5 text-xs font-medium rounded border ${TAG_CLASSES}">${tag}</span>`).join("") : ""}
-                        </div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                            <span class="text-xs font-mono text-gray-400">#${task.id}</span>
-                            ${config.assignee ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>${config.assignee}</span>` : ""}
-                            ${config.due_date ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>${this.formatDate(config.due_date)}</span>` : ""}
-                            ${config.effort ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>${config.effort}d</span>` : ""}
-                            ${config.milestone ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg>${config.milestone}</span>` : ""}
-                            ${config.blocked_by && config.blocked_by.length > 0 ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>${config.blocked_by.join(", ")}</span>` : ""}
-                            <span class="text-gray-400">${task.section}</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex space-x-2">
-                    ${
-                      !isChild
-                        ? `
-                        <button onclick="taskManager.addSubtask('${task.id}')"
-                                class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="Add Subtask">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                        </button>
-                    `
-                        : ""
-                    }
-                    ${
-                      task.description && task.description.length > 0
-                        ? `
-                        <button onclick="taskManager.toggleDescription('${task.id}')"
-                                class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="View Description">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </button>
-                    `
-                        : ""
-                    }
-                    <button onclick="taskManager.copyTaskLink('${task.id}')"
-                            class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="Copy Link">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
-                        </svg>
-                    </button>
-                    <button onclick="taskManager.editTask('${task.id}')"
-                            class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="Edit">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>
-                    </button>
-                    <button onclick="taskManager.deleteTask('${task.id}')"
-                            class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        `;
-
-    return div;
+    return this.listView.createTaskElement(task, isChild);
   }
 
+  // Board View - delegating to BoardView module
   renderBoardView() {
-    const sections = this.sections || [];
-    const container = document.getElementById("boardContainer");
-
-    // Show no results message when search is active but no tasks match
-    if (this.searchQuery && this.filteredTasks.length === 0) {
-      container.className = "flex items-center justify-center h-64";
-      container.innerHTML = `
-        <div class="text-center text-gray-500 dark:text-gray-400">
-          <svg class="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
-          <p class="text-lg font-medium">No tasks found</p>
-          <p class="text-sm mt-1">No tasks match "${this.searchQuery}"</p>
-        </div>`;
-      return;
-    }
-
-    if (sections.length === 0) {
-      container.className = "flex items-center justify-center h-64";
-      container.innerHTML =
-        '<div class="text-center text-gray-500 dark:text-gray-400">No sections found. Please add sections to your markdown board with "## Section Name".</div>';
-      return;
-    }
-
-    // Use flex with horizontal scroll to keep all columns on same row
-    container.className = "flex gap-6 overflow-x-auto pb-4";
-    container.innerHTML = "";
-
-    sections.forEach((section) => {
-      const tasksToRender = this.getTasksToRender();
-      const sectionTasks = tasksToRender.filter(
-        (task) => task.section === section && !task.parentId,
-      );
-
-      // Create column with fixed width for consistent layout
-      const column = document.createElement("div");
-      column.className =
-        "bg-white dark:bg-gray-800 rounded-lg shadow flex-shrink-0 w-80";
-      column.innerHTML = `
-                <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                    <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">${section}</h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${sectionTasks.length} tasks</p>
-                </div>
-                <div class="p-4 min-h-96 space-y-3" data-section="${section}">
-                    <!-- Tasks will be populated here -->
-                </div>
-            `;
-
-      const tasksContainer = column.querySelector("[data-section]");
-      sectionTasks.forEach((task) => {
-        const taskCard = this.createBoardTaskElement(task);
-        tasksContainer.appendChild(taskCard);
-      });
-
-      container.appendChild(column);
-    });
+    this.boardView.render();
   }
 
   createBoardTaskElement(task) {
-    const config = task.config || {};
-    const div = document.createElement("div");
-    div.className =
-      "task-card bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-3 cursor-move";
-    div.draggable = true;
-    div.dataset.taskId = task.id;
-
-    const priorityBadgeClasses = this.getPriorityBadgeClasses(config.priority);
-    const priorityText = this.getPriorityText(config.priority);
-
-    div.innerHTML = `
-            <div class="flex items-start justify-between mb-2">
-                <h4 class="${task.completed ? "line-through text-gray-500 dark:text-gray-400" : "text-gray-900 dark:text-gray-100"} font-medium text-sm">
-                    ${task.title}
-                </h4>
-                <div class="flex space-x-1">
-                    <button onclick="taskManager.addSubtask('${task.id}')"
-                            class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="Add Subtask">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        </svg>
-                    </button>
-                    ${
-                      task.description && task.description.length > 0
-                        ? `
-                        <button onclick="taskManager.toggleDescription('${task.id}')"
-                                class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="View Description">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </button>
-                    `
-                        : ""
-                    }
-                    <button onclick="taskManager.copyTaskLink('${task.id}')"
-                            class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="Copy Link">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
-                        </svg>
-                    </button>
-                    <button onclick="taskManager.editTask('${task.id}')"
-                            class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="Edit">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>
-                    </button>
-                    <button onclick="taskManager.deleteTask('${task.id}')"
-                            class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="Delete">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <div class="space-y-2">
-                <div class="flex items-center space-x-1">
-                    <input type="checkbox" ${task.completed ? "checked" : ""}
-                           onchange="taskManager.toggleTask('${task.id}')"
-                           class="rounded border-gray-300 dark:border-gray-600 text-gray-900 focus:ring-gray-500 dark:bg-gray-600 text-xs">
-                    <span class="text-xs text-gray-500 dark:text-gray-400">Complete</span>
-                </div>
-
-                <div class="flex flex-wrap gap-1">
-                    ${config.priority ? `<span class="inline-block px-2 py-0.5 text-xs font-medium rounded ${priorityBadgeClasses}">${priorityText}</span>` : ""}
-                    ${
-                      config.tag
-                        ? config.tag
-                            .map(
-                              (tag) =>
-                                `<span class="inline-block px-2 py-0.5 text-xs font-medium rounded border ${TAG_CLASSES}">${tag}</span>`,
-                            )
-                            .join("")
-                        : ""
-                    }
-                </div>
-
-                <div class="text-xs font-mono text-gray-400">#${task.id}</div>
-                ${config.assignee ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> ${config.assignee}</div>` : ""}
-                ${config.due_date ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> ${this.formatDate(config.due_date)}</div>` : ""}
-                ${config.effort ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ${config.effort}d</div>` : ""}
-                ${config.milestone ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg> ${config.milestone}</div>` : ""}
-                ${config.blocked_by && config.blocked_by.length > 0 ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg> ${config.blocked_by.join(", ")}</div>` : ""}
-
-                ${
-                  task.children && task.children.length > 0
-                    ? `
-                    <div class="mt-3 pt-2 border-t border-gray-100 dark:border-gray-600">
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg> Subtasks (${task.children.length})</div>
-                        <div class="space-y-1">
-                            ${task.children
-                              .map(
-                                (child) => `
-                                <div class="flex items-center space-x-2 text-xs">
-                                    <input type="checkbox" ${child.completed ? "checked" : ""}
-                                           onchange="taskManager.toggleTask('${child.id}')"
-                                           class="rounded border-gray-300 dark:border-gray-600 text-gray-900 focus:ring-gray-500 dark:bg-gray-600" style="transform: scale(0.8);">
-                                    <span class="${child.completed ? "line-through text-gray-400 dark:text-gray-500" : "text-gray-600 dark:text-gray-300"}">${child.title}</span>
-                                </div>
-                            `,
-                              )
-                              .join("")}
-                        </div>
-                    </div>
-                `
-                    : ""
-                }
-            </div>
-        `;
-
-    return div;
+    return this.boardView.createTaskElement(task);
   }
 
   setupDragAndDrop() {
@@ -2760,7 +1968,7 @@ class TaskManager {
         e.target.hasAttribute("data-section") ||
         e.target.closest("[data-section]")
       ) {
-        this.handleDragOver(e);
+        this.boardView.handleDragOver(e);
       }
     });
 
@@ -2778,7 +1986,7 @@ class TaskManager {
         e.target.hasAttribute("data-section") ||
         e.target.closest("[data-section]")
       ) {
-        this.handleDragEnter(e);
+        this.boardView.handleDragEnter(e);
       }
     });
 
@@ -2787,7 +1995,7 @@ class TaskManager {
         e.target.hasAttribute("data-section") ||
         e.target.closest("[data-section]")
       ) {
-        this.handleDragLeave(e);
+        this.boardView.handleDragLeave(e);
       }
     });
 
@@ -2814,29 +2022,6 @@ class TaskManager {
           .forEach((el) => el.classList.remove("drag-over"));
       }
     });
-  }
-
-  handleDragOver(e) {
-    e.preventDefault();
-  }
-
-  handleDragEnter(e) {
-    e.preventDefault();
-    const target = e.target.hasAttribute("data-section")
-      ? e.target
-      : e.target.closest("[data-section]");
-    if (target) {
-      target.classList.add("drag-over");
-    }
-  }
-
-  handleDragLeave(e) {
-    const target = e.target.hasAttribute("data-section")
-      ? e.target
-      : e.target.closest("[data-section]");
-    if (target) {
-      target.classList.remove("drag-over");
-    }
   }
 
   async handleDrop(e) {
@@ -2931,105 +2116,15 @@ class TaskManager {
   }
 
   findTaskById(id) {
-    const findInTasks = (tasks) => {
-      for (const task of tasks) {
-        if (task.id === id) return task;
-        if (task.children) {
-          const found = findInTasks(task.children);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-    return findInTasks(this.tasks);
+    return this.tasksModule.findById(id);
   }
 
   async openTaskModal(task = null, parentTaskId = null) {
-    // If task is a string (ID), find the actual task object
-    if (typeof task === "string") {
-      task = this.findTaskById(task);
-    }
-    this.editingTask = task;
-    this.parentTaskId = parentTaskId;
-    const modal = document.getElementById("taskModal");
-    const form = document.getElementById("taskForm");
-    const title = document.getElementById("modalTitle");
-
-    if (parentTaskId) {
-      const parentTask = this.findTaskById(parentTaskId);
-      title.textContent = `Add Subtask to: ${parentTask.title}`;
-    } else {
-      title.textContent = task ? "Edit Task" : "Add Task";
-    }
-
-    // Populate form options
-    await this.populateFormOptions(task ? task.id : null);
-
-    if (task) {
-      const config = task.config || {};
-      document.getElementById("taskTitle").value = task.title || "";
-      document.getElementById("taskSection").value = task.section || "";
-      document.getElementById("taskPriority").value = config.priority != null ? String(config.priority) : "";
-      document.getElementById("taskAssignee").value = config.assignee || "";
-      document.getElementById("taskEffort").value = config.effort != null ? config.effort : "";
-      document.getElementById("taskDueDate").value =
-        this.formatDateForInput(config.due_date) || "";
-      document.getElementById("taskMilestone").value = config.milestone || "";
-      document.getElementById("taskPlannedStart").value =
-        config.planned_start || "";
-      document.getElementById("taskPlannedEnd").value =
-        config.planned_end || "";
-
-      // Show time entries section for existing tasks
-      document.getElementById("timeEntriesSection").classList.remove("hidden");
-      this.loadTaskTimeEntries(task.id);
-
-      // Set selected tags
-      const tagSelect = document.getElementById("taskTags");
-      Array.from(tagSelect.options).forEach((option) => {
-        option.selected = config.tag && config.tag.includes(option.value);
-      });
-
-      // Set selected dependencies
-      this.selectedDependencies = config.blocked_by
-        ? [...config.blocked_by]
-        : [];
-      this.updateSelectedDependencies();
-
-      document.getElementById("taskDescription").value = task.description
-        ? task.description.join("\n")
-        : "";
-    } else {
-      form.reset();
-      this.selectedDependencies = [];
-      this.updateSelectedDependencies();
-      // Hide time entries section for new tasks
-      document.getElementById("timeEntriesSection").classList.add("hidden");
-      document.getElementById("timeEntriesList").innerHTML = "";
-      // If creating a subtask, inherit parent's section
-      if (parentTaskId) {
-        const parentTask = this.findTaskById(parentTaskId);
-        document.getElementById("taskSection").value = parentTask.section;
-      }
-    }
-
-    // Hide time entry form on modal open
-    this.hideTimeEntryForm();
-
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
+    return this.tasksModule.openModal(task, parentTaskId);
   }
 
   closeTaskModal() {
-    const modal = document.getElementById("taskModal");
-    modal.classList.add("hidden");
-    modal.classList.remove("flex");
-    this.editingTask = null;
-    this.parentTaskId = null;
-    // Clear task hash from URL
-    if (window.location.hash.startsWith("#task=")) {
-      history.replaceState(null, "", window.location.pathname + window.location.search);
-    }
+    return this.tasksModule.closeModal();
   }
 
   closeAllModals() {
@@ -3063,72 +2158,15 @@ class TaskManager {
   }
 
   async handleTaskSubmit(e) {
-    e.preventDefault();
-
-    const formData = {
-      title: document.getElementById("taskTitle").value,
-      section: document.getElementById("taskSection").value,
-      completed: false,
-      config: {
-        priority: document.getElementById("taskPriority").value
-          ? parseInt(document.getElementById("taskPriority").value)
-          : undefined,
-        assignee: document.getElementById("taskAssignee").value || undefined,
-        effort: document.getElementById("taskEffort").value
-          ? parseInt(document.getElementById("taskEffort").value)
-          : undefined,
-        due_date: document.getElementById("taskDueDate").value || undefined,
-        milestone: document.getElementById("taskMilestone").value || undefined,
-        planned_start: document.getElementById("taskPlannedStart").value || undefined,
-        planned_end: document.getElementById("taskPlannedEnd").value || undefined,
-        tag: this.getSelectedTags(),
-        blocked_by:
-          this.selectedDependencies.length > 0
-            ? this.selectedDependencies
-            : undefined,
-      },
-      description: document.getElementById("taskDescription").value
-        ? document.getElementById("taskDescription").value.split("\n")
-        : undefined,
-      children: [],
-      parentId: this.parentTaskId || undefined,
-    };
-
-    try {
-      let response;
-      if (this.editingTask) {
-        response = await TasksAPI.update(this.editingTask.id, formData);
-      } else {
-        response = await TasksAPI.create(formData);
-      }
-
-      if (response.ok) {
-        await this.loadTasks();
-        this.closeTaskModal();
-      } else {
-        console.error("Failed to save task");
-      }
-    } catch (error) {
-      console.error("Error saving task:", error);
-    }
+    return this.tasksModule.handleSubmit(e);
   }
 
   async editTask(taskId) {
-    const task = this.findTaskById(taskId);
-    if (task) {
-      history.replaceState(null, "", `#task=${taskId}`);
-      await this.openTaskModal(task);
-    }
+    return this.tasksModule.edit(taskId);
   }
 
   copyTaskLink(taskId) {
-    const url = `${window.location.origin}${window.location.pathname}#task=${taskId}`;
-    navigator.clipboard.writeText(url).then(() => {
-      this.showToast("Link copied to clipboard");
-    }).catch(err => {
-      console.error("Failed to copy link:", err);
-      this.showToast("Failed to copy link", true);
-    });
+    return this.tasksModule.copyLink(taskId);
   }
 
   showToast(message, isError = false) {
@@ -3136,78 +2174,19 @@ class TaskManager {
   }
 
   async addSubtask(parentTaskId) {
-    const parentTask = this.findTaskById(parentTaskId);
-    if (parentTask) {
-      await this.openTaskModal(null, parentTaskId);
-    }
+    return this.tasksModule.addSubtask(parentTaskId);
   }
 
   toggleDescription(taskId) {
-    const task = this.findTaskById(taskId);
-    if (!task || !task.description || task.description.length === 0) return;
-
-    // Create or toggle description modal
-    let modal = document.getElementById("descriptionModal");
-    if (!modal) {
-      modal = document.createElement("div");
-      modal.id = "descriptionModal";
-      modal.className =
-        "fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50";
-      modal.innerHTML = `
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                        <h3 id="descriptionModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Task Description</h3>
-                        <button onclick="taskManager.closeDescriptionModal()" class="text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="p-6">
-                        <div id="descriptionContent" class="prose prose-gray dark:prose-invert max-w-none"></div>
-                    </div>
-                </div>
-            `;
-      document.body.appendChild(modal);
-
-      // Close on background click
-      modal.addEventListener("click", (e) => {
-        if (e.target === modal) {
-          this.closeDescriptionModal();
-        }
-      });
-    }
-
-    // Update content
-    document.getElementById("descriptionModalTitle").textContent =
-      `${task.title} - Description`;
-    const markdownText = task.description.join("\n");
-    document.getElementById("descriptionContent").innerHTML =
-      this.markdownToHtml(markdownText);
-
-    modal.classList.remove("hidden");
+    return this.tasksModule.toggleDescription(taskId);
   }
 
   closeDescriptionModal() {
-    const modal = document.getElementById("descriptionModal");
-    if (modal) {
-      modal.classList.add("hidden");
-    }
+    return this.tasksModule.closeDescriptionModal();
   }
 
   async deleteTask(taskId) {
-    if (confirm("Are you sure you want to delete this task?")) {
-      try {
-        const response = await TasksAPI.delete(taskId);
-        if (response.ok) {
-          await this.loadTasks();
-        } else {
-          console.error("Failed to delete task");
-        }
-      } catch (error) {
-        console.error("Error deleting task:", error);
-      }
-    }
+    return this.tasksModule.delete(taskId);
   }
 
   getPriorityColor(priority) {
@@ -3263,54 +2242,11 @@ class TaskManager {
   }
 
   async populateFormOptions(currentTaskId = null) {
-    // Load project config if not already loaded
-    if (!this.projectConfig) {
-      await this.loadProjectConfig();
-    }
-
-    // Populate sections
-    const sectionSelect = document.getElementById("taskSection");
-    sectionSelect.innerHTML = "";
-    const sections = this.sections || [];
-    sections.forEach((section) => {
-      const option = document.createElement("option");
-      option.value = section;
-      option.textContent = section;
-      sectionSelect.appendChild(option);
-    });
-
-    // Populate assignees
-    const assigneeSelect = document.getElementById("taskAssignee");
-    assigneeSelect.innerHTML = '<option value="">Select Assignee</option>';
-    if (this.projectConfig && this.projectConfig.assignees) {
-      this.projectConfig.assignees.forEach((assignee) => {
-        const option = document.createElement("option");
-        option.value = assignee;
-        option.textContent = assignee;
-        assigneeSelect.appendChild(option);
-      });
-    }
-
-    // Populate tags
-    const tagSelect = document.getElementById("taskTags");
-    tagSelect.innerHTML = "";
-    if (this.projectConfig && this.projectConfig.tags) {
-      this.projectConfig.tags.forEach((tag) => {
-        const option = document.createElement("option");
-        option.value = tag;
-        option.textContent = tag;
-        tagSelect.appendChild(option);
-      });
-    }
+    return this.tasksModule.populateFormOptions(currentTaskId);
   }
 
   getSelectedTags() {
-    const tagSelect = document.getElementById("taskTags");
-    const selected = [];
-    Array.from(tagSelect.selectedOptions).forEach((option) => {
-      selected.push(option.value);
-    });
-    return selected.length > 0 ? selected : undefined;
+    return this.tasksModule.getSelectedTags();
   }
 
   handleDependencyInput(e) {
@@ -3423,56 +2359,15 @@ class TaskManager {
   }
 
   async renderTimelineView() {
-    await this.loadProjectConfig();
-    this.updateTimelineConfig();
-    this.generateTimeline();
+    await this.timelineView.render();
   }
 
   async renderConfigView() {
-    await this.loadProjectConfig();
-    this.renderProjectConfigUI();
-    this.updateConfigStats();
-  }
-
-  updateTimelineConfig() {
-    // Show read-only config in timeline view
-    document.getElementById("timelineStartDate").value =
-      this.projectConfig?.startDate || "";
-    document.getElementById("timelineWorkingDays").value =
-      this.projectConfig?.workingDaysPerWeek || 5;
+    await this.configView.render();
   }
 
   async updateWorkingDays(workingDays) {
-    if (this.projectConfig) {
-      this.projectConfig.workingDaysPerWeek = workingDays;
-      // Update both UI fields to keep them in sync
-      document.getElementById("workingDays").value = workingDays;
-      document.getElementById("timelineWorkingDays").value = workingDays;
-      await this.saveProjectConfig();
-      this.generateTimeline(); // Refresh timeline with new working days
-    }
-  }
-
-  updateConfigStats() {
-    // Count all tasks including children
-    let allTasks = [];
-    const addTasksRecursively = (tasks) => {
-      for (const task of tasks) {
-        allTasks.push(task);
-        if (task.children && task.children.length > 0) {
-          addTasksRecursively(task.children);
-        }
-      }
-    };
-    addTasksRecursively(this.tasks);
-
-    document.getElementById("configTotalTasks").textContent = allTasks.length;
-    document.getElementById("configTotalSections").textContent =
-      this.projectConfig?.sections?.length || 0;
-    document.getElementById("configTotalAssignees").textContent =
-      this.projectConfig?.assignees?.length || 0;
-    document.getElementById("configTotalTags").textContent =
-      this.projectConfig?.tags?.length || 0;
+    await this.timelineView.updateWorkingDays(workingDays);
   }
 
   async loadProjectConfig() {
@@ -3499,10 +2394,10 @@ class TaskManager {
 
       // Render config UI if in config or timeline view
       if (this.currentView === "config") {
-        this.renderProjectConfigUI();
-        this.updateConfigStats();
+        this.configView.renderUI();
+        this.configView.updateStats();
       } else if (this.currentView === "timeline") {
-        this.updateTimelineConfig();
+        this.timelineView.updateConfig();
       }
     } catch (error) {
       console.error("Error loading project config:", error);
@@ -3565,7 +2460,7 @@ class TaskManager {
       if (response.ok) {
         this.projectConfig = config;
         if (this.currentView === "timeline") {
-          this.generateTimeline();
+          this.timelineView.generate();
         }
         // Show success message
         const button = document.getElementById("saveProjectConfig");
@@ -3584,647 +2479,15 @@ class TaskManager {
     }
   }
 
-  generateTimeline() {
-    const timelineContent = document.getElementById("timelineContent");
-
-    if (!this.projectConfig || !this.projectConfig.startDate) {
-      timelineContent.innerHTML =
-        '<div class="text-center text-gray-500 dark:text-gray-400 py-8">Please configure project start date first</div>';
-      return;
-    }
-
-    // Count tasks without effort numbers
-    const tasksWithoutEffort = this.getTasksWithoutEffort();
-
-    // Calculate task scheduling based on dependencies and effort
-    const scheduledTasks = this.calculateTaskSchedule();
-
-    let html = '<div class="timeline-chart">';
-
-    // Add warning banner if there are tasks without effort
-    if (tasksWithoutEffort.length > 0) {
-      html +=
-        '<div class="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">';
-      html += '<div class="flex items-center">';
-      html +=
-        '<svg class="w-5 h-5 text-yellow-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">';
-      html +=
-        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"></path>';
-      html += "</svg>";
-      html += `<span class="text-sm font-medium text-yellow-800 dark:text-yellow-200">${tasksWithoutEffort.length} task${tasksWithoutEffort.length !== 1 ? "s" : ""} without effort estimates (not shown in timeline)</span>`;
-      html += "</div>";
-      html += '<div class="mt-2 text-xs text-yellow-700 dark:text-yellow-300">';
-      html +=
-        "Tasks missing effort: " +
-        tasksWithoutEffort.map((t) => `${t.title} (${t.id})`).join(", ");
-      html += "</div>";
-      html += "</div>";
-    }
-
-    if (scheduledTasks.length === 0) {
-      html +=
-        '<div class="text-center text-gray-500 dark:text-gray-400 py-8">No tasks with effort estimates found</div>';
-    } else {
-      html += this.generateTimelineHeader(scheduledTasks);
-      html += this.generateTimelineRows(scheduledTasks);
-    }
-
-    html += "</div>";
-
-    timelineContent.innerHTML = html;
-  }
-
-  getTasksWithoutEffort() {
-    const tasksWithoutEffort = [];
-
-    const collectTasks = (tasks) => {
-      for (const task of tasks) {
-        if (!task.config.effort || task.config.effort <= 0) {
-          tasksWithoutEffort.push(task);
-        }
-        if (task.children && task.children.length > 0) {
-          collectTasks(task.children);
-        }
-      }
-    };
-
-    collectTasks(this.tasks);
-    return tasksWithoutEffort;
-  }
-
-  calculateTaskSchedule() {
-    const allTasks = [];
-
-    // Collect all tasks with effort estimates
-    const collectTasks = (tasks) => {
-      for (const task of tasks) {
-        if (task.config.effort && task.config.effort > 0 && !task.completed) {
-          allTasks.push(task);
-        }
-        if (task.children && task.children.length > 0) {
-          collectTasks(task.children);
-        }
-      }
-    };
-
-    collectTasks(this.tasks);
-
-    const scheduled = new Map(); // taskId -> scheduled task
-    const projectStartDate = new Date(this.projectConfig.startDate);
-
-    // Recursive function to calculate start date for a task
-    const calculateTaskStartDate = (task) => {
-      if (scheduled.has(task.id)) {
-        return scheduled.get(task.id);
-      }
-
-      const blockedBy = task.config.blocked_by || [];
-      let taskStartDate = new Date(projectStartDate);
-
-      if (blockedBy.length > 0) {
-        // Find the latest end date among all blocking tasks that are still incomplete
-        let latestEndDate = new Date(projectStartDate);
-        let hasIncompleteDependencies = false;
-
-        for (const depId of blockedBy) {
-          // Find dependency in incomplete tasks with effort
-          const depTask = allTasks.find((t) => t.id === depId);
-          if (depTask && depTask.config.effort > 0) {
-            hasIncompleteDependencies = true;
-            const depScheduled = calculateTaskStartDate(depTask);
-            if (depScheduled.endDate > latestEndDate) {
-              latestEndDate = new Date(depScheduled.endDate);
-            }
-          }
-          // Note: Completed dependencies are automatically ignored since they're not in allTasks
-        }
-
-        // Only adjust start date if there are still incomplete dependencies
-        if (hasIncompleteDependencies) {
-          // Start this task the day after the latest blocking task ends
-          taskStartDate = new Date(latestEndDate);
-          taskStartDate.setDate(taskStartDate.getDate() + 1);
-        }
-        // If all dependencies are completed, task starts at project start date (taskStartDate remains unchanged)
-      }
-
-      // Handle tasks with no effort but due dates
-      let endDate;
-      let duration;
-      if (!task.config.effort || task.config.effort === 0) {
-        if (task.config.due_date) {
-          endDate = new Date(task.config.due_date);
-          taskStartDate = new Date(task.config.due_date);
-          duration = 0;
-        } else {
-          endDate = new Date(taskStartDate);
-          duration = 0;
-        }
-      } else {
-        endDate = this.addWorkingDays(taskStartDate, task.config.effort);
-        duration = task.config.effort;
-      }
-
-      const scheduledTask = {
-        ...task,
-        startDate: taskStartDate,
-        endDate,
-        duration,
-        blockedBy: blockedBy,
-        isDueDateOnly: !task.config.effort || task.config.effort === 0,
-      };
-
-      scheduled.set(task.id, scheduledTask);
-      return scheduledTask;
-    };
-
-    // Calculate schedule for all tasks
-    const result = [];
-    for (const task of allTasks) {
-      result.push(calculateTaskStartDate(task));
-    }
-
-    // Sort to group dependencies visually
-    return this.sortTasksForVisualGrouping(result);
-  }
-
-  sortTasksForVisualGrouping(tasks) {
-    // Create a dependency map to understand relationships
-    const dependencyMap = new Map(); // taskId -> array of tasks that depend on it
-    const dependentMap = new Map(); // taskId -> array of tasks this task depends on
-
-    // Build dependency relationships
-    tasks.forEach((task) => {
-      dependentMap.set(task.id, task.config.blocked_by || []);
-
-      // For each dependency, add this task to its dependents list
-      (task.config.blocked_by || []).forEach((depId) => {
-        if (!dependencyMap.has(depId)) {
-          dependencyMap.set(depId, []);
-        }
-        dependencyMap.get(depId).push(task.id);
-      });
-    });
-
-    // Create groups of related tasks
-    const groups = [];
-    const processed = new Set();
-
-    tasks.forEach((task) => {
-      if (processed.has(task.id)) return;
-
-      // Start a new dependency chain
-      const group = [];
-      const toProcess = [task.id];
-      const groupSet = new Set();
-
-      while (toProcess.length > 0) {
-        const currentId = toProcess.pop();
-        if (groupSet.has(currentId)) continue;
-
-        groupSet.add(currentId);
-        const currentTask = tasks.find((t) => t.id === currentId);
-        if (currentTask) {
-          group.push(currentTask);
-          processed.add(currentId);
-
-          // Add dependencies and dependents to the same group
-          const deps = dependentMap.get(currentId) || [];
-          const dependents = dependencyMap.get(currentId) || [];
-
-          deps.forEach((depId) => {
-            if (!groupSet.has(depId)) toProcess.push(depId);
-          });
-          dependents.forEach((depId) => {
-            if (!groupSet.has(depId)) toProcess.push(depId);
-          });
-        }
-      }
-
-      // Sort group by start date and dependency order
-      group.sort((a, b) => {
-        // First sort by start date
-        const dateCompare = a.startDate - b.startDate;
-        if (dateCompare !== 0) return dateCompare;
-
-        // If same start date, put dependencies before dependents
-        if (a.config.blocked_by && a.config.blocked_by.includes(b.id)) return 1;
-        if (b.config.blocked_by && b.config.blocked_by.includes(a.id))
-          return -1;
-
-        return 0;
-      });
-
-      groups.push(group);
-    });
-
-    // Sort groups by earliest start date in each group
-    groups.sort((a, b) => {
-      const minDateA = Math.min(...a.map((t) => t.startDate));
-      const minDateB = Math.min(...b.map((t) => t.startDate));
-      return minDateA - minDateB;
-    });
-
-    // Flatten groups back into a single array
-    return groups.flat();
-  }
-
-  addWorkingDays(startDate, days) {
-    const result = new Date(startDate);
-    const workingDaysPerWeek = this.projectConfig.workingDaysPerWeek || 5;
-    let addedDays = 0;
-
-    while (addedDays < days) {
-      result.setDate(result.getDate() + 1);
-      const dayOfWeek = result.getDay();
-
-      // Count working days based on configuration
-      if (
-        workingDaysPerWeek === 7 ||
-        (workingDaysPerWeek === 6 && dayOfWeek !== 0) ||
-        (workingDaysPerWeek === 5 && dayOfWeek !== 0 && dayOfWeek !== 6)
-      ) {
-        addedDays++;
-      }
-    }
-
-    return result;
-  }
-
-  generateTimelineHeader(scheduledTasks) {
-    if (scheduledTasks.length === 0) return "";
-
-    const startDate = new Date(
-      Math.min(...scheduledTasks.map((t) => t.startDate)),
-    );
-    const endDate = new Date(Math.max(...scheduledTasks.map((t) => t.endDate)));
-
-    let html =
-      '<div class="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">';
-    html +=
-      '<div class="w-48 p-3 font-medium text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-700">Task</div>';
-    html += '<div class="flex-1 p-3">';
-    html +=
-      '<div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">';
-    html += `<span>Start: ${startDate.toLocaleDateString()}</span>`;
-    html += `<span>End: ${endDate.toLocaleDateString()}</span>`;
-    html += "</div>";
-    html += "</div>";
-    html += "</div>";
-
-    return html;
-  }
-
-  generateTimelineRows(scheduledTasks) {
-    if (scheduledTasks.length === 0) return "";
-
-    const projectStart = new Date(
-      Math.min(...scheduledTasks.map((t) => t.startDate)),
-    );
-    const projectEnd = new Date(
-      Math.max(...scheduledTasks.map((t) => t.endDate)),
-    );
-    const totalDays =
-      Math.ceil((projectEnd - projectStart) / (1000 * 60 * 60 * 24)) + 1;
-
-    let html = "";
-
-    scheduledTasks.forEach((task) => {
-      const startOffset = Math.ceil(
-        (task.startDate - projectStart) / (1000 * 60 * 60 * 24),
-      );
-      const duration =
-        Math.ceil((task.endDate - task.startDate) / (1000 * 60 * 60 * 24)) + 1;
-      const widthPercent = (duration / totalDays) * 100;
-      const leftPercent = (startOffset / totalDays) * 100;
-
-      const priorityColor = this.getPriorityColor(task.config.priority);
-
-      // Check if task is overdue
-      const isOverdue =
-        task.config.due_date && task.endDate > new Date(task.config.due_date);
-      const taskBarColor = isOverdue ? "red" : priorityColor;
-
-      html +=
-        '<div class="flex border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">';
-      html += `<div class="w-48 p-3 border-r border-gray-200 dark:border-gray-700">`;
-      html += `<div class="font-medium text-gray-900 dark:text-gray-100 text-sm">${task.title}</div>`;
-      html += `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">ID: ${task.id}</div>`;
-      html += `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">`;
-      html += `${task.config.effort} days • ${task.section}`;
-      if (task.config.due_date) {
-        const dueDate = new Date(task.config.due_date);
-        const isOverdue = task.endDate > dueDate;
-        html += ` • Due: ${dueDate.toLocaleDateString()}`;
-        if (isOverdue) {
-          html += ` <span class="text-red-600 dark:text-red-400 font-medium inline-flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> OVERDUE</span>`;
-        }
-      }
-      if (task.config.blocked_by && task.config.blocked_by.length > 0) {
-        html += ` • Blocked by: ${task.config.blocked_by.join(", ")}`;
-      }
-      html += `</div>`;
-      html += `</div>`;
-      html += `<div class="flex-1 p-3 relative">`;
-
-      // Add dependency arrows if task is blocked
-      if (task.config.blocked_by && task.config.blocked_by.length > 0) {
-        task.config.blocked_by.forEach((depId) => {
-          const depTask = scheduledTasks.find((t) => t.id === depId);
-          if (depTask) {
-            const depEndOffset = Math.ceil(
-              (depTask.endDate - projectStart) / (1000 * 60 * 60 * 24),
-            );
-            const depEndPercent = (depEndOffset / totalDays) * 100;
-
-            // Draw arrow from dependency end to task start
-            const arrowLength = leftPercent - depEndPercent;
-            if (arrowLength > 0) {
-              html += `<div class="absolute h-0.5 bg-red-400 dark:bg-red-500" style="left: ${depEndPercent}%; width: ${arrowLength}%; top: 50%; z-index: 10;">`;
-              html += `<div class="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1">`;
-              html += `<svg class="w-3 h-3 text-red-400 dark:text-red-500" fill="currentColor" viewBox="0 0 20 20">`;
-              html += `<path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>`;
-              html += `</svg>`;
-              html += `</div>`;
-              html += `<div class="absolute left-1/2 -top-5 transform -translate-x-1/2 text-xs text-red-600 dark:text-red-400 font-medium">${depId}</div>`;
-              html += `</div>`;
-            }
-          }
-        });
-      }
-
-      html += `<div class="absolute h-6 bg-${taskBarColor}-400 dark:bg-${taskBarColor}-500 rounded border border-${taskBarColor}-500 dark:border-${taskBarColor}-600${isOverdue ? " animate-pulse" : ""}" style="left: ${leftPercent}%; width: ${widthPercent}%; top: 50%; transform: translateY(-50%); z-index: 20;">`;
-      html += `<div class="px-2 py-1 text-xs text-white font-medium truncate">${task.startDate.toLocaleDateString()} - ${task.endDate.toLocaleDateString()}</div>`;
-      html += `</div>`;
-
-      // Add per-task due date marker
-      if (task.config.due_date) {
-        // Parse due date properly for different formats
-        let dueDate = new Date(task.config.due_date);
-
-        // If invalid, try fixing incomplete datetime format like "2025-08-21T22"
-        if (isNaN(dueDate.getTime())) {
-          if (task.config.due_date.match(/^\d{4}-\d{2}-\d{2}T\d{1,2}$/)) {
-            dueDate = new Date(task.config.due_date + ":00:00");
-          } else if (task.config.due_date.match(/^\d{4}-\d{2}-\d{2}$/)) {
-            dueDate = new Date(task.config.due_date + "T00:00:00");
-          }
-        }
-
-        if (!isNaN(dueDate.getTime())) {
-          const dueDateOffset = Math.ceil(
-            (dueDate - projectStart) / (1000 * 60 * 60 * 24),
-          );
-          const dueDatePercent = (dueDateOffset / totalDays) * 100;
-
-          if (dueDatePercent >= 0 && dueDatePercent <= 100) {
-            html += `<div class="absolute w-0.5 bg-orange-500 dark:bg-orange-400" style="left: ${dueDatePercent}%; height: 100%; top: 0; z-index: 25;">`;
-            html += `<div class="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs text-orange-600 dark:text-orange-400 font-medium whitespace-nowrap bg-white dark:bg-gray-800 px-1 rounded flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>${dueDate.toLocaleDateString()}</div>`;
-            html += `</div>`;
-          }
-        }
-      }
-      html += `</div>`;
-      html += "</div>";
-    });
-
-    return html;
-  }
-
-  async rewriteTasksWithUpdatedSections() {
-    try {
-      // Use the dedicated rewrite endpoint to update section headers
-      const response = await ProjectAPI.rewrite({ sections: this.sections });
-      if (response.ok) {
-        // Reload tasks and sections to reflect changes
-        await this.loadTasks();
-        await this.loadSections();
-      } else {
-        console.error("Failed to rewrite tasks with updated sections");
-      }
-    } catch (error) {
-      console.error("Error updating sections in markdown:", error);
-    }
-  }
-
-  renderProjectConfigUI() {
-    if (!this.projectConfig) return;
-
-    this.renderSections();
-    this.renderAssignees();
-    this.renderTags();
-  }
-
-  renderSections() {
-    const container = document.getElementById("sectionsContainer");
-    container.innerHTML = "";
-
-    const sections = this.sections || [];
-    sections.forEach((section, index) => {
-      const div = document.createElement("div");
-      div.className =
-        "flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700 rounded border";
-      div.innerHTML = `
-                <span class="flex-1 text-gray-900 dark:text-gray-100">${section}</span>
-                <div class="flex gap-1">
-                    ${
-                      index > 0
-                        ? `<button onclick="taskManager.moveSectionUp(${index})" class="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" title="Move Up">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                        </svg>
-                    </button>`
-                        : ""
-                    }
-                    ${
-                      index < sections.length - 1
-                        ? `<button onclick="taskManager.moveSectionDown(${index})" class="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" title="Move Down">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </button>`
-                        : ""
-                    }
-                    <button onclick="taskManager.removeSection(${index})" class="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300" title="Remove">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-            `;
-      container.appendChild(div);
-    });
-  }
-
-  renderAssignees() {
-    const container = document.getElementById("assigneesContainer");
-    container.innerHTML = "";
-
-    const assignees = this.projectConfig.assignees || [];
-    assignees.forEach((assignee, index) => {
-      const chip = document.createElement("div");
-      chip.className =
-        "inline-flex items-center px-3 py-1 rounded-full text-sm border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700 text-gray-800 dark:text-gray-200";
-      chip.innerHTML = `
-                <span>${assignee}</span>
-                <button onclick="taskManager.removeAssignee(${index})" class="ml-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            `;
-      container.appendChild(chip);
-    });
-  }
-
-  renderTags() {
-    const container = document.getElementById("tagsContainer");
-    container.innerHTML = "";
-
-    const tags = this.projectConfig.tags || [];
-    tags.forEach((tag, index) => {
-      const chip = document.createElement("div");
-      chip.className =
-        "inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200";
-      chip.innerHTML = `
-                <span>${tag}</span>
-                <button onclick="taskManager.removeTag(${index})" class="ml-2 text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            `;
-      container.appendChild(chip);
-    });
-  }
-
-  async addSection() {
-    const input = document.getElementById("newSectionInput");
-    const sectionName = input.value.trim();
-
-    if (sectionName && !this.sections.includes(sectionName)) {
-      // Add section to local array
-      this.sections.push(sectionName);
-      input.value = "";
-      this.renderSections();
-      this.updateConfigStats();
-
-      // Rewrite the markdown file to include the new section
-      await this.rewriteTasksWithUpdatedSections();
-
-      // Refresh summary view if it's currently active
-      if (this.currentView === "summary") {
-        this.renderSummaryView();
-      }
-    }
-  }
-
-  async removeSection(index) {
-    const remainingSections = this.sections.filter((_, i) => i !== index);
-    const targetSection =
-      remainingSections.length > 0 ? remainingSections[0] : "Backlog";
-
-    if (
-      confirm(
-        `Are you sure you want to remove this section? Tasks in this section will be moved to "${targetSection}".`,
-      )
-    ) {
-      const removedSection = this.sections[index];
-      this.sections.splice(index, 1);
-
-      // Move tasks from removed section to first remaining section or Backlog
-      await this.moveTasksFromSection(removedSection, targetSection);
-
-      this.renderSections();
-      this.updateConfigStats();
-      // Rewrite tasks to remove old section headers
-      await this.rewriteTasksWithUpdatedSections();
-    }
-  }
-
-  async moveSectionUp(index) {
-    if (index > 0) {
-      const sections = this.sections;
-      [sections[index - 1], sections[index]] = [
-        sections[index],
-        sections[index - 1],
-      ];
-      this.renderSections();
-      // Rewrite tasks to reorder section headers
-      await this.rewriteTasksWithUpdatedSections();
-    }
-  }
-
-  async moveSectionDown(index) {
-    const sections = this.sections;
-    if (index < sections.length - 1) {
-      [sections[index], sections[index + 1]] = [
-        sections[index + 1],
-        sections[index],
-      ];
-      this.renderSections();
-      // Rewrite tasks to reorder section headers
-      await this.rewriteTasksWithUpdatedSections();
-    }
-  }
-
-  async moveTasksFromSection(fromSection, toSection) {
-    const tasksToMove = this.tasks.filter(
-      (task) => task.section === fromSection,
-    );
-    for (const task of tasksToMove) {
-      await this.updateTask(task.id, { section: toSection });
-    }
-    await this.loadTasks();
-  }
-
-  async addAssignee() {
-    const input = document.getElementById("newAssigneeInput");
-    const assigneeName = input.value.trim();
-
-    if (assigneeName && !this.projectConfig.assignees.includes(assigneeName)) {
-      this.projectConfig.assignees.push(assigneeName);
-      // Sort assignees alphabetically
-      this.projectConfig.assignees.sort();
-      input.value = "";
-      this.renderAssignees();
-      this.updateConfigStats();
-      // Auto-save the configuration
-      await this.saveProjectConfig();
-    }
-  }
-
-  async removeAssignee(index) {
-    this.projectConfig.assignees.splice(index, 1);
-    this.renderAssignees();
-    this.updateConfigStats();
-    // Auto-save the configuration
-    await this.saveProjectConfig();
-  }
-
-  async addTag() {
-    const input = document.getElementById("newTagInput");
-    const tagName = input.value.trim();
-
-    if (tagName && !this.projectConfig.tags.includes(tagName)) {
-      this.projectConfig.tags.push(tagName);
-      // Sort tags alphabetically
-      this.projectConfig.tags.sort();
-      input.value = "";
-      this.renderTags();
-      this.updateConfigStats();
-      // Auto-save the configuration
-      await this.saveProjectConfig();
-    }
-  }
-
-  async removeTag(index) {
-    this.projectConfig.tags.splice(index, 1);
-    this.renderTags();
-    this.updateConfigStats();
-    // Auto-save the configuration
-    await this.saveProjectConfig();
-  }
+  // Delegate config methods to configView
+  async addSection() { await this.configView.addSection(); }
+  async removeSection(index) { await this.configView.removeSection(index); }
+  async moveSectionUp(index) { await this.configView.moveSectionUp(index); }
+  async moveSectionDown(index) { await this.configView.moveSectionDown(index); }
+  async addAssignee() { await this.configView.addAssignee(); }
+  async removeAssignee(index) { await this.configView.removeAssignee(index); }
+  async addTag() { await this.configView.addTag(); }
+  async removeTag(index) { await this.configView.removeTag(index); }
 
   async updateTask(taskId, updates) {
     try {
@@ -4237,63 +2500,19 @@ class TaskManager {
   }
 
   handleSearch(query) {
-    this.searchQuery = query.toLowerCase().trim();
-    if (this.searchQuery === "") {
-      this.filteredTasks = this.tasks;
-    } else {
-      this.filteredTasks = this.filterTasksRecursive(this.tasks);
-      // Auto-switch to list view when searching from non-task pages
-      if (!["list", "board"].includes(this.currentView)) {
-        this.switchView("list");
-        return; // switchView will call renderTasks
-      }
-    }
-    this.renderTasks();
+    return this.tasksModule.handleSearch(query);
   }
 
   filterTasksRecursive(tasks) {
-    const filtered = [];
-    for (const task of tasks) {
-      if (this.matchesSearch(task)) {
-        // Include the task with all its children if it matches
-        filtered.push({
-          ...task,
-          children: task.children || [],
-        });
-      } else if (task.children && task.children.length > 0) {
-        // Check if any children match
-        const filteredChildren = this.filterTasksRecursive(task.children);
-        if (filteredChildren.length > 0) {
-          // Include parent if children match
-          filtered.push({
-            ...task,
-            children: filteredChildren,
-          });
-        }
-      }
-    }
-    return filtered;
+    return this.tasksModule.filterRecursive(tasks);
   }
 
   matchesSearch(task) {
-    const query = this.searchQuery;
-    return (
-      task.title.toLowerCase().includes(query) ||
-      task.id.toLowerCase().includes(query) ||
-      task.section.toLowerCase().includes(query) ||
-      (task.config.assignee &&
-        task.config.assignee.toLowerCase().includes(query)) ||
-      (task.config.milestone &&
-        task.config.milestone.toLowerCase().includes(query)) ||
-      (task.config.tag &&
-        task.config.tag.some((tag) => tag.toLowerCase().includes(query))) ||
-      (task.description &&
-        task.description.some((desc) => desc.toLowerCase().includes(query)))
-    );
+    return this.tasksModule.matchesSearch(task);
   }
 
   getTasksToRender() {
-    return this.searchQuery ? this.filteredTasks : this.tasks;
+    return this.tasksModule.getToRender();
   }
 
   // Notes functionality
