@@ -1,0 +1,323 @@
+/* ==========================================================================
+   Theme System
+
+   To create a new theme:
+   1. Copy the .theme-light block
+   2. Rename to .theme-{name}
+   3. Adjust color values
+   4. Add theme class to <html> element
+
+   Available themes:
+   - theme-light (default)
+   - theme-dark
+   - theme-yellow
+   - theme-minimal
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Base: Semantic variable names (do not change these names)
+   -------------------------------------------------------------------------- */
+
+:root {
+    /* Typography - shared across all themes */
+    --font-sans: 'Roboto', system-ui, sans-serif;
+    --font-mono: 'Roboto Mono', monospace;
+
+    /* Spacing scale */
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+
+    /* Border radius */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-full: 9999px;
+
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.2s ease;
+    --transition-slow: 0.3s ease;
+
+    /* Shadows - light theme defaults */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* --------------------------------------------------------------------------
+   Theme: Light (default)
+   -------------------------------------------------------------------------- */
+
+.theme-light,
+:root:not(.theme-dark):not(.theme-yellow):not(.theme-minimal) {
+    /* Backgrounds */
+    --color-bg-primary: #ffffff;
+    --color-bg-secondary: #f9fafb;
+    --color-bg-tertiary: #f3f4f6;
+    --color-bg-inverse: #111827;
+    --color-bg-hover: #f3f4f6;
+    --color-bg-active: #e5e7eb;
+
+    /* Text */
+    --color-text-primary: #111827;
+    --color-text-secondary: #4b5563;
+    --color-text-muted: #9ca3af;
+    --color-text-inverse: #ffffff;
+
+    /* Borders */
+    --color-border-default: #e5e7eb;
+    --color-border-strong: #d1d5db;
+    --color-border-focus: #9ca3af;
+
+    /* Accent */
+    --color-accent: #111827;
+    --color-accent-hover: #374151;
+
+    /* Success */
+    --color-success: #059669;
+    --color-success-bg: #ecfdf5;
+    --color-success-border: #a7f3d0;
+    --color-success-text: #065f46;
+
+    /* Warning */
+    --color-warning: #d97706;
+    --color-warning-bg: #fffbeb;
+    --color-warning-border: #fde68a;
+    --color-warning-text: #92400e;
+
+    /* Error */
+    --color-error: #dc2626;
+    --color-error-bg: #fef2f2;
+    --color-error-border: #fecaca;
+    --color-error-text: #991b1b;
+
+    /* Info */
+    --color-info: #2563eb;
+    --color-info-bg: #eff6ff;
+    --color-info-border: #bfdbfe;
+    --color-info-text: #1e40af;
+}
+
+/* --------------------------------------------------------------------------
+   Theme: Dark
+   -------------------------------------------------------------------------- */
+
+.theme-dark,
+.dark {
+    /* Backgrounds */
+    --color-bg-primary: #111827;
+    --color-bg-secondary: #1f2937;
+    --color-bg-tertiary: #374151;
+    --color-bg-inverse: #ffffff;
+    --color-bg-hover: #374151;
+    --color-bg-active: #4b5563;
+
+    /* Text */
+    --color-text-primary: #f9fafb;
+    --color-text-secondary: #e5e7eb;
+    --color-text-muted: #9ca3af;
+    --color-text-inverse: #111827;
+
+    /* Borders */
+    --color-border-default: #374151;
+    --color-border-strong: #4b5563;
+    --color-border-focus: #6b7280;
+
+    /* Accent */
+    --color-accent: #f9fafb;
+    --color-accent-hover: #e5e7eb;
+
+    /* Success */
+    --color-success: #34d399;
+    --color-success-bg: #064e3b;
+    --color-success-border: #065f46;
+    --color-success-text: #a7f3d0;
+
+    /* Warning */
+    --color-warning: #fbbf24;
+    --color-warning-bg: #78350f;
+    --color-warning-border: #92400e;
+    --color-warning-text: #fde68a;
+
+    /* Error */
+    --color-error: #f87171;
+    --color-error-bg: #7f1d1d;
+    --color-error-border: #991b1b;
+    --color-error-text: #fecaca;
+
+    /* Info */
+    --color-info: #60a5fa;
+    --color-info-bg: #1e3a5f;
+    --color-info-border: #1e40af;
+    --color-info-text: #bfdbfe;
+
+    /* Shadows - darker for dark theme */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   Theme: Yellow (warm, focused)
+   -------------------------------------------------------------------------- */
+
+.theme-yellow {
+    /* Backgrounds */
+    --color-bg-primary: #fffbeb;
+    --color-bg-secondary: #fef3c7;
+    --color-bg-tertiary: #fde68a;
+    --color-bg-inverse: #78350f;
+    --color-bg-hover: #fde68a;
+    --color-bg-active: #fcd34d;
+
+    /* Text */
+    --color-text-primary: #78350f;
+    --color-text-secondary: #92400e;
+    --color-text-muted: #b45309;
+    --color-text-inverse: #fffbeb;
+
+    /* Borders */
+    --color-border-default: #fcd34d;
+    --color-border-strong: #f59e0b;
+    --color-border-focus: #d97706;
+
+    /* Accent */
+    --color-accent: #b45309;
+    --color-accent-hover: #92400e;
+
+    /* Success */
+    --color-success: #059669;
+    --color-success-bg: #ecfdf5;
+    --color-success-border: #a7f3d0;
+    --color-success-text: #065f46;
+
+    /* Warning */
+    --color-warning: #ea580c;
+    --color-warning-bg: #fff7ed;
+    --color-warning-border: #fed7aa;
+    --color-warning-text: #9a3412;
+
+    /* Error */
+    --color-error: #dc2626;
+    --color-error-bg: #fef2f2;
+    --color-error-border: #fecaca;
+    --color-error-text: #991b1b;
+
+    /* Info */
+    --color-info: #0284c7;
+    --color-info-bg: #f0f9ff;
+    --color-info-border: #bae6fd;
+    --color-info-text: #075985;
+}
+
+/* --------------------------------------------------------------------------
+   Theme: Minimal (reduced contrast, calming)
+   -------------------------------------------------------------------------- */
+
+.theme-minimal {
+    /* Backgrounds */
+    --color-bg-primary: #fafafa;
+    --color-bg-secondary: #f5f5f5;
+    --color-bg-tertiary: #e5e5e5;
+    --color-bg-inverse: #525252;
+    --color-bg-hover: #e5e5e5;
+    --color-bg-active: #d4d4d4;
+
+    /* Text */
+    --color-text-primary: #525252;
+    --color-text-secondary: #737373;
+    --color-text-muted: #a3a3a3;
+    --color-text-inverse: #fafafa;
+
+    /* Borders */
+    --color-border-default: #e5e5e5;
+    --color-border-strong: #d4d4d4;
+    --color-border-focus: #a3a3a3;
+
+    /* Accent */
+    --color-accent: #525252;
+    --color-accent-hover: #404040;
+
+    /* Success - muted */
+    --color-success: #4ade80;
+    --color-success-bg: #f0fdf4;
+    --color-success-border: #bbf7d0;
+    --color-success-text: #166534;
+
+    /* Warning - muted */
+    --color-warning: #facc15;
+    --color-warning-bg: #fefce8;
+    --color-warning-border: #fef08a;
+    --color-warning-text: #854d0e;
+
+    /* Error - muted */
+    --color-error: #f87171;
+    --color-error-bg: #fef2f2;
+    --color-error-border: #fecaca;
+    --color-error-text: #b91c1c;
+
+    /* Info - muted */
+    --color-info: #38bdf8;
+    --color-info-bg: #f0f9ff;
+    --color-info-border: #bae6fd;
+    --color-info-text: #0369a1;
+
+    /* Softer shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.07);
+}
+
+/* --------------------------------------------------------------------------
+   Theme: Template (copy this to create new themes)
+   --------------------------------------------------------------------------
+
+.theme-YOURNAME {
+    --color-bg-primary: ;
+    --color-bg-secondary: ;
+    --color-bg-tertiary: ;
+    --color-bg-inverse: ;
+    --color-bg-hover: ;
+    --color-bg-active: ;
+
+    --color-text-primary: ;
+    --color-text-secondary: ;
+    --color-text-muted: ;
+    --color-text-inverse: ;
+
+    --color-border-default: ;
+    --color-border-strong: ;
+    --color-border-focus: ;
+
+    --color-accent: ;
+    --color-accent-hover: ;
+
+    --color-success: ;
+    --color-success-bg: ;
+    --color-success-border: ;
+    --color-success-text: ;
+
+    --color-warning: ;
+    --color-warning-bg: ;
+    --color-warning-border: ;
+    --color-warning-text: ;
+
+    --color-error: ;
+    --color-error-bg: ;
+    --color-error-border: ;
+    --color-error-text: ;
+
+    --color-info: ;
+    --color-info-bg: ;
+    --color-info-border: ;
+    --color-info-text: ;
+
+    --shadow-sm: ;
+    --shadow-md: ;
+    --shadow-lg: ;
+}
+
+*/

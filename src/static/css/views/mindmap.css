@@ -1,0 +1,95 @@
+/* ==========================================================================
+   Mindmap Styles
+
+   Mindmap nodes and connection lines.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Mindmap Nodes
+   -------------------------------------------------------------------------- */
+
+.mindmap-node {
+    position: absolute;
+    background: var(--color-bg-primary);
+    border: 2px solid var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    padding: 8px 12px;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    user-select: none;
+    transition: all var(--transition-base);
+    min-width: 80px;
+    text-align: center;
+    font-weight: 500;
+    z-index: 10;
+}
+
+.mindmap-node:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
+}
+
+/* Root node */
+.mindmap-node.root {
+    background: var(--color-bg-inverse);
+    color: var(--color-text-inverse);
+    font-size: 16px;
+    font-weight: bold;
+    border-color: var(--color-bg-inverse);
+}
+
+/* Level 1 nodes */
+.mindmap-node.level-1 {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-text-secondary);
+}
+
+/* Level 2+ nodes */
+.mindmap-node.level-2 {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-text-muted);
+}
+
+/* Dark theme overrides */
+.dark .mindmap-node,
+.theme-dark .mindmap-node {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-text-muted);
+    color: var(--color-text-primary);
+}
+
+.dark .mindmap-node.root,
+.theme-dark .mindmap-node.root {
+    background: var(--color-bg-inverse);
+    color: var(--color-text-inverse);
+    border-color: var(--color-border-strong);
+}
+
+.dark .mindmap-node.level-1,
+.theme-dark .mindmap-node.level-1 {
+    background: var(--color-bg-active);
+    border-color: var(--color-border-strong);
+}
+
+.dark .mindmap-node.level-2,
+.theme-dark .mindmap-node.level-2 {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Mindmap Connections
+   -------------------------------------------------------------------------- */
+
+.mindmap-connection {
+    position: absolute;
+    border: 2px solid var(--color-text-muted);
+    border-radius: 2px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.dark .mindmap-connection,
+.theme-dark .mindmap-connection {
+    border-color: var(--color-border-strong);
+}

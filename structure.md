@@ -6,7 +6,7 @@ Markdown powered task manager tool.
 
 Start Date: 2025-08-17
 Working Days: 7
-Last Updated: 2026-02-14T04:52:24.693Z
+Last Updated: 2026-02-14T20:12:25.742Z
 
 Assignees:
 - Alice
@@ -211,9 +211,9 @@ New Sticky
 
 ## In Progress
 
-- [ ] (1) backup {tag: [Backend]; due_date: 2025-08-27T13; assignee: Jane Doe; priority: 2}
-- [ ] (4) Testing migration {tag: [Backend]; due_date: 2026-02-13T23:00; assignee: Bob; priority: 1; effort: 1; blocked_by: [1]; milestone: M1; planned_end: 2026-02-20}
+- [ ] (4) Testing migration {tag: [Backend]; due_date: 2026-02-13T23; assignee: Bob; priority: 1; effort: 1; blocked_by: [1]; milestone: M1; planned_end: 2026-02-20}
   Testing the Whole UI
+- [ ] (1) backup {tag: [Backend]; due_date: 2025-08-27T13; assignee: Jane Doe; priority: 2}
 
 ## Done
 

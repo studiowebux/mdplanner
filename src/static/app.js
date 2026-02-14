@@ -177,8 +177,8 @@ class TaskManager {
   }
 
   async init() {
-    this.initDarkMode();
-    this.initFullscreenMode();
+    ThemeManager.initDarkMode();
+    ThemeManager.initFullscreenMode();
     this.bindEvents();
     await this.loadProjects(); // Load projects first
     await this.loadProjectConfig();
