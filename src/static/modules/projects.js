@@ -267,6 +267,9 @@ export class ProjectsModule {
       case "c4":
         tm.loadC4Components();
         break;
+      case "portfolio":
+        tm.portfolioView.load();
+        break;
       default:
         // Board, list, timeline views use tasks which are already loaded
         tm.renderTasks();

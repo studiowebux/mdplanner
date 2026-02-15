@@ -121,6 +121,39 @@ export const ProjectAPI = {
   async switchProject(filename) {
     const response = await post('/api/projects/switch', { filename });
     return response;
+  },
+
+  async listProjectsEnriched() {
+    const response = await get('/api/projects/enriched');
+    return response.json();
+  },
+
+  async getPortfolioSummary() {
+    const response = await get('/api/projects/portfolio/summary');
+    return response.json();
+  }
+};
+
+// Portfolio API - reads from portfolio/ directory
+export const PortfolioAPI = {
+  async fetchAll() {
+    const response = await get('/api/portfolio');
+    return response.json();
+  },
+
+  async getSummary() {
+    const response = await get('/api/portfolio/summary');
+    return response.json();
+  },
+
+  async get(id) {
+    const response = await get(`/api/portfolio/${id}`);
+    return response.json();
+  },
+
+  async update(id, data) {
+    const response = await put(`/api/portfolio/${id}`, data);
+    return response;
   }
 };
 

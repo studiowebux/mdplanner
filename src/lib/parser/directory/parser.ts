@@ -23,6 +23,7 @@ import { CapacityDirectoryParser } from "./capacity.ts";
 import { StrategicLevelsDirectoryParser } from "./strategic-levels.ts";
 import { BillingDirectoryParser } from "./billing.ts";
 import { CRMDirectoryParser } from "./crm.ts";
+import { PortfolioDirectoryParser, type PortfolioItem, type PortfolioSummary, type PortfolioKPI } from "./portfolio.ts";
 import type {
   Task,
   TaskConfig,
@@ -82,6 +83,7 @@ export class DirectoryMarkdownParser {
   protected strategicLevelsParser: StrategicLevelsDirectoryParser;
   protected billingParser: BillingDirectoryParser;
   protected crmParser: CRMDirectoryParser;
+  protected portfolioParser: PortfolioDirectoryParser;
 
   constructor(projectDir: string) {
     this.projectDir = projectDir;
@@ -105,6 +107,7 @@ export class DirectoryMarkdownParser {
     this.strategicLevelsParser = new StrategicLevelsDirectoryParser(projectDir);
     this.billingParser = new BillingDirectoryParser(projectDir);
     this.crmParser = new CRMDirectoryParser(projectDir);
+    this.portfolioParser = new PortfolioDirectoryParser(projectDir);
   }
 
   // ============================================================
@@ -1076,6 +1079,30 @@ export class DirectoryMarkdownParser {
 
   async getNextInvoiceNumber(): Promise<string> {
     return this.billingParser.getNextInvoiceNumber();
+  }
+
+  // ============================================================
+  // Portfolio
+  // ============================================================
+
+  async readPortfolioItems(): Promise<PortfolioItem[]> {
+    return this.portfolioParser.readAll();
+  }
+
+  async readPortfolioItem(id: string): Promise<PortfolioItem | null> {
+    return this.portfolioParser.read(id);
+  }
+
+  async updatePortfolioItem(id: string, updates: Partial<PortfolioItem>): Promise<PortfolioItem | null> {
+    return this.portfolioParser.update(id, updates);
+  }
+
+  async getPortfolioSummary(): Promise<PortfolioSummary> {
+    return this.portfolioParser.getSummary();
+  }
+
+  async hasPortfolio(): Promise<boolean> {
+    return this.portfolioParser.exists();
   }
 
   // ============================================================

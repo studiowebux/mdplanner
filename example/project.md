@@ -18,6 +18,11 @@ links:
     title: Figma Designs
     url: "https://figma.com/file/taskflow"
 last_updated: "2026-02-15T18:16:00.349Z"
+status: active
+category: SaaS Products
+client: Internal
+revenue: 125000
+expenses: 45000
 ---
 
 # TaskFlow SaaS

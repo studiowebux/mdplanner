@@ -223,6 +223,11 @@
                         <button id="strategicLevelsViewBtn" data-view="strategicLevels" class="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Strategic Levels</button>
                     </div>
                 </div>
+
+                <!-- Portfolio - Top level button -->
+                <button id="portfolioViewBtn" data-view="portfolio" class="px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded hover:bg-gray-100 dark:hover:bg-gray-800">
+                    Portfolio
+                </button>
             </div>
         </div>
 
@@ -282,6 +287,7 @@
                     <div class="px-4 py-1 text-xs font-medium text-gray-400 dark:text-gray-500 uppercase">Other</div>
                     <button id="notesViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Notes</button>
                     <button id="strategicLevelsViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Strategic Levels</button>
+                    <button id="portfolioViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Portfolio</button>
                     <button id="configViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Settings</button>
                     <button id="helpBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Help</button>
                 </div>
@@ -313,6 +319,33 @@
         <!-- Loading State -->
         <div id="loading" class="flex justify-center items-center h-64">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+
+        <!-- Portfolio View -->
+        <div id="portfolioView" class="hidden pb-16">
+            <!-- Summary Cards -->
+            <div id="portfolioSummaryCards" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <!-- Cards rendered by JS -->
+            </div>
+
+            <!-- Filter Bar -->
+            <div id="portfolioFilterBar" class="flex flex-wrap items-center gap-2 mb-4">
+                <!-- Filters rendered by JS -->
+            </div>
+
+            <!-- Project Grid -->
+            <div id="portfolioGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Cards rendered by JS -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="portfolioEmpty" class="hidden text-center py-12">
+                <svg class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+                <p class="text-gray-500 dark:text-gray-400 text-lg mb-2">No projects found</p>
+                <p class="text-gray-400 dark:text-gray-500 text-sm">Create a new project to get started</p>
+            </div>
         </div>
 
         <!-- Summary View -->
@@ -3849,6 +3882,24 @@
 
     <!-- Focus Mode Container -->
     <div id="focusModeContainer" class="hidden"></div>
+
+    <!-- Portfolio Detail Panel -->
+    <div id="portfolioDetailPanel" class="sidenav-panel sidenav-md">
+        <div class="sidenav-header">
+            <h2 class="sidenav-title" id="portfolioDetailTitle">Project Details</h2>
+            <button type="button" id="portfolioDetailClose" class="sidenav-close" aria-label="Close">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="sidenav-content" id="portfolioDetailContent">
+            <!-- Content rendered by JS -->
+        </div>
+        <div class="sidenav-footer">
+            <button type="button" id="portfolioDetailSave" class="btn btn-primary">Save Changes</button>
+        </div>
+    </div>
 
     <!-- Help Panel -->
     <div id="helpPanel" class="sidenav-panel sidenav-sm">

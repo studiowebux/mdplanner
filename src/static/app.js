@@ -14,6 +14,7 @@ import { ListView } from './modules/views/list.js';
 import { BoardView } from './modules/views/board.js';
 import { TimelineView } from './modules/views/timeline.js';
 import { ConfigView } from './modules/views/config.js';
+import { PortfolioView } from './modules/views/portfolio.js';
 import { TasksModule } from './modules/features/tasks.js';
 import { DependenciesModule } from './modules/dependencies.js';
 import { NotesModule } from './modules/features/notes.js';
@@ -153,6 +154,7 @@ class TaskManager {
     this.boardView = new BoardView(this);
     this.timelineView = new TimelineView(this);
     this.configView = new ConfigView(this);
+    this.portfolioView = new PortfolioView(this);
 
     // Initialize feature modules
     this.tasksModule = new TasksModule(this);
@@ -214,6 +216,11 @@ class TaskManager {
 
   async switchProject(filename) {
     return this.projectsModule.switch(filename);
+  }
+
+  // Portfolio View - delegate method for switching projects from portfolio
+  async portfolioSwitchProject(filename) {
+    await this.portfolioView.switchToProject(filename);
   }
 
   checkTaskHashOnLoad() {
@@ -286,6 +293,7 @@ class TaskManager {
       { id: "strategicLevelsViewBtn", view: "strategicLevels" },
       { id: "billingViewBtn", view: "billing" },
       { id: "crmViewBtn", view: "crm" },
+      { id: "portfolioViewBtn", view: "portfolio" },
     ];
     additionalViews.forEach(({ id, view }) => {
       document.getElementById(id)?.addEventListener("click", () => {
@@ -468,6 +476,12 @@ class TaskManager {
         this.switchView("crm");
         this.closeMobileMenu();
       });
+    document
+      .getElementById("portfolioViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("portfolio");
+        this.closeMobileMenu();
+      });
 
     // Dark mode toggle
     document
@@ -597,6 +611,9 @@ class TaskManager {
     // C4 Architecture events - delegated to C4Module
     this.c4Module.bindEvents();
 
+    // Portfolio View events - delegated to PortfolioView
+    this.portfolioView.bindEvents();
+
     // Modal close on background click - track mousedown to prevent closing during text selection
     let noteModalMouseDownTarget = null;
     document.getElementById("noteModal").addEventListener("mousedown", (e) => {
@@ -663,7 +680,7 @@ class TaskManager {
       summary: "Summary", list: "List", board: "Board", timeline: "Timeline",
       notes: "Notes", goals: "Goals", milestones: "Milestones", ideas: "Ideas",
       canvas: "Canvas", mindmap: "Mindmap", c4: "C4 Architecture",
-      retrospectives: "Retrospectives", swot: "SWOT Analysis", riskAnalysis: "Risk Analysis", leanCanvas: "Lean Canvas", businessModel: "Business Model", brief: "Brief", timeTracking: "Time Tracking", capacity: "Capacity", strategicLevels: "Strategic Levels", billing: "Billing", crm: "CRM", config: "Settings"
+      retrospectives: "Retrospectives", swot: "SWOT Analysis", riskAnalysis: "Risk Analysis", leanCanvas: "Lean Canvas", businessModel: "Business Model", brief: "Brief", timeTracking: "Time Tracking", capacity: "Capacity", strategicLevels: "Strategic Levels", billing: "Billing", crm: "CRM", portfolio: "Portfolio", config: "Settings"
     };
     const label = document.getElementById("currentViewLabel");
     if (label) label.textContent = viewLabels[view] || view;
@@ -707,7 +724,7 @@ class TaskManager {
     this.notesLoaded = false;
 
     // Reset all desktop nav buttons in dropdown
-    const desktopNavBtns = ["summaryViewBtn", "listViewBtn", "boardViewBtn", "timelineViewBtn", "notesViewBtn", "goalsViewBtn", "milestonesViewBtn", "ideasViewBtn", "canvasViewBtn", "mindmapViewBtn", "c4ViewBtn", "retrospectivesViewBtn", "swotViewBtn", "riskAnalysisViewBtn", "leanCanvasViewBtn", "businessModelViewBtn", "projectValueViewBtn", "briefViewBtn", "timeTrackingViewBtn", "capacityViewBtn", "strategicLevelsViewBtn", "billingViewBtn", "crmViewBtn"];
+    const desktopNavBtns = ["summaryViewBtn", "listViewBtn", "boardViewBtn", "timelineViewBtn", "notesViewBtn", "goalsViewBtn", "milestonesViewBtn", "ideasViewBtn", "canvasViewBtn", "mindmapViewBtn", "c4ViewBtn", "retrospectivesViewBtn", "swotViewBtn", "riskAnalysisViewBtn", "leanCanvasViewBtn", "businessModelViewBtn", "projectValueViewBtn", "briefViewBtn", "timeTrackingViewBtn", "capacityViewBtn", "strategicLevelsViewBtn", "billingViewBtn", "crmViewBtn", "portfolioViewBtn"];
     desktopNavBtns.forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) {
@@ -717,7 +734,7 @@ class TaskManager {
     });
 
     // Reset mobile buttons
-    const mobileBtnIds = ["summaryViewBtnMobile", "listViewBtnMobile", "boardViewBtnMobile", "timelineViewBtnMobile", "notesViewBtnMobile", "goalsViewBtnMobile", "milestonesViewBtnMobile", "canvasViewBtnMobile", "mindmapViewBtnMobile", "c4ViewBtnMobile", "ideasViewBtnMobile", "retrospectivesViewBtnMobile", "swotViewBtnMobile", "riskAnalysisViewBtnMobile", "leanCanvasViewBtnMobile", "businessModelViewBtnMobile", "projectValueViewBtnMobile", "briefViewBtnMobile", "timeTrackingViewBtnMobile", "capacityViewBtnMobile", "strategicLevelsViewBtnMobile", "billingViewBtnMobile", "crmViewBtnMobile", "configViewBtnMobile"];
+    const mobileBtnIds = ["summaryViewBtnMobile", "listViewBtnMobile", "boardViewBtnMobile", "timelineViewBtnMobile", "notesViewBtnMobile", "goalsViewBtnMobile", "milestonesViewBtnMobile", "canvasViewBtnMobile", "mindmapViewBtnMobile", "c4ViewBtnMobile", "ideasViewBtnMobile", "retrospectivesViewBtnMobile", "swotViewBtnMobile", "riskAnalysisViewBtnMobile", "leanCanvasViewBtnMobile", "businessModelViewBtnMobile", "projectValueViewBtnMobile", "briefViewBtnMobile", "timeTrackingViewBtnMobile", "capacityViewBtnMobile", "strategicLevelsViewBtnMobile", "billingViewBtnMobile", "crmViewBtnMobile", "portfolioViewBtnMobile", "configViewBtnMobile"];
     mobileBtnIds.forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) {
@@ -747,6 +764,7 @@ class TaskManager {
     document.getElementById("strategicLevelsView").classList.add("hidden");
     document.getElementById("billingView")?.classList.add("hidden");
     document.getElementById("crmView")?.classList.add("hidden");
+    document.getElementById("portfolioView")?.classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
     document.getElementById("mindmapView").classList.add("hidden");
     document.getElementById("c4View").classList.add("hidden");
@@ -851,6 +869,10 @@ class TaskManager {
       this.activateViewButton("c4");
       document.getElementById("c4View").classList.remove("hidden");
       this.loadC4Components();
+    } else if (view === "portfolio") {
+      this.activateViewButton("portfolio");
+      document.getElementById("portfolioView").classList.remove("hidden");
+      this.portfolioView.load();
     } else if (view === "config") {
       this.activateViewButton("config");
       document.getElementById("configView").classList.remove("hidden");

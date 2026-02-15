@@ -35,6 +35,7 @@ import { capacityRouter } from "./features/capacity.ts";
 import { strategicRouter } from "./features/strategic.ts";
 import { billingRouter } from "./features/billing.ts";
 import { crmRouter } from "./features/crm.ts";
+import { portfolioRouter } from "./portfolio.ts";
 
 // Export/Import routes
 import { exportImportRouter } from "./export-import.ts";
@@ -83,6 +84,9 @@ export function createApiRouter(projectManager: ProjectManager): Hono<{ Variable
 
   // CRM routes (nested under various paths)
   api.route("/", crmRouter);
+
+  // Portfolio routes
+  api.route("/portfolio", portfolioRouter);
 
   // Export/Import routes
   api.route("/", exportImportRouter);

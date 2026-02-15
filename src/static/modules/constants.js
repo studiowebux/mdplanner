@@ -27,3 +27,19 @@ export const DEADLINE_CLASSES = {
 export const SECTION_COLORS = [
   'gray-900', 'gray-700', 'gray-600', 'gray-500', 'gray-400', 'gray-800', 'gray-300', 'gray-200'
 ];
+
+// Portfolio View - Project status badge classes
+export const PROJECT_STATUS_CLASSES = {
+  planning: 'bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700',
+  active: 'bg-green-100 text-green-800 border border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-700',
+  'on-hold': 'bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-900 dark:text-amber-200 dark:border-amber-700',
+  completed: 'bg-gray-100 text-gray-700 border border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
+};
+
+// Portfolio View - Project status labels
+export const PROJECT_STATUS_LABELS = {
+  planning: 'Planning',
+  active: 'Active',
+  'on-hold': 'On Hold',
+  completed: 'Completed'
+};

@@ -5,9 +5,28 @@ import { Parser } from "./parser-interface.ts";
 export interface ProjectMeta {
   filename: string;
   name: string;
+  description?: string;
+  status?: string;
+  category?: string;
+  client?: string;
+  revenue?: number;
+  expenses?: number;
   lastUpdated: string;
   taskCount: number;
+  completedTaskCount?: number;
+  progressPercent?: number;
   isDirectory?: boolean;
+}
+
+export interface PortfolioSummary {
+  total: number;
+  byStatus: Record<string, number>;
+  byCategory: Record<string, number>;
+  overallProgress: number;
+  totalTasks: number;
+  completedTasks: number;
+  totalRevenue: number;
+  totalExpenses: number;
 }
 
 const EXCLUDED_FILES = [
@@ -154,6 +173,184 @@ export class ProjectManager {
       }
     }
     return count;
+  }
+
+  private countCompletedTasks(tasks: any[]): number {
+    let count = 0;
+    for (const task of tasks) {
+      if (task.completed) {
+        count++;
+      }
+      if (task.children) {
+        count += this.countCompletedTasks(task.children);
+      }
+    }
+    return count;
+  }
+
+  /**
+   * Scan projects with enriched metadata for portfolio view.
+   * Includes description, status, progress metrics.
+   */
+  async scanProjectsEnriched(): Promise<ProjectMeta[]> {
+    const projects: ProjectMeta[] = [];
+
+    try {
+      for await (const entry of Deno.readDir(this.directory)) {
+        // Handle single-file markdown projects
+        if (entry.isFile && entry.name.endsWith(".md")) {
+          if (EXCLUDED_FILES.includes(entry.name)) continue;
+          if (EXCLUDED_PATTERNS.some(p => p.test(entry.name))) continue;
+
+          const filePath = `${this.directory}/${entry.name}`;
+
+          try {
+            const parser = new MarkdownParser(filePath);
+            const projectInfo = await parser.readProjectInfo();
+            const config = await parser.readProjectConfig();
+            const tasks = await parser.readTasks();
+
+            const totalTasks = this.countTasks(tasks);
+            const completedTasks = this.countCompletedTasks(tasks);
+            const progressPercent = totalTasks > 0
+              ? Math.round((completedTasks / totalTasks) * 100)
+              : 0;
+
+            // Get description (first 2 lines max, truncated to 150 chars)
+            const descriptionLines = projectInfo.description || [];
+            const description = descriptionLines.slice(0, 2).join(' ').slice(0, 150);
+
+            projects.push({
+              filename: entry.name,
+              name: projectInfo.name || entry.name.replace(".md", ""),
+              description: description || undefined,
+              status: config.status || "active",
+              category: config.category,
+              client: config.client,
+              revenue: config.revenue,
+              expenses: config.expenses,
+              lastUpdated: config.lastUpdated || "",
+              taskCount: totalTasks,
+              completedTaskCount: completedTasks,
+              progressPercent,
+              isDirectory: false,
+            });
+          } catch (e) {
+            console.warn(`Failed to parse ${entry.name}:`, e);
+          }
+        }
+
+        // Handle directory-based projects
+        if (entry.isDirectory) {
+          if (EXCLUDED_DIRS.includes(entry.name)) continue;
+
+          const dirPath = `${this.directory}/${entry.name}`;
+
+          // Check if it's a directory project (has project.md)
+          if (await DirectoryMarkdownParser.isDirectoryProject(dirPath)) {
+            try {
+              const parser = new DirectoryMarkdownParser(dirPath);
+              const projectInfo = await parser.readProjectInfo();
+              const config = await parser.readProjectConfig();
+              const tasks = await parser.readTasks();
+
+              const totalTasks = this.countTasks(tasks);
+              const completedTasks = this.countCompletedTasks(tasks);
+              const progressPercent = totalTasks > 0
+                ? Math.round((completedTasks / totalTasks) * 100)
+                : 0;
+
+              // Get description (first 2 lines max, truncated to 150 chars)
+              const descriptionLines = projectInfo.description || [];
+              const description = descriptionLines.slice(0, 2).join(' ').slice(0, 150);
+
+              projects.push({
+                filename: entry.name,
+                name: projectInfo.name || entry.name,
+                description: description || undefined,
+                status: config.status || "active",
+                category: config.category,
+                client: config.client,
+                revenue: config.revenue,
+                expenses: config.expenses,
+                lastUpdated: config.lastUpdated || "",
+                taskCount: totalTasks,
+                completedTaskCount: completedTasks,
+                progressPercent,
+                isDirectory: true,
+              });
+            } catch (e) {
+              console.warn(`Failed to parse directory project ${entry.name}:`, e);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Failed to scan directory:", e);
+    }
+
+    // Sort by lastUpdated descending
+    projects.sort((a, b) => {
+      if (!a.lastUpdated) return 1;
+      if (!b.lastUpdated) return -1;
+      return b.lastUpdated.localeCompare(a.lastUpdated);
+    });
+
+    return projects;
+  }
+
+  /**
+   * Get portfolio summary with aggregate metrics.
+   */
+  async getPortfolioSummary(): Promise<PortfolioSummary> {
+    const projects = await this.scanProjectsEnriched();
+
+    const byStatus: Record<string, number> = {
+      planning: 0,
+      active: 0,
+      "on-hold": 0,
+      completed: 0,
+    };
+
+    const byCategory: Record<string, number> = {};
+
+    let totalTasks = 0;
+    let completedTasks = 0;
+    let totalRevenue = 0;
+    let totalExpenses = 0;
+
+    for (const project of projects) {
+      const status = project.status || "active";
+      if (byStatus[status] !== undefined) {
+        byStatus[status]++;
+      } else {
+        byStatus[status] = 1;
+      }
+
+      // Count by category
+      const category = project.category || "Uncategorized";
+      byCategory[category] = (byCategory[category] || 0) + 1;
+
+      totalTasks += project.taskCount || 0;
+      completedTasks += project.completedTaskCount || 0;
+      totalRevenue += project.revenue || 0;
+      totalExpenses += project.expenses || 0;
+    }
+
+    const overallProgress = totalTasks > 0
+      ? Math.round((completedTasks / totalTasks) * 100)
+      : 0;
+
+    return {
+      total: projects.length,
+      byStatus,
+      byCategory,
+      overallProgress,
+      totalTasks,
+      completedTasks,
+      totalRevenue,
+      totalExpenses,
+    };
   }
 
   getActiveParser(): Parser {

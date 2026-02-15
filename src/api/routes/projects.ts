@@ -42,3 +42,17 @@ projectsRouter.post("/create", async (c) => {
   const filename = await pm.createProject(body.name);
   return jsonResponse({ success: true, filename }, 201);
 });
+
+// GET /projects/enriched - list all projects with enriched metadata
+projectsRouter.get("/enriched", async (c) => {
+  const pm = getProjectManager(c);
+  const projects = await pm.scanProjectsEnriched();
+  return jsonResponse(projects);
+});
+
+// GET /projects/portfolio/summary - get portfolio summary
+projectsRouter.get("/portfolio/summary", async (c) => {
+  const pm = getProjectManager(c);
+  const summary = await pm.getPortfolioSummary();
+  return jsonResponse(summary);
+});

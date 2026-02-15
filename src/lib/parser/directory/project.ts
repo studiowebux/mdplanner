@@ -13,6 +13,12 @@ interface ProjectFrontmatter {
   tags?: string[];
   last_updated?: string;
   links?: ProjectLink[];
+  status?: string;
+  status_comment?: string;
+  category?: string;
+  client?: string;
+  revenue?: number;
+  expenses?: number;
 }
 
 export interface ProjectData {
@@ -126,6 +132,12 @@ export class ProjectDirectoryParser {
     if (frontmatter.tags) config.tags = frontmatter.tags;
     if (frontmatter.last_updated) config.lastUpdated = frontmatter.last_updated;
     if (frontmatter.links) config.links = frontmatter.links;
+    if (frontmatter.status) config.status = frontmatter.status;
+    if (frontmatter.status_comment) config.statusComment = frontmatter.status_comment;
+    if (frontmatter.category) config.category = frontmatter.category;
+    if (frontmatter.client) config.client = frontmatter.client;
+    if (frontmatter.revenue !== undefined) config.revenue = frontmatter.revenue;
+    if (frontmatter.expenses !== undefined) config.expenses = frontmatter.expenses;
 
     return { name, description, config };
   }
@@ -144,6 +156,12 @@ export class ProjectDirectoryParser {
     if (data.config.assignees) frontmatter.assignees = data.config.assignees;
     if (data.config.tags) frontmatter.tags = data.config.tags;
     if (data.config.links) frontmatter.links = data.config.links;
+    if (data.config.status) frontmatter.status = data.config.status;
+    if (data.config.statusComment) frontmatter.status_comment = data.config.statusComment;
+    if (data.config.category) frontmatter.category = data.config.category;
+    if (data.config.client) frontmatter.client = data.config.client;
+    if (data.config.revenue !== undefined) frontmatter.revenue = data.config.revenue;
+    if (data.config.expenses !== undefined) frontmatter.expenses = data.config.expenses;
 
     // Always update last_updated
     frontmatter.last_updated = new Date().toISOString();

@@ -136,6 +136,12 @@ export interface ProjectConfig {
   tags?: string[];
   lastUpdated?: string;
   links?: ProjectLink[];
+  status?: string;
+  statusComment?: string;
+  category?: string;
+  client?: string;
+  revenue?: number;
+  expenses?: number;
 }
 
 export interface Milestone {
