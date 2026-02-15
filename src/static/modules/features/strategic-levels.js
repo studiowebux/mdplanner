@@ -408,72 +408,18 @@ export class StrategicLevelsModule {
     return result;
   }
 
-  // Builder modal methods
+  // Builder operations use sidenav - Pattern: Sidenav Module
   openBuilderModal(editId = null) {
-    const modal = document.getElementById("strategicLevelsModal");
-    const title = document.getElementById("strategicLevelsModalTitle");
-    document.getElementById("strategicLevelsTitle").value = "";
-    document.getElementById("strategicLevelsDate").value = new Date()
-      .toISOString()
-      .split("T")[0];
-
     if (editId) {
-      this.taskManager.editingStrategicBuilderId = editId;
-      const builder = this.taskManager.strategicLevelsBuilders.find(
-        (b) => b.id === editId,
-      );
-      if (builder) {
-        document.getElementById("strategicLevelsTitle").value = builder.title;
-        document.getElementById("strategicLevelsDate").value = builder.date;
-      }
-      title.textContent = "Edit Strategy";
+      this.taskManager.strategicLevelsSidenavModule?.openEditBuilder(editId);
     } else {
-      this.taskManager.editingStrategicBuilderId = null;
-      title.textContent = "New Strategy";
-    }
-
-    modal?.classList.remove("hidden");
-    modal?.classList.add("flex");
-    document.getElementById("strategicLevelsTitle").focus();
-  }
-
-  closeBuilderModal() {
-    const modal = document.getElementById("strategicLevelsModal");
-    modal?.classList.add("hidden");
-    modal?.classList.remove("flex");
-    this.taskManager.editingStrategicBuilderId = null;
-  }
-
-  async saveBuilder(e) {
-    e.preventDefault();
-    const titleEl = document.getElementById("strategicLevelsTitle");
-    const dateEl = document.getElementById("strategicLevelsDate");
-    const title = titleEl.value.trim();
-    const date = dateEl.value;
-
-    if (!title) return;
-
-    try {
-      if (this.taskManager.editingStrategicBuilderId) {
-        await StrategicLevelsAPI.update(
-          this.taskManager.editingStrategicBuilderId,
-          { title, date },
-        );
-      } else {
-        const response = await StrategicLevelsAPI.create({ title, date });
-        const newBuilder = await response.json();
-        this.taskManager.selectedStrategicBuilderId = newBuilder.id;
-      }
-      this.closeBuilderModal();
-      await this.load();
-    } catch (error) {
-      console.error("Error saving strategic levels builder:", error);
+      this.taskManager.strategicLevelsSidenavModule?.openNewBuilder();
     }
   }
 
   editBuilder() {
     if (!this.taskManager.selectedStrategicBuilderId) return;
-    this.openBuilderModal(this.taskManager.selectedStrategicBuilderId);
+    this.taskManager.strategicLevelsSidenavModule?.openEditBuilder(this.taskManager.selectedStrategicBuilderId);
   }
 
   async deleteBuilder() {
@@ -491,111 +437,12 @@ export class StrategicLevelsModule {
     }
   }
 
-  // Level modal methods
+  // Level operations use sidenav - Pattern: Sidenav Module
   openLevelModal(levelType, editId = null, parentId = null) {
-    const modal = document.getElementById("strategicLevelModal");
-    const title = document.getElementById("strategicLevelModalTitle");
-    const typeSelect = document.getElementById("strategicLevelType");
-    const parentGroup = document.getElementById("strategicLevelParentGroup");
-    const parentSelect = document.getElementById("strategicLevelParent");
-
-    document.getElementById("strategicLevelTitle").value = "";
-    document.getElementById("strategicLevelDescription").value = "";
-    typeSelect.value = levelType;
-
-    this.taskManager.strategicLevelParentId = parentId;
-    this.taskManager.strategicLevelType = levelType;
-
-    // Populate parent options
-    const builder = this.taskManager.strategicLevelsBuilders.find(
-      (b) => b.id === this.taskManager.selectedStrategicBuilderId,
-    );
-    parentSelect.innerHTML = '<option value="">None (Root)</option>';
-
-    if (builder) {
-      const parentLevelType = this.getParentLevelType(levelType);
-      if (parentLevelType) {
-        const potentialParents = builder.levels.filter(
-          (l) => l.level === parentLevelType,
-        );
-        potentialParents.forEach((p) => {
-          const option = document.createElement("option");
-          option.value = p.id;
-          option.textContent = p.title;
-          if (p.id === parentId) option.selected = true;
-          parentSelect.appendChild(option);
-        });
-      }
-    }
-
-    // Show/hide parent group based on level type
-    if (levelType === "vision") {
-      parentGroup?.classList.add("hidden");
-    } else {
-      parentGroup?.classList.remove("hidden");
-    }
-
     if (editId) {
-      this.taskManager.editingStrategicLevelId = editId;
-      const level = builder?.levels.find((l) => l.id === editId);
-      if (level) {
-        document.getElementById("strategicLevelTitle").value = level.title;
-        document.getElementById("strategicLevelDescription").value =
-          level.description || "";
-        typeSelect.value = level.level;
-        parentSelect.value = level.parentId || "";
-      }
-      title.textContent = "Edit Level";
+      this.taskManager.strategicLevelsSidenavModule?.openEditLevel(editId);
     } else {
-      this.taskManager.editingStrategicLevelId = null;
-      title.textContent = "Add Level";
-    }
-
-    modal?.classList.remove("hidden");
-    modal?.classList.add("flex");
-    document.getElementById("strategicLevelTitle").focus();
-  }
-
-  closeLevelModal() {
-    const modal = document.getElementById("strategicLevelModal");
-    modal?.classList.add("hidden");
-    modal?.classList.remove("flex");
-    this.taskManager.editingStrategicLevelId = null;
-    this.taskManager.strategicLevelParentId = null;
-    this.taskManager.strategicLevelType = null;
-  }
-
-  async saveLevel(e) {
-    e.preventDefault();
-    if (!this.taskManager.selectedStrategicBuilderId) return;
-
-    const title = document.getElementById("strategicLevelTitle").value.trim();
-    const description = document
-      .getElementById("strategicLevelDescription")
-      .value.trim();
-    const level = document.getElementById("strategicLevelType").value;
-    const parentId =
-      document.getElementById("strategicLevelParent").value || undefined;
-
-    if (!title) return;
-
-    try {
-      if (this.taskManager.editingStrategicLevelId) {
-        await StrategicLevelsAPI.updateLevel(
-          this.taskManager.selectedStrategicBuilderId,
-          this.taskManager.editingStrategicLevelId,
-          { title, description, level, parentId },
-        );
-      } else {
-        await StrategicLevelsAPI.createLevel(
-          this.taskManager.selectedStrategicBuilderId,
-          { title, description, level, parentId },
-        );
-      }
-      this.closeLevelModal();
-      await this.load();
-    } catch (error) {
-      console.error("Error saving strategic level:", error);
+      this.taskManager.strategicLevelsSidenavModule?.openNewLevel(levelType, parentId);
     }
   }
 

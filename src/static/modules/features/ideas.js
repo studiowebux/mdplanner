@@ -284,37 +284,21 @@ export class IdeasModule {
         document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
       });
 
-    // Add idea button
+    // Add idea button - opens sidenav instead of modal
     document
       .getElementById("addIdeaBtn")
-      .addEventListener("click", () => this.openModal());
+      .addEventListener("click", () => this.taskManager.ideaSidenavModule.openNew());
 
-    // Cancel idea modal
+    // Legacy modal bindings (keep for backwards compatibility)
     document
       .getElementById("cancelIdeaBtn")
-      .addEventListener("click", () => this.closeModal());
+      ?.addEventListener("click", () => this.closeModal());
 
-    // Idea form submission
     document
       .getElementById("ideaForm")
-      .addEventListener("submit", (e) => this.save(e));
+      ?.addEventListener("submit", (e) => this.save(e));
 
-    // Idea link picker events
-    document
-      .getElementById("openIdeaLinkPickerBtn")
-      ?.addEventListener("click", () => this.openLinkPicker());
-    document
-      .getElementById("cancelIdeaLinkPickerBtn")
-      ?.addEventListener("click", () => this.closeLinkPicker());
-    document
-      .getElementById("saveIdeaLinksBtn")
-      ?.addEventListener("click", () => this.saveLinks());
-    document
-      .getElementById("ideaLinkSearch")
-      ?.addEventListener("input", (e) => this.filterLinkList(e.target.value));
-
-    // Close modal on background click
-    document.getElementById("ideaModal").addEventListener("click", (e) => {
+    document.getElementById("ideaModal")?.addEventListener("click", (e) => {
       if (e.target.id === "ideaModal") {
         this.closeModal();
       }

@@ -162,7 +162,7 @@ export class SwotModule {
 
   editSelected() {
     if (this.taskManager.selectedSwotId) {
-      this.openModal(this.taskManager.selectedSwotId);
+      this.taskManager.swotSidenavModule.openEdit(this.taskManager.selectedSwotId);
     }
   }
 
@@ -256,10 +256,10 @@ export class SwotModule {
         document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
       });
 
-    // Add SWOT button
+    // Add SWOT button - opens sidenav
     document
       .getElementById("addSwotBtn")
-      .addEventListener("click", () => this.openModal());
+      .addEventListener("click", () => this.taskManager.swotSidenavModule.openNew());
 
     // Cancel SWOT modal
     document

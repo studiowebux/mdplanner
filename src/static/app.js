@@ -19,6 +19,24 @@ import { TasksModule } from './modules/features/tasks.js';
 import { DependenciesModule } from './modules/dependencies.js';
 import { NotesModule } from './modules/features/notes.js';
 import { EnhancedNotesModule } from './modules/features/notes-enhanced.js';
+import { NoteSidenavModule } from './modules/features/note-sidenav.js';
+import { GoalSidenavModule } from './modules/features/goal-sidenav.js';
+import { MilestoneSidenavModule } from './modules/features/milestone-sidenav.js';
+import { RetrospectiveSidenavModule } from './modules/features/retrospective-sidenav.js';
+import { MindmapSidenavModule } from './modules/features/mindmap-sidenav.js';
+import { StickyNoteSidenavModule } from './modules/features/sticky-note-sidenav.js';
+import { SwotSidenavModule } from './modules/features/swot-sidenav.js';
+import { RiskSidenavModule } from './modules/features/risk-sidenav.js';
+import { LeanCanvasSidenavModule } from './modules/features/lean-canvas-sidenav.js';
+import { BusinessModelSidenavModule } from './modules/features/business-model-sidenav.js';
+import { ProjectValueSidenavModule } from './modules/features/project-value-sidenav.js';
+import { BriefSidenavModule } from './modules/features/brief-sidenav.js';
+import { IdeaSidenavModule } from './modules/features/idea-sidenav.js';
+import { C4SidenavModule } from './modules/features/c4-sidenav.js';
+import { CapacitySidenavModule } from './modules/features/capacity-sidenav.js';
+import { CRMSidenavModule } from './modules/features/crm-sidenav.js';
+import { BillingSidenavModule } from './modules/features/billing-sidenav.js';
+import { StrategicLevelsSidenavModule } from './modules/features/strategic-levels-sidenav.js';
 import { GoalsModule } from './modules/features/goals.js';
 import { MilestonesModule } from './modules/features/milestones.js';
 import { IdeasModule } from './modules/features/ideas.js';
@@ -37,6 +55,8 @@ import { CRMModule } from './modules/features/crm.js';
 import { CanvasModule } from './modules/features/canvas.js';
 import { MindmapModule } from './modules/features/mindmap.js';
 import { C4Module } from './modules/features/c4.js';
+import { OrgChartModule } from './modules/views/orgchart.js';
+import { OrgChartSidenavModule } from './modules/features/orgchart-sidenav.js';
 import { PomodoroModule } from './modules/features/pomodoro.js';
 import { ImportExportModule } from './modules/import-export.js';
 import { ProjectsModule } from './modules/projects.js';
@@ -162,6 +182,25 @@ class TaskManager {
     this.dependenciesModule = new DependenciesModule(this);
     this.notesModule = new NotesModule(this);
     this.enhancedNotesModule = new EnhancedNotesModule(this);
+    this.noteSidenavModule = new NoteSidenavModule(this);
+    this.noteSidenav = this.noteSidenavModule; // Alias for HTML onclick handlers
+    this.goalSidenavModule = new GoalSidenavModule(this);
+    this.milestoneSidenavModule = new MilestoneSidenavModule(this);
+    this.retrospectiveSidenavModule = new RetrospectiveSidenavModule(this);
+    this.mindmapSidenavModule = new MindmapSidenavModule(this);
+    this.stickyNoteSidenavModule = new StickyNoteSidenavModule(this);
+    this.swotSidenavModule = new SwotSidenavModule(this);
+    this.riskSidenavModule = new RiskSidenavModule(this);
+    this.leanCanvasSidenavModule = new LeanCanvasSidenavModule(this);
+    this.businessModelSidenavModule = new BusinessModelSidenavModule(this);
+    this.projectValueSidenavModule = new ProjectValueSidenavModule(this);
+    this.briefSidenavModule = new BriefSidenavModule(this);
+    this.ideaSidenavModule = new IdeaSidenavModule(this);
+    this.c4SidenavModule = new C4SidenavModule(this);
+    this.capacitySidenavModule = new CapacitySidenavModule(this);
+    this.crmSidenavModule = new CRMSidenavModule(this);
+    this.billingSidenavModule = new BillingSidenavModule(this);
+    this.strategicLevelsSidenavModule = new StrategicLevelsSidenavModule(this);
     this.goalsModule = new GoalsModule(this);
     this.milestonesModule = new MilestonesModule(this);
     this.ideasModule = new IdeasModule(this);
@@ -177,6 +216,8 @@ class TaskManager {
     this.strategicLevelsModule = new StrategicLevelsModule(this);
     this.billingModule = new BillingModule(this);
     this.crmModule = new CRMModule(this);
+    this.orgchartModule = new OrgChartModule(this);
+    this.orgchartSidenavModule = new OrgChartSidenavModule(this);
     this.canvasModule = new CanvasModule(this);
     this.mindmapModule = new MindmapModule(this);
     this.c4Module = new C4Module(this);
@@ -212,15 +253,6 @@ class TaskManager {
 
   async loadProjects() {
     return this.projectsModule.load();
-  }
-
-  async switchProject(filename) {
-    return this.projectsModule.switch(filename);
-  }
-
-  // Portfolio View - delegate method for switching projects from portfolio
-  async portfolioSwitchProject(filename) {
-    await this.portfolioView.switchToProject(filename);
   }
 
   checkTaskHashOnLoad() {
@@ -293,6 +325,7 @@ class TaskManager {
       { id: "strategicLevelsViewBtn", view: "strategicLevels" },
       { id: "billingViewBtn", view: "billing" },
       { id: "crmViewBtn", view: "crm" },
+      { id: "orgchartViewBtn", view: "orgchart" },
       { id: "portfolioViewBtn", view: "portfolio" },
     ];
     additionalViews.forEach(({ id, view }) => {
@@ -477,6 +510,12 @@ class TaskManager {
         this.closeMobileMenu();
       });
     document
+      .getElementById("orgchartViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("orgchart");
+        this.closeMobileMenu();
+      });
+    document
       .getElementById("portfolioViewBtnMobile")
       ?.addEventListener("click", () => {
         this.switchView("portfolio");
@@ -522,6 +561,34 @@ class TaskManager {
 
     // Task sidenav bindings
     this.taskSidenavModule.bindEvents();
+
+    // Note sidenav bindings
+    this.noteSidenavModule.bindEvents();
+
+    // Batch 1 sidenav bindings
+    this.goalSidenavModule.bindEvents();
+    this.milestoneSidenavModule.bindEvents();
+    this.retrospectiveSidenavModule.bindEvents();
+    this.mindmapSidenavModule.bindEvents();
+    this.stickyNoteSidenavModule.bindEvents();
+
+    // Batch 2 sidenav bindings (Analysis Tools)
+    this.swotSidenavModule.bindEvents();
+    this.riskSidenavModule.bindEvents();
+    this.leanCanvasSidenavModule.bindEvents();
+    this.businessModelSidenavModule.bindEvents();
+    this.projectValueSidenavModule.bindEvents();
+    this.briefSidenavModule.bindEvents();
+
+    // Batch 3 sidenav bindings (Ideas & Diagrams)
+    this.ideaSidenavModule.bindEvents();
+    this.c4SidenavModule.bindEvents();
+
+    // Batch 4 sidenav bindings (Complex modules)
+    this.capacitySidenavModule.bindEvents();
+    this.crmSidenavModule.bindEvents();
+    this.billingSidenavModule.bindEvents();
+    this.strategicLevelsSidenavModule.bindEvents();
 
     // Import/Export operations - delegated to ImportExportModule
     this.importExportModule.bindEvents();
@@ -571,6 +638,10 @@ class TaskManager {
 
     // CRM events - delegated to CRMModule
     this.crmModule.bindEvents();
+
+    // Org Chart events - delegated to OrgChartModule
+    this.orgchartModule.bindEvents();
+    this.orgchartSidenavModule.bindEvents();
 
     // Retrospectives events - delegated to RetrospectivesModule
     this.retrospectivesModule.bindEvents();
@@ -724,7 +795,7 @@ class TaskManager {
     this.notesLoaded = false;
 
     // Reset all desktop nav buttons in dropdown
-    const desktopNavBtns = ["summaryViewBtn", "listViewBtn", "boardViewBtn", "timelineViewBtn", "notesViewBtn", "goalsViewBtn", "milestonesViewBtn", "ideasViewBtn", "canvasViewBtn", "mindmapViewBtn", "c4ViewBtn", "retrospectivesViewBtn", "swotViewBtn", "riskAnalysisViewBtn", "leanCanvasViewBtn", "businessModelViewBtn", "projectValueViewBtn", "briefViewBtn", "timeTrackingViewBtn", "capacityViewBtn", "strategicLevelsViewBtn", "billingViewBtn", "crmViewBtn", "portfolioViewBtn"];
+    const desktopNavBtns = ["summaryViewBtn", "listViewBtn", "boardViewBtn", "timelineViewBtn", "notesViewBtn", "goalsViewBtn", "milestonesViewBtn", "ideasViewBtn", "canvasViewBtn", "mindmapViewBtn", "c4ViewBtn", "retrospectivesViewBtn", "swotViewBtn", "riskAnalysisViewBtn", "leanCanvasViewBtn", "businessModelViewBtn", "projectValueViewBtn", "briefViewBtn", "timeTrackingViewBtn", "capacityViewBtn", "strategicLevelsViewBtn", "billingViewBtn", "crmViewBtn", "orgchartViewBtn", "portfolioViewBtn"];
     desktopNavBtns.forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) {
@@ -734,7 +805,7 @@ class TaskManager {
     });
 
     // Reset mobile buttons
-    const mobileBtnIds = ["summaryViewBtnMobile", "listViewBtnMobile", "boardViewBtnMobile", "timelineViewBtnMobile", "notesViewBtnMobile", "goalsViewBtnMobile", "milestonesViewBtnMobile", "canvasViewBtnMobile", "mindmapViewBtnMobile", "c4ViewBtnMobile", "ideasViewBtnMobile", "retrospectivesViewBtnMobile", "swotViewBtnMobile", "riskAnalysisViewBtnMobile", "leanCanvasViewBtnMobile", "businessModelViewBtnMobile", "projectValueViewBtnMobile", "briefViewBtnMobile", "timeTrackingViewBtnMobile", "capacityViewBtnMobile", "strategicLevelsViewBtnMobile", "billingViewBtnMobile", "crmViewBtnMobile", "portfolioViewBtnMobile", "configViewBtnMobile"];
+    const mobileBtnIds = ["summaryViewBtnMobile", "listViewBtnMobile", "boardViewBtnMobile", "timelineViewBtnMobile", "notesViewBtnMobile", "goalsViewBtnMobile", "milestonesViewBtnMobile", "canvasViewBtnMobile", "mindmapViewBtnMobile", "c4ViewBtnMobile", "ideasViewBtnMobile", "retrospectivesViewBtnMobile", "swotViewBtnMobile", "riskAnalysisViewBtnMobile", "leanCanvasViewBtnMobile", "businessModelViewBtnMobile", "projectValueViewBtnMobile", "briefViewBtnMobile", "timeTrackingViewBtnMobile", "capacityViewBtnMobile", "strategicLevelsViewBtnMobile", "billingViewBtnMobile", "crmViewBtnMobile", "orgchartViewBtnMobile", "portfolioViewBtnMobile", "configViewBtnMobile"];
     mobileBtnIds.forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) {
@@ -764,6 +835,7 @@ class TaskManager {
     document.getElementById("strategicLevelsView").classList.add("hidden");
     document.getElementById("billingView")?.classList.add("hidden");
     document.getElementById("crmView")?.classList.add("hidden");
+    document.getElementById("orgchartView")?.classList.add("hidden");
     document.getElementById("portfolioView")?.classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
     document.getElementById("mindmapView").classList.add("hidden");
@@ -856,6 +928,10 @@ class TaskManager {
       this.activateViewButton("crm");
       document.getElementById("crmView").classList.remove("hidden");
       this.crmModule.load();
+    } else if (view === "orgchart") {
+      this.activateViewButton("orgchart");
+      document.getElementById("orgchartView").classList.remove("hidden");
+      this.orgchartModule.load();
     } else if (view === "canvas") {
       this.activateViewButton("canvas");
       document.getElementById("canvasView").classList.remove("hidden");
@@ -1288,6 +1364,15 @@ class TaskManager {
     await this.notesModule.deleteCurrent();
   }
 
+  // Note Sidenav - delegation to NoteSidenavModule
+  openNewNoteSidenav() {
+    this.noteSidenavModule.openNew();
+  }
+
+  openEditNoteSidenav(noteIndex) {
+    this.noteSidenavModule.openEdit(noteIndex);
+  }
+
   // Enhanced Notes Functionality - delegation to EnhancedNotesModule
   toggleEnhancedMode() {
     this.enhancedNotesModule.toggleMode();
@@ -1562,19 +1647,29 @@ class TaskManager {
   }
 
   openGoalModal() {
-    this.goalsModule.openModal();
+    // Legacy modal method - redirect to sidenav
+    this.goalSidenavModule.openNew();
+  }
+
+  openGoalSidenav() {
+    this.goalSidenavModule.openNew();
   }
 
   closeGoalModal() {
-    this.goalsModule.closeModal();
+    this.goalSidenavModule.close();
   }
 
   async handleGoalSubmit(e) {
-    return this.goalsModule.handleSubmit(e);
+    // Form is now handled by sidenav auto-save
+    e.preventDefault();
+    return this.goalSidenavModule.save();
   }
 
   editGoal(goalIndex) {
-    this.goalsModule.edit(goalIndex);
+    const goal = this.goals[goalIndex];
+    if (goal) {
+      this.goalSidenavModule.openEdit(goal.id);
+    }
   }
 
   async deleteGoal(goalIndex) {
@@ -1591,15 +1686,26 @@ class TaskManager {
   }
 
   openMilestoneModal(id = null) {
-    this.milestonesModule.openModal(id);
+    // Legacy modal method - redirect to sidenav
+    if (id) {
+      this.milestoneSidenavModule.openEdit(id);
+    } else {
+      this.milestoneSidenavModule.openNew();
+    }
+  }
+
+  openMilestoneSidenav() {
+    this.milestoneSidenavModule.openNew();
   }
 
   closeMilestoneModal() {
-    this.milestonesModule.closeModal();
+    this.milestoneSidenavModule.close();
   }
 
   async saveMilestone(e) {
-    return this.milestonesModule.save(e);
+    // Form is now handled by sidenav auto-save
+    e.preventDefault();
+    return this.milestoneSidenavModule.save();
   }
 
   async deleteMilestone(id) {
@@ -1616,14 +1722,19 @@ class TaskManager {
   }
 
   openIdeaModal(id = null) {
-    this.ideasModule.openModal(id);
+    if (id) {
+      this.ideaSidenavModule.openEdit(id);
+    } else {
+      this.ideaSidenavModule.openNew();
+    }
   }
 
   closeIdeaModal() {
-    this.ideasModule.closeModal();
+    this.ideaSidenavModule.close();
   }
 
   async saveIdea(e) {
+    // Not used - sidenav handles save internally
     return this.ideasModule.save(e);
   }
 
@@ -1641,15 +1752,26 @@ class TaskManager {
   }
 
   openRetrospectiveModal(id = null) {
-    this.retrospectivesModule.openModal(id);
+    // Legacy modal method - redirect to sidenav
+    if (id) {
+      this.retrospectiveSidenavModule.openEdit(id);
+    } else {
+      this.retrospectiveSidenavModule.openNew();
+    }
+  }
+
+  openRetrospectiveSidenav() {
+    this.retrospectiveSidenavModule.openNew();
   }
 
   closeRetrospectiveModal() {
-    this.retrospectivesModule.closeModal();
+    this.retrospectiveSidenavModule.close();
   }
 
   async saveRetrospective(e) {
-    return this.retrospectivesModule.save(e);
+    // Form is now handled by sidenav auto-save
+    e.preventDefault();
+    return this.retrospectiveSidenavModule.save();
   }
 
   async deleteRetrospective(id) {
@@ -2159,19 +2281,26 @@ class TaskManager {
   }
 
   openStickyNoteModal() {
-    return this.canvasModule.openModal();
+    // Legacy modal method - redirect to sidenav
+    this.stickyNoteSidenavModule.openNew();
+  }
+
+  openStickySidenav() {
+    this.stickyNoteSidenavModule.openNew();
   }
 
   closeStickyNoteModal() {
-    return this.canvasModule.closeModal();
+    this.stickyNoteSidenavModule.close();
   }
 
   async handleStickyNoteSubmit(e) {
-    return this.canvasModule.handleSubmit(e);
+    // Form is now handled by sidenav auto-save
+    e.preventDefault();
+    return this.stickyNoteSidenavModule.save();
   }
 
   editStickyNote(id) {
-    return this.canvasModule.edit(id);
+    this.stickyNoteSidenavModule.openEdit(id);
   }
 
   async updateStickyNoteContent(id, content) {
@@ -2228,7 +2357,9 @@ class TaskManager {
   }
 
   editSelectedMindmap() {
-    return this.mindmapModule.editSelected();
+    if (this.mindmapModule.selectedMindmap) {
+      this.mindmapSidenavModule.openEdit(this.mindmapModule.selectedMindmap.id);
+    }
   }
 
   async deleteSelectedMindmap() {
@@ -2252,11 +2383,16 @@ class TaskManager {
   }
 
   openMindmapModal() {
-    return this.mindmapModule.openModal();
+    // Legacy modal method - redirect to sidenav
+    this.mindmapSidenavModule.openNew();
+  }
+
+  openMindmapSidenav() {
+    this.mindmapSidenavModule.openNew();
   }
 
   closeMindmapModal() {
-    return this.mindmapModule.closeModal();
+    this.mindmapSidenavModule.close();
   }
 
   handleMindmapKeyDown(e) {
@@ -2653,7 +2789,7 @@ class TaskManager {
   }
 
   removeIdeaLink(linkId) {
-    this.ideasModule.removeLink(linkId);
+    this.ideaSidenavModule.removeLink(linkId);
   }
 
   // ================== BILLING - delegated to BillingModule ==================

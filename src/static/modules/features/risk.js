@@ -155,7 +155,7 @@ export class RiskModule {
 
   editSelected() {
     if (this.taskManager.selectedRiskId) {
-      this.openModal(this.taskManager.selectedRiskId);
+      this.taskManager.riskSidenavModule.openEdit(this.taskManager.selectedRiskId);
     }
   }
 
@@ -249,10 +249,10 @@ export class RiskModule {
         document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
       });
 
-    // Add Risk Analysis button
+    // Add Risk Analysis button - opens sidenav
     document
       .getElementById("addRiskAnalysisBtn")
-      .addEventListener("click", () => this.openModal());
+      .addEventListener("click", () => this.taskManager.riskSidenavModule.openNew());
 
     // Cancel Risk Analysis modal
     document

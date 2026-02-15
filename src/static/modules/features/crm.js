@@ -103,68 +103,12 @@ export class CRMModule {
     }).join("");
   }
 
+  // Company operations use sidenav - Pattern: Sidenav Module
   openCompanyModal(id = null) {
-    this.editingCompanyId = id;
-    const modal = document.getElementById("crmCompanyModal");
-    const title = document.getElementById("crmCompanyModalTitle");
-    document.getElementById("crmCompanyForm").reset();
-
-    title.textContent = id ? "Edit Company" : "Add Company";
-
     if (id) {
-      const c = this.companies.find(c => c.id === id);
-      if (c) {
-        document.getElementById("crmCompanyName").value = c.name;
-        document.getElementById("crmCompanyIndustry").value = c.industry || "";
-        document.getElementById("crmCompanyWebsite").value = c.website || "";
-        document.getElementById("crmCompanyPhone").value = c.phone || "";
-        document.getElementById("crmCompanyStreet").value = c.address?.street || "";
-        document.getElementById("crmCompanyCity").value = c.address?.city || "";
-        document.getElementById("crmCompanyState").value = c.address?.state || "";
-        document.getElementById("crmCompanyPostalCode").value = c.address?.postalCode || "";
-        document.getElementById("crmCompanyCountry").value = c.address?.country || "";
-        document.getElementById("crmCompanyNotes").value = c.notes || "";
-      }
-    }
-
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
-  }
-
-  closeCompanyModal() {
-    const modal = document.getElementById("crmCompanyModal");
-    modal.classList.add("hidden");
-    modal.classList.remove("flex");
-    this.editingCompanyId = null;
-  }
-
-  async saveCompany(e) {
-    e.preventDefault();
-    const data = {
-      name: document.getElementById("crmCompanyName").value,
-      industry: document.getElementById("crmCompanyIndustry").value || null,
-      website: document.getElementById("crmCompanyWebsite").value || null,
-      phone: document.getElementById("crmCompanyPhone").value || null,
-      address: {
-        street: document.getElementById("crmCompanyStreet").value || null,
-        city: document.getElementById("crmCompanyCity").value || null,
-        state: document.getElementById("crmCompanyState").value || null,
-        postalCode: document.getElementById("crmCompanyPostalCode").value || null,
-        country: document.getElementById("crmCompanyCountry").value || null,
-      },
-      notes: document.getElementById("crmCompanyNotes").value || null,
-    };
-
-    try {
-      if (this.editingCompanyId) {
-        await CRMAPI.updateCompany(this.editingCompanyId, data);
-      } else {
-        await CRMAPI.createCompany(data);
-      }
-      this.closeCompanyModal();
-      await this.load();
-    } catch (error) {
-      console.error("Error saving company:", error);
+      this.tm.crmSidenavModule?.openEditCompany(id);
+    } else {
+      this.tm.crmSidenavModule?.openNewCompany();
     }
   }
 
@@ -238,63 +182,12 @@ export class CRMModule {
       filteredDeals.map(d => `<option value="${d.id}">${d.title}</option>`).join("");
   }
 
+  // Contact operations use sidenav - Pattern: Sidenav Module
   openContactModal(id = null) {
-    this.editingContactId = id;
-    const modal = document.getElementById("crmContactModal");
-    const title = document.getElementById("crmContactModalTitle");
-    document.getElementById("crmContactForm").reset();
-    this.populateCompanySelect("crmContactCompany");
-
-    title.textContent = id ? "Edit Contact" : "Add Contact";
-
     if (id) {
-      const c = this.contacts.find(c => c.id === id);
-      if (c) {
-        document.getElementById("crmContactCompany").value = c.companyId;
-        document.getElementById("crmContactFirstName").value = c.firstName;
-        document.getElementById("crmContactLastName").value = c.lastName;
-        document.getElementById("crmContactEmail").value = c.email || "";
-        document.getElementById("crmContactPhone").value = c.phone || "";
-        document.getElementById("crmContactTitle").value = c.title || "";
-        document.getElementById("crmContactPrimary").checked = c.isPrimary;
-        document.getElementById("crmContactNotes").value = c.notes || "";
-      }
-    }
-
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
-  }
-
-  closeContactModal() {
-    const modal = document.getElementById("crmContactModal");
-    modal.classList.add("hidden");
-    modal.classList.remove("flex");
-    this.editingContactId = null;
-  }
-
-  async saveContact(e) {
-    e.preventDefault();
-    const data = {
-      companyId: document.getElementById("crmContactCompany").value,
-      firstName: document.getElementById("crmContactFirstName").value,
-      lastName: document.getElementById("crmContactLastName").value,
-      email: document.getElementById("crmContactEmail").value || null,
-      phone: document.getElementById("crmContactPhone").value || null,
-      title: document.getElementById("crmContactTitle").value || null,
-      isPrimary: document.getElementById("crmContactPrimary").checked,
-      notes: document.getElementById("crmContactNotes").value || null,
-    };
-
-    try {
-      if (this.editingContactId) {
-        await CRMAPI.updateContact(this.editingContactId, data);
-      } else {
-        await CRMAPI.createContact(data);
-      }
-      this.closeContactModal();
-      await this.load();
-    } catch (error) {
-      console.error("Error saving contact:", error);
+      this.tm.crmSidenavModule?.openEditContact(id);
+    } else {
+      this.tm.crmSidenavModule?.openNewContact();
     }
   }
 
@@ -370,65 +263,12 @@ export class CRMModule {
     }).join("");
   }
 
+  // Deal operations use sidenav - Pattern: Sidenav Module
   openDealModal(id = null) {
-    this.editingDealId = id;
-    const modal = document.getElementById("crmDealModal");
-    const title = document.getElementById("crmDealModalTitle");
-    document.getElementById("crmDealForm").reset();
-    this.populateCompanySelect("crmDealCompany");
-    this.populateContactSelect("crmDealContact");
-
-    title.textContent = id ? "Edit Deal" : "Add Deal";
-
     if (id) {
-      const d = this.deals.find(d => d.id === id);
-      if (d) {
-        document.getElementById("crmDealCompany").value = d.companyId;
-        this.populateContactSelect("crmDealContact", d.companyId);
-        document.getElementById("crmDealContact").value = d.contactId || "";
-        document.getElementById("crmDealTitle").value = d.title;
-        document.getElementById("crmDealValue").value = d.value;
-        document.getElementById("crmDealStage").value = d.stage;
-        document.getElementById("crmDealProbability").value = d.probability;
-        document.getElementById("crmDealExpectedClose").value = d.expectedCloseDate || "";
-        document.getElementById("crmDealNotes").value = d.notes || "";
-      }
-    }
-
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
-  }
-
-  closeDealModal() {
-    const modal = document.getElementById("crmDealModal");
-    modal.classList.add("hidden");
-    modal.classList.remove("flex");
-    this.editingDealId = null;
-  }
-
-  async saveDeal(e) {
-    e.preventDefault();
-    const data = {
-      companyId: document.getElementById("crmDealCompany").value,
-      contactId: document.getElementById("crmDealContact").value || null,
-      title: document.getElementById("crmDealTitle").value,
-      value: parseFloat(document.getElementById("crmDealValue").value) || 0,
-      stage: document.getElementById("crmDealStage").value,
-      probability: parseInt(document.getElementById("crmDealProbability").value) || 0,
-      expectedCloseDate: document.getElementById("crmDealExpectedClose").value || null,
-      notes: document.getElementById("crmDealNotes").value || null,
-    };
-
-    try {
-      if (this.editingDealId) {
-        await CRMAPI.updateDeal(this.editingDealId, data);
-      } else {
-        await CRMAPI.createDeal(data);
-      }
-      this.closeDealModal();
-      await this.load();
-    } catch (error) {
-      console.error("Error saving deal:", error);
+      this.tm.crmSidenavModule?.openEditDeal(id);
+    } else {
+      this.tm.crmSidenavModule?.openNewDeal();
     }
   }
 
@@ -516,72 +356,12 @@ export class CRMModule {
     }).join("");
   }
 
+  // Interaction operations use sidenav - Pattern: Sidenav Module
   openInteractionModal(id = null) {
-    this.editingInteractionId = id;
-    const modal = document.getElementById("crmInteractionModal");
-    const title = document.getElementById("crmInteractionModalTitle");
-    document.getElementById("crmInteractionForm").reset();
-    this.populateCompanySelect("crmInteractionCompany");
-    this.populateContactSelect("crmInteractionContact");
-    this.populateDealSelect("crmInteractionDeal");
-
-    title.textContent = id ? "Edit Interaction" : "Log Interaction";
-
-    // Set default date to today
-    document.getElementById("crmInteractionDate").value = new Date().toISOString().split("T")[0];
-
     if (id) {
-      const i = this.interactions.find(i => i.id === id);
-      if (i) {
-        document.getElementById("crmInteractionCompany").value = i.companyId;
-        this.populateContactSelect("crmInteractionContact", i.companyId);
-        this.populateDealSelect("crmInteractionDeal", i.companyId);
-        document.getElementById("crmInteractionContact").value = i.contactId || "";
-        document.getElementById("crmInteractionDeal").value = i.dealId || "";
-        document.getElementById("crmInteractionType").value = i.type;
-        document.getElementById("crmInteractionSummary").value = i.summary;
-        document.getElementById("crmInteractionDate").value = i.date;
-        document.getElementById("crmInteractionDuration").value = i.duration || "";
-        document.getElementById("crmInteractionFollowUp").value = i.nextFollowUp || "";
-        document.getElementById("crmInteractionNotes").value = i.notes || "";
-      }
-    }
-
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
-  }
-
-  closeInteractionModal() {
-    const modal = document.getElementById("crmInteractionModal");
-    modal.classList.add("hidden");
-    modal.classList.remove("flex");
-    this.editingInteractionId = null;
-  }
-
-  async saveInteraction(e) {
-    e.preventDefault();
-    const data = {
-      companyId: document.getElementById("crmInteractionCompany").value,
-      contactId: document.getElementById("crmInteractionContact").value || null,
-      dealId: document.getElementById("crmInteractionDeal").value || null,
-      type: document.getElementById("crmInteractionType").value,
-      summary: document.getElementById("crmInteractionSummary").value,
-      date: document.getElementById("crmInteractionDate").value,
-      duration: parseInt(document.getElementById("crmInteractionDuration").value) || null,
-      nextFollowUp: document.getElementById("crmInteractionFollowUp").value || null,
-      notes: document.getElementById("crmInteractionNotes").value || null,
-    };
-
-    try {
-      if (this.editingInteractionId) {
-        await CRMAPI.updateInteraction(this.editingInteractionId, data);
-      } else {
-        await CRMAPI.createInteraction(data);
-      }
-      this.closeInteractionModal();
-      await this.load();
-    } catch (error) {
-      console.error("Error saving interaction:", error);
+      this.tm.crmSidenavModule?.openEditInteraction(id);
+    } else {
+      this.tm.crmSidenavModule?.openNewInteraction();
     }
   }
 
@@ -612,26 +392,10 @@ export class CRMModule {
       tab.addEventListener("click", (e) => this.switchTab(e.target.dataset.crmTab));
     });
 
-    // Company events
+    // Add buttons use sidenav
     document.getElementById("addCRMCompanyBtn")?.addEventListener("click", () => this.openCompanyModal());
-    document.getElementById("cancelCRMCompanyBtn")?.addEventListener("click", () => this.closeCompanyModal());
-    document.getElementById("crmCompanyForm")?.addEventListener("submit", (e) => this.saveCompany(e));
-
-    // Contact events
     document.getElementById("addCRMContactBtn")?.addEventListener("click", () => this.openContactModal());
-    document.getElementById("cancelCRMContactBtn")?.addEventListener("click", () => this.closeContactModal());
-    document.getElementById("crmContactForm")?.addEventListener("submit", (e) => this.saveContact(e));
-
-    // Deal events
     document.getElementById("addCRMDealBtn")?.addEventListener("click", () => this.openDealModal());
-    document.getElementById("cancelCRMDealBtn")?.addEventListener("click", () => this.closeDealModal());
-    document.getElementById("crmDealForm")?.addEventListener("submit", (e) => this.saveDeal(e));
-    document.getElementById("crmDealCompany")?.addEventListener("change", () => this.onCompanyChange("crmDealCompany"));
-
-    // Interaction events
     document.getElementById("addCRMInteractionBtn")?.addEventListener("click", () => this.openInteractionModal());
-    document.getElementById("cancelCRMInteractionBtn")?.addEventListener("click", () => this.closeInteractionModal());
-    document.getElementById("crmInteractionForm")?.addEventListener("submit", (e) => this.saveInteraction(e));
-    document.getElementById("crmInteractionCompany")?.addEventListener("change", () => this.onCompanyChange("crmInteractionCompany"));
   }
 }

@@ -416,13 +416,13 @@ export class NotesModule {
   }
 
   bindEvents() {
-    // Add note buttons (header and inline tab)
+    // Add note buttons (header and inline tab) - use sidenav
     document
       .getElementById("addNoteBtn")
-      .addEventListener("click", () => this.openModal());
+      .addEventListener("click", () => this.tm.noteSidenavModule.openNew());
     document
       .getElementById("addNoteTabBtn")
-      .addEventListener("click", () => this.openModal());
+      .addEventListener("click", () => this.tm.noteSidenavModule.openNew());
 
     // Cancel note modal
     document
@@ -452,6 +452,15 @@ export class NotesModule {
     document
       .getElementById("toggleEditBtn")
       .addEventListener("click", () => this.toggleEditMode());
+
+    // Edit in panel (sidenav)
+    document
+      .getElementById("editInPanelBtn")
+      .addEventListener("click", () => {
+        if (this.tm.activeNote !== null) {
+          this.tm.noteSidenavModule.openEdit(this.tm.activeNote);
+        }
+      });
 
     // Delete note
     document

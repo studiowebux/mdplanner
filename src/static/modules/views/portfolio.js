@@ -323,15 +323,6 @@ export class PortfolioView {
   }
 
   /**
-   * Switch to a project.
-   * @param {string} filename - Project filename
-   */
-  async switchToProject(filename) {
-    await this.tm.switchProject(filename);
-    this.tm.switchView('summary');
-  }
-
-  /**
    * Format a date as relative time.
    * @param {Date} date
    * @returns {string}

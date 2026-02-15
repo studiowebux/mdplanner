@@ -424,15 +424,7 @@ export class MindmapModule {
 
   editSelected() {
     if (!this.selectedMindmap) return;
-
-    document.getElementById("mindmapModalTitle").textContent = "Edit Mindmap";
-    document.getElementById("mindmapTitle").value = this.selectedMindmap.title;
-
-    const structure = this.convertNodesToStructure(this.selectedMindmap.nodes);
-    document.getElementById("mindmapStructure").value = structure;
-
-    this.editingMindmap = this.selectedMindmap;
-    this.openModal();
+    this.tm.mindmapSidenavModule.openEdit(this.selectedMindmap.id);
   }
 
   async deleteSelected() {
@@ -820,7 +812,7 @@ export class MindmapModule {
   bindEvents() {
     document
       .getElementById("addMindmapBtn")
-      ?.addEventListener("click", () => this.openModal());
+      ?.addEventListener("click", () => this.tm.mindmapSidenavModule.openNew());
     document
       .getElementById("cancelMindmapBtn")
       ?.addEventListener("click", () => this.closeModal());

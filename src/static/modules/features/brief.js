@@ -167,7 +167,7 @@ export class BriefModule {
 
   edit() {
     if (this.taskManager.selectedBriefId) {
-      this.openModal(this.taskManager.selectedBriefId);
+      this.taskManager.briefSidenavModule.openEdit(this.taskManager.selectedBriefId);
     }
   }
 
@@ -268,10 +268,10 @@ export class BriefModule {
         document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
       });
 
-    // Add Brief button
+    // Add Brief button - opens sidenav
     document
       .getElementById("addBriefBtn")
-      .addEventListener("click", () => this.openModal());
+      .addEventListener("click", () => this.taskManager.briefSidenavModule.openNew());
 
     // Cancel Brief modal
     document

@@ -164,7 +164,7 @@ export class BusinessModelModule {
 
   editSelected() {
     if (this.taskManager.selectedBusinessModelId) {
-      this.openModal(this.taskManager.selectedBusinessModelId);
+      this.taskManager.businessModelSidenavModule.openEdit(this.taskManager.selectedBusinessModelId);
     }
   }
 
@@ -269,10 +269,10 @@ export class BusinessModelModule {
         document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
       });
 
-    // Add Business Model button
+    // Add Business Model button - opens sidenav
     document
       .getElementById("addBusinessModelBtn")
-      .addEventListener("click", () => this.openModal());
+      .addEventListener("click", () => this.taskManager.businessModelSidenavModule.openNew());
 
     // Cancel Business Model modal
     document

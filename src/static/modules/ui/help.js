@@ -225,6 +225,17 @@ const VIEW_HELP_CONTENT = {
     ],
     shortcuts: [],
   },
+  orgchart: {
+    title: "Org Chart",
+    description: "Visualize your team structure and reporting hierarchy.",
+    tips: [
+      "Click on any team member to view details",
+      "Toggle between Tree and Card views",
+      "Filter by department to focus on specific teams",
+      "Drag to pan the tree view, use zoom slider to resize",
+    ],
+    shortcuts: [],
+  },
   notes: {
     title: "Notes",
     description: "Rich text notes with markdown support.",

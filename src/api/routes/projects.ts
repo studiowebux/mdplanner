@@ -1,5 +1,5 @@
 /**
- * Project management routes.
+ * Project routes - simplified for single-project mode.
  */
 
 import { Hono } from "hono";
@@ -8,51 +8,36 @@ import { VERSION, GITHUB_REPO } from "../../../main.ts";
 
 export const projectsRouter = new Hono<{ Variables: AppVariables }>();
 
-// GET /projects - list all projects
+// GET /projects - returns the active project (kept for compatibility)
 projectsRouter.get("/", async (c) => {
   const pm = getProjectManager(c);
   const projects = await pm.scanProjects();
   return jsonResponse(projects);
 });
 
-// GET /projects/active - get active project
+// GET /projects/active - get active project info
 projectsRouter.get("/active", async (c) => {
   const pm = getProjectManager(c);
-  const activeFile = pm.getActiveFile();
   const projects = await pm.scanProjects();
-  const active = projects.find(p => p.filename === activeFile);
-  return jsonResponse({ filename: activeFile, project: active });
+  const active = projects[0];
+  return jsonResponse({
+    filename: pm.getActiveFile(),
+    name: active?.name || pm.getActiveFile(),
+    project: active
+  });
 });
 
-// POST /projects/switch - switch to a different project
-projectsRouter.post("/switch", async (c) => {
+// GET /projects/validate - validate project directory structure
+projectsRouter.get("/validate", async (c) => {
   const pm = getProjectManager(c);
-  const body = await c.req.json();
-  const success = await pm.switchProject(body.filename);
-  if (success) {
-    return jsonResponse({ success: true, filename: body.filename });
+
+  const { validateProjectDirectory } = await import("../../lib/parser/directory/validate.ts");
+  const projectDir = pm.getActiveProjectDir();
+
+  if (!projectDir) {
+    return errorResponse("No active project directory", 400);
   }
-  return errorResponse("Project not found", 404);
-});
 
-// POST /projects/create - create new project
-projectsRouter.post("/create", async (c) => {
-  const pm = getProjectManager(c);
-  const body = await c.req.json();
-  const filename = await pm.createProject(body.name);
-  return jsonResponse({ success: true, filename }, 201);
-});
-
-// GET /projects/enriched - list all projects with enriched metadata
-projectsRouter.get("/enriched", async (c) => {
-  const pm = getProjectManager(c);
-  const projects = await pm.scanProjectsEnriched();
-  return jsonResponse(projects);
-});
-
-// GET /projects/portfolio/summary - get portfolio summary
-projectsRouter.get("/portfolio/summary", async (c) => {
-  const pm = getProjectManager(c);
-  const summary = await pm.getPortfolioSummary();
-  return jsonResponse(summary);
+  const result = await validateProjectDirectory(projectDir);
+  return jsonResponse(result);
 });

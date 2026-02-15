@@ -51,7 +51,7 @@ export class MilestonesModule {
         </div>
         ${m.description ? `<p class="text-sm text-gray-600 dark:text-gray-300 mt-2">${m.description}</p>` : ""}
         <div class="flex justify-end space-x-2 mt-3">
-          <button onclick="taskManager.openMilestoneModal('${m.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">Edit</button>
+          <button onclick="taskManager.milestoneSidenavModule.openEdit('${m.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">Edit</button>
           <button onclick="taskManager.deleteMilestone('${m.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
         </div>
       </div>
@@ -130,10 +130,10 @@ export class MilestonesModule {
       .getElementById("milestonesViewBtn")
       .addEventListener("click", () => this.taskManager.switchView("milestones"));
 
-    // Add milestone button
+    // Add milestone button - opens sidenav
     document
       .getElementById("addMilestoneBtn")
-      .addEventListener("click", () => this.openModal());
+      .addEventListener("click", () => this.taskManager.milestoneSidenavModule.openNew());
 
     // Cancel milestone modal
     document

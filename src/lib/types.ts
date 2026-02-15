@@ -452,3 +452,17 @@ export interface Interaction {
   nextFollowUp?: string;
   notes?: string;
 }
+
+// Org Chart Types
+
+export interface OrgChartMember {
+  id: string;
+  name: string;
+  title: string;
+  department: string;
+  reportsTo?: string;
+  email?: string;
+  phone?: string;
+  startDate?: string;
+  notes?: string;
+}

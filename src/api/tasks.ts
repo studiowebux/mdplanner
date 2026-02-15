@@ -1,4 +1,4 @@
-import { MarkdownParser } from "../lib/markdown-parser.ts";
+import { DirectoryMarkdownParser } from "../lib/parser/directory/parser.ts";
 import { ProjectManager } from "../lib/project-manager.ts";
 import { Task } from "../lib/types.ts";
 import { VERSION, GITHUB_REPO } from "../../main.ts";
@@ -10,7 +10,7 @@ export class TaskAPI {
     this.projectManager = projectManager;
   }
 
-  private get parser(): MarkdownParser {
+  private get parser(): DirectoryMarkdownParser {
     return this.projectManager.getActiveParser();
   }
 

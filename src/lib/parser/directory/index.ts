@@ -22,5 +22,14 @@ export { CapacityDirectoryParser } from "./capacity.ts";
 export { StrategicLevelsDirectoryParser } from "./strategic-levels.ts";
 export { BillingDirectoryParser } from "./billing.ts";
 export { CRMDirectoryParser } from "./crm.ts";
+export { OrgChartDirectoryParser, type OrgChartMemberWithChildren, type OrgChartSummary } from "./orgchart.ts";
 export { DirectoryMarkdownParser } from "./parser.ts";
 export { migrateToDirectory, migrateFromDirectory, type MigrationResult } from "./migrate.ts";
+export {
+  validateProjectDirectory,
+  formatValidationResult,
+  type ValidationResult,
+  type ValidationError,
+  type ValidationWarning,
+  type ValidationStats,
+} from "./validate.ts";

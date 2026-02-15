@@ -1,4 +1,5 @@
 ---
+id: portfolio_api_gateway
 name: API Gateway
 category: Infrastructure
 status: active

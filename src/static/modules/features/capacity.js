@@ -325,69 +325,18 @@ export class CapacityModule {
     }
   }
 
+  // Plan operations use sidenav - Pattern: Sidenav Module
   openPlanModal(editId = null) {
-    this.taskManager.editingCapacityPlanId = editId;
-    const modal = document.getElementById("capacityPlanModal");
-    const title = document.getElementById("capacityPlanModalTitle");
-    const titleInput = document.getElementById("capacityPlanTitle");
-    const dateInput = document.getElementById("capacityPlanDate");
-    const budgetInput = document.getElementById("capacityPlanBudget");
-
     if (editId) {
-      const plan = this.taskManager.capacityPlans.find((p) => p.id === editId);
-      if (plan) {
-        title.textContent = "Edit Capacity Plan";
-        titleInput.value = plan.title;
-        dateInput.value = plan.date;
-        budgetInput.value = plan.budgetHours || "";
-      }
+      this.taskManager.capacitySidenavModule?.openEdit(editId);
     } else {
-      title.textContent = "New Capacity Plan";
-      titleInput.value = "";
-      dateInput.value = new Date().toISOString().split("T")[0];
-      budgetInput.value = "";
-    }
-    modal?.classList.remove("hidden");
-    modal?.classList.add("flex");
-  }
-
-  closePlanModal() {
-    const modal = document.getElementById("capacityPlanModal");
-    modal?.classList.add("hidden");
-    modal?.classList.remove("flex");
-    this.taskManager.editingCapacityPlanId = null;
-  }
-
-  async savePlan(e) {
-    e.preventDefault();
-    const title = document.getElementById("capacityPlanTitle").value;
-    const date = document.getElementById("capacityPlanDate").value;
-    const budget = document.getElementById("capacityPlanBudget").value;
-
-    const data = {
-      title,
-      date,
-      budgetHours: budget ? parseInt(budget) : undefined,
-    };
-
-    try {
-      if (this.taskManager.editingCapacityPlanId) {
-        await CapacityAPI.update(this.taskManager.editingCapacityPlanId, data);
-      } else {
-        const response = await CapacityAPI.create(data);
-        const newPlan = await response.json();
-        this.taskManager.selectedCapacityPlanId = newPlan.id;
-      }
-      this.closePlanModal();
-      await this.load();
-    } catch (error) {
-      console.error("Error saving capacity plan:", error);
+      this.taskManager.capacitySidenavModule?.openNew();
     }
   }
 
   editPlan() {
     if (this.taskManager.selectedCapacityPlanId) {
-      this.openPlanModal(this.taskManager.selectedCapacityPlanId);
+      this.taskManager.capacitySidenavModule?.openEdit(this.taskManager.selectedCapacityPlanId);
     }
   }
 
@@ -828,16 +777,10 @@ export class CapacityModule {
         document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
       });
 
-    // Plan modal events
+    // Plan sidenav (add button uses sidenav)
     document
       .getElementById("addCapacityPlanBtn")
       ?.addEventListener("click", () => this.openPlanModal());
-    document
-      .getElementById("cancelCapacityPlanBtn")
-      ?.addEventListener("click", () => this.closePlanModal());
-    document
-      .getElementById("capacityPlanForm")
-      ?.addEventListener("submit", (e) => this.savePlan(e));
 
     // Plan selector
     document
@@ -917,11 +860,6 @@ export class CapacityModule {
       ?.addEventListener("click", () => this.applyAutoAssign());
 
     // Close modals on background click
-    document.getElementById("capacityPlanModal")?.addEventListener("click", (e) => {
-      if (e.target.id === "capacityPlanModal") {
-        this.closePlanModal();
-      }
-    });
     document.getElementById("teamMemberModal")?.addEventListener("click", (e) => {
       if (e.target.id === "teamMemberModal") {
         this.closeTeamMemberModal();

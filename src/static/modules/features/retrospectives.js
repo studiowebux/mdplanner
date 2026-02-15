@@ -46,7 +46,7 @@ export class RetrospectivesModule {
           </div>
           <div class="flex items-center gap-2">
             <span class="px-2 py-1 text-xs rounded-full ${statusColor}">${retro.status}</span>
-            <button onclick="taskManager.openRetrospectiveModal('${retro.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">Edit</button>
+            <button onclick="taskManager.retrospectiveSidenavModule.openEdit('${retro.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">Edit</button>
           </div>
         </div>
         <div class="p-4 space-y-3">
@@ -171,10 +171,10 @@ export class RetrospectivesModule {
         document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
       });
 
-    // Add retrospective button
+    // Add retrospective button - opens sidenav
     document
       .getElementById("addRetrospectiveBtn")
-      .addEventListener("click", () => this.openModal());
+      .addEventListener("click", () => this.taskManager.retrospectiveSidenavModule.openNew());
 
     // Cancel retrospective modal
     document

@@ -95,68 +95,12 @@ export class BillingModule {
     `).join("");
   }
 
+  // Customer operations use sidenav - Pattern: Sidenav Module
   openCustomerModal(id = null) {
-    this.editingCustomerId = id;
-    const modal = document.getElementById("customerModal");
-    const title = document.getElementById("customerModalTitle");
-    document.getElementById("customerForm").reset();
-
-    title.textContent = id ? "Edit Customer" : "Add Customer";
-
     if (id) {
-      const c = this.customers.find(c => c.id === id);
-      if (c) {
-        document.getElementById("customerName").value = c.name;
-        document.getElementById("customerEmail").value = c.email || "";
-        document.getElementById("customerPhone").value = c.phone || "";
-        document.getElementById("customerCompany").value = c.company || "";
-        document.getElementById("customerStreet").value = c.billingAddress?.street || "";
-        document.getElementById("customerCity").value = c.billingAddress?.city || "";
-        document.getElementById("customerState").value = c.billingAddress?.state || "";
-        document.getElementById("customerPostalCode").value = c.billingAddress?.postalCode || "";
-        document.getElementById("customerCountry").value = c.billingAddress?.country || "";
-        document.getElementById("customerNotes").value = c.notes || "";
-      }
-    }
-
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
-  }
-
-  closeCustomerModal() {
-    const modal = document.getElementById("customerModal");
-    modal.classList.add("hidden");
-    modal.classList.remove("flex");
-    this.editingCustomerId = null;
-  }
-
-  async saveCustomer(e) {
-    e.preventDefault();
-    const data = {
-      name: document.getElementById("customerName").value,
-      email: document.getElementById("customerEmail").value || null,
-      phone: document.getElementById("customerPhone").value || null,
-      company: document.getElementById("customerCompany").value || null,
-      billingAddress: {
-        street: document.getElementById("customerStreet").value || null,
-        city: document.getElementById("customerCity").value || null,
-        state: document.getElementById("customerState").value || null,
-        postalCode: document.getElementById("customerPostalCode").value || null,
-        country: document.getElementById("customerCountry").value || null,
-      },
-      notes: document.getElementById("customerNotes").value || null,
-    };
-
-    try {
-      if (this.editingCustomerId) {
-        await BillingAPI.updateCustomer(this.editingCustomerId, data);
-      } else {
-        await BillingAPI.createCustomer(data);
-      }
-      this.closeCustomerModal();
-      await this.load();
-    } catch (error) {
-      console.error("Error saving customer:", error);
+      this.tm.billingSidenavModule?.openEditCustomer(id);
+    } else {
+      this.tm.billingSidenavModule?.openNewCustomer();
     }
   }
 
@@ -198,54 +142,12 @@ export class BillingModule {
     `).join("");
   }
 
+  // Rate operations use sidenav - Pattern: Sidenav Module
   openRateModal(id = null) {
-    this.editingBillingRateId = id;
-    const modal = document.getElementById("billingRateModal");
-    const title = document.getElementById("billingRateModalTitle");
-    document.getElementById("billingRateForm").reset();
-
-    title.textContent = id ? "Edit Billing Rate" : "Add Billing Rate";
-
     if (id) {
-      const r = this.billingRates.find(r => r.id === id);
-      if (r) {
-        document.getElementById("billingRateName").value = r.name;
-        document.getElementById("billingRateHourly").value = r.hourlyRate;
-        document.getElementById("billingRateAssignee").value = r.assignee || "";
-        document.getElementById("billingRateDefault").checked = r.isDefault || false;
-      }
-    }
-
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
-  }
-
-  closeRateModal() {
-    const modal = document.getElementById("billingRateModal");
-    modal.classList.add("hidden");
-    modal.classList.remove("flex");
-    this.editingBillingRateId = null;
-  }
-
-  async saveRate(e) {
-    e.preventDefault();
-    const data = {
-      name: document.getElementById("billingRateName").value,
-      hourlyRate: parseFloat(document.getElementById("billingRateHourly").value) || 0,
-      assignee: document.getElementById("billingRateAssignee").value || null,
-      isDefault: document.getElementById("billingRateDefault").checked,
-    };
-
-    try {
-      if (this.editingBillingRateId) {
-        await BillingAPI.updateRate(this.editingBillingRateId, data);
-      } else {
-        await BillingAPI.createRate(data);
-      }
-      this.closeRateModal();
-      await this.load();
-    } catch (error) {
-      console.error("Error saving billing rate:", error);
+      this.tm.billingSidenavModule?.openEditRate(id);
+    } else {
+      this.tm.billingSidenavModule?.openNewRate();
     }
   }
 
@@ -304,83 +206,19 @@ export class BillingModule {
     }).join("");
   }
 
+  // Quote operations use sidenav - Pattern: Sidenav Module
   openQuoteModal(id = null) {
-    this.editingQuoteId = id;
-    const modal = document.getElementById("quoteModal");
-    const title = document.getElementById("quoteModalTitle");
-    document.getElementById("quoteForm").reset();
-    this.quoteLineItems = [];
-
-    this.populateCustomerSelect("quoteCustomer");
-    title.textContent = id ? "Edit Quote" : "New Quote";
-
     if (id) {
-      const q = this.quotes.find(q => q.id === id);
-      if (q) {
-        document.getElementById("quoteTitle").value = q.title;
-        document.getElementById("quoteCustomer").value = q.customerId;
-        document.getElementById("quoteValidUntil").value = q.validUntil || "";
-        document.getElementById("quoteTaxRate").value = q.taxRate || 0;
-        document.getElementById("quoteNotes").value = q.notes || "";
-        this.quoteLineItems = [...q.lineItems];
-      }
+      this.tm.billingSidenavModule?.openEditQuote(id);
+    } else {
+      this.tm.billingSidenavModule?.openNewQuote();
     }
-
-    this.renderQuoteLineItems();
-    this.updateQuoteTotals();
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
-  }
-
-  closeQuoteModal() {
-    const modal = document.getElementById("quoteModal");
-    modal.classList.add("hidden");
-    modal.classList.remove("flex");
-    this.editingQuoteId = null;
   }
 
   populateCustomerSelect(selectId) {
     const select = document.getElementById(selectId);
     select.innerHTML = '<option value="">Select customer...</option>' +
       this.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
-  }
-
-  addQuoteLineItem() {
-    const id = crypto.randomUUID().substring(0, 8);
-    this.quoteLineItems.push({ id, description: "", quantity: 1, rate: 0, amount: 0 });
-    this.renderQuoteLineItems();
-  }
-
-  renderQuoteLineItems() {
-    const container = document.getElementById("quoteLineItems");
-    container.innerHTML = this.quoteLineItems.map((item) => `
-      <div class="flex gap-2 items-center" data-line-id="${item.id}">
-        <input type="text" placeholder="Description" value="${item.description}"
-          onchange="taskManager.updateQuoteLineItem('${item.id}', 'description', this.value)"
-          class="flex-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1 text-sm">
-        <input type="number" placeholder="Qty" value="${item.quantity}" step="0.01" min="0"
-          onchange="taskManager.updateQuoteLineItem('${item.id}', 'quantity', this.value)"
-          class="w-16 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1 text-sm">
-        <input type="number" placeholder="Rate" value="${item.rate}" step="0.01" min="0"
-          onchange="taskManager.updateQuoteLineItem('${item.id}', 'rate', this.value)"
-          class="w-20 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1 text-sm">
-        <span class="w-20 text-sm text-right text-gray-900 dark:text-gray-100">${this.formatCurrency(item.amount)}</span>
-        <button type="button" onclick="taskManager.removeQuoteLineItem('${item.id}')" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">&times;</button>
-      </div>
-    `).join("");
-  }
-
-  updateQuoteLineItem(id, field, value) {
-    const item = this.quoteLineItems.find(i => i.id === id);
-    if (!item) return;
-    if (field === "quantity" || field === "rate") {
-      item[field] = parseFloat(value) || 0;
-      item.amount = item.quantity * item.rate;
-    } else {
-      item[field] = value;
-    }
-    this.renderQuoteLineItems();
-    this.updateQuoteTotals();
   }
 
   removeQuoteLineItem(id) {
@@ -513,117 +351,12 @@ export class BillingModule {
     }).join("");
   }
 
+  // Invoice operations use sidenav - Pattern: Sidenav Module
   openInvoiceModal(id = null) {
-    this.editingInvoiceId = id;
-    const modal = document.getElementById("invoiceModal");
-    const title = document.getElementById("invoiceModalTitle");
-    document.getElementById("invoiceForm").reset();
-    this.invoiceLineItems = [];
-
-    this.populateCustomerSelect("invoiceCustomer");
-    title.textContent = id ? "Edit Invoice" : "New Invoice";
-
     if (id) {
-      const inv = this.invoices.find(i => i.id === id);
-      if (inv) {
-        document.getElementById("invoiceTitle").value = inv.title;
-        document.getElementById("invoiceCustomer").value = inv.customerId;
-        document.getElementById("invoiceDueDate").value = inv.dueDate || "";
-        document.getElementById("invoiceTaxRate").value = inv.taxRate || 0;
-        document.getElementById("invoiceNotes").value = inv.notes || "";
-        this.invoiceLineItems = [...inv.lineItems];
-      }
-    }
-
-    this.renderInvoiceLineItems();
-    this.updateInvoiceTotals();
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
-  }
-
-  closeInvoiceModal() {
-    const modal = document.getElementById("invoiceModal");
-    modal.classList.add("hidden");
-    modal.classList.remove("flex");
-    this.editingInvoiceId = null;
-  }
-
-  addInvoiceLineItem() {
-    const id = crypto.randomUUID().substring(0, 8);
-    this.invoiceLineItems.push({ id, description: "", quantity: 1, rate: 0, amount: 0 });
-    this.renderInvoiceLineItems();
-  }
-
-  renderInvoiceLineItems() {
-    const container = document.getElementById("invoiceLineItems");
-    container.innerHTML = this.invoiceLineItems.map((item) => `
-      <div class="flex gap-2 items-center" data-line-id="${item.id}">
-        <input type="text" placeholder="Description" value="${item.description}"
-          onchange="taskManager.updateInvoiceLineItem('${item.id}', 'description', this.value)"
-          class="flex-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1 text-sm">
-        <input type="number" placeholder="Qty" value="${item.quantity}" step="0.01" min="0"
-          onchange="taskManager.updateInvoiceLineItem('${item.id}', 'quantity', this.value)"
-          class="w-16 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1 text-sm">
-        <input type="number" placeholder="Rate" value="${item.rate}" step="0.01" min="0"
-          onchange="taskManager.updateInvoiceLineItem('${item.id}', 'rate', this.value)"
-          class="w-20 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1 text-sm">
-        <span class="w-20 text-sm text-right text-gray-900 dark:text-gray-100">${this.formatCurrency(item.amount)}</span>
-        <button type="button" onclick="taskManager.removeInvoiceLineItem('${item.id}')" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">&times;</button>
-      </div>
-    `).join("");
-  }
-
-  updateInvoiceLineItem(id, field, value) {
-    const item = this.invoiceLineItems.find(i => i.id === id);
-    if (!item) return;
-    if (field === "quantity" || field === "rate") {
-      item[field] = parseFloat(value) || 0;
-      item.amount = item.quantity * item.rate;
+      this.tm.billingSidenavModule?.openEditInvoice(id);
     } else {
-      item[field] = value;
-    }
-    this.renderInvoiceLineItems();
-    this.updateInvoiceTotals();
-  }
-
-  removeInvoiceLineItem(id) {
-    this.invoiceLineItems = this.invoiceLineItems.filter(i => i.id !== id);
-    this.renderInvoiceLineItems();
-    this.updateInvoiceTotals();
-  }
-
-  updateInvoiceTotals() {
-    const subtotal = this.invoiceLineItems.reduce((sum, i) => sum + i.amount, 0);
-    const taxRate = parseFloat(document.getElementById("invoiceTaxRate").value) || 0;
-    const tax = subtotal * (taxRate / 100);
-    const total = subtotal + tax;
-
-    document.getElementById("invoiceSubtotal").textContent = this.formatCurrency(subtotal);
-    document.getElementById("invoiceTaxDisplay").textContent = this.formatCurrency(tax);
-    document.getElementById("invoiceTotal").textContent = this.formatCurrency(total);
-  }
-
-  async saveInvoice(e) {
-    e.preventDefault();
-    const data = {
-      title: document.getElementById("invoiceTitle").value,
-      customerId: document.getElementById("invoiceCustomer").value,
-      dueDate: document.getElementById("invoiceDueDate").value || null,
-      taxRate: parseFloat(document.getElementById("invoiceTaxRate").value) || 0,
-      lineItems: this.invoiceLineItems,
-      notes: document.getElementById("invoiceNotes").value || null,
-    };
-
-    try {
-      if (this.editingInvoiceId) {
-        await BillingAPI.updateInvoice(this.editingInvoiceId, data);
-      } else {
-        await BillingAPI.createInvoice(data);
-      }
-      this.closeInvoiceModal();
-      await this.load();
-    } catch (error) {
-      console.error("Error saving invoice:", error);
+      this.tm.billingSidenavModule?.openNewInvoice();
     }
   }
 
@@ -770,36 +503,18 @@ export class BillingModule {
       tab.addEventListener("click", (e) => this.switchTab(e.target.dataset.billingTab));
     });
 
-    // Customer events
+    // Add buttons use sidenav
     document.getElementById("addCustomerBtn")?.addEventListener("click", () => this.openCustomerModal());
-    document.getElementById("cancelCustomerBtn")?.addEventListener("click", () => this.closeCustomerModal());
-    document.getElementById("customerForm")?.addEventListener("submit", (e) => this.saveCustomer(e));
-
-    // Billing Rate events
     document.getElementById("addBillingRateBtn")?.addEventListener("click", () => this.openRateModal());
-    document.getElementById("cancelBillingRateBtn")?.addEventListener("click", () => this.closeRateModal());
-    document.getElementById("billingRateForm")?.addEventListener("submit", (e) => this.saveRate(e));
-
-    // Quote events
     document.getElementById("addQuoteBtn")?.addEventListener("click", () => this.openQuoteModal());
-    document.getElementById("cancelQuoteBtn")?.addEventListener("click", () => this.closeQuoteModal());
-    document.getElementById("quoteForm")?.addEventListener("submit", (e) => this.saveQuote(e));
-    document.getElementById("addQuoteLineBtn")?.addEventListener("click", () => this.addQuoteLineItem());
-    document.getElementById("quoteTaxRate")?.addEventListener("input", () => this.updateQuoteTotals());
-
-    // Invoice events
     document.getElementById("addInvoiceBtn")?.addEventListener("click", () => this.openInvoiceModal());
-    document.getElementById("cancelInvoiceBtn")?.addEventListener("click", () => this.closeInvoiceModal());
-    document.getElementById("invoiceForm")?.addEventListener("submit", (e) => this.saveInvoice(e));
-    document.getElementById("addInvoiceLineBtn")?.addEventListener("click", () => this.addInvoiceLineItem());
-    document.getElementById("invoiceTaxRate")?.addEventListener("input", () => this.updateInvoiceTotals());
 
-    // Generate Invoice events
+    // Generate Invoice events (keep modal for now)
     document.getElementById("generateInvoiceBtn")?.addEventListener("click", () => this.openGenerateInvoiceModal());
     document.getElementById("cancelGenerateInvoiceBtn")?.addEventListener("click", () => this.closeGenerateInvoiceModal());
     document.getElementById("generateInvoiceForm")?.addEventListener("submit", (e) => this.generateInvoice(e));
 
-    // Payment events
+    // Payment events (keep modal for now)
     document.getElementById("cancelPaymentBtn")?.addEventListener("click", () => this.closePaymentModal());
     document.getElementById("paymentForm")?.addEventListener("submit", (e) => this.savePayment(e));
   }

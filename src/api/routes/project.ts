@@ -32,12 +32,13 @@ projectRouter.get("/sections", async (c) => {
 projectRouter.post("/config", async (c) => {
   const parser = getParser(c);
   const config = await c.req.json();
-  const success = await parser.saveProjectConfig(config);
-
-  if (success) {
+  try {
+    await parser.saveProjectConfig(config);
     return jsonResponse({ success: true });
+  } catch (error) {
+    console.error("Failed to save config:", error);
+    return errorResponse("Failed to save config", 500);
   }
-  return errorResponse("Failed to save config", 500);
 });
 
 // POST /project/rewrite - rewrite tasks with sections

@@ -560,77 +560,18 @@ export class C4Module {
   }
 
   openModal() {
-    this.tm.editingC4Component = null;
-    document.getElementById('c4ComponentModalTitle').textContent = 'Add C4 Component';
-    document.getElementById('c4ComponentIdDisplay')?.classList.add('hidden');
-    document.getElementById('c4ComponentForm').reset();
-    document.getElementById('c4ComponentLevel').value = this.tm.currentC4Level;
-    document.getElementById('c4ComponentType').value = this.getDefaultTypeForLevel(this.tm.currentC4Level);
-
-    document.getElementById('c4ConnectionsForm').innerHTML = '';
-
-    const levelSelect = document.getElementById('c4ComponentLevel');
-    if (!levelSelect.hasAttribute('data-change-bound')) {
-      levelSelect.addEventListener('change', (e) => {
-        document.getElementById('c4ComponentType').value = this.getDefaultTypeForLevel(e.target.value);
-      });
-      levelSelect.setAttribute('data-change-bound', 'true');
-    }
-    document.getElementById('c4ComponentModal').classList.remove('hidden');
-    document.getElementById('c4ComponentModal').classList.add('flex');
-
-    setTimeout(() => {
-      document.querySelectorAll('.c4-target-input').forEach(input => {
-        if (!input.hasAttribute('data-autocomplete-setup')) {
-          this.setupTargetAutocomplete(input);
-          input.setAttribute('data-autocomplete-setup', 'true');
-        }
-      });
-    }, 0);
+    // Delegate to sidenav
+    this.tm.c4SidenavModule.openNew();
   }
 
   openModalWithLevel(x = 300, y = 200) {
-    this.tm.editingC4Component = null;
-    document.getElementById('c4ComponentModalTitle').textContent = 'Add C4 Component';
-    document.getElementById('c4ComponentIdDisplay')?.classList.add('hidden');
-    document.getElementById('c4ComponentForm').reset();
-
-    const levels = ['context', 'container', 'component', 'code'];
-    let targetLevel = this.tm.currentC4Level;
-
-    if (this.tm.c4NavigationStack.length > 0) {
-      const currentParentId = this.tm.c4NavigationStack[this.tm.c4NavigationStack.length - 1];
-      const currentParent = this.tm.c4Components.find(c => c.id === currentParentId);
-      if (currentParent) {
-        const currentIndex = levels.indexOf(currentParent.level);
-        if (currentIndex < levels.length - 1) {
-          targetLevel = levels[currentIndex + 1];
-        } else {
-          targetLevel = 'code';
-        }
-      }
-    }
-
-    document.getElementById('c4ComponentLevel').value = targetLevel;
-    document.getElementById('c4ComponentType').value = this.getDefaultTypeForLevel(targetLevel);
-    document.getElementById('c4ComponentX').value = Math.round(x);
-    document.getElementById('c4ComponentY').value = Math.round(y);
-    document.getElementById('c4ComponentModal').classList.remove('hidden');
-    document.getElementById('c4ComponentModal').classList.add('flex');
-
-    setTimeout(() => {
-      document.querySelectorAll('.c4-target-input').forEach(input => {
-        if (!input.hasAttribute('data-autocomplete-setup')) {
-          this.setupTargetAutocomplete(input);
-          input.setAttribute('data-autocomplete-setup', 'true');
-        }
-      });
-    }, 0);
+    // Delegate to sidenav with position
+    this.tm.c4SidenavModule.openNew(x, y);
   }
 
   closeModal() {
-    document.getElementById('c4ComponentModal').classList.add('hidden');
-    document.getElementById('c4ComponentModal').classList.remove('flex');
+    // Delegate to sidenav
+    this.tm.c4SidenavModule.close();
   }
 
   handleSubmit(e) {
@@ -804,47 +745,8 @@ export class C4Module {
   }
 
   openEditModal(component) {
-    this.tm.editingC4Component = component;
-    document.getElementById('c4ComponentModalTitle').textContent = 'Edit C4 Component';
-
-    // Show component ID
-    const idDisplay = document.getElementById('c4ComponentIdDisplay');
-    const idValue = document.getElementById('c4ComponentIdValue');
-    if (idDisplay && idValue) {
-      idDisplay.classList.remove('hidden');
-      idValue.textContent = component.id;
-    }
-
-    document.getElementById('c4ComponentName').value = component.name;
-    document.getElementById('c4ComponentLevel').value = component.level;
-    document.getElementById('c4ComponentType').value = component.type;
-    document.getElementById('c4ComponentTechnology').value = component.technology || '';
-    document.getElementById('c4ComponentDescription').value = component.description || '';
-    document.getElementById('c4ComponentX').value = component.position.x;
-    document.getElementById('c4ComponentY').value = component.position.y;
-
-    const connectionsContainer = document.getElementById('c4ConnectionsForm');
-    connectionsContainer.innerHTML = '';
-
-    if (component.connections && component.connections.length > 0) {
-      component.connections.forEach(conn => {
-        const div = document.createElement('div');
-        div.className = 'flex space-x-2';
-        div.innerHTML = `
-          <div class="flex-1 relative">
-            <input type="text" placeholder="Target component name" class="c4-target-input w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 text-sm" autocomplete="off" value="${conn.target}">
-            <div class="c4-target-dropdown hidden absolute top-full left-0 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-b-md max-h-32 overflow-y-auto z-50"></div>
-          </div>
-          <input type="text" placeholder="Relationship label" class="flex-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 text-sm" value="${conn.label}">
-          <button type="button" class="px-2 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm" onclick="this.parentElement.remove()">X</button>
-        `;
-        connectionsContainer.appendChild(div);
-        this.setupTargetAutocomplete(div.querySelector('.c4-target-input'));
-      });
-    }
-
-    document.getElementById('c4ComponentModal').classList.remove('hidden');
-    document.getElementById('c4ComponentModal').classList.add('flex');
+    // Delegate to sidenav
+    this.tm.c4SidenavModule.openEdit(component);
   }
 
   generateId() {

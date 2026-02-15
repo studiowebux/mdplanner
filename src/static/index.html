@@ -53,9 +53,7 @@
                 <div class="flex items-center gap-4">
                     <h1 class="text-base font-semibold text-gray-900 dark:text-gray-100">MD Planner</h1>
                     <span id="currentViewLabel" class="hidden">Summary</span>
-                    <select id="projectSelector" class="text-sm bg-gray-100 dark:bg-gray-800 border-0 rounded px-2 py-1 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-gray-400 cursor-pointer max-w-[200px]">
-                        <option value="">Loading...</option>
-                    </select>
+                    <span id="projectName" class="text-sm text-gray-600 dark:text-gray-400 max-w-[200px] truncate">Loading...</span>
                 </div>
 
                 <!-- Right: Actions -->
@@ -209,6 +207,7 @@
                         <button id="capacityViewBtn" data-view="capacity" class="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Capacity</button>
                         <button id="billingViewBtn" data-view="billing" class="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Billing</button>
                         <button id="crmViewBtn" data-view="crm" class="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">CRM</button>
+                        <button id="orgchartViewBtn" data-view="orgchart" class="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Org Chart</button>
                     </div>
                 </div>
 
@@ -234,11 +233,9 @@
         <!-- Mobile menu -->
         <div id="mobileMenu" class="hidden lg:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 max-h-[80vh] overflow-y-auto">
             <div class="py-2">
-                <!-- Project selector -->
+                <!-- Project name -->
                 <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-800">
-                    <select id="projectSelectorMobile" class="w-full text-sm bg-gray-100 dark:bg-gray-800 border-0 rounded px-3 py-2 text-gray-900 dark:text-gray-100">
-                        <option value="">Loading...</option>
-                    </select>
+                    <span id="projectNameMobile" class="text-sm font-medium text-gray-900 dark:text-gray-100">Loading...</span>
                 </div>
 
                 <!-- Search -->
@@ -282,6 +279,7 @@
                     <button id="capacityViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Capacity</button>
                     <button id="billingViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Billing</button>
                     <button id="crmViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">CRM</button>
+                    <button id="orgchartViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Org Chart</button>
                 </div>
                 <div class="py-1 border-t border-gray-100 dark:border-gray-800">
                     <div class="px-4 py-1 text-xs font-medium text-gray-400 dark:text-gray-500 uppercase">Other</div>
@@ -761,6 +759,12 @@
                                     <button id="toggleEditBtn" class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors" title="Toggle Edit Mode">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <!-- Edit in Panel -->
+                                    <button id="editInPanelBtn" class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors" title="Edit in Panel">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
                                         </svg>
                                     </button>
                                     <!-- Delete -->
@@ -2278,6 +2282,78 @@
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Log calls, emails, and meetings with contacts.</p>
                         </div>
                         <div id="interactionsContainer" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Org Chart View -->
+        <div id="orgchartView" class="hidden pb-16">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Org Chart</h2>
+                        <button id="addOrgchartMemberBtn" class="btn-primary py-2 rounded-lg">+ Add Member</button>
+                    </div>
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Team Members</p>
+                            <p id="orgchartTotalMembers" class="text-xl font-bold text-gray-900 dark:text-gray-100">0</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Departments</p>
+                            <p id="orgchartTotalDepartments" class="text-xl font-bold text-gray-900 dark:text-gray-100">0</p>
+                        </div>
+                    </div>
+                    <!-- Controls -->
+                    <div class="flex items-center gap-4 flex-wrap">
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm text-gray-600 dark:text-gray-400">View:</label>
+                            <select id="orgchartViewToggle" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1">
+                                <option value="tree">Tree</option>
+                                <option value="card">Card</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm text-gray-600 dark:text-gray-400">Department:</label>
+                            <select id="orgchartDepartmentFilter" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1">
+                                <option value="">All</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm text-gray-600 dark:text-gray-400">Zoom:</label>
+                            <input type="range" id="orgchartZoom" min="0.5" max="2" step="0.1" value="1" class="w-24">
+                            <span id="orgchartZoomLevel" class="text-sm text-gray-600 dark:text-gray-400">100%</span>
+                        </div>
+                        <div class="flex items-center gap-2 ml-auto">
+                            <button id="orgchartExportPNG" class="text-sm px-3 py-1 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300" title="Export as PNG image">
+                                <svg class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                PNG
+                            </button>
+                            <button id="orgchartExportPDF" class="text-sm px-3 py-1 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300" title="Export as PDF (print)">
+                                <svg class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div id="orgchartEmptyState" class="text-center py-12 hidden">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No team members yet</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Add team members to build your org chart.</p>
+                    </div>
+                    <div id="orgchartContainer" class="relative overflow-hidden min-h-[400px]" style="cursor: grab;">
+                        <div id="orgchartViewport" class="origin-top-left transition-transform">
+                            <div id="orgchartTreeContent"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -3871,6 +3947,617 @@
         </form>
     </div>
 
+    <!-- Note Sidenav Panel -->
+    <div id="noteSidenav" class="sidenav-panel sidenav-md">
+        <div class="sidenav-header">
+            <h2 id="noteSidenavHeader" class="sidenav-title">New Note</h2>
+            <div class="flex items-center gap-2">
+                <span id="noteSidenavSaveStatus" class="text-xs hidden"></span>
+                <button type="button" id="noteSidenavClose" class="sidenav-close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="sidenav-content">
+            <div class="sidenav-section">
+                <div class="form-group">
+                    <label class="form-label">Title</label>
+                    <input type="text" id="noteSidenavTitle" class="form-input" placeholder="Note title">
+                </div>
+            </div>
+
+            <div class="sidenav-section">
+                <div class="sidenav-section-title">Mode</div>
+                <div class="flex gap-2">
+                    <button type="button" id="noteSidenavModeBasic"
+                            class="px-4 py-2 text-sm font-medium rounded-md bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900">
+                        Basic
+                    </button>
+                    <button type="button" id="noteSidenavModeEnhanced"
+                            class="px-4 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600">
+                        Enhanced
+                    </button>
+                </div>
+            </div>
+
+            <!-- Basic Editor -->
+            <div id="noteSidenavBasicEditor" class="sidenav-section">
+                <div class="form-group">
+                    <label class="form-label">Content</label>
+                    <textarea id="noteSidenavEditor" rows="15" class="form-textarea font-mono text-sm" placeholder="Write your note content here..."></textarea>
+                </div>
+            </div>
+
+            <!-- Enhanced Editor -->
+            <div id="noteSidenavEnhancedEditor" class="sidenav-section hidden">
+                <!-- Toolbar -->
+                <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Paragraphs</span>
+                    <div class="flex flex-wrap gap-1">
+                        <button type="button" id="noteSidenavAddParagraph"
+                                class="px-2 py-1 text-xs font-medium bg-gray-900 dark:bg-gray-600 text-white rounded hover:bg-gray-700 dark:hover:bg-gray-500">
+                            + Text
+                        </button>
+                        <button type="button" id="noteSidenavAddCode"
+                                class="px-2 py-1 text-xs font-medium bg-gray-500 text-white rounded hover:bg-gray-600">
+                            + Code
+                        </button>
+                        <button type="button" id="noteSidenavMultiSelect"
+                                class="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                                title="Multi-select mode">
+                            Select
+                        </button>
+                        <button type="button" id="noteSidenavImportMd"
+                                class="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                                title="Import markdown file">
+                            Import
+                        </button>
+                        <input type="file" id="noteSidenavFileInput" accept=".md,.txt" class="hidden">
+                    </div>
+                </div>
+
+                <!-- Bulk Actions (hidden by default) -->
+                <div id="noteSidenavBulkActions" class="hidden flex items-center gap-2 mb-3 p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                    <span class="text-xs text-purple-700 dark:text-purple-300">Bulk:</span>
+                    <button type="button" id="noteSidenavMoveUp"
+                            class="px-2 py-1 text-xs bg-white dark:bg-gray-800 border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-100 dark:hover:bg-purple-900">
+                        Move Up
+                    </button>
+                    <button type="button" id="noteSidenavMoveDown"
+                            class="px-2 py-1 text-xs bg-white dark:bg-gray-800 border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-100 dark:hover:bg-purple-900">
+                        Move Down
+                    </button>
+                    <button type="button" id="noteSidenavBulkDelete"
+                            class="px-2 py-1 text-xs bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900">
+                        Delete
+                    </button>
+                </div>
+
+                <!-- Drop Zone -->
+                <div id="noteSidenavDropZone" class="mb-3 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-center text-sm text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+                    Drop .md or .txt file here to import
+                </div>
+
+                <!-- Paragraphs Container -->
+                <div id="noteSidenavParagraphs" class="space-y-3">
+                    <!-- Paragraphs rendered here -->
+                </div>
+
+                <!-- Custom Sections -->
+                <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-medium text-purple-700 dark:text-purple-300">Custom Sections</span>
+                        <button type="button" id="noteSidenavAddSection"
+                                class="px-2 py-1 text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-200 dark:hover:bg-purple-800">
+                            + Section
+                        </button>
+                    </div>
+                    <div id="noteSidenavCustomSections">
+                        <!-- Custom sections rendered here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="sidenav-footer">
+            <button type="button" id="noteSidenavDelete"
+                    class="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hidden">
+                Delete
+            </button>
+            <button type="button" id="noteSidenavFullEditor"
+                    class="px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                    title="Open in full editor">
+                Full Editor
+            </button>
+            <div class="flex-1"></div>
+            <button type="button" id="noteSidenavCancel"
+                    class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Goal Sidenav -->
+    <div id="goalSidenav" class="sidenav-panel sidenav-md">
+        <div class="sidenav-header">
+            <h2 id="goalSidenavHeader" class="sidenav-title">New Goal</h2>
+            <div class="flex items-center gap-2">
+                <span id="goalSidenavSaveStatus" class="text-xs hidden"></span>
+                <button type="button" id="goalSidenavClose" class="sidenav-close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <form id="goalSidenavForm" class="flex flex-col flex-1 overflow-hidden">
+            <div class="sidenav-content">
+                <div class="sidenav-section">
+                    <div class="form-group">
+                        <label class="form-label">Title</label>
+                        <input type="text" id="goalSidenavTitle" required class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea id="goalSidenavDescription" rows="3" class="form-textarea"></textarea>
+                    </div>
+                </div>
+                <div class="sidenav-section">
+                    <div class="sidenav-section-title">Details</div>
+                    <div class="sidenav-grid">
+                        <div class="form-group">
+                            <label class="form-label">Type</label>
+                            <select id="goalSidenavType" class="form-select">
+                                <option value="project">Project</option>
+                                <option value="enterprise">Enterprise</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Status</label>
+                            <select id="goalSidenavStatus" class="form-select">
+                                <option value="planning">Planning</option>
+                                <option value="on-track">On Track</option>
+                                <option value="at-risk">At Risk</option>
+                                <option value="late">Late</option>
+                                <option value="success">Success</option>
+                                <option value="failed">Failed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">KPI</label>
+                        <input type="text" id="goalSidenavKpi" class="form-input" placeholder="e.g., Revenue $1M">
+                    </div>
+                    <div class="sidenav-grid">
+                        <div class="form-group">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" id="goalSidenavStartDate" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">End Date</label>
+                            <input type="date" id="goalSidenavEndDate" class="form-input">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sidenav-footer">
+                <button type="button" id="goalSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+                <div class="flex-1"></div>
+                <button type="button" id="goalSidenavCancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">Cancel</button>
+                <button type="submit" class="btn btn-primary ml-2">Save</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Milestone Sidenav -->
+    <div id="milestoneSidenav" class="sidenav-panel sidenav-md">
+        <div class="sidenav-header">
+            <h2 id="milestoneSidenavHeader" class="sidenav-title">New Milestone</h2>
+            <div class="flex items-center gap-2">
+                <span id="milestoneSidenavSaveStatus" class="text-xs hidden"></span>
+                <button type="button" id="milestoneSidenavClose" class="sidenav-close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <form id="milestoneSidenavForm" class="flex flex-col flex-1 overflow-hidden">
+            <div class="sidenav-content">
+                <div class="sidenav-section">
+                    <div class="form-group">
+                        <label class="form-label">Name</label>
+                        <input type="text" id="milestoneSidenavName" required class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea id="milestoneSidenavDescription" rows="3" class="form-textarea"></textarea>
+                    </div>
+                </div>
+                <div class="sidenav-section">
+                    <div class="sidenav-section-title">Details</div>
+                    <div class="sidenav-grid">
+                        <div class="form-group">
+                            <label class="form-label">Target Date</label>
+                            <input type="date" id="milestoneSidenavTarget" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Status</label>
+                            <select id="milestoneSidenavStatus" class="form-select">
+                                <option value="pending">Pending</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div id="milestoneSidenavProgress" class="sidenav-section hidden">
+                    <div class="sidenav-section-title">Progress</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-2" id="milestoneSidenavProgressText">0/0 tasks (0%)</div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                        <div id="milestoneSidenavProgressBar" class="bg-gray-900 dark:bg-gray-100 h-2 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="sidenav-footer">
+                <button type="button" id="milestoneSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+                <div class="flex-1"></div>
+                <button type="button" id="milestoneSidenavCancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">Cancel</button>
+                <button type="submit" class="btn btn-primary ml-2">Save</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Retrospective Sidenav -->
+    <div id="retroSidenav" class="sidenav-panel sidenav-lg">
+        <div class="sidenav-header">
+            <h2 id="retroSidenavHeader" class="sidenav-title">New Retrospective</h2>
+            <div class="flex items-center gap-2">
+                <span id="retroSidenavSaveStatus" class="text-xs hidden"></span>
+                <button type="button" id="retroSidenavClose" class="sidenav-close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <form id="retroSidenavForm" class="flex flex-col flex-1 overflow-hidden">
+            <div class="sidenav-content">
+                <div class="sidenav-section">
+                    <div class="form-group">
+                        <label class="form-label">Title</label>
+                        <input type="text" id="retroSidenavTitle" required class="form-input" placeholder="e.g., Sprint 5 Retrospective">
+                    </div>
+                    <div class="sidenav-grid">
+                        <div class="form-group">
+                            <label class="form-label">Date</label>
+                            <input type="date" id="retroSidenavDate" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Status</label>
+                            <select id="retroSidenavStatus" class="form-select">
+                                <option value="open">Open</option>
+                                <option value="closed">Closed</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav-section">
+                    <div class="sidenav-section-title">Continue (What went well)</div>
+                    <textarea id="retroSidenavContinue" rows="4" class="form-textarea" placeholder="One item per line"></textarea>
+                </div>
+                <div class="sidenav-section">
+                    <div class="sidenav-section-title">Stop (What to improve)</div>
+                    <textarea id="retroSidenavStop" rows="4" class="form-textarea" placeholder="One item per line"></textarea>
+                </div>
+                <div class="sidenav-section">
+                    <div class="sidenav-section-title">Start (New ideas)</div>
+                    <textarea id="retroSidenavStart" rows="4" class="form-textarea" placeholder="One item per line"></textarea>
+                </div>
+            </div>
+            <div class="sidenav-footer">
+                <button type="button" id="retroSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+                <div class="flex-1"></div>
+                <button type="button" id="retroSidenavCancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">Cancel</button>
+                <button type="submit" class="btn btn-primary ml-2">Save</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Mindmap Sidenav -->
+    <div id="mindmapSidenav" class="sidenav-panel sidenav-lg">
+        <div class="sidenav-header">
+            <h2 id="mindmapSidenavHeader" class="sidenav-title">New Mindmap</h2>
+            <div class="flex items-center gap-2">
+                <span id="mindmapSidenavSaveStatus" class="text-xs hidden"></span>
+                <button type="button" id="mindmapSidenavClose" class="sidenav-close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <form id="mindmapSidenavForm" class="flex flex-col flex-1 overflow-hidden">
+            <div class="sidenav-content">
+                <div class="sidenav-section">
+                    <div class="form-group">
+                        <label class="form-label">Title</label>
+                        <input type="text" id="mindmapSidenavTitle" required class="form-input">
+                    </div>
+                </div>
+                <div class="sidenav-section">
+                    <div class="sidenav-section-title">Structure</div>
+                    <div class="flex flex-wrap gap-1 mb-2">
+                        <button type="button" id="mmSidenavAddRoot" class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">+ Root</button>
+                        <button type="button" id="mmSidenavAddChild" class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">+ Child</button>
+                        <button type="button" id="mmSidenavAddSibling" class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">+ Sibling</button>
+                        <button type="button" id="mmSidenavIndent" class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">Indent</button>
+                        <button type="button" id="mmSidenavUnindent" class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">Unindent</button>
+                        <button type="button" id="mmSidenavMoveUp" class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">Up</button>
+                        <button type="button" id="mmSidenavMoveDown" class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">Down</button>
+                        <button type="button" id="mmSidenavDeleteLine" class="px-2 py-1 text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-800">Delete</button>
+                    </div>
+                    <textarea id="mindmapSidenavStructure" rows="10" class="form-textarea font-mono text-sm" placeholder="- Root Node&#10;  - Child 1&#10;    - Grandchild&#10;  - Child 2"></textarea>
+                </div>
+                <div class="sidenav-section">
+                    <div class="sidenav-section-title">Preview</div>
+                    <div id="mindmapSidenavPreview" class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 max-h-48 overflow-auto text-sm">
+                        <div class="text-gray-400 dark:text-gray-500 italic">Enter structure to see preview</div>
+                    </div>
+                </div>
+            </div>
+            <div class="sidenav-footer">
+                <button type="button" id="mindmapSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+                <div class="flex-1"></div>
+                <button type="button" id="mindmapSidenavCancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">Cancel</button>
+                <button type="submit" class="btn btn-primary ml-2">Save</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Sticky Note Sidenav -->
+    <div id="stickySidenav" class="sidenav-panel sidenav-sm">
+        <div class="sidenav-header">
+            <h2 id="stickySidenavHeader" class="sidenav-title">New Sticky Note</h2>
+            <div class="flex items-center gap-2">
+                <span id="stickySidenavSaveStatus" class="text-xs hidden"></span>
+                <button type="button" id="stickySidenavClose" class="sidenav-close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <form id="stickySidenavForm" class="flex flex-col flex-1 overflow-hidden">
+            <div class="sidenav-content">
+                <div class="sidenav-section">
+                    <div class="form-group">
+                        <label class="form-label">Content</label>
+                        <textarea id="stickySidenavContent" rows="6" required class="form-textarea" placeholder="Enter sticky note content..."></textarea>
+                    </div>
+                </div>
+                <div class="sidenav-section">
+                    <div class="sidenav-section-title">Color</div>
+                    <div class="flex gap-2 flex-wrap">
+                        <button type="button" class="color-option w-8 h-8 rounded-full bg-yellow-200 ring-2 ring-offset-2 ring-gray-900 dark:ring-gray-100 selected" data-color="yellow"></button>
+                        <button type="button" class="color-option w-8 h-8 rounded-full bg-pink-200" data-color="pink"></button>
+                        <button type="button" class="color-option w-8 h-8 rounded-full bg-blue-200" data-color="blue"></button>
+                        <button type="button" class="color-option w-8 h-8 rounded-full bg-green-200" data-color="green"></button>
+                        <button type="button" class="color-option w-8 h-8 rounded-full bg-purple-200" data-color="purple"></button>
+                        <button type="button" class="color-option w-8 h-8 rounded-full bg-orange-200" data-color="orange"></button>
+                    </div>
+                </div>
+            </div>
+            <div class="sidenav-footer">
+                <button type="button" id="stickySidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+                <div class="flex-1"></div>
+                <button type="button" id="stickySidenavCancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">Cancel</button>
+                <button type="submit" class="btn btn-primary ml-2">Save</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- SWOT Analysis Sidenav -->
+    <div id="swotSidenav" class="sidenav-panel sidenav-lg">
+        <div class="sidenav-header">
+            <h2 id="swotSidenavHeader" class="sidenav-title">New SWOT Analysis</h2>
+            <div class="flex items-center gap-2">
+                <span id="swotSidenavSaveStatus" class="text-xs hidden"></span>
+                <button type="button" id="swotSidenavClose" class="sidenav-close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div class="sidenav-content">
+            <div class="sidenav-section">
+                <div class="sidenav-grid">
+                    <div class="form-group"><label class="form-label">Title</label><input type="text" id="swotSidenavTitle" class="form-input" required></div>
+                    <div class="form-group"><label class="form-label">Date</label><input type="date" id="swotSidenavDate" class="form-input"></div>
+                </div>
+            </div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Strengths</span><button type="button" id="swotSidenav_add_strengths" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="swotSidenav_strengths"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Weaknesses</span><button type="button" id="swotSidenav_add_weaknesses" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="swotSidenav_weaknesses"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Opportunities</span><button type="button" id="swotSidenav_add_opportunities" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="swotSidenav_opportunities"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Threats</span><button type="button" id="swotSidenav_add_threats" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="swotSidenav_threats"></div></div>
+        </div>
+        <div class="sidenav-footer">
+            <button type="button" id="swotSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+            <div class="flex-1"></div>
+            <button type="button" id="swotSidenavCancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">Close</button>
+        </div>
+    </div>
+
+    <!-- Risk Analysis Sidenav -->
+    <div id="riskSidenav" class="sidenav-panel sidenav-lg">
+        <div class="sidenav-header">
+            <h2 id="riskSidenavHeader" class="sidenav-title">New Risk Analysis</h2>
+            <div class="flex items-center gap-2">
+                <span id="riskSidenavSaveStatus" class="text-xs hidden"></span>
+                <button type="button" id="riskSidenavClose" class="sidenav-close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div class="sidenav-content">
+            <div class="sidenav-section">
+                <div class="sidenav-grid">
+                    <div class="form-group"><label class="form-label">Title</label><input type="text" id="riskSidenavTitle" class="form-input" required></div>
+                    <div class="form-group"><label class="form-label">Date</label><input type="date" id="riskSidenavDate" class="form-input"></div>
+                </div>
+            </div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">High Impact / High Probability</span><button type="button" id="riskSidenav_add_highImpactHighProb" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="riskSidenav_highImpactHighProb"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">High Impact / Low Probability</span><button type="button" id="riskSidenav_add_highImpactLowProb" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="riskSidenav_highImpactLowProb"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Low Impact / High Probability</span><button type="button" id="riskSidenav_add_lowImpactHighProb" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="riskSidenav_lowImpactHighProb"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Low Impact / Low Probability</span><button type="button" id="riskSidenav_add_lowImpactLowProb" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="riskSidenav_lowImpactLowProb"></div></div>
+        </div>
+        <div class="sidenav-footer">
+            <button type="button" id="riskSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+            <div class="flex-1"></div>
+            <button type="button" id="riskSidenavCancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">Close</button>
+        </div>
+    </div>
+
+    <!-- Lean Canvas Sidenav -->
+    <div id="leanCanvasSidenav" class="sidenav-panel sidenav-lg">
+        <div class="sidenav-header">
+            <h2 id="leanCanvasSidenavHeader" class="sidenav-title">New Lean Canvas</h2>
+            <div class="flex items-center gap-2">
+                <span id="leanCanvasSidenavSaveStatus" class="text-xs hidden"></span>
+                <button type="button" id="leanCanvasSidenavClose" class="sidenav-close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div class="sidenav-content">
+            <div class="sidenav-section">
+                <div class="sidenav-grid">
+                    <div class="form-group"><label class="form-label">Title</label><input type="text" id="leanCanvasSidenavTitle" class="form-input" required></div>
+                    <div class="form-group"><label class="form-label">Date</label><input type="date" id="leanCanvasSidenavDate" class="form-input"></div>
+                </div>
+            </div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Problem</span><button type="button" id="leanSidenav_add_problem" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="leanSidenav_problem"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Solution</span><button type="button" id="leanSidenav_add_solution" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="leanSidenav_solution"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Unique Value Proposition</span><button type="button" id="leanSidenav_add_uniqueValueProp" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="leanSidenav_uniqueValueProp"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Unfair Advantage</span><button type="button" id="leanSidenav_add_unfairAdvantage" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="leanSidenav_unfairAdvantage"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Customer Segments</span><button type="button" id="leanSidenav_add_customerSegments" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="leanSidenav_customerSegments"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Existing Alternatives</span><button type="button" id="leanSidenav_add_existingAlternatives" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="leanSidenav_existingAlternatives"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Key Metrics</span><button type="button" id="leanSidenav_add_keyMetrics" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="leanSidenav_keyMetrics"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">High-Level Concept</span><button type="button" id="leanSidenav_add_highLevelConcept" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="leanSidenav_highLevelConcept"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Channels</span><button type="button" id="leanSidenav_add_channels" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="leanSidenav_channels"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Early Adopters</span><button type="button" id="leanSidenav_add_earlyAdopters" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="leanSidenav_earlyAdopters"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Cost Structure</span><button type="button" id="leanSidenav_add_costStructure" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="leanSidenav_costStructure"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Revenue Streams</span><button type="button" id="leanSidenav_add_revenueStreams" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="leanSidenav_revenueStreams"></div></div>
+        </div>
+        <div class="sidenav-footer">
+            <button type="button" id="leanCanvasSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+            <div class="flex-1"></div>
+            <button type="button" id="leanCanvasSidenavCancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">Close</button>
+        </div>
+    </div>
+
+    <!-- Business Model Canvas Sidenav -->
+    <div id="bmcSidenav" class="sidenav-panel sidenav-lg">
+        <div class="sidenav-header">
+            <h2 id="bmcSidenavHeader" class="sidenav-title">New Business Model Canvas</h2>
+            <div class="flex items-center gap-2">
+                <span id="bmcSidenavSaveStatus" class="text-xs hidden"></span>
+                <button type="button" id="bmcSidenavClose" class="sidenav-close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div class="sidenav-content">
+            <div class="sidenav-section">
+                <div class="sidenav-grid">
+                    <div class="form-group"><label class="form-label">Title</label><input type="text" id="bmcSidenavTitle" class="form-input" required></div>
+                    <div class="form-group"><label class="form-label">Date</label><input type="date" id="bmcSidenavDate" class="form-input"></div>
+                </div>
+            </div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Key Partners</span><button type="button" id="bmcSidenav_add_keyPartners" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="bmcSidenav_keyPartners"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Key Activities</span><button type="button" id="bmcSidenav_add_keyActivities" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="bmcSidenav_keyActivities"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Key Resources</span><button type="button" id="bmcSidenav_add_keyResources" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="bmcSidenav_keyResources"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Value Proposition</span><button type="button" id="bmcSidenav_add_valueProposition" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="bmcSidenav_valueProposition"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Customer Relationships</span><button type="button" id="bmcSidenav_add_customerRelationships" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="bmcSidenav_customerRelationships"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Channels</span><button type="button" id="bmcSidenav_add_channels" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="bmcSidenav_channels"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Customer Segments</span><button type="button" id="bmcSidenav_add_customerSegments" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="bmcSidenav_customerSegments"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Cost Structure</span><button type="button" id="bmcSidenav_add_costStructure" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="bmcSidenav_costStructure"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Revenue Streams</span><button type="button" id="bmcSidenav_add_revenueStreams" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="bmcSidenav_revenueStreams"></div></div>
+        </div>
+        <div class="sidenav-footer">
+            <button type="button" id="bmcSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+            <div class="flex-1"></div>
+            <button type="button" id="bmcSidenavCancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">Close</button>
+        </div>
+    </div>
+
+    <!-- Project Value Board Sidenav -->
+    <div id="pvbSidenav" class="sidenav-panel sidenav-md">
+        <div class="sidenav-header">
+            <h2 id="pvbSidenavHeader" class="sidenav-title">New Project Value Board</h2>
+            <div class="flex items-center gap-2">
+                <span id="pvbSidenavSaveStatus" class="text-xs hidden"></span>
+                <button type="button" id="pvbSidenavClose" class="sidenav-close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div class="sidenav-content">
+            <div class="sidenav-section">
+                <div class="sidenav-grid">
+                    <div class="form-group"><label class="form-label">Title</label><input type="text" id="pvbSidenavTitle" class="form-input" required></div>
+                    <div class="form-group"><label class="form-label">Date</label><input type="date" id="pvbSidenavDate" class="form-input"></div>
+                </div>
+            </div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Customer Segments</span><button type="button" id="pvbSidenav_add_customerSegments" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="pvbSidenav_customerSegments"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Problem</span><button type="button" id="pvbSidenav_add_problem" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="pvbSidenav_problem"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Solution</span><button type="button" id="pvbSidenav_add_solution" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="pvbSidenav_solution"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Benefit</span><button type="button" id="pvbSidenav_add_benefit" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="pvbSidenav_benefit"></div></div>
+        </div>
+        <div class="sidenav-footer">
+            <button type="button" id="pvbSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+            <div class="flex-1"></div>
+            <button type="button" id="pvbSidenavCancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">Close</button>
+        </div>
+    </div>
+
+    <!-- Brief Sidenav -->
+    <div id="briefSidenav" class="sidenav-panel sidenav-lg">
+        <div class="sidenav-header">
+            <h2 id="briefSidenavHeader" class="sidenav-title">New Brief</h2>
+            <div class="flex items-center gap-2">
+                <span id="briefSidenavSaveStatus" class="text-xs hidden"></span>
+                <button type="button" id="briefSidenavClose" class="sidenav-close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div class="sidenav-content">
+            <div class="sidenav-section">
+                <div class="sidenav-grid">
+                    <div class="form-group"><label class="form-label">Title</label><input type="text" id="briefSidenavTitle" class="form-input" required></div>
+                    <div class="form-group"><label class="form-label">Date</label><input type="date" id="briefSidenavDate" class="form-input"></div>
+                </div>
+            </div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Summary</span><button type="button" id="briefSidenav_add_summary" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="briefSidenav_summary"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Mission</span><button type="button" id="briefSidenav_add_mission" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="briefSidenav_mission"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Responsible</span><button type="button" id="briefSidenav_add_responsible" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="briefSidenav_responsible"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Accountable</span><button type="button" id="briefSidenav_add_accountable" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="briefSidenav_accountable"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Consulted</span><button type="button" id="briefSidenav_add_consulted" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="briefSidenav_consulted"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Informed</span><button type="button" id="briefSidenav_add_informed" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="briefSidenav_informed"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">High Level Budget</span><button type="button" id="briefSidenav_add_highLevelBudget" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="briefSidenav_highLevelBudget"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">High Level Timeline</span><button type="button" id="briefSidenav_add_highLevelTimeline" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="briefSidenav_highLevelTimeline"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Culture</span><button type="button" id="briefSidenav_add_culture" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="briefSidenav_culture"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Change Capacity</span><button type="button" id="briefSidenav_add_changeCapacity" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="briefSidenav_changeCapacity"></div></div>
+            <div class="sidenav-section"><div class="flex justify-between items-center mb-2"><span class="sidenav-section-title">Guiding Principles</span><button type="button" id="briefSidenav_add_guidingPrinciples" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button></div><div id="briefSidenav_guidingPrinciples"></div></div>
+        </div>
+        <div class="sidenav-footer">
+            <button type="button" id="briefSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+            <div class="flex-1"></div>
+            <button type="button" id="briefSidenavCancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">Close</button>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer id="app-footer" class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-2 px-4 text-xs text-gray-500 dark:text-gray-400 flex justify-between items-center z-40">
         <div class="flex items-center gap-2">
@@ -3899,6 +4586,313 @@
         <div class="sidenav-footer">
             <button type="button" id="portfolioDetailSave" class="btn btn-primary">Save Changes</button>
         </div>
+    </div>
+
+    <!-- Idea Sidenav -->
+    <div id="ideaSidenav" class="sidenav-panel sidenav-md">
+        <div class="sidenav-header">
+            <h2 id="ideaSidenavHeader" class="sidenav-title">New Idea</h2>
+            <div class="flex items-center gap-2">
+                <span id="ideaSidenavSaveStatus" class="text-xs hidden"></span>
+                <button type="button" id="ideaSidenavClose" class="sidenav-close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div class="sidenav-content">
+            <div class="sidenav-section">
+                <div class="form-group">
+                    <label class="form-label">Title</label>
+                    <input type="text" id="ideaSidenavTitle" class="form-input" required placeholder="What's your idea?">
+                </div>
+                <div class="sidenav-grid">
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select id="ideaSidenavStatus" class="form-input">
+                            <option value="new">New</option>
+                            <option value="considering">Considering</option>
+                            <option value="planned">Planned</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <input type="text" id="ideaSidenavCategory" class="form-input" placeholder="e.g., feature, bug">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea id="ideaSidenavDescription" class="form-input" rows="4" placeholder="Describe the idea..."></textarea>
+                </div>
+            </div>
+            <div id="ideaSidenavLinksSection" class="sidenav-section hidden">
+                <button type="button" id="ideaSidenavToggleLinks" class="flex justify-between items-center w-full text-left">
+                    <span class="sidenav-section-title">Linked Ideas (Zettelkasten)</span>
+                    <svg id="ideaSidenavToggleLinksIcon" class="w-4 h-4 text-gray-500 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="ideaSidenavLinksContent" class="mt-3">
+                    <div class="mb-3">
+                        <label class="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Current Links</label>
+                        <div id="ideaSidenavLinkedList" class="border border-gray-200 dark:border-gray-600 rounded p-2 bg-gray-50 dark:bg-gray-700 min-h-[40px]"></div>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Add Link</label>
+                        <input type="text" id="ideaSidenavLinkSearch" class="form-input mb-2" placeholder="Search ideas...">
+                        <div id="ideaSidenavLinkOptions" class="border border-gray-200 dark:border-gray-600 rounded max-h-[200px] overflow-y-auto"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="sidenav-footer">
+            <button type="button" id="ideaSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+            <div class="flex-1"></div>
+            <button type="button" id="ideaSidenavCancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">Close</button>
+        </div>
+    </div>
+
+    <!-- C4 Component Sidenav -->
+    <div id="c4Sidenav" class="sidenav-panel sidenav-md">
+        <div class="sidenav-header">
+            <h2 id="c4SidenavHeader" class="sidenav-title">New C4 Component</h2>
+            <div class="flex items-center gap-2">
+                <span id="c4SidenavSaveStatus" class="text-xs hidden"></span>
+                <button type="button" id="c4SidenavClose" class="sidenav-close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div class="sidenav-content">
+            <div class="sidenav-section">
+                <div id="c4SidenavIdDisplay" class="text-xs text-gray-500 dark:text-gray-400 mb-2 hidden">ID: <span id="c4SidenavIdValue"></span></div>
+                <div class="form-group">
+                    <label class="form-label">Component Name</label>
+                    <input type="text" id="c4SidenavName" class="form-input" required placeholder="e.g., Web Application, API Gateway">
+                </div>
+                <div class="sidenav-grid grid-cols-3">
+                    <div class="form-group">
+                        <label class="form-label">Level</label>
+                        <select id="c4SidenavLevel" class="form-input">
+                            <option value="context">Context</option>
+                            <option value="container">Container</option>
+                            <option value="component">Component</option>
+                            <option value="code">Code</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Type</label>
+                        <input type="text" id="c4SidenavType" class="form-input" placeholder="e.g., System">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Technology</label>
+                        <input type="text" id="c4SidenavTechnology" class="form-input" placeholder="e.g., React">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea id="c4SidenavDescription" class="form-input" rows="3" placeholder="What does this component do?"></textarea>
+                </div>
+                <div class="sidenav-grid">
+                    <div class="form-group">
+                        <label class="form-label">X Position</label>
+                        <input type="number" id="c4SidenavX" class="form-input" value="100">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Y Position</label>
+                        <input type="number" id="c4SidenavY" class="form-input" value="100">
+                    </div>
+                </div>
+            </div>
+            <div class="sidenav-section">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="sidenav-section-title">Connections</span>
+                    <button type="button" id="c4SidenavAddConnection" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button>
+                </div>
+                <div id="c4SidenavConnections" class="space-y-2"></div>
+            </div>
+        </div>
+        <div class="sidenav-footer">
+            <button type="button" id="c4SidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+            <div class="flex-1"></div>
+            <button type="button" id="c4SidenavCancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">Close</button>
+        </div>
+    </div>
+
+    <!-- Strategic Levels Sidenav -->
+    <div id="strategicSidenav" class="sidenav-panel sidenav-md">
+        <div class="sidenav-header">
+            <h2 id="strategicSidenavHeader" class="sidenav-title">Strategic Levels</h2>
+            <div class="flex items-center gap-2">
+                <span id="strategicSidenavSaveStatus" class="text-xs hidden"></span>
+                <button type="button" id="strategicSidenavClose" class="sidenav-close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div class="sidenav-content" id="strategicSidenavContent">
+            <!-- Dynamic content rendered by JS -->
+        </div>
+        <div class="sidenav-footer">
+            <button type="button" id="strategicSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+            <div class="flex-1"></div>
+            <button type="button" id="strategicSidenavCancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">Close</button>
+        </div>
+    </div>
+
+    <!-- Billing Entity Sidenav -->
+    <div id="billingSidenav" class="sidenav-panel sidenav-lg">
+        <div class="sidenav-header">
+            <h2 id="billingSidenavHeader" class="sidenav-title">Billing</h2>
+            <div class="flex items-center gap-2">
+                <span id="billingSidenavSaveStatus" class="text-xs hidden"></span>
+                <button type="button" id="billingSidenavClose" class="sidenav-close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div class="sidenav-content" id="billingSidenavContent">
+            <!-- Dynamic content rendered by JS -->
+        </div>
+        <div class="sidenav-footer">
+            <button type="button" id="billingSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+            <div class="flex-1"></div>
+            <button type="button" id="billingSidenavCancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">Close</button>
+        </div>
+    </div>
+
+    <!-- CRM Entity Sidenav -->
+    <div id="crmSidenav" class="sidenav-panel sidenav-md">
+        <div class="sidenav-header">
+            <h2 id="crmSidenavHeader" class="sidenav-title">CRM</h2>
+            <div class="flex items-center gap-2">
+                <span id="crmSidenavSaveStatus" class="text-xs hidden"></span>
+                <button type="button" id="crmSidenavClose" class="sidenav-close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div class="sidenav-content" id="crmSidenavContent">
+            <!-- Dynamic content rendered by JS -->
+        </div>
+        <div class="sidenav-footer">
+            <button type="button" id="crmSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+            <div class="flex-1"></div>
+            <button type="button" id="crmSidenavCancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">Close</button>
+        </div>
+    </div>
+
+    <!-- Capacity Plan Sidenav -->
+    <div id="capacitySidenav" class="sidenav-panel sidenav-md">
+        <div class="sidenav-header">
+            <h2 id="capacitySidenavHeader" class="sidenav-title">New Capacity Plan</h2>
+            <div class="flex items-center gap-2">
+                <span id="capacitySidenavSaveStatus" class="text-xs hidden"></span>
+                <button type="button" id="capacitySidenavClose" class="sidenav-close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div class="sidenav-content">
+            <div class="sidenav-section">
+                <div class="form-group">
+                    <label class="form-label">Plan Title</label>
+                    <input type="text" id="capacitySidenavTitle" class="form-input" required placeholder="e.g., Q1 2026 Capacity">
+                </div>
+                <div class="sidenav-grid">
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" id="capacitySidenavDate" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Budget (hours)</label>
+                        <input type="number" id="capacitySidenavBudget" class="form-input" min="0" placeholder="Optional">
+                    </div>
+                </div>
+            </div>
+            <div class="sidenav-section">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="sidenav-section-title">Team Members</span>
+                    <div class="flex gap-2">
+                        <button type="button" id="capacitySidenav_importAssignees" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">Import</button>
+                        <button type="button" id="capacitySidenav_addMember" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button>
+                    </div>
+                </div>
+                <div id="capacitySidenav_memberForm"></div>
+                <div id="capacitySidenav_members"></div>
+            </div>
+        </div>
+        <div class="sidenav-footer">
+            <button type="button" id="capacitySidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+            <div class="flex-1"></div>
+            <button type="button" id="capacitySidenavCancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">Close</button>
+        </div>
+    </div>
+
+    <!-- Org Chart Sidenav -->
+    <div id="orgchartSidenav" class="sidenav-panel sidenav-md">
+        <div class="sidenav-header">
+            <h2 id="orgchartSidenavHeader" class="sidenav-title">New Team Member</h2>
+            <div class="flex items-center gap-2">
+                <span id="orgchartSidenavSaveStatus" class="text-xs hidden"></span>
+                <button type="button" id="orgchartSidenavClose" class="sidenav-close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <form id="orgchartSidenavForm" class="flex flex-col flex-1 overflow-hidden">
+            <div class="sidenav-content">
+                <div class="sidenav-section">
+                    <div class="form-group">
+                        <label class="form-label">Name *</label>
+                        <input type="text" id="orgchartSidenavName" required class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Title *</label>
+                        <input type="text" id="orgchartSidenavTitle" required class="form-input" placeholder="e.g., Engineering Manager">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Department *</label>
+                        <input type="text" id="orgchartSidenavDepartment" required class="form-input" placeholder="e.g., Engineering">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Reports To</label>
+                        <select id="orgchartSidenavReportsTo" class="form-select">
+                            <option value="">None (Top Level)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="sidenav-section">
+                    <div class="sidenav-section-title">Contact Info</div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="orgchartSidenavEmail" class="form-input" placeholder="name@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone</label>
+                        <input type="tel" id="orgchartSidenavPhone" class="form-input" placeholder="+1-555-0100">
+                    </div>
+                </div>
+                <div class="sidenav-section">
+                    <div class="sidenav-section-title">Additional Info</div>
+                    <div class="form-group">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" id="orgchartSidenavStartDate" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notes</label>
+                        <textarea id="orgchartSidenavNotes" rows="3" class="form-textarea"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="sidenav-footer">
+                <button type="button" id="orgchartSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+                <div class="flex-1"></div>
+                <button type="button" id="orgchartSidenavCancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">Cancel</button>
+                <button type="submit" class="btn btn-primary ml-2">Save</button>
+            </div>
+        </form>
     </div>
 
     <!-- Help Panel -->

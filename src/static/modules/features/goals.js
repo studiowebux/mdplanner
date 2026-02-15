@@ -66,7 +66,7 @@ export class GoalsModule {
                         </div>
                     </div>
                     <div class="flex space-x-2 ml-4">
-                        <button onclick="taskManager.editGoal(${this.taskManager.goals.indexOf(goal)})" class="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100">
+                        <button onclick="taskManager.goalSidenavModule.openEdit('${goal.id}')" class="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
@@ -223,10 +223,10 @@ export class GoalsModule {
   }
 
   bindEvents() {
-    // Add goal button
+    // Add goal button - opens sidenav
     document
       .getElementById("addGoalBtn")
-      .addEventListener("click", () => this.openModal());
+      .addEventListener("click", () => this.taskManager.goalSidenavModule.openNew());
 
     // Cancel goal modal
     document

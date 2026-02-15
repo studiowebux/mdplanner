@@ -296,3 +296,44 @@
 .reduce-motion .sidenav-panel {
     transition: none;
 }
+
+/* --------------------------------------------------------------------------
+   Note Sidenav Enhancements
+   -------------------------------------------------------------------------- */
+
+/* Drop zone drag-over state */
+#noteSidenavDropZone.drag-over {
+    border-color: #9333ea;
+    background-color: #faf5ff;
+    color: #7c3aed;
+}
+
+.dark #noteSidenavDropZone.drag-over {
+    border-color: #a855f7;
+    background-color: rgba(147, 51, 234, 0.1);
+    color: #c4b5fd;
+}
+
+/* Paragraph drag styling */
+.paragraph-item[draggable="true"] {
+    cursor: grab;
+}
+
+.paragraph-item[draggable="true"]:active {
+    cursor: grabbing;
+}
+
+.paragraph-item.opacity-50 {
+    opacity: 0.5;
+}
+
+/* Three column grid */
+.sidenav-grid.grid-cols-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+@media (max-width: 480px) {
+    .sidenav-grid.grid-cols-3 {
+        grid-template-columns: 1fr;
+    }
+}

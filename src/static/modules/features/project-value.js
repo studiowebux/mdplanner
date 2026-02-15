@@ -159,7 +159,7 @@ export class ProjectValueModule {
 
   editSelected() {
     if (this.taskManager.selectedProjectValueId) {
-      this.openModal(this.taskManager.selectedProjectValueId);
+      this.taskManager.projectValueSidenavModule.openEdit(this.taskManager.selectedProjectValueId);
     }
   }
 
@@ -262,7 +262,7 @@ export class ProjectValueModule {
     // Add Project Value button
     document
       .getElementById("addProjectValueBtn")
-      .addEventListener("click", () => this.openModal());
+      .addEventListener("click", () => this.taskManager.projectValueSidenavModule.openNew());
 
     // Cancel Project Value modal
     document

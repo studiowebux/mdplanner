@@ -4,7 +4,7 @@
 
 import { Context } from "hono";
 import { ProjectManager } from "../../lib/project-manager.ts";
-import { Parser } from "../../lib/parser-interface.ts";
+import { DirectoryMarkdownParser } from "../../lib/parser/directory/parser.ts";
 
 export interface AppVariables {
   projectManager: ProjectManager;
@@ -12,7 +12,7 @@ export interface AppVariables {
 
 export type AppContext = Context<{ Variables: AppVariables }>;
 
-export function getParser(c: AppContext): Parser {
+export function getParser(c: AppContext): DirectoryMarkdownParser {
   return c.get("projectManager").getActiveParser();
 }
 

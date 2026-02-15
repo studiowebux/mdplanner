@@ -24,6 +24,7 @@ import { StrategicLevelsDirectoryParser } from "./strategic-levels.ts";
 import { BillingDirectoryParser } from "./billing.ts";
 import { CRMDirectoryParser } from "./crm.ts";
 import { PortfolioDirectoryParser, type PortfolioItem, type PortfolioSummary, type PortfolioKPI } from "./portfolio.ts";
+import { OrgChartDirectoryParser, type OrgChartMemberWithChildren, type OrgChartSummary } from "./orgchart.ts";
 import type {
   Task,
   TaskConfig,
@@ -58,6 +59,7 @@ import type {
   Interaction,
   TimeEntry,
   Payment,
+  OrgChartMember,
 } from "../../types.ts";
 
 export class DirectoryMarkdownParser {
@@ -84,6 +86,7 @@ export class DirectoryMarkdownParser {
   protected billingParser: BillingDirectoryParser;
   protected crmParser: CRMDirectoryParser;
   protected portfolioParser: PortfolioDirectoryParser;
+  protected orgchartParser: OrgChartDirectoryParser;
 
   constructor(projectDir: string) {
     this.projectDir = projectDir;
@@ -108,6 +111,7 @@ export class DirectoryMarkdownParser {
     this.billingParser = new BillingDirectoryParser(projectDir);
     this.crmParser = new CRMDirectoryParser(projectDir);
     this.portfolioParser = new PortfolioDirectoryParser(projectDir);
+    this.orgchartParser = new OrgChartDirectoryParser(projectDir);
   }
 
   // ============================================================
@@ -1106,6 +1110,59 @@ export class DirectoryMarkdownParser {
   }
 
   // ============================================================
+  // Org Chart
+  // ============================================================
+
+  async readOrgChartMembers(): Promise<OrgChartMember[]> {
+    return this.orgchartParser.readAll();
+  }
+
+  async readOrgChartMember(id: string): Promise<OrgChartMember | null> {
+    return this.orgchartParser.read(id);
+  }
+
+  async addOrgChartMember(member: Omit<OrgChartMember, "id">): Promise<OrgChartMember> {
+    return this.orgchartParser.add(member);
+  }
+
+  async updateOrgChartMember(id: string, updates: Partial<OrgChartMember>): Promise<OrgChartMember | null> {
+    return this.orgchartParser.update(id, updates);
+  }
+
+  async deleteOrgChartMember(id: string): Promise<boolean> {
+    return this.orgchartParser.delete(id);
+  }
+
+  async getOrgChartByDepartment(department: string): Promise<OrgChartMember[]> {
+    return this.orgchartParser.getByDepartment(department);
+  }
+
+  async getOrgChartDirectReports(memberId: string): Promise<OrgChartMember[]> {
+    return this.orgchartParser.getDirectReports(memberId);
+  }
+
+  async getOrgChartDepartments(): Promise<string[]> {
+    return this.orgchartParser.getDepartments();
+  }
+
+  async getOrgChartTree(): Promise<OrgChartMemberWithChildren[]> {
+    return this.orgchartParser.getTree();
+  }
+
+  async getOrgChartSummary(): Promise<OrgChartSummary> {
+    return this.orgchartParser.getSummary();
+  }
+
+  async hasOrgChart(): Promise<boolean> {
+    const members = await this.orgchartParser.readAll();
+    return members.length > 0;
+  }
+
+  async saveOrgChartMembers(members: OrgChartMember[]): Promise<void> {
+    await this.orgchartParser.saveAll(members);
+  }
+
+  // ============================================================
   // Utility Methods
   // ============================================================
 
@@ -1159,6 +1216,7 @@ export class DirectoryMarkdownParser {
     await Deno.mkdir(`${this.projectDir}/crm/contacts`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/crm/deals`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/crm/interactions`, { recursive: true });
+    await Deno.mkdir(`${this.projectDir}/orgchart`, { recursive: true });
 
     // Create project.md
     await this.projectParser.write({

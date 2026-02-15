@@ -163,7 +163,7 @@ export class LeanCanvasModule {
 
   editSelected() {
     if (this.taskManager.selectedLeanCanvasId) {
-      this.openModal(this.taskManager.selectedLeanCanvasId);
+      this.taskManager.leanCanvasSidenavModule.openEdit(this.taskManager.selectedLeanCanvasId);
     }
   }
 
@@ -265,10 +265,10 @@ export class LeanCanvasModule {
         document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
       });
 
-    // Add Lean Canvas button
+    // Add Lean Canvas button - opens sidenav
     document
       .getElementById("addLeanCanvasBtn")
-      .addEventListener("click", () => this.openModal());
+      .addEventListener("click", () => this.taskManager.leanCanvasSidenavModule.openNew());
 
     // Cancel Lean Canvas modal
     document

@@ -254,17 +254,8 @@ export class CanvasModule {
   }
 
   edit(id) {
-    const element = document.querySelector(
-      `[data-sticky-note-id="${id}"] div[contenteditable]`,
-    );
-    if (element) {
-      element.focus();
-      const range = document.createRange();
-      range.selectNodeContents(element);
-      const selection = window.getSelection();
-      selection.removeAllRanges();
-      selection.addRange(range);
-    }
+    // Open sidenav for editing
+    this.tm.stickyNoteSidenavModule.openEdit(id);
   }
 
   async updateContent(id, content) {
@@ -309,7 +300,7 @@ export class CanvasModule {
   bindEvents() {
     document
       .getElementById("addStickyNoteBtn")
-      ?.addEventListener("click", () => this.openModal());
+      ?.addEventListener("click", () => this.tm.stickyNoteSidenavModule.openNew());
     document
       .getElementById("cancelStickyNoteBtn")
       ?.addEventListener("click", () => this.closeModal());

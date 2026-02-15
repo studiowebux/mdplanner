@@ -108,28 +108,8 @@ export const ProjectAPI = {
     return response.json();
   },
 
-  async listProjects() {
-    const response = await get('/api/projects');
-    return response.json();
-  },
-
   async getActiveProject() {
     const response = await get('/api/projects/active');
-    return response.json();
-  },
-
-  async switchProject(filename) {
-    const response = await post('/api/projects/switch', { filename });
-    return response;
-  },
-
-  async listProjectsEnriched() {
-    const response = await get('/api/projects/enriched');
-    return response.json();
-  },
-
-  async getPortfolioSummary() {
-    const response = await get('/api/projects/portfolio/summary');
     return response.json();
   }
 };
@@ -829,5 +809,53 @@ export const CRMAPI = {
   async getSummary() {
     const response = await get('/api/crm/summary');
     return response.json();
+  }
+};
+
+// Org Chart API
+export const OrgChartAPI = {
+  async fetchAll() {
+    const response = await get('/api/orgchart');
+    return response.json();
+  },
+
+  async fetchTree() {
+    const response = await get('/api/orgchart/tree');
+    return response.json();
+  },
+
+  async getSummary() {
+    const response = await get('/api/orgchart/summary');
+    return response.json();
+  },
+
+  async getDepartments() {
+    const response = await get('/api/orgchart/departments');
+    return response.json();
+  },
+
+  async get(id) {
+    const response = await get(`/api/orgchart/${id}`);
+    return response.json();
+  },
+
+  async getDirectReports(id) {
+    const response = await get(`/api/orgchart/${id}/reports`);
+    return response.json();
+  },
+
+  async create(member) {
+    const response = await post('/api/orgchart', member);
+    return response;
+  },
+
+  async update(id, member) {
+    const response = await put(`/api/orgchart/${id}`, member);
+    return response;
+  },
+
+  async delete(id) {
+    const response = await del(`/api/orgchart/${id}`);
+    return response;
   }
 };
