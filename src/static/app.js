@@ -4,6 +4,8 @@ import { toggleMobileMenu, closeMobileMenu } from './modules/ui/mobile.js';
 import { AccessibilityManager } from './modules/ui/accessibility.js';
 import { FocusMode } from './modules/ui/focus-mode.js';
 import { Breadcrumb } from './modules/ui/breadcrumb.js';
+import { Sidenav } from './modules/ui/sidenav.js';
+import { TaskSidenavModule } from './modules/features/task-sidenav.js';
 import { TasksAPI, ProjectAPI } from './modules/api.js';
 import { markdownToHtml as markdownToHtmlUtil } from './modules/utils.js';
 import { SummaryView } from './modules/views/summary.js';
@@ -153,6 +155,7 @@ class TaskManager {
 
     // Initialize feature modules
     this.tasksModule = new TasksModule(this);
+    this.taskSidenavModule = new TaskSidenavModule(this);
     this.dependenciesModule = new DependenciesModule(this);
     this.notesModule = new NotesModule(this);
     this.enhancedNotesModule = new EnhancedNotesModule(this);
@@ -186,6 +189,7 @@ class TaskManager {
     ThemeManager.initDarkMode();
     ThemeManager.initFullscreenMode();
     AccessibilityManager.init();
+    Sidenav.init();
     this.bindEvents();
     await this.loadProjects(); // Load projects first
     await this.loadProjectConfig();
@@ -216,9 +220,8 @@ class TaskManager {
       const taskId = hash.substring(6); // Remove "#task="
       const task = this.findTaskById(taskId);
       if (task) {
-        // Switch to list view for better task visibility
         this.switchView("list");
-        this.openTaskModal(task);
+        this.taskSidenavModule.open(task);
       }
     }
   }
@@ -490,16 +493,19 @@ class TaskManager {
       .getElementById("fullscreenToggle")
       .addEventListener("click", () => this.toggleFullscreen());
 
-    // Add task - Desktop and Mobile
+    // Add task - Desktop and Mobile (uses sidenav)
     document
       .getElementById("addTaskBtn")
-      .addEventListener("click", () => this.openTaskModal());
+      .addEventListener("click", () => this.taskSidenavModule.open());
     document
       .getElementById("addTaskBtnMobile")
       .addEventListener("click", () => {
-        this.openTaskModal();
+        this.taskSidenavModule.open();
         this.closeMobileMenu();
       });
+
+    // Task sidenav bindings
+    this.taskSidenavModule.bindEvents();
 
     // Import/Export operations - delegated to ImportExportModule
     this.importExportModule.bindEvents();
@@ -989,26 +995,11 @@ class TaskManager {
   }
 
   closeAllModals() {
-    const modals = [
-      "taskModal",
-      "noteModal",
-      "goalModal",
-      "milestoneModal",
-      "stickyNoteModal",
-      "mindmapModal",
-      "c4ComponentModal",
-      "customSectionModal",
-      "descriptionModal",
-      "ideaModal",
-      "swotModal",
-      "swotItemModal"
-    ];
-    modals.forEach(id => {
-      const modal = document.getElementById(id);
-      if (modal && !modal.classList.contains("hidden")) {
-        modal.classList.add("hidden");
-        modal.classList.remove("flex");
-      }
+    // Find all modal elements by their common class pattern
+    const allModals = document.querySelectorAll('[id$="Modal"]:not(.hidden)');
+    allModals.forEach(modal => {
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
     });
     // Clear any modal state
     this.editingTask = null;
@@ -1034,7 +1025,10 @@ class TaskManager {
   }
 
   async editTask(taskId) {
-    return this.tasksModule.edit(taskId);
+    const task = this.findTaskById(taskId);
+    if (task) {
+      this.taskSidenavModule.open(task);
+    }
   }
 
   copyTaskLink(taskId) {
@@ -1334,6 +1328,10 @@ class TaskManager {
 
   generateTimelineId() {
     return this.enhancedNotesModule.generateTimelineId();
+  }
+
+  renderParagraphs() {
+    this.enhancedNotesModule.renderParagraphs();
   }
 
   renderCustomSections() {

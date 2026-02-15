@@ -484,139 +484,59 @@ export class MarkdownParser extends BaseParser {
   }
 
   async writeTasks(tasks: Task[], customSections?: string[]): Promise<void> {
+    // Read existing file and only update the Board section
+    // This preserves all other sections (Milestones, Retrospectives, etc.)
     const existingContent = await Deno.readTextFile(this.filePath);
-    const config = this.parseProjectConfig(existingContent);
-    const projectInfo = this.parseProjectInfo(existingContent);
+    const lines = existingContent.split("\n");
 
-    // Update lastUpdated timestamp
-    config.lastUpdated = new Date().toISOString();
+    // Find Board section boundaries
+    let boardStartIndex = -1;
+    let boardEndIndex = -1;
 
-    let content = `# ${projectInfo.name}\n\n`;
-
-    // Add project description
-    if (projectInfo.description && projectInfo.description.length > 0) {
-      content += projectInfo.description.join("\n") + "\n\n";
-    } else {
-      content +=
-        "this is a project to track task management using markdown and configurable using `{}`\n\n";
-      content += "the configurations:\n\n";
-      content += "**tag**: string[]\n";
-      content += "**due_date**: Date/Time\n";
-      content += "**assignee**: string\n";
-      content += "**priority**: 1-5 (High to Low)\n";
-      content +=
-        "**Effort**: int (number of estimated days to complete the tasks)\n";
-      content += "**blocked_by**: taskId[] (so string[])\n";
-      content += "**(string)** : is the task id\n";
-      content += "**[ ]:** mark a task as completed\n";
-      content +=
-        "**Children items without [] and (string)**: it is a multiline description of the parent item\n\n\n";
-    }
-
-    content = content.trim();
-
-    // Add configuration section
-    content += "\n<!-- Configurations -->\n# Configurations\n\n";
-    content += `Start Date: ${
-      config.startDate || new Date().toISOString().split("T")[0]
-    }\n`;
-    if (config.workingDaysPerWeek && config.workingDaysPerWeek !== 5) {
-      content += `Working Days: ${config.workingDaysPerWeek}\n`;
-    }
-    content += `Last Updated: ${config.lastUpdated}\n`;
-    content += "\n";
-
-    if (config.assignees && config.assignees.length > 0) {
-      content += "Assignees:\n";
-      // Sort assignees alphabetically
-      [...config.assignees].sort().forEach((assignee) => {
-        content += `- ${assignee}\n`;
-      });
-      content += "\n";
-    }
-
-    if (config.tags && config.tags.length > 0) {
-      content += "Tags:\n";
-      // Sort tags alphabetically
-      [...config.tags].sort().forEach((tag) => {
-        content += `- ${tag}\n`;
-      });
-      content += "\n";
-    }
-
-    if (config.links && config.links.length > 0) {
-      content += "Links:\n";
-      config.links.forEach((link) => {
-        content += `- [${link.title}](${link.url})\n`;
-      });
-      content += "\n";
-    }
-
-    // Add notes section
-    content += "<!-- Notes -->\n# Notes\n\n";
-    for (const note of projectInfo.notes) {
-      content += `## ${note.title}\n\n`;
-      content += `<!-- id: ${note.id} | created: ${note.createdAt} | updated: ${note.updatedAt} | rev: ${note.revision || 1} -->\n`;
-      content += `${note.content}\n\n`;
-    }
-
-    // Add goals section
-    content += this.goalsParser.goalsToMarkdown(projectInfo.goals);
-
-    // Add canvas section
-    content += "<!-- Canvas -->\n# Canvas\n\n";
-    for (const stickyNote of projectInfo.stickyNotes) {
-      // Generate sticky note markdown - ALWAYS use "Sticky Note" as header
-      const stickyNoteLines = [
-        `## Sticky note {color: ${stickyNote.color}; position: {x: ${stickyNote.position.x}, y: ${stickyNote.position.y}}; size: {width: ${
-          stickyNote.size?.width || 0
-        }, height: ${stickyNote.size?.height || 0}}}`,
-        "",
-        `<!-- id: ${stickyNote.id} -->`,
-        stickyNote.content,
-        "",
-      ];
-
-      content += stickyNoteLines.join("\n");
-    }
-
-    // Add mindmap section
-    content += "<!-- Mindmap -->\n# Mindmap\n\n";
-    for (const mindmap of projectInfo.mindmaps) {
-      content += `## ${mindmap.title}\n\n`;
-      content += `<!-- id: ${mindmap.id} -->\n\n`;
-
-      // Write mindmap nodes as nested list
-      const rootNodes = mindmap.nodes.filter((node) => node.level === 0);
-      for (const rootNode of rootNodes) {
-        content += this.canvasParser.mindmapNodeToMarkdown(rootNode, mindmap.nodes, 0);
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (boardStartIndex === -1 && (line === "# Board" || line === "<!-- Board -->")) {
+        boardStartIndex = i;
+      } else if (boardStartIndex !== -1 && line.startsWith("# ") && line !== "# Board") {
+        boardEndIndex = i;
+        break;
       }
-      content += "\n";
     }
 
-    // Add C4 Architecture section
-    content += this.c4Parser.c4ComponentsToMarkdown(projectInfo.c4Components || []);
-
-    content += "<!-- Board -->\n# Board\n\n";
-
-    // Use custom sections if provided, otherwise get from board
+    // Generate new Board section content
     const sections = customSections || this.getSectionsFromBoard();
+    let boardContent = "<!-- Board -->\n# Board\n\n";
 
     for (const section of sections) {
-      content += `## ${section}\n\n`;
+      boardContent += `## ${section}\n\n`;
 
       const sectionTasks = tasks.filter((task) =>
         task.section === section && !task.parentId
       );
 
       for (const task of sectionTasks) {
-        content += this.taskParser.taskToMarkdown(task, 0);
+        boardContent += this.taskParser.taskToMarkdown(task, 0);
       }
 
-      content += "\n";
+      boardContent += "\n";
     }
 
-    await this.safeWriteFile(content);
+    // Replace only the Board section, keeping everything else
+    if (boardStartIndex !== -1) {
+      // Find comment line before # Board if it exists
+      if (boardStartIndex > 0 && lines[boardStartIndex - 1].trim() === "<!-- Board -->") {
+        boardStartIndex--;
+      }
+
+      const before = lines.slice(0, boardStartIndex);
+      const after = boardEndIndex !== -1 ? lines.slice(boardEndIndex) : [];
+      const newContent = [...before, boardContent.trimEnd(), ...after].join("\n");
+      await this.safeWriteFile(newContent);
+    } else {
+      // No Board section exists, append it at the end
+      const newContent = existingContent.trimEnd() + "\n\n" + boardContent;
+      await this.safeWriteFile(newContent);
+    }
   }
 
   async updateTask(taskId: string, updates: Partial<Task>): Promise<boolean> {

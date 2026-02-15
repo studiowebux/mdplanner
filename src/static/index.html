@@ -3725,6 +3725,108 @@
         </div>
     </div>
 
+    <!-- Task Sidenav Panel -->
+    <div id="taskSidenav" class="sidenav-panel sidenav-md">
+        <div class="sidenav-header">
+            <h2 id="sidenavTaskTitle" class="sidenav-title">Add Task</h2>
+            <button type="button" id="sidenavTaskClose" class="sidenav-close" aria-label="Close">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <form id="sidenavTaskForm" class="flex flex-col flex-1 overflow-hidden">
+            <div class="sidenav-content">
+                <div class="sidenav-section">
+                    <div class="form-group">
+                        <label class="form-label">Title</label>
+                        <input type="text" id="sidenavTaskTitleInput" required class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea id="sidenavTaskDescription" rows="3" class="form-textarea"></textarea>
+                    </div>
+                </div>
+
+                <div class="sidenav-section">
+                    <div class="sidenav-section-title">Details</div>
+                    <div class="sidenav-grid">
+                        <div class="form-group">
+                            <label class="form-label">Section</label>
+                            <select id="sidenavTaskSection" class="form-select"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Priority</label>
+                            <select id="sidenavTaskPriority" class="form-select">
+                                <option value="">None</option>
+                                <option value="1">P1 - Critical</option>
+                                <option value="2">P2 - High</option>
+                                <option value="3">P3 - Medium</option>
+                                <option value="4">P4 - Low</option>
+                                <option value="5">P5 - Minor</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="sidenav-grid">
+                        <div class="form-group">
+                            <label class="form-label">Assignee</label>
+                            <select id="sidenavTaskAssignee" class="form-select"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Effort (days)</label>
+                            <input type="number" id="sidenavTaskEffort" min="1" class="form-input">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidenav-section">
+                    <div class="sidenav-section-title">Schedule</div>
+                    <div class="form-group">
+                        <label class="form-label">Due Date</label>
+                        <input type="datetime-local" id="sidenavTaskDueDate" class="form-input">
+                    </div>
+                    <div class="sidenav-grid">
+                        <div class="form-group">
+                            <label class="form-label">Planned Start</label>
+                            <input type="date" id="sidenavTaskPlannedStart" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Planned End</label>
+                            <input type="date" id="sidenavTaskPlannedEnd" class="form-input">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidenav-section">
+                    <div class="sidenav-section-title">Organization</div>
+                    <div class="form-group">
+                        <label class="form-label">Milestone</label>
+                        <input type="text" id="sidenavTaskMilestone" placeholder="e.g., v1.0, Sprint 2" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tags</label>
+                        <select id="sidenavTaskTags" multiple class="form-select" style="min-height: 80px;"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Blocked By</label>
+                        <input type="text" id="sidenavTaskBlockedBy" placeholder="Search tasks..." class="form-input" autocomplete="off">
+                        <div id="sidenavDependencyDropdown" class="absolute z-10 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg mt-1 max-h-48 overflow-y-auto hidden"></div>
+                        <div id="sidenavSelectedDependencies" class="flex flex-wrap gap-2 mt-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidenav-footer">
+                <button type="button" id="sidenavTaskCancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-gray-900 dark:bg-gray-600 rounded-md hover:bg-gray-700 dark:hover:bg-gray-500">
+                    Save Task
+                </button>
+            </div>
+        </form>
+    </div>
+
     <!-- Footer -->
     <footer id="app-footer" class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-2 px-4 text-xs text-gray-500 dark:text-gray-400 flex justify-between items-center z-40">
         <div class="flex items-center gap-2">
