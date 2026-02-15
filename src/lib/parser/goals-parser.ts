@@ -219,4 +219,109 @@ export class GoalsParser extends BaseParser {
       id: this.generateGoalId(),
     };
   }
+
+  /**
+   * Finds the Goals section boundaries in the file.
+   * Returns startIndex (line with marker) and endIndex (line of next section).
+   */
+  findGoalsSection(lines: string[]): { startIndex: number; endIndex: number } {
+    let startIndex = -1;
+    let endIndex = -1;
+
+    // Known section boundary patterns
+    const sectionBoundaryPattern = /^<!-- (Notes|Canvas|Mindmap|C4 Architecture|Board|Configurations|Milestones|Ideas|Retrospectives|SWOT Analysis|Risk Analysis|Lean Canvas|Business Model|Project Value Board|Brief|Time Tracking|Capacity Planning|Strategic Levels|Billing|Customers|Billing Rates|Quotes|Invoices|Companies|Contacts|Deals|Interactions) -->$/;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+
+      if (startIndex === -1) {
+        if (line === "<!-- Goals -->" || line === "# Goals") {
+          startIndex = line === "<!-- Goals -->" ? i : i;
+          // If we found "# Goals", check if there's a comment before it
+          if (line === "# Goals" && i > 0 && lines[i - 1].trim() === "<!-- Goals -->") {
+            startIndex = i - 1;
+          }
+        }
+      } else {
+        // Look for the next section - must be a known section boundary
+        if (sectionBoundaryPattern.test(line)) {
+          endIndex = i;
+          break;
+        }
+        // Also check for # headers that are sections (not ## which are goals)
+        if (line.startsWith("# ") && !line.startsWith("## ") && line !== "# Goals") {
+          endIndex = i;
+          break;
+        }
+      }
+    }
+
+    return { startIndex, endIndex };
+  }
+
+  /**
+   * Reads all goals from the file using section-specific parsing.
+   */
+  async readGoals(): Promise<Goal[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const { startIndex } = this.findGoalsSection(lines);
+
+    if (startIndex === -1) {
+      return [];
+    }
+
+    // Find the first ## header after the section start
+    let parseStart = startIndex;
+    for (let i = startIndex; i < lines.length; i++) {
+      if (lines[i].trim().startsWith("## ")) {
+        parseStart = i;
+        break;
+      }
+    }
+
+    const result = this.parseGoalsSection(lines, parseStart);
+    return result.goals;
+  }
+
+  /**
+   * Saves goals by replacing only the Goals section in the file.
+   * This preserves all other sections.
+   */
+  async saveGoals(goals: Goal[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    const { startIndex, endIndex } = this.findGoalsSection(lines);
+    const goalsContent = this.goalsToMarkdown(goals);
+
+    if (startIndex === -1) {
+      // No Goals section exists, find where to insert it
+      // Insert before Canvas, Mindmap, or Board
+      let insertIndex = lines.length;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (
+          line === "<!-- Canvas -->" ||
+          line === "# Canvas" ||
+          line === "<!-- Mindmap -->" ||
+          line === "# Mindmap" ||
+          line === "<!-- Board -->" ||
+          line === "# Board"
+        ) {
+          insertIndex = i;
+          break;
+        }
+      }
+      lines.splice(insertIndex, 0, goalsContent);
+    } else {
+      // Replace existing Goals section
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, goalsContent.trimEnd(), ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
 }

@@ -13,6 +13,11 @@ export class NotesParser extends BaseParser {
   /**
    * Parses the notes section from markdown lines starting at the given index.
    * Returns the parsed notes and the next line index to process.
+   *
+   * Handles enhanced mode notes with custom sections that may contain ## headers.
+   * Custom sections are delimited by:
+   *   <!-- Custom Section: ... -->  (start)
+   *   <!-- End Custom Section -->   (end)
    */
   parseNotesSection(
     lines: string[],
@@ -24,8 +29,13 @@ export class NotesParser extends BaseParser {
     while (i < lines.length) {
       const line = lines[i].trim();
 
-      // Stop at next major section
+      // Stop at next major section (# header or section boundary comment)
       if (line.startsWith("# ") && !line.startsWith("## ")) {
+        break;
+      }
+
+      // Stop at section boundary comments (excluding custom section markers)
+      if (line.match(/^<!-- (Board|Goals|Configurations|Canvas|Mindmap|C4 Architecture|Milestones|Ideas|Retrospectives|SWOT|Risk|Lean|Business|Brief|Time|Capacity|Strategic|Billing|Companies|Contacts|Deals|Interactions) -->$/)) {
         break;
       }
 
@@ -33,6 +43,7 @@ export class NotesParser extends BaseParser {
       if (line.startsWith("## ")) {
         const title = line.substring(3).trim();
         const noteContent: string[] = [];
+        let customSectionDepth = 0;
         i++;
 
         // Collect note content until next note or major section
@@ -40,17 +51,22 @@ export class NotesParser extends BaseParser {
           const contentLine = lines[i];
           const trimmedLine = contentLine.trim();
 
-          // Break on section boundary comments
+          // Track custom section depth
+          if (trimmedLine.match(/^<!-- Custom Section:/)) {
+            customSectionDepth++;
+          } else if (trimmedLine === "<!-- End Custom Section -->") {
+            customSectionDepth = Math.max(0, customSectionDepth - 1);
+          }
+
+          // Break on section boundary comments (but not custom section markers)
           if (
-            trimmedLine.match(
-              /<!-- (Board|Goals|Configurations|Notes|Canvas|Mindmap) -->/,
-            )
+            trimmedLine.match(/^<!-- (Board|Goals|Configurations|Canvas|Mindmap|C4 Architecture|Milestones|Ideas|Retrospectives|SWOT|Risk|Lean|Business|Brief|Time|Capacity|Strategic|Billing|Companies|Contacts|Deals|Interactions) -->$/)
           ) {
             break;
           }
 
-          // Check if this is a new note (## followed by <!-- id: note_X --> within a few lines)
-          if (trimmedLine.startsWith("## ")) {
+          // Check if this is a new note ONLY if we're not inside a custom section
+          if (customSectionDepth === 0 && trimmedLine.startsWith("## ")) {
             // Look ahead to see if there's an ID comment coming up
             let hasIdComment = false;
             for (
@@ -58,16 +74,15 @@ export class NotesParser extends BaseParser {
               lookAhead < Math.min(i + 5, lines.length);
               lookAhead++
             ) {
-              if (lines[lookAhead].trim().match(/<!-- id: note_[\w]+ /)) {
+              const lookAheadLine = lines[lookAhead].trim();
+              if (lookAheadLine.match(/<!-- id: note_[\w]+ /)) {
                 hasIdComment = true;
                 break;
               }
               // If we hit another ## or section boundary, stop looking
               if (
-                lines[lookAhead].trim().startsWith("##") ||
-                lines[lookAhead].trim().match(
-                  /<!-- (Board|Goals|Configurations|Notes|Canvas|Mindmap) -->/,
-                )
+                lookAheadLine.startsWith("## ") ||
+                lookAheadLine.match(/^<!-- (Board|Goals|Configurations|Canvas|Mindmap) -->$/)
               ) {
                 break;
               }
@@ -234,5 +249,117 @@ export class NotesParser extends BaseParser {
       updatedAt: new Date().toISOString(),
       revision: 1,
     };
+  }
+
+  /**
+   * Finds the Notes section boundaries in the file.
+   * Returns startIndex (line with marker) and endIndex (line of next section).
+   *
+   * Section boundaries are marked by:
+   *   <!-- SectionName --> where SectionName is a known section like Goals, Canvas, Board, etc.
+   *   # SectionName
+   *
+   * Does NOT treat custom section markers as section boundaries:
+   *   <!-- Custom Section: ... --> and <!-- End Custom Section --> are part of note content.
+   */
+  findNotesSection(lines: string[]): { startIndex: number; endIndex: number } {
+    let startIndex = -1;
+    let endIndex = -1;
+
+    // Known section boundary patterns
+    const sectionBoundaryPattern = /^<!-- (Goals|Canvas|Mindmap|C4 Architecture|Board|Configurations|Milestones|Ideas|Retrospectives|SWOT Analysis|Risk Analysis|Lean Canvas|Business Model|Project Value Board|Brief|Time Tracking|Capacity Planning|Strategic Levels|Billing|Customers|Billing Rates|Quotes|Invoices|Companies|Contacts|Deals|Interactions) -->$/;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+
+      if (startIndex === -1) {
+        if (line === "<!-- Notes -->" || line === "# Notes") {
+          startIndex = line === "<!-- Notes -->" ? i : i;
+          // If we found "# Notes", check if there's a comment before it
+          if (line === "# Notes" && i > 0 && lines[i - 1].trim() === "<!-- Notes -->") {
+            startIndex = i - 1;
+          }
+        }
+      } else {
+        // Look for the next section - must be a known section boundary
+        if (sectionBoundaryPattern.test(line)) {
+          endIndex = i;
+          break;
+        }
+        // Also check for # headers that are sections (not ## which are notes/content)
+        if (line.startsWith("# ") && !line.startsWith("## ") && line !== "# Notes") {
+          endIndex = i;
+          break;
+        }
+      }
+    }
+
+    return { startIndex, endIndex };
+  }
+
+  /**
+   * Reads all notes from the file using section-specific parsing.
+   */
+  async readNotes(): Promise<Note[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const { startIndex } = this.findNotesSection(lines);
+
+    if (startIndex === -1) {
+      return [];
+    }
+
+    // Find the first ## header after the section start
+    let parseStart = startIndex;
+    for (let i = startIndex; i < lines.length; i++) {
+      if (lines[i].trim().startsWith("## ")) {
+        parseStart = i;
+        break;
+      }
+    }
+
+    const result = this.parseNotesSection(lines, parseStart);
+    return result.notes;
+  }
+
+  /**
+   * Saves notes by replacing only the Notes section in the file.
+   * This preserves all other sections.
+   */
+  async saveNotes(notes: Note[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    const { startIndex, endIndex } = this.findNotesSection(lines);
+    const notesContent = this.notesToMarkdown(notes);
+
+    if (startIndex === -1) {
+      // No Notes section exists, find where to insert it
+      // Insert before Goals, Canvas, or Board
+      let insertIndex = lines.length;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (
+          line === "<!-- Goals -->" ||
+          line === "# Goals" ||
+          line === "<!-- Canvas -->" ||
+          line === "# Canvas" ||
+          line === "<!-- Board -->" ||
+          line === "# Board"
+        ) {
+          insertIndex = i;
+          break;
+        }
+      }
+      lines.splice(insertIndex, 0, notesContent);
+    } else {
+      // Replace existing Notes section
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, notesContent.trimEnd(), ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
   }
 }

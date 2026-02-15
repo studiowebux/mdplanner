@@ -910,11 +910,11 @@ export class MarkdownParser extends BaseParser {
   async addNote(
     note: Omit<Note, "id" | "createdAt" | "updatedAt" | "revision">,
   ): Promise<string> {
-    const projectInfo = await this.readProjectInfo();
+    const notes = await this.notesParser.readNotes();
     const newNote = this.notesParser.createNote(note);
 
-    projectInfo.notes.push(newNote);
-    await this.saveProjectInfo(projectInfo);
+    notes.push(newNote);
+    await this.notesParser.saveNotes(notes);
     return newNote.id;
   }
 
@@ -922,43 +922,41 @@ export class MarkdownParser extends BaseParser {
     noteId: string,
     updates: Partial<Omit<Note, "id" | "createdAt" | "revision">>,
   ): Promise<boolean> {
-    const projectInfo = await this.readProjectInfo();
+    const notes = await this.notesParser.readNotes();
     const result = this.notesParser.updateNoteInList(
-      projectInfo.notes,
+      notes,
       noteId,
       updates,
     );
 
     if (!result.success) return false;
 
-    projectInfo.notes = result.notes;
-    await this.saveProjectInfo(projectInfo);
+    await this.notesParser.saveNotes(result.notes);
     return true;
   }
 
   async deleteNote(noteId: string): Promise<boolean> {
-    const projectInfo = await this.readProjectInfo();
+    const notes = await this.notesParser.readNotes();
     const result = this.notesParser.deleteNoteFromList(
-      projectInfo.notes,
+      notes,
       noteId,
     );
 
     if (!result.success) return false;
 
-    projectInfo.notes = result.notes;
-    await this.saveProjectInfo(projectInfo);
+    await this.notesParser.saveNotes(result.notes);
     return true;
   }
 
   async addGoal(goal: Omit<Goal, "id">): Promise<string> {
-    const projectInfo = await this.readProjectInfo();
+    const goals = await this.goalsParser.readGoals();
     const newGoal: Goal = {
       ...goal,
       id: this.goalsParser.generateGoalId(),
     };
 
-    projectInfo.goals.push(newGoal);
-    await this.saveProjectInfo(projectInfo);
+    goals.push(newGoal);
+    await this.goalsParser.saveGoals(goals);
     return newGoal.id;
   }
 
@@ -966,27 +964,27 @@ export class MarkdownParser extends BaseParser {
     goalId: string,
     updates: Partial<Omit<Goal, "id">>,
   ): Promise<boolean> {
-    const projectInfo = await this.readProjectInfo();
-    const goalIndex = projectInfo.goals.findIndex((goal) => goal.id === goalId);
+    const goals = await this.goalsParser.readGoals();
+    const goalIndex = goals.findIndex((goal) => goal.id === goalId);
 
     if (goalIndex === -1) return false;
 
-    projectInfo.goals[goalIndex] = {
-      ...projectInfo.goals[goalIndex],
+    goals[goalIndex] = {
+      ...goals[goalIndex],
       ...updates,
     };
 
-    await this.saveProjectInfo(projectInfo);
+    await this.goalsParser.saveGoals(goals);
     return true;
   }
 
   async deleteGoal(goalId: string): Promise<boolean> {
-    const projectInfo = await this.readProjectInfo();
-    const originalLength = projectInfo.goals.length;
-    projectInfo.goals = projectInfo.goals.filter((goal) => goal.id !== goalId);
+    const goals = await this.goalsParser.readGoals();
+    const originalLength = goals.length;
+    const filteredGoals = goals.filter((goal) => goal.id !== goalId);
 
-    if (projectInfo.goals.length !== originalLength) {
-      await this.saveProjectInfo(projectInfo);
+    if (filteredGoals.length !== originalLength) {
+      await this.goalsParser.saveGoals(filteredGoals);
       return true;
     }
     return false;
@@ -1118,15 +1116,14 @@ export class MarkdownParser extends BaseParser {
   }
 
   async addStickyNote(stickyNote: Omit<StickyNote, "id">): Promise<string> {
-    const projectInfo = await this.readProjectInfo();
+    const stickyNotes = await this.canvasParser.readStickyNotes();
     const newStickyNote: StickyNote = {
       ...stickyNote,
       id: this.canvasParser.generateStickyNoteId(),
     };
 
-    projectInfo.stickyNotes.push(newStickyNote);
-    // Use direct file manipulation for sticky notes to avoid Canvas regeneration
-    await this.canvasParser.addStickyNoteToFile(newStickyNote);
+    stickyNotes.push(newStickyNote);
+    await this.canvasParser.saveStickyNotes(stickyNotes);
     return newStickyNote.id;
   }
 
@@ -1134,49 +1131,45 @@ export class MarkdownParser extends BaseParser {
     stickyNoteId: string,
     updates: Partial<Omit<StickyNote, "id">>,
   ): Promise<boolean> {
-    const projectInfo = await this.readProjectInfo();
-    const stickyNoteIndex = projectInfo.stickyNotes.findIndex((stickyNote) =>
+    const stickyNotes = await this.canvasParser.readStickyNotes();
+    const stickyNoteIndex = stickyNotes.findIndex((stickyNote) =>
       stickyNote.id === stickyNoteId
     );
 
     if (stickyNoteIndex === -1) return false;
 
-    projectInfo.stickyNotes[stickyNoteIndex] = {
-      ...projectInfo.stickyNotes[stickyNoteIndex],
+    stickyNotes[stickyNoteIndex] = {
+      ...stickyNotes[stickyNoteIndex],
       ...updates,
     };
 
-    // Use direct file manipulation for sticky notes to avoid Canvas regeneration
-    await this.canvasParser.updateStickyNoteInFile(
-      stickyNoteId,
-      projectInfo.stickyNotes[stickyNoteIndex],
-    );
+    await this.canvasParser.saveStickyNotes(stickyNotes);
     return true;
   }
 
   async deleteStickyNote(stickyNoteId: string): Promise<boolean> {
-    const projectInfo = await this.readProjectInfo();
-    const originalLength = projectInfo.stickyNotes.length;
-    projectInfo.stickyNotes = projectInfo.stickyNotes.filter((stickyNote) =>
+    const stickyNotes = await this.canvasParser.readStickyNotes();
+    const originalLength = stickyNotes.length;
+    const filteredStickyNotes = stickyNotes.filter((stickyNote) =>
       stickyNote.id !== stickyNoteId
     );
 
-    if (projectInfo.stickyNotes.length !== originalLength) {
-      await this.saveProjectInfo(projectInfo);
+    if (filteredStickyNotes.length !== originalLength) {
+      await this.canvasParser.saveStickyNotes(filteredStickyNotes);
       return true;
     }
     return false;
   }
 
   async addMindmap(mindmap: Omit<Mindmap, "id">): Promise<string> {
-    const projectInfo = await this.readProjectInfo();
+    const mindmaps = await this.canvasParser.readMindmaps();
     const newMindmap: Mindmap = {
       ...mindmap,
       id: this.canvasParser.generateMindmapId(),
     };
 
-    projectInfo.mindmaps.push(newMindmap);
-    await this.saveProjectInfo(projectInfo);
+    mindmaps.push(newMindmap);
+    await this.canvasParser.saveMindmaps(mindmaps);
     return newMindmap.id;
   }
 
@@ -1184,31 +1177,31 @@ export class MarkdownParser extends BaseParser {
     mindmapId: string,
     updates: Partial<Omit<Mindmap, "id">>,
   ): Promise<boolean> {
-    const projectInfo = await this.readProjectInfo();
-    const mindmapIndex = projectInfo.mindmaps.findIndex((mindmap) =>
+    const mindmaps = await this.canvasParser.readMindmaps();
+    const mindmapIndex = mindmaps.findIndex((mindmap) =>
       mindmap.id === mindmapId
     );
 
     if (mindmapIndex === -1) return false;
 
-    projectInfo.mindmaps[mindmapIndex] = {
-      ...projectInfo.mindmaps[mindmapIndex],
+    mindmaps[mindmapIndex] = {
+      ...mindmaps[mindmapIndex],
       ...updates,
     };
 
-    await this.saveProjectInfo(projectInfo);
+    await this.canvasParser.saveMindmaps(mindmaps);
     return true;
   }
 
   async deleteMindmap(mindmapId: string): Promise<boolean> {
-    const projectInfo = await this.readProjectInfo();
-    const originalLength = projectInfo.mindmaps.length;
-    projectInfo.mindmaps = projectInfo.mindmaps.filter((mindmap) =>
+    const mindmaps = await this.canvasParser.readMindmaps();
+    const originalLength = mindmaps.length;
+    const filteredMindmaps = mindmaps.filter((mindmap) =>
       mindmap.id !== mindmapId
     );
 
-    if (projectInfo.mindmaps.length !== originalLength) {
-      await this.saveProjectInfo(projectInfo);
+    if (filteredMindmaps.length !== originalLength) {
+      await this.canvasParser.saveMindmaps(filteredMindmaps);
       return true;
     }
     return false;

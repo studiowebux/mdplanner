@@ -683,4 +683,208 @@ export class CanvasParser extends BaseParser {
       "",
     ].join("\n");
   }
+
+  /**
+   * Finds the Canvas section boundaries in the file.
+   * Returns startIndex (line with marker) and endIndex (line of next section).
+   */
+  findCanvasSection(lines: string[]): { startIndex: number; endIndex: number } {
+    let startIndex = -1;
+    let endIndex = -1;
+
+    // Known section boundary patterns
+    const sectionBoundaryPattern = /^<!-- (Notes|Goals|Mindmap|C4 Architecture|Board|Configurations|Milestones|Ideas|Retrospectives|SWOT Analysis|Risk Analysis|Lean Canvas|Business Model|Project Value Board|Brief|Time Tracking|Capacity Planning|Strategic Levels|Billing|Customers|Billing Rates|Quotes|Invoices|Companies|Contacts|Deals|Interactions) -->$/;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+
+      if (startIndex === -1) {
+        if (line === "<!-- Canvas -->" || line === "# Canvas") {
+          startIndex = line === "<!-- Canvas -->" ? i : i;
+          if (line === "# Canvas" && i > 0 && lines[i - 1].trim() === "<!-- Canvas -->") {
+            startIndex = i - 1;
+          }
+        }
+      } else {
+        // Look for the next section - must be a known section boundary
+        if (sectionBoundaryPattern.test(line)) {
+          endIndex = i;
+          break;
+        }
+        // Also check for # headers that are sections
+        if (line.startsWith("# ") && !line.startsWith("## ") && line !== "# Canvas") {
+          endIndex = i;
+          break;
+        }
+      }
+    }
+
+    return { startIndex, endIndex };
+  }
+
+  /**
+   * Finds the Mindmap section boundaries in the file.
+   * Returns startIndex (line with marker) and endIndex (line of next section).
+   */
+  findMindmapSection(lines: string[]): { startIndex: number; endIndex: number } {
+    let startIndex = -1;
+    let endIndex = -1;
+
+    // Known section boundary patterns
+    const sectionBoundaryPattern = /^<!-- (Notes|Goals|Canvas|C4 Architecture|Board|Configurations|Milestones|Ideas|Retrospectives|SWOT Analysis|Risk Analysis|Lean Canvas|Business Model|Project Value Board|Brief|Time Tracking|Capacity Planning|Strategic Levels|Billing|Customers|Billing Rates|Quotes|Invoices|Companies|Contacts|Deals|Interactions) -->$/;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+
+      if (startIndex === -1) {
+        if (line === "<!-- Mindmap -->" || line === "# Mindmap") {
+          startIndex = line === "<!-- Mindmap -->" ? i : i;
+          if (line === "# Mindmap" && i > 0 && lines[i - 1].trim() === "<!-- Mindmap -->") {
+            startIndex = i - 1;
+          }
+        }
+      } else {
+        // Look for the next section - must be a known section boundary
+        if (sectionBoundaryPattern.test(line)) {
+          endIndex = i;
+          break;
+        }
+        // Also check for # headers that are sections
+        if (line.startsWith("# ") && !line.startsWith("## ") && line !== "# Mindmap") {
+          endIndex = i;
+          break;
+        }
+      }
+    }
+
+    return { startIndex, endIndex };
+  }
+
+  /**
+   * Reads all sticky notes from the file using section-specific parsing.
+   */
+  async readStickyNotes(): Promise<StickyNote[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const { startIndex } = this.findCanvasSection(lines);
+
+    if (startIndex === -1) {
+      return [];
+    }
+
+    // Find the first ## header after the section start
+    let parseStart = startIndex;
+    for (let i = startIndex; i < lines.length; i++) {
+      if (lines[i].trim().startsWith("## ")) {
+        parseStart = i;
+        break;
+      }
+    }
+
+    const result = this.parseCanvasSection(lines, parseStart);
+    return result.stickyNotes;
+  }
+
+  /**
+   * Reads all mindmaps from the file using section-specific parsing.
+   */
+  async readMindmaps(): Promise<Mindmap[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const { startIndex } = this.findMindmapSection(lines);
+
+    if (startIndex === -1) {
+      return [];
+    }
+
+    // Find the first ## header after the section start
+    let parseStart = startIndex;
+    for (let i = startIndex; i < lines.length; i++) {
+      if (lines[i].trim().startsWith("## ")) {
+        parseStart = i;
+        break;
+      }
+    }
+
+    const result = this.parseMindmapSection(lines, parseStart);
+    return result.mindmaps;
+  }
+
+  /**
+   * Saves sticky notes by replacing only the Canvas section in the file.
+   * This preserves all other sections.
+   */
+  async saveStickyNotes(stickyNotes: StickyNote[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    const { startIndex, endIndex } = this.findCanvasSection(lines);
+    const canvasContent = this.stickyNotesToMarkdown(stickyNotes);
+
+    if (startIndex === -1) {
+      // No Canvas section exists, find where to insert it
+      let insertIndex = lines.length;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (
+          line === "<!-- Mindmap -->" ||
+          line === "# Mindmap" ||
+          line === "<!-- C4 Architecture -->" ||
+          line === "# C4 Architecture" ||
+          line === "<!-- Board -->" ||
+          line === "# Board"
+        ) {
+          insertIndex = i;
+          break;
+        }
+      }
+      lines.splice(insertIndex, 0, canvasContent);
+    } else {
+      // Replace existing Canvas section
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, canvasContent.trimEnd(), ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  /**
+   * Saves mindmaps by replacing only the Mindmap section in the file.
+   * This preserves all other sections.
+   */
+  async saveMindmaps(mindmaps: Mindmap[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    const { startIndex, endIndex } = this.findMindmapSection(lines);
+    const mindmapContent = this.mindmapsToMarkdown(mindmaps);
+
+    if (startIndex === -1) {
+      // No Mindmap section exists, find where to insert it
+      let insertIndex = lines.length;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (
+          line === "<!-- C4 Architecture -->" ||
+          line === "# C4 Architecture" ||
+          line === "<!-- Board -->" ||
+          line === "# Board"
+        ) {
+          insertIndex = i;
+          break;
+        }
+      }
+      lines.splice(insertIndex, 0, mindmapContent);
+    } else {
+      // Replace existing Mindmap section
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, mindmapContent.trimEnd(), ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
 }

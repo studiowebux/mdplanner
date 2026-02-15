@@ -340,4 +340,100 @@ export class C4Parser extends BaseParser {
       id: this.generateC4ComponentId(existingComponents),
     };
   }
+
+  /**
+   * Finds the C4 Architecture section boundaries in the file.
+   * Returns startIndex (line with marker) and endIndex (line of next section).
+   */
+  findC4Section(lines: string[]): { startIndex: number; endIndex: number } {
+    let startIndex = -1;
+    let endIndex = -1;
+
+    // Known section boundary patterns
+    const sectionBoundaryPattern = /^<!-- (Notes|Goals|Canvas|Mindmap|Board|Configurations|Milestones|Ideas|Retrospectives|SWOT Analysis|Risk Analysis|Lean Canvas|Business Model|Project Value Board|Brief|Time Tracking|Capacity Planning|Strategic Levels|Billing|Customers|Billing Rates|Quotes|Invoices|Companies|Contacts|Deals|Interactions) -->$/;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+
+      if (startIndex === -1) {
+        if (line === "<!-- C4 Architecture -->" || line === "# C4 Architecture") {
+          startIndex = line === "<!-- C4 Architecture -->" ? i : i;
+          if (line === "# C4 Architecture" && i > 0 && lines[i - 1].trim() === "<!-- C4 Architecture -->") {
+            startIndex = i - 1;
+          }
+        }
+      } else {
+        // Look for the next section - must be a known section boundary
+        if (sectionBoundaryPattern.test(line)) {
+          endIndex = i;
+          break;
+        }
+        // Also check for # headers that are sections
+        if (line.startsWith("# ") && !line.startsWith("## ") && line !== "# C4 Architecture") {
+          endIndex = i;
+          break;
+        }
+      }
+    }
+
+    return { startIndex, endIndex };
+  }
+
+  /**
+   * Reads all C4 components from the file using section-specific parsing.
+   */
+  async readC4Components(): Promise<C4Component[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    const { startIndex } = this.findC4Section(lines);
+
+    if (startIndex === -1) {
+      return [];
+    }
+
+    // Find the first ## header after the section start
+    let parseStart = startIndex;
+    for (let i = startIndex; i < lines.length; i++) {
+      if (lines[i].trim().startsWith("## ")) {
+        parseStart = i;
+        break;
+      }
+    }
+
+    const result = this.parseC4ComponentsSection(lines, parseStart);
+    return result.components;
+  }
+
+  /**
+   * Saves C4 components by replacing only the C4 Architecture section in the file.
+   * This preserves all other sections.
+   */
+  async saveC4Components(components: C4Component[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    const { startIndex, endIndex } = this.findC4Section(lines);
+    const c4Content = this.c4ComponentsToMarkdown(components);
+
+    if (startIndex === -1) {
+      // No C4 section exists, find where to insert it
+      let insertIndex = lines.length;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line === "<!-- Board -->" || line === "# Board") {
+          insertIndex = i;
+          break;
+        }
+      }
+      lines.splice(insertIndex, 0, c4Content);
+    } else {
+      // Replace existing C4 section
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, c4Content.trimEnd(), ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
 }

@@ -129,7 +129,6 @@ Right column content with a list:
 - Item C
 
 <!-- End Custom Section -->
-
 <!-- Goals -->
 # Goals
 
@@ -145,7 +144,6 @@ Right column content with a list:
 
 <!-- id: goal_3 -->
 Reach $100,000 annual recurring revenue.
-
 <!-- Canvas -->
 # Canvas
 
