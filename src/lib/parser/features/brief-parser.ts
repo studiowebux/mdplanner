@@ -47,6 +47,17 @@ export class BriefParser extends BaseParser {
     let inSection = false;
     let currentBrief: Partial<Brief> | null = null;
     let currentSubsection: keyof Omit<Brief, "id" | "title" | "date"> | null = null;
+    let currentParagraph: string[] = [];
+
+    const flushParagraph = () => {
+      if (currentParagraph.length > 0 && currentSubsection && currentBrief) {
+        const text = currentParagraph.join(" ").trim();
+        if (text) {
+          currentBrief[currentSubsection]?.push(text);
+        }
+        currentParagraph = [];
+      }
+    };
 
     for (const line of lines) {
       if (line.includes("<!-- Brief -->") || line.startsWith("# Brief")) {
@@ -55,6 +66,7 @@ export class BriefParser extends BaseParser {
       }
 
       if (inSection && line.startsWith("# ") && !line.startsWith("# Brief")) {
+        flushParagraph();
         if (currentBrief?.title) briefs.push(currentBrief as Brief);
         currentBrief = null;
         break;
@@ -63,6 +75,7 @@ export class BriefParser extends BaseParser {
       if (!inSection) continue;
 
       if (line.startsWith("## ")) {
+        flushParagraph();
         if (currentBrief?.title) briefs.push(currentBrief as Brief);
         const title = line.substring(3).trim();
         currentBrief = {
@@ -98,19 +111,36 @@ export class BriefParser extends BaseParser {
         continue;
       }
 
+      // Check if line is a section header
+      let foundHeader = false;
       for (const [header, key] of Object.entries(this.sectionMap)) {
         if (line.startsWith(header)) {
+          flushParagraph();
           currentSubsection = key;
+          foundHeader = true;
           break;
         }
       }
+      if (foundHeader) continue;
 
+      // Handle list items
       if (currentSubsection && line.startsWith("- ")) {
+        flushParagraph();
         const item = line.substring(2).trim();
         if (item) currentBrief[currentSubsection]?.push(item);
+        continue;
+      }
+
+      // Handle paragraph text
+      const trimmed = line.trim();
+      if (trimmed && currentSubsection && !trimmed.startsWith("#") && !trimmed.startsWith("<!--")) {
+        currentParagraph.push(trimmed);
+      } else if (!trimmed && currentParagraph.length > 0) {
+        flushParagraph();
       }
     }
 
+    flushParagraph();
     if (currentBrief?.title) briefs.push(currentBrief as Brief);
     return briefs;
   }

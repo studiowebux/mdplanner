@@ -238,21 +238,21 @@
 
                 <!-- Navigation -->
                 <div class="py-1">
-                    <div class="px-4 py-1 text-xs font-medium text-gray-400 uppercase">Tasks</div>
+                    <div class="px-4 py-1 text-xs font-medium text-gray-400 dark:text-gray-500 uppercase">Tasks</div>
                     <button id="summaryViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800">Summary</button>
                     <button id="listViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">List</button>
                     <button id="boardViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Board</button>
                     <button id="timelineViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Timeline</button>
                 </div>
                 <div class="py-1 border-t border-gray-100 dark:border-gray-800">
-                    <div class="px-4 py-1 text-xs font-medium text-gray-400 uppercase">Planning</div>
+                    <div class="px-4 py-1 text-xs font-medium text-gray-400 dark:text-gray-500 uppercase">Planning</div>
                     <button id="goalsViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Goals</button>
                     <button id="milestonesViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Milestones</button>
                     <button id="ideasViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Ideas</button>
                     <button id="retrospectivesViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Retrospectives</button>
                 </div>
                 <div class="py-1 border-t border-gray-100 dark:border-gray-800">
-                    <div class="px-4 py-1 text-xs font-medium text-gray-400 uppercase">Analysis</div>
+                    <div class="px-4 py-1 text-xs font-medium text-gray-400 dark:text-gray-500 uppercase">Analysis</div>
                     <button id="swotViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">SWOT</button>
                     <button id="riskAnalysisViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Risk</button>
                     <button id="leanCanvasViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Lean Canvas</button>
@@ -261,20 +261,20 @@
                     <button id="briefViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Brief</button>
                 </div>
                 <div class="py-1 border-t border-gray-100 dark:border-gray-800">
-                    <div class="px-4 py-1 text-xs font-medium text-gray-400 uppercase">Diagrams</div>
+                    <div class="px-4 py-1 text-xs font-medium text-gray-400 dark:text-gray-500 uppercase">Diagrams</div>
                     <button id="canvasViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Canvas</button>
                     <button id="mindmapViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Mindmap</button>
                     <button id="c4ViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">C4 Architecture</button>
                 </div>
                 <div class="py-1 border-t border-gray-100 dark:border-gray-800">
-                    <div class="px-4 py-1 text-xs font-medium text-gray-400 uppercase">Resources</div>
+                    <div class="px-4 py-1 text-xs font-medium text-gray-400 dark:text-gray-500 uppercase">Resources</div>
                     <button id="timeTrackingViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Time Tracking</button>
                     <button id="capacityViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Capacity</button>
                     <button id="billingViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Billing</button>
                     <button id="crmViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">CRM</button>
                 </div>
                 <div class="py-1 border-t border-gray-100 dark:border-gray-800">
-                    <div class="px-4 py-1 text-xs font-medium text-gray-400 uppercase">Other</div>
+                    <div class="px-4 py-1 text-xs font-medium text-gray-400 dark:text-gray-500 uppercase">Other</div>
                     <button id="notesViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Notes</button>
                     <button id="strategicLevelsViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Strategic Levels</button>
                     <button id="configViewBtnMobile" class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300">Settings</button>
@@ -738,6 +738,11 @@
                                 <span id="noteCreatedAt"></span>
                                 <span id="noteUpdatedAt"></span>
                                 <span id="noteRevision"></span>
+                            </div>
+
+                            <!-- Enhanced View Mode (rendered content) -->
+                            <div id="enhancedNoteView" class="hidden">
+                                <!-- Beautifully rendered enhanced note content -->
                             </div>
 
                             <!-- Enhanced Editor Mode -->
@@ -2600,7 +2605,7 @@
                         <div>
                             <div class="flex justify-between items-center mb-2">
                                 <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Line Items</label>
-                                <button type="button" id="addQuoteLineBtn" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900">+ Add Item</button>
+                                <button type="button" id="addQuoteLineBtn" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">+ Add Item</button>
                             </div>
                             <div id="quoteLineItems" class="space-y-2"></div>
                         </div>
@@ -2655,7 +2660,7 @@
                         <div>
                             <div class="flex justify-between items-center mb-2">
                                 <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Line Items</label>
-                                <button type="button" id="addInvoiceLineBtn" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900">+ Add Item</button>
+                                <button type="button" id="addInvoiceLineBtn" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">+ Add Item</button>
                             </div>
                             <div id="invoiceLineItems" class="space-y-2"></div>
                         </div>

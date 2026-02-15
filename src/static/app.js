@@ -1338,6 +1338,10 @@ class TaskManager {
     this.enhancedNotesModule.renderCustomSections();
   }
 
+  renderEnhancedViewMode() {
+    return this.enhancedNotesModule.renderEnhancedViewMode();
+  }
+
   createCustomSectionElement(section) {
     return this.enhancedNotesModule.createCustomSectionElement(section);
   }

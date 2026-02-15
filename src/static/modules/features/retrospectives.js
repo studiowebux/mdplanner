@@ -38,7 +38,7 @@ export class RetrospectivesModule {
             ? "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600"
             : "bg-gray-900 text-white dark:bg-gray-600 dark:text-white";
         return `
-      <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden">
+      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden">
         <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600 flex justify-between items-center">
           <div>
             <h3 class="font-medium text-gray-900 dark:text-gray-100">${retro.title}</h3>
@@ -59,18 +59,18 @@ export class RetrospectivesModule {
           <div>
             <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stop</h4>
             <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-              ${retro.stop.length > 0 ? retro.stop.map((item) => `<li class="flex items-start"><span class="text-gray-500 mr-2">-</span>${item}</li>`).join("") : '<li class="text-gray-400 italic">No items</li>'}
+              ${retro.stop.length > 0 ? retro.stop.map((item) => `<li class="flex items-start"><span class="text-gray-500 dark:text-gray-400 mr-2">-</span>${item}</li>`).join("") : '<li class="text-gray-400 dark:text-gray-500 italic">No items</li>'}
             </ul>
           </div>
           <div>
             <h4 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Start</h4>
             <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-              ${retro.start.length > 0 ? retro.start.map((item) => `<li class="flex items-start"><span class="text-gray-400 mr-2">*</span>${item}</li>`).join("") : '<li class="text-gray-400 italic">No items</li>'}
+              ${retro.start.length > 0 ? retro.start.map((item) => `<li class="flex items-start"><span class="text-gray-400 dark:text-gray-500 mr-2">*</span>${item}</li>`).join("") : '<li class="text-gray-400 dark:text-gray-500 italic">No items</li>'}
             </ul>
           </div>
         </div>
         <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-600 flex justify-end">
-          <button onclick="taskManager.deleteRetrospective('${retro.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">Delete</button>
+          <button onclick="taskManager.deleteRetrospective('${retro.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
         </div>
       </div>
     `;

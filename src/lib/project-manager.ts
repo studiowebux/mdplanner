@@ -1,10 +1,13 @@
 import { MarkdownParser } from "./markdown-parser.ts";
+import { DirectoryMarkdownParser } from "./parser/directory/parser.ts";
+import { Parser } from "./parser-interface.ts";
 
 export interface ProjectMeta {
   filename: string;
   name: string;
   lastUpdated: string;
   taskCount: number;
+  isDirectory?: boolean;
 }
 
 const EXCLUDED_FILES = [
@@ -19,10 +22,19 @@ const EXCLUDED_PATTERNS = [
   /^backup/i,
 ];
 
+const EXCLUDED_DIRS = [
+  "node_modules",
+  ".git",
+  ".vscode",
+  "backup",
+  "__trash",
+];
+
 export class ProjectManager {
   private directory: string;
   private activeFile: string;
-  private parsers: Map<string, MarkdownParser> = new Map();
+  private activeIsDirectory: boolean = false;
+  private parsers: Map<string, Parser> = new Map();
 
   constructor(directory: string = ".") {
     this.directory = directory;
@@ -34,10 +46,13 @@ export class ProjectManager {
     if (projects.length > 0) {
       // Try to restore last active project from a simple marker file
       const lastActive = await this.getLastActiveProject();
-      if (lastActive && projects.some(p => p.filename === lastActive)) {
-        this.activeFile = lastActive;
+      const lastActiveProject = projects.find(p => p.filename === lastActive);
+      if (lastActiveProject) {
+        this.activeFile = lastActiveProject.filename;
+        this.activeIsDirectory = lastActiveProject.isDirectory || false;
       } else {
         this.activeFile = projects[0].filename;
+        this.activeIsDirectory = projects[0].isDirectory || false;
       }
     }
   }
@@ -64,26 +79,56 @@ export class ProjectManager {
 
     try {
       for await (const entry of Deno.readDir(this.directory)) {
-        if (!entry.isFile || !entry.name.endsWith(".md")) continue;
-        if (EXCLUDED_FILES.includes(entry.name)) continue;
-        if (EXCLUDED_PATTERNS.some(p => p.test(entry.name))) continue;
+        // Handle single-file markdown projects
+        if (entry.isFile && entry.name.endsWith(".md")) {
+          if (EXCLUDED_FILES.includes(entry.name)) continue;
+          if (EXCLUDED_PATTERNS.some(p => p.test(entry.name))) continue;
 
-        const filePath = `${this.directory}/${entry.name}`;
+          const filePath = `${this.directory}/${entry.name}`;
 
-        try {
-          const parser = new MarkdownParser(filePath);
-          const projectInfo = await parser.readProjectInfo();
-          const config = await parser.readProjectConfig();
-          const tasks = await parser.readTasks();
+          try {
+            const parser = new MarkdownParser(filePath);
+            const projectInfo = await parser.readProjectInfo();
+            const config = await parser.readProjectConfig();
+            const tasks = await parser.readTasks();
 
-          projects.push({
-            filename: entry.name,
-            name: projectInfo.name || entry.name.replace(".md", ""),
-            lastUpdated: config.lastUpdated || "",
-            taskCount: this.countTasks(tasks),
-          });
-        } catch (e) {
-          console.warn(`Failed to parse ${entry.name}:`, e);
+            projects.push({
+              filename: entry.name,
+              name: projectInfo.name || entry.name.replace(".md", ""),
+              lastUpdated: config.lastUpdated || "",
+              taskCount: this.countTasks(tasks),
+              isDirectory: false,
+            });
+          } catch (e) {
+            console.warn(`Failed to parse ${entry.name}:`, e);
+          }
+        }
+
+        // Handle directory-based projects
+        if (entry.isDirectory) {
+          if (EXCLUDED_DIRS.includes(entry.name)) continue;
+
+          const dirPath = `${this.directory}/${entry.name}`;
+
+          // Check if it's a directory project (has project.md)
+          if (await DirectoryMarkdownParser.isDirectoryProject(dirPath)) {
+            try {
+              const parser = new DirectoryMarkdownParser(dirPath);
+              const projectInfo = await parser.readProjectInfo();
+              const config = await parser.readProjectConfig();
+              const tasks = await parser.readTasks();
+
+              projects.push({
+                filename: entry.name,
+                name: projectInfo.name || entry.name,
+                lastUpdated: config.lastUpdated || "",
+                taskCount: this.countTasks(tasks),
+                isDirectory: true,
+              });
+            } catch (e) {
+              console.warn(`Failed to parse directory project ${entry.name}:`, e);
+            }
+          }
         }
       }
     } catch (e) {
@@ -111,14 +156,19 @@ export class ProjectManager {
     return count;
   }
 
-  getActiveParser(): MarkdownParser {
+  getActiveParser(): Parser {
     if (!this.activeFile) {
       throw new Error("No active project");
     }
 
     if (!this.parsers.has(this.activeFile)) {
-      const filePath = `${this.directory}/${this.activeFile}`;
-      this.parsers.set(this.activeFile, new MarkdownParser(filePath));
+      if (this.activeIsDirectory) {
+        const dirPath = `${this.directory}/${this.activeFile}`;
+        this.parsers.set(this.activeFile, new DirectoryMarkdownParser(dirPath));
+      } else {
+        const filePath = `${this.directory}/${this.activeFile}`;
+        this.parsers.set(this.activeFile, new MarkdownParser(filePath));
+      }
     }
 
     return this.parsers.get(this.activeFile)!;
@@ -126,13 +176,19 @@ export class ProjectManager {
 
   async switchProject(filename: string): Promise<boolean> {
     const projects = await this.scanProjects();
-    if (!projects.some(p => p.filename === filename)) {
+    const project = projects.find(p => p.filename === filename);
+    if (!project) {
       return false;
     }
 
     this.activeFile = filename;
+    this.activeIsDirectory = project.isDirectory || false;
     await this.saveLastActiveProject();
     return true;
+  }
+
+  isActiveProjectDirectory(): boolean {
+    return this.activeIsDirectory;
   }
 
   async createProject(name: string): Promise<string> {
@@ -203,5 +259,36 @@ Tags:
 
   getActiveFile(): string {
     return this.activeFile;
+  }
+
+  /**
+   * Create a directory-based project.
+   */
+  async createDirectoryProject(name: string): Promise<string> {
+    // Sanitize directory name
+    const safeName = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    let dirname = safeName;
+
+    // Check for existing directory
+    let counter = 1;
+    while (true) {
+      try {
+        await Deno.stat(`${this.directory}/${dirname}`);
+        dirname = `${safeName}-${counter}`;
+        counter++;
+      } catch {
+        break;
+      }
+    }
+
+    const dirPath = `${this.directory}/${dirname}`;
+    const parser = new DirectoryMarkdownParser(dirPath);
+    await parser.initialize(name);
+
+    this.activeFile = dirname;
+    this.activeIsDirectory = true;
+    await this.saveLastActiveProject();
+
+    return dirname;
   }
 }

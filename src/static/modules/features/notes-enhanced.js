@@ -722,6 +722,35 @@ export class EnhancedNotesModule {
   }
 
   // Rendering
+
+  // View mode: renders enhanced note content as beautiful HTML without editing controls
+  renderEnhancedViewMode() {
+    const currentNote = this.tm.notes[this.tm.activeNote];
+    if (!currentNote) return '';
+
+    let html = '<div class="enhanced-note-view prose dark:prose-invert max-w-none">';
+
+    // Render paragraphs as formatted content
+    const sortedParagraphs = [...(currentNote.paragraphs || [])].sort((a, b) => a.order - b.order);
+    sortedParagraphs.forEach(paragraph => {
+      if (paragraph.type === 'code') {
+        const lang = paragraph.language || 'text';
+        html += `<pre class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 overflow-x-auto my-4"><code class="language-${lang} text-sm">${escapeHtml(paragraph.content)}</code></pre>`;
+      } else {
+        html += `<div class="my-4">${markdownToHtml(paragraph.content)}</div>`;
+      }
+    });
+
+    // Render custom sections
+    const sortedSections = [...(currentNote.customSections || [])].sort((a, b) => a.order - b.order);
+    sortedSections.forEach(section => {
+      html += this.renderCustomSectionPreview(section);
+    });
+
+    html += '</div>';
+    return html;
+  }
+
   renderParagraphs() {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.paragraphs) return;

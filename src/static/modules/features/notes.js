@@ -112,16 +112,28 @@ export class NotesModule {
       }
     }
 
-    // Show/hide appropriate editors
+    // Show/hide appropriate editors based on mode and edit state
+    const enhancedView = document.getElementById('enhancedNoteView');
     const enhancedEditor = document.getElementById('enhancedNoteEditor');
     const simpleEditor = document.getElementById('activeNoteBodyContainer');
 
     if (isEnhanced) {
-      enhancedEditor.classList.remove('hidden');
       simpleEditor.classList.add('hidden');
-      this.tm.renderParagraphs();
-      this.tm.renderCustomSections();
+
+      if (this.tm.noteEditMode) {
+        // Edit mode: show editing controls
+        enhancedView.classList.add('hidden');
+        enhancedEditor.classList.remove('hidden');
+        this.tm.renderParagraphs();
+        this.tm.renderCustomSections();
+      } else {
+        // View mode: show beautiful rendered content
+        enhancedEditor.classList.add('hidden');
+        enhancedView.classList.remove('hidden');
+        enhancedView.innerHTML = this.tm.renderEnhancedViewMode();
+      }
     } else {
+      enhancedView.classList.add('hidden');
       enhancedEditor.classList.add('hidden');
       simpleEditor.classList.remove('hidden');
       document.getElementById("activeNoteEditor").value = activeNote.content;
@@ -163,34 +175,40 @@ export class NotesModule {
 
   toggleEditMode() {
     this.tm.noteEditMode = !this.tm.noteEditMode;
-    const editor = document.getElementById("activeNoteEditor");
-    const display = document.getElementById("activeNoteBody");
     const titleInput = document.getElementById("activeNoteTitle");
+    const activeNote = this.tm.notes[this.tm.activeNote];
+    const isEnhanced = this.tm.enhancedMode && activeNote?.mode === 'enhanced';
 
+    // Update title input styling
     if (this.tm.noteEditMode) {
-      // Switch to edit mode
-      editor.classList.remove("hidden");
-      display.classList.add("hidden");
       titleInput.removeAttribute("readonly");
-      titleInput.classList.add(
-        "border-b",
-        "border-gray-300",
-        "dark:border-gray-600",
-      );
-      editor.focus();
+      titleInput.classList.add("border-b", "border-gray-300", "dark:border-gray-600");
     } else {
-      // Switch to view mode
-      editor.classList.add("hidden");
-      display.classList.remove("hidden");
       titleInput.setAttribute("readonly", "true");
-      titleInput.classList.remove(
-        "border-b",
-        "border-gray-300",
-        "dark:border-gray-600",
-      );
-      this.updateDisplay();
+      titleInput.classList.remove("border-b", "border-gray-300", "dark:border-gray-600");
+    }
+
+    // Handle enhanced vs simple mode differently
+    if (isEnhanced) {
+      // For enhanced notes, re-render with appropriate mode
+      this.renderActive();
+    } else {
+      // For simple notes, toggle editor/display
+      const editor = document.getElementById("activeNoteEditor");
+      const display = document.getElementById("activeNoteBody");
+
+      if (this.tm.noteEditMode) {
+        editor.classList.remove("hidden");
+        display.classList.add("hidden");
+        editor.focus();
+      } else {
+        editor.classList.add("hidden");
+        display.classList.remove("hidden");
+        this.updateDisplay();
+      }
     }
   }
+
 
   showSaveStatus(text) {
     const statusEl = document.getElementById("noteSaveText");

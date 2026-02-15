@@ -101,16 +101,23 @@ export class LeanCanvasParser extends BaseParser {
           const match = line.match(/<!-- id: ([^ ]+)/);
           if (match) currentCanvas.id = match[1];
         } else {
+          let foundSection = false;
           for (const [header, key] of Object.entries(this.sectionMap)) {
             if (line.startsWith(header)) {
               currentSubsection = key;
+              foundSection = true;
               break;
             }
           }
-          if (line.trim().startsWith("- ") && currentSubsection) {
-            const item = line.trim().substring(2).trim();
-            if (item) {
-              (currentCanvas[currentSubsection] as string[]).push(item);
+          if (!foundSection && currentSubsection) {
+            if (line.trim().startsWith("- ")) {
+              const item = line.trim().substring(2).trim();
+              if (item) {
+                (currentCanvas[currentSubsection] as string[]).push(item);
+              }
+            } else if (line.trim() && !line.startsWith("#")) {
+              // Paragraph text support
+              (currentCanvas[currentSubsection] as string[]).push(line.trim());
             }
           }
         }

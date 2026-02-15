@@ -296,14 +296,14 @@ export class StrategicLevelsModule {
               </div>
               <div class="flex justify-center gap-1 mt-2">
                 <button onclick="taskManager.openStrategicLevelModal('${levelType}', '${level.id}')"
-                        class="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Edit</button>
+                        class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Edit</button>
                 <button onclick="taskManager.openStrategicLinkModal('${level.id}')"
-                        class="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Link</button>
+                        class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Link</button>
                 ${
                   childLevelType
                     ? `
                 <button onclick="taskManager.openStrategicLevelModal('${childLevelType}', null, '${level.id}')"
-                        class="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">+</button>
+                        class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">+</button>
                 `
                     : ""
                 }

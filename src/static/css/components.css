@@ -77,6 +77,25 @@
     opacity: 0.85;
 }
 
+/* Ghost variant for inline delete links */
+/* Pattern: use in table rows, list items, inline actions */
+.btn-danger-ghost {
+    background-color: transparent;
+    color: var(--color-error-text);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+.btn-danger-ghost:hover {
+    background-color: var(--color-error-bg);
+    color: var(--color-error);
+}
+
 /* --------------------------------------------------------------------------
    Badges
    -------------------------------------------------------------------------- */
@@ -451,7 +470,8 @@ select.input {
 .large-targets .btn-primary,
 .large-targets .btn-secondary,
 .large-targets .btn-ghost,
-.large-targets .btn-danger {
+.large-targets .btn-danger,
+.large-targets .btn-danger-ghost {
     padding: var(--space-md) var(--space-lg);
 }
 

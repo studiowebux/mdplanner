@@ -88,8 +88,8 @@ export class BillingModule {
         ${c.email ? `<p class="text-sm text-gray-600 dark:text-gray-400">${c.email}</p>` : ""}
         ${c.phone ? `<p class="text-sm text-gray-600 dark:text-gray-400">${c.phone}</p>` : ""}
         <div class="flex justify-end space-x-2 mt-3">
-          <button onclick="taskManager.openCustomerModal('${c.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900">Edit</button>
-          <button onclick="taskManager.deleteCustomer('${c.id}')" class="text-sm text-red-600 hover:text-red-800">Delete</button>
+          <button onclick="taskManager.openCustomerModal('${c.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Edit</button>
+          <button onclick="taskManager.deleteCustomer('${c.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
         </div>
       </div>
     `).join("");
@@ -191,8 +191,8 @@ export class BillingModule {
         <p class="text-xl font-bold text-gray-900 dark:text-gray-100">${this.formatCurrency(r.hourlyRate)}/hr</p>
         ${r.assignee ? `<p class="text-sm text-gray-600 dark:text-gray-400">Assignee: ${r.assignee}</p>` : ""}
         <div class="flex justify-end space-x-2 mt-3">
-          <button onclick="taskManager.openBillingRateModal('${r.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900">Edit</button>
-          <button onclick="taskManager.deleteBillingRate('${r.id}')" class="text-sm text-red-600 hover:text-red-800">Delete</button>
+          <button onclick="taskManager.openBillingRateModal('${r.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Edit</button>
+          <button onclick="taskManager.deleteBillingRate('${r.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
         </div>
       </div>
     `).join("");
@@ -281,7 +281,7 @@ export class BillingModule {
     container.innerHTML = this.quotes.map(q => {
       const customer = this.customers.find(c => c.id === q.customerId);
       return `
-        <div class="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
           <div class="flex justify-between items-start mb-2">
             <div>
               <p class="text-xs text-gray-500 dark:text-gray-400">${q.number}</p>
@@ -296,8 +296,8 @@ export class BillingModule {
             ${q.status === "draft" ? `<button onclick="taskManager.sendQuote('${q.id}')" class="text-sm text-blue-600 hover:text-blue-800">Send</button>` : ""}
             ${q.status === "sent" ? `<button onclick="taskManager.acceptQuote('${q.id}')" class="text-sm text-green-600 hover:text-green-800">Accept</button>` : ""}
             ${q.status === "accepted" ? `<button onclick="taskManager.convertQuoteToInvoice('${q.id}')" class="text-sm text-purple-600 hover:text-purple-800">To Invoice</button>` : ""}
-            <button onclick="taskManager.openQuoteModal('${q.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900">Edit</button>
-            <button onclick="taskManager.deleteQuote('${q.id}')" class="text-sm text-red-600 hover:text-red-800">Delete</button>
+            <button onclick="taskManager.openQuoteModal('${q.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Edit</button>
+            <button onclick="taskManager.deleteQuote('${q.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
           </div>
         </div>
       `;
@@ -486,7 +486,7 @@ export class BillingModule {
       const customer = this.customers.find(c => c.id === inv.customerId);
       const balance = inv.total - inv.paidAmount;
       return `
-        <div class="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
           <div class="flex justify-between items-start mb-2">
             <div>
               <p class="text-xs text-gray-500 dark:text-gray-400">${inv.number}</p>
@@ -500,13 +500,13 @@ export class BillingModule {
               <p class="text-xl font-bold text-gray-900 dark:text-gray-100">${this.formatCurrency(inv.total)}</p>
               ${balance > 0 ? `<p class="text-sm text-red-600">Balance: ${this.formatCurrency(balance)}</p>` : ""}
             </div>
-            ${inv.dueDate ? `<p class="text-xs text-gray-500">Due: ${inv.dueDate}</p>` : ""}
+            ${inv.dueDate ? `<p class="text-xs text-gray-500 dark:text-gray-400">Due: ${inv.dueDate}</p>` : ""}
           </div>
           <div class="flex justify-end space-x-2 mt-3">
             ${inv.status === "draft" ? `<button onclick="taskManager.sendInvoice('${inv.id}')" class="text-sm text-blue-600 hover:text-blue-800">Send</button>` : ""}
             ${(inv.status === "sent" || inv.status === "overdue") && balance > 0 ? `<button onclick="taskManager.openPaymentModal('${inv.id}')" class="text-sm text-green-600 hover:text-green-800">Record Payment</button>` : ""}
-            <button onclick="taskManager.openInvoiceModal('${inv.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900">Edit</button>
-            <button onclick="taskManager.deleteInvoice('${inv.id}')" class="text-sm text-red-600 hover:text-red-800">Delete</button>
+            <button onclick="taskManager.openInvoiceModal('${inv.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Edit</button>
+            <button onclick="taskManager.deleteInvoice('${inv.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
           </div>
         </div>
       `;
@@ -720,7 +720,7 @@ export class BillingModule {
     const tasksWithTime = this.tm.tasks.filter(t => t.config?.time_entries?.length > 0);
 
     if (tasksWithTime.length === 0) {
-      container.innerHTML = '<p class="text-gray-500 text-sm">No tasks with time entries found</p>';
+      container.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">No tasks with time entries found</p>';
       return;
     }
 
@@ -730,7 +730,7 @@ export class BillingModule {
         <label class="flex items-center p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer">
           <input type="checkbox" class="generate-invoice-task h-4 w-4 text-gray-900 border-gray-300 rounded" value="${t.id}">
           <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">${t.title}</span>
-          <span class="ml-auto text-xs text-gray-500">${totalHours}h</span>
+          <span class="ml-auto text-xs text-gray-500 dark:text-gray-400">${totalHours}h</span>
         </label>
       `;
     }).join("");

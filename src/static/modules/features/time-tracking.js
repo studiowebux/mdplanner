@@ -109,7 +109,7 @@ export class TimeTrackingModule {
       .map(([taskId, entries]) => {
         const taskTotal = entries.reduce((sum, e) => sum + e.hours, 0);
         return `
-      <div class="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
+      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
         <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
           <span class="font-medium text-gray-900 dark:text-gray-100">${taskMap[taskId]}</span>
           <span class="text-sm text-gray-600 dark:text-gray-400">${taskTotal.toFixed(1)}h total</span>
@@ -126,7 +126,7 @@ export class TimeTrackingModule {
               </div>
               <div class="flex items-center gap-2">
                 ${e.description ? `<span class="text-gray-500 dark:text-gray-400">${e.description}</span>` : ""}
-                <button onclick="taskManager.deleteTimeEntryFromView('${taskId}', '${e.id}')" class="text-red-500 hover:text-red-700 text-xs">Delete</button>
+                <button onclick="taskManager.deleteTimeEntryFromView('${taskId}', '${e.id}')" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-xs">Delete</button>
               </div>
             </div>
           `,
@@ -222,11 +222,11 @@ export class TimeTrackingModule {
         <div>
           <span>${e.date}</span>
           <span class="font-medium ml-2">${e.hours}h</span>
-          ${e.person ? `<span class="text-gray-500 ml-2">by ${e.person}</span>` : ""}
+          ${e.person ? `<span class="text-gray-500 dark:text-gray-400 ml-2">by ${e.person}</span>` : ""}
         </div>
         <div class="flex items-center gap-2">
-          ${e.description ? `<span class="text-gray-400 truncate max-w-32">${e.description}</span>` : ""}
-          <button type="button" onclick="taskManager.deleteTaskTimeEntry('${e.id}')" class="text-red-500 hover:text-red-700">x</button>
+          ${e.description ? `<span class="text-gray-400 dark:text-gray-500 truncate max-w-32">${e.description}</span>` : ""}
+          <button type="button" onclick="taskManager.deleteTaskTimeEntry('${e.id}')" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">x</button>
         </div>
       </div>
     `,

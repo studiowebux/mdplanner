@@ -95,8 +95,8 @@ export class CRMModule {
             <span>${dealCount} deals</span>
           </div>
           <div class="flex justify-end space-x-2 mt-3">
-            <button onclick="taskManager.openCRMCompanyModal('${c.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900">Edit</button>
-            <button onclick="taskManager.deleteCRMCompany('${c.id}')" class="text-sm text-red-600 hover:text-red-800">Delete</button>
+            <button onclick="taskManager.openCRMCompanyModal('${c.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Edit</button>
+            <button onclick="taskManager.deleteCRMCompany('${c.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
           </div>
         </div>
       `;
@@ -206,8 +206,8 @@ export class CRMModule {
           ${c.email ? `<p class="text-sm text-gray-600 dark:text-gray-400">${c.email}</p>` : ""}
           ${c.phone ? `<p class="text-sm text-gray-600 dark:text-gray-400">${c.phone}</p>` : ""}
           <div class="flex justify-end space-x-2 mt-3">
-            <button onclick="taskManager.openCRMContactModal('${c.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900">Edit</button>
-            <button onclick="taskManager.deleteCRMContact('${c.id}')" class="text-sm text-red-600 hover:text-red-800">Delete</button>
+            <button onclick="taskManager.openCRMContactModal('${c.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Edit</button>
+            <button onclick="taskManager.deleteCRMContact('${c.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
           </div>
         </div>
       `;
@@ -334,7 +334,7 @@ export class CRMModule {
       const company = this.companies.find(c => c.id === d.companyId);
       const contact = this.contacts.find(c => c.id === d.contactId);
       return `
-        <div class="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
           <div class="flex justify-between items-start mb-2">
             <div>
               <h3 class="font-medium text-gray-900 dark:text-gray-100">${d.title}</h3>
@@ -348,7 +348,7 @@ export class CRMModule {
               <p class="text-xl font-bold text-gray-900 dark:text-gray-100">${this.formatCurrency(d.value)}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400">${d.probability}% probability</p>
             </div>
-            ${d.expectedCloseDate ? `<p class="text-xs text-gray-500">Expected: ${d.expectedCloseDate}</p>` : ""}
+            ${d.expectedCloseDate ? `<p class="text-xs text-gray-500 dark:text-gray-400">Expected: ${d.expectedCloseDate}</p>` : ""}
           </div>
           <div class="flex justify-end space-x-2 mt-3">
             ${d.stage !== "won" && d.stage !== "lost" ? `
@@ -362,8 +362,8 @@ export class CRMModule {
                 <option value="lost">Lost</option>
               </select>
             ` : ""}
-            <button onclick="taskManager.openCRMDealModal('${d.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900">Edit</button>
-            <button onclick="taskManager.deleteCRMDeal('${d.id}')" class="text-sm text-red-600 hover:text-red-800">Delete</button>
+            <button onclick="taskManager.openCRMDealModal('${d.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Edit</button>
+            <button onclick="taskManager.deleteCRMDeal('${d.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
           </div>
         </div>
       `;
@@ -507,8 +507,8 @@ export class CRMModule {
               ${i.notes ? `<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">${i.notes}</p>` : ""}
             </div>
             <div class="flex gap-2">
-              <button onclick="taskManager.openCRMInteractionModal('${i.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900">Edit</button>
-              <button onclick="taskManager.deleteCRMInteraction('${i.id}')" class="text-sm text-red-600 hover:text-red-800">Delete</button>
+              <button onclick="taskManager.openCRMInteractionModal('${i.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Edit</button>
+              <button onclick="taskManager.deleteCRMInteraction('${i.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
             </div>
           </div>
         </div>

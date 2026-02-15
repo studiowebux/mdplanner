@@ -249,7 +249,7 @@ export class IdeasModule {
       this.taskManager.tempIdeaLinks.length === 0
     ) {
       container.innerHTML =
-        '<span class="text-gray-400 text-sm">No linked ideas</span>';
+        '<span class="text-gray-400 dark:text-gray-500 text-sm">No linked ideas</span>';
       return;
     }
 
