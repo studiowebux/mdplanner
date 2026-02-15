@@ -36,20 +36,24 @@ export class NotesModule {
 
     emptyState.classList.add("hidden");
 
-    // Render tabs using linear indexing for stable IDs
+    // Truncate long titles
+    const truncate = (str, max = 20) => str.length > max ? str.slice(0, max) + '...' : str;
+
+    // Render tabs with pill-style design
     tabNav.innerHTML = this.tm.notes
-      .map(
-        (note, index) => `
-          <button class="py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-            (this.tm.activeNote === null && index === 0) ||
-            this.tm.activeNote === index
-              ? "border-gray-900 text-gray-900 dark:border-gray-100 dark:text-gray-100"
-              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
-          }" onclick="taskManager.selectNote(${index})">
-              ${note.title}
+      .map((note, index) => {
+        const isActive = (this.tm.activeNote === null && index === 0) || this.tm.activeNote === index;
+        const isEnhanced = note.mode === 'enhanced';
+        return `
+          <button class="px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
+            isActive
+              ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
+              : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-gray-700"
+          }" onclick="taskManager.selectNote(${index})" title="${note.title}">
+              ${isEnhanced ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-purple-500 mr-1.5"></span>' : ''}${truncate(note.title)}
           </button>
-        `,
-      )
+        `;
+      })
       .join("");
 
     // Show first note if none selected
@@ -96,15 +100,15 @@ export class NotesModule {
     const btnText = document.getElementById('toggleModeText');
     if (btn && btnText) {
       if (isEnhanced) {
-        btn.classList.add('bg-purple-200', 'dark:bg-purple-800');
-        btn.classList.remove('bg-purple-100', 'dark:bg-purple-900');
-        btn.title = 'Switch to Simple Mode';
-        btnText.textContent = 'Simple';
-      } else {
-        btn.classList.remove('bg-purple-200', 'dark:bg-purple-800');
-        btn.classList.add('bg-purple-100', 'dark:bg-purple-900');
-        btn.title = 'Switch to Enhanced Mode';
+        btn.classList.add('bg-purple-600', 'text-white');
+        btn.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+        btn.title = 'Switch to Basic Mode';
         btnText.textContent = 'Enhanced';
+      } else {
+        btn.classList.remove('bg-purple-600', 'text-white');
+        btn.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+        btn.title = 'Switch to Enhanced Mode';
+        btnText.textContent = 'Basic';
       }
     }
 
@@ -188,6 +192,31 @@ export class NotesModule {
     }
   }
 
+  showSaveStatus(text) {
+    const statusEl = document.getElementById("noteSaveText");
+    if (statusEl) {
+      statusEl.textContent = text;
+      statusEl.classList.remove("hidden");
+      if (text === "Saved") {
+        statusEl.classList.remove("text-gray-500", "text-red-500");
+        statusEl.classList.add("text-green-600", "dark:text-green-400");
+      } else if (text === "Error") {
+        statusEl.classList.remove("text-gray-500", "text-green-600", "dark:text-green-400");
+        statusEl.classList.add("text-red-500");
+      } else {
+        statusEl.classList.remove("text-green-600", "dark:text-green-400", "text-red-500");
+        statusEl.classList.add("text-gray-500", "dark:text-gray-400");
+      }
+    }
+  }
+
+  hideSaveStatus() {
+    const statusEl = document.getElementById("noteSaveText");
+    if (statusEl) {
+      statusEl.classList.add("hidden");
+    }
+  }
+
   scheduleAutoSave() {
     // Clear existing timeout
     if (this.tm.autoSaveTimeout) {
@@ -221,8 +250,7 @@ export class NotesModule {
 
     try {
       // Show saving indicator
-      const indicator = document.getElementById("saveIndicator");
-      indicator.classList.remove("hidden");
+      this.showSaveStatus("Saving...");
 
       // Prepare the data to save - include all enhanced mode data
       const saveData = {
@@ -238,16 +266,22 @@ export class NotesModule {
         // Update local data
         this.tm.notes[this.tm.activeNote].title = title;
 
+        // Show saved status
+        this.showSaveStatus("Saved");
+
         // Update tab title if it changed
         this.renderView();
+      } else {
+        this.showSaveStatus("Error");
       }
 
       // Hide indicator after a short delay
       setTimeout(() => {
-        indicator.classList.add("hidden");
-      }, 1000);
+        this.hideSaveStatus();
+      }, 2000);
     } catch (error) {
       console.error("Error auto-saving note:", error);
+      this.showSaveStatus("Error");
     }
   }
 
@@ -263,12 +297,32 @@ export class NotesModule {
 
   openModal() {
     this.tm.editingNote = null;
-    document.getElementById("noteModalTitle").textContent = "Add Note";
+    this.tm.newNoteEnhanced = false;
+    document.getElementById("noteModalTitle").textContent = "New Note";
     document.getElementById("noteTitle").value = "";
     document.getElementById("noteContent").value = "";
-    document.getElementById("noteEnhancedMode").checked = false;
+    document.getElementById("noteEnhancedMode").value = "";
+    this.updateModeButtons();
     document.getElementById("noteModal").classList.remove("hidden");
     document.getElementById("noteModal").classList.add("flex");
+    document.getElementById("noteTitle").focus();
+  }
+
+  updateModeButtons() {
+    const basicBtn = document.getElementById("noteModeBasic");
+    const enhancedBtn = document.getElementById("noteModeEnhanced");
+
+    if (this.tm.newNoteEnhanced) {
+      basicBtn.classList.remove("bg-gray-900", "dark:bg-gray-100", "text-white", "dark:text-gray-900");
+      basicBtn.classList.add("bg-white", "dark:bg-gray-600", "text-gray-700", "dark:text-gray-300", "border", "border-gray-300", "dark:border-gray-500", "hover:bg-gray-100", "dark:hover:bg-gray-500");
+      enhancedBtn.classList.remove("bg-white", "dark:bg-gray-600", "text-gray-700", "dark:text-gray-300", "border", "border-gray-300", "dark:border-gray-500", "hover:bg-gray-100", "dark:hover:bg-gray-500");
+      enhancedBtn.classList.add("bg-purple-600", "text-white");
+    } else {
+      basicBtn.classList.remove("bg-white", "dark:bg-gray-600", "text-gray-700", "dark:text-gray-300", "border", "border-gray-300", "dark:border-gray-500", "hover:bg-gray-100", "dark:hover:bg-gray-500");
+      basicBtn.classList.add("bg-gray-900", "dark:bg-gray-100", "text-white", "dark:text-gray-900");
+      enhancedBtn.classList.remove("bg-purple-600", "text-white");
+      enhancedBtn.classList.add("bg-white", "dark:bg-gray-600", "text-gray-700", "dark:text-gray-300", "border", "border-gray-300", "dark:border-gray-500", "hover:bg-gray-100", "dark:hover:bg-gray-500");
+    }
   }
 
   closeModal() {
@@ -280,8 +334,8 @@ export class NotesModule {
     e.preventDefault();
 
     const title = document.getElementById("noteTitle").value;
-    const content = document.getElementById("noteContent").value;
-    const enhancedMode = document.getElementById("noteEnhancedMode").checked;
+    const content = "";
+    const enhancedMode = this.tm.newNoteEnhanced || false;
 
     try {
       let response;
@@ -290,11 +344,11 @@ export class NotesModule {
         const note = this.tm.notes[this.tm.editingNote];
         response = await NotesAPI.update(note.id, { title, content });
       } else {
-        // Create new note
+        // Create new note with empty content - user will edit inline
         const noteData = { title, content };
         if (enhancedMode) {
           noteData.mode = "enhanced";
-          noteData.paragraphs = content ? [{ id: `p-${Date.now()}`, type: "text", content }] : [];
+          noteData.paragraphs = [];
         }
         response = await NotesAPI.create(noteData);
       }
@@ -307,12 +361,21 @@ export class NotesModule {
       this.closeModal();
       await this.load();
 
-      // If enhanced mode was selected, select the new note and enable enhanced mode
-      if (enhancedMode && this.tm.editingNote === null) {
+      // Select the new note and enable edit mode
+      if (this.tm.editingNote === null) {
         const newNoteIndex = this.tm.notes.length - 1;
         this.tm.activeNote = newNoteIndex;
-        this.tm.enhancedMode = true;
+        this.tm.enhancedMode = enhancedMode;
         this.renderView();
+
+        // Auto-enable edit mode for new notes (basic mode only)
+        if (!enhancedMode) {
+          // Small delay to ensure DOM is ready
+          setTimeout(() => {
+            this.tm.noteEditMode = false;
+            this.toggleEditMode();
+          }, 100);
+        }
       }
     } catch (error) {
       console.error("Error saving note:", error);
@@ -335,9 +398,12 @@ export class NotesModule {
   }
 
   bindEvents() {
-    // Add note button
+    // Add note buttons (header and inline tab)
     document
       .getElementById("addNoteBtn")
+      .addEventListener("click", () => this.openModal());
+    document
+      .getElementById("addNoteTabBtn")
       .addEventListener("click", () => this.openModal());
 
     // Cancel note modal
@@ -349,6 +415,20 @@ export class NotesModule {
     document
       .getElementById("noteForm")
       .addEventListener("submit", (e) => this.handleSubmit(e));
+
+    // Mode toggle buttons
+    document
+      .getElementById("noteModeBasic")
+      .addEventListener("click", () => {
+        this.tm.newNoteEnhanced = false;
+        this.updateModeButtons();
+      });
+    document
+      .getElementById("noteModeEnhanced")
+      .addEventListener("click", () => {
+        this.tm.newNoteEnhanced = true;
+        this.updateModeButtons();
+      });
 
     // Toggle edit mode
     document

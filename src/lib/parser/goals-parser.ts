@@ -42,11 +42,11 @@ export class GoalsParser extends BaseParser {
             const contentLine = lines[i];
             const trimmedLine = contentLine.trim();
 
-            // Stop at next goal, section, or boundary comment
+            // Stop at next goal, section, or section boundary comment (but NOT id comments)
             if (
               trimmedLine.startsWith("## ") ||
               trimmedLine.startsWith("# ") ||
-              trimmedLine.match(/<!-- (Board|Goals|Configurations|Notes) -->/)
+              (trimmedLine.match(/^<!--\s*[A-Z]/) && !trimmedLine.includes("id:"))
             ) {
               break;
             }
@@ -148,7 +148,7 @@ export class GoalsParser extends BaseParser {
     content += `<!-- id: ${goal.id} -->\n`;
     if (goal.description && goal.description.trim()) {
       // Remove any embedded HTML comments from description
-      const cleanDescription = goal.description.replace(/<!--[^>]*-->/g, "").trim();
+      const cleanDescription = goal.description.replace(/<!--[\s\S]*?-->/g, "").trim();
       if (cleanDescription) {
         content += `${cleanDescription}\n\n`;
       } else {

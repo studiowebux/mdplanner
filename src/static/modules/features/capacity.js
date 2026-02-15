@@ -1,4 +1,4 @@
-import { CapacityAPI } from "../api.js";
+import { CapacityAPI, MilestonesAPI } from "../api.js";
 import { escapeHtml } from "../utils.js";
 
 /**
@@ -512,7 +512,7 @@ export class CapacityModule {
     }
   }
 
-  openAllocationModal(memberId, weekStart) {
+  async openAllocationModal(memberId, weekStart) {
     this.taskManager.editingAllocationMemberId = memberId;
     this.taskManager.editingAllocationWeek = weekStart;
 
@@ -529,32 +529,78 @@ export class CapacityModule {
     const title = document.getElementById("allocationModalTitle");
     const hoursInput = document.getElementById("allocationHours");
     const typeSelect = document.getElementById("allocationTargetType");
-    const targetInput = document.getElementById("allocationTargetId");
+    const targetSelect = document.getElementById("allocationTargetId");
     const notesInput = document.getElementById("allocationNotes");
     const deleteBtn = document.getElementById("deleteAllocationBtn");
 
     title.textContent = `Allocation: ${member?.name || "Member"} - ${this.getWeekDates(weekStart)}`;
 
+    let existingTargetId = "";
+    let existingTargetType = "task";
+
     if (allocs.length > 0) {
-      // Edit first allocation (simplified - could be improved to handle multiple)
       const alloc = allocs[0];
       this.taskManager.editingAllocationId = alloc.id;
       hoursInput.value = allocs.reduce((sum, a) => sum + a.allocatedHours, 0);
-      typeSelect.value = alloc.targetType;
-      targetInput.value = alloc.targetId || "";
+      existingTargetType = alloc.targetType;
+      existingTargetId = alloc.targetId || "";
       notesInput.value = alloc.notes || "";
       deleteBtn?.classList.remove("hidden");
     } else {
       this.taskManager.editingAllocationId = null;
       hoursInput.value = "";
-      typeSelect.value = "project";
-      targetInput.value = "";
+      existingTargetType = "task";
+      existingTargetId = "";
       notesInput.value = "";
       deleteBtn?.classList.add("hidden");
     }
 
+    typeSelect.value = existingTargetType;
+    await this.updateTargetOptions(existingTargetType, existingTargetId);
+
     modal?.classList.remove("hidden");
     modal?.classList.add("flex");
+  }
+
+  async updateTargetOptions(targetType, selectedValue = "") {
+    const targetSelect = document.getElementById("allocationTargetId");
+    const hint = document.getElementById("allocationTargetHint");
+    if (!targetSelect) return;
+
+    targetSelect.innerHTML = '<option value="">Select target...</option>';
+
+    if (targetType === "task") {
+      hint.textContent = "Allocate time to a specific task";
+      const tasks = this.taskManager.tasks || [];
+      // Group by status for better organization
+      const incomplete = tasks.filter(t => !t.completed);
+      incomplete.forEach(task => {
+        const option = document.createElement("option");
+        option.value = task.id;
+        const title = task.title.length > 35 ? task.title.slice(0, 35) + "..." : task.title;
+        const effort = task.config?.effort ? ` (${task.config.effort}h)` : "";
+        const assignee = task.config?.assignee ? ` [${task.config.assignee}]` : "";
+        option.textContent = `${title}${effort}${assignee}`;
+        if (task.id === selectedValue) option.selected = true;
+        targetSelect.appendChild(option);
+      });
+    } else if (targetType === "milestone") {
+      hint.textContent = "Allocate time to a milestone";
+      try {
+        const milestones = await MilestonesAPI.fetchAll();
+        milestones.forEach(ms => {
+          const option = document.createElement("option");
+          option.value = ms.id;
+          option.textContent = `${ms.title}${ms.status ? ` (${ms.status})` : ""}`;
+          if (ms.id === selectedValue) option.selected = true;
+          targetSelect.appendChild(option);
+        });
+      } catch (error) {
+        console.error("Error loading milestones:", error);
+      }
+    } else {
+      hint.textContent = "General project allocation";
+    }
   }
 
   closeAllocationModal() {
@@ -698,6 +744,81 @@ export class CapacityModule {
     }
   }
 
+  openImportAssigneesModal() {
+    const plan = this.taskManager.capacityPlans.find(
+      (p) => p.id === this.taskManager.selectedCapacityPlanId,
+    );
+    if (!plan) return;
+
+    const modal = document.getElementById("importAssigneesModal");
+    const list = document.getElementById("importAssigneesList");
+    const empty = document.getElementById("importAssigneesEmpty");
+
+    // Get assignees from project config that aren't already team members
+    const assignees = this.taskManager.projectConfig?.assignees || [];
+    const existingNames = plan.teamMembers.map(m => m.name.toLowerCase());
+    const availableAssignees = assignees.filter(
+      name => !existingNames.includes(name.toLowerCase())
+    );
+
+    if (availableAssignees.length === 0) {
+      empty?.classList.remove("hidden");
+      list?.classList.add("hidden");
+    } else {
+      empty?.classList.add("hidden");
+      list?.classList.remove("hidden");
+      list.innerHTML = availableAssignees
+        .map((name, i) => `
+          <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+            <input type="checkbox" checked data-name="${escapeHtml(name)}" class="import-assignee-checkbox rounded">
+            <div class="flex-1">
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${escapeHtml(name)}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">8h/day, Mon-Fri</div>
+            </div>
+          </label>
+        `)
+        .join("");
+    }
+
+    modal?.classList.remove("hidden");
+    modal?.classList.add("flex");
+  }
+
+  closeImportAssigneesModal() {
+    const modal = document.getElementById("importAssigneesModal");
+    modal?.classList.add("hidden");
+    modal?.classList.remove("flex");
+  }
+
+  async applyImportAssignees() {
+    const checkboxes = document.querySelectorAll(".import-assignee-checkbox:checked");
+    const selectedNames = Array.from(checkboxes).map(cb => cb.dataset.name);
+
+    if (selectedNames.length === 0) {
+      this.closeImportAssigneesModal();
+      return;
+    }
+
+    try {
+      // Create team members with default settings
+      for (const name of selectedNames) {
+        await CapacityAPI.createMember(
+          this.taskManager.selectedCapacityPlanId,
+          {
+            name,
+            hoursPerDay: 8,
+            workingDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+          }
+        );
+      }
+      this.closeImportAssigneesModal();
+      await this.load();
+      this.renderTeamMembers();
+    } catch (error) {
+      console.error("Error importing assignees:", error);
+    }
+  }
+
   bindEvents() {
     // View button
     document
@@ -750,6 +871,20 @@ export class CapacityModule {
     document
       .getElementById("allocationForm")
       ?.addEventListener("submit", (e) => this.saveAllocation(e));
+    document
+      .getElementById("allocationTargetType")
+      ?.addEventListener("change", async (e) => await this.updateTargetOptions(e.target.value));
+
+    // Import assignees modal events
+    document
+      .getElementById("importAssigneesBtn")
+      ?.addEventListener("click", () => this.openImportAssigneesModal());
+    document
+      .getElementById("cancelImportAssigneesBtn")
+      ?.addEventListener("click", () => this.closeImportAssigneesModal());
+    document
+      .getElementById("applyImportAssigneesBtn")
+      ?.addEventListener("click", () => this.applyImportAssignees());
 
     // Tab switching
     document
@@ -800,6 +935,11 @@ export class CapacityModule {
     document.getElementById("autoAssignModal")?.addEventListener("click", (e) => {
       if (e.target.id === "autoAssignModal") {
         this.closeAutoAssignModal();
+      }
+    });
+    document.getElementById("importAssigneesModal")?.addEventListener("click", (e) => {
+      if (e.target.id === "importAssigneesModal") {
+        this.closeImportAssigneesModal();
       }
     });
   }

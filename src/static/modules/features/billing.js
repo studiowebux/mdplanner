@@ -272,10 +272,10 @@ export class BillingModule {
 
     emptyState?.classList.add("hidden");
     const statusColors = {
-      draft: "bg-gray-200 text-gray-800",
-      sent: "bg-blue-100 text-blue-800",
-      accepted: "bg-green-100 text-green-800",
-      rejected: "bg-red-100 text-red-800",
+      draft: "bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200",
+      sent: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+      accepted: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+      rejected: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
     };
 
     container.innerHTML = this.quotes.map(q => {
@@ -364,8 +364,8 @@ export class BillingModule {
         <input type="number" placeholder="Rate" value="${item.rate}" step="0.01" min="0"
           onchange="taskManager.updateQuoteLineItem('${item.id}', 'rate', this.value)"
           class="w-20 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1 text-sm">
-        <span class="w-20 text-sm text-right">${this.formatCurrency(item.amount)}</span>
-        <button type="button" onclick="taskManager.removeQuoteLineItem('${item.id}')" class="text-red-600 hover:text-red-800">&times;</button>
+        <span class="w-20 text-sm text-right text-gray-900 dark:text-gray-100">${this.formatCurrency(item.amount)}</span>
+        <button type="button" onclick="taskManager.removeQuoteLineItem('${item.id}')" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">&times;</button>
       </div>
     `).join("");
   }
@@ -475,11 +475,11 @@ export class BillingModule {
 
     emptyState?.classList.add("hidden");
     const statusColors = {
-      draft: "bg-gray-200 text-gray-800",
-      sent: "bg-blue-100 text-blue-800",
-      paid: "bg-green-100 text-green-800",
-      overdue: "bg-red-100 text-red-800",
-      cancelled: "bg-gray-400 text-gray-800",
+      draft: "bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200",
+      sent: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+      paid: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+      overdue: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+      cancelled: "bg-gray-400 text-gray-800 dark:bg-gray-500 dark:text-gray-200",
     };
 
     container.innerHTML = this.invoices.map(inv => {
@@ -567,8 +567,8 @@ export class BillingModule {
         <input type="number" placeholder="Rate" value="${item.rate}" step="0.01" min="0"
           onchange="taskManager.updateInvoiceLineItem('${item.id}', 'rate', this.value)"
           class="w-20 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1 text-sm">
-        <span class="w-20 text-sm text-right">${this.formatCurrency(item.amount)}</span>
-        <button type="button" onclick="taskManager.removeInvoiceLineItem('${item.id}')" class="text-red-600 hover:text-red-800">&times;</button>
+        <span class="w-20 text-sm text-right text-gray-900 dark:text-gray-100">${this.formatCurrency(item.amount)}</span>
+        <button type="button" onclick="taskManager.removeInvoiceLineItem('${item.id}')" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">&times;</button>
       </div>
     `).join("");
   }

@@ -16,8 +16,12 @@ export class StrategicParser extends BaseParser {
     "### Mission": "mission",
     "### Goals": "goals",
     "### Objectives": "objectives",
+    "### Strategic Objectives": "objectives",
+    "### Key Results": "goals",
     "### Strategies": "strategies",
+    "### Initiatives": "strategies",
     "### Tactics": "tactics",
+    "### Projects": "tactics",
   };
 
   constructor(filePath: string) {
@@ -110,6 +114,20 @@ export class StrategicParser extends BaseParser {
           title: levelText,
           level: currentLevelType,
           order: (currentBuilder.levels?.filter(l => l.level === currentLevelType).length || 0),
+          linkedTasks: [],
+          linkedMilestones: [],
+        };
+        continue;
+      }
+
+      // Handle single-line content for Vision/Mission (not list items)
+      if (currentLevelType && (currentLevelType === "vision" || currentLevelType === "mission") &&
+          !currentLevel && trimmed && !trimmed.startsWith("#") && !trimmed.startsWith("<!--") && !trimmed.startsWith("Date:")) {
+        currentLevel = {
+          id: this.generateLevelId(),
+          title: trimmed,
+          level: currentLevelType,
+          order: 0,
           linkedTasks: [],
           linkedMilestones: [],
         };
