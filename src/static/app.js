@@ -5,6 +5,7 @@ import { AccessibilityManager } from './modules/ui/accessibility.js';
 import { FocusMode } from './modules/ui/focus-mode.js';
 import { Breadcrumb } from './modules/ui/breadcrumb.js';
 import { Sidenav } from './modules/ui/sidenav.js';
+import { Help } from './modules/ui/help.js';
 import { TaskSidenavModule } from './modules/features/task-sidenav.js';
 import { TasksAPI, ProjectAPI } from './modules/api.js';
 import { markdownToHtml as markdownToHtmlUtil } from './modules/utils.js';
@@ -190,6 +191,7 @@ class TaskManager {
     ThemeManager.initFullscreenMode();
     AccessibilityManager.init();
     Sidenav.init();
+    Help.init();
     this.bindEvents();
     await this.loadProjects(); // Load projects first
     await this.loadProjectConfig();
@@ -692,6 +694,9 @@ class TaskManager {
 
     // Update breadcrumb
     Breadcrumb.render(view);
+
+    // Update help panel context
+    Help.setCurrentView(view);
 
     // Disable multi-select mode when switching views
     if (this.multiSelectMode) {
