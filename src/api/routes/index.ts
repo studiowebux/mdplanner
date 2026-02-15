@@ -41,6 +41,9 @@ import { portfolioRouter } from "./portfolio.ts";
 // Export/Import routes
 import { exportImportRouter } from "./export-import.ts";
 
+// Search/Cache routes
+import { searchRouter } from "./search.ts";
+
 export function createApiRouter(projectManager: ProjectManager): Hono<{ Variables: AppVariables }> {
   const api = new Hono<{ Variables: AppVariables }>();
 
@@ -94,6 +97,9 @@ export function createApiRouter(projectManager: ProjectManager): Hono<{ Variable
 
   // Export/Import routes
   api.route("/", exportImportRouter);
+
+  // Search/Cache routes
+  api.route("/search", searchRouter);
 
   // 404 handler
   api.notFound((c) => {

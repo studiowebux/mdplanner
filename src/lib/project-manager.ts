@@ -1,4 +1,5 @@
 import { DirectoryMarkdownParser } from "./parser/directory/parser.ts";
+import { CacheDatabase, CacheSync, SearchEngine } from "./cache/index.ts";
 
 /**
  * ProjectManager - Manages a single directory-based project
@@ -24,13 +25,33 @@ export interface ProjectMeta {
   isDirectory: boolean;
 }
 
+export interface ProjectManagerOptions {
+  enableCache?: boolean;
+  dbPath?: string;
+}
+
+export interface CacheLayer {
+  db: CacheDatabase;
+  sync: CacheSync;
+  search: SearchEngine;
+}
+
 export class ProjectManager {
   private projectPath: string;
   private parser: DirectoryMarkdownParser;
+  private cache: CacheLayer | null = null;
 
-  constructor(projectPath: string) {
+  constructor(projectPath: string, options?: ProjectManagerOptions) {
     this.projectPath = projectPath;
     this.parser = new DirectoryMarkdownParser(projectPath);
+
+    if (options?.enableCache) {
+      const dbPath = options.dbPath ?? `${projectPath}/.mdplanner.db`;
+      const db = new CacheDatabase(dbPath);
+      const sync = new CacheSync(this.parser, db);
+      const search = new SearchEngine(db);
+      this.cache = { db, sync, search };
+    }
   }
 
   async init(): Promise<void> {
@@ -39,6 +60,14 @@ export class ProjectManager {
     if (!exists) {
       throw new Error(`Invalid project directory: ${this.projectPath} (missing project.md)`);
     }
+
+    // Initialize cache if enabled
+    if (this.cache) {
+      this.cache.sync.init();
+      if (this.cache.sync.needsSync()) {
+        await this.cache.sync.fullSync();
+      }
+    }
   }
 
   /**
@@ -46,6 +75,28 @@ export class ProjectManager {
    */
   getActiveParser(): DirectoryMarkdownParser {
     return this.parser;
+  }
+
+  /**
+   * Check if cache is enabled.
+   */
+  isCacheEnabled(): boolean {
+    return this.cache !== null;
+  }
+
+  /**
+   * Get cache layer (null if not enabled).
+   */
+  getCache(): CacheLayer | null {
+    return this.cache;
+  }
+
+  /**
+   * Rebuild cache from markdown.
+   */
+  async rebuildCache(): Promise<{ tables: number; items: number; duration: number; errors: string[] } | null> {
+    if (!this.cache) return null;
+    return this.cache.sync.rebuild();
   }
 
   /**

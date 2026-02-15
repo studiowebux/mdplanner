@@ -3,7 +3,7 @@
  */
 
 import { Context } from "hono";
-import { ProjectManager } from "../../lib/project-manager.ts";
+import { ProjectManager, type CacheLayer } from "../../lib/project-manager.ts";
 import { DirectoryMarkdownParser } from "../../lib/parser/directory/parser.ts";
 
 export interface AppVariables {
@@ -18,6 +18,14 @@ export function getParser(c: AppContext): DirectoryMarkdownParser {
 
 export function getProjectManager(c: AppContext): ProjectManager {
   return c.get("projectManager");
+}
+
+export function getCache(c: AppContext): CacheLayer | null {
+  return c.get("projectManager").getCache();
+}
+
+export function isCacheEnabled(c: AppContext): boolean {
+  return c.get("projectManager").isCacheEnabled();
 }
 
 export const corsHeaders = {

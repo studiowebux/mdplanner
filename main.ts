@@ -11,6 +11,7 @@ interface CLIArgs {
   projectPath: string;
   port: number;
   help: boolean;
+  cache: boolean;
 }
 
 function printHelp(): void {
@@ -25,11 +26,13 @@ Arguments:
 
 Options:
   -p, --port <port>      Port to run the server on (default: 8003)
+  -c, --cache            Enable SQLite cache for fast search and queries
   -h, --help             Show this help message
 
 Examples:
   mdplanner ./my-project
   mdplanner --port 8080 ./my-project
+  mdplanner --cache ./my-project
   deno task dev ./example/portfolio
 
 Repository: https://github.com/${GITHUB_REPO}
@@ -41,6 +44,7 @@ function parseArgs(args: string[]): CLIArgs {
     projectPath: ".",
     port: 8003,
     help: false,
+    cache: false,
   };
 
   let i = 0;
@@ -49,6 +53,9 @@ function parseArgs(args: string[]): CLIArgs {
 
     if (arg === "-h" || arg === "--help") {
       result.help = true;
+      i++;
+    } else if (arg === "-c" || arg === "--cache") {
+      result.cache = true;
       i++;
     } else if (arg === "-p" || arg === "--port") {
       const portValue = args[i + 1];
@@ -113,7 +120,10 @@ if (cliArgs.help) {
 // Validate project path
 await validateProjectPath(cliArgs.projectPath);
 
-const projectManager = new ProjectManager(cliArgs.projectPath);
+const projectManager = new ProjectManager(cliArgs.projectPath, {
+  enableCache: cliArgs.cache,
+  dbPath: `${cliArgs.projectPath}/.mdplanner.db`,
+});
 await projectManager.init();
 
 // Create main app
@@ -139,6 +149,9 @@ app.use(
 console.log(`mdplanner v${VERSION}`);
 console.log(`Server running on http://localhost:${cliArgs.port}`);
 console.log(`Project: ${cliArgs.projectPath}`);
+if (cliArgs.cache) {
+  console.log(`Cache: enabled (${cliArgs.projectPath}/.mdplanner.db)`);
+}
 
 const projects = await projectManager.scanProjects();
 console.log(`Found ${projects.length} project(s):`);
