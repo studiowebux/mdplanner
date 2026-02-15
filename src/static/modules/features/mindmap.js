@@ -123,42 +123,97 @@ export class MindmapModule {
     }
 
     this.renderTreeLayout(rootNodes, content);
-    this.drawConnections(content);
+    // Defer connection drawing to ensure DOM is laid out
+    requestAnimationFrame(() => {
+      this.drawConnections(content);
+    });
   }
 
   renderTreeLayout(rootNodes, content) {
     const isVertical = this.currentLayout === "vertical";
-    const levelSpacing = 150;
-    const nodeSpacing = 120;
+    const levelSpacing = 180;
+    const nodeSpacing = 20;
+    const nodeWidth = 150;
+    const nodeHeight = 40;
 
+    // First pass: calculate subtree sizes
+    rootNodes.forEach((rootNode) => {
+      this.calculateSubtreeSize(rootNode, nodeSpacing, nodeWidth, nodeHeight, isVertical);
+    });
+
+    // Second pass: position nodes
     if (isVertical) {
-      const startX = 400;
-      const startY = 100;
-      rootNodes.forEach((rootNode, rootIndex) => {
-        const rootX = startX + rootIndex * 300;
+      // Vertical: root at top, children below
+      let currentX = 100;
+      rootNodes.forEach((rootNode) => {
+        const subtreeWidth = rootNode._subtreeWidth || nodeWidth;
+        const rootX = currentX + subtreeWidth / 2 - nodeWidth / 2;
         this.positionNodeAndChildren(
           rootNode,
           rootX,
-          startY,
+          60,
           levelSpacing,
           nodeSpacing,
           content,
+          nodeWidth,
+          nodeHeight,
         );
+        currentX += subtreeWidth + nodeSpacing * 2;
       });
     } else {
-      const startX = 100;
-      const startY = 250;
-      rootNodes.forEach((rootNode, rootIndex) => {
-        const rootY = startY + rootIndex * 300;
+      // Horizontal: root on left, children to the right
+      let currentY = 60;
+      rootNodes.forEach((rootNode) => {
+        const subtreeHeight = rootNode._subtreeHeight || nodeHeight;
+        const rootY = currentY + subtreeHeight / 2 - nodeHeight / 2;
         this.positionNodeAndChildren(
           rootNode,
-          startX,
+          60,
           rootY,
           levelSpacing,
           nodeSpacing,
           content,
+          nodeWidth,
+          nodeHeight,
         );
+        currentY += subtreeHeight + nodeSpacing * 2;
       });
+    }
+  }
+
+  calculateSubtreeSize(node, nodeSpacing, nodeWidth, nodeHeight, isVertical) {
+    const children = this.selectedMindmap.nodes.filter(
+      (n) => n.parent === node.id,
+    );
+
+    if (children.length === 0) {
+      node._subtreeWidth = nodeWidth;
+      node._subtreeHeight = nodeHeight;
+      return;
+    }
+
+    children.forEach((child) => {
+      this.calculateSubtreeSize(child, nodeSpacing, nodeWidth, nodeHeight, isVertical);
+    });
+
+    if (isVertical) {
+      // Vertical: width = sum of children widths
+      const totalChildWidth = children.reduce(
+        (sum, child) => sum + (child._subtreeWidth || nodeWidth),
+        0,
+      );
+      const spacing = (children.length - 1) * nodeSpacing;
+      node._subtreeWidth = Math.max(nodeWidth, totalChildWidth + spacing);
+      node._subtreeHeight = nodeHeight;
+    } else {
+      // Horizontal: height = sum of children heights
+      const totalChildHeight = children.reduce(
+        (sum, child) => sum + (child._subtreeHeight || nodeHeight),
+        0,
+      );
+      const spacing = (children.length - 1) * nodeSpacing;
+      node._subtreeHeight = Math.max(nodeHeight, totalChildHeight + spacing);
+      node._subtreeWidth = nodeWidth;
     }
   }
 
@@ -177,7 +232,7 @@ export class MindmapModule {
     container.appendChild(element);
   }
 
-  positionNodeAndChildren(node, x, y, levelSpacing, nodeSpacing, container) {
+  positionNodeAndChildren(node, x, y, levelSpacing, nodeSpacing, container, nodeWidth, nodeHeight) {
     const isVertical = this.currentLayout === "vertical";
 
     const element = document.createElement("div");
@@ -195,38 +250,73 @@ export class MindmapModule {
 
     node.x = x;
     node.y = y;
+    node._width = nodeWidth;
+    node._height = nodeHeight;
 
     const children = this.selectedMindmap.nodes.filter(
       (n) => n.parent === node.id,
     );
+
     if (children.length > 0) {
       if (isVertical) {
-        const childStartX = x - ((children.length - 1) * nodeSpacing) / 2;
-        children.forEach((child, index) => {
-          const childX = childStartX + index * nodeSpacing;
+        // Calculate total width needed for all children
+        const totalChildWidth = children.reduce(
+          (sum, child) => sum + (child._subtreeWidth || nodeWidth),
+          0,
+        );
+        const totalSpacing = (children.length - 1) * nodeSpacing;
+        const totalWidth = totalChildWidth + totalSpacing;
+
+        // Start from left edge, centering under parent
+        let childX = x + nodeWidth / 2 - totalWidth / 2;
+
+        children.forEach((child) => {
+          const childSubtreeWidth = child._subtreeWidth || nodeWidth;
+          const childCenterX = childX + childSubtreeWidth / 2 - nodeWidth / 2;
           const childY = y + levelSpacing;
+
           this.positionNodeAndChildren(
             child,
-            childX,
+            childCenterX,
             childY,
             levelSpacing,
             nodeSpacing,
             container,
+            nodeWidth,
+            nodeHeight,
           );
+
+          childX += childSubtreeWidth + nodeSpacing;
         });
       } else {
-        const childStartY = y - ((children.length - 1) * nodeSpacing) / 2;
-        children.forEach((child, index) => {
+        // Calculate total height needed for all children
+        const totalChildHeight = children.reduce(
+          (sum, child) => sum + (child._subtreeHeight || nodeHeight),
+          0,
+        );
+        const totalSpacing = (children.length - 1) * nodeSpacing;
+        const totalHeight = totalChildHeight + totalSpacing;
+
+        // Start from top edge, centering beside parent
+        let childY = y + nodeHeight / 2 - totalHeight / 2;
+
+        children.forEach((child) => {
+          const childSubtreeHeight = child._subtreeHeight || nodeHeight;
+          const childCenterY = childY + childSubtreeHeight / 2 - nodeHeight / 2;
           const childX = x + levelSpacing;
-          const childY = childStartY + index * nodeSpacing;
+
           this.positionNodeAndChildren(
             child,
             childX,
-            childY,
+            childCenterY,
             levelSpacing,
             nodeSpacing,
             container,
+            nodeWidth,
+            nodeHeight,
           );
+
+          childY += childSubtreeHeight + nodeSpacing;
         });
       }
     }
@@ -241,21 +331,32 @@ export class MindmapModule {
           (n) => n.id === node.parent,
         );
         if (parent && parent.x !== undefined && node.x !== undefined) {
+          // Get actual rendered dimensions from DOM
+          const parentEl = container.querySelector(`[data-node-id="${parent.id}"]`);
+          const nodeEl = container.querySelector(`[data-node-id="${node.id}"]`);
+
+          const parentWidth = parentEl ? parentEl.offsetWidth : 150;
+          const parentHeight = parentEl ? parentEl.offsetHeight : 40;
+          const nodeWidth = nodeEl ? nodeEl.offsetWidth : 150;
+          const nodeHeight = nodeEl ? nodeEl.offsetHeight : 40;
+
           const line = document.createElement("div");
           line.className = "mindmap-connection";
 
           let x1, y1, x2, y2;
 
           if (isVertical) {
-            x1 = parent.x + 60;
-            y1 = parent.y + 40;
-            x2 = node.x + 60;
+            // Parent: bottom-center, Child: top-center
+            x1 = parent.x + parentWidth / 2;
+            y1 = parent.y + parentHeight;
+            x2 = node.x + nodeWidth / 2;
             y2 = node.y;
           } else {
-            x1 = parent.x + 80;
-            y1 = parent.y + 20;
+            // Parent: right-center, Child: left-center
+            x1 = parent.x + parentWidth;
+            y1 = parent.y + parentHeight / 2;
             x2 = node.x;
-            y2 = node.y + 20;
+            y2 = node.y + nodeHeight / 2;
           }
 
           const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
@@ -267,7 +368,7 @@ export class MindmapModule {
           line.style.top = `${y1}px`;
           line.style.transform = `rotate(${angle}deg)`;
           line.style.transformOrigin = "0 50%";
-          line.style.backgroundColor = "#6b7280";
+          line.style.backgroundColor = "var(--color-text-muted)";
           line.style.zIndex = "1";
 
           container.appendChild(line);
@@ -278,18 +379,21 @@ export class MindmapModule {
 
   setupPanning() {
     const viewport = document.getElementById("mindmapViewport");
+    const container = document.getElementById("mindmapContainer");
     let isDragging = false;
     let startX,
       startY,
       startTranslateX = 0,
       startTranslateY = 0;
 
-    viewport.addEventListener("mousedown", (e) => {
-      if (e.target === viewport || e.target.id === "mindmapContent") {
+    container.addEventListener("mousedown", (e) => {
+      // Allow panning unless clicking on a mindmap node
+      if (!e.target.closest(".mindmap-node")) {
         isDragging = true;
         startX = e.clientX;
         startY = e.clientY;
-        viewport.style.cursor = "grabbing";
+        container.style.cursor = "grabbing";
+        e.preventDefault();
       }
     });
 
@@ -307,7 +411,7 @@ export class MindmapModule {
     document.addEventListener("mouseup", () => {
       if (isDragging) {
         isDragging = false;
-        viewport.style.cursor = "grab";
+        container.style.cursor = "grab";
         const transform = viewport.style.transform;
         const match = transform.match(/translate\(([^,]+),\s*([^)]+)\)/);
         if (match) {

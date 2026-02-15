@@ -660,3 +660,141 @@ export const BillingAPI = {
     return response;
   }
 };
+
+// CRM API
+export const CRMAPI = {
+  // Companies
+  async fetchCompanies() {
+    const response = await get('/api/companies');
+    return response.json();
+  },
+
+  async getCompany(id) {
+    const response = await get(`/api/companies/${id}`);
+    return response.json();
+  },
+
+  async createCompany(company) {
+    const response = await post('/api/companies', company);
+    return response;
+  },
+
+  async updateCompany(id, company) {
+    const response = await put(`/api/companies/${id}`, company);
+    return response;
+  },
+
+  async deleteCompany(id) {
+    const response = await del(`/api/companies/${id}`);
+    return response;
+  },
+
+  async getCompanyContacts(companyId) {
+    const response = await get(`/api/companies/${companyId}/contacts`);
+    return response.json();
+  },
+
+  async getCompanyDeals(companyId) {
+    const response = await get(`/api/companies/${companyId}/deals`);
+    return response.json();
+  },
+
+  async getCompanyInteractions(companyId) {
+    const response = await get(`/api/companies/${companyId}/interactions`);
+    return response.json();
+  },
+
+  // Contacts
+  async fetchContacts() {
+    const response = await get('/api/contacts');
+    return response.json();
+  },
+
+  async getContact(id) {
+    const response = await get(`/api/contacts/${id}`);
+    return response.json();
+  },
+
+  async createContact(contact) {
+    const response = await post('/api/contacts', contact);
+    return response;
+  },
+
+  async updateContact(id, contact) {
+    const response = await put(`/api/contacts/${id}`, contact);
+    return response;
+  },
+
+  async deleteContact(id) {
+    const response = await del(`/api/contacts/${id}`);
+    return response;
+  },
+
+  // Deals
+  async fetchDeals() {
+    const response = await get('/api/deals');
+    return response.json();
+  },
+
+  async getDeal(id) {
+    const response = await get(`/api/deals/${id}`);
+    return response.json();
+  },
+
+  async createDeal(deal) {
+    const response = await post('/api/deals', deal);
+    return response;
+  },
+
+  async updateDeal(id, deal) {
+    const response = await put(`/api/deals/${id}`, deal);
+    return response;
+  },
+
+  async deleteDeal(id) {
+    const response = await del(`/api/deals/${id}`);
+    return response;
+  },
+
+  async updateDealStage(id, stage) {
+    const response = await post(`/api/deals/${id}/stage`, { stage });
+    return response;
+  },
+
+  async getDealInteractions(dealId) {
+    const response = await get(`/api/deals/${dealId}/interactions`);
+    return response.json();
+  },
+
+  // Interactions
+  async fetchInteractions() {
+    const response = await get('/api/interactions');
+    return response.json();
+  },
+
+  async getInteraction(id) {
+    const response = await get(`/api/interactions/${id}`);
+    return response.json();
+  },
+
+  async createInteraction(interaction) {
+    const response = await post('/api/interactions', interaction);
+    return response;
+  },
+
+  async updateInteraction(id, interaction) {
+    const response = await put(`/api/interactions/${id}`, interaction);
+    return response;
+  },
+
+  async deleteInteraction(id) {
+    const response = await del(`/api/interactions/${id}`);
+    return response;
+  },
+
+  // Summary
+  async getSummary() {
+    const response = await get('/api/crm/summary');
+    return response.json();
+  }
+};

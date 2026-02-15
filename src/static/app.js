@@ -1,6 +1,9 @@
 import { showToast } from './modules/ui/toast.js';
 import { ThemeManager } from './modules/ui/theme.js';
 import { toggleMobileMenu, closeMobileMenu } from './modules/ui/mobile.js';
+import { AccessibilityManager } from './modules/ui/accessibility.js';
+import { FocusMode } from './modules/ui/focus-mode.js';
+import { Breadcrumb } from './modules/ui/breadcrumb.js';
 import { TasksAPI, ProjectAPI } from './modules/api.js';
 import { markdownToHtml as markdownToHtmlUtil } from './modules/utils.js';
 import { SummaryView } from './modules/views/summary.js';
@@ -26,6 +29,7 @@ import { CapacityModule } from './modules/features/capacity.js';
 import { TimeTrackingModule } from './modules/features/time-tracking.js';
 import { StrategicLevelsModule } from './modules/features/strategic-levels.js';
 import { BillingModule } from './modules/features/billing.js';
+import { CRMModule } from './modules/features/crm.js';
 import { CanvasModule } from './modules/features/canvas.js';
 import { MindmapModule } from './modules/features/mindmap.js';
 import { C4Module } from './modules/features/c4.js';
@@ -166,6 +170,7 @@ class TaskManager {
     this.timeTrackingModule = new TimeTrackingModule(this);
     this.strategicLevelsModule = new StrategicLevelsModule(this);
     this.billingModule = new BillingModule(this);
+    this.crmModule = new CRMModule(this);
     this.canvasModule = new CanvasModule(this);
     this.mindmapModule = new MindmapModule(this);
     this.c4Module = new C4Module(this);
@@ -180,6 +185,7 @@ class TaskManager {
   async init() {
     ThemeManager.initDarkMode();
     ThemeManager.initFullscreenMode();
+    AccessibilityManager.init();
     this.bindEvents();
     await this.loadProjects(); // Load projects first
     await this.loadProjectConfig();
@@ -244,19 +250,19 @@ class TaskManager {
       .getElementById("canvasViewBtn")
       .addEventListener("click", () => {
         this.switchView("canvas");
-        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+        document.querySelectorAll(".nav-dropdown-menu").forEach(m => m.classList.add("hidden"));
       });
     document
       .getElementById("mindmapViewBtn")
       .addEventListener("click", () => {
         this.switchView("mindmap");
-        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+        document.querySelectorAll(".nav-dropdown-menu").forEach(m => m.classList.add("hidden"));
       });
     document
       .getElementById("c4ViewBtn")
       .addEventListener("click", () => {
         this.switchView("c4");
-        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+        document.querySelectorAll(".nav-dropdown-menu").forEach(m => m.classList.add("hidden"));
       });
 
     // Additional desktop view buttons
@@ -274,24 +280,36 @@ class TaskManager {
       { id: "capacityViewBtn", view: "capacity" },
       { id: "strategicLevelsViewBtn", view: "strategicLevels" },
       { id: "billingViewBtn", view: "billing" },
+      { id: "crmViewBtn", view: "crm" },
     ];
     additionalViews.forEach(({ id, view }) => {
       document.getElementById(id)?.addEventListener("click", () => {
         this.switchView(view);
-        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+        document.querySelectorAll(".nav-dropdown-menu").forEach(m => m.classList.add("hidden"));
       });
     });
 
-    // View selector dropdown
-    document.getElementById("viewSelectorBtn")?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      document.getElementById("viewSelectorDropdown")?.classList.toggle("hidden");
+    // Navigation dropdowns (multiple category dropdowns)
+    document.querySelectorAll(".nav-dropdown").forEach((dropdown) => {
+      const btn = dropdown.querySelector(".nav-dropdown-btn");
+      const menu = dropdown.querySelector(".nav-dropdown-menu");
+      if (btn && menu) {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          // Close all other dropdowns first
+          document.querySelectorAll(".nav-dropdown-menu").forEach((m) => {
+            if (m !== menu) m.classList.add("hidden");
+          });
+          menu.classList.toggle("hidden");
+        });
+      }
     });
+    // Close dropdowns when clicking outside
     document.addEventListener("click", (e) => {
-      const dropdown = document.getElementById("viewSelectorDropdown");
-      const btn = document.getElementById("viewSelectorBtn");
-      if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
-        dropdown.classList.add("hidden");
+      if (!e.target.closest(".nav-dropdown")) {
+        document.querySelectorAll(".nav-dropdown-menu").forEach((menu) => {
+          menu.classList.add("hidden");
+        });
       }
     });
 
@@ -439,11 +457,35 @@ class TaskManager {
         this.switchView("billing");
         this.closeMobileMenu();
       });
+    document
+      .getElementById("crmViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("crm");
+        this.closeMobileMenu();
+      });
 
     // Dark mode toggle
     document
       .getElementById("darkModeToggle")
       .addEventListener("click", () => this.toggleDarkMode());
+    document
+      .getElementById("darkModeToggleMobile")
+      ?.addEventListener("click", () => {
+        this.toggleDarkMode();
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("pomodoroBtnMobile")
+      ?.addEventListener("click", () => {
+        this.closeMobileMenu();
+        document.getElementById("pomodoroBtn")?.click();
+      });
+    document
+      .getElementById("importExportBtnMobile")
+      ?.addEventListener("click", () => {
+        this.closeMobileMenu();
+        document.getElementById("importExportBtn")?.click();
+      });
     document
       .getElementById("fullscreenToggle")
       .addEventListener("click", () => this.toggleFullscreen());
@@ -504,6 +546,9 @@ class TaskManager {
 
     // Billing events - delegated to BillingModule
     this.billingModule.bindEvents();
+
+    // CRM events - delegated to CRMModule
+    this.crmModule.bindEvents();
 
     // Retrospectives events - delegated to RetrospectivesModule
     this.retrospectivesModule.bindEvents();
@@ -610,13 +655,13 @@ class TaskManager {
       summary: "Summary", list: "List", board: "Board", timeline: "Timeline",
       notes: "Notes", goals: "Goals", milestones: "Milestones", ideas: "Ideas",
       canvas: "Canvas", mindmap: "Mindmap", c4: "C4 Architecture",
-      retrospectives: "Retrospectives", swot: "SWOT Analysis", riskAnalysis: "Risk Analysis", leanCanvas: "Lean Canvas", businessModel: "Business Model", brief: "Brief", timeTracking: "Time Tracking", capacity: "Capacity", strategicLevels: "Strategic Levels", config: "Settings"
+      retrospectives: "Retrospectives", swot: "SWOT Analysis", riskAnalysis: "Risk Analysis", leanCanvas: "Lean Canvas", businessModel: "Business Model", brief: "Brief", timeTracking: "Time Tracking", capacity: "Capacity", strategicLevels: "Strategic Levels", billing: "Billing", crm: "CRM", config: "Settings"
     };
     const label = document.getElementById("currentViewLabel");
     if (label) label.textContent = viewLabels[view] || view;
 
     // Close dropdown
-    document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+    document.querySelectorAll(".nav-dropdown-menu").forEach(m => m.classList.add("hidden"));
 
     // Activate desktop button in dropdown
     const desktopBtn = document.getElementById(`${view}ViewBtn`);
@@ -639,6 +684,9 @@ class TaskManager {
     // Set data attribute on body for CSS targeting
     document.body.setAttribute('data-current-view', view);
 
+    // Update breadcrumb
+    Breadcrumb.render(view);
+
     // Disable multi-select mode when switching views
     if (this.multiSelectMode) {
       this.toggleMultiSelect();
@@ -648,7 +696,7 @@ class TaskManager {
     this.notesLoaded = false;
 
     // Reset all desktop nav buttons in dropdown
-    const desktopNavBtns = ["summaryViewBtn", "listViewBtn", "boardViewBtn", "timelineViewBtn", "notesViewBtn", "goalsViewBtn", "milestonesViewBtn", "ideasViewBtn", "canvasViewBtn", "mindmapViewBtn", "c4ViewBtn", "retrospectivesViewBtn", "swotViewBtn", "riskAnalysisViewBtn", "leanCanvasViewBtn", "businessModelViewBtn", "projectValueViewBtn", "briefViewBtn", "timeTrackingViewBtn", "capacityViewBtn", "strategicLevelsViewBtn", "billingViewBtn"];
+    const desktopNavBtns = ["summaryViewBtn", "listViewBtn", "boardViewBtn", "timelineViewBtn", "notesViewBtn", "goalsViewBtn", "milestonesViewBtn", "ideasViewBtn", "canvasViewBtn", "mindmapViewBtn", "c4ViewBtn", "retrospectivesViewBtn", "swotViewBtn", "riskAnalysisViewBtn", "leanCanvasViewBtn", "businessModelViewBtn", "projectValueViewBtn", "briefViewBtn", "timeTrackingViewBtn", "capacityViewBtn", "strategicLevelsViewBtn", "billingViewBtn", "crmViewBtn"];
     desktopNavBtns.forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) {
@@ -658,7 +706,7 @@ class TaskManager {
     });
 
     // Reset mobile buttons
-    const mobileBtnIds = ["summaryViewBtnMobile", "listViewBtnMobile", "boardViewBtnMobile", "timelineViewBtnMobile", "notesViewBtnMobile", "goalsViewBtnMobile", "milestonesViewBtnMobile", "canvasViewBtnMobile", "mindmapViewBtnMobile", "c4ViewBtnMobile", "ideasViewBtnMobile", "retrospectivesViewBtnMobile", "swotViewBtnMobile", "riskAnalysisViewBtnMobile", "leanCanvasViewBtnMobile", "businessModelViewBtnMobile", "projectValueViewBtnMobile", "briefViewBtnMobile", "timeTrackingViewBtnMobile", "capacityViewBtnMobile", "strategicLevelsViewBtnMobile", "billingViewBtnMobile", "configViewBtnMobile"];
+    const mobileBtnIds = ["summaryViewBtnMobile", "listViewBtnMobile", "boardViewBtnMobile", "timelineViewBtnMobile", "notesViewBtnMobile", "goalsViewBtnMobile", "milestonesViewBtnMobile", "canvasViewBtnMobile", "mindmapViewBtnMobile", "c4ViewBtnMobile", "ideasViewBtnMobile", "retrospectivesViewBtnMobile", "swotViewBtnMobile", "riskAnalysisViewBtnMobile", "leanCanvasViewBtnMobile", "businessModelViewBtnMobile", "projectValueViewBtnMobile", "briefViewBtnMobile", "timeTrackingViewBtnMobile", "capacityViewBtnMobile", "strategicLevelsViewBtnMobile", "billingViewBtnMobile", "crmViewBtnMobile", "configViewBtnMobile"];
     mobileBtnIds.forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) {
@@ -687,6 +735,7 @@ class TaskManager {
     document.getElementById("capacityView").classList.add("hidden");
     document.getElementById("strategicLevelsView").classList.add("hidden");
     document.getElementById("billingView")?.classList.add("hidden");
+    document.getElementById("crmView")?.classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
     document.getElementById("mindmapView").classList.add("hidden");
     document.getElementById("c4View").classList.add("hidden");
@@ -774,6 +823,10 @@ class TaskManager {
       this.activateViewButton("billing");
       document.getElementById("billingView").classList.remove("hidden");
       this.billingModule.load();
+    } else if (view === "crm") {
+      this.activateViewButton("crm");
+      document.getElementById("crmView").classList.remove("hidden");
+      this.crmModule.load();
     } else if (view === "canvas") {
       this.activateViewButton("canvas");
       document.getElementById("canvasView").classList.remove("hidden");
@@ -963,6 +1016,17 @@ class TaskManager {
     if (window.location.hash.startsWith("#task=")) {
       history.replaceState(null, "", window.location.pathname + window.location.search);
     }
+    // Exit focus mode if active
+    FocusMode.exit();
+  }
+
+  // Focus Mode - enter distraction-free single-task view
+  enterFocusMode(taskId) {
+    FocusMode.enter(taskId, this);
+  }
+
+  exitFocusMode() {
+    FocusMode.exit();
   }
 
   async handleTaskSubmit(e) {
@@ -2747,6 +2811,79 @@ class TaskManager {
 
   async generateInvoice(e) {
     return this.billingModule.generateInvoice(e);
+  }
+
+  // CRM delegate methods
+  openCRMCompanyModal(id = null) {
+    return this.crmModule.openCompanyModal(id);
+  }
+
+  closeCRMCompanyModal() {
+    return this.crmModule.closeCompanyModal();
+  }
+
+  async saveCRMCompany(e) {
+    return this.crmModule.saveCompany(e);
+  }
+
+  async deleteCRMCompany(id) {
+    return this.crmModule.deleteCompany(id);
+  }
+
+  openCRMContactModal(id = null) {
+    return this.crmModule.openContactModal(id);
+  }
+
+  closeCRMContactModal() {
+    return this.crmModule.closeContactModal();
+  }
+
+  async saveCRMContact(e) {
+    return this.crmModule.saveContact(e);
+  }
+
+  async deleteCRMContact(id) {
+    return this.crmModule.deleteContact(id);
+  }
+
+  openCRMDealModal(id = null) {
+    return this.crmModule.openDealModal(id);
+  }
+
+  closeCRMDealModal() {
+    return this.crmModule.closeDealModal();
+  }
+
+  async saveCRMDeal(e) {
+    return this.crmModule.saveDeal(e);
+  }
+
+  async deleteCRMDeal(id) {
+    return this.crmModule.deleteDeal(id);
+  }
+
+  async updateCRMDealStage(id, stage) {
+    return this.crmModule.updateDealStage(id, stage);
+  }
+
+  openCRMInteractionModal(id = null) {
+    return this.crmModule.openInteractionModal(id);
+  }
+
+  closeCRMInteractionModal() {
+    return this.crmModule.closeInteractionModal();
+  }
+
+  async saveCRMInteraction(e) {
+    return this.crmModule.saveInteraction(e);
+  }
+
+  async deleteCRMInteraction(id) {
+    return this.crmModule.deleteInteraction(id);
+  }
+
+  switchCRMTab(tab) {
+    return this.crmModule.switchTab(tab);
   }
 }
 

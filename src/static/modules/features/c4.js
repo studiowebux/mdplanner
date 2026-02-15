@@ -14,7 +14,14 @@ export class C4Module {
       this.tm.c4Components = this.getDefault();
     }
     this.validate();
-    this.save();
+
+    // Auto-spread overlapping components at initial level
+    const levelComponents = this.getCurrentLevelComponents();
+    if (this.hasOverlappingComponents(levelComponents)) {
+      this.spreadComponents(levelComponents);
+      this.save();
+    }
+
     this.render();
 
     setTimeout(() => {
@@ -122,14 +129,16 @@ export class C4Module {
     });
     container.innerHTML = '';
 
-    container.onclick = (e) => {
-      if (e.target === container) {
+    // Double-click to add component (single click is for panning)
+    container.ondblclick = (e) => {
+      if (!e.target.closest('.c4-component')) {
         const rect = container.getBoundingClientRect();
         const x = (e.clientX - rect.left) / this.tm.c4Zoom - this.tm.c4Offset.x;
         const y = (e.clientY - rect.top) / this.tm.c4Zoom - this.tm.c4Offset.y;
         this.openModalWithLevel(x, y);
       }
     };
+    container.onclick = null;
 
     currentComponents.forEach(component => {
       this.createElement(component, container);
@@ -155,17 +164,40 @@ export class C4Module {
   }
 
   getCurrentLevelComponents() {
+    const hasParentRelationships = this.tm.c4Components.some(c => c.parent);
+
     if (this.tm.c4NavigationStack.length === 0) {
-      return this.tm.c4Components.filter(comp => !comp.parent);
+      // Root level
+      if (hasParentRelationships) {
+        // Show components without parents
+        return this.tm.c4Components.filter(comp => !comp.parent);
+      }
+      // Fallback: show context-level components
+      return this.tm.c4Components.filter(comp => comp.level === 'context');
     } else {
       const currentParentId = this.tm.c4NavigationStack[this.tm.c4NavigationStack.length - 1];
-      return this.tm.c4Components.filter(comp => comp.parent === currentParentId);
+      const currentParent = this.tm.c4Components.find(c => c.id === currentParentId);
+      if (!currentParent) return [];
+
+      // Show direct children (components with this as parent)
+      const directChildren = this.tm.c4Components.filter(comp => comp.parent === currentParentId);
+      if (directChildren.length > 0) {
+        return directChildren;
+      }
+
+      // Show children listed in parent's children array
+      if (currentParent.children && currentParent.children.length > 0) {
+        return this.tm.c4Components.filter(comp => currentParent.children.includes(comp.id));
+      }
+
+      // No children defined - return empty (don't show unrelated components)
+      return [];
     }
   }
 
   createElement(component, container) {
     const element = document.createElement('div');
-    element.className = `c4-component ${component.level}`;
+    element.className = `c4-component c4-level-${component.level}`;
     element.style.left = `${component.position.x}px`;
     element.style.top = `${component.position.y}px`;
     element.setAttribute('data-c4-id', component.id);
@@ -209,17 +241,68 @@ export class C4Module {
   }
 
   canBeDrilledDown(component) {
-    const levels = ['context', 'container', 'component', 'code'];
-    const currentIndex = levels.indexOf(component.level);
-    return (component.children && component.children.length > 0) || currentIndex < levels.length - 1;
+    // Check if component has explicit children array
+    if (component.children && component.children.length > 0) {
+      return true;
+    }
+
+    // Check if any components have this as their parent
+    if (this.tm.c4Components.some(c => c.parent === component.id)) {
+      return true;
+    }
+
+    // No explicit children - cannot drill down
+    return false;
   }
 
   drillDown(component) {
     this.stopForceLayout();
     this.tm.c4NavigationStack.push(component.id);
     document.getElementById('c4BackBtn').classList.remove('hidden');
+
+    // Reset view to center when drilling down
+    this.resetView();
+
+    // Auto-layout components at the new level if they overlap
+    const levelComponents = this.getCurrentLevelComponents();
+    if (this.hasOverlappingComponents(levelComponents)) {
+      this.spreadComponents(levelComponents);
+      this.save();
+    }
+
     this.render();
     document.getElementById('c4Container').style.cursor = 'grab';
+  }
+
+  hasOverlappingComponents(components) {
+    if (components.length < 2) return false;
+
+    const threshold = 50;
+    for (let i = 0; i < components.length; i++) {
+      for (let j = i + 1; j < components.length; j++) {
+        const dx = Math.abs(components[i].position.x - components[j].position.x);
+        const dy = Math.abs(components[i].position.y - components[j].position.y);
+        if (dx < threshold && dy < threshold) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  spreadComponents(components) {
+    const spacingX = 250;
+    const spacingY = 180;
+    const cols = Math.ceil(Math.sqrt(components.length));
+    const startX = 100;
+    const startY = 100;
+
+    components.forEach((comp, index) => {
+      const col = index % cols;
+      const row = Math.floor(index / cols);
+      comp.position.x = startX + col * spacingX;
+      comp.position.y = startY + row * spacingY;
+    });
   }
 
   getNavigationComponent(index) {
@@ -234,6 +317,7 @@ export class C4Module {
       if (this.tm.c4NavigationStack.length === 0) {
         document.getElementById('c4BackBtn').classList.add('hidden');
       }
+      this.resetView();
       this.render();
       document.getElementById('c4Container').style.cursor = 'grab';
     }
@@ -241,13 +325,19 @@ export class C4Module {
 
   updateBreadcrumb() {
     const breadcrumb = document.getElementById('c4Breadcrumb');
-    let html = `<span class="c4-breadcrumb-item" onclick="taskManager.c4Module.navigateToRoot()">Root</span>`;
+    const levels = ['context', 'container', 'component', 'code'];
+    const levelLabels = { context: 'Context', container: 'Container', component: 'Component', code: 'Code' };
+
+    let html = `<span class="c4-breadcrumb-item" onclick="taskManager.c4Module.navigateToRoot()">Context</span>`;
 
     this.tm.c4NavigationStack.forEach((componentId, index) => {
       const component = this.tm.c4Components.find(c => c.id === componentId);
       if (component) {
         html += `<span class="c4-breadcrumb-separator">/</span>`;
-        html += `<span class="c4-breadcrumb-item" onclick="taskManager.c4Module.navigateToLevel(${index})">${component.name}</span>`;
+        const levelIndex = levels.indexOf(component.level);
+        const nextLevel = levelIndex < levels.length - 1 ? levelLabels[levels[levelIndex + 1]] : '';
+        const label = nextLevel ? `${component.name} (${nextLevel})` : component.name;
+        html += `<span class="c4-breadcrumb-item" onclick="taskManager.c4Module.navigateToLevel(${index})">${label}</span>`;
       }
     });
 
@@ -258,6 +348,7 @@ export class C4Module {
     this.stopForceLayout();
     this.tm.c4NavigationStack = [];
     document.getElementById('c4BackBtn').classList.add('hidden');
+    this.resetView();
     this.render();
     document.getElementById('c4Container').style.cursor = 'grab';
   }
@@ -268,6 +359,7 @@ export class C4Module {
     if (this.tm.c4NavigationStack.length === 0) {
       document.getElementById('c4BackBtn').classList.add('hidden');
     }
+    this.resetView();
     this.render();
     document.getElementById('c4Container').style.cursor = 'grab';
   }
@@ -297,28 +389,58 @@ export class C4Module {
     });
   }
 
+  getRectEdgePoint(centerX, centerY, width, height, targetX, targetY) {
+    const dx = targetX - centerX;
+    const dy = targetY - centerY;
+
+    if (dx === 0 && dy === 0) return { x: centerX, y: centerY };
+
+    const halfW = width / 2;
+    const halfH = height / 2;
+
+    // Calculate intersection with rectangle edges
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+
+    let edgeX, edgeY;
+
+    if (absDx * halfH > absDy * halfW) {
+      // Intersects left or right edge
+      edgeX = centerX + (dx > 0 ? halfW : -halfW);
+      edgeY = centerY + dy * (halfW / absDx);
+    } else {
+      // Intersects top or bottom edge
+      edgeX = centerX + dx * (halfH / absDy);
+      edgeY = centerY + (dy > 0 ? halfH : -halfH);
+    }
+
+    return { x: edgeX, y: edgeY };
+  }
+
   drawConnection(svg, fromComponent, toComponent, label) {
-    const componentWidth = 160;
-    const componentHeight = 100;
+    // Get actual rendered dimensions from DOM elements
+    const fromEl = document.querySelector(`[data-c4-id="${fromComponent.id}"]`);
+    const toEl = document.querySelector(`[data-c4-id="${toComponent.id}"]`);
 
-    const fromCenterX = fromComponent.position.x + componentWidth / 2;
-    const fromCenterY = fromComponent.position.y + componentHeight / 2;
-    const toCenterX = toComponent.position.x + componentWidth / 2;
-    const toCenterY = toComponent.position.y + componentHeight / 2;
+    const fromWidth = fromEl ? fromEl.offsetWidth : 180;
+    const fromHeight = fromEl ? fromEl.offsetHeight : 120;
+    const toWidth = toEl ? toEl.offsetWidth : 180;
+    const toHeight = toEl ? toEl.offsetHeight : 120;
 
-    const dx = toCenterX - fromCenterX;
-    const dy = toCenterY - fromCenterY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
+    const fromCenterX = fromComponent.position.x + fromWidth / 2;
+    const fromCenterY = fromComponent.position.y + fromHeight / 2;
+    const toCenterX = toComponent.position.x + toWidth / 2;
+    const toCenterY = toComponent.position.y + toHeight / 2;
 
-    if (distance === 0) return;
+    if (fromCenterX === toCenterX && fromCenterY === toCenterY) return;
 
-    const dirX = dx / distance;
-    const dirY = dy / distance;
+    const fromEdge = this.getRectEdgePoint(fromCenterX, fromCenterY, fromWidth, fromHeight, toCenterX, toCenterY);
+    const toEdge = this.getRectEdgePoint(toCenterX, toCenterY, toWidth, toHeight, fromCenterX, fromCenterY);
 
-    const fromX = fromCenterX + dirX * (componentWidth / 2);
-    const fromY = fromCenterY + dirY * (componentHeight / 2);
-    const toX = toCenterX - dirX * (componentWidth / 2);
-    const toY = toCenterY - dirY * (componentHeight / 2);
+    const fromX = fromEdge.x;
+    const fromY = fromEdge.y;
+    const toX = toEdge.x;
+    const toY = toEdge.y;
 
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     line.setAttribute('x1', fromX);
@@ -440,6 +562,7 @@ export class C4Module {
   openModal() {
     this.tm.editingC4Component = null;
     document.getElementById('c4ComponentModalTitle').textContent = 'Add C4 Component';
+    document.getElementById('c4ComponentIdDisplay')?.classList.add('hidden');
     document.getElementById('c4ComponentForm').reset();
     document.getElementById('c4ComponentLevel').value = this.tm.currentC4Level;
     document.getElementById('c4ComponentType').value = this.getDefaultTypeForLevel(this.tm.currentC4Level);
@@ -469,6 +592,7 @@ export class C4Module {
   openModalWithLevel(x = 300, y = 200) {
     this.tm.editingC4Component = null;
     document.getElementById('c4ComponentModalTitle').textContent = 'Add C4 Component';
+    document.getElementById('c4ComponentIdDisplay')?.classList.add('hidden');
     document.getElementById('c4ComponentForm').reset();
 
     const levels = ['context', 'container', 'component', 'code'];
@@ -683,6 +807,14 @@ export class C4Module {
     this.tm.editingC4Component = component;
     document.getElementById('c4ComponentModalTitle').textContent = 'Edit C4 Component';
 
+    // Show component ID
+    const idDisplay = document.getElementById('c4ComponentIdDisplay');
+    const idValue = document.getElementById('c4ComponentIdValue');
+    if (idDisplay && idValue) {
+      idDisplay.classList.remove('hidden');
+      idValue.textContent = component.id;
+    }
+
     document.getElementById('c4ComponentName').value = component.name;
     document.getElementById('c4ComponentLevel').value = component.level;
     document.getElementById('c4ComponentType').value = component.type;
@@ -776,12 +908,21 @@ export class C4Module {
     const viewport = document.getElementById('c4Viewport');
     const content = document.getElementById('c4Content');
     const container = document.getElementById('c4Container');
+    const componentsContainer = document.getElementById('c4ComponentsContainer');
 
     let isPanning = false;
     let startX, startY, initialOffsetX, initialOffsetY;
 
     container.addEventListener('mousedown', (e) => {
-      if (e.target === container || e.target === viewport || e.target === content || e.target.id === 'c4Connections') {
+      // Allow panning when clicking on background elements, not on components
+      const isBackground = e.target === container ||
+                          e.target === viewport ||
+                          e.target === content ||
+                          e.target === componentsContainer ||
+                          e.target.id === 'c4Connections' ||
+                          e.target.tagName === 'svg';
+
+      if (isBackground && !e.target.closest('.c4-component')) {
         isPanning = true;
         startX = e.clientX;
         startY = e.clientY;
@@ -877,8 +1018,16 @@ export class C4Module {
       return;
     }
 
-    const rootComponents = this.tm.c4Components.filter(c => !c.parent);
-    container.innerHTML = this.renderListItems(rootComponents, 0);
+    const hasParentRelationships = this.tm.c4Components.some(c => c.parent);
+
+    if (hasParentRelationships) {
+      // Use parent-based nesting
+      const rootComponents = this.tm.c4Components.filter(c => !c.parent);
+      container.innerHTML = this.renderListItems(rootComponents, 0);
+    } else {
+      // Use C4 level-based indentation
+      container.innerHTML = this.renderListItemsByLevel();
+    }
 
     container.querySelectorAll('.c4-list-toggle').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -982,13 +1131,84 @@ export class C4Module {
     }).join('');
   }
 
+  renderListItemsByLevel() {
+    const levels = ['context', 'container', 'component', 'code'];
+    const levelIndent = { context: 0, container: 1, component: 2, code: 3 };
+
+    const levelColors = {
+      context: 'border-l-gray-800 dark:border-l-gray-200',
+      container: 'border-l-gray-600 dark:border-l-gray-400',
+      component: 'border-l-gray-400 dark:border-l-gray-500',
+      code: 'border-l-gray-300 dark:border-l-gray-600'
+    };
+
+    const levelBadgeColors = {
+      context: 'bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-800',
+      container: 'bg-gray-600 text-white dark:bg-gray-400 dark:text-gray-800',
+      component: 'bg-gray-400 text-white dark:bg-gray-500 dark:text-gray-100',
+      code: 'bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200'
+    };
+
+    // Sort components by level order
+    const sortedComponents = [...this.tm.c4Components].sort((a, b) => {
+      return levels.indexOf(a.level) - levels.indexOf(b.level);
+    });
+
+    return sortedComponents.map(component => {
+      const indent = levelIndent[component.level] || 0;
+      const borderColor = levelColors[component.level] || levelColors.context;
+      const badgeColor = levelBadgeColors[component.level] || levelBadgeColors.context;
+
+      return `
+        <div class="c4-list-item border-l-4 ${borderColor} mb-2" style="margin-left: ${indent * 24}px;">
+          <div class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-r-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+            <div class="w-6"></div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="font-medium text-gray-900 dark:text-gray-100">${component.name}</span>
+                <span class="px-2 py-0.5 text-xs rounded ${badgeColor}">${component.level}</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">${component.type}</span>
+              </div>
+              ${component.description ? `<p class="text-sm text-gray-600 dark:text-gray-400 truncate">${component.description}</p>` : ''}
+              ${component.connections && component.connections.length > 0 ? `
+                <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                  Connects to: ${component.connections.map(c => c.target).join(', ')}
+                </div>
+              ` : ''}
+            </div>
+            <div class="flex items-center gap-1">
+              <button class="c4-list-edit p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded" data-component-id="${component.id}" title="Edit">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+              </button>
+              <button class="c4-list-delete p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-200 dark:hover:bg-gray-600 rounded" data-component-id="${component.id}" title="Delete">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
   triggerAutoLayout() {
     const currentComponents = this.getCurrentLevelComponents();
     if (currentComponents.length > 0) {
-      this.applyHierarchicalLayout(currentComponents);
+      // Get viewport dimensions for centering
+      const container = document.getElementById('c4Container');
+      const viewportWidth = container ? container.clientWidth : 1200;
+      const viewportHeight = container ? container.clientHeight : 600;
+
+      this.applyHierarchicalLayout(currentComponents, viewportWidth, viewportHeight);
       this.updatePositions(currentComponents);
       this.drawConnections(currentComponents);
       this.save();
+
+      // Reset view to show centered components
+      this.resetView();
     }
   }
 
@@ -997,7 +1217,10 @@ export class C4Module {
 
     this.stopForceLayout();
 
-    this.applyHierarchicalLayout(components);
+    const container = document.getElementById('c4Container');
+    const viewportWidth = container ? container.clientWidth : 1200;
+    const viewportHeight = container ? container.clientHeight : 600;
+    this.applyHierarchicalLayout(components, viewportWidth, viewportHeight);
 
     components.forEach(component => {
       if (!component.physics) {
@@ -1022,53 +1245,19 @@ export class C4Module {
     this.runForceSimulation();
   }
 
-  applyHierarchicalLayout(components) {
-    const levelSpacing = 350;
-    const nodeSpacing = 300;
-    const containerWidth = 1200;
+  applyHierarchicalLayout(components, viewportWidth = 1200, viewportHeight = 600) {
+    const nodeSpacing = 250;
+    const nodeWidth = 180;
+    const nodeHeight = 120;
 
-    const componentsByLevel = {
-      context: [],
-      container: [],
-      component: [],
-      code: []
-    };
+    // Simple horizontal layout centered in viewport
+    const totalWidth = components.length * nodeWidth + (components.length - 1) * (nodeSpacing - nodeWidth);
+    const startX = Math.max(50, (viewportWidth - totalWidth) / 2);
+    const startY = Math.max(50, (viewportHeight - nodeHeight) / 3);
 
-    const componentsByParent = new Map();
-
-    components.forEach(comp => {
-      if (componentsByLevel[comp.level]) {
-        componentsByLevel[comp.level].push(comp);
-      }
-
-      if (comp.parent) {
-        if (!componentsByParent.has(comp.parent)) {
-          componentsByParent.set(comp.parent, []);
-        }
-        componentsByParent.get(comp.parent).push(comp);
-      }
-    });
-
-    const rootComponents = components.filter(c => !c.parent);
-    this.layoutInRow(rootComponents, 100, containerWidth, nodeSpacing);
-
-    const levels = ['context', 'container', 'component', 'code'];
-    levels.forEach((level, levelIndex) => {
-      const levelComponents = componentsByLevel[level];
-      if (!levelComponents || levelComponents.length === 0) return;
-
-      levelComponents.forEach(parent => {
-        const children = componentsByParent.get(parent.id) || [];
-        if (children.length > 0) {
-          const parentY = parent.position.y + levelSpacing;
-          const startX = parent.position.x - (children.length - 1) * nodeSpacing / 2;
-
-          children.forEach((child, index) => {
-            child.position.x = startX + index * nodeSpacing;
-            child.position.y = parentY;
-          });
-        }
-      });
+    components.forEach((comp, index) => {
+      comp.position.x = startX + index * nodeSpacing;
+      comp.position.y = startY;
     });
 
     this.adjustForOverlaps(components);
@@ -1087,9 +1276,9 @@ export class C4Module {
   }
 
   adjustForOverlaps(components) {
-    const componentWidth = 160;
-    const componentHeight = 100;
-    const minGap = 50;
+    const componentWidth = 180;
+    const componentHeight = 120;
+    const minGap = 60;
 
     const sortedComponents = [...components].sort((a, b) => a.position.y - b.position.y);
 

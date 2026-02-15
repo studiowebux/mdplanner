@@ -4,9 +4,13 @@ import {
   BusinessModelCanvas,
   C4Component,
   CapacityPlan,
+  Company,
+  Contact,
   Customer,
+  Deal,
   Goal,
   Idea,
+  Interaction,
   Invoice,
   InvoiceLineItem,
   LeanCanvas,
@@ -53,6 +57,7 @@ import { BriefParser } from "./parser/features/brief-parser.ts";
 import { CapacityParser } from "./parser/features/capacity-parser.ts";
 import { StrategicParser } from "./parser/features/strategic-parser.ts";
 import { BillingParser } from "./parser/features/billing-parser.ts";
+import { CRMParser } from "./parser/features/crm-parser.ts";
 
 export class MarkdownParser extends BaseParser {
   private taskParser: TaskParser;
@@ -73,6 +78,7 @@ export class MarkdownParser extends BaseParser {
   private capacityParser: CapacityParser;
   private strategicParser: StrategicParser;
   private billingParser: BillingParser;
+  private crmParser: CRMParser;
 
   constructor(filePath: string) {
     super(filePath);
@@ -94,6 +100,7 @@ export class MarkdownParser extends BaseParser {
     this.capacityParser = new CapacityParser(filePath);
     this.strategicParser = new StrategicParser(filePath);
     this.billingParser = new BillingParser(filePath);
+    this.crmParser = new CRMParser(filePath);
   }
 
   async readTasks(): Promise<Task[]> {
@@ -135,6 +142,7 @@ export class MarkdownParser extends BaseParser {
     let c4Components: C4Component[] = [];
     let i = 0;
     let foundFirstHeader = false;
+    let descriptionComplete = false; // Set true after first section header
     let inConfigSection = false;
     let inNotesSection = false;
     let inGoalsSection = false;
@@ -156,6 +164,7 @@ export class MarkdownParser extends BaseParser {
       // Check which section we're entering
       // Check for section boundary comments
       if (line.trim() === "<!-- Configurations -->") {
+        descriptionComplete = true;
         inConfigSection = true;
         inNotesSection = false;
         inGoalsSection = false;
@@ -164,6 +173,7 @@ export class MarkdownParser extends BaseParser {
       }
 
       if (line.trim() === "<!-- Notes -->") {
+        descriptionComplete = true;
         inNotesSection = true;
         inConfigSection = false;
         inGoalsSection = false;
@@ -172,6 +182,7 @@ export class MarkdownParser extends BaseParser {
       }
 
       if (line.trim() === "<!-- Goals -->") {
+        descriptionComplete = true;
         inGoalsSection = true;
         inConfigSection = false;
         inNotesSection = false;
@@ -182,6 +193,7 @@ export class MarkdownParser extends BaseParser {
       }
 
       if (line.trim() === "<!-- Canvas -->") {
+        descriptionComplete = true;
         inCanvasSection = true;
         inConfigSection = false;
         inNotesSection = false;
@@ -192,6 +204,7 @@ export class MarkdownParser extends BaseParser {
       }
 
       if (line.trim() === "<!-- Mindmap -->") {
+        descriptionComplete = true;
         inMindmapSection = true;
         inConfigSection = false;
         inNotesSection = false;
@@ -203,6 +216,7 @@ export class MarkdownParser extends BaseParser {
       }
 
       if (line.trim() === "<!-- C4 Architecture -->") {
+        descriptionComplete = true;
         inC4Section = true;
         inMindmapSection = false;
         inConfigSection = false;
@@ -214,6 +228,7 @@ export class MarkdownParser extends BaseParser {
       }
 
       if (line === "# Configurations") {
+        descriptionComplete = true;
         inConfigSection = true;
         inNotesSection = false;
         inGoalsSection = false;
@@ -224,6 +239,7 @@ export class MarkdownParser extends BaseParser {
       }
 
       if (line === "# Notes") {
+        descriptionComplete = true;
         inNotesSection = true;
         inConfigSection = false;
         inGoalsSection = false;
@@ -234,6 +250,7 @@ export class MarkdownParser extends BaseParser {
       }
 
       if (line === "# Goals") {
+        descriptionComplete = true;
         inGoalsSection = true;
         inConfigSection = false;
         inNotesSection = false;
@@ -244,6 +261,7 @@ export class MarkdownParser extends BaseParser {
       }
 
       if (line === "# Canvas") {
+        descriptionComplete = true;
         inCanvasSection = true;
         inConfigSection = false;
         inNotesSection = false;
@@ -254,6 +272,7 @@ export class MarkdownParser extends BaseParser {
       }
 
       if (line === "# Mindmap") {
+        descriptionComplete = true;
         inMindmapSection = true;
         inConfigSection = false;
         inNotesSection = false;
@@ -265,6 +284,7 @@ export class MarkdownParser extends BaseParser {
       }
 
       if (line === "# C4 Architecture") {
+        descriptionComplete = true;
         inC4Section = true;
         inMindmapSection = false;
         inConfigSection = false;
@@ -385,7 +405,7 @@ export class MarkdownParser extends BaseParser {
         continue;
       }
 
-      // Skip configuration section content for description
+      // Skip any section content (not just known sections)
       if (
         inConfigSection || inNotesSection || inGoalsSection ||
         inCanvasSection || inMindmapSection || inC4Section
@@ -394,17 +414,25 @@ export class MarkdownParser extends BaseParser {
         continue;
       }
 
-      // Collect description lines (skip empty lines at the start)
-      if (
-        foundFirstHeader && line && !inConfigSection && !inNotesSection &&
-        !inGoalsSection && !inCanvasSection && !inMindmapSection && !inC4Section
-      ) {
+      // If we hit any # header (unknown section) or section comment after project name,
+      // mark description as complete and skip this content
+      if (foundFirstHeader && line.startsWith("# ")) {
+        descriptionComplete = true;
+        i++;
+        continue;
+      }
+
+      // Section boundary comments also end description collection
+      if (foundFirstHeader && line.startsWith("<!--") && line.endsWith("-->") && !line.includes("id:")) {
+        descriptionComplete = true;
+        i++;
+        continue;
+      }
+
+      // Collect description lines only before any section starts
+      if (foundFirstHeader && !descriptionComplete && line) {
         description.push(line);
-      } else if (
-        foundFirstHeader && !line && description.length > 0 &&
-        !inConfigSection && !inNotesSection && !inGoalsSection &&
-        !inCanvasSection && !inMindmapSection && !inC4Section
-      ) {
+      } else if (foundFirstHeader && !descriptionComplete && !line && description.length > 0) {
         // Keep empty lines if we already have content
         description.push("");
       }
@@ -779,6 +807,10 @@ export class MarkdownParser extends BaseParser {
       "<!-- Capacity Planning -->",
       "<!-- Strategic Levels -->",
       "<!-- Billing -->",
+      "<!-- Companies -->",
+      "<!-- Contacts -->",
+      "<!-- Deals -->",
+      "<!-- Interactions -->",
     ];
 
     const endMarkers = [
@@ -1848,5 +1880,205 @@ export class MarkdownParser extends BaseParser {
   async getNextInvoiceNumber(): Promise<string> {
     const invoices = await this.readInvoices();
     return this.billingParser.getNextInvoiceNumber(invoices);
+  }
+
+  // ============================================
+  // CRM: COMPANIES
+  // ============================================
+
+  async readCompanies(): Promise<Company[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    return this.crmParser.parseCompaniesSection(lines);
+  }
+
+  async saveCompanies(companies: Company[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    const { startIndex, endIndex } = this.crmParser.findCompaniesSection(lines);
+    const companiesContent = this.crmParser.companiesToMarkdown(companies);
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.startsWith("# Board"));
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, companiesContent);
+      } else {
+        lines.push(companiesContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, companiesContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  // ============================================
+  // CRM: CONTACTS
+  // ============================================
+
+  async readContacts(): Promise<Contact[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    return this.crmParser.parseContactsSection(lines);
+  }
+
+  async saveContacts(contacts: Contact[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    const { startIndex, endIndex } = this.crmParser.findContactsSection(lines);
+    const contactsContent = this.crmParser.contactsToMarkdown(contacts);
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.startsWith("# Board"));
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, contactsContent);
+      } else {
+        lines.push(contactsContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, contactsContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  // ============================================
+  // CRM: DEALS
+  // ============================================
+
+  async readDeals(): Promise<Deal[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    return this.crmParser.parseDealsSection(lines);
+  }
+
+  async saveDeals(deals: Deal[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    const { startIndex, endIndex } = this.crmParser.findDealsSection(lines);
+    const dealsContent = this.crmParser.dealsToMarkdown(deals);
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.startsWith("# Board"));
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, dealsContent);
+      } else {
+        lines.push(dealsContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, dealsContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  // ============================================
+  // CRM: INTERACTIONS
+  // ============================================
+
+  async readInteractions(): Promise<Interaction[]> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+    return this.crmParser.parseInteractionsSection(lines);
+  }
+
+  async saveInteractions(interactions: Interaction[]): Promise<void> {
+    const content = await Deno.readTextFile(this.filePath);
+    const lines = content.split("\n");
+
+    const { startIndex, endIndex } = this.crmParser.findInteractionsSection(lines);
+    const interactionsContent = this.crmParser.interactionsToMarkdown(interactions);
+
+    if (startIndex === -1) {
+      const boardIndex = lines.findIndex(l => l.includes("<!-- Board -->") || l.startsWith("# Board"));
+      if (boardIndex !== -1) {
+        lines.splice(boardIndex, 0, interactionsContent);
+      } else {
+        lines.push(interactionsContent);
+      }
+    } else {
+      const before = lines.slice(0, startIndex);
+      const after = endIndex !== -1 ? lines.slice(endIndex) : [];
+      lines.length = 0;
+      lines.push(...before, interactionsContent, ...after);
+    }
+
+    await this.safeWriteFile(lines.join("\n"));
+  }
+
+  // ============================================
+  // CRM: SUMMARY
+  // ============================================
+
+  async getCRMSummary(): Promise<{
+    totalCompanies: number;
+    totalContacts: number;
+    totalDeals: number;
+    pipelineValue: number;
+    wonValue: number;
+    lostValue: number;
+    dealsByStage: Record<string, { count: number; value: number }>;
+    recentInteractions: number;
+  }> {
+    const [companies, contacts, deals, interactions] = await Promise.all([
+      this.readCompanies(),
+      this.readContacts(),
+      this.readDeals(),
+      this.readInteractions(),
+    ]);
+
+    const dealsByStage: Record<string, { count: number; value: number }> = {
+      lead: { count: 0, value: 0 },
+      qualified: { count: 0, value: 0 },
+      proposal: { count: 0, value: 0 },
+      negotiation: { count: 0, value: 0 },
+      won: { count: 0, value: 0 },
+      lost: { count: 0, value: 0 },
+    };
+
+    let pipelineValue = 0;
+    let wonValue = 0;
+    let lostValue = 0;
+
+    for (const deal of deals) {
+      dealsByStage[deal.stage].count++;
+      dealsByStage[deal.stage].value += deal.value;
+
+      if (deal.stage === "won") {
+        wonValue += deal.value;
+      } else if (deal.stage === "lost") {
+        lostValue += deal.value;
+      } else {
+        pipelineValue += deal.value * (deal.probability / 100);
+      }
+    }
+
+    // Count recent interactions (last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const recentInteractions = interactions.filter(i => new Date(i.date) >= sevenDaysAgo).length;
+
+    return {
+      totalCompanies: companies.length,
+      totalContacts: contacts.length,
+      totalDeals: deals.length,
+      pipelineValue,
+      wonValue,
+      lostValue,
+      dealsByStage,
+      recentInteractions,
+    };
   }
 }

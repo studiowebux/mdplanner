@@ -9,12 +9,8 @@
    -------------------------------------------------------------------------- */
 
 .canvas-height {
-    height: 600px;
-}
-
-/* Fullscreen mode */
-body.h-screen .canvas-height {
-    height: calc(100vh - 180px);
+    height: calc(100vh - 280px);
+    min-height: 500px;
 }
 
 .canvas-grid {

@@ -350,3 +350,150 @@ select.input {
     border-color: var(--color-info);
     color: var(--color-info-text);
 }
+
+/* --------------------------------------------------------------------------
+   Breadcrumb Navigation (Accessibility)
+   -------------------------------------------------------------------------- */
+
+#breadcrumb {
+    padding: var(--space-sm) 0;
+    margin-bottom: var(--space-sm);
+}
+
+#breadcrumb.hidden {
+    display: none;
+}
+
+.breadcrumb-nav {
+    font-size: 0.875rem;
+}
+
+.breadcrumb-list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+}
+
+.breadcrumb-separator {
+    display: flex;
+    align-items: center;
+    color: var(--color-text-muted);
+}
+
+.breadcrumb-separator svg {
+    width: 12px;
+    height: 12px;
+}
+
+.breadcrumb-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    color: var(--color-text-secondary);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.breadcrumb-link:hover {
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-tertiary);
+}
+
+.breadcrumb-link:focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 1px;
+}
+
+.breadcrumb-category {
+    color: var(--color-text-muted);
+    padding: var(--space-xs) var(--space-sm);
+}
+
+.breadcrumb-current {
+    color: var(--color-text-primary);
+    font-weight: 500;
+    padding: var(--space-xs) var(--space-sm);
+}
+
+/* --------------------------------------------------------------------------
+   Large Touch Targets (Accessibility)
+   -------------------------------------------------------------------------- */
+
+.large-targets button,
+.large-targets a,
+.large-targets input[type="checkbox"],
+.large-targets input[type="radio"],
+.large-targets select,
+.large-targets .dropdown-item {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+.large-targets input[type="checkbox"],
+.large-targets input[type="radio"] {
+    width: 22px;
+    height: 22px;
+}
+
+.large-targets .btn-primary,
+.large-targets .btn-secondary,
+.large-targets .btn-ghost,
+.large-targets .btn-danger {
+    padding: var(--space-md) var(--space-lg);
+}
+
+.large-targets .dropdown-item {
+    padding: var(--space-md) 0.75rem;
+}
+
+/* Larger click area for small action buttons */
+.large-targets .task-card button,
+.large-targets .task-list-item button {
+    padding: var(--space-sm);
+}
+
+.large-targets .task-card button svg,
+.large-targets .task-list-item button svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* --------------------------------------------------------------------------
+   Focus Button (Focus Mode Entry)
+   -------------------------------------------------------------------------- */
+
+.focus-task-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    color: var(--color-text-muted);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.focus-task-btn:hover {
+    color: var(--color-accent);
+    background-color: var(--color-bg-tertiary);
+}
+
+.focus-task-btn:focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 1px;
+}

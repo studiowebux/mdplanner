@@ -59,20 +59,23 @@ export class C4Parser extends BaseParser {
             i++;
           }
 
-          // Check for existing ID in comment format <!-- id: c4_component_xxx -->
+          // Check for existing ID in comment format <!-- id: xxx -->
           let componentId = this.generateC4ComponentId(components);
           let actualDescription = componentDescription.join("\n");
 
+          // Try multiple ID formats
           const idMatch = actualDescription.match(
-            /<!-- id: (c4_component_\d+) -->/,
+            /<!-- id: (c4_component_\d+|c4_\d+|[a-zA-Z0-9_-]+) -->/,
           );
           if (idMatch) {
             componentId = idMatch[1];
           }
-          // Remove all ID comments from description (both new and old formats)
+          // Remove all ID comments from description (all formats)
           actualDescription = actualDescription
             .replace(/<!-- id: c4_component_\d+ -->\s*/g, "")
+            .replace(/<!-- id: c4_\d+ -->\s*/g, "")
             .replace(/<!-- id: \d+ -->\s*/g, "")
+            .replace(/<!-- id: [a-zA-Z0-9_-]+ -->\s*/g, "")
             .trim();
 
           // Parse component config

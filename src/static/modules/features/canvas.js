@@ -121,34 +121,48 @@ export class CanvasModule {
     let isDragging = false;
     let startX, startY, startLeft, startTop;
 
-    element.addEventListener("mousedown", (e) => {
+    const onMouseDown = (e) => {
       if (e.target.contentEditable === "true") return;
       isDragging = true;
       element.classList.add("dragging");
       startX = e.clientX;
       startY = e.clientY;
-      startLeft = parseInt(element.style.left);
-      startTop = parseInt(element.style.top);
-    });
+      startLeft = parseInt(element.style.left) || 0;
+      startTop = parseInt(element.style.top) || 0;
 
-    document.addEventListener("mousemove", (e) => {
+      // Add document listeners only when dragging starts
+      document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mouseup", onMouseUp);
+    };
+
+    const onMouseMove = (e) => {
       if (!isDragging) return;
       const newLeft = startLeft + (e.clientX - startX);
       const newTop = startTop + (e.clientY - startY);
       element.style.left = `${newLeft}px`;
       element.style.top = `${newTop}px`;
-    });
+    };
 
-    document.addEventListener("mouseup", () => {
+    const onMouseUp = () => {
       if (isDragging) {
         isDragging = false;
         element.classList.remove("dragging");
-        this.updatePosition(element.dataset.id, {
-          x: parseInt(element.style.left),
-          y: parseInt(element.style.top),
-        });
+
+        const newX = parseInt(element.style.left) || 0;
+        const newY = parseInt(element.style.top) || 0;
+        const id = element.dataset.id;
+
+        console.log("Canvas: Saving position for", id, "to", newX, newY);
+
+        this.updatePosition(id, { x: newX, y: newY });
+
+        // Remove document listeners when dragging ends
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
       }
-    });
+    };
+
+    element.addEventListener("mousedown", onMouseDown);
   }
 
   makeResizable(element) {

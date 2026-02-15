@@ -5,6 +5,15 @@
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
+   Mindmap Container
+   -------------------------------------------------------------------------- */
+
+#mindmapContent {
+    width: 4000px;
+    height: 4000px;
+}
+
+/* --------------------------------------------------------------------------
    Mindmap Nodes
    -------------------------------------------------------------------------- */
 
@@ -13,14 +22,19 @@
     background: var(--color-bg-primary);
     border: 2px solid var(--color-border-strong);
     border-radius: var(--radius-lg);
-    padding: 8px 12px;
+    padding: 8px 16px;
     box-shadow: var(--shadow-sm);
     cursor: pointer;
     user-select: none;
     transition: all var(--transition-base);
-    min-width: 80px;
+    min-width: 100px;
+    max-width: 180px;
     text-align: center;
     font-weight: 500;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     z-index: 10;
 }
 
@@ -53,28 +67,30 @@
 /* Dark theme overrides */
 .dark .mindmap-node,
 .theme-dark .mindmap-node {
-    background: var(--color-bg-tertiary);
-    border-color: var(--color-text-muted);
-    color: var(--color-text-primary);
+    background: #1a1a1a;
+    border-color: #404040;
+    color: #ffffff;
 }
 
 .dark .mindmap-node.root,
 .theme-dark .mindmap-node.root {
-    background: var(--color-bg-inverse);
-    color: var(--color-text-inverse);
-    border-color: var(--color-border-strong);
+    background: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
 }
 
 .dark .mindmap-node.level-1,
 .theme-dark .mindmap-node.level-1 {
-    background: var(--color-bg-active);
-    border-color: var(--color-border-strong);
+    background: #262626;
+    border-color: #525252;
+    color: #ffffff;
 }
 
 .dark .mindmap-node.level-2,
 .theme-dark .mindmap-node.level-2 {
-    background: var(--color-bg-tertiary);
-    border-color: var(--color-text-muted);
+    background: #1a1a1a;
+    border-color: #404040;
+    color: #e5e5e5;
 }
 
 /* --------------------------------------------------------------------------

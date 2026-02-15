@@ -255,7 +255,8 @@ export class CanvasParser extends BaseParser {
                 for (let j = nodes.length - 1; j >= 0; j--) {
                   if (nodes[j].level === level - 1) {
                     node.parent = nodes[j].id;
-                    nodes[j].children.push(node);
+                    // Don't add to children array here - the flat nodes array is the source of truth
+                    // The children array will be populated by the frontend when rendering
                     break;
                   }
                 }
@@ -284,22 +285,24 @@ export class CanvasParser extends BaseParser {
 
   /**
    * Generates the next sticky note ID based on existing sticky notes in the file.
+   * Supports both sticky_X and sticky_note_X formats.
    */
   generateStickyNoteId(): string {
     try {
       const content = Deno.readTextFileSync(this.filePath);
+      // Match both sticky_X and sticky_note_X formats
       const stickyNoteIdMatches =
-        content.match(/<!-- id: sticky_note_(\d+) -->/g) || [];
+        content.match(/<!-- id: sticky_?(?:note_)?(\d+) -->/g) || [];
       const maxId = Math.max(
         0,
         ...stickyNoteIdMatches.map((match) => {
-          const idMatch = match.match(/sticky_note_(\d+)/);
+          const idMatch = match.match(/sticky_?(?:note_)?(\d+)/);
           return idMatch ? parseInt(idMatch[1]) : 0;
         }),
       );
-      return `sticky_note_${maxId + 1}`;
+      return `sticky_${maxId + 1}`;
     } catch {
-      return "sticky_note_1";
+      return "sticky_1";
     }
   }
 
@@ -363,8 +366,9 @@ export class CanvasParser extends BaseParser {
     const indent = "  ".repeat(level);
     let result = `${indent}- ${node.text}\n`;
 
-    // Add children
-    for (const child of node.children) {
+    // Find children from flat array using parent field
+    const children = allNodes.filter((n) => n.parent === node.id);
+    for (const child of children) {
       result += this.mindmapNodeToMarkdown(child, allNodes, level + 1);
     }
 
@@ -608,12 +612,14 @@ export class CanvasParser extends BaseParser {
     const content = await Deno.readTextFile(this.filePath);
     const lines = content.split("\n");
 
-    // Find the sticky note by ID
+    // Find the sticky note by ID (supports both sticky_1 and sticky_note_1 formats)
     let stickyNoteStart = -1;
     let stickyNoteEnd = -1;
 
     for (let i = 0; i < lines.length; i++) {
-      const idMatch = lines[i].trim().match(/<!-- id: (sticky_note_\d+) -->/);
+      const idMatch = lines[i]
+        .trim()
+        .match(/<!-- id: (sticky_?\d+|sticky_note_\d+) -->/);
       if (idMatch && idMatch[1] === stickyNoteId) {
         // Found the ID comment, now find the header
         for (let j = i - 1; j >= 0; j--) {
@@ -623,11 +629,17 @@ export class CanvasParser extends BaseParser {
           }
         }
 
-        // Find end of this sticky note (next sticky note or section)
+        // Find end of this sticky note (next sticky note, section header, or section comment)
         for (let j = i + 1; j < lines.length; j++) {
+          const trimmedLine = lines[j].trim();
           if (
-            lines[j].trim().startsWith("## ") ||
-            lines[j].trim().startsWith("<!--")
+            trimmedLine.startsWith("## ") ||
+            trimmedLine.startsWith("# ") ||
+            (trimmedLine.startsWith("<!--") &&
+              !trimmedLine.includes("id:") &&
+              trimmedLine.match(
+                /<!-- (Mindmap|Board|Notes|Goals|Canvas|C4) -->/,
+              ))
           ) {
             stickyNoteEnd = j;
             break;
@@ -640,10 +652,11 @@ export class CanvasParser extends BaseParser {
 
     if (stickyNoteStart === -1) return; // Sticky note not found
 
-    // Generate new sticky note markdown
-    const newStickyNoteLines = this.stickyNoteToMarkdown(stickyNote).split(
-      "\n",
-    );
+    // Generate new sticky note markdown (preserving original ID format)
+    const newStickyNoteLines = this.stickyNoteToMarkdownWithId(
+      stickyNote,
+      stickyNoteId,
+    ).split("\n");
 
     // Replace the old sticky note with the new one
     lines.splice(
@@ -652,5 +665,22 @@ export class CanvasParser extends BaseParser {
       ...newStickyNoteLines,
     );
     await this.safeWriteFile(lines.join("\n"));
+  }
+
+  /**
+   * Converts a sticky note to markdown format, preserving the original ID.
+   */
+  stickyNoteToMarkdownWithId(stickyNote: StickyNote, originalId: string): string {
+    const sizeStr = stickyNote.size
+      ? `; size: {width: ${stickyNote.size.width}, height: ${stickyNote.size.height}}`
+      : "";
+
+    return [
+      `## Sticky note {color: ${stickyNote.color}; position: {x: ${Math.round(stickyNote.position.x)}, y: ${Math.round(stickyNote.position.y)}}${sizeStr}}`,
+      "",
+      `<!-- id: ${originalId} -->`,
+      stickyNote.content,
+      "",
+    ].join("\n");
   }
 }

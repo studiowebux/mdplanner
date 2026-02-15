@@ -5,6 +5,16 @@
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
+   C4 Components Container
+   -------------------------------------------------------------------------- */
+
+#c4ComponentsContainer {
+    position: absolute;
+    inset: 0;
+    transform-origin: 0 0;
+}
+
+/* --------------------------------------------------------------------------
    C4 Components
    -------------------------------------------------------------------------- */
 
@@ -13,18 +23,22 @@
     background: var(--color-bg-primary);
     border: 2px solid var(--color-border-strong);
     border-radius: 12px;
-    padding: 16px;
+    padding: 12px 16px;
     box-shadow: var(--shadow-md);
     cursor: pointer;
     user-select: none;
     transition: all var(--transition-base);
-    min-width: 160px;
-    min-height: 100px;
+    width: 180px;
+    max-width: 180px;
+    height: 120px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
 .c4-component:hover {
@@ -39,23 +53,23 @@
     opacity: 0.9;
 }
 
-/* C4 Level colors */
-.c4-component.context {
+/* C4 Level colors - prefixed to avoid Tailwind collision */
+.c4-component.c4-level-context {
     background: var(--color-bg-secondary);
     border-color: var(--color-accent);
 }
 
-.c4-component.container {
+.c4-component.c4-level-container {
     background: var(--color-bg-tertiary);
     border-color: var(--color-border-strong);
 }
 
-.c4-component.component {
+.c4-component.c4-level-component {
     background: var(--color-bg-primary);
     border-color: var(--color-text-muted);
 }
 
-.c4-component.code {
+.c4-component.c4-level-code {
     background: var(--color-bg-secondary);
     border-color: var(--color-text-muted);
 }
@@ -63,38 +77,38 @@
 /* Dark theme */
 .dark .c4-component,
 .theme-dark .c4-component {
-    background: var(--color-bg-tertiary);
-    color: var(--color-text-primary);
-    border-color: var(--color-text-muted);
+    background: #1f2937;
+    color: #f3f4f6;
+    border-color: #4b5563;
 }
 
 .dark .c4-component:hover,
 .theme-dark .c4-component:hover {
-    border-color: var(--color-text-secondary);
+    border-color: #9ca3af;
 }
 
-.dark .c4-component.context,
-.theme-dark .c4-component.context {
-    background: var(--color-bg-active);
-    border-color: var(--color-border-strong);
+.dark .c4-component.c4-level-context,
+.theme-dark .c4-component.c4-level-context {
+    background: #1f2937;
+    border-color: #6b7280;
 }
 
-.dark .c4-component.container,
-.theme-dark .c4-component.container {
-    background: var(--color-bg-tertiary);
-    border-color: var(--color-border-strong);
+.dark .c4-component.c4-level-container,
+.theme-dark .c4-component.c4-level-container {
+    background: #374151;
+    border-color: #6b7280;
 }
 
-.dark .c4-component.component,
-.theme-dark .c4-component.component {
-    background: var(--color-bg-active);
-    border-color: var(--color-text-muted);
+.dark .c4-component.c4-level-component,
+.theme-dark .c4-component.c4-level-component {
+    background: #4b5563;
+    border-color: #9ca3af;
 }
 
-.dark .c4-component.code,
-.theme-dark .c4-component.code {
-    background: var(--color-bg-tertiary);
-    border-color: var(--color-text-muted);
+.dark .c4-component.c4-level-code,
+.theme-dark .c4-component.c4-level-code {
+    background: #6b7280;
+    border-color: #9ca3af;
 }
 
 /* --------------------------------------------------------------------------
@@ -116,9 +130,15 @@
 }
 
 .c4-component-description {
-    font-size: 12px;
-    opacity: 0.9;
+    font-size: 11px;
+    opacity: 0.85;
     line-height: 1.3;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 /* --------------------------------------------------------------------------

@@ -338,7 +338,11 @@ export class TimelineView {
     const totalDays =
       Math.ceil((projectEnd - projectStart) / (1000 * 60 * 60 * 24)) + 1;
 
-    let html = "";
+    // Calculate minimum width for scrolling (40px per day, minimum 800px)
+    const pixelsPerDay = 40;
+    const chartWidth = Math.max(800, totalDays * pixelsPerDay);
+
+    let html = `<div style="min-width: ${chartWidth}px">`;
 
     scheduledTasks.forEach((task) => {
       const startOffset = Math.ceil(
@@ -439,6 +443,7 @@ export class TimelineView {
       html += "</div>";
     });
 
+    html += "</div>"; // Close the min-width wrapper
     return html;
   }
 }

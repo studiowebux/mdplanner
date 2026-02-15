@@ -27,3 +27,4 @@ export { BriefParser } from "./features/brief-parser.ts";
 export { CapacityParser } from "./features/capacity-parser.ts";
 export { StrategicParser } from "./features/strategic-parser.ts";
 export { BillingParser } from "./features/billing-parser.ts";
+export { CRMParser } from "./features/crm-parser.ts";

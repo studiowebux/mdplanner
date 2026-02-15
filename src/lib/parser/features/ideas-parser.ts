@@ -41,17 +41,37 @@ export class IdeasParser extends BaseParser {
 
       if (line.startsWith("## ")) {
         if (currentIdea?.title) ideas.push(currentIdea as Idea);
-        const title = line.substring(3).trim();
+        let title = line.substring(3).trim();
+        let status: Idea["status"] = "new";
+
+        // Parse inline metadata {status: X} from header
+        const inlineMatch = title.match(/\{status:\s*([^}]+)\}/i);
+        if (inlineMatch) {
+          const s = inlineMatch[1].trim().toLowerCase();
+          if (
+            ["new", "considering", "planned", "approved", "rejected"].includes(
+              s,
+            )
+          ) {
+            status = s as Idea["status"];
+          }
+          title = title.replace(/\s*\{status:\s*[^}]+\}/, "").trim();
+        }
+
         currentIdea = {
           id: this.generateIdeaId(),
           title,
-          status: "new",
+          status,
           created: new Date().toISOString().split("T")[0],
         };
       } else if (currentIdea) {
         if (line.startsWith("Status:")) {
           const s = line.substring(7).trim().toLowerCase();
-          if (["new", "considering", "planned", "rejected"].includes(s)) {
+          if (
+            ["new", "considering", "planned", "approved", "rejected"].includes(
+              s,
+            )
+          ) {
             currentIdea.status = s as Idea["status"];
           }
         } else if (line.startsWith("Category:")) {

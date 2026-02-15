@@ -34,6 +34,7 @@ import { timeTrackingRouter } from "./features/time-tracking.ts";
 import { capacityRouter } from "./features/capacity.ts";
 import { strategicRouter } from "./features/strategic.ts";
 import { billingRouter } from "./features/billing.ts";
+import { crmRouter } from "./features/crm.ts";
 
 // Export/Import routes
 import { exportImportRouter } from "./export-import.ts";
@@ -79,6 +80,9 @@ export function createApiRouter(projectManager: ProjectManager): Hono<{ Variable
 
   // Billing routes (nested under various paths)
   api.route("/", billingRouter);
+
+  // CRM routes (nested under various paths)
+  api.route("/", crmRouter);
 
   // Export/Import routes
   api.route("/", exportImportRouter);

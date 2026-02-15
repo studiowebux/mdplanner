@@ -1,851 +1,13 @@
 # CLAUDE.md - Comprehensive Test Project
 
 This file tests ALL features of MD Planner for migration validation.
-# Milestones
-## Alpha Release {date: 2026-02-15; status: completed}
-<!-- id: milestone_1 -->
-First internal alpha release for testing.
-## Beta Release {date: 2026-03-15; status: in-progress}
-<!-- id: milestone_2 -->
-Public beta release with feedback collection.
-## v1.0 Release {date: 2026-06-01; status: planned}
-<!-- id: milestone_3 -->
-Official v1.0 production release.
-## Enterprise Features {date: 2026-09-01; status: planned}
-<!-- id: milestone_4 -->
-Enterprise tier features release.
-<!-- Ideas -->
-# Ideas
-## Dark Mode Improvements {status: approved}
-<!-- id: idea_1 -->
-Enhance dark mode with better contrast and custom accent colors.
-## Mobile App {status: considering}
-<!-- id: idea_2 -->
-Native mobile app for iOS and Android.
-## AI Integration {status: approved}
-<!-- id: idea_3 -->
-Integrate AI for task suggestions and auto-categorization.
-## Plugin System {status: considering}
-<!-- id: idea_4 -->
-Allow third-party plugins for extensibility.
-<!-- Retrospectives -->
-# Retrospectives
-## Sprint 1 Retro {date: 2026-01-31}
-<!-- id: retro_1 -->
-### Went Well
-- Fast initial setup
-- Good team collaboration
-- Clear requirements
-### To Improve
-- Better testing coverage
-- More documentation
-- Earlier code reviews
-### Action Items
-- Set up CI/CD pipeline
-- Create onboarding docs
-- Implement code review checklist
-## Sprint 2 Retro {date: 2026-02-14}
-<!-- id: retro_2 -->
-### Went Well
-- CI/CD pipeline working
-- Improved code quality
-- Better communication
-### To Improve
-- Performance optimization
-- Error handling
-- User feedback integration
-### Action Items
-- Profile and optimize slow queries
-- Add error boundaries
-- Create feedback widget
-<!-- SWOT Analysis -->
-# SWOT Analysis
-## Product Launch SWOT
-<!-- id: swot_1 -->
-### Strengths
-- Modern tech stack
-- Fast performance
-- Clean UI design
-- Markdown-based storage
-### Weaknesses
-- Limited integrations
-- No mobile app yet
-- Small user base
-- Documentation gaps
-### Opportunities
-- Growing market demand
-- Remote work trends
-- Open source community
-- Enterprise market
-### Threats
-- Established competitors
-- Rapid tech changes
-- Economic uncertainty
-- Data privacy regulations
-<!-- Risk Analysis -->
-# Risk Analysis
-## Project Risks
-<!-- id: risk_1 -->
-### High Likelihood, High Impact
-- Scope creep affecting timeline
-- Key developer leaving team
-### High Likelihood, Low Impact
-- Minor bugs in release
-- Documentation delays
-### Low Likelihood, High Impact
-- Security breach
-- Server infrastructure failure
-### Low Likelihood, Low Impact
-- Third-party API changes
-- Minor UI inconsistencies
-<!-- Lean Canvas -->
-# Lean Canvas
-## MD Planner Lean Canvas
-<!-- id: lean_1 -->
-### Problem
-- Complex project management tools
-- Data lock-in with proprietary formats
-- Expensive enterprise solutions
-### Solution
-- Simple markdown-based task management
-- Open file format, no lock-in
-- Self-hosted or cloud options
-### Key Metrics
-- Monthly active users
-- Task completion rate
-- User retention
-### Unique Value Proposition
-- Your data stays yours in plain markdown
-- Fast, keyboard-driven interface
-### Unfair Advantage
-- First markdown-native task manager
-- Developer-focused features
-### Channels
-- GitHub community
-- Dev.to articles
-- Product Hunt launch
-### Customer Segments
-- Individual developers
-- Small tech teams
-- Open source maintainers
-### Cost Structure
-- Server infrastructure
-- Development team
-- Marketing
-### Revenue Streams
-- Premium features subscription
-- Enterprise licensing
-- Support contracts
-<!-- Business Model -->
-# Business Model
-## SaaS Business Model
-<!-- id: bm_1 -->
-### Key Partners
-- Cloud providers (AWS, GCP)
-- Integration partners
-- Developer communities
-### Key Activities
-- Product development
-- Customer support
-- Marketing and sales
-### Key Resources
-- Development team
-- Cloud infrastructure
-- Intellectual property
-### Value Propositions
-- Simplicity and speed
-- Data ownership
-- Developer experience
-### Customer Relationships
-- Self-service
-- Community support
-- Premium support tier
-### Channels
-- Website
-- GitHub
-- Social media
-### Customer Segments
-- Developers
-- Small teams
-- Enterprises
-### Cost Structure
-- Development costs
-- Infrastructure costs
-- Marketing costs
-### Revenue Streams
-- Subscriptions
-- Enterprise licenses
-- Consulting
-<!-- Project Value -->
-# Project Value
-## Value Assessment Q1
-<!-- id: pv_1 -->
-### Value Delivered
-- Core task management features
-- Clean user interface
-- Fast performance
-- Markdown storage
-### Value Expected
-- Team collaboration
-- Integrations
-- Mobile support
-### Value Destroyed
-- Initial bugs
-- Learning curve
-- Limited documentation
-### Value Potential
-- AI features
-- Plugin ecosystem
-- Enterprise market
-<!-- Brief -->
-# Brief
-## Product Brief Q2
-<!-- id: brief_1 -->
-### Objective
-Launch v1.0 with complete feature set
-### Background
-Project has been in development for 6 months with positive beta feedback
-### Target Audience
-Developers and small technical teams
-### Requirements
-- Stable core features
-- Good documentation
-- Support channels ready
-### Success Criteria
-- Zero critical bugs at launch
-- 100 new signups first week
-- 4.5+ rating in reviews
-### Timeline
-Launch by end of Q2 2026
-<!-- Time Tracking -->
-# Time Tracking
-## Entry {task_id: 1; date: 2026-02-10; duration: 2.5; description: Backend API implementation}
-<!-- id: time_1 -->
-## Entry {task_id: 1; date: 2026-02-11; duration: 3.0; description: API testing and fixes}
-<!-- id: time_2 -->
-## Entry {task_id: 4; date: 2026-02-12; duration: 1.5; description: UI improvements}
-<!-- id: time_3 -->
-## Entry {task_id: 2; date: 2026-02-13; duration: 4.0; description: Documentation writing}
-<!-- id: time_4 -->
-<!-- Capacity Planning -->
-# Capacity Planning
-## Q1 2026 Capacity
-<!-- id: capacity_1 -->
-### Team Members
-- Alice {role: Frontend; hours_per_week: 40}
-- Bob {role: Backend; hours_per_week: 40}
-- Charlie {role: DevOps; hours_per_week: 20}
-### Allocations
-- Week 2026-01-06: Alice 32h Feature A, Bob 40h API, Charlie 16h Infra
-- Week 2026-01-13: Alice 40h Feature B, Bob 32h Testing, Charlie 20h Deploy
-<!-- Strategic Levels -->
-# Strategic Levels
-
-## Company Strategy
-<!-- id: strategic_1 -->
-Date: 2026-02-15
-
-### Vision
-- Become the leading markdown-based productivity tool
-<!-- level-id: 256152fa -->
-
-### Mission
-- Empower developers with simple, powerful task management
-<!-- level-id: aeacede3 -->
-
-### Goals
-- 1000 active users
-<!-- level-id: c53e4ef3 -->
-- $50k MRR
-<!-- level-id: bfb39c14 -->
-- 10 enterprise customers
-<!-- level-id: 66420aec -->
-
-### Objectives
-- Achieve product-market fit by Q2
-<!-- level-id: 68d2bf05 -->
-- Build sustainable revenue by Q4
-<!-- level-id: ac9a4553 -->
-- Expand to enterprise by next year
-<!-- level-id: b75a4e8f -->
-
-### Strategies
-- Launch marketing campaign
-<!-- level-id: 49b927da -->
-- Build integration ecosystem
-<!-- level-id: b0b23abd -->
-- Develop enterprise features
-<!-- level-id: 83b46781 -->
-
-### Tactics
-- v1.0 Release
-<!-- level-id: fcec42e0 -->
-- Integration Framework
-<!-- level-id: d6a89655 -->
-- Enterprise Admin Panel
-<!-- level-id: b4e6967b -->
-
-
-# Billing
-## Customers
-- Acme Corp {email: billing@acme.com; company: Acme Corporation}
-<!-- id: customer_1 -->
-- TechStart Inc {email: accounts@techstart.io; company: TechStart Inc}
-<!-- id: customer_2 -->
-## Rates
-- Development {rate: 150; unit: hour}
-<!-- id: rate_1 -->
-- Consulting {rate: 200; unit: hour}
-<!-- id: rate_2 -->
-- Support {rate: 100; unit: hour}
-<!-- id: rate_3 -->
-## Quotes
-- Quote Q2026-001 {customer: customer_1; date: 2026-01-15; status: accepted; total: 5000}
-<!-- id: quote_1 -->
-## Invoices
-- Invoice INV-2026-001 {customer: customer_1; date: 2026-02-01; due_date: 2026-03-01; status: paid; total: 5000}
-<!-- id: invoice_1 -->
-# Ideas
-## Dark Mode Improvements {status: approved}
-<!-- id: idea_1 -->
-Enhance dark mode with better contrast and custom accent colors.
-## Mobile App {status: considering}
-<!-- id: idea_2 -->
-Native mobile app for iOS and Android.
-## AI Integration {status: approved}
-<!-- id: idea_3 -->
-Integrate AI for task suggestions and auto-categorization.
-## Plugin System {status: considering}
-<!-- id: idea_4 -->
-Allow third-party plugins for extensibility.
-<!-- Retrospectives -->
-# Retrospectives
-## Sprint 1 Retro {date: 2026-01-31}
-<!-- id: retro_1 -->
-### Went Well
-- Fast initial setup
-- Good team collaboration
-- Clear requirements
-### To Improve
-- Better testing coverage
-- More documentation
-- Earlier code reviews
-### Action Items
-- Set up CI/CD pipeline
-- Create onboarding docs
-- Implement code review checklist
-## Sprint 2 Retro {date: 2026-02-14}
-<!-- id: retro_2 -->
-### Went Well
-- CI/CD pipeline working
-- Improved code quality
-- Better communication
-### To Improve
-- Performance optimization
-- Error handling
-- User feedback integration
-### Action Items
-- Profile and optimize slow queries
-- Add error boundaries
-- Create feedback widget
-<!-- SWOT Analysis -->
-# SWOT Analysis
-## Product Launch SWOT
-<!-- id: swot_1 -->
-### Strengths
-- Modern tech stack
-- Fast performance
-- Clean UI design
-- Markdown-based storage
-### Weaknesses
-- Limited integrations
-- No mobile app yet
-- Small user base
-- Documentation gaps
-### Opportunities
-- Growing market demand
-- Remote work trends
-- Open source community
-- Enterprise market
-### Threats
-- Established competitors
-- Rapid tech changes
-- Economic uncertainty
-- Data privacy regulations
-<!-- Risk Analysis -->
-# Risk Analysis
-## Project Risks
-<!-- id: risk_1 -->
-### High Likelihood, High Impact
-- Scope creep affecting timeline
-- Key developer leaving team
-### High Likelihood, Low Impact
-- Minor bugs in release
-- Documentation delays
-### Low Likelihood, High Impact
-- Security breach
-- Server infrastructure failure
-### Low Likelihood, Low Impact
-- Third-party API changes
-- Minor UI inconsistencies
-<!-- Lean Canvas -->
-# Lean Canvas
-## MD Planner Lean Canvas
-<!-- id: lean_1 -->
-### Problem
-- Complex project management tools
-- Data lock-in with proprietary formats
-- Expensive enterprise solutions
-### Solution
-- Simple markdown-based task management
-- Open file format, no lock-in
-- Self-hosted or cloud options
-### Key Metrics
-- Monthly active users
-- Task completion rate
-- User retention
-### Unique Value Proposition
-- Your data stays yours in plain markdown
-- Fast, keyboard-driven interface
-### Unfair Advantage
-- First markdown-native task manager
-- Developer-focused features
-### Channels
-- GitHub community
-- Dev.to articles
-- Product Hunt launch
-### Customer Segments
-- Individual developers
-- Small tech teams
-- Open source maintainers
-### Cost Structure
-- Server infrastructure
-- Development team
-- Marketing
-### Revenue Streams
-- Premium features subscription
-- Enterprise licensing
-- Support contracts
-<!-- Business Model -->
-# Business Model
-## SaaS Business Model
-<!-- id: bm_1 -->
-### Key Partners
-- Cloud providers (AWS, GCP)
-- Integration partners
-- Developer communities
-### Key Activities
-- Product development
-- Customer support
-- Marketing and sales
-### Key Resources
-- Development team
-- Cloud infrastructure
-- Intellectual property
-### Value Propositions
-- Simplicity and speed
-- Data ownership
-- Developer experience
-### Customer Relationships
-- Self-service
-- Community support
-- Premium support tier
-### Channels
-- Website
-- GitHub
-- Social media
-### Customer Segments
-- Developers
-- Small teams
-- Enterprises
-### Cost Structure
-- Development costs
-- Infrastructure costs
-- Marketing costs
-### Revenue Streams
-- Subscriptions
-- Enterprise licenses
-- Consulting
-<!-- Project Value -->
-# Project Value
-## Value Assessment Q1
-<!-- id: pv_1 -->
-### Value Delivered
-- Core task management features
-- Clean user interface
-- Fast performance
-- Markdown storage
-### Value Expected
-- Team collaboration
-- Integrations
-- Mobile support
-### Value Destroyed
-- Initial bugs
-- Learning curve
-- Limited documentation
-### Value Potential
-- AI features
-- Plugin ecosystem
-- Enterprise market
-<!-- Brief -->
-# Brief
-## Product Brief Q2
-<!-- id: brief_1 -->
-### Objective
-Launch v1.0 with complete feature set
-### Background
-Project has been in development for 6 months with positive beta feedback
-### Target Audience
-Developers and small technical teams
-### Requirements
-- Stable core features
-- Good documentation
-- Support channels ready
-### Success Criteria
-- Zero critical bugs at launch
-- 100 new signups first week
-- 4.5+ rating in reviews
-### Timeline
-Launch by end of Q2 2026
-<!-- Time Tracking -->
-# Time Tracking
-## Entry {task_id: 1; date: 2026-02-10; duration: 2.5; description: Backend API implementation}
-<!-- id: time_1 -->
-## Entry {task_id: 1; date: 2026-02-11; duration: 3.0; description: API testing and fixes}
-<!-- id: time_2 -->
-## Entry {task_id: 4; date: 2026-02-12; duration: 1.5; description: UI improvements}
-<!-- id: time_3 -->
-## Entry {task_id: 2; date: 2026-02-13; duration: 4.0; description: Documentation writing}
-<!-- id: time_4 -->
-<!-- Capacity Planning -->
-# Capacity Planning
-## Q1 2026 Capacity
-<!-- id: capacity_1 -->
-### Team Members
-- Alice {role: Frontend; hours_per_week: 40}
-- Bob {role: Backend; hours_per_week: 40}
-- Charlie {role: DevOps; hours_per_week: 20}
-### Allocations
-- Week 2026-01-06: Alice 32h Feature A, Bob 40h API, Charlie 16h Infra
-- Week 2026-01-13: Alice 40h Feature B, Bob 32h Testing, Charlie 20h Deploy
-<!-- Strategic Levels -->
-# Strategic Levels
-## Company Strategy
-<!-- id: strategic_1 -->
-### Vision
-Become the leading markdown-based productivity tool
-### Mission
-Empower developers with simple, powerful task management
-### Strategic Objectives
-- Achieve product-market fit by Q2
-- Build sustainable revenue by Q4
-- Expand to enterprise by next year
-### Key Results
-- 1000 active users
-- $50k MRR
-- 10 enterprise customers
-### Initiatives
-- Launch marketing campaign
-- Build integration ecosystem
-- Develop enterprise features
-### Projects
-- v1.0 Release
-- Integration Framework
-- Enterprise Admin Panel
-<!-- Billing -->
-# Billing
-## Customers
-- Acme Corp {email: billing@acme.com; company: Acme Corporation}
-<!-- id: customer_1 -->
-- TechStart Inc {email: accounts@techstart.io; company: TechStart Inc}
-<!-- id: customer_2 -->
-## Rates
-- Development {rate: 150; unit: hour}
-<!-- id: rate_1 -->
-- Consulting {rate: 200; unit: hour}
-<!-- id: rate_2 -->
-- Support {rate: 100; unit: hour}
-<!-- id: rate_3 -->
-## Quotes
-- Quote Q2026-001 {customer: customer_1; date: 2026-01-15; status: accepted; total: 5000}
-<!-- id: quote_1 -->
-## Invoices
-- Invoice INV-2026-001 {customer: customer_1; date: 2026-02-01; due_date: 2026-03-01; status: paid; total: 5000}
-<!-- id: invoice_1 -->
-# Ideas
-## Dark Mode Improvements {status: approved}
-<!-- id: idea_1 -->
-Enhance dark mode with better contrast and custom accent colors.
-## Mobile App {status: considering}
-<!-- id: idea_2 -->
-Native mobile app for iOS and Android.
-## AI Integration {status: approved}
-<!-- id: idea_3 -->
-Integrate AI for task suggestions and auto-categorization.
-## Plugin System {status: considering}
-<!-- id: idea_4 -->
-Allow third-party plugins for extensibility.
-<!-- Retrospectives -->
-# Retrospectives
-## Sprint 1 Retro {date: 2026-01-31}
-<!-- id: retro_1 -->
-### Went Well
-- Fast initial setup
-- Good team collaboration
-- Clear requirements
-### To Improve
-- Better testing coverage
-- More documentation
-- Earlier code reviews
-### Action Items
-- Set up CI/CD pipeline
-- Create onboarding docs
-- Implement code review checklist
-## Sprint 2 Retro {date: 2026-02-14}
-<!-- id: retro_2 -->
-### Went Well
-- CI/CD pipeline working
-- Improved code quality
-- Better communication
-### To Improve
-- Performance optimization
-- Error handling
-- User feedback integration
-### Action Items
-- Profile and optimize slow queries
-- Add error boundaries
-- Create feedback widget
-<!-- SWOT Analysis -->
-# SWOT Analysis
-## Product Launch SWOT
-<!-- id: swot_1 -->
-### Strengths
-- Modern tech stack
-- Fast performance
-- Clean UI design
-- Markdown-based storage
-### Weaknesses
-- Limited integrations
-- No mobile app yet
-- Small user base
-- Documentation gaps
-### Opportunities
-- Growing market demand
-- Remote work trends
-- Open source community
-- Enterprise market
-### Threats
-- Established competitors
-- Rapid tech changes
-- Economic uncertainty
-- Data privacy regulations
-<!-- Risk Analysis -->
-# Risk Analysis
-## Project Risks
-<!-- id: risk_1 -->
-### High Likelihood, High Impact
-- Scope creep affecting timeline
-- Key developer leaving team
-### High Likelihood, Low Impact
-- Minor bugs in release
-- Documentation delays
-### Low Likelihood, High Impact
-- Security breach
-- Server infrastructure failure
-### Low Likelihood, Low Impact
-- Third-party API changes
-- Minor UI inconsistencies
-<!-- Lean Canvas -->
-# Lean Canvas
-## MD Planner Lean Canvas
-<!-- id: lean_1 -->
-### Problem
-- Complex project management tools
-- Data lock-in with proprietary formats
-- Expensive enterprise solutions
-### Solution
-- Simple markdown-based task management
-- Open file format, no lock-in
-- Self-hosted or cloud options
-### Key Metrics
-- Monthly active users
-- Task completion rate
-- User retention
-### Unique Value Proposition
-- Your data stays yours in plain markdown
-- Fast, keyboard-driven interface
-### Unfair Advantage
-- First markdown-native task manager
-- Developer-focused features
-### Channels
-- GitHub community
-- Dev.to articles
-- Product Hunt launch
-### Customer Segments
-- Individual developers
-- Small tech teams
-- Open source maintainers
-### Cost Structure
-- Server infrastructure
-- Development team
-- Marketing
-### Revenue Streams
-- Premium features subscription
-- Enterprise licensing
-- Support contracts
-<!-- Business Model -->
-# Business Model
-## SaaS Business Model
-<!-- id: bm_1 -->
-### Key Partners
-- Cloud providers (AWS, GCP)
-- Integration partners
-- Developer communities
-### Key Activities
-- Product development
-- Customer support
-- Marketing and sales
-### Key Resources
-- Development team
-- Cloud infrastructure
-- Intellectual property
-### Value Propositions
-- Simplicity and speed
-- Data ownership
-- Developer experience
-### Customer Relationships
-- Self-service
-- Community support
-- Premium support tier
-### Channels
-- Website
-- GitHub
-- Social media
-### Customer Segments
-- Developers
-- Small teams
-- Enterprises
-### Cost Structure
-- Development costs
-- Infrastructure costs
-- Marketing costs
-### Revenue Streams
-- Subscriptions
-- Enterprise licenses
-- Consulting
-<!-- Project Value -->
-# Project Value
-## Value Assessment Q1
-<!-- id: pv_1 -->
-### Value Delivered
-- Core task management features
-- Clean user interface
-- Fast performance
-- Markdown storage
-### Value Expected
-- Team collaboration
-- Integrations
-- Mobile support
-### Value Destroyed
-- Initial bugs
-- Learning curve
-- Limited documentation
-### Value Potential
-- AI features
-- Plugin ecosystem
-- Enterprise market
-<!-- Brief -->
-# Brief
-## Product Brief Q2
-<!-- id: brief_1 -->
-### Objective
-Launch v1.0 with complete feature set
-### Background
-Project has been in development for 6 months with positive beta feedback
-### Target Audience
-Developers and small technical teams
-### Requirements
-- Stable core features
-- Good documentation
-- Support channels ready
-### Success Criteria
-- Zero critical bugs at launch
-- 100 new signups first week
-- 4.5+ rating in reviews
-### Timeline
-Launch by end of Q2 2026
-<!-- Time Tracking -->
-# Time Tracking
-## Entry {task_id: 1; date: 2026-02-10; duration: 2.5; description: Backend API implementation}
-<!-- id: time_1 -->
-## Entry {task_id: 1; date: 2026-02-11; duration: 3.0; description: API testing and fixes}
-<!-- id: time_2 -->
-## Entry {task_id: 4; date: 2026-02-12; duration: 1.5; description: UI improvements}
-<!-- id: time_3 -->
-## Entry {task_id: 2; date: 2026-02-13; duration: 4.0; description: Documentation writing}
-<!-- id: time_4 -->
-<!-- Capacity Planning -->
-# Capacity Planning
-## Q1 2026 Capacity
-<!-- id: capacity_1 -->
-### Team Members
-- Alice {role: Frontend; hours_per_week: 40}
-- Bob {role: Backend; hours_per_week: 40}
-- Charlie {role: DevOps; hours_per_week: 20}
-### Allocations
-- Week 2026-01-06: Alice 32h Feature A, Bob 40h API, Charlie 16h Infra
-- Week 2026-01-13: Alice 40h Feature B, Bob 32h Testing, Charlie 20h Deploy
-<!-- Strategic Levels -->
-# Strategic Levels
-## Company Strategy
-<!-- id: strategic_1 -->
-### Vision
-Become the leading markdown-based productivity tool
-### Mission
-Empower developers with simple, powerful task management
-### Strategic Objectives
-- Achieve product-market fit by Q2
-- Build sustainable revenue by Q4
-- Expand to enterprise by next year
-### Key Results
-- 1000 active users
-- $50k MRR
-- 10 enterprise customers
-### Initiatives
-- Launch marketing campaign
-- Build integration ecosystem
-- Develop enterprise features
-### Projects
-- v1.0 Release
-- Integration Framework
-- Enterprise Admin Panel
-<!-- Billing -->
-# Billing
-## Customers
-- Acme Corp {email: billing@acme.com; company: Acme Corporation}
-<!-- id: customer_1 -->
-- TechStart Inc {email: accounts@techstart.io; company: TechStart Inc}
-<!-- id: customer_2 -->
-## Rates
-- Development {rate: 150; unit: hour}
-<!-- id: rate_1 -->
-- Consulting {rate: 200; unit: hour}
-<!-- id: rate_2 -->
-- Support {rate: 100; unit: hour}
-<!-- id: rate_3 -->
-## Quotes
-- Quote Q2026-001 {customer: customer_1; date: 2026-01-15; status: accepted; total: 5000}
-<!-- id: quote_1 -->
-## Invoices
-- Invoice INV-2026-001 {customer: customer_1; date: 2026-02-01; due_date: 2026-03-01; status: paid; total: 5000}
-<!-- id: invoice_1 -->
 
 <!-- Configurations -->
 # Configurations
 
 Start Date: 2026-01-01
 Working Days: 5
-Last Updated: 2026-02-14T22:59:11.808Z
+Last Updated: 2026-02-15T05:00:21.409Z
 
 Assignees:
 - Alice
@@ -987,24 +149,39 @@ Right column content with a list:
 Reach $100,000 annual recurring revenue.
 
 
-
 <!-- Ideas -->
 # Ideas
+
 ## Dark Mode Improvements {status: approved}
 <!-- id: idea_1 -->
+<!-- links: idea_2 -->
+Status: new
+Created: 2026-02-15
+
 Enhance dark mode with better contrast and custom accent colors.
+
 ## Mobile App {status: considering}
 <!-- id: idea_2 -->
+Status: new
+Created: 2026-02-15
+
 Native mobile app for iOS and Android.
+
 ## AI Integration {status: approved}
 <!-- id: idea_3 -->
+Status: new
+Created: 2026-02-15
+
 Integrate AI for task suggestions and auto-categorization.
+
 ## Plugin System {status: considering}
 <!-- id: idea_4 -->
+Status: new
+Created: 2026-02-15
+
 Allow third-party plugins for extensibility.
 
 
-<!-- Retrospectives -->
 # Retrospectives
 ## Sprint 1 Retro {date: 2026-01-31}
 <!-- id: retro_1 -->
@@ -1221,41 +398,135 @@ Launch by end of Q2 2026
 
 <!-- Capacity Planning -->
 # Capacity Planning
+
 ## Q1 2026 Capacity
 <!-- id: capacity_1 -->
+Date: 2026-01-01
+Budget Hours: 480
+
 ### Team Members
-- Alice {role: Frontend; hours_per_week: 40}
-- Bob {role: Backend; hours_per_week: 40}
-- Charlie {role: DevOps; hours_per_week: 20}
+
+#### Alice
+<!-- member-id: member_alice -->
+Role: Frontend Developer
+Hours Per Day: 8
+Working Days: Mon, Tue, Wed, Thu, Fri
+
+#### Bob
+<!-- member-id: member_bob -->
+Role: Backend Developer
+Hours Per Day: 8
+Working Days: Mon, Tue, Wed, Thu, Fri
+
+#### Charlie
+<!-- member-id: member_charlie -->
+Role: DevOps Engineer
+Hours Per Day: 4
+Working Days: Mon, Tue, Wed, Thu
+
 ### Allocations
-- Week 2026-01-06: Alice 32h Feature A, Bob 40h API, Charlie 16h Infra
-- Week 2026-01-13: Alice 40h Feature B, Bob 32h Testing, Charlie 20h Deploy
+
+#### 2026-01-06
+- member_alice: 32h task:prog1 "Feature development"
+- member_bob: 40h task:todo3 "API implementation"
+- member_charlie: 16h project "Infrastructure setup"
+
+#### 2026-01-13
+- member_alice: 40h task:prog1 "Continue feature work"
+- member_bob: 32h task:rev1 "Code review and testing"
+- member_charlie: 20h project "Deployment prep"
+
+#### 2026-01-20
+- member_alice: 36h task:todo1 "Sidenav component"
+- member_bob: 40h task:todo3 "SSR setup"
+- member_charlie: 16h project "Monitoring"
+
+#### 2026-01-27
+- member_alice: 40h milestone:beta "Beta release prep"
+- member_bob: 40h milestone:beta "Backend finalization"
+- member_charlie: 20h project "Production deploy"
 
 
 <!-- Strategic Levels -->
 # Strategic Levels
+
 ## Company Strategy
 <!-- id: strategic_1 -->
+Date: 2026-02-15
+
 ### Vision
-Become the leading markdown-based productivity tool
+- Become the leading markdown-based productivity tool
+<!-- level-id: 256152fa -->
+
 ### Mission
-Empower developers with simple, powerful task management
-### Strategic Objectives
-- Achieve product-market fit by Q2
-- Build sustainable revenue by Q4
-- Expand to enterprise by next year
-### Key Results
+- Empower developers with simple, powerful task management
+<!-- level-id: aeacede3 -->
+
+### Goals
 - 1000 active users
+<!-- level-id: c53e4ef3 -->
 - $50k MRR
+<!-- level-id: bfb39c14 -->
 - 10 enterprise customers
-### Initiatives
+<!-- level-id: 66420aec -->
+
+### Objectives
+- Achieve product-market fit by Q2
+<!-- level-id: 68d2bf05 -->
+- Build sustainable revenue by Q4
+<!-- level-id: ac9a4553 -->
+- Expand to enterprise by next year
+<!-- level-id: b75a4e8f -->
+
+### Strategies
 - Launch marketing campaign
+<!-- level-id: 49b927da -->
 - Build integration ecosystem
+<!-- level-id: b0b23abd -->
 - Develop enterprise features
-### Projects
+<!-- level-id: 83b46781 -->
+
+### Tactics
 - v1.0 Release
+<!-- level-id: fcec42e0 -->
 - Integration Framework
+<!-- level-id: d6a89655 -->
 - Enterprise Admin Panel
+<!-- level-id: b4e6967b -->
+
+
+# Billing
+## Customers
+- Acme Corp {email: billing@acme.com; company: Acme Corporation}
+<!-- id: customer_1 -->
+- TechStart Inc {email: accounts@techstart.io; company: TechStart Inc}
+<!-- id: customer_2 -->
+## Rates
+- Development {rate: 150; unit: hour}
+<!-- id: rate_1 -->
+- Consulting {rate: 200; unit: hour}
+<!-- id: rate_2 -->
+- Support {rate: 100; unit: hour}
+<!-- id: rate_3 -->
+## Quotes
+- Quote Q2026-001 {customer: customer_1; date: 2026-01-15; status: accepted; total: 5000}
+<!-- id: quote_1 -->
+## Invoices
+- Invoice INV-2026-001 {customer: customer_1; date: 2026-02-01; due_date: 2026-03-01; status: paid; total: 5000}
+<!-- id: invoice_1 -->
+# Ideas
+## Dark Mode Improvements {status: approved}
+<!-- id: idea_1 -->
+Enhance dark mode with better contrast and custom accent colors.
+## Mobile App {status: considering}
+<!-- id: idea_2 -->
+Native mobile app for iOS and Android.
+## AI Integration {status: approved}
+<!-- id: idea_3 -->
+Integrate AI for task suggestions and auto-categorization.
+## Plugin System {status: considering}
+<!-- id: idea_4 -->
+Allow third-party plugins for extensibility.
 
 
 <!-- Billing -->
@@ -1295,10 +566,11 @@ Allow third-party plugins for extensibility.
 <!-- Canvas -->
 # Canvas
 
-## Sticky note {color: yellow; position: {x: 100, y: 100}; size: {width: 200, height: 150}}
+## Sticky note {color: yellow; position: {x: 102, y: 98}; size: {width: 200, height: 150}}
 
 <!-- id: sticky_1 -->
 Items to complete today
+
 ## Sticky note {color: blue; position: {x: 350, y: 100}; size: {width: 200, height: 150}}
 
 <!-- id: sticky_2 -->
@@ -1361,52 +633,44 @@ Future improvements
 <!-- C4 Architecture -->
 # C4 Architecture
 
-## User {level: context; type: Person; position: {x: 100, y: 200}}
+## User {level: context; type: Person; position: {x: 100, y: 100}}
 
 <!-- id: c4_component_1 -->
-<!-- id: c4_1 -->
 End user accessing the application
 
-## MD Planner {level: context; type: System; position: {x: 400, y: 200}; connections: [{target: User, label: Uses}]}
+## MD Planner {level: context; type: System; position: {x: 350, y: 100}; connections: [{target: User, label: Uses}]; children: [c4_component_4, c4_component_5, c4_component_6]}
 
 <!-- id: c4_component_2 -->
-<!-- id: c4_2 -->
 Main application system
 
-## File System {level: context; type: ExternalSystem; position: {x: 700, y: 200}; connections: [{target: MD Planner, label: Stores data}]}
+## File System {level: context; type: ExternalSystem; position: {x: 600, y: 100}; connections: [{target: MD Planner, label: Stores data}]}
 
 <!-- id: c4_component_3 -->
-<!-- id: c4_3 -->
 Local file storage for markdown files
 
-## Web Server {level: container; type: Container; position: {x: 200, y: 100}; parent: c4_2}
+## Web Server {level: container; type: Container; position: {x: 268, y: 126.66666666666667}; children: [c4_component_7, c4_component_8]; parent: c4_component_2}
 
 <!-- id: c4_component_4 -->
-<!-- id: c4_4 -->
 Hono-based web server
 
-## Static Files {level: container; type: Container; position: {x: 400, y: 100}; parent: c4_2}
+## Static Files {level: container; type: Container; position: {x: 518, y: 126.66666666666667}; parent: c4_component_2}
 
 <!-- id: c4_component_5 -->
-<!-- id: c4_5 -->
 HTML, CSS, JS assets
 
-## Markdown Parser {level: container; type: Container; position: {x: 600, y: 100}; parent: c4_2}
+## Markdown Parser {level: container; type: Container; position: {x: 768, y: 126.66666666666667}; parent: c4_component_2}
 
 <!-- id: c4_component_6 -->
-<!-- id: c4_6 -->
 Parser for markdown file handling
 
-## API Handler {level: component; type: Component; position: {x: 100, y: 100}; parent: c4_4}
+## API Handler {level: component; type: Component; position: {x: 393, y: 126.66666666666667}; parent: c4_component_4}
 
 <!-- id: c4_component_7 -->
-<!-- id: c4_7 -->
 REST API endpoint handlers
 
-## Route Controller {level: component; type: Component; position: {x: 300, y: 100}; parent: c4_4}
+## Route Controller {level: component; type: Component; position: {x: 643, y: 126.66666666666667}; parent: c4_component_4}
 
 <!-- id: c4_component_8 -->
-<!-- id: c4_8 -->
 Request routing logic
 
 <!-- Board -->

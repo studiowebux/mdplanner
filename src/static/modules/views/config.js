@@ -1,5 +1,6 @@
 // Config View Module
 import { ProjectAPI } from '../api.js';
+import { AccessibilityManager } from '../ui/accessibility.js';
 
 /**
  * Project configuration - sections, assignees, tags management
@@ -44,6 +45,28 @@ export class ConfigView {
     this.renderSections();
     this.renderAssignees();
     this.renderTags();
+    this.renderAccessibilitySettings();
+  }
+
+  renderAccessibilitySettings() {
+    // Set current values
+    const reducedMotion = document.getElementById('accessibilityReducedMotion');
+    const highContrast = document.getElementById('accessibilityHighContrast');
+    const largeTargets = document.getElementById('accessibilityLargeTargets');
+    const showBreadcrumbs = document.getElementById('accessibilityShowBreadcrumbs');
+
+    if (reducedMotion) {
+      reducedMotion.value = AccessibilityManager.get('reducedMotion');
+    }
+    if (highContrast) {
+      highContrast.checked = AccessibilityManager.get('highContrast');
+    }
+    if (largeTargets) {
+      largeTargets.checked = AccessibilityManager.get('largeTargets');
+    }
+    if (showBreadcrumbs) {
+      showBreadcrumbs.checked = AccessibilityManager.get('showBreadcrumbs');
+    }
   }
 
   renderSections() {
@@ -328,6 +351,28 @@ export class ConfigView {
           e.preventDefault();
           this.addTag();
         }
+      });
+
+    // Accessibility settings events
+    document
+      .getElementById("accessibilityReducedMotion")
+      ?.addEventListener("change", (e) => {
+        AccessibilityManager.set('reducedMotion', e.target.value);
+      });
+    document
+      .getElementById("accessibilityHighContrast")
+      ?.addEventListener("change", (e) => {
+        AccessibilityManager.set('highContrast', e.target.checked);
+      });
+    document
+      .getElementById("accessibilityLargeTargets")
+      ?.addEventListener("change", (e) => {
+        AccessibilityManager.set('largeTargets', e.target.checked);
+      });
+    document
+      .getElementById("accessibilityShowBreadcrumbs")
+      ?.addEventListener("change", (e) => {
+        AccessibilityManager.set('showBreadcrumbs', e.target.checked);
       });
   }
 }
