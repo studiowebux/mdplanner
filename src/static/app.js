@@ -2,6 +2,7 @@ import { showToast } from './modules/ui/toast.js';
 import { ThemeManager } from './modules/ui/theme.js';
 import { toggleMobileMenu, closeMobileMenu } from './modules/ui/mobile.js';
 import { TasksAPI, ProjectAPI } from './modules/api.js';
+import { markdownToHtml as markdownToHtmlUtil } from './modules/utils.js';
 import { SummaryView } from './modules/views/summary.js';
 import { ListView } from './modules/views/list.js';
 import { BoardView } from './modules/views/board.js';
@@ -258,6 +259,29 @@ class TaskManager {
         document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
       });
 
+    // Additional desktop view buttons
+    const additionalViews = [
+      { id: "milestonesViewBtn", view: "milestones" },
+      { id: "ideasViewBtn", view: "ideas" },
+      { id: "retrospectivesViewBtn", view: "retrospectives" },
+      { id: "swotViewBtn", view: "swot" },
+      { id: "riskAnalysisViewBtn", view: "riskAnalysis" },
+      { id: "leanCanvasViewBtn", view: "leanCanvas" },
+      { id: "businessModelViewBtn", view: "businessModel" },
+      { id: "projectValueViewBtn", view: "projectValue" },
+      { id: "briefViewBtn", view: "brief" },
+      { id: "timeTrackingViewBtn", view: "timeTracking" },
+      { id: "capacityViewBtn", view: "capacity" },
+      { id: "strategicLevelsViewBtn", view: "strategicLevels" },
+      { id: "billingViewBtn", view: "billing" },
+    ];
+    additionalViews.forEach(({ id, view }) => {
+      document.getElementById(id)?.addEventListener("click", () => {
+        this.switchView(view);
+        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+      });
+    });
+
     // View selector dropdown
     document.getElementById("viewSelectorBtn")?.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -407,6 +431,12 @@ class TaskManager {
       .getElementById("strategicLevelsViewBtnMobile")
       ?.addEventListener("click", () => {
         this.switchView("strategicLevels");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("billingViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("billing");
         this.closeMobileMenu();
       });
 
@@ -1139,6 +1169,14 @@ class TaskManager {
 
   renderCustomSectionPreview(section) {
     return this.enhancedNotesModule.renderCustomSectionPreview(section);
+  }
+
+  parseContentAndCustomSections(content) {
+    return this.enhancedNotesModule.parseContentAndCustomSections(content);
+  }
+
+  markdownToHtml(content) {
+    return markdownToHtmlUtil(content);
   }
 
   switchPreviewTab(sectionId, tabId) {

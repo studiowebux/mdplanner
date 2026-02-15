@@ -118,8 +118,8 @@ export const ProjectAPI = {
     return response.json();
   },
 
-  async switchProject(projectPath) {
-    const response = await post('/api/projects/switch', { path: projectPath });
+  async switchProject(filename) {
+    const response = await post('/api/projects/switch', { filename });
     return response;
   }
 };

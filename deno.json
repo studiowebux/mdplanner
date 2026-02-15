@@ -7,7 +7,10 @@
     "deno/http": "https://deno.land/std@0.224.0/http/server.ts",
     "deno/http/file_server": "https://deno.land/std@0.224.0/http/file_server.ts",
     "@std/path": "jsr:@std/path@^1.0.0",
-    "@std/fs": "jsr:@std/fs@^1.0.0"
+    "@std/fs": "jsr:@std/fs@^1.0.0",
+    "hono": "jsr:@hono/hono@^4",
+    "hono/cors": "jsr:@hono/hono@^4/cors",
+    "hono/deno": "jsr:@hono/hono@^4/deno"
   },
   "compilerOptions": {
     "strict": true,
