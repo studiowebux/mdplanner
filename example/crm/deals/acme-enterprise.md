@@ -15,6 +15,7 @@ created: 2026-01-20
 Enterprise license for 100+ users.
 
 ## Notes
+
 - Annual contract
 - Custom onboarding required
 - Waiting for security review

@@ -1,4 +1,4 @@
-import { CRMAPI } from '../api.js';
+import { CRMAPI } from "../api.js";
 
 export class CRMModule {
   constructor(taskManager) {
@@ -17,13 +17,14 @@ export class CRMModule {
 
   async load() {
     try {
-      const [companies, contacts, deals, interactions, summary] = await Promise.all([
-        CRMAPI.fetchCompanies(),
-        CRMAPI.fetchContacts(),
-        CRMAPI.fetchDeals(),
-        CRMAPI.fetchInteractions(),
-        CRMAPI.getSummary(),
-      ]);
+      const [companies, contacts, deals, interactions, summary] = await Promise
+        .all([
+          CRMAPI.fetchCompanies(),
+          CRMAPI.fetchContacts(),
+          CRMAPI.fetchDeals(),
+          CRMAPI.fetchInteractions(),
+          CRMAPI.getSummary(),
+        ]);
 
       this.companies = companies;
       this.contacts = contacts;
@@ -43,25 +44,48 @@ export class CRMModule {
 
   renderSummary() {
     const s = this.crmSummary || {};
-    document.getElementById("crmSummaryCompanies").textContent = s.totalCompanies || 0;
-    document.getElementById("crmSummaryContacts").textContent = s.totalContacts || 0;
+    document.getElementById("crmSummaryCompanies").textContent =
+      s.totalCompanies || 0;
+    document.getElementById("crmSummaryContacts").textContent =
+      s.totalContacts || 0;
     document.getElementById("crmSummaryDeals").textContent = s.totalDeals || 0;
-    document.getElementById("crmSummaryPipeline").textContent = this.formatCurrency(s.pipelineValue || 0);
+    document.getElementById("crmSummaryPipeline").textContent = this
+      .formatCurrency(s.pipelineValue || 0);
   }
 
   formatCurrency(amount) {
-    return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount);
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(amount);
   }
 
   switchTab(tab) {
-    document.querySelectorAll(".crm-tab").forEach(t => {
-      t.classList.remove("text-gray-900", "dark:text-gray-100", "border-b-2", "border-gray-900", "dark:border-gray-100");
+    document.querySelectorAll(".crm-tab").forEach((t) => {
+      t.classList.remove(
+        "text-gray-900",
+        "dark:text-gray-100",
+        "border-b-2",
+        "border-gray-900",
+        "dark:border-gray-100",
+      );
       t.classList.add("text-gray-500", "dark:text-gray-400");
     });
-    document.querySelector(`[data-crm-tab="${tab}"]`)?.classList.add("text-gray-900", "dark:text-gray-100", "border-b-2", "border-gray-900", "dark:border-gray-100");
-    document.querySelector(`[data-crm-tab="${tab}"]`)?.classList.remove("text-gray-500", "dark:text-gray-400");
+    document.querySelector(`[data-crm-tab="${tab}"]`)?.classList.add(
+      "text-gray-900",
+      "dark:text-gray-100",
+      "border-b-2",
+      "border-gray-900",
+      "dark:border-gray-100",
+    );
+    document.querySelector(`[data-crm-tab="${tab}"]`)?.classList.remove(
+      "text-gray-500",
+      "dark:text-gray-400",
+    );
 
-    document.querySelectorAll(".crm-tab-content").forEach(c => c.classList.add("hidden"));
+    document.querySelectorAll(".crm-tab-content").forEach((c) =>
+      c.classList.add("hidden")
+    );
     document.getElementById(`${tab}Tab`)?.classList.remove("hidden");
     this.currentTab = tab;
   }
@@ -79,17 +103,31 @@ export class CRMModule {
     }
 
     emptyState?.classList.add("hidden");
-    container.innerHTML = this.companies.map(c => {
-      const contactCount = this.contacts.filter(cont => cont.companyId === c.id).length;
-      const dealCount = this.deals.filter(d => d.companyId === c.id).length;
+    container.innerHTML = this.companies.map((c) => {
+      const contactCount = this.contacts.filter((cont) =>
+        cont.companyId === c.id
+      ).length;
+      const dealCount = this.deals.filter((d) => d.companyId === c.id).length;
       return `
         <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
           <div class="flex justify-between items-start mb-2">
             <h3 class="font-medium text-gray-900 dark:text-gray-100">${c.name}</h3>
-            ${c.industry ? `<span class="text-xs px-2 py-0.5 bg-gray-200 dark:bg-gray-600 rounded">${c.industry}</span>` : ""}
+            ${
+        c.industry
+          ? `<span class="text-xs px-2 py-0.5 bg-gray-200 dark:bg-gray-600 rounded">${c.industry}</span>`
+          : ""
+      }
           </div>
-          ${c.website ? `<p class="text-sm text-blue-600 dark:text-blue-400 truncate"><a href="${c.website}" target="_blank">${c.website}</a></p>` : ""}
-          ${c.phone ? `<p class="text-sm text-gray-600 dark:text-gray-400">${c.phone}</p>` : ""}
+          ${
+        c.website
+          ? `<p class="text-sm text-blue-600 dark:text-blue-400 truncate"><a href="${c.website}" target="_blank">${c.website}</a></p>`
+          : ""
+      }
+          ${
+        c.phone
+          ? `<p class="text-sm text-gray-600 dark:text-gray-400">${c.phone}</p>`
+          : ""
+      }
           <div class="flex gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
             <span>${contactCount} contacts</span>
             <span>${dealCount} deals</span>
@@ -113,7 +151,11 @@ export class CRMModule {
   }
 
   async deleteCompany(id) {
-    if (!confirm("Delete this company? This will also remove related contacts, deals, and interactions.")) return;
+    if (
+      !confirm(
+        "Delete this company? This will also remove related contacts, deals, and interactions.",
+      )
+    ) return;
     try {
       await CRMAPI.deleteCompany(id);
       await this.load();
@@ -135,20 +177,40 @@ export class CRMModule {
     }
 
     emptyState?.classList.add("hidden");
-    container.innerHTML = this.contacts.map(c => {
-      const company = this.companies.find(comp => comp.id === c.companyId);
+    container.innerHTML = this.contacts.map((c) => {
+      const company = this.companies.find((comp) => comp.id === c.companyId);
       return `
         <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
           <div class="flex justify-between items-start mb-2">
             <div>
               <h3 class="font-medium text-gray-900 dark:text-gray-100">${c.firstName} ${c.lastName}</h3>
-              ${c.title ? `<p class="text-sm text-gray-500 dark:text-gray-400">${c.title}</p>` : ""}
+              ${
+        c.title
+          ? `<p class="text-sm text-gray-500 dark:text-gray-400">${c.title}</p>`
+          : ""
+      }
             </div>
-            ${c.isPrimary ? '<span class="text-xs px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded">Primary</span>' : ""}
+            ${
+        c.isPrimary
+          ? '<span class="text-xs px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded">Primary</span>'
+          : ""
+      }
           </div>
-          ${company ? `<p class="text-sm text-gray-600 dark:text-gray-400">${company.name}</p>` : ""}
-          ${c.email ? `<p class="text-sm text-gray-600 dark:text-gray-400">${c.email}</p>` : ""}
-          ${c.phone ? `<p class="text-sm text-gray-600 dark:text-gray-400">${c.phone}</p>` : ""}
+          ${
+        company
+          ? `<p class="text-sm text-gray-600 dark:text-gray-400">${company.name}</p>`
+          : ""
+      }
+          ${
+        c.email
+          ? `<p class="text-sm text-gray-600 dark:text-gray-400">${c.email}</p>`
+          : ""
+      }
+          ${
+        c.phone
+          ? `<p class="text-sm text-gray-600 dark:text-gray-400">${c.phone}</p>`
+          : ""
+      }
           <div class="flex justify-end space-x-2 mt-3">
             <button onclick="taskManager.openCRMContactModal('${c.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Edit</button>
             <button onclick="taskManager.deleteCRMContact('${c.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
@@ -161,25 +223,29 @@ export class CRMModule {
   populateCompanySelect(selectId) {
     const select = document.getElementById(selectId);
     select.innerHTML = '<option value="">Select company...</option>' +
-      this.companies.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+      this.companies.map((c) => `<option value="${c.id}">${c.name}</option>`)
+        .join("");
   }
 
   populateContactSelect(selectId, companyId = null) {
     const select = document.getElementById(selectId);
     const filteredContacts = companyId
-      ? this.contacts.filter(c => c.companyId === companyId)
+      ? this.contacts.filter((c) => c.companyId === companyId)
       : this.contacts;
     select.innerHTML = '<option value="">Select contact...</option>' +
-      filteredContacts.map(c => `<option value="${c.id}">${c.firstName} ${c.lastName}</option>`).join("");
+      filteredContacts.map((c) =>
+        `<option value="${c.id}">${c.firstName} ${c.lastName}</option>`
+      ).join("");
   }
 
   populateDealSelect(selectId, companyId = null) {
     const select = document.getElementById(selectId);
     const filteredDeals = companyId
-      ? this.deals.filter(d => d.companyId === companyId)
+      ? this.deals.filter((d) => d.companyId === companyId)
       : this.deals;
     select.innerHTML = '<option value="">Select deal...</option>' +
-      filteredDeals.map(d => `<option value="${d.id}">${d.title}</option>`).join("");
+      filteredDeals.map((d) => `<option value="${d.id}">${d.title}</option>`)
+        .join("");
   }
 
   // Contact operations use sidenav - Pattern: Sidenav Module
@@ -216,35 +282,54 @@ export class CRMModule {
     emptyState?.classList.add("hidden");
     const stageColors = {
       lead: "bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200",
-      qualified: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-      proposal: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-      negotiation: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
+      qualified:
+        "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+      proposal:
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+      negotiation:
+        "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
       won: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
       lost: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
     };
 
-    container.innerHTML = this.deals.map(d => {
-      const company = this.companies.find(c => c.id === d.companyId);
-      const contact = this.contacts.find(c => c.id === d.contactId);
+    container.innerHTML = this.deals.map((d) => {
+      const company = this.companies.find((c) => c.id === d.companyId);
+      const contact = this.contacts.find((c) => c.id === d.contactId);
       return `
         <div class="bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
           <div class="flex justify-between items-start mb-2">
             <div>
               <h3 class="font-medium text-gray-900 dark:text-gray-100">${d.title}</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400">${company?.name || "Unknown"}</p>
-              ${contact ? `<p class="text-xs text-gray-500 dark:text-gray-400">${contact.firstName} ${contact.lastName}</p>` : ""}
+              <p class="text-sm text-gray-600 dark:text-gray-400">${
+        company?.name || "Unknown"
+      }</p>
+              ${
+        contact
+          ? `<p class="text-xs text-gray-500 dark:text-gray-400">${contact.firstName} ${contact.lastName}</p>`
+          : ""
+      }
             </div>
-            <span class="px-2 py-1 text-xs rounded ${stageColors[d.stage] || stageColors.lead}">${d.stage}</span>
+            <span class="px-2 py-1 text-xs rounded ${
+        stageColors[d.stage] || stageColors.lead
+      }">${d.stage}</span>
           </div>
           <div class="flex justify-between items-center">
             <div>
-              <p class="text-xl font-bold text-gray-900 dark:text-gray-100">${this.formatCurrency(d.value)}</p>
+              <p class="text-xl font-bold text-gray-900 dark:text-gray-100">${
+        this.formatCurrency(d.value)
+      }</p>
               <p class="text-xs text-gray-500 dark:text-gray-400">${d.probability}% probability</p>
             </div>
-            ${d.expectedCloseDate ? `<p class="text-xs text-gray-500 dark:text-gray-400">Expected: ${d.expectedCloseDate}</p>` : ""}
+            ${
+        d.expectedCloseDate
+          ? `<p class="text-xs text-gray-500 dark:text-gray-400">Expected: ${d.expectedCloseDate}</p>`
+          : ""
+      }
           </div>
           <div class="flex justify-end space-x-2 mt-3">
-            ${d.stage !== "won" && d.stage !== "lost" ? `
+            ${
+        d.stage !== "won" && d.stage !== "lost"
+          ? `
               <select onchange="taskManager.updateCRMDealStage('${d.id}', this.value)" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1">
                 <option value="">Move to...</option>
                 <option value="lead">Lead</option>
@@ -254,7 +339,9 @@ export class CRMModule {
                 <option value="won">Won</option>
                 <option value="lost">Lost</option>
               </select>
-            ` : ""}
+            `
+          : ""
+      }
             <button onclick="taskManager.openCRMDealModal('${d.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Edit</button>
             <button onclick="taskManager.deleteCRMDeal('${d.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
           </div>
@@ -306,25 +393,33 @@ export class CRMModule {
 
     emptyState?.classList.add("hidden");
     const typeIcons = {
-      email: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
-      call: "M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z",
-      meeting: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
-      note: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
+      email:
+        "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+      call:
+        "M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z",
+      meeting:
+        "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
+      note:
+        "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
     };
 
     // Sort by date descending
-    const sorted = [...this.interactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+    const sorted = [...this.interactions].sort((a, b) =>
+      new Date(b.date) - new Date(a.date)
+    );
 
-    container.innerHTML = sorted.map(i => {
-      const company = this.companies.find(c => c.id === i.companyId);
-      const contact = this.contacts.find(c => c.id === i.contactId);
-      const deal = this.deals.find(d => d.id === i.dealId);
+    container.innerHTML = sorted.map((i) => {
+      const company = this.companies.find((c) => c.id === i.companyId);
+      const contact = this.contacts.find((c) => c.id === i.contactId);
+      const deal = this.deals.find((d) => d.id === i.dealId);
       return `
         <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
           <div class="flex items-start gap-3">
             <div class="p-2 bg-gray-200 dark:bg-gray-600 rounded-full">
               <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${typeIcons[i.type] || typeIcons.note}"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${
+        typeIcons[i.type] || typeIcons.note
+      }"></path>
               </svg>
             </div>
             <div class="flex-1">
@@ -340,11 +435,25 @@ export class CRMModule {
               </div>
               <div class="flex flex-wrap gap-2 mt-2 text-sm text-gray-600 dark:text-gray-400">
                 ${company ? `<span>${company.name}</span>` : ""}
-                ${contact ? `<span>- ${contact.firstName} ${contact.lastName}</span>` : ""}
-                ${deal ? `<span class="text-blue-600 dark:text-blue-400">Re: ${deal.title}</span>` : ""}
+                ${
+        contact ? `<span>- ${contact.firstName} ${contact.lastName}</span>` : ""
+      }
+                ${
+        deal
+          ? `<span class="text-blue-600 dark:text-blue-400">Re: ${deal.title}</span>`
+          : ""
+      }
               </div>
-              ${i.nextFollowUp ? `<p class="mt-2 text-xs text-orange-600 dark:text-orange-400">Follow-up: ${i.nextFollowUp}</p>` : ""}
-              ${i.notes ? `<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">${i.notes}</p>` : ""}
+              ${
+        i.nextFollowUp
+          ? `<p class="mt-2 text-xs text-orange-600 dark:text-orange-400">Follow-up: ${i.nextFollowUp}</p>`
+          : ""
+      }
+              ${
+        i.notes
+          ? `<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">${i.notes}</p>`
+          : ""
+      }
             </div>
             <div class="flex gap-2">
               <button onclick="taskManager.openCRMInteractionModal('${i.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Edit</button>
@@ -388,14 +497,29 @@ export class CRMModule {
 
   bindEvents() {
     // CRM tab navigation
-    document.querySelectorAll(".crm-tab").forEach(tab => {
-      tab.addEventListener("click", (e) => this.switchTab(e.target.dataset.crmTab));
+    document.querySelectorAll(".crm-tab").forEach((tab) => {
+      tab.addEventListener(
+        "click",
+        (e) => this.switchTab(e.target.dataset.crmTab),
+      );
     });
 
     // Add buttons use sidenav
-    document.getElementById("addCRMCompanyBtn")?.addEventListener("click", () => this.openCompanyModal());
-    document.getElementById("addCRMContactBtn")?.addEventListener("click", () => this.openContactModal());
-    document.getElementById("addCRMDealBtn")?.addEventListener("click", () => this.openDealModal());
-    document.getElementById("addCRMInteractionBtn")?.addEventListener("click", () => this.openInteractionModal());
+    document.getElementById("addCRMCompanyBtn")?.addEventListener(
+      "click",
+      () => this.openCompanyModal(),
+    );
+    document.getElementById("addCRMContactBtn")?.addEventListener(
+      "click",
+      () => this.openContactModal(),
+    );
+    document.getElementById("addCRMDealBtn")?.addEventListener(
+      "click",
+      () => this.openDealModal(),
+    );
+    document.getElementById("addCRMInteractionBtn")?.addEventListener(
+      "click",
+      () => this.openInteractionModal(),
+    );
   }
 }

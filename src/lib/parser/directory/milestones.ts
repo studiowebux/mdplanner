@@ -2,7 +2,7 @@
  * Directory-based parser for Milestones.
  * Each milestone is stored as a separate markdown file.
  */
-import { DirectoryParser, parseFrontmatter, buildFileContent } from "./base.ts";
+import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
 import type { Milestone } from "../../types.ts";
 
 interface MilestoneFrontmatter {
@@ -17,7 +17,9 @@ export class MilestonesDirectoryParser extends DirectoryParser<Milestone> {
   }
 
   protected parseFile(content: string, _filePath: string): Milestone | null {
-    const { frontmatter, content: body } = parseFrontmatter<MilestoneFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<
+      MilestoneFrontmatter
+    >(content);
 
     if (!frontmatter.id) {
       return null;
@@ -78,7 +80,10 @@ export class MilestonesDirectoryParser extends DirectoryParser<Milestone> {
   /**
    * Update an existing milestone.
    */
-  async update(id: string, updates: Partial<Milestone>): Promise<Milestone | null> {
+  async update(
+    id: string,
+    updates: Partial<Milestone>,
+  ): Promise<Milestone | null> {
     const existing = await this.read(id);
     if (!existing) return null;
 

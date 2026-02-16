@@ -21,6 +21,7 @@ lineItems:
 Annual subscription with 20% discount.
 
 ## Terms
+
 - 12 month commitment
 - Annual billing upfront
 - Includes email support

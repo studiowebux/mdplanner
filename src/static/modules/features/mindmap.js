@@ -1,5 +1,5 @@
-import { MindmapsAPI } from '../api.js';
-import { escapeHtml } from '../utils.js';
+import { MindmapsAPI } from "../api.js";
+import { escapeHtml } from "../utils.js";
 
 export class MindmapModule {
   constructor(taskManager) {
@@ -138,7 +138,13 @@ export class MindmapModule {
 
     // First pass: calculate subtree sizes
     rootNodes.forEach((rootNode) => {
-      this.calculateSubtreeSize(rootNode, nodeSpacing, nodeWidth, nodeHeight, isVertical);
+      this.calculateSubtreeSize(
+        rootNode,
+        nodeSpacing,
+        nodeWidth,
+        nodeHeight,
+        isVertical,
+      );
     });
 
     // Second pass: position nodes
@@ -193,7 +199,13 @@ export class MindmapModule {
     }
 
     children.forEach((child) => {
-      this.calculateSubtreeSize(child, nodeSpacing, nodeWidth, nodeHeight, isVertical);
+      this.calculateSubtreeSize(
+        child,
+        nodeSpacing,
+        nodeWidth,
+        nodeHeight,
+        isVertical,
+      );
     });
 
     if (isVertical) {
@@ -232,7 +244,16 @@ export class MindmapModule {
     container.appendChild(element);
   }
 
-  positionNodeAndChildren(node, x, y, levelSpacing, nodeSpacing, container, nodeWidth, nodeHeight) {
+  positionNodeAndChildren(
+    node,
+    x,
+    y,
+    levelSpacing,
+    nodeSpacing,
+    container,
+    nodeWidth,
+    nodeHeight,
+  ) {
     const isVertical = this.currentLayout === "vertical";
 
     const element = document.createElement("div");
@@ -332,7 +353,9 @@ export class MindmapModule {
         );
         if (parent && parent.x !== undefined && node.x !== undefined) {
           // Get actual rendered dimensions from DOM
-          const parentEl = container.querySelector(`[data-node-id="${parent.id}"]`);
+          const parentEl = container.querySelector(
+            `[data-node-id="${parent.id}"]`,
+          );
           const nodeEl = container.querySelector(`[data-node-id="${node.id}"]`);
 
           const parentWidth = parentEl ? parentEl.offsetWidth : 150;
@@ -404,7 +427,8 @@ export class MindmapModule {
         const newTranslateX = startTranslateX + deltaX;
         const newTranslateY = startTranslateY + deltaY;
 
-        viewport.style.transform = `translate(${newTranslateX}px, ${newTranslateY}px) scale(${this.zoom})`;
+        viewport.style.transform =
+          `translate(${newTranslateX}px, ${newTranslateY}px) scale(${this.zoom})`;
       }
     });
 
@@ -470,9 +494,11 @@ export class MindmapModule {
   updateZoom(value) {
     this.zoom = parseFloat(value);
     const viewport = document.getElementById("mindmapViewport");
-    viewport.style.transform = `translate(${this.offset.x}px, ${this.offset.y}px) scale(${this.zoom})`;
-    document.getElementById("mindmapZoomLevel").textContent =
-      `${Math.round(this.zoom * 100)}%`;
+    viewport.style.transform =
+      `translate(${this.offset.x}px, ${this.offset.y}px) scale(${this.zoom})`;
+    document.getElementById("mindmapZoomLevel").textContent = `${
+      Math.round(this.zoom * 100)
+    }%`;
   }
 
   updateLayout(layout) {
@@ -507,25 +533,25 @@ export class MindmapModule {
     const end = textarea.selectionEnd;
     const value = textarea.value;
 
-    if (e.key === 'Tab') {
+    if (e.key === "Tab") {
       e.preventDefault();
 
       if (e.shiftKey) {
-        const lines = value.split('\n');
-        const startLine = value.substring(0, start).split('\n').length - 1;
-        const endLine = value.substring(0, end).split('\n').length - 1;
+        const lines = value.split("\n");
+        const startLine = value.substring(0, start).split("\n").length - 1;
+        const endLine = value.substring(0, end).split("\n").length - 1;
 
-        let newValue = '';
+        let newValue = "";
         let cursorOffset = 0;
 
         for (let i = 0; i < lines.length; i++) {
           if (i >= startLine && i <= endLine) {
-            if (lines[i].startsWith('  ')) {
+            if (lines[i].startsWith("  ")) {
               lines[i] = lines[i].substring(2);
               if (i === startLine) cursorOffset = -2;
             }
           }
-          newValue += lines[i] + (i < lines.length - 1 ? '\n' : '');
+          newValue += lines[i] + (i < lines.length - 1 ? "\n" : "");
         }
 
         textarea.value = newValue;
@@ -533,67 +559,71 @@ export class MindmapModule {
         textarea.selectionEnd = Math.max(0, end + cursorOffset);
       } else {
         if (start === end) {
-          const newValue = value.substring(0, start) + '  ' + value.substring(end);
+          const newValue = value.substring(0, start) + "  " +
+            value.substring(end);
           textarea.value = newValue;
           textarea.selectionStart = textarea.selectionEnd = start + 2;
         } else {
-          const lines = value.split('\n');
-          const startLine = value.substring(0, start).split('\n').length - 1;
-          const endLine = value.substring(0, end).split('\n').length - 1;
+          const lines = value.split("\n");
+          const startLine = value.substring(0, start).split("\n").length - 1;
+          const endLine = value.substring(0, end).split("\n").length - 1;
 
-          let newValue = '';
+          let newValue = "";
           let cursorOffset = 0;
 
           for (let i = 0; i < lines.length; i++) {
             if (i >= startLine && i <= endLine) {
-              lines[i] = '  ' + lines[i];
+              lines[i] = "  " + lines[i];
               if (i === startLine) cursorOffset = 2;
             }
-            newValue += lines[i] + (i < lines.length - 1 ? '\n' : '');
+            newValue += lines[i] + (i < lines.length - 1 ? "\n" : "");
           }
 
           textarea.value = newValue;
           textarea.selectionStart = start + cursorOffset;
-          textarea.selectionEnd = end + (cursorOffset * (endLine - startLine + 1));
+          textarea.selectionEnd = end +
+            (cursorOffset * (endLine - startLine + 1));
         }
       }
       this.updatePreview();
-    } else if (e.key === 'Enter' && !e.shiftKey) {
+    } else if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      const lines = value.split('\n');
-      const currentLineIndex = value.substring(0, start).split('\n').length - 1;
+      const lines = value.split("\n");
+      const currentLineIndex = value.substring(0, start).split("\n").length - 1;
       const currentLine = lines[currentLineIndex];
       const indent = currentLine.match(/^(\s*)/)[1];
-      const newLine = indent + '- ';
+      const newLine = indent + "- ";
 
-      const lineEnd = value.indexOf('\n', start);
+      const lineEnd = value.indexOf("\n", start);
       const insertPos = lineEnd === -1 ? value.length : lineEnd;
-      const newValue = value.substring(0, insertPos) + '\n' + newLine + value.substring(insertPos);
+      const newValue = value.substring(0, insertPos) + "\n" + newLine +
+        value.substring(insertPos);
       textarea.value = newValue;
-      textarea.selectionStart = textarea.selectionEnd = insertPos + 1 + newLine.length;
+      textarea.selectionStart = textarea.selectionEnd = insertPos + 1 +
+        newLine.length;
       this.updatePreview();
-    } else if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+    } else if (e.altKey && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
       e.preventDefault();
-      this.moveLine(e.key === 'ArrowUp' ? -1 : 1);
+      this.moveLine(e.key === "ArrowUp" ? -1 : 1);
     }
   }
 
   getCurrentLineInfo() {
-    const textarea = document.getElementById('mindmapStructure');
+    const textarea = document.getElementById("mindmapStructure");
     const value = textarea.value;
     const start = textarea.selectionStart;
-    const lines = value.split('\n');
-    const lineIndex = value.substring(0, start).split('\n').length - 1;
+    const lines = value.split("\n");
+    const lineIndex = value.substring(0, start).split("\n").length - 1;
     const currentLine = lines[lineIndex];
-    const indent = currentLine.match(/^(\s*)/)?.[1] || '';
+    const indent = currentLine.match(/^(\s*)/)?.[1] || "";
     return { textarea, value, start, lines, lineIndex, currentLine, indent };
   }
 
   addRoot() {
-    const textarea = document.getElementById('mindmapStructure');
+    const textarea = document.getElementById("mindmapStructure");
     const value = textarea.value;
-    const newLine = '- New Node';
-    const newValue = value ? value + '\n' + newLine : newLine;
+    const newLine = "- New Node";
+    const newValue = value ? value + "\n" + newLine : newLine;
     textarea.value = newValue;
     textarea.focus();
     textarea.selectionStart = newValue.length - 8;
@@ -602,15 +632,17 @@ export class MindmapModule {
   }
 
   addChild() {
-    const { textarea, value, lines, lineIndex, indent } = this.getCurrentLineInfo();
+    const { textarea, value, lines, lineIndex, indent } = this
+      .getCurrentLineInfo();
     if (lines.length === 0 || !lines[lineIndex].trim()) {
       this.addRoot();
       return;
     }
-    const newIndent = indent + '  ';
-    const newLine = newIndent + '- New Child';
-    const lineEnd = value.split('\n').slice(0, lineIndex + 1).join('\n').length;
-    const newValue = value.substring(0, lineEnd) + '\n' + newLine + value.substring(lineEnd);
+    const newIndent = indent + "  ";
+    const newLine = newIndent + "- New Child";
+    const lineEnd = value.split("\n").slice(0, lineIndex + 1).join("\n").length;
+    const newValue = value.substring(0, lineEnd) + "\n" + newLine +
+      value.substring(lineEnd);
     textarea.value = newValue;
     textarea.focus();
     const cursorStart = lineEnd + 1 + newIndent.length + 2;
@@ -620,14 +652,16 @@ export class MindmapModule {
   }
 
   addSibling() {
-    const { textarea, value, lines, lineIndex, indent } = this.getCurrentLineInfo();
+    const { textarea, value, lines, lineIndex, indent } = this
+      .getCurrentLineInfo();
     if (lines.length === 0 || !lines[lineIndex].trim()) {
       this.addRoot();
       return;
     }
-    const newLine = indent + '- New Sibling';
-    const lineEnd = value.split('\n').slice(0, lineIndex + 1).join('\n').length;
-    const newValue = value.substring(0, lineEnd) + '\n' + newLine + value.substring(lineEnd);
+    const newLine = indent + "- New Sibling";
+    const lineEnd = value.split("\n").slice(0, lineIndex + 1).join("\n").length;
+    const newValue = value.substring(0, lineEnd) + "\n" + newLine +
+      value.substring(lineEnd);
     textarea.value = newValue;
     textarea.focus();
     const cursorStart = lineEnd + 1 + indent.length + 2;
@@ -637,10 +671,14 @@ export class MindmapModule {
   }
 
   indent() {
-    const { textarea, value, start, lines, lineIndex } = this.getCurrentLineInfo();
-    if (lines[lineIndex].startsWith('  ') || lines[lineIndex].trim().startsWith('-')) {
-      lines[lineIndex] = '  ' + lines[lineIndex];
-      textarea.value = lines.join('\n');
+    const { textarea, value, start, lines, lineIndex } = this
+      .getCurrentLineInfo();
+    if (
+      lines[lineIndex].startsWith("  ") ||
+      lines[lineIndex].trim().startsWith("-")
+    ) {
+      lines[lineIndex] = "  " + lines[lineIndex];
+      textarea.value = lines.join("\n");
       textarea.selectionStart = start + 2;
       textarea.selectionEnd = (textarea.selectionEnd || start) + 2;
       this.updatePreview();
@@ -649,10 +687,11 @@ export class MindmapModule {
   }
 
   unindent() {
-    const { textarea, value, start, lines, lineIndex } = this.getCurrentLineInfo();
-    if (lines[lineIndex].startsWith('  ')) {
+    const { textarea, value, start, lines, lineIndex } = this
+      .getCurrentLineInfo();
+    if (lines[lineIndex].startsWith("  ")) {
       lines[lineIndex] = lines[lineIndex].substring(2);
-      textarea.value = lines.join('\n');
+      textarea.value = lines.join("\n");
       textarea.selectionStart = Math.max(0, start - 2);
       textarea.selectionEnd = Math.max(0, (textarea.selectionEnd || start) - 2);
       this.updatePreview();
@@ -670,9 +709,10 @@ export class MindmapModule {
     lines[targetIndex] = temp;
 
     const beforeLines = lines.slice(0, targetIndex);
-    const newStart = beforeLines.join('\n').length + (beforeLines.length > 0 ? 1 : 0);
+    const newStart = beforeLines.join("\n").length +
+      (beforeLines.length > 0 ? 1 : 0);
 
-    textarea.value = lines.join('\n');
+    textarea.value = lines.join("\n");
     textarea.focus();
     textarea.selectionStart = newStart;
     textarea.selectionEnd = newStart + lines[targetIndex].length;
@@ -684,13 +724,14 @@ export class MindmapModule {
     if (lines.length === 0) return;
 
     lines.splice(lineIndex, 1);
-    const newValue = lines.join('\n');
+    const newValue = lines.join("\n");
     textarea.value = newValue;
 
     const newLineIndex = Math.min(lineIndex, lines.length - 1);
     if (newLineIndex >= 0) {
       const beforeLines = lines.slice(0, newLineIndex);
-      const newStart = beforeLines.join('\n').length + (beforeLines.length > 0 ? 1 : 0);
+      const newStart = beforeLines.join("\n").length +
+        (beforeLines.length > 0 ? 1 : 0);
       textarea.selectionStart = textarea.selectionEnd = newStart;
     }
     textarea.focus();
@@ -698,41 +739,49 @@ export class MindmapModule {
   }
 
   updatePreview() {
-    const structure = document.getElementById('mindmapStructure').value;
-    const preview = document.getElementById('mindmapPreview');
+    const structure = document.getElementById("mindmapStructure").value;
+    const preview = document.getElementById("mindmapPreview");
 
     if (!structure.trim()) {
-      preview.innerHTML = '<div class="text-gray-400 dark:text-gray-500 italic">Enter structure to see preview</div>';
+      preview.innerHTML =
+        '<div class="text-gray-400 dark:text-gray-500 italic">Enter structure to see preview</div>';
       return;
     }
 
     const nodes = this.parseStructure(structure);
     if (nodes.length === 0) {
-      preview.innerHTML = '<div class="text-gray-400 dark:text-gray-500 italic">Enter structure to see preview</div>';
+      preview.innerHTML =
+        '<div class="text-gray-400 dark:text-gray-500 italic">Enter structure to see preview</div>';
       return;
     }
 
     const buildTree = (parentId = undefined, level = 0) => {
-      const children = nodes.filter(n => n.parent === parentId);
-      if (children.length === 0) return '';
+      const children = nodes.filter((n) => n.parent === parentId);
+      if (children.length === 0) return "";
 
-      let html = '<ul class="pl-3 border-l border-gray-300 dark:border-gray-600">';
+      let html =
+        '<ul class="pl-3 border-l border-gray-300 dark:border-gray-600">';
       for (const node of children) {
-        html += `<li class="py-0.5"><span class="text-gray-800 dark:text-gray-200">${escapeHtml(node.text)}</span>`;
+        html +=
+          `<li class="py-0.5"><span class="text-gray-800 dark:text-gray-200">${
+            escapeHtml(node.text)
+          }</span>`;
         html += buildTree(node.id, level + 1);
-        html += '</li>';
+        html += "</li>";
       }
-      html += '</ul>';
+      html += "</ul>";
       return html;
     };
 
-    const roots = nodes.filter(n => !n.parent);
+    const roots = nodes.filter((n) => !n.parent);
     let html = '<div class="space-y-1">';
     for (const root of roots) {
-      html += `<div class="font-medium text-gray-900 dark:text-gray-100">${escapeHtml(root.text)}</div>`;
+      html += `<div class="font-medium text-gray-900 dark:text-gray-100">${
+        escapeHtml(root.text)
+      }</div>`;
       html += buildTree(root.id, 1);
     }
-    html += '</div>';
+    html += "</div>";
 
     preview.innerHTML = html;
   }
@@ -747,7 +796,10 @@ export class MindmapModule {
     try {
       let response;
       if (this.editingMindmap) {
-        response = await MindmapsAPI.update(this.editingMindmap.id, { title, nodes });
+        response = await MindmapsAPI.update(this.editingMindmap.id, {
+          title,
+          nodes,
+        });
       } else {
         response = await MindmapsAPI.create({ title, nodes });
       }

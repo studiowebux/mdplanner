@@ -1,4 +1,4 @@
-import { showToast } from './ui/toast.js';
+import { showToast } from "./ui/toast.js";
 
 export class ImportExportModule {
   constructor(taskManager) {
@@ -74,7 +74,10 @@ export class ImportExportModule {
       if (response.ok) {
         const result = await response.json();
         console.log("Import result:", result);
-        showToast(`Successfully imported ${result.imported} task(s).`, "success");
+        showToast(
+          `Successfully imported ${result.imported} task(s).`,
+          "success",
+        );
 
         // Reload tasks to show imported ones
         console.log("Reloading tasks...");
@@ -97,7 +100,10 @@ export class ImportExportModule {
       }
     } catch (error) {
       console.error("Error importing CSV:", error);
-      showToast("Error importing CSV file. Please check the file format.", "error");
+      showToast(
+        "Error importing CSV file. Please check the file format.",
+        "error",
+      );
     }
 
     // Clear the file input

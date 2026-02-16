@@ -2,8 +2,18 @@
  * Cache module exports
  */
 
-export { CacheDatabase, type BindParams, type BindValue, type QueryResult } from "./database.ts";
-export { initSchema, dropSchema } from "./schema.ts";
-export { CachingParser, CacheConfigs, type CacheConfig } from "./cache.ts";
-export { CacheSync, type SyncResult, type SyncOptions } from "./sync.ts";
-export { SearchEngine, type SearchResult, type SearchOptions, type SearchStats } from "./search.ts";
+export {
+  type BindParams,
+  type BindValue,
+  CacheDatabase,
+  type QueryResult,
+} from "./database.ts";
+export { dropSchema, initSchema } from "./schema.ts";
+export { type CacheConfig, CacheConfigs, CachingParser } from "./cache.ts";
+export { CacheSync, type SyncOptions, type SyncResult } from "./sync.ts";
+export {
+  SearchEngine,
+  type SearchOptions,
+  type SearchResult,
+  type SearchStats,
+} from "./search.ts";

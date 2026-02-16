@@ -2,7 +2,7 @@
  * Directory-based parser for Ideas.
  * Each idea is stored as a separate markdown file.
  */
-import { DirectoryParser, parseFrontmatter, buildFileContent } from "./base.ts";
+import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
 import type { Idea } from "../../types.ts";
 
 interface IdeaFrontmatter {
@@ -19,7 +19,9 @@ export class IdeasDirectoryParser extends DirectoryParser<Idea> {
   }
 
   protected parseFile(content: string, _filePath: string): Idea | null {
-    const { frontmatter, content: body } = parseFrontmatter<IdeaFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<IdeaFrontmatter>(
+      content,
+    );
 
     if (!frontmatter.id) {
       return null;
@@ -136,11 +138,15 @@ export class IdeasDirectoryParser extends DirectoryParser<Idea> {
     if (!idea1 || !idea2) return false;
 
     if (idea1.links) {
-      await this.update(ideaId1, { links: idea1.links.filter(id => id !== ideaId2) });
+      await this.update(ideaId1, {
+        links: idea1.links.filter((id) => id !== ideaId2),
+      });
     }
 
     if (idea2.links) {
-      await this.update(ideaId2, { links: idea2.links.filter(id => id !== ideaId1) });
+      await this.update(ideaId2, {
+        links: idea2.links.filter((id) => id !== ideaId1),
+      });
     }
 
     return true;

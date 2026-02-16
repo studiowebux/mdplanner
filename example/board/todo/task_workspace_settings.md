@@ -15,9 +15,10 @@ order: 0
 # Workspace Settings Page
 
 Build settings page for workspace configuration.
+
 - General (name, description, logo)
 - Members and roles
 - Integrations
 - Billing (link to Stripe portal)
-- Danger zone (delete workspace)
-Currently implementing member management with invite flow.
+- Danger zone (delete workspace) Currently implementing member management with
+  invite flow.

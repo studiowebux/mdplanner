@@ -3,7 +3,7 @@
  * Uses orgchart/ directory with member_xxx.md files.
  * Pattern: DirectoryParser with hierarchical reportsTo references.
  */
-import { DirectoryParser, parseFrontmatter, buildFileContent } from "./base.ts";
+import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
 import type { OrgChartMember } from "../../types.ts";
 
 interface OrgChartMemberFrontmatter {
@@ -21,8 +21,13 @@ export class OrgChartDirectoryParser extends DirectoryParser<OrgChartMember> {
     super({ projectDir, sectionName: "orgchart" });
   }
 
-  protected parseFile(content: string, _filePath: string): OrgChartMember | null {
-    const { frontmatter, content: body } = parseFrontmatter<OrgChartMemberFrontmatter>(content);
+  protected parseFile(
+    content: string,
+    _filePath: string,
+  ): OrgChartMember | null {
+    const { frontmatter, content: body } = parseFrontmatter<
+      OrgChartMemberFrontmatter
+    >(content);
     if (!frontmatter.id) return null;
 
     const lines = body.split("\n");
@@ -89,11 +94,18 @@ export class OrgChartDirectoryParser extends DirectoryParser<OrgChartMember> {
   /**
    * Update an existing org chart member.
    */
-  async update(id: string, updates: Partial<OrgChartMember>): Promise<OrgChartMember | null> {
+  async update(
+    id: string,
+    updates: Partial<OrgChartMember>,
+  ): Promise<OrgChartMember | null> {
     const existing = await this.read(id);
     if (!existing) return null;
 
-    const updated: OrgChartMember = { ...existing, ...updates, id: existing.id };
+    const updated: OrgChartMember = {
+      ...existing,
+      ...updates,
+      id: existing.id,
+    };
     await this.write(updated);
     return updated;
   }

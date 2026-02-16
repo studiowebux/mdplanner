@@ -10,20 +10,17 @@ milestone: milestone_beta
 planned_start: 2026-02-10
 planned_end: 2026-02-20
 time_entries:
-  -
-    id: te_1
+  - id: te_1
     date: 2026-02-10
     hours: 4
     person: alice
     description: Database schema and API design
-  -
-    id: te_2
+  - id: te_2
     date: 2026-02-11
     hours: 6
     person: alice
     description: Backend implementation
-  -
-    id: te_3
+  - id: te_3
     date: 2026-02-12
     hours: 3
     person: alice
@@ -34,6 +31,7 @@ order: 2
 # Time Tracking Feature
 
 Implement time tracking with timer and manual entry.
+
 - Start/stop timer
 - Manual time entry
 - Edit past entries

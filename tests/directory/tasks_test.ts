@@ -79,7 +79,10 @@ Deno.test("TasksDirectoryParser - creates task with full config", async () => {
     assertEquals(retrieved.config.effort, 4);
     assertEquals(retrieved.config.milestone, "v1.0");
     assertEquals(retrieved.config.blocked_by, ["task_001"]);
-    assertEquals(retrieved.description, ["This task needs attention.", "It is high priority."]);
+    assertEquals(retrieved.description, [
+      "This task needs attention.",
+      "It is high priority.",
+    ]);
   } finally {
     await cleanup();
   }
@@ -138,9 +141,24 @@ Deno.test("TasksDirectoryParser - creates tasks in different sections", async ()
   const parser = await setup();
 
   try {
-    await parser.add({ title: "Backlog Task", completed: false, section: "Backlog", config: {} });
-    await parser.add({ title: "Todo Task", completed: false, section: "Todo", config: {} });
-    await parser.add({ title: "Done Task", completed: true, section: "Done", config: {} });
+    await parser.add({
+      title: "Backlog Task",
+      completed: false,
+      section: "Backlog",
+      config: {},
+    });
+    await parser.add({
+      title: "Todo Task",
+      completed: false,
+      section: "Todo",
+      config: {},
+    });
+    await parser.add({
+      title: "Done Task",
+      completed: true,
+      section: "Done",
+      config: {},
+    });
 
     const sections = await parser.listSections();
     assertEquals(sections.length, 3);
@@ -154,9 +172,24 @@ Deno.test("TasksDirectoryParser - reads tasks by section", async () => {
   const parser = await setup();
 
   try {
-    await parser.add({ title: "Todo 1", completed: false, section: "Todo", config: {} });
-    await parser.add({ title: "Todo 2", completed: false, section: "Todo", config: {} });
-    await parser.add({ title: "Done 1", completed: true, section: "Done", config: {} });
+    await parser.add({
+      title: "Todo 1",
+      completed: false,
+      section: "Todo",
+      config: {},
+    });
+    await parser.add({
+      title: "Todo 2",
+      completed: false,
+      section: "Todo",
+      config: {},
+    });
+    await parser.add({
+      title: "Done 1",
+      completed: true,
+      section: "Done",
+      config: {},
+    });
 
     const todoTasks = await parser.readBySection("Todo");
     assertEquals(todoTasks.length, 2);
@@ -225,8 +258,20 @@ Deno.test("TasksDirectoryParser - creates task with subtasks", async () => {
       section: "Todo",
       config: {},
       children: [
-        { id: "sub_1", title: "Subtask 1", completed: false, section: "Todo", config: {} },
-        { id: "sub_2", title: "Subtask 2", completed: true, section: "Todo", config: {} },
+        {
+          id: "sub_1",
+          title: "Subtask 1",
+          completed: false,
+          section: "Todo",
+          config: {},
+        },
+        {
+          id: "sub_2",
+          title: "Subtask 2",
+          completed: true,
+          section: "Todo",
+          config: {},
+        },
       ],
     });
 
@@ -302,7 +347,9 @@ Deno.test("TasksDirectoryParser - update returns null for non-existent task", as
   const parser = await setup();
 
   try {
-    const result = await parser.update("nonexistent_id", { title: "New Title" });
+    const result = await parser.update("nonexistent_id", {
+      title: "New Title",
+    });
     assertEquals(result, null);
   } finally {
     await cleanup();
@@ -345,10 +392,30 @@ Deno.test("TasksDirectoryParser - readAll returns tasks from all sections", asyn
   const parser = await setup();
 
   try {
-    await parser.add({ title: "T1", completed: false, section: "Backlog", config: {} });
-    await parser.add({ title: "T2", completed: false, section: "Todo", config: {} });
-    await parser.add({ title: "T3", completed: false, section: "In Progress", config: {} });
-    await parser.add({ title: "T4", completed: true, section: "Done", config: {} });
+    await parser.add({
+      title: "T1",
+      completed: false,
+      section: "Backlog",
+      config: {},
+    });
+    await parser.add({
+      title: "T2",
+      completed: false,
+      section: "Todo",
+      config: {},
+    });
+    await parser.add({
+      title: "T3",
+      completed: false,
+      section: "In Progress",
+      config: {},
+    });
+    await parser.add({
+      title: "T4",
+      completed: true,
+      section: "Done",
+      config: {},
+    });
 
     const allTasks = await parser.readAll();
     assertEquals(allTasks.length, 4);
@@ -362,8 +429,18 @@ Deno.test("TasksDirectoryParser - saveAll replaces all tasks", async () => {
 
   try {
     // Create initial tasks
-    const task1 = await parser.add({ title: "T1", completed: false, section: "Todo", config: {} });
-    await parser.add({ title: "T2", completed: false, section: "Todo", config: {} });
+    const task1 = await parser.add({
+      title: "T1",
+      completed: false,
+      section: "Todo",
+      config: {},
+    });
+    await parser.add({
+      title: "T2",
+      completed: false,
+      section: "Todo",
+      config: {},
+    });
 
     // Save new set (replacing all)
     const newTasks: Task[] = [
@@ -417,7 +494,13 @@ Deno.test("TasksDirectoryParser - stores time entries in frontmatter", async () 
       section: "Todo",
       config: {
         time_entries: [
-          { id: "te_1", date: "2026-02-15", hours: 2, person: "alice", description: "Initial work" },
+          {
+            id: "te_1",
+            date: "2026-02-15",
+            hours: 2,
+            person: "alice",
+            description: "Initial work",
+          },
         ],
       },
     });

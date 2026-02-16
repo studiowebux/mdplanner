@@ -10,7 +10,8 @@ mode: enhanced
 
 ## Key Decisions
 
-1. **Monorepo Structure**: Using Turborepo for managing frontend and backend in single repo
+1. **Monorepo Structure**: Using Turborepo for managing frontend and backend in
+   single repo
 2. **API Design**: REST with OpenAPI spec, considering GraphQL for v2
 3. **Auth**: JWT with refresh tokens, Auth0 as identity provider
 4. **Real-time**: WebSocket connections for live collaboration
@@ -25,6 +26,7 @@ See C4 diagrams for detailed architecture views.
 <!-- section-id: section_stack, type: tabs -->
 
 ### Tab: Frontend
+
 <!-- tab-id: tab_frontend -->
 
 - React 18 with TypeScript
@@ -33,6 +35,7 @@ See C4 diagrams for detailed architecture views.
 - React Query for server state
 
 ### Tab: Backend
+
 <!-- tab-id: tab_backend -->
 
 - Deno with Hono framework
@@ -41,6 +44,7 @@ See C4 diagrams for detailed architecture views.
 - S3 for file storage
 
 ### Tab: Infrastructure
+
 <!-- tab-id: tab_infra -->
 
 - AWS ECS for containers
@@ -49,6 +53,7 @@ See C4 diagrams for detailed architecture views.
 - Terraform for IaC
 
 ### Tab: Hello
+
 <!-- tab-id: tab_1771209579776_zg0vszck1 -->
 
 Hello World !

@@ -2,7 +2,7 @@
  * Directory-based parser for Lean Canvas.
  * Each lean canvas is stored as a separate markdown file.
  */
-import { DirectoryParser, parseFrontmatter, buildFileContent } from "./base.ts";
+import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
 import type { LeanCanvas } from "../../types.ts";
 
 interface LeanCanvasFrontmatter {
@@ -33,7 +33,9 @@ export class LeanCanvasDirectoryParser extends DirectoryParser<LeanCanvas> {
   }
 
   protected parseFile(content: string, _filePath: string): LeanCanvas | null {
-    const { frontmatter, content: body } = parseFrontmatter<LeanCanvasFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<
+      LeanCanvasFrontmatter
+    >(content);
 
     if (!frontmatter.id) {
       return null;
@@ -85,7 +87,7 @@ export class LeanCanvasDirectoryParser extends DirectoryParser<LeanCanvas> {
         currentSection = null;
 
         for (const [section, keywords] of Object.entries(SECTION_HEADERS)) {
-          if (keywords.some(kw => headerText.includes(kw))) {
+          if (keywords.some((kw) => headerText.includes(kw))) {
             currentSection = section as LeanCanvasSection;
             break;
           }
@@ -158,7 +160,10 @@ export class LeanCanvasDirectoryParser extends DirectoryParser<LeanCanvas> {
     return newCanvas;
   }
 
-  async update(id: string, updates: Partial<LeanCanvas>): Promise<LeanCanvas | null> {
+  async update(
+    id: string,
+    updates: Partial<LeanCanvas>,
+  ): Promise<LeanCanvas | null> {
     const existing = await this.read(id);
     if (!existing) return null;
 
@@ -171,7 +176,11 @@ export class LeanCanvasDirectoryParser extends DirectoryParser<LeanCanvas> {
     return updated;
   }
 
-  async addItem(id: string, section: LeanCanvasSection, item: string): Promise<LeanCanvas | null> {
+  async addItem(
+    id: string,
+    section: LeanCanvasSection,
+    item: string,
+  ): Promise<LeanCanvas | null> {
     const canvas = await this.read(id);
     if (!canvas) return null;
 
@@ -180,7 +189,11 @@ export class LeanCanvasDirectoryParser extends DirectoryParser<LeanCanvas> {
     return canvas;
   }
 
-  async removeItem(id: string, section: LeanCanvasSection, itemIndex: number): Promise<LeanCanvas | null> {
+  async removeItem(
+    id: string,
+    section: LeanCanvasSection,
+    itemIndex: number,
+  ): Promise<LeanCanvas | null> {
     const canvas = await this.read(id);
     if (!canvas) return null;
 

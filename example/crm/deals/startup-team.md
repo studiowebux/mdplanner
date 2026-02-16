@@ -15,6 +15,7 @@ created: 2026-01-25
 Team plan for 12 users, annual billing.
 
 ## Notes
+
 - Very likely to close
 - Waiting for beta access
 - May upgrade as team grows

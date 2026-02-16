@@ -9,9 +9,11 @@ status: on-track
 
 # Launch MVP
 
-Ship the minimum viable product with core task management features. Target: 100 beta users in first month.
+Ship the minimum viable product with core task management features. Target: 100
+beta users in first month.
 
 ## Key Features
+
 - User authentication and workspaces
 - Project and task management
 - Basic time tracking

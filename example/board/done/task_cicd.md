@@ -13,6 +13,7 @@ milestone: milestone_alpha
 Set up automated deployment pipeline.
 
 ## Completed
+
 - GitHub Actions workflow
 - Automated testing on PR
 - Staging deployment on merge

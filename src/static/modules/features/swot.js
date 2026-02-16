@@ -162,7 +162,9 @@ export class SwotModule {
 
   editSelected() {
     if (this.taskManager.selectedSwotId) {
-      this.taskManager.swotSidenavModule.openEdit(this.taskManager.selectedSwotId);
+      this.taskManager.swotSidenavModule.openEdit(
+        this.taskManager.selectedSwotId,
+      );
     }
   }
 
@@ -253,13 +255,18 @@ export class SwotModule {
       .getElementById("swotViewBtn")
       .addEventListener("click", () => {
         this.taskManager.switchView("swot");
-        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+        document.getElementById("viewSelectorDropdown")?.classList.add(
+          "hidden",
+        );
       });
 
     // Add SWOT button - opens sidenav
     document
       .getElementById("addSwotBtn")
-      .addEventListener("click", () => this.taskManager.swotSidenavModule.openNew());
+      .addEventListener(
+        "click",
+        () => this.taskManager.swotSidenavModule.openNew(),
+      );
 
     // Cancel SWOT modal
     document
@@ -293,8 +300,11 @@ export class SwotModule {
       .addEventListener("submit", (e) => this.saveItem(e));
 
     // Add buttons for each quadrant
-    document.querySelectorAll(".swot-add-btn").forEach(btn => {
-      btn.addEventListener("click", () => this.openItemModal(btn.dataset.quadrant));
+    document.querySelectorAll(".swot-add-btn").forEach((btn) => {
+      btn.addEventListener(
+        "click",
+        () => this.openItemModal(btn.dataset.quadrant),
+      );
     });
 
     // Close modals on background click

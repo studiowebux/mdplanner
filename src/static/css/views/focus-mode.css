@@ -9,32 +9,32 @@
    -------------------------------------------------------------------------- */
 
 #focusModeContainer {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #focusModeContainer.hidden {
-    display: none;
+  display: none;
 }
 
 .focus-mode-overlay {
-    position: absolute;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(4px);
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
 }
 
 /* Hide header when focus mode is active */
 .focus-mode-active header {
-    display: none;
+  display: none;
 }
 
 .focus-mode-active main {
-    display: none;
+  display: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -42,17 +42,17 @@
    -------------------------------------------------------------------------- */
 
 .focus-mode-panel {
-    position: relative;
-    background-color: var(--color-bg-primary);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-    width: 100%;
-    max-width: 640px;
-    max-height: 90vh;
-    margin: var(--space-md);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+  position: relative;
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  margin: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* --------------------------------------------------------------------------
@@ -60,36 +60,38 @@
    -------------------------------------------------------------------------- */
 
 .focus-mode-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-md) var(--space-lg);
-    border-bottom: 1px solid var(--color-border-default);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--color-border-default);
 }
 
 .focus-mode-close {
-    padding: var(--space-sm);
-    border-radius: var(--radius-md);
-    color: var(--color-text-secondary);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: background-color var(--transition-fast), color var(--transition-fast);
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .focus-mode-close:hover {
-    background-color: var(--color-bg-tertiary);
-    color: var(--color-text-primary);
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
 }
 
 .focus-mode-close:focus-visible {
-    outline: 3px solid var(--color-border-focus);
-    outline-offset: 2px;
+  outline: 3px solid var(--color-border-focus);
+  outline-offset: 2px;
 }
 
 .focus-mode-hint {
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
 }
 
 /* --------------------------------------------------------------------------
@@ -97,65 +99,65 @@
    -------------------------------------------------------------------------- */
 
 .focus-mode-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: var(--space-xl);
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-xl);
 }
 
 .focus-mode-task {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
 }
 
 .focus-mode-checkbox-row {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-md);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
 }
 
 .focus-mode-checkbox {
-    width: 24px;
-    height: 24px;
-    margin-top: 4px;
-    flex-shrink: 0;
-    accent-color: var(--color-success);
-    cursor: pointer;
+  width: 24px;
+  height: 24px;
+  margin-top: 4px;
+  flex-shrink: 0;
+  accent-color: var(--color-success);
+  cursor: pointer;
 }
 
 .focus-mode-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    line-height: 1.3;
-    cursor: pointer;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+  cursor: pointer;
 }
 
 .focus-mode-title.completed {
-    text-decoration: line-through;
-    color: var(--color-text-muted);
+  text-decoration: line-through;
+  color: var(--color-text-muted);
 }
 
 .focus-mode-meta {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    color: var(--color-text-secondary);
-    font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
 }
 
 .focus-mode-meta svg {
-    color: var(--color-text-muted);
+  color: var(--color-text-muted);
 }
 
 .focus-mode-description {
-    padding: var(--space-md);
-    background-color: var(--color-bg-secondary);
-    border-radius: var(--radius-md);
-    color: var(--color-text-secondary);
-    font-size: 0.9375rem;
-    line-height: 1.6;
-    white-space: pre-wrap;
+  padding: var(--space-md);
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
 }
 
 /* --------------------------------------------------------------------------
@@ -163,50 +165,50 @@
    -------------------------------------------------------------------------- */
 
 .focus-mode-subtasks {
-    border-top: 1px solid var(--color-border-default);
-    padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-border-default);
+  padding-top: var(--space-lg);
 }
 
 .focus-mode-subtasks-header {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--color-text-secondary);
-    margin-bottom: var(--space-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-md);
 }
 
 .focus-mode-subtasks-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
 }
 
 .focus-mode-subtask {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    padding: var(--space-sm) var(--space-md);
-    background-color: var(--color-bg-secondary);
-    border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
 }
 
 .focus-mode-subtask-checkbox {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-    accent-color: var(--color-success);
-    cursor: pointer;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: var(--color-success);
+  cursor: pointer;
 }
 
 .focus-mode-subtask label {
-    flex: 1;
-    color: var(--color-text-primary);
-    font-size: 0.9375rem;
-    cursor: pointer;
+  flex: 1;
+  color: var(--color-text-primary);
+  font-size: 0.9375rem;
+  cursor: pointer;
 }
 
 .focus-mode-subtask label.completed {
-    text-decoration: line-through;
-    color: var(--color-text-muted);
+  text-decoration: line-through;
+  color: var(--color-text-muted);
 }
 
 /* --------------------------------------------------------------------------
@@ -214,33 +216,33 @@
    -------------------------------------------------------------------------- */
 
 .focus-mode-footer {
-    padding: var(--space-md) var(--space-lg);
-    border-top: 1px solid var(--color-border-default);
-    display: flex;
-    justify-content: flex-end;
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--color-border-default);
+  display: flex;
+  justify-content: flex-end;
 }
 
 .focus-mode-action {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-sm);
-    padding: var(--space-sm) var(--space-md);
-    background-color: var(--color-bg-tertiary);
-    color: var(--color-text-primary);
-    border: 1px solid var(--color-border-default);
-    border-radius: var(--radius-md);
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: background-color var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
 }
 
 .focus-mode-action:hover {
-    background-color: var(--color-bg-active);
+  background-color: var(--color-bg-active);
 }
 
 .focus-mode-action:focus-visible {
-    outline: 3px solid var(--color-border-focus);
-    outline-offset: 2px;
+  outline: 3px solid var(--color-border-focus);
+  outline-offset: 2px;
 }
 
 /* --------------------------------------------------------------------------
@@ -248,16 +250,16 @@
    -------------------------------------------------------------------------- */
 
 @media (max-width: 640px) {
-    .focus-mode-panel {
-        margin: var(--space-sm);
-        max-height: 95vh;
-    }
+  .focus-mode-panel {
+    margin: var(--space-sm);
+    max-height: 95vh;
+  }
 
-    .focus-mode-content {
-        padding: var(--space-lg);
-    }
+  .focus-mode-content {
+    padding: var(--space-lg);
+  }
 
-    .focus-mode-title {
-        font-size: 1.25rem;
-    }
+  .focus-mode-title {
+    font-size: 1.25rem;
+  }
 }

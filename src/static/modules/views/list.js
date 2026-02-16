@@ -1,6 +1,10 @@
 // List View Module
-import { TAG_CLASSES } from '../constants.js';
-import { formatDate, getPriorityBadgeClasses, getPriorityText } from '../utils.js';
+import { TAG_CLASSES } from "../constants.js";
+import {
+  formatDate,
+  getPriorityBadgeClasses,
+  getPriorityText,
+} from "../utils.js";
 
 /**
  * List view with filtering, sorting, and drag-drop
@@ -30,15 +34,23 @@ export class ListView {
   }
 
   applyFilters() {
-    this.tm.listFilters.section = document.getElementById("filterSection").value;
-    this.tm.listFilters.assignee = document.getElementById("filterAssignee").value;
-    this.tm.listFilters.milestone = document.getElementById("filterMilestone").value;
+    this.tm.listFilters.section =
+      document.getElementById("filterSection").value;
+    this.tm.listFilters.assignee =
+      document.getElementById("filterAssignee").value;
+    this.tm.listFilters.milestone =
+      document.getElementById("filterMilestone").value;
     this.tm.listFilters.status = document.getElementById("filterStatus").value;
     this.tm.listFilters.sort = document.getElementById("sortTasks").value;
 
-    const hasFilters = this.tm.listFilters.section || this.tm.listFilters.assignee ||
-      this.tm.listFilters.milestone || this.tm.listFilters.status || this.tm.listFilters.sort !== "default";
-    document.getElementById("clearFilters").classList.toggle("hidden", !hasFilters);
+    const hasFilters = this.tm.listFilters.section ||
+      this.tm.listFilters.assignee ||
+      this.tm.listFilters.milestone || this.tm.listFilters.status ||
+      this.tm.listFilters.sort !== "default";
+    document.getElementById("clearFilters").classList.toggle(
+      "hidden",
+      !hasFilters,
+    );
 
     this.render();
   }
@@ -49,7 +61,13 @@ export class ListView {
     document.getElementById("filterMilestone").value = "";
     document.getElementById("filterStatus").value = "";
     document.getElementById("sortTasks").value = "default";
-    this.tm.listFilters = { section: "", assignee: "", milestone: "", status: "", sort: "default" };
+    this.tm.listFilters = {
+      section: "",
+      assignee: "",
+      milestone: "",
+      status: "",
+      sort: "default",
+    };
     document.getElementById("clearFilters").classList.add("hidden");
     this.render();
   }
@@ -62,10 +80,14 @@ export class ListView {
       result = result.filter((t) => t.section === this.tm.listFilters.section);
     }
     if (this.tm.listFilters.assignee) {
-      result = result.filter((t) => t.config.assignee === this.tm.listFilters.assignee);
+      result = result.filter((t) =>
+        t.config.assignee === this.tm.listFilters.assignee
+      );
     }
     if (this.tm.listFilters.milestone) {
-      result = result.filter((t) => t.config.milestone === this.tm.listFilters.milestone);
+      result = result.filter((t) =>
+        t.config.milestone === this.tm.listFilters.milestone
+      );
     }
     if (this.tm.listFilters.status === "completed") {
       result = result.filter((t) => t.completed);
@@ -76,8 +98,12 @@ export class ListView {
     // Apply sort
     if (this.tm.listFilters.sort === "due_date") {
       result.sort((a, b) => {
-        const dateA = a.config.due_date ? new Date(a.config.due_date) : new Date("9999-12-31");
-        const dateB = b.config.due_date ? new Date(b.config.due_date) : new Date("9999-12-31");
+        const dateA = a.config.due_date
+          ? new Date(a.config.due_date)
+          : new Date("9999-12-31");
+        const dateB = b.config.due_date
+          ? new Date(b.config.due_date)
+          : new Date("9999-12-31");
         return dateA - dateB;
       });
     } else if (this.tm.listFilters.sort === "priority") {
@@ -135,7 +161,11 @@ export class ListView {
       allTasks.some((task) => task.section === section && !task.parentId)
     );
 
-    if (!hasAnyTasks && (this.tm.listFilters.assignee || this.tm.listFilters.milestone || this.tm.listFilters.status)) {
+    if (
+      !hasAnyTasks &&
+      (this.tm.listFilters.assignee || this.tm.listFilters.milestone ||
+        this.tm.listFilters.status)
+    ) {
       container.innerHTML = `
         <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
           <p class="text-lg font-medium">No tasks match filters</p>
@@ -157,7 +187,9 @@ export class ListView {
       sectionHeader.innerHTML = `
                 <div class="flex items-center justify-between">
                     <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">${section}</h3>
-                    <span class="text-xs text-gray-500 dark:text-gray-400">${sectionTasks.length} task${sectionTasks.length !== 1 ? "s" : ""}</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">${sectionTasks.length} task${
+        sectionTasks.length !== 1 ? "s" : ""
+      }</span>
                 </div>
             `;
       container.appendChild(sectionHeader);
@@ -207,7 +239,10 @@ export class ListView {
   createTaskElement(task, isChild = false) {
     const config = task.config || {};
     const div = document.createElement("div");
-    div.className = `task-list-item px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 ${isChild ? "pl-12 bg-gray-25 dark:bg-gray-800" : ""} cursor-move border-b border-gray-100 dark:border-gray-700`;
+    div.className =
+      `task-list-item px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 ${
+        isChild ? "pl-12 bg-gray-25 dark:bg-gray-800" : ""
+      } cursor-move border-b border-gray-100 dark:border-gray-700`;
     div.draggable = !isChild; // Only allow parent tasks to be dragged
     div.dataset.taskId = task.id;
 
@@ -222,19 +257,57 @@ export class ListView {
                            class="rounded border-gray-300 dark:border-gray-600 text-gray-900 focus:ring-gray-500 dark:bg-gray-700">
                     <div>
                         <div class="flex items-center space-x-2 flex-wrap gap-1">
-                            <span class="${task.completed ? "line-through text-gray-500 dark:text-gray-400" : "text-gray-900 dark:text-gray-100"} font-medium">
+                            <span class="${
+      task.completed
+        ? "line-through text-gray-500 dark:text-gray-400"
+        : "text-gray-900 dark:text-gray-100"
+    } font-medium">
                                 ${task.title}
                             </span>
-                            ${config.priority ? `<span class="px-2 py-0.5 text-xs font-medium rounded ${priorityBadgeClasses}">${priorityText}</span>` : ""}
-                            ${config.tag ? config.tag.map((tag) => `<span class="px-2 py-0.5 text-xs font-medium rounded border ${TAG_CLASSES}">${tag}</span>`).join("") : ""}
+                            ${
+      config.priority
+        ? `<span class="px-2 py-0.5 text-xs font-medium rounded ${priorityBadgeClasses}">${priorityText}</span>`
+        : ""
+    }
+                            ${
+      config.tag
+        ? config.tag.map((tag) =>
+          `<span class="px-2 py-0.5 text-xs font-medium rounded border ${TAG_CLASSES}">${tag}</span>`
+        ).join("")
+        : ""
+    }
                         </div>
                         <div class="text-sm text-gray-500 dark:text-gray-400 mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
                             <span class="text-xs font-mono text-gray-400">#${task.id}</span>
-                            ${config.assignee ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>${config.assignee}</span>` : ""}
-                            ${config.due_date ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>${formatDate(config.due_date)}</span>` : ""}
-                            ${config.effort ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>${config.effort}d</span>` : ""}
-                            ${config.milestone ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg>${config.milestone}</span>` : ""}
-                            ${config.blocked_by && config.blocked_by.length > 0 ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>${config.blocked_by.join(", ")}</span>` : ""}
+                            ${
+      config.assignee
+        ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>${config.assignee}</span>`
+        : ""
+    }
+                            ${
+      config.due_date
+        ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>${
+          formatDate(config.due_date)
+        }</span>`
+        : ""
+    }
+                            ${
+      config.effort
+        ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>${config.effort}d</span>`
+        : ""
+    }
+                            ${
+      config.milestone
+        ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg>${config.milestone}</span>`
+        : ""
+    }
+                            ${
+      config.blocked_by && config.blocked_by.length > 0
+        ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>${
+          config.blocked_by.join(", ")
+        }</span>`
+        : ""
+    }
                             <span class="text-gray-400">${task.section}</span>
                         </div>
                     </div>
@@ -248,8 +321,8 @@ export class ListView {
                         </svg>
                     </button>
                     ${
-                      !isChild
-                        ? `
+      !isChild
+        ? `
                         <button onclick="taskManager.addSubtask('${task.id}')"
                                 class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="Add Subtask">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -257,11 +330,11 @@ export class ListView {
                             </svg>
                         </button>
                     `
-                        : ""
-                    }
+        : ""
+    }
                     ${
-                      task.description && task.description.length > 0
-                        ? `
+      task.description && task.description.length > 0
+        ? `
                         <button onclick="taskManager.toggleDescription('${task.id}')"
                                 class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="View Description">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -269,8 +342,8 @@ export class ListView {
                             </svg>
                         </button>
                     `
-                        : ""
-                    }
+        : ""
+    }
                     <button onclick="taskManager.copyTaskLink('${task.id}')"
                             class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="Copy Link">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

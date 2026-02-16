@@ -10,4 +10,5 @@ startDate: "2021-08-01"
 
 # Frank Taylor
 
-Manages the core platform product. Background in agile methodology and customer research.
+Manages the core platform product. Background in agile methodology and customer
+research.

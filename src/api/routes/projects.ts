@@ -3,8 +3,13 @@
  */
 
 import { Hono } from "hono";
-import { AppVariables, getProjectManager, jsonResponse, errorResponse } from "./context.ts";
-import { VERSION, GITHUB_REPO } from "../../../main.ts";
+import {
+  AppVariables,
+  errorResponse,
+  getProjectManager,
+  jsonResponse,
+} from "./context.ts";
+import { GITHUB_REPO, VERSION } from "../../../main.ts";
 
 export const projectsRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -23,7 +28,7 @@ projectsRouter.get("/active", async (c) => {
   return jsonResponse({
     filename: pm.getActiveFile(),
     name: active?.name || pm.getActiveFile(),
-    project: active
+    project: active,
   });
 });
 
@@ -31,7 +36,9 @@ projectsRouter.get("/active", async (c) => {
 projectsRouter.get("/validate", async (c) => {
   const pm = getProjectManager(c);
 
-  const { validateProjectDirectory } = await import("../../lib/parser/directory/validate.ts");
+  const { validateProjectDirectory } = await import(
+    "../../lib/parser/directory/validate.ts"
+  );
   const projectDir = pm.getActiveProjectDir();
 
   if (!projectDir) {

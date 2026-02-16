@@ -11,6 +11,7 @@ connections:
   - target: api
     label: Caches data
 ---
+
 # Cache
 
 Session and query cache

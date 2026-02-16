@@ -1,6 +1,6 @@
 // Portfolio View Module - Cross-project dashboard
-import { PortfolioAPI } from '../api.js';
-import { PROJECT_STATUS_CLASSES, PROJECT_STATUS_LABELS } from '../constants.js';
+import { PortfolioAPI } from "../api.js";
+import { PROJECT_STATUS_CLASSES, PROJECT_STATUS_LABELS } from "../constants.js";
 
 /**
  * Portfolio dashboard - displays all projects with status, progress, and filtering.
@@ -12,8 +12,8 @@ export class PortfolioView {
     this.tm = taskManager;
     this.projects = [];
     this.summary = null;
-    this.currentFilter = 'all';
-    this.currentViewMode = 'list'; // 'list' or 'tree'
+    this.currentFilter = "all";
+    this.currentViewMode = "list"; // 'list' or 'tree'
     this.selectedProject = null;
     this.isDetailOpen = false;
   }
@@ -25,13 +25,13 @@ export class PortfolioView {
     try {
       const [items, summary] = await Promise.all([
         PortfolioAPI.fetchAll(),
-        PortfolioAPI.getSummary()
+        PortfolioAPI.getSummary(),
       ]);
       this.projects = items;
       this.summary = summary;
       this.render();
     } catch (error) {
-      console.error('Error loading portfolio data:', error);
+      console.error("Error loading portfolio data:", error);
     }
   }
 
@@ -41,7 +41,7 @@ export class PortfolioView {
   render() {
     this.renderSummaryCards();
     this.renderFilterBar();
-    if (this.currentViewMode === 'tree') {
+    if (this.currentViewMode === "tree") {
       this.renderTreeView();
     } else {
       this.renderListView();
@@ -54,12 +54,12 @@ export class PortfolioView {
    * @returns {string}
    */
   formatCurrency(value) {
-    if (value === undefined || value === null) return '-';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    if (value === undefined || value === null) return "-";
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(value);
   }
 
@@ -67,33 +67,54 @@ export class PortfolioView {
    * Render summary cards with aggregate metrics.
    */
   renderSummaryCards() {
-    const container = document.getElementById('portfolioSummaryCards');
+    const container = document.getElementById("portfolioSummaryCards");
     if (!container || !this.summary) return;
 
-    const { total, byStatus, byCategory, avgProgress, totalRevenue, totalExpenses } = this.summary;
+    const {
+      total,
+      byStatus,
+      byCategory,
+      avgProgress,
+      totalRevenue,
+      totalExpenses,
+    } = this.summary;
     const netProfit = totalRevenue - totalExpenses;
-    const profitClass = netProfit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+    const profitClass = netProfit >= 0
+      ? "text-green-600 dark:text-green-400"
+      : "text-red-600 dark:text-red-400";
 
     container.innerHTML = `
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div class="text-sm text-gray-500 dark:text-gray-400">Total Projects</div>
         <div class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">${total}</div>
-        <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">${Object.keys(byCategory || {}).length} categories</div>
+        <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">${
+      Object.keys(byCategory || {}).length
+    } categories</div>
       </div>
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div class="text-sm text-gray-500 dark:text-gray-400">Active</div>
-        <div class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">${byStatus?.active || 0}</div>
-        <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">${byStatus?.['on-hold'] || 0} on hold</div>
+        <div class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">${
+      byStatus?.active || 0
+    }</div>
+        <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">${
+      byStatus?.["on-hold"] || 0
+    } on hold</div>
       </div>
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div class="text-sm text-gray-500 dark:text-gray-400">Avg Progress</div>
-        <div class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">${avgProgress || 0}%</div>
+        <div class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">${
+      avgProgress || 0
+    }%</div>
         <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">${total} projects</div>
       </div>
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div class="text-sm text-gray-500 dark:text-gray-400">Net Revenue</div>
-        <div class="text-2xl font-bold ${profitClass} mt-1">${this.formatCurrency(netProfit)}</div>
-        <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">${this.formatCurrency(totalRevenue)} rev / ${this.formatCurrency(totalExpenses)} exp</div>
+        <div class="text-2xl font-bold ${profitClass} mt-1">${
+      this.formatCurrency(netProfit)
+    }</div>
+        <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">${
+      this.formatCurrency(totalRevenue)
+    } rev / ${this.formatCurrency(totalExpenses)} exp</div>
       </div>
     `;
   }
@@ -102,41 +123,49 @@ export class PortfolioView {
    * Render filter bar with status filters and view mode toggle.
    */
   renderFilterBar() {
-    const container = document.getElementById('portfolioFilterBar');
+    const container = document.getElementById("portfolioFilterBar");
     if (!container) return;
 
     const statusFilters = [
-      { key: 'all', label: 'All' },
-      { key: 'planning', label: 'Planning' },
-      { key: 'active', label: 'Active' },
-      { key: 'on-hold', label: 'On Hold' },
-      { key: 'completed', label: 'Completed' }
+      { key: "all", label: "All" },
+      { key: "planning", label: "Planning" },
+      { key: "active", label: "Active" },
+      { key: "on-hold", label: "On Hold" },
+      { key: "completed", label: "Completed" },
     ];
 
-    const statusHtml = statusFilters.map(f => {
+    const statusHtml = statusFilters.map((f) => {
       const isActive = this.currentFilter === f.key;
       const activeClass = isActive
-        ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
-        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600';
+        ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
+        : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600";
       return `
         <button data-portfolio-filter="${f.key}"
                 class="px-3 py-1.5 text-sm font-medium rounded transition-colors ${activeClass}">
           ${f.label}
         </button>
       `;
-    }).join('');
+    }).join("");
 
     // View mode toggle
-    const listActive = this.currentViewMode === 'list';
-    const treeActive = this.currentViewMode === 'tree';
+    const listActive = this.currentViewMode === "list";
+    const treeActive = this.currentViewMode === "tree";
     const viewToggleHtml = `
       <span class="text-gray-300 dark:text-gray-600 mx-2">|</span>
       <button data-portfolio-view="list"
-              class="px-3 py-1.5 text-sm font-medium rounded transition-colors ${listActive ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}">
+              class="px-3 py-1.5 text-sm font-medium rounded transition-colors ${
+      listActive
+        ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
+        : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+    }">
         List
       </button>
       <button data-portfolio-view="tree"
-              class="px-3 py-1.5 text-sm font-medium rounded transition-colors ${treeActive ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}">
+              class="px-3 py-1.5 text-sm font-medium rounded transition-colors ${
+      treeActive
+        ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
+        : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+    }">
         Tree
       </button>
     `;
@@ -148,51 +177,57 @@ export class PortfolioView {
    * Render list view of projects.
    */
   renderListView() {
-    const container = document.getElementById('portfolioGrid');
-    const emptyState = document.getElementById('portfolioEmpty');
+    const container = document.getElementById("portfolioGrid");
+    const emptyState = document.getElementById("portfolioEmpty");
     if (!container || !emptyState) return;
 
     // Apply status filter
-    const filtered = this.currentFilter === 'all'
+    const filtered = this.currentFilter === "all"
       ? this.projects
-      : this.projects.filter(p => (p.status || 'active') === this.currentFilter);
+      : this.projects.filter((p) =>
+        (p.status || "active") === this.currentFilter
+      );
 
     if (filtered.length === 0) {
-      container.innerHTML = '';
-      emptyState.classList.remove('hidden');
+      container.innerHTML = "";
+      emptyState.classList.remove("hidden");
       return;
     }
 
-    emptyState.classList.add('hidden');
-    container.className = 'space-y-2';
-    container.innerHTML = filtered.map(project => this.renderProjectRow(project)).join('');
+    emptyState.classList.add("hidden");
+    container.className = "space-y-2";
+    container.innerHTML = filtered.map((project) =>
+      this.renderProjectRow(project)
+    ).join("");
   }
 
   /**
    * Render tree view grouped by category.
    */
   renderTreeView() {
-    const container = document.getElementById('portfolioGrid');
-    const emptyState = document.getElementById('portfolioEmpty');
+    const container = document.getElementById("portfolioGrid");
+    const emptyState = document.getElementById("portfolioEmpty");
     if (!container || !emptyState) return;
 
     // Apply status filter
-    const filtered = this.currentFilter === 'all'
+    const filtered = this.currentFilter === "all"
       ? this.projects
-      : this.projects.filter(p => (p.status || 'active') === this.currentFilter);
+      : this.projects.filter((p) =>
+        (p.status || "active") === this.currentFilter
+      );
 
     if (filtered.length === 0) {
-      container.innerHTML = '';
-      emptyState.classList.remove('hidden');
+      container.innerHTML = "";
+      emptyState.classList.remove("hidden");
       return;
     }
 
-    emptyState.classList.add('hidden');
+    emptyState.classList.add("hidden");
 
     // Group by category
     const byCategory = {};
     for (const project of filtered) {
-      const category = project.category || 'Uncategorized';
+      const category = project.category || "Uncategorized";
       if (!byCategory[category]) {
         byCategory[category] = [];
       }
@@ -201,38 +236,54 @@ export class PortfolioView {
 
     // Sort categories
     const sortedCategories = Object.keys(byCategory).sort((a, b) => {
-      if (a === 'Uncategorized') return 1;
-      if (b === 'Uncategorized') return -1;
+      if (a === "Uncategorized") return 1;
+      if (b === "Uncategorized") return -1;
       return a.localeCompare(b);
     });
 
-    container.className = 'space-y-6';
-    container.innerHTML = sortedCategories.map(category => {
+    container.className = "space-y-6";
+    container.innerHTML = sortedCategories.map((category) => {
       const projects = byCategory[category];
-      const categoryRevenue = projects.reduce((sum, p) => sum + (p.revenue || 0), 0);
-      const categoryExpenses = projects.reduce((sum, p) => sum + (p.expenses || 0), 0);
+      const categoryRevenue = projects.reduce(
+        (sum, p) => sum + (p.revenue || 0),
+        0,
+      );
+      const categoryExpenses = projects.reduce(
+        (sum, p) => sum + (p.expenses || 0),
+        0,
+      );
       const categoryNet = categoryRevenue - categoryExpenses;
-      const netClass = categoryNet >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+      const netClass = categoryNet >= 0
+        ? "text-green-600 dark:text-green-400"
+        : "text-red-600 dark:text-red-400";
 
       return `
         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600 flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <span class="text-base font-medium text-gray-900 dark:text-gray-100">${this.escapeHtml(category)}</span>
-              <span class="text-sm text-gray-500 dark:text-gray-400">${projects.length} project${projects.length !== 1 ? 's' : ''}</span>
+              <span class="text-base font-medium text-gray-900 dark:text-gray-100">${
+        this.escapeHtml(category)
+      }</span>
+              <span class="text-sm text-gray-500 dark:text-gray-400">${projects.length} project${
+        projects.length !== 1 ? "s" : ""
+      }</span>
             </div>
             <div class="text-sm">
-              <span class="text-gray-500 dark:text-gray-400">${this.formatCurrency(categoryRevenue)} rev</span>
+              <span class="text-gray-500 dark:text-gray-400">${
+        this.formatCurrency(categoryRevenue)
+      } rev</span>
               <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
-              <span class="${netClass} font-medium">${this.formatCurrency(categoryNet)} net</span>
+              <span class="${netClass} font-medium">${
+        this.formatCurrency(categoryNet)
+      } net</span>
             </div>
           </div>
           <div class="divide-y divide-gray-100 dark:divide-gray-700">
-            ${projects.map(p => this.renderProjectRow(p, true)).join('')}
+            ${projects.map((p) => this.renderProjectRow(p, true)).join("")}
           </div>
         </div>
       `;
-    }).join('');
+    }).join("");
   }
 
   /**
@@ -242,35 +293,57 @@ export class PortfolioView {
    * @returns {string} HTML string
    */
   renderProjectRow(project, inTree = false) {
-    const status = project.status || 'active';
-    const statusClass = PROJECT_STATUS_CLASSES[status] || PROJECT_STATUS_CLASSES.active;
-    const statusLabel = PROJECT_STATUS_LABELS[status] || 'Active';
+    const status = project.status || "active";
+    const statusClass = PROJECT_STATUS_CLASSES[status] ||
+      PROJECT_STATUS_CLASSES.active;
+    const statusLabel = PROJECT_STATUS_LABELS[status] || "Active";
     const progressPercent = project.progress || 0;
 
     // Financial info
     const revenue = project.revenue || 0;
     const expenses = project.expenses || 0;
     const netProfit = revenue - expenses;
-    const hasFinancials = project.revenue !== undefined || project.expenses !== undefined;
-    const profitClass = netProfit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+    const hasFinancials = project.revenue !== undefined ||
+      project.expenses !== undefined;
+    const profitClass = netProfit >= 0
+      ? "text-green-600 dark:text-green-400"
+      : "text-red-600 dark:text-red-400";
 
     // KPI indicator
     const hasKpis = project.kpis && project.kpis.length > 0;
 
     const containerClass = inTree
-      ? 'px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/30 cursor-pointer transition-colors'
-      : 'bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/30 cursor-pointer transition-colors';
+      ? "px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/30 cursor-pointer transition-colors"
+      : "bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/30 cursor-pointer transition-colors";
 
     return `
       <div class="${containerClass}" data-portfolio-id="${project.id}">
         <div class="flex items-center justify-between gap-4">
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2">
-              <span class="font-medium text-gray-900 dark:text-gray-100 truncate">${this.escapeHtml(project.name)}</span>
-              ${project.client ? `<span class="text-xs text-gray-400 dark:text-gray-500">${this.escapeHtml(project.client)}</span>` : ''}
-              ${hasKpis ? '<span class="w-2 h-2 bg-purple-500 rounded-full" title="Has KPIs"></span>' : ''}
+              <span class="font-medium text-gray-900 dark:text-gray-100 truncate">${
+      this.escapeHtml(project.name)
+    }</span>
+              ${
+      project.client
+        ? `<span class="text-xs text-gray-400 dark:text-gray-500">${
+          this.escapeHtml(project.client)
+        }</span>`
+        : ""
+    }
+              ${
+      hasKpis
+        ? '<span class="w-2 h-2 bg-purple-500 rounded-full" title="Has KPIs"></span>'
+        : ""
+    }
             </div>
-            ${project.description ? `<p class="text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5">${this.escapeHtml(project.description)}</p>` : ''}
+            ${
+      project.description
+        ? `<p class="text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5">${
+          this.escapeHtml(project.description)
+        }</p>`
+        : ""
+    }
           </div>
           <div class="flex items-center gap-4 flex-shrink-0">
             <div class="text-right w-20">
@@ -279,12 +352,20 @@ export class PortfolioView {
                 <div class="bg-green-500 dark:bg-green-400 h-1.5 rounded-full" style="width: ${progressPercent}%"></div>
               </div>
             </div>
-            ${hasFinancials ? `
+            ${
+      hasFinancials
+        ? `
               <div class="text-right w-24">
-                <div class="text-xs text-gray-400 dark:text-gray-500">${this.formatCurrency(revenue)}</div>
-                <div class="text-sm font-medium ${profitClass}">${this.formatCurrency(netProfit)}</div>
+                <div class="text-xs text-gray-400 dark:text-gray-500">${
+          this.formatCurrency(revenue)
+        }</div>
+                <div class="text-sm font-medium ${profitClass}">${
+          this.formatCurrency(netProfit)
+        }</div>
               </div>
-            ` : ''}
+            `
+        : ""
+    }
             <span class="px-2 py-0.5 text-xs font-medium rounded ${statusClass} whitespace-nowrap">
               ${statusLabel}
             </span>
@@ -301,7 +382,7 @@ export class PortfolioView {
   filterByStatus(status) {
     this.currentFilter = status;
     this.renderFilterBar();
-    if (this.currentViewMode === 'tree') {
+    if (this.currentViewMode === "tree") {
       this.renderTreeView();
     } else {
       this.renderListView();
@@ -315,7 +396,7 @@ export class PortfolioView {
   setViewMode(mode) {
     this.currentViewMode = mode;
     this.renderFilterBar();
-    if (mode === 'tree') {
+    if (mode === "tree") {
       this.renderTreeView();
     } else {
       this.renderListView();
@@ -344,7 +425,7 @@ export class PortfolioView {
     } else if (diffMin > 0) {
       return `${diffMin}m ago`;
     } else {
-      return 'Just now';
+      return "Just now";
     }
   }
 
@@ -354,7 +435,7 @@ export class PortfolioView {
    * @returns {string}
    */
   escapeHtml(str) {
-    const div = document.createElement('div');
+    const div = document.createElement("div");
     div.textContent = str;
     return div.innerHTML;
   }
@@ -369,9 +450,9 @@ export class PortfolioView {
       this.selectedProject = project;
       this.isDetailOpen = true;
       this.renderDetailPanel(project);
-      document.getElementById('portfolioDetailPanel')?.classList.add('open');
+      document.getElementById("portfolioDetailPanel")?.classList.add("open");
     } catch (error) {
-      console.error('Error loading project details:', error);
+      console.error("Error loading project details:", error);
     }
   }
 
@@ -381,7 +462,7 @@ export class PortfolioView {
   closeDetailPanel() {
     this.isDetailOpen = false;
     this.selectedProject = null;
-    document.getElementById('portfolioDetailPanel')?.classList.remove('open');
+    document.getElementById("portfolioDetailPanel")?.classList.remove("open");
   }
 
   /**
@@ -389,35 +470,51 @@ export class PortfolioView {
    * @param {Object} project
    */
   renderDetailPanel(project) {
-    const titleEl = document.getElementById('portfolioDetailTitle');
-    const contentEl = document.getElementById('portfolioDetailContent');
+    const titleEl = document.getElementById("portfolioDetailTitle");
+    const contentEl = document.getElementById("portfolioDetailContent");
     if (!titleEl || !contentEl) return;
 
     titleEl.textContent = project.name;
 
-    const statusOptions = ['planning', 'active', 'on-hold', 'completed']
-      .map(s => `<option value="${s}" ${project.status === s ? 'selected' : ''}>${PROJECT_STATUS_LABELS[s] || s}</option>`)
-      .join('');
+    const statusOptions = ["planning", "active", "on-hold", "completed"]
+      .map((s) =>
+        `<option value="${s}" ${project.status === s ? "selected" : ""}>${
+          PROJECT_STATUS_LABELS[s] || s
+        }</option>`
+      )
+      .join("");
 
     // Build KPIs section
     const kpis = project.kpis || [];
-    const kpisHtml = kpis.length > 0 ? kpis.map((kpi, idx) => `
+    const kpisHtml = kpis.length > 0
+      ? kpis.map((kpi, idx) => `
       <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 relative" data-kpi-index="${idx}">
         <button type="button" class="absolute top-2 right-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400" data-remove-kpi="${idx}">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
         <div class="grid grid-cols-2 gap-2">
-          <input type="text" class="form-input text-sm" value="${this.escapeHtml(kpi.name)}" placeholder="KPI Name" data-kpi-field="name" data-kpi-idx="${idx}">
+          <input type="text" class="form-input text-sm" value="${
+        this.escapeHtml(kpi.name)
+      }" placeholder="KPI Name" data-kpi-field="name" data-kpi-idx="${idx}">
           <input type="text" class="form-input text-sm" value="${kpi.value}" placeholder="Value" data-kpi-field="value" data-kpi-idx="${idx}">
-          <input type="text" class="form-input text-sm" value="${kpi.target || ''}" placeholder="Target" data-kpi-field="target" data-kpi-idx="${idx}">
-          <input type="text" class="form-input text-sm" value="${kpi.unit || ''}" placeholder="Unit" data-kpi-field="unit" data-kpi-idx="${idx}">
+          <input type="text" class="form-input text-sm" value="${
+        kpi.target || ""
+      }" placeholder="Target" data-kpi-field="target" data-kpi-idx="${idx}">
+          <input type="text" class="form-input text-sm" value="${
+        kpi.unit || ""
+      }" placeholder="Unit" data-kpi-field="unit" data-kpi-idx="${idx}">
         </div>
       </div>
-    `).join('') : '<p class="text-sm text-gray-500 dark:text-gray-400">No KPIs defined</p>';
+    `).join("")
+      : '<p class="text-sm text-gray-500 dark:text-gray-400">No KPIs defined</p>';
 
     // Team members
     const team = project.team || [];
-    const teamHtml = team.map(member => `<span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-sm rounded">${this.escapeHtml(member)}</span>`).join(' ');
+    const teamHtml = team.map((member) =>
+      `<span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-sm rounded">${
+        this.escapeHtml(member)
+      }</span>`
+    ).join(" ");
 
     contentEl.innerHTML = `
       <div class="space-y-6">
@@ -427,11 +524,15 @@ export class PortfolioView {
           <div class="space-y-4">
             <div>
               <label class="form-label">Name</label>
-              <input type="text" id="portfolioDetailName" class="form-input" value="${this.escapeHtml(project.name)}">
+              <input type="text" id="portfolioDetailName" class="form-input" value="${
+      this.escapeHtml(project.name)
+    }">
             </div>
             <div>
               <label class="form-label">Category</label>
-              <input type="text" id="portfolioDetailCategory" class="form-input" value="${this.escapeHtml(project.category)}">
+              <input type="text" id="portfolioDetailCategory" class="form-input" value="${
+      this.escapeHtml(project.category)
+    }">
             </div>
             <div>
               <label class="form-label">Status</label>
@@ -441,11 +542,15 @@ export class PortfolioView {
             </div>
             <div>
               <label class="form-label">Client</label>
-              <input type="text" id="portfolioDetailClient" class="form-input" value="${this.escapeHtml(project.client || '')}">
+              <input type="text" id="portfolioDetailClient" class="form-input" value="${
+      this.escapeHtml(project.client || "")
+    }">
             </div>
             <div>
               <label class="form-label">Description</label>
-              <textarea id="portfolioDetailDescription" class="form-input" rows="3">${this.escapeHtml(project.description || '')}</textarea>
+              <textarea id="portfolioDetailDescription" class="form-input" rows="3">${
+      this.escapeHtml(project.description || "")
+    }</textarea>
             </div>
           </div>
         </section>
@@ -456,20 +561,32 @@ export class PortfolioView {
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="form-label">Progress (%)</label>
-              <input type="number" id="portfolioDetailProgress" class="form-input" min="0" max="100" value="${project.progress || 0}">
+              <input type="number" id="portfolioDetailProgress" class="form-input" min="0" max="100" value="${
+      project.progress || 0
+    }">
             </div>
             <div>
               <label class="form-label">Revenue</label>
-              <input type="number" id="portfolioDetailRevenue" class="form-input" min="0" value="${project.revenue || 0}">
+              <input type="number" id="portfolioDetailRevenue" class="form-input" min="0" value="${
+      project.revenue || 0
+    }">
             </div>
             <div>
               <label class="form-label">Expenses</label>
-              <input type="number" id="portfolioDetailExpenses" class="form-input" min="0" value="${project.expenses || 0}">
+              <input type="number" id="portfolioDetailExpenses" class="form-input" min="0" value="${
+      project.expenses || 0
+    }">
             </div>
             <div>
               <label class="form-label">Net</label>
-              <div class="form-input bg-gray-100 dark:bg-gray-700 ${(project.revenue || 0) - (project.expenses || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">
-                ${this.formatCurrency((project.revenue || 0) - (project.expenses || 0))}
+              <div class="form-input bg-gray-100 dark:bg-gray-700 ${
+      (project.revenue || 0) - (project.expenses || 0) >= 0
+        ? "text-green-600 dark:text-green-400"
+        : "text-red-600 dark:text-red-400"
+    }">
+                ${
+      this.formatCurrency((project.revenue || 0) - (project.expenses || 0))
+    }
               </div>
             </div>
           </div>
@@ -481,11 +598,15 @@ export class PortfolioView {
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="form-label">Start Date</label>
-              <input type="date" id="portfolioDetailStartDate" class="form-input" value="${project.startDate || ''}">
+              <input type="date" id="portfolioDetailStartDate" class="form-input" value="${
+      project.startDate || ""
+    }">
             </div>
             <div>
               <label class="form-label">End Date</label>
-              <input type="date" id="portfolioDetailEndDate" class="form-input" value="${project.endDate || ''}">
+              <input type="date" id="portfolioDetailEndDate" class="form-input" value="${
+      project.endDate || ""
+    }">
             </div>
           </div>
         </section>
@@ -495,9 +616,15 @@ export class PortfolioView {
           <h3 class="sidenav-section-title">Team</h3>
           <div>
             <label class="form-label">Team Members (comma-separated)</label>
-            <input type="text" id="portfolioDetailTeam" class="form-input" value="${team.join(', ')}" placeholder="John, Jane, Bob">
+            <input type="text" id="portfolioDetailTeam" class="form-input" value="${
+      team.join(", ")
+    }" placeholder="John, Jane, Bob">
           </div>
-          ${team.length > 0 ? `<div class="flex flex-wrap gap-2 mt-2">${teamHtml}</div>` : ''}
+          ${
+      team.length > 0
+        ? `<div class="flex flex-wrap gap-2 mt-2">${teamHtml}</div>`
+        : ""
+    }
         </section>
 
         <!-- KPIs -->
@@ -518,12 +645,12 @@ export class PortfolioView {
    * Add a new KPI to the form.
    */
   addKpi() {
-    const list = document.getElementById('portfolioKpisList');
+    const list = document.getElementById("portfolioKpisList");
     if (!list) return;
 
-    const idx = list.querySelectorAll('[data-kpi-index]').length;
-    const div = document.createElement('div');
-    div.className = 'bg-gray-50 dark:bg-gray-700 rounded-lg p-3 relative';
+    const idx = list.querySelectorAll("[data-kpi-index]").length;
+    const div = document.createElement("div");
+    div.className = "bg-gray-50 dark:bg-gray-700 rounded-lg p-3 relative";
     div.dataset.kpiIndex = idx.toString();
     div.innerHTML = `
       <button type="button" class="absolute top-2 right-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400" data-remove-kpi="${idx}">
@@ -539,7 +666,7 @@ export class PortfolioView {
     list.appendChild(div);
 
     // Remove the "No KPIs defined" message if it exists
-    const emptyMsg = list.querySelector('p');
+    const emptyMsg = list.querySelector("p");
     if (emptyMsg) emptyMsg.remove();
   }
 
@@ -560,38 +687,61 @@ export class PortfolioView {
 
     // Collect KPIs
     const kpis = [];
-    const kpiElements = document.querySelectorAll('[data-kpi-index]');
-    kpiElements.forEach(el => {
+    const kpiElements = document.querySelectorAll("[data-kpi-index]");
+    kpiElements.forEach((el) => {
       const name = el.querySelector('[data-kpi-field="name"]')?.value?.trim();
       const value = el.querySelector('[data-kpi-field="value"]')?.value?.trim();
-      const target = el.querySelector('[data-kpi-field="target"]')?.value?.trim();
+      const target = el.querySelector('[data-kpi-field="target"]')?.value
+        ?.trim();
       const unit = el.querySelector('[data-kpi-field="unit"]')?.value?.trim();
 
       if (name && value) {
-        const kpi = { name, value: isNaN(Number(value)) ? value : Number(value) };
-        if (target) kpi.target = isNaN(Number(target)) ? target : Number(target);
+        const kpi = {
+          name,
+          value: isNaN(Number(value)) ? value : Number(value),
+        };
+        if (target) {
+          kpi.target = isNaN(Number(target)) ? target : Number(target);
+        }
         if (unit) kpi.unit = unit;
         kpis.push(kpi);
       }
     });
 
     // Collect team members
-    const teamInput = document.getElementById('portfolioDetailTeam')?.value || '';
-    const team = teamInput.split(',').map(t => t.trim()).filter(t => t.length > 0);
+    const teamInput = document.getElementById("portfolioDetailTeam")?.value ||
+      "";
+    const team = teamInput.split(",").map((t) => t.trim()).filter((t) =>
+      t.length > 0
+    );
 
     const updates = {
-      name: document.getElementById('portfolioDetailName')?.value?.trim() || this.selectedProject.name,
-      category: document.getElementById('portfolioDetailCategory')?.value?.trim() || 'Uncategorized',
-      status: document.getElementById('portfolioDetailStatus')?.value || 'active',
-      client: document.getElementById('portfolioDetailClient')?.value?.trim() || undefined,
-      description: document.getElementById('portfolioDetailDescription')?.value?.trim() || undefined,
-      progress: parseInt(document.getElementById('portfolioDetailProgress')?.value) || 0,
-      revenue: parseInt(document.getElementById('portfolioDetailRevenue')?.value) || 0,
-      expenses: parseInt(document.getElementById('portfolioDetailExpenses')?.value) || 0,
-      startDate: document.getElementById('portfolioDetailStartDate')?.value || undefined,
-      endDate: document.getElementById('portfolioDetailEndDate')?.value || undefined,
+      name: document.getElementById("portfolioDetailName")?.value?.trim() ||
+        this.selectedProject.name,
+      category:
+        document.getElementById("portfolioDetailCategory")?.value?.trim() ||
+        "Uncategorized",
+      status: document.getElementById("portfolioDetailStatus")?.value ||
+        "active",
+      client: document.getElementById("portfolioDetailClient")?.value?.trim() ||
+        undefined,
+      description:
+        document.getElementById("portfolioDetailDescription")?.value?.trim() ||
+        undefined,
+      progress:
+        parseInt(document.getElementById("portfolioDetailProgress")?.value) ||
+        0,
+      revenue:
+        parseInt(document.getElementById("portfolioDetailRevenue")?.value) || 0,
+      expenses:
+        parseInt(document.getElementById("portfolioDetailExpenses")?.value) ||
+        0,
+      startDate: document.getElementById("portfolioDetailStartDate")?.value ||
+        undefined,
+      endDate: document.getElementById("portfolioDetailEndDate")?.value ||
+        undefined,
       team: team.length > 0 ? team : undefined,
-      kpis: kpis.length > 0 ? kpis : undefined
+      kpis: kpis.length > 0 ? kpis : undefined,
     };
 
     try {
@@ -599,8 +749,8 @@ export class PortfolioView {
       this.closeDetailPanel();
       await this.load(); // Refresh the list
     } catch (error) {
-      console.error('Error saving project:', error);
-      alert('Failed to save project');
+      console.error("Error saving project:", error);
+      alert("Failed to save project");
     }
   }
 
@@ -609,24 +759,27 @@ export class PortfolioView {
    */
   bindEvents() {
     // Filter button clicks
-    document.getElementById('portfolioFilterBar')?.addEventListener('click', (e) => {
-      const filterBtn = e.target.closest('[data-portfolio-filter]');
-      if (filterBtn) {
-        const filter = filterBtn.dataset.portfolioFilter;
-        this.filterByStatus(filter);
-        return;
-      }
+    document.getElementById("portfolioFilterBar")?.addEventListener(
+      "click",
+      (e) => {
+        const filterBtn = e.target.closest("[data-portfolio-filter]");
+        if (filterBtn) {
+          const filter = filterBtn.dataset.portfolioFilter;
+          this.filterByStatus(filter);
+          return;
+        }
 
-      const viewBtn = e.target.closest('[data-portfolio-view]');
-      if (viewBtn) {
-        const mode = viewBtn.dataset.portfolioView;
-        this.setViewMode(mode);
-      }
-    });
+        const viewBtn = e.target.closest("[data-portfolio-view]");
+        if (viewBtn) {
+          const mode = viewBtn.dataset.portfolioView;
+          this.setViewMode(mode);
+        }
+      },
+    );
 
     // Project row clicks
-    document.getElementById('portfolioGrid')?.addEventListener('click', (e) => {
-      const row = e.target.closest('[data-portfolio-id]');
+    document.getElementById("portfolioGrid")?.addEventListener("click", (e) => {
+      const row = e.target.closest("[data-portfolio-id]");
       if (row) {
         const projectId = row.dataset.portfolioId;
         this.openDetailPanel(projectId);
@@ -634,29 +787,38 @@ export class PortfolioView {
     });
 
     // Detail panel close
-    document.getElementById('portfolioDetailClose')?.addEventListener('click', () => {
-      this.closeDetailPanel();
-    });
+    document.getElementById("portfolioDetailClose")?.addEventListener(
+      "click",
+      () => {
+        this.closeDetailPanel();
+      },
+    );
 
     // Detail panel save
-    document.getElementById('portfolioDetailSave')?.addEventListener('click', () => {
-      this.saveDetailPanel();
-    });
+    document.getElementById("portfolioDetailSave")?.addEventListener(
+      "click",
+      () => {
+        this.saveDetailPanel();
+      },
+    );
 
     // Detail panel content events (delegated)
-    document.getElementById('portfolioDetailContent')?.addEventListener('click', (e) => {
-      // Add KPI button
-      if (e.target.closest('#portfolioAddKpi')) {
-        this.addKpi();
-        return;
-      }
+    document.getElementById("portfolioDetailContent")?.addEventListener(
+      "click",
+      (e) => {
+        // Add KPI button
+        if (e.target.closest("#portfolioAddKpi")) {
+          this.addKpi();
+          return;
+        }
 
-      // Remove KPI button
-      const removeBtn = e.target.closest('[data-remove-kpi]');
-      if (removeBtn) {
-        const idx = removeBtn.dataset.removeKpi;
-        this.removeKpi(idx);
-      }
-    });
+        // Remove KPI button
+        const removeBtn = e.target.closest("[data-remove-kpi]");
+        if (removeBtn) {
+          const idx = removeBtn.dataset.removeKpi;
+          this.removeKpi(idx);
+        }
+      },
+    );
   }
 }

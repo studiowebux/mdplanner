@@ -13,6 +13,7 @@ order: 1
 # Email Notifications
 
 Implement email notification system for task updates and mentions.
+
 - Task assigned to you
 - Task status changed
 - Mentioned in comment

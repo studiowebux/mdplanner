@@ -3,7 +3,12 @@
  */
 
 import { Hono } from "hono";
-import { AppVariables, getParser, jsonResponse, errorResponse } from "../context.ts";
+import {
+  AppVariables,
+  errorResponse,
+  getParser,
+  jsonResponse,
+} from "../context.ts";
 
 export const ideasRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -38,7 +43,7 @@ ideasRouter.put("/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json();
   const ideas = await parser.readIdeas();
-  const index = ideas.findIndex(i => i.id === id);
+  const index = ideas.findIndex((i) => i.id === id);
   if (index === -1) return errorResponse("Not found", 404);
   ideas[index] = { ...ideas[index], ...body };
   await parser.saveIdeas(ideas);
@@ -50,7 +55,7 @@ ideasRouter.delete("/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const ideas = await parser.readIdeas();
-  const filtered = ideas.filter(i => i.id !== id);
+  const filtered = ideas.filter((i) => i.id !== id);
   if (filtered.length === ideas.length) return errorResponse("Not found", 404);
   await parser.saveIdeas(filtered);
   return jsonResponse({ success: true });

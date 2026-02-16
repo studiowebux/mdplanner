@@ -10,4 +10,5 @@ startDate: "2021-01-10"
 
 # Alice Chen
 
-Manages the backend and platform engineering teams. Focus on scalability and reliability.
+Manages the backend and platform engineering teams. Focus on scalability and
+reliability.

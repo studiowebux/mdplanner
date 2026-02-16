@@ -3,7 +3,12 @@
  */
 
 import { Hono } from "hono";
-import { AppVariables, getParser, jsonResponse, errorResponse } from "../context.ts";
+import {
+  AppVariables,
+  errorResponse,
+  getParser,
+  jsonResponse,
+} from "../context.ts";
 import { Task } from "../../../lib/types.ts";
 
 export const capacityRouter = new Hono<{ Variables: AppVariables }>();
@@ -52,7 +57,7 @@ capacityRouter.get("/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const plans = await parser.readCapacityPlans();
-  const plan = plans.find(p => p.id === id);
+  const plan = plans.find((p) => p.id === id);
   if (!plan) return errorResponse("Not found", 404);
   return jsonResponse(plan);
 });
@@ -63,7 +68,7 @@ capacityRouter.put("/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json();
   const plans = await parser.readCapacityPlans();
-  const index = plans.findIndex(p => p.id === id);
+  const index = plans.findIndex((p) => p.id === id);
   if (index === -1) return errorResponse("Not found", 404);
   plans[index] = { ...plans[index], ...body };
   await parser.saveCapacityPlans(plans);
@@ -75,7 +80,7 @@ capacityRouter.delete("/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const plans = await parser.readCapacityPlans();
-  const filtered = plans.filter(p => p.id !== id);
+  const filtered = plans.filter((p) => p.id !== id);
   if (filtered.length === plans.length) return errorResponse("Not found", 404);
   await parser.saveCapacityPlans(filtered);
   return jsonResponse({ success: true });
@@ -87,7 +92,7 @@ capacityRouter.post("/:id/members", async (c) => {
   const planId = c.req.param("id");
   const body = await c.req.json();
   const plans = await parser.readCapacityPlans();
-  const plan = plans.find(p => p.id === planId);
+  const plan = plans.find((p) => p.id === planId);
   if (!plan) return errorResponse("Plan not found", 404);
 
   const newMember = {
@@ -109,10 +114,10 @@ capacityRouter.put("/:id/members/:mid", async (c) => {
   const memberId = c.req.param("mid");
   const body = await c.req.json();
   const plans = await parser.readCapacityPlans();
-  const plan = plans.find(p => p.id === planId);
+  const plan = plans.find((p) => p.id === planId);
   if (!plan) return errorResponse("Plan not found", 404);
 
-  const memberIndex = plan.teamMembers.findIndex(m => m.id === memberId);
+  const memberIndex = plan.teamMembers.findIndex((m) => m.id === memberId);
   if (memberIndex === -1) return errorResponse("Member not found", 404);
 
   plan.teamMembers[memberIndex] = { ...plan.teamMembers[memberIndex], ...body };
@@ -126,14 +131,16 @@ capacityRouter.delete("/:id/members/:mid", async (c) => {
   const planId = c.req.param("id");
   const memberId = c.req.param("mid");
   const plans = await parser.readCapacityPlans();
-  const plan = plans.find(p => p.id === planId);
+  const plan = plans.find((p) => p.id === planId);
   if (!plan) return errorResponse("Plan not found", 404);
 
-  const filtered = plan.teamMembers.filter(m => m.id !== memberId);
-  if (filtered.length === plan.teamMembers.length) return errorResponse("Member not found", 404);
+  const filtered = plan.teamMembers.filter((m) => m.id !== memberId);
+  if (filtered.length === plan.teamMembers.length) {
+    return errorResponse("Member not found", 404);
+  }
 
   plan.teamMembers = filtered;
-  plan.allocations = plan.allocations.filter(a => a.memberId !== memberId);
+  plan.allocations = plan.allocations.filter((a) => a.memberId !== memberId);
   await parser.saveCapacityPlans(plans);
   return jsonResponse({ success: true });
 });
@@ -144,7 +151,7 @@ capacityRouter.post("/:id/allocations", async (c) => {
   const planId = c.req.param("id");
   const body = await c.req.json();
   const plans = await parser.readCapacityPlans();
-  const plan = plans.find(p => p.id === planId);
+  const plan = plans.find((p) => p.id === planId);
   if (!plan) return errorResponse("Plan not found", 404);
 
   const newAllocation = {
@@ -168,10 +175,10 @@ capacityRouter.put("/:id/allocations/:aid", async (c) => {
   const allocId = c.req.param("aid");
   const body = await c.req.json();
   const plans = await parser.readCapacityPlans();
-  const plan = plans.find(p => p.id === planId);
+  const plan = plans.find((p) => p.id === planId);
   if (!plan) return errorResponse("Plan not found", 404);
 
-  const allocIndex = plan.allocations.findIndex(a => a.id === allocId);
+  const allocIndex = plan.allocations.findIndex((a) => a.id === allocId);
   if (allocIndex === -1) return errorResponse("Allocation not found", 404);
 
   plan.allocations[allocIndex] = { ...plan.allocations[allocIndex], ...body };
@@ -185,11 +192,13 @@ capacityRouter.delete("/:id/allocations/:aid", async (c) => {
   const planId = c.req.param("id");
   const allocId = c.req.param("aid");
   const plans = await parser.readCapacityPlans();
-  const plan = plans.find(p => p.id === planId);
+  const plan = plans.find((p) => p.id === planId);
   if (!plan) return errorResponse("Plan not found", 404);
 
-  const filtered = plan.allocations.filter(a => a.id !== allocId);
-  if (filtered.length === plan.allocations.length) return errorResponse("Allocation not found", 404);
+  const filtered = plan.allocations.filter((a) => a.id !== allocId);
+  if (filtered.length === plan.allocations.length) {
+    return errorResponse("Allocation not found", 404);
+  }
 
   plan.allocations = filtered;
   await parser.saveCapacityPlans(plans);
@@ -201,16 +210,18 @@ capacityRouter.get("/:id/utilization", async (c) => {
   const parser = getParser(c);
   const planId = c.req.param("id");
   const plans = await parser.readCapacityPlans();
-  const plan = plans.find(p => p.id === planId);
+  const plan = plans.find((p) => p.id === planId);
   if (!plan) return errorResponse("Plan not found", 404);
 
   const timeEntries = await parser.readTimeEntries();
 
-  const utilization = plan.teamMembers.map(member => {
+  const utilization = plan.teamMembers.map((member) => {
     const weeklyCapacity = member.hoursPerDay * member.workingDays.length;
     const allocatedByWeek = new Map<string, number>();
 
-    for (const alloc of plan.allocations.filter(a => a.memberId === member.id)) {
+    for (
+      const alloc of plan.allocations.filter((a) => a.memberId === member.id)
+    ) {
       const current = allocatedByWeek.get(alloc.weekStart) || 0;
       allocatedByWeek.set(alloc.weekStart, current + alloc.allocatedHours);
     }
@@ -224,7 +235,10 @@ capacityRouter.get("/:id/utilization", async (c) => {
       }
     }
 
-    const totalAllocated = Array.from(allocatedByWeek.values()).reduce((a, b) => a + b, 0);
+    const totalAllocated = Array.from(allocatedByWeek.values()).reduce(
+      (a, b) => a + b,
+      0,
+    );
 
     return {
       memberId: member.id,
@@ -233,7 +247,9 @@ capacityRouter.get("/:id/utilization", async (c) => {
       allocatedByWeek: Object.fromEntries(allocatedByWeek),
       totalAllocated,
       actualHours,
-      utilizationPercent: weeklyCapacity > 0 ? Math.round((totalAllocated / weeklyCapacity) * 100) : 0,
+      utilizationPercent: weeklyCapacity > 0
+        ? Math.round((totalAllocated / weeklyCapacity) * 100)
+        : 0,
     };
   });
 
@@ -245,11 +261,13 @@ capacityRouter.get("/:id/suggest-assignments", async (c) => {
   const parser = getParser(c);
   const planId = c.req.param("id");
   const plans = await parser.readCapacityPlans();
-  const plan = plans.find(p => p.id === planId);
+  const plan = plans.find((p) => p.id === planId);
   if (!plan) return errorResponse("Plan not found", 404);
 
   const tasks = await parser.readTasks();
-  const unassignedTasks = getUnassignedTasks(tasks).sort((a, b) => (a.config.priority || 999) - (b.config.priority || 999));
+  const unassignedTasks = getUnassignedTasks(tasks).sort((a, b) =>
+    (a.config.priority || 999) - (b.config.priority || 999)
+  );
 
   const now = new Date();
   const monday = new Date(now);
@@ -260,12 +278,21 @@ capacityRouter.get("/:id/suggest-assignments", async (c) => {
   for (const member of plan.teamMembers) {
     const weeklyCapacity = member.hoursPerDay * member.workingDays.length;
     const allocated = plan.allocations
-      .filter(a => a.memberId === member.id && a.weekStart === weekStart)
+      .filter((a) => a.memberId === member.id && a.weekStart === weekStart)
       .reduce((sum, a) => sum + a.allocatedHours, 0);
     memberCapacity.set(member.id, weeklyCapacity - allocated);
   }
 
-  const suggestions: Array<{ taskId: string; taskTitle: string; memberId: string; memberName: string; hours: number; weekStart: string }> = [];
+  const suggestions: Array<
+    {
+      taskId: string;
+      taskTitle: string;
+      memberId: string;
+      memberName: string;
+      hours: number;
+      weekStart: string;
+    }
+  > = [];
 
   for (const task of unassignedTasks) {
     const effort = task.config.effort || 8;
@@ -290,7 +317,10 @@ capacityRouter.get("/:id/suggest-assignments", async (c) => {
         hours: effort,
         weekStart,
       });
-      memberCapacity.set(bestMember.id, (memberCapacity.get(bestMember.id) || 0) - effort);
+      memberCapacity.set(
+        bestMember.id,
+        (memberCapacity.get(bestMember.id) || 0) - effort,
+      );
     }
   }
 
@@ -305,7 +335,7 @@ capacityRouter.post("/:id/apply-assignments", async (c) => {
   const suggestions = body.suggestions || [];
 
   const plans = await parser.readCapacityPlans();
-  const plan = plans.find(p => p.id === planId);
+  const plan = plans.find((p) => p.id === planId);
   if (!plan) return errorResponse("Plan not found", 404);
 
   for (const suggestion of suggestions) {
@@ -318,10 +348,10 @@ capacityRouter.post("/:id/apply-assignments", async (c) => {
       targetId: suggestion.taskId,
     });
 
-    const member = plan.teamMembers.find(m => m.id === suggestion.memberId);
+    const member = plan.teamMembers.find((m) => m.id === suggestion.memberId);
     if (member) {
       await parser.updateTask(suggestion.taskId, {
-        config: { assignee: member.name }
+        config: { assignee: member.name },
       });
     }
   }

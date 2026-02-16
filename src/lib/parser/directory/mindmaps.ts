@@ -2,7 +2,7 @@
  * Directory-based parser for Mindmaps.
  * Each mindmap is stored as a separate markdown file with nodes as nested lists.
  */
-import { DirectoryParser, parseFrontmatter, buildFileContent } from "./base.ts";
+import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
 import type { Mindmap, MindmapNode } from "../../types.ts";
 
 interface MindmapFrontmatter {
@@ -15,7 +15,9 @@ export class MindmapsDirectoryParser extends DirectoryParser<Mindmap> {
   }
 
   protected parseFile(content: string, _filePath: string): Mindmap | null {
-    const { frontmatter, content: body } = parseFrontmatter<MindmapFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<MindmapFrontmatter>(
+      content,
+    );
 
     if (!frontmatter.id) {
       return null;
@@ -100,7 +102,9 @@ export class MindmapsDirectoryParser extends DirectoryParser<Mindmap> {
     let body = `# ${mindmap.title}\n\n`;
 
     // Serialize nodes as nested list
-    const rootNodes = mindmap.nodes.filter((node) => node.level === 0 || !node.parent);
+    const rootNodes = mindmap.nodes.filter((node) =>
+      node.level === 0 || !node.parent
+    );
     for (const rootNode of rootNodes) {
       body += this.serializeNode(rootNode, mindmap.nodes, 0);
     }
@@ -111,7 +115,11 @@ export class MindmapsDirectoryParser extends DirectoryParser<Mindmap> {
   /**
    * Serialize a mindmap node and its children recursively.
    */
-  private serializeNode(node: MindmapNode, allNodes: MindmapNode[], level: number): string {
+  private serializeNode(
+    node: MindmapNode,
+    allNodes: MindmapNode[],
+    level: number,
+  ): string {
     const indent = "  ".repeat(level);
     let result = `${indent}- ${node.text}\n`;
 
@@ -167,7 +175,7 @@ export class MindmapsDirectoryParser extends DirectoryParser<Mindmap> {
   async addNode(
     mindmapId: string,
     text: string,
-    parentId?: string
+    parentId?: string,
   ): Promise<Mindmap | null> {
     const mindmap = await this.read(mindmapId);
     if (!mindmap) return null;
@@ -200,7 +208,7 @@ export class MindmapsDirectoryParser extends DirectoryParser<Mindmap> {
   async updateNode(
     mindmapId: string,
     nodeId: string,
-    text: string
+    text: string,
   ): Promise<Mindmap | null> {
     const mindmap = await this.read(mindmapId);
     if (!mindmap) return null;
@@ -229,7 +237,10 @@ export class MindmapsDirectoryParser extends DirectoryParser<Mindmap> {
     while (foundMore) {
       foundMore = false;
       for (const node of mindmap.nodes) {
-        if (node.parent && idsToDelete.has(node.parent) && !idsToDelete.has(node.id)) {
+        if (
+          node.parent && idsToDelete.has(node.parent) &&
+          !idsToDelete.has(node.id)
+        ) {
           idsToDelete.add(node.id);
           foundMore = true;
         }

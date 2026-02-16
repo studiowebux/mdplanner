@@ -9,15 +9,15 @@
    -------------------------------------------------------------------------- */
 
 .canvas-height {
-    height: calc(100vh - 280px);
-    min-height: 500px;
+  height: calc(100vh - 280px);
+  min-height: 500px;
 }
 
 .canvas-grid {
-    background-image:
-        linear-gradient(var(--color-border-default) 1px, transparent 1px),
-        linear-gradient(90deg, var(--color-border-default) 1px, transparent 1px);
-    background-size: 20px 20px;
+  background-image:
+    linear-gradient(var(--color-border-default) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-border-default) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
 /* --------------------------------------------------------------------------
@@ -25,112 +25,114 @@
    -------------------------------------------------------------------------- */
 
 .sticky-note {
-    position: absolute;
-    width: 200px;
-    min-height: 150px;
-    padding: 12px;
-    border-radius: 4px;
-    box-shadow: var(--shadow-md);
-    cursor: move;
-    user-select: none;
-    font-family: 'Comic Sans MS', cursive, sans-serif;
-    font-size: 14px;
-    line-height: 1.4;
-    transition: transform var(--transition-base), box-shadow var(--transition-base);
-    resize: both;
-    overflow: auto;
-    min-width: 150px;
-    min-height: 100px;
+  position: absolute;
+  width: 200px;
+  min-height: 150px;
+  padding: 12px;
+  border-radius: 4px;
+  box-shadow: var(--shadow-md);
+  cursor: move;
+  user-select: none;
+  font-family: "Comic Sans MS", cursive, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
+  resize: both;
+  overflow: auto;
+  min-width: 150px;
+  min-height: 100px;
 }
 
 .sticky-note:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
 .sticky-note.dragging {
-    transform: rotate(5deg) scale(1.05);
-    z-index: 1000;
+  transform: rotate(5deg) scale(1.05);
+  z-index: 1000;
 }
 
 /* Sticky note colors - Light theme */
 .sticky-note.yellow {
-    background-color: #fef9c3;
-    border-left: 4px solid #eab308;
-    color: #713f12;
+  background-color: #fef9c3;
+  border-left: 4px solid #eab308;
+  color: #713f12;
 }
 
 .sticky-note.pink {
-    background-color: #fce7f3;
-    border-left: 4px solid #ec4899;
-    color: #831843;
+  background-color: #fce7f3;
+  border-left: 4px solid #ec4899;
+  color: #831843;
 }
 
 .sticky-note.blue {
-    background-color: #dbeafe;
-    border-left: 4px solid #3b82f6;
-    color: #1e40af;
+  background-color: #dbeafe;
+  border-left: 4px solid #3b82f6;
+  color: #1e40af;
 }
 
 .sticky-note.green {
-    background-color: #dcfce7;
-    border-left: 4px solid #22c55e;
-    color: #166534;
+  background-color: #dcfce7;
+  border-left: 4px solid #22c55e;
+  color: #166534;
 }
 
 .sticky-note.purple {
-    background-color: #f3e8ff;
-    border-left: 4px solid #a855f7;
-    color: #6b21a8;
+  background-color: #f3e8ff;
+  border-left: 4px solid #a855f7;
+  color: #6b21a8;
 }
 
 .sticky-note.orange {
-    background-color: #ffedd5;
-    border-left: 4px solid #f97316;
-    color: #9a3412;
+  background-color: #ffedd5;
+  border-left: 4px solid #f97316;
+  color: #9a3412;
 }
 
 /* Sticky note colors - Dark theme */
 .dark .sticky-note.yellow,
 .theme-dark .sticky-note.yellow {
-    background-color: #422006;
-    border-left-color: #eab308;
-    color: #fef9c3;
+  background-color: #422006;
+  border-left-color: #eab308;
+  color: #fef9c3;
 }
 
 .dark .sticky-note.pink,
 .theme-dark .sticky-note.pink {
-    background-color: #500724;
-    border-left-color: #ec4899;
-    color: #fce7f3;
+  background-color: #500724;
+  border-left-color: #ec4899;
+  color: #fce7f3;
 }
 
 .dark .sticky-note.blue,
 .theme-dark .sticky-note.blue {
-    background-color: #1e3a5f;
-    border-left-color: #3b82f6;
-    color: #dbeafe;
+  background-color: #1e3a5f;
+  border-left-color: #3b82f6;
+  color: #dbeafe;
 }
 
 .dark .sticky-note.green,
 .theme-dark .sticky-note.green {
-    background-color: #14532d;
-    border-left-color: #22c55e;
-    color: #dcfce7;
+  background-color: #14532d;
+  border-left-color: #22c55e;
+  color: #dcfce7;
 }
 
 .dark .sticky-note.purple,
 .theme-dark .sticky-note.purple {
-    background-color: #3b0764;
-    border-left-color: #a855f7;
-    color: #f3e8ff;
+  background-color: #3b0764;
+  border-left-color: #a855f7;
+  color: #f3e8ff;
 }
 
 .dark .sticky-note.orange,
 .theme-dark .sticky-note.orange {
-    background-color: #431407;
-    border-left-color: #f97316;
-    color: #ffedd5;
+  background-color: #431407;
+  border-left-color: #f97316;
+  color: #ffedd5;
 }
 
 /* --------------------------------------------------------------------------
@@ -138,29 +140,29 @@
    -------------------------------------------------------------------------- */
 
 .sticky-note-controls {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    display: none;
-    background: rgba(0, 0, 0, 0.7);
-    border-radius: 4px;
-    padding: 2px;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: none;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 4px;
+  padding: 2px;
 }
 
 .sticky-note:hover .sticky-note-controls {
-    display: flex;
+  display: flex;
 }
 
 .sticky-note-controls button {
-    background: none;
-    border: none;
-    color: white;
-    padding: 2px 4px;
-    cursor: pointer;
-    border-radius: 2px;
-    font-size: 12px;
+  background: none;
+  border: none;
+  color: white;
+  padding: 2px 4px;
+  cursor: pointer;
+  border-radius: 2px;
+  font-size: 12px;
 }
 
 .sticky-note-controls button:hover {
-    background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.2);
 }

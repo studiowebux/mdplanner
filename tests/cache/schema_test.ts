@@ -4,7 +4,7 @@
 
 import { assertEquals, assertExists } from "jsr:@std/assert";
 import { CacheDatabase } from "../../src/lib/cache/database.ts";
-import { initSchema, dropSchema } from "../../src/lib/cache/schema.ts";
+import { dropSchema, initSchema } from "../../src/lib/cache/schema.ts";
 
 const TEST_DB = ":memory:";
 
@@ -64,7 +64,7 @@ Deno.test("initSchema - creates FTS tables", () => {
   for (const table of FTS_TABLES) {
     const result = db.queryOne<{ name: string }>(
       "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
-      [table]
+      [table],
     );
     assertEquals(result !== null, true, `FTS table ${table} should exist`);
   }
@@ -129,7 +129,7 @@ Deno.test("schema - tasks table has correct columns", () => {
       "2026-02-20",
       null,
       '{"custom": "value"}',
-    ]
+    ],
   );
 
   const task = db.queryOne<{
@@ -166,7 +166,7 @@ Deno.test("schema - notes table supports all modes", () => {
       '[{"id": "p1", "text": "Para 1"}]',
       '[{"title": "Custom", "content": "Section content"}]',
       3,
-    ]
+    ],
   );
 
   const note = db.queryOne<{
@@ -190,18 +190,18 @@ Deno.test("schema - foreign keys are enforced", () => {
   // Insert a company first
   db.execute(
     "INSERT INTO companies (id, name) VALUES (?, ?)",
-    ["company-1", "Test Company"]
+    ["company-1", "Test Company"],
   );
 
   // Insert a contact referencing the company
   db.execute(
     "INSERT INTO contacts (id, company_id, first_name, last_name) VALUES (?, ?, ?, ?)",
-    ["contact-1", "company-1", "John", "Doe"]
+    ["contact-1", "company-1", "John", "Doe"],
   );
 
   const contact = db.queryOne<{ company_id: string }>(
     "SELECT company_id FROM contacts WHERE id = ?",
-    ["contact-1"]
+    ["contact-1"],
   );
 
   assertEquals(contact?.company_id, "company-1");
@@ -216,13 +216,13 @@ Deno.test("schema - FTS triggers populate search index", () => {
   // Insert a task
   db.execute(
     "INSERT INTO tasks (id, title, description) VALUES (?, ?, ?)",
-    ["task-1", "Important Task", "This is the description"]
+    ["task-1", "Important Task", "This is the description"],
   );
 
   // Query FTS
   const results = db.query<{ id: string }>(
     "SELECT id FROM tasks_fts WHERE tasks_fts MATCH ?",
-    ["Important"]
+    ["Important"],
   );
 
   assertEquals(results.length, 1);
@@ -236,7 +236,7 @@ Deno.test("schema - indexes are created", () => {
   initSchema(db);
 
   const indexes = db.query<{ name: string }>(
-    "SELECT name FROM sqlite_master WHERE type='index' AND name LIKE 'idx_%'"
+    "SELECT name FROM sqlite_master WHERE type='index' AND name LIKE 'idx_%'",
   );
 
   // Should have multiple indexes

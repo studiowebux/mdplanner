@@ -15,6 +15,7 @@ nextFollowUp: 2026-03-01
 Discussed beta program participation.
 
 ## Notes
+
 - Sarah excited about early access
 - Will provide detailed feedback
 - Interested in referral program

@@ -96,7 +96,9 @@ export class BriefModule {
         const li = document.createElement("li");
         li.className = "group flex items-start gap-2 py-1";
         li.innerHTML = `
-          <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">${escapeHtml(item)}</span>
+          <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">${
+          escapeHtml(item)
+        }</span>
           <button onclick="taskManager.removeBriefItem('${key}', ${idx})" class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 ml-1 flex-shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
@@ -167,7 +169,9 @@ export class BriefModule {
 
   edit() {
     if (this.taskManager.selectedBriefId) {
-      this.taskManager.briefSidenavModule.openEdit(this.taskManager.selectedBriefId);
+      this.taskManager.briefSidenavModule.openEdit(
+        this.taskManager.selectedBriefId,
+      );
     }
   }
 
@@ -265,13 +269,18 @@ export class BriefModule {
       .getElementById("briefViewBtn")
       .addEventListener("click", () => {
         this.taskManager.switchView("brief");
-        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+        document.getElementById("viewSelectorDropdown")?.classList.add(
+          "hidden",
+        );
       });
 
     // Add Brief button - opens sidenav
     document
       .getElementById("addBriefBtn")
-      .addEventListener("click", () => this.taskManager.briefSidenavModule.openNew());
+      .addEventListener(
+        "click",
+        () => this.taskManager.briefSidenavModule.openNew(),
+      );
 
     // Cancel Brief modal
     document
@@ -305,8 +314,11 @@ export class BriefModule {
       .addEventListener("submit", (e) => this.saveItem(e));
 
     // Add buttons for each section
-    document.querySelectorAll(".brief-add-btn").forEach(btn => {
-      btn.addEventListener("click", () => this.openItemModal(btn.dataset.section));
+    document.querySelectorAll(".brief-add-btn").forEach((btn) => {
+      btn.addEventListener(
+        "click",
+        () => this.openItemModal(btn.dataset.section),
+      );
     });
 
     // Close modals on background click
@@ -315,10 +327,13 @@ export class BriefModule {
         this.closeModal();
       }
     });
-    document.getElementById("briefItemModal")?.addEventListener("click", (e) => {
-      if (e.target.id === "briefItemModal") {
-        this.closeItemModal();
-      }
-    });
+    document.getElementById("briefItemModal")?.addEventListener(
+      "click",
+      (e) => {
+        if (e.target.id === "briefItemModal") {
+          this.closeItemModal();
+        }
+      },
+    );
   }
 }

@@ -25,6 +25,7 @@ lineItems:
 Paid in full via Stripe.
 
 ## Payment
+
 - Method: Credit Card
 - Reference: ch_1234567890
 - Date: 2026-02-18

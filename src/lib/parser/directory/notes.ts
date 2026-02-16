@@ -2,8 +2,8 @@
  * Directory-based parser for Notes.
  * Each note is stored as a separate markdown file.
  */
-import { DirectoryParser, parseFrontmatter, buildFileContent } from "./base.ts";
-import type { Note, NoteParagraph, CustomSection } from "../../types.ts";
+import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
+import type { CustomSection, Note, NoteParagraph } from "../../types.ts";
 
 interface NoteFrontmatter {
   id: string;
@@ -19,7 +19,9 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
   }
 
   protected parseFile(content: string, _filePath: string): Note | null {
-    const { frontmatter, content: body } = parseFrontmatter<NoteFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<NoteFrontmatter>(
+      content,
+    );
 
     if (!frontmatter.id) {
       return null;
@@ -46,7 +48,9 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
       bodyContent.includes("<!-- Custom Section:");
 
     if (isEnhanced) {
-      const { paragraphs, customSections } = this.parseEnhancedContent(bodyContent);
+      const { paragraphs, customSections } = this.parseEnhancedContent(
+        bodyContent,
+      );
       return {
         id: frontmatter.id,
         title,
@@ -82,8 +86,14 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
 
     let body = `# ${note.title}\n\n`;
 
-    if (note.mode === "enhanced" && (note.paragraphs?.length || note.customSections?.length)) {
-      body += this.serializeEnhancedContent(note.paragraphs || [], note.customSections || []);
+    if (
+      note.mode === "enhanced" &&
+      (note.paragraphs?.length || note.customSections?.length)
+    ) {
+      body += this.serializeEnhancedContent(
+        note.paragraphs || [],
+        note.customSections || [],
+      );
     } else if (note.content) {
       body += note.content;
     }
@@ -95,7 +105,7 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
    * Parse enhanced note content with paragraphs and custom sections.
    */
   private parseEnhancedContent(
-    content: string
+    content: string,
   ): { paragraphs: NoteParagraph[]; customSections: CustomSection[] } {
     const paragraphs: NoteParagraph[] = [];
     const customSections: CustomSection[] = [];
@@ -169,7 +179,7 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
         const nextLine = lines[i + 1];
         if (nextLine?.startsWith("<!-- section-id:")) {
           const metaMatch = nextLine.match(
-            /<!-- section-id: ([^,]+), type: ([^>]+) -->/
+            /<!-- section-id: ([^,]+), type: ([^>]+) -->/,
           );
           if (metaMatch) {
             customSectionId = metaMatch[1];
@@ -191,8 +201,8 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
               customSectionTitle,
               customSectionType,
               customSectionLines.join("\n"),
-              sectionOrder++
-            )
+              sectionOrder++,
+            ),
           );
           inCustomSection = false;
           customSectionLines = [];
@@ -222,7 +232,7 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
     title: string,
     type: "tabs" | "timeline" | "split-view",
     content: string,
-    order: number
+    order: number,
   ): CustomSection {
     const section: CustomSection = {
       id,
@@ -254,7 +264,9 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
 
     const flushColumn = () => {
       if (currentColumnIdx >= 0) {
-        columns[currentColumnIdx] = this.parseContentBlocks(contentLines.join("\n"));
+        columns[currentColumnIdx] = this.parseContentBlocks(
+          contentLines.join("\n"),
+        );
         contentLines = [];
       }
     };
@@ -294,11 +306,13 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
    * Parse tabs content.
    */
   private parseTabs(
-    content: string
+    content: string,
   ): { id: string; title: string; content: NoteParagraph[] }[] {
     const tabs: { id: string; title: string; content: NoteParagraph[] }[] = [];
     const lines = content.split("\n");
-    let currentTab: { id: string; title: string; content: NoteParagraph[] } | null = null;
+    let currentTab:
+      | { id: string; title: string; content: NoteParagraph[] }
+      | null = null;
     let contentLines: string[] = [];
 
     const flushTab = () => {
@@ -315,7 +329,9 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
       const tabMatch = line.match(/^### (?:Tab: )?(.+)$/);
       if (tabMatch) {
         flushTab();
-        let tabId = `tab_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+        let tabId = `tab_${Date.now()}_${
+          Math.random().toString(36).substring(2, 6)
+        }`;
         // Check next line for tab-id comment
         const nextLine = lines[i + 1];
         if (nextLine?.startsWith("<!-- tab-id:")) {
@@ -357,7 +373,9 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
       const text = currentBlock.join("\n").trim();
       if (text) {
         blocks.push({
-          id: `block_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+          id: `block_${Date.now()}_${
+            Math.random().toString(36).substring(2, 6)
+          }`,
           type: "text",
           content: text,
           order: order++,
@@ -376,7 +394,9 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
           const codeContent = currentBlock.join("\n");
           if (codeContent.trim()) {
             blocks.push({
-              id: `code_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+              id: `code_${Date.now()}_${
+                Math.random().toString(36).substring(2, 6)
+              }`,
               type: "code",
               content: codeContent,
               language: codeLanguage || undefined,
@@ -401,9 +421,21 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
    * Parse timeline content.
    */
   private parseTimeline(
-    content: string
-  ): { id: string; title: string; status: "success" | "failed" | "pending"; date?: string; content: NoteParagraph[] }[] {
-    const items: { id: string; title: string; status: "success" | "failed" | "pending"; date?: string; content: NoteParagraph[] }[] = [];
+    content: string,
+  ): {
+    id: string;
+    title: string;
+    status: "success" | "failed" | "pending";
+    date?: string;
+    content: NoteParagraph[];
+  }[] {
+    const items: {
+      id: string;
+      title: string;
+      status: "success" | "failed" | "pending";
+      date?: string;
+      content: NoteParagraph[];
+    }[] = [];
     const lines = content.split("\n");
     let currentItem: typeof items[0] | null = null;
     let contentLines: string[] = [];
@@ -419,18 +451,24 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       // Match ## Title (status) or ### Title {status: ...} (legacy)
-      const newFormatMatch = line.match(/^## (.+?) \((success|failed|pending)\)$/);
+      const newFormatMatch = line.match(
+        /^## (.+?) \((success|failed|pending)\)$/,
+      );
       const legacyMatch = line.match(/^### (.+?)(?:\s*\{(.+)\})?$/);
 
       if (newFormatMatch) {
         flushItem();
-        let itemId = `timeline_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+        let itemId = `timeline_${Date.now()}_${
+          Math.random().toString(36).substring(2, 6)
+        }`;
         let date: string | undefined;
 
         // Check next line for item-id comment
         const nextLine = lines[i + 1];
         if (nextLine?.startsWith("<!-- item-id:")) {
-          const metaMatch = nextLine.match(/<!-- item-id: ([^,]+), status: [^,>]+(?:, date: ([^>]+))? -->/);
+          const metaMatch = nextLine.match(
+            /<!-- item-id: ([^,]+), status: [^,>]+(?:, date: ([^>]+))? -->/,
+          );
           if (metaMatch) {
             itemId = metaMatch[1].trim();
             date = metaMatch[2]?.trim();
@@ -463,7 +501,9 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
         }
 
         currentItem = {
-          id: `timeline_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+          id: `timeline_${Date.now()}_${
+            Math.random().toString(36).substring(2, 6)
+          }`,
           title,
           status,
           date,
@@ -486,13 +526,15 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
    */
   private serializeEnhancedContent(
     paragraphs: NoteParagraph[],
-    customSections: CustomSection[]
+    customSections: CustomSection[],
   ): string {
     const lines: string[] = [];
 
     // Sort by order
     const sortedParagraphs = [...paragraphs].sort((a, b) => a.order - b.order);
-    const sortedSections = [...customSections].sort((a, b) => a.order - b.order);
+    const sortedSections = [...customSections].sort((a, b) =>
+      a.order - b.order
+    );
 
     // Serialize paragraphs
     for (const p of sortedParagraphs) {
@@ -534,7 +576,11 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
       } else if (section.type === "timeline" && section.config.timeline) {
         for (const item of section.config.timeline) {
           lines.push(`## ${item.title} (${item.status})`);
-          lines.push(`<!-- item-id: ${item.id}, status: ${item.status}${item.date ? `, date: ${item.date}` : ""} -->`);
+          lines.push(
+            `<!-- item-id: ${item.id}, status: ${item.status}${
+              item.date ? `, date: ${item.date}` : ""
+            } -->`,
+          );
           lines.push("");
           for (const p of item.content || []) {
             this.serializeContentBlock(lines, p);
@@ -566,7 +612,9 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
   /**
    * Add a new note.
    */
-  async add(note: Omit<Note, "id" | "createdAt" | "updatedAt" | "revision">): Promise<Note> {
+  async add(
+    note: Omit<Note, "id" | "createdAt" | "updatedAt" | "revision">,
+  ): Promise<Note> {
     const now = new Date().toISOString();
     const newNote: Note = {
       ...note,

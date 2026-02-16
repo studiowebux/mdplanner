@@ -1,7 +1,11 @@
 // Board View Module
-import { TAG_CLASSES } from '../constants.js';
-import { formatDate, getPriorityBadgeClasses, getPriorityText } from '../utils.js';
-import { TasksAPI } from '../api.js';
+import { TAG_CLASSES } from "../constants.js";
+import {
+  formatDate,
+  getPriorityBadgeClasses,
+  getPriorityText,
+} from "../utils.js";
+import { TasksAPI } from "../api.js";
 
 /**
  * Kanban board view with drag-drop between sections
@@ -75,16 +79,18 @@ export class BoardView {
         tasksContainer.appendChild(taskCard);
         // Add drop zone after each card (last one should expand)
         const isLast = index === sectionTasks.length - 1;
-        tasksContainer.appendChild(this.createDropZone(section, index + 1, isLast));
+        tasksContainer.appendChild(
+          this.createDropZone(section, index + 1, isLast),
+        );
       });
 
       // If no tasks, make the single drop zone expandable
       if (sectionTasks.length === 0) {
-        const existingZone = tasksContainer.querySelector('.drop-zone');
+        const existingZone = tasksContainer.querySelector(".drop-zone");
         if (existingZone) {
-          existingZone.classList.add('drop-zone-expand');
-          existingZone.style.flex = '1';
-          existingZone.style.minHeight = '48px';
+          existingZone.classList.add("drop-zone-expand");
+          existingZone.style.flex = "1";
+          existingZone.style.minHeight = "48px";
         }
       }
 
@@ -106,8 +112,8 @@ export class BoardView {
       flex-shrink: 0;
     `;
     if (expandable) {
-      zone.style.flex = '1';
-      zone.style.minHeight = '48px';
+      zone.style.flex = "1";
+      zone.style.minHeight = "48px";
     }
     return zone;
   }
@@ -125,7 +131,11 @@ export class BoardView {
 
     div.innerHTML = `
             <div class="flex items-start justify-between mb-2">
-                <h4 class="${task.completed ? "line-through text-gray-500 dark:text-gray-400" : "text-gray-900 dark:text-gray-100"} font-medium text-sm">
+                <h4 class="${
+      task.completed
+        ? "line-through text-gray-500 dark:text-gray-400"
+        : "text-gray-900 dark:text-gray-100"
+    } font-medium text-sm">
                     ${task.title}
                 </h4>
                 <div class="flex space-x-1">
@@ -143,8 +153,8 @@ export class BoardView {
                         </svg>
                     </button>
                     ${
-                      task.description && task.description.length > 0
-                        ? `
+      task.description && task.description.length > 0
+        ? `
                         <button onclick="taskManager.toggleDescription('${task.id}')"
                                 class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="View Description">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -152,8 +162,8 @@ export class BoardView {
                             </svg>
                         </button>
                     `
-                        : ""
-                    }
+        : ""
+    }
                     <button onclick="taskManager.copyTaskLink('${task.id}')"
                             class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="Copy Link">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -184,49 +194,85 @@ export class BoardView {
                 </div>
 
                 <div class="flex flex-wrap gap-1">
-                    ${config.priority ? `<span class="inline-block px-2 py-0.5 text-xs font-medium rounded ${priorityBadgeClasses}">${priorityText}</span>` : ""}
                     ${
-                      config.tag
-                        ? config.tag
-                            .map(
-                              (tag) =>
-                                `<span class="inline-block px-2 py-0.5 text-xs font-medium rounded border ${TAG_CLASSES}">${tag}</span>`,
-                            )
-                            .join("")
-                        : ""
-                    }
+      config.priority
+        ? `<span class="inline-block px-2 py-0.5 text-xs font-medium rounded ${priorityBadgeClasses}">${priorityText}</span>`
+        : ""
+    }
+                    ${
+      config.tag
+        ? config.tag
+          .map(
+            (tag) =>
+              `<span class="inline-block px-2 py-0.5 text-xs font-medium rounded border ${TAG_CLASSES}">${tag}</span>`,
+          )
+          .join("")
+        : ""
+    }
                 </div>
 
                 <div class="text-xs font-mono text-gray-400">#${task.id}</div>
-                ${config.assignee ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> ${config.assignee}</div>` : ""}
-                ${config.due_date ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> ${formatDate(config.due_date)}</div>` : ""}
-                ${config.effort ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ${config.effort}d</div>` : ""}
-                ${config.milestone ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg> ${config.milestone}</div>` : ""}
-                ${config.blocked_by && config.blocked_by.length > 0 ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg> ${config.blocked_by.join(", ")}</div>` : ""}
+                ${
+      config.assignee
+        ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> ${config.assignee}</div>`
+        : ""
+    }
+                ${
+      config.due_date
+        ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> ${
+          formatDate(config.due_date)
+        }</div>`
+        : ""
+    }
+                ${
+      config.effort
+        ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ${config.effort}d</div>`
+        : ""
+    }
+                ${
+      config.milestone
+        ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg> ${config.milestone}</div>`
+        : ""
+    }
+                ${
+      config.blocked_by && config.blocked_by.length > 0
+        ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg> ${
+          config.blocked_by.join(", ")
+        }</div>`
+        : ""
+    }
 
                 ${
-                  task.children && task.children.length > 0
-                    ? `
+      task.children && task.children.length > 0
+        ? `
                     <div class="mt-3 pt-2 border-t border-gray-100 dark:border-gray-600">
                         <div class="text-xs text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg> Subtasks (${task.children.length})</div>
                         <div class="space-y-1">
-                            ${task.children
-                              .map(
-                                (child) => `
+                            ${
+          task.children
+            .map(
+              (child) => `
                                 <div class="flex items-center space-x-2 text-xs">
-                                    <input type="checkbox" ${child.completed ? "checked" : ""}
+                                    <input type="checkbox" ${
+                child.completed ? "checked" : ""
+              }
                                            onchange="taskManager.toggleTask('${child.id}')"
                                            class="rounded border-gray-300 dark:border-gray-600 text-gray-900 focus:ring-gray-500 dark:bg-gray-600" style="transform: scale(0.8);">
-                                    <span class="${child.completed ? "line-through text-gray-400 dark:text-gray-500" : "text-gray-600 dark:text-gray-300"}">${child.title}</span>
+                                    <span class="${
+                child.completed
+                  ? "line-through text-gray-400 dark:text-gray-500"
+                  : "text-gray-600 dark:text-gray-300"
+              }">${child.title}</span>
                                 </div>
                             `,
-                              )
-                              .join("")}
+            )
+            .join("")
+        }
                         </div>
                     </div>
                 `
-                    : ""
-                }
+        : ""
+    }
             </div>
         `;
 
@@ -234,35 +280,35 @@ export class BoardView {
   }
 
   showDropZones() {
-    document.querySelectorAll('.drop-zone').forEach(zone => {
-      const isExpandable = zone.classList.contains('drop-zone-expand');
-      zone.style.background = 'rgba(59, 130, 246, 0.1)';
-      zone.style.border = '2px dashed #3b82f6';
-      zone.style.minHeight = isExpandable ? '48px' : '32px';
-      zone.style.margin = '4px 0';
+    document.querySelectorAll(".drop-zone").forEach((zone) => {
+      const isExpandable = zone.classList.contains("drop-zone-expand");
+      zone.style.background = "rgba(59, 130, 246, 0.1)";
+      zone.style.border = "2px dashed #3b82f6";
+      zone.style.minHeight = isExpandable ? "48px" : "32px";
+      zone.style.margin = "4px 0";
     });
   }
 
   hideDropZones() {
-    document.querySelectorAll('.drop-zone').forEach(zone => {
-      const isExpandable = zone.classList.contains('drop-zone-expand');
-      zone.style.background = 'transparent';
-      zone.style.border = 'none';
-      zone.style.minHeight = isExpandable ? '48px' : '8px';
-      zone.style.margin = '0';
+    document.querySelectorAll(".drop-zone").forEach((zone) => {
+      const isExpandable = zone.classList.contains("drop-zone-expand");
+      zone.style.background = "transparent";
+      zone.style.border = "none";
+      zone.style.minHeight = isExpandable ? "48px" : "8px";
+      zone.style.margin = "0";
     });
   }
 
   highlightDropZone(zone) {
     // Reset all zones to default drag state
-    document.querySelectorAll('.drop-zone').forEach(z => {
-      z.style.background = 'rgba(59, 130, 246, 0.1)';
-      z.style.border = '2px dashed #3b82f6';
+    document.querySelectorAll(".drop-zone").forEach((z) => {
+      z.style.background = "rgba(59, 130, 246, 0.1)";
+      z.style.border = "2px dashed #3b82f6";
     });
     // Highlight active zone
     if (zone) {
-      zone.style.background = '#3b82f6';
-      zone.style.border = '2px solid #3b82f6';
+      zone.style.background = "#3b82f6";
+      zone.style.border = "2px solid #3b82f6";
     }
   }
 
@@ -301,13 +347,12 @@ export class BoardView {
 
         // Track where we're dragging from
         this.draggedTaskId = e.target.dataset.taskId;
-        const container = e.target.closest('[data-section]');
+        const container = e.target.closest("[data-section]");
         if (container) {
           this.draggedFromSection = container.dataset.section;
           // Find the index of this card among its siblings
-          const cards = Array.from(container.querySelectorAll('.task-card'));
+          const cards = Array.from(container.querySelectorAll(".task-card"));
           this.draggedFromIndex = cards.indexOf(e.target);
-
         }
 
         // Delay to allow drag image to be captured
@@ -332,7 +377,7 @@ export class BoardView {
 
     // Drag over drop zone - highlight it
     document.addEventListener("dragover", (e) => {
-      const dropZone = e.target.closest('.drop-zone');
+      const dropZone = e.target.closest(".drop-zone");
       if (dropZone) {
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
@@ -342,16 +387,16 @@ export class BoardView {
 
     // Drag leave drop zone
     document.addEventListener("dragleave", (e) => {
-      const dropZone = e.target.closest('.drop-zone');
+      const dropZone = e.target.closest(".drop-zone");
       if (dropZone && !dropZone.contains(e.relatedTarget)) {
-        dropZone.style.background = 'rgba(59, 130, 246, 0.1)';
-        dropZone.style.border = '2px dashed #3b82f6';
+        dropZone.style.background = "rgba(59, 130, 246, 0.1)";
+        dropZone.style.border = "2px dashed #3b82f6";
       }
     });
 
     // Drop on zone
     document.addEventListener("drop", (e) => {
-      const dropZone = e.target.closest('.drop-zone');
+      const dropZone = e.target.closest(".drop-zone");
       if (dropZone) {
         e.preventDefault();
         e.stopPropagation();
@@ -364,7 +409,10 @@ export class BoardView {
         // For same-section moves: adjust position because backend filters out dragged card
         const isSameSection = this.draggedFromSection === targetSection;
 
-        if (isSameSection && this.draggedFromIndex !== null && position > this.draggedFromIndex) {
+        if (
+          isSameSection && this.draggedFromIndex !== null &&
+          position > this.draggedFromIndex
+        ) {
           position = position - 1;
         }
 

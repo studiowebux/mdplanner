@@ -1,7 +1,7 @@
 // Tasks Feature Module
-import { TasksAPI } from '../api.js';
-import { formatDateForInput, markdownToHtml } from '../utils.js';
-import { showToast } from '../ui/toast.js';
+import { TasksAPI } from "../api.js";
+import { formatDateForInput, markdownToHtml } from "../utils.js";
+import { showToast } from "../ui/toast.js";
 
 /**
  * Handles task CRUD operations, search, and modal management
@@ -59,16 +59,20 @@ export class TasksModule {
       const config = task.config || {};
       document.getElementById("taskTitle").value = task.title || "";
       document.getElementById("taskSection").value = task.section || "";
-      document.getElementById("taskPriority").value = config.priority != null ? String(config.priority) : "";
+      document.getElementById("taskPriority").value = config.priority != null
+        ? String(config.priority)
+        : "";
       document.getElementById("taskAssignee").value = config.assignee || "";
-      document.getElementById("taskEffort").value = config.effort != null ? config.effort : "";
+      document.getElementById("taskEffort").value = config.effort != null
+        ? config.effort
+        : "";
       document.getElementById("taskDueDate").value =
         formatDateForInput(config.due_date) || "";
       document.getElementById("taskMilestone").value = config.milestone || "";
       document.getElementById("taskPlannedStart").value =
         config.planned_start || "";
-      document.getElementById("taskPlannedEnd").value =
-        config.planned_end || "";
+      document.getElementById("taskPlannedEnd").value = config.planned_end ||
+        "";
 
       // Show time entries section for existing tasks
       document.getElementById("timeEntriesSection").classList.remove("hidden");
@@ -118,7 +122,11 @@ export class TasksModule {
     this.tm.parentTaskId = null;
     // Clear task hash from URL
     if (window.location.hash.startsWith("#task=")) {
-      history.replaceState(null, "", window.location.pathname + window.location.search);
+      history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search,
+      );
     }
   }
 
@@ -139,13 +147,14 @@ export class TasksModule {
           : undefined,
         due_date: document.getElementById("taskDueDate").value || undefined,
         milestone: document.getElementById("taskMilestone").value || undefined,
-        planned_start: document.getElementById("taskPlannedStart").value || undefined,
-        planned_end: document.getElementById("taskPlannedEnd").value || undefined,
+        planned_start: document.getElementById("taskPlannedStart").value ||
+          undefined,
+        planned_end: document.getElementById("taskPlannedEnd").value ||
+          undefined,
         tag: this.getSelectedTags(),
-        blocked_by:
-          this.tm.selectedDependencies.length > 0
-            ? this.tm.selectedDependencies
-            : undefined,
+        blocked_by: this.tm.selectedDependencies.length > 0
+          ? this.tm.selectedDependencies
+          : undefined,
       },
       description: document.getElementById("taskDescription").value
         ? document.getElementById("taskDescription").value.split("\n")
@@ -182,10 +191,11 @@ export class TasksModule {
   }
 
   copyLink(taskId) {
-    const url = `${window.location.origin}${window.location.pathname}#task=${taskId}`;
+    const url =
+      `${window.location.origin}${window.location.pathname}#task=${taskId}`;
     navigator.clipboard.writeText(url).then(() => {
       showToast("Link copied to clipboard");
-    }).catch(err => {
+    }).catch((err) => {
       console.error("Failed to copy link:", err);
       showToast("Failed to copy link", true);
     });
@@ -238,8 +248,9 @@ export class TasksModule {
     document.getElementById("descriptionModalTitle").textContent =
       `${task.title} - Description`;
     const markdownText = task.description.join("\n");
-    document.getElementById("descriptionContent").innerHTML =
-      markdownToHtml(markdownText);
+    document.getElementById("descriptionContent").innerHTML = markdownToHtml(
+      markdownText,
+    );
 
     modal.classList.remove("hidden");
   }
@@ -390,7 +401,9 @@ export class TasksModule {
       this.updateInView(taskId, task);
 
       try {
-        const response = await TasksAPI.update(taskId, { completed: newCompleted });
+        const response = await TasksAPI.update(taskId, {
+          completed: newCompleted,
+        });
         if (!response.ok) {
           // Revert on failure
           task.completed = !newCompleted;
@@ -408,8 +421,10 @@ export class TasksModule {
 
   updateInView(taskId, task) {
     // Update checkbox state
-    const checkboxes = document.querySelectorAll(`input[onchange*="toggleTask('${taskId}')"]`);
-    checkboxes.forEach(cb => {
+    const checkboxes = document.querySelectorAll(
+      `input[onchange*="toggleTask('${taskId}')"]`,
+    );
+    checkboxes.forEach((cb) => {
       cb.checked = task.completed;
     });
 
@@ -417,27 +432,39 @@ export class TasksModule {
     const card = document.querySelector(`[data-task-id="${taskId}"]`);
     if (card) {
       // Board view - h4 title
-      const h4Title = card.querySelector('h4');
+      const h4Title = card.querySelector("h4");
       if (h4Title) {
         if (task.completed) {
-          h4Title.classList.add('line-through');
-          h4Title.classList.remove('text-gray-900', 'dark:text-gray-100');
-          h4Title.classList.add('text-gray-500', 'dark:text-gray-400');
+          h4Title.classList.add("line-through");
+          h4Title.classList.remove("text-gray-900", "dark:text-gray-100");
+          h4Title.classList.add("text-gray-500", "dark:text-gray-400");
         } else {
-          h4Title.classList.remove('line-through', 'text-gray-500', 'dark:text-gray-400');
-          h4Title.classList.add('text-gray-900', 'dark:text-gray-100');
+          h4Title.classList.remove(
+            "line-through",
+            "text-gray-500",
+            "dark:text-gray-400",
+          );
+          h4Title.classList.add("text-gray-900", "dark:text-gray-100");
         }
       }
 
       // List view - task-title span
-      const titleSpan = card.querySelector('.task-title');
+      const titleSpan = card.querySelector(".task-title");
       if (titleSpan) {
         if (task.completed) {
-          titleSpan.classList.add('line-through', 'text-gray-400', 'dark:text-gray-500');
-          titleSpan.classList.remove('text-gray-900', 'dark:text-gray-100');
+          titleSpan.classList.add(
+            "line-through",
+            "text-gray-400",
+            "dark:text-gray-500",
+          );
+          titleSpan.classList.remove("text-gray-900", "dark:text-gray-100");
         } else {
-          titleSpan.classList.remove('line-through', 'text-gray-400', 'dark:text-gray-500');
-          titleSpan.classList.add('text-gray-900', 'dark:text-gray-100');
+          titleSpan.classList.remove(
+            "line-through",
+            "text-gray-400",
+            "dark:text-gray-500",
+          );
+          titleSpan.classList.add("text-gray-900", "dark:text-gray-100");
         }
       }
     }

@@ -11,10 +11,9 @@ progress: 60
 
 # Client Portal
 
-Custom client portal for Acme Corp. White-label portal for customers to track orders, view invoices, and submit support tickets.
+Custom client portal for Acme Corp. White-label portal for customers to track
+orders, view invoices, and submit support tickets.
 
 ## Key Metrics
 
-Contract Value: $45,000
-Deadline: March 2026
-Completion: 60%
+Contract Value: $45,000 Deadline: March 2026 Completion: 60%

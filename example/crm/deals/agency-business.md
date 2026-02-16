@@ -15,6 +15,7 @@ created: 2026-02-05
 Business plan for 20 users with advanced reporting.
 
 ## Notes
+
 - Need time tracking demo
 - Comparing with Harvest
 - Quarterly budget approval needed

@@ -143,7 +143,7 @@ app.use(
       c.header("Pragma", "no-cache");
       c.header("Expires", "0");
     },
-  })
+  }),
 );
 
 console.log(`mdplanner v${VERSION}`);
@@ -155,6 +155,8 @@ if (cliArgs.cache) {
 
 const projects = await projectManager.scanProjects();
 console.log(`Found ${projects.length} project(s):`);
-projects.forEach(p => console.log(`  - ${p.filename} (${p.name}, ${p.taskCount} tasks)`));
+projects.forEach((p) =>
+  console.log(`  - ${p.filename} (${p.name}, ${p.taskCount} tasks)`)
+);
 
 Deno.serve({ port: cliArgs.port }, app.fetch);

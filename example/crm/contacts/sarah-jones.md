@@ -14,6 +14,7 @@ created: 2026-01-20
 Founder and CEO of Startup Labs.
 
 ## Notes
+
 - Very responsive
 - Interested in beta program
 - Active on Twitter

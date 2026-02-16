@@ -2,7 +2,7 @@
  * Directory-based parser for Business Model Canvas.
  * Each business model canvas is stored as a separate markdown file.
  */
-import { DirectoryParser, parseFrontmatter, buildFileContent } from "./base.ts";
+import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
 import type { BusinessModelCanvas } from "../../types.ts";
 
 interface BusinessModelFrontmatter {
@@ -10,7 +10,10 @@ interface BusinessModelFrontmatter {
   date: string;
 }
 
-type BusinessModelSection = keyof Omit<BusinessModelCanvas, "id" | "title" | "date">;
+type BusinessModelSection = keyof Omit<
+  BusinessModelCanvas,
+  "id" | "title" | "date"
+>;
 
 const SECTION_HEADERS: Record<BusinessModelSection, string[]> = {
   keyPartners: ["key partner", "partners"],
@@ -24,13 +27,19 @@ const SECTION_HEADERS: Record<BusinessModelSection, string[]> = {
   revenueStreams: ["revenue stream", "revenue"],
 };
 
-export class BusinessModelDirectoryParser extends DirectoryParser<BusinessModelCanvas> {
+export class BusinessModelDirectoryParser
+  extends DirectoryParser<BusinessModelCanvas> {
   constructor(projectDir: string) {
     super({ projectDir, sectionName: "businessmodel" });
   }
 
-  protected parseFile(content: string, _filePath: string): BusinessModelCanvas | null {
-    const { frontmatter, content: body } = parseFrontmatter<BusinessModelFrontmatter>(content);
+  protected parseFile(
+    content: string,
+    _filePath: string,
+  ): BusinessModelCanvas | null {
+    const { frontmatter, content: body } = parseFrontmatter<
+      BusinessModelFrontmatter
+    >(content);
 
     if (!frontmatter.id) {
       return null;
@@ -65,7 +74,7 @@ export class BusinessModelDirectoryParser extends DirectoryParser<BusinessModelC
         currentSection = null;
 
         for (const [section, keywords] of Object.entries(SECTION_HEADERS)) {
-          if (keywords.some(kw => headerText.includes(kw))) {
+          if (keywords.some((kw) => headerText.includes(kw))) {
             currentSection = section as BusinessModelSection;
             break;
           }
@@ -112,7 +121,9 @@ export class BusinessModelDirectoryParser extends DirectoryParser<BusinessModelC
     return buildFileContent(frontmatter, sections.join("\n"));
   }
 
-  async add(canvas: Omit<BusinessModelCanvas, "id">): Promise<BusinessModelCanvas> {
+  async add(
+    canvas: Omit<BusinessModelCanvas, "id">,
+  ): Promise<BusinessModelCanvas> {
     const newCanvas: BusinessModelCanvas = {
       ...canvas,
       id: this.generateId("bmc"),
@@ -121,7 +132,10 @@ export class BusinessModelDirectoryParser extends DirectoryParser<BusinessModelC
     return newCanvas;
   }
 
-  async update(id: string, updates: Partial<BusinessModelCanvas>): Promise<BusinessModelCanvas | null> {
+  async update(
+    id: string,
+    updates: Partial<BusinessModelCanvas>,
+  ): Promise<BusinessModelCanvas | null> {
     const existing = await this.read(id);
     if (!existing) return null;
 
@@ -134,7 +148,11 @@ export class BusinessModelDirectoryParser extends DirectoryParser<BusinessModelC
     return updated;
   }
 
-  async addItem(id: string, section: BusinessModelSection, item: string): Promise<BusinessModelCanvas | null> {
+  async addItem(
+    id: string,
+    section: BusinessModelSection,
+    item: string,
+  ): Promise<BusinessModelCanvas | null> {
     const canvas = await this.read(id);
     if (!canvas) return null;
 
@@ -143,7 +161,11 @@ export class BusinessModelDirectoryParser extends DirectoryParser<BusinessModelC
     return canvas;
   }
 
-  async removeItem(id: string, section: BusinessModelSection, itemIndex: number): Promise<BusinessModelCanvas | null> {
+  async removeItem(
+    id: string,
+    section: BusinessModelSection,
+    itemIndex: number,
+  ): Promise<BusinessModelCanvas | null> {
     const canvas = await this.read(id);
     if (!canvas) return null;
 

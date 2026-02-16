@@ -32,4 +32,5 @@ kpis:
 
 # TaskFlow Platform
 
-Cloud-based project management platform for agile teams. TaskFlow combines task tracking, time management, and team collaboration into a seamless experience.
+Cloud-based project management platform for agile teams. TaskFlow combines task
+tracking, time management, and team collaboration into a seamless experience.

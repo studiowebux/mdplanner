@@ -21,6 +21,7 @@ lineItems:
 Quarterly subscription for DevAgency.
 
 ## Terms
+
 - 3 month commitment
 - Quarterly billing
 - Priority support included

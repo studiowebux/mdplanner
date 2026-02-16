@@ -15,6 +15,7 @@ created: 2026-01-15
 Primary contact at Acme Corporation.
 
 ## Notes
+
 - Decision maker for tools
 - Technical background
 - Prefers email communication

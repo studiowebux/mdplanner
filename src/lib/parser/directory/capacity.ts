@@ -3,8 +3,12 @@
  * Each capacity plan is stored as a separate markdown file.
  * Team members and allocations are stored as nested structures.
  */
-import { DirectoryParser, parseFrontmatter, buildFileContent } from "./base.ts";
-import type { CapacityPlan, TeamMember, WeeklyAllocation } from "../../types.ts";
+import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
+import type {
+  CapacityPlan,
+  TeamMember,
+  WeeklyAllocation,
+} from "../../types.ts";
 
 interface CapacityFrontmatter {
   id: string;
@@ -18,7 +22,9 @@ export class CapacityDirectoryParser extends DirectoryParser<CapacityPlan> {
   }
 
   protected parseFile(content: string, _filePath: string): CapacityPlan | null {
-    const { frontmatter, content: body } = parseFrontmatter<CapacityFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<
+      CapacityFrontmatter
+    >(content);
 
     if (!frontmatter.id) {
       return null;
@@ -43,32 +49,42 @@ export class CapacityDirectoryParser extends DirectoryParser<CapacityPlan> {
       }
 
       const lowerLine = line.toLowerCase();
-      if (lowerLine.startsWith("## team member") || lowerLine.startsWith("## members")) {
+      if (
+        lowerLine.startsWith("## team member") ||
+        lowerLine.startsWith("## members")
+      ) {
         currentSection = "members";
         continue;
       }
-      if (lowerLine.startsWith("## allocation") || lowerLine.startsWith("## weekly")) {
+      if (
+        lowerLine.startsWith("## allocation") ||
+        lowerLine.startsWith("## weekly")
+      ) {
         currentSection = "allocations";
         continue;
       }
 
       // Parse team members: - Name | Role | 8h/day | Mon,Tue,Wed,Thu,Fri
       if (currentSection === "members") {
-        const memberMatch = line.match(/^[-*]\s+\((\w+)\)\s+(.+?)\s*\|\s*(.+?)\s*\|\s*(\d+)h\/day\s*\|\s*(.+)$/);
+        const memberMatch = line.match(
+          /^[-*]\s+\((\w+)\)\s+(.+?)\s*\|\s*(.+?)\s*\|\s*(\d+)h\/day\s*\|\s*(.+)$/,
+        );
         if (memberMatch) {
           result.teamMembers.push({
             id: memberMatch[1],
             name: memberMatch[2].trim(),
             role: memberMatch[3].trim() || undefined,
             hoursPerDay: parseInt(memberMatch[4], 10),
-            workingDays: memberMatch[5].split(",").map(d => d.trim()),
+            workingDays: memberMatch[5].split(",").map((d) => d.trim()),
           });
         }
       }
 
       // Parse allocations: - (alloc_id) member_id | 2026-02-10 | 20h | task | task_123 | Notes
       if (currentSection === "allocations") {
-        const allocMatch = line.match(/^[-*]\s+\((\w+)\)\s+(\w+)\s*\|\s*(\S+)\s*\|\s*(\d+)h\s*\|\s*(\w+)\s*\|\s*(\S*)\s*(?:\|\s*(.*))?$/);
+        const allocMatch = line.match(
+          /^[-*]\s+\((\w+)\)\s+(\w+)\s*\|\s*(\S+)\s*\|\s*(\d+)h\s*\|\s*(\w+)\s*\|\s*(\S*)\s*(?:\|\s*(.*))?$/,
+        );
         if (allocMatch) {
           result.allocations.push({
             id: allocMatch[1],
@@ -105,7 +121,9 @@ export class CapacityDirectoryParser extends DirectoryParser<CapacityPlan> {
     for (const member of plan.teamMembers) {
       const role = member.role || "";
       const days = member.workingDays.join(",");
-      sections.push(`- (${member.id}) ${member.name} | ${role} | ${member.hoursPerDay}h/day | ${days}`);
+      sections.push(
+        `- (${member.id}) ${member.name} | ${role} | ${member.hoursPerDay}h/day | ${days}`,
+      );
     }
 
     // Allocations
@@ -114,7 +132,11 @@ export class CapacityDirectoryParser extends DirectoryParser<CapacityPlan> {
     sections.push("");
     for (const alloc of plan.allocations) {
       const notes = alloc.notes ? ` | ${alloc.notes}` : "";
-      sections.push(`- (${alloc.id}) ${alloc.memberId} | ${alloc.weekStart} | ${alloc.allocatedHours}h | ${alloc.targetType} | ${alloc.targetId || ""}${notes}`);
+      sections.push(
+        `- (${alloc.id}) ${alloc.memberId} | ${alloc.weekStart} | ${alloc.allocatedHours}h | ${alloc.targetType} | ${
+          alloc.targetId || ""
+        }${notes}`,
+      );
     }
 
     return buildFileContent(frontmatter, sections.join("\n"));
@@ -129,7 +151,10 @@ export class CapacityDirectoryParser extends DirectoryParser<CapacityPlan> {
     return newPlan;
   }
 
-  async update(id: string, updates: Partial<CapacityPlan>): Promise<CapacityPlan | null> {
+  async update(
+    id: string,
+    updates: Partial<CapacityPlan>,
+  ): Promise<CapacityPlan | null> {
     const existing = await this.read(id);
     if (!existing) return null;
 
@@ -142,7 +167,10 @@ export class CapacityDirectoryParser extends DirectoryParser<CapacityPlan> {
     return updated;
   }
 
-  async addTeamMember(planId: string, member: Omit<TeamMember, "id">): Promise<CapacityPlan | null> {
+  async addTeamMember(
+    planId: string,
+    member: Omit<TeamMember, "id">,
+  ): Promise<CapacityPlan | null> {
     const plan = await this.read(planId);
     if (!plan) return null;
 
@@ -155,11 +183,15 @@ export class CapacityDirectoryParser extends DirectoryParser<CapacityPlan> {
     return plan;
   }
 
-  async updateTeamMember(planId: string, memberId: string, updates: Partial<TeamMember>): Promise<CapacityPlan | null> {
+  async updateTeamMember(
+    planId: string,
+    memberId: string,
+    updates: Partial<TeamMember>,
+  ): Promise<CapacityPlan | null> {
     const plan = await this.read(planId);
     if (!plan) return null;
 
-    const memberIndex = plan.teamMembers.findIndex(m => m.id === memberId);
+    const memberIndex = plan.teamMembers.findIndex((m) => m.id === memberId);
     if (memberIndex === -1) return null;
 
     plan.teamMembers[memberIndex] = {
@@ -171,18 +203,24 @@ export class CapacityDirectoryParser extends DirectoryParser<CapacityPlan> {
     return plan;
   }
 
-  async removeTeamMember(planId: string, memberId: string): Promise<CapacityPlan | null> {
+  async removeTeamMember(
+    planId: string,
+    memberId: string,
+  ): Promise<CapacityPlan | null> {
     const plan = await this.read(planId);
     if (!plan) return null;
 
-    plan.teamMembers = plan.teamMembers.filter(m => m.id !== memberId);
+    plan.teamMembers = plan.teamMembers.filter((m) => m.id !== memberId);
     // Also remove allocations for this member
-    plan.allocations = plan.allocations.filter(a => a.memberId !== memberId);
+    plan.allocations = plan.allocations.filter((a) => a.memberId !== memberId);
     await this.write(plan);
     return plan;
   }
 
-  async addAllocation(planId: string, allocation: Omit<WeeklyAllocation, "id">): Promise<CapacityPlan | null> {
+  async addAllocation(
+    planId: string,
+    allocation: Omit<WeeklyAllocation, "id">,
+  ): Promise<CapacityPlan | null> {
     const plan = await this.read(planId);
     if (!plan) return null;
 
@@ -195,11 +233,15 @@ export class CapacityDirectoryParser extends DirectoryParser<CapacityPlan> {
     return plan;
   }
 
-  async updateAllocation(planId: string, allocationId: string, updates: Partial<WeeklyAllocation>): Promise<CapacityPlan | null> {
+  async updateAllocation(
+    planId: string,
+    allocationId: string,
+    updates: Partial<WeeklyAllocation>,
+  ): Promise<CapacityPlan | null> {
     const plan = await this.read(planId);
     if (!plan) return null;
 
-    const allocIndex = plan.allocations.findIndex(a => a.id === allocationId);
+    const allocIndex = plan.allocations.findIndex((a) => a.id === allocationId);
     if (allocIndex === -1) return null;
 
     plan.allocations[allocIndex] = {
@@ -211,11 +253,14 @@ export class CapacityDirectoryParser extends DirectoryParser<CapacityPlan> {
     return plan;
   }
 
-  async removeAllocation(planId: string, allocationId: string): Promise<CapacityPlan | null> {
+  async removeAllocation(
+    planId: string,
+    allocationId: string,
+  ): Promise<CapacityPlan | null> {
     const plan = await this.read(planId);
     if (!plan) return null;
 
-    plan.allocations = plan.allocations.filter(a => a.id !== allocationId);
+    plan.allocations = plan.allocations.filter((a) => a.id !== allocationId);
     await this.write(plan);
     return plan;
   }

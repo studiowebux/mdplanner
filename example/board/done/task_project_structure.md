@@ -13,6 +13,7 @@ milestone: milestone_alpha
 Implement project organization with boards.
 
 ## Completed
+
 - Project creation and settings
 - Board views (Kanban, List)
 - Custom columns

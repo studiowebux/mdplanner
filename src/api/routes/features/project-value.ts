@@ -3,7 +3,12 @@
  */
 
 import { Hono } from "hono";
-import { AppVariables, getParser, jsonResponse, errorResponse } from "../context.ts";
+import {
+  AppVariables,
+  errorResponse,
+  getParser,
+  jsonResponse,
+} from "../context.ts";
 
 export const projectValueRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -39,7 +44,7 @@ projectValueRouter.put("/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json();
   const boards = await parser.readProjectValueBoards();
-  const index = boards.findIndex(b => b.id === id);
+  const index = boards.findIndex((b) => b.id === id);
   if (index === -1) return errorResponse("Not found", 404);
   boards[index] = { ...boards[index], ...body };
   await parser.saveProjectValueBoards(boards);
@@ -51,7 +56,7 @@ projectValueRouter.delete("/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const boards = await parser.readProjectValueBoards();
-  const filtered = boards.filter(b => b.id !== id);
+  const filtered = boards.filter((b) => b.id !== id);
   if (filtered.length === boards.length) return errorResponse("Not found", 404);
   await parser.saveProjectValueBoards(filtered);
   return jsonResponse({ success: true });

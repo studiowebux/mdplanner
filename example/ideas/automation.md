@@ -12,12 +12,14 @@ links: [idea_ai, idea_integrations]
 Allow users to create automated workflows triggered by events.
 
 ## Trigger Examples
+
 - Task moved to column
 - Due date approaching
 - Task completed
 - New comment added
 
 ## Action Examples
+
 - Send notification
 - Assign to user
 - Add label
@@ -25,4 +27,5 @@ Allow users to create automated workflows triggered by events.
 - Create subtasks
 
 ## Implementation
+
 Consider n8n or custom rules engine.

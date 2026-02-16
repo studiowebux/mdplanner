@@ -12,12 +12,14 @@ links: [idea_automation]
 Connect TaskFlow with other tools teams use.
 
 ## Priority Integrations
+
 1. Slack - notifications, create tasks from messages
 2. GitHub - link PRs to tasks, auto-close on merge
 3. Google Calendar - sync due dates
 4. Figma - embed designs in tasks
 
 ## Later Phase
+
 - Jira import/sync
 - Linear import
 - Notion sync

@@ -18,6 +18,7 @@ mode: simple
 ## Authentication
 
 All endpoints require Bearer token except:
+
 - POST /auth/login
 - POST /auth/register
 - POST /auth/refresh

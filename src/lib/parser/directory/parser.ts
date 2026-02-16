@@ -3,7 +3,7 @@
  * Composes individual section parsers to provide the same interface
  * as the single-file MarkdownParser.
  */
-import { ProjectDirectoryParser, type ProjectData } from "./project.ts";
+import { type ProjectData, ProjectDirectoryParser } from "./project.ts";
 import { NotesDirectoryParser } from "./notes.ts";
 import { GoalsDirectoryParser } from "./goals.ts";
 import { TasksDirectoryParser } from "./tasks.ts";
@@ -23,43 +23,52 @@ import { CapacityDirectoryParser } from "./capacity.ts";
 import { StrategicLevelsDirectoryParser } from "./strategic-levels.ts";
 import { BillingDirectoryParser } from "./billing.ts";
 import { CRMDirectoryParser } from "./crm.ts";
-import { PortfolioDirectoryParser, type PortfolioItem, type PortfolioSummary, type PortfolioKPI } from "./portfolio.ts";
-import { OrgChartDirectoryParser, type OrgChartMemberWithChildren, type OrgChartSummary } from "./orgchart.ts";
+import {
+  PortfolioDirectoryParser,
+  type PortfolioItem,
+  type PortfolioKPI,
+  type PortfolioSummary,
+} from "./portfolio.ts";
+import {
+  OrgChartDirectoryParser,
+  type OrgChartMemberWithChildren,
+  type OrgChartSummary,
+} from "./orgchart.ts";
 import type {
-  Task,
-  TaskConfig,
-  Note,
-  Goal,
-  StickyNote,
-  Mindmap,
-  C4Component,
-  ProjectInfo,
-  ProjectConfig,
-  Milestone,
-  Idea,
-  Retrospective,
-  SwotAnalysis,
-  RiskAnalysis,
-  LeanCanvas,
-  BusinessModelCanvas,
-  ProjectValueBoard,
-  Brief,
-  CapacityPlan,
-  TeamMember,
-  WeeklyAllocation,
-  StrategicLevelsBuilder,
-  StrategicLevel,
-  Customer,
   BillingRate,
-  Quote,
-  Invoice,
+  Brief,
+  BusinessModelCanvas,
+  C4Component,
+  CapacityPlan,
   Company,
   Contact,
+  Customer,
   Deal,
+  Goal,
+  Idea,
   Interaction,
-  TimeEntry,
-  Payment,
+  Invoice,
+  LeanCanvas,
+  Milestone,
+  Mindmap,
+  Note,
   OrgChartMember,
+  Payment,
+  ProjectConfig,
+  ProjectInfo,
+  ProjectValueBoard,
+  Quote,
+  Retrospective,
+  RiskAnalysis,
+  StickyNote,
+  StrategicLevel,
+  StrategicLevelsBuilder,
+  SwotAnalysis,
+  Task,
+  TaskConfig,
+  TeamMember,
+  TimeEntry,
+  WeeklyAllocation,
 } from "../../types.ts";
 
 export class DirectoryMarkdownParser {
@@ -173,7 +182,7 @@ export class DirectoryMarkdownParser {
 
   async updateTask(
     id: string,
-    updates: Partial<Omit<Task, "id">>
+    updates: Partial<Omit<Task, "id">>,
   ): Promise<boolean> {
     const result = await this.tasksParser.update(id, updates);
     return result !== null;
@@ -187,7 +196,11 @@ export class DirectoryMarkdownParser {
     return this.tasksParser.moveToSection(id, newSection);
   }
 
-  async reorderTask(id: string, section: string, position: number): Promise<boolean> {
+  async reorderTask(
+    id: string,
+    section: string,
+    position: number,
+  ): Promise<boolean> {
     return this.tasksParser.reorder(id, section, position);
   }
 
@@ -206,7 +219,7 @@ export class DirectoryMarkdownParser {
   }
 
   async addNote(
-    note: Omit<Note, "id" | "createdAt" | "updatedAt" | "revision">
+    note: Omit<Note, "id" | "createdAt" | "updatedAt" | "revision">,
   ): Promise<string> {
     const newNote = await this.notesParser.add({
       title: note.title,
@@ -272,14 +285,14 @@ export class DirectoryMarkdownParser {
       stickyNote.content,
       stickyNote.color,
       stickyNote.position,
-      stickyNote.size
+      stickyNote.size,
     );
     return newNote.id;
   }
 
   async updateStickyNote(
     id: string,
-    updates: Partial<StickyNote>
+    updates: Partial<StickyNote>,
   ): Promise<boolean> {
     const result = await this.canvasParser.update(id, updates);
     return result !== null;
@@ -291,7 +304,7 @@ export class DirectoryMarkdownParser {
 
   async updateStickyNotePosition(
     id: string,
-    position: { x: number; y: number }
+    position: { x: number; y: number },
   ): Promise<StickyNote | null> {
     return this.canvasParser.updatePosition(id, position);
   }
@@ -313,7 +326,7 @@ export class DirectoryMarkdownParser {
 
   async updateMindmap(
     id: string,
-    updates: Partial<Mindmap>
+    updates: Partial<Mindmap>,
   ): Promise<boolean> {
     const result = await this.mindmapsParser.update(id, updates);
     return result !== null;
@@ -326,7 +339,7 @@ export class DirectoryMarkdownParser {
   async addMindmapNode(
     mindmapId: string,
     text: string,
-    parentId?: string
+    parentId?: string,
   ): Promise<Mindmap | null> {
     return this.mindmapsParser.addNode(mindmapId, text, parentId);
   }
@@ -334,14 +347,14 @@ export class DirectoryMarkdownParser {
   async updateMindmapNode(
     mindmapId: string,
     nodeId: string,
-    text: string
+    text: string,
   ): Promise<Mindmap | null> {
     return this.mindmapsParser.updateNode(mindmapId, nodeId, text);
   }
 
   async deleteMindmapNode(
     mindmapId: string,
-    nodeId: string
+    nodeId: string,
   ): Promise<Mindmap | null> {
     return this.mindmapsParser.deleteNode(mindmapId, nodeId);
   }
@@ -355,14 +368,14 @@ export class DirectoryMarkdownParser {
   }
 
   async addC4Component(
-    component: Omit<C4Component, "id">
+    component: Omit<C4Component, "id">,
   ): Promise<C4Component> {
     return this.c4Parser.add(component);
   }
 
   async updateC4Component(
     id: string,
-    updates: Partial<C4Component>
+    updates: Partial<C4Component>,
   ): Promise<C4Component | null> {
     return this.c4Parser.update(id, updates);
   }
@@ -373,7 +386,7 @@ export class DirectoryMarkdownParser {
 
   async updateC4Position(
     id: string,
-    position: { x: number; y: number }
+    position: { x: number; y: number },
   ): Promise<C4Component | null> {
     return this.c4Parser.updatePosition(id, position);
   }
@@ -381,14 +394,14 @@ export class DirectoryMarkdownParser {
   async addC4Connection(
     sourceId: string,
     targetId: string,
-    label: string
+    label: string,
   ): Promise<C4Component | null> {
     return this.c4Parser.addConnection(sourceId, targetId, label);
   }
 
   async removeC4Connection(
     sourceId: string,
-    targetId: string
+    targetId: string,
   ): Promise<C4Component | null> {
     return this.c4Parser.removeConnection(sourceId, targetId);
   }
@@ -409,7 +422,10 @@ export class DirectoryMarkdownParser {
     return this.milestonesParser.add(milestone);
   }
 
-  async updateMilestone(id: string, updates: Partial<Milestone>): Promise<Milestone | null> {
+  async updateMilestone(
+    id: string,
+    updates: Partial<Milestone>,
+  ): Promise<Milestone | null> {
     return this.milestonesParser.update(id, updates);
   }
 
@@ -473,11 +489,16 @@ export class DirectoryMarkdownParser {
     return this.retrospectivesParser.readAll();
   }
 
-  async addRetrospective(retro: Omit<Retrospective, "id">): Promise<Retrospective> {
+  async addRetrospective(
+    retro: Omit<Retrospective, "id">,
+  ): Promise<Retrospective> {
     return this.retrospectivesParser.add(retro);
   }
 
-  async updateRetrospective(id: string, updates: Partial<Retrospective>): Promise<Retrospective | null> {
+  async updateRetrospective(
+    id: string,
+    updates: Partial<Retrospective>,
+  ): Promise<Retrospective | null> {
     return this.retrospectivesParser.update(id, updates);
   }
 
@@ -488,7 +509,7 @@ export class DirectoryMarkdownParser {
   async addRetrospectiveItem(
     id: string,
     section: "continue" | "stop" | "start",
-    item: string
+    item: string,
   ): Promise<Retrospective | null> {
     return this.retrospectivesParser.addItem(id, section, item);
   }
@@ -505,7 +526,10 @@ export class DirectoryMarkdownParser {
     return this.swotParser.add(swot);
   }
 
-  async updateSwotAnalysis(id: string, updates: Partial<SwotAnalysis>): Promise<SwotAnalysis | null> {
+  async updateSwotAnalysis(
+    id: string,
+    updates: Partial<SwotAnalysis>,
+  ): Promise<SwotAnalysis | null> {
     return this.swotParser.update(id, updates);
   }
 
@@ -516,7 +540,7 @@ export class DirectoryMarkdownParser {
   async addSwotItem(
     id: string,
     section: "strengths" | "weaknesses" | "opportunities" | "threats",
-    item: string
+    item: string,
   ): Promise<SwotAnalysis | null> {
     return this.swotParser.addItem(id, section, item);
   }
@@ -533,7 +557,10 @@ export class DirectoryMarkdownParser {
     return this.riskParser.add(risk);
   }
 
-  async updateRiskAnalysis(id: string, updates: Partial<RiskAnalysis>): Promise<RiskAnalysis | null> {
+  async updateRiskAnalysis(
+    id: string,
+    updates: Partial<RiskAnalysis>,
+  ): Promise<RiskAnalysis | null> {
     return this.riskParser.update(id, updates);
   }
 
@@ -543,8 +570,12 @@ export class DirectoryMarkdownParser {
 
   async addRiskItem(
     id: string,
-    quadrant: "highImpactHighProb" | "highImpactLowProb" | "lowImpactHighProb" | "lowImpactLowProb",
-    item: string
+    quadrant:
+      | "highImpactHighProb"
+      | "highImpactLowProb"
+      | "lowImpactHighProb"
+      | "lowImpactLowProb",
+    item: string,
   ): Promise<RiskAnalysis | null> {
     return this.riskParser.addItem(id, quadrant, item);
   }
@@ -561,7 +592,10 @@ export class DirectoryMarkdownParser {
     return this.leanCanvasParser.add(canvas);
   }
 
-  async updateLeanCanvas(id: string, updates: Partial<LeanCanvas>): Promise<LeanCanvas | null> {
+  async updateLeanCanvas(
+    id: string,
+    updates: Partial<LeanCanvas>,
+  ): Promise<LeanCanvas | null> {
     return this.leanCanvasParser.update(id, updates);
   }
 
@@ -577,11 +611,16 @@ export class DirectoryMarkdownParser {
     return this.businessModelParser.readAll();
   }
 
-  async addBusinessModelCanvas(canvas: Omit<BusinessModelCanvas, "id">): Promise<BusinessModelCanvas> {
+  async addBusinessModelCanvas(
+    canvas: Omit<BusinessModelCanvas, "id">,
+  ): Promise<BusinessModelCanvas> {
     return this.businessModelParser.add(canvas);
   }
 
-  async updateBusinessModelCanvas(id: string, updates: Partial<BusinessModelCanvas>): Promise<BusinessModelCanvas | null> {
+  async updateBusinessModelCanvas(
+    id: string,
+    updates: Partial<BusinessModelCanvas>,
+  ): Promise<BusinessModelCanvas | null> {
     return this.businessModelParser.update(id, updates);
   }
 
@@ -597,11 +636,16 @@ export class DirectoryMarkdownParser {
     return this.projectValueParser.readAll();
   }
 
-  async addProjectValueBoard(board: Omit<ProjectValueBoard, "id">): Promise<ProjectValueBoard> {
+  async addProjectValueBoard(
+    board: Omit<ProjectValueBoard, "id">,
+  ): Promise<ProjectValueBoard> {
     return this.projectValueParser.add(board);
   }
 
-  async updateProjectValueBoard(id: string, updates: Partial<ProjectValueBoard>): Promise<ProjectValueBoard | null> {
+  async updateProjectValueBoard(
+    id: string,
+    updates: Partial<ProjectValueBoard>,
+  ): Promise<ProjectValueBoard | null> {
     return this.projectValueParser.update(id, updates);
   }
 
@@ -621,7 +665,10 @@ export class DirectoryMarkdownParser {
     return this.briefParser.add(brief);
   }
 
-  async updateBrief(id: string, updates: Partial<Brief>): Promise<Brief | null> {
+  async updateBrief(
+    id: string,
+    updates: Partial<Brief>,
+  ): Promise<Brief | null> {
     return this.briefParser.update(id, updates);
   }
 
@@ -641,7 +688,10 @@ export class DirectoryMarkdownParser {
     return this.capacityParser.add(plan);
   }
 
-  async updateCapacityPlan(id: string, updates: Partial<CapacityPlan>): Promise<CapacityPlan | null> {
+  async updateCapacityPlan(
+    id: string,
+    updates: Partial<CapacityPlan>,
+  ): Promise<CapacityPlan | null> {
     return this.capacityParser.update(id, updates);
   }
 
@@ -649,27 +699,47 @@ export class DirectoryMarkdownParser {
     return this.capacityParser.delete(id);
   }
 
-  async addTeamMember(planId: string, member: Omit<TeamMember, "id">): Promise<CapacityPlan | null> {
+  async addTeamMember(
+    planId: string,
+    member: Omit<TeamMember, "id">,
+  ): Promise<CapacityPlan | null> {
     return this.capacityParser.addTeamMember(planId, member);
   }
 
-  async updateTeamMember(planId: string, memberId: string, updates: Partial<TeamMember>): Promise<CapacityPlan | null> {
+  async updateTeamMember(
+    planId: string,
+    memberId: string,
+    updates: Partial<TeamMember>,
+  ): Promise<CapacityPlan | null> {
     return this.capacityParser.updateTeamMember(planId, memberId, updates);
   }
 
-  async removeTeamMember(planId: string, memberId: string): Promise<CapacityPlan | null> {
+  async removeTeamMember(
+    planId: string,
+    memberId: string,
+  ): Promise<CapacityPlan | null> {
     return this.capacityParser.removeTeamMember(planId, memberId);
   }
 
-  async addAllocation(planId: string, allocation: Omit<WeeklyAllocation, "id">): Promise<CapacityPlan | null> {
+  async addAllocation(
+    planId: string,
+    allocation: Omit<WeeklyAllocation, "id">,
+  ): Promise<CapacityPlan | null> {
     return this.capacityParser.addAllocation(planId, allocation);
   }
 
-  async updateAllocation(planId: string, allocationId: string, updates: Partial<WeeklyAllocation>): Promise<CapacityPlan | null> {
+  async updateAllocation(
+    planId: string,
+    allocationId: string,
+    updates: Partial<WeeklyAllocation>,
+  ): Promise<CapacityPlan | null> {
     return this.capacityParser.updateAllocation(planId, allocationId, updates);
   }
 
-  async removeAllocation(planId: string, allocationId: string): Promise<CapacityPlan | null> {
+  async removeAllocation(
+    planId: string,
+    allocationId: string,
+  ): Promise<CapacityPlan | null> {
     return this.capacityParser.removeAllocation(planId, allocationId);
   }
 
@@ -681,11 +751,16 @@ export class DirectoryMarkdownParser {
     return this.strategicLevelsParser.readAll();
   }
 
-  async addStrategicLevelsBuilder(builder: Omit<StrategicLevelsBuilder, "id">): Promise<StrategicLevelsBuilder> {
+  async addStrategicLevelsBuilder(
+    builder: Omit<StrategicLevelsBuilder, "id">,
+  ): Promise<StrategicLevelsBuilder> {
     return this.strategicLevelsParser.add(builder);
   }
 
-  async updateStrategicLevelsBuilder(id: string, updates: Partial<StrategicLevelsBuilder>): Promise<StrategicLevelsBuilder | null> {
+  async updateStrategicLevelsBuilder(
+    id: string,
+    updates: Partial<StrategicLevelsBuilder>,
+  ): Promise<StrategicLevelsBuilder | null> {
     return this.strategicLevelsParser.update(id, updates);
   }
 
@@ -693,15 +768,25 @@ export class DirectoryMarkdownParser {
     return this.strategicLevelsParser.delete(id);
   }
 
-  async addStrategicLevel(builderId: string, level: Omit<StrategicLevel, "id" | "order">): Promise<StrategicLevelsBuilder | null> {
+  async addStrategicLevel(
+    builderId: string,
+    level: Omit<StrategicLevel, "id" | "order">,
+  ): Promise<StrategicLevelsBuilder | null> {
     return this.strategicLevelsParser.addLevel(builderId, level);
   }
 
-  async updateStrategicLevel(builderId: string, levelId: string, updates: Partial<StrategicLevel>): Promise<StrategicLevelsBuilder | null> {
+  async updateStrategicLevel(
+    builderId: string,
+    levelId: string,
+    updates: Partial<StrategicLevel>,
+  ): Promise<StrategicLevelsBuilder | null> {
     return this.strategicLevelsParser.updateLevel(builderId, levelId, updates);
   }
 
-  async removeStrategicLevel(builderId: string, levelId: string): Promise<StrategicLevelsBuilder | null> {
+  async removeStrategicLevel(
+    builderId: string,
+    levelId: string,
+  ): Promise<StrategicLevelsBuilder | null> {
     return this.strategicLevelsParser.removeLevel(builderId, levelId);
   }
 
@@ -713,11 +798,16 @@ export class DirectoryMarkdownParser {
     return this.billingParser.readAllCustomers();
   }
 
-  async addCustomer(customer: Omit<Customer, "id" | "created">): Promise<Customer> {
+  async addCustomer(
+    customer: Omit<Customer, "id" | "created">,
+  ): Promise<Customer> {
     return this.billingParser.addCustomer(customer);
   }
 
-  async updateCustomer(id: string, updates: Partial<Customer>): Promise<Customer | null> {
+  async updateCustomer(
+    id: string,
+    updates: Partial<Customer>,
+  ): Promise<Customer | null> {
     return this.billingParser.updateCustomer(id, updates);
   }
 
@@ -737,7 +827,10 @@ export class DirectoryMarkdownParser {
     return this.billingParser.addRate(rate);
   }
 
-  async updateBillingRate(id: string, updates: Partial<BillingRate>): Promise<BillingRate | null> {
+  async updateBillingRate(
+    id: string,
+    updates: Partial<BillingRate>,
+  ): Promise<BillingRate | null> {
     return this.billingParser.updateRate(id, updates);
   }
 
@@ -757,7 +850,10 @@ export class DirectoryMarkdownParser {
     return this.billingParser.addQuote(quote);
   }
 
-  async updateQuote(id: string, updates: Partial<Quote>): Promise<Quote | null> {
+  async updateQuote(
+    id: string,
+    updates: Partial<Quote>,
+  ): Promise<Quote | null> {
     return this.billingParser.updateQuote(id, updates);
   }
 
@@ -777,7 +873,10 @@ export class DirectoryMarkdownParser {
     return this.billingParser.addInvoice(invoice);
   }
 
-  async updateInvoice(id: string, updates: Partial<Invoice>): Promise<Invoice | null> {
+  async updateInvoice(
+    id: string,
+    updates: Partial<Invoice>,
+  ): Promise<Invoice | null> {
     return this.billingParser.updateInvoice(id, updates);
   }
 
@@ -812,7 +911,7 @@ export class DirectoryMarkdownParser {
 
   async addTimeEntry(
     taskId: string,
-    entry: Omit<TimeEntry, "id">
+    entry: Omit<TimeEntry, "id">,
   ): Promise<string> {
     const task = await this.tasksParser.read(taskId);
     if (!task) throw new Error(`Task ${taskId} not found`);
@@ -877,7 +976,10 @@ export class DirectoryMarkdownParser {
     return this.crmParser.addCompany(company);
   }
 
-  async updateCompany(id: string, updates: Partial<Company>): Promise<Company | null> {
+  async updateCompany(
+    id: string,
+    updates: Partial<Company>,
+  ): Promise<Company | null> {
     return this.crmParser.updateCompany(id, updates);
   }
 
@@ -897,7 +999,10 @@ export class DirectoryMarkdownParser {
     return this.crmParser.addContact(contact);
   }
 
-  async updateContact(id: string, updates: Partial<Contact>): Promise<Contact | null> {
+  async updateContact(
+    id: string,
+    updates: Partial<Contact>,
+  ): Promise<Contact | null> {
     return this.crmParser.updateContact(id, updates);
   }
 
@@ -945,11 +1050,16 @@ export class DirectoryMarkdownParser {
     return this.crmParser.readAllInteractions();
   }
 
-  async addInteraction(interaction: Omit<Interaction, "id">): Promise<Interaction> {
+  async addInteraction(
+    interaction: Omit<Interaction, "id">,
+  ): Promise<Interaction> {
     return this.crmParser.addInteraction(interaction);
   }
 
-  async updateInteraction(id: string, updates: Partial<Interaction>): Promise<Interaction | null> {
+  async updateInteraction(
+    id: string,
+    updates: Partial<Interaction>,
+  ): Promise<Interaction | null> {
     return this.crmParser.updateInteraction(id, updates);
   }
 
@@ -1006,7 +1116,9 @@ export class DirectoryMarkdownParser {
     await this.leanCanvasParser.saveAll(leanCanvases);
   }
 
-  async saveBusinessModelCanvases(canvases: BusinessModelCanvas[]): Promise<void> {
+  async saveBusinessModelCanvases(
+    canvases: BusinessModelCanvas[],
+  ): Promise<void> {
     await this.businessModelParser.saveAll(canvases);
   }
 
@@ -1022,7 +1134,9 @@ export class DirectoryMarkdownParser {
     await this.capacityParser.saveAll(plans);
   }
 
-  async saveStrategicLevelsBuilders(builders: StrategicLevelsBuilder[]): Promise<void> {
+  async saveStrategicLevelsBuilders(
+    builders: StrategicLevelsBuilder[],
+  ): Promise<void> {
     await this.strategicLevelsParser.saveAll(builders);
   }
 
@@ -1101,7 +1215,10 @@ export class DirectoryMarkdownParser {
     return this.portfolioParser.read(id);
   }
 
-  async updatePortfolioItem(id: string, updates: Partial<PortfolioItem>): Promise<PortfolioItem | null> {
+  async updatePortfolioItem(
+    id: string,
+    updates: Partial<PortfolioItem>,
+  ): Promise<PortfolioItem | null> {
     return this.portfolioParser.update(id, updates);
   }
 
@@ -1125,11 +1242,16 @@ export class DirectoryMarkdownParser {
     return this.orgchartParser.read(id);
   }
 
-  async addOrgChartMember(member: Omit<OrgChartMember, "id">): Promise<OrgChartMember> {
+  async addOrgChartMember(
+    member: Omit<OrgChartMember, "id">,
+  ): Promise<OrgChartMember> {
     return this.orgchartParser.add(member);
   }
 
-  async updateOrgChartMember(id: string, updates: Partial<OrgChartMember>): Promise<OrgChartMember | null> {
+  async updateOrgChartMember(
+    id: string,
+    updates: Partial<OrgChartMember>,
+  ): Promise<OrgChartMember | null> {
     return this.orgchartParser.update(id, updates);
   }
 
@@ -1199,7 +1321,9 @@ export class DirectoryMarkdownParser {
     await Deno.mkdir(`${this.projectDir}/mindmaps`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/c4`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/board/todo`, { recursive: true });
-    await Deno.mkdir(`${this.projectDir}/board/in_progress`, { recursive: true });
+    await Deno.mkdir(`${this.projectDir}/board/in_progress`, {
+      recursive: true,
+    });
     await Deno.mkdir(`${this.projectDir}/board/done`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/milestones`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/ideas`, { recursive: true });
@@ -1212,14 +1336,20 @@ export class DirectoryMarkdownParser {
     await Deno.mkdir(`${this.projectDir}/brief`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/capacity`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/strategiclevels`, { recursive: true });
-    await Deno.mkdir(`${this.projectDir}/billing/customers`, { recursive: true });
+    await Deno.mkdir(`${this.projectDir}/billing/customers`, {
+      recursive: true,
+    });
     await Deno.mkdir(`${this.projectDir}/billing/rates`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/billing/quotes`, { recursive: true });
-    await Deno.mkdir(`${this.projectDir}/billing/invoices`, { recursive: true });
+    await Deno.mkdir(`${this.projectDir}/billing/invoices`, {
+      recursive: true,
+    });
     await Deno.mkdir(`${this.projectDir}/crm/companies`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/crm/contacts`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/crm/deals`, { recursive: true });
-    await Deno.mkdir(`${this.projectDir}/crm/interactions`, { recursive: true });
+    await Deno.mkdir(`${this.projectDir}/crm/interactions`, {
+      recursive: true,
+    });
     await Deno.mkdir(`${this.projectDir}/orgchart`, { recursive: true });
 
     // Create project.md

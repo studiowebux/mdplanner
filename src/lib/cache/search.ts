@@ -91,7 +91,7 @@ export class SearchEngine {
         WHERE tasks_fts MATCH ?
         ORDER BY score
         LIMIT ?`,
-        [query, limit]
+        [query, limit],
       );
       return rows.map((r) => ({ ...r, type: "task" as const }));
     } catch {
@@ -119,7 +119,7 @@ export class SearchEngine {
         WHERE notes_fts MATCH ?
         ORDER BY score
         LIMIT ?`,
-        [query, limit]
+        [query, limit],
       );
       return rows.map((r) => ({ ...r, type: "note" as const }));
     } catch {
@@ -147,7 +147,7 @@ export class SearchEngine {
         WHERE goals_fts MATCH ?
         ORDER BY score
         LIMIT ?`,
-        [query, limit]
+        [query, limit],
       );
       return rows.map((r) => ({ ...r, type: "goal" as const }));
     } catch {
@@ -175,7 +175,7 @@ export class SearchEngine {
         WHERE ideas_fts MATCH ?
         ORDER BY score
         LIMIT ?`,
-        [query, limit]
+        [query, limit],
       );
       return rows.map((r) => ({ ...r, type: "idea" as const }));
     } catch {
@@ -211,7 +211,7 @@ export class SearchEngine {
       milestones,
       companies,
       deals,
-      total: tasks + notes + goals + ideas + milestones + companies + deals
+      total: tasks + notes + goals + ideas + milestones + companies + deals,
     };
   }
 

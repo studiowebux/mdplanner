@@ -1,13 +1,13 @@
 // Accessibility Preferences Manager
 // Manages: reducedMotion, focusMode, highContrast, largeTargets, showBreadcrumbs
 
-const STORAGE_KEY = 'mdplanner_accessibility_prefs';
+const STORAGE_KEY = "mdplanner_accessibility_prefs";
 
 const DEFAULT_PREFS = {
-  reducedMotion: 'system', // 'system' | 'on' | 'off'
+  reducedMotion: "system", // 'system' | 'on' | 'off'
   highContrast: false,
   largeTargets: false,
-  showBreadcrumbs: true
+  showBreadcrumbs: true,
 };
 
 /**
@@ -36,7 +36,7 @@ export class AccessibilityManager {
         this.prefs = { ...DEFAULT_PREFS, ...parsed };
       }
     } catch (e) {
-      console.warn('Failed to load accessibility preferences:', e);
+      console.warn("Failed to load accessibility preferences:", e);
     }
   }
 
@@ -47,7 +47,7 @@ export class AccessibilityManager {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.prefs));
     } catch (e) {
-      console.warn('Failed to save accessibility preferences:', e);
+      console.warn("Failed to save accessibility preferences:", e);
     }
   }
 
@@ -90,19 +90,19 @@ export class AccessibilityManager {
 
     // Reduced motion
     const shouldReduceMotion = this.shouldReduceMotion();
-    body.classList.toggle('reduce-motion', shouldReduceMotion);
+    body.classList.toggle("reduce-motion", shouldReduceMotion);
 
     // High contrast
-    body.classList.toggle('high-contrast', this.prefs.highContrast);
-    html.classList.toggle('high-contrast', this.prefs.highContrast);
+    body.classList.toggle("high-contrast", this.prefs.highContrast);
+    html.classList.toggle("high-contrast", this.prefs.highContrast);
 
     // Large targets
-    body.classList.toggle('large-targets', this.prefs.largeTargets);
+    body.classList.toggle("large-targets", this.prefs.largeTargets);
 
     // Breadcrumbs visibility
-    const breadcrumb = document.getElementById('breadcrumb');
+    const breadcrumb = document.getElementById("breadcrumb");
     if (breadcrumb) {
-      breadcrumb.classList.toggle('hidden', !this.prefs.showBreadcrumbs);
+      breadcrumb.classList.toggle("hidden", !this.prefs.showBreadcrumbs);
     }
   }
 
@@ -111,19 +111,19 @@ export class AccessibilityManager {
    * @returns {boolean}
    */
   static shouldReduceMotion() {
-    if (this.prefs.reducedMotion === 'on') return true;
-    if (this.prefs.reducedMotion === 'off') return false;
+    if (this.prefs.reducedMotion === "on") return true;
+    if (this.prefs.reducedMotion === "off") return false;
     // 'system' - check prefers-reduced-motion
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }
 
   /**
    * Watch for system preference changes
    */
   static watchSystemPreferences() {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    mediaQuery.addEventListener('change', () => {
-      if (this.prefs.reducedMotion === 'system') {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    mediaQuery.addEventListener("change", () => {
+      if (this.prefs.reducedMotion === "system") {
         this.apply();
       }
     });

@@ -2,7 +2,7 @@
  * Directory-based parser for Retrospectives.
  * Each retrospective is stored as a separate markdown file.
  */
-import { DirectoryParser, parseFrontmatter, buildFileContent } from "./base.ts";
+import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
 import type { Retrospective } from "../../types.ts";
 
 interface RetrospectiveFrontmatter {
@@ -11,13 +11,19 @@ interface RetrospectiveFrontmatter {
   status: "open" | "closed";
 }
 
-export class RetrospectivesDirectoryParser extends DirectoryParser<Retrospective> {
+export class RetrospectivesDirectoryParser
+  extends DirectoryParser<Retrospective> {
   constructor(projectDir: string) {
     super({ projectDir, sectionName: "retrospectives" });
   }
 
-  protected parseFile(content: string, _filePath: string): Retrospective | null {
-    const { frontmatter, content: body } = parseFrontmatter<RetrospectiveFrontmatter>(content);
+  protected parseFile(
+    content: string,
+    _filePath: string,
+  ): Retrospective | null {
+    const { frontmatter, content: body } = parseFrontmatter<
+      RetrospectiveFrontmatter
+    >(content);
 
     if (!frontmatter.id) {
       return null;
@@ -40,15 +46,25 @@ export class RetrospectivesDirectoryParser extends DirectoryParser<Retrospective
 
       // Check for section headers
       const lowerLine = line.toLowerCase();
-      if (lowerLine.startsWith("## continue") || lowerLine.startsWith("## went well") || lowerLine.startsWith("## keep doing")) {
+      if (
+        lowerLine.startsWith("## continue") ||
+        lowerLine.startsWith("## went well") ||
+        lowerLine.startsWith("## keep doing")
+      ) {
         currentSection = "continue";
         continue;
       }
-      if (lowerLine.startsWith("## stop") || lowerLine.startsWith("## improve") || lowerLine.startsWith("## needs improvement")) {
+      if (
+        lowerLine.startsWith("## stop") || lowerLine.startsWith("## improve") ||
+        lowerLine.startsWith("## needs improvement")
+      ) {
         currentSection = "stop";
         continue;
       }
-      if (lowerLine.startsWith("## start") || lowerLine.startsWith("## action") || lowerLine.startsWith("## try")) {
+      if (
+        lowerLine.startsWith("## start") || lowerLine.startsWith("## action") ||
+        lowerLine.startsWith("## try")
+      ) {
         currentSection = "start";
         continue;
       }
@@ -136,7 +152,10 @@ export class RetrospectivesDirectoryParser extends DirectoryParser<Retrospective
   /**
    * Update an existing retrospective.
    */
-  async update(id: string, updates: Partial<Retrospective>): Promise<Retrospective | null> {
+  async update(
+    id: string,
+    updates: Partial<Retrospective>,
+  ): Promise<Retrospective | null> {
     const existing = await this.read(id);
     if (!existing) return null;
 
@@ -152,7 +171,11 @@ export class RetrospectivesDirectoryParser extends DirectoryParser<Retrospective
   /**
    * Add item to a specific section.
    */
-  async addItem(id: string, section: "continue" | "stop" | "start", item: string): Promise<Retrospective | null> {
+  async addItem(
+    id: string,
+    section: "continue" | "stop" | "start",
+    item: string,
+  ): Promise<Retrospective | null> {
     const retro = await this.read(id);
     if (!retro) return null;
 
@@ -164,7 +187,11 @@ export class RetrospectivesDirectoryParser extends DirectoryParser<Retrospective
   /**
    * Remove item from a specific section.
    */
-  async removeItem(id: string, section: "continue" | "stop" | "start", itemIndex: number): Promise<Retrospective | null> {
+  async removeItem(
+    id: string,
+    section: "continue" | "stop" | "start",
+    itemIndex: number,
+  ): Promise<Retrospective | null> {
     const retro = await this.read(id);
     if (!retro) return null;
 

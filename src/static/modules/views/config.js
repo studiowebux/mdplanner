@@ -1,6 +1,6 @@
 // Config View Module
-import { ProjectAPI } from '../api.js';
-import { AccessibilityManager } from '../ui/accessibility.js';
+import { ProjectAPI } from "../api.js";
+import { AccessibilityManager } from "../ui/accessibility.js";
 
 /**
  * Project configuration - sections, assignees, tags management
@@ -50,22 +50,24 @@ export class ConfigView {
 
   renderAccessibilitySettings() {
     // Set current values
-    const reducedMotion = document.getElementById('accessibilityReducedMotion');
-    const highContrast = document.getElementById('accessibilityHighContrast');
-    const largeTargets = document.getElementById('accessibilityLargeTargets');
-    const showBreadcrumbs = document.getElementById('accessibilityShowBreadcrumbs');
+    const reducedMotion = document.getElementById("accessibilityReducedMotion");
+    const highContrast = document.getElementById("accessibilityHighContrast");
+    const largeTargets = document.getElementById("accessibilityLargeTargets");
+    const showBreadcrumbs = document.getElementById(
+      "accessibilityShowBreadcrumbs",
+    );
 
     if (reducedMotion) {
-      reducedMotion.value = AccessibilityManager.get('reducedMotion');
+      reducedMotion.value = AccessibilityManager.get("reducedMotion");
     }
     if (highContrast) {
-      highContrast.checked = AccessibilityManager.get('highContrast');
+      highContrast.checked = AccessibilityManager.get("highContrast");
     }
     if (largeTargets) {
-      largeTargets.checked = AccessibilityManager.get('largeTargets');
+      largeTargets.checked = AccessibilityManager.get("largeTargets");
     }
     if (showBreadcrumbs) {
-      showBreadcrumbs.checked = AccessibilityManager.get('showBreadcrumbs');
+      showBreadcrumbs.checked = AccessibilityManager.get("showBreadcrumbs");
     }
   }
 
@@ -82,23 +84,23 @@ export class ConfigView {
                 <span class="flex-1 text-gray-900 dark:text-gray-100">${section}</span>
                 <div class="flex gap-1">
                     ${
-                      index > 0
-                        ? `<button onclick="taskManager.configView.moveSectionUp(${index})" class="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" title="Move Up">
+        index > 0
+          ? `<button onclick="taskManager.configView.moveSectionUp(${index})" class="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" title="Move Up">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
                         </svg>
                     </button>`
-                        : ""
-                    }
+          : ""
+      }
                     ${
-                      index < sections.length - 1
-                        ? `<button onclick="taskManager.configView.moveSectionDown(${index})" class="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" title="Move Down">
+        index < sections.length - 1
+          ? `<button onclick="taskManager.configView.moveSectionDown(${index})" class="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" title="Move Down">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </button>`
-                        : ""
-                    }
+          : ""
+      }
                     <button onclick="taskManager.configView.removeSection(${index})" class="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300" title="Remove">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -175,8 +177,9 @@ export class ConfigView {
 
   async removeSection(index) {
     const remainingSections = this.tm.sections.filter((_, i) => i !== index);
-    const targetSection =
-      remainingSections.length > 0 ? remainingSections[0] : "Backlog";
+    const targetSection = remainingSections.length > 0
+      ? remainingSections[0]
+      : "Backlog";
 
     if (
       confirm(
@@ -236,7 +239,9 @@ export class ConfigView {
     const input = document.getElementById("newAssigneeInput");
     const assigneeName = input.value.trim();
 
-    if (assigneeName && !this.tm.projectConfig.assignees.includes(assigneeName)) {
+    if (
+      assigneeName && !this.tm.projectConfig.assignees.includes(assigneeName)
+    ) {
       this.tm.projectConfig.assignees.push(assigneeName);
       // Sort assignees alphabetically
       this.tm.projectConfig.assignees.sort();
@@ -357,22 +362,22 @@ export class ConfigView {
     document
       .getElementById("accessibilityReducedMotion")
       ?.addEventListener("change", (e) => {
-        AccessibilityManager.set('reducedMotion', e.target.value);
+        AccessibilityManager.set("reducedMotion", e.target.value);
       });
     document
       .getElementById("accessibilityHighContrast")
       ?.addEventListener("change", (e) => {
-        AccessibilityManager.set('highContrast', e.target.checked);
+        AccessibilityManager.set("highContrast", e.target.checked);
       });
     document
       .getElementById("accessibilityLargeTargets")
       ?.addEventListener("change", (e) => {
-        AccessibilityManager.set('largeTargets', e.target.checked);
+        AccessibilityManager.set("largeTargets", e.target.checked);
       });
     document
       .getElementById("accessibilityShowBreadcrumbs")
       ?.addEventListener("change", (e) => {
-        AccessibilityManager.set('showBreadcrumbs', e.target.checked);
+        AccessibilityManager.set("showBreadcrumbs", e.target.checked);
       });
   }
 }

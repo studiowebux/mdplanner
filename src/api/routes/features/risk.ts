@@ -3,7 +3,12 @@
  */
 
 import { Hono } from "hono";
-import { AppVariables, getParser, jsonResponse, errorResponse } from "../context.ts";
+import {
+  AppVariables,
+  errorResponse,
+  getParser,
+  jsonResponse,
+} from "../context.ts";
 
 export const riskRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -39,7 +44,7 @@ riskRouter.put("/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json();
   const riskAnalyses = await parser.readRiskAnalyses();
-  const index = riskAnalyses.findIndex(r => r.id === id);
+  const index = riskAnalyses.findIndex((r) => r.id === id);
   if (index === -1) return errorResponse("Not found", 404);
   riskAnalyses[index] = { ...riskAnalyses[index], ...body };
   await parser.saveRiskAnalyses(riskAnalyses);
@@ -51,8 +56,10 @@ riskRouter.delete("/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const riskAnalyses = await parser.readRiskAnalyses();
-  const filtered = riskAnalyses.filter(r => r.id !== id);
-  if (filtered.length === riskAnalyses.length) return errorResponse("Not found", 404);
+  const filtered = riskAnalyses.filter((r) => r.id !== id);
+  if (filtered.length === riskAnalyses.length) {
+    return errorResponse("Not found", 404);
+  }
   await parser.saveRiskAnalyses(filtered);
   return jsonResponse({ success: true });
 });

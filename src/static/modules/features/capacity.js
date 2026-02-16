@@ -34,8 +34,9 @@ export class CapacityModule {
       const option = document.createElement("option");
       option.value = plan.id;
       option.textContent = plan.title;
-      if (plan.id === this.taskManager.selectedCapacityPlanId)
+      if (plan.id === this.taskManager.selectedCapacityPlanId) {
         option.selected = true;
+      }
       selector.appendChild(option);
     }
   }
@@ -89,7 +90,7 @@ export class CapacityModule {
       );
     });
     [teamContent, allocContent, utilContent].forEach((c) =>
-      c?.classList.add("hidden"),
+      c?.classList.add("hidden")
     );
 
     if (tab === "team") {
@@ -156,8 +157,16 @@ export class CapacityModule {
       <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
         <div class="flex justify-between items-start mb-2">
           <div>
-            <h4 class="font-medium text-gray-900 dark:text-gray-100">${escapeHtml(member.name)}</h4>
-            ${member.role ? `<p class="text-sm text-gray-500 dark:text-gray-400">${escapeHtml(member.role)}</p>` : ""}
+            <h4 class="font-medium text-gray-900 dark:text-gray-100">${
+          escapeHtml(member.name)
+        }</h4>
+            ${
+          member.role
+            ? `<p class="text-sm text-gray-500 dark:text-gray-400">${
+              escapeHtml(member.role)
+            }</p>`
+            : ""
+        }
           </div>
           <div class="flex gap-1">
             <button onclick="taskManager.editTeamMember('${member.id}')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm">Edit</button>
@@ -167,7 +176,9 @@ export class CapacityModule {
         <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
           <div>${member.hoursPerDay}h/day</div>
           <div>${member.workingDays.join(", ")}</div>
-          <div class="text-xs text-gray-500 dark:text-gray-500">${member.hoursPerDay * member.workingDays.length}h/week capacity</div>
+          <div class="text-xs text-gray-500 dark:text-gray-500">${
+          member.hoursPerDay * member.workingDays.length
+        }h/week capacity</div>
         </div>
       </div>
     `,
@@ -215,7 +226,13 @@ export class CapacityModule {
 
     header.innerHTML = `
       <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Member</th>
-      ${weeks.map((w) => `<th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">${this.getWeekDates(w)}</th>`).join("")}
+      ${
+      weeks.map((w) =>
+        `<th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">${
+          this.getWeekDates(w)
+        }</th>`
+      ).join("")
+    }
     `;
 
     if (plan.teamMembers.length === 0) {
@@ -230,10 +247,13 @@ export class CapacityModule {
         return `
         <tr>
           <td class="px-4 py-3 whitespace-nowrap">
-            <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${escapeHtml(member.name)}</div>
+            <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${
+          escapeHtml(member.name)
+        }</div>
             <div class="text-xs text-gray-500 dark:text-gray-400">${weeklyCapacity}h/week</div>
           </td>
-          ${weeks
+          ${
+          weeks
             .map((week) => {
               const allocs = plan.allocations.filter(
                 (a) => a.memberId === member.id && a.weekStart === week,
@@ -242,16 +262,18 @@ export class CapacityModule {
                 (sum, a) => sum + a.allocatedHours,
                 0,
               );
-              const utilPct =
-                weeklyCapacity > 0 ? (totalHours / weeklyCapacity) * 100 : 0;
+              const utilPct = weeklyCapacity > 0
+                ? (totalHours / weeklyCapacity) * 100
+                : 0;
               let bgClass =
                 "bg-green-100 dark:bg-green-900/30 border-green-300 dark:border-green-700";
-              if (utilPct >= 100)
+              if (utilPct >= 100) {
                 bgClass =
                   "bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700";
-              else if (utilPct >= 80)
+              } else if (utilPct >= 80) {
                 bgClass =
                   "bg-yellow-100 dark:bg-yellow-900/30 border-yellow-300 dark:border-yellow-700";
+              }
 
               return `
               <td class="px-4 py-3 text-center">
@@ -262,7 +284,8 @@ export class CapacityModule {
               </td>
             `;
             })
-            .join("")}
+            .join("")
+        }
         </tr>
       `;
       })
@@ -292,16 +315,20 @@ export class CapacityModule {
             u.totalAllocated,
             u.actualHours,
           );
-          const capacityPct =
-            maxHours > 0 ? ((u.weeklyCapacity * 4) / maxHours) * 100 : 0;
-          const allocPct =
-            maxHours > 0 ? (u.totalAllocated / maxHours) * 100 : 0;
+          const capacityPct = maxHours > 0
+            ? ((u.weeklyCapacity * 4) / maxHours) * 100
+            : 0;
+          const allocPct = maxHours > 0
+            ? (u.totalAllocated / maxHours) * 100
+            : 0;
           const actualPct = maxHours > 0 ? (u.actualHours / maxHours) * 100 : 0;
 
           return `
           <div class="space-y-2">
             <div class="flex justify-between items-center">
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">${escapeHtml(u.memberName)}</span>
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">${
+            escapeHtml(u.memberName)
+          }</span>
               <span class="text-sm text-gray-500 dark:text-gray-400">${u.utilizationPercent}% utilization</span>
             </div>
             <div class="relative h-6 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden">
@@ -336,7 +363,9 @@ export class CapacityModule {
 
   editPlan() {
     if (this.taskManager.selectedCapacityPlanId) {
-      this.taskManager.capacitySidenavModule?.openEdit(this.taskManager.selectedCapacityPlanId);
+      this.taskManager.capacitySidenavModule?.openEdit(
+        this.taskManager.selectedCapacityPlanId,
+      );
     }
   }
 
@@ -446,9 +475,12 @@ export class CapacityModule {
 
   async deleteTeamMember(id) {
     if (
-      !confirm("Delete this team member? Their allocations will also be removed.")
-    )
+      !confirm(
+        "Delete this team member? Their allocations will also be removed.",
+      )
+    ) {
       return;
+    }
     try {
       await CapacityAPI.deleteMember(
         this.taskManager.selectedCapacityPlanId,
@@ -469,10 +501,9 @@ export class CapacityModule {
       (p) => p.id === this.taskManager.selectedCapacityPlanId,
     );
     const member = plan?.teamMembers.find((m) => m.id === memberId);
-    const allocs =
-      plan?.allocations.filter(
-        (a) => a.memberId === memberId && a.weekStart === weekStart,
-      ) || [];
+    const allocs = plan?.allocations.filter(
+      (a) => a.memberId === memberId && a.weekStart === weekStart,
+    ) || [];
 
     const modal = document.getElementById("allocationModal");
     const title = document.getElementById("allocationModalTitle");
@@ -482,7 +513,9 @@ export class CapacityModule {
     const notesInput = document.getElementById("allocationNotes");
     const deleteBtn = document.getElementById("deleteAllocationBtn");
 
-    title.textContent = `Allocation: ${member?.name || "Member"} - ${this.getWeekDates(weekStart)}`;
+    title.textContent = `Allocation: ${member?.name || "Member"} - ${
+      this.getWeekDates(weekStart)
+    }`;
 
     let existingTargetId = "";
     let existingTargetType = "task";
@@ -522,13 +555,17 @@ export class CapacityModule {
       hint.textContent = "Allocate time to a specific task";
       const tasks = this.taskManager.tasks || [];
       // Group by status for better organization
-      const incomplete = tasks.filter(t => !t.completed);
-      incomplete.forEach(task => {
+      const incomplete = tasks.filter((t) => !t.completed);
+      incomplete.forEach((task) => {
         const option = document.createElement("option");
         option.value = task.id;
-        const title = task.title.length > 35 ? task.title.slice(0, 35) + "..." : task.title;
+        const title = task.title.length > 35
+          ? task.title.slice(0, 35) + "..."
+          : task.title;
         const effort = task.config?.effort ? ` (${task.config.effort}h)` : "";
-        const assignee = task.config?.assignee ? ` [${task.config.assignee}]` : "";
+        const assignee = task.config?.assignee
+          ? ` [${task.config.assignee}]`
+          : "";
         option.textContent = `${title}${effort}${assignee}`;
         if (task.id === selectedValue) option.selected = true;
         targetSelect.appendChild(option);
@@ -537,10 +574,12 @@ export class CapacityModule {
       hint.textContent = "Allocate time to a milestone";
       try {
         const milestones = await MilestonesAPI.fetchAll();
-        milestones.forEach(ms => {
+        milestones.forEach((ms) => {
           const option = document.createElement("option");
           option.value = ms.id;
-          option.textContent = `${ms.title}${ms.status ? ` (${ms.status})` : ""}`;
+          option.textContent = `${ms.title}${
+            ms.status ? ` (${ms.status})` : ""
+          }`;
           if (ms.id === selectedValue) option.selected = true;
           targetSelect.appendChild(option);
         });
@@ -563,8 +602,8 @@ export class CapacityModule {
 
   async saveAllocation(e) {
     e.preventDefault();
-    const hours =
-      parseInt(document.getElementById("allocationHours").value) || 0;
+    const hours = parseInt(document.getElementById("allocationHours").value) ||
+      0;
     const targetType = document.getElementById("allocationTargetType").value;
     const targetId = document.getElementById("allocationTargetId").value;
     const notes = document.getElementById("allocationNotes").value;
@@ -626,8 +665,8 @@ export class CapacityModule {
     const empty = document.getElementById("autoAssignEmpty");
 
     try {
-      this.taskManager.autoAssignSuggestions =
-        await CapacityAPI.suggestAssignments(plan.id);
+      this.taskManager.autoAssignSuggestions = await CapacityAPI
+        .suggestAssignments(plan.id);
 
       if (this.taskManager.autoAssignSuggestions.length === 0) {
         empty?.classList.remove("hidden");
@@ -641,9 +680,13 @@ export class CapacityModule {
           <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
             <input type="checkbox" checked data-index="${i}" class="auto-assign-checkbox rounded">
             <div class="flex-1">
-              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${escapeHtml(s.taskTitle)}</div>
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${
+              escapeHtml(s.taskTitle)
+            }</div>
               <div class="text-xs text-gray-500 dark:text-gray-400">
-                Assign to <span class="font-medium">${escapeHtml(s.memberName)}</span> for ${s.hours}h
+                Assign to <span class="font-medium">${
+              escapeHtml(s.memberName)
+            }</span> for ${s.hours}h
               </div>
             </div>
           </label>
@@ -705,9 +748,9 @@ export class CapacityModule {
 
     // Get assignees from project config that aren't already team members
     const assignees = this.taskManager.projectConfig?.assignees || [];
-    const existingNames = plan.teamMembers.map(m => m.name.toLowerCase());
+    const existingNames = plan.teamMembers.map((m) => m.name.toLowerCase());
     const availableAssignees = assignees.filter(
-      name => !existingNames.includes(name.toLowerCase())
+      (name) => !existingNames.includes(name.toLowerCase()),
     );
 
     if (availableAssignees.length === 0) {
@@ -719,9 +762,13 @@ export class CapacityModule {
       list.innerHTML = availableAssignees
         .map((name, i) => `
           <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
-            <input type="checkbox" checked data-name="${escapeHtml(name)}" class="import-assignee-checkbox rounded">
+            <input type="checkbox" checked data-name="${
+          escapeHtml(name)
+        }" class="import-assignee-checkbox rounded">
             <div class="flex-1">
-              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${escapeHtml(name)}</div>
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${
+          escapeHtml(name)
+        }</div>
               <div class="text-xs text-gray-500 dark:text-gray-400">8h/day, Mon-Fri</div>
             </div>
           </label>
@@ -740,8 +787,10 @@ export class CapacityModule {
   }
 
   async applyImportAssignees() {
-    const checkboxes = document.querySelectorAll(".import-assignee-checkbox:checked");
-    const selectedNames = Array.from(checkboxes).map(cb => cb.dataset.name);
+    const checkboxes = document.querySelectorAll(
+      ".import-assignee-checkbox:checked",
+    );
+    const selectedNames = Array.from(checkboxes).map((cb) => cb.dataset.name);
 
     if (selectedNames.length === 0) {
       this.closeImportAssigneesModal();
@@ -757,7 +806,7 @@ export class CapacityModule {
             name,
             hoursPerDay: 8,
             workingDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-          }
+          },
         );
       }
       this.closeImportAssigneesModal();
@@ -774,7 +823,9 @@ export class CapacityModule {
       .getElementById("capacityViewBtn")
       ?.addEventListener("click", () => {
         this.taskManager.switchView("capacity");
-        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+        document.getElementById("viewSelectorDropdown")?.classList.add(
+          "hidden",
+        );
       });
 
     // Plan sidenav (add button uses sidenav)
@@ -816,7 +867,10 @@ export class CapacityModule {
       ?.addEventListener("submit", (e) => this.saveAllocation(e));
     document
       .getElementById("allocationTargetType")
-      ?.addEventListener("change", async (e) => await this.updateTargetOptions(e.target.value));
+      ?.addEventListener(
+        "change",
+        async (e) => await this.updateTargetOptions(e.target.value),
+      );
 
     // Import assignees modal events
     document
@@ -860,25 +914,37 @@ export class CapacityModule {
       ?.addEventListener("click", () => this.applyAutoAssign());
 
     // Close modals on background click
-    document.getElementById("teamMemberModal")?.addEventListener("click", (e) => {
-      if (e.target.id === "teamMemberModal") {
-        this.closeTeamMemberModal();
-      }
-    });
-    document.getElementById("allocationModal")?.addEventListener("click", (e) => {
-      if (e.target.id === "allocationModal") {
-        this.closeAllocationModal();
-      }
-    });
-    document.getElementById("autoAssignModal")?.addEventListener("click", (e) => {
-      if (e.target.id === "autoAssignModal") {
-        this.closeAutoAssignModal();
-      }
-    });
-    document.getElementById("importAssigneesModal")?.addEventListener("click", (e) => {
-      if (e.target.id === "importAssigneesModal") {
-        this.closeImportAssigneesModal();
-      }
-    });
+    document.getElementById("teamMemberModal")?.addEventListener(
+      "click",
+      (e) => {
+        if (e.target.id === "teamMemberModal") {
+          this.closeTeamMemberModal();
+        }
+      },
+    );
+    document.getElementById("allocationModal")?.addEventListener(
+      "click",
+      (e) => {
+        if (e.target.id === "allocationModal") {
+          this.closeAllocationModal();
+        }
+      },
+    );
+    document.getElementById("autoAssignModal")?.addEventListener(
+      "click",
+      (e) => {
+        if (e.target.id === "autoAssignModal") {
+          this.closeAutoAssignModal();
+        }
+      },
+    );
+    document.getElementById("importAssigneesModal")?.addEventListener(
+      "click",
+      (e) => {
+        if (e.target.id === "importAssigneesModal") {
+          this.closeImportAssigneesModal();
+        }
+      },
+    );
   }
 }

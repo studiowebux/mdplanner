@@ -51,7 +51,13 @@ export interface CustomSection {
   order: number;
   config: {
     tabs?: { id: string; title: string; content: NoteParagraph[] }[];
-    timeline?: { id: string; title: string; status: "success" | "failed" | "pending"; date?: string; content: NoteParagraph[] }[];
+    timeline?: {
+      id: string;
+      title: string;
+      status: "success" | "failed" | "pending";
+      date?: string;
+      content: NoteParagraph[];
+    }[];
     splitView?: { columns: NoteParagraph[][] };
   };
 }
@@ -160,7 +166,7 @@ export interface Idea {
   category?: string;
   created: string;
   description?: string;
-  links?: string[];  // Zettelkasten-style linked idea IDs
+  links?: string[]; // Zettelkasten-style linked idea IDs
 }
 
 export interface Retrospective {
@@ -281,7 +287,14 @@ export interface CapacityPlan {
 }
 
 // Strategic Levels Builder
-export const STRATEGIC_LEVEL_ORDER = ["vision", "mission", "goals", "objectives", "strategies", "tactics"] as const;
+export const STRATEGIC_LEVEL_ORDER = [
+  "vision",
+  "mission",
+  "goals",
+  "objectives",
+  "strategies",
+  "tactics",
+] as const;
 export type StrategicLevelType = typeof STRATEGIC_LEVEL_ORDER[number];
 
 export interface StrategicLevel {
@@ -339,7 +352,7 @@ export interface QuoteLineItem {
 
 export interface Quote {
   id: string;
-  number: string;  // Q-2026-001
+  number: string; // Q-2026-001
   customerId: string;
   title: string;
   status: "draft" | "sent" | "accepted" | "rejected";
@@ -367,7 +380,7 @@ export interface InvoiceLineItem {
 
 export interface Invoice {
   id: string;
-  number: string;  // INV-2026-001
+  number: string; // INV-2026-001
   customerId: string;
   quoteId?: string;
   title: string;

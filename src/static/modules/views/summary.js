@@ -1,7 +1,7 @@
 // Summary View Module
-import { DEADLINE_CLASSES } from '../constants.js';
-import { markdownToHtml } from '../utils.js';
-import { showToast } from '../ui/toast.js';
+import { DEADLINE_CLASSES } from "../constants.js";
+import { markdownToHtml } from "../utils.js";
+import { showToast } from "../ui/toast.js";
 
 /**
  * Project summary dashboard - stats, deadlines, links, status
@@ -17,7 +17,8 @@ export class SummaryView {
     if (!this.tm.projectInfo) return;
 
     // Update project name and description
-    document.getElementById("projectName").textContent = this.tm.projectInfo.name;
+    document.getElementById("projectName").textContent =
+      this.tm.projectInfo.name;
     const descriptionEl = document.getElementById("projectDescription");
 
     if (
@@ -48,8 +49,9 @@ export class SummaryView {
     this.renderMilestoneBreakdown(stats.allTasks);
 
     // Update progress bar
-    const progressPercent =
-      stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
+    const progressPercent = stats.total > 0
+      ? Math.round((stats.completed / stats.total) * 100)
+      : 0;
     document.getElementById("progressPercent").textContent =
       `${progressPercent}%`;
     document.getElementById("progressBar").style.width = `${progressPercent}%`;
@@ -67,7 +69,9 @@ export class SummaryView {
 
     if (this.tm.projectConfig && this.tm.projectConfig.lastUpdated) {
       const date = new Date(this.tm.projectConfig.lastUpdated);
-      lastUpdatedEl.textContent = `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+      lastUpdatedEl.textContent = `${date.toLocaleDateString()} ${
+        date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      }`;
     } else {
       lastUpdatedEl.textContent = "-";
     }
@@ -111,11 +115,16 @@ export class SummaryView {
       .sort((a, b) => a.dueDateParsed - b.dueDateParsed);
 
     const overdue = tasksWithDueDate.filter((t) => t.dueDateParsed < today);
-    const dueToday = tasksWithDueDate.filter((t) => t.dueDateParsed.getTime() === today.getTime());
-    const dueSoon = tasksWithDueDate.filter((t) => t.dueDateParsed > today && t.dueDateParsed <= nextWeek);
+    const dueToday = tasksWithDueDate.filter((t) =>
+      t.dueDateParsed.getTime() === today.getTime()
+    );
+    const dueSoon = tasksWithDueDate.filter((t) =>
+      t.dueDateParsed > today && t.dueDateParsed <= nextWeek
+    );
 
     if (overdue.length === 0 && dueToday.length === 0 && dueSoon.length === 0) {
-      container.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400 italic">No upcoming deadlines.</p>';
+      container.innerHTML =
+        '<p class="text-sm text-gray-500 dark:text-gray-400 italic">No upcoming deadlines.</p>';
       return;
     }
 
@@ -126,7 +135,9 @@ export class SummaryView {
         <div>
           <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Overdue (${overdue.length})</h4>
           <div class="space-y-2">
-            ${overdue.map((task) => this.renderDeadlineTask(task, "overdue")).join("")}
+            ${
+        overdue.map((task) => this.renderDeadlineTask(task, "overdue")).join("")
+      }
           </div>
         </div>
       `;
@@ -137,7 +148,9 @@ export class SummaryView {
         <div>
           <h4 class="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Due Today (${dueToday.length})</h4>
           <div class="space-y-2">
-            ${dueToday.map((task) => this.renderDeadlineTask(task, "today")).join("")}
+            ${
+        dueToday.map((task) => this.renderDeadlineTask(task, "today")).join("")
+      }
           </div>
         </div>
       `;
@@ -148,7 +161,9 @@ export class SummaryView {
         <div>
           <h4 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Due This Week (${dueSoon.length})</h4>
           <div class="space-y-2">
-            ${dueSoon.map((task) => this.renderDeadlineTask(task, "soon")).join("")}
+            ${
+        dueSoon.map((task) => this.renderDeadlineTask(task, "soon")).join("")
+      }
           </div>
         </div>
       `;
@@ -160,7 +175,9 @@ export class SummaryView {
   renderDeadlineTask(task, urgency) {
     const dateStr = task.dueDateParsed.toLocaleDateString();
     return `
-      <div class="p-2 rounded border ${DEADLINE_CLASSES[urgency]} cursor-pointer hover:opacity-80 transition-opacity"
+      <div class="p-2 rounded border ${
+      DEADLINE_CLASSES[urgency]
+    } cursor-pointer hover:opacity-80 transition-opacity"
            onclick="taskManager.editTask('${task.id}')">
         <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">${task.title}</div>
         <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
@@ -198,7 +215,8 @@ export class SummaryView {
     const links = this.tm.projectConfig?.links || [];
 
     if (links.length === 0) {
-      container.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400 italic">No links added yet.</p>';
+      container.innerHTML =
+        '<p class="text-sm text-gray-500 dark:text-gray-400 italic">No links added yet.</p>';
       return;
     }
 
@@ -284,7 +302,8 @@ export class SummaryView {
     const select = document.getElementById("projectStatus");
     const status = select.value;
     const statusClass = `status-select-${status}`;
-    select.className = `text-sm border-2 rounded-md px-2 py-1 font-medium focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent ${statusClass}`;
+    select.className =
+      `text-sm border-2 rounded-md px-2 py-1 font-medium focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent ${statusClass}`;
   }
 
   renderDynamicSectionCounts(allTasks) {
@@ -351,7 +370,9 @@ export class SummaryView {
     sections.forEach((section, index) => {
       const count = allTasks.filter((task) => task.section === section).length;
       // Alternate between different grey shades for visual distinction
-      const dotShade = index % 2 === 0 ? 'bg-gray-800 dark:bg-gray-200' : 'bg-gray-500 dark:bg-gray-400';
+      const dotShade = index % 2 === 0
+        ? "bg-gray-800 dark:bg-gray-200"
+        : "bg-gray-500 dark:bg-gray-400";
 
       const div = document.createElement("div");
       div.className = "flex items-center justify-between";
@@ -403,10 +424,13 @@ export class SummaryView {
     milestones.sort().forEach((milestone, index) => {
       const data = milestoneData[milestone];
       const completedCount = data.total - data.incomplete;
-      const progressPercent =
-        data.total > 0 ? Math.round((completedCount / data.total) * 100) : 0;
+      const progressPercent = data.total > 0
+        ? Math.round((completedCount / data.total) * 100)
+        : 0;
       // Alternate between different grey shades for visual distinction
-      const dotShade = index % 2 === 0 ? 'bg-gray-800 dark:bg-gray-200' : 'bg-gray-500 dark:bg-gray-400';
+      const dotShade = index % 2 === 0
+        ? "bg-gray-800 dark:bg-gray-200"
+        : "bg-gray-500 dark:bg-gray-400";
 
       const div = document.createElement("div");
       div.className = "space-y-2";
@@ -445,7 +469,10 @@ export class SummaryView {
     // Project status events
     document
       .getElementById("projectStatus")
-      .addEventListener("change", (e) => this.updateProjectStatus(e.target.value));
+      .addEventListener(
+        "change",
+        (e) => this.updateProjectStatus(e.target.value),
+      );
     document
       .getElementById("statusCommentText")
       .addEventListener("blur", () => this.saveStatusComment());

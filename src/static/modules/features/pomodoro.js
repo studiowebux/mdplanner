@@ -1,4 +1,4 @@
-import { showToast } from '../ui/toast.js';
+import { showToast } from "../ui/toast.js";
 
 export class PomodoroModule {
   constructor(taskManager) {
@@ -52,16 +52,25 @@ export class PomodoroModule {
     if (!statusEl) return;
 
     if (!("Notification" in window)) {
-      statusEl.innerHTML = '<span class="text-gray-400">Notifications not supported</span>';
+      statusEl.innerHTML =
+        '<span class="text-gray-400">Notifications not supported</span>';
     } else if (Notification.permission === "granted") {
-      statusEl.innerHTML = '<span class="text-green-600 dark:text-green-400">Notifications enabled</span>';
+      statusEl.innerHTML =
+        '<span class="text-green-600 dark:text-green-400">Notifications enabled</span>';
     } else if (Notification.permission === "denied") {
-      statusEl.innerHTML = '<span class="text-red-600 dark:text-red-400">Notifications blocked - enable in browser settings</span>';
+      statusEl.innerHTML =
+        '<span class="text-red-600 dark:text-red-400">Notifications blocked - enable in browser settings</span>';
     } else {
-      statusEl.innerHTML = '<button id="enableNotifBtn" class="text-gray-900 dark:text-gray-100 hover:underline">Enable notifications</button>';
-      document.getElementById("enableNotifBtn")?.addEventListener("click", () => {
-        Notification.requestPermission().then(() => this.updateNotificationStatus());
-      });
+      statusEl.innerHTML =
+        '<button id="enableNotifBtn" class="text-gray-900 dark:text-gray-100 hover:underline">Enable notifications</button>';
+      document.getElementById("enableNotifBtn")?.addEventListener(
+        "click",
+        () => {
+          Notification.requestPermission().then(() =>
+            this.updateNotificationStatus()
+          );
+        },
+      );
     }
   }
 
@@ -71,7 +80,9 @@ export class PomodoroModule {
     this.stopSound();
 
     if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission().then(() => this.updateNotificationStatus());
+      Notification.requestPermission().then(() =>
+        this.updateNotificationStatus()
+      );
     }
 
     this.tm.pomodoro.isRunning = true;
@@ -82,7 +93,10 @@ export class PomodoroModule {
     document.getElementById("pomodoroDisplay").classList.remove("hidden");
 
     if (this.tm.pomodoro.worker) {
-      this.tm.pomodoro.worker.postMessage({ command: "start", endTime: this.tm.pomodoro.endTime });
+      this.tm.pomodoro.worker.postMessage({
+        command: "start",
+        endTime: this.tm.pomodoro.endTime,
+      });
     } else {
       this.tm.pomodoro.interval = setInterval(() => this.tick(), 1000);
     }
@@ -92,7 +106,10 @@ export class PomodoroModule {
   tick() {
     if (!this.tm.pomodoro.isRunning || !this.tm.pomodoro.endTime) return;
 
-    const remaining = Math.max(0, Math.ceil((this.tm.pomodoro.endTime - Date.now()) / 1000));
+    const remaining = Math.max(
+      0,
+      Math.ceil((this.tm.pomodoro.endTime - Date.now()) / 1000),
+    );
     this.tm.pomodoro.timeLeft = remaining;
     this.updateDisplay();
 
@@ -131,8 +148,18 @@ export class PomodoroModule {
     this.stop();
     this.tm.pomodoro.mode = mode;
 
-    const durations = { focus: 25 * 60, short: 5 * 60, long: 15 * 60, debug: 5 };
-    const labels = { focus: "Focus Time", short: "Short Break", long: "Long Break", debug: "Debug (5s)" };
+    const durations = {
+      focus: 25 * 60,
+      short: 5 * 60,
+      long: 15 * 60,
+      debug: 5,
+    };
+    const labels = {
+      focus: "Focus Time",
+      short: "Short Break",
+      long: "Long Break",
+      debug: "Debug (5s)",
+    };
 
     this.tm.pomodoro.duration = durations[mode];
     this.tm.pomodoro.timeLeft = durations[mode];
@@ -144,9 +171,11 @@ export class PomodoroModule {
       const btn = document.getElementById(`pomodoro${m}Btn`);
       if (!btn) return;
       if (m.toLowerCase() === mode) {
-        btn.className = "px-3 py-1 rounded text-xs font-medium bg-gray-900 text-white dark:bg-gray-600 dark:text-white";
+        btn.className =
+          "px-3 py-1 rounded text-xs font-medium bg-gray-900 text-white dark:bg-gray-600 dark:text-white";
       } else {
-        btn.className = "px-3 py-1 rounded text-xs font-medium bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300";
+        btn.className =
+          "px-3 py-1 rounded text-xs font-medium bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300";
       }
     });
 
@@ -156,7 +185,9 @@ export class PomodoroModule {
   updateDisplay() {
     const minutes = Math.floor(this.tm.pomodoro.timeLeft / 60);
     const seconds = this.tm.pomodoro.timeLeft % 60;
-    const display = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+    const display = `${minutes.toString().padStart(2, "0")}:${
+      seconds.toString().padStart(2, "0")
+    }`;
 
     document.getElementById("pomodoroTimer").textContent = display;
     document.getElementById("pomodoroDisplay").textContent = display;
@@ -173,10 +204,13 @@ export class PomodoroModule {
     }
 
     let title, body;
-    if (this.tm.pomodoro.mode === "focus" || this.tm.pomodoro.mode === "debug") {
+    if (
+      this.tm.pomodoro.mode === "focus" || this.tm.pomodoro.mode === "debug"
+    ) {
       if (this.tm.pomodoro.mode === "focus") {
         this.tm.pomodoro.count++;
-        document.getElementById("pomodoroCount").textContent = this.tm.pomodoro.count;
+        document.getElementById("pomodoroCount").textContent =
+          this.tm.pomodoro.count;
       }
       title = "Pomodoro Complete!";
       body = "Great work! Time for a break.";
@@ -199,13 +233,16 @@ export class PomodoroModule {
 
     if ("Notification" in window && Notification.permission === "granted") {
       try {
-        this.tm.pomodoroNotification = new Notification("MD Planner - " + title, {
-          body: body + "\nClick to open app and stop alarm.",
-          icon: "/favicon.ico",
-          tag: "pomodoro-" + Date.now(),
-          requireInteraction: true,
-          silent: false,
-        });
+        this.tm.pomodoroNotification = new Notification(
+          "MD Planner - " + title,
+          {
+            body: body + "\nClick to open app and stop alarm.",
+            icon: "/favicon.ico",
+            tag: "pomodoro-" + Date.now(),
+            requireInteraction: true,
+            silent: false,
+          },
+        );
 
         this.tm.pomodoroNotification.onclick = () => {
           window.focus();
@@ -227,7 +264,10 @@ export class PomodoroModule {
       this.tm.pomodoroAlarmInterval = null;
     }
     try {
-      if (this.tm.pomodoroAudioContext && this.tm.pomodoroAudioContext.state !== "closed") {
+      if (
+        this.tm.pomodoroAudioContext &&
+        this.tm.pomodoroAudioContext.state !== "closed"
+      ) {
         this.tm.pomodoroAudioContext.close();
       }
     } catch (e) {
@@ -238,7 +278,8 @@ export class PomodoroModule {
 
   playSound() {
     try {
-      this.tm.pomodoroAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+      this.tm.pomodoroAudioContext =
+        new (window.AudioContext || window.webkitAudioContext)();
       this.tm.pomodoroAlarmInterval = null;
 
       const playAlarmPattern = () => {
@@ -266,7 +307,6 @@ export class PomodoroModule {
 
       playAlarmPattern();
       this.tm.pomodoroAlarmInterval = setInterval(playAlarmPattern, 2000);
-
     } catch (e) {
       console.warn("Audio not supported", e);
     }

@@ -1,4 +1,4 @@
-import { PRIORITY_CLASSES } from './constants.js';
+import { PRIORITY_CLASSES } from "./constants.js";
 
 /**
  * @param {string} dateString - ISO date or datetime string
@@ -13,16 +13,13 @@ export function formatDate(dateString) {
     // If it's just a date (YYYY-MM-DD)
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
       date = new Date(dateString + "T00:00:00");
-    }
-    // If it's incomplete datetime (YYYY-MM-DDTHH)
+    } // If it's incomplete datetime (YYYY-MM-DDTHH)
     else if (/^\d{4}-\d{2}-\d{2}T\d{1,2}$/.test(dateString)) {
       date = new Date(dateString + ":00:00");
-    }
-    // If it's incomplete datetime (YYYY-MM-DDTHH:MM)
+    } // If it's incomplete datetime (YYYY-MM-DDTHH:MM)
     else if (/^\d{4}-\d{2}-\d{2}T\d{1,2}:\d{2}$/.test(dateString)) {
       date = new Date(dateString + ":00");
-    }
-    // Otherwise try to parse as-is
+    } // Otherwise try to parse as-is
     else {
       date = new Date(dateString);
     }
@@ -52,20 +49,16 @@ export function formatDateForInput(dateString) {
     // If it's just a date (YYYY-MM-DD), convert to datetime for input
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
       return dateString + "T09:00";
-    }
-    // If it's incomplete datetime (YYYY-MM-DDTHH)
+    } // If it's incomplete datetime (YYYY-MM-DDTHH)
     else if (/^\d{4}-\d{2}-\d{2}T\d{1,2}$/.test(dateString)) {
       return dateString.padEnd(13, "0") + ":00";
-    }
-    // If it's incomplete datetime (YYYY-MM-DDTHH:MM)
+    } // If it's incomplete datetime (YYYY-MM-DDTHH:MM)
     else if (/^\d{4}-\d{2}-\d{2}T\d{1,2}:\d{2}$/.test(dateString)) {
       return dateString;
-    }
-    // If it's full datetime (YYYY-MM-DDTHH:MM:SS)
+    } // If it's full datetime (YYYY-MM-DDTHH:MM:SS)
     else if (/^\d{4}-\d{2}-\d{2}T\d{1,2}:\d{2}:\d{2}/.test(dateString)) {
       return dateString.substring(0, 16);
-    }
-    // Try to parse and format
+    } // Try to parse and format
     else {
       date = new Date(dateString);
       if (!isNaN(date.getTime())) {
@@ -90,7 +83,7 @@ export function formatDateForInput(dateString) {
  * @returns {string} HTML-safe string
  */
 export function escapeHtml(text) {
-  const div = document.createElement('div');
+  const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
 }
@@ -153,7 +146,9 @@ export function markdownToHtml(markdown) {
 
       // Handle list items
       if (trimmed.startsWith("- ")) {
-        return `<li class="text-gray-700 dark:text-gray-300 mb-1">${trimmed.substring(2)}</li>`;
+        return `<li class="text-gray-700 dark:text-gray-300 mb-1">${
+          trimmed.substring(2)
+        }</li>`;
       }
 
       // Skip already processed HTML

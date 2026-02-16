@@ -163,7 +163,9 @@ export class LeanCanvasModule {
 
   editSelected() {
     if (this.taskManager.selectedLeanCanvasId) {
-      this.taskManager.leanCanvasSidenavModule.openEdit(this.taskManager.selectedLeanCanvasId);
+      this.taskManager.leanCanvasSidenavModule.openEdit(
+        this.taskManager.selectedLeanCanvasId,
+      );
     }
   }
 
@@ -262,13 +264,18 @@ export class LeanCanvasModule {
       .getElementById("leanCanvasViewBtn")
       .addEventListener("click", () => {
         this.taskManager.switchView("leanCanvas");
-        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+        document.getElementById("viewSelectorDropdown")?.classList.add(
+          "hidden",
+        );
       });
 
     // Add Lean Canvas button - opens sidenav
     document
       .getElementById("addLeanCanvasBtn")
-      .addEventListener("click", () => this.taskManager.leanCanvasSidenavModule.openNew());
+      .addEventListener(
+        "click",
+        () => this.taskManager.leanCanvasSidenavModule.openNew(),
+      );
 
     // Cancel Lean Canvas modal
     document
@@ -302,20 +309,29 @@ export class LeanCanvasModule {
       .addEventListener("submit", (e) => this.saveItem(e));
 
     // Add buttons for each section
-    document.querySelectorAll(".lean-add-btn").forEach(btn => {
-      btn.addEventListener("click", () => this.openItemModal(btn.dataset.section));
+    document.querySelectorAll(".lean-add-btn").forEach((btn) => {
+      btn.addEventListener(
+        "click",
+        () => this.openItemModal(btn.dataset.section),
+      );
     });
 
     // Close modals on background click
-    document.getElementById("leanCanvasModal").addEventListener("click", (e) => {
-      if (e.target.id === "leanCanvasModal") {
-        this.closeModal();
-      }
-    });
-    document.getElementById("leanCanvasItemModal").addEventListener("click", (e) => {
-      if (e.target.id === "leanCanvasItemModal") {
-        this.closeItemModal();
-      }
-    });
+    document.getElementById("leanCanvasModal").addEventListener(
+      "click",
+      (e) => {
+        if (e.target.id === "leanCanvasModal") {
+          this.closeModal();
+        }
+      },
+    );
+    document.getElementById("leanCanvasItemModal").addEventListener(
+      "click",
+      (e) => {
+        if (e.target.id === "leanCanvasItemModal") {
+          this.closeItemModal();
+        }
+      },
+    );
   }
 }

@@ -4,7 +4,7 @@
 
 import { Hono } from "hono";
 import { AppVariables, jsonResponse } from "./context.ts";
-import { VERSION, GITHUB_REPO } from "../../../main.ts";
+import { GITHUB_REPO, VERSION } from "../../../main.ts";
 
 export const versionRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -16,7 +16,7 @@ versionRouter.get("/", async () => {
   try {
     const response = await fetch(
       `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`,
-      { headers: { Accept: "application/vnd.github.v3+json" } }
+      { headers: { Accept: "application/vnd.github.v3+json" } },
     );
     if (response.ok) {
       const data = await response.json();

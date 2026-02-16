@@ -2,7 +2,7 @@
  * Directory-based parser for SWOT Analysis.
  * Each SWOT analysis is stored as a separate markdown file.
  */
-import { DirectoryParser, parseFrontmatter, buildFileContent } from "./base.ts";
+import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
 import type { SwotAnalysis } from "../../types.ts";
 
 interface SwotFrontmatter {
@@ -16,7 +16,9 @@ export class SwotDirectoryParser extends DirectoryParser<SwotAnalysis> {
   }
 
   protected parseFile(content: string, _filePath: string): SwotAnalysis | null {
-    const { frontmatter, content: body } = parseFrontmatter<SwotFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<SwotFrontmatter>(
+      content,
+    );
 
     if (!frontmatter.id) {
       return null;
@@ -29,7 +31,12 @@ export class SwotDirectoryParser extends DirectoryParser<SwotAnalysis> {
     const opportunities: string[] = [];
     const threats: string[] = [];
 
-    let currentSection: "none" | "strengths" | "weaknesses" | "opportunities" | "threats" = "none";
+    let currentSection:
+      | "none"
+      | "strengths"
+      | "weaknesses"
+      | "opportunities"
+      | "threats" = "none";
 
     for (const line of lines) {
       if (line.startsWith("# ")) {
@@ -134,7 +141,10 @@ export class SwotDirectoryParser extends DirectoryParser<SwotAnalysis> {
     return newSwot;
   }
 
-  async update(id: string, updates: Partial<SwotAnalysis>): Promise<SwotAnalysis | null> {
+  async update(
+    id: string,
+    updates: Partial<SwotAnalysis>,
+  ): Promise<SwotAnalysis | null> {
     const existing = await this.read(id);
     if (!existing) return null;
 
@@ -150,7 +160,7 @@ export class SwotDirectoryParser extends DirectoryParser<SwotAnalysis> {
   async addItem(
     id: string,
     section: "strengths" | "weaknesses" | "opportunities" | "threats",
-    item: string
+    item: string,
   ): Promise<SwotAnalysis | null> {
     const swot = await this.read(id);
     if (!swot) return null;
@@ -163,7 +173,7 @@ export class SwotDirectoryParser extends DirectoryParser<SwotAnalysis> {
   async removeItem(
     id: string,
     section: "strengths" | "weaknesses" | "opportunities" | "threats",
-    itemIndex: number
+    itemIndex: number,
   ): Promise<SwotAnalysis | null> {
     const swot = await this.read(id);
     if (!swot) return null;

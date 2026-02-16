@@ -9,6 +9,7 @@ date: 2026-01-15
 Strategic analysis for product positioning.
 
 ## Strengths
+
 - Modern tech stack (fast development)
 - Small team (quick decisions)
 - Focus on developer experience
@@ -16,6 +17,7 @@ Strategic analysis for product positioning.
 - Strong UX design
 
 ## Weaknesses
+
 - Limited brand awareness
 - No mobile app yet
 - Small support team
@@ -23,6 +25,7 @@ Strategic analysis for product positioning.
 - No enterprise features
 
 ## Opportunities
+
 - Remote work trend continuing
 - Competitor pricing increases
 - AI features differentiation
@@ -30,6 +33,7 @@ Strategic analysis for product positioning.
 - Growing PM tool market
 
 ## Threats
+
 - Established competitors (Asana, Monday)
 - Economic downturn reducing SaaS spend
 - Larger companies copying features

@@ -18,5 +18,6 @@ billingAddress:
 Business plan customer.
 
 ## Notes
+
 - Quarterly invoicing
 - NET 30 terms

@@ -45,8 +45,8 @@ export class TimeTrackingModule {
 
     // Calculate totals
     const totalHours = allEntries.reduce((sum, e) => sum + e.hours, 0);
-    document.getElementById("globalTotalHours").textContent =
-      totalHours.toFixed(1);
+    document.getElementById("globalTotalHours").textContent = totalHours
+      .toFixed(1);
 
     // Weekly hours
     const now = new Date();
@@ -76,8 +76,8 @@ export class TimeTrackingModule {
     const personList = Object.entries(byPerson)
       .map(([name, hours]) => `${name}: ${hours.toFixed(1)}h`)
       .join(", ");
-    document.getElementById("hoursByPerson").textContent =
-      personList || "No data";
+    document.getElementById("hoursByPerson").textContent = personList ||
+      "No data";
 
     // Group entries by task
     const groupedByTask = {};
@@ -111,27 +111,41 @@ export class TimeTrackingModule {
         return `
       <div class="bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
         <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
-          <span class="font-medium text-gray-900 dark:text-gray-100">${taskMap[taskId]}</span>
-          <span class="text-sm text-gray-600 dark:text-gray-400">${taskTotal.toFixed(1)}h total</span>
+          <span class="font-medium text-gray-900 dark:text-gray-100">${
+          taskMap[taskId]
+        }</span>
+          <span class="text-sm text-gray-600 dark:text-gray-400">${
+          taskTotal.toFixed(1)
+        }h total</span>
         </div>
         <div class="divide-y divide-gray-100 dark:divide-gray-600">
-          ${entries
+          ${
+          entries
             .map(
               (e) => `
             <div class="px-4 py-2 flex justify-between items-center text-sm">
               <div>
                 <span class="text-gray-900 dark:text-gray-100">${e.date}</span>
                 <span class="text-gray-500 dark:text-gray-400 ml-2">${e.hours}h</span>
-                ${e.person ? `<span class="text-gray-400 dark:text-gray-500 ml-2">by ${e.person}</span>` : ""}
+                ${
+                e.person
+                  ? `<span class="text-gray-400 dark:text-gray-500 ml-2">by ${e.person}</span>`
+                  : ""
+              }
               </div>
               <div class="flex items-center gap-2">
-                ${e.description ? `<span class="text-gray-500 dark:text-gray-400">${e.description}</span>` : ""}
+                ${
+                e.description
+                  ? `<span class="text-gray-500 dark:text-gray-400">${e.description}</span>`
+                  : ""
+              }
                 <button onclick="taskManager.deleteTimeEntryFromView('${taskId}', '${e.id}')" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-xs">Delete</button>
               </div>
             </div>
           `,
             )
-            .join("")}
+            .join("")
+        }
         </div>
       </div>
     `;
@@ -222,10 +236,18 @@ export class TimeTrackingModule {
         <div>
           <span>${e.date}</span>
           <span class="font-medium ml-2">${e.hours}h</span>
-          ${e.person ? `<span class="text-gray-500 dark:text-gray-400 ml-2">by ${e.person}</span>` : ""}
+          ${
+          e.person
+            ? `<span class="text-gray-500 dark:text-gray-400 ml-2">by ${e.person}</span>`
+            : ""
+        }
         </div>
         <div class="flex items-center gap-2">
-          ${e.description ? `<span class="text-gray-400 dark:text-gray-500 truncate max-w-32">${e.description}</span>` : ""}
+          ${
+          e.description
+            ? `<span class="text-gray-400 dark:text-gray-500 truncate max-w-32">${e.description}</span>`
+            : ""
+        }
           <button type="button" onclick="taskManager.deleteTaskTimeEntry('${e.id}')" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">x</button>
         </div>
       </div>
@@ -250,7 +272,9 @@ export class TimeTrackingModule {
       .getElementById("timeTrackingViewBtn")
       .addEventListener("click", () => {
         this.taskManager.switchView("timeTracking");
-        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+        document.getElementById("viewSelectorDropdown")?.classList.add(
+          "hidden",
+        );
       });
 
     // Add time entry button

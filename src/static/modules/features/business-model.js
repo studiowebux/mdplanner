@@ -10,7 +10,8 @@ export class BusinessModelModule {
 
   async load() {
     try {
-      this.taskManager.businessModelCanvases = await BusinessModelAPI.fetchAll();
+      this.taskManager.businessModelCanvases = await BusinessModelAPI
+        .fetchAll();
       this.renderSelector();
       if (
         this.taskManager.businessModelCanvases.length > 0 &&
@@ -164,7 +165,9 @@ export class BusinessModelModule {
 
   editSelected() {
     if (this.taskManager.selectedBusinessModelId) {
-      this.taskManager.businessModelSidenavModule.openEdit(this.taskManager.selectedBusinessModelId);
+      this.taskManager.businessModelSidenavModule.openEdit(
+        this.taskManager.selectedBusinessModelId,
+      );
     }
   }
 
@@ -266,13 +269,18 @@ export class BusinessModelModule {
       .getElementById("businessModelViewBtn")
       .addEventListener("click", () => {
         this.taskManager.switchView("businessModel");
-        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+        document.getElementById("viewSelectorDropdown")?.classList.add(
+          "hidden",
+        );
       });
 
     // Add Business Model button - opens sidenav
     document
       .getElementById("addBusinessModelBtn")
-      .addEventListener("click", () => this.taskManager.businessModelSidenavModule.openNew());
+      .addEventListener(
+        "click",
+        () => this.taskManager.businessModelSidenavModule.openNew(),
+      );
 
     // Cancel Business Model modal
     document
@@ -306,20 +314,29 @@ export class BusinessModelModule {
       .addEventListener("submit", (e) => this.saveItem(e));
 
     // Add buttons for each section
-    document.querySelectorAll(".bmc-add-btn").forEach(btn => {
-      btn.addEventListener("click", () => this.openItemModal(btn.dataset.section));
+    document.querySelectorAll(".bmc-add-btn").forEach((btn) => {
+      btn.addEventListener(
+        "click",
+        () => this.openItemModal(btn.dataset.section),
+      );
     });
 
     // Close modals on background click
-    document.getElementById("businessModelModal").addEventListener("click", (e) => {
-      if (e.target.id === "businessModelModal") {
-        this.closeModal();
-      }
-    });
-    document.getElementById("businessModelItemModal").addEventListener("click", (e) => {
-      if (e.target.id === "businessModelItemModal") {
-        this.closeItemModal();
-      }
-    });
+    document.getElementById("businessModelModal").addEventListener(
+      "click",
+      (e) => {
+        if (e.target.id === "businessModelModal") {
+          this.closeModal();
+        }
+      },
+    );
+    document.getElementById("businessModelItemModal").addEventListener(
+      "click",
+      (e) => {
+        if (e.target.id === "businessModelItemModal") {
+          this.closeItemModal();
+        }
+      },
+    );
   }
 }

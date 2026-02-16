@@ -6,7 +6,7 @@
  * markdown (source of truth) and SQLite (cache).
  */
 
-import { CacheDatabase, type BindParams, type BindValue } from "./database.ts";
+import { type BindParams, type BindValue, CacheDatabase } from "./database.ts";
 import type { DirectoryParser } from "../parser/directory/base.ts";
 
 export interface CacheConfig {
@@ -25,7 +25,7 @@ export class CachingParser<T extends { id: string }> {
   constructor(
     private source: DirectoryParser<T>,
     private db: CacheDatabase,
-    private config: CacheConfig
+    private config: CacheConfig,
   ) {}
 
   /**
@@ -115,7 +115,7 @@ export class CachingParser<T extends { id: string }> {
 
   private readFromCache(): T[] {
     const rows = this.db.query<Record<string, unknown>>(
-      `SELECT * FROM ${this.config.tableName}`
+      `SELECT * FROM ${this.config.tableName}`,
     );
     return rows.map((row) => this.config.deserializeRow(row) as T);
   }
@@ -123,7 +123,7 @@ export class CachingParser<T extends { id: string }> {
   private readOneFromCache(id: string): T | null {
     const row = this.db.queryOne<Record<string, unknown>>(
       `SELECT * FROM ${this.config.tableName} WHERE id = ?`,
-      [id]
+      [id],
     );
     if (!row) return null;
     return this.config.deserializeRow(row) as T;
@@ -132,7 +132,9 @@ export class CachingParser<T extends { id: string }> {
   private populateCache(items: T[]): void {
     this.clearCache();
     const placeholders = this.config.columns.map(() => "?").join(", ");
-    const sql = `INSERT INTO ${this.config.tableName} (${this.config.columns.join(", ")}) VALUES (${placeholders})`;
+    const sql = `INSERT INTO ${this.config.tableName} (${
+      this.config.columns.join(", ")
+    }) VALUES (${placeholders})`;
 
     this.db.transaction(() => {
       for (const item of items) {
@@ -144,7 +146,9 @@ export class CachingParser<T extends { id: string }> {
 
   private upsertCache(item: T): void {
     const placeholders = this.config.columns.map(() => "?").join(", ");
-    const sql = `INSERT OR REPLACE INTO ${this.config.tableName} (${this.config.columns.join(", ")}) VALUES (${placeholders})`;
+    const sql = `INSERT OR REPLACE INTO ${this.config.tableName} (${
+      this.config.columns.join(", ")
+    }) VALUES (${placeholders})`;
     const params = this.config.serializeRow(item);
     this.db.execute(sql, params);
   }
@@ -171,10 +175,22 @@ export const CacheConfigs = {
   tasks: (): CacheConfig => ({
     tableName: "tasks",
     columns: [
-      "id", "title", "completed", "section", "description",
-      "tags", "due_date", "assignee", "priority", "effort",
-      "milestone", "blocked_by", "planned_start", "planned_end",
-      "parent_id", "config"
+      "id",
+      "title",
+      "completed",
+      "section",
+      "description",
+      "tags",
+      "due_date",
+      "assignee",
+      "priority",
+      "effort",
+      "milestone",
+      "blocked_by",
+      "planned_start",
+      "planned_end",
+      "parent_id",
+      "config",
     ],
     serializeRow: (item: unknown): BindParams => {
       const t = item as Record<string, unknown>;
@@ -184,7 +200,9 @@ export const CacheConfigs = {
         t.title as BindValue,
         t.completed ? 1 : 0,
         t.section as BindValue,
-        Array.isArray(t.description) ? t.description.join("\n") : (t.description as BindValue),
+        Array.isArray(t.description)
+          ? t.description.join("\n")
+          : (t.description as BindValue),
         JSON.stringify(config?.tag ?? []),
         (config?.due_date as BindValue) ?? null,
         (config?.assignee as BindValue) ?? null,
@@ -195,7 +213,7 @@ export const CacheConfigs = {
         (config?.planned_start as BindValue) ?? null,
         (config?.planned_end as BindValue) ?? null,
         (t.parentId as BindValue) ?? null,
-        JSON.stringify(config ?? {})
+        JSON.stringify(config ?? {}),
       ];
     },
     deserializeRow: (row: Record<string, unknown>) => ({
@@ -205,15 +223,22 @@ export const CacheConfigs = {
       section: row.section,
       description: row.description ? String(row.description).split("\n") : [],
       parentId: row.parent_id ?? undefined,
-      config: row.config ? JSON.parse(String(row.config)) : {}
-    })
+      config: row.config ? JSON.parse(String(row.config)) : {},
+    }),
   }),
 
   notes: (): CacheConfig => ({
     tableName: "notes",
     columns: [
-      "id", "title", "content", "mode", "paragraphs",
-      "custom_sections", "revision", "created_at", "updated_at"
+      "id",
+      "title",
+      "content",
+      "mode",
+      "paragraphs",
+      "custom_sections",
+      "revision",
+      "created_at",
+      "updated_at",
     ],
     serializeRow: (item: unknown): BindParams => {
       const n = item as Record<string, unknown>;
@@ -226,7 +251,7 @@ export const CacheConfigs = {
         JSON.stringify(n.customSections ?? []),
         (n.revision as BindValue) ?? 1,
         n.createdAt as BindValue,
-        n.updatedAt as BindValue
+        n.updatedAt as BindValue,
       ];
     },
     deserializeRow: (row: Record<string, unknown>) => ({
@@ -235,22 +260,38 @@ export const CacheConfigs = {
       content: row.content ?? "",
       mode: row.mode ?? "simple",
       paragraphs: row.paragraphs ? JSON.parse(String(row.paragraphs)) : [],
-      customSections: row.custom_sections ? JSON.parse(String(row.custom_sections)) : [],
+      customSections: row.custom_sections
+        ? JSON.parse(String(row.custom_sections))
+        : [],
       revision: Number(row.revision) || 1,
       createdAt: row.created_at,
-      updatedAt: row.updated_at
-    })
+      updatedAt: row.updated_at,
+    }),
   }),
 
   goals: (): CacheConfig => ({
     tableName: "goals",
-    columns: ["id", "title", "description", "type", "kpi", "start_date", "end_date", "status"],
+    columns: [
+      "id",
+      "title",
+      "description",
+      "type",
+      "kpi",
+      "start_date",
+      "end_date",
+      "status",
+    ],
     serializeRow: (item: unknown): BindParams => {
       const g = item as Record<string, unknown>;
       return [
-        g.id as BindValue, g.title as BindValue, g.description as BindValue,
-        g.type as BindValue, g.kpi as BindValue, g.startDate as BindValue,
-        g.endDate as BindValue, g.status as BindValue
+        g.id as BindValue,
+        g.title as BindValue,
+        g.description as BindValue,
+        g.type as BindValue,
+        g.kpi as BindValue,
+        g.startDate as BindValue,
+        g.endDate as BindValue,
+        g.status as BindValue,
       ];
     },
     deserializeRow: (row: Record<string, unknown>) => ({
@@ -261,8 +302,8 @@ export const CacheConfigs = {
       kpi: row.kpi ?? "",
       startDate: row.start_date ?? "",
       endDate: row.end_date ?? "",
-      status: row.status ?? "planning"
-    })
+      status: row.status ?? "planning",
+    }),
   }),
 
   milestones: (): CacheConfig => ({
@@ -271,8 +312,11 @@ export const CacheConfigs = {
     serializeRow: (item: unknown): BindParams => {
       const m = item as Record<string, unknown>;
       return [
-        m.id as BindValue, m.name as BindValue, m.target as BindValue,
-        m.status as BindValue, m.description as BindValue
+        m.id as BindValue,
+        m.name as BindValue,
+        m.target as BindValue,
+        m.status as BindValue,
+        m.description as BindValue,
       ];
     },
     deserializeRow: (row: Record<string, unknown>) => ({
@@ -280,19 +324,31 @@ export const CacheConfigs = {
       name: row.name,
       target: row.target,
       status: row.status ?? "open",
-      description: row.description
-    })
+      description: row.description,
+    }),
   }),
 
   ideas: (): CacheConfig => ({
     tableName: "ideas",
-    columns: ["id", "title", "status", "category", "description", "links", "created"],
+    columns: [
+      "id",
+      "title",
+      "status",
+      "category",
+      "description",
+      "links",
+      "created",
+    ],
     serializeRow: (item: unknown): BindParams => {
       const i = item as Record<string, unknown>;
       return [
-        i.id as BindValue, i.title as BindValue, i.status as BindValue,
-        i.category as BindValue, i.description as BindValue,
-        JSON.stringify(i.links ?? []), i.created as BindValue
+        i.id as BindValue,
+        i.title as BindValue,
+        i.status as BindValue,
+        i.category as BindValue,
+        i.description as BindValue,
+        JSON.stringify(i.links ?? []),
+        i.created as BindValue,
       ];
     },
     deserializeRow: (row: Record<string, unknown>) => ({
@@ -302,7 +358,7 @@ export const CacheConfigs = {
       category: row.category,
       description: row.description,
       links: row.links ? JSON.parse(String(row.links)) : [],
-      created: row.created
-    })
-  })
+      created: row.created,
+    }),
+  }),
 };

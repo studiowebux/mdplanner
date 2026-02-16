@@ -3,7 +3,7 @@
  * Tasks are organized by section: board/{section_name}/{task_id}.md
  * Subtasks are stored inline in the parent task file.
  */
-import { parseFrontmatter, buildFileContent } from "./base.ts";
+import { buildFileContent, parseFrontmatter } from "./base.ts";
 import type { Task, TaskConfig, TimeEntry } from "../../types.ts";
 
 interface TaskFrontmatter {
@@ -37,7 +37,10 @@ export class TasksDirectoryParser {
    */
   async ensureDir(section?: string): Promise<void> {
     if (section) {
-      await Deno.mkdir(`${this.boardDir}/${this.sanitizeSectionName(section)}`, { recursive: true });
+      await Deno.mkdir(
+        `${this.boardDir}/${this.sanitizeSectionName(section)}`,
+        { recursive: true },
+      );
     } else {
       await Deno.mkdir(this.boardDir, { recursive: true });
     }
@@ -47,7 +50,10 @@ export class TasksDirectoryParser {
    * Sanitize section name for filesystem.
    */
   private sanitizeSectionName(section: string): string {
-    return section.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_-]/g, "");
+    return section.toLowerCase().replace(/\s+/g, "_").replace(
+      /[^a-z0-9_-]/g,
+      "",
+    );
   }
 
   /**
@@ -288,7 +294,11 @@ export class TasksDirectoryParser {
    * Reorder a task within or across sections.
    * Updates order field for all affected tasks.
    */
-  async reorder(taskId: string, targetSection: string, position: number): Promise<boolean> {
+  async reorder(
+    taskId: string,
+    targetSection: string,
+    position: number,
+  ): Promise<boolean> {
     const task = await this.read(taskId);
     if (!task) return false;
 
@@ -304,7 +314,7 @@ export class TasksDirectoryParser {
     // Get tasks in target section (excluding the moved task if same section)
     let targetTasks = await this.readBySection(targetSection);
     if (isSameSection) {
-      targetTasks = targetTasks.filter(t => t.id !== taskId);
+      targetTasks = targetTasks.filter((t) => t.id !== taskId);
     }
 
     // Insert task at new position
@@ -365,7 +375,10 @@ export class TasksDirectoryParser {
   /**
    * Find the actual file path for a task by its ID.
    */
-  private async findTaskFilePath(id: string, section: string): Promise<string | null> {
+  private async findTaskFilePath(
+    id: string,
+    section: string,
+  ): Promise<string | null> {
     // First try direct path
     const directPath = this.getFilePath(id, section);
     try {
@@ -412,7 +425,9 @@ export class TasksDirectoryParser {
    * Parse task file content.
    */
   private parseFile(content: string, section: string): Task | null {
-    const { frontmatter, content: body } = parseFrontmatter<TaskFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<TaskFrontmatter>(
+      content,
+    );
 
     if (!frontmatter.id) {
       return null;
@@ -467,13 +482,19 @@ export class TasksDirectoryParser {
     if (frontmatter.tag) config.tag = frontmatter.tag;
     if (frontmatter.due_date) config.due_date = frontmatter.due_date;
     if (frontmatter.assignee) config.assignee = frontmatter.assignee;
-    if (frontmatter.priority !== undefined) config.priority = frontmatter.priority;
+    if (frontmatter.priority !== undefined) {
+      config.priority = frontmatter.priority;
+    }
     if (frontmatter.effort !== undefined) config.effort = frontmatter.effort;
     if (frontmatter.blocked_by) config.blocked_by = frontmatter.blocked_by;
     if (frontmatter.milestone) config.milestone = frontmatter.milestone;
-    if (frontmatter.planned_start) config.planned_start = frontmatter.planned_start;
+    if (frontmatter.planned_start) {
+      config.planned_start = frontmatter.planned_start;
+    }
     if (frontmatter.planned_end) config.planned_end = frontmatter.planned_end;
-    if (frontmatter.time_entries) config.time_entries = frontmatter.time_entries;
+    if (frontmatter.time_entries) {
+      config.time_entries = frontmatter.time_entries;
+    }
     if (frontmatter.order !== undefined) config.order = frontmatter.order;
 
     return {
@@ -500,13 +521,25 @@ export class TasksDirectoryParser {
     if (task.config.tag?.length) frontmatter.tag = task.config.tag;
     if (task.config.due_date) frontmatter.due_date = task.config.due_date;
     if (task.config.assignee) frontmatter.assignee = task.config.assignee;
-    if (task.config.priority !== undefined) frontmatter.priority = task.config.priority;
-    if (task.config.effort !== undefined) frontmatter.effort = task.config.effort;
-    if (task.config.blocked_by?.length) frontmatter.blocked_by = task.config.blocked_by;
+    if (task.config.priority !== undefined) {
+      frontmatter.priority = task.config.priority;
+    }
+    if (task.config.effort !== undefined) {
+      frontmatter.effort = task.config.effort;
+    }
+    if (task.config.blocked_by?.length) {
+      frontmatter.blocked_by = task.config.blocked_by;
+    }
     if (task.config.milestone) frontmatter.milestone = task.config.milestone;
-    if (task.config.planned_start) frontmatter.planned_start = task.config.planned_start;
-    if (task.config.planned_end) frontmatter.planned_end = task.config.planned_end;
-    if (task.config.time_entries?.length) frontmatter.time_entries = task.config.time_entries;
+    if (task.config.planned_start) {
+      frontmatter.planned_start = task.config.planned_start;
+    }
+    if (task.config.planned_end) {
+      frontmatter.planned_end = task.config.planned_end;
+    }
+    if (task.config.time_entries?.length) {
+      frontmatter.time_entries = task.config.time_entries;
+    }
     if (task.config.order !== undefined) frontmatter.order = task.config.order;
 
     let body = `# ${task.title}\n\n`;
@@ -531,7 +564,10 @@ export class TasksDirectoryParser {
   /**
    * Acquire write lock for a specific task.
    */
-  private async withWriteLock<R>(id: string, operation: () => Promise<R>): Promise<R> {
+  private async withWriteLock<R>(
+    id: string,
+    operation: () => Promise<R>,
+  ): Promise<R> {
     const previousLock = this.writeLocks.get(id) || Promise.resolve();
     let releaseLock: () => void;
     const newLock = new Promise<void>((resolve) => {
@@ -553,7 +589,10 @@ export class TasksDirectoryParser {
   /**
    * Atomic write using temp file + rename.
    */
-  private async atomicWriteFile(filePath: string, content: string): Promise<void> {
+  private async atomicWriteFile(
+    filePath: string,
+    content: string,
+  ): Promise<void> {
     const tempPath = filePath + ".tmp";
     await Deno.writeTextFile(tempPath, content);
     await Deno.rename(tempPath, filePath);

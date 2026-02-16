@@ -7,7 +7,14 @@
  */
 
 import { Hono } from "hono";
-import { type AppVariables, getCache, isCacheEnabled, getProjectManager, jsonResponse, errorResponse } from "./context.ts";
+import {
+  type AppVariables,
+  errorResponse,
+  getCache,
+  getProjectManager,
+  isCacheEnabled,
+  jsonResponse,
+} from "./context.ts";
 
 const searchRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -15,7 +22,10 @@ const searchRouter = new Hono<{ Variables: AppVariables }>();
 searchRouter.get("/", async (c) => {
   const cache = getCache(c);
   if (!cache) {
-    return errorResponse("Cache is not enabled. Start server with --cache flag.", 400);
+    return errorResponse(
+      "Cache is not enabled. Start server with --cache flag.",
+      400,
+    );
   }
 
   const query = c.req.query("q");
@@ -27,9 +37,13 @@ searchRouter.get("/", async (c) => {
   const offsetParam = c.req.query("offset");
   const typesParam = c.req.query("types");
 
-  const limit = limitParam ? Math.min(100, Math.max(1, parseInt(limitParam, 10) || 50)) : 50;
+  const limit = limitParam
+    ? Math.min(100, Math.max(1, parseInt(limitParam, 10) || 50))
+    : 50;
   const offset = offsetParam ? Math.max(0, parseInt(offsetParam, 10) || 0) : 0;
-  const types = typesParam?.split(",").filter(Boolean) as ("task" | "note" | "goal" | "idea")[] | undefined;
+  const types = typesParam?.split(",").filter(Boolean) as
+    | ("task" | "note" | "goal" | "idea")[]
+    | undefined;
 
   const results = cache.search.search(query, { limit, offset, types });
 
@@ -44,7 +58,10 @@ searchRouter.get("/", async (c) => {
 searchRouter.get("/stats", async (c) => {
   const cache = getCache(c);
   if (!cache) {
-    return errorResponse("Cache is not enabled. Start server with --cache flag.", 400);
+    return errorResponse(
+      "Cache is not enabled. Start server with --cache flag.",
+      400,
+    );
   }
 
   const stats = cache.search.getStats();
@@ -85,7 +102,10 @@ searchRouter.post("/rebuild", async (c) => {
   const pm = getProjectManager(c);
 
   if (!pm.isCacheEnabled()) {
-    return errorResponse("Cache is not enabled. Start server with --cache flag.", 400);
+    return errorResponse(
+      "Cache is not enabled. Start server with --cache flag.",
+      400,
+    );
   }
 
   const result = await pm.rebuildCache();
@@ -107,7 +127,10 @@ searchRouter.post("/rebuild", async (c) => {
 searchRouter.post("/sync", async (c) => {
   const cache = getCache(c);
   if (!cache) {
-    return errorResponse("Cache is not enabled. Start server with --cache flag.", 400);
+    return errorResponse(
+      "Cache is not enabled. Start server with --cache flag.",
+      400,
+    );
   }
 
   const result = await cache.sync.fullSync();

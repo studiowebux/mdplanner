@@ -10,17 +10,20 @@ status: closed
 Beta preparation sprint.
 
 ## Continue
+
 - ADR documentation (started last sprint)
 - Focus time blocks working well
 - Smaller, focused PRs
 - Async updates in Slack
 
 ## Stop
+
 - Context switching between too many tasks
 - Waiting for design approval blocking dev
 - Manual deployment steps
 
 ## Start
+
 - Design reviews earlier in process
 - Automated E2E tests
 - Performance budgets

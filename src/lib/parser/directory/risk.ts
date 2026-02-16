@@ -3,7 +3,7 @@
  * Each risk analysis is stored as a separate markdown file.
  * Uses a 2x2 matrix (Impact vs Probability).
  */
-import { DirectoryParser, parseFrontmatter, buildFileContent } from "./base.ts";
+import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
 import type { RiskAnalysis } from "../../types.ts";
 
 interface RiskFrontmatter {
@@ -17,7 +17,9 @@ export class RiskDirectoryParser extends DirectoryParser<RiskAnalysis> {
   }
 
   protected parseFile(content: string, _filePath: string): RiskAnalysis | null {
-    const { frontmatter, content: body } = parseFrontmatter<RiskFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<RiskFrontmatter>(
+      content,
+    );
 
     if (!frontmatter.id) {
       return null;
@@ -40,7 +42,9 @@ export class RiskDirectoryParser extends DirectoryParser<RiskAnalysis> {
 
       const lowerLine = line.toLowerCase();
       // High Impact, High Probability
-      if (lowerLine.includes("high impact") && lowerLine.includes("high prob")) {
+      if (
+        lowerLine.includes("high impact") && lowerLine.includes("high prob")
+      ) {
         currentSection = "hihp";
         continue;
       }
@@ -139,7 +143,10 @@ export class RiskDirectoryParser extends DirectoryParser<RiskAnalysis> {
     return newRisk;
   }
 
-  async update(id: string, updates: Partial<RiskAnalysis>): Promise<RiskAnalysis | null> {
+  async update(
+    id: string,
+    updates: Partial<RiskAnalysis>,
+  ): Promise<RiskAnalysis | null> {
     const existing = await this.read(id);
     if (!existing) return null;
 
@@ -154,8 +161,12 @@ export class RiskDirectoryParser extends DirectoryParser<RiskAnalysis> {
 
   async addItem(
     id: string,
-    quadrant: "highImpactHighProb" | "highImpactLowProb" | "lowImpactHighProb" | "lowImpactLowProb",
-    item: string
+    quadrant:
+      | "highImpactHighProb"
+      | "highImpactLowProb"
+      | "lowImpactHighProb"
+      | "lowImpactLowProb",
+    item: string,
   ): Promise<RiskAnalysis | null> {
     const risk = await this.read(id);
     if (!risk) return null;
@@ -167,8 +178,12 @@ export class RiskDirectoryParser extends DirectoryParser<RiskAnalysis> {
 
   async removeItem(
     id: string,
-    quadrant: "highImpactHighProb" | "highImpactLowProb" | "lowImpactHighProb" | "lowImpactLowProb",
-    itemIndex: number
+    quadrant:
+      | "highImpactHighProb"
+      | "highImpactLowProb"
+      | "lowImpactHighProb"
+      | "lowImpactLowProb",
+    itemIndex: number,
   ): Promise<RiskAnalysis | null> {
     const risk = await this.read(id);
     if (!risk) return null;

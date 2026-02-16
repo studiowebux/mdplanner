@@ -18,5 +18,6 @@ billingAddress:
 Beta customer, team plan subscriber.
 
 ## Notes
+
 - Monthly billing
 - Auto-renewal enabled

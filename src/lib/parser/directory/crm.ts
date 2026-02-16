@@ -2,7 +2,7 @@
  * Directory-based parser for CRM.
  * Uses subdirectories: companies/, contacts/, deals/, interactions/
  */
-import { parseFrontmatter, buildFileContent } from "./base.ts";
+import { buildFileContent, parseFrontmatter } from "./base.ts";
 import type { Company, Contact, Deal, Interaction } from "../../types.ts";
 
 export class CRMDirectoryParser {
@@ -27,7 +27,10 @@ export class CRMDirectoryParser {
     return `${prefix}_${timestamp}_${random}`;
   }
 
-  protected async atomicWriteFile(filePath: string, content: string): Promise<void> {
+  protected async atomicWriteFile(
+    filePath: string,
+    content: string,
+  ): Promise<void> {
     const tempPath = filePath + ".tmp";
     await Deno.writeTextFile(tempPath, content);
     await Deno.rename(tempPath, filePath);
@@ -85,7 +88,9 @@ export class CRMDirectoryParser {
       created: string;
     }
 
-    const { frontmatter, content: body } = parseFrontmatter<CompanyFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<CompanyFrontmatter>(
+      content,
+    );
     if (!frontmatter.id) return null;
 
     const lines = body.split("\n");
@@ -106,13 +111,15 @@ export class CRMDirectoryParser {
       industry: frontmatter.industry,
       website: frontmatter.website,
       phone: frontmatter.phone,
-      address: frontmatter.street ? {
-        street: frontmatter.street,
-        city: frontmatter.city,
-        state: frontmatter.state,
-        postalCode: frontmatter.postalCode,
-        country: frontmatter.country,
-      } : undefined,
+      address: frontmatter.street
+        ? {
+          street: frontmatter.street,
+          city: frontmatter.city,
+          state: frontmatter.state,
+          postalCode: frontmatter.postalCode,
+          country: frontmatter.country,
+        }
+        : undefined,
       notes: notes || undefined,
       created: frontmatter.created || new Date().toISOString(),
     };
@@ -131,8 +138,12 @@ export class CRMDirectoryParser {
       if (company.address.street) frontmatter.street = company.address.street;
       if (company.address.city) frontmatter.city = company.address.city;
       if (company.address.state) frontmatter.state = company.address.state;
-      if (company.address.postalCode) frontmatter.postalCode = company.address.postalCode;
-      if (company.address.country) frontmatter.country = company.address.country;
+      if (company.address.postalCode) {
+        frontmatter.postalCode = company.address.postalCode;
+      }
+      if (company.address.country) {
+        frontmatter.country = company.address.country;
+      }
     }
 
     const body = `# ${company.name}\n\n${company.notes || ""}`;
@@ -151,9 +162,12 @@ export class CRMDirectoryParser {
     return newCompany;
   }
 
-  async updateCompany(id: string, updates: Partial<Company>): Promise<Company | null> {
+  async updateCompany(
+    id: string,
+    updates: Partial<Company>,
+  ): Promise<Company | null> {
     const companies = await this.readAllCompanies();
-    const existing = companies.find(c => c.id === id);
+    const existing = companies.find((c) => c.id === id);
     if (!existing) return null;
 
     const updated: Company = { ...existing, ...updates, id: existing.id };
@@ -205,7 +219,9 @@ export class CRMDirectoryParser {
       created: string;
     }
 
-    const { frontmatter, content: body } = parseFrontmatter<ContactFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<ContactFrontmatter>(
+      content,
+    );
     if (!frontmatter.id) return null;
 
     const notes = body.trim();
@@ -254,9 +270,12 @@ export class CRMDirectoryParser {
     return newContact;
   }
 
-  async updateContact(id: string, updates: Partial<Contact>): Promise<Contact | null> {
+  async updateContact(
+    id: string,
+    updates: Partial<Contact>,
+  ): Promise<Contact | null> {
     const contacts = await this.readAllContacts();
-    const existing = contacts.find(c => c.id === id);
+    const existing = contacts.find((c) => c.id === id);
     if (!existing) return null;
 
     const updated: Contact = { ...existing, ...updates, id: existing.id };
@@ -276,7 +295,7 @@ export class CRMDirectoryParser {
 
   async getContactsByCompany(companyId: string): Promise<Contact[]> {
     const contacts = await this.readAllContacts();
-    return contacts.filter(c => c.companyId === companyId);
+    return contacts.filter((c) => c.companyId === companyId);
   }
 
   // ============================================================
@@ -313,7 +332,9 @@ export class CRMDirectoryParser {
       closedAt?: string;
     }
 
-    const { frontmatter, content: body } = parseFrontmatter<DealFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<DealFrontmatter>(
+      content,
+    );
     if (!frontmatter.id) return null;
 
     const lines = body.split("\n");
@@ -354,7 +375,9 @@ export class CRMDirectoryParser {
     };
 
     if (deal.contactId) frontmatter.contactId = deal.contactId;
-    if (deal.expectedCloseDate) frontmatter.expectedCloseDate = deal.expectedCloseDate;
+    if (deal.expectedCloseDate) {
+      frontmatter.expectedCloseDate = deal.expectedCloseDate;
+    }
     if (deal.closedAt) frontmatter.closedAt = deal.closedAt;
 
     const body = `# ${deal.title}\n\n${deal.notes || ""}`;
@@ -375,7 +398,7 @@ export class CRMDirectoryParser {
 
   async updateDeal(id: string, updates: Partial<Deal>): Promise<Deal | null> {
     const deals = await this.readAllDeals();
-    const existing = deals.find(d => d.id === id);
+    const existing = deals.find((d) => d.id === id);
     if (!existing) return null;
 
     const updated: Deal = { ...existing, ...updates, id: existing.id };
@@ -395,12 +418,12 @@ export class CRMDirectoryParser {
 
   async getDealsByCompany(companyId: string): Promise<Deal[]> {
     const deals = await this.readAllDeals();
-    return deals.filter(d => d.companyId === companyId);
+    return deals.filter((d) => d.companyId === companyId);
   }
 
   async getDealsByStage(stage: Deal["stage"]): Promise<Deal[]> {
     const deals = await this.readAllDeals();
-    return deals.filter(d => d.stage === stage);
+    return deals.filter((d) => d.stage === stage);
   }
 
   // ============================================================
@@ -436,7 +459,9 @@ export class CRMDirectoryParser {
       nextFollowUp?: string;
     }
 
-    const { frontmatter, content: body } = parseFrontmatter<InteractionFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<
+      InteractionFrontmatter
+    >(content);
     if (!frontmatter.id) return null;
 
     const lines = body.split("\n");
@@ -487,7 +512,9 @@ export class CRMDirectoryParser {
     if (interaction.contactId) frontmatter.contactId = interaction.contactId;
     if (interaction.dealId) frontmatter.dealId = interaction.dealId;
     if (interaction.duration) frontmatter.duration = interaction.duration;
-    if (interaction.nextFollowUp) frontmatter.nextFollowUp = interaction.nextFollowUp;
+    if (interaction.nextFollowUp) {
+      frontmatter.nextFollowUp = interaction.nextFollowUp;
+    }
 
     const sections: string[] = [`# ${interaction.summary}`];
 
@@ -501,20 +528,28 @@ export class CRMDirectoryParser {
     return buildFileContent(frontmatter, sections.join("\n"));
   }
 
-  async addInteraction(interaction: Omit<Interaction, "id">): Promise<Interaction> {
+  async addInteraction(
+    interaction: Omit<Interaction, "id">,
+  ): Promise<Interaction> {
     await this.ensureDir();
     const newInteraction: Interaction = {
       ...interaction,
       id: this.generateId("interaction"),
     };
     const filePath = `${this.crmDir}/interactions/${newInteraction.id}.md`;
-    await this.atomicWriteFile(filePath, this.serializeInteraction(newInteraction));
+    await this.atomicWriteFile(
+      filePath,
+      this.serializeInteraction(newInteraction),
+    );
     return newInteraction;
   }
 
-  async updateInteraction(id: string, updates: Partial<Interaction>): Promise<Interaction | null> {
+  async updateInteraction(
+    id: string,
+    updates: Partial<Interaction>,
+  ): Promise<Interaction | null> {
     const interactions = await this.readAllInteractions();
-    const existing = interactions.find(i => i.id === id);
+    const existing = interactions.find((i) => i.id === id);
     if (!existing) return null;
 
     const updated: Interaction = { ...existing, ...updates, id: existing.id };
@@ -534,20 +569,22 @@ export class CRMDirectoryParser {
 
   async getInteractionsByCompany(companyId: string): Promise<Interaction[]> {
     const interactions = await this.readAllInteractions();
-    return interactions.filter(i => i.companyId === companyId);
+    return interactions.filter((i) => i.companyId === companyId);
   }
 
   async getInteractionsByDeal(dealId: string): Promise<Interaction[]> {
     const interactions = await this.readAllInteractions();
-    return interactions.filter(i => i.dealId === dealId);
+    return interactions.filter((i) => i.dealId === dealId);
   }
 
   async getUpcomingFollowUps(): Promise<Interaction[]> {
     const interactions = await this.readAllInteractions();
     const today = new Date().toISOString().split("T")[0];
     return interactions
-      .filter(i => i.nextFollowUp && i.nextFollowUp >= today)
-      .sort((a, b) => (a.nextFollowUp || "").localeCompare(b.nextFollowUp || ""));
+      .filter((i) => i.nextFollowUp && i.nextFollowUp >= today)
+      .sort((a, b) =>
+        (a.nextFollowUp || "").localeCompare(b.nextFollowUp || "")
+      );
   }
 
   // ============================================================
@@ -557,7 +594,7 @@ export class CRMDirectoryParser {
   async saveAllCompanies(companies: Company[]): Promise<void> {
     await this.ensureDir();
     const existing = await this.readAllCompanies();
-    const newIds = new Set(companies.map(c => c.id));
+    const newIds = new Set(companies.map((c) => c.id));
 
     // Delete removed companies
     for (const company of existing) {
@@ -576,7 +613,7 @@ export class CRMDirectoryParser {
   async saveAllContacts(contacts: Contact[]): Promise<void> {
     await this.ensureDir();
     const existing = await this.readAllContacts();
-    const newIds = new Set(contacts.map(c => c.id));
+    const newIds = new Set(contacts.map((c) => c.id));
 
     // Delete removed contacts
     for (const contact of existing) {
@@ -595,7 +632,7 @@ export class CRMDirectoryParser {
   async saveAllDeals(deals: Deal[]): Promise<void> {
     await this.ensureDir();
     const existing = await this.readAllDeals();
-    const newIds = new Set(deals.map(d => d.id));
+    const newIds = new Set(deals.map((d) => d.id));
 
     // Delete removed deals
     for (const deal of existing) {
@@ -614,7 +651,7 @@ export class CRMDirectoryParser {
   async saveAllInteractions(interactions: Interaction[]): Promise<void> {
     await this.ensureDir();
     const existing = await this.readAllInteractions();
-    const newIds = new Set(interactions.map(i => i.id));
+    const newIds = new Set(interactions.map((i) => i.id));
 
     // Delete removed interactions
     for (const interaction of existing) {
@@ -626,7 +663,10 @@ export class CRMDirectoryParser {
     // Write all interactions
     for (const interaction of interactions) {
       const filePath = `${this.crmDir}/interactions/${interaction.id}.md`;
-      await this.atomicWriteFile(filePath, this.serializeInteraction(interaction));
+      await this.atomicWriteFile(
+        filePath,
+        this.serializeInteraction(interaction),
+      );
     }
   }
 
@@ -649,9 +689,9 @@ export class CRMDirectoryParser {
       this.readAllInteractions(),
     ]);
 
-    const openDeals = deals.filter(d => !["won", "lost"].includes(d.stage));
+    const openDeals = deals.filter((d) => !["won", "lost"].includes(d.stage));
     const pipelineValue = openDeals.reduce((sum, d) => sum + (d.value || 0), 0);
-    const wonDeals = deals.filter(d => d.stage === "won").length;
+    const wonDeals = deals.filter((d) => d.stage === "won").length;
 
     return {
       totalCompanies: companies.length,

@@ -6,8 +6,8 @@
  * files (source of truth) to SQLite cache.
  */
 
-import { CacheDatabase, type BindValue } from "./database.ts";
-import { initSchema, dropSchema } from "./schema.ts";
+import { type BindValue, CacheDatabase } from "./database.ts";
+import { dropSchema, initSchema } from "./schema.ts";
 import type { DirectoryMarkdownParser } from "../parser/directory/parser.ts";
 
 // Helper to safely extract values for SQL binding
@@ -35,8 +35,8 @@ export interface SyncResult {
 }
 
 export interface SyncOptions {
-  tables?: string[];  // Specific tables to sync, or all if empty
-  force?: boolean;    // Force rebuild even if cache exists
+  tables?: string[]; // Specific tables to sync, or all if empty
+  force?: boolean; // Force rebuild even if cache exists
 }
 
 /**
@@ -47,7 +47,7 @@ export class CacheSync {
 
   constructor(
     private parser: DirectoryMarkdownParser,
-    private db: CacheDatabase
+    private db: CacheDatabase,
   ) {}
 
   /**
@@ -127,7 +127,7 @@ export class CacheSync {
   private setMeta(key: string, value: string): void {
     this.db.execute(
       "INSERT OR REPLACE INTO cache_meta (key, value, updated_at) VALUES (?, ?, ?)",
-      [key, value, new Date().toISOString()]
+      [key, value, new Date().toISOString()],
     );
   }
 
@@ -137,7 +137,7 @@ export class CacheSync {
   private getMeta(key: string): string | null {
     const row = this.db.queryOne<{ value: string }>(
       "SELECT value FROM cache_meta WHERE key = ?",
-      [key]
+      [key],
     );
     return row?.value ?? null;
   }
@@ -145,17 +145,40 @@ export class CacheSync {
 
 // All syncable tables
 const ALL_TABLES = [
-  "tasks", "notes", "goals", "milestones", "ideas",
-  "retrospectives", "sticky_notes", "mindmaps", "c4_components",
-  "swot", "risk", "lean_canvas", "business_model", "project_value",
-  "brief", "capacity_plans", "strategic_builders",
-  "customers", "rates", "quotes", "invoices",
-  "companies", "contacts", "deals", "interactions",
-  "portfolio", "org_members"
+  "tasks",
+  "notes",
+  "goals",
+  "milestones",
+  "ideas",
+  "retrospectives",
+  "sticky_notes",
+  "mindmaps",
+  "c4_components",
+  "swot",
+  "risk",
+  "lean_canvas",
+  "business_model",
+  "project_value",
+  "brief",
+  "capacity_plans",
+  "strategic_builders",
+  "customers",
+  "rates",
+  "quotes",
+  "invoices",
+  "companies",
+  "contacts",
+  "deals",
+  "interactions",
+  "portfolio",
+  "org_members",
 ];
 
 // Table-specific sync functions
-type TableSyncer = (parser: DirectoryMarkdownParser, db: CacheDatabase) => Promise<number>;
+type TableSyncer = (
+  parser: DirectoryMarkdownParser,
+  db: CacheDatabase,
+) => Promise<number>;
 
 const TABLE_SYNCERS: Record<string, TableSyncer> = {
   tasks: async (parser, db) => {
@@ -169,13 +192,23 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
         `INSERT INTO tasks (id, title, completed, section, description, tags, due_date, assignee, priority, effort, milestone, blocked_by, planned_start, planned_end, parent_id, config)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          val(task.id), val(task.title), task.completed ? 1 : 0, val(task.section),
+          val(task.id),
+          val(task.title),
+          task.completed ? 1 : 0,
+          val(task.section),
           Array.isArray(task.description) ? task.description.join("\n") : null,
-          json(config.tag), val(config.due_date), val(config.assignee),
-          val(config.priority), val(config.effort), val(config.milestone),
-          json(config.blocked_by), val(config.planned_start), val(config.planned_end),
-          val(parentId), JSON.stringify(config)
-        ]
+          json(config.tag),
+          val(config.due_date),
+          val(config.assignee),
+          val(config.priority),
+          val(config.effort),
+          val(config.milestone),
+          json(config.blocked_by),
+          val(config.planned_start),
+          val(config.planned_end),
+          val(parentId),
+          JSON.stringify(config),
+        ],
       );
       count++;
       if (task.children) {
@@ -184,7 +217,7 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
         }
       }
     };
-    for (const task of tasks) { insertTask(task); }
+    for (const task of tasks) insertTask(task);
     return count;
   },
 
@@ -195,9 +228,17 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       db.execute(
         `INSERT INTO notes (id, title, content, mode, paragraphs, custom_sections, revision, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [val(n.id), val(n.title), val(n.content), val(n.mode) ?? "simple",
-         json(n.paragraphs), json(n.customSections), val(n.revision) ?? 1,
-         val(n.createdAt), val(n.updatedAt)]
+        [
+          val(n.id),
+          val(n.title),
+          val(n.content),
+          val(n.mode) ?? "simple",
+          json(n.paragraphs),
+          json(n.customSections),
+          val(n.revision) ?? 1,
+          val(n.createdAt),
+          val(n.updatedAt),
+        ],
       );
     }
     return notes.length;
@@ -210,8 +251,16 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       db.execute(
         `INSERT INTO goals (id, title, description, type, kpi, start_date, end_date, status)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [val(g.id), val(g.title), val(g.description), val(g.type),
-         val(g.kpi), val(g.startDate), val(g.endDate), val(g.status)]
+        [
+          val(g.id),
+          val(g.title),
+          val(g.description),
+          val(g.type),
+          val(g.kpi),
+          val(g.startDate),
+          val(g.endDate),
+          val(g.status),
+        ],
       );
     }
     return goals.length;
@@ -223,7 +272,13 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
     for (const m of milestones) {
       db.execute(
         `INSERT INTO milestones (id, name, target, status, description) VALUES (?, ?, ?, ?, ?)`,
-        [val(m.id), val(m.name), val(m.target), val(m.status), val(m.description)]
+        [
+          val(m.id),
+          val(m.name),
+          val(m.target),
+          val(m.status),
+          val(m.description),
+        ],
       );
     }
     return milestones.length;
@@ -236,8 +291,15 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       db.execute(
         `INSERT INTO ideas (id, title, status, category, description, links, created)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [val(i.id), val(i.title), val(i.status), val(i.category),
-         val(i.description), json(i.links), val(i.created)]
+        [
+          val(i.id),
+          val(i.title),
+          val(i.status),
+          val(i.category),
+          val(i.description),
+          json(i.links),
+          val(i.created),
+        ],
       );
     }
     return ideas.length;
@@ -250,8 +312,15 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       db.execute(
         `INSERT INTO retrospectives (id, title, date, status, continue_items, stop_items, start_items)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [val(r.id), val(r.title), val(r.date), val(r.status),
-         json(r.continue), json(r.stop), json(r.start)]
+        [
+          val(r.id),
+          val(r.title),
+          val(r.date),
+          val(r.status),
+          json(r.continue),
+          json(r.stop),
+          json(r.start),
+        ],
       );
     }
     return retros.length;
@@ -264,9 +333,15 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       db.execute(
         `INSERT INTO sticky_notes (id, content, color, position_x, position_y, width, height)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [val(n.id), val(n.content), val(n.color),
-         n.position?.x ?? 0, n.position?.y ?? 0,
-         n.size?.width ?? null, n.size?.height ?? null]
+        [
+          val(n.id),
+          val(n.content),
+          val(n.color),
+          n.position?.x ?? 0,
+          n.position?.y ?? 0,
+          n.size?.width ?? null,
+          n.size?.height ?? null,
+        ],
       );
     }
     return notes.length;
@@ -278,7 +353,7 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
     for (const m of mindmaps) {
       db.execute(
         `INSERT INTO mindmaps (id, title, nodes) VALUES (?, ?, ?)`,
-        [val(m.id), val(m.title), json(m.nodes)]
+        [val(m.id), val(m.title), json(m.nodes)],
       );
     }
     return mindmaps.length;
@@ -291,9 +366,19 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       db.execute(
         `INSERT INTO c4_components (id, name, level, type, technology, description, position_x, position_y, connections, children, parent)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [val(c.id), val(c.name), val(c.level), val(c.type), val(c.technology),
-         val(c.description), c.position?.x ?? 0, c.position?.y ?? 0,
-         json(c.connections), json(c.children), val(c.parent)]
+        [
+          val(c.id),
+          val(c.name),
+          val(c.level),
+          val(c.type),
+          val(c.technology),
+          val(c.description),
+          c.position?.x ?? 0,
+          c.position?.y ?? 0,
+          json(c.connections),
+          json(c.children),
+          val(c.parent),
+        ],
       );
     }
     return components.length;
@@ -306,8 +391,15 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       db.execute(
         `INSERT INTO swot (id, title, date, strengths, weaknesses, opportunities, threats)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [val(s.id), val(s.title), val(s.date),
-         json(s.strengths), json(s.weaknesses), json(s.opportunities), json(s.threats)]
+        [
+          val(s.id),
+          val(s.title),
+          val(s.date),
+          json(s.strengths),
+          json(s.weaknesses),
+          json(s.opportunities),
+          json(s.threats),
+        ],
       );
     }
     return analyses.length;
@@ -320,9 +412,15 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       db.execute(
         `INSERT INTO risk (id, title, date, high_impact_high_prob, high_impact_low_prob, low_impact_high_prob, low_impact_low_prob)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [val(r.id), val(r.title), val(r.date),
-         json(r.highImpactHighProb), json(r.highImpactLowProb),
-         json(r.lowImpactHighProb), json(r.lowImpactLowProb)]
+        [
+          val(r.id),
+          val(r.title),
+          val(r.date),
+          json(r.highImpactHighProb),
+          json(r.highImpactLowProb),
+          json(r.lowImpactHighProb),
+          json(r.lowImpactLowProb),
+        ],
       );
     }
     return analyses.length;
@@ -332,8 +430,10 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
     const canvases = await parser.readLeanCanvases();
     db.execute("DELETE FROM lean_canvas");
     for (const c of canvases) {
-      db.execute(`INSERT INTO lean_canvas (id, title, date, data) VALUES (?, ?, ?, ?)`,
-        [val(c.id), val(c.title), val(c.date), JSON.stringify(c)]);
+      db.execute(
+        `INSERT INTO lean_canvas (id, title, date, data) VALUES (?, ?, ?, ?)`,
+        [val(c.id), val(c.title), val(c.date), JSON.stringify(c)],
+      );
     }
     return canvases.length;
   },
@@ -342,8 +442,10 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
     const canvases = await parser.readBusinessModelCanvases();
     db.execute("DELETE FROM business_model");
     for (const c of canvases) {
-      db.execute(`INSERT INTO business_model (id, title, date, data) VALUES (?, ?, ?, ?)`,
-        [val(c.id), val(c.title), val(c.date), JSON.stringify(c)]);
+      db.execute(
+        `INSERT INTO business_model (id, title, date, data) VALUES (?, ?, ?, ?)`,
+        [val(c.id), val(c.title), val(c.date), JSON.stringify(c)],
+      );
     }
     return canvases.length;
   },
@@ -352,8 +454,10 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
     const boards = await parser.readProjectValueBoards();
     db.execute("DELETE FROM project_value");
     for (const b of boards) {
-      db.execute(`INSERT INTO project_value (id, title, date, data) VALUES (?, ?, ?, ?)`,
-        [val(b.id), val(b.title), val(b.date), JSON.stringify(b)]);
+      db.execute(
+        `INSERT INTO project_value (id, title, date, data) VALUES (?, ?, ?, ?)`,
+        [val(b.id), val(b.title), val(b.date), JSON.stringify(b)],
+      );
     }
     return boards.length;
   },
@@ -362,8 +466,10 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
     const briefs = await parser.readBriefs();
     db.execute("DELETE FROM brief");
     for (const b of briefs) {
-      db.execute(`INSERT INTO brief (id, title, date, data) VALUES (?, ?, ?, ?)`,
-        [val(b.id), val(b.title), val(b.date), JSON.stringify(b)]);
+      db.execute(
+        `INSERT INTO brief (id, title, date, data) VALUES (?, ?, ?, ?)`,
+        [val(b.id), val(b.title), val(b.date), JSON.stringify(b)],
+      );
     }
     return briefs.length;
   },
@@ -375,8 +481,14 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       db.execute(
         `INSERT INTO capacity_plans (id, title, date, budget_hours, team_members, allocations)
          VALUES (?, ?, ?, ?, ?, ?)`,
-        [val(p.id), val(p.title), val(p.date), val(p.budgetHours),
-         json(p.teamMembers), json(p.allocations)]
+        [
+          val(p.id),
+          val(p.title),
+          val(p.date),
+          val(p.budgetHours),
+          json(p.teamMembers),
+          json(p.allocations),
+        ],
       );
     }
     return plans.length;
@@ -386,8 +498,10 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
     const builders = await parser.readStrategicLevelsBuilders();
     db.execute("DELETE FROM strategic_builders");
     for (const b of builders) {
-      db.execute(`INSERT INTO strategic_builders (id, title, date, levels) VALUES (?, ?, ?, ?)`,
-        [val(b.id), val(b.title), val(b.date), json(b.levels)]);
+      db.execute(
+        `INSERT INTO strategic_builders (id, title, date, levels) VALUES (?, ?, ?, ?)`,
+        [val(b.id), val(b.title), val(b.date), json(b.levels)],
+      );
     }
     return builders.length;
   },
@@ -398,8 +512,17 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
     for (const c of customers) {
       // deno-lint-ignore no-explicit-any
       const cust = c as any;
-      db.execute(`INSERT INTO customers (id, name, email, phone, address, notes) VALUES (?, ?, ?, ?, ?, ?)`,
-        [val(cust.id), val(cust.name), val(cust.email), val(cust.phone), val(cust.address), val(cust.notes)]);
+      db.execute(
+        `INSERT INTO customers (id, name, email, phone, address, notes) VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          val(cust.id),
+          val(cust.name),
+          val(cust.email),
+          val(cust.phone),
+          val(cust.address),
+          val(cust.notes),
+        ],
+      );
     }
     return customers.length;
   },
@@ -411,11 +534,22 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       const rates = await (parser as any).readRates?.() ?? [];
       db.execute("DELETE FROM rates");
       for (const r of rates) {
-        db.execute(`INSERT INTO rates (id, name, type, amount, currency, description) VALUES (?, ?, ?, ?, ?, ?)`,
-          [val(r.id), val(r.name), val(r.type), val(r.amount), val(r.currency), val(r.description)]);
+        db.execute(
+          `INSERT INTO rates (id, name, type, amount, currency, description) VALUES (?, ?, ?, ?, ?, ?)`,
+          [
+            val(r.id),
+            val(r.name),
+            val(r.type),
+            val(r.amount),
+            val(r.currency),
+            val(r.description),
+          ],
+        );
       }
       return rates.length;
-    } catch { return 0; }
+    } catch {
+      return 0;
+    }
   },
 
   quotes: async (parser, db) => {
@@ -427,8 +561,17 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       db.execute(
         `INSERT INTO quotes (id, number, customer_id, status, date, valid_until, line_items, notes, total)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [val(quote.id), val(quote.number), val(quote.customerId), val(quote.status), val(quote.date),
-         val(quote.validUntil), json(quote.lineItems), val(quote.notes), val(quote.total)]
+        [
+          val(quote.id),
+          val(quote.number),
+          val(quote.customerId),
+          val(quote.status),
+          val(quote.date),
+          val(quote.validUntil),
+          json(quote.lineItems),
+          val(quote.notes),
+          val(quote.total),
+        ],
       );
     }
     return quotes.length;
@@ -443,8 +586,18 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       db.execute(
         `INSERT INTO invoices (id, number, customer_id, quote_id, status, date, due_date, line_items, notes, total)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [val(inv.id), val(inv.number), val(inv.customerId), val(inv.quoteId), val(inv.status),
-         val(inv.date), val(inv.dueDate), json(inv.lineItems), val(inv.notes), val(inv.total)]
+        [
+          val(inv.id),
+          val(inv.number),
+          val(inv.customerId),
+          val(inv.quoteId),
+          val(inv.status),
+          val(inv.date),
+          val(inv.dueDate),
+          json(inv.lineItems),
+          val(inv.notes),
+          val(inv.total),
+        ],
       );
     }
     return invoices.length;
@@ -457,8 +610,16 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       db.execute(
         `INSERT INTO companies (id, name, industry, website, phone, address, notes, created)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [val(c.id), val(c.name), val(c.industry), val(c.website),
-         val(c.phone), val(c.address), val(c.notes), val(c.created)]
+        [
+          val(c.id),
+          val(c.name),
+          val(c.industry),
+          val(c.website),
+          val(c.phone),
+          val(c.address),
+          val(c.notes),
+          val(c.created),
+        ],
       );
     }
     return companies.length;
@@ -471,9 +632,18 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       db.execute(
         `INSERT INTO contacts (id, company_id, first_name, last_name, email, phone, title, is_primary, notes, created)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [val(c.id), val(c.companyId), val(c.firstName), val(c.lastName),
-         val(c.email), val(c.phone), val(c.title), c.isPrimary ? 1 : 0,
-         val(c.notes), val(c.created)]
+        [
+          val(c.id),
+          val(c.companyId),
+          val(c.firstName),
+          val(c.lastName),
+          val(c.email),
+          val(c.phone),
+          val(c.title),
+          c.isPrimary ? 1 : 0,
+          val(c.notes),
+          val(c.created),
+        ],
       );
     }
     return contacts.length;
@@ -486,9 +656,19 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       db.execute(
         `INSERT INTO deals (id, company_id, contact_id, title, value, stage, probability, expected_close, closed_at, notes, created)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [val(d.id), val(d.companyId), val(d.contactId), val(d.title), val(d.value),
-         val(d.stage), val(d.probability), val(d.expectedCloseDate), val(d.closedAt),
-         val(d.notes), val(d.created)]
+        [
+          val(d.id),
+          val(d.companyId),
+          val(d.contactId),
+          val(d.title),
+          val(d.value),
+          val(d.stage),
+          val(d.probability),
+          val(d.expectedCloseDate),
+          val(d.closedAt),
+          val(d.notes),
+          val(d.created),
+        ],
       );
     }
     return deals.length;
@@ -501,8 +681,18 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       db.execute(
         `INSERT INTO interactions (id, company_id, contact_id, deal_id, type, summary, date, duration, next_follow_up, notes)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [val(i.id), val(i.companyId), val(i.contactId), val(i.dealId), val(i.type),
-         val(i.summary), val(i.date), val(i.duration), val(i.nextFollowUp), val(i.notes)]
+        [
+          val(i.id),
+          val(i.companyId),
+          val(i.contactId),
+          val(i.dealId),
+          val(i.type),
+          val(i.summary),
+          val(i.date),
+          val(i.duration),
+          val(i.nextFollowUp),
+          val(i.notes),
+        ],
       );
     }
     return interactions.length;
@@ -515,9 +705,20 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       db.execute(
         `INSERT INTO portfolio (id, name, category, status, client, revenue, expenses, progress, start_date, end_date, team, kpis)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [val(p.id), val(p.name), val(p.category), val(p.status), val(p.client),
-         val(p.revenue), val(p.expenses), val(p.progress), val(p.startDate), val(p.endDate),
-         json(p.team), json(p.kpis)]
+        [
+          val(p.id),
+          val(p.name),
+          val(p.category),
+          val(p.status),
+          val(p.client),
+          val(p.revenue),
+          val(p.expenses),
+          val(p.progress),
+          val(p.startDate),
+          val(p.endDate),
+          json(p.team),
+          json(p.kpis),
+        ],
       );
     }
     return items.length;
@@ -530,10 +731,19 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       db.execute(
         `INSERT INTO org_members (id, name, title, departments, reports_to, email, phone, start_date, notes)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [val(m.id), val(m.name), val(m.title), val(JSON.stringify(m.departments)),
-         val(m.reportsTo), val(m.email), val(m.phone), val(m.startDate), val(m.notes)]
+        [
+          val(m.id),
+          val(m.name),
+          val(m.title),
+          val(JSON.stringify(m.departments)),
+          val(m.reportsTo),
+          val(m.email),
+          val(m.phone),
+          val(m.startDate),
+          val(m.notes),
+        ],
       );
     }
     return members.length;
-  }
+  },
 };

@@ -1,65 +1,65 @@
-import { showToast } from './modules/ui/toast.js';
-import { ThemeManager } from './modules/ui/theme.js';
-import { toggleMobileMenu, closeMobileMenu } from './modules/ui/mobile.js';
-import { AccessibilityManager } from './modules/ui/accessibility.js';
-import { FocusMode } from './modules/ui/focus-mode.js';
-import { Breadcrumb } from './modules/ui/breadcrumb.js';
-import { Sidenav } from './modules/ui/sidenav.js';
-import { Help } from './modules/ui/help.js';
-import { TaskSidenavModule } from './modules/features/task-sidenav.js';
-import { TasksAPI, ProjectAPI } from './modules/api.js';
-import { markdownToHtml as markdownToHtmlUtil } from './modules/utils.js';
-import { SummaryView } from './modules/views/summary.js';
-import { ListView } from './modules/views/list.js';
-import { BoardView } from './modules/views/board.js';
-import { TimelineView } from './modules/views/timeline.js';
-import { ConfigView } from './modules/views/config.js';
-import { PortfolioView } from './modules/views/portfolio.js';
-import { TasksModule } from './modules/features/tasks.js';
-import { DependenciesModule } from './modules/dependencies.js';
-import { NotesModule } from './modules/features/notes.js';
-import { EnhancedNotesModule } from './modules/features/notes-enhanced.js';
-import { NoteSidenavModule } from './modules/features/note-sidenav.js';
-import { GoalSidenavModule } from './modules/features/goal-sidenav.js';
-import { MilestoneSidenavModule } from './modules/features/milestone-sidenav.js';
-import { RetrospectiveSidenavModule } from './modules/features/retrospective-sidenav.js';
-import { MindmapSidenavModule } from './modules/features/mindmap-sidenav.js';
-import { StickyNoteSidenavModule } from './modules/features/sticky-note-sidenav.js';
-import { SwotSidenavModule } from './modules/features/swot-sidenav.js';
-import { RiskSidenavModule } from './modules/features/risk-sidenav.js';
-import { LeanCanvasSidenavModule } from './modules/features/lean-canvas-sidenav.js';
-import { BusinessModelSidenavModule } from './modules/features/business-model-sidenav.js';
-import { ProjectValueSidenavModule } from './modules/features/project-value-sidenav.js';
-import { BriefSidenavModule } from './modules/features/brief-sidenav.js';
-import { IdeaSidenavModule } from './modules/features/idea-sidenav.js';
-import { C4SidenavModule } from './modules/features/c4-sidenav.js';
-import { CapacitySidenavModule } from './modules/features/capacity-sidenav.js';
-import { CRMSidenavModule } from './modules/features/crm-sidenav.js';
-import { BillingSidenavModule } from './modules/features/billing-sidenav.js';
-import { StrategicLevelsSidenavModule } from './modules/features/strategic-levels-sidenav.js';
-import { GoalsModule } from './modules/features/goals.js';
-import { MilestonesModule } from './modules/features/milestones.js';
-import { IdeasModule } from './modules/features/ideas.js';
-import { RetrospectivesModule } from './modules/features/retrospectives.js';
-import { SwotModule } from './modules/features/swot.js';
-import { RiskModule } from './modules/features/risk.js';
-import { LeanCanvasModule } from './modules/features/lean-canvas.js';
-import { BusinessModelModule } from './modules/features/business-model.js';
-import { ProjectValueModule } from './modules/features/project-value.js';
-import { BriefModule } from './modules/features/brief.js';
-import { CapacityModule } from './modules/features/capacity.js';
-import { TimeTrackingModule } from './modules/features/time-tracking.js';
-import { StrategicLevelsModule } from './modules/features/strategic-levels.js';
-import { BillingModule } from './modules/features/billing.js';
-import { CRMModule } from './modules/features/crm.js';
-import { CanvasModule } from './modules/features/canvas.js';
-import { MindmapModule } from './modules/features/mindmap.js';
-import { C4Module } from './modules/features/c4.js';
-import { OrgChartModule } from './modules/views/orgchart.js';
-import { OrgChartSidenavModule } from './modules/features/orgchart-sidenav.js';
-import { PomodoroModule } from './modules/features/pomodoro.js';
-import { ImportExportModule } from './modules/import-export.js';
-import { ProjectsModule } from './modules/projects.js';
+import { showToast } from "./modules/ui/toast.js";
+import { ThemeManager } from "./modules/ui/theme.js";
+import { closeMobileMenu, toggleMobileMenu } from "./modules/ui/mobile.js";
+import { AccessibilityManager } from "./modules/ui/accessibility.js";
+import { FocusMode } from "./modules/ui/focus-mode.js";
+import { Breadcrumb } from "./modules/ui/breadcrumb.js";
+import { Sidenav } from "./modules/ui/sidenav.js";
+import { Help } from "./modules/ui/help.js";
+import { TaskSidenavModule } from "./modules/features/task-sidenav.js";
+import { ProjectAPI, TasksAPI } from "./modules/api.js";
+import { markdownToHtml as markdownToHtmlUtil } from "./modules/utils.js";
+import { SummaryView } from "./modules/views/summary.js";
+import { ListView } from "./modules/views/list.js";
+import { BoardView } from "./modules/views/board.js";
+import { TimelineView } from "./modules/views/timeline.js";
+import { ConfigView } from "./modules/views/config.js";
+import { PortfolioView } from "./modules/views/portfolio.js";
+import { TasksModule } from "./modules/features/tasks.js";
+import { DependenciesModule } from "./modules/dependencies.js";
+import { NotesModule } from "./modules/features/notes.js";
+import { EnhancedNotesModule } from "./modules/features/notes-enhanced.js";
+import { NoteSidenavModule } from "./modules/features/note-sidenav.js";
+import { GoalSidenavModule } from "./modules/features/goal-sidenav.js";
+import { MilestoneSidenavModule } from "./modules/features/milestone-sidenav.js";
+import { RetrospectiveSidenavModule } from "./modules/features/retrospective-sidenav.js";
+import { MindmapSidenavModule } from "./modules/features/mindmap-sidenav.js";
+import { StickyNoteSidenavModule } from "./modules/features/sticky-note-sidenav.js";
+import { SwotSidenavModule } from "./modules/features/swot-sidenav.js";
+import { RiskSidenavModule } from "./modules/features/risk-sidenav.js";
+import { LeanCanvasSidenavModule } from "./modules/features/lean-canvas-sidenav.js";
+import { BusinessModelSidenavModule } from "./modules/features/business-model-sidenav.js";
+import { ProjectValueSidenavModule } from "./modules/features/project-value-sidenav.js";
+import { BriefSidenavModule } from "./modules/features/brief-sidenav.js";
+import { IdeaSidenavModule } from "./modules/features/idea-sidenav.js";
+import { C4SidenavModule } from "./modules/features/c4-sidenav.js";
+import { CapacitySidenavModule } from "./modules/features/capacity-sidenav.js";
+import { CRMSidenavModule } from "./modules/features/crm-sidenav.js";
+import { BillingSidenavModule } from "./modules/features/billing-sidenav.js";
+import { StrategicLevelsSidenavModule } from "./modules/features/strategic-levels-sidenav.js";
+import { GoalsModule } from "./modules/features/goals.js";
+import { MilestonesModule } from "./modules/features/milestones.js";
+import { IdeasModule } from "./modules/features/ideas.js";
+import { RetrospectivesModule } from "./modules/features/retrospectives.js";
+import { SwotModule } from "./modules/features/swot.js";
+import { RiskModule } from "./modules/features/risk.js";
+import { LeanCanvasModule } from "./modules/features/lean-canvas.js";
+import { BusinessModelModule } from "./modules/features/business-model.js";
+import { ProjectValueModule } from "./modules/features/project-value.js";
+import { BriefModule } from "./modules/features/brief.js";
+import { CapacityModule } from "./modules/features/capacity.js";
+import { TimeTrackingModule } from "./modules/features/time-tracking.js";
+import { StrategicLevelsModule } from "./modules/features/strategic-levels.js";
+import { BillingModule } from "./modules/features/billing.js";
+import { CRMModule } from "./modules/features/crm.js";
+import { CanvasModule } from "./modules/features/canvas.js";
+import { MindmapModule } from "./modules/features/mindmap.js";
+import { C4Module } from "./modules/features/c4.js";
+import { OrgChartModule } from "./modules/views/orgchart.js";
+import { OrgChartSidenavModule } from "./modules/features/orgchart-sidenav.js";
+import { PomodoroModule } from "./modules/features/pomodoro.js";
+import { ImportExportModule } from "./modules/import-export.js";
+import { ProjectsModule } from "./modules/projects.js";
 
 class TaskManager {
   constructor() {
@@ -146,7 +146,7 @@ class TaskManager {
     this.c4Zoom = 1;
     this.c4Offset = { x: 0, y: 0 };
     this.c4NavigationStack = [];
-    this.currentC4Level = 'context';
+    this.currentC4Level = "context";
     this.editingC4Component = null;
     this.c4PanningInitialized = false;
     this.c4ForceSimulation = null;
@@ -239,7 +239,8 @@ class TaskManager {
     await this.loadProjects(); // Load projects first
     await this.loadProjectConfig();
     await this.loadSections();
-    const savedView = localStorage.getItem("mdplanner_current_view") || "summary";
+    const savedView = localStorage.getItem("mdplanner_current_view") ||
+      "summary";
     this.switchView(savedView);
     await this.loadTasks();
     this.checkTaskHashOnLoad();
@@ -294,19 +295,25 @@ class TaskManager {
       .getElementById("canvasViewBtn")
       .addEventListener("click", () => {
         this.switchView("canvas");
-        document.querySelectorAll(".nav-dropdown-menu").forEach(m => m.classList.add("hidden"));
+        document.querySelectorAll(".nav-dropdown-menu").forEach((m) =>
+          m.classList.add("hidden")
+        );
       });
     document
       .getElementById("mindmapViewBtn")
       .addEventListener("click", () => {
         this.switchView("mindmap");
-        document.querySelectorAll(".nav-dropdown-menu").forEach(m => m.classList.add("hidden"));
+        document.querySelectorAll(".nav-dropdown-menu").forEach((m) =>
+          m.classList.add("hidden")
+        );
       });
     document
       .getElementById("c4ViewBtn")
       .addEventListener("click", () => {
         this.switchView("c4");
-        document.querySelectorAll(".nav-dropdown-menu").forEach(m => m.classList.add("hidden"));
+        document.querySelectorAll(".nav-dropdown-menu").forEach((m) =>
+          m.classList.add("hidden")
+        );
       });
 
     // Additional desktop view buttons
@@ -331,7 +338,9 @@ class TaskManager {
     additionalViews.forEach(({ id, view }) => {
       document.getElementById(id)?.addEventListener("click", () => {
         this.switchView(view);
-        document.querySelectorAll(".nav-dropdown-menu").forEach(m => m.classList.add("hidden"));
+        document.querySelectorAll(".nav-dropdown-menu").forEach((m) =>
+          m.classList.add("hidden")
+        );
       });
     });
 
@@ -691,7 +700,10 @@ class TaskManager {
       noteModalMouseDownTarget = e.target;
     });
     document.getElementById("noteModal").addEventListener("click", (e) => {
-      if (e.target.id === "noteModal" && noteModalMouseDownTarget?.id === "noteModal") {
+      if (
+        e.target.id === "noteModal" &&
+        noteModalMouseDownTarget?.id === "noteModal"
+      ) {
         this.closeNoteModal();
       }
       noteModalMouseDownTarget = null;
@@ -703,7 +715,10 @@ class TaskManager {
       goalModalMouseDownTarget = e.target;
     });
     document.getElementById("goalModal").addEventListener("click", (e) => {
-      if (e.target.id === "goalModal" && goalModalMouseDownTarget?.id === "goalModal") {
+      if (
+        e.target.id === "goalModal" &&
+        goalModalMouseDownTarget?.id === "goalModal"
+      ) {
         this.closeGoalModal();
       }
       goalModalMouseDownTarget = null;
@@ -748,28 +763,60 @@ class TaskManager {
   activateViewButton(view) {
     // Update the view selector label
     const viewLabels = {
-      summary: "Summary", list: "List", board: "Board", timeline: "Timeline",
-      notes: "Notes", goals: "Goals", milestones: "Milestones", ideas: "Ideas",
-      canvas: "Canvas", mindmap: "Mindmap", c4: "C4 Architecture",
-      retrospectives: "Retrospectives", swot: "SWOT Analysis", riskAnalysis: "Risk Analysis", leanCanvas: "Lean Canvas", businessModel: "Business Model", brief: "Brief", timeTracking: "Time Tracking", capacity: "Capacity", strategicLevels: "Strategic Levels", billing: "Billing", crm: "CRM", portfolio: "Portfolio", config: "Settings"
+      summary: "Summary",
+      list: "List",
+      board: "Board",
+      timeline: "Timeline",
+      notes: "Notes",
+      goals: "Goals",
+      milestones: "Milestones",
+      ideas: "Ideas",
+      canvas: "Canvas",
+      mindmap: "Mindmap",
+      c4: "C4 Architecture",
+      retrospectives: "Retrospectives",
+      swot: "SWOT Analysis",
+      riskAnalysis: "Risk Analysis",
+      leanCanvas: "Lean Canvas",
+      businessModel: "Business Model",
+      brief: "Brief",
+      timeTracking: "Time Tracking",
+      capacity: "Capacity",
+      strategicLevels: "Strategic Levels",
+      billing: "Billing",
+      crm: "CRM",
+      portfolio: "Portfolio",
+      config: "Settings",
     };
     const label = document.getElementById("currentViewLabel");
     if (label) label.textContent = viewLabels[view] || view;
 
     // Close dropdown
-    document.querySelectorAll(".nav-dropdown-menu").forEach(m => m.classList.add("hidden"));
+    document.querySelectorAll(".nav-dropdown-menu").forEach((m) =>
+      m.classList.add("hidden")
+    );
 
     // Activate desktop button in dropdown
     const desktopBtn = document.getElementById(`${view}ViewBtn`);
     if (desktopBtn) {
-      desktopBtn.classList.add("text-gray-900", "dark:text-white", "bg-gray-100", "dark:bg-gray-700");
+      desktopBtn.classList.add(
+        "text-gray-900",
+        "dark:text-white",
+        "bg-gray-100",
+        "dark:bg-gray-700",
+      );
       desktopBtn.classList.remove("text-gray-600", "dark:text-gray-300");
     }
 
     // Activate mobile button
     const mobileBtn = document.getElementById(`${view}ViewBtnMobile`);
     if (mobileBtn) {
-      mobileBtn.classList.add("text-gray-900", "dark:text-white", "bg-gray-100", "dark:bg-gray-800");
+      mobileBtn.classList.add(
+        "text-gray-900",
+        "dark:text-white",
+        "bg-gray-100",
+        "dark:bg-gray-800",
+      );
       mobileBtn.classList.remove("text-gray-600", "dark:text-gray-300");
     }
   }
@@ -778,7 +825,7 @@ class TaskManager {
     this.currentView = view;
     localStorage.setItem("mdplanner_current_view", view);
     // Set data attribute on body for CSS targeting
-    document.body.setAttribute('data-current-view', view);
+    document.body.setAttribute("data-current-view", view);
 
     // Update breadcrumb
     Breadcrumb.render(view);
@@ -795,21 +842,84 @@ class TaskManager {
     this.notesLoaded = false;
 
     // Reset all desktop nav buttons in dropdown
-    const desktopNavBtns = ["summaryViewBtn", "listViewBtn", "boardViewBtn", "timelineViewBtn", "notesViewBtn", "goalsViewBtn", "milestonesViewBtn", "ideasViewBtn", "canvasViewBtn", "mindmapViewBtn", "c4ViewBtn", "retrospectivesViewBtn", "swotViewBtn", "riskAnalysisViewBtn", "leanCanvasViewBtn", "businessModelViewBtn", "projectValueViewBtn", "briefViewBtn", "timeTrackingViewBtn", "capacityViewBtn", "strategicLevelsViewBtn", "billingViewBtn", "crmViewBtn", "orgchartViewBtn", "portfolioViewBtn"];
+    const desktopNavBtns = [
+      "summaryViewBtn",
+      "listViewBtn",
+      "boardViewBtn",
+      "timelineViewBtn",
+      "notesViewBtn",
+      "goalsViewBtn",
+      "milestonesViewBtn",
+      "ideasViewBtn",
+      "canvasViewBtn",
+      "mindmapViewBtn",
+      "c4ViewBtn",
+      "retrospectivesViewBtn",
+      "swotViewBtn",
+      "riskAnalysisViewBtn",
+      "leanCanvasViewBtn",
+      "businessModelViewBtn",
+      "projectValueViewBtn",
+      "briefViewBtn",
+      "timeTrackingViewBtn",
+      "capacityViewBtn",
+      "strategicLevelsViewBtn",
+      "billingViewBtn",
+      "crmViewBtn",
+      "orgchartViewBtn",
+      "portfolioViewBtn",
+    ];
     desktopNavBtns.forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) {
-        btn.classList.remove("text-gray-900", "dark:text-white", "bg-gray-100", "dark:bg-gray-700");
+        btn.classList.remove(
+          "text-gray-900",
+          "dark:text-white",
+          "bg-gray-100",
+          "dark:bg-gray-700",
+        );
         btn.classList.add("text-gray-600", "dark:text-gray-300");
       }
     });
 
     // Reset mobile buttons
-    const mobileBtnIds = ["summaryViewBtnMobile", "listViewBtnMobile", "boardViewBtnMobile", "timelineViewBtnMobile", "notesViewBtnMobile", "goalsViewBtnMobile", "milestonesViewBtnMobile", "canvasViewBtnMobile", "mindmapViewBtnMobile", "c4ViewBtnMobile", "ideasViewBtnMobile", "retrospectivesViewBtnMobile", "swotViewBtnMobile", "riskAnalysisViewBtnMobile", "leanCanvasViewBtnMobile", "businessModelViewBtnMobile", "projectValueViewBtnMobile", "briefViewBtnMobile", "timeTrackingViewBtnMobile", "capacityViewBtnMobile", "strategicLevelsViewBtnMobile", "billingViewBtnMobile", "crmViewBtnMobile", "orgchartViewBtnMobile", "portfolioViewBtnMobile", "configViewBtnMobile"];
+    const mobileBtnIds = [
+      "summaryViewBtnMobile",
+      "listViewBtnMobile",
+      "boardViewBtnMobile",
+      "timelineViewBtnMobile",
+      "notesViewBtnMobile",
+      "goalsViewBtnMobile",
+      "milestonesViewBtnMobile",
+      "canvasViewBtnMobile",
+      "mindmapViewBtnMobile",
+      "c4ViewBtnMobile",
+      "ideasViewBtnMobile",
+      "retrospectivesViewBtnMobile",
+      "swotViewBtnMobile",
+      "riskAnalysisViewBtnMobile",
+      "leanCanvasViewBtnMobile",
+      "businessModelViewBtnMobile",
+      "projectValueViewBtnMobile",
+      "briefViewBtnMobile",
+      "timeTrackingViewBtnMobile",
+      "capacityViewBtnMobile",
+      "strategicLevelsViewBtnMobile",
+      "billingViewBtnMobile",
+      "crmViewBtnMobile",
+      "orgchartViewBtnMobile",
+      "portfolioViewBtnMobile",
+      "configViewBtnMobile",
+    ];
     mobileBtnIds.forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) {
-        btn.classList.remove("text-gray-900", "dark:text-white", "bg-gray-100", "dark:bg-gray-800");
+        btn.classList.remove(
+          "text-gray-900",
+          "dark:text-white",
+          "bg-gray-100",
+          "dark:bg-gray-800",
+        );
         btn.classList.add("text-gray-600", "dark:text-gray-300");
       }
     });
@@ -841,12 +951,12 @@ class TaskManager {
     document.getElementById("mindmapView").classList.add("hidden");
     document.getElementById("c4View").classList.add("hidden");
     document.getElementById("configView").classList.add("hidden");
-    
+
     // Clear C4 connections SVG when switching away from C4 view
-    const c4Svg = document.getElementById('c4Connections');
-    if (c4Svg && view !== 'c4') {
+    const c4Svg = document.getElementById("c4Connections");
+    if (c4Svg && view !== "c4") {
       // Clear all connections when leaving C4 view
-      c4Svg.innerHTML = '';
+      c4Svg.innerHTML = "";
     }
 
     // Activate current view
@@ -1100,7 +1210,7 @@ class TaskManager {
   closeAllModals() {
     // Find all modal elements by their common class pattern
     const allModals = document.querySelectorAll('[id$="Modal"]:not(.hidden)');
-    allModals.forEach(modal => {
+    allModals.forEach((modal) => {
       modal.classList.add("hidden");
       modal.classList.remove("flex");
     });
@@ -1108,7 +1218,11 @@ class TaskManager {
     this.editingTask = null;
     this.parentTaskId = null;
     if (window.location.hash.startsWith("#task=")) {
-      history.replaceState(null, "", window.location.pathname + window.location.search);
+      history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search,
+      );
     }
     // Exit focus mode if active
     FocusMode.exit();
@@ -1187,11 +1301,16 @@ class TaskManager {
         this.projectConfig.startDate || "";
 
       // Handle working days - check if custom schedule
-      if (this.projectConfig.workingDays && this.projectConfig.workingDays.length > 0) {
+      if (
+        this.projectConfig.workingDays &&
+        this.projectConfig.workingDays.length > 0
+      ) {
         document.getElementById("workingDays").value = "custom";
-        document.getElementById("customDaysContainer").classList.remove("hidden");
+        document.getElementById("customDaysContainer").classList.remove(
+          "hidden",
+        );
         // Set checkboxes
-        document.querySelectorAll(".working-day-checkbox").forEach(cb => {
+        document.querySelectorAll(".working-day-checkbox").forEach((cb) => {
           cb.checked = this.projectConfig.workingDays.includes(cb.value);
         });
       } else {
@@ -1241,16 +1360,20 @@ class TaskManager {
 
     if (workingDaysInput.value === "custom") {
       workingDays = [];
-      document.querySelectorAll(".working-day-checkbox:checked").forEach(cb => {
-        workingDays.push(cb.value);
-      });
+      document.querySelectorAll(".working-day-checkbox:checked").forEach(
+        (cb) => {
+          workingDays.push(cb.value);
+        },
+      );
       workingDaysPerWeek = workingDays.length;
     } else {
       workingDaysPerWeek = parseInt(workingDaysInput.value) || 5;
     }
 
     const config = {
-      startDate: startDateInput ? startDateInput.value : this.projectConfig?.startDate,
+      startDate: startDateInput
+        ? startDateInput.value
+        : this.projectConfig?.startDate,
       workingDaysPerWeek,
       workingDays,
       assignees: this.projectConfig?.assignees || [],
@@ -1288,14 +1411,30 @@ class TaskManager {
   }
 
   // Delegate config methods to configView
-  async addSection() { await this.configView.addSection(); }
-  async removeSection(index) { await this.configView.removeSection(index); }
-  async moveSectionUp(index) { await this.configView.moveSectionUp(index); }
-  async moveSectionDown(index) { await this.configView.moveSectionDown(index); }
-  async addAssignee() { await this.configView.addAssignee(); }
-  async removeAssignee(index) { await this.configView.removeAssignee(index); }
-  async addTag() { await this.configView.addTag(); }
-  async removeTag(index) { await this.configView.removeTag(index); }
+  async addSection() {
+    await this.configView.addSection();
+  }
+  async removeSection(index) {
+    await this.configView.removeSection(index);
+  }
+  async moveSectionUp(index) {
+    await this.configView.moveSectionUp(index);
+  }
+  async moveSectionDown(index) {
+    await this.configView.moveSectionDown(index);
+  }
+  async addAssignee() {
+    await this.configView.addAssignee();
+  }
+  async removeAssignee(index) {
+    await this.configView.removeAssignee(index);
+  }
+  async addTag() {
+    await this.configView.addTag();
+  }
+  async removeTag(index) {
+    await this.configView.removeTag(index);
+  }
 
   async updateTask(taskId, updates) {
     try {
@@ -1382,7 +1521,7 @@ class TaskManager {
     this.enhancedNotesModule.toggleMode();
   }
 
-  addParagraph(type = 'text') {
+  addParagraph(type = "text") {
     this.enhancedNotesModule.addParagraph(type);
   }
 
@@ -1554,19 +1693,24 @@ class TaskManager {
     this.enhancedNotesModule.preventDefaults(e);
   }
 
-
   parseMarkdownContent(content) {
     // Basic markdown parsing
     return content
-      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-      .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-      .replace(/\*(.*)\*/gim, '<em>$1</em>')
-      .replace(/`([^`]+)`/gim, '<code>$1</code>')
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" target="_blank">$1</a>')
-      .replace(/!\[([^\]]*)\]\(([^)]+)\)/gim, '<img src="$2" alt="$1" class="max-w-full h-auto">')
-      .replace(/\n/g, '<br>');
+      .replace(/^### (.*$)/gim, "<h3>$1</h3>")
+      .replace(/^## (.*$)/gim, "<h2>$1</h2>")
+      .replace(/^# (.*$)/gim, "<h1>$1</h1>")
+      .replace(/\*\*(.*)\*\*/gim, "<strong>$1</strong>")
+      .replace(/\*(.*)\*/gim, "<em>$1</em>")
+      .replace(/`([^`]+)`/gim, "<code>$1</code>")
+      .replace(
+        /\[([^\]]+)\]\(([^)]+)\)/gim,
+        '<a href="$2" target="_blank">$1</a>',
+      )
+      .replace(
+        /!\[([^\]]*)\]\(([^)]+)\)/gim,
+        '<img src="$2" alt="$1" class="max-w-full h-auto">',
+      )
+      .replace(/\n/g, "<br>");
   }
 
   deleteCustomSection(sectionId) {
@@ -1606,7 +1750,11 @@ class TaskManager {
   }
 
   updateTimelineItemStatus(sectionId, itemId, status) {
-    this.enhancedNotesModule.updateTimelineItemStatus(sectionId, itemId, status);
+    this.enhancedNotesModule.updateTimelineItemStatus(
+      sectionId,
+      itemId,
+      status,
+    );
   }
 
   deleteTimelineItem(sectionId, itemId) {
@@ -1626,7 +1774,11 @@ class TaskManager {
   }
 
   addContentToSplitView(sectionId, columnIndex, type) {
-    this.enhancedNotesModule.addContentToSplitView(sectionId, columnIndex, type);
+    this.enhancedNotesModule.addContentToSplitView(
+      sectionId,
+      columnIndex,
+      type,
+    );
   }
 
   scheduleCustomContentSave(contentId, content) {
@@ -2353,7 +2505,14 @@ class TaskManager {
   }
 
   positionNodeAndChildren(node, x, y, levelSpacing, nodeSpacing, container) {
-    return this.mindmapModule.positionNodeAndChildren(node, x, y, levelSpacing, nodeSpacing, container);
+    return this.mindmapModule.positionNodeAndChildren(
+      node,
+      x,
+      y,
+      levelSpacing,
+      nodeSpacing,
+      container,
+    );
   }
 
   drawConnections(container) {
@@ -2699,7 +2858,13 @@ class TaskManager {
   }
 
   renderStrategicNode(node, allLevels, depth = 0, isLast = true, prefix = "") {
-    return this.strategicLevelsModule.renderNode(node, allLevels, depth, isLast, prefix);
+    return this.strategicLevelsModule.renderNode(
+      node,
+      allLevels,
+      depth,
+      isLast,
+      prefix,
+    );
   }
 
   renderStrategicLevelsTree(builder, container) {
@@ -2743,7 +2908,11 @@ class TaskManager {
   }
 
   openStrategicLevelModal(levelType, editId = null, parentId = null) {
-    return this.strategicLevelsModule.openLevelModal(levelType, editId, parentId);
+    return this.strategicLevelsModule.openLevelModal(
+      levelType,
+      editId,
+      parentId,
+    );
   }
 
   closeStrategicLevelModal() {

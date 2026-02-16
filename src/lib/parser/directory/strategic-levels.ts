@@ -3,23 +3,40 @@
  * Each strategic levels builder is stored as a separate markdown file.
  * Levels are stored as nested hierarchical structures.
  */
-import { DirectoryParser, parseFrontmatter, buildFileContent } from "./base.ts";
-import type { StrategicLevelsBuilder, StrategicLevel, StrategicLevelType } from "../../types.ts";
+import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
+import type {
+  StrategicLevel,
+  StrategicLevelsBuilder,
+  StrategicLevelType,
+} from "../../types.ts";
 
 interface StrategicLevelsFrontmatter {
   id: string;
   date: string;
 }
 
-const LEVEL_ORDER: StrategicLevelType[] = ["vision", "mission", "goals", "objectives", "strategies", "tactics"];
+const LEVEL_ORDER: StrategicLevelType[] = [
+  "vision",
+  "mission",
+  "goals",
+  "objectives",
+  "strategies",
+  "tactics",
+];
 
-export class StrategicLevelsDirectoryParser extends DirectoryParser<StrategicLevelsBuilder> {
+export class StrategicLevelsDirectoryParser
+  extends DirectoryParser<StrategicLevelsBuilder> {
   constructor(projectDir: string) {
     super({ projectDir, sectionName: "strategiclevels" });
   }
 
-  protected parseFile(content: string, _filePath: string): StrategicLevelsBuilder | null {
-    const { frontmatter, content: body } = parseFrontmatter<StrategicLevelsFrontmatter>(content);
+  protected parseFile(
+    content: string,
+    _filePath: string,
+  ): StrategicLevelsBuilder | null {
+    const { frontmatter, content: body } = parseFrontmatter<
+      StrategicLevelsFrontmatter
+    >(content);
 
     if (!frontmatter.id) {
       return null;
@@ -56,13 +73,19 @@ export class StrategicLevelsDirectoryParser extends DirectoryParser<StrategicLev
 
       // Parse level items: - (level_id) Title | description | parentId | linkedTasks | linkedMilestones
       if (currentLevelType) {
-        const levelMatch = line.match(/^[-*]\s+\((\w+)\)\s+(.+?)(?:\s*\|\s*(.*))?$/);
+        const levelMatch = line.match(
+          /^[-*]\s+\((\w+)\)\s+(.+?)(?:\s*\|\s*(.*))?$/,
+        );
         if (levelMatch) {
-          const parts = levelMatch[3]?.split("|").map(p => p.trim()) || [];
+          const parts = levelMatch[3]?.split("|").map((p) => p.trim()) || [];
           const description = parts[0] || undefined;
           const parentId = parts[1] || undefined;
-          const linkedTasks = parts[2] ? parts[2].split(",").map(t => t.trim()).filter(Boolean) : undefined;
-          const linkedMilestones = parts[3] ? parts[3].split(",").map(m => m.trim()).filter(Boolean) : undefined;
+          const linkedTasks = parts[2]
+            ? parts[2].split(",").map((t) => t.trim()).filter(Boolean)
+            : undefined;
+          const linkedMilestones = parts[3]
+            ? parts[3].split(",").map((m) => m.trim()).filter(Boolean)
+            : undefined;
 
           result.levels.push({
             id: levelMatch[1],
@@ -103,7 +126,9 @@ export class StrategicLevelsDirectoryParser extends DirectoryParser<StrategicLev
       const levels = levelsByType.get(levelType) || [];
       if (levels.length > 0) {
         sections.push("");
-        sections.push(`## ${levelType.charAt(0).toUpperCase() + levelType.slice(1)}`);
+        sections.push(
+          `## ${levelType.charAt(0).toUpperCase() + levelType.slice(1)}`,
+        );
         sections.push("");
 
         for (const level of levels.sort((a, b) => a.order - b.order)) {
@@ -111,9 +136,12 @@ export class StrategicLevelsDirectoryParser extends DirectoryParser<StrategicLev
           if (level.description) parts.push(level.description);
           if (level.parentId) parts.push(level.parentId);
           else if (parts.length > 0) parts.push("");
-          if (level.linkedTasks?.length) parts.push(level.linkedTasks.join(","));
-          else if (parts.length > 1) parts.push("");
-          if (level.linkedMilestones?.length) parts.push(level.linkedMilestones.join(","));
+          if (level.linkedTasks?.length) {
+            parts.push(level.linkedTasks.join(","));
+          } else if (parts.length > 1) parts.push("");
+          if (level.linkedMilestones?.length) {
+            parts.push(level.linkedMilestones.join(","));
+          }
 
           const suffix = parts.length > 0 ? ` | ${parts.join(" | ")}` : "";
           sections.push(`- (${level.id}) ${level.title}${suffix}`);
@@ -124,7 +152,9 @@ export class StrategicLevelsDirectoryParser extends DirectoryParser<StrategicLev
     return buildFileContent(frontmatter, sections.join("\n"));
   }
 
-  async add(builder: Omit<StrategicLevelsBuilder, "id">): Promise<StrategicLevelsBuilder> {
+  async add(
+    builder: Omit<StrategicLevelsBuilder, "id">,
+  ): Promise<StrategicLevelsBuilder> {
     const newBuilder: StrategicLevelsBuilder = {
       ...builder,
       id: this.generateId("strategic"),
@@ -133,7 +163,10 @@ export class StrategicLevelsDirectoryParser extends DirectoryParser<StrategicLev
     return newBuilder;
   }
 
-  async update(id: string, updates: Partial<StrategicLevelsBuilder>): Promise<StrategicLevelsBuilder | null> {
+  async update(
+    id: string,
+    updates: Partial<StrategicLevelsBuilder>,
+  ): Promise<StrategicLevelsBuilder | null> {
     const existing = await this.read(id);
     if (!existing) return null;
 
@@ -146,11 +179,17 @@ export class StrategicLevelsDirectoryParser extends DirectoryParser<StrategicLev
     return updated;
   }
 
-  async addLevel(builderId: string, level: Omit<StrategicLevel, "id" | "order">): Promise<StrategicLevelsBuilder | null> {
+  async addLevel(
+    builderId: string,
+    level: Omit<StrategicLevel, "id" | "order">,
+  ): Promise<StrategicLevelsBuilder | null> {
     const builder = await this.read(builderId);
     if (!builder) return null;
 
-    const maxOrder = builder.levels.reduce((max, l) => Math.max(max, l.order), -1);
+    const maxOrder = builder.levels.reduce(
+      (max, l) => Math.max(max, l.order),
+      -1,
+    );
     const newLevel: StrategicLevel = {
       ...level,
       id: this.generateId("level"),
@@ -161,11 +200,15 @@ export class StrategicLevelsDirectoryParser extends DirectoryParser<StrategicLev
     return builder;
   }
 
-  async updateLevel(builderId: string, levelId: string, updates: Partial<StrategicLevel>): Promise<StrategicLevelsBuilder | null> {
+  async updateLevel(
+    builderId: string,
+    levelId: string,
+    updates: Partial<StrategicLevel>,
+  ): Promise<StrategicLevelsBuilder | null> {
     const builder = await this.read(builderId);
     if (!builder) return null;
 
-    const levelIndex = builder.levels.findIndex(l => l.id === levelId);
+    const levelIndex = builder.levels.findIndex((l) => l.id === levelId);
     if (levelIndex === -1) return null;
 
     builder.levels[levelIndex] = {
@@ -177,21 +220,30 @@ export class StrategicLevelsDirectoryParser extends DirectoryParser<StrategicLev
     return builder;
   }
 
-  async removeLevel(builderId: string, levelId: string): Promise<StrategicLevelsBuilder | null> {
+  async removeLevel(
+    builderId: string,
+    levelId: string,
+  ): Promise<StrategicLevelsBuilder | null> {
     const builder = await this.read(builderId);
     if (!builder) return null;
 
     // Also remove any levels that have this as parent
-    builder.levels = builder.levels.filter(l => l.id !== levelId && l.parentId !== levelId);
+    builder.levels = builder.levels.filter((l) =>
+      l.id !== levelId && l.parentId !== levelId
+    );
     await this.write(builder);
     return builder;
   }
 
-  async reorderLevel(builderId: string, levelId: string, newOrder: number): Promise<StrategicLevelsBuilder | null> {
+  async reorderLevel(
+    builderId: string,
+    levelId: string,
+    newOrder: number,
+  ): Promise<StrategicLevelsBuilder | null> {
     const builder = await this.read(builderId);
     if (!builder) return null;
 
-    const levelIndex = builder.levels.findIndex(l => l.id === levelId);
+    const levelIndex = builder.levels.findIndex((l) => l.id === levelId);
     if (levelIndex === -1) return null;
 
     builder.levels[levelIndex].order = newOrder;

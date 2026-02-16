@@ -56,9 +56,13 @@ export class ProjectManager {
 
   async init(): Promise<void> {
     // Verify the project exists
-    const exists = await DirectoryMarkdownParser.isDirectoryProject(this.projectPath);
+    const exists = await DirectoryMarkdownParser.isDirectoryProject(
+      this.projectPath,
+    );
     if (!exists) {
-      throw new Error(`Invalid project directory: ${this.projectPath} (missing project.md)`);
+      throw new Error(
+        `Invalid project directory: ${this.projectPath} (missing project.md)`,
+      );
     }
 
     // Initialize cache if enabled
@@ -94,7 +98,9 @@ export class ProjectManager {
   /**
    * Rebuild cache from markdown.
    */
-  async rebuildCache(): Promise<{ tables: number; items: number; duration: number; errors: string[] } | null> {
+  async rebuildCache(): Promise<
+    { tables: number; items: number; duration: number; errors: string[] } | null
+  > {
     if (!this.cache) return null;
     return this.cache.sync.rebuild();
   }
@@ -138,7 +144,9 @@ export class ProjectManager {
       return [{
         filename: this.getActiveFile(),
         name: projectInfo.name || this.getActiveFile(),
-        description: (projectInfo.description || []).slice(0, 2).join(' ').slice(0, 150) || undefined,
+        description:
+          (projectInfo.description || []).slice(0, 2).join(" ").slice(0, 150) ||
+          undefined,
         status: config.status || "active",
         category: config.category,
         client: config.client,
@@ -147,7 +155,9 @@ export class ProjectManager {
         lastUpdated: config.lastUpdated || "",
         taskCount: totalTasks,
         completedTaskCount: completedTasks,
-        progressPercent: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
+        progressPercent: totalTasks > 0
+          ? Math.round((completedTasks / totalTasks) * 100)
+          : 0,
         isDirectory: true,
       }];
     } catch (e) {

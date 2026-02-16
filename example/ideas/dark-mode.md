@@ -12,10 +12,12 @@ links: []
 System and manual dark mode toggle.
 
 ## Requirements
+
 - Follow system preference by default
 - Manual override in settings
 - Persist preference
 - Smooth transition animation
 
 ## Status
+
 Approved for Beta release. Design tokens ready.

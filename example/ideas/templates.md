@@ -12,6 +12,7 @@ links: [idea_ai]
 Pre-built project structures for common use cases.
 
 ## Template Categories
+
 - Software Development (Scrum, Kanban)
 - Marketing Campaign
 - Product Launch
@@ -19,6 +20,7 @@ Pre-built project structures for common use cases.
 - Content Calendar
 
 ## Features
+
 - Clone template to new project
 - Customize template before creation
 - Community template gallery

@@ -13,6 +13,7 @@ milestone: milestone_enterprise
 Enable single sign-on for enterprise customers.
 
 ## Requirements
+
 - SAML 2.0 support
 - Integration with Okta, Azure AD, Google Workspace
 - Just-in-time user provisioning

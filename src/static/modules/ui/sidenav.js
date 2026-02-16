@@ -56,7 +56,7 @@ export class Sidenav {
     if (options.focusFirst !== false) {
       setTimeout(() => {
         const firstInput = panel.querySelector(
-          'input:not([type="hidden"]), textarea, select'
+          'input:not([type="hidden"]), textarea, select',
         );
         if (firstInput) firstInput.focus();
       }, 100);

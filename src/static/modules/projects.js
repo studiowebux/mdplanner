@@ -1,4 +1,4 @@
-import { ProjectAPI } from './api.js';
+import { ProjectAPI } from "./api.js";
 
 /**
  * ProjectsModule - Handles project display and version checking
@@ -12,10 +12,12 @@ export class ProjectsModule {
   async checkVersion() {
     try {
       const data = await ProjectAPI.getVersion();
-      document.getElementById("versionDisplay").textContent = `MD Planner v${data.current}`;
+      document.getElementById("versionDisplay").textContent =
+        `MD Planner v${data.current}`;
       if (data.updateAvailable) {
         document.getElementById("updateBadge").classList.remove("hidden");
-        document.getElementById("updateBadge").textContent = `v${data.latest} available`;
+        document.getElementById("updateBadge").textContent =
+          `v${data.latest} available`;
       }
     } catch (error) {
       console.error("Error checking version:", error);
@@ -155,7 +157,7 @@ export class ProjectsModule {
     tm.c4Zoom = 1;
     tm.c4Offset = { x: 0, y: 0 };
     tm.c4NavigationStack = [];
-    tm.currentC4Level = 'context';
+    tm.currentC4Level = "context";
     tm.editingC4Component = null;
 
     // Dependencies & editing

@@ -3,7 +3,12 @@
  */
 
 import { Hono } from "hono";
-import { AppVariables, getParser, jsonResponse, errorResponse } from "../context.ts";
+import {
+  AppVariables,
+  errorResponse,
+  getParser,
+  jsonResponse,
+} from "../context.ts";
 
 export const crmRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -21,7 +26,7 @@ crmRouter.get("/companies/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const companies = await parser.readCompanies();
-  const company = companies.find(comp => comp.id === id);
+  const company = companies.find((comp) => comp.id === id);
   if (!company) return errorResponse("Not found", 404);
   return jsonResponse(company);
 });
@@ -53,7 +58,7 @@ crmRouter.put("/companies/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json();
   const companies = await parser.readCompanies();
-  const index = companies.findIndex(comp => comp.id === id);
+  const index = companies.findIndex((comp) => comp.id === id);
   if (index === -1) return errorResponse("Not found", 404);
   companies[index] = { ...companies[index], ...body };
   await parser.saveCompanies(companies);
@@ -65,8 +70,10 @@ crmRouter.delete("/companies/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const companies = await parser.readCompanies();
-  const filtered = companies.filter(comp => comp.id !== id);
-  if (filtered.length === companies.length) return errorResponse("Not found", 404);
+  const filtered = companies.filter((comp) => comp.id !== id);
+  if (filtered.length === companies.length) {
+    return errorResponse("Not found", 404);
+  }
   await parser.saveCompanies(filtered);
   return jsonResponse({ success: true });
 });
@@ -76,7 +83,9 @@ crmRouter.get("/companies/:id/contacts", async (c) => {
   const parser = getParser(c);
   const companyId = c.req.param("id");
   const contacts = await parser.readContacts();
-  const companyContacts = contacts.filter(contact => contact.companyId === companyId);
+  const companyContacts = contacts.filter((contact) =>
+    contact.companyId === companyId
+  );
   return jsonResponse(companyContacts);
 });
 
@@ -85,7 +94,7 @@ crmRouter.get("/companies/:id/deals", async (c) => {
   const parser = getParser(c);
   const companyId = c.req.param("id");
   const deals = await parser.readDeals();
-  const companyDeals = deals.filter(deal => deal.companyId === companyId);
+  const companyDeals = deals.filter((deal) => deal.companyId === companyId);
   return jsonResponse(companyDeals);
 });
 
@@ -94,7 +103,9 @@ crmRouter.get("/companies/:id/interactions", async (c) => {
   const parser = getParser(c);
   const companyId = c.req.param("id");
   const interactions = await parser.readInteractions();
-  const companyInteractions = interactions.filter(i => i.companyId === companyId);
+  const companyInteractions = interactions.filter((i) =>
+    i.companyId === companyId
+  );
   return jsonResponse(companyInteractions);
 });
 
@@ -112,7 +123,7 @@ crmRouter.get("/contacts/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const contacts = await parser.readContacts();
-  const contact = contacts.find(cont => cont.id === id);
+  const contact = contacts.find((cont) => cont.id === id);
   if (!contact) return errorResponse("Not found", 404);
   return jsonResponse(contact);
 });
@@ -146,7 +157,7 @@ crmRouter.put("/contacts/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json();
   const contacts = await parser.readContacts();
-  const index = contacts.findIndex(cont => cont.id === id);
+  const index = contacts.findIndex((cont) => cont.id === id);
   if (index === -1) return errorResponse("Not found", 404);
   contacts[index] = { ...contacts[index], ...body };
   await parser.saveContacts(contacts);
@@ -158,8 +169,10 @@ crmRouter.delete("/contacts/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const contacts = await parser.readContacts();
-  const filtered = contacts.filter(cont => cont.id !== id);
-  if (filtered.length === contacts.length) return errorResponse("Not found", 404);
+  const filtered = contacts.filter((cont) => cont.id !== id);
+  if (filtered.length === contacts.length) {
+    return errorResponse("Not found", 404);
+  }
   await parser.saveContacts(filtered);
   return jsonResponse({ success: true });
 });
@@ -178,7 +191,7 @@ crmRouter.get("/deals/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const deals = await parser.readDeals();
-  const deal = deals.find(d => d.id === id);
+  const deal = deals.find((d) => d.id === id);
   if (!deal) return errorResponse("Not found", 404);
   return jsonResponse(deal);
 });
@@ -212,7 +225,7 @@ crmRouter.put("/deals/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json();
   const deals = await parser.readDeals();
-  const index = deals.findIndex(d => d.id === id);
+  const index = deals.findIndex((d) => d.id === id);
   if (index === -1) return errorResponse("Not found", 404);
   deals[index] = { ...deals[index], ...body };
   await parser.saveDeals(deals);
@@ -224,7 +237,7 @@ crmRouter.delete("/deals/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const deals = await parser.readDeals();
-  const filtered = deals.filter(d => d.id !== id);
+  const filtered = deals.filter((d) => d.id !== id);
   if (filtered.length === deals.length) return errorResponse("Not found", 404);
   await parser.saveDeals(filtered);
   return jsonResponse({ success: true });
@@ -236,10 +249,17 @@ crmRouter.post("/deals/:id/stage", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json();
   const deals = await parser.readDeals();
-  const index = deals.findIndex(d => d.id === id);
+  const index = deals.findIndex((d) => d.id === id);
   if (index === -1) return errorResponse("Not found", 404);
 
-  const validStages = ["lead", "qualified", "proposal", "negotiation", "won", "lost"];
+  const validStages = [
+    "lead",
+    "qualified",
+    "proposal",
+    "negotiation",
+    "won",
+    "lost",
+  ];
   if (!validStages.includes(body.stage)) {
     return errorResponse("Invalid stage", 400);
   }
@@ -262,7 +282,7 @@ crmRouter.get("/deals/:id/interactions", async (c) => {
   const parser = getParser(c);
   const dealId = c.req.param("id");
   const interactions = await parser.readInteractions();
-  const dealInteractions = interactions.filter(i => i.dealId === dealId);
+  const dealInteractions = interactions.filter((i) => i.dealId === dealId);
   return jsonResponse(dealInteractions);
 });
 
@@ -280,7 +300,7 @@ crmRouter.get("/interactions/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const interactions = await parser.readInteractions();
-  const interaction = interactions.find(i => i.id === id);
+  const interaction = interactions.find((i) => i.id === id);
   if (!interaction) return errorResponse("Not found", 404);
   return jsonResponse(interaction);
 });
@@ -314,7 +334,7 @@ crmRouter.put("/interactions/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json();
   const interactions = await parser.readInteractions();
-  const index = interactions.findIndex(i => i.id === id);
+  const index = interactions.findIndex((i) => i.id === id);
   if (index === -1) return errorResponse("Not found", 404);
   interactions[index] = { ...interactions[index], ...body };
   await parser.saveInteractions(interactions);
@@ -326,8 +346,10 @@ crmRouter.delete("/interactions/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const interactions = await parser.readInteractions();
-  const filtered = interactions.filter(i => i.id !== id);
-  if (filtered.length === interactions.length) return errorResponse("Not found", 404);
+  const filtered = interactions.filter((i) => i.id !== id);
+  if (filtered.length === interactions.length) {
+    return errorResponse("Not found", 404);
+  }
   await parser.saveInteractions(filtered);
   return jsonResponse({ success: true });
 });

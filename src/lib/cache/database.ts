@@ -82,7 +82,7 @@ export class CacheDatabase {
   tableExists(tableName: string): boolean {
     const result = this.queryOne<{ name: string }>(
       "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
-      [tableName]
+      [tableName],
     );
     return result !== null;
   }
@@ -92,7 +92,7 @@ export class CacheDatabase {
    */
   count(tableName: string): number {
     const result = this.queryOne<{ count: number }>(
-      `SELECT COUNT(*) as count FROM ${tableName}`
+      `SELECT COUNT(*) as count FROM ${tableName}`,
     );
     return result?.count ?? 0;
   }

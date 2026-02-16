@@ -10,6 +10,7 @@ status: completed
 Internal testing release with core functionality.
 
 ## Deliverables
+
 - User authentication working
 - Basic task CRUD operations
 - Project structure in place

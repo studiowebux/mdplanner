@@ -8,9 +8,13 @@ Bug Tracker: [GitHub Issues](https://github.com/studiowebux/mdplanner/issues)
 
 ## About
 
-MD Planner is a task management system that uses a directory of markdown files as the database. Each entity (task, note, goal) is a separate `.md` file with YAML frontmatter. No external database required. Human-readable. Git-friendly.
+MD Planner is a task management system that uses a directory of markdown files
+as the database. Each entity (task, note, goal) is a separate `.md` file with
+YAML frontmatter. No external database required. Human-readable. Git-friendly.
 
-Views: Summary, List, Board (kanban), Timeline (Gantt), Notes, Goals, Milestones, Ideas, Canvas, Mindmap, C4 Architecture, SWOT, Risk Analysis, Lean Canvas, Business Model, Capacity Planning, Strategic Levels, Billing, CRM.
+Views: Summary, List, Board (kanban), Timeline (Gantt), Notes, Goals,
+Milestones, Ideas, Canvas, Mindmap, C4 Architecture, SWOT, Risk Analysis, Lean
+Canvas, Business Model, Capacity Planning, Strategic Levels, Billing, CRM.
 
 ## Installation
 

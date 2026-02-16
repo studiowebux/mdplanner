@@ -2,7 +2,7 @@
  * Directory-based parser for C4 Architecture components.
  * Each component is stored as a separate markdown file.
  */
-import { DirectoryParser, parseFrontmatter, buildFileContent } from "./base.ts";
+import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
 import type { C4Component } from "../../types.ts";
 
 interface C4Frontmatter {
@@ -22,7 +22,9 @@ export class C4DirectoryParser extends DirectoryParser<C4Component> {
   }
 
   protected parseFile(content: string, _filePath: string): C4Component | null {
-    const { frontmatter, content: body } = parseFrontmatter<C4Frontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<C4Frontmatter>(
+      content,
+    );
 
     if (!frontmatter.id) {
       return null;
@@ -113,7 +115,10 @@ export class C4DirectoryParser extends DirectoryParser<C4Component> {
   /**
    * Update an existing C4 component.
    */
-  async update(id: string, updates: Partial<C4Component>): Promise<C4Component | null> {
+  async update(
+    id: string,
+    updates: Partial<C4Component>,
+  ): Promise<C4Component | null> {
     const existing = await this.read(id);
     if (!existing) return null;
 
@@ -131,7 +136,7 @@ export class C4DirectoryParser extends DirectoryParser<C4Component> {
    */
   async updatePosition(
     id: string,
-    position: { x: number; y: number }
+    position: { x: number; y: number },
   ): Promise<C4Component | null> {
     return this.update(id, { position });
   }
@@ -142,7 +147,7 @@ export class C4DirectoryParser extends DirectoryParser<C4Component> {
   async addConnection(
     sourceId: string,
     targetId: string,
-    label: string
+    label: string,
   ): Promise<C4Component | null> {
     const source = await this.read(sourceId);
     if (!source) return null;
@@ -158,13 +163,13 @@ export class C4DirectoryParser extends DirectoryParser<C4Component> {
    */
   async removeConnection(
     sourceId: string,
-    targetId: string
+    targetId: string,
   ): Promise<C4Component | null> {
     const source = await this.read(sourceId);
     if (!source) return null;
 
     const connections = (source.connections || []).filter(
-      (c) => c.target !== targetId
+      (c) => c.target !== targetId,
     );
 
     return this.update(sourceId, { connections });

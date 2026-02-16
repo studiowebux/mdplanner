@@ -1,32 +1,32 @@
 // Breadcrumb Component
 // Shows navigation path: Home > Category > Current View
 
-import { AccessibilityManager } from './accessibility.js';
+import { AccessibilityManager } from "./accessibility.js";
 
 const VIEW_CATEGORIES = {
-  summary: { category: 'Overview', label: 'Summary' },
-  list: { category: 'Tasks', label: 'List View' },
-  board: { category: 'Tasks', label: 'Board View' },
-  timeline: { category: 'Tasks', label: 'Timeline' },
-  notes: { category: 'Planning', label: 'Notes' },
-  goals: { category: 'Planning', label: 'Goals' },
-  milestones: { category: 'Planning', label: 'Milestones' },
-  ideas: { category: 'Planning', label: 'Ideas' },
-  canvas: { category: 'Diagrams', label: 'Canvas' },
-  mindmap: { category: 'Diagrams', label: 'Mindmap' },
-  c4: { category: 'Diagrams', label: 'C4 Architecture' },
-  retrospectives: { category: 'Analysis', label: 'Retrospectives' },
-  swot: { category: 'Analysis', label: 'SWOT Analysis' },
-  riskAnalysis: { category: 'Analysis', label: 'Risk Analysis' },
-  leanCanvas: { category: 'Strategy', label: 'Lean Canvas' },
-  businessModel: { category: 'Strategy', label: 'Business Model' },
-  projectValue: { category: 'Strategy', label: 'Value Board' },
-  brief: { category: 'Strategy', label: 'Brief' },
-  strategicLevels: { category: 'Strategy', label: 'Strategic Levels' },
-  timeTracking: { category: 'Resources', label: 'Time Tracking' },
-  capacity: { category: 'Resources', label: 'Capacity' },
-  billing: { category: 'Resources', label: 'Billing' },
-  config: { category: 'Settings', label: 'Configuration' }
+  summary: { category: "Overview", label: "Summary" },
+  list: { category: "Tasks", label: "List View" },
+  board: { category: "Tasks", label: "Board View" },
+  timeline: { category: "Tasks", label: "Timeline" },
+  notes: { category: "Planning", label: "Notes" },
+  goals: { category: "Planning", label: "Goals" },
+  milestones: { category: "Planning", label: "Milestones" },
+  ideas: { category: "Planning", label: "Ideas" },
+  canvas: { category: "Diagrams", label: "Canvas" },
+  mindmap: { category: "Diagrams", label: "Mindmap" },
+  c4: { category: "Diagrams", label: "C4 Architecture" },
+  retrospectives: { category: "Analysis", label: "Retrospectives" },
+  swot: { category: "Analysis", label: "SWOT Analysis" },
+  riskAnalysis: { category: "Analysis", label: "Risk Analysis" },
+  leanCanvas: { category: "Strategy", label: "Lean Canvas" },
+  businessModel: { category: "Strategy", label: "Business Model" },
+  projectValue: { category: "Strategy", label: "Value Board" },
+  brief: { category: "Strategy", label: "Brief" },
+  strategicLevels: { category: "Strategy", label: "Strategic Levels" },
+  timeTracking: { category: "Resources", label: "Time Tracking" },
+  capacity: { category: "Resources", label: "Capacity" },
+  billing: { category: "Resources", label: "Billing" },
+  config: { category: "Settings", label: "Configuration" },
 };
 
 /**
@@ -38,17 +38,18 @@ export class Breadcrumb {
    * @param {string} currentView
    */
   static render(currentView) {
-    const container = document.getElementById('breadcrumb');
+    const container = document.getElementById("breadcrumb");
     if (!container) return;
 
     // Check if breadcrumbs should be shown
-    if (!AccessibilityManager.get('showBreadcrumbs')) {
-      container.classList.add('hidden');
+    if (!AccessibilityManager.get("showBreadcrumbs")) {
+      container.classList.add("hidden");
       return;
     }
-    container.classList.remove('hidden');
+    container.classList.remove("hidden");
 
-    const viewInfo = VIEW_CATEGORIES[currentView] || { category: 'Other', label: currentView };
+    const viewInfo = VIEW_CATEGORIES[currentView] ||
+      { category: "Other", label: currentView };
 
     container.innerHTML = `
       <nav class="breadcrumb-nav" aria-label="Breadcrumb">

@@ -10,4 +10,5 @@ startDate: "2020-03-01"
 
 # David Chen
 
-Leads all technical strategy and engineering teams. Previously at Google and Stripe.
+Leads all technical strategy and engineering teams. Previously at Google and
+Stripe.

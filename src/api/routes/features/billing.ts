@@ -3,7 +3,12 @@
  */
 
 import { Hono } from "hono";
-import { AppVariables, getParser, jsonResponse, errorResponse } from "../context.ts";
+import {
+  AppVariables,
+  errorResponse,
+  getParser,
+  jsonResponse,
+} from "../context.ts";
 import { Task } from "../../../lib/types.ts";
 
 export const billingRouter = new Hono<{ Variables: AppVariables }>();
@@ -33,7 +38,7 @@ billingRouter.get("/customers/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const customers = await parser.readCustomers();
-  const customer = customers.find(cust => cust.id === id);
+  const customer = customers.find((cust) => cust.id === id);
   if (!customer) return errorResponse("Not found", 404);
   return jsonResponse(customer);
 });
@@ -65,7 +70,7 @@ billingRouter.put("/customers/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json();
   const customers = await parser.readCustomers();
-  const index = customers.findIndex(cust => cust.id === id);
+  const index = customers.findIndex((cust) => cust.id === id);
   if (index === -1) return errorResponse("Not found", 404);
   customers[index] = { ...customers[index], ...body };
   await parser.saveCustomers(customers);
@@ -77,8 +82,10 @@ billingRouter.delete("/customers/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const customers = await parser.readCustomers();
-  const filtered = customers.filter(cust => cust.id !== id);
-  if (filtered.length === customers.length) return errorResponse("Not found", 404);
+  const filtered = customers.filter((cust) => cust.id !== id);
+  if (filtered.length === customers.length) {
+    return errorResponse("Not found", 404);
+  }
   await parser.saveCustomers(filtered);
   return jsonResponse({ success: true });
 });
@@ -116,7 +123,7 @@ billingRouter.put("/billing-rates/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json();
   const rates = await parser.readBillingRates();
-  const index = rates.findIndex(r => r.id === id);
+  const index = rates.findIndex((r) => r.id === id);
   if (index === -1) return errorResponse("Not found", 404);
   rates[index] = { ...rates[index], ...body };
   await parser.saveBillingRates(rates);
@@ -128,7 +135,7 @@ billingRouter.delete("/billing-rates/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const rates = await parser.readBillingRates();
-  const filtered = rates.filter(r => r.id !== id);
+  const filtered = rates.filter((r) => r.id !== id);
   if (filtered.length === rates.length) return errorResponse("Not found", 404);
   await parser.saveBillingRates(filtered);
   return jsonResponse({ success: true });
@@ -148,7 +155,7 @@ billingRouter.get("/quotes/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const quotes = await parser.readQuotes();
-  const quote = quotes.find(q => q.id === id);
+  const quote = quotes.find((q) => q.id === id);
   if (!quote) return errorResponse("Not found", 404);
   return jsonResponse(quote);
 });
@@ -161,7 +168,10 @@ billingRouter.post("/quotes", async (c) => {
   const id = crypto.randomUUID().substring(0, 8);
   const number = await parser.getNextQuoteNumber();
   const lineItems = body.lineItems || [];
-  const subtotal = lineItems.reduce((sum: number, item: { amount: number }) => sum + (item.amount || 0), 0);
+  const subtotal = lineItems.reduce(
+    (sum: number, item: { amount: number }) => sum + (item.amount || 0),
+    0,
+  );
   const tax = body.taxRate ? subtotal * (body.taxRate / 100) : 0;
   const newQuote = {
     id,
@@ -189,13 +199,18 @@ billingRouter.put("/quotes/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json();
   const quotes = await parser.readQuotes();
-  const index = quotes.findIndex(q => q.id === id);
+  const index = quotes.findIndex((q) => q.id === id);
   if (index === -1) return errorResponse("Not found", 404);
 
   const updated = { ...quotes[index], ...body };
   if (body.lineItems) {
-    updated.subtotal = updated.lineItems.reduce((sum: number, item: { amount: number }) => sum + (item.amount || 0), 0);
-    updated.tax = updated.taxRate ? updated.subtotal * (updated.taxRate / 100) : 0;
+    updated.subtotal = updated.lineItems.reduce(
+      (sum: number, item: { amount: number }) => sum + (item.amount || 0),
+      0,
+    );
+    updated.tax = updated.taxRate
+      ? updated.subtotal * (updated.taxRate / 100)
+      : 0;
     updated.total = updated.subtotal + (updated.tax || 0);
   }
   quotes[index] = updated;
@@ -208,7 +223,7 @@ billingRouter.delete("/quotes/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const quotes = await parser.readQuotes();
-  const filtered = quotes.filter(q => q.id !== id);
+  const filtered = quotes.filter((q) => q.id !== id);
   if (filtered.length === quotes.length) return errorResponse("Not found", 404);
   await parser.saveQuotes(filtered);
   return jsonResponse({ success: true });
@@ -219,7 +234,7 @@ billingRouter.post("/quotes/:id/send", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const quotes = await parser.readQuotes();
-  const index = quotes.findIndex(q => q.id === id);
+  const index = quotes.findIndex((q) => q.id === id);
   if (index === -1) return errorResponse("Not found", 404);
   quotes[index].status = "sent";
   quotes[index].sentAt = new Date().toISOString().split("T")[0];
@@ -232,7 +247,7 @@ billingRouter.post("/quotes/:id/accept", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const quotes = await parser.readQuotes();
-  const index = quotes.findIndex(q => q.id === id);
+  const index = quotes.findIndex((q) => q.id === id);
   if (index === -1) return errorResponse("Not found", 404);
   quotes[index].status = "accepted";
   quotes[index].acceptedAt = new Date().toISOString().split("T")[0];
@@ -245,7 +260,7 @@ billingRouter.post("/quotes/:id/to-invoice", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const quotes = await parser.readQuotes();
-  const quote = quotes.find(q => q.id === id);
+  const quote = quotes.find((q) => q.id === id);
   if (!quote) return errorResponse("Quote not found", 404);
 
   const invoices = await parser.readInvoices();
@@ -258,7 +273,7 @@ billingRouter.post("/quotes/:id/to-invoice", async (c) => {
     quoteId: quote.id,
     title: quote.title,
     status: "draft" as const,
-    lineItems: quote.lineItems.map(item => ({
+    lineItems: quote.lineItems.map((item) => ({
       ...item,
       id: crypto.randomUUID().substring(0, 8),
     })),
@@ -289,7 +304,7 @@ billingRouter.get("/invoices/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const invoices = await parser.readInvoices();
-  const invoice = invoices.find(inv => inv.id === id);
+  const invoice = invoices.find((inv) => inv.id === id);
   if (!invoice) return errorResponse("Not found", 404);
   return jsonResponse(invoice);
 });
@@ -302,7 +317,10 @@ billingRouter.post("/invoices", async (c) => {
   const id = crypto.randomUUID().substring(0, 8);
   const number = await parser.getNextInvoiceNumber();
   const lineItems = body.lineItems || [];
-  const subtotal = lineItems.reduce((sum: number, item: { amount: number }) => sum + (item.amount || 0), 0);
+  const subtotal = lineItems.reduce(
+    (sum: number, item: { amount: number }) => sum + (item.amount || 0),
+    0,
+  );
   const tax = body.taxRate ? subtotal * (body.taxRate / 100) : 0;
   const newInvoice = {
     id,
@@ -332,13 +350,18 @@ billingRouter.put("/invoices/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json();
   const invoices = await parser.readInvoices();
-  const index = invoices.findIndex(inv => inv.id === id);
+  const index = invoices.findIndex((inv) => inv.id === id);
   if (index === -1) return errorResponse("Not found", 404);
 
   const updated = { ...invoices[index], ...body };
   if (body.lineItems) {
-    updated.subtotal = updated.lineItems.reduce((sum: number, item: { amount: number }) => sum + (item.amount || 0), 0);
-    updated.tax = updated.taxRate ? updated.subtotal * (updated.taxRate / 100) : 0;
+    updated.subtotal = updated.lineItems.reduce(
+      (sum: number, item: { amount: number }) => sum + (item.amount || 0),
+      0,
+    );
+    updated.tax = updated.taxRate
+      ? updated.subtotal * (updated.taxRate / 100)
+      : 0;
     updated.total = updated.subtotal + (updated.tax || 0);
   }
   invoices[index] = updated;
@@ -351,8 +374,10 @@ billingRouter.delete("/invoices/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const invoices = await parser.readInvoices();
-  const filtered = invoices.filter(inv => inv.id !== id);
-  if (filtered.length === invoices.length) return errorResponse("Not found", 404);
+  const filtered = invoices.filter((inv) => inv.id !== id);
+  if (filtered.length === invoices.length) {
+    return errorResponse("Not found", 404);
+  }
   await parser.saveInvoices(filtered);
   return jsonResponse({ success: true });
 });
@@ -362,7 +387,7 @@ billingRouter.post("/invoices/:id/send", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const invoices = await parser.readInvoices();
-  const index = invoices.findIndex(inv => inv.id === id);
+  const index = invoices.findIndex((inv) => inv.id === id);
   if (index === -1) return errorResponse("Not found", 404);
   invoices[index].status = "sent";
   invoices[index].sentAt = new Date().toISOString().split("T")[0];
@@ -375,7 +400,7 @@ billingRouter.get("/invoices/:id/payments", async (c) => {
   const parser = getParser(c);
   const invoiceId = c.req.param("id");
   const payments = await parser.readPayments();
-  const invoicePayments = payments.filter(p => p.invoiceId === invoiceId);
+  const invoicePayments = payments.filter((p) => p.invoiceId === invoiceId);
   return jsonResponse(invoicePayments);
 });
 
@@ -386,7 +411,7 @@ billingRouter.post("/invoices/:id/payments", async (c) => {
   const body = await c.req.json();
 
   const invoices = await parser.readInvoices();
-  const invoiceIndex = invoices.findIndex(inv => inv.id === invoiceId);
+  const invoiceIndex = invoices.findIndex((inv) => inv.id === invoiceId);
   if (invoiceIndex === -1) return errorResponse("Invoice not found", 404);
 
   const payments = await parser.readPayments();
@@ -426,13 +451,21 @@ billingRouter.post("/invoices/generate", async (c) => {
   const timeEntries = await parser.readTimeEntries();
   const tasks = await parser.readTasks();
 
-  const lineItems: { id: string; description: string; quantity: number; rate: number; amount: number; taskId: string; timeEntryIds: string[] }[] = [];
+  const lineItems: {
+    id: string;
+    description: string;
+    quantity: number;
+    rate: number;
+    amount: number;
+    taskId: string;
+    timeEntryIds: string[];
+  }[] = [];
 
   for (const taskId of taskIds) {
     const entries = timeEntries.get(taskId) || [];
     const task = findTaskById(tasks, taskId);
 
-    const filteredEntries = entries.filter(entry => {
+    const filteredEntries = entries.filter((entry) => {
       if (startDate && entry.date < startDate) return false;
       if (endDate && entry.date > endDate) return false;
       return true;
@@ -448,13 +481,16 @@ billingRouter.post("/invoices/generate", async (c) => {
         rate,
         amount: totalHours * rate,
         taskId,
-        timeEntryIds: filteredEntries.map(e => e.id),
+        timeEntryIds: filteredEntries.map((e) => e.id),
       });
     }
   }
 
   if (lineItems.length === 0) {
-    return errorResponse("No time entries found for the specified criteria", 400);
+    return errorResponse(
+      "No time entries found for the specified criteria",
+      400,
+    );
   }
 
   const invoices = await parser.readInvoices();
@@ -466,7 +502,8 @@ billingRouter.post("/invoices/generate", async (c) => {
     id,
     number,
     customerId,
-    title: title || `Time Entry Invoice - ${new Date().toISOString().split("T")[0]}`,
+    title: title ||
+      `Time Entry Invoice - ${new Date().toISOString().split("T")[0]}`,
     status: "draft" as const,
     lineItems,
     subtotal,
@@ -510,17 +547,17 @@ billingRouter.get("/billing/summary", async (c) => {
       summary.draftInvoices++;
     } else if (invoice.status === "sent") {
       summary.sentInvoices++;
-      summary.totalOutstanding += (invoice.total - invoice.paidAmount);
+      summary.totalOutstanding += invoice.total - invoice.paidAmount;
       if (invoice.dueDate && invoice.dueDate < today) {
         summary.overdueInvoices++;
-        summary.totalOverdue += (invoice.total - invoice.paidAmount);
+        summary.totalOverdue += invoice.total - invoice.paidAmount;
       }
     } else if (invoice.status === "paid") {
       summary.paidInvoices++;
     } else if (invoice.status === "overdue") {
       summary.overdueInvoices++;
-      summary.totalOverdue += (invoice.total - invoice.paidAmount);
-      summary.totalOutstanding += (invoice.total - invoice.paidAmount);
+      summary.totalOverdue += invoice.total - invoice.paidAmount;
+      summary.totalOutstanding += invoice.total - invoice.paidAmount;
     }
   }
 

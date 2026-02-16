@@ -159,7 +159,9 @@ export class ProjectValueModule {
 
   editSelected() {
     if (this.taskManager.selectedProjectValueId) {
-      this.taskManager.projectValueSidenavModule.openEdit(this.taskManager.selectedProjectValueId);
+      this.taskManager.projectValueSidenavModule.openEdit(
+        this.taskManager.selectedProjectValueId,
+      );
     }
   }
 
@@ -256,13 +258,18 @@ export class ProjectValueModule {
       .getElementById("projectValueViewBtn")
       .addEventListener("click", () => {
         this.taskManager.switchView("projectValue");
-        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+        document.getElementById("viewSelectorDropdown")?.classList.add(
+          "hidden",
+        );
       });
 
     // Add Project Value button
     document
       .getElementById("addProjectValueBtn")
-      .addEventListener("click", () => this.taskManager.projectValueSidenavModule.openNew());
+      .addEventListener(
+        "click",
+        () => this.taskManager.projectValueSidenavModule.openNew(),
+      );
 
     // Cancel Project Value modal
     document
@@ -296,20 +303,29 @@ export class ProjectValueModule {
       .addEventListener("submit", (e) => this.saveItem(e));
 
     // Add buttons for each section
-    document.querySelectorAll(".pvb-add-btn").forEach(btn => {
-      btn.addEventListener("click", () => this.openItemModal(btn.dataset.section));
+    document.querySelectorAll(".pvb-add-btn").forEach((btn) => {
+      btn.addEventListener(
+        "click",
+        () => this.openItemModal(btn.dataset.section),
+      );
     });
 
     // Close modals on background click
-    document.getElementById("projectValueModal").addEventListener("click", (e) => {
-      if (e.target.id === "projectValueModal") {
-        this.closeModal();
-      }
-    });
-    document.getElementById("projectValueItemModal").addEventListener("click", (e) => {
-      if (e.target.id === "projectValueItemModal") {
-        this.closeItemModal();
-      }
-    });
+    document.getElementById("projectValueModal").addEventListener(
+      "click",
+      (e) => {
+        if (e.target.id === "projectValueModal") {
+          this.closeModal();
+        }
+      },
+    );
+    document.getElementById("projectValueItemModal").addEventListener(
+      "click",
+      (e) => {
+        if (e.target.id === "projectValueItemModal") {
+          this.closeItemModal();
+        }
+      },
+    );
   }
 }

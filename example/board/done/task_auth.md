@@ -13,6 +13,7 @@ milestone: milestone_alpha
 Implement user authentication with Auth0.
 
 ## Completed
+
 - Email/password login
 - Social login (Google, GitHub)
 - JWT token management

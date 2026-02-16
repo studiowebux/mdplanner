@@ -10,18 +10,18 @@
    ========================================================================== */
 
 /* Core (always needed) */
-@import url('./variables.css');
-@import url('./base.css');
-@import url('./components.css');
+@import url("./variables.css");
+@import url("./base.css");
+@import url("./components.css");
 
 /* Views (load per page or all together) */
-@import url('./views/task.css');
-@import url('./views/canvas.css');
-@import url('./views/mindmap.css');
-@import url('./views/c4.css');
-@import url('./views/notes.css');
-@import url('./views/notes-enhanced.css');
-@import url('./views/strategic.css');
-@import url('./views/focus-mode.css');
-@import url('./views/sidenav.css');
-@import url('./views/orgchart.css');
+@import url("./views/task.css");
+@import url("./views/canvas.css");
+@import url("./views/mindmap.css");
+@import url("./views/c4.css");
+@import url("./views/notes.css");
+@import url("./views/notes-enhanced.css");
+@import url("./views/strategic.css");
+@import url("./views/focus-mode.css");
+@import url("./views/sidenav.css");
+@import url("./views/orgchart.css");

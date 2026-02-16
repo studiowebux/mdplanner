@@ -13,6 +13,7 @@ order: 2
 # File Attachments
 
 Allow users to attach files to tasks and comments.
+
 - Max 25MB per file
 - Image preview thumbnails
 - Drag and drop upload

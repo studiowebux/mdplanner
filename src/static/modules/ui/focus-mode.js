@@ -21,24 +21,24 @@ export class FocusMode {
     this.previousScrollPos = window.scrollY;
 
     // Add focus mode class to body
-    document.body.classList.add('focus-mode-active');
+    document.body.classList.add("focus-mode-active");
 
     // Render focus mode UI
     this.render(task, taskManager);
 
     // Show container
-    const container = document.getElementById('focusModeContainer');
+    const container = document.getElementById("focusModeContainer");
     if (container) {
-      container.classList.remove('hidden');
+      container.classList.remove("hidden");
     }
 
     // Bind escape key
     this.escapeHandler = (e) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         this.exit();
       }
     };
-    document.addEventListener('keydown', this.escapeHandler);
+    document.addEventListener("keydown", this.escapeHandler);
   }
 
   /**
@@ -48,13 +48,13 @@ export class FocusMode {
     this.currentTaskId = null;
 
     // Remove focus mode class
-    document.body.classList.remove('focus-mode-active');
+    document.body.classList.remove("focus-mode-active");
 
     // Hide container
-    const container = document.getElementById('focusModeContainer');
+    const container = document.getElementById("focusModeContainer");
     if (container) {
-      container.classList.add('hidden');
-      container.innerHTML = '';
+      container.classList.add("hidden");
+      container.innerHTML = "";
     }
 
     // Restore scroll position
@@ -62,7 +62,7 @@ export class FocusMode {
 
     // Remove escape handler
     if (this.escapeHandler) {
-      document.removeEventListener('keydown', this.escapeHandler);
+      document.removeEventListener("keydown", this.escapeHandler);
       this.escapeHandler = null;
     }
   }
@@ -73,7 +73,7 @@ export class FocusMode {
    * @param {TaskManager} taskManager
    */
   static render(task, taskManager) {
-    const container = document.getElementById('focusModeContainer');
+    const container = document.getElementById("focusModeContainer");
     if (!container) return;
 
     const config = task.config || {};
@@ -97,60 +97,84 @@ export class FocusMode {
               <input
                 type="checkbox"
                 id="focusModeCheckbox"
-                ${task.completed ? 'checked' : ''}
+                ${task.completed ? "checked" : ""}
                 onchange="window.FocusMode.toggleTask('${task.id}')"
                 class="focus-mode-checkbox"
               >
-              <label for="focusModeCheckbox" class="focus-mode-title ${task.completed ? 'completed' : ''}">
+              <label for="focusModeCheckbox" class="focus-mode-title ${
+      task.completed ? "completed" : ""
+    }">
                 ${this.escapeHtml(task.title)}
               </label>
             </div>
 
-            ${config.due_date ? `
+            ${
+      config.due_date
+        ? `
               <div class="focus-mode-meta">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                 </svg>
                 <span>Due: ${this.formatDate(config.due_date)}</span>
               </div>
-            ` : ''}
+            `
+        : ""
+    }
 
-            ${config.assignee ? `
+            ${
+      config.assignee
+        ? `
               <div class="focus-mode-meta">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                 </svg>
                 <span>${this.escapeHtml(config.assignee)}</span>
               </div>
-            ` : ''}
+            `
+        : ""
+    }
 
-            ${task.description ? `
+            ${
+      task.description
+        ? `
               <div class="focus-mode-description">
                 ${this.escapeHtml(task.description)}
               </div>
-            ` : ''}
+            `
+        : ""
+    }
 
-            ${subtasks.length > 0 ? `
+            ${
+      subtasks.length > 0
+        ? `
               <div class="focus-mode-subtasks">
-                <h4 class="focus-mode-subtasks-header">Subtasks (${subtasks.filter(s => s.completed).length}/${subtasks.length})</h4>
+                <h4 class="focus-mode-subtasks-header">Subtasks (${
+          subtasks.filter((s) => s.completed).length
+        }/${subtasks.length})</h4>
                 <div class="focus-mode-subtasks-list">
-                  ${subtasks.map(subtask => `
+                  ${
+          subtasks.map((subtask) => `
                     <div class="focus-mode-subtask">
                       <input
                         type="checkbox"
                         id="focusSubtask_${subtask.id}"
-                        ${subtask.completed ? 'checked' : ''}
+                        ${subtask.completed ? "checked" : ""}
                         onchange="window.FocusMode.toggleTask('${subtask.id}')"
                         class="focus-mode-subtask-checkbox"
                       >
-                      <label for="focusSubtask_${subtask.id}" class="${subtask.completed ? 'completed' : ''}">
+                      <label for="focusSubtask_${subtask.id}" class="${
+            subtask.completed ? "completed" : ""
+          }">
                         ${this.escapeHtml(subtask.title)}
                       </label>
                     </div>
-                  `).join('')}
+                  `).join("")
+        }
                 </div>
               </div>
-            ` : ''}
+            `
+        : ""
+    }
           </div>
         </div>
 
@@ -190,8 +214,8 @@ export class FocusMode {
    * @returns {string}
    */
   static escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
+    if (!text) return "";
+    const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
   }
@@ -202,12 +226,12 @@ export class FocusMode {
    * @returns {string}
    */
   static formatDate(dateStr) {
-    if (!dateStr) return '';
+    if (!dateStr) return "";
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   }
 }

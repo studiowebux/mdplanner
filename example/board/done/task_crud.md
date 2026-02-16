@@ -13,6 +13,7 @@ milestone: milestone_alpha
 Basic task management functionality.
 
 ## Completed
+
 - Create, read, update, delete tasks
 - Task status transitions
 - Assignee management

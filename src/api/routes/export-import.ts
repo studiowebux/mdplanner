@@ -3,7 +3,13 @@
  */
 
 import { Hono } from "hono";
-import { AppVariables, getParser, jsonResponse, errorResponse, corsHeaders } from "./context.ts";
+import {
+  AppVariables,
+  corsHeaders,
+  errorResponse,
+  getParser,
+  jsonResponse,
+} from "./context.ts";
 import { Task } from "../../lib/types.ts";
 
 export const exportImportRouter = new Hono<{ Variables: AppVariables }>();
@@ -21,7 +27,10 @@ function flattenTasks(tasks: Task[]): Task[] {
   return flattened;
 }
 
-function flattenTasksWithParent(tasks: Task[], parentId?: string): Array<Task & { parentId?: string }> {
+function flattenTasksWithParent(
+  tasks: Task[],
+  parentId?: string,
+): Array<Task & { parentId?: string }> {
   const flattened: Array<Task & { parentId?: string }> = [];
   for (const task of tasks) {
     const taskWithParent = { ...task, parentId };
@@ -110,7 +119,9 @@ function convertTasksToCSV(tasks: Task[]): string {
   return csv;
 }
 
-function buildTaskHierarchy(flatTasks: Array<Task & { parentId?: string }>): Task[] {
+function buildTaskHierarchy(
+  flatTasks: Array<Task & { parentId?: string }>,
+): Task[] {
   const taskMap = new Map<string, Task>();
   const rootTasks: Task[] = [];
 
@@ -172,7 +183,13 @@ function parseTasksCSV(csvContent: string): Task[] {
   return buildTaskHierarchy(tasks);
 }
 
-type StickyNoteColor = "yellow" | "pink" | "blue" | "green" | "purple" | "orange";
+type StickyNoteColor =
+  | "yellow"
+  | "pink"
+  | "blue"
+  | "green"
+  | "purple"
+  | "orange";
 
 function parseCanvasCSV(csvContent: string): {
   id: string;
@@ -186,15 +203,23 @@ function parseCanvasCSV(csvContent: string): {
 
   const stickyNotes = [];
 
-  const validColors: StickyNoteColor[] = ["yellow", "pink", "blue", "green", "purple", "orange"];
+  const validColors: StickyNoteColor[] = [
+    "yellow",
+    "pink",
+    "blue",
+    "green",
+    "purple",
+    "orange",
+  ];
 
   for (let i = 1; i < lines.length; i++) {
     const values = parseCSVLine(lines[i]);
     if (values.length >= 5) {
       const parsedColor = values[2] || "yellow";
-      const color: StickyNoteColor = validColors.includes(parsedColor as StickyNoteColor)
-        ? (parsedColor as StickyNoteColor)
-        : "yellow";
+      const color: StickyNoteColor =
+        validColors.includes(parsedColor as StickyNoteColor)
+          ? (parsedColor as StickyNoteColor)
+          : "yellow";
       const stickyNote: {
         id: string;
         content: string;
@@ -226,7 +251,19 @@ function parseCanvasCSV(csvContent: string): {
 }
 
 function generateProjectReportHTML(
-  projectInfo: { name: string; description?: string[]; goals?: { title: string; type: string; status: string; kpi: string; startDate: string; endDate: string; description?: string }[] },
+  projectInfo: {
+    name: string;
+    description?: string[];
+    goals?: {
+      title: string;
+      type: string;
+      status: string;
+      kpi: string;
+      startDate: string;
+      endDate: string;
+      description?: string;
+    }[];
+  },
   tasks: Task[],
   _config: unknown,
 ): string {
@@ -292,7 +329,9 @@ function generateProjectReportHTML(
 
     <div class="header">
         <h1>${projectInfo.name}</h1>
-        <div class="subtitle">Project Report - Generated on ${new Date().toLocaleDateString()}</div>
+        <div class="subtitle">Project Report - Generated on ${
+    new Date().toLocaleDateString()
+  }</div>
     </div>
 
     <div class="section">
@@ -304,12 +343,15 @@ function generateProjectReportHTML(
             <div class="stat-card"><div class="stat-number">${sections.length}</div><div class="stat-label">Sections</div></div>
         </div>
         <div class="progress-bar"><div class="progress-fill" style="width: ${progressPercent}%"></div></div>
-        ${projectInfo.description ? `<p>${projectInfo.description.join(" ")}</p>` : ""}
+        ${
+    projectInfo.description ? `<p>${projectInfo.description.join(" ")}</p>` : ""
+  }
     </div>
 
     <div class="section">
         <h2>Section Breakdown</h2>
-        ${sectionStats.map((section) => `
+        ${
+    sectionStats.map((section) => `
             <div style="margin-bottom: 20px;">
                 <h3>${section.name}</h3>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -318,13 +360,17 @@ function generateProjectReportHTML(
                 </div>
                 <div class="progress-bar" style="height: 12px;"><div class="progress-fill" style="width: ${section.progress}%"></div></div>
             </div>
-        `).join("")}
+        `).join("")
+  }
     </div>
 
-    ${projectInfo.goals && projectInfo.goals.length > 0 ? `
+    ${
+    projectInfo.goals && projectInfo.goals.length > 0
+      ? `
     <div class="section">
         <h2>Goals</h2>
-        ${projectInfo.goals.map((goal) => `
+        ${
+        projectInfo.goals.map((goal) => `
             <div class="goal-item">
                 <div class="goal-title">${goal.title}</div>
                 <div class="goal-meta">
@@ -335,26 +381,37 @@ function generateProjectReportHTML(
                 </div>
                 ${goal.description ? `<div>${goal.description}</div>` : ""}
             </div>
-        `).join("")}
+        `).join("")
+      }
     </div>
-    ` : ""}
+    `
+      : ""
+  }
 
     <div class="section">
         <h2>Recent Tasks</h2>
         <div class="task-list">
-            ${flattenTasks(tasks).slice(0, 20).map((task) => `
+            ${
+    flattenTasks(tasks).slice(0, 20).map((task) => `
                 <div class="task-item">
-                    <div class="task-status ${task.completed ? "task-completed" : "task-pending"}">${task.completed ? "V" : "O"}</div>
+                    <div class="task-status ${
+      task.completed ? "task-completed" : "task-pending"
+    }">${task.completed ? "V" : "O"}</div>
                     <div style="flex: 1;">
                         <div style="font-weight: 500;">${task.title}</div>
-                        <div style="font-size: 0.9em; color: #666;">${task.section}${task.config.assignee ? ` - ${task.config.assignee}` : ""}${task.config.due_date ? ` - Due: ${task.config.due_date}` : ""}</div>
+                        <div style="font-size: 0.9em; color: #666;">${task.section}${
+      task.config.assignee ? ` - ${task.config.assignee}` : ""
+    }${task.config.due_date ? ` - Due: ${task.config.due_date}` : ""}</div>
                     </div>
                 </div>
-            `).join("")}
+            `).join("")
+  }
         </div>
     </div>
 
-    <div class="footer"><p>Generated by MD Planner - ${new Date().toISOString()}</p></div>
+    <div class="footer"><p>Generated by MD Planner - ${
+    new Date().toISOString()
+  }</p></div>
 
     <script>if (window.location.search.includes('auto-print')) { window.onload = () => setTimeout(() => window.print(), 1000); }</script>
 </body>

@@ -33,7 +33,9 @@ Deno.test("CacheDatabase - insert and query", () => {
   db.execute("INSERT INTO items (id, value) VALUES (?, ?)", ["item1", 42]);
   db.execute("INSERT INTO items (id, value) VALUES (?, ?)", ["item2", 100]);
 
-  const rows = db.query<{ id: string; value: number }>("SELECT * FROM items ORDER BY id");
+  const rows = db.query<{ id: string; value: number }>(
+    "SELECT * FROM items ORDER BY id",
+  );
   assertEquals(rows.length, 2);
   assertEquals(rows[0].id, "item1");
   assertEquals(rows[0].value, 42);
@@ -48,7 +50,7 @@ Deno.test("CacheDatabase - queryOne returns single row", () => {
 
   const row = db.queryOne<{ id: string; value: number }>(
     "SELECT * FROM items WHERE id = ?",
-    ["item1"]
+    ["item1"],
   );
 
   assertExists(row);
@@ -64,7 +66,7 @@ Deno.test("CacheDatabase - queryOne returns null for no match", () => {
 
   const row = db.queryOne<{ id: string; value: number }>(
     "SELECT * FROM items WHERE id = ?",
-    ["nonexistent"]
+    ["nonexistent"],
   );
 
   assertEquals(row, null);
@@ -142,7 +144,7 @@ Deno.test("CacheDatabase - handles null values", () => {
 
   const row = db.queryOne<{ id: string; optional: string | null }>(
     "SELECT * FROM items WHERE id = ?",
-    ["a"]
+    ["a"],
   );
 
   assertExists(row);
@@ -157,7 +159,10 @@ Deno.test("CacheDatabase - execute returns affected row count", () => {
   db.execute("INSERT INTO items (id, value) VALUES (?, ?)", ["b", 1]);
   db.execute("INSERT INTO items (id, value) VALUES (?, ?)", ["c", 2]);
 
-  const affected = db.execute("UPDATE items SET value = ? WHERE value = ?", [99, 1]);
+  const affected = db.execute("UPDATE items SET value = ? WHERE value = ?", [
+    99,
+    1,
+  ]);
   assertEquals(affected, 2);
 
   db.close();

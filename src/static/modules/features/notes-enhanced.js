@@ -1,6 +1,6 @@
 // Enhanced Notes Module - Paragraphs, Custom Sections, Tabs, Timeline, Split View
-import { NotesAPI } from '../api.js';
-import { escapeHtml, markdownToHtml } from '../utils.js';
+import { NotesAPI } from "../api.js";
+import { escapeHtml, markdownToHtml } from "../utils.js";
 
 export class EnhancedNotesModule {
   constructor(taskManager) {
@@ -25,18 +25,18 @@ export class EnhancedNotesModule {
       currentNote.mode = "simple";
     }
 
-    const btn = document.getElementById('toggleModeBtn');
-    const btnText = document.getElementById('toggleModeText');
+    const btn = document.getElementById("toggleModeBtn");
+    const btnText = document.getElementById("toggleModeText");
     if (this.tm.enhancedMode) {
-      btn.classList.add('bg-purple-200', 'dark:bg-purple-800');
-      btn.classList.remove('bg-purple-100', 'dark:bg-purple-900');
-      btn.title = 'Switch to Simple Mode';
-      btnText.textContent = 'Simple';
+      btn.classList.add("bg-purple-200", "dark:bg-purple-800");
+      btn.classList.remove("bg-purple-100", "dark:bg-purple-900");
+      btn.title = "Switch to Simple Mode";
+      btnText.textContent = "Simple";
     } else {
-      btn.classList.remove('bg-purple-200', 'dark:bg-purple-800');
-      btn.classList.add('bg-purple-100', 'dark:bg-purple-900');
-      btn.title = 'Switch to Enhanced Mode';
-      btnText.textContent = 'Enhanced';
+      btn.classList.remove("bg-purple-200", "dark:bg-purple-800");
+      btn.classList.add("bg-purple-100", "dark:bg-purple-900");
+      btn.title = "Switch to Enhanced Mode";
+      btnText.textContent = "Enhanced";
     }
 
     this.tm.renderActiveNote();
@@ -49,7 +49,8 @@ export class EnhancedNotesModule {
     const customSections = [];
     let cleanContent = content;
 
-    const sectionRegex = /<!-- Custom Section: (.+?) -->\n<!-- section-id: (.+?), type: (.+?) -->\n([\s\S]*?)<!-- End Custom Section -->/g;
+    const sectionRegex =
+      /<!-- Custom Section: (.+?) -->\n<!-- section-id: (.+?), type: (.+?) -->\n([\s\S]*?)<!-- End Custom Section -->/g;
     let match;
 
     while ((match = sectionRegex.exec(content)) !== null) {
@@ -59,10 +60,10 @@ export class EnhancedNotesModule {
         title: title,
         type: type,
         order: customSections.length,
-        config: this.parseCustomSectionContent(type, sectionContent)
+        config: this.parseCustomSectionContent(type, sectionContent),
       };
       customSections.push(section);
-      cleanContent = cleanContent.replace(fullMatch, '');
+      cleanContent = cleanContent.replace(fullMatch, "");
     }
 
     const paragraphs = this.convertContentToParagraphs(cleanContent);
@@ -70,22 +71,24 @@ export class EnhancedNotesModule {
   }
 
   parseCustomSectionContent(type, content) {
-    if (type === 'tabs') {
+    if (type === "tabs") {
       const tabs = [];
-      const tabRegex = /### Tab: (.+?)\n<!-- tab-id: (.+?) -->\n([\s\S]*?)(?=### Tab:|$)/g;
+      const tabRegex =
+        /### Tab: (.+?)\n<!-- tab-id: (.+?) -->\n([\s\S]*?)(?=### Tab:|$)/g;
       let match;
       while ((match = tabRegex.exec(content)) !== null) {
         const [, title, tabId, tabContent] = match;
         tabs.push({
           id: tabId,
           title: title,
-          content: this.parseContentBlocks(tabContent.trim())
+          content: this.parseContentBlocks(tabContent.trim()),
         });
       }
       return { tabs };
-    } else if (type === 'timeline') {
+    } else if (type === "timeline") {
       const timeline = [];
-      const itemRegex = /## (.+?) \((.+?)\)\n<!-- item-id: (.+?), status: (.+?)(?:, date: (.+?))? -->\n([\s\S]*?)(?=## |$)/g;
+      const itemRegex =
+        /## (.+?) \((.+?)\)\n<!-- item-id: (.+?), status: (.+?)(?:, date: (.+?))? -->\n([\s\S]*?)(?=## |$)/g;
       let match;
       while ((match = itemRegex.exec(content)) !== null) {
         const [, title, status, itemId, , date, itemContent] = match;
@@ -93,14 +96,15 @@ export class EnhancedNotesModule {
           id: itemId,
           title: title,
           status: status,
-          date: date || '',
-          content: this.parseContentBlocks(itemContent.trim())
+          date: date || "",
+          content: this.parseContentBlocks(itemContent.trim()),
         });
       }
       return { timeline };
-    } else if (type === 'split-view') {
+    } else if (type === "split-view") {
       const columns = [];
-      const columnRegex = /### Column (\d+)\n<!-- column-index: (\d+) -->\n([\s\S]*?)(?=### Column|$)/g;
+      const columnRegex =
+        /### Column (\d+)\n<!-- column-index: (\d+) -->\n([\s\S]*?)(?=### Column|$)/g;
       let match;
       while ((match = columnRegex.exec(content)) !== null) {
         const [, , columnIndex, columnContent] = match;
@@ -125,15 +129,15 @@ export class EnhancedNotesModule {
       if (codeMatch) {
         blocks.push({
           id: this.generateParagraphId(),
-          type: 'code',
-          language: codeMatch[1] || 'text',
-          content: codeMatch[2]
+          type: "code",
+          language: codeMatch[1] || "text",
+          content: codeMatch[2],
         });
       } else {
         blocks.push({
           id: this.generateParagraphId(),
-          type: 'text',
-          content: trimmed
+          type: "text",
+          content: trimmed,
         });
       }
     }
@@ -144,112 +148,114 @@ export class EnhancedNotesModule {
     if (!content) return [];
 
     const paragraphs = [];
-    const lines = content.split('\n');
-    let currentParagraph = '';
+    const lines = content.split("\n");
+    let currentParagraph = "";
     let order = 0;
     let inCodeBlock = false;
-    let codeLanguage = '';
+    let codeLanguage = "";
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
 
-      if (line.trim().startsWith('## ') || line.trim().startsWith('### ')) {
+      if (line.trim().startsWith("## ") || line.trim().startsWith("### ")) {
         if (currentParagraph.trim()) {
           paragraphs.push({
             id: this.generateParagraphId(),
-            type: 'text',
+            type: "text",
             content: currentParagraph.trim(),
-            order: order++
+            order: order++,
           });
-          currentParagraph = '';
+          currentParagraph = "";
         }
         continue;
       }
 
-      if (line.trim().startsWith('```')) {
+      if (line.trim().startsWith("```")) {
         if (inCodeBlock) {
           if (currentParagraph.trim()) {
             paragraphs.push({
               id: this.generateParagraphId(),
-              type: 'code',
+              type: "code",
               content: currentParagraph.trim(),
               language: codeLanguage,
-              order: order++
+              order: order++,
             });
           }
-          currentParagraph = '';
+          currentParagraph = "";
           inCodeBlock = false;
-          codeLanguage = '';
+          codeLanguage = "";
         } else {
           if (currentParagraph.trim()) {
             paragraphs.push({
               id: this.generateParagraphId(),
-              type: 'text',
+              type: "text",
               content: currentParagraph.trim(),
-              order: order++
+              order: order++,
             });
           }
           inCodeBlock = true;
-          codeLanguage = line.replace('```', '').trim();
-          currentParagraph = '';
+          codeLanguage = line.replace("```", "").trim();
+          currentParagraph = "";
         }
         continue;
       }
 
       if (inCodeBlock) {
-        currentParagraph += (currentParagraph ? '\n' : '') + line;
-      } else if (line.trim() === '') {
+        currentParagraph += (currentParagraph ? "\n" : "") + line;
+      } else if (line.trim() === "") {
         if (currentParagraph.trim()) {
           paragraphs.push({
             id: this.generateParagraphId(),
-            type: 'text',
+            type: "text",
             content: currentParagraph.trim(),
-            order: order++
+            order: order++,
           });
-          currentParagraph = '';
+          currentParagraph = "";
         }
       } else {
-        currentParagraph += (currentParagraph ? '\n' : '') + line;
+        currentParagraph += (currentParagraph ? "\n" : "") + line;
       }
     }
 
     if (currentParagraph.trim()) {
       paragraphs.push({
         id: this.generateParagraphId(),
-        type: inCodeBlock ? 'code' : 'text',
+        type: inCodeBlock ? "code" : "text",
         content: currentParagraph.trim(),
         language: inCodeBlock ? codeLanguage : undefined,
-        order: order++
+        order: order++,
       });
     }
 
     return paragraphs.length > 0 ? paragraphs : [{
       id: this.generateParagraphId(),
-      type: 'text',
-      content: '',
-      order: 0
+      type: "text",
+      content: "",
+      order: 0,
     }];
   }
 
   // ID Generators
   generateParagraphId() {
-    return 'para_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    return "para_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
   }
 
   generateSectionId() {
-    return 'section_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    return "section_" + Date.now() + "_" +
+      Math.random().toString(36).substr(2, 9);
   }
 
   generateTabId() {
-    return 'tab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    return "tab_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
   }
 
   generateTimelineId() {
-    return 'timeline_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    return "timeline_" + Date.now() + "_" +
+      Math.random().toString(36).substr(2, 9);
   }
 
   // Paragraph Management
-  addParagraph(type = 'text') {
+  addParagraph(type = "text") {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote) return;
 
@@ -260,9 +266,9 @@ export class EnhancedNotesModule {
     const newParagraph = {
       id: this.generateParagraphId(),
       type: type,
-      content: '',
-      language: type === 'code' ? 'javascript' : undefined,
-      order: currentNote.paragraphs.length
+      content: "",
+      language: type === "code" ? "javascript" : undefined,
+      order: currentNote.paragraphs.length,
     };
 
     currentNote.paragraphs.push(newParagraph);
@@ -273,7 +279,9 @@ export class EnhancedNotesModule {
     });
 
     setTimeout(() => {
-      const paragraphElement = document.querySelector(`[data-paragraph-id="${newParagraph.id}"] textarea, [data-paragraph-id="${newParagraph.id}"] [contenteditable]`);
+      const paragraphElement = document.querySelector(
+        `[data-paragraph-id="${newParagraph.id}"] textarea, [data-paragraph-id="${newParagraph.id}"] [contenteditable]`,
+      );
       if (paragraphElement) {
         paragraphElement.focus();
       }
@@ -284,13 +292,15 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.paragraphs) return;
 
-    const originalParagraph = currentNote.paragraphs.find(p => p.id === paragraphId);
+    const originalParagraph = currentNote.paragraphs.find((p) =>
+      p.id === paragraphId
+    );
     if (!originalParagraph) return;
 
     const newParagraph = {
       ...originalParagraph,
       id: this.generateParagraphId(),
-      order: originalParagraph.order + 0.5
+      order: originalParagraph.order + 0.5,
     };
 
     currentNote.paragraphs.push(newParagraph);
@@ -308,9 +318,11 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.paragraphs) return;
 
-    if (!confirm('Delete this paragraph?')) return;
+    if (!confirm("Delete this paragraph?")) return;
 
-    currentNote.paragraphs = currentNote.paragraphs.filter(p => p.id !== paragraphId);
+    currentNote.paragraphs = currentNote.paragraphs.filter((p) =>
+      p.id !== paragraphId
+    );
     currentNote.paragraphs.forEach((p, index) => p.order = index);
 
     this.syncParagraphsToContent();
@@ -324,12 +336,12 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.paragraphs) return;
 
-    const paragraph = currentNote.paragraphs.find(p => p.id === paragraphId);
+    const paragraph = currentNote.paragraphs.find((p) => p.id === paragraphId);
     if (!paragraph) return;
 
-    paragraph.type = paragraph.type === 'code' ? 'text' : 'code';
-    if (paragraph.type === 'code' && !paragraph.language) {
-      paragraph.language = 'javascript';
+    paragraph.type = paragraph.type === "code" ? "text" : "code";
+    if (paragraph.type === "code" && !paragraph.language) {
+      paragraph.language = "javascript";
     }
 
     this.syncParagraphsToContent();
@@ -343,7 +355,7 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.paragraphs) return;
 
-    const paragraph = currentNote.paragraphs.find(p => p.id === paragraphId);
+    const paragraph = currentNote.paragraphs.find((p) => p.id === paragraphId);
     if (paragraph && paragraph.content !== content) {
       paragraph.content = content;
       this.syncParagraphsToContent();
@@ -357,7 +369,7 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.paragraphs) return;
 
-    const paragraph = currentNote.paragraphs.find(p => p.id === paragraphId);
+    const paragraph = currentNote.paragraphs.find((p) => p.id === paragraphId);
     if (paragraph && paragraph.language !== language) {
       paragraph.language = language;
       this.syncParagraphsToContent();
@@ -370,11 +382,14 @@ export class EnhancedNotesModule {
 
   handleParagraphBlur(event, paragraphId, content) {
     const relatedTarget = event.relatedTarget;
-    if (relatedTarget && (
-      relatedTarget.classList.contains('language-selector') ||
-      relatedTarget.closest('.paragraph-controls') ||
-      relatedTarget.onclick && relatedTarget.onclick.toString().includes('deleteTabContent')
-    )) {
+    if (
+      relatedTarget && (
+        relatedTarget.classList.contains("language-selector") ||
+        relatedTarget.closest(".paragraph-controls") ||
+        relatedTarget.onclick &&
+          relatedTarget.onclick.toString().includes("deleteTabContent")
+      )
+    ) {
       return;
     }
     setTimeout(() => {
@@ -383,7 +398,7 @@ export class EnhancedNotesModule {
   }
 
   handleParagraphKeyDown(event, paragraphId) {
-    if (event.key === 'Tab') {
+    if (event.key === "Tab") {
       event.preventDefault();
       const target = event.target;
       const start = target.selectionStart;
@@ -392,15 +407,16 @@ export class EnhancedNotesModule {
       if (event.shiftKey) {
         const beforeCursor = target.value.substring(0, start);
         const afterCursor = target.value.substring(end);
-        if (beforeCursor.endsWith('  ')) {
+        if (beforeCursor.endsWith("  ")) {
           target.value = beforeCursor.slice(0, -2) + afterCursor;
           target.selectionStart = target.selectionEnd = start - 2;
-        } else if (beforeCursor.endsWith('\t')) {
+        } else if (beforeCursor.endsWith("\t")) {
           target.value = beforeCursor.slice(0, -1) + afterCursor;
           target.selectionStart = target.selectionEnd = start - 1;
         }
       } else {
-        target.value = target.value.substring(0, start) + '  ' + target.value.substring(end);
+        target.value = target.value.substring(0, start) + "  " +
+          target.value.substring(end);
         target.selectionStart = target.selectionEnd = start + 2;
       }
 
@@ -421,11 +437,13 @@ export class EnhancedNotesModule {
   // Multi-Select
   toggleMultiSelect() {
     this.tm.multiSelectMode = !this.tm.multiSelectMode;
-    const btn = document.getElementById('enableMultiSelectBtn');
-    btn.textContent = this.tm.multiSelectMode ? 'Exit Multi-Select' : 'Multi-Select';
+    const btn = document.getElementById("enableMultiSelectBtn");
+    btn.textContent = this.tm.multiSelectMode
+      ? "Exit Multi-Select"
+      : "Multi-Select";
     btn.className = this.tm.multiSelectMode
-      ? 'bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700'
-      : 'bg-orange-600 text-white px-3 py-1 rounded text-sm hover:bg-orange-700';
+      ? "bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+      : "bg-orange-600 text-white px-3 py-1 rounded text-sm hover:bg-orange-700";
 
     if (!this.tm.multiSelectMode) {
       this.tm.selectedParagraphs = [];
@@ -437,13 +455,14 @@ export class EnhancedNotesModule {
   }
 
   showMultiSelectActions() {
-    const container = document.getElementById('paragraphsContainer');
-    let actionBar = document.getElementById('multiSelectActions');
+    const container = document.getElementById("paragraphsContainer");
+    let actionBar = document.getElementById("multiSelectActions");
 
     if (!actionBar) {
-      actionBar = document.createElement('div');
-      actionBar.id = 'multiSelectActions';
-      actionBar.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3 flex space-x-2 z-50';
+      actionBar = document.createElement("div");
+      actionBar.id = "multiSelectActions";
+      actionBar.className =
+        "fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3 flex space-x-2 z-50";
       actionBar.innerHTML = `
         <button onclick="taskManager.deleteSelectedParagraphs()" class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">Delete Selected</button>
         <button onclick="taskManager.duplicateSelectedParagraphs()" class="bg-gray-900 text-white px-3 py-1 rounded text-sm hover:bg-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500">Duplicate Selected</button>
@@ -452,24 +471,30 @@ export class EnhancedNotesModule {
       `;
       document.body.appendChild(actionBar);
     }
-    actionBar.style.display = 'flex';
+    actionBar.style.display = "flex";
   }
 
   hideMultiSelectActions() {
-    const actionBar = document.getElementById('multiSelectActions');
+    const actionBar = document.getElementById("multiSelectActions");
     if (actionBar) {
-      actionBar.style.display = 'none';
+      actionBar.style.display = "none";
     }
   }
 
   deleteSelectedParagraphs() {
     if (this.tm.selectedParagraphs.length === 0) return;
-    if (!confirm(`Delete ${this.tm.selectedParagraphs.length} selected paragraph(s)?`)) return;
+    if (
+      !confirm(
+        `Delete ${this.tm.selectedParagraphs.length} selected paragraph(s)?`,
+      )
+    ) return;
 
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.paragraphs) return;
 
-    currentNote.paragraphs = currentNote.paragraphs.filter(p => !this.tm.selectedParagraphs.includes(p.id));
+    currentNote.paragraphs = currentNote.paragraphs.filter((p) =>
+      !this.tm.selectedParagraphs.includes(p.id)
+    );
     currentNote.paragraphs.forEach((p, index) => p.order = index);
     this.tm.selectedParagraphs = [];
 
@@ -486,11 +511,13 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.paragraphs) return;
 
-    const selectedParagraphs = currentNote.paragraphs.filter(p => this.tm.selectedParagraphs.includes(p.id));
-    const newParagraphs = selectedParagraphs.map(p => ({
+    const selectedParagraphs = currentNote.paragraphs.filter((p) =>
+      this.tm.selectedParagraphs.includes(p.id)
+    );
+    const newParagraphs = selectedParagraphs.map((p) => ({
       ...p,
       id: this.generateParagraphId(),
-      order: p.order + 0.1
+      order: p.order + 0.1,
     }));
 
     currentNote.paragraphs.push(...newParagraphs);
@@ -511,20 +538,31 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.paragraphs) return;
 
-    const sortedParagraphs = [...currentNote.paragraphs].sort((a, b) => a.order - b.order);
-    const selectedIndices = this.tm.selectedParagraphs.map(id =>
-      sortedParagraphs.findIndex(p => p.id === id)
+    const sortedParagraphs = [...currentNote.paragraphs].sort((a, b) =>
+      a.order - b.order
+    );
+    const selectedIndices = this.tm.selectedParagraphs.map((id) =>
+      sortedParagraphs.findIndex((p) => p.id === id)
     ).sort((a, b) => a - b);
 
     let moved = false;
-    if (direction === 'up' && selectedIndices[0] > 0) {
-      selectedIndices.forEach(index => {
-        [sortedParagraphs[index], sortedParagraphs[index - 1]] = [sortedParagraphs[index - 1], sortedParagraphs[index]];
+    if (direction === "up" && selectedIndices[0] > 0) {
+      selectedIndices.forEach((index) => {
+        [sortedParagraphs[index], sortedParagraphs[index - 1]] = [
+          sortedParagraphs[index - 1],
+          sortedParagraphs[index],
+        ];
       });
       moved = true;
-    } else if (direction === 'down' && selectedIndices[selectedIndices.length - 1] < sortedParagraphs.length - 1) {
-      selectedIndices.reverse().forEach(index => {
-        [sortedParagraphs[index], sortedParagraphs[index + 1]] = [sortedParagraphs[index + 1], sortedParagraphs[index]];
+    } else if (
+      direction === "down" &&
+      selectedIndices[selectedIndices.length - 1] < sortedParagraphs.length - 1
+    ) {
+      selectedIndices.reverse().forEach((index) => {
+        [sortedParagraphs[index], sortedParagraphs[index + 1]] = [
+          sortedParagraphs[index + 1],
+          sortedParagraphs[index],
+        ];
       });
       moved = true;
     }
@@ -544,13 +582,17 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote) return;
 
-    let content = '';
+    let content = "";
 
     if (currentNote.paragraphs && currentNote.paragraphs.length > 0) {
-      const sortedParagraphs = [...currentNote.paragraphs].sort((a, b) => a.order - b.order);
-      sortedParagraphs.forEach(paragraph => {
-        if (paragraph.type === 'code') {
-          content += `\`\`\`${paragraph.language || 'text'}\n${paragraph.content}\n\`\`\`\n\n`;
+      const sortedParagraphs = [...currentNote.paragraphs].sort((a, b) =>
+        a.order - b.order
+      );
+      sortedParagraphs.forEach((paragraph) => {
+        if (paragraph.type === "code") {
+          content += `\`\`\`${
+            paragraph.language || "text"
+          }\n${paragraph.content}\n\`\`\`\n\n`;
         } else {
           content += `${paragraph.content}\n\n`;
         }
@@ -558,8 +600,10 @@ export class EnhancedNotesModule {
     }
 
     if (currentNote.customSections && currentNote.customSections.length > 0) {
-      const sortedSections = [...currentNote.customSections].sort((a, b) => a.order - b.order);
-      sortedSections.forEach(section => {
+      const sortedSections = [...currentNote.customSections].sort((a, b) =>
+        a.order - b.order
+      );
+      sortedSections.forEach((section) => {
         content += this.renderCustomSectionAsMarkdown(section);
       });
     }
@@ -571,39 +615,45 @@ export class EnhancedNotesModule {
     let markdown = `\n<!-- Custom Section: ${section.title} -->\n`;
     markdown += `<!-- section-id: ${section.id}, type: ${section.type} -->\n\n`;
 
-    if (section.type === 'tabs') {
-      section.config.tabs?.forEach(tab => {
+    if (section.type === "tabs") {
+      section.config.tabs?.forEach((tab) => {
         markdown += `### Tab: ${tab.title}\n`;
         markdown += `<!-- tab-id: ${tab.id} -->\n\n`;
-        tab.content?.forEach(item => {
-          if (item.type === 'code') {
-            markdown += `\`\`\`${item.language || 'text'}\n${item.content}\n\`\`\`\n\n`;
+        tab.content?.forEach((item) => {
+          if (item.type === "code") {
+            markdown += `\`\`\`${
+              item.language || "text"
+            }\n${item.content}\n\`\`\`\n\n`;
           } else {
             markdown += `${item.content}\n\n`;
           }
         });
       });
-    } else if (section.type === 'timeline') {
-      section.config.timeline?.forEach(item => {
+    } else if (section.type === "timeline") {
+      section.config.timeline?.forEach((item) => {
         markdown += `## ${item.title} (${item.status})\n`;
         markdown += `<!-- item-id: ${item.id}, status: ${item.status}`;
         if (item.date) markdown += `, date: ${item.date}`;
         markdown += ` -->\n\n`;
-        item.content?.forEach(contentItem => {
-          if (contentItem.type === 'code') {
-            markdown += `\`\`\`${contentItem.language || 'text'}\n${contentItem.content}\n\`\`\`\n\n`;
+        item.content?.forEach((contentItem) => {
+          if (contentItem.type === "code") {
+            markdown += `\`\`\`${
+              contentItem.language || "text"
+            }\n${contentItem.content}\n\`\`\`\n\n`;
           } else {
             markdown += `${contentItem.content}\n\n`;
           }
         });
       });
-    } else if (section.type === 'split-view') {
+    } else if (section.type === "split-view") {
       section.config.splitView?.columns?.forEach((column, index) => {
         markdown += `### Column ${index + 1}\n`;
         markdown += `<!-- column-index: ${index} -->\n\n`;
-        column.forEach(item => {
-          if (item.type === 'code') {
-            markdown += `\`\`\`${item.language || 'text'}\n${item.content}\n\`\`\`\n\n`;
+        column.forEach((item) => {
+          if (item.type === "code") {
+            markdown += `\`\`\`${
+              item.language || "text"
+            }\n${item.content}\n\`\`\`\n\n`;
           } else {
             markdown += `${item.content}\n\n`;
           }
@@ -617,11 +667,11 @@ export class EnhancedNotesModule {
 
   // Auto Save Indicator
   showAutoSaveIndicator() {
-    const indicator = document.getElementById('autoSaveIndicator');
+    const indicator = document.getElementById("autoSaveIndicator");
     if (indicator) {
-      indicator.classList.add('show');
+      indicator.classList.add("show");
       setTimeout(() => {
-        indicator.classList.remove('show');
+        indicator.classList.remove("show");
       }, 2000);
     }
   }
@@ -632,23 +682,23 @@ export class EnhancedNotesModule {
   }
 
   openCustomSectionModal() {
-    document.getElementById('customSectionTitle').value = '';
-    document.getElementById('customSectionType').value = 'tabs';
-    document.getElementById('customSectionModal').classList.remove('hidden');
-    document.getElementById('customSectionModal').classList.add('flex');
+    document.getElementById("customSectionTitle").value = "";
+    document.getElementById("customSectionType").value = "tabs";
+    document.getElementById("customSectionModal").classList.remove("hidden");
+    document.getElementById("customSectionModal").classList.add("flex");
   }
 
   closeCustomSectionModal() {
-    document.getElementById('customSectionModal').classList.add('hidden');
-    document.getElementById('customSectionModal').classList.remove('flex');
+    document.getElementById("customSectionModal").classList.add("hidden");
+    document.getElementById("customSectionModal").classList.remove("flex");
   }
 
   createCustomSection() {
-    const type = document.getElementById('customSectionType').value;
-    const title = document.getElementById('customSectionTitle').value.trim();
+    const type = document.getElementById("customSectionType").value;
+    const title = document.getElementById("customSectionTitle").value.trim();
 
     if (!title) {
-      alert('Please enter a section title');
+      alert("Please enter a section title");
       return;
     }
 
@@ -664,7 +714,7 @@ export class EnhancedNotesModule {
       type: type,
       title: title,
       order: currentNote.customSections.length,
-      config: this.getInitialSectionConfig(type)
+      config: this.getInitialSectionConfig(type),
     };
 
     currentNote.customSections.push(newSection);
@@ -677,26 +727,26 @@ export class EnhancedNotesModule {
 
   getInitialSectionConfig(type) {
     switch (type) {
-      case 'tabs':
+      case "tabs":
         return {
           tabs: [
-            { id: this.generateTabId(), title: 'Tab 1', content: [] },
-            { id: this.generateTabId(), title: 'Tab 2', content: [] }
-          ]
+            { id: this.generateTabId(), title: "Tab 1", content: [] },
+            { id: this.generateTabId(), title: "Tab 2", content: [] },
+          ],
         };
-      case 'timeline':
+      case "timeline":
         return {
           timeline: [{
             id: this.generateTimelineId(),
-            title: 'Initial Step',
-            status: 'pending',
-            date: new Date().toISOString().split('T')[0],
-            content: []
-          }]
+            title: "Initial Step",
+            status: "pending",
+            date: new Date().toISOString().split("T")[0],
+            content: [],
+          }],
         };
-      case 'split-view':
+      case "split-view":
         return {
-          splitView: { columns: [[], []] }
+          splitView: { columns: [[], []] },
         };
       default:
         return {};
@@ -704,12 +754,14 @@ export class EnhancedNotesModule {
   }
 
   deleteCustomSection(sectionId) {
-    if (!confirm('Delete this custom section?')) return;
+    if (!confirm("Delete this custom section?")) return;
 
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
 
-    currentNote.customSections = currentNote.customSections.filter(s => s.id !== sectionId);
+    currentNote.customSections = currentNote.customSections.filter((s) =>
+      s.id !== sectionId
+    );
     if (this.tm.activeTabState[sectionId]) {
       delete this.tm.activeTabState[sectionId];
     }
@@ -726,28 +778,37 @@ export class EnhancedNotesModule {
   // View mode: renders enhanced note content as beautiful HTML without editing controls
   renderEnhancedViewMode() {
     const currentNote = this.tm.notes[this.tm.activeNote];
-    if (!currentNote) return '';
+    if (!currentNote) return "";
 
-    let html = '<div class="enhanced-note-view prose dark:prose-invert max-w-none">';
+    let html =
+      '<div class="enhanced-note-view prose dark:prose-invert max-w-none">';
 
     // Render paragraphs as formatted content
-    const sortedParagraphs = [...(currentNote.paragraphs || [])].sort((a, b) => a.order - b.order);
-    sortedParagraphs.forEach(paragraph => {
-      if (paragraph.type === 'code') {
-        const lang = paragraph.language || 'text';
-        html += `<pre class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 overflow-x-auto my-4"><code class="language-${lang} text-sm">${escapeHtml(paragraph.content)}</code></pre>`;
+    const sortedParagraphs = [...(currentNote.paragraphs || [])].sort((a, b) =>
+      a.order - b.order
+    );
+    sortedParagraphs.forEach((paragraph) => {
+      if (paragraph.type === "code") {
+        const lang = paragraph.language || "text";
+        html +=
+          `<pre class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 overflow-x-auto my-4"><code class="language-${lang} text-sm">${
+            escapeHtml(paragraph.content)
+          }</code></pre>`;
       } else {
         html += `<div class="my-4">${markdownToHtml(paragraph.content)}</div>`;
       }
     });
 
     // Render custom sections
-    const sortedSections = [...(currentNote.customSections || [])].sort((a, b) => a.order - b.order);
-    sortedSections.forEach(section => {
+    const sortedSections = [...(currentNote.customSections || [])].sort((
+      a,
+      b,
+    ) => a.order - b.order);
+    sortedSections.forEach((section) => {
       html += this.renderCustomSectionPreview(section);
     });
 
-    html += '</div>';
+    html += "</div>";
     return html;
   }
 
@@ -755,11 +816,13 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.paragraphs) return;
 
-    const container = document.getElementById('paragraphsContainer');
-    container.innerHTML = '';
+    const container = document.getElementById("paragraphsContainer");
+    container.innerHTML = "";
 
-    const sortedParagraphs = [...currentNote.paragraphs].sort((a, b) => a.order - b.order);
-    sortedParagraphs.forEach(paragraph => {
+    const sortedParagraphs = [...currentNote.paragraphs].sort((a, b) =>
+      a.order - b.order
+    );
+    sortedParagraphs.forEach((paragraph) => {
       const paragraphElement = this.createParagraphElement(paragraph);
       container.appendChild(paragraphElement);
     });
@@ -768,42 +831,70 @@ export class EnhancedNotesModule {
   }
 
   createParagraphElement(paragraph) {
-    const div = document.createElement('div');
-    div.className = `paragraph-section ${this.tm.selectedParagraphs.includes(paragraph.id) ? 'selected' : ''}`;
-    div.setAttribute('data-paragraph-id', paragraph.id);
+    const div = document.createElement("div");
+    div.className = `paragraph-section ${
+      this.tm.selectedParagraphs.includes(paragraph.id) ? "selected" : ""
+    }`;
+    div.setAttribute("data-paragraph-id", paragraph.id);
 
-    const isCodeBlock = paragraph.type === 'code';
+    const isCodeBlock = paragraph.type === "code";
 
     div.innerHTML = `
       <div class="paragraph-handle" style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); cursor: grab; color: #9ca3af; font-size: 14px; padding: 4px; background: #f9fafb; border-radius: 3px;" draggable="true" onmousedown="this.parentElement.draggable=true" onmouseup="this.parentElement.draggable=false">
         ::
       </div>
       <div class="paragraph-controls flex flex-wrap items-center gap-2 mb-2">
-        ${isCodeBlock ? `
+        ${
+      isCodeBlock
+        ? `
           <div class="flex items-center gap-2">
             <span class="text-xs text-gray-600 dark:text-gray-400">Language:</span>
             <select class="language-selector text-xs border rounded px-2 py-1 min-w-24"
                     onchange="taskManager.updateParagraphLanguage('${paragraph.id}', this.value)"
                     onmousedown="event.stopPropagation()"
                     onclick="event.stopPropagation()">
-              <option value="javascript" ${paragraph.language === 'javascript' ? 'selected' : ''}>JavaScript</option>
-              <option value="python" ${paragraph.language === 'python' ? 'selected' : ''}>Python</option>
-              <option value="typescript" ${paragraph.language === 'typescript' ? 'selected' : ''}>TypeScript</option>
-              <option value="html" ${paragraph.language === 'html' ? 'selected' : ''}>HTML</option>
-              <option value="css" ${paragraph.language === 'css' ? 'selected' : ''}>CSS</option>
-              <option value="sql" ${paragraph.language === 'sql' ? 'selected' : ''}>SQL</option>
-              <option value="bash" ${paragraph.language === 'bash' ? 'selected' : ''}>Bash</option>
-              <option value="json" ${paragraph.language === 'json' ? 'selected' : ''}>JSON</option>
-              <option value="markdown" ${paragraph.language === 'markdown' ? 'selected' : ''}>Markdown</option>
-              <option value="text" ${paragraph.language === 'text' ? 'selected' : ''}>Plain Text</option>
+              <option value="javascript" ${
+          paragraph.language === "javascript" ? "selected" : ""
+        }>JavaScript</option>
+              <option value="python" ${
+          paragraph.language === "python" ? "selected" : ""
+        }>Python</option>
+              <option value="typescript" ${
+          paragraph.language === "typescript" ? "selected" : ""
+        }>TypeScript</option>
+              <option value="html" ${
+          paragraph.language === "html" ? "selected" : ""
+        }>HTML</option>
+              <option value="css" ${
+          paragraph.language === "css" ? "selected" : ""
+        }>CSS</option>
+              <option value="sql" ${
+          paragraph.language === "sql" ? "selected" : ""
+        }>SQL</option>
+              <option value="bash" ${
+          paragraph.language === "bash" ? "selected" : ""
+        }>Bash</option>
+              <option value="json" ${
+          paragraph.language === "json" ? "selected" : ""
+        }>JSON</option>
+              <option value="markdown" ${
+          paragraph.language === "markdown" ? "selected" : ""
+        }>Markdown</option>
+              <option value="text" ${
+          paragraph.language === "text" ? "selected" : ""
+        }>Plain Text</option>
             </select>
           </div>
-        ` : ''}
+        `
+        : ""
+    }
         <div class="flex gap-2">
           <button onclick="taskManager.duplicateParagraph('${paragraph.id}')"
                   class="px-2 py-1 text-xs bg-gray-900 text-white rounded hover:bg-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500" title="Duplicate">Copy</button>
           <button onclick="taskManager.toggleParagraphType('${paragraph.id}')"
-                  class="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600" title="Toggle Type">${isCodeBlock ? 'Text' : 'Code'}</button>
+                  class="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600" title="Toggle Type">${
+      isCodeBlock ? "Text" : "Code"
+    }</button>
           <button onclick="taskManager.deleteParagraph('${paragraph.id}')"
                   class="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600" title="Delete">Delete</button>
         </div>
@@ -814,24 +905,24 @@ export class EnhancedNotesModule {
     `;
 
     if (this.tm.multiSelectMode) {
-      div.addEventListener('click', (e) => {
-        if (!e.target.closest('.paragraph-content')) {
+      div.addEventListener("click", (e) => {
+        if (!e.target.closest(".paragraph-content")) {
           e.preventDefault();
           this.toggleParagraphSelection(paragraph.id);
         }
       });
     }
 
-    const dragHandle = div.querySelector('.paragraph-handle');
-    dragHandle.addEventListener('dragstart', (e) => {
-      e.dataTransfer.setData('text/plain', paragraph.id);
-      div.classList.add('dragging');
+    const dragHandle = div.querySelector(".paragraph-handle");
+    dragHandle.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("text/plain", paragraph.id);
+      div.classList.add("dragging");
     });
-    dragHandle.addEventListener('dragend', (e) => {
-      div.classList.remove('dragging');
+    dragHandle.addEventListener("dragend", (e) => {
+      div.classList.remove("dragging");
       div.draggable = false;
     });
-    dragHandle.addEventListener('mousedown', () => {
+    dragHandle.addEventListener("mousedown", () => {
       div.draggable = true;
     });
 
@@ -839,14 +930,16 @@ export class EnhancedNotesModule {
   }
 
   renderParagraphContent(paragraph) {
-    const isCodeBlock = paragraph.type === 'code';
-    const elementType = isCodeBlock ? 'textarea' : 'div';
+    const isCodeBlock = paragraph.type === "code";
+    const elementType = isCodeBlock ? "textarea" : "div";
     const attrs = isCodeBlock
       ? `rows="10" class="w-full p-3 code-block border-0 resize-none focus:outline-none text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-800"`
       : `contenteditable="true" class="w-full p-3 border-0 focus:outline-none min-h-[100px] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700"`;
 
     return `<${elementType} ${attrs}
-              onblur="taskManager.handleParagraphBlur(event, '${paragraph.id}', this.${isCodeBlock ? 'value' : 'innerText'})"
+              onblur="taskManager.handleParagraphBlur(event, '${paragraph.id}', this.${
+      isCodeBlock ? "value" : "innerText"
+    })"
               onkeydown="taskManager.handleParagraphKeyDown(event, '${paragraph.id}')">${paragraph.content}</${elementType}>`;
   }
 
@@ -854,20 +947,22 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
 
-    const container = document.getElementById('customSectionsContainer');
-    container.innerHTML = '';
+    const container = document.getElementById("customSectionsContainer");
+    container.innerHTML = "";
 
-    const sortedSections = [...currentNote.customSections].sort((a, b) => a.order - b.order);
-    sortedSections.forEach(section => {
+    const sortedSections = [...currentNote.customSections].sort((a, b) =>
+      a.order - b.order
+    );
+    sortedSections.forEach((section) => {
       const sectionElement = this.createCustomSectionElement(section);
       container.appendChild(sectionElement);
     });
   }
 
   createCustomSectionElement(section) {
-    const div = document.createElement('div');
-    div.className = 'custom-section';
-    div.setAttribute('data-section-id', section.id);
+    const div = document.createElement("div");
+    div.className = "custom-section";
+    div.setAttribute("data-section-id", section.id);
 
     const headerHtml = `
       <div class="flex justify-between items-center mb-4">
@@ -879,15 +974,15 @@ export class EnhancedNotesModule {
       </div>
     `;
 
-    let contentHtml = '';
+    let contentHtml = "";
     switch (section.type) {
-      case 'tabs':
+      case "tabs":
         contentHtml = this.renderTabsSection(section);
         break;
-      case 'timeline':
+      case "timeline":
         contentHtml = this.renderTimelineSection(section);
         break;
-      case 'split-view':
+      case "split-view":
         contentHtml = this.renderSplitViewSection(section);
         break;
     }
@@ -899,24 +994,26 @@ export class EnhancedNotesModule {
   renderTabsSection(section) {
     const tabs = section.config.tabs || [];
     const storedActiveTab = this.tm.activeTabState[section.id];
-    const activeTabId = storedActiveTab && tabs.find(t => t.id === storedActiveTab)
-      ? storedActiveTab
-      : (tabs.length > 0 ? tabs[0].id : null);
+    const activeTabId =
+      storedActiveTab && tabs.find((t) => t.id === storedActiveTab)
+        ? storedActiveTab
+        : (tabs.length > 0 ? tabs[0].id : null);
 
     if (activeTabId) {
       this.tm.activeTabState[section.id] = activeTabId;
     }
 
-    let tabNavHtml = '<div class="border-b border-gray-200 dark:border-gray-700 mb-4"><nav class="flex space-x-8">';
+    let tabNavHtml =
+      '<div class="border-b border-gray-200 dark:border-gray-700 mb-4"><nav class="flex space-x-8">';
     tabs.forEach((tab) => {
       const isActive = tab.id === activeTabId;
       tabNavHtml += `
         <button onclick="taskManager.switchTab('${section.id}', '${tab.id}')"
                 class="py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                  isActive
-                    ? 'border-gray-900 text-gray-900 dark:border-gray-100 dark:text-gray-100'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-                }"
+        isActive
+          ? "border-gray-900 text-gray-900 dark:border-gray-100 dark:text-gray-100"
+          : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
+      }"
                 data-tab-id="${tab.id}">
           ${tab.title}
         </button>
@@ -933,7 +1030,9 @@ export class EnhancedNotesModule {
     tabs.forEach((tab) => {
       const isActive = tab.id === activeTabId;
       tabContentHtml += `
-        <div class="tab-content ${isActive ? 'active' : ''}" data-tab-id="${tab.id}">
+        <div class="tab-content ${
+        isActive ? "active" : ""
+      }" data-tab-id="${tab.id}">
           <div class="mb-2">
             <input type="text" value="${tab.title}"
                    onblur="taskManager.updateTabTitle('${section.id}', '${tab.id}', this.value)"
@@ -953,7 +1052,7 @@ export class EnhancedNotesModule {
         </div>
       `;
     });
-    tabContentHtml += '</div>';
+    tabContentHtml += "</div>";
 
     return tabNavHtml + tabContentHtml;
   }
@@ -969,12 +1068,12 @@ export class EnhancedNotesModule {
       <div class="space-y-4">
     `;
 
-    timeline.forEach(item => {
+    timeline.forEach((item) => {
       const statusColor = {
-        'success': 'border-green-500 text-green-700',
-        'failed': 'border-red-500 text-red-700',
-        'pending': 'border-yellow-500 text-yellow-700'
-      }[item.status] || 'border-gray-500 text-gray-700';
+        "success": "border-green-500 text-green-700",
+        "failed": "border-red-500 text-red-700",
+        "pending": "border-yellow-500 text-yellow-700",
+      }[item.status] || "border-gray-500 text-gray-700";
 
       html += `
         <div class="timeline-item ${item.status}">
@@ -988,9 +1087,15 @@ export class EnhancedNotesModule {
                      class="text-xs border rounded px-2 py-1 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
               <select onchange="taskManager.updateTimelineItemStatus('${section.id}', '${item.id}', this.value)"
                       class="text-xs border rounded px-2 py-1 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${statusColor}">
-                <option value="pending" ${item.status === 'pending' ? 'selected' : ''}>Pending</option>
-                <option value="success" ${item.status === 'success' ? 'selected' : ''}>Success</option>
-                <option value="failed" ${item.status === 'failed' ? 'selected' : ''}>Failed</option>
+                <option value="pending" ${
+        item.status === "pending" ? "selected" : ""
+      }>Pending</option>
+                <option value="success" ${
+        item.status === "success" ? "selected" : ""
+      }>Success</option>
+                <option value="failed" ${
+        item.status === "failed" ? "selected" : ""
+      }>Failed</option>
               </select>
               <button onclick="taskManager.deleteTimelineItem('${section.id}', '${item.id}')"
                       class="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
@@ -1009,7 +1114,7 @@ export class EnhancedNotesModule {
       `;
     });
 
-    html += '</div>';
+    html += "</div>";
     return html;
   }
 
@@ -1029,7 +1134,9 @@ export class EnhancedNotesModule {
       html += `
         <div class="split-view-column flex-1">
           <div class="flex justify-between items-center mb-2">
-            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">Column ${columnIndex + 1}</h4>
+            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">Column ${
+        columnIndex + 1
+      }</h4>
             <button onclick="taskManager.removeColumnFromSplitView('${section.id}', ${columnIndex})"
                     class="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600">Remove</button>
           </div>
@@ -1046,7 +1153,7 @@ export class EnhancedNotesModule {
       `;
     });
 
-    html += '</div>';
+    html += "</div>";
     return html;
   }
 
@@ -1055,8 +1162,8 @@ export class EnhancedNotesModule {
       return '<p class="text-sm text-gray-500 dark:text-gray-400 italic">No content yet</p>';
     }
 
-    return content.map(item => {
-      const isCodeBlock = item.type === 'code';
+    return content.map((item) => {
+      const isCodeBlock = item.type === "code";
       if (isCodeBlock) {
         return `
           <div class="relative border border-gray-200 dark:border-gray-600 rounded mb-2">
@@ -1080,7 +1187,7 @@ export class EnhancedNotesModule {
           </div>
         `;
       }
-    }).join('');
+    }).join("");
   }
 
   // Tab Functions
@@ -1090,24 +1197,50 @@ export class EnhancedNotesModule {
 
     this.tm.activeTabState[sectionId] = tabId;
 
-    section.querySelectorAll('[data-tab-id]').forEach(btn => {
-      btn.classList.remove('border-gray-900', 'text-gray-900', 'dark:border-gray-100', 'dark:text-gray-100');
-      btn.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'dark:text-gray-400', 'dark:hover:text-gray-300');
+    section.querySelectorAll("[data-tab-id]").forEach((btn) => {
+      btn.classList.remove(
+        "border-gray-900",
+        "text-gray-900",
+        "dark:border-gray-100",
+        "dark:text-gray-100",
+      );
+      btn.classList.add(
+        "border-transparent",
+        "text-gray-500",
+        "hover:text-gray-700",
+        "hover:border-gray-300",
+        "dark:text-gray-400",
+        "dark:hover:text-gray-300",
+      );
     });
 
     const activeTab = section.querySelector(`button[data-tab-id="${tabId}"]`);
     if (activeTab) {
-      activeTab.classList.add('border-gray-900', 'text-gray-900', 'dark:border-gray-100', 'dark:text-gray-100');
-      activeTab.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'dark:text-gray-400', 'dark:hover:text-gray-300');
+      activeTab.classList.add(
+        "border-gray-900",
+        "text-gray-900",
+        "dark:border-gray-100",
+        "dark:text-gray-100",
+      );
+      activeTab.classList.remove(
+        "border-transparent",
+        "text-gray-500",
+        "hover:text-gray-700",
+        "hover:border-gray-300",
+        "dark:text-gray-400",
+        "dark:hover:text-gray-300",
+      );
     }
 
-    section.querySelectorAll('.tab-content').forEach(content => {
-      content.classList.remove('active');
+    section.querySelectorAll(".tab-content").forEach((content) => {
+      content.classList.remove("active");
     });
 
-    const activeContent = section.querySelector(`.tab-content[data-tab-id="${tabId}"]`);
+    const activeContent = section.querySelector(
+      `.tab-content[data-tab-id="${tabId}"]`,
+    );
     if (activeContent) {
-      activeContent.classList.add('active');
+      activeContent.classList.add("active");
     }
   }
 
@@ -1115,13 +1248,13 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
 
-    const section = currentNote.customSections.find(s => s.id === sectionId);
-    if (!section || section.type !== 'tabs') return;
+    const section = currentNote.customSections.find((s) => s.id === sectionId);
+    if (!section || section.type !== "tabs") return;
 
     const newTab = {
       id: this.generateTabId(),
       title: `Tab ${section.config.tabs.length + 1}`,
-      content: []
+      content: [],
     };
 
     section.config.tabs.push(newTab);
@@ -1136,10 +1269,10 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
 
-    const section = currentNote.customSections.find(s => s.id === sectionId);
-    if (!section || section.type !== 'tabs') return;
+    const section = currentNote.customSections.find((s) => s.id === sectionId);
+    if (!section || section.type !== "tabs") return;
 
-    const tab = section.config.tabs.find(t => t.id === tabId);
+    const tab = section.config.tabs.find((t) => t.id === tabId);
     if (tab) {
       tab.title = title;
       this.syncParagraphsToContent();
@@ -1150,15 +1283,15 @@ export class EnhancedNotesModule {
   }
 
   deleteTab(sectionId, tabId) {
-    if (!confirm('Delete this entire tab and all its content?')) return;
+    if (!confirm("Delete this entire tab and all its content?")) return;
 
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
 
-    const section = currentNote.customSections.find(s => s.id === sectionId);
-    if (!section || section.type !== 'tabs') return;
+    const section = currentNote.customSections.find((s) => s.id === sectionId);
+    if (!section || section.type !== "tabs") return;
 
-    section.config.tabs = section.config.tabs.filter(t => t.id !== tabId);
+    section.config.tabs = section.config.tabs.filter((t) => t.id !== tabId);
     if (this.tm.activeTabState[sectionId] === tabId) {
       delete this.tm.activeTabState[sectionId];
     }
@@ -1174,17 +1307,19 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
 
-    const section = currentNote.customSections.find(s => s.id === sectionId);
-    if (!section || section.type !== 'tabs') return;
+    const section = currentNote.customSections.find((s) => s.id === sectionId);
+    if (!section || section.type !== "tabs") return;
 
-    const tab = section.config.tabs.find(t => t.id === tabId);
+    const tab = section.config.tabs.find((t) => t.id === tabId);
     if (!tab) return;
 
     const newContent = {
       id: this.generateParagraphId(),
       type: type,
-      content: type === 'code' ? '// Enter your code here' : 'Enter your text here',
-      language: type === 'code' ? 'javascript' : undefined
+      content: type === "code"
+        ? "// Enter your code here"
+        : "Enter your text here",
+      language: type === "code" ? "javascript" : undefined,
     };
 
     tab.content.push(newContent);
@@ -1200,15 +1335,15 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
 
-    const section = currentNote.customSections.find(s => s.id === sectionId);
-    if (!section || section.type !== 'timeline') return;
+    const section = currentNote.customSections.find((s) => s.id === sectionId);
+    if (!section || section.type !== "timeline") return;
 
     const newItem = {
       id: this.generateTimelineId(),
-      title: 'New Step',
-      status: 'pending',
-      date: new Date().toISOString().split('T')[0],
-      content: []
+      title: "New Step",
+      status: "pending",
+      date: new Date().toISOString().split("T")[0],
+      content: [],
     };
 
     section.config.timeline.push(newItem);
@@ -1223,10 +1358,10 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
 
-    const section = currentNote.customSections.find(s => s.id === sectionId);
-    if (!section || section.type !== 'timeline') return;
+    const section = currentNote.customSections.find((s) => s.id === sectionId);
+    if (!section || section.type !== "timeline") return;
 
-    const item = section.config.timeline.find(i => i.id === itemId);
+    const item = section.config.timeline.find((i) => i.id === itemId);
     if (item) {
       item.title = title;
       this.syncParagraphsToContent();
@@ -1240,10 +1375,10 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
 
-    const section = currentNote.customSections.find(s => s.id === sectionId);
-    if (!section || section.type !== 'timeline') return;
+    const section = currentNote.customSections.find((s) => s.id === sectionId);
+    if (!section || section.type !== "timeline") return;
 
-    const item = section.config.timeline.find(i => i.id === itemId);
+    const item = section.config.timeline.find((i) => i.id === itemId);
     if (item) {
       item.date = date;
       this.syncParagraphsToContent();
@@ -1257,10 +1392,10 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
 
-    const section = currentNote.customSections.find(s => s.id === sectionId);
-    if (!section || section.type !== 'timeline') return;
+    const section = currentNote.customSections.find((s) => s.id === sectionId);
+    if (!section || section.type !== "timeline") return;
 
-    const item = section.config.timeline.find(i => i.id === itemId);
+    const item = section.config.timeline.find((i) => i.id === itemId);
     if (item) {
       item.status = status;
       this.syncParagraphsToContent();
@@ -1272,15 +1407,17 @@ export class EnhancedNotesModule {
   }
 
   deleteTimelineItem(sectionId, itemId) {
-    if (!confirm('Delete this timeline item?')) return;
+    if (!confirm("Delete this timeline item?")) return;
 
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
 
-    const section = currentNote.customSections.find(s => s.id === sectionId);
-    if (!section || section.type !== 'timeline') return;
+    const section = currentNote.customSections.find((s) => s.id === sectionId);
+    if (!section || section.type !== "timeline") return;
 
-    section.config.timeline = section.config.timeline.filter(i => i.id !== itemId);
+    section.config.timeline = section.config.timeline.filter((i) =>
+      i.id !== itemId
+    );
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
     this.tm.autoSaveNote().then(() => {
@@ -1292,17 +1429,19 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
 
-    const section = currentNote.customSections.find(s => s.id === sectionId);
-    if (!section || section.type !== 'timeline') return;
+    const section = currentNote.customSections.find((s) => s.id === sectionId);
+    if (!section || section.type !== "timeline") return;
 
-    const item = section.config.timeline.find(i => i.id === itemId);
+    const item = section.config.timeline.find((i) => i.id === itemId);
     if (!item) return;
 
     const newContent = {
       id: this.generateParagraphId(),
       type: type,
-      content: type === 'code' ? '// Enter your code here' : 'Enter your text here',
-      language: type === 'code' ? 'javascript' : undefined
+      content: type === "code"
+        ? "// Enter your code here"
+        : "Enter your text here",
+      language: type === "code" ? "javascript" : undefined,
     };
 
     item.content.push(newContent);
@@ -1318,8 +1457,8 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
 
-    const section = currentNote.customSections.find(s => s.id === sectionId);
-    if (!section || section.type !== 'split-view') return;
+    const section = currentNote.customSections.find((s) => s.id === sectionId);
+    if (!section || section.type !== "split-view") return;
 
     section.config.splitView.columns.push([]);
     this.syncParagraphsToContent();
@@ -1330,13 +1469,13 @@ export class EnhancedNotesModule {
   }
 
   removeColumnFromSplitView(sectionId, columnIndex) {
-    if (!confirm('Remove this column and all its content?')) return;
+    if (!confirm("Remove this column and all its content?")) return;
 
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
 
-    const section = currentNote.customSections.find(s => s.id === sectionId);
-    if (!section || section.type !== 'split-view') return;
+    const section = currentNote.customSections.find((s) => s.id === sectionId);
+    if (!section || section.type !== "split-view") return;
 
     section.config.splitView.columns.splice(columnIndex, 1);
     this.syncParagraphsToContent();
@@ -1350,16 +1489,18 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
 
-    const section = currentNote.customSections.find(s => s.id === sectionId);
-    if (!section || section.type !== 'split-view') return;
+    const section = currentNote.customSections.find((s) => s.id === sectionId);
+    if (!section || section.type !== "split-view") return;
 
     if (!section.config.splitView.columns[columnIndex]) return;
 
     const newContent = {
       id: this.generateParagraphId(),
       type: type,
-      content: type === 'code' ? '// Enter your code here' : 'Enter your text here',
-      language: type === 'code' ? 'javascript' : undefined
+      content: type === "code"
+        ? "// Enter your code here"
+        : "Enter your text here",
+      language: type === "code" ? "javascript" : undefined,
     };
 
     section.config.splitView.columns[columnIndex].push(newContent);
@@ -1388,28 +1529,28 @@ export class EnhancedNotesModule {
     let found = false;
     let oldContent = null;
 
-    currentNote.customSections.forEach(section => {
-      if (section.type === 'tabs') {
-        section.config.tabs.forEach(tab => {
-          const item = tab.content.find(c => c.id === contentId);
+    currentNote.customSections.forEach((section) => {
+      if (section.type === "tabs") {
+        section.config.tabs.forEach((tab) => {
+          const item = tab.content.find((c) => c.id === contentId);
           if (item) {
             oldContent = item.content;
             item.content = content;
             found = true;
           }
         });
-      } else if (section.type === 'timeline') {
-        section.config.timeline.forEach(item => {
-          const contentItem = item.content.find(c => c.id === contentId);
+      } else if (section.type === "timeline") {
+        section.config.timeline.forEach((item) => {
+          const contentItem = item.content.find((c) => c.id === contentId);
           if (contentItem) {
             oldContent = contentItem.content;
             contentItem.content = content;
             found = true;
           }
         });
-      } else if (section.type === 'split-view') {
-        section.config.splitView.columns.forEach(column => {
-          const item = column.find(c => c.id === contentId);
+      } else if (section.type === "split-view") {
+        section.config.splitView.columns.forEach((column) => {
+          const item = column.find((c) => c.id === contentId);
           if (item) {
             oldContent = item.content;
             item.content = content;
@@ -1428,28 +1569,28 @@ export class EnhancedNotesModule {
   }
 
   deleteTabContent(contentId) {
-    if (!confirm('Delete this content?')) return;
+    if (!confirm("Delete this content?")) return;
 
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
 
     let found = false;
-    currentNote.customSections.forEach(section => {
-      if (section.type === 'tabs') {
-        section.config.tabs.forEach(tab => {
+    currentNote.customSections.forEach((section) => {
+      if (section.type === "tabs") {
+        section.config.tabs.forEach((tab) => {
           const originalLength = tab.content.length;
-          tab.content = tab.content.filter(c => c.id !== contentId);
+          tab.content = tab.content.filter((c) => c.id !== contentId);
           if (tab.content.length < originalLength) found = true;
         });
-      } else if (section.type === 'timeline') {
-        section.config.timeline.forEach(item => {
+      } else if (section.type === "timeline") {
+        section.config.timeline.forEach((item) => {
           const originalLength = item.content.length;
-          item.content = item.content.filter(c => c.id !== contentId);
+          item.content = item.content.filter((c) => c.id !== contentId);
           if (item.content.length < originalLength) found = true;
         });
-      } else if (section.type === 'split-view') {
-        section.config.splitView.columns.forEach(column => {
-          const index = column.findIndex(c => c.id === contentId);
+      } else if (section.type === "split-view") {
+        section.config.splitView.columns.forEach((column) => {
+          const index = column.findIndex((c) => c.id === contentId);
           if (index > -1) {
             column.splice(index, 1);
             found = true;
@@ -1469,7 +1610,7 @@ export class EnhancedNotesModule {
 
   // File Handling
   openMarkdownFile() {
-    document.getElementById('markdownFileInput').click();
+    document.getElementById("markdownFileInput").click();
   }
 
   async handleMarkdownFileSelect(event) {
@@ -1478,15 +1619,15 @@ export class EnhancedNotesModule {
 
     try {
       const content = await file.text();
-      const title = file.name.replace(/\.(md|markdown)$/i, '');
+      const title = file.name.replace(/\.(md|markdown)$/i, "");
 
       const parsed = this.parseContentAndCustomSections(content);
       const newNote = {
         title: title,
         content: content,
-        mode: 'enhanced',
+        mode: "enhanced",
         paragraphs: parsed.paragraphs,
-        customSections: parsed.customSections
+        customSections: parsed.customSections,
       };
 
       const response = await NotesAPI.create(newNote);
@@ -1498,36 +1639,36 @@ export class EnhancedNotesModule {
         this.showAutoSaveIndicator();
       }
     } catch (error) {
-      console.error('Error importing markdown file:', error);
-      alert('Error importing markdown file');
+      console.error("Error importing markdown file:", error);
+      alert("Error importing markdown file");
     }
 
-    event.target.value = '';
+    event.target.value = "";
   }
 
   // Drag and Drop
   initDragAndDrop() {
-    const dropZone = document.getElementById('fileDropZone');
+    const dropZone = document.getElementById("fileDropZone");
     if (dropZone) {
-      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
         dropZone.addEventListener(eventName, this.preventDefaults, false);
       });
 
-      ['dragenter', 'dragover'].forEach(eventName => {
+      ["dragenter", "dragover"].forEach((eventName) => {
         dropZone.addEventListener(eventName, () => {
-          dropZone.classList.remove('hidden');
-          dropZone.classList.add('drop-zone-active');
+          dropZone.classList.remove("hidden");
+          dropZone.classList.add("drop-zone-active");
         }, false);
       });
 
-      ['dragleave', 'drop'].forEach(eventName => {
+      ["dragleave", "drop"].forEach((eventName) => {
         dropZone.addEventListener(eventName, () => {
-          dropZone.classList.add('hidden');
-          dropZone.classList.remove('drop-zone-active');
+          dropZone.classList.add("hidden");
+          dropZone.classList.remove("drop-zone-active");
         }, false);
       });
 
-      dropZone.addEventListener('drop', (e) => {
+      dropZone.addEventListener("drop", (e) => {
         this.handleFileDrop(e);
       }, false);
     }
@@ -1536,13 +1677,13 @@ export class EnhancedNotesModule {
   }
 
   initParagraphDragAndDrop() {
-    const container = document.getElementById('paragraphsContainer');
+    const container = document.getElementById("paragraphsContainer");
     if (!container) return;
 
-    container.addEventListener('dragover', (e) => {
+    container.addEventListener("dragover", (e) => {
       e.preventDefault();
       const afterElement = this.getDragAfterElement(container, e.clientY);
-      const draggedElement = container.querySelector('.dragging');
+      const draggedElement = container.querySelector(".dragging");
 
       if (draggedElement) {
         if (afterElement == null) {
@@ -1553,18 +1694,20 @@ export class EnhancedNotesModule {
       }
     });
 
-    container.addEventListener('drop', (e) => {
+    container.addEventListener("drop", (e) => {
       e.preventDefault();
       this.updateParagraphOrder();
     });
 
-    container.addEventListener('dragenter', (e) => {
+    container.addEventListener("dragenter", (e) => {
       e.preventDefault();
     });
   }
 
   getDragAfterElement(container, y) {
-    const draggableElements = [...container.querySelectorAll('.paragraph-section:not(.dragging)')];
+    const draggableElements = [
+      ...container.querySelectorAll(".paragraph-section:not(.dragging)"),
+    ];
 
     return draggableElements.reduce((closest, child) => {
       const box = child.getBoundingClientRect();
@@ -1579,16 +1722,18 @@ export class EnhancedNotesModule {
   }
 
   updateParagraphOrder() {
-    const container = document.getElementById('paragraphsContainer');
-    const paragraphElements = container.querySelectorAll('.paragraph-section');
+    const container = document.getElementById("paragraphsContainer");
+    const paragraphElements = container.querySelectorAll(".paragraph-section");
     const currentNote = this.tm.notes[this.tm.activeNote];
 
     if (!currentNote || !currentNote.paragraphs) return;
 
     let orderChanged = false;
     paragraphElements.forEach((element, index) => {
-      const paragraphId = element.getAttribute('data-paragraph-id');
-      const paragraph = currentNote.paragraphs.find(p => p.id === paragraphId);
+      const paragraphId = element.getAttribute("data-paragraph-id");
+      const paragraph = currentNote.paragraphs.find((p) =>
+        p.id === paragraphId
+      );
       if (paragraph && paragraph.order !== index) {
         paragraph.order = index;
         orderChanged = true;
@@ -1607,9 +1752,12 @@ export class EnhancedNotesModule {
     const files = [...e.dataTransfer.files];
 
     for (const file of files) {
-      if (file.type.startsWith('image/')) {
+      if (file.type.startsWith("image/")) {
         await this.addImageToNote(file);
-      } else if (file.type === 'text/plain' || file.name.endsWith('.md') || file.name.endsWith('.txt')) {
+      } else if (
+        file.type === "text/plain" || file.name.endsWith(".md") ||
+        file.name.endsWith(".txt")
+      ) {
         await this.addTextFileToNote(file);
       } else {
         await this.addFileReference(file);
@@ -1621,9 +1769,10 @@ export class EnhancedNotesModule {
     const reader = new FileReader();
     reader.onload = (e) => {
       const imageMarkdown = `![${file.name}](${e.target.result})`;
-      this.addParagraph('text');
+      this.addParagraph("text");
       const currentNote = this.tm.notes[this.tm.activeNote];
-      const lastParagraph = currentNote.paragraphs[currentNote.paragraphs.length - 1];
+      const lastParagraph =
+        currentNote.paragraphs[currentNote.paragraphs.length - 1];
       lastParagraph.content = imageMarkdown;
       this.syncParagraphsToContent();
       this.tm.renderActiveNote();
@@ -1636,24 +1785,30 @@ export class EnhancedNotesModule {
 
   async addTextFileToNote(file) {
     const content = await file.text();
-    const isMarkdown = file.name.endsWith('.md');
+    const isMarkdown = file.name.endsWith(".md");
 
     if (isMarkdown) {
       const parsed = this.parseContentAndCustomSections(content);
       const currentNote = this.tm.notes[this.tm.activeNote];
-      currentNote.paragraphs.push(...parsed.paragraphs.map(p => ({ ...p, order: currentNote.paragraphs.length + p.order })));
+      currentNote.paragraphs.push(
+        ...parsed.paragraphs.map((p) => ({
+          ...p,
+          order: currentNote.paragraphs.length + p.order,
+        })),
+      );
 
       if (parsed.customSections && parsed.customSections.length > 0) {
         if (!currentNote.customSections) currentNote.customSections = [];
-        currentNote.customSections.push(...parsed.customSections.map(s => ({
+        currentNote.customSections.push(...parsed.customSections.map((s) => ({
           ...s,
-          order: currentNote.customSections.length + s.order
+          order: currentNote.customSections.length + s.order,
         })));
       }
     } else {
-      this.addParagraph('text');
+      this.addParagraph("text");
       const currentNote = this.tm.notes[this.tm.activeNote];
-      const lastParagraph = currentNote.paragraphs[currentNote.paragraphs.length - 1];
+      const lastParagraph =
+        currentNote.paragraphs[currentNote.paragraphs.length - 1];
       lastParagraph.content = content;
     }
 
@@ -1666,9 +1821,10 @@ export class EnhancedNotesModule {
 
   async addFileReference(file) {
     const fileRef = `[Attachment: ${file.name}](attachment:${file.name})`;
-    this.addParagraph('text');
+    this.addParagraph("text");
     const currentNote = this.tm.notes[this.tm.activeNote];
-    const lastParagraph = currentNote.paragraphs[currentNote.paragraphs.length - 1];
+    const lastParagraph =
+      currentNote.paragraphs[currentNote.paragraphs.length - 1];
     lastParagraph.content = fileRef;
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
@@ -1725,116 +1881,164 @@ export class EnhancedNotesModule {
       .addEventListener("click", () => this.createCustomSection());
 
     // Close custom section modal on background click
-    document.getElementById("customSectionModal")?.addEventListener("click", (e) => {
-      if (e.target.id === "customSectionModal") {
-        this.closeCustomSectionModal();
-      }
-    });
+    document.getElementById("customSectionModal")?.addEventListener(
+      "click",
+      (e) => {
+        if (e.target.id === "customSectionModal") {
+          this.closeCustomSectionModal();
+        }
+      },
+    );
   }
 
   // Preview Rendering
   renderCustomSectionPreview(section) {
-    let sectionHtml = `<div class="mt-6 border border-gray-200 dark:border-gray-700 rounded-lg p-4" data-section-preview-id="${section.id}">
+    let sectionHtml =
+      `<div class="mt-6 border border-gray-200 dark:border-gray-700 rounded-lg p-4" data-section-preview-id="${section.id}">
       <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">${section.title}</h2>`;
 
-    if (section.type === 'tabs') {
+    if (section.type === "tabs") {
       const tabs = section.config.tabs || [];
       if (tabs.length > 0) {
         // Tab navigation
-        sectionHtml += '<div class="border-b border-gray-200 dark:border-gray-700 mb-4"><nav class="flex space-x-8">';
+        sectionHtml +=
+          '<div class="border-b border-gray-200 dark:border-gray-700 mb-4"><nav class="flex space-x-8">';
         tabs.forEach((tab, index) => {
           const isActive = index === 0;
           sectionHtml += `
             <button class="py-2 px-1 border-b-2 font-medium text-sm ${
-              isActive
-                ? 'border-gray-900 text-gray-900 dark:border-gray-100 dark:text-gray-100'
-                : 'border-transparent text-gray-500'
-            }" onclick="taskManager.switchPreviewTab('${section.id}', '${tab.id}')">
+            isActive
+              ? "border-gray-900 text-gray-900 dark:border-gray-100 dark:text-gray-100"
+              : "border-transparent text-gray-500"
+          }" onclick="taskManager.switchPreviewTab('${section.id}', '${tab.id}')">
               ${tab.title}
             </button>`;
         });
-        sectionHtml += '</nav></div>';
+        sectionHtml += "</nav></div>";
 
         // Tab content
         tabs.forEach((tab, index) => {
           const isActive = index === 0;
-          sectionHtml += `<div class="tab-preview-content ${isActive ? '' : 'hidden'}" data-preview-tab-id="${tab.id}">`;
-          tab.content.forEach(item => {
-            if (item.type === 'code') {
-              sectionHtml += `<pre class="bg-gray-100 dark:bg-gray-800 p-3 rounded mb-2 overflow-x-auto"><code class="text-sm text-gray-900 dark:text-gray-100">${escapeHtml(item.content)}</code></pre>`;
+          sectionHtml += `<div class="tab-preview-content ${
+            isActive ? "" : "hidden"
+          }" data-preview-tab-id="${tab.id}">`;
+          tab.content.forEach((item) => {
+            if (item.type === "code") {
+              sectionHtml +=
+                `<pre class="bg-gray-100 dark:bg-gray-800 p-3 rounded mb-2 overflow-x-auto"><code class="text-sm text-gray-900 dark:text-gray-100">${
+                  escapeHtml(item.content)
+                }</code></pre>`;
             } else {
-              sectionHtml += `<div class="mb-2">${markdownToHtml(item.content)}</div>`;
+              sectionHtml += `<div class="mb-2">${
+                markdownToHtml(item.content)
+              }</div>`;
             }
           });
-          sectionHtml += '</div>';
+          sectionHtml += "</div>";
         });
       }
-    } else if (section.type === 'timeline') {
-      section.config.timeline?.forEach(item => {
-        const statusClass = item.status === 'success' ? 'text-green-600 dark:text-green-400'
-          : item.status === 'failed' ? 'text-red-600 dark:text-red-400'
-          : 'text-yellow-600 dark:text-yellow-400';
+    } else if (section.type === "timeline") {
+      section.config.timeline?.forEach((item) => {
+        const statusClass = item.status === "success"
+          ? "text-green-600 dark:text-green-400"
+          : item.status === "failed"
+          ? "text-red-600 dark:text-red-400"
+          : "text-yellow-600 dark:text-yellow-400";
         sectionHtml += `
           <div class="mb-4 p-3 border-l-4 border-gray-500 bg-gray-50 dark:bg-gray-800">
             <h3 class="font-semibold ${statusClass}">${item.title} (${item.status})</h3>
-            ${item.date ? `<p class="text-sm text-gray-600 dark:text-gray-400">Date: ${item.date}</p>` : ''}
+            ${
+          item.date
+            ? `<p class="text-sm text-gray-600 dark:text-gray-400">Date: ${item.date}</p>`
+            : ""
+        }
             <div class="mt-2">`;
-        item.content?.forEach(contentItem => {
-          if (contentItem.type === 'code') {
-            sectionHtml += `<pre class="bg-gray-100 dark:bg-gray-800 p-3 rounded mb-2 overflow-x-auto"><code class="text-sm text-gray-900 dark:text-gray-100">${escapeHtml(contentItem.content)}</code></pre>`;
+        item.content?.forEach((contentItem) => {
+          if (contentItem.type === "code") {
+            sectionHtml +=
+              `<pre class="bg-gray-100 dark:bg-gray-800 p-3 rounded mb-2 overflow-x-auto"><code class="text-sm text-gray-900 dark:text-gray-100">${
+                escapeHtml(contentItem.content)
+              }</code></pre>`;
           } else {
-            sectionHtml += `<div class="mb-2">${markdownToHtml(contentItem.content)}</div>`;
+            sectionHtml += `<div class="mb-2">${
+              markdownToHtml(contentItem.content)
+            }</div>`;
           }
         });
-        sectionHtml += '</div></div>';
+        sectionHtml += "</div></div>";
       });
-    } else if (section.type === 'split-view') {
+    } else if (section.type === "split-view") {
       sectionHtml += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
       section.config.splitView?.columns?.forEach((column, index) => {
-        sectionHtml += `<div class="border border-gray-200 dark:border-gray-700 rounded p-3">
-          <h4 class="font-medium mb-2 text-gray-900 dark:text-gray-100">Column ${index + 1}</h4>`;
-        column.forEach(item => {
-          if (item.type === 'code') {
-            sectionHtml += `<pre class="bg-gray-100 dark:bg-gray-800 p-3 rounded mb-2 overflow-x-auto"><code class="text-sm">${escapeHtml(item.content)}</code></pre>`;
+        sectionHtml +=
+          `<div class="border border-gray-200 dark:border-gray-700 rounded p-3">
+          <h4 class="font-medium mb-2 text-gray-900 dark:text-gray-100">Column ${
+            index + 1
+          }</h4>`;
+        column.forEach((item) => {
+          if (item.type === "code") {
+            sectionHtml +=
+              `<pre class="bg-gray-100 dark:bg-gray-800 p-3 rounded mb-2 overflow-x-auto"><code class="text-sm">${
+                escapeHtml(item.content)
+              }</code></pre>`;
           } else {
-            sectionHtml += `<div class="mb-2">${markdownToHtml(item.content)}</div>`;
+            sectionHtml += `<div class="mb-2">${
+              markdownToHtml(item.content)
+            }</div>`;
           }
         });
-        sectionHtml += '</div>';
+        sectionHtml += "</div>";
       });
-      sectionHtml += '</div>';
+      sectionHtml += "</div>";
     }
 
-    sectionHtml += '</div>';
+    sectionHtml += "</div>";
     return sectionHtml;
   }
 
   switchPreviewTab(sectionId, tabId) {
     // Find the section container
-    const sectionElement = document.querySelector(`[data-section-preview-id="${sectionId}"]`);
+    const sectionElement = document.querySelector(
+      `[data-section-preview-id="${sectionId}"]`,
+    );
     if (!sectionElement) return;
 
     // Hide all tab contents in this section only
-    sectionElement.querySelectorAll('[data-preview-tab-id]').forEach(content => {
-      content.classList.add('hidden');
-    });
+    sectionElement.querySelectorAll("[data-preview-tab-id]").forEach(
+      (content) => {
+        content.classList.add("hidden");
+      },
+    );
 
     // Show the selected tab content
-    const activeContent = sectionElement.querySelector(`[data-preview-tab-id="${tabId}"]`);
+    const activeContent = sectionElement.querySelector(
+      `[data-preview-tab-id="${tabId}"]`,
+    );
     if (activeContent) {
-      activeContent.classList.remove('hidden');
+      activeContent.classList.remove("hidden");
     }
 
     // Update tab button states in this section only
-    sectionElement.querySelectorAll('button[onclick*="switchPreviewTab"]').forEach(btn => {
-      btn.classList.remove('border-gray-900', 'text-gray-900', 'dark:border-gray-100', 'dark:text-gray-100');
-      btn.classList.add('border-transparent', 'text-gray-500');
-    });
+    sectionElement.querySelectorAll('button[onclick*="switchPreviewTab"]')
+      .forEach((btn) => {
+        btn.classList.remove(
+          "border-gray-900",
+          "text-gray-900",
+          "dark:border-gray-100",
+          "dark:text-gray-100",
+        );
+        btn.classList.add("border-transparent", "text-gray-500");
+      });
 
     const activeBtn = sectionElement.querySelector(`[onclick*="${tabId}"]`);
     if (activeBtn) {
-      activeBtn.classList.add('border-gray-900', 'text-gray-900', 'dark:border-gray-100', 'dark:text-gray-100');
-      activeBtn.classList.remove('border-transparent', 'text-gray-500');
+      activeBtn.classList.add(
+        "border-gray-900",
+        "text-gray-900",
+        "dark:border-gray-100",
+        "dark:text-gray-100",
+      );
+      activeBtn.classList.remove("border-transparent", "text-gray-500");
     }
   }
 }

@@ -87,7 +87,9 @@ export class DependenciesModule {
   handleDocumentClick(e) {
     const dropdown = document.getElementById("dependencyDropdown");
     const input = document.getElementById("taskBlockedBy");
-    if (dropdown && input && !dropdown.contains(e.target) && e.target !== input) {
+    if (
+      dropdown && input && !dropdown.contains(e.target) && e.target !== input
+    ) {
       dropdown.classList.add("hidden");
     }
   }

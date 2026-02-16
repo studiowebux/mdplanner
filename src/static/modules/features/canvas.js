@@ -1,4 +1,4 @@
-import { CanvasAPI } from '../api.js';
+import { CanvasAPI } from "../api.js";
 
 export class CanvasModule {
   constructor(taskManager) {
@@ -67,7 +67,8 @@ export class CanvasModule {
         this.offset.x = newTranslateX;
         this.offset.y = newTranslateY;
 
-        viewport.style.transform = `translate(${newTranslateX}px, ${newTranslateY}px) scale(${this.zoom})`;
+        viewport.style.transform =
+          `translate(${newTranslateX}px, ${newTranslateY}px) scale(${this.zoom})`;
       }
     });
 
@@ -177,8 +178,9 @@ export class CanvasModule {
           continue;
         }
 
-        const { inlineSize: width, blockSize: height } =
-          entry.borderBoxSize.at(0);
+        const { inlineSize: width, blockSize: height } = entry.borderBoxSize.at(
+          0,
+        );
         clearTimeout(element.resizeTimeout);
         element.resizeTimeout = setTimeout(() => {
           this.updateSize(element.dataset.id, { width, height });
@@ -288,9 +290,11 @@ export class CanvasModule {
   updateZoom(value) {
     this.zoom = parseFloat(value);
     const viewport = document.getElementById("canvasViewport");
-    viewport.style.transform = `translate(${this.offset.x}px, ${this.offset.y}px) scale(${this.zoom})`;
-    document.getElementById("zoomLevel").textContent =
-      `${Math.round(this.zoom * 100)}%`;
+    viewport.style.transform =
+      `translate(${this.offset.x}px, ${this.offset.y}px) scale(${this.zoom})`;
+    document.getElementById("zoomLevel").textContent = `${
+      Math.round(this.zoom * 100)
+    }%`;
   }
 
   selectColor(color) {
@@ -300,7 +304,10 @@ export class CanvasModule {
   bindEvents() {
     document
       .getElementById("addStickyNoteBtn")
-      ?.addEventListener("click", () => this.tm.stickyNoteSidenavModule.openNew());
+      ?.addEventListener(
+        "click",
+        () => this.tm.stickyNoteSidenavModule.openNew(),
+      );
     document
       .getElementById("cancelStickyNoteBtn")
       ?.addEventListener("click", () => this.closeModal());

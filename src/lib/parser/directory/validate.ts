@@ -15,7 +15,12 @@ export interface ValidationResult {
 }
 
 export interface ValidationError {
-  type: "missing_file" | "invalid_frontmatter" | "missing_id" | "duplicate_id" | "invalid_structure";
+  type:
+    | "missing_file"
+    | "invalid_frontmatter"
+    | "missing_id"
+    | "duplicate_id"
+    | "invalid_structure";
   path: string;
   message: string;
 }
@@ -71,7 +76,9 @@ const NESTED_DIRECTORIES: Record<string, string[]> = {
 /**
  * Validate a directory-based project structure
  */
-export async function validateProjectDirectory(projectDir: string): Promise<ValidationResult> {
+export async function validateProjectDirectory(
+  projectDir: string,
+): Promise<ValidationResult> {
   const errors: ValidationError[] = [];
   const warnings: ValidationWarning[] = [];
   const stats: ValidationStats = {
@@ -105,7 +112,9 @@ export async function validateProjectDirectory(projectDir: string): Promise<Vali
       errors.push({
         type: "invalid_frontmatter",
         path: projectFile,
-        message: `Invalid frontmatter: ${e instanceof Error ? e.message : String(e)}`,
+        message: `Invalid frontmatter: ${
+          e instanceof Error ? e.message : String(e)
+        }`,
       });
     }
   }
@@ -133,7 +142,12 @@ export async function validateProjectDirectory(projectDir: string): Promise<Vali
           const nestedPath = join(dirPath, nestedDir);
           if (await exists(nestedPath)) {
             stats.directories++;
-            const nestedStats = await validateDirectory(nestedPath, `${dir}/${nestedDir}`, errors, warnings);
+            const nestedStats = await validateDirectory(
+              nestedPath,
+              `${dir}/${nestedDir}`,
+              errors,
+              warnings,
+            );
             stats.files += nestedStats.files;
             stats.sections[`${dir}/${nestedDir}`] = nestedStats.files;
           }
@@ -197,7 +211,9 @@ async function validateDirectory(
           errors.push({
             type: "invalid_structure",
             path: filePath,
-            message: `Failed to read file: ${e instanceof Error ? e.message : String(e)}`,
+            message: `Failed to read file: ${
+              e instanceof Error ? e.message : String(e)
+            }`,
           });
         }
       }
@@ -214,7 +230,9 @@ async function validateDirectory(
     errors.push({
       type: "invalid_structure",
       path: dirPath,
-      message: `Failed to read directory: ${e instanceof Error ? e.message : String(e)}`,
+      message: `Failed to read directory: ${
+        e instanceof Error ? e.message : String(e)
+      }`,
     });
   }
 

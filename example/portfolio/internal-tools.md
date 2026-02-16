@@ -11,10 +11,9 @@ progress: 80
 
 # Internal Tools
 
-Development tooling and automation scripts. CI/CD pipelines, deployment scripts, monitoring dashboards.
+Development tooling and automation scripts. CI/CD pipelines, deployment scripts,
+monitoring dashboards.
 
 ## Key Metrics
 
-Build Time Saved: 45 hrs/month
-Deployment Frequency: 12/week
-MTTR: 15 min
+Build Time Saved: 45 hrs/month Deployment Frequency: 12/week MTTR: 15 min

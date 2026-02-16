@@ -2,7 +2,7 @@
  * Directory-based parser for Brief.
  * Each brief is stored as a separate markdown file.
  */
-import { DirectoryParser, parseFrontmatter, buildFileContent } from "./base.ts";
+import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
 import type { Brief } from "../../types.ts";
 
 interface BriefFrontmatter {
@@ -32,7 +32,9 @@ export class BriefDirectoryParser extends DirectoryParser<Brief> {
   }
 
   protected parseFile(content: string, _filePath: string): Brief | null {
-    const { frontmatter, content: body } = parseFrontmatter<BriefFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<BriefFrontmatter>(
+      content,
+    );
 
     if (!frontmatter.id) {
       return null;
@@ -82,7 +84,7 @@ export class BriefDirectoryParser extends DirectoryParser<Brief> {
         currentSection = null;
 
         for (const [section, keywords] of Object.entries(SECTION_HEADERS)) {
-          if (keywords.some(kw => headerText.includes(kw))) {
+          if (keywords.some((kw) => headerText.includes(kw))) {
             currentSection = section as BriefSection;
             break;
           }
@@ -168,7 +170,11 @@ export class BriefDirectoryParser extends DirectoryParser<Brief> {
     return updated;
   }
 
-  async addItem(id: string, section: BriefSection, item: string): Promise<Brief | null> {
+  async addItem(
+    id: string,
+    section: BriefSection,
+    item: string,
+  ): Promise<Brief | null> {
     const brief = await this.read(id);
     if (!brief) return null;
 
@@ -177,7 +183,11 @@ export class BriefDirectoryParser extends DirectoryParser<Brief> {
     return brief;
   }
 
-  async removeItem(id: string, section: BriefSection, itemIndex: number): Promise<Brief | null> {
+  async removeItem(
+    id: string,
+    section: BriefSection,
+    itemIndex: number,
+  ): Promise<Brief | null> {
     const brief = await this.read(id);
     if (!brief) return null;
 

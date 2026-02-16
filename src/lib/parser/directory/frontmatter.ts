@@ -16,7 +16,7 @@ export interface ParsedFile<T> {
  * Returns frontmatter object and remaining content.
  */
 export function parseFrontmatter<T = Record<string, unknown>>(
-  content: string
+  content: string,
 ): ParsedFile<T> {
   const lines = content.split("\n");
 
@@ -126,7 +126,9 @@ function parseYamlSimple<T = Record<string, unknown>>(yaml: string): T {
         baseArrayIndent = indent;
       } else if (valueStr.startsWith("[") && valueStr.endsWith("]")) {
         // Inline array: [item1, item2]
-        const items = valueStr.slice(1, -1).split(",").map((s) => parseValue(s.trim()));
+        const items = valueStr.slice(1, -1).split(",").map((s) =>
+          parseValue(s.trim())
+        );
         result[key] = items;
       } else if (valueStr.startsWith("{") && valueStr.endsWith("}")) {
         // Inline object: {x: 1, y: 2}
@@ -159,8 +161,10 @@ function parseValue(value: string): string | number | boolean | null {
   if (value === "false") return false;
 
   // Remove quotes if present
-  if ((value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))) {
+  if (
+    (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
     return value.slice(1, -1);
   }
 
@@ -216,7 +220,7 @@ function parseInlineObject(str: string): Record<string, unknown> {
  * Serialize object to YAML frontmatter string.
  */
 export function serializeFrontmatter(
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
 ): string {
   const lines: string[] = ["---"];
 
@@ -232,7 +236,11 @@ export function serializeFrontmatter(
 /**
  * Serialize a single key-value pair to YAML.
  */
-function serializeYamlLine(key: string, value: unknown, indent: number): string {
+function serializeYamlLine(
+  key: string,
+  value: unknown,
+  indent: number,
+): string {
   const prefix = "  ".repeat(indent);
 
   if (value === null) {
@@ -249,8 +257,10 @@ function serializeYamlLine(key: string, value: unknown, indent: number): string 
 
   if (typeof value === "string") {
     // Quote strings that might be ambiguous
-    if (value.includes(":") || value.includes("#") || value.includes("\n") ||
-        value === "true" || value === "false" || !isNaN(Number(value))) {
+    if (
+      value.includes(":") || value.includes("#") || value.includes("\n") ||
+      value === "true" || value === "false" || !isNaN(Number(value))
+    ) {
       return `${prefix}${key}: "${value.replace(/"/g, '\\"')}"`;
     }
     return `${prefix}${key}: ${value}`;
@@ -286,8 +296,10 @@ function serializeYamlLine(key: string, value: unknown, indent: number): string 
 
   if (typeof value === "object") {
     // Inline object for simple position/size objects
-    if (Object.keys(value).length <= 3 &&
-        Object.values(value).every((v) => typeof v !== "object")) {
+    if (
+      Object.keys(value).length <= 3 &&
+      Object.values(value).every((v) => typeof v !== "object")
+    ) {
       const pairs = Object.entries(value)
         .filter(([_, v]) => v !== undefined)
         .map(([k, v]) => `${k}: ${serializeValue(v)}`);
@@ -327,7 +339,7 @@ function serializeValue(value: unknown): string {
  */
 export function buildFileContent<T extends object>(
   frontmatter: T,
-  body: string
+  body: string,
 ): string {
   const fm = serializeFrontmatter(frontmatter as Record<string, unknown>);
   return `${fm}\n\n${body}`;

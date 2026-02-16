@@ -2,7 +2,7 @@
  * Directory-based parser for Canvas (Sticky Notes).
  * Each sticky note is stored as a separate markdown file.
  */
-import { DirectoryParser, parseFrontmatter, buildFileContent } from "./base.ts";
+import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
 import type { StickyNote } from "../../types.ts";
 
 interface StickyNoteFrontmatter {
@@ -18,7 +18,9 @@ export class CanvasDirectoryParser extends DirectoryParser<StickyNote> {
   }
 
   protected parseFile(content: string, _filePath: string): StickyNote | null {
-    const { frontmatter, content: body } = parseFrontmatter<StickyNoteFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<
+      StickyNoteFrontmatter
+    >(content);
 
     if (!frontmatter.id) {
       return null;
@@ -69,7 +71,7 @@ export class CanvasDirectoryParser extends DirectoryParser<StickyNote> {
     content: string,
     color: StickyNote["color"],
     position: StickyNote["position"],
-    size?: StickyNote["size"]
+    size?: StickyNote["size"],
   ): Promise<StickyNote> {
     const stickyNote: StickyNote = {
       id: this.generateId("sticky"),
@@ -85,7 +87,10 @@ export class CanvasDirectoryParser extends DirectoryParser<StickyNote> {
   /**
    * Update an existing sticky note.
    */
-  async update(id: string, updates: Partial<StickyNote>): Promise<StickyNote | null> {
+  async update(
+    id: string,
+    updates: Partial<StickyNote>,
+  ): Promise<StickyNote | null> {
     const existing = await this.read(id);
     if (!existing) return null;
 
@@ -103,7 +108,7 @@ export class CanvasDirectoryParser extends DirectoryParser<StickyNote> {
    */
   async updatePosition(
     id: string,
-    position: { x: number; y: number }
+    position: { x: number; y: number },
   ): Promise<StickyNote | null> {
     return this.update(id, { position });
   }
@@ -113,7 +118,7 @@ export class CanvasDirectoryParser extends DirectoryParser<StickyNote> {
    */
   async updateSize(
     id: string,
-    size: { width: number; height: number }
+    size: { width: number; height: number },
   ): Promise<StickyNote | null> {
     return this.update(id, { size });
   }

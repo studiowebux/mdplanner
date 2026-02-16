@@ -16,6 +16,7 @@ address:
 Early stage startup, good fit for team plan.
 
 ## Notes
+
 - 12 person team
 - Remote first
 - Fast growing, may upgrade to business

@@ -9,4 +9,5 @@ startDate: "2023-01-08"
 
 # Diana Kim
 
-Full-stack developer with strong backend expertise. Works on integrations and webhooks.
+Full-stack developer with strong backend expertise. Works on integrations and
+webhooks.

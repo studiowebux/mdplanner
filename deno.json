@@ -1,4 +1,22 @@
 {
+  "fmt": {
+    "exclude": [
+      "src/static/",
+      "example/",
+      "docs/",
+      "__trash/",
+      "dist/"
+    ]
+  },
+  "lint": {
+    "exclude": [
+      "src/static/",
+      "example/",
+      "docs/",
+      "__trash/",
+      "dist/"
+    ]
+  },
   "tasks": {
     "dev": "deno run --allow-net --allow-read --allow-write --allow-env --watch main.ts ./example",
     "start": "deno run --allow-net --allow-read --allow-write --allow-env main.ts",

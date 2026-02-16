@@ -2,7 +2,12 @@
  * Base class for directory-based parsers.
  * Provides file scanning, atomic writes, and common utilities.
  */
-import { parseFrontmatter, serializeFrontmatter, buildFileContent, type ParsedFile } from "./frontmatter.ts";
+import {
+  buildFileContent,
+  type ParsedFile,
+  parseFrontmatter,
+  serializeFrontmatter,
+} from "./frontmatter.ts";
 
 export interface DirectoryParserOptions {
   projectDir: string;
@@ -88,7 +93,7 @@ export abstract class DirectoryParser<T extends { id: string }> {
 
     // Fall back to scanning all files for matching ID
     const items = await this.readAll();
-    return items.find(item => item.id === id) || null;
+    return items.find((item) => item.id === id) || null;
   }
 
   /**
@@ -223,7 +228,10 @@ export abstract class DirectoryParser<T extends { id: string }> {
   /**
    * Acquire write lock for a specific item.
    */
-  protected async withWriteLock<R>(id: string, operation: () => Promise<R>): Promise<R> {
+  protected async withWriteLock<R>(
+    id: string,
+    operation: () => Promise<R>,
+  ): Promise<R> {
     const previousLock = this.writeLocks.get(id) || Promise.resolve();
     let releaseLock: () => void;
     const newLock = new Promise<void>((resolve) => {
@@ -246,7 +254,10 @@ export abstract class DirectoryParser<T extends { id: string }> {
   /**
    * Atomic write using temp file + rename.
    */
-  protected async atomicWriteFile(filePath: string, content: string): Promise<void> {
+  protected async atomicWriteFile(
+    filePath: string,
+    content: string,
+  ): Promise<void> {
     const tempPath = filePath + ".tmp";
     await Deno.writeTextFile(tempPath, content);
     await Deno.rename(tempPath, filePath);
@@ -264,4 +275,9 @@ export abstract class DirectoryParser<T extends { id: string }> {
 }
 
 // Re-export frontmatter utilities for convenience
-export { parseFrontmatter, serializeFrontmatter, buildFileContent, type ParsedFile };
+export {
+  buildFileContent,
+  type ParsedFile,
+  parseFrontmatter,
+  serializeFrontmatter,
+};

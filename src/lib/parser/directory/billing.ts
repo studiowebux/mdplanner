@@ -2,15 +2,15 @@
  * Directory-based parser for Billing.
  * Uses subdirectories: customers/, rates/, quotes/, invoices/
  */
-import { parseFrontmatter, buildFileContent } from "./base.ts";
+import { buildFileContent, parseFrontmatter } from "./base.ts";
 import type {
-  Customer,
   BillingRate,
-  Quote,
-  QuoteLineItem,
+  Customer,
   Invoice,
   InvoiceLineItem,
   Payment,
+  Quote,
+  QuoteLineItem,
 } from "../../types.ts";
 
 export class BillingDirectoryParser {
@@ -35,7 +35,10 @@ export class BillingDirectoryParser {
     return `${prefix}_${timestamp}_${random}`;
   }
 
-  protected async atomicWriteFile(filePath: string, content: string): Promise<void> {
+  protected async atomicWriteFile(
+    filePath: string,
+    content: string,
+  ): Promise<void> {
     const tempPath = filePath + ".tmp";
     await Deno.writeTextFile(tempPath, content);
     await Deno.rename(tempPath, filePath);
@@ -93,7 +96,9 @@ export class BillingDirectoryParser {
       created: string;
     }
 
-    const { frontmatter, content: body } = parseFrontmatter<CustomerFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<
+      CustomerFrontmatter
+    >(content);
     if (!frontmatter.id) return null;
 
     const lines = body.split("\n");
@@ -114,13 +119,15 @@ export class BillingDirectoryParser {
       email: frontmatter.email,
       phone: frontmatter.phone,
       company: frontmatter.company,
-      billingAddress: frontmatter.street ? {
-        street: frontmatter.street,
-        city: frontmatter.city,
-        state: frontmatter.state,
-        postalCode: frontmatter.postalCode,
-        country: frontmatter.country,
-      } : undefined,
+      billingAddress: frontmatter.street
+        ? {
+          street: frontmatter.street,
+          city: frontmatter.city,
+          state: frontmatter.state,
+          postalCode: frontmatter.postalCode,
+          country: frontmatter.country,
+        }
+        : undefined,
       notes: notes || undefined,
       created: frontmatter.created || new Date().toISOString(),
     };
@@ -136,18 +143,30 @@ export class BillingDirectoryParser {
     if (customer.phone) frontmatter.phone = customer.phone;
     if (customer.company) frontmatter.company = customer.company;
     if (customer.billingAddress) {
-      if (customer.billingAddress.street) frontmatter.street = customer.billingAddress.street;
-      if (customer.billingAddress.city) frontmatter.city = customer.billingAddress.city;
-      if (customer.billingAddress.state) frontmatter.state = customer.billingAddress.state;
-      if (customer.billingAddress.postalCode) frontmatter.postalCode = customer.billingAddress.postalCode;
-      if (customer.billingAddress.country) frontmatter.country = customer.billingAddress.country;
+      if (customer.billingAddress.street) {
+        frontmatter.street = customer.billingAddress.street;
+      }
+      if (customer.billingAddress.city) {
+        frontmatter.city = customer.billingAddress.city;
+      }
+      if (customer.billingAddress.state) {
+        frontmatter.state = customer.billingAddress.state;
+      }
+      if (customer.billingAddress.postalCode) {
+        frontmatter.postalCode = customer.billingAddress.postalCode;
+      }
+      if (customer.billingAddress.country) {
+        frontmatter.country = customer.billingAddress.country;
+      }
     }
 
     const body = `# ${customer.name}\n\n${customer.notes || ""}`;
     return buildFileContent(frontmatter, body);
   }
 
-  async addCustomer(customer: Omit<Customer, "id" | "created">): Promise<Customer> {
+  async addCustomer(
+    customer: Omit<Customer, "id" | "created">,
+  ): Promise<Customer> {
     await this.ensureDir();
     const newCustomer: Customer = {
       ...customer,
@@ -159,9 +178,12 @@ export class BillingDirectoryParser {
     return newCustomer;
   }
 
-  async updateCustomer(id: string, updates: Partial<Customer>): Promise<Customer | null> {
+  async updateCustomer(
+    id: string,
+    updates: Partial<Customer>,
+  ): Promise<Customer | null> {
     const customers = await this.readAllCustomers();
-    const existing = customers.find(c => c.id === id);
+    const existing = customers.find((c) => c.id === id);
     if (!existing) return null;
 
     const updated: Customer = { ...existing, ...updates, id: existing.id };
@@ -208,7 +230,9 @@ export class BillingDirectoryParser {
       isDefault?: boolean;
     }
 
-    const { frontmatter, content: body } = parseFrontmatter<RateFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<RateFrontmatter>(
+      content,
+    );
     if (!frontmatter.id) return null;
 
     const lines = body.split("\n");
@@ -254,9 +278,12 @@ export class BillingDirectoryParser {
     return newRate;
   }
 
-  async updateRate(id: string, updates: Partial<BillingRate>): Promise<BillingRate | null> {
+  async updateRate(
+    id: string,
+    updates: Partial<BillingRate>,
+  ): Promise<BillingRate | null> {
     const rates = await this.readAllRates();
-    const existing = rates.find(r => r.id === id);
+    const existing = rates.find((r) => r.id === id);
     if (!existing) return null;
 
     const updated: BillingRate = { ...existing, ...updates, id: existing.id };
@@ -311,7 +338,9 @@ export class BillingDirectoryParser {
       acceptedAt?: string;
     }
 
-    const { frontmatter, content: body } = parseFrontmatter<QuoteFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<QuoteFrontmatter>(
+      content,
+    );
     if (!frontmatter.id) return null;
 
     const lines = body.split("\n");
@@ -342,7 +371,9 @@ export class BillingDirectoryParser {
 
       if (inLineItems) {
         // - (item_id) Description | qty | rate | amount
-        const itemMatch = line.match(/^[-*]\s+\((\w+)\)\s+(.+?)\s*\|\s*(\d+(?:\.\d+)?)\s*\|\s*(\d+(?:\.\d+)?)\s*\|\s*(\d+(?:\.\d+)?)$/);
+        const itemMatch = line.match(
+          /^[-*]\s+\((\w+)\)\s+(.+?)\s*\|\s*(\d+(?:\.\d+)?)\s*\|\s*(\d+(?:\.\d+)?)\s*\|\s*(\d+(?:\.\d+)?)$/,
+        );
         if (itemMatch) {
           lineItems.push({
             id: itemMatch[1],
@@ -401,7 +432,9 @@ export class BillingDirectoryParser {
     sections.push("## Line Items");
     sections.push("");
     for (const item of quote.lineItems) {
-      sections.push(`- (${item.id}) ${item.description} | ${item.quantity} | ${item.rate} | ${item.amount}`);
+      sections.push(
+        `- (${item.id}) ${item.description} | ${item.quantity} | ${item.rate} | ${item.amount}`,
+      );
     }
 
     if (quote.notes) {
@@ -426,9 +459,12 @@ export class BillingDirectoryParser {
     return newQuote;
   }
 
-  async updateQuote(id: string, updates: Partial<Quote>): Promise<Quote | null> {
+  async updateQuote(
+    id: string,
+    updates: Partial<Quote>,
+  ): Promise<Quote | null> {
     const quotes = await this.readAllQuotes();
-    const existing = quotes.find(q => q.id === id);
+    const existing = quotes.find((q) => q.id === id);
     if (!existing) return null;
 
     const updated: Quote = { ...existing, ...updates, id: existing.id };
@@ -485,7 +521,9 @@ export class BillingDirectoryParser {
       paidAt?: string;
     }
 
-    const { frontmatter, content: body } = parseFrontmatter<InvoiceFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<InvoiceFrontmatter>(
+      content,
+    );
     if (!frontmatter.id) return null;
 
     const lines = body.split("\n");
@@ -516,7 +554,9 @@ export class BillingDirectoryParser {
 
       if (inLineItems) {
         // - (item_id) Description | qty | rate | amount | taskId | timeEntryIds
-        const itemMatch = line.match(/^[-*]\s+\((\w+)\)\s+(.+?)\s*\|\s*(\d+(?:\.\d+)?)\s*\|\s*(\d+(?:\.\d+)?)\s*\|\s*(\d+(?:\.\d+)?)(?:\s*\|\s*(\S*))?(?:\s*\|\s*(.*))?$/);
+        const itemMatch = line.match(
+          /^[-*]\s+\((\w+)\)\s+(.+?)\s*\|\s*(\d+(?:\.\d+)?)\s*\|\s*(\d+(?:\.\d+)?)\s*\|\s*(\d+(?:\.\d+)?)(?:\s*\|\s*(\S*))?(?:\s*\|\s*(.*))?$/,
+        );
         if (itemMatch) {
           lineItems.push({
             id: itemMatch[1],
@@ -525,7 +565,9 @@ export class BillingDirectoryParser {
             rate: parseFloat(itemMatch[4]),
             amount: parseFloat(itemMatch[5]),
             taskId: itemMatch[6] || undefined,
-            timeEntryIds: itemMatch[7] ? itemMatch[7].split(",").map(t => t.trim()).filter(Boolean) : undefined,
+            timeEntryIds: itemMatch[7]
+              ? itemMatch[7].split(",").map((t) => t.trim()).filter(Boolean)
+              : undefined,
           });
         }
       }
@@ -583,7 +625,9 @@ export class BillingDirectoryParser {
     for (const item of invoice.lineItems) {
       const taskPart = item.taskId || "";
       const timeEntryPart = item.timeEntryIds?.join(",") || "";
-      sections.push(`- (${item.id}) ${item.description} | ${item.quantity} | ${item.rate} | ${item.amount} | ${taskPart} | ${timeEntryPart}`);
+      sections.push(
+        `- (${item.id}) ${item.description} | ${item.quantity} | ${item.rate} | ${item.amount} | ${taskPart} | ${timeEntryPart}`,
+      );
     }
 
     if (invoice.notes) {
@@ -608,9 +652,12 @@ export class BillingDirectoryParser {
     return newInvoice;
   }
 
-  async updateInvoice(id: string, updates: Partial<Invoice>): Promise<Invoice | null> {
+  async updateInvoice(
+    id: string,
+    updates: Partial<Invoice>,
+  ): Promise<Invoice | null> {
     const invoices = await this.readAllInvoices();
-    const existing = invoices.find(i => i.id === id);
+    const existing = invoices.find((i) => i.id === id);
     if (!existing) return null;
 
     const updated: Invoice = { ...existing, ...updates, id: existing.id };
@@ -659,7 +706,9 @@ export class BillingDirectoryParser {
       reference?: string;
     }
 
-    const { frontmatter, content: body } = parseFrontmatter<PaymentFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<PaymentFrontmatter>(
+      content,
+    );
     if (!frontmatter.id) return null;
 
     const lines = body.split("\n");
@@ -717,9 +766,12 @@ export class BillingDirectoryParser {
     return newPayment;
   }
 
-  async updatePayment(id: string, updates: Partial<Payment>): Promise<Payment | null> {
+  async updatePayment(
+    id: string,
+    updates: Partial<Payment>,
+  ): Promise<Payment | null> {
     const payments = await this.readAllPayments();
-    const existing = payments.find(p => p.id === id);
+    const existing = payments.find((p) => p.id === id);
     if (!existing) return null;
 
     const updated: Payment = { ...existing, ...updates, id: existing.id };
@@ -740,7 +792,7 @@ export class BillingDirectoryParser {
   async saveAllPayments(payments: Payment[]): Promise<void> {
     await Deno.mkdir(`${this.billingDir}/payments`, { recursive: true });
     const existing = await this.readAllPayments();
-    const newIds = new Set(payments.map(p => p.id));
+    const newIds = new Set(payments.map((p) => p.id));
 
     for (const payment of existing) {
       if (!newIds.has(payment.id)) {
@@ -761,8 +813,8 @@ export class BillingDirectoryParser {
   async saveAllCustomers(customers: Customer[]): Promise<void> {
     await this.ensureDir();
     const existing = await this.readAllCustomers();
-    const existingIds = new Set(existing.map(c => c.id));
-    const newIds = new Set(customers.map(c => c.id));
+    const existingIds = new Set(existing.map((c) => c.id));
+    const newIds = new Set(customers.map((c) => c.id));
 
     // Delete removed customers
     for (const customer of existing) {
@@ -781,8 +833,8 @@ export class BillingDirectoryParser {
   async saveAllRates(rates: BillingRate[]): Promise<void> {
     await this.ensureDir();
     const existing = await this.readAllRates();
-    const existingIds = new Set(existing.map(r => r.id));
-    const newIds = new Set(rates.map(r => r.id));
+    const existingIds = new Set(existing.map((r) => r.id));
+    const newIds = new Set(rates.map((r) => r.id));
 
     // Delete removed rates
     for (const rate of existing) {
@@ -801,8 +853,8 @@ export class BillingDirectoryParser {
   async saveAllQuotes(quotes: Quote[]): Promise<void> {
     await this.ensureDir();
     const existing = await this.readAllQuotes();
-    const existingIds = new Set(existing.map(q => q.id));
-    const newIds = new Set(quotes.map(q => q.id));
+    const existingIds = new Set(existing.map((q) => q.id));
+    const newIds = new Set(quotes.map((q) => q.id));
 
     // Delete removed quotes
     for (const quote of existing) {
@@ -821,8 +873,8 @@ export class BillingDirectoryParser {
   async saveAllInvoices(invoices: Invoice[]): Promise<void> {
     await this.ensureDir();
     const existing = await this.readAllInvoices();
-    const existingIds = new Set(existing.map(i => i.id));
-    const newIds = new Set(invoices.map(i => i.id));
+    const existingIds = new Set(existing.map((i) => i.id));
+    const newIds = new Set(invoices.map((i) => i.id));
 
     // Delete removed invoices
     for (const invoice of existing) {

@@ -2,7 +2,7 @@
  * Directory-based parser for Goals.
  * Each goal is stored as a separate markdown file.
  */
-import { DirectoryParser, parseFrontmatter, buildFileContent } from "./base.ts";
+import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
 import type { Goal } from "../../types.ts";
 
 interface GoalFrontmatter {
@@ -20,7 +20,9 @@ export class GoalsDirectoryParser extends DirectoryParser<Goal> {
   }
 
   protected parseFile(content: string, _filePath: string): Goal | null {
-    const { frontmatter, content: body } = parseFrontmatter<GoalFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<GoalFrontmatter>(
+      content,
+    );
 
     if (!frontmatter.id) {
       return null;

@@ -13,6 +13,7 @@ order: 1
 # Reporting Dashboard
 
 Build analytics dashboard for project insights.
+
 - Task completion over time
 - Time spent by project/assignee
 - Burndown chart

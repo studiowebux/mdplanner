@@ -10,6 +10,7 @@ status: open
 Features for large team deployments.
 
 ## Deliverables
+
 - SSO/SAML integration
 - Audit logging
 - Custom branding

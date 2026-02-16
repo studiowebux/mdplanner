@@ -1,11 +1,16 @@
 /**
  * Directory-based parser exports.
  */
-export { DirectoryParser, parseFrontmatter, serializeFrontmatter, buildFileContent } from "./base.ts";
+export {
+  buildFileContent,
+  DirectoryParser,
+  parseFrontmatter,
+  serializeFrontmatter,
+} from "./base.ts";
 export { NotesDirectoryParser } from "./notes.ts";
 export { GoalsDirectoryParser } from "./goals.ts";
 export { TasksDirectoryParser } from "./tasks.ts";
-export { ProjectDirectoryParser, type ProjectData } from "./project.ts";
+export { type ProjectData, ProjectDirectoryParser } from "./project.ts";
 export { CanvasDirectoryParser } from "./canvas.ts";
 export { MindmapsDirectoryParser } from "./mindmaps.ts";
 export { C4DirectoryParser } from "./c4.ts";
@@ -22,14 +27,22 @@ export { CapacityDirectoryParser } from "./capacity.ts";
 export { StrategicLevelsDirectoryParser } from "./strategic-levels.ts";
 export { BillingDirectoryParser } from "./billing.ts";
 export { CRMDirectoryParser } from "./crm.ts";
-export { OrgChartDirectoryParser, type OrgChartMemberWithChildren, type OrgChartSummary } from "./orgchart.ts";
-export { DirectoryMarkdownParser } from "./parser.ts";
-export { migrateToDirectory, migrateFromDirectory, type MigrationResult } from "./migrate.ts";
 export {
-  validateProjectDirectory,
+  OrgChartDirectoryParser,
+  type OrgChartMemberWithChildren,
+  type OrgChartSummary,
+} from "./orgchart.ts";
+export { DirectoryMarkdownParser } from "./parser.ts";
+export {
+  migrateFromDirectory,
+  migrateToDirectory,
+  type MigrationResult,
+} from "./migrate.ts";
+export {
   formatValidationResult,
-  type ValidationResult,
+  validateProjectDirectory,
   type ValidationError,
-  type ValidationWarning,
+  type ValidationResult,
   type ValidationStats,
+  type ValidationWarning,
 } from "./validate.ts";

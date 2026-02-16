@@ -2,7 +2,7 @@
  * Directory-based parser for Project configuration.
  * Stores project name, description, and config in project.md at root.
  */
-import { parseFrontmatter, buildFileContent } from "./base.ts";
+import { buildFileContent, parseFrontmatter } from "./base.ts";
 import type { ProjectConfig, ProjectLink } from "../../types.ts";
 
 interface ProjectFrontmatter {
@@ -99,7 +99,9 @@ export class ProjectDirectoryParser {
    * Parse project.md content.
    */
   private parseFile(content: string): ProjectData {
-    const { frontmatter, content: body } = parseFrontmatter<ProjectFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<ProjectFrontmatter>(
+      content,
+    );
 
     // Extract title from first heading
     const lines = body.split("\n");
@@ -133,11 +135,15 @@ export class ProjectDirectoryParser {
     if (frontmatter.last_updated) config.lastUpdated = frontmatter.last_updated;
     if (frontmatter.links) config.links = frontmatter.links;
     if (frontmatter.status) config.status = frontmatter.status;
-    if (frontmatter.status_comment) config.statusComment = frontmatter.status_comment;
+    if (frontmatter.status_comment) {
+      config.statusComment = frontmatter.status_comment;
+    }
     if (frontmatter.category) config.category = frontmatter.category;
     if (frontmatter.client) config.client = frontmatter.client;
     if (frontmatter.revenue !== undefined) config.revenue = frontmatter.revenue;
-    if (frontmatter.expenses !== undefined) config.expenses = frontmatter.expenses;
+    if (frontmatter.expenses !== undefined) {
+      config.expenses = frontmatter.expenses;
+    }
 
     return { name, description, config };
   }
@@ -152,16 +158,24 @@ export class ProjectDirectoryParser {
     if (data.config.workingDaysPerWeek !== undefined) {
       frontmatter.working_days_per_week = data.config.workingDaysPerWeek;
     }
-    if (data.config.workingDays) frontmatter.working_days = data.config.workingDays;
+    if (data.config.workingDays) {
+      frontmatter.working_days = data.config.workingDays;
+    }
     if (data.config.assignees) frontmatter.assignees = data.config.assignees;
     if (data.config.tags) frontmatter.tags = data.config.tags;
     if (data.config.links) frontmatter.links = data.config.links;
     if (data.config.status) frontmatter.status = data.config.status;
-    if (data.config.statusComment) frontmatter.status_comment = data.config.statusComment;
+    if (data.config.statusComment) {
+      frontmatter.status_comment = data.config.statusComment;
+    }
     if (data.config.category) frontmatter.category = data.config.category;
     if (data.config.client) frontmatter.client = data.config.client;
-    if (data.config.revenue !== undefined) frontmatter.revenue = data.config.revenue;
-    if (data.config.expenses !== undefined) frontmatter.expenses = data.config.expenses;
+    if (data.config.revenue !== undefined) {
+      frontmatter.revenue = data.config.revenue;
+    }
+    if (data.config.expenses !== undefined) {
+      frontmatter.expenses = data.config.expenses;
+    }
 
     // Always update last_updated
     frontmatter.last_updated = new Date().toISOString();

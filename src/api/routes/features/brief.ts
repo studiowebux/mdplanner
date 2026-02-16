@@ -3,7 +3,12 @@
  */
 
 import { Hono } from "hono";
-import { AppVariables, getParser, jsonResponse, errorResponse } from "../context.ts";
+import {
+  AppVariables,
+  errorResponse,
+  getParser,
+  jsonResponse,
+} from "../context.ts";
 
 export const briefRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -46,7 +51,7 @@ briefRouter.put("/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json();
   const briefs = await parser.readBriefs();
-  const index = briefs.findIndex(b => b.id === id);
+  const index = briefs.findIndex((b) => b.id === id);
   if (index === -1) return errorResponse("Not found", 404);
   briefs[index] = { ...briefs[index], ...body };
   await parser.saveBriefs(briefs);
@@ -58,7 +63,7 @@ briefRouter.delete("/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const briefs = await parser.readBriefs();
-  const filtered = briefs.filter(b => b.id !== id);
+  const filtered = briefs.filter((b) => b.id !== id);
   if (filtered.length === briefs.length) return errorResponse("Not found", 404);
   await parser.saveBriefs(filtered);
   return jsonResponse({ success: true });

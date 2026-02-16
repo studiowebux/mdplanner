@@ -109,7 +109,9 @@ export class PortfolioDirectoryParser {
    * Parse portfolio file content.
    */
   private parseFile(filename: string, content: string): PortfolioItem {
-    const { frontmatter, content: body } = parseFrontmatter<PortfolioFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<
+      PortfolioFrontmatter
+    >(content);
 
     // Extract description from body (first paragraph after title)
     const lines = body.split("\n");
@@ -162,7 +164,10 @@ export class PortfolioDirectoryParser {
   /**
    * Update a portfolio item.
    */
-  async update(id: string, updates: Partial<PortfolioItem>): Promise<PortfolioItem | null> {
+  async update(
+    id: string,
+    updates: Partial<PortfolioItem>,
+  ): Promise<PortfolioItem | null> {
     const existing = await this.read(id);
     if (!existing) return null;
 
@@ -185,7 +190,9 @@ export class PortfolioDirectoryParser {
     };
 
     // Clean undefined values
-    for (const key of Object.keys(frontmatter) as Array<keyof PortfolioFrontmatter>) {
+    for (
+      const key of Object.keys(frontmatter) as Array<keyof PortfolioFrontmatter>
+    ) {
       if (frontmatter[key] === undefined) {
         delete frontmatter[key];
       }
@@ -199,9 +206,19 @@ export class PortfolioDirectoryParser {
           yamlLines.push(`${key}:`);
           for (const kpi of value as PortfolioKPI[]) {
             yamlLines.push(`  - name: "${kpi.name}"`);
-            yamlLines.push(`    value: ${typeof kpi.value === "string" ? `"${kpi.value}"` : kpi.value}`);
+            yamlLines.push(
+              `    value: ${
+                typeof kpi.value === "string" ? `"${kpi.value}"` : kpi.value
+              }`,
+            );
             if (kpi.target !== undefined) {
-              yamlLines.push(`    target: ${typeof kpi.target === "string" ? `"${kpi.target}"` : kpi.target}`);
+              yamlLines.push(
+                `    target: ${
+                  typeof kpi.target === "string"
+                    ? `"${kpi.target}"`
+                    : kpi.target
+                }`,
+              );
             }
             if (kpi.unit) {
               yamlLines.push(`    unit: "${kpi.unit}"`);
@@ -268,7 +285,9 @@ export class PortfolioDirectoryParser {
       totalProgress += item.progress || 0;
     }
 
-    const avgProgress = items.length > 0 ? Math.round(totalProgress / items.length) : 0;
+    const avgProgress = items.length > 0
+      ? Math.round(totalProgress / items.length)
+      : 0;
 
     return {
       total: items.length,

@@ -10,9 +10,9 @@ async function request(url, options = {}) {
   const response = await fetch(url, {
     ...restOptions,
     headers: {
-      'Content-Type': 'application/json',
-      ...optionHeaders
-    }
+      "Content-Type": "application/json",
+      ...optionHeaders,
+    },
   });
   return response;
 }
@@ -23,40 +23,40 @@ export async function get(url) {
 
 export async function post(url, data) {
   return request(url, {
-    method: 'POST',
-    body: JSON.stringify(data)
+    method: "POST",
+    body: JSON.stringify(data),
   });
 }
 
 export async function put(url, data) {
   return request(url, {
-    method: 'PUT',
-    body: JSON.stringify(data)
+    method: "PUT",
+    body: JSON.stringify(data),
   });
 }
 
 export async function del(url) {
   return request(url, {
-    method: 'DELETE'
+    method: "DELETE",
   });
 }
 
 export async function patch(url, data) {
   return request(url, {
-    method: 'PATCH',
-    body: JSON.stringify(data)
+    method: "PATCH",
+    body: JSON.stringify(data),
   });
 }
 
 /** Tasks CRUD operations */
 export const TasksAPI = {
   async fetchAll() {
-    const response = await get('/api/tasks');
+    const response = await get("/api/tasks");
     return response.json();
   },
 
   async create(task) {
-    const response = await post('/api/tasks', task);
+    const response = await post("/api/tasks", task);
     return response;
   },
 
@@ -73,56 +73,56 @@ export const TasksAPI = {
   async move(id, data) {
     const response = await patch(`/api/tasks/${id}/move`, data);
     return response;
-  }
+  },
 };
 
 /** Project config and info operations */
 export const ProjectAPI = {
   async getInfo() {
-    const response = await get('/api/project');
+    const response = await get("/api/project");
     return response.json();
   },
 
   async getConfig() {
-    const response = await get('/api/project/config');
+    const response = await get("/api/project/config");
     return response.json();
   },
 
   async saveConfig(config) {
-    const response = await post('/api/project/config', config);
+    const response = await post("/api/project/config", config);
     return response;
   },
 
   async getSections() {
-    const response = await get('/api/project/sections');
+    const response = await get("/api/project/sections");
     return response.json();
   },
 
   async rewrite(data) {
-    const response = await post('/api/project/rewrite', data);
+    const response = await post("/api/project/rewrite", data);
     return response;
   },
 
   async getVersion() {
-    const response = await get('/api/version');
+    const response = await get("/api/version");
     return response.json();
   },
 
   async getActiveProject() {
-    const response = await get('/api/projects/active');
+    const response = await get("/api/projects/active");
     return response.json();
-  }
+  },
 };
 
 // Portfolio API - reads from portfolio/ directory
 export const PortfolioAPI = {
   async fetchAll() {
-    const response = await get('/api/portfolio');
+    const response = await get("/api/portfolio");
     return response.json();
   },
 
   async getSummary() {
-    const response = await get('/api/portfolio/summary');
+    const response = await get("/api/portfolio/summary");
     return response.json();
   },
 
@@ -134,18 +134,18 @@ export const PortfolioAPI = {
   async update(id, data) {
     const response = await put(`/api/portfolio/${id}`, data);
     return response;
-  }
+  },
 };
 
 // Notes API
 export const NotesAPI = {
   async fetchAll() {
-    const response = await get('/api/notes');
+    const response = await get("/api/notes");
     return response.json();
   },
 
   async create(note) {
-    const response = await post('/api/notes', note);
+    const response = await post("/api/notes", note);
     return response;
   },
 
@@ -157,13 +157,13 @@ export const NotesAPI = {
   async delete(id) {
     const response = await del(`/api/notes/${id}`);
     return response;
-  }
+  },
 };
 
 // Goals API
 export const GoalsAPI = {
   async create(goal) {
-    const response = await post('/api/goals', goal);
+    const response = await post("/api/goals", goal);
     return response;
   },
 
@@ -175,18 +175,18 @@ export const GoalsAPI = {
   async delete(id) {
     const response = await del(`/api/goals/${id}`);
     return response;
-  }
+  },
 };
 
 // Milestones API
 export const MilestonesAPI = {
   async fetchAll() {
-    const response = await get('/api/milestones');
+    const response = await get("/api/milestones");
     return response.json();
   },
 
   async create(milestone) {
-    const response = await post('/api/milestones', milestone);
+    const response = await post("/api/milestones", milestone);
     return response;
   },
 
@@ -198,18 +198,18 @@ export const MilestonesAPI = {
   async delete(id) {
     const response = await del(`/api/milestones/${id}`);
     return response;
-  }
+  },
 };
 
 // Ideas API
 export const IdeasAPI = {
   async fetchAll() {
-    const response = await get('/api/ideas');
+    const response = await get("/api/ideas");
     return response.json();
   },
 
   async create(idea) {
-    const response = await post('/api/ideas', idea);
+    const response = await post("/api/ideas", idea);
     return response;
   },
 
@@ -221,18 +221,18 @@ export const IdeasAPI = {
   async delete(id) {
     const response = await del(`/api/ideas/${id}`);
     return response;
-  }
+  },
 };
 
 // Retrospectives API
 export const RetrospectivesAPI = {
   async fetchAll() {
-    const response = await get('/api/retrospectives');
+    const response = await get("/api/retrospectives");
     return response.json();
   },
 
   async create(retrospective) {
-    const response = await post('/api/retrospectives', retrospective);
+    const response = await post("/api/retrospectives", retrospective);
     return response;
   },
 
@@ -244,18 +244,18 @@ export const RetrospectivesAPI = {
   async delete(id) {
     const response = await del(`/api/retrospectives/${id}`);
     return response;
-  }
+  },
 };
 
 // SWOT API
 export const SwotAPI = {
   async fetchAll() {
-    const response = await get('/api/swot');
+    const response = await get("/api/swot");
     return response.json();
   },
 
   async create(swot) {
-    const response = await post('/api/swot', swot);
+    const response = await post("/api/swot", swot);
     return response;
   },
 
@@ -267,18 +267,18 @@ export const SwotAPI = {
   async delete(id) {
     const response = await del(`/api/swot/${id}`);
     return response;
-  }
+  },
 };
 
 // Risk Analysis API
 export const RiskAnalysisAPI = {
   async fetchAll() {
-    const response = await get('/api/risk-analysis');
+    const response = await get("/api/risk-analysis");
     return response.json();
   },
 
   async create(risk) {
-    const response = await post('/api/risk-analysis', risk);
+    const response = await post("/api/risk-analysis", risk);
     return response;
   },
 
@@ -290,18 +290,18 @@ export const RiskAnalysisAPI = {
   async delete(id) {
     const response = await del(`/api/risk-analysis/${id}`);
     return response;
-  }
+  },
 };
 
 // Lean Canvas API
 export const LeanCanvasAPI = {
   async fetchAll() {
-    const response = await get('/api/lean-canvas');
+    const response = await get("/api/lean-canvas");
     return response.json();
   },
 
   async create(canvas) {
-    const response = await post('/api/lean-canvas', canvas);
+    const response = await post("/api/lean-canvas", canvas);
     return response;
   },
 
@@ -313,18 +313,18 @@ export const LeanCanvasAPI = {
   async delete(id) {
     const response = await del(`/api/lean-canvas/${id}`);
     return response;
-  }
+  },
 };
 
 // Business Model API
 export const BusinessModelAPI = {
   async fetchAll() {
-    const response = await get('/api/business-model');
+    const response = await get("/api/business-model");
     return response.json();
   },
 
   async create(model) {
-    const response = await post('/api/business-model', model);
+    const response = await post("/api/business-model", model);
     return response;
   },
 
@@ -336,18 +336,18 @@ export const BusinessModelAPI = {
   async delete(id) {
     const response = await del(`/api/business-model/${id}`);
     return response;
-  }
+  },
 };
 
 // Project Value Board API
 export const ProjectValueAPI = {
   async fetchAll() {
-    const response = await get('/api/project-value-board');
+    const response = await get("/api/project-value-board");
     return response.json();
   },
 
   async create(board) {
-    const response = await post('/api/project-value-board', board);
+    const response = await post("/api/project-value-board", board);
     return response;
   },
 
@@ -359,18 +359,18 @@ export const ProjectValueAPI = {
   async delete(id) {
     const response = await del(`/api/project-value-board/${id}`);
     return response;
-  }
+  },
 };
 
 // Brief API
 export const BriefAPI = {
   async fetchAll() {
-    const response = await get('/api/brief');
+    const response = await get("/api/brief");
     return response.json();
   },
 
   async create(brief) {
-    const response = await post('/api/brief', brief);
+    const response = await post("/api/brief", brief);
     return response;
   },
 
@@ -382,18 +382,18 @@ export const BriefAPI = {
   async delete(id) {
     const response = await del(`/api/brief/${id}`);
     return response;
-  }
+  },
 };
 
 // Capacity API
 export const CapacityAPI = {
   async fetchAll() {
-    const response = await get('/api/capacity');
+    const response = await get("/api/capacity");
     return response.json();
   },
 
   async create(plan) {
-    const response = await post('/api/capacity', plan);
+    const response = await post("/api/capacity", plan);
     return response;
   },
 
@@ -418,7 +418,10 @@ export const CapacityAPI = {
   },
 
   async applyAssignments(id, assignments) {
-    const response = await post(`/api/capacity/${id}/apply-assignments`, assignments);
+    const response = await post(
+      `/api/capacity/${id}/apply-assignments`,
+      assignments,
+    );
     return response;
   },
 
@@ -429,7 +432,10 @@ export const CapacityAPI = {
   },
 
   async updateMember(planId, memberId, member) {
-    const response = await put(`/api/capacity/${planId}/members/${memberId}`, member);
+    const response = await put(
+      `/api/capacity/${planId}/members/${memberId}`,
+      member,
+    );
     return response;
   },
 
@@ -440,20 +446,25 @@ export const CapacityAPI = {
 
   // Allocations
   async createAllocation(planId, allocation) {
-    const response = await post(`/api/capacity/${planId}/allocations`, allocation);
+    const response = await post(
+      `/api/capacity/${planId}/allocations`,
+      allocation,
+    );
     return response;
   },
 
   async deleteAllocation(planId, allocationId) {
-    const response = await del(`/api/capacity/${planId}/allocations/${allocationId}`);
+    const response = await del(
+      `/api/capacity/${planId}/allocations/${allocationId}`,
+    );
     return response;
-  }
+  },
 };
 
 // Time Tracking API
 export const TimeTrackingAPI = {
   async fetchAll() {
-    const response = await get('/api/time-entries');
+    const response = await get("/api/time-entries");
     return response.json();
   },
 
@@ -470,18 +481,18 @@ export const TimeTrackingAPI = {
   async delete(taskId, entryId) {
     const response = await del(`/api/time-entries/${taskId}/${entryId}`);
     return response;
-  }
+  },
 };
 
 // Canvas/Sticky Notes API
 export const CanvasAPI = {
   async fetchAll() {
-    const response = await get('/api/canvas/sticky_notes');
+    const response = await get("/api/canvas/sticky_notes");
     return response.json();
   },
 
   async create(note) {
-    const response = await post('/api/canvas/sticky_notes', note);
+    const response = await post("/api/canvas/sticky_notes", note);
     return response;
   },
 
@@ -493,18 +504,18 @@ export const CanvasAPI = {
   async delete(id) {
     const response = await del(`/api/canvas/sticky_notes/${id}`);
     return response;
-  }
+  },
 };
 
 // Mindmaps API
 export const MindmapsAPI = {
   async fetchAll() {
-    const response = await get('/api/mindmaps');
+    const response = await get("/api/mindmaps");
     return response.json();
   },
 
   async create(mindmap) {
-    const response = await post('/api/mindmaps', mindmap);
+    const response = await post("/api/mindmaps", mindmap);
     return response;
   },
 
@@ -516,31 +527,31 @@ export const MindmapsAPI = {
   async delete(id) {
     const response = await del(`/api/mindmaps/${id}`);
     return response;
-  }
+  },
 };
 
 // C4 API
 export const C4API = {
   async fetchAll() {
-    const response = await get('/api/c4');
+    const response = await get("/api/c4");
     return response.json();
   },
 
   async save(components) {
-    const response = await post('/api/c4', components);
+    const response = await post("/api/c4", components);
     return response;
-  }
+  },
 };
 
 // Strategic Levels API
 export const StrategicLevelsAPI = {
   async fetchAll() {
-    const response = await get('/api/strategic-levels');
+    const response = await get("/api/strategic-levels");
     return response.json();
   },
 
   async create(builder) {
-    const response = await post('/api/strategic-levels', builder);
+    const response = await post("/api/strategic-levels", builder);
     return response;
   },
 
@@ -556,31 +567,39 @@ export const StrategicLevelsAPI = {
 
   // Level operations
   async createLevel(builderId, level) {
-    const response = await post(`/api/strategic-levels/${builderId}/levels`, level);
+    const response = await post(
+      `/api/strategic-levels/${builderId}/levels`,
+      level,
+    );
     return response;
   },
 
   async updateLevel(builderId, levelId, level) {
-    const response = await put(`/api/strategic-levels/${builderId}/levels/${levelId}`, level);
+    const response = await put(
+      `/api/strategic-levels/${builderId}/levels/${levelId}`,
+      level,
+    );
     return response;
   },
 
   async deleteLevel(builderId, levelId) {
-    const response = await del(`/api/strategic-levels/${builderId}/levels/${levelId}`);
+    const response = await del(
+      `/api/strategic-levels/${builderId}/levels/${levelId}`,
+    );
     return response;
-  }
+  },
 };
 
 // Billing API
 export const BillingAPI = {
   async fetchAll() {
-    const response = await get('/api/billing');
+    const response = await get("/api/billing");
     return response.json();
   },
 
   // Customers
   async createCustomer(customer) {
-    const response = await post('/api/customers', customer);
+    const response = await post("/api/customers", customer);
     return response;
   },
 
@@ -596,7 +615,7 @@ export const BillingAPI = {
 
   // Rates
   async createRate(rate) {
-    const response = await post('/api/billing-rates', rate);
+    const response = await post("/api/billing-rates", rate);
     return response;
   },
 
@@ -612,7 +631,7 @@ export const BillingAPI = {
 
   // Quotes
   async createQuote(quote) {
-    const response = await post('/api/quotes', quote);
+    const response = await post("/api/quotes", quote);
     return response;
   },
 
@@ -643,7 +662,7 @@ export const BillingAPI = {
 
   // Invoices
   async createInvoice(invoice) {
-    const response = await post('/api/invoices', invoice);
+    const response = await post("/api/invoices", invoice);
     return response;
   },
 
@@ -663,22 +682,25 @@ export const BillingAPI = {
   },
 
   async generateInvoice(data) {
-    const response = await post('/api/invoices/generate', data);
+    const response = await post("/api/invoices/generate", data);
     return response;
   },
 
   // Payments
   async createPayment(invoiceId, payment) {
-    const response = await post(`/api/billing/invoices/${invoiceId}/payments`, payment);
+    const response = await post(
+      `/api/billing/invoices/${invoiceId}/payments`,
+      payment,
+    );
     return response;
-  }
+  },
 };
 
 // CRM API
 export const CRMAPI = {
   // Companies
   async fetchCompanies() {
-    const response = await get('/api/companies');
+    const response = await get("/api/companies");
     return response.json();
   },
 
@@ -688,7 +710,7 @@ export const CRMAPI = {
   },
 
   async createCompany(company) {
-    const response = await post('/api/companies', company);
+    const response = await post("/api/companies", company);
     return response;
   },
 
@@ -719,7 +741,7 @@ export const CRMAPI = {
 
   // Contacts
   async fetchContacts() {
-    const response = await get('/api/contacts');
+    const response = await get("/api/contacts");
     return response.json();
   },
 
@@ -729,7 +751,7 @@ export const CRMAPI = {
   },
 
   async createContact(contact) {
-    const response = await post('/api/contacts', contact);
+    const response = await post("/api/contacts", contact);
     return response;
   },
 
@@ -745,7 +767,7 @@ export const CRMAPI = {
 
   // Deals
   async fetchDeals() {
-    const response = await get('/api/deals');
+    const response = await get("/api/deals");
     return response.json();
   },
 
@@ -755,7 +777,7 @@ export const CRMAPI = {
   },
 
   async createDeal(deal) {
-    const response = await post('/api/deals', deal);
+    const response = await post("/api/deals", deal);
     return response;
   },
 
@@ -781,7 +803,7 @@ export const CRMAPI = {
 
   // Interactions
   async fetchInteractions() {
-    const response = await get('/api/interactions');
+    const response = await get("/api/interactions");
     return response.json();
   },
 
@@ -791,7 +813,7 @@ export const CRMAPI = {
   },
 
   async createInteraction(interaction) {
-    const response = await post('/api/interactions', interaction);
+    const response = await post("/api/interactions", interaction);
     return response;
   },
 
@@ -807,30 +829,30 @@ export const CRMAPI = {
 
   // Summary
   async getSummary() {
-    const response = await get('/api/crm/summary');
+    const response = await get("/api/crm/summary");
     return response.json();
-  }
+  },
 };
 
 // Org Chart API
 export const OrgChartAPI = {
   async fetchAll() {
-    const response = await get('/api/orgchart');
+    const response = await get("/api/orgchart");
     return response.json();
   },
 
   async fetchTree() {
-    const response = await get('/api/orgchart/tree');
+    const response = await get("/api/orgchart/tree");
     return response.json();
   },
 
   async getSummary() {
-    const response = await get('/api/orgchart/summary');
+    const response = await get("/api/orgchart/summary");
     return response.json();
   },
 
   async getDepartments() {
-    const response = await get('/api/orgchart/departments');
+    const response = await get("/api/orgchart/departments");
     return response.json();
   },
 
@@ -845,7 +867,7 @@ export const OrgChartAPI = {
   },
 
   async create(member) {
-    const response = await post('/api/orgchart', member);
+    const response = await post("/api/orgchart", member);
     return response;
   },
 
@@ -857,5 +879,5 @@ export const OrgChartAPI = {
   async delete(id) {
     const response = await del(`/api/orgchart/${id}`);
     return response;
-  }
+  },
 };

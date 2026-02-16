@@ -3,7 +3,12 @@
  */
 
 import { Hono } from "hono";
-import { AppVariables, getParser, jsonResponse, errorResponse } from "../context.ts";
+import {
+  AppVariables,
+  errorResponse,
+  getParser,
+  jsonResponse,
+} from "../context.ts";
 
 export const businessModelRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -44,7 +49,7 @@ businessModelRouter.put("/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json();
   const canvases = await parser.readBusinessModelCanvases();
-  const index = canvases.findIndex(c => c.id === id);
+  const index = canvases.findIndex((c) => c.id === id);
   if (index === -1) return errorResponse("Not found", 404);
   canvases[index] = { ...canvases[index], ...body };
   await parser.saveBusinessModelCanvases(canvases);
@@ -56,8 +61,10 @@ businessModelRouter.delete("/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const canvases = await parser.readBusinessModelCanvases();
-  const filtered = canvases.filter(c => c.id !== id);
-  if (filtered.length === canvases.length) return errorResponse("Not found", 404);
+  const filtered = canvases.filter((c) => c.id !== id);
+  if (filtered.length === canvases.length) {
+    return errorResponse("Not found", 404);
+  }
   await parser.saveBusinessModelCanvases(filtered);
   return jsonResponse({ success: true });
 });

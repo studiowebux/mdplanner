@@ -11,6 +11,7 @@ connections:
   - target: api
     label: Reads/writes
 ---
+
 # Database
 
 Primary data store

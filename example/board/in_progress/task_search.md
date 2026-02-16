@@ -13,6 +13,7 @@ order: 0
 # Global Search
 
 Implement full-text search across tasks, projects, and comments.
+
 - PostgreSQL full-text search for MVP
 - Consider Elasticsearch/Meilisearch for scale
 - Task titles and descriptions

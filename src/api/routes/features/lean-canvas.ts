@@ -3,7 +3,12 @@
  */
 
 import { Hono } from "hono";
-import { AppVariables, getParser, jsonResponse, errorResponse } from "../context.ts";
+import {
+  AppVariables,
+  errorResponse,
+  getParser,
+  jsonResponse,
+} from "../context.ts";
 
 export const leanCanvasRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -47,7 +52,7 @@ leanCanvasRouter.put("/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json();
   const leanCanvases = await parser.readLeanCanvases();
-  const index = leanCanvases.findIndex(lc => lc.id === id);
+  const index = leanCanvases.findIndex((lc) => lc.id === id);
   if (index === -1) return errorResponse("Not found", 404);
   leanCanvases[index] = { ...leanCanvases[index], ...body };
   await parser.saveLeanCanvases(leanCanvases);
@@ -59,8 +64,10 @@ leanCanvasRouter.delete("/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const leanCanvases = await parser.readLeanCanvases();
-  const filtered = leanCanvases.filter(lc => lc.id !== id);
-  if (filtered.length === leanCanvases.length) return errorResponse("Not found", 404);
+  const filtered = leanCanvases.filter((lc) => lc.id !== id);
+  if (filtered.length === leanCanvases.length) {
+    return errorResponse("Not found", 404);
+  }
   await parser.saveLeanCanvases(filtered);
   return jsonResponse({ success: true });
 });

@@ -1,10 +1,10 @@
 // Risk Analysis Sidenav Module
 // Slide-in panel for risk analysis with inline item management (2x2 matrix)
 
-import { Sidenav } from '../ui/sidenav.js';
-import { RiskAnalysisAPI } from '../api.js';
-import { showToast } from '../ui/toast.js';
-import { escapeHtml } from '../utils.js';
+import { Sidenav } from "../ui/sidenav.js";
+import { RiskAnalysisAPI } from "../api.js";
+import { showToast } from "../ui/toast.js";
+import { escapeHtml } from "../utils.js";
 
 export class RiskSidenavModule {
   constructor(taskManager) {
@@ -13,58 +13,83 @@ export class RiskSidenavModule {
     this.currentRisk = null;
     this.autoSaveTimeout = null;
 
-    this.quadrants = ['highImpactHighProb', 'highImpactLowProb', 'lowImpactHighProb', 'lowImpactLowProb'];
+    this.quadrants = [
+      "highImpactHighProb",
+      "highImpactLowProb",
+      "lowImpactHighProb",
+      "lowImpactLowProb",
+    ];
     this.quadrantNames = {
-      highImpactHighProb: 'High Impact / High Probability',
-      highImpactLowProb: 'High Impact / Low Probability',
-      lowImpactHighProb: 'Low Impact / High Probability',
-      lowImpactLowProb: 'Low Impact / Low Probability'
+      highImpactHighProb: "High Impact / High Probability",
+      highImpactLowProb: "High Impact / Low Probability",
+      lowImpactHighProb: "Low Impact / High Probability",
+      lowImpactLowProb: "Low Impact / Low Probability",
     };
   }
 
   bindEvents() {
-    document.getElementById('riskSidenavClose')?.addEventListener('click', () => this.close());
-    document.getElementById('riskSidenavCancel')?.addEventListener('click', () => this.close());
-    document.getElementById('riskSidenavDelete')?.addEventListener('click', () => this.handleDelete());
+    document.getElementById("riskSidenavClose")?.addEventListener(
+      "click",
+      () => this.close(),
+    );
+    document.getElementById("riskSidenavCancel")?.addEventListener(
+      "click",
+      () => this.close(),
+    );
+    document.getElementById("riskSidenavDelete")?.addEventListener(
+      "click",
+      () => this.handleDelete(),
+    );
 
-    document.getElementById('riskSidenavTitle')?.addEventListener('input', () => this.scheduleAutoSave());
-    document.getElementById('riskSidenavDate')?.addEventListener('change', () => this.scheduleAutoSave());
+    document.getElementById("riskSidenavTitle")?.addEventListener(
+      "input",
+      () => this.scheduleAutoSave(),
+    );
+    document.getElementById("riskSidenavDate")?.addEventListener(
+      "change",
+      () => this.scheduleAutoSave(),
+    );
 
-    this.quadrants.forEach(quadrant => {
-      document.getElementById(`riskSidenav_add_${quadrant}`)?.addEventListener('click', () => {
-        this.showAddItemInput(quadrant);
-      });
+    this.quadrants.forEach((quadrant) => {
+      document.getElementById(`riskSidenav_add_${quadrant}`)?.addEventListener(
+        "click",
+        () => {
+          this.showAddItemInput(quadrant);
+        },
+      );
     });
   }
 
   openNew() {
     this.editingRiskId = null;
     this.currentRisk = {
-      title: '',
-      date: new Date().toISOString().split('T')[0],
+      title: "",
+      date: new Date().toISOString().split("T")[0],
       highImpactHighProb: [],
       highImpactLowProb: [],
       lowImpactHighProb: [],
-      lowImpactLowProb: []
+      lowImpactLowProb: [],
     };
 
-    document.getElementById('riskSidenavHeader').textContent = 'New Risk Analysis';
+    document.getElementById("riskSidenavHeader").textContent =
+      "New Risk Analysis";
     this.fillForm();
-    document.getElementById('riskSidenavDelete').classList.add('hidden');
-    Sidenav.open('riskSidenav');
+    document.getElementById("riskSidenavDelete").classList.add("hidden");
+    Sidenav.open("riskSidenav");
   }
 
   openEdit(riskId) {
-    const risk = this.tm.riskAnalyses.find(r => r.id === riskId);
+    const risk = this.tm.riskAnalyses.find((r) => r.id === riskId);
     if (!risk) return;
 
     this.editingRiskId = riskId;
     this.currentRisk = JSON.parse(JSON.stringify(risk));
 
-    document.getElementById('riskSidenavHeader').textContent = 'Edit Risk Analysis';
+    document.getElementById("riskSidenavHeader").textContent =
+      "Edit Risk Analysis";
     this.fillForm();
-    document.getElementById('riskSidenavDelete').classList.remove('hidden');
-    Sidenav.open('riskSidenav');
+    document.getElementById("riskSidenavDelete").classList.remove("hidden");
+    Sidenav.open("riskSidenav");
   }
 
   close() {
@@ -72,15 +97,17 @@ export class RiskSidenavModule {
       clearTimeout(this.autoSaveTimeout);
       this.autoSaveTimeout = null;
     }
-    Sidenav.close('riskSidenav');
+    Sidenav.close("riskSidenav");
     this.editingRiskId = null;
     this.currentRisk = null;
   }
 
   fillForm() {
-    document.getElementById('riskSidenavTitle').value = this.currentRisk.title || '';
-    document.getElementById('riskSidenavDate').value = this.currentRisk.date || '';
-    this.quadrants.forEach(q => this.renderQuadrant(q));
+    document.getElementById("riskSidenavTitle").value =
+      this.currentRisk.title || "";
+    document.getElementById("riskSidenavDate").value = this.currentRisk.date ||
+      "";
+    this.quadrants.forEach((q) => this.renderQuadrant(q));
   }
 
   renderQuadrant(quadrant) {
@@ -93,7 +120,9 @@ export class RiskSidenavModule {
       ? '<div class="text-gray-400 dark:text-gray-500 text-sm italic py-2">No risks</div>'
       : items.map((item, idx) => `
         <div class="flex items-start gap-2 py-1 group">
-          <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">${escapeHtml(item)}</span>
+          <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">${
+        escapeHtml(item)
+      }</span>
           <button onclick="taskManager.riskSidenavModule.removeItem('${quadrant}', ${idx})"
                   class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 flex-shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,14 +130,14 @@ export class RiskSidenavModule {
             </svg>
           </button>
         </div>
-      `).join('');
+      `).join("");
   }
 
   showAddItemInput(quadrant) {
     const container = document.getElementById(`riskSidenav_${quadrant}`);
-    const existingInput = container.querySelector('.risk-add-input');
+    const existingInput = container.querySelector(".risk-add-input");
     if (existingInput) {
-      existingInput.querySelector('input').focus();
+      existingInput.querySelector("input").focus();
       return;
     }
 
@@ -120,12 +149,12 @@ export class RiskSidenavModule {
         <button type="button" class="px-2 py-1 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Cancel</button>
       </div>
     `;
-    container.insertAdjacentHTML('beforeend', inputHtml);
+    container.insertAdjacentHTML("beforeend", inputHtml);
 
-    const inputWrapper = container.querySelector('.risk-add-input');
-    const input = inputWrapper.querySelector('input');
-    const addBtn = inputWrapper.querySelectorAll('button')[0];
-    const cancelBtn = inputWrapper.querySelectorAll('button')[1];
+    const inputWrapper = container.querySelector(".risk-add-input");
+    const input = inputWrapper.querySelector("input");
+    const addBtn = inputWrapper.querySelectorAll("button")[0];
+    const cancelBtn = inputWrapper.querySelectorAll("button")[1];
 
     const addItem = () => {
       const text = input.value.trim();
@@ -137,12 +166,12 @@ export class RiskSidenavModule {
       inputWrapper.remove();
     };
 
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') addItem();
-      if (e.key === 'Escape') inputWrapper.remove();
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") addItem();
+      if (e.key === "Escape") inputWrapper.remove();
     });
-    addBtn.addEventListener('click', addItem);
-    cancelBtn.addEventListener('click', () => inputWrapper.remove());
+    addBtn.addEventListener("click", addItem);
+    cancelBtn.addEventListener("click", () => inputWrapper.remove());
     input.focus();
   }
 
@@ -154,72 +183,81 @@ export class RiskSidenavModule {
 
   scheduleAutoSave() {
     if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus('Saving...');
+    this.showSaveStatus("Saving...");
     this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {
-    this.currentRisk.title = document.getElementById('riskSidenavTitle').value.trim();
-    this.currentRisk.date = document.getElementById('riskSidenavDate').value;
+    this.currentRisk.title = document.getElementById("riskSidenavTitle").value
+      .trim();
+    this.currentRisk.date = document.getElementById("riskSidenavDate").value;
 
     if (!this.currentRisk.title) {
-      this.showSaveStatus('Title required');
+      this.showSaveStatus("Title required");
       return;
     }
 
     try {
       if (this.editingRiskId) {
         await RiskAnalysisAPI.update(this.editingRiskId, this.currentRisk);
-        this.showSaveStatus('Saved');
+        this.showSaveStatus("Saved");
       } else {
         const response = await RiskAnalysisAPI.create(this.currentRisk);
         const result = await response.json();
         this.editingRiskId = result.id;
         this.currentRisk.id = result.id;
-        this.showSaveStatus('Created');
-        document.getElementById('riskSidenavHeader').textContent = 'Edit Risk Analysis';
-        document.getElementById('riskSidenavDelete').classList.remove('hidden');
+        this.showSaveStatus("Created");
+        document.getElementById("riskSidenavHeader").textContent =
+          "Edit Risk Analysis";
+        document.getElementById("riskSidenavDelete").classList.remove("hidden");
       }
       await this.tm.riskModule.load();
     } catch (error) {
-      console.error('Error saving risk analysis:', error);
-      this.showSaveStatus('Error');
-      showToast('Error saving risk analysis', 'error');
+      console.error("Error saving risk analysis:", error);
+      this.showSaveStatus("Error");
+      showToast("Error saving risk analysis", "error");
     }
   }
 
   async handleDelete() {
     if (!this.editingRiskId) return;
-    if (!confirm(`Delete "${this.currentRisk.title}"? This cannot be undone.`)) return;
+    if (
+      !confirm(`Delete "${this.currentRisk.title}"? This cannot be undone.`)
+    ) return;
 
     try {
       await RiskAnalysisAPI.delete(this.editingRiskId);
-      showToast('Risk analysis deleted', 'success');
+      showToast("Risk analysis deleted", "success");
       await this.tm.riskModule.load();
       this.close();
     } catch (error) {
-      console.error('Error deleting risk analysis:', error);
-      showToast('Error deleting risk analysis', 'error');
+      console.error("Error deleting risk analysis:", error);
+      showToast("Error deleting risk analysis", "error");
     }
   }
 
   showSaveStatus(text) {
-    const statusEl = document.getElementById('riskSidenavSaveStatus');
+    const statusEl = document.getElementById("riskSidenavSaveStatus");
     if (!statusEl) return;
 
     statusEl.textContent = text;
-    statusEl.classList.remove('hidden', 'text-green-600', 'text-red-500', 'text-gray-500');
+    statusEl.classList.remove(
+      "hidden",
+      "text-green-600",
+      "text-red-500",
+      "text-gray-500",
+    );
 
-    if (text === 'Saved' || text === 'Created') {
-      statusEl.classList.add('text-green-600', 'dark:text-green-400');
-    } else if (text === 'Error' || text === 'Title required') {
-      statusEl.classList.add('text-red-500');
+    if (text === "Saved" || text === "Created") {
+      statusEl.classList.add("text-green-600", "dark:text-green-400");
+    } else if (text === "Error" || text === "Title required") {
+      statusEl.classList.add("text-red-500");
     } else {
-      statusEl.classList.add('text-gray-500', 'dark:text-gray-400');
+      statusEl.classList.add("text-gray-500", "dark:text-gray-400");
     }
 
-    if (text === 'Saved' || text === 'Created' || text === 'Error') {
-      setTimeout(() => statusEl.classList.add('hidden'), 2000);
+    if (text === "Saved" || text === "Created" || text === "Error") {
+      setTimeout(() => statusEl.classList.add("hidden"), 2000);
     }
   }
 }

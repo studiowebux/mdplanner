@@ -33,10 +33,9 @@ export class RetrospectivesModule {
     emptyState?.classList.add("hidden");
     container.innerHTML = this.taskManager.retrospectives
       .map((retro) => {
-        const statusColor =
-          retro.status === "open"
-            ? "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600"
-            : "bg-gray-900 text-white dark:bg-gray-600 dark:text-white";
+        const statusColor = retro.status === "open"
+          ? "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600"
+          : "bg-gray-900 text-white dark:bg-gray-600 dark:text-white";
         return `
       <div class="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden">
         <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600 flex justify-between items-center">
@@ -53,19 +52,37 @@ export class RetrospectivesModule {
           <div>
             <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Continue</h4>
             <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-              ${retro.continue.length > 0 ? retro.continue.map((item) => `<li class="flex items-start"><span class="text-gray-900 dark:text-gray-100 mr-2">+</span>${item}</li>`).join("") : '<li class="text-gray-400 italic">No items</li>'}
+              ${
+          retro.continue.length > 0
+            ? retro.continue.map((item) =>
+              `<li class="flex items-start"><span class="text-gray-900 dark:text-gray-100 mr-2">+</span>${item}</li>`
+            ).join("")
+            : '<li class="text-gray-400 italic">No items</li>'
+        }
             </ul>
           </div>
           <div>
             <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stop</h4>
             <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-              ${retro.stop.length > 0 ? retro.stop.map((item) => `<li class="flex items-start"><span class="text-gray-500 dark:text-gray-400 mr-2">-</span>${item}</li>`).join("") : '<li class="text-gray-400 dark:text-gray-500 italic">No items</li>'}
+              ${
+          retro.stop.length > 0
+            ? retro.stop.map((item) =>
+              `<li class="flex items-start"><span class="text-gray-500 dark:text-gray-400 mr-2">-</span>${item}</li>`
+            ).join("")
+            : '<li class="text-gray-400 dark:text-gray-500 italic">No items</li>'
+        }
             </ul>
           </div>
           <div>
             <h4 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Start</h4>
             <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-              ${retro.start.length > 0 ? retro.start.map((item) => `<li class="flex items-start"><span class="text-gray-400 dark:text-gray-500 mr-2">*</span>${item}</li>`).join("") : '<li class="text-gray-400 dark:text-gray-500 italic">No items</li>'}
+              ${
+          retro.start.length > 0
+            ? retro.start.map((item) =>
+              `<li class="flex items-start"><span class="text-gray-400 dark:text-gray-500 mr-2">*</span>${item}</li>`
+            ).join("")
+            : '<li class="text-gray-400 dark:text-gray-500 italic">No items</li>'
+        }
             </ul>
           </div>
         </div>
@@ -96,12 +113,14 @@ export class RetrospectivesModule {
         document.getElementById("retrospectiveTitle").value = retro.title;
         document.getElementById("retrospectiveDate").value = retro.date;
         document.getElementById("retrospectiveStatus").value = retro.status;
-        document.getElementById("retrospectiveContinue").value =
-          retro.continue.join("\n");
-        document.getElementById("retrospectiveStop").value =
-          retro.stop.join("\n");
-        document.getElementById("retrospectiveStart").value =
-          retro.start.join("\n");
+        document.getElementById("retrospectiveContinue").value = retro.continue
+          .join("\n");
+        document.getElementById("retrospectiveStop").value = retro.stop.join(
+          "\n",
+        );
+        document.getElementById("retrospectiveStart").value = retro.start.join(
+          "\n",
+        );
       }
     } else {
       title.textContent = "Add Retrospective";
@@ -168,13 +187,18 @@ export class RetrospectivesModule {
       .getElementById("retrospectivesViewBtn")
       .addEventListener("click", () => {
         this.taskManager.switchView("retrospectives");
-        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+        document.getElementById("viewSelectorDropdown")?.classList.add(
+          "hidden",
+        );
       });
 
     // Add retrospective button - opens sidenav
     document
       .getElementById("addRetrospectiveBtn")
-      .addEventListener("click", () => this.taskManager.retrospectiveSidenavModule.openNew());
+      .addEventListener(
+        "click",
+        () => this.taskManager.retrospectiveSidenavModule.openNew(),
+      );
 
     // Cancel retrospective modal
     document
@@ -187,10 +211,13 @@ export class RetrospectivesModule {
       .addEventListener("submit", (e) => this.save(e));
 
     // Close modal on background click
-    document.getElementById("retrospectiveModal").addEventListener("click", (e) => {
-      if (e.target.id === "retrospectiveModal") {
-        this.closeModal();
-      }
-    });
+    document.getElementById("retrospectiveModal").addEventListener(
+      "click",
+      (e) => {
+        if (e.target.id === "retrospectiveModal") {
+          this.closeModal();
+        }
+      },
+    );
   }
 }

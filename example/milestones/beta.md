@@ -10,6 +10,7 @@ status: open
 First public release for beta testers.
 
 ## Deliverables
+
 - Full task management
 - Time tracking
 - Team workspaces

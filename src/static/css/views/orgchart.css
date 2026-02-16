@@ -45,7 +45,9 @@
 
 .orgchart-node:hover {
   border-color: var(--color-text-muted);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1);
 }
 
 /* Node Header with Department Color Indicator */
@@ -84,7 +86,7 @@
 
 /* Connector Lines - vertical from parent */
 .orgchart-children::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 50%;
@@ -95,7 +97,7 @@
 
 /* Horizontal line across siblings */
 .orgchart-children::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 1rem;
   left: 0;
@@ -111,7 +113,7 @@
 
 /* Vertical line from horizontal connector to each child */
 .orgchart-children > .orgchart-node-wrapper::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -1rem;
   left: 50%;
@@ -162,7 +164,9 @@
 }
 
 .orgchart-card:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1);
 }
 
 .orgchart-card-name {
@@ -216,7 +220,11 @@
 /* Drag States */
 .orgchart-node[draggable="true"] {
   cursor: grab;
-  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, border-color 0.15s ease-out, opacity 0.15s ease-out;
+  transition:
+    transform 0.15s ease-out,
+    box-shadow 0.15s ease-out,
+    border-color 0.15s ease-out,
+    opacity 0.15s ease-out;
 }
 
 .orgchart-node.orgchart-dragging {

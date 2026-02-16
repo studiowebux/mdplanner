@@ -2,15 +2,18 @@
 id: strategy_company
 date: 2026-01-01
 ---
+
 # TaskFlow Strategy 2026
 
 ## Vision
 
-- (vision_1) Become the most loved project management tool for small tech teams by 2028
+- (vision_1) Become the most loved project management tool for small tech teams
+  by 2028
 
 ## Mission
 
-- (mission_1) Make project management simple, fast, and affordable for every team
+- (mission_1) Make project management simple, fast, and affordable for every
+  team
 
 ## Goals
 

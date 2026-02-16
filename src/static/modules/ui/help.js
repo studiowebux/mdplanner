@@ -10,7 +10,8 @@ const PANEL_ID = "helpPanel";
 const VIEW_HELP_CONTENT = {
   summary: {
     title: "Summary",
-    description: "Overview of your project with key metrics and recent activity.",
+    description:
+      "Overview of your project with key metrics and recent activity.",
     tips: [
       "Click on any chart segment to filter tasks",
       "Drag and drop to reorder sections",
@@ -101,7 +102,8 @@ const VIEW_HELP_CONTENT = {
   },
   riskAnalysis: {
     title: "Risk Analysis",
-    description: "Identify and assess project risks with mitigation strategies.",
+    description:
+      "Identify and assess project risks with mitigation strategies.",
     tips: [
       "Plot risks by probability and impact",
       "Define mitigation actions for high risks",
@@ -280,9 +282,18 @@ const GLOBAL_SHORTCUTS = [
 
 // Documentation links
 const DOC_LINKS = [
-  { label: "Getting Started", url: "https://github.com/studiowebux/mdplanner#getting-started" },
-  { label: "Keyboard Shortcuts", url: "https://github.com/studiowebux/mdplanner#keyboard-shortcuts" },
-  { label: "Report an Issue", url: "https://github.com/studiowebux/mdplanner/issues" },
+  {
+    label: "Getting Started",
+    url: "https://github.com/studiowebux/mdplanner#getting-started",
+  },
+  {
+    label: "Keyboard Shortcuts",
+    url: "https://github.com/studiowebux/mdplanner#keyboard-shortcuts",
+  },
+  {
+    label: "Report an Issue",
+    url: "https://github.com/studiowebux/mdplanner/issues",
+  },
 ];
 
 /**
@@ -347,7 +358,8 @@ export class Help {
    * Render help content
    */
   static render() {
-    const content = VIEW_HELP_CONTENT[this.currentView] || VIEW_HELP_CONTENT.summary;
+    const content = VIEW_HELP_CONTENT[this.currentView] ||
+      VIEW_HELP_CONTENT.summary;
 
     // Context section
     const contextSection = document.getElementById("helpContextSection");
@@ -381,18 +393,22 @@ export class Help {
       shortcutsSection.innerHTML = `
         <h4 class="sidenav-section-title">Keyboard Shortcuts</h4>
         <div class="help-shortcuts-grid">
-          ${allShortcuts
-            .map(
-              (s) => `
+          ${
+        allShortcuts
+          .map(
+            (s) => `
             <div class="help-shortcut-row">
               <span class="help-shortcut-keys">
-                ${s.keys.map((k) => `<kbd class="help-kbd">${k}</kbd>`).join(" + ")}
+                ${
+              s.keys.map((k) => `<kbd class="help-kbd">${k}</kbd>`).join(" + ")
+            }
               </span>
               <span class="help-shortcut-action">${s.action}</span>
             </div>
-          `
-            )
-            .join("")}
+          `,
+          )
+          .join("")
+      }
         </div>
       `;
     }
@@ -403,8 +419,9 @@ export class Help {
       docsSection.innerHTML = `
         <h4 class="sidenav-section-title">Documentation</h4>
         <ul class="help-links-list">
-          ${DOC_LINKS.map(
-            (link) => `
+          ${
+        DOC_LINKS.map(
+          (link) => `
             <li>
               <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="help-link">
                 ${link.label}
@@ -413,8 +430,9 @@ export class Help {
                 </svg>
               </a>
             </li>
-          `
-          ).join("")}
+          `,
+        ).join("")
+      }
         </ul>
       `;
     }
@@ -427,7 +445,9 @@ export class Help {
     document.addEventListener("keydown", (e) => {
       // Ignore if typing in an input
       const tagName = e.target.tagName.toLowerCase();
-      if (tagName === "input" || tagName === "textarea" || tagName === "select") {
+      if (
+        tagName === "input" || tagName === "textarea" || tagName === "select"
+      ) {
         return;
       }
 

@@ -1,10 +1,10 @@
 // SWOT Analysis Sidenav Module
 // Slide-in panel for SWOT analysis with inline item management
 
-import { Sidenav } from '../ui/sidenav.js';
-import { SwotAPI } from '../api.js';
-import { showToast } from '../ui/toast.js';
-import { escapeHtml } from '../utils.js';
+import { Sidenav } from "../ui/sidenav.js";
+import { SwotAPI } from "../api.js";
+import { showToast } from "../ui/toast.js";
+import { escapeHtml } from "../utils.js";
 
 export class SwotSidenavModule {
   constructor(taskManager) {
@@ -15,50 +15,70 @@ export class SwotSidenavModule {
   }
 
   bindEvents() {
-    document.getElementById('swotSidenavClose')?.addEventListener('click', () => this.close());
-    document.getElementById('swotSidenavCancel')?.addEventListener('click', () => this.close());
-    document.getElementById('swotSidenavDelete')?.addEventListener('click', () => this.handleDelete());
+    document.getElementById("swotSidenavClose")?.addEventListener(
+      "click",
+      () => this.close(),
+    );
+    document.getElementById("swotSidenavCancel")?.addEventListener(
+      "click",
+      () => this.close(),
+    );
+    document.getElementById("swotSidenavDelete")?.addEventListener(
+      "click",
+      () => this.handleDelete(),
+    );
 
     // Title and date auto-save
-    document.getElementById('swotSidenavTitle')?.addEventListener('input', () => this.scheduleAutoSave());
-    document.getElementById('swotSidenavDate')?.addEventListener('change', () => this.scheduleAutoSave());
+    document.getElementById("swotSidenavTitle")?.addEventListener(
+      "input",
+      () => this.scheduleAutoSave(),
+    );
+    document.getElementById("swotSidenavDate")?.addEventListener(
+      "change",
+      () => this.scheduleAutoSave(),
+    );
 
     // Add item buttons
-    ['strengths', 'weaknesses', 'opportunities', 'threats'].forEach(quadrant => {
-      document.getElementById(`swotSidenav_add_${quadrant}`)?.addEventListener('click', () => {
-        this.showAddItemInput(quadrant);
-      });
-    });
+    ["strengths", "weaknesses", "opportunities", "threats"].forEach(
+      (quadrant) => {
+        document.getElementById(`swotSidenav_add_${quadrant}`)
+          ?.addEventListener("click", () => {
+            this.showAddItemInput(quadrant);
+          });
+      },
+    );
   }
 
   openNew() {
     this.editingSwotId = null;
     this.currentSwot = {
-      title: '',
-      date: new Date().toISOString().split('T')[0],
+      title: "",
+      date: new Date().toISOString().split("T")[0],
       strengths: [],
       weaknesses: [],
       opportunities: [],
-      threats: []
+      threats: [],
     };
 
-    document.getElementById('swotSidenavHeader').textContent = 'New SWOT Analysis';
+    document.getElementById("swotSidenavHeader").textContent =
+      "New SWOT Analysis";
     this.fillForm();
-    document.getElementById('swotSidenavDelete').classList.add('hidden');
-    Sidenav.open('swotSidenav');
+    document.getElementById("swotSidenavDelete").classList.add("hidden");
+    Sidenav.open("swotSidenav");
   }
 
   openEdit(swotId) {
-    const swot = this.tm.swotAnalyses.find(s => s.id === swotId);
+    const swot = this.tm.swotAnalyses.find((s) => s.id === swotId);
     if (!swot) return;
 
     this.editingSwotId = swotId;
     this.currentSwot = JSON.parse(JSON.stringify(swot)); // Deep copy
 
-    document.getElementById('swotSidenavHeader').textContent = 'Edit SWOT Analysis';
+    document.getElementById("swotSidenavHeader").textContent =
+      "Edit SWOT Analysis";
     this.fillForm();
-    document.getElementById('swotSidenavDelete').classList.remove('hidden');
-    Sidenav.open('swotSidenav');
+    document.getElementById("swotSidenavDelete").classList.remove("hidden");
+    Sidenav.open("swotSidenav");
   }
 
   close() {
@@ -66,19 +86,23 @@ export class SwotSidenavModule {
       clearTimeout(this.autoSaveTimeout);
       this.autoSaveTimeout = null;
     }
-    Sidenav.close('swotSidenav');
+    Sidenav.close("swotSidenav");
     this.editingSwotId = null;
     this.currentSwot = null;
   }
 
   fillForm() {
-    document.getElementById('swotSidenavTitle').value = this.currentSwot.title || '';
-    document.getElementById('swotSidenavDate').value = this.currentSwot.date || '';
+    document.getElementById("swotSidenavTitle").value =
+      this.currentSwot.title || "";
+    document.getElementById("swotSidenavDate").value = this.currentSwot.date ||
+      "";
     this.renderAllQuadrants();
   }
 
   renderAllQuadrants() {
-    ['strengths', 'weaknesses', 'opportunities', 'threats'].forEach(q => this.renderQuadrant(q));
+    ["strengths", "weaknesses", "opportunities", "threats"].forEach((q) =>
+      this.renderQuadrant(q)
+    );
   }
 
   renderQuadrant(quadrant) {
@@ -91,7 +115,9 @@ export class SwotSidenavModule {
       ? '<div class="text-gray-400 dark:text-gray-500 text-sm italic py-2">No items yet</div>'
       : items.map((item, idx) => `
         <div class="flex items-start gap-2 py-1 group">
-          <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">${escapeHtml(item)}</span>
+          <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">${
+        escapeHtml(item)
+      }</span>
           <button onclick="taskManager.swotSidenavModule.removeItem('${quadrant}', ${idx})"
                   class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 flex-shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -99,14 +125,14 @@ export class SwotSidenavModule {
             </svg>
           </button>
         </div>
-      `).join('');
+      `).join("");
   }
 
   showAddItemInput(quadrant) {
     const container = document.getElementById(`swotSidenav_${quadrant}`);
-    const existingInput = container.querySelector('.swot-add-input');
+    const existingInput = container.querySelector(".swot-add-input");
     if (existingInput) {
-      existingInput.querySelector('input').focus();
+      existingInput.querySelector("input").focus();
       return;
     }
 
@@ -118,12 +144,12 @@ export class SwotSidenavModule {
         <button type="button" class="px-2 py-1 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Cancel</button>
       </div>
     `;
-    container.insertAdjacentHTML('beforeend', inputHtml);
+    container.insertAdjacentHTML("beforeend", inputHtml);
 
-    const inputWrapper = container.querySelector('.swot-add-input');
-    const input = inputWrapper.querySelector('input');
-    const addBtn = inputWrapper.querySelectorAll('button')[0];
-    const cancelBtn = inputWrapper.querySelectorAll('button')[1];
+    const inputWrapper = container.querySelector(".swot-add-input");
+    const input = inputWrapper.querySelector("input");
+    const addBtn = inputWrapper.querySelectorAll("button")[0];
+    const cancelBtn = inputWrapper.querySelectorAll("button")[1];
 
     const addItem = () => {
       const text = input.value.trim();
@@ -135,12 +161,12 @@ export class SwotSidenavModule {
       inputWrapper.remove();
     };
 
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') addItem();
-      if (e.key === 'Escape') inputWrapper.remove();
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") addItem();
+      if (e.key === "Escape") inputWrapper.remove();
     });
-    addBtn.addEventListener('click', addItem);
-    cancelBtn.addEventListener('click', () => inputWrapper.remove());
+    addBtn.addEventListener("click", addItem);
+    cancelBtn.addEventListener("click", () => inputWrapper.remove());
     input.focus();
   }
 
@@ -152,72 +178,81 @@ export class SwotSidenavModule {
 
   scheduleAutoSave() {
     if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus('Saving...');
+    this.showSaveStatus("Saving...");
     this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {
-    this.currentSwot.title = document.getElementById('swotSidenavTitle').value.trim();
-    this.currentSwot.date = document.getElementById('swotSidenavDate').value;
+    this.currentSwot.title = document.getElementById("swotSidenavTitle").value
+      .trim();
+    this.currentSwot.date = document.getElementById("swotSidenavDate").value;
 
     if (!this.currentSwot.title) {
-      this.showSaveStatus('Title required');
+      this.showSaveStatus("Title required");
       return;
     }
 
     try {
       if (this.editingSwotId) {
         await SwotAPI.update(this.editingSwotId, this.currentSwot);
-        this.showSaveStatus('Saved');
+        this.showSaveStatus("Saved");
       } else {
         const response = await SwotAPI.create(this.currentSwot);
         const result = await response.json();
         this.editingSwotId = result.id;
         this.currentSwot.id = result.id;
-        this.showSaveStatus('Created');
-        document.getElementById('swotSidenavHeader').textContent = 'Edit SWOT Analysis';
-        document.getElementById('swotSidenavDelete').classList.remove('hidden');
+        this.showSaveStatus("Created");
+        document.getElementById("swotSidenavHeader").textContent =
+          "Edit SWOT Analysis";
+        document.getElementById("swotSidenavDelete").classList.remove("hidden");
       }
       await this.tm.swotModule.load();
     } catch (error) {
-      console.error('Error saving SWOT:', error);
-      this.showSaveStatus('Error');
-      showToast('Error saving SWOT analysis', 'error');
+      console.error("Error saving SWOT:", error);
+      this.showSaveStatus("Error");
+      showToast("Error saving SWOT analysis", "error");
     }
   }
 
   async handleDelete() {
     if (!this.editingSwotId) return;
-    if (!confirm(`Delete "${this.currentSwot.title}"? This cannot be undone.`)) return;
+    if (
+      !confirm(`Delete "${this.currentSwot.title}"? This cannot be undone.`)
+    ) return;
 
     try {
       await SwotAPI.delete(this.editingSwotId);
-      showToast('SWOT analysis deleted', 'success');
+      showToast("SWOT analysis deleted", "success");
       await this.tm.swotModule.load();
       this.close();
     } catch (error) {
-      console.error('Error deleting SWOT:', error);
-      showToast('Error deleting SWOT analysis', 'error');
+      console.error("Error deleting SWOT:", error);
+      showToast("Error deleting SWOT analysis", "error");
     }
   }
 
   showSaveStatus(text) {
-    const statusEl = document.getElementById('swotSidenavSaveStatus');
+    const statusEl = document.getElementById("swotSidenavSaveStatus");
     if (!statusEl) return;
 
     statusEl.textContent = text;
-    statusEl.classList.remove('hidden', 'text-green-600', 'text-red-500', 'text-gray-500');
+    statusEl.classList.remove(
+      "hidden",
+      "text-green-600",
+      "text-red-500",
+      "text-gray-500",
+    );
 
-    if (text === 'Saved' || text === 'Created') {
-      statusEl.classList.add('text-green-600', 'dark:text-green-400');
-    } else if (text === 'Error' || text === 'Title required') {
-      statusEl.classList.add('text-red-500');
+    if (text === "Saved" || text === "Created") {
+      statusEl.classList.add("text-green-600", "dark:text-green-400");
+    } else if (text === "Error" || text === "Title required") {
+      statusEl.classList.add("text-red-500");
     } else {
-      statusEl.classList.add('text-gray-500', 'dark:text-gray-400');
+      statusEl.classList.add("text-gray-500", "dark:text-gray-400");
     }
 
-    if (text === 'Saved' || text === 'Created' || text === 'Error') {
-      setTimeout(() => statusEl.classList.add('hidden'), 2000);
+    if (text === "Saved" || text === "Created" || text === "Error") {
+      setTimeout(() => statusEl.classList.add("hidden"), 2000);
     }
   }
 }

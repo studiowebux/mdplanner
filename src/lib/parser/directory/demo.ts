@@ -28,7 +28,7 @@ async function main() {
   const note = await parser.addNote(
     "Project Overview",
     "This is a demo project to test the directory-based parser.\n\nIt stores each item in a separate markdown file.",
-    "simple"
+    "simple",
   );
   console.log(`   Created: ${DEMO_DIR}/notes/${note.id}.md`);
   console.log(`   Title: ${note.title}`);
@@ -53,14 +53,14 @@ async function main() {
     "Implement CanvasDirectoryParser",
     "Todo",
     { priority: 1, effort: 3, tag: ["Backend", "Parser"] },
-    ["Create parser for sticky notes", "Support position and color"]
+    ["Create parser for sticky notes", "Support position and color"],
   );
   console.log(`   Created: ${DEMO_DIR}/board/todo/${task1.id}.md`);
 
   const task2 = await parser.addTask(
     "Implement MindmapsDirectoryParser",
     "Todo",
-    { priority: 2, effort: 4, tag: ["Backend", "Parser"] }
+    { priority: 2, effort: 4, tag: ["Backend", "Parser"] },
   );
   console.log(`   Created: ${DEMO_DIR}/board/todo/${task2.id}.md`);
 
@@ -68,7 +68,7 @@ async function main() {
     "Write unit tests",
     "In Progress",
     { priority: 1, effort: 2, tag: ["Testing"] },
-    ["Test YAML frontmatter parsing", "Test each parser"]
+    ["Test YAML frontmatter parsing", "Test each parser"],
   );
   console.log(`   Created: ${DEMO_DIR}/board/in_progress/${task3.id}.md`);
 
@@ -106,7 +106,7 @@ async function main() {
   const sticky1 = await parser.addStickyNote(
     "Remember to update docs",
     "yellow",
-    { x: 100, y: 50 }
+    { x: 100, y: 50 },
   );
   console.log(`   Created: ${DEMO_DIR}/canvas/${sticky1.id}.md`);
 
@@ -114,7 +114,7 @@ async function main() {
     "Bug: Fix login issue",
     "pink",
     { x: 300, y: 50 },
-    { width: 200, height: 150 }
+    { width: 200, height: 150 },
   );
   console.log(`   Created: ${DEMO_DIR}/canvas/${sticky2.id}.md`);
 

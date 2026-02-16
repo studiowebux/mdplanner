@@ -63,7 +63,13 @@ export const ThemeManager = {
         "py-4",
         "sm:py-8",
       );
-      main.classList.remove("w-full", "h-screen", "p-2", "pb-16", "overflow-auto");
+      main.classList.remove(
+        "w-full",
+        "h-screen",
+        "p-2",
+        "pb-16",
+        "overflow-auto",
+      );
 
       // Restore body
       body.classList.remove("h-screen", "overflow-hidden");
@@ -111,5 +117,5 @@ export const ThemeManager = {
       // Apply fullscreen mode after DOM is ready
       setTimeout(() => this.applyFullscreenMode(), 0);
     }
-  }
+  },
 };

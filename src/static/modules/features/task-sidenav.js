@@ -1,9 +1,9 @@
 // Task Sidenav Module
 // Handles task creation/editing via slide-in panel
 
-import { Sidenav } from '../ui/sidenav.js';
-import { TasksAPI } from '../api.js';
-import { showToast } from '../ui/toast.js';
+import { Sidenav } from "../ui/sidenav.js";
+import { TasksAPI } from "../api.js";
+import { showToast } from "../ui/toast.js";
 
 export class TaskSidenavModule {
   constructor(taskManager) {
@@ -14,20 +14,29 @@ export class TaskSidenavModule {
 
   bindEvents() {
     // Close button
-    document.getElementById("sidenavTaskClose")?.addEventListener("click", () => {
-      this.close();
-    });
+    document.getElementById("sidenavTaskClose")?.addEventListener(
+      "click",
+      () => {
+        this.close();
+      },
+    );
 
     // Cancel button
-    document.getElementById("sidenavTaskCancel")?.addEventListener("click", () => {
-      this.close();
-    });
+    document.getElementById("sidenavTaskCancel")?.addEventListener(
+      "click",
+      () => {
+        this.close();
+      },
+    );
 
     // Form submit
-    document.getElementById("sidenavTaskForm")?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      await this.handleSubmit();
-    });
+    document.getElementById("sidenavTaskForm")?.addEventListener(
+      "submit",
+      async (e) => {
+        e.preventDefault();
+        await this.handleSubmit();
+      },
+    );
   }
 
   open(task = null, parentTaskId = null) {
@@ -62,7 +71,7 @@ export class TaskSidenavModule {
     // Sections
     const sectionSelect = document.getElementById("sidenavTaskSection");
     if (sectionSelect && this.tm.sections) {
-      sectionSelect.innerHTML = this.tm.sections.map(s =>
+      sectionSelect.innerHTML = this.tm.sections.map((s) =>
         `<option value="${s}">${s}</option>`
       ).join("");
     }
@@ -71,7 +80,7 @@ export class TaskSidenavModule {
     const assigneeSelect = document.getElementById("sidenavTaskAssignee");
     if (assigneeSelect && this.tm.projectConfig?.assignees) {
       assigneeSelect.innerHTML = `<option value="">Unassigned</option>` +
-        this.tm.projectConfig.assignees.map(a =>
+        this.tm.projectConfig.assignees.map((a) =>
           `<option value="${a}">${a}</option>`
         ).join("");
     }
@@ -79,7 +88,7 @@ export class TaskSidenavModule {
     // Tags
     const tagsSelect = document.getElementById("sidenavTaskTags");
     if (tagsSelect && this.tm.projectConfig?.tags) {
-      tagsSelect.innerHTML = this.tm.projectConfig.tags.map(t =>
+      tagsSelect.innerHTML = this.tm.projectConfig.tags.map((t) =>
         `<option value="${t}">${t}</option>`
       ).join("");
     }
@@ -113,7 +122,7 @@ export class TaskSidenavModule {
     const tagsSelect = document.getElementById("sidenavTaskTags");
     if (tagsSelect && task.tag) {
       const tags = Array.isArray(task.tag) ? task.tag : [task.tag];
-      Array.from(tagsSelect.options).forEach(opt => {
+      Array.from(tagsSelect.options).forEach((opt) => {
         opt.selected = tags.includes(opt.value);
       });
     }
@@ -137,16 +146,20 @@ export class TaskSidenavModule {
     const getSelectedValues = (id) => {
       const el = document.getElementById(id);
       if (!el) return [];
-      return Array.from(el.selectedOptions).map(o => o.value);
+      return Array.from(el.selectedOptions).map((o) => o.value);
     };
 
     const taskData = {
       title: getValue("sidenavTaskTitleInput"),
       description: getValue("sidenavTaskDescription"),
       section: getValue("sidenavTaskSection"),
-      priority: getValue("sidenavTaskPriority") ? parseInt(getValue("sidenavTaskPriority")) : null,
+      priority: getValue("sidenavTaskPriority")
+        ? parseInt(getValue("sidenavTaskPriority"))
+        : null,
       assignee: getValue("sidenavTaskAssignee"),
-      effort: getValue("sidenavTaskEffort") ? parseInt(getValue("sidenavTaskEffort")) : null,
+      effort: getValue("sidenavTaskEffort")
+        ? parseInt(getValue("sidenavTaskEffort"))
+        : null,
       due_date: getValue("sidenavTaskDueDate") || null,
       planned_start: getValue("sidenavTaskPlannedStart") || null,
       planned_end: getValue("sidenavTaskPlannedEnd") || null,

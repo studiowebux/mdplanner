@@ -155,7 +155,9 @@ export class RiskModule {
 
   editSelected() {
     if (this.taskManager.selectedRiskId) {
-      this.taskManager.riskSidenavModule.openEdit(this.taskManager.selectedRiskId);
+      this.taskManager.riskSidenavModule.openEdit(
+        this.taskManager.selectedRiskId,
+      );
     }
   }
 
@@ -246,13 +248,18 @@ export class RiskModule {
       .getElementById("riskAnalysisViewBtn")
       .addEventListener("click", () => {
         this.taskManager.switchView("riskAnalysis");
-        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+        document.getElementById("viewSelectorDropdown")?.classList.add(
+          "hidden",
+        );
       });
 
     // Add Risk Analysis button - opens sidenav
     document
       .getElementById("addRiskAnalysisBtn")
-      .addEventListener("click", () => this.taskManager.riskSidenavModule.openNew());
+      .addEventListener(
+        "click",
+        () => this.taskManager.riskSidenavModule.openNew(),
+      );
 
     // Cancel Risk Analysis modal
     document
@@ -286,20 +293,29 @@ export class RiskModule {
       .addEventListener("submit", (e) => this.saveItem(e));
 
     // Add buttons for each quadrant
-    document.querySelectorAll(".risk-add-btn").forEach(btn => {
-      btn.addEventListener("click", () => this.openItemModal(btn.dataset.quadrant));
+    document.querySelectorAll(".risk-add-btn").forEach((btn) => {
+      btn.addEventListener(
+        "click",
+        () => this.openItemModal(btn.dataset.quadrant),
+      );
     });
 
     // Close modals on background click
-    document.getElementById("riskAnalysisModal").addEventListener("click", (e) => {
-      if (e.target.id === "riskAnalysisModal") {
-        this.closeModal();
-      }
-    });
-    document.getElementById("riskAnalysisItemModal").addEventListener("click", (e) => {
-      if (e.target.id === "riskAnalysisItemModal") {
-        this.closeItemModal();
-      }
-    });
+    document.getElementById("riskAnalysisModal").addEventListener(
+      "click",
+      (e) => {
+        if (e.target.id === "riskAnalysisModal") {
+          this.closeModal();
+        }
+      },
+    );
+    document.getElementById("riskAnalysisItemModal").addEventListener(
+      "click",
+      (e) => {
+        if (e.target.id === "riskAnalysisItemModal") {
+          this.closeItemModal();
+        }
+      },
+    );
   }
 }

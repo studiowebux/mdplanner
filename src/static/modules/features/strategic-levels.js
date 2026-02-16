@@ -1,4 +1,4 @@
-import { StrategicLevelsAPI, MilestonesAPI } from "../api.js";
+import { MilestonesAPI, StrategicLevelsAPI } from "../api.js";
 import { escapeHtml } from "../utils.js";
 
 /**
@@ -12,8 +12,8 @@ export class StrategicLevelsModule {
 
   async load() {
     try {
-      this.taskManager.strategicLevelsBuilders =
-        await StrategicLevelsAPI.fetchAll();
+      this.taskManager.strategicLevelsBuilders = await StrategicLevelsAPI
+        .fetchAll();
       this.renderSelector();
       if (
         this.taskManager.strategicLevelsBuilders.length > 0 &&
@@ -38,8 +38,9 @@ export class StrategicLevelsModule {
       const option = document.createElement("option");
       option.value = builder.id;
       option.textContent = builder.title;
-      if (builder.id === this.taskManager.selectedStrategicBuilderId)
+      if (builder.id === this.taskManager.selectedStrategicBuilderId) {
         option.selected = true;
+      }
       selector.appendChild(option);
     });
   }
@@ -156,23 +157,49 @@ export class StrategicLevelsModule {
 
     const progress = this.calculateProgress(node, allLevels);
     const childLevelType = this.getChildLevelType(node.level);
-    const linkedCount =
-      (node.linkedTasks?.length || 0) + (node.linkedMilestones?.length || 0);
+    const linkedCount = (node.linkedTasks?.length || 0) +
+      (node.linkedMilestones?.length || 0);
     const hasChildren = node.children && node.children.length > 0;
 
     let html = `
       <div class="strategic-tree-node" style="margin-left: ${depth * 24}px;">
-        ${depth > 0 ? `<div class="strategic-tree-connector">${isLast ? "\u2514" : "\u251C"}\u2500</div>` : ""}
-        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border-l-4 ${levelColors[node.level]} border border-gray-200 dark:border-gray-600 mb-2">
+        ${
+      depth > 0
+        ? `<div class="strategic-tree-connector">${
+          isLast ? "\u2514" : "\u251C"
+        }\u2500</div>`
+        : ""
+    }
+        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border-l-4 ${
+      levelColors[node.level]
+    } border border-gray-200 dark:border-gray-600 mb-2">
           <div class="flex items-start justify-between">
             <div class="flex-1">
               <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300">${levelLabels[node.level]}</span>
-                <span class="font-medium text-gray-900 dark:text-gray-100">${escapeHtml(node.title)}</span>
-                <span class="text-xs text-gray-500 dark:text-gray-400">(${Math.round(progress)}%)</span>
+                <span class="text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300">${
+      levelLabels[node.level]
+    }</span>
+                <span class="font-medium text-gray-900 dark:text-gray-100">${
+      escapeHtml(node.title)
+    }</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">(${
+      Math.round(progress)
+    }%)</span>
               </div>
-              ${node.description ? `<p class="text-sm text-gray-600 dark:text-gray-400 mt-1">${escapeHtml(node.description)}</p>` : ""}
-              ${linkedCount > 0 ? `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Linked: ${node.linkedTasks?.length || 0} tasks, ${node.linkedMilestones?.length || 0} milestones</div>` : ""}
+              ${
+      node.description
+        ? `<p class="text-sm text-gray-600 dark:text-gray-400 mt-1">${
+          escapeHtml(node.description)
+        }</p>`
+        : ""
+    }
+              ${
+      linkedCount > 0
+        ? `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Linked: ${
+          node.linkedTasks?.length || 0
+        } tasks, ${node.linkedMilestones?.length || 0} milestones</div>`
+        : ""
+    }
               <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1.5 mt-2">
                 <div class="bg-gray-900 dark:bg-gray-100 h-1.5 rounded-full" style="width: ${progress}%"></div>
               </div>
@@ -185,13 +212,15 @@ export class StrategicLevelsModule {
               <button onclick="taskManager.openStrategicLinkModal('${node.id}')"
                       class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600">Link</button>
               ${
-                childLevelType
-                  ? `
+      childLevelType
+        ? `
               <button onclick="taskManager.openStrategicLevelModal('${childLevelType}', null, '${node.id}')"
-                      class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600">+ ${levelLabels[childLevelType]}</button>
+                      class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600">+ ${
+          levelLabels[childLevelType]
+        }</button>
               `
-                  : ""
-              }
+        : ""
+    }
             </div>
           </div>
         </div>
@@ -201,7 +230,13 @@ export class StrategicLevelsModule {
     if (hasChildren) {
       node.children.forEach((child, idx) => {
         const childIsLast = idx === node.children.length - 1;
-        html += this.renderNode(child, allLevels, depth + 1, childIsLast, prefix);
+        html += this.renderNode(
+          child,
+          allLevels,
+          depth + 1,
+          childIsLast,
+          prefix,
+        );
       });
     }
 
@@ -278,7 +313,9 @@ export class StrategicLevelsModule {
 
       html += `
         <div class="pyramid-row ${pyramidWidths[levelType]} mx-auto mb-3">
-          <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 text-center">${levelLabels[levelType]}</div>
+          <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 text-center">${
+        levelLabels[levelType]
+      }</div>
           <div class="flex flex-wrap justify-center gap-2">
       `;
 
@@ -289,8 +326,12 @@ export class StrategicLevelsModule {
         html += `
           <div class="pyramid-card bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 flex-1 min-w-[140px] max-w-[200px]">
             <div class="text-center">
-              <div class="font-medium text-gray-900 dark:text-gray-100 text-sm truncate" title="${escapeHtml(level.title)}">${escapeHtml(level.title)}</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">${Math.round(progress)}%</div>
+              <div class="font-medium text-gray-900 dark:text-gray-100 text-sm truncate" title="${
+          escapeHtml(level.title)
+        }">${escapeHtml(level.title)}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">${
+          Math.round(progress)
+        }%</div>
               <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1 mt-2">
                 <div class="bg-gray-900 dark:bg-gray-100 h-1 rounded-full" style="width: ${progress}%"></div>
               </div>
@@ -300,13 +341,13 @@ export class StrategicLevelsModule {
                 <button onclick="taskManager.openStrategicLinkModal('${level.id}')"
                         class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Link</button>
                 ${
-                  childLevelType
-                    ? `
+          childLevelType
+            ? `
                 <button onclick="taskManager.openStrategicLevelModal('${childLevelType}', null, '${level.id}')"
                         class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">+</button>
                 `
-                    : ""
-                }
+            : ""
+        }
               </div>
             </div>
           </div>
@@ -373,10 +414,10 @@ export class StrategicLevelsModule {
     if (children.length === 0) return directProgress * 100;
 
     const childrenProgress = children.map((c) =>
-      this.calculateProgress(c, allLevels),
+      this.calculateProgress(c, allLevels)
     );
-    const avgChildProgress =
-      childrenProgress.reduce((a, b) => a + b, 0) / children.length;
+    const avgChildProgress = childrenProgress.reduce((a, b) => a + b, 0) /
+      children.length;
 
     // Combine direct + children (weighted if both exist)
     if (directCount > 0 && children.length > 0) {
@@ -419,7 +460,9 @@ export class StrategicLevelsModule {
 
   editBuilder() {
     if (!this.taskManager.selectedStrategicBuilderId) return;
-    this.taskManager.strategicLevelsSidenavModule?.openEditBuilder(this.taskManager.selectedStrategicBuilderId);
+    this.taskManager.strategicLevelsSidenavModule?.openEditBuilder(
+      this.taskManager.selectedStrategicBuilderId,
+    );
   }
 
   async deleteBuilder() {
@@ -442,7 +485,10 @@ export class StrategicLevelsModule {
     if (editId) {
       this.taskManager.strategicLevelsSidenavModule?.openEditLevel(editId);
     } else {
-      this.taskManager.strategicLevelsSidenavModule?.openNewLevel(levelType, parentId);
+      this.taskManager.strategicLevelsSidenavModule?.openNewLevel(
+        levelType,
+        parentId,
+      );
     }
   }
 
@@ -495,38 +541,40 @@ export class StrategicLevelsModule {
 
     // Render task checkboxes
     const allTasks = this.flattenTasks(this.taskManager.tasks);
-    tasksContainer.innerHTML =
-      allTasks.length > 0
-        ? allTasks
-            .map(
-              (task) => `
+    tasksContainer.innerHTML = allTasks.length > 0
+      ? allTasks
+        .map(
+          (task) => `
       <label class="flex items-center gap-2 p-1 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
         <input type="checkbox" class="strategic-link-task rounded" value="${task.id}"
                ${level?.linkedTasks?.includes(task.id) ? "checked" : ""}>
-        <span class="text-sm text-gray-700 dark:text-gray-300 ${task.completed ? "line-through" : ""}">${escapeHtml(task.title)}</span>
+        <span class="text-sm text-gray-700 dark:text-gray-300 ${
+            task.completed ? "line-through" : ""
+          }">${escapeHtml(task.title)}</span>
       </label>
     `,
-            )
-            .join("")
-        : '<p class="text-sm text-gray-500 dark:text-gray-400 p-2">No tasks available</p>';
+        )
+        .join("")
+      : '<p class="text-sm text-gray-500 dark:text-gray-400 p-2">No tasks available</p>';
 
     // Render milestone checkboxes
     try {
       const milestones = await MilestonesAPI.fetchAll();
-      milestonesContainer.innerHTML =
-        milestones.length > 0
-          ? milestones
-              .map(
-                (m) => `
+      milestonesContainer.innerHTML = milestones.length > 0
+        ? milestones
+          .map(
+            (m) => `
         <label class="flex items-center gap-2 p-1 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
           <input type="checkbox" class="strategic-link-milestone rounded" value="${m.id}"
                  ${level?.linkedMilestones?.includes(m.id) ? "checked" : ""}>
-          <span class="text-sm text-gray-700 dark:text-gray-300">${escapeHtml(m.name)}</span>
+          <span class="text-sm text-gray-700 dark:text-gray-300">${
+              escapeHtml(m.name)
+            }</span>
         </label>
       `,
-              )
-              .join("")
-          : '<p class="text-sm text-gray-500 dark:text-gray-400 p-2">No milestones available</p>';
+          )
+          .join("")
+        : '<p class="text-sm text-gray-500 dark:text-gray-400 p-2">No milestones available</p>';
     } catch (error) {
       milestonesContainer.innerHTML =
         '<p class="text-sm text-gray-500 dark:text-gray-400 p-2">Error loading milestones</p>';
@@ -577,7 +625,9 @@ export class StrategicLevelsModule {
       .getElementById("strategicLevelsViewBtn")
       ?.addEventListener("click", () => {
         this.taskManager.switchView("strategicLevels");
-        document.getElementById("viewSelectorDropdown")?.classList.add("hidden");
+        document.getElementById("viewSelectorDropdown")?.classList.add(
+          "hidden",
+        );
       });
 
     // Builder modal events
@@ -619,20 +669,29 @@ export class StrategicLevelsModule {
       ?.addEventListener("click", () => this.saveLinks());
 
     // Close modals on background click
-    document.getElementById("strategicLevelsModal")?.addEventListener("click", (e) => {
-      if (e.target.id === "strategicLevelsModal") {
-        this.closeBuilderModal();
-      }
-    });
-    document.getElementById("strategicLevelModal")?.addEventListener("click", (e) => {
-      if (e.target.id === "strategicLevelModal") {
-        this.closeLevelModal();
-      }
-    });
-    document.getElementById("strategicLinkModal")?.addEventListener("click", (e) => {
-      if (e.target.id === "strategicLinkModal") {
-        this.closeLinkModal();
-      }
-    });
+    document.getElementById("strategicLevelsModal")?.addEventListener(
+      "click",
+      (e) => {
+        if (e.target.id === "strategicLevelsModal") {
+          this.closeBuilderModal();
+        }
+      },
+    );
+    document.getElementById("strategicLevelModal")?.addEventListener(
+      "click",
+      (e) => {
+        if (e.target.id === "strategicLevelModal") {
+          this.closeLevelModal();
+        }
+      },
+    );
+    document.getElementById("strategicLinkModal")?.addEventListener(
+      "click",
+      (e) => {
+        if (e.target.id === "strategicLinkModal") {
+          this.closeLinkModal();
+        }
+      },
+    );
   }
 }

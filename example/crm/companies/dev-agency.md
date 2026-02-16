@@ -16,6 +16,7 @@ address:
 Development agency managing multiple client projects.
 
 ## Notes
+
 - Needs multi-project support
 - Time tracking is key feature
 - May refer other agencies

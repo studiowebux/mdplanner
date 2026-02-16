@@ -13,41 +13,51 @@ function setupTestData(db: CacheDatabase): void {
   // Insert test tasks
   db.execute(
     "INSERT INTO tasks (id, title, description, section) VALUES (?, ?, ?, ?)",
-    ["task-1", "Fix login bug", "Users cannot login with special characters", "todo"]
+    [
+      "task-1",
+      "Fix login bug",
+      "Users cannot login with special characters",
+      "todo",
+    ],
   );
   db.execute(
     "INSERT INTO tasks (id, title, description, section) VALUES (?, ?, ?, ?)",
-    ["task-2", "Add user profile", "Create user profile page", "in_progress"]
+    ["task-2", "Add user profile", "Create user profile page", "in_progress"],
   );
   db.execute(
     "INSERT INTO tasks (id, title, description, section) VALUES (?, ?, ?, ?)",
-    ["task-3", "Update documentation", "Refresh the API docs", "done"]
+    ["task-3", "Update documentation", "Refresh the API docs", "done"],
   );
 
   // Insert test notes
   db.execute(
     "INSERT INTO notes (id, title, content, mode) VALUES (?, ?, ?, ?)",
-    ["note-1", "Meeting Notes", "Discussed login issues and user feedback", "simple"]
+    [
+      "note-1",
+      "Meeting Notes",
+      "Discussed login issues and user feedback",
+      "simple",
+    ],
   );
   db.execute(
     "INSERT INTO notes (id, title, content, mode) VALUES (?, ?, ?, ?)",
-    ["note-2", "Architecture Decision", "Using SQLite for caching", "enhanced"]
+    ["note-2", "Architecture Decision", "Using SQLite for caching", "enhanced"],
   );
 
   // Insert test goals
   db.execute(
     "INSERT INTO goals (id, title, description, status) VALUES (?, ?, ?, ?)",
-    ["goal-1", "Improve Performance", "Reduce page load time by 50%", "active"]
+    ["goal-1", "Improve Performance", "Reduce page load time by 50%", "active"],
   );
 
   // Insert test ideas
   db.execute(
     "INSERT INTO ideas (id, title, description, status) VALUES (?, ?, ?, ?)",
-    ["idea-1", "Mobile App", "Create a mobile version of the app", "new"]
+    ["idea-1", "Mobile App", "Create a mobile version of the app", "new"],
   );
   db.execute(
     "INSERT INTO ideas (id, title, description, status) VALUES (?, ?, ?, ?)",
-    ["idea-2", "Dark Mode", "Add dark mode support for better UX", "approved"]
+    ["idea-2", "Dark Mode", "Add dark mode support for better UX", "approved"],
   );
 }
 
@@ -61,7 +71,9 @@ Deno.test("SearchEngine - search returns matching tasks", () => {
 
   assertEquals(results.length >= 1, true);
 
-  const taskResult = results.find((r) => r.type === "task" && r.id === "task-1");
+  const taskResult = results.find((r) =>
+    r.type === "task" && r.id === "task-1"
+  );
   assertExists(taskResult);
   assertEquals(taskResult!.title, "Fix login bug");
 
@@ -236,7 +248,7 @@ Deno.test("SearchEngine - search handles special characters", () => {
   // Insert data with special characters
   db.execute(
     "INSERT INTO tasks (id, title, description) VALUES (?, ?, ?)",
-    ["task-special", "Fix C++ compiler", "Handle <template> syntax"]
+    ["task-special", "Fix C++ compiler", "Handle <template> syntax"],
   );
 
   const search = new SearchEngine(db);

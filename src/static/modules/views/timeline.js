@@ -1,5 +1,5 @@
 // Timeline View Module
-import { getTaskBarColors } from '../constants.js';
+import { getTaskBarColors } from "../constants.js";
 
 /**
  * Gantt chart view - task scheduling based on effort and dependencies
@@ -66,11 +66,13 @@ export class TimelineView {
       html +=
         '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"></path>';
       html += "</svg>";
-      html += `<span class="text-sm font-medium text-yellow-800 dark:text-yellow-200">${tasksWithoutEffort.length} task${tasksWithoutEffort.length !== 1 ? "s" : ""} without effort estimates (not shown in timeline)</span>`;
+      html +=
+        `<span class="text-sm font-medium text-yellow-800 dark:text-yellow-200">${tasksWithoutEffort.length} task${
+          tasksWithoutEffort.length !== 1 ? "s" : ""
+        } without effort estimates (not shown in timeline)</span>`;
       html += "</div>";
       html += '<div class="mt-2 text-xs text-yellow-700 dark:text-yellow-300">';
-      html +=
-        "Tasks missing effort: " +
+      html += "Tasks missing effort: " +
         tasksWithoutEffort.map((t) => `${t.title} (${t.id})`).join(", ");
       html += "</div>";
       html += "</div>";
@@ -81,9 +83,14 @@ export class TimelineView {
         '<div class="text-center text-gray-500 dark:text-gray-400 py-8">No tasks with effort estimates found</div>';
     } else {
       // Calculate chart width for consistent header/rows alignment
-      const projectStart = new Date(Math.min(...scheduledTasks.map((t) => t.startDate)));
-      const projectEnd = new Date(Math.max(...scheduledTasks.map((t) => t.endDate)));
-      const totalDays = Math.ceil((projectEnd - projectStart) / (1000 * 60 * 60 * 24)) + 1;
+      const projectStart = new Date(
+        Math.min(...scheduledTasks.map((t) => t.startDate)),
+      );
+      const projectEnd = new Date(
+        Math.max(...scheduledTasks.map((t) => t.endDate)),
+      );
+      const totalDays =
+        Math.ceil((projectEnd - projectStart) / (1000 * 60 * 60 * 24)) + 1;
       const pixelsPerDay = 40;
       const chartWidth = Math.max(800, totalDays * pixelsPerDay);
 
@@ -91,7 +98,7 @@ export class TimelineView {
       html += `<div style="min-width: ${chartWidth}px">`;
       html += this.generateHeader(scheduledTasks);
       html += this.generateRows(scheduledTasks, chartWidth);
-      html += '</div>';
+      html += "</div>";
     }
 
     html += "</div>";
@@ -276,8 +283,9 @@ export class TimelineView {
 
         // If same start date, put dependencies before dependents
         if (a.config.blocked_by && a.config.blocked_by.includes(b.id)) return 1;
-        if (b.config.blocked_by && b.config.blocked_by.includes(a.id))
+        if (b.config.blocked_by && b.config.blocked_by.includes(a.id)) {
           return -1;
+        }
 
         return 0;
       });
@@ -354,7 +362,7 @@ export class TimelineView {
     const totalDays =
       Math.ceil((projectEnd - projectStart) / (1000 * 60 * 60 * 24)) + 1;
 
-    let html = '';
+    let html = "";
 
     scheduledTasks.forEach((task) => {
       const startOffset = Math.ceil(
@@ -366,15 +374,18 @@ export class TimelineView {
       const leftPercent = (startOffset / totalDays) * 100;
 
       // Check if task is overdue
-      const isOverdue =
-        task.config.due_date && task.endDate > new Date(task.config.due_date);
+      const isOverdue = task.config.due_date &&
+        task.endDate > new Date(task.config.due_date);
       const barColors = getTaskBarColors(task.config.priority, isOverdue);
 
       html +=
         '<div class="flex border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">';
-      html += `<div class="w-48 p-3 border-r border-gray-200 dark:border-gray-700">`;
-      html += `<div class="font-medium text-gray-900 dark:text-gray-100 text-sm">${task.title}</div>`;
-      html += `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">ID: ${task.id}</div>`;
+      html +=
+        `<div class="w-48 p-3 border-r border-gray-200 dark:border-gray-700">`;
+      html +=
+        `<div class="font-medium text-gray-900 dark:text-gray-100 text-sm">${task.title}</div>`;
+      html +=
+        `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">ID: ${task.id}</div>`;
       html += `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">`;
       html += `${task.config.effort} days • ${task.section}`;
       if (task.config.due_date) {
@@ -382,7 +393,8 @@ export class TimelineView {
         const isOverdue = task.endDate > dueDate;
         html += ` • Due: ${dueDate.toLocaleDateString()}`;
         if (isOverdue) {
-          html += ` <span class="text-red-600 dark:text-red-400 font-medium inline-flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> OVERDUE</span>`;
+          html +=
+            ` <span class="text-red-600 dark:text-red-400 font-medium inline-flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> OVERDUE</span>`;
         }
       }
       if (task.config.blocked_by && task.config.blocked_by.length > 0) {
@@ -405,21 +417,29 @@ export class TimelineView {
             // Draw arrow from dependency end to task start
             const arrowLength = leftPercent - depEndPercent;
             if (arrowLength > 0) {
-              html += `<div class="absolute h-0.5 bg-red-400 dark:bg-red-500" style="left: ${depEndPercent}%; width: ${arrowLength}%; top: 50%; z-index: 10;">`;
-              html += `<div class="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1">`;
-              html += `<svg class="w-3 h-3 text-red-400 dark:text-red-500" fill="currentColor" viewBox="0 0 20 20">`;
-              html += `<path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>`;
+              html +=
+                `<div class="absolute h-0.5 bg-red-400 dark:bg-red-500" style="left: ${depEndPercent}%; width: ${arrowLength}%; top: 50%; z-index: 10;">`;
+              html +=
+                `<div class="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1">`;
+              html +=
+                `<svg class="w-3 h-3 text-red-400 dark:text-red-500" fill="currentColor" viewBox="0 0 20 20">`;
+              html +=
+                `<path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>`;
               html += `</svg>`;
               html += `</div>`;
-              html += `<div class="absolute left-1/2 -top-5 transform -translate-x-1/2 text-xs text-red-600 dark:text-red-400 font-medium">${depId}</div>`;
+              html +=
+                `<div class="absolute left-1/2 -top-5 transform -translate-x-1/2 text-xs text-red-600 dark:text-red-400 font-medium">${depId}</div>`;
               html += `</div>`;
             }
           }
         });
       }
 
-      html += `<div class="absolute h-6 rounded${isOverdue ? " animate-pulse" : ""}" style="left: ${leftPercent}%; width: ${widthPercent}%; top: 50%; transform: translateY(-50%); z-index: 20; background-color: ${barColors.bg}; border: 1px solid ${barColors.border};">`;
-      html += `<div class="px-2 py-1 text-xs text-white font-medium truncate">${task.startDate.toLocaleDateString()} - ${task.endDate.toLocaleDateString()}</div>`;
+      html += `<div class="absolute h-6 rounded${
+        isOverdue ? " animate-pulse" : ""
+      }" style="left: ${leftPercent}%; width: ${widthPercent}%; top: 50%; transform: translateY(-50%); z-index: 20; background-color: ${barColors.bg}; border: 1px solid ${barColors.border};">`;
+      html +=
+        `<div class="px-2 py-1 text-xs text-white font-medium truncate">${task.startDate.toLocaleDateString()} - ${task.endDate.toLocaleDateString()}</div>`;
       html += `</div>`;
 
       // Add per-task due date marker
@@ -443,8 +463,10 @@ export class TimelineView {
           const dueDatePercent = (dueDateOffset / totalDays) * 100;
 
           if (dueDatePercent >= 0 && dueDatePercent <= 100) {
-            html += `<div class="absolute w-0.5 bg-orange-500 dark:bg-orange-400" style="left: ${dueDatePercent}%; height: 100%; top: 0; z-index: 25;">`;
-            html += `<div class="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs text-orange-600 dark:text-orange-400 font-medium whitespace-nowrap bg-white dark:bg-gray-800 px-1 rounded flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>${dueDate.toLocaleDateString()}</div>`;
+            html +=
+              `<div class="absolute w-0.5 bg-orange-500 dark:bg-orange-400" style="left: ${dueDatePercent}%; height: 100%; top: 0; z-index: 25;">`;
+            html +=
+              `<div class="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs text-orange-600 dark:text-orange-400 font-medium whitespace-nowrap bg-white dark:bg-gray-800 px-1 rounded flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>${dueDate.toLocaleDateString()}</div>`;
             html += `</div>`;
           }
         }

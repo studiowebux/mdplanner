@@ -18,6 +18,7 @@ address:
 Enterprise software company, potential enterprise customer.
 
 ## Notes
+
 - Met at TechConf 2026
 - Interested in team features
 - Current using Asana, unhappy with pricing

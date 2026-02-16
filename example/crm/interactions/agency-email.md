@@ -13,6 +13,7 @@ date: 2026-02-05
 Mike inquired about time tracking capabilities.
 
 ## Notes
+
 - Sent feature comparison doc
 - Highlighted billable hours tracking
 - Scheduled demo for next week

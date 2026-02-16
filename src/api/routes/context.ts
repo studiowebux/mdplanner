@@ -3,7 +3,7 @@
  */
 
 import { Context } from "hono";
-import { ProjectManager, type CacheLayer } from "../../lib/project-manager.ts";
+import { type CacheLayer, ProjectManager } from "../../lib/project-manager.ts";
 import { DirectoryMarkdownParser } from "../../lib/parser/directory/parser.ts";
 
 export interface AppVariables {

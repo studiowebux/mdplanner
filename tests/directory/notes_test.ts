@@ -7,7 +7,11 @@ import {
   assertStringIncludes,
 } from "jsr:@std/assert";
 import { NotesDirectoryParser } from "../../src/lib/parser/directory/notes.ts";
-import type { Note, CustomSection, NoteParagraph } from "../../src/lib/types.ts";
+import type {
+  CustomSection,
+  Note,
+  NoteParagraph,
+} from "../../src/lib/types.ts";
 
 const TEST_DIR = "/tmp/mdplanner-test-notes-" + Date.now();
 
@@ -152,7 +156,12 @@ Deno.test("NotesDirectoryParser - creates enhanced note with custom sections", a
             {
               id: "tab1",
               title: "Overview",
-              content: [{ id: "t1", type: "text", content: "Tab content", order: 0 }],
+              content: [{
+                id: "t1",
+                type: "text",
+                content: "Tab content",
+                order: 0,
+              }],
             },
           ],
         },
@@ -190,8 +199,18 @@ Deno.test("NotesDirectoryParser - preserves split-view sections", async () => {
         config: {
           splitView: {
             columns: [
-              [{ id: "col1-1", type: "text", content: "Left column text", order: 0 }],
-              [{ id: "col2-1", type: "text", content: "Right column text", order: 0 }],
+              [{
+                id: "col1-1",
+                type: "text",
+                content: "Left column text",
+                order: 0,
+              }],
+              [{
+                id: "col2-1",
+                type: "text",
+                content: "Right column text",
+                order: 0,
+              }],
             ],
           },
         },
@@ -232,13 +251,23 @@ Deno.test("NotesDirectoryParser - preserves timeline sections", async () => {
               title: "Phase 1 Complete",
               status: "success",
               date: "2026-01-15",
-              content: [{ id: "e1", type: "text", content: "Details", order: 0 }],
+              content: [{
+                id: "e1",
+                type: "text",
+                content: "Details",
+                order: 0,
+              }],
             },
             {
               id: "event2",
               title: "Phase 2 In Progress",
               status: "pending",
-              content: [{ id: "e2", type: "text", content: "Working on it", order: 0 }],
+              content: [{
+                id: "e2",
+                type: "text",
+                content: "Working on it",
+                order: 0,
+              }],
             },
           ],
         },
@@ -331,7 +360,9 @@ Deno.test("NotesDirectoryParser - update returns null for non-existent note", as
   const parser = await setup();
 
   try {
-    const result = await parser.update("nonexistent_id", { title: "New Title" });
+    const result = await parser.update("nonexistent_id", {
+      title: "New Title",
+    });
     assertEquals(result, null);
   } finally {
     await cleanup();
@@ -381,7 +412,11 @@ Deno.test("NotesDirectoryParser - saveAll replaces all notes", async () => {
 
   try {
     // Create initial notes
-    const note1 = await parser.add({ title: "Note 1", content: "Content 1", mode: "simple" });
+    const note1 = await parser.add({
+      title: "Note 1",
+      content: "Content 1",
+      mode: "simple",
+    });
     await parser.add({ title: "Note 2", content: "Content 2", mode: "simple" });
 
     // Save new set (replacing all)

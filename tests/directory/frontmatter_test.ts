@@ -3,9 +3,9 @@
  */
 import { assertEquals, assertObjectMatch } from "jsr:@std/assert";
 import {
+  buildFileContent,
   parseFrontmatter,
   serializeFrontmatter,
-  buildFileContent,
 } from "../../src/lib/parser/directory/frontmatter.ts";
 
 // === parseFrontmatter tests ===
@@ -40,7 +40,7 @@ active: false
 Body`;
 
   const result = parseFrontmatter<{ completed: boolean; active: boolean }>(
-    content
+    content,
   );
 
   assertEquals(result.frontmatter.completed, true);
@@ -70,7 +70,7 @@ numbers: [1, 2, 3]
 Body`;
 
   const result = parseFrontmatter<{ tags: string[]; numbers: number[] }>(
-    content
+    content,
   );
 
   assertEquals(result.frontmatter.tags, ["bug", "urgent", "frontend"]);
@@ -189,7 +189,7 @@ id: test_123
 title: My Title
 revision: 1
 completed: false
----`
+---`,
   );
 });
 
@@ -206,7 +206,7 @@ Deno.test("serializeFrontmatter - serializes null values", () => {
     `---
 id: test
 value: null
----`
+---`,
   );
 });
 
@@ -223,7 +223,7 @@ Deno.test("serializeFrontmatter - serializes arrays inline", () => {
     `---
 tags: [bug, urgent]
 numbers: [1, 2, 3]
----`
+---`,
   );
 });
 
@@ -240,7 +240,7 @@ Deno.test("serializeFrontmatter - serializes empty arrays", () => {
     `---
 id: test
 tags: []
----`
+---`,
   );
 });
 
@@ -255,7 +255,7 @@ Deno.test("serializeFrontmatter - serializes small objects inline", () => {
     result,
     `---
 position: {x: 100, y: 200}
----`
+---`,
   );
 });
 
@@ -272,7 +272,7 @@ Deno.test("serializeFrontmatter - quotes strings with special chars", () => {
     `---
 title: "Has: colon"
 comment: "Has # hash"
----`
+---`,
   );
 });
 
@@ -289,7 +289,7 @@ Deno.test("serializeFrontmatter - quotes boolean-like strings", () => {
     `---
 status: "true"
 flag: "false"
----`
+---`,
   );
 });
 
@@ -307,7 +307,7 @@ Deno.test("serializeFrontmatter - skips undefined values", () => {
     `---
 id: test
 title: Title
----`
+---`,
   );
 });
 
@@ -333,7 +333,7 @@ revision: 1
 
 # My Note
 
-This is the content.`
+This is the content.`,
   );
 });
 
@@ -349,7 +349,7 @@ Deno.test("buildFileContent - handles empty body", () => {
 id: test
 ---
 
-`
+`,
   );
 });
 
@@ -373,7 +373,7 @@ Deno.test("round-trip - preserves data through serialize/parse cycle", () => {
   assertEquals(parsed.frontmatter.tags, original.tags);
   assertObjectMatch(
     parsed.frontmatter.position as Record<string, unknown>,
-    original.position
+    original.position,
   );
 });
 
@@ -389,7 +389,10 @@ Deno.test("round-trip - preserves task config structure", () => {
     milestone: "v1.0",
   };
 
-  const content = buildFileContent(taskFrontmatter, "# Task Title\n\nDescription here");
+  const content = buildFileContent(
+    taskFrontmatter,
+    "# Task Title\n\nDescription here",
+  );
   const parsed = parseFrontmatter<typeof taskFrontmatter>(content);
 
   assertEquals(parsed.frontmatter.id, taskFrontmatter.id);
@@ -412,7 +415,10 @@ Deno.test("round-trip - preserves note frontmatter structure", () => {
     mode: "enhanced" as const,
   };
 
-  const content = buildFileContent(noteFrontmatter, "# Note Title\n\nNote content");
+  const content = buildFileContent(
+    noteFrontmatter,
+    "# Note Title\n\nNote content",
+  );
   const parsed = parseFrontmatter<typeof noteFrontmatter>(content);
 
   assertEquals(parsed.frontmatter.id, noteFrontmatter.id);

@@ -2,7 +2,7 @@
  * Directory-based parser for Project Value Board.
  * Each project value board is stored as a separate markdown file.
  */
-import { DirectoryParser, parseFrontmatter, buildFileContent } from "./base.ts";
+import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
 import type { ProjectValueBoard } from "../../types.ts";
 
 interface ProjectValueFrontmatter {
@@ -10,7 +10,10 @@ interface ProjectValueFrontmatter {
   date: string;
 }
 
-type ProjectValueSection = keyof Omit<ProjectValueBoard, "id" | "title" | "date">;
+type ProjectValueSection = keyof Omit<
+  ProjectValueBoard,
+  "id" | "title" | "date"
+>;
 
 const SECTION_HEADERS: Record<ProjectValueSection, string[]> = {
   customerSegments: ["customer segment", "target customer", "who"],
@@ -19,13 +22,19 @@ const SECTION_HEADERS: Record<ProjectValueSection, string[]> = {
   benefit: ["benefit", "value", "outcome"],
 };
 
-export class ProjectValueDirectoryParser extends DirectoryParser<ProjectValueBoard> {
+export class ProjectValueDirectoryParser
+  extends DirectoryParser<ProjectValueBoard> {
   constructor(projectDir: string) {
     super({ projectDir, sectionName: "projectvalue" });
   }
 
-  protected parseFile(content: string, _filePath: string): ProjectValueBoard | null {
-    const { frontmatter, content: body } = parseFrontmatter<ProjectValueFrontmatter>(content);
+  protected parseFile(
+    content: string,
+    _filePath: string,
+  ): ProjectValueBoard | null {
+    const { frontmatter, content: body } = parseFrontmatter<
+      ProjectValueFrontmatter
+    >(content);
 
     if (!frontmatter.id) {
       return null;
@@ -55,7 +64,7 @@ export class ProjectValueDirectoryParser extends DirectoryParser<ProjectValueBoa
         currentSection = null;
 
         for (const [section, keywords] of Object.entries(SECTION_HEADERS)) {
-          if (keywords.some(kw => headerText.includes(kw))) {
+          if (keywords.some((kw) => headerText.includes(kw))) {
             currentSection = section as ProjectValueSection;
             break;
           }
@@ -106,7 +115,10 @@ export class ProjectValueDirectoryParser extends DirectoryParser<ProjectValueBoa
     return newBoard;
   }
 
-  async update(id: string, updates: Partial<ProjectValueBoard>): Promise<ProjectValueBoard | null> {
+  async update(
+    id: string,
+    updates: Partial<ProjectValueBoard>,
+  ): Promise<ProjectValueBoard | null> {
     const existing = await this.read(id);
     if (!existing) return null;
 
@@ -119,7 +131,11 @@ export class ProjectValueDirectoryParser extends DirectoryParser<ProjectValueBoa
     return updated;
   }
 
-  async addItem(id: string, section: ProjectValueSection, item: string): Promise<ProjectValueBoard | null> {
+  async addItem(
+    id: string,
+    section: ProjectValueSection,
+    item: string,
+  ): Promise<ProjectValueBoard | null> {
     const board = await this.read(id);
     if (!board) return null;
 
@@ -128,7 +144,11 @@ export class ProjectValueDirectoryParser extends DirectoryParser<ProjectValueBoa
     return board;
   }
 
-  async removeItem(id: string, section: ProjectValueSection, itemIndex: number): Promise<ProjectValueBoard | null> {
+  async removeItem(
+    id: string,
+    section: ProjectValueSection,
+    itemIndex: number,
+  ): Promise<ProjectValueBoard | null> {
     const board = await this.read(id);
     if (!board) return null;
 

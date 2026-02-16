@@ -4,8 +4,8 @@
  * Pattern: ViewModule with selector, tree rendering, and sidenav integration.
  * Features: Drag-and-drop hierarchy reordering, PNG/PDF export.
  */
-import { OrgChartAPI } from '../api.js';
-import { escapeHtml } from '../utils.js';
+import { OrgChartAPI } from "../api.js";
+import { escapeHtml } from "../utils.js";
 
 export class OrgChartModule {
   constructor(taskManager) {
@@ -13,8 +13,8 @@ export class OrgChartModule {
     this.members = [];
     this.tree = [];
     this.departments = [];
-    this.currentView = 'tree';
-    this.currentDepartment = '';
+    this.currentView = "tree";
+    this.currentDepartment = "";
     this.zoom = 1;
     this.offset = { x: 0, y: 0 };
     // Drag-and-drop state
@@ -27,7 +27,7 @@ export class OrgChartModule {
       const [members, tree, departments] = await Promise.all([
         OrgChartAPI.fetchAll(),
         OrgChartAPI.fetchTree(),
-        OrgChartAPI.getDepartments()
+        OrgChartAPI.getDepartments(),
       ]);
       this.members = members;
       this.tree = tree;
@@ -36,17 +36,17 @@ export class OrgChartModule {
       this.render();
       this.renderSummary();
     } catch (error) {
-      console.error('Error loading org chart:', error);
+      console.error("Error loading org chart:", error);
     }
   }
 
   renderDepartmentFilter() {
-    const filter = document.getElementById('orgchartDepartmentFilter');
+    const filter = document.getElementById("orgchartDepartmentFilter");
     if (!filter) return;
 
     filter.innerHTML = '<option value="">All Departments</option>';
-    this.departments.forEach(dept => {
-      const option = document.createElement('option');
+    this.departments.forEach((dept) => {
+      const option = document.createElement("option");
       option.value = dept;
       option.textContent = dept;
       filter.appendChild(option);
@@ -55,15 +55,15 @@ export class OrgChartModule {
   }
 
   renderSummary() {
-    const totalEl = document.getElementById('orgchartTotalMembers');
-    const deptsEl = document.getElementById('orgchartTotalDepartments');
+    const totalEl = document.getElementById("orgchartTotalMembers");
+    const deptsEl = document.getElementById("orgchartTotalDepartments");
 
     if (totalEl) totalEl.textContent = this.members.length;
     if (deptsEl) deptsEl.textContent = this.departments.length;
   }
 
   render() {
-    if (this.currentView === 'tree') {
+    if (this.currentView === "tree") {
       this.renderTreeView();
     } else {
       this.renderCardView();
@@ -71,30 +71,33 @@ export class OrgChartModule {
   }
 
   renderTreeView() {
-    const container = document.getElementById('orgchartTreeContent');
-    const emptyState = document.getElementById('orgchartEmptyState');
+    const container = document.getElementById("orgchartTreeContent");
+    const emptyState = document.getElementById("orgchartEmptyState");
 
     if (!container) return;
 
     // Filter tree by department if selected
     let filteredTree = this.tree;
     if (this.currentDepartment) {
-      filteredTree = this.filterTreeByDepartment(this.tree, this.currentDepartment);
+      filteredTree = this.filterTreeByDepartment(
+        this.tree,
+        this.currentDepartment,
+      );
     }
 
     if (filteredTree.length === 0) {
-      container.innerHTML = '';
-      if (emptyState) emptyState.style.display = 'flex';
+      container.innerHTML = "";
+      if (emptyState) emptyState.style.display = "flex";
       return;
     }
 
-    if (emptyState) emptyState.style.display = 'none';
+    if (emptyState) emptyState.style.display = "none";
 
-    container.innerHTML = '';
-    const treeContainer = document.createElement('div');
-    treeContainer.className = 'orgchart-tree';
+    container.innerHTML = "";
+    const treeContainer = document.createElement("div");
+    treeContainer.className = "orgchart-tree";
 
-    filteredTree.forEach(root => {
+    filteredTree.forEach((root) => {
       const rootEl = this.renderTreeNode(root, 0);
       treeContainer.appendChild(rootEl);
     });
@@ -109,14 +112,20 @@ export class OrgChartModule {
       if (node.departments && node.departments.includes(department)) {
         filtered.push({
           ...node,
-          children: this.filterTreeByDepartment(node.children || [], department)
+          children: this.filterTreeByDepartment(
+            node.children || [],
+            department,
+          ),
         });
       } else {
-        const childFiltered = this.filterTreeByDepartment(node.children || [], department);
+        const childFiltered = this.filterTreeByDepartment(
+          node.children || [],
+          department,
+        );
         if (childFiltered.length > 0) {
           filtered.push({
             ...node,
-            children: childFiltered
+            children: childFiltered,
           });
         }
       }
@@ -125,16 +134,16 @@ export class OrgChartModule {
   }
 
   renderTreeNode(node, level) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'orgchart-node-wrapper';
+    const wrapper = document.createElement("div");
+    wrapper.className = "orgchart-node-wrapper";
 
-    const nodeEl = document.createElement('div');
+    const nodeEl = document.createElement("div");
     nodeEl.className = `orgchart-node level-${level}`;
     nodeEl.dataset.memberId = node.id;
     nodeEl.draggable = true;
 
-    const deptColor = this.getDepartmentColor(node.departments?.[0] || '');
-    const deptText = node.departments?.join(', ') || '';
+    const deptColor = this.getDepartmentColor(node.departments?.[0] || "");
+    const deptText = node.departments?.join(", ") || "";
     nodeEl.innerHTML = `
       <div class="orgchart-node-header" style="border-left: 4px solid ${deptColor};">
         <div class="orgchart-drag-handle" title="Drag to change reporting structure">⋮⋮</div>
@@ -145,27 +154,36 @@ export class OrgChartModule {
     `;
 
     // Click handler (only if not dragging)
-    nodeEl.addEventListener('click', (e) => {
+    nodeEl.addEventListener("click", (e) => {
       if (!this.isDragging) {
         this.openMemberSidenav(node.id);
       }
     });
 
     // Drag-and-drop handlers
-    nodeEl.addEventListener('dragstart', (e) => this.handleDragStart(e, node.id));
-    nodeEl.addEventListener('dragend', (e) => this.handleDragEnd(e));
-    nodeEl.addEventListener('dragover', (e) => this.handleDragOver(e, node.id));
-    nodeEl.addEventListener('dragenter', (e) => this.handleDragEnter(e, node.id));
-    nodeEl.addEventListener('dragleave', (e) => this.handleDragLeave(e, node.id));
-    nodeEl.addEventListener('drop', (e) => this.handleDrop(e, node.id));
+    nodeEl.addEventListener(
+      "dragstart",
+      (e) => this.handleDragStart(e, node.id),
+    );
+    nodeEl.addEventListener("dragend", (e) => this.handleDragEnd(e));
+    nodeEl.addEventListener("dragover", (e) => this.handleDragOver(e, node.id));
+    nodeEl.addEventListener(
+      "dragenter",
+      (e) => this.handleDragEnter(e, node.id),
+    );
+    nodeEl.addEventListener(
+      "dragleave",
+      (e) => this.handleDragLeave(e, node.id),
+    );
+    nodeEl.addEventListener("drop", (e) => this.handleDrop(e, node.id));
 
     wrapper.appendChild(nodeEl);
 
     if (node.children && node.children.length > 0) {
-      const childrenContainer = document.createElement('div');
-      childrenContainer.className = 'orgchart-children';
+      const childrenContainer = document.createElement("div");
+      childrenContainer.className = "orgchart-children";
 
-      node.children.forEach(child => {
+      node.children.forEach((child) => {
         childrenContainer.appendChild(this.renderTreeNode(child, level + 1));
       });
 
@@ -204,14 +222,14 @@ export class OrgChartModule {
   handleDragStart(e, memberId) {
     this.isDragging = true;
     this.draggedMemberId = memberId;
-    e.target.classList.add('orgchart-dragging');
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', memberId);
+    e.target.classList.add("orgchart-dragging");
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", memberId);
 
     // Show the unlink drop zone
-    const unlinkZone = document.getElementById('orgchartUnlinkZone');
+    const unlinkZone = document.getElementById("orgchartUnlinkZone");
     if (unlinkZone) {
-      unlinkZone.classList.add('active');
+      unlinkZone.classList.add("active");
     }
   }
 
@@ -219,15 +237,16 @@ export class OrgChartModule {
     this.isDragging = false;
     this.draggedMemberId = null;
     this.dragOverMemberId = null;
-    e.target.classList.remove('orgchart-dragging');
+    e.target.classList.remove("orgchart-dragging");
     // Remove all drop-target classes
-    document.querySelectorAll('.orgchart-drop-target, .orgchart-drop-invalid').forEach(el => {
-      el.classList.remove('orgchart-drop-target', 'orgchart-drop-invalid');
-    });
+    document.querySelectorAll(".orgchart-drop-target, .orgchart-drop-invalid")
+      .forEach((el) => {
+        el.classList.remove("orgchart-drop-target", "orgchart-drop-invalid");
+      });
     // Hide the unlink drop zone
-    const unlinkZone = document.getElementById('orgchartUnlinkZone');
+    const unlinkZone = document.getElementById("orgchartUnlinkZone");
     if (unlinkZone) {
-      unlinkZone.classList.remove('active', 'drag-over');
+      unlinkZone.classList.remove("active", "drag-over");
     }
   }
 
@@ -236,9 +255,9 @@ export class OrgChartModule {
     if (this.draggedMemberId && memberId !== this.draggedMemberId) {
       // Check if valid drop target (not dropping on self or descendant)
       if (!this.isDescendantOf(this.draggedMemberId, memberId)) {
-        e.dataTransfer.dropEffect = 'move';
+        e.dataTransfer.dropEffect = "move";
       } else {
-        e.dataTransfer.dropEffect = 'none';
+        e.dataTransfer.dropEffect = "none";
       }
     }
   }
@@ -246,17 +265,19 @@ export class OrgChartModule {
   handleDragEnter(e, memberId) {
     e.preventDefault();
     if (this.draggedMemberId && memberId !== this.draggedMemberId) {
-      const nodeEl = e.target.closest('.orgchart-node');
+      const nodeEl = e.target.closest(".orgchart-node");
       if (nodeEl) {
         // Remove from previous
-        document.querySelectorAll('.orgchart-drop-target, .orgchart-drop-invalid').forEach(el => {
-          el.classList.remove('orgchart-drop-target', 'orgchart-drop-invalid');
+        document.querySelectorAll(
+          ".orgchart-drop-target, .orgchart-drop-invalid",
+        ).forEach((el) => {
+          el.classList.remove("orgchart-drop-target", "orgchart-drop-invalid");
         });
         // Add to current
         if (this.isDescendantOf(this.draggedMemberId, memberId)) {
-          nodeEl.classList.add('orgchart-drop-invalid');
+          nodeEl.classList.add("orgchart-drop-invalid");
         } else {
-          nodeEl.classList.add('orgchart-drop-target');
+          nodeEl.classList.add("orgchart-drop-target");
         }
         this.dragOverMemberId = memberId;
       }
@@ -267,9 +288,9 @@ export class OrgChartModule {
     // Only clear if actually leaving the node (not entering a child)
     const related = e.relatedTarget;
     if (related && e.target.contains(related)) return;
-    const nodeEl = e.target.closest('.orgchart-node');
+    const nodeEl = e.target.closest(".orgchart-node");
     if (nodeEl) {
-      nodeEl.classList.remove('orgchart-drop-target', 'orgchart-drop-invalid');
+      nodeEl.classList.remove("orgchart-drop-target", "orgchart-drop-invalid");
     }
   }
 
@@ -282,66 +303,72 @@ export class OrgChartModule {
 
     // Prevent dropping on descendants (would create circular reference)
     if (this.isDescendantOf(sourceMemberId, targetMemberId)) {
-      console.warn('Cannot drop on descendant - would create circular reference');
+      console.warn(
+        "Cannot drop on descendant - would create circular reference",
+      );
       return;
     }
 
     // Update the member's reportsTo field
-    const sourceMember = this.members.find(m => m.id === sourceMemberId);
+    const sourceMember = this.members.find((m) => m.id === sourceMemberId);
     if (!sourceMember) return;
 
     try {
       await OrgChartAPI.update(sourceMemberId, {
         ...sourceMember,
-        reportsTo: targetMemberId
+        reportsTo: targetMemberId,
       });
       // Reload to reflect changes
       await this.load();
     } catch (error) {
-      console.error('Error updating reporting structure:', error);
+      console.error("Error updating reporting structure:", error);
     }
   }
 
   // Make a member a root (no manager) by dropping on empty area
   async makeRoot(memberId) {
-    const member = this.members.find(m => m.id === memberId);
+    const member = this.members.find((m) => m.id === memberId);
     if (!member || !member.reportsTo) return;
 
     try {
       await OrgChartAPI.update(memberId, {
         ...member,
-        reportsTo: null
+        reportsTo: null,
       });
       await this.load();
     } catch (error) {
-      console.error('Error making member root:', error);
+      console.error("Error making member root:", error);
     }
   }
 
   renderCardView() {
-    const container = document.getElementById('orgchartTreeContent');
-    const emptyState = document.getElementById('orgchartEmptyState');
+    const container = document.getElementById("orgchartTreeContent");
+    const emptyState = document.getElementById("orgchartEmptyState");
 
     if (!container) return;
 
     let filteredMembers = this.members;
     if (this.currentDepartment) {
-      filteredMembers = this.members.filter(m => m.departments?.includes(this.currentDepartment));
+      filteredMembers = this.members.filter((m) =>
+        m.departments?.includes(this.currentDepartment)
+      );
     }
 
     if (filteredMembers.length === 0) {
-      container.innerHTML = '';
-      if (emptyState) emptyState.style.display = 'flex';
+      container.innerHTML = "";
+      if (emptyState) emptyState.style.display = "flex";
       return;
     }
 
-    if (emptyState) emptyState.style.display = 'none';
+    if (emptyState) emptyState.style.display = "none";
 
     // Group by department (members can appear in multiple departments)
     const byDepartment = {};
-    filteredMembers.forEach(member => {
-      const depts = member.departments?.length ? member.departments : ['No Department'];
-      depts.forEach(dept => {
+    filteredMembers.forEach((member) => {
+      const depts = member.departments?.length
+        ? member.departments
+        : ["No Department"];
+      depts.forEach((dept) => {
         if (!byDepartment[dept]) byDepartment[dept] = [];
         byDepartment[dept].push(member);
       });
@@ -349,9 +376,10 @@ export class OrgChartModule {
 
     let html = '<div class="orgchart-card-grid">';
 
-    Object.entries(byDepartment).sort((a, b) => a[0].localeCompare(b[0])).forEach(([dept, members]) => {
-      const deptColor = this.getDepartmentColor(dept);
-      html += `
+    Object.entries(byDepartment).sort((a, b) => a[0].localeCompare(b[0]))
+      .forEach(([dept, members]) => {
+        const deptColor = this.getDepartmentColor(dept);
+        html += `
         <div class="orgchart-department-section">
           <h3 class="orgchart-department-header" style="border-left: 4px solid ${deptColor};">
             ${escapeHtml(dept)}
@@ -360,34 +388,46 @@ export class OrgChartModule {
           <div class="orgchart-cards">
       `;
 
-      members.forEach(member => {
-        const manager = member.reportsTo
-          ? this.members.find(m => m.id === member.reportsTo)
-          : null;
-        const managerName = manager ? `Reports to: ${escapeHtml(manager.name)}` : '';
+        members.forEach((member) => {
+          const manager = member.reportsTo
+            ? this.members.find((m) => m.id === member.reportsTo)
+            : null;
+          const managerName = manager
+            ? `Reports to: ${escapeHtml(manager.name)}`
+            : "";
 
-        html += `
+          html += `
           <div class="orgchart-card" data-member-id="${member.id}">
             <div class="orgchart-card-name">${escapeHtml(member.name)}</div>
             <div class="orgchart-card-title">${escapeHtml(member.title)}</div>
-            ${member.email ? `<div class="orgchart-card-email">${escapeHtml(member.email)}</div>` : ''}
-            ${managerName ? `<div class="orgchart-card-reports">${managerName}</div>` : ''}
+            ${
+            member.email
+              ? `<div class="orgchart-card-email">${
+                escapeHtml(member.email)
+              }</div>`
+              : ""
+          }
+            ${
+            managerName
+              ? `<div class="orgchart-card-reports">${managerName}</div>`
+              : ""
+          }
           </div>
         `;
-      });
+        });
 
-      html += `
+        html += `
           </div>
         </div>
       `;
-    });
+      });
 
-    html += '</div>';
+    html += "</div>";
     container.innerHTML = html;
 
     // Bind click events to cards
-    container.querySelectorAll('.orgchart-card').forEach(card => {
-      card.addEventListener('click', () => {
+    container.querySelectorAll(".orgchart-card").forEach((card) => {
+      card.addEventListener("click", () => {
         this.openMemberSidenav(card.dataset.memberId);
       });
     });
@@ -395,52 +435,53 @@ export class OrgChartModule {
 
   getDepartmentColor(department) {
     const colors = [
-      '#3b82f6', // blue
-      '#10b981', // emerald
-      '#f59e0b', // amber
-      '#ef4444', // red
-      '#8b5cf6', // violet
-      '#ec4899', // pink
-      '#06b6d4', // cyan
-      '#84cc16', // lime
+      "#3b82f6", // blue
+      "#10b981", // emerald
+      "#f59e0b", // amber
+      "#ef4444", // red
+      "#8b5cf6", // violet
+      "#ec4899", // pink
+      "#06b6d4", // cyan
+      "#84cc16", // lime
     ];
     const index = this.departments.indexOf(department);
-    return colors[index % colors.length] || '#6b7280';
+    return colors[index % colors.length] || "#6b7280";
   }
 
   setupPanning() {
-    const viewport = document.getElementById('orgchartViewport');
-    const container = document.getElementById('orgchartContainer');
+    const viewport = document.getElementById("orgchartViewport");
+    const container = document.getElementById("orgchartContainer");
     if (!viewport || !container) return;
 
     let isDragging = false;
     let startX, startY;
     let startTranslateX = 0, startTranslateY = 0;
 
-    container.addEventListener('mousedown', (e) => {
-      if (!e.target.closest('.orgchart-node')) {
+    container.addEventListener("mousedown", (e) => {
+      if (!e.target.closest(".orgchart-node")) {
         isDragging = true;
         startX = e.clientX;
         startY = e.clientY;
-        container.style.cursor = 'grabbing';
+        container.style.cursor = "grabbing";
         e.preventDefault();
       }
     });
 
-    document.addEventListener('mousemove', (e) => {
+    document.addEventListener("mousemove", (e) => {
       if (isDragging) {
         const deltaX = e.clientX - startX;
         const deltaY = e.clientY - startY;
         const newTranslateX = startTranslateX + deltaX;
         const newTranslateY = startTranslateY + deltaY;
-        viewport.style.transform = `translate(${newTranslateX}px, ${newTranslateY}px) scale(${this.zoom})`;
+        viewport.style.transform =
+          `translate(${newTranslateX}px, ${newTranslateY}px) scale(${this.zoom})`;
       }
     });
 
-    document.addEventListener('mouseup', () => {
+    document.addEventListener("mouseup", () => {
       if (isDragging) {
         isDragging = false;
-        container.style.cursor = 'grab';
+        container.style.cursor = "grab";
         const transform = viewport.style.transform;
         const match = transform.match(/translate\(([^,]+),\s*([^)]+)\)/);
         if (match) {
@@ -469,11 +510,12 @@ export class OrgChartModule {
 
   updateZoom(value) {
     this.zoom = parseFloat(value);
-    const viewport = document.getElementById('orgchartViewport');
+    const viewport = document.getElementById("orgchartViewport");
     if (viewport) {
-      viewport.style.transform = `translate(${this.offset.x}px, ${this.offset.y}px) scale(${this.zoom})`;
+      viewport.style.transform =
+        `translate(${this.offset.x}px, ${this.offset.y}px) scale(${this.zoom})`;
     }
-    const zoomLabel = document.getElementById('orgchartZoomLevel');
+    const zoomLabel = document.getElementById("orgchartZoomLevel");
     if (zoomLabel) {
       zoomLabel.textContent = `${Math.round(this.zoom * 100)}%`;
     }
@@ -487,14 +529,15 @@ export class OrgChartModule {
 
   // Export to SVG
   async exportToPNG() {
-    const container = document.getElementById('orgchartTreeContent');
+    const container = document.getElementById("orgchartTreeContent");
     if (!container || container.children.length === 0) {
-      alert('No org chart to export. Add members first.');
+      alert("No org chart to export. Add members first.");
       return;
     }
 
     try {
-      const treeEl = container.querySelector('.orgchart-tree') || container.querySelector('.orgchart-card-grid');
+      const treeEl = container.querySelector(".orgchart-tree") ||
+        container.querySelector(".orgchart-card-grid");
       if (!treeEl) return;
 
       const rect = treeEl.getBoundingClientRect();
@@ -514,35 +557,35 @@ export class OrgChartModule {
   </foreignObject>
 </svg>`;
 
-      const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+      const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.download = `orgchart-${new Date().toISOString().split('T')[0]}.svg`;
+      const link = document.createElement("a");
+      link.download = `orgchart-${new Date().toISOString().split("T")[0]}.svg`;
       link.href = url;
       link.click();
       URL.revokeObjectURL(url);
-
     } catch (error) {
-      console.error('Error exporting to SVG:', error);
-      alert('Export failed.');
+      console.error("Error exporting to SVG:", error);
+      alert("Export failed.");
     }
   }
 
   // Export to PDF using browser print
   exportToPDF() {
-    const container = document.getElementById('orgchartTreeContent');
+    const container = document.getElementById("orgchartTreeContent");
     if (!container || container.children.length === 0) {
-      alert('No org chart to export. Add members first.');
+      alert("No org chart to export. Add members first.");
       return;
     }
 
-    const treeEl = container.querySelector('.orgchart-tree') || container.querySelector('.orgchart-card-grid');
+    const treeEl = container.querySelector(".orgchart-tree") ||
+      container.querySelector(".orgchart-card-grid");
     if (!treeEl) return;
 
     const styles = this.getExportStyles();
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     if (!printWindow) {
-      alert('Please allow popups to export PDF.');
+      alert("Please allow popups to export PDF.");
       return;
     }
 
@@ -761,35 +804,53 @@ export class OrgChartModule {
   }
 
   bindEvents() {
-    document.getElementById('addOrgchartMemberBtn')?.addEventListener('click', () => this.addMember());
-    document.getElementById('orgchartViewToggle')?.addEventListener('change', (e) => this.updateView(e.target.value));
-    document.getElementById('orgchartDepartmentFilter')?.addEventListener('change', (e) => this.filterByDepartment(e.target.value));
-    document.getElementById('orgchartZoom')?.addEventListener('input', (e) => this.updateZoom(e.target.value));
-    document.getElementById('orgchartExportPNG')?.addEventListener('click', () => this.exportToPNG());
-    document.getElementById('orgchartExportPDF')?.addEventListener('click', () => this.exportToPDF());
+    document.getElementById("addOrgchartMemberBtn")?.addEventListener(
+      "click",
+      () => this.addMember(),
+    );
+    document.getElementById("orgchartViewToggle")?.addEventListener(
+      "change",
+      (e) => this.updateView(e.target.value),
+    );
+    document.getElementById("orgchartDepartmentFilter")?.addEventListener(
+      "change",
+      (e) => this.filterByDepartment(e.target.value),
+    );
+    document.getElementById("orgchartZoom")?.addEventListener(
+      "input",
+      (e) => this.updateZoom(e.target.value),
+    );
+    document.getElementById("orgchartExportPNG")?.addEventListener(
+      "click",
+      () => this.exportToPNG(),
+    );
+    document.getElementById("orgchartExportPDF")?.addEventListener(
+      "click",
+      () => this.exportToPDF(),
+    );
 
     // Dedicated unlink drop zone
-    const unlinkZone = document.getElementById('orgchartUnlinkZone');
+    const unlinkZone = document.getElementById("orgchartUnlinkZone");
     if (unlinkZone) {
-      unlinkZone.addEventListener('dragover', (e) => {
+      unlinkZone.addEventListener("dragover", (e) => {
         if (this.draggedMemberId) {
           e.preventDefault();
-          e.dataTransfer.dropEffect = 'move';
+          e.dataTransfer.dropEffect = "move";
         }
       });
-      unlinkZone.addEventListener('dragenter', (e) => {
+      unlinkZone.addEventListener("dragenter", (e) => {
         if (this.draggedMemberId) {
           e.preventDefault();
-          unlinkZone.classList.add('drag-over');
+          unlinkZone.classList.add("drag-over");
         }
       });
-      unlinkZone.addEventListener('dragleave', (e) => {
-        unlinkZone.classList.remove('drag-over');
+      unlinkZone.addEventListener("dragleave", (e) => {
+        unlinkZone.classList.remove("drag-over");
       });
-      unlinkZone.addEventListener('drop', async (e) => {
+      unlinkZone.addEventListener("drop", async (e) => {
         e.preventDefault();
         e.stopPropagation();
-        unlinkZone.classList.remove('drag-over');
+        unlinkZone.classList.remove("drag-over");
         if (this.draggedMemberId) {
           await this.makeRoot(this.draggedMemberId);
         }
@@ -797,16 +858,16 @@ export class OrgChartModule {
     }
 
     // Container drop zone for making root
-    const container = document.getElementById('orgchartContainer');
+    const container = document.getElementById("orgchartContainer");
     if (container) {
-      container.addEventListener('dragover', (e) => {
+      container.addEventListener("dragover", (e) => {
         if (this.draggedMemberId) {
           e.preventDefault();
-          e.dataTransfer.dropEffect = 'move';
+          e.dataTransfer.dropEffect = "move";
         }
       });
-      container.addEventListener('drop', async (e) => {
-        if (this.draggedMemberId && !e.target.closest('.orgchart-node')) {
+      container.addEventListener("drop", async (e) => {
+        if (this.draggedMemberId && !e.target.closest(".orgchart-node")) {
           e.preventDefault();
           e.stopPropagation();
           await this.makeRoot(this.draggedMemberId);

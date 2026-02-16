@@ -3,7 +3,12 @@
  */
 
 import { Hono } from "hono";
-import { AppVariables, getParser, jsonResponse, errorResponse } from "../context.ts";
+import {
+  AppVariables,
+  errorResponse,
+  getParser,
+  jsonResponse,
+} from "../context.ts";
 
 export const strategicRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -35,7 +40,7 @@ strategicRouter.get("/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const builders = await parser.readStrategicLevelsBuilders();
-  const builder = builders.find(b => b.id === id);
+  const builder = builders.find((b) => b.id === id);
   if (!builder) return errorResponse("Not found", 404);
   return jsonResponse(builder);
 });
@@ -46,7 +51,7 @@ strategicRouter.put("/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json();
   const builders = await parser.readStrategicLevelsBuilders();
-  const index = builders.findIndex(b => b.id === id);
+  const index = builders.findIndex((b) => b.id === id);
   if (index === -1) return errorResponse("Not found", 404);
   builders[index] = { ...builders[index], ...body };
   await parser.saveStrategicLevelsBuilders(builders);
@@ -58,8 +63,10 @@ strategicRouter.delete("/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const builders = await parser.readStrategicLevelsBuilders();
-  const filtered = builders.filter(b => b.id !== id);
-  if (filtered.length === builders.length) return errorResponse("Not found", 404);
+  const filtered = builders.filter((b) => b.id !== id);
+  if (filtered.length === builders.length) {
+    return errorResponse("Not found", 404);
+  }
   await parser.saveStrategicLevelsBuilders(filtered);
   return jsonResponse({ success: true });
 });
@@ -70,7 +77,7 @@ strategicRouter.post("/:id/levels", async (c) => {
   const builderId = c.req.param("id");
   const body = await c.req.json();
   const builders = await parser.readStrategicLevelsBuilders();
-  const builder = builders.find(b => b.id === builderId);
+  const builder = builders.find((b) => b.id === builderId);
   if (!builder) return errorResponse("Builder not found", 404);
 
   const newLevel = {
@@ -79,7 +86,7 @@ strategicRouter.post("/:id/levels", async (c) => {
     description: body.description,
     level: body.level,
     parentId: body.parentId,
-    order: builder.levels.filter(l => l.level === body.level).length,
+    order: builder.levels.filter((l) => l.level === body.level).length,
     linkedTasks: body.linkedTasks || [],
     linkedMilestones: body.linkedMilestones || [],
   };
@@ -95,10 +102,10 @@ strategicRouter.put("/:id/levels/:levelId", async (c) => {
   const levelId = c.req.param("levelId");
   const body = await c.req.json();
   const builders = await parser.readStrategicLevelsBuilders();
-  const builder = builders.find(b => b.id === builderId);
+  const builder = builders.find((b) => b.id === builderId);
   if (!builder) return errorResponse("Builder not found", 404);
 
-  const levelIndex = builder.levels.findIndex(l => l.id === levelId);
+  const levelIndex = builder.levels.findIndex((l) => l.id === levelId);
   if (levelIndex === -1) return errorResponse("Level not found", 404);
 
   builder.levels[levelIndex] = { ...builder.levels[levelIndex], ...body };
@@ -112,13 +119,15 @@ strategicRouter.delete("/:id/levels/:levelId", async (c) => {
   const builderId = c.req.param("id");
   const levelId = c.req.param("levelId");
   const builders = await parser.readStrategicLevelsBuilders();
-  const builder = builders.find(b => b.id === builderId);
+  const builder = builders.find((b) => b.id === builderId);
   if (!builder) return errorResponse("Builder not found", 404);
 
-  const filtered = builder.levels.filter(l => l.id !== levelId);
-  if (filtered.length === builder.levels.length) return errorResponse("Level not found", 404);
+  const filtered = builder.levels.filter((l) => l.id !== levelId);
+  if (filtered.length === builder.levels.length) {
+    return errorResponse("Level not found", 404);
+  }
 
-  builder.levels = filtered.map(l => {
+  builder.levels = filtered.map((l) => {
     if (l.parentId === levelId) {
       return { ...l, parentId: undefined };
     }
