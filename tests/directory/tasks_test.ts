@@ -1,11 +1,7 @@
 /**
  * Unit tests for TasksDirectoryParser.
  */
-import {
-  assertEquals,
-  assertExists,
-  assertStringIncludes,
-} from "jsr:@std/assert";
+import { assertEquals, assertExists, assertStringIncludes } from "@std/assert";
 import { TasksDirectoryParser } from "../../src/lib/parser/directory/tasks.ts";
 import type { Task } from "../../src/lib/types.ts";
 

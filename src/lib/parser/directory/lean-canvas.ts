@@ -42,7 +42,7 @@ export class LeanCanvasDirectoryParser extends DirectoryParser<LeanCanvas> {
     }
 
     const lines = body.split("\n");
-    let title = "Untitled Lean Canvas";
+    const title = "Untitled Lean Canvas";
     const result: LeanCanvas = {
       id: frontmatter.id,
       title,

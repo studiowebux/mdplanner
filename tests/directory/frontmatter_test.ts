@@ -1,7 +1,7 @@
 /**
  * Unit tests for YAML frontmatter parser.
  */
-import { assertEquals, assertObjectMatch } from "jsr:@std/assert";
+import { assertEquals, assertObjectMatch } from "@std/assert";
 import {
   buildFileContent,
   parseFrontmatter,

@@ -2,7 +2,7 @@
  * CacheDatabase tests
  */
 
-import { assertEquals, assertExists } from "jsr:@std/assert";
+import { assertEquals, assertExists } from "@std/assert";
 import { CacheDatabase } from "../../src/lib/cache/database.ts";
 
 const TEST_DB = ":memory:";

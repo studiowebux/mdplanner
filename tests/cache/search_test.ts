@@ -2,7 +2,7 @@
  * SearchEngine tests
  */
 
-import { assertEquals, assertExists } from "jsr:@std/assert";
+import { assertEquals, assertExists } from "@std/assert";
 import { CacheDatabase } from "../../src/lib/cache/database.ts";
 import { initSchema } from "../../src/lib/cache/schema.ts";
 import { SearchEngine } from "../../src/lib/cache/search.ts";

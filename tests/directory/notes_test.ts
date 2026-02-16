@@ -1,11 +1,7 @@
 /**
  * Unit tests for NotesDirectoryParser.
  */
-import {
-  assertEquals,
-  assertExists,
-  assertStringIncludes,
-} from "jsr:@std/assert";
+import { assertEquals, assertExists, assertStringIncludes } from "@std/assert";
 import { NotesDirectoryParser } from "../../src/lib/parser/directory/notes.ts";
 import type {
   CustomSection,

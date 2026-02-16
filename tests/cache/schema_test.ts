@@ -2,7 +2,7 @@
  * Schema initialization tests
  */
 
-import { assertEquals, assertExists } from "jsr:@std/assert";
+import { assertEquals } from "@std/assert";
 import { CacheDatabase } from "../../src/lib/cache/database.ts";
 import { dropSchema, initSchema } from "../../src/lib/cache/schema.ts";
 
