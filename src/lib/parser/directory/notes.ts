@@ -82,8 +82,8 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
 
     let body = `# ${note.title}\n\n`;
 
-    if (note.mode === "enhanced" && note.customSections?.length) {
-      body += this.serializeEnhancedContent(note.paragraphs || [], note.customSections);
+    if (note.mode === "enhanced" && (note.paragraphs?.length || note.customSections?.length)) {
+      body += this.serializeEnhancedContent(note.paragraphs || [], note.customSections || []);
     } else if (note.content) {
       body += note.content;
     }
@@ -247,30 +247,46 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
    * Parse split-view content into columns.
    */
   private parseSplitView(content: string): { columns: NoteParagraph[][] } {
-    const columns: NoteParagraph[][] = [[], []];
+    const columns: NoteParagraph[][] = [];
     const lines = content.split("\n");
-    let currentColumn = 0;
+    let currentColumnIdx = -1;
+    let contentLines: string[] = [];
 
-    for (const line of lines) {
-      if (line.startsWith("### Column 1")) {
-        currentColumn = 0;
+    const flushColumn = () => {
+      if (currentColumnIdx >= 0) {
+        columns[currentColumnIdx] = this.parseContentBlocks(contentLines.join("\n"));
+        contentLines = [];
+      }
+    };
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const columnMatch = line.match(/^### Column (\d+)$/);
+      if (columnMatch) {
+        flushColumn();
+        currentColumnIdx = parseInt(columnMatch[1], 10) - 1;
+        // Ensure columns array is large enough
+        while (columns.length <= currentColumnIdx) {
+          columns.push([]);
+        }
+        // Skip column-index comment if present
+        const nextLine = lines[i + 1];
+        if (nextLine?.startsWith("<!-- column-index:")) {
+          i++;
+        }
         continue;
       }
-      if (line.startsWith("### Column 2")) {
-        currentColumn = 1;
-        continue;
-      }
 
-      if (line.trim() && currentColumn < 2) {
-        columns[currentColumn].push({
-          id: `col_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-          type: "text",
-          content: line,
-          order: columns[currentColumn].length,
-        });
+      if (currentColumnIdx >= 0) {
+        contentLines.push(line);
       }
     }
 
+    flushColumn();
+    // Ensure at least 2 columns
+    while (columns.length < 2) {
+      columns.push([]);
+    }
     return { columns };
   }
 
@@ -287,24 +303,31 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
 
     const flushTab = () => {
       if (currentTab) {
-        currentTab.content = [{
-          id: `tab_content_${Date.now()}`,
-          type: "text",
-          content: contentLines.join("\n").trim(),
-          order: 0,
-        }];
+        currentTab.content = this.parseContentBlocks(contentLines.join("\n"));
         tabs.push(currentTab);
         contentLines = [];
       }
     };
 
-    for (const line of lines) {
-      const tabMatch = line.match(/^### (.+)$/);
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      // Match ### Tab: Title or ### Title (legacy)
+      const tabMatch = line.match(/^### (?:Tab: )?(.+)$/);
       if (tabMatch) {
         flushTab();
+        let tabId = `tab_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+        // Check next line for tab-id comment
+        const nextLine = lines[i + 1];
+        if (nextLine?.startsWith("<!-- tab-id:")) {
+          const idMatch = nextLine.match(/<!-- tab-id: ([^>]+) -->/);
+          if (idMatch) {
+            tabId = idMatch[1].trim();
+            i++; // Skip the metadata line
+          }
+        }
         currentTab = {
-          id: `tab_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-          title: tabMatch[1],
+          id: tabId,
+          title: tabMatch[1].trim(),
           content: [],
         };
         continue;
@@ -320,6 +343,61 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
   }
 
   /**
+   * Parse content blocks from markdown, handling code fences.
+   */
+  private parseContentBlocks(content: string): NoteParagraph[] {
+    const blocks: NoteParagraph[] = [];
+    const lines = content.split("\n");
+    let currentBlock: string[] = [];
+    let inCodeBlock = false;
+    let codeLanguage = "";
+    let order = 0;
+
+    const flushBlock = () => {
+      const text = currentBlock.join("\n").trim();
+      if (text) {
+        blocks.push({
+          id: `block_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+          type: "text",
+          content: text,
+          order: order++,
+        });
+      }
+      currentBlock = [];
+    };
+
+    for (const line of lines) {
+      if (line.startsWith("```")) {
+        if (!inCodeBlock) {
+          flushBlock();
+          inCodeBlock = true;
+          codeLanguage = line.slice(3).trim();
+        } else {
+          const codeContent = currentBlock.join("\n");
+          if (codeContent.trim()) {
+            blocks.push({
+              id: `code_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+              type: "code",
+              content: codeContent,
+              language: codeLanguage || undefined,
+              order: order++,
+            });
+          }
+          currentBlock = [];
+          inCodeBlock = false;
+          codeLanguage = "";
+        }
+        continue;
+      }
+
+      currentBlock.push(line);
+    }
+
+    flushBlock();
+    return blocks;
+  }
+
+  /**
    * Parse timeline content.
    */
   private parseTimeline(
@@ -332,28 +410,49 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
 
     const flushItem = () => {
       if (currentItem) {
-        currentItem.content = [{
-          id: `timeline_content_${Date.now()}`,
-          type: "text",
-          content: contentLines.join("\n").trim(),
-          order: 0,
-        }];
+        currentItem.content = this.parseContentBlocks(contentLines.join("\n"));
         items.push(currentItem);
         contentLines = [];
       }
     };
 
-    for (const line of lines) {
-      // ### Title {status: success; date: 2026-01-01}
-      const itemMatch = line.match(/^### (.+?)(?:\s*\{(.+)\})?$/);
-      if (itemMatch) {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      // Match ## Title (status) or ### Title {status: ...} (legacy)
+      const newFormatMatch = line.match(/^## (.+?) \((success|failed|pending)\)$/);
+      const legacyMatch = line.match(/^### (.+?)(?:\s*\{(.+)\})?$/);
+
+      if (newFormatMatch) {
         flushItem();
-        const title = itemMatch[1].trim();
-        const configStr = itemMatch[2] || "";
+        let itemId = `timeline_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+        let date: string | undefined;
+
+        // Check next line for item-id comment
+        const nextLine = lines[i + 1];
+        if (nextLine?.startsWith("<!-- item-id:")) {
+          const metaMatch = nextLine.match(/<!-- item-id: ([^,]+), status: [^,>]+(?:, date: ([^>]+))? -->/);
+          if (metaMatch) {
+            itemId = metaMatch[1].trim();
+            date = metaMatch[2]?.trim();
+            i++; // Skip metadata line
+          }
+        }
+
+        currentItem = {
+          id: itemId,
+          title: newFormatMatch[1].trim(),
+          status: newFormatMatch[2] as "success" | "failed" | "pending",
+          date,
+          content: [],
+        };
+        continue;
+      } else if (legacyMatch) {
+        flushItem();
+        const title = legacyMatch[1].trim();
+        const configStr = legacyMatch[2] || "";
         let status: "success" | "failed" | "pending" = "pending";
         let date: string | undefined;
 
-        // Parse config
         for (const part of configStr.split(";")) {
           const [key, value] = part.split(":").map((s) => s.trim());
           if (key === "status") {
@@ -411,33 +510,35 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
     for (const section of sortedSections) {
       lines.push(`<!-- Custom Section: ${section.title} -->`);
       lines.push(`<!-- section-id: ${section.id}, type: ${section.type} -->`);
+      lines.push("");
 
       if (section.type === "split-view" && section.config.splitView) {
-        lines.push("### Column 1");
-        for (const p of section.config.splitView.columns[0] || []) {
-          lines.push(p.content);
-        }
-        lines.push("");
-        lines.push("### Column 2");
-        for (const p of section.config.splitView.columns[1] || []) {
-          lines.push(p.content);
-        }
+        const columns = section.config.splitView.columns || [];
+        columns.forEach((column, idx) => {
+          lines.push(`### Column ${idx + 1}`);
+          lines.push(`<!-- column-index: ${idx} -->`);
+          lines.push("");
+          for (const p of column) {
+            this.serializeContentBlock(lines, p);
+          }
+        });
       } else if (section.type === "tabs" && section.config.tabs) {
         for (const tab of section.config.tabs) {
-          lines.push(`### ${tab.title}`);
-          for (const p of tab.content) {
-            lines.push(p.content);
-          }
+          lines.push(`### Tab: ${tab.title}`);
+          lines.push(`<!-- tab-id: ${tab.id} -->`);
           lines.push("");
+          for (const p of tab.content || []) {
+            this.serializeContentBlock(lines, p);
+          }
         }
       } else if (section.type === "timeline" && section.config.timeline) {
         for (const item of section.config.timeline) {
-          const config = `status: ${item.status}${item.date ? `; date: ${item.date}` : ""}`;
-          lines.push(`### ${item.title} {${config}}`);
-          for (const p of item.content) {
-            lines.push(p.content);
-          }
+          lines.push(`## ${item.title} (${item.status})`);
+          lines.push(`<!-- item-id: ${item.id}, status: ${item.status}${item.date ? `, date: ${item.date}` : ""} -->`);
           lines.push("");
+          for (const p of item.content || []) {
+            this.serializeContentBlock(lines, p);
+          }
         }
       }
 
@@ -446,6 +547,20 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
     }
 
     return lines.join("\n").trim();
+  }
+
+  /**
+   * Serialize a content block (paragraph) with proper code fencing.
+   */
+  private serializeContentBlock(lines: string[], p: NoteParagraph): void {
+    if (p.type === "code") {
+      lines.push(`\`\`\`${p.language || ""}`);
+      lines.push(p.content);
+      lines.push("```");
+    } else {
+      lines.push(p.content);
+    }
+    lines.push("");
   }
 
   /**
@@ -478,6 +593,7 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
       updatedAt: new Date().toISOString(),
       revision: existing.revision + 1,
     };
+
     await this.write(updated);
     return updated;
   }

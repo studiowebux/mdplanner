@@ -187,6 +187,10 @@ export class DirectoryMarkdownParser {
     return this.tasksParser.moveToSection(id, newSection);
   }
 
+  async reorderTask(id: string, section: string, position: number): Promise<boolean> {
+    return this.tasksParser.reorder(id, section, position);
+  }
+
   async toggleTask(id: string): Promise<Task | null> {
     const task = await this.tasksParser.read(id);
     if (!task) return null;

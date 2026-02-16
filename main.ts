@@ -3,7 +3,7 @@ import { serveStatic } from "hono/deno";
 import { ProjectManager } from "./src/lib/project-manager.ts";
 import { createApiRouter } from "./src/api/routes/index.ts";
 
-export const VERSION = "0.1.0";
+export const VERSION = "0.2.0";
 export const GITHUB_REPO = "studiowebux/mdplanner";
 
 // CLI argument parsing

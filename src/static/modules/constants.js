@@ -43,3 +43,19 @@ export const PROJECT_STATUS_LABELS = {
   'on-hold': 'On Hold',
   completed: 'Completed'
 };
+
+// Priority hex colors for inline styles (timeline, charts)
+export const PRIORITY_HEX_COLORS = {
+  1: { bg: '#111827', border: '#030712' },  // gray-900
+  2: { bg: '#374151', border: '#1f2937' },  // gray-700
+  3: { bg: '#6b7280', border: '#4b5563' },  // gray-500
+  4: { bg: '#9ca3af', border: '#6b7280' },  // gray-400
+  5: { bg: '#d1d5db', border: '#9ca3af' },  // gray-300
+  default: { bg: '#9ca3af', border: '#6b7280' },
+  overdue: { bg: '#ef4444', border: '#dc2626' }  // red-500
+};
+
+export function getTaskBarColors(priority, isOverdue) {
+  if (isOverdue) return PRIORITY_HEX_COLORS.overdue;
+  return PRIORITY_HEX_COLORS[priority] || PRIORITY_HEX_COLORS.default;
+}

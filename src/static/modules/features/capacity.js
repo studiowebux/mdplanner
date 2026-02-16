@@ -161,7 +161,7 @@ export class CapacityModule {
           </div>
           <div class="flex gap-1">
             <button onclick="taskManager.editTeamMember('${member.id}')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm">Edit</button>
-            <button onclick="taskManager.deleteTeamMember('${member.id}')" class="text-red-400 hover:text-red-600 text-sm">Del</button>
+            <button onclick="taskManager.deleteTeamMember('${member.id}')" class="text-red-400 hover:text-red-600 text-sm">Delete</button>
           </div>
         </div>
         <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">

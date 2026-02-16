@@ -9,6 +9,7 @@ import type { Task, TaskConfig, TimeEntry } from "../../types.ts";
 interface TaskFrontmatter {
   id: string;
   completed: boolean;
+  order?: number;
   tag?: string[];
   due_date?: string;
   assignee?: string;
@@ -96,6 +97,7 @@ export class TasksDirectoryParser {
 
   /**
    * Read all tasks from all sections.
+   * Returns tasks sorted by section, then by order within each section.
    */
   async readAll(): Promise<Task[]> {
     const sections = await this.listSections();
@@ -116,11 +118,16 @@ export class TasksDirectoryParser {
       }
     }
 
-    return tasks;
+    // Sort by order within each section
+    return tasks.sort((a, b) => {
+      const orderA = a.config.order ?? Infinity;
+      const orderB = b.config.order ?? Infinity;
+      return orderA - orderB;
+    });
   }
 
   /**
-   * Read tasks from a specific section.
+   * Read tasks from a specific section, sorted by order.
    */
   async readBySection(section: string): Promise<Task[]> {
     const files = await this.listTaskFiles(section);
@@ -138,23 +145,46 @@ export class TasksDirectoryParser {
       }
     }
 
-    return tasks;
+    // Sort by order (undefined orders go to end)
+    return tasks.sort((a, b) => {
+      const orderA = a.config.order ?? Infinity;
+      const orderB = b.config.order ?? Infinity;
+      return orderA - orderB;
+    });
   }
 
   /**
    * Read a single task by ID.
+   * Scans all task files to find the one with matching ID in frontmatter.
    */
   async read(id: string): Promise<Task | null> {
     const sections = await this.listSections();
 
     for (const section of sections) {
+      // First try direct file lookup by ID
       const filePath = this.getFilePath(id, section);
       try {
         const content = await Deno.readTextFile(filePath);
-        return this.parseFile(content, section);
+        const task = this.parseFile(content, section);
+        if (task && task.id === id) {
+          return task;
+        }
       } catch {
-        // Try next section
-        continue;
+        // File not found, continue
+      }
+
+      // Fallback: scan all files in section to find by frontmatter ID
+      const files = await this.listTaskFiles(section);
+      for (const file of files) {
+        try {
+          const content = await Deno.readTextFile(file);
+          const task = this.parseFile(content, section);
+          if (task && task.id === id) {
+            return task;
+          }
+        } catch {
+          continue;
+        }
       }
     }
 
@@ -163,33 +193,61 @@ export class TasksDirectoryParser {
 
   /**
    * Write a task. Creates section directory if needed.
+   * Cleans up old file if filename differs from expected (e.g., title-based vs ID-based naming).
    */
   async write(task: Task): Promise<void> {
     await this.ensureDir(task.section);
-    const filePath = this.getFilePath(task.id, task.section);
+    const expectedPath = this.getFilePath(task.id, task.section);
+
+    // Find actual current file path (may differ from expected if using old naming convention)
+    const actualPath = await this.findTaskFilePath(task.id, task.section);
+
     const content = this.serializeTask(task);
 
     await this.withWriteLock(task.id, async () => {
-      await this.atomicWriteFile(filePath, content);
+      await this.atomicWriteFile(expectedPath, content);
+
+      // Clean up old file if it has a different name
+      if (actualPath && actualPath !== expectedPath) {
+        try {
+          await Deno.remove(actualPath);
+        } catch {
+          // Ignore - file may already be removed
+        }
+      }
     });
   }
 
   /**
    * Delete a task by ID.
+   * Scans files to find the one with matching ID in frontmatter.
    */
   async delete(id: string): Promise<boolean> {
     const sections = await this.listSections();
 
     for (const section of sections) {
-      const filePath = this.getFilePath(id, section);
+      // First try direct file path
+      const directPath = this.getFilePath(id, section);
       try {
-        await Deno.remove(filePath);
+        await Deno.remove(directPath);
         return true;
-      } catch (error) {
-        if ((error as Deno.errors.NotFound)?.name === "NotFound") {
+      } catch {
+        // File not found at direct path
+      }
+
+      // Fallback: scan files to find by frontmatter ID
+      const files = await this.listTaskFiles(section);
+      for (const file of files) {
+        try {
+          const content = await Deno.readTextFile(file);
+          const task = this.parseFile(content, section);
+          if (task && task.id === id) {
+            await Deno.remove(file);
+            return true;
+          }
+        } catch {
           continue;
         }
-        throw error;
       }
     }
 
@@ -198,26 +256,139 @@ export class TasksDirectoryParser {
 
   /**
    * Move task to a different section.
+   * Finds the actual file path by scanning for the task ID in frontmatter.
    */
   async moveToSection(id: string, newSection: string): Promise<boolean> {
+    // Find the task and its actual file path
+    const oldSection = await this.findTaskSection(id);
+    if (!oldSection) return false;
+
     const task = await this.read(id);
     if (!task) return false;
 
-    const oldSection = task.section;
-    const oldPath = this.getFilePath(id, oldSection);
+    const oldFilePath = await this.findTaskFilePath(id, oldSection);
 
     // Update section and write to new location
     task.section = newSection;
     await this.write(task);
 
     // Remove from old location
-    try {
-      await Deno.remove(oldPath);
-    } catch {
-      // Ignore if already removed
+    if (oldFilePath) {
+      try {
+        await Deno.remove(oldFilePath);
+      } catch {
+        // Ignore if already removed
+      }
     }
 
     return true;
+  }
+
+  /**
+   * Reorder a task within or across sections.
+   * Updates order field for all affected tasks.
+   */
+  async reorder(taskId: string, targetSection: string, position: number): Promise<boolean> {
+    const task = await this.read(taskId);
+    if (!task) return false;
+
+    const sourceSection = task.section;
+    const isSameSection = sourceSection === targetSection;
+
+    // For cross-section moves: find and remember the old file path BEFORE modifications
+    // The write() function handles same-section filename cleanup
+    const oldFilePath = !isSameSection
+      ? await this.findTaskFilePath(taskId, sourceSection)
+      : null;
+
+    // Get tasks in target section (excluding the moved task if same section)
+    let targetTasks = await this.readBySection(targetSection);
+    if (isSameSection) {
+      targetTasks = targetTasks.filter(t => t.id !== taskId);
+    }
+
+    // Insert task at new position
+    const clampedPosition = Math.max(0, Math.min(position, targetTasks.length));
+    targetTasks.splice(clampedPosition, 0, task);
+
+    // Update order and section for all tasks, then write
+    // The write() function handles cleanup of mismatched filenames
+    for (let i = 0; i < targetTasks.length; i++) {
+      targetTasks[i].config.order = i;
+      targetTasks[i].section = targetSection;
+      await this.write(targetTasks[i]);
+    }
+
+    // Cross-section move: delete old file from source section
+    if (!isSameSection && oldFilePath) {
+      try {
+        await Deno.remove(oldFilePath);
+      } catch {
+        // Ignore - file may already be deleted
+      }
+
+      // Reorder remaining tasks in source section
+      const sourceTasks = await this.readBySection(sourceSection);
+      for (let i = 0; i < sourceTasks.length; i++) {
+        if (sourceTasks[i].config.order !== i) {
+          sourceTasks[i].config.order = i;
+          await this.write(sourceTasks[i]);
+        }
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Find which section a task is in.
+   */
+  private async findTaskSection(id: string): Promise<string | null> {
+    const sections = await this.listSections();
+    for (const section of sections) {
+      const files = await this.listTaskFiles(section);
+      for (const file of files) {
+        try {
+          const content = await Deno.readTextFile(file);
+          const task = this.parseFile(content, section);
+          if (task && task.id === id) {
+            return section;
+          }
+        } catch {
+          continue;
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Find the actual file path for a task by its ID.
+   */
+  private async findTaskFilePath(id: string, section: string): Promise<string | null> {
+    // First try direct path
+    const directPath = this.getFilePath(id, section);
+    try {
+      await Deno.stat(directPath);
+      return directPath;
+    } catch {
+      // Not found at direct path
+    }
+
+    // Scan files to find by frontmatter ID
+    const files = await this.listTaskFiles(section);
+    for (const file of files) {
+      try {
+        const content = await Deno.readTextFile(file);
+        const task = this.parseFile(content, section);
+        if (task && task.id === id) {
+          return file;
+        }
+      } catch {
+        continue;
+      }
+    }
+    return null;
   }
 
   /**
@@ -303,6 +474,7 @@ export class TasksDirectoryParser {
     if (frontmatter.planned_start) config.planned_start = frontmatter.planned_start;
     if (frontmatter.planned_end) config.planned_end = frontmatter.planned_end;
     if (frontmatter.time_entries) config.time_entries = frontmatter.time_entries;
+    if (frontmatter.order !== undefined) config.order = frontmatter.order;
 
     return {
       id: frontmatter.id,
@@ -335,6 +507,7 @@ export class TasksDirectoryParser {
     if (task.config.planned_start) frontmatter.planned_start = task.config.planned_start;
     if (task.config.planned_end) frontmatter.planned_end = task.config.planned_end;
     if (task.config.time_entries?.length) frontmatter.time_entries = task.config.time_entries;
+    if (task.config.order !== undefined) frontmatter.order = task.config.order;
 
     let body = `# ${task.title}\n\n`;
 
@@ -400,12 +573,12 @@ export class TasksDirectoryParser {
 
   /**
    * Update an existing task.
+   * The write() function handles file path cleanup automatically.
    */
   async update(id: string, updates: Partial<Task>): Promise<Task | null> {
     const existing = await this.read(id);
     if (!existing) return null;
 
-    // Handle section change
     const oldSection = existing.section;
     const newSection = updates.section || oldSection;
 
@@ -415,10 +588,11 @@ export class TasksDirectoryParser {
       id: existing.id, // Prevent ID change
     };
 
-    // If section changed, move the file
+    // If section changed, use moveToSection
     if (newSection !== oldSection) {
       await this.moveToSection(id, newSection);
     } else {
+      // write() handles cleanup of mismatched filenames
       await this.write(updated);
     }
 

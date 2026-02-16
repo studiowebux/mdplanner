@@ -2,18 +2,17 @@
 id: task_reporting
 completed: false
 tag: [feature]
+due_date: 2026-03-10
+assignee: charlie
 priority: 2
 effort: 12
-assignee: charlie
-due_date: 2026-03-10
 milestone: milestone_beta
+order: 1
 ---
 
 # Reporting Dashboard
 
 Build analytics dashboard for project insights.
-
-## Charts
 - Task completion over time
 - Time spent by project/assignee
 - Burndown chart

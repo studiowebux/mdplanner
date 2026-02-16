@@ -71,18 +71,24 @@ export abstract class DirectoryParser<T extends { id: string }> {
 
   /**
    * Read a single item by ID.
+   * First tries direct file lookup, then falls back to scanning all files.
    */
   async read(id: string): Promise<T | null> {
+    // Try direct file lookup first (fast path)
     const filePath = this.getFilePath(id);
     try {
       const content = await Deno.readTextFile(filePath);
-      return this.parseFile(content, filePath);
-    } catch (error) {
-      if ((error as Deno.errors.NotFound)?.name === "NotFound") {
-        return null;
+      const item = this.parseFile(content, filePath);
+      if (item && item.id === id) {
+        return item;
       }
-      throw error;
+    } catch {
+      // File not found by name, fall through to scan
     }
+
+    // Fall back to scanning all files for matching ID
+    const items = await this.readAll();
+    return items.find(item => item.id === id) || null;
   }
 
   /**
@@ -90,7 +96,29 @@ export abstract class DirectoryParser<T extends { id: string }> {
    */
   async write(item: T): Promise<void> {
     await this.ensureDir();
-    const filePath = this.getFilePath(item.id);
+
+    // Find existing file path by scanning for matching ID
+    let filePath = this.getFilePath(item.id);
+    try {
+      for await (const entry of Deno.readDir(this.sectionDir)) {
+        if (entry.isFile && entry.name.endsWith(".md")) {
+          const candidatePath = `${this.sectionDir}/${entry.name}`;
+          try {
+            const content = await Deno.readTextFile(candidatePath);
+            const parsed = this.parseFile(content, candidatePath);
+            if (parsed && parsed.id === item.id) {
+              filePath = candidatePath;
+              break;
+            }
+          } catch {
+            // Skip unparseable files
+          }
+        }
+      }
+    } catch {
+      // Directory doesn't exist yet, use default path
+    }
+
     const content = this.serializeItem(item);
 
     await this.withWriteLock(item.id, async () => {
@@ -102,7 +130,32 @@ export abstract class DirectoryParser<T extends { id: string }> {
    * Delete an item by ID.
    */
   async delete(id: string): Promise<boolean> {
-    const filePath = this.getFilePath(id);
+    // Find file by scanning for matching ID
+    let filePath: string | null = null;
+    try {
+      for await (const entry of Deno.readDir(this.sectionDir)) {
+        if (entry.isFile && entry.name.endsWith(".md")) {
+          const candidatePath = `${this.sectionDir}/${entry.name}`;
+          try {
+            const content = await Deno.readTextFile(candidatePath);
+            const parsed = this.parseFile(content, candidatePath);
+            if (parsed && parsed.id === id) {
+              filePath = candidatePath;
+              break;
+            }
+          } catch {
+            // Skip unparseable files
+          }
+        }
+      }
+    } catch {
+      return false;
+    }
+
+    if (!filePath) {
+      return false;
+    }
+
     try {
       await Deno.remove(filePath);
       return true;

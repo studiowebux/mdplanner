@@ -17,6 +17,7 @@ export interface TaskConfig {
   planned_start?: string;
   planned_end?: string;
   time_entries?: TimeEntry[];
+  order?: number;
 }
 
 export interface Task {

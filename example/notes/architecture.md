@@ -1,33 +1,12 @@
 ---
 id: note_architecture
-created: 2026-01-05T10:00:00Z
-updated: 2026-02-10T14:30:00Z
-revision: 3
+created: "2026-01-05T10:00:00Z"
+updated: "2026-02-16T02:39:51.384Z"
+revision: 7
 mode: enhanced
 ---
 
 # Architecture Overview
-
-<!-- Custom Section: Tech Stack -->
-<!-- section-id: section_stack, type: tabs -->
-### Frontend
-- React 18 with TypeScript
-- TailwindCSS for styling
-- Zustand for state management
-- React Query for server state
-
-### Backend
-- Deno with Hono framework
-- PostgreSQL database
-- Redis for caching
-- S3 for file storage
-
-### Infrastructure
-- AWS ECS for containers
-- CloudFront CDN
-- Route53 DNS
-- Terraform for IaC
-<!-- End Custom Section -->
 
 ## Key Decisions
 
@@ -41,3 +20,37 @@ mode: enhanced
 Primary entities: Users, Workspaces, Projects, Tasks, Comments, TimeEntries
 
 See C4 diagrams for detailed architecture views.
+
+<!-- Custom Section: Tech Stack -->
+<!-- section-id: section_stack, type: tabs -->
+
+### Tab: Frontend
+<!-- tab-id: tab_frontend -->
+
+- React 18 with TypeScript
+- TailwindCSS for styling
+- Zustand for state management
+- React Query for server state
+
+### Tab: Backend
+<!-- tab-id: tab_backend -->
+
+- Deno with Hono framework
+- PostgreSQL database
+- Redis for caching
+- S3 for file storage
+
+### Tab: Infrastructure
+<!-- tab-id: tab_infra -->
+
+- AWS ECS for containers
+- CloudFront CDN
+- Route53 DNS
+- Terraform for IaC
+
+### Tab: Hello
+<!-- tab-id: tab_1771209579776_zg0vszck1 -->
+
+Hello World !
+
+<!-- End Custom Section -->

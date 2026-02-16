@@ -1370,6 +1370,16 @@ export class EnhancedNotesModule {
     });
   }
 
+  // Debounced save for custom content (saves after 1 second of no typing)
+  scheduleCustomContentSave(contentId, content) {
+    if (this.customContentSaveTimeout) {
+      clearTimeout(this.customContentSaveTimeout);
+    }
+    this.customContentSaveTimeout = setTimeout(() => {
+      this.updateCustomContent(contentId, content);
+    }, 1000);
+  }
+
   // General Content Update/Delete
   updateCustomContent(contentId, content) {
     const currentNote = this.tm.notes[this.tm.activeNote];

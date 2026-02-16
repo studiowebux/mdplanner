@@ -74,15 +74,23 @@ tasksRouter.delete("/:id", async (c) => {
   return errorResponse("Task not found", 404);
 });
 
-// PATCH /tasks/:id/move - move task to section
+// PATCH /tasks/:id/move - move task to section with optional position
 tasksRouter.patch("/:id/move", async (c) => {
   const parser = getParser(c);
   const taskId = c.req.param("id");
-  const { section } = await c.req.json();
-  const success = await parser.updateTask(taskId, { section });
+  const { section, position } = await c.req.json();
 
-  if (success) {
-    return jsonResponse({ success: true });
+  // If position is provided, use reorder; otherwise just move section
+  if (position !== undefined && position !== null) {
+    const success = await parser.reorderTask(taskId, section, position);
+    if (success) {
+      return jsonResponse({ success: true });
+    }
+  } else {
+    const success = await parser.updateTask(taskId, { section });
+    if (success) {
+      return jsonResponse({ success: true });
+    }
   }
   return errorResponse("Task not found", 404);
 });

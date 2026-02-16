@@ -5,11 +5,16 @@ import { TasksAPI } from '../api.js';
 
 /**
  * Kanban board view with drag-drop between sections
+ * Pattern: Observer - TaskManager notifies views of state changes
  */
 export class BoardView {
   /** @param {TaskManager} taskManager */
   constructor(taskManager) {
     this.tm = taskManager;
+    this.eventsBound = false;
+    this.draggedTaskId = null;
+    this.draggedFromSection = null;
+    this.draggedFromIndex = null;
   }
 
   render() {
@@ -37,8 +42,8 @@ export class BoardView {
       return;
     }
 
-    // Use flex with horizontal scroll to keep all columns on same row
-    container.className = "flex gap-6 overflow-x-auto pb-4";
+    // Use flex with horizontal scroll, items-stretch ensures equal column heights
+    container.className = "flex gap-6 overflow-x-auto pb-4 items-stretch";
     container.innerHTML = "";
 
     sections.forEach((section) => {
@@ -47,35 +52,71 @@ export class BoardView {
         (task) => task.section === section && !task.parentId,
       );
 
-      // Create column with fixed width for consistent layout
+      // Column uses flex-col so task container can stretch to fill height
       const column = document.createElement("div");
       column.className =
-        "bg-white dark:bg-gray-800 rounded-lg shadow flex-shrink-0 w-80";
+        "bg-white dark:bg-gray-800 rounded-lg shadow flex-shrink-0 w-80 flex flex-col";
       column.innerHTML = `
                 <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                     <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">${section}</h3>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${sectionTasks.length} tasks</p>
                 </div>
-                <div class="p-4 min-h-96 space-y-3" data-section="${section}">
-                    <!-- Tasks will be populated here -->
+                <div class="p-4 min-h-48 flex-1 flex flex-col" data-section="${section}">
                 </div>
             `;
 
       const tasksContainer = column.querySelector("[data-section]");
-      sectionTasks.forEach((task) => {
+
+      // Add drop zone before first card
+      tasksContainer.appendChild(this.createDropZone(section, 0, false));
+
+      sectionTasks.forEach((task, index) => {
         const taskCard = this.createTaskElement(task);
         tasksContainer.appendChild(taskCard);
+        // Add drop zone after each card (last one should expand)
+        const isLast = index === sectionTasks.length - 1;
+        tasksContainer.appendChild(this.createDropZone(section, index + 1, isLast));
       });
+
+      // If no tasks, make the single drop zone expandable
+      if (sectionTasks.length === 0) {
+        const existingZone = tasksContainer.querySelector('.drop-zone');
+        if (existingZone) {
+          existingZone.classList.add('drop-zone-expand');
+          existingZone.style.flex = '1';
+          existingZone.style.minHeight = '48px';
+        }
+      }
 
       container.appendChild(column);
     });
+  }
+
+  createDropZone(section, position, expandable = false) {
+    const zone = document.createElement("div");
+    zone.className = expandable ? "drop-zone drop-zone-expand" : "drop-zone";
+    zone.dataset.section = section;
+    zone.dataset.position = position;
+    // Hidden by default, shown when dragging
+    // Last zone in each column expands to fill remaining space
+    zone.style.cssText = `
+      min-height: 8px;
+      border-radius: 4px;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    `;
+    if (expandable) {
+      zone.style.flex = '1';
+      zone.style.minHeight = '48px';
+    }
+    return zone;
   }
 
   createTaskElement(task) {
     const config = task.config || {};
     const div = document.createElement("div");
     div.className =
-      "task-card bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-3 cursor-move";
+      "task-card bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-3 cursor-move my-1";
     div.draggable = true;
     div.dataset.taskId = task.id;
 
@@ -192,47 +233,46 @@ export class BoardView {
     return div;
   }
 
-  // Drag and drop handlers
-  handleDragOver(e) {
-    e.preventDefault();
+  showDropZones() {
+    document.querySelectorAll('.drop-zone').forEach(zone => {
+      const isExpandable = zone.classList.contains('drop-zone-expand');
+      zone.style.background = 'rgba(59, 130, 246, 0.1)';
+      zone.style.border = '2px dashed #3b82f6';
+      zone.style.minHeight = isExpandable ? '48px' : '32px';
+      zone.style.margin = '4px 0';
+    });
   }
 
-  handleDragEnter(e) {
-    e.preventDefault();
-    const target = e.target.hasAttribute("data-section")
-      ? e.target
-      : e.target.closest("[data-section]");
-    if (target) {
-      target.classList.add("drag-over");
+  hideDropZones() {
+    document.querySelectorAll('.drop-zone').forEach(zone => {
+      const isExpandable = zone.classList.contains('drop-zone-expand');
+      zone.style.background = 'transparent';
+      zone.style.border = 'none';
+      zone.style.minHeight = isExpandable ? '48px' : '8px';
+      zone.style.margin = '0';
+    });
+  }
+
+  highlightDropZone(zone) {
+    // Reset all zones to default drag state
+    document.querySelectorAll('.drop-zone').forEach(z => {
+      z.style.background = 'rgba(59, 130, 246, 0.1)';
+      z.style.border = '2px dashed #3b82f6';
+    });
+    // Highlight active zone
+    if (zone) {
+      zone.style.background = '#3b82f6';
+      zone.style.border = '2px solid #3b82f6';
     }
   }
 
-  handleDragLeave(e) {
-    const target = e.target.hasAttribute("data-section")
-      ? e.target
-      : e.target.closest("[data-section]");
-    if (target) {
-      target.classList.remove("drag-over");
-    }
-  }
-
-  async handleDrop(e) {
-    e.preventDefault();
-    const taskId = e.dataTransfer.getData("text/plain");
-    const target = e.target.hasAttribute("data-section")
-      ? e.target
-      : e.target.closest("[data-section]");
-    const newSection = target ? target.dataset.section : null;
-
-    if (taskId && newSection) {
-      target.classList.remove("drag-over");
-      await this.moveTask(taskId, newSection);
-    }
-  }
-
-  async moveTask(taskId, newSection) {
+  async moveTask(taskId, newSection, position = null) {
     try {
-      const response = await TasksAPI.move(taskId, { section: newSection });
+      const payload = { section: newSection };
+      if (position !== null) {
+        payload.position = position;
+      }
+      const response = await TasksAPI.move(taskId, payload);
       if (response.ok) {
         await this.tm.loadTasks();
       } else {
@@ -244,64 +284,99 @@ export class BoardView {
   }
 
   bindEvents() {
-    // Drag event listeners for board columns and list drop zones
-    document.addEventListener("dragover", (e) => {
-      if (
-        e.target.hasAttribute("data-section") ||
-        e.target.closest("[data-section]")
-      ) {
-        this.handleDragOver(e);
-      }
-    });
+    // Guard: prevent binding events multiple times
+    if (this.eventsBound) return;
+    this.eventsBound = true;
 
-    document.addEventListener("drop", (e) => {
-      if (
-        e.target.hasAttribute("data-section") ||
-        e.target.closest("[data-section]")
-      ) {
-        this.handleDrop(e);
-      }
-    });
-
-    document.addEventListener("dragenter", (e) => {
-      if (
-        e.target.hasAttribute("data-section") ||
-        e.target.closest("[data-section]")
-      ) {
-        this.handleDragEnter(e);
-      }
-    });
-
-    document.addEventListener("dragleave", (e) => {
-      if (
-        e.target.hasAttribute("data-section") ||
-        e.target.closest("[data-section]")
-      ) {
-        this.handleDragLeave(e);
-      }
-    });
-
-    // Drag start/end listeners for task cards and list items
+    // Drag start - show all drop zones and track source info
     document.addEventListener("dragstart", (e) => {
       if (
         e.target.classList.contains("task-card") ||
         e.target.classList.contains("task-list-item")
       ) {
         e.target.classList.add("dragging");
+        e.target.style.opacity = "0.5";
         e.dataTransfer.setData("text/plain", e.target.dataset.taskId);
+        e.dataTransfer.effectAllowed = "move";
+
+        // Track where we're dragging from
+        this.draggedTaskId = e.target.dataset.taskId;
+        const container = e.target.closest('[data-section]');
+        if (container) {
+          this.draggedFromSection = container.dataset.section;
+          // Find the index of this card among its siblings
+          const cards = Array.from(container.querySelectorAll('.task-card'));
+          this.draggedFromIndex = cards.indexOf(e.target);
+
+        }
+
+        // Delay to allow drag image to be captured
+        setTimeout(() => this.showDropZones(), 0);
       }
     });
 
+    // Drag end - hide all drop zones and clear tracking
     document.addEventListener("dragend", (e) => {
       if (
         e.target.classList.contains("task-card") ||
         e.target.classList.contains("task-list-item")
       ) {
         e.target.classList.remove("dragging");
-        // Remove drag-over class from all elements
-        document
-          .querySelectorAll(".drag-over")
-          .forEach((el) => el.classList.remove("drag-over"));
+        e.target.style.opacity = "1";
+        this.hideDropZones();
+        this.draggedTaskId = null;
+        this.draggedFromSection = null;
+        this.draggedFromIndex = null;
+      }
+    });
+
+    // Drag over drop zone - highlight it
+    document.addEventListener("dragover", (e) => {
+      const dropZone = e.target.closest('.drop-zone');
+      if (dropZone) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        this.highlightDropZone(dropZone);
+      }
+    });
+
+    // Drag leave drop zone
+    document.addEventListener("dragleave", (e) => {
+      const dropZone = e.target.closest('.drop-zone');
+      if (dropZone && !dropZone.contains(e.relatedTarget)) {
+        dropZone.style.background = 'rgba(59, 130, 246, 0.1)';
+        dropZone.style.border = '2px dashed #3b82f6';
+      }
+    });
+
+    // Drop on zone
+    document.addEventListener("drop", (e) => {
+      const dropZone = e.target.closest('.drop-zone');
+      if (dropZone) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const taskId = e.dataTransfer.getData("text/plain");
+        const targetSection = dropZone.dataset.section;
+        const zonePosition = parseInt(dropZone.dataset.position, 10);
+        let position = zonePosition;
+
+        // For same-section moves: adjust position because backend filters out dragged card
+        const isSameSection = this.draggedFromSection === targetSection;
+
+        if (isSameSection && this.draggedFromIndex !== null && position > this.draggedFromIndex) {
+          position = position - 1;
+        }
+
+        this.hideDropZones();
+
+        if (taskId && targetSection !== undefined && !isNaN(position)) {
+          this.moveTask(taskId, targetSection, position);
+        }
+
+        this.draggedTaskId = null;
+        this.draggedFromSection = null;
+        this.draggedFromIndex = null;
       }
     });
   }

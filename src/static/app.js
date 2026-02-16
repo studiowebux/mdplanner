@@ -1364,6 +1364,10 @@ class TaskManager {
     await this.notesModule.deleteCurrent();
   }
 
+  async autoSaveNote() {
+    return this.notesModule.autoSave();
+  }
+
   // Note Sidenav - delegation to NoteSidenavModule
   openNewNoteSidenav() {
     this.noteSidenavModule.openNew();
@@ -1623,6 +1627,10 @@ class TaskManager {
 
   addContentToSplitView(sectionId, columnIndex, type) {
     this.enhancedNotesModule.addContentToSplitView(sectionId, columnIndex, type);
+  }
+
+  scheduleCustomContentSave(contentId, content) {
+    this.enhancedNotesModule.scheduleCustomContentSave(contentId, content);
   }
 
   updateCustomContent(contentId, content) {

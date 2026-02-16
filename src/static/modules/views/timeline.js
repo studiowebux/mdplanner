@@ -1,5 +1,5 @@
 // Timeline View Module
-import { getPriorityColor } from '../utils.js';
+import { getTaskBarColors } from '../constants.js';
 
 /**
  * Gantt chart view - task scheduling based on effort and dependencies
@@ -12,6 +12,10 @@ export class TimelineView {
 
   async render() {
     await this.tm.loadProjectConfig();
+    // Ensure tasks are loaded before generating timeline
+    if (!this.tm.tasks || this.tm.tasks.length === 0) {
+      await this.tm.loadTasks();
+    }
     this.updateConfig();
     this.generate();
   }
@@ -76,8 +80,18 @@ export class TimelineView {
       html +=
         '<div class="text-center text-gray-500 dark:text-gray-400 py-8">No tasks with effort estimates found</div>';
     } else {
+      // Calculate chart width for consistent header/rows alignment
+      const projectStart = new Date(Math.min(...scheduledTasks.map((t) => t.startDate)));
+      const projectEnd = new Date(Math.max(...scheduledTasks.map((t) => t.endDate)));
+      const totalDays = Math.ceil((projectEnd - projectStart) / (1000 * 60 * 60 * 24)) + 1;
+      const pixelsPerDay = 40;
+      const chartWidth = Math.max(800, totalDays * pixelsPerDay);
+
+      // Wrap both header and rows in same min-width container
+      html += `<div style="min-width: ${chartWidth}px">`;
       html += this.generateHeader(scheduledTasks);
-      html += this.generateRows(scheduledTasks);
+      html += this.generateRows(scheduledTasks, chartWidth);
+      html += '</div>';
     }
 
     html += "</div>";
@@ -90,7 +104,8 @@ export class TimelineView {
 
     const collectTasks = (tasks) => {
       for (const task of tasks) {
-        if (!task.config.effort || task.config.effort <= 0) {
+        const effort = Number(task.config?.effort);
+        if (!effort || effort <= 0) {
           tasksWithoutEffort.push(task);
         }
         if (task.children && task.children.length > 0) {
@@ -99,7 +114,7 @@ export class TimelineView {
       }
     };
 
-    collectTasks(this.tm.tasks);
+    collectTasks(this.tm.tasks || []);
     return tasksWithoutEffort;
   }
 
@@ -109,7 +124,8 @@ export class TimelineView {
     // Collect all tasks with effort estimates
     const collectTasks = (tasks) => {
       for (const task of tasks) {
-        if (task.config.effort && task.config.effort > 0 && !task.completed) {
+        const effort = Number(task.config?.effort);
+        if (effort > 0 && !task.completed) {
           allTasks.push(task);
         }
         if (task.children && task.children.length > 0) {
@@ -118,7 +134,7 @@ export class TimelineView {
       }
     };
 
-    collectTasks(this.tm.tasks);
+    collectTasks(this.tm.tasks || []);
 
     const scheduled = new Map(); // taskId -> scheduled task
     const projectStartDate = new Date(this.tm.projectConfig.startDate);
@@ -326,7 +342,7 @@ export class TimelineView {
     return html;
   }
 
-  generateRows(scheduledTasks) {
+  generateRows(scheduledTasks, chartWidth) {
     if (scheduledTasks.length === 0) return "";
 
     const projectStart = new Date(
@@ -338,11 +354,7 @@ export class TimelineView {
     const totalDays =
       Math.ceil((projectEnd - projectStart) / (1000 * 60 * 60 * 24)) + 1;
 
-    // Calculate minimum width for scrolling (40px per day, minimum 800px)
-    const pixelsPerDay = 40;
-    const chartWidth = Math.max(800, totalDays * pixelsPerDay);
-
-    let html = `<div style="min-width: ${chartWidth}px">`;
+    let html = '';
 
     scheduledTasks.forEach((task) => {
       const startOffset = Math.ceil(
@@ -353,12 +365,10 @@ export class TimelineView {
       const widthPercent = (duration / totalDays) * 100;
       const leftPercent = (startOffset / totalDays) * 100;
 
-      const priorityColor = getPriorityColor(task.config.priority);
-
       // Check if task is overdue
       const isOverdue =
         task.config.due_date && task.endDate > new Date(task.config.due_date);
-      const taskBarColor = isOverdue ? "red" : priorityColor;
+      const barColors = getTaskBarColors(task.config.priority, isOverdue);
 
       html +=
         '<div class="flex border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">';
@@ -408,7 +418,7 @@ export class TimelineView {
         });
       }
 
-      html += `<div class="absolute h-6 bg-${taskBarColor}-400 dark:bg-${taskBarColor}-500 rounded border border-${taskBarColor}-500 dark:border-${taskBarColor}-600${isOverdue ? " animate-pulse" : ""}" style="left: ${leftPercent}%; width: ${widthPercent}%; top: 50%; transform: translateY(-50%); z-index: 20;">`;
+      html += `<div class="absolute h-6 rounded${isOverdue ? " animate-pulse" : ""}" style="left: ${leftPercent}%; width: ${widthPercent}%; top: 50%; transform: translateY(-50%); z-index: 20; background-color: ${barColors.bg}; border: 1px solid ${barColors.border};">`;
       html += `<div class="px-2 py-1 text-xs text-white font-medium truncate">${task.startDate.toLocaleDateString()} - ${task.endDate.toLocaleDateString()}</div>`;
       html += `</div>`;
 
@@ -443,7 +453,6 @@ export class TimelineView {
       html += "</div>";
     });
 
-    html += "</div>"; // Close the min-width wrapper
     return html;
   }
 }
