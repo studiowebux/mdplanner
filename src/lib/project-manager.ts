@@ -1,103 +1,159 @@
-import { MarkdownParser } from "./markdown-parser.ts";
+import { DirectoryMarkdownParser } from "./parser/directory/parser.ts";
+import { CacheDatabase, CacheSync, SearchEngine } from "./cache/index.ts";
+
+/**
+ * ProjectManager - Manages a single directory-based project
+ * Pattern: Facade pattern for project operations
+ *
+ * The project path is passed via CLI argument.
+ * Directory must contain a project.md file.
+ */
 
 export interface ProjectMeta {
   filename: string;
   name: string;
+  description?: string;
+  status?: string;
+  category?: string;
+  client?: string;
+  revenue?: number;
+  expenses?: number;
   lastUpdated: string;
   taskCount: number;
+  completedTaskCount?: number;
+  progressPercent?: number;
+  isDirectory: boolean;
 }
 
-const EXCLUDED_FILES = [
-  "README.md",
-  "TODO.md",
-  "CHANGELOG.md",
-  "LICENSE.md",
-];
+export interface ProjectManagerOptions {
+  enableCache?: boolean;
+  dbPath?: string;
+}
 
-const EXCLUDED_PATTERNS = [
-  /^PLAN.*\.md$/i,
-  /^backup/i,
-];
+export interface CacheLayer {
+  db: CacheDatabase;
+  sync: CacheSync;
+  search: SearchEngine;
+}
 
 export class ProjectManager {
-  private directory: string;
-  private activeFile: string;
-  private parsers: Map<string, MarkdownParser> = new Map();
+  private projectPath: string;
+  private parser: DirectoryMarkdownParser;
+  private cache: CacheLayer | null = null;
 
-  constructor(directory: string = ".") {
-    this.directory = directory;
-    this.activeFile = "";
+  constructor(projectPath: string, options?: ProjectManagerOptions) {
+    this.projectPath = projectPath;
+    this.parser = new DirectoryMarkdownParser(projectPath);
+
+    if (options?.enableCache) {
+      const dbPath = options.dbPath ?? `${projectPath}/.mdplanner.db`;
+      const db = new CacheDatabase(dbPath);
+      const sync = new CacheSync(this.parser, db);
+      const search = new SearchEngine(db);
+      this.cache = { db, sync, search };
+    }
   }
 
   async init(): Promise<void> {
-    const projects = await this.scanProjects();
-    if (projects.length > 0) {
-      // Try to restore last active project from a simple marker file
-      const lastActive = await this.getLastActiveProject();
-      if (lastActive && projects.some(p => p.filename === lastActive)) {
-        this.activeFile = lastActive;
-      } else {
-        this.activeFile = projects[0].filename;
+    // Verify the project exists
+    const exists = await DirectoryMarkdownParser.isDirectoryProject(this.projectPath);
+    if (!exists) {
+      throw new Error(`Invalid project directory: ${this.projectPath} (missing project.md)`);
+    }
+
+    // Initialize cache if enabled
+    if (this.cache) {
+      this.cache.sync.init();
+      if (this.cache.sync.needsSync()) {
+        await this.cache.sync.fullSync();
       }
     }
   }
 
-  private async getLastActiveProject(): Promise<string | null> {
-    try {
-      const content = await Deno.readTextFile(`${this.directory}/.mdplanner_active`);
-      return content.trim();
-    } catch {
-      return null;
-    }
+  /**
+   * Get the active parser instance.
+   */
+  getActiveParser(): DirectoryMarkdownParser {
+    return this.parser;
   }
 
-  private async saveLastActiveProject(): Promise<void> {
-    try {
-      await Deno.writeTextFile(`${this.directory}/.mdplanner_active`, this.activeFile);
-    } catch {
-      // Ignore errors
-    }
+  /**
+   * Check if cache is enabled.
+   */
+  isCacheEnabled(): boolean {
+    return this.cache !== null;
   }
 
+  /**
+   * Get cache layer (null if not enabled).
+   */
+  getCache(): CacheLayer | null {
+    return this.cache;
+  }
+
+  /**
+   * Rebuild cache from markdown.
+   */
+  async rebuildCache(): Promise<{ tables: number; items: number; duration: number; errors: string[] } | null> {
+    if (!this.cache) return null;
+    return this.cache.sync.rebuild();
+  }
+
+  /**
+   * Get active project filename (directory name).
+   */
+  getActiveFile(): string {
+    const parts = this.projectPath.split("/");
+    return parts[parts.length - 1] || this.projectPath;
+  }
+
+  /**
+   * Check if active project is directory-based.
+   * Always true since we only support directory projects.
+   */
+  isActiveProjectDirectory(): boolean {
+    return true;
+  }
+
+  /**
+   * Get the active project directory path.
+   */
+  getActiveProjectDir(): string {
+    return this.projectPath;
+  }
+
+  /**
+   * Scan projects returns the single active project.
+   * Kept for API compatibility.
+   */
   async scanProjects(): Promise<ProjectMeta[]> {
-    const projects: ProjectMeta[] = [];
-
     try {
-      for await (const entry of Deno.readDir(this.directory)) {
-        if (!entry.isFile || !entry.name.endsWith(".md")) continue;
-        if (EXCLUDED_FILES.includes(entry.name)) continue;
-        if (EXCLUDED_PATTERNS.some(p => p.test(entry.name))) continue;
+      const projectInfo = await this.parser.readProjectInfo();
+      const config = await this.parser.readProjectConfig();
+      const tasks = await this.parser.readTasks();
 
-        const filePath = `${this.directory}/${entry.name}`;
+      const totalTasks = this.countTasks(tasks);
+      const completedTasks = this.countCompletedTasks(tasks);
 
-        try {
-          const parser = new MarkdownParser(filePath);
-          const projectInfo = await parser.readProjectInfo();
-          const config = await parser.readProjectConfig();
-          const tasks = await parser.readTasks();
-
-          projects.push({
-            filename: entry.name,
-            name: projectInfo.name || entry.name.replace(".md", ""),
-            lastUpdated: config.lastUpdated || "",
-            taskCount: this.countTasks(tasks),
-          });
-        } catch (e) {
-          console.warn(`Failed to parse ${entry.name}:`, e);
-        }
-      }
+      return [{
+        filename: this.getActiveFile(),
+        name: projectInfo.name || this.getActiveFile(),
+        description: (projectInfo.description || []).slice(0, 2).join(' ').slice(0, 150) || undefined,
+        status: config.status || "active",
+        category: config.category,
+        client: config.client,
+        revenue: config.revenue,
+        expenses: config.expenses,
+        lastUpdated: config.lastUpdated || "",
+        taskCount: totalTasks,
+        completedTaskCount: completedTasks,
+        progressPercent: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
+        isDirectory: true,
+      }];
     } catch (e) {
-      console.error("Failed to scan directory:", e);
+      console.error("Failed to read project:", e);
+      return [];
     }
-
-    // Sort by lastUpdated descending
-    projects.sort((a, b) => {
-      if (!a.lastUpdated) return 1;
-      if (!b.lastUpdated) return -1;
-      return b.lastUpdated.localeCompare(a.lastUpdated);
-    });
-
-    return projects;
   }
 
   private countTasks(tasks: any[]): number {
@@ -111,97 +167,16 @@ export class ProjectManager {
     return count;
   }
 
-  getActiveParser(): MarkdownParser {
-    if (!this.activeFile) {
-      throw new Error("No active project");
-    }
-
-    if (!this.parsers.has(this.activeFile)) {
-      const filePath = `${this.directory}/${this.activeFile}`;
-      this.parsers.set(this.activeFile, new MarkdownParser(filePath));
-    }
-
-    return this.parsers.get(this.activeFile)!;
-  }
-
-  async switchProject(filename: string): Promise<boolean> {
-    const projects = await this.scanProjects();
-    if (!projects.some(p => p.filename === filename)) {
-      return false;
-    }
-
-    this.activeFile = filename;
-    await this.saveLastActiveProject();
-    return true;
-  }
-
-  async createProject(name: string): Promise<string> {
-    // Sanitize filename
-    const safeName = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    let filename = `${safeName}.md`;
-
-    // Check for existing file
-    let counter = 1;
-    while (true) {
-      try {
-        await Deno.stat(`${this.directory}/${filename}`);
-        filename = `${safeName}-${counter}.md`;
-        counter++;
-      } catch {
-        break;
+  private countCompletedTasks(tasks: any[]): number {
+    let count = 0;
+    for (const task of tasks) {
+      if (task.completed) {
+        count++;
+      }
+      if (task.children) {
+        count += this.countCompletedTasks(task.children);
       }
     }
-
-    const template = `# ${name}
-
-Project description here.
-
-<!-- Configurations -->
-# Configurations
-
-Start Date: ${new Date().toISOString().split("T")[0]}
-Last Updated: ${new Date().toISOString()}
-
-Assignees:
-
-Tags:
-
-<!-- Notes -->
-# Notes
-
-<!-- Goals -->
-# Goals
-
-<!-- Canvas -->
-# Canvas
-
-<!-- Mindmap -->
-# Mindmap
-
-<!-- C4 Architecture -->
-# C4 Architecture
-
-<!-- Board -->
-# Board
-
-## Backlog
-
-## Todo
-
-## In Progress
-
-## Done
-
-`;
-
-    await Deno.writeTextFile(`${this.directory}/${filename}`, template);
-    this.activeFile = filename;
-    await this.saveLastActiveProject();
-
-    return filename;
-  }
-
-  getActiveFile(): string {
-    return this.activeFile;
+    return count;
   }
 }

@@ -17,6 +17,7 @@ export interface TaskConfig {
   planned_start?: string;
   planned_end?: string;
   time_entries?: TimeEntry[];
+  order?: number;
 }
 
 export interface Task {
@@ -136,6 +137,12 @@ export interface ProjectConfig {
   tags?: string[];
   lastUpdated?: string;
   links?: ProjectLink[];
+  status?: string;
+  statusComment?: string;
+  category?: string;
+  client?: string;
+  revenue?: number;
+  expenses?: number;
 }
 
 export interface Milestone {
@@ -149,7 +156,7 @@ export interface Milestone {
 export interface Idea {
   id: string;
   title: string;
-  status: "new" | "considering" | "planned" | "rejected";
+  status: "new" | "considering" | "planned" | "approved" | "rejected";
   category?: string;
   created: string;
   description?: string;
@@ -385,5 +392,78 @@ export interface Payment {
   date: string;
   method?: "bank" | "card" | "cash" | "other";
   reference?: string;
+  notes?: string;
+}
+
+// CRM Types
+
+export interface Company {
+  id: string;
+  name: string;
+  industry?: string;
+  website?: string;
+  phone?: string;
+  address?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+  };
+  notes?: string;
+  created: string;
+}
+
+export interface Contact {
+  id: string;
+  companyId: string;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone?: string;
+  title?: string;
+  isPrimary: boolean;
+  notes?: string;
+  created: string;
+}
+
+export interface Deal {
+  id: string;
+  companyId: string;
+  contactId?: string;
+  title: string;
+  value: number;
+  stage: "lead" | "qualified" | "proposal" | "negotiation" | "won" | "lost";
+  probability: number;
+  expectedCloseDate?: string;
+  notes?: string;
+  created: string;
+  closedAt?: string;
+}
+
+export interface Interaction {
+  id: string;
+  companyId: string;
+  contactId?: string;
+  dealId?: string;
+  type: "email" | "call" | "meeting" | "note";
+  summary: string;
+  date: string;
+  duration?: number;
+  nextFollowUp?: string;
+  notes?: string;
+}
+
+// Org Chart Types
+
+export interface OrgChartMember {
+  id: string;
+  name: string;
+  title: string;
+  department: string;
+  reportsTo?: string;
+  email?: string;
+  phone?: string;
+  startDate?: string;
   notes?: string;
 }

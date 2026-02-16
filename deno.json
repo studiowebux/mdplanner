@@ -1,13 +1,24 @@
 {
   "tasks": {
-    "dev": "deno run --allow-net --allow-read --allow-write --allow-env --watch main.ts",
-    "start": "deno run --allow-net --allow-read --allow-write --allow-env main.ts"
+    "dev": "deno run --allow-net --allow-read --allow-write --allow-env --watch main.ts ./example",
+    "start": "deno run --allow-net --allow-read --allow-write --allow-env main.ts",
+    "test": "deno test --allow-read --allow-write --allow-env tests/",
+    "test:watch": "deno test --allow-read --allow-write --allow-env --watch tests/",
+    "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --include ./src/static --output mdplanner main.ts",
+    "compile:linux": "deno compile --allow-net --allow-read --allow-write --allow-env --include ./src/static --target x86_64-unknown-linux-gnu --output dist/mdplanner-linux main.ts",
+    "compile:macos-intel": "deno compile --allow-net --allow-read --allow-write --allow-env --include ./src/static --target x86_64-apple-darwin --output dist/mdplanner-macos-intel main.ts",
+    "compile:macos-arm": "deno compile --allow-net --allow-read --allow-write --allow-env --include ./src/static --target aarch64-apple-darwin --output dist/mdplanner-macos-arm main.ts",
+    "compile:windows": "deno compile --allow-net --allow-read --allow-write --allow-env --include ./src/static --target x86_64-pc-windows-msvc --output dist/mdplanner-windows main.ts",
+    "compile:all": "mkdir -p dist && deno task compile:linux && deno task compile:macos-intel && deno task compile:macos-arm && deno task compile:windows"
   },
   "imports": {
     "deno/http": "https://deno.land/std@0.224.0/http/server.ts",
     "deno/http/file_server": "https://deno.land/std@0.224.0/http/file_server.ts",
     "@std/path": "jsr:@std/path@^1.0.0",
-    "@std/fs": "jsr:@std/fs@^1.0.0"
+    "@std/fs": "jsr:@std/fs@^1.0.0",
+    "hono": "jsr:@hono/hono@^4",
+    "hono/cors": "jsr:@hono/hono@^4/cors",
+    "hono/deno": "jsr:@hono/hono@^4/deno"
   },
   "compilerOptions": {
     "strict": true,

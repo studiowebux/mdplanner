@@ -1,0 +1,247 @@
+/* ==========================================================================
+   Enhanced Notes Styles
+
+   Paragraph editor, custom sections (tabs, timeline, split-view).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Paragraph Sections
+   -------------------------------------------------------------------------- */
+
+.paragraph-section {
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    background: var(--color-bg-primary);
+    transition: all var(--transition-base);
+    position: relative;
+}
+
+.paragraph-section:hover {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-sm);
+}
+
+.paragraph-section.selected {
+    border-color: var(--color-accent);
+    background-color: var(--color-bg-tertiary);
+    box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.15);
+}
+
+.paragraph-section.dragging {
+    opacity: 0.6;
+    transform: rotate(2deg);
+}
+
+/* --------------------------------------------------------------------------
+   Paragraph Controls
+   -------------------------------------------------------------------------- */
+
+.paragraph-controls {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: none;
+    gap: 4px;
+}
+
+.paragraph-section:hover .paragraph-controls {
+    display: flex;
+}
+
+/* --------------------------------------------------------------------------
+   Paragraph Drag Handle
+   -------------------------------------------------------------------------- */
+
+.paragraph-handle {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: grab;
+    color: var(--color-text-muted);
+    display: none;
+}
+
+.paragraph-section:hover .paragraph-handle {
+    display: block;
+}
+
+.paragraph-handle:active {
+    cursor: grabbing;
+}
+
+/* --------------------------------------------------------------------------
+   Code Blocks
+   -------------------------------------------------------------------------- */
+
+.code-block {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+}
+
+.language-selector {
+    position: absolute;
+    top: 8px;
+    right: 80px;
+    font-size: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   Custom Sections Container
+   -------------------------------------------------------------------------- */
+
+.custom-section {
+    border: 2px dashed var(--color-border-strong);
+    border-radius: 12px;
+    padding: 20px;
+    background: var(--color-bg-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   Tabs
+   -------------------------------------------------------------------------- */
+
+.tab-header {
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border-strong);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.tab-header:hover {
+    background: var(--color-bg-hover);
+}
+
+.tab-header.active {
+    background: var(--color-bg-inverse);
+    color: var(--color-text-inverse);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.tab-content-area {
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+}
+
+/* --------------------------------------------------------------------------
+   Timeline
+   -------------------------------------------------------------------------- */
+
+.timeline-item {
+    border-left: 4px solid var(--color-border-default);
+    padding-left: 16px;
+    margin-bottom: 16px;
+    position: relative;
+}
+
+.timeline-item.success {
+    border-left-color: var(--color-accent);
+}
+
+.timeline-item.failed {
+    border-left-color: var(--color-text-muted);
+}
+
+.timeline-item.pending {
+    border-left-color: var(--color-text-muted);
+    border-left-style: dashed;
+}
+
+.timeline-item.in-progress {
+    border-left-color: var(--color-info);
+}
+
+/* Timeline dot */
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 8px;
+    width: 12px;
+    height: 12px;
+    border-radius: var(--radius-full);
+    background: currentColor;
+}
+
+.timeline-item.success::before {
+    background: var(--color-accent);
+}
+
+.timeline-item.failed::before {
+    background: var(--color-text-muted);
+}
+
+.timeline-item.pending::before {
+    background: var(--color-bg-primary);
+    border: 2px solid var(--color-text-muted);
+}
+
+.timeline-item.in-progress::before {
+    background: var(--color-info);
+}
+
+/* --------------------------------------------------------------------------
+   Split View
+   -------------------------------------------------------------------------- */
+
+.split-view-column {
+    flex: 1;
+    min-height: 200px;
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin: 0 8px;
+    background: var(--color-bg-primary);
+}
+
+.split-view-column:first-child {
+    margin-left: 0;
+}
+
+.split-view-column:last-child {
+    margin-right: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Multi-select Floating Bar
+   -------------------------------------------------------------------------- */
+
+.multi-select-bar {
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border-strong);
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius-lg);
+    padding: var(--space-sm) var(--space-md);
+}
+
+/* --------------------------------------------------------------------------
+   File Drop Zone
+   -------------------------------------------------------------------------- */
+
+.file-drop-zone {
+    background: var(--color-bg-secondary);
+    border: 2px dashed var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    text-align: center;
+    transition: all var(--transition-fast);
+}
+
+.file-drop-zone.drag-over {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-accent);
+}

@@ -1,4 +1,4 @@
-import { MarkdownParser } from "../lib/markdown-parser.ts";
+import { DirectoryMarkdownParser } from "../lib/parser/directory/parser.ts";
 import { ProjectManager } from "../lib/project-manager.ts";
 import { Task } from "../lib/types.ts";
 import { VERSION, GITHUB_REPO } from "../../main.ts";
@@ -10,7 +10,7 @@ export class TaskAPI {
     this.projectManager = projectManager;
   }
 
-  private get parser(): MarkdownParser {
+  private get parser(): DirectoryMarkdownParser {
     return this.projectManager.getActiveParser();
   }
 
@@ -2226,7 +2226,13 @@ export class TaskAPI {
     for (let i = 1; i < lines.length; i++) {
       const values = this.parseCSVLine(lines[i]);
       if (values.length >= 5) {
-        const stickyNote = {
+        const stickyNote: {
+          id: string;
+          content: string;
+          color: string;
+          position: { x: number; y: number };
+          size?: { width: number; height: number };
+        } = {
           id: values[0] || `sticky_note_${Date.now()}_${i}`,
           content: values[1] || "",
           color: values[2] || "yellow",
@@ -2559,7 +2565,7 @@ export class TaskAPI {
     <div class="section">
         <h2>Goals</h2>
         ${
-          projectInfo.goals.map((goal) => `
+          projectInfo.goals.map((goal: { title: string; type: string; status: string; kpi: string; startDate: string; endDate: string; description?: string }) => `
             <div class="goal-item">
                 <div class="goal-title">${goal.title}</div>
                 <div class="goal-meta">

@@ -1,0 +1,258 @@
+/**
+ * Org Chart View Styles.
+ * Tree and Card views for organizational chart.
+ */
+
+/* Tree View Container */
+.orgchart-tree {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  min-height: 400px;
+}
+
+/* Node Wrapper - contains node and children */
+.orgchart-node-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Tree Node */
+.orgchart-node {
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  min-width: 180px;
+  max-width: 220px;
+  cursor: pointer;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.orgchart-node:hover {
+  border-color: var(--color-text-muted);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+.orgchart-node.level-0 {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.orgchart-node.level-0 .orgchart-node-name,
+.orgchart-node.level-0 .orgchart-node-title,
+.orgchart-node.level-0 .orgchart-node-dept {
+  color: white;
+}
+
+/* Node Header with Department Color Indicator */
+.orgchart-node-header {
+  padding-left: 0.5rem;
+  position: relative;
+}
+
+.orgchart-node-name {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  margin-bottom: 0.125rem;
+}
+
+.orgchart-node-title {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.125rem;
+}
+
+.orgchart-node-dept {
+  font-size: 0.625rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Children Container */
+.orgchart-children {
+  display: flex;
+  gap: 1.5rem;
+  padding-top: 2rem;
+  position: relative;
+}
+
+/* Connector Lines */
+.orgchart-children::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 1rem;
+  background-color: var(--color-border);
+}
+
+.orgchart-node-wrapper:not(:first-child):not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: -1rem;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--color-border);
+}
+
+/* Card View */
+.orgchart-card-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.orgchart-department-section {
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.orgchart-department-header {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  padding: 0.75rem 1rem;
+  background-color: var(--color-bg-muted);
+}
+
+.orgchart-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.orgchart-card {
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.orgchart-card:hover {
+  border-color: var(--color-text-muted);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+.orgchart-card-name {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--color-text);
+  margin-bottom: 0.25rem;
+}
+
+.orgchart-card-title {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.orgchart-card-email {
+  font-size: 0.75rem;
+  color: var(--color-primary);
+  margin-bottom: 0.25rem;
+}
+
+.orgchart-card-reports {
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Drag Handle */
+.orgchart-drag-handle {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.2s;
+  letter-spacing: -0.1em;
+}
+
+.orgchart-node:hover .orgchart-drag-handle {
+  opacity: 0.6;
+}
+
+.orgchart-drag-handle:hover {
+  opacity: 1 !important;
+}
+
+/* Drag States */
+.orgchart-node[draggable="true"] {
+  cursor: grab;
+}
+
+.orgchart-node.orgchart-dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.orgchart-node.orgchart-drop-target {
+  border-color: var(--color-primary);
+  border-width: 2px;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.orgchart-node.orgchart-drop-invalid {
+  border-color: var(--color-error-text);
+  border-width: 2px;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+  cursor: not-allowed;
+}
+
+/* Root Drop Zone */
+#orgchartContainer.orgchart-root-drop-zone {
+  background-color: rgba(59, 130, 246, 0.05);
+  border: 2px dashed var(--color-primary);
+  border-radius: 0.5rem;
+}
+
+#orgchartContainer.orgchart-root-drop-zone::after {
+  content: 'Drop here to make root (no manager)';
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: var(--color-primary);
+  background: var(--color-bg);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-primary);
+}
+
+/* Dark Mode Adjustments */
+[data-theme="dark"] .orgchart-node {
+  background-color: var(--color-bg-muted);
+}
+
+[data-theme="dark"] .orgchart-node.level-0 {
+  background-color: var(--color-primary);
+}
+
+[data-theme="dark"] .orgchart-card {
+  background-color: var(--color-bg-muted);
+}
+
+[data-theme="dark"] .orgchart-node.orgchart-drop-target {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+[data-theme="dark"] .orgchart-node.orgchart-drop-invalid {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+}

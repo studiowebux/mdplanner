@@ -1,0 +1,90 @@
+/* ==========================================================================
+   Strategic Levels Styles
+
+   Tree view and pyramid view for strategic planning.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Strategic Tree View
+   -------------------------------------------------------------------------- */
+
+.strategic-tree-node {
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+
+.strategic-tree-connector {
+    position: absolute;
+    left: -20px;
+    top: 14px;
+    color: var(--color-border-strong);
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1;
+    user-select: none;
+}
+
+/* Ensure tree nodes at depth > 0 have visible connectors */
+.strategic-tree-node[style*="margin-left"] .strategic-tree-connector {
+    display: inline-block;
+}
+
+/* --------------------------------------------------------------------------
+   Strategic Pyramid View
+   -------------------------------------------------------------------------- */
+
+.strategic-pyramid {
+    padding: var(--space-md) 0;
+}
+
+.pyramid-row {
+    transition: all var(--transition-base);
+}
+
+.pyramid-card {
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-md);
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.pyramid-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* --------------------------------------------------------------------------
+   Strategic Level Type Colors (border-left accents)
+   -------------------------------------------------------------------------- */
+
+.border-l-purple-500 { border-left-color: #8b5cf6; }
+.border-l-blue-500 { border-left-color: #3b82f6; }
+.border-l-green-500 { border-left-color: #22c55e; }
+.border-l-yellow-500 { border-left-color: #eab308; }
+.border-l-orange-500 { border-left-color: #f97316; }
+.border-l-red-500 { border-left-color: #ef4444; }
+
+/* Level-specific styling */
+.strategic-vision {
+    border-left: 4px solid #8b5cf6;
+}
+
+.strategic-mission {
+    border-left: 4px solid #3b82f6;
+}
+
+.strategic-objective {
+    border-left: 4px solid #22c55e;
+}
+
+.strategic-key-result {
+    border-left: 4px solid #eab308;
+}
+
+.strategic-initiative {
+    border-left: 4px solid #f97316;
+}
+
+.strategic-project {
+    border-left: 4px solid #ef4444;
+}

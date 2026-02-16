@@ -1,0 +1,296 @@
+/* ==========================================================================
+   C4 Architecture Styles
+
+   C4 diagram components and connections.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   C4 Components Container
+   -------------------------------------------------------------------------- */
+
+#c4ComponentsContainer {
+    position: absolute;
+    inset: 0;
+    transform-origin: 0 0;
+}
+
+/* --------------------------------------------------------------------------
+   C4 Components
+   -------------------------------------------------------------------------- */
+
+.c4-component {
+    position: absolute;
+    background: var(--color-bg-primary);
+    border: 2px solid var(--color-border-strong);
+    border-radius: 12px;
+    padding: 12px 16px;
+    box-shadow: var(--shadow-md);
+    cursor: pointer;
+    user-select: none;
+    transition: all var(--transition-base);
+    width: 180px;
+    max-width: 180px;
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.c4-component:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-accent);
+}
+
+.c4-component.dragging {
+    cursor: grabbing !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    opacity: 0.9;
+}
+
+/* C4 Level colors - prefixed to avoid Tailwind collision */
+.c4-component.c4-level-context {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-accent);
+}
+
+.c4-component.c4-level-container {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-border-strong);
+}
+
+.c4-component.c4-level-component {
+    background: var(--color-bg-primary);
+    border-color: var(--color-text-muted);
+}
+
+.c4-component.c4-level-code {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-text-muted);
+}
+
+/* Dark theme */
+.dark .c4-component,
+.theme-dark .c4-component {
+    background: #1f2937;
+    color: #f3f4f6;
+    border-color: #4b5563;
+}
+
+.dark .c4-component:hover,
+.theme-dark .c4-component:hover {
+    border-color: #9ca3af;
+}
+
+.dark .c4-component.c4-level-context,
+.theme-dark .c4-component.c4-level-context {
+    background: #1f2937;
+    border-color: #6b7280;
+}
+
+.dark .c4-component.c4-level-container,
+.theme-dark .c4-component.c4-level-container {
+    background: #374151;
+    border-color: #6b7280;
+}
+
+.dark .c4-component.c4-level-component,
+.theme-dark .c4-component.c4-level-component {
+    background: #4b5563;
+    border-color: #9ca3af;
+}
+
+.dark .c4-component.c4-level-code,
+.theme-dark .c4-component.c4-level-code {
+    background: #6b7280;
+    border-color: #9ca3af;
+}
+
+/* --------------------------------------------------------------------------
+   C4 Component Text
+   -------------------------------------------------------------------------- */
+
+.c4-component-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.c4-component-type {
+    font-size: 11px;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.c4-component-description {
+    font-size: 11px;
+    opacity: 0.85;
+    line-height: 1.3;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* --------------------------------------------------------------------------
+   C4 Drilldown Indicator
+   -------------------------------------------------------------------------- */
+
+.c4-component-drilldown {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 16px;
+    height: 16px;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-hover);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    color: var(--color-text-secondary);
+}
+
+.dark .c4-component-drilldown,
+.theme-dark .c4-component-drilldown {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   C4 Component Controls
+   -------------------------------------------------------------------------- */
+
+.c4-component-controls {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    display: none;
+    gap: 2px;
+    z-index: 10;
+}
+
+.c4-component:hover .c4-component-controls {
+    display: flex;
+}
+
+.c4-edit-btn,
+.c4-delete-btn {
+    background: rgba(0, 0, 0, 0.6);
+    border: none;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.c4-edit-btn:hover,
+.c4-delete-btn:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.dark .c4-edit-btn,
+.dark .c4-delete-btn,
+.theme-dark .c4-edit-btn,
+.theme-dark .c4-delete-btn {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.dark .c4-edit-btn:hover,
+.dark .c4-delete-btn:hover,
+.theme-dark .c4-edit-btn:hover,
+.theme-dark .c4-delete-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   C4 Connections (SVG)
+   -------------------------------------------------------------------------- */
+
+.c4-connection {
+    stroke: var(--color-text-muted);
+    stroke-width: 2;
+    fill: none;
+    marker-end: url(#arrowhead);
+}
+
+.c4-connection-label {
+    font-size: 11px;
+    fill: var(--color-text-muted);
+    text-anchor: middle;
+}
+
+.dark .c4-connection,
+.theme-dark .c4-connection {
+    stroke: var(--color-text-muted);
+}
+
+.dark .c4-connection-label,
+.theme-dark .c4-connection-label {
+    fill: var(--color-text-muted);
+}
+
+/* Hide connections when not in C4 view */
+body:not([data-current-view="c4"]) #c4Connections {
+    display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   C4 Breadcrumb Navigation
+   -------------------------------------------------------------------------- */
+
+.c4-breadcrumb-item {
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition-fast);
+}
+
+.c4-breadcrumb-item:hover {
+    background: var(--color-bg-hover);
+}
+
+.c4-breadcrumb-separator {
+    margin: 0 4px;
+    color: var(--color-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   C4 Target Dropdown (for connections)
+   -------------------------------------------------------------------------- */
+
+.c4-target-dropdown {
+    box-shadow: var(--shadow-lg);
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-md);
+}
+
+.c4-target-dropdown-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--color-border-default);
+}
+
+.c4-target-dropdown-item:hover {
+    background: var(--color-bg-hover);
+}
+
+.c4-target-dropdown-item:last-child {
+    border-bottom: none;
+}

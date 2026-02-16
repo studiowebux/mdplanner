@@ -1,13 +1,12 @@
 # MD Planner
 
 Markdown powered task manager tool.
-
 <!-- Configurations -->
 # Configurations
 
 Start Date: 2025-08-17
 Working Days: 7
-Last Updated: 2026-02-12T05:45:11.021Z
+Last Updated: 2026-02-14T20:12:25.742Z
 
 Assignees:
 - Alice
@@ -98,13 +97,17 @@ Enter your text here
 
 <!-- End Custom Section -->
 
+## Test Enhanced Note
+
+<!-- id: note_1 | created: 2026-02-14T04:07:09.767Z | updated: 2026-02-14T04:07:09.767Z | rev: 1 -->
+Hello World
+
 <!-- Goals -->
 # Goals
 
 ## 100 MAU {type: project; kpi: onboard 100 MAU; start: 2025-08-17; end: 2026-01-01; status: planning}
 
 <!-- id: goal_1 -->
-
 ## Maintenance plan and new release weekly {type: enterprise; kpi: Release every weeks; start: 2025-08-17; end: 2025-12-01; status: on-track}
 
 <!-- id: goal_2 -->
@@ -113,7 +116,7 @@ Enter your text here
 <!-- Canvas -->
 # Canvas
 
-## Sticky note {color: yellow; position: {x: 158, y: 100}; size: {width: 150, height: 100}}
+## Sticky note {color: yellow; position: {x: 258, y: 43}; size: {width: 150, height: 100}}
 
 <!-- id: sticky_note_1 -->
 Todos
@@ -125,10 +128,14 @@ On Going
 
 <!-- id: sticky_note_3 -->
 Done
-## Sticky note {color: purple; position: {x: 161, y: 260}; size: {width: 760, height: 124}}
+## Sticky note {color: purple; position: {x: 161, y: 260}; size: {width: 0, height: 0}}
 
 <!-- id: sticky_note_4 -->
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+## Sticky note {color: purple; position: {x: 941, y: 154}; size: {width: 0, height: 0}}
+
+<!-- id: sticky_note_5 -->
+New Sticky
 <!-- Mindmap -->
 # Mindmap
 
@@ -152,10 +159,19 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
     - John Doe
     - Jane Doe
 
+## Testing mm
+
+<!-- id: mindmap_3 -->
+
+- Hello
+  - World
+  - Bonjour
+    - Monde
+
 <!-- C4 Architecture -->
 # C4 Architecture
 
-## Context 1 {level: context; type: System; position: {x: 263, y: 243}}
+## Context 1 {level: context; type: System; position: {x: 839, y: 274}}
 
 <!-- id: c4_component_1 -->
 
@@ -178,184 +194,9 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 ## Component 2 {level: component; type: Component; position: {x: 121, y: 275}; parent: c4_component_3}
 
 <!-- id: c4_component_5 -->
-
-
 <!-- SWOT Analysis -->
-# SWOT Analysis
 
-## MD Planner Product
-<!-- id: swot_001 -->
-Date: 2026-02-12
-
-### Strengths
-- Single markdown file storage
-- No database required
-- Human-readable data format
-- Lightweight and portable
-- Full offline capability
-
-### Weaknesses
-- Limited concurrent user support
-- No real-time collaboration
-- File-based storage limits scalability
-
-### Opportunities
-- Obsidian plugin integration
-- SQLite backend option
-- Team collaboration features
-- Mobile app development
-
-### Threats
-- Established competitors (Notion, Linear)
-- Users preferring cloud-based solutions
-- Markdown format limitations for complex data
-
-<!-- Risk Analysis -->
-# Risk Analysis
-
-## test
-<!-- id: dbdc2be8 -->
-Date: 2026-02-12
-
-### High Impact / High Probability
-
-### High Impact / Low Probability
-
-### Low Impact / High Probability
-- breaking the code
-
-### Low Impact / Low Probability
-
-
-<!-- Business Model Canvas -->
-# Business Model Canvas
-
-## Test
-<!-- id: fd1947c5 -->
-Date: 2026-02-12
-
-### Key Partners
-
-### Key Activities
-
-### Key Resources
-
-### Value Proposition
-
-### Customer Relationships
-
-### Channels
-
-### Customer Segments
-
-### Cost Structure
-
-### Revenue Streams
-
-
-<!-- Lean Canvas -->
-# Lean Canvas
-
-## Test
-<!-- id: 41c9fb81 -->
-Date: 2026-02-12
-
-### Problem
-
-### Solution
-
-### Unique Value Proposition
-
-### Unfair Advantage
-
-### Customer Segments
-
-### Existing Alternatives
-
-### Key Metrics
-
-### High-Level Concept
-
-### Channels
-
-### Early Adopters
-
-### Cost Structure
-
-### Revenue Streams
-
-
-<!-- Retrospectives -->
-# Retrospectives
-
-## Test
-<!-- id: 80d76c17 -->
-Date: 2026-02-12
-Status: open
-
-### Continue
-
-### Stop
-
-### Start
-
-
-<!-- Strategic Levels -->
-# Strategic Levels
-
-
-<!-- Customers -->
-# Customers
-
-## Fresh Customer
-<!-- id: a1c2af0b -->
-Email: fresh@example.com
-Created: 2026-02-13
-
-
-<!-- Billing Rates -->
-# Billing Rates
-
-## Standard
-<!-- id: ad995b4a -->
-Hourly Rate: 100
-Default: true
-
-
-<!-- Quotes -->
-# Quotes
-
-## Test Quote
-<!-- id: 2cd50f8d -->
-Number: Q-2026-001
-Customer: a1c2af0b
-Status: draft
-Created: 2026-02-13
-
-### Line Items
-- [line1] Development | Qty: 10 | Rate: 100 | Amount: 1000
-
-
-<!-- Ideas -->
-# Ideas
-
-## Idea Alpha
-<!-- id: d803f749 -->
-<!-- links: d91cfde3,3c394ffa -->
-Status: new
-Created: 2026-02-13
-
-## Idea Beta
-<!-- id: d91cfde3 -->
-Status: considering
-Created: 2026-02-13
-
-## Idea Gamma
-<!-- id: 3c394ffa -->
-Status: planned
-Created: 2026-02-13
-
-
+<!-- Board -->
 # Board
 
 ## Todo
@@ -370,11 +211,13 @@ Created: 2026-02-13
 
 ## In Progress
 
+- [ ] (4) Testing migration {tag: [Backend]; due_date: 2026-02-13T23; assignee: Bob; priority: 1; effort: 1; blocked_by: [1]; milestone: M1; planned_end: 2026-02-20}
+  Testing the Whole UI
 - [ ] (1) backup {tag: [Backend]; due_date: 2025-08-27T13; assignee: Jane Doe; priority: 2}
-- [ ] (test1) Simple Test Task {tag: [Test]; due_date: 2025-08-22; assignee: Test User; priority: 1; effort: 1; milestone: Test}
-  Test description
 
 ## Done
 
 - [ ] (3) Almost ready ! {tag: [Bug]; assignee: Bob; priority: 1}
+- [ ] (test1) Simple Test Task {tag: [Test]; due_date: 2025-08-22; assignee: Test User; priority: 1; effort: 1; milestone: Test}
+  Test description
 

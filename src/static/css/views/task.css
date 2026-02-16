@@ -1,0 +1,75 @@
+/* ==========================================================================
+   Task Styles
+
+   Task cards, list items, and drag/drop functionality.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Task Cards (Board View)
+   -------------------------------------------------------------------------- */
+
+.task-card {
+    background-color: var(--color-bg-primary);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+    transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+
+.task-card:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-border-strong);
+}
+
+.task-card.dragging {
+    opacity: 0.5;
+    transform: rotate(2deg);
+}
+
+/* --------------------------------------------------------------------------
+   Task List Items (List View)
+   -------------------------------------------------------------------------- */
+
+.task-list-item {
+    transition: all var(--transition-base);
+}
+
+.task-list-item.dragging {
+    opacity: 0.5;
+    background-color: var(--color-bg-tertiary);
+}
+
+/* --------------------------------------------------------------------------
+   Drag and Drop Zones
+   -------------------------------------------------------------------------- */
+
+.drag-over {
+    background-color: var(--color-bg-tertiary);
+    border-color: var(--color-border-strong);
+}
+
+.dragging {
+    opacity: 0.5;
+}
+
+.list-drop-zone.drag-over {
+    background-color: var(--color-bg-hover);
+}
+
+.list-drop-zone.drag-over .border-dashed {
+    border-color: var(--color-border-strong);
+    border-style: solid;
+}
+
+.list-section-header.drag-over {
+    background-color: var(--color-bg-active);
+}
+
+/* --------------------------------------------------------------------------
+   Drop Zone Placeholder
+   -------------------------------------------------------------------------- */
+
+.drop-zone-active {
+    border-color: var(--color-border-strong) !important;
+    background-color: var(--color-bg-tertiary) !important;
+}

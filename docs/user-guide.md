@@ -704,6 +704,84 @@ All operations accessible via REST API for automation and integration.
 
 Full API documentation available in README.md.
 
+## SQLite Cache
+
+Optional SQLite cache layer for fast queries and full-text search. Markdown remains source of truth.
+
+### Enabling Cache
+
+Start server with `--cache` flag:
+
+```bash
+mdplanner --cache ./my-project
+deno task dev --cache ./example/portfolio
+```
+
+Creates `.mdplanner.db` in project directory. Add to `.gitignore`.
+
+### Search API
+
+Full-text search across tasks, notes, goals, and ideas.
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/search?q=query` | GET | Full-text search |
+| `/api/search/stats` | GET | Entity counts |
+| `/api/search/status` | GET | Cache status |
+| `/api/search/rebuild` | POST | Rebuild cache from markdown |
+| `/api/search/sync` | POST | Sync cache |
+
+**Search parameters:**
+
+| Parameter | Description |
+|-----------|-------------|
+| `q` | Search query (required) |
+| `limit` | Max results (default: 50, max: 100) |
+| `offset` | Pagination offset |
+| `types` | Filter by type: `task,note,goal,idea` |
+
+**Example:**
+
+```bash
+curl "http://localhost:8003/api/search?q=login&types=task,note&limit=10"
+```
+
+**Response:**
+
+```json
+{
+  "query": "login",
+  "count": 3,
+  "results": [
+    {
+      "type": "task",
+      "id": "task-1",
+      "title": "Fix login bug",
+      "snippet": "Users cannot <mark>login</mark> with...",
+      "score": -1.5
+    }
+  ]
+}
+```
+
+### Cache Architecture
+
+```
+Markdown Files (source of truth)
+       ↓ sync on startup / rebuild
+    SQLite DB (read cache)
+       ↓
+   Fast Queries / Search / Aggregations
+```
+
+**Tables synced:** tasks, notes, goals, milestones, ideas, retrospectives, sticky_notes, mindmaps, c4_components, swot, risk, lean_canvas, business_model, project_value, brief, capacity_plans, strategic_builders, customers, rates, quotes, invoices, companies, contacts, deals, interactions, portfolio, org_members.
+
+**FTS5 indexes:** tasks, notes, goals, ideas.
+
+### Cloud Migration
+
+All markdown data is stored 1:1 in SQLite. Complex nested structures (mindmap nodes, canvas data) are serialized as JSON. Schema supports future migration to SQLite-primary storage for cloud deployment.
+
 ## Advanced Features
 
 ### Zettelkasten Linking
