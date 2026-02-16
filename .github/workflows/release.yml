@@ -16,15 +16,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v4
 
       - name: Setup Deno
-        uses: denoland/setup-deno@e95548e56dfa95d4e0a7a06b2e29dc98797b7236 # v2.0.3
+        uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
 
       - name: Cache Deno dependencies
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cache/deno
@@ -53,15 +53,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v4
 
       - name: Setup Deno
-        uses: denoland/setup-deno@e95548e56dfa95d4e0a7a06b2e29dc98797b7236 # v2.0.3
+        uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
 
       - name: Cache Deno dependencies
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cache/deno
@@ -74,7 +74,7 @@ jobs:
         run: deno task compile:all
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@v4
         with:
           name: binaries
           path: dist/
@@ -88,16 +88,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v4
 
       - name: Download artifacts
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@v4
         with:
           name: binaries
           path: dist/
 
       - name: Create release
-        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
+        uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           files: |

@@ -16,15 +16,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v4
 
       - name: Setup Deno
-        uses: denoland/setup-deno@e95548e56dfa95d4e0a7a06b2e29dc98797b7236 # v2.0.3
+        uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
 
       - name: Cache Deno dependencies
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cache/deno
