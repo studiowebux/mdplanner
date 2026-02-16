@@ -460,7 +460,7 @@ export interface OrgChartMember {
   id: string;
   name: string;
   title: string;
-  departments: string[];
+  department: string;
   reportsTo?: string;
   email?: string;
   phone?: string;

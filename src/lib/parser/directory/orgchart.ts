@@ -9,7 +9,7 @@ import type { OrgChartMember } from "../../types.ts";
 interface OrgChartMemberFrontmatter {
   id: string;
   title: string;
-  departments: string[];
+  department: string;
   reportsTo?: string;
   email?: string;
   phone?: string;
@@ -37,19 +37,11 @@ export class OrgChartDirectoryParser extends DirectoryParser<OrgChartMember> {
       }
     }
 
-    // Handle departments as array
-    let departments: string[] = [];
-    if (Array.isArray(frontmatter.departments)) {
-      departments = frontmatter.departments;
-    } else if (typeof frontmatter.departments === "string") {
-      departments = [frontmatter.departments];
-    }
-
     return {
       id: frontmatter.id,
       name,
       title: frontmatter.title || "",
-      departments,
+      department: frontmatter.department || "",
       reportsTo: frontmatter.reportsTo,
       email: frontmatter.email,
       phone: frontmatter.phone,
@@ -62,7 +54,7 @@ export class OrgChartDirectoryParser extends DirectoryParser<OrgChartMember> {
     const frontmatter: Record<string, unknown> = {
       id: member.id,
       title: member.title,
-      departments: member.departments,
+      department: member.department,
     };
 
     if (member.reportsTo) frontmatter.reportsTo = member.reportsTo;
@@ -103,7 +95,7 @@ export class OrgChartDirectoryParser extends DirectoryParser<OrgChartMember> {
    */
   async getByDepartment(department: string): Promise<OrgChartMember[]> {
     const members = await this.readAll();
-    return members.filter((m) => m.departments.includes(department));
+    return members.filter((m) => m.department === department);
   }
 
   /**
@@ -121,8 +113,8 @@ export class OrgChartDirectoryParser extends DirectoryParser<OrgChartMember> {
     const members = await this.readAll();
     const departments = new Set<string>();
     for (const member of members) {
-      for (const dept of member.departments) {
-        departments.add(dept);
+      if (member.department) {
+        departments.add(member.department);
       }
     }
     return Array.from(departments).sort();
@@ -168,8 +160,8 @@ export class OrgChartDirectoryParser extends DirectoryParser<OrgChartMember> {
     const departments = new Set<string>();
 
     for (const member of members) {
-      for (const dept of member.departments) {
-        departments.add(dept);
+      if (member.department) {
+        departments.add(member.department);
       }
     }
 

@@ -41,7 +41,7 @@ export class OrgChartSidenavModule {
     const inputs = [
       'orgchartSidenavName',
       'orgchartSidenavTitle',
-      'orgchartSidenavDepartments',
+      'orgchartSidenavDepartment',
       'orgchartSidenavReportsTo',
       'orgchartSidenavEmail',
       'orgchartSidenavPhone',
@@ -139,7 +139,7 @@ export class OrgChartSidenavModule {
   clearForm() {
     document.getElementById('orgchartSidenavName').value = '';
     document.getElementById('orgchartSidenavTitle').value = '';
-    document.getElementById('orgchartSidenavDepartments').value = '';
+    document.getElementById('orgchartSidenavDepartment').value = '';
     document.getElementById('orgchartSidenavReportsTo').value = '';
     document.getElementById('orgchartSidenavEmail').value = '';
     document.getElementById('orgchartSidenavPhone').value = '';
@@ -150,7 +150,7 @@ export class OrgChartSidenavModule {
   fillForm(member) {
     document.getElementById('orgchartSidenavName').value = member.name || '';
     document.getElementById('orgchartSidenavTitle').value = member.title || '';
-    document.getElementById('orgchartSidenavDepartments').value = member.departments?.join(', ') || '';
+    document.getElementById('orgchartSidenavDepartment').value = member.department || '';
     document.getElementById('orgchartSidenavReportsTo').value = member.reportsTo || '';
     document.getElementById('orgchartSidenavEmail').value = member.email || '';
     document.getElementById('orgchartSidenavPhone').value = member.phone || '';
@@ -159,15 +159,10 @@ export class OrgChartSidenavModule {
   }
 
   getFormData() {
-    const deptInput = document.getElementById('orgchartSidenavDepartments').value.trim();
-    const departments = deptInput
-      ? deptInput.split(',').map(d => d.trim()).filter(d => d)
-      : [];
-
     return {
       name: document.getElementById('orgchartSidenavName').value.trim(),
       title: document.getElementById('orgchartSidenavTitle').value.trim(),
-      departments,
+      department: document.getElementById('orgchartSidenavDepartment').value.trim(),
       reportsTo: document.getElementById('orgchartSidenavReportsTo').value || undefined,
       email: document.getElementById('orgchartSidenavEmail').value.trim() || undefined,
       phone: document.getElementById('orgchartSidenavPhone').value.trim() || undefined,
@@ -201,8 +196,8 @@ export class OrgChartSidenavModule {
       return;
     }
 
-    if (!data.departments || data.departments.length === 0) {
-      this.showSaveStatus('At least one department required');
+    if (!data.department) {
+      this.showSaveStatus('Department required');
       return;
     }
 

@@ -528,9 +528,9 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
     db.execute("DELETE FROM org_members");
     for (const m of members) {
       db.execute(
-        `INSERT INTO org_members (id, name, title, departments, reports_to, email, phone, start_date, notes)
+        `INSERT INTO org_members (id, name, title, department, reports_to, email, phone, start_date, notes)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [val(m.id), val(m.name), val(m.title), val(JSON.stringify(m.departments)),
+        [val(m.id), val(m.name), val(m.title), val(m.department),
          val(m.reportsTo), val(m.email), val(m.phone), val(m.startDate), val(m.notes)]
       );
     }

@@ -2342,11 +2342,11 @@
                             <span id="orgchartZoomLevel" class="text-sm text-gray-600 dark:text-gray-400">100%</span>
                         </div>
                         <div class="flex items-center gap-2 ml-auto">
-                            <button id="orgchartExportPNG" class="text-sm px-3 py-1 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300" title="Export as SVG image">
+                            <button id="orgchartExportPNG" class="text-sm px-3 py-1 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300" title="Export as PNG image">
                                 <svg class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                SVG
+                                PNG
                             </button>
                             <button id="orgchartExportPDF" class="text-sm px-3 py-1 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300" title="Export as PDF (print)">
                                 <svg class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -2370,7 +2370,6 @@
                             <div id="orgchartTreeContent"></div>
                         </div>
                     </div>
-                    <div id="orgchartUnlinkZone" class="orgchart-unlink-zone">Drop here to remove manager</div>
                 </div>
             </div>
         </div>
@@ -4869,9 +4868,8 @@
                         <input type="text" id="orgchartSidenavTitle" required class="form-input" placeholder="e.g., Engineering Manager">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Departments *</label>
-                        <input type="text" id="orgchartSidenavDepartments" required class="form-input" placeholder="e.g., Engineering, Product">
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Comma-separated for multiple departments</p>
+                        <label class="form-label">Department *</label>
+                        <input type="text" id="orgchartSidenavDepartment" required class="form-input" placeholder="e.g., Engineering">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Reports To</label>
