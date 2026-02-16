@@ -1,9 +1,13 @@
 import { Hono } from "hono";
 import { serveStatic } from "hono/deno";
+import { dirname, fromFileUrl, join } from "@std/path";
 import { ProjectManager } from "./src/lib/project-manager.ts";
 import { createApiRouter } from "./src/api/routes/index.ts";
 
-export const VERSION = "0.2.0";
+// Get the directory where this script is located (works for both dev and compiled)
+const __dirname = dirname(fromFileUrl(import.meta.url));
+
+export const VERSION = "0.2.1";
 export const GITHUB_REPO = "studiowebux/mdplanner";
 
 // CLI argument parsing
@@ -134,10 +138,11 @@ const apiRouter = createApiRouter(projectManager);
 app.route("/api", apiRouter);
 
 // Static files with no-cache headers
+const staticRoot = join(__dirname, "src", "static");
 app.use(
   "/*",
   serveStatic({
-    root: "./src/static",
+    root: staticRoot,
     onFound: (_path, c) => {
       c.header("Cache-Control", "no-cache, no-store, must-revalidate");
       c.header("Pragma", "no-cache");
