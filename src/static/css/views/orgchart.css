@@ -10,6 +10,18 @@
   align-items: center;
   padding: 2rem;
   min-height: 400px;
+  gap: 3rem;
+}
+
+/* Root nodes (direct children of tree) - visual separation */
+.orgchart-tree > .orgchart-node-wrapper {
+  padding-top: 1.5rem;
+  border-top: 1px dashed var(--color-border-default);
+}
+
+.orgchart-tree > .orgchart-node-wrapper:first-child {
+  padding-top: 0;
+  border-top: none;
 }
 
 /* Node Wrapper - contains node and children */
@@ -21,8 +33,8 @@
 
 /* Tree Node */
 .orgchart-node {
-  background-color: var(--color-bg);
-  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
   border-radius: 0.5rem;
   padding: 0.75rem 1rem;
   min-width: 180px;
@@ -32,20 +44,10 @@
 }
 
 .orgchart-node:hover {
-  border-color: var(--color-text-muted);
+  border-color: var(--color-border-strong);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
 }
 
-.orgchart-node.level-0 {
-  background-color: var(--color-primary);
-  border-color: var(--color-primary);
-}
-
-.orgchart-node.level-0 .orgchart-node-name,
-.orgchart-node.level-0 .orgchart-node-title,
-.orgchart-node.level-0 .orgchart-node-dept {
-  color: white;
-}
 
 /* Node Header with Department Color Indicator */
 .orgchart-node-header {
@@ -56,13 +58,13 @@
 .orgchart-node-name {
   font-weight: 600;
   font-size: 0.875rem;
-  color: var(--color-text);
+  color: var(--color-text-primary);
   margin-bottom: 0.125rem;
 }
 
 .orgchart-node-title {
   font-size: 0.75rem;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   margin-bottom: 0.125rem;
 }
 
@@ -81,7 +83,7 @@
   position: relative;
 }
 
-/* Connector Lines */
+/* Connector Lines - vertical from parent */
 .orgchart-children::before {
   content: '';
   position: absolute;
@@ -89,18 +91,41 @@
   left: 50%;
   width: 1px;
   height: 1rem;
-  background-color: var(--color-border);
+  background-color: var(--color-border-default);
 }
 
-.orgchart-node-wrapper:not(:first-child):not(:last-child)::before {
+/* Horizontal line across siblings */
+.orgchart-children::after {
   content: '';
   position: absolute;
-  top: -1rem;
+  top: 1rem;
   left: 0;
   right: 0;
   height: 1px;
-  background-color: var(--color-border);
+  background-color: var(--color-border-default);
 }
+
+/* Single child - no horizontal line needed */
+.orgchart-children:has(> .orgchart-node-wrapper:only-child)::after {
+  display: none;
+}
+
+/* Vertical line from horizontal connector to each child */
+.orgchart-children > .orgchart-node-wrapper::before {
+  content: '';
+  position: absolute;
+  top: -1rem;
+  left: 50%;
+  width: 1px;
+  height: 1rem;
+  background-color: var(--color-border-default);
+}
+
+/* Position the node wrapper for connector */
+.orgchart-children > .orgchart-node-wrapper {
+  position: relative;
+}
+
 
 /* Card View */
 .orgchart-card-grid {
@@ -110,7 +135,7 @@
 }
 
 .orgchart-department-section {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-default);
   border-radius: 0.5rem;
   overflow: hidden;
 }
@@ -118,9 +143,9 @@
 .orgchart-department-header {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-text);
+  color: var(--color-text-primary);
   padding: 0.75rem 1rem;
-  background-color: var(--color-bg-muted);
+  background-color: var(--color-bg-secondary);
 }
 
 .orgchart-cards {
@@ -132,15 +157,13 @@
 
 .orgchart-card {
   background-color: var(--color-bg);
-  border: 1px solid var(--color-border);
   border-radius: 0.5rem;
   padding: 1rem;
   cursor: pointer;
-  transition: box-shadow 0.2s, border-color 0.2s;
+  transition: box-shadow 0.2s;
 }
 
 .orgchart-card:hover {
-  border-color: var(--color-text-muted);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
 }
 
@@ -180,7 +203,7 @@
   color: var(--color-text-muted);
   cursor: grab;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.15s ease-out;
   letter-spacing: -0.1em;
 }
 
@@ -195,45 +218,59 @@
 /* Drag States */
 .orgchart-node[draggable="true"] {
   cursor: grab;
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, border-color 0.15s ease-out, opacity 0.15s ease-out;
 }
 
 .orgchart-node.orgchart-dragging {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: grabbing;
+  transform: scale(0.98);
 }
 
 .orgchart-node.orgchart-drop-target {
   border-color: var(--color-primary);
   border-width: 2px;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  transform: scale(1.02);
 }
 
 .orgchart-node.orgchart-drop-invalid {
   border-color: var(--color-error-text);
   border-width: 2px;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15);
   cursor: not-allowed;
 }
 
-/* Root Drop Zone */
-#orgchartContainer.orgchart-root-drop-zone {
-  background-color: rgba(59, 130, 246, 0.05);
-  border: 2px dashed var(--color-primary);
-  border-radius: 0.5rem;
-}
-
-#orgchartContainer.orgchart-root-drop-zone::after {
-  content: 'Drop here to make root (no manager)';
-  position: absolute;
-  bottom: 1rem;
+/* Unlink Drop Zone - appears at bottom when dragging */
+.orgchart-unlink-zone {
+  display: none;
+  position: fixed;
+  bottom: 1.5rem;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--color-bg-primary);
+  border: 2px dashed var(--color-border-default);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  z-index: 100;
+  transition: all 0.15s ease-out;
+}
+
+.orgchart-unlink-zone.active {
+  display: block;
+}
+
+.orgchart-unlink-zone.drag-over {
+  border-color: var(--color-primary);
+  background-color: rgba(59, 130, 246, 0.1);
   color: var(--color-primary);
-  background: var(--color-bg);
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.25rem;
-  border: 1px solid var(--color-primary);
+  transform: translateX(-50%) scale(1.05);
+}
+
+[data-theme="dark"] .orgchart-unlink-zone.drag-over {
+  background-color: rgba(59, 130, 246, 0.2);
 }
 
 /* Dark Mode Adjustments */
@@ -241,18 +278,15 @@
   background-color: var(--color-bg-muted);
 }
 
-[data-theme="dark"] .orgchart-node.level-0 {
-  background-color: var(--color-primary);
-}
 
 [data-theme="dark"] .orgchart-card {
   background-color: var(--color-bg-muted);
 }
 
 [data-theme="dark"] .orgchart-node.orgchart-drop-target {
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
 }
 
 [data-theme="dark"] .orgchart-node.orgchart-drop-invalid {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.25);
 }

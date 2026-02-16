@@ -341,7 +341,7 @@ CREATE TABLE IF NOT EXISTS org_members (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   title TEXT,
-  department TEXT,
+  departments TEXT,  -- JSON array
   reports_to TEXT,
   email TEXT,
   phone TEXT,
@@ -495,7 +495,6 @@ CREATE INDEX IF NOT EXISTS idx_invoices_customer ON invoices(customer_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status);
 
 CREATE INDEX IF NOT EXISTS idx_org_reports_to ON org_members(reports_to);
-CREATE INDEX IF NOT EXISTS idx_org_department ON org_members(department);
 
 CREATE INDEX IF NOT EXISTS idx_portfolio_status ON portfolio(status);
 CREATE INDEX IF NOT EXISTS idx_portfolio_category ON portfolio(category);

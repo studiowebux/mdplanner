@@ -65,7 +65,7 @@ orgchartRouter.post("/", async (c) => {
   const member = await parser.addOrgChartMember({
     name: body.name,
     title: body.title,
-    department: body.department,
+    departments: body.departments || [],
     reportsTo: body.reportsTo,
     email: body.email,
     phone: body.phone,

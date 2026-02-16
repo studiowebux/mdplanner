@@ -106,7 +106,7 @@ export class OrgChartModule {
   filterTreeByDepartment(nodes, department) {
     const filtered = [];
     for (const node of nodes) {
-      if (node.department === department) {
+      if (node.departments && node.departments.includes(department)) {
         filtered.push({
           ...node,
           children: this.filterTreeByDepartment(node.children || [], department)
@@ -133,13 +133,14 @@ export class OrgChartModule {
     nodeEl.dataset.memberId = node.id;
     nodeEl.draggable = true;
 
-    const deptColor = this.getDepartmentColor(node.department);
+    const deptColor = this.getDepartmentColor(node.departments?.[0] || '');
+    const deptText = node.departments?.join(', ') || '';
     nodeEl.innerHTML = `
       <div class="orgchart-node-header" style="border-left: 4px solid ${deptColor};">
         <div class="orgchart-drag-handle" title="Drag to change reporting structure">⋮⋮</div>
         <div class="orgchart-node-name">${escapeHtml(node.name)}</div>
         <div class="orgchart-node-title">${escapeHtml(node.title)}</div>
-        <div class="orgchart-node-dept">${escapeHtml(node.department)}</div>
+        <div class="orgchart-node-dept">${escapeHtml(deptText)}</div>
       </div>
     `;
 
@@ -206,6 +207,12 @@ export class OrgChartModule {
     e.target.classList.add('orgchart-dragging');
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', memberId);
+
+    // Show the unlink drop zone
+    const unlinkZone = document.getElementById('orgchartUnlinkZone');
+    if (unlinkZone) {
+      unlinkZone.classList.add('active');
+    }
   }
 
   handleDragEnd(e) {
@@ -217,6 +224,16 @@ export class OrgChartModule {
     document.querySelectorAll('.orgchart-drop-target, .orgchart-drop-invalid').forEach(el => {
       el.classList.remove('orgchart-drop-target', 'orgchart-drop-invalid');
     });
+    // Hide the unlink drop zone
+    const unlinkZone = document.getElementById('orgchartUnlinkZone');
+    if (unlinkZone) {
+      unlinkZone.classList.remove('active', 'drag-over');
+    }
+    // Remove root drop zone class
+    const container = document.getElementById('orgchartContainer');
+    if (container) {
+      container.classList.remove('orgchart-root-drop-zone');
+    }
   }
 
   handleDragOver(e, memberId) {
@@ -314,7 +331,7 @@ export class OrgChartModule {
 
     let filteredMembers = this.members;
     if (this.currentDepartment) {
-      filteredMembers = this.members.filter(m => m.department === this.currentDepartment);
+      filteredMembers = this.members.filter(m => m.departments?.includes(this.currentDepartment));
     }
 
     if (filteredMembers.length === 0) {
@@ -325,12 +342,14 @@ export class OrgChartModule {
 
     if (emptyState) emptyState.style.display = 'none';
 
-    // Group by department
+    // Group by department (members can appear in multiple departments)
     const byDepartment = {};
     filteredMembers.forEach(member => {
-      const dept = member.department || 'No Department';
-      if (!byDepartment[dept]) byDepartment[dept] = [];
-      byDepartment[dept].push(member);
+      const depts = member.departments?.length ? member.departments : ['No Department'];
+      depts.forEach(dept => {
+        if (!byDepartment[dept]) byDepartment[dept] = [];
+        byDepartment[dept].push(member);
+      });
     });
 
     let html = '<div class="orgchart-card-grid">';
@@ -471,7 +490,7 @@ export class OrgChartModule {
     }
   }
 
-  // Export to PNG using Canvas API
+  // Export to SVG
   async exportToPNG() {
     const container = document.getElementById('orgchartTreeContent');
     if (!container || container.children.length === 0) {
@@ -480,69 +499,38 @@ export class OrgChartModule {
     }
 
     try {
-      // Create a canvas to render the org chart
       const treeEl = container.querySelector('.orgchart-tree') || container.querySelector('.orgchart-card-grid');
       if (!treeEl) return;
 
-      // Use SVG foreignObject approach for HTML-to-Canvas
       const rect = treeEl.getBoundingClientRect();
-      const width = Math.max(rect.width, 800);
-      const height = Math.max(rect.height, 600);
+      const width = Math.max(rect.width + 40, 800);
+      const height = Math.max(rect.height + 40, 600);
 
-      // Clone the element for export (to avoid modifying the visible one)
-      const clone = treeEl.cloneNode(true);
-      clone.style.transform = 'none';
-      clone.style.position = 'absolute';
-      clone.style.left = '-9999px';
-      document.body.appendChild(clone);
-
-      // Get computed styles
       const styles = this.getExportStyles();
 
-      // Create SVG with foreignObject
-      const svg = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-          <style>${styles}</style>
-          <foreignObject width="100%" height="100%">
-            <div xmlns="http://www.w3.org/1999/xhtml" style="background: white; padding: 20px;">
-              ${clone.outerHTML}
-            </div>
-          </foreignObject>
-        </svg>
-      `;
+      // Build SVG with embedded HTML via foreignObject
+      const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+  <style>${styles}</style>
+  <rect width="100%" height="100%" fill="white"/>
+  <foreignObject width="100%" height="100%">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+      ${treeEl.outerHTML}
+    </div>
+  </foreignObject>
+</svg>`;
 
-      document.body.removeChild(clone);
-
-      // Convert SVG to blob and download
       const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
       const url = URL.createObjectURL(blob);
-
-      // Create image from SVG
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, width, height);
-        ctx.drawImage(img, 0, 0);
-
-        canvas.toBlob((pngBlob) => {
-          const pngUrl = URL.createObjectURL(pngBlob);
-          const link = document.createElement('a');
-          link.download = `orgchart-${new Date().toISOString().split('T')[0]}.png`;
-          link.href = pngUrl;
-          link.click();
-          URL.revokeObjectURL(pngUrl);
-          URL.revokeObjectURL(url);
-        }, 'image/png');
-      };
-      img.src = url;
+      const link = document.createElement('a');
+      link.download = `orgchart-${new Date().toISOString().split('T')[0]}.svg`;
+      link.href = url;
+      link.click();
+      URL.revokeObjectURL(url);
 
     } catch (error) {
-      console.error('Error exporting to PNG:', error);
-      alert('Export failed. Try using Print to PDF instead.');
+      console.error('Error exporting to SVG:', error);
+      alert('Export failed.');
     }
   }
 
@@ -554,57 +542,82 @@ export class OrgChartModule {
       return;
     }
 
-    // Create print-specific window
+    const treeEl = container.querySelector('.orgchart-tree') || container.querySelector('.orgchart-card-grid');
+    if (!treeEl) return;
+
+    const styles = this.getExportStyles();
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
       alert('Please allow popups to export PDF.');
       return;
     }
 
-    const treeEl = container.querySelector('.orgchart-tree') || container.querySelector('.orgchart-card-grid');
-    if (!treeEl) return;
-
-    const styles = this.getExportStyles();
-
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Org Chart Export</title>
-        <style>
-          ${styles}
-          @page {
-            size: landscape;
-            margin: 1cm;
-          }
-          body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: white;
-            padding: 20px;
-          }
-          .orgchart-tree {
-            transform: none !important;
-          }
-          @media print {
-            .no-print { display: none !important; }
-          }
-        </style>
-      </head>
-      <body>
-        <h1 style="margin-bottom: 20px; font-size: 24px;">Org Chart</h1>
-        <p style="margin-bottom: 20px; color: #666; font-size: 12px;">Exported: ${new Date().toLocaleDateString()}</p>
-        ${treeEl.outerHTML}
-        <script>
-          window.onload = function() {
-            setTimeout(function() {
-              window.print();
-              window.close();
-            }, 250);
-          };
-        </script>
-      </body>
-      </html>
-    `);
+    printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <title>Org Chart</title>
+  <style>
+    * { box-sizing: border-box; }
+    ${styles}
+    @page {
+      size: A4 landscape;
+      margin: 1.5cm;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: white;
+      margin: 0;
+      padding: 20px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    .header .date {
+      color: #6b7280;
+      font-size: 12px;
+    }
+    .orgchart-tree {
+      transform: none !important;
+    }
+    .print-btn {
+      padding: 8px 16px;
+      background: #111;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .print-btn:hover {
+      background: #333;
+    }
+    @media print {
+      .no-print { display: none !important; }
+      .header { border-bottom-color: #000; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Organization Chart</h1>
+    <div>
+      <span class="date">Exported: ${new Date().toLocaleDateString()}</span>
+      <button class="print-btn no-print" onclick="window.print()" style="margin-left: 15px;">Print / Save PDF</button>
+    </div>
+  </div>
+  ${treeEl.outerHTML}
+</body>
+</html>`);
     printWindow.document.close();
   }
 
@@ -616,6 +629,15 @@ export class OrgChartModule {
         flex-direction: column;
         align-items: center;
         padding: 2rem;
+        gap: 3rem;
+      }
+      .orgchart-tree > .orgchart-node-wrapper {
+        padding-top: 1.5rem;
+        border-top: 1px dashed #e5e7eb;
+      }
+      .orgchart-tree > .orgchart-node-wrapper:first-child {
+        padding-top: 0;
+        border-top: none;
       }
       .orgchart-node-wrapper {
         display: flex;
@@ -629,16 +651,6 @@ export class OrgChartModule {
         padding: 0.75rem 1rem;
         min-width: 180px;
         max-width: 220px;
-      }
-      .orgchart-node.level-0 {
-        background-color: #3b82f6;
-        border-color: #3b82f6;
-        color: white;
-      }
-      .orgchart-node.level-0 .orgchart-node-name,
-      .orgchart-node.level-0 .orgchart-node-title,
-      .orgchart-node.level-0 .orgchart-node-dept {
-        color: white;
       }
       .orgchart-node-header {
         padding-left: 0.5rem;
@@ -670,6 +682,27 @@ export class OrgChartModule {
         content: '';
         position: absolute;
         top: 0;
+        left: 50%;
+        width: 1px;
+        height: 1rem;
+        background-color: #e5e7eb;
+      }
+      .orgchart-children::after {
+        content: '';
+        position: absolute;
+        top: 1rem;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background-color: #e5e7eb;
+      }
+      .orgchart-children > .orgchart-node-wrapper {
+        position: relative;
+      }
+      .orgchart-children > .orgchart-node-wrapper::before {
+        content: '';
+        position: absolute;
+        top: -1rem;
         left: 50%;
         width: 1px;
         height: 1rem;
@@ -741,25 +774,48 @@ export class OrgChartModule {
     document.getElementById('orgchartExportPNG')?.addEventListener('click', () => this.exportToPNG());
     document.getElementById('orgchartExportPDF')?.addEventListener('click', () => this.exportToPDF());
 
+    // Dedicated unlink drop zone
+    const unlinkZone = document.getElementById('orgchartUnlinkZone');
+    if (unlinkZone) {
+      unlinkZone.addEventListener('dragover', (e) => {
+        if (this.draggedMemberId) {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+        }
+      });
+      unlinkZone.addEventListener('dragenter', (e) => {
+        if (this.draggedMemberId) {
+          e.preventDefault();
+          unlinkZone.classList.add('drag-over');
+        }
+      });
+      unlinkZone.addEventListener('dragleave', (e) => {
+        unlinkZone.classList.remove('drag-over');
+      });
+      unlinkZone.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        unlinkZone.classList.remove('drag-over');
+        if (this.draggedMemberId) {
+          await this.makeRoot(this.draggedMemberId);
+        }
+      });
+    }
+
     // Root drop zone: make member root by dropping on container background
     const container = document.getElementById('orgchartContainer');
     if (container) {
       container.addEventListener('dragover', (e) => {
-        if (this.draggedMemberId && !e.target.closest('.orgchart-node')) {
+        if (this.draggedMemberId) {
           e.preventDefault();
           e.dataTransfer.dropEffect = 'move';
-          container.classList.add('orgchart-root-drop-zone');
-        }
-      });
-      container.addEventListener('dragleave', (e) => {
-        if (!container.contains(e.relatedTarget)) {
-          container.classList.remove('orgchart-root-drop-zone');
         }
       });
       container.addEventListener('drop', async (e) => {
+        container.classList.remove('orgchart-root-drop-zone');
         if (this.draggedMemberId && !e.target.closest('.orgchart-node')) {
           e.preventDefault();
-          container.classList.remove('orgchart-root-drop-zone');
+          e.stopPropagation();
           await this.makeRoot(this.draggedMemberId);
         }
       });
