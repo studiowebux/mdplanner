@@ -468,6 +468,23 @@ export interface Interaction {
   notes?: string;
 }
 
+// People Registry Types
+
+export interface Person {
+  id: string;
+  name: string;
+  title?: string;
+  role?: string;
+  departments?: string[];
+  reportsTo?: string;
+  email?: string;
+  phone?: string;
+  startDate?: string;
+  hoursPerDay?: number;
+  workingDays?: string[];
+  notes?: string;
+}
+
 // Org Chart Types
 
 export interface OrgChartMember {

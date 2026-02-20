@@ -34,6 +34,11 @@ import {
   type OrgChartMemberWithChildren,
   type OrgChartSummary,
 } from "./orgchart.ts";
+import {
+  PeopleDirectoryParser,
+  type PeopleSummary,
+  type PersonWithChildren,
+} from "./people.ts";
 import type {
   BillingRate,
   Brief,
@@ -54,6 +59,7 @@ import type {
   Note,
   OrgChartMember,
   Payment,
+  Person,
   ProjectConfig,
   ProjectInfo,
   ProjectValueBoard,
@@ -96,6 +102,7 @@ export class DirectoryMarkdownParser {
   protected crmParser: CRMDirectoryParser;
   protected portfolioParser: PortfolioDirectoryParser;
   protected orgchartParser: OrgChartDirectoryParser;
+  protected peopleParser: PeopleDirectoryParser;
 
   constructor(projectDir: string) {
     this.projectDir = projectDir;
@@ -121,6 +128,7 @@ export class DirectoryMarkdownParser {
     this.crmParser = new CRMDirectoryParser(projectDir);
     this.portfolioParser = new PortfolioDirectoryParser(projectDir);
     this.orgchartParser = new OrgChartDirectoryParser(projectDir);
+    this.peopleParser = new PeopleDirectoryParser(projectDir);
   }
 
   // ============================================================
@@ -1241,6 +1249,62 @@ export class DirectoryMarkdownParser {
   }
 
   // ============================================================
+  // People Registry
+  // ============================================================
+
+  async readPeople(): Promise<Person[]> {
+    return this.peopleParser.readAll();
+  }
+
+  async readPerson(id: string): Promise<Person | null> {
+    return this.peopleParser.read(id);
+  }
+
+  async addPerson(person: Omit<Person, "id">): Promise<Person> {
+    return this.peopleParser.add(person);
+  }
+
+  async updatePerson(
+    id: string,
+    updates: Partial<Person>,
+  ): Promise<Person | null> {
+    return this.peopleParser.update(id, updates);
+  }
+
+  async deletePerson(id: string): Promise<boolean> {
+    return this.peopleParser.delete(id);
+  }
+
+  async getPeopleByDepartment(department: string): Promise<Person[]> {
+    return this.peopleParser.getByDepartment(department);
+  }
+
+  async getPeopleDirectReports(personId: string): Promise<Person[]> {
+    return this.peopleParser.getDirectReports(personId);
+  }
+
+  async getPeopleDepartments(): Promise<string[]> {
+    return this.peopleParser.getDepartments();
+  }
+
+  async getPeopleTree(): Promise<PersonWithChildren[]> {
+    return this.peopleParser.getTree();
+  }
+
+  async getPeopleSummary(): Promise<PeopleSummary> {
+    return this.peopleParser.getSummary();
+  }
+
+  async hasPeople(): Promise<boolean> {
+    const people = await this.peopleParser.readAll();
+    return people.length > 0;
+  }
+
+  async savePeople(people: Person[]): Promise<void> {
+    await this.peopleParser.saveAll(people);
+  }
+
+  // ============================================================
   // Org Chart
   // ============================================================
 
@@ -1361,6 +1425,7 @@ export class DirectoryMarkdownParser {
       recursive: true,
     });
     await Deno.mkdir(`${this.projectDir}/orgchart`, { recursive: true });
+    await Deno.mkdir(`${this.projectDir}/people`, { recursive: true });
 
     // Create project.md
     await this.projectParser.write({
