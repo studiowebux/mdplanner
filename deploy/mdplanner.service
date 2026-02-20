@@ -1,0 +1,26 @@
+[Unit]
+Description=MD Planner - Markdown-based project management
+Documentation=https://github.com/studiowebux/mdplanner
+After=network.target
+
+[Service]
+Type=simple
+User=mdplanner
+Group=mdplanner
+WorkingDirectory=/var/lib/mdplanner
+ExecStart=/usr/local/bin/mdplanner --port 8003 /var/lib/mdplanner/project
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mdplanner
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/mdplanner
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
