@@ -239,17 +239,12 @@ export class OrgChartSidenavModule {
         const response = await OrgChartAPI.create(data);
         const result = await response.json();
         this.editingMemberId = result.id;
-        this.showSaveStatus("Created");
+        showToast("Team member created", "success");
 
-        // Update header and show delete button
-        document.getElementById("orgchartSidenavHeader").textContent =
-          "Edit Team Member";
-        document.getElementById("orgchartSidenavDelete").classList.remove(
-          "hidden",
-        );
-
-        // Update dropdown to include new member
-        this.populateReportsToDropdown(this.editingMemberId);
+        // Reload, re-render, and close panel
+        await this.tm.orgchartModule.load();
+        this.close();
+        return;
       }
 
       // Reload and re-render
@@ -289,17 +284,17 @@ export class OrgChartSidenavModule {
     statusEl.textContent = text;
     statusEl.classList.remove(
       "hidden",
-      "text-green-600",
-      "text-red-500",
-      "text-gray-500",
+      "orgchart-status-success",
+      "orgchart-status-error",
+      "orgchart-status-saving",
     );
 
     if (text === "Saved" || text === "Created") {
-      statusEl.classList.add("text-green-600", "dark:text-green-400");
+      statusEl.classList.add("orgchart-status-success");
     } else if (text === "Error" || text.includes("required")) {
-      statusEl.classList.add("text-red-500");
+      statusEl.classList.add("orgchart-status-error");
     } else {
-      statusEl.classList.add("text-gray-500", "dark:text-gray-400");
+      statusEl.classList.add("orgchart-status-saving");
     }
 
     if (text === "Saved" || text === "Created" || text === "Error") {

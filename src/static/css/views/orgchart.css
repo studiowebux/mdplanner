@@ -33,7 +33,7 @@
 
 /* Tree Node */
 .orgchart-node {
-  background-color: var(--color-bg);
+  background-color: var(--color-bg-primary);
   border: 1px solid var(--color-border-default);
   border-radius: 0.5rem;
   padding: 0.75rem 1rem;
@@ -59,7 +59,7 @@
 .orgchart-node-name {
   font-weight: 600;
   font-size: 0.875rem;
-  color: var(--color-text);
+  color: var(--color-text-primary);
   margin-bottom: 0.125rem;
 }
 
@@ -143,9 +143,9 @@
 .orgchart-department-header {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-text);
+  color: var(--color-text-primary);
   padding: 0.75rem 1rem;
-  background-color: var(--color-bg-muted);
+  background-color: var(--color-bg-secondary);
 }
 
 .orgchart-cards {
@@ -156,7 +156,7 @@
 }
 
 .orgchart-card {
-  background-color: var(--color-bg);
+  background-color: var(--color-bg-primary);
   border-radius: 0.5rem;
   padding: 1rem;
   cursor: pointer;
@@ -172,7 +172,7 @@
 .orgchart-card-name {
   font-weight: 600;
   font-size: 0.9375rem;
-  color: var(--color-text);
+  color: var(--color-text-primary);
   margin-bottom: 0.25rem;
 }
 
@@ -184,8 +184,13 @@
 
 .orgchart-card-email {
   font-size: 0.75rem;
-  color: var(--color-primary);
+  color: var(--color-accent);
   margin-bottom: 0.25rem;
+}
+
+.orgchart-department-count {
+  color: var(--color-text-muted);
+  font-weight: 400;
 }
 
 .orgchart-card-reports {
@@ -234,7 +239,7 @@
 }
 
 .orgchart-node.orgchart-drop-target {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   border-width: 2px;
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
   transform: scale(1.02);
@@ -255,7 +260,7 @@
   left: 50%;
   transform: translateX(-50%);
   padding: 0.75rem 1.5rem;
-  background-color: var(--color-bg);
+  background-color: var(--color-bg-primary);
   border: 2px dashed var(--color-border-default);
   border-radius: 0.5rem;
   font-size: 0.875rem;
@@ -269,29 +274,46 @@
 }
 
 .orgchart-unlink-zone.drag-over {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   background-color: rgba(59, 130, 246, 0.1);
-  color: var(--color-primary);
+  color: var(--color-accent);
   transform: translateX(-50%) scale(1.05);
 }
 
 /* Dark Mode Adjustments */
-[data-theme="dark"] .orgchart-node {
-  background-color: var(--color-bg-muted);
+.dark .orgchart-node {
+  background-color: var(--color-bg-secondary);
 }
 
-[data-theme="dark"] .orgchart-card {
-  background-color: var(--color-bg-muted);
+.dark .orgchart-card {
+  background-color: var(--color-bg-secondary);
 }
 
-[data-theme="dark"] .orgchart-node.orgchart-drop-target {
+.dark .orgchart-department-header {
+  background-color: var(--color-bg-tertiary);
+}
+
+.dark .orgchart-node.orgchart-drop-target {
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
 }
 
-[data-theme="dark"] .orgchart-node.orgchart-drop-invalid {
+.dark .orgchart-node.orgchart-drop-invalid {
   box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.25);
 }
 
-[data-theme="dark"] .orgchart-unlink-zone.drag-over {
+.dark .orgchart-unlink-zone.drag-over {
   background-color: rgba(59, 130, 246, 0.2);
+}
+
+/* Save Status Indicators */
+.orgchart-status-success {
+  color: var(--color-success-text);
+}
+
+.orgchart-status-error {
+  color: var(--color-error-text);
+}
+
+.orgchart-status-saving {
+  color: var(--color-text-muted);
 }

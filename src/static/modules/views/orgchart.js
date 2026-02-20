@@ -383,7 +383,7 @@ export class OrgChartModule {
         <div class="orgchart-department-section">
           <h3 class="orgchart-department-header" style="border-left: 4px solid ${deptColor};">
             ${escapeHtml(dept)}
-            <span class="text-gray-500 dark:text-gray-400 font-normal">(${members.length})</span>
+            <span class="orgchart-department-count">(${members.length})</span>
           </h3>
           <div class="orgchart-cards">
       `;
