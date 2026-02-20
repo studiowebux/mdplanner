@@ -7326,42 +7326,79 @@
                   <option value="vertical">Top to Bottom</option>
                 </select>
               </div>
+              <button
+                id="mindmapSplitToggle"
+                class="btn-ghost"
+                title="Toggle split view"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:0.25rem"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+                Split
+              </button>
             </div>
           </div>
 
-          <!-- Mindmap Container -->
-          <div
-            id="mindmapContainer"
-            class="relative overflow-hidden bg-gray-50 dark:bg-gray-800 canvas-height"
-          >
-            <div id="mindmapViewport" class="absolute inset-0 cursor-grab">
-              <div id="mindmapContent" class="relative w-full h-full">
-                <div
-                  id="mindmapEmptyState"
-                  class="flex items-center justify-center h-full"
+          <!-- Mindmap Viewport Grid -->
+          <div id="mindmapViewportGrid" class="mindmap-viewport-grid">
+            <!-- Primary Viewport -->
+            <div class="mindmap-viewport-panel">
+              <div
+                id="mindmapContainer"
+                class="relative overflow-hidden bg-gray-50 dark:bg-gray-800 canvas-height"
+              >
+                <div id="mindmapViewport" class="absolute inset-0 cursor-grab">
+                  <div id="mindmapContent" class="relative w-full h-full">
+                    <div
+                      id="mindmapEmptyState"
+                      class="flex items-center justify-center h-full"
+                    >
+                      <div class="text-center">
+                        <svg
+                          class="mx-auto h-12 w-12 text-gray-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                          />
+                        </svg>
+                        <h3
+                          class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100"
+                        >
+                          No mindmap data
+                        </h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                          Add a Mindmap section with ul>li lists to your markdown.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Secondary Viewport (hidden by default) -->
+            <div id="mindmapSecondaryPanel" class="mindmap-viewport-panel" style="display:none">
+              <div class="mindmap-secondary-toolbar">
+                <select
+                  id="mindmapSecondarySelector"
+                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-2 py-1"
                 >
-                  <div class="text-center">
-                    <svg
-                      class="mx-auto h-12 w-12 text-gray-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                      />
-                    </svg>
-                    <h3
-                      class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100"
-                    >
-                      No mindmap data
-                    </h3>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                      Add a Mindmap section with ul>li lists to your markdown.
-                    </p>
+                  <option value="">Select Mindmap</option>
+                </select>
+              </div>
+              <div
+                id="mindmapSecondaryContainer"
+                class="relative overflow-hidden bg-gray-50 dark:bg-gray-800 canvas-height"
+              >
+                <div id="mindmapSecondaryViewport" class="absolute inset-0 cursor-grab">
+                  <div id="mindmapSecondaryContent" class="relative w-full h-full">
+                    <div class="flex items-center justify-center h-full">
+                      <p class="text-sm text-gray-500 dark:text-gray-400">Select a mindmap to compare</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -11762,6 +11799,7 @@
       </div>
     </div>
 
+    <script src="vendor/marked/marked.min.js"></script>
     <script type="module" src="app.js"></script>
   </body>
 </html>

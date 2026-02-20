@@ -48,19 +48,21 @@
 .btn-ghost {
   background-color: transparent;
   color: var(--color-text-secondary);
-  padding: var(--space-sm) var(--space-md);
+  padding: 0.3rem 0.625rem;
   border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  border: none;
+  font-size: 0.75rem;
+  border: 1px solid var(--color-border-default);
   cursor: pointer;
   transition:
     color var(--transition-base),
-    background-color var(--transition-base);
+    background-color var(--transition-base),
+    border-color var(--transition-base);
 }
 
 .btn-ghost:hover {
   background-color: var(--color-bg-tertiary);
   color: var(--color-text-primary);
+  border-color: var(--color-border-strong);
 }
 
 .btn-danger {

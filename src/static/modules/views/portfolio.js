@@ -469,7 +469,7 @@ export class PortfolioView {
     const titleEl = document.getElementById("portfolioDetailTitle");
     if (titleEl) titleEl.textContent = "New Project";
 
-    document.getElementById("portfolioDetailPanel")?.classList.add("open");
+    document.getElementById("portfolioDetailPanel")?.classList.add("active");
 
     // Focus the name field
     setTimeout(() => {
@@ -488,7 +488,7 @@ export class PortfolioView {
       this.isDetailOpen = true;
       this.isCreating = false;
       this.renderDetailPanel(project);
-      document.getElementById("portfolioDetailPanel")?.classList.add("open");
+      document.getElementById("portfolioDetailPanel")?.classList.add("active");
     } catch (error) {
       console.error("Error loading project details:", error);
     }
@@ -501,7 +501,7 @@ export class PortfolioView {
     this.isDetailOpen = false;
     this.isCreating = false;
     this.selectedProject = null;
-    document.getElementById("portfolioDetailPanel")?.classList.remove("open");
+    document.getElementById("portfolioDetailPanel")?.classList.remove("active");
   }
 
   /**
@@ -722,7 +722,7 @@ export class PortfolioView {
    * Collect form data and save.
    */
   async saveDetailPanel() {
-    if (!this.selectedProject) return;
+    if (!this.selectedProject && !this.isCreating) return;
 
     // Collect KPIs
     const kpis = [];

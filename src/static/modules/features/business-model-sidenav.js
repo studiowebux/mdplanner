@@ -248,17 +248,17 @@ export class BusinessModelSidenavModule {
     statusEl.textContent = text;
     statusEl.classList.remove(
       "hidden",
-      "text-green-600",
-      "text-red-500",
-      "text-gray-500",
+      "sidenav-status-saved",
+      "sidenav-status-saving",
+      "sidenav-status-error",
     );
 
     if (text === "Saved" || text === "Created") {
-      statusEl.classList.add("text-green-600", "dark:text-green-400");
+      statusEl.classList.add("sidenav-status-saved");
     } else if (text === "Error" || text === "Title required") {
-      statusEl.classList.add("text-red-500");
+      statusEl.classList.add("sidenav-status-error");
     } else {
-      statusEl.classList.add("text-gray-500", "dark:text-gray-400");
+      statusEl.classList.add("sidenav-status-saving");
     }
 
     if (text === "Saved" || text === "Created" || text === "Error") {

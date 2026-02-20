@@ -89,108 +89,46 @@ export function escapeHtml(text) {
 }
 
 /**
+ * Configure marked.js with custom renderer.
+ * Uses global `marked` from vendor/marked/marked.min.js (UMD build).
+ */
+const markedRenderer = new marked.Renderer();
+
+// Links open in new tab
+markedRenderer.link = function ({ href, title, text }) {
+  const titleAttr = title ? ` title="${title}"` : "";
+  return `<a href="${href}"${titleAttr} target="_blank" rel="noopener noreferrer">${text}</a>`;
+};
+
+// Code blocks with language label and copy button
+markedRenderer.code = function ({ text, lang }) {
+  const escaped = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+  const langLabel = lang
+    ? `<span class="code-language-label">${lang}</span>`
+    : "";
+  return `<div class="code-block">${langLabel}<button type="button" class="code-copy-btn" onclick="navigator.clipboard.writeText(this.parentElement.querySelector('code').textContent)">Copy</button><pre><code>${escaped}</code></pre></div>`;
+};
+
+marked.setOptions({
+  renderer: markedRenderer,
+  gfm: true,
+  breaks: true,
+});
+
+/**
  * @param {string} markdown - Markdown text
- * @returns {string} HTML with Tailwind classes
+ * @returns {string} HTML rendered by marked.js, wrapped in .markdown-content
  */
 export function markdownToHtml(markdown) {
   if (!markdown) return "";
-
-  let html = markdown;
-
-  // Headers
-  html = html.replace(
-    /^### (.*$)/gim,
-    '<h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">$1</h3>',
-  );
-  html = html.replace(
-    /^## (.*$)/gim,
-    '<h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">$1</h2>',
-  );
-  html = html.replace(
-    /^# (.*$)/gim,
-    '<h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">$1</h1>',
-  );
-
-  // Bold and italic
-  html = html.replace(
-    /\*\*(.*?)\*\*/g,
-    '<strong class="font-semibold text-gray-900 dark:text-gray-100">$1</strong>',
-  );
-  html = html.replace(
-    /\*(.*?)\*/g,
-    '<em class="italic text-gray-700 dark:text-gray-300">$1</em>',
-  );
-
-  // Code (inline)
-  html = html.replace(
-    /`([^`]+)`/g,
-    '<code class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-1 py-0.5 rounded text-sm font-mono">$1</code>',
-  );
-
-  // Links
-  html = html.replace(
-    /\[([^\]]+)\]\(([^)]+)\)/g,
-    '<a href="$2" class="text-gray-900 dark:text-gray-100 underline hover:no-underline" target="_blank" rel="noopener noreferrer">$1</a>',
-  );
-
-  // Simple line processing for better text wrapping
-  html = html
-    .split("\n")
-    .map((line) => {
-      const trimmed = line.trim();
-
-      // Skip empty lines
-      if (!trimmed) {
-        return "<br>";
-      }
-
-      // Handle list items
-      if (trimmed.startsWith("- ")) {
-        return `<li class="text-gray-700 dark:text-gray-300 mb-1">${
-          trimmed.substring(2)
-        }</li>`;
-      }
-
-      // Skip already processed HTML
-      if (trimmed.startsWith("<")) {
-        return trimmed;
-      }
-
-      // Wrap plain text in paragraphs
-      return `<p class="text-gray-700 dark:text-gray-300 mb-2">${trimmed}</p>`;
-    })
-    .join("");
-
-  // Wrap consecutive list items
-  html = html.replace(
-    /(<li[^>]*>.*?<\/li>)+/g,
-    '<ul class="list-disc list-inside mb-3">$&</ul>',
-  );
-
-  // Clean up consecutive <br> tags
-  html = html.replace(/(<br>\s*){2,}/g, "<br>");
-
-  return html;
+  const html = marked.parse(markdown);
+  return `<div class="markdown-content">${html}</div>`;
 }
 
 // Priority utilities
-export function getPriorityColor(priority) {
-  switch (priority) {
-    case 1:
-      return "gray-900";
-    case 2:
-      return "gray-700";
-    case 3:
-      return "gray-500";
-    case 4:
-      return "gray-400";
-    case 5:
-      return "gray-300";
-    default:
-      return "gray-400";
-  }
-}
-
 export function getPriorityBadgeClasses(priority) {
   return PRIORITY_CLASSES[priority]?.badge || PRIORITY_CLASSES[5].badge;
 }

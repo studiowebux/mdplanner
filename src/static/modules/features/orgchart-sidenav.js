@@ -1,138 +1,56 @@
 /**
  * OrgChart Sidenav Module.
- * Slide-in panel for org chart member creation and editing.
- * Pattern: SidenavModule with auto-save and CRUD operations.
+ * Pattern: Template Method (extends BaseSidenavModule)
+ * Custom: async openEdit fetches from API, multi-field validation, closes on create.
  */
 
+import { BaseSidenavModule } from "../ui/base-sidenav.js";
 import { Sidenav } from "../ui/sidenav.js";
 import { OrgChartAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 
-export class OrgChartSidenavModule {
-  constructor(taskManager) {
-    this.tm = taskManager;
-    this.editingMemberId = null;
-    this.autoSaveTimeout = null;
-  }
-
-  bindEvents() {
-    // Close button
-    document.getElementById("orgchartSidenavClose")?.addEventListener(
-      "click",
-      () => {
-        this.close();
-      },
-    );
-
-    // Cancel button
-    document.getElementById("orgchartSidenavCancel")?.addEventListener(
-      "click",
-      () => {
-        this.close();
-      },
-    );
-
-    // Delete button
-    document.getElementById("orgchartSidenavDelete")?.addEventListener(
-      "click",
-      () => {
-        this.handleDelete();
-      },
-    );
-
-    // Form submit
-    document.getElementById("orgchartSidenavForm")?.addEventListener(
-      "submit",
-      async (e) => {
-        e.preventDefault();
-        await this.save();
-      },
-    );
-
-    // Auto-save on input changes
-    const inputs = [
-      "orgchartSidenavName",
-      "orgchartSidenavTitle",
-      "orgchartSidenavDepartments",
-      "orgchartSidenavReportsTo",
-      "orgchartSidenavEmail",
-      "orgchartSidenavPhone",
-      "orgchartSidenavStartDate",
-      "orgchartSidenavNotes",
+export class OrgChartSidenavModule extends BaseSidenavModule {
+  get prefix() { return "orgchart"; }
+  get entityName() { return "Team Member"; }
+  get api() { return OrgChartAPI; }
+  get titleField() { return "name"; }
+  get newLabel() { return "New Team Member"; }
+  get editLabel() { return "Edit Team Member"; }
+  get inputIds() {
+    return [
+      "orgchartSidenavName", "orgchartSidenavTitle", "orgchartSidenavDepartments",
+      "orgchartSidenavReportsTo", "orgchartSidenavEmail", "orgchartSidenavPhone",
+      "orgchartSidenavStartDate", "orgchartSidenavNotes",
     ];
-
-    inputs.forEach((id) => {
-      document.getElementById(id)?.addEventListener("input", () => {
-        if (this.editingMemberId) {
-          this.scheduleAutoSave();
-        }
-      });
-      document.getElementById(id)?.addEventListener("change", () => {
-        if (this.editingMemberId) {
-          this.scheduleAutoSave();
-        }
-      });
-    });
   }
 
   openNew() {
-    this.editingMemberId = null;
-
-    // Update header
-    document.getElementById("orgchartSidenavHeader").textContent =
-      "New Team Member";
-
-    // Reset form
-    this.clearForm();
-
-    // Populate manager dropdown
+    super.openNew();
     this.populateReportsToDropdown();
-
-    // Hide delete button
-    document.getElementById("orgchartSidenavDelete").classList.add("hidden");
-
-    // Open sidenav
-    Sidenav.open("orgchartSidenav");
   }
 
+  /** Override: fetch member from API instead of local state */
   async open(memberId) {
     try {
       const member = await OrgChartAPI.get(memberId);
       if (!member) return;
 
-      this.editingMemberId = memberId;
-
-      // Update header
-      document.getElementById("orgchartSidenavHeader").textContent =
-        "Edit Team Member";
-
-      // Populate manager dropdown
+      this.editingId = memberId;
+      this.el("Header").textContent = this.editLabel;
       this.populateReportsToDropdown(memberId);
-
-      // Fill form
       this.fillForm(member);
+      this.el("Delete")?.classList.remove("hidden");
 
-      // Show delete button
-      document.getElementById("orgchartSidenavDelete").classList.remove(
-        "hidden",
-      );
-
-      // Open sidenav
-      Sidenav.open("orgchartSidenav");
+      Sidenav.open(this.panelId);
     } catch (error) {
       console.error("Error loading member:", error);
       showToast("Error loading member", "error");
     }
   }
 
-  close() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-    }
-
-    Sidenav.close("orgchartSidenav");
-    this.editingMemberId = null;
+  /** Alias for compatibility with callers using openEdit */
+  openEdit(memberId) {
+    return this.open(memberId);
   }
 
   populateReportsToDropdown(excludeId = null) {
@@ -201,54 +119,29 @@ export class OrgChartSidenavModule {
     };
   }
 
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-    }
-
-    this.showSaveStatus("Saving...");
-
-    this.autoSaveTimeout = setTimeout(async () => {
-      await this.save();
-    }, 1000);
-  }
-
+  /** Override: multi-field validation, close on create */
   async save() {
     const data = this.getFormData();
 
-    if (!data.name) {
-      this.showSaveStatus("Name required");
-      return;
-    }
-
-    if (!data.title) {
-      this.showSaveStatus("Title required");
-      return;
-    }
-
+    if (!data.name) { this.showSaveStatus("Name required"); return; }
+    if (!data.title) { this.showSaveStatus("Title required"); return; }
     if (!data.departments || data.departments.length === 0) {
       this.showSaveStatus("At least one department required");
       return;
     }
 
     try {
-      if (this.editingMemberId) {
-        await OrgChartAPI.update(this.editingMemberId, data);
+      if (this.editingId) {
+        await OrgChartAPI.update(this.editingId, data);
         this.showSaveStatus("Saved");
       } else {
-        const response = await OrgChartAPI.create(data);
-        const result = await response.json();
-        this.editingMemberId = result.id;
+        await OrgChartAPI.create(data);
         showToast("Team member created", "success");
-
-        // Reload, re-render, and close panel
-        await this.tm.orgchartModule.load();
+        await this.reloadData();
         this.close();
         return;
       }
-
-      // Reload and re-render
-      await this.tm.orgchartModule.load();
+      await this.reloadData();
     } catch (error) {
       console.error("Error saving member:", error);
       this.showSaveStatus("Error");
@@ -256,52 +149,12 @@ export class OrgChartSidenavModule {
     }
   }
 
-  async handleDelete() {
-    if (!this.editingMemberId) return;
-
-    const member = this.tm.orgchartModule?.members.find((m) =>
-      m.id === this.editingMemberId
-    );
-    if (!member) return;
-
-    if (!confirm(`Delete "${member.name}"? This cannot be undone.`)) return;
-
-    try {
-      await OrgChartAPI.delete(this.editingMemberId);
-      showToast("Team member deleted", "success");
-      await this.tm.orgchartModule.load();
-      this.close();
-    } catch (error) {
-      console.error("Error deleting member:", error);
-      showToast("Error deleting team member", "error");
-    }
+  findEntity(id) {
+    return this.tm.orgchartModule?.members?.find((m) => m.id === id);
   }
 
-  showSaveStatus(text) {
-    const statusEl = document.getElementById("orgchartSidenavSaveStatus");
-    if (!statusEl) return;
-
-    statusEl.textContent = text;
-    statusEl.classList.remove(
-      "hidden",
-      "orgchart-status-success",
-      "orgchart-status-error",
-      "orgchart-status-saving",
-    );
-
-    if (text === "Saved" || text === "Created") {
-      statusEl.classList.add("orgchart-status-success");
-    } else if (text === "Error" || text.includes("required")) {
-      statusEl.classList.add("orgchart-status-error");
-    } else {
-      statusEl.classList.add("orgchart-status-saving");
-    }
-
-    if (text === "Saved" || text === "Created" || text === "Error") {
-      setTimeout(() => {
-        statusEl.classList.add("hidden");
-      }, 2000);
-    }
+  async reloadData() {
+    await this.tm.orgchartModule.load();
   }
 }
 

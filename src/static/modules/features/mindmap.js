@@ -10,6 +10,9 @@ export class MindmapModule {
     this.zoom = 1;
     this.offset = { x: 0, y: 0 };
     this.currentLayout = "horizontal";
+    this.splitMode = false;
+    this.secondaryMindmap = null;
+    this.secondaryZoom = 1;
   }
 
   async load(autoSelect = true) {
@@ -45,6 +48,18 @@ export class MindmapModule {
       option.textContent = mindmap.title;
       selector.appendChild(option);
     });
+
+    // Also populate secondary selector
+    const secondary = document.getElementById("mindmapSecondarySelector");
+    if (secondary) {
+      secondary.innerHTML = '<option value="">Select Mindmap</option>';
+      this.mindmaps.forEach((mindmap) => {
+        const option = document.createElement("option");
+        option.value = mindmap.id;
+        option.textContent = mindmap.title;
+        secondary.appendChild(option);
+      });
+    }
   }
 
   select(mindmapId) {
@@ -91,45 +106,47 @@ export class MindmapModule {
   }
 
   render() {
-    const content = document.getElementById("mindmapContent");
-    const emptyState = document.getElementById("mindmapEmptyState");
+    this.renderMindmapInto(
+      this.selectedMindmap,
+      document.getElementById("mindmapContent"),
+      document.getElementById("mindmapEmptyState"),
+      "mindmapViewport",
+      "mindmapContainer",
+      false,
+    );
+  }
 
+  /** Render a mindmap into a given container. Reusable for primary and secondary viewports. */
+  renderMindmapInto(mindmap, content, emptyState, viewportId, containerId, isSecondary) {
     if (!content) {
-      console.error("mindmapContent element not found");
+      console.error(`${containerId} element not found`);
       return;
     }
 
-    if (!this.selectedMindmap || this.selectedMindmap.nodes.length === 0) {
-      if (emptyState) {
-        emptyState.style.display = "flex";
-      }
+    if (!mindmap || mindmap.nodes.length === 0) {
+      if (emptyState) emptyState.style.display = "flex";
       return;
     }
 
-    if (emptyState) {
-      emptyState.style.display = "none";
-    }
+    if (emptyState) emptyState.style.display = "none";
     content.innerHTML = "";
 
-    this.setupPanning();
+    this.setupPanningFor(viewportId, containerId, isSecondary);
 
-    const rootNodes = this.selectedMindmap.nodes.filter(
-      (node) => node.level === 0,
-    );
+    const rootNodes = mindmap.nodes.filter((node) => node.level === 0);
 
     if (rootNodes.length === 0) {
-      emptyState.style.display = "flex";
+      if (emptyState) emptyState.style.display = "flex";
       return;
     }
 
-    this.renderTreeLayout(rootNodes, content);
-    // Defer connection drawing to ensure DOM is laid out
+    this.renderTreeLayoutFor(rootNodes, content, mindmap);
     requestAnimationFrame(() => {
-      this.drawConnections(content);
+      this.drawConnectionsFor(content, mindmap);
     });
   }
 
-  renderTreeLayout(rootNodes, content) {
+  renderTreeLayoutFor(rootNodes, content, mindmap) {
     const isVertical = this.currentLayout === "vertical";
     const levelSpacing = 180;
     const nodeSpacing = 20;
@@ -144,12 +161,12 @@ export class MindmapModule {
         nodeWidth,
         nodeHeight,
         isVertical,
+        mindmap,
       );
     });
 
     // Second pass: position nodes
     if (isVertical) {
-      // Vertical: root at top, children below
       let currentX = 100;
       rootNodes.forEach((rootNode) => {
         const subtreeWidth = rootNode._subtreeWidth || nodeWidth;
@@ -163,11 +180,11 @@ export class MindmapModule {
           content,
           nodeWidth,
           nodeHeight,
+          mindmap,
         );
         currentX += subtreeWidth + nodeSpacing * 2;
       });
     } else {
-      // Horizontal: root on left, children to the right
       let currentY = 60;
       rootNodes.forEach((rootNode) => {
         const subtreeHeight = rootNode._subtreeHeight || nodeHeight;
@@ -181,14 +198,15 @@ export class MindmapModule {
           content,
           nodeWidth,
           nodeHeight,
+          mindmap,
         );
         currentY += subtreeHeight + nodeSpacing * 2;
       });
     }
   }
 
-  calculateSubtreeSize(node, nodeSpacing, nodeWidth, nodeHeight, isVertical) {
-    const children = this.selectedMindmap.nodes.filter(
+  calculateSubtreeSize(node, nodeSpacing, nodeWidth, nodeHeight, isVertical, mindmap) {
+    const children = mindmap.nodes.filter(
       (n) => n.parent === node.id,
     );
 
@@ -205,6 +223,7 @@ export class MindmapModule {
         nodeWidth,
         nodeHeight,
         isVertical,
+        mindmap,
       );
     });
 
@@ -229,21 +248,6 @@ export class MindmapModule {
     }
   }
 
-  createElement(node, x, y, container) {
-    const element = document.createElement("div");
-    element.className = `mindmap-node level-${node.level}`;
-    element.textContent = node.text;
-    element.dataset.nodeId = node.id;
-
-    if (node.level === 0) {
-      element.classList.add("root");
-    }
-
-    element.style.left = `${x}px`;
-    element.style.top = `${y}px`;
-    container.appendChild(element);
-  }
-
   positionNodeAndChildren(
     node,
     x,
@@ -253,6 +257,7 @@ export class MindmapModule {
     container,
     nodeWidth,
     nodeHeight,
+    mindmap,
   ) {
     const isVertical = this.currentLayout === "vertical";
 
@@ -274,13 +279,12 @@ export class MindmapModule {
     node._width = nodeWidth;
     node._height = nodeHeight;
 
-    const children = this.selectedMindmap.nodes.filter(
+    const children = mindmap.nodes.filter(
       (n) => n.parent === node.id,
     );
 
     if (children.length > 0) {
       if (isVertical) {
-        // Calculate total width needed for all children
         const totalChildWidth = children.reduce(
           (sum, child) => sum + (child._subtreeWidth || nodeWidth),
           0,
@@ -288,7 +292,6 @@ export class MindmapModule {
         const totalSpacing = (children.length - 1) * nodeSpacing;
         const totalWidth = totalChildWidth + totalSpacing;
 
-        // Start from left edge, centering under parent
         let childX = x + nodeWidth / 2 - totalWidth / 2;
 
         children.forEach((child) => {
@@ -305,12 +308,12 @@ export class MindmapModule {
             container,
             nodeWidth,
             nodeHeight,
+            mindmap,
           );
 
           childX += childSubtreeWidth + nodeSpacing;
         });
       } else {
-        // Calculate total height needed for all children
         const totalChildHeight = children.reduce(
           (sum, child) => sum + (child._subtreeHeight || nodeHeight),
           0,
@@ -318,7 +321,6 @@ export class MindmapModule {
         const totalSpacing = (children.length - 1) * nodeSpacing;
         const totalHeight = totalChildHeight + totalSpacing;
 
-        // Start from top edge, centering beside parent
         let childY = y + nodeHeight / 2 - totalHeight / 2;
 
         children.forEach((child) => {
@@ -335,6 +337,7 @@ export class MindmapModule {
             container,
             nodeWidth,
             nodeHeight,
+            mindmap,
           );
 
           childY += childSubtreeHeight + nodeSpacing;
@@ -343,12 +346,12 @@ export class MindmapModule {
     }
   }
 
-  drawConnections(container) {
+  drawConnectionsFor(container, mindmap) {
     const isVertical = this.currentLayout === "vertical";
 
-    this.selectedMindmap.nodes.forEach((node) => {
+    mindmap.nodes.forEach((node) => {
       if (node.parent) {
-        const parent = this.selectedMindmap.nodes.find(
+        const parent = mindmap.nodes.find(
           (n) => n.id === node.parent,
         );
         if (parent && parent.x !== undefined && node.x !== undefined) {
@@ -400,9 +403,9 @@ export class MindmapModule {
     });
   }
 
-  setupPanning() {
-    const viewport = document.getElementById("mindmapViewport");
-    const container = document.getElementById("mindmapContainer");
+  setupPanningFor(viewportId, containerId, isSecondary) {
+    const viewport = document.getElementById(viewportId);
+    const container = document.getElementById(containerId);
     let isDragging = false;
     let startX,
       startY,
@@ -423,8 +426,9 @@ export class MindmapModule {
       const newTranslateX = startTranslateX + deltaX;
       const newTranslateY = startTranslateY + deltaY;
 
+      const currentZoom = isSecondary ? this.secondaryZoom : this.zoom;
       viewport.style.transform =
-        `translate(${newTranslateX}px, ${newTranslateY}px) scale(${this.zoom})`;
+        `translate(${newTranslateX}px, ${newTranslateY}px) scale(${currentZoom})`;
     };
 
     const panEnd = () => {
@@ -526,6 +530,55 @@ export class MindmapModule {
     if (this.selectedMindmap) {
       this.render();
     }
+    if (this.splitMode && this.secondaryMindmap) {
+      this.renderSecondary();
+    }
+  }
+
+  toggleSplitMode() {
+    this.splitMode = !this.splitMode;
+    const grid = document.getElementById("mindmapViewportGrid");
+    const secondaryPanel = document.getElementById("mindmapSecondaryPanel");
+    const toggleBtn = document.getElementById("mindmapSplitToggle");
+
+    if (this.splitMode) {
+      grid?.classList.add("split-mode");
+      if (secondaryPanel) secondaryPanel.style.display = "";
+      toggleBtn?.classList.add("active");
+    } else {
+      grid?.classList.remove("split-mode");
+      if (secondaryPanel) secondaryPanel.style.display = "none";
+      toggleBtn?.classList.remove("active");
+      this.secondaryMindmap = null;
+    }
+  }
+
+  selectSecondary(mindmapId) {
+    if (!mindmapId || mindmapId === "") {
+      this.secondaryMindmap = null;
+      const content = document.getElementById("mindmapSecondaryContent");
+      if (content) {
+        content.innerHTML =
+          '<div class="flex items-center justify-center h-full"><p class="text-sm" style="color:var(--color-text-muted)">Select a mindmap to compare</p></div>';
+      }
+      return;
+    }
+
+    this.secondaryMindmap = this.mindmaps.find((m) => m.id === mindmapId);
+    if (this.secondaryMindmap) {
+      this.renderSecondary();
+    }
+  }
+
+  renderSecondary() {
+    this.renderMindmapInto(
+      this.secondaryMindmap,
+      document.getElementById("mindmapSecondaryContent"),
+      null,
+      "mindmapSecondaryViewport",
+      "mindmapSecondaryContainer",
+      true,
+    );
   }
 
   openModal() {
@@ -939,6 +992,16 @@ export class MindmapModule {
     document
       .getElementById("mindmapLayout")
       ?.addEventListener("change", (e) => this.updateLayout(e.target.value));
+
+    // Split mode toggle
+    document
+      .getElementById("mindmapSplitToggle")
+      ?.addEventListener("click", () => this.toggleSplitMode());
+
+    // Secondary mindmap selector
+    document
+      .getElementById("mindmapSecondarySelector")
+      ?.addEventListener("change", (e) => this.selectSecondary(e.target.value));
 
     // Modal close on background click
     document.getElementById("mindmapModal")?.addEventListener("click", (e) => {
