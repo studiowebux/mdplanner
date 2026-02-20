@@ -2,6 +2,8 @@
 
 Markdown-based project management with directory storage.
 
+> 2026-02-20 - Heavy WIP, main branch unstable features
+
 ## Links
 
 Bug Tracker: [GitHub Issues](https://github.com/studiowebux/mdplanner/issues)

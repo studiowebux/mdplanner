@@ -34,11 +34,11 @@ sudo systemctl start mdplanner
 
 Edit the service file to change runtime options:
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--port` | 8003 | HTTP server port |
-| `--cache` | disabled | Add flag to enable SQLite cache |
-| Project path | `/var/lib/mdplanner/project` | Last argument to ExecStart |
+| Option       | Default                      | Description                     |
+| ------------ | ---------------------------- | ------------------------------- |
+| `--port`     | 8003                         | HTTP server port                |
+| `--cache`    | disabled                     | Add flag to enable SQLite cache |
+| Project path | `/var/lib/mdplanner/project` | Last argument to ExecStart      |
 
 To enable the SQLite cache, modify ExecStart:
 
