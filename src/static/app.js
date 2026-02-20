@@ -57,6 +57,8 @@ import { MindmapModule } from "./modules/features/mindmap.js";
 import { C4Module } from "./modules/features/c4.js";
 import { OrgChartModule } from "./modules/views/orgchart.js";
 import { OrgChartSidenavModule } from "./modules/features/orgchart-sidenav.js";
+import { PeopleModule } from "./modules/views/people.js";
+import { PeopleSidenavModule } from "./modules/features/people-sidenav.js";
 import { PomodoroModule } from "./modules/features/pomodoro.js";
 import { ImportExportModule } from "./modules/import-export.js";
 import { ProjectsModule } from "./modules/projects.js";
@@ -218,6 +220,8 @@ class TaskManager {
     this.crmModule = new CRMModule(this);
     this.orgchartModule = new OrgChartModule(this);
     this.orgchartSidenavModule = new OrgChartSidenavModule(this);
+    this.peopleModule = new PeopleModule(this);
+    this.peopleSidenavModule = new PeopleSidenavModule(this);
     this.canvasModule = new CanvasModule(this);
     this.mindmapModule = new MindmapModule(this);
     this.c4Module = new C4Module(this);
@@ -334,6 +338,7 @@ class TaskManager {
       { id: "billingViewBtn", view: "billing" },
       { id: "crmViewBtn", view: "crm" },
       { id: "orgchartViewBtn", view: "orgchart" },
+      { id: "peopleViewBtn", view: "people" },
       { id: "portfolioViewBtn", view: "portfolio" },
     ];
     additionalViews.forEach(({ id, view }) => {
@@ -526,6 +531,12 @@ class TaskManager {
         this.closeMobileMenu();
       });
     document
+      .getElementById("peopleViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("people");
+        this.closeMobileMenu();
+      });
+    document
       .getElementById("portfolioViewBtnMobile")
       ?.addEventListener("click", () => {
         this.switchView("portfolio");
@@ -653,6 +664,10 @@ class TaskManager {
     this.orgchartModule.bindEvents();
     this.orgchartSidenavModule.bindEvents();
 
+    // People events - delegated to PeopleModule
+    this.peopleModule.bindEvents();
+    this.peopleSidenavModule.bindEvents();
+
     // Retrospectives events - delegated to RetrospectivesModule
     this.retrospectivesModule.bindEvents();
 
@@ -773,7 +788,7 @@ class TaskManager {
       "canvas", "mindmap", "c4", "retrospectives",
       "swot", "riskAnalysis", "leanCanvas", "businessModel",
       "projectValue", "brief", "timeTracking", "capacity",
-      "strategicLevels", "billing", "crm", "orgchart", "portfolio",
+      "strategicLevels", "billing", "crm", "orgchart", "people", "portfolio",
     ];
 
     // If no features configured, show everything
@@ -828,6 +843,8 @@ class TaskManager {
       strategicLevels: "Strategic Levels",
       billing: "Billing",
       crm: "CRM",
+      orgchart: "Org Chart",
+      people: "People",
       portfolio: "Portfolio",
       config: "Settings",
     };
@@ -910,6 +927,7 @@ class TaskManager {
       "billingViewBtn",
       "crmViewBtn",
       "orgchartViewBtn",
+      "peopleViewBtn",
       "portfolioViewBtn",
     ];
     desktopNavBtns.forEach((id) => {
@@ -951,6 +969,7 @@ class TaskManager {
       "billingViewBtnMobile",
       "crmViewBtnMobile",
       "orgchartViewBtnMobile",
+      "peopleViewBtnMobile",
       "portfolioViewBtnMobile",
       "configViewBtnMobile",
     ];
@@ -989,6 +1008,7 @@ class TaskManager {
     document.getElementById("billingView")?.classList.add("hidden");
     document.getElementById("crmView")?.classList.add("hidden");
     document.getElementById("orgchartView")?.classList.add("hidden");
+    document.getElementById("peopleView")?.classList.add("hidden");
     document.getElementById("portfolioView")?.classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
     document.getElementById("mindmapView").classList.add("hidden");
@@ -1085,6 +1105,10 @@ class TaskManager {
       this.activateViewButton("orgchart");
       document.getElementById("orgchartView").classList.remove("hidden");
       this.orgchartModule.load();
+    } else if (view === "people") {
+      this.activateViewButton("people");
+      document.getElementById("peopleView").classList.remove("hidden");
+      this.peopleModule.load();
     } else if (view === "canvas") {
       this.activateViewButton("canvas");
       document.getElementById("canvasView").classList.remove("hidden");
