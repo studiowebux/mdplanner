@@ -131,8 +131,18 @@ export const PortfolioAPI = {
     return response.json();
   },
 
+  async create(data) {
+    const response = await post("/api/portfolio", data);
+    return response.json();
+  },
+
   async update(id, data) {
     const response = await put(`/api/portfolio/${id}`, data);
+    return response;
+  },
+
+  async remove(id) {
+    const response = await del(`/api/portfolio/${id}`);
     return response;
   },
 };

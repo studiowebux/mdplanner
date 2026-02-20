@@ -248,6 +248,72 @@ export class PortfolioDirectoryParser {
   }
 
   /**
+   * Create a new portfolio item.
+   */
+  async create(
+    data: Omit<PortfolioItem, "id">,
+  ): Promise<PortfolioItem> {
+    // Ensure portfolio directory exists
+    try {
+      await Deno.stat(this.portfolioDir);
+    } catch {
+      await Deno.mkdir(this.portfolioDir, { recursive: true });
+    }
+
+    // Generate ID from name
+    const id = data.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+
+    // Check for ID collision
+    let finalId = id;
+    let counter = 1;
+    while (true) {
+      try {
+        await Deno.stat(`${this.portfolioDir}/${finalId}.md`);
+        finalId = `${id}-${counter}`;
+        counter++;
+      } catch {
+        break;
+      }
+    }
+
+    const item: PortfolioItem = {
+      id: finalId,
+      name: data.name,
+      category: data.category || "Uncategorized",
+      status: data.status || "active",
+      client: data.client,
+      revenue: data.revenue,
+      expenses: data.expenses,
+      progress: data.progress || 0,
+      description: data.description,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      team: data.team,
+      kpis: data.kpis,
+    };
+
+    // Write the file using the existing update logic
+    await this.update(finalId, item);
+
+    return item;
+  }
+
+  /**
+   * Delete a portfolio item.
+   */
+  async delete(id: string): Promise<boolean> {
+    try {
+      await Deno.remove(`${this.portfolioDir}/${id}.md`);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
    * Get portfolio summary.
    */
   async getSummary(): Promise<PortfolioSummary> {

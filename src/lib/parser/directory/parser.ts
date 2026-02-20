@@ -1215,11 +1215,21 @@ export class DirectoryMarkdownParser {
     return this.portfolioParser.read(id);
   }
 
+  async createPortfolioItem(
+    data: Omit<PortfolioItem, "id">,
+  ): Promise<PortfolioItem> {
+    return this.portfolioParser.create(data);
+  }
+
   async updatePortfolioItem(
     id: string,
     updates: Partial<PortfolioItem>,
   ): Promise<PortfolioItem | null> {
     return this.portfolioParser.update(id, updates);
+  }
+
+  async deletePortfolioItem(id: string): Promise<boolean> {
+    return this.portfolioParser.delete(id);
   }
 
   async getPortfolioSummary(): Promise<PortfolioSummary> {

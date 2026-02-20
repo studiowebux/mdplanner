@@ -80,6 +80,38 @@ portfolioRouter.get("/:id", async (c) => {
   return jsonResponse(item);
 });
 
+// POST /portfolio - create portfolio item
+portfolioRouter.post("/", async (c) => {
+  const parser = getParser(c);
+
+  if (!(parser instanceof DirectoryMarkdownParser)) {
+    return errorResponse("Portfolio requires directory-based project", 400);
+  }
+
+  const body = await c.req.json();
+
+  if (!body.name) {
+    return errorResponse("Name is required", 400);
+  }
+
+  const item = await parser.createPortfolioItem({
+    name: body.name,
+    category: body.category || "Uncategorized",
+    status: body.status || "active",
+    client: body.client,
+    revenue: body.revenue,
+    expenses: body.expenses,
+    progress: body.progress,
+    description: body.description,
+    startDate: body.startDate,
+    endDate: body.endDate,
+    team: body.team,
+    kpis: body.kpis,
+  });
+
+  return jsonResponse(item, 201);
+});
+
 // PUT /portfolio/:id - update portfolio item
 portfolioRouter.put("/:id", async (c) => {
   const parser = getParser(c);
@@ -97,4 +129,22 @@ portfolioRouter.put("/:id", async (c) => {
   }
 
   return jsonResponse(updated);
+});
+
+// DELETE /portfolio/:id - delete portfolio item
+portfolioRouter.delete("/:id", async (c) => {
+  const parser = getParser(c);
+  const id = c.req.param("id");
+
+  if (!(parser instanceof DirectoryMarkdownParser)) {
+    return errorResponse("Portfolio requires directory-based project", 400);
+  }
+
+  const deleted = await parser.deletePortfolioItem(id);
+
+  if (!deleted) {
+    return errorResponse(`Portfolio item ${id} not found`, 404);
+  }
+
+  return jsonResponse({ success: true });
 });

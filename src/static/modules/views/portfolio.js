@@ -16,6 +16,7 @@ export class PortfolioView {
     this.currentViewMode = "list"; // 'list' or 'tree'
     this.selectedProject = null;
     this.isDetailOpen = false;
+    this.isCreating = false;
   }
 
   /**
@@ -441,6 +442,42 @@ export class PortfolioView {
   }
 
   /**
+   * Open detail panel for a new project.
+   */
+  openNewDetailPanel() {
+    this.selectedProject = null;
+    this.isDetailOpen = true;
+    this.isCreating = true;
+
+    const newProject = {
+      name: "",
+      category: "Uncategorized",
+      status: "planning",
+      client: "",
+      description: "",
+      progress: 0,
+      revenue: 0,
+      expenses: 0,
+      startDate: "",
+      endDate: "",
+      team: [],
+      kpis: [],
+    };
+
+    this.renderDetailPanel(newProject);
+
+    const titleEl = document.getElementById("portfolioDetailTitle");
+    if (titleEl) titleEl.textContent = "New Project";
+
+    document.getElementById("portfolioDetailPanel")?.classList.add("open");
+
+    // Focus the name field
+    setTimeout(() => {
+      document.getElementById("portfolioDetailName")?.focus();
+    }, 200);
+  }
+
+  /**
    * Open detail panel for a project.
    * @param {string} projectId
    */
@@ -449,6 +486,7 @@ export class PortfolioView {
       const project = await PortfolioAPI.get(projectId);
       this.selectedProject = project;
       this.isDetailOpen = true;
+      this.isCreating = false;
       this.renderDetailPanel(project);
       document.getElementById("portfolioDetailPanel")?.classList.add("open");
     } catch (error) {
@@ -461,6 +499,7 @@ export class PortfolioView {
    */
   closeDetailPanel() {
     this.isDetailOpen = false;
+    this.isCreating = false;
     this.selectedProject = null;
     document.getElementById("portfolioDetailPanel")?.classList.remove("open");
   }
@@ -745,12 +784,18 @@ export class PortfolioView {
     };
 
     try {
-      await PortfolioAPI.update(this.selectedProject.id, updates);
+      if (this.isCreating) {
+        if (!updates.name) {
+          return;
+        }
+        await PortfolioAPI.create(updates);
+      } else {
+        await PortfolioAPI.update(this.selectedProject.id, updates);
+      }
       this.closeDetailPanel();
-      await this.load(); // Refresh the list
+      await this.load();
     } catch (error) {
       console.error("Error saving project:", error);
-      alert("Failed to save project");
     }
   }
 
@@ -758,6 +803,14 @@ export class PortfolioView {
    * Bind event listeners for the portfolio view.
    */
   bindEvents() {
+    // Add Project button
+    document.getElementById("portfolioAddBtn")?.addEventListener(
+      "click",
+      () => {
+        this.openNewDetailPanel();
+      },
+    );
+
     // Filter button clicks
     document.getElementById("portfolioFilterBar")?.addEventListener(
       "click",
