@@ -102,3 +102,26 @@
 .strategic-project {
   border-left: 4px solid #ef4444;
 }
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 640px) {
+  .strategic-pyramid {
+    overflow-x: auto;
+  }
+
+  .pyramid-row {
+    min-width: 0;
+  }
+
+  .pyramid-card {
+    min-width: 0;
+    word-break: break-word;
+  }
+
+  .strategic-tree-node[style*="margin-left"] {
+    margin-left: 1rem !important;
+  }
+}

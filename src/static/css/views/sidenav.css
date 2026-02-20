@@ -272,6 +272,19 @@
    Responsive
    -------------------------------------------------------------------------- */
 
+@media (max-width: 900px) {
+  .sidenav-panel.sidenav-xl {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidenav-panel.sidenav-lg,
+  .sidenav-panel.sidenav-xl {
+    max-width: 100%;
+  }
+}
+
 @media (max-width: 640px) {
   .sidenav-panel {
     max-width: 100%;

@@ -48,44 +48,65 @@ export class CanvasModule {
       startTranslateX = 0,
       startTranslateY = 0;
 
+    const panStart = (x, y) => {
+      isDragging = true;
+      startX = x;
+      startY = y;
+      viewport.style.cursor = "grabbing";
+    };
+
+    const panMove = (x, y) => {
+      if (!isDragging) return;
+      const deltaX = x - startX;
+      const deltaY = y - startY;
+      const newTranslateX = startTranslateX + deltaX;
+      const newTranslateY = startTranslateY + deltaY;
+
+      this.offset.x = newTranslateX;
+      this.offset.y = newTranslateY;
+
+      viewport.style.transform =
+        `translate(${newTranslateX}px, ${newTranslateY}px) scale(${this.zoom})`;
+    };
+
+    const panEnd = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      viewport.style.cursor = "grab";
+      const transform = viewport.style.transform;
+      const match = transform.match(/translate\(([^,]+),\s*([^)]+)\)/);
+      if (match) {
+        startTranslateX = parseFloat(match[1]);
+        startTranslateY = parseFloat(match[2]);
+        this.offset.x = startTranslateX;
+        this.offset.y = startTranslateY;
+      }
+    };
+
+    // Mouse events
     viewport.addEventListener("mousedown", (e) => {
       if (e.target === viewport || e.target.id === "canvasContent") {
-        isDragging = true;
-        startX = e.clientX;
-        startY = e.clientY;
-        viewport.style.cursor = "grabbing";
+        panStart(e.clientX, e.clientY);
       }
     });
+    document.addEventListener("mousemove", (e) => panMove(e.clientX, e.clientY));
+    document.addEventListener("mouseup", panEnd);
 
-    document.addEventListener("mousemove", (e) => {
+    // Touch events
+    viewport.addEventListener("touchstart", (e) => {
+      if (e.target === viewport || e.target.id === "canvasContent") {
+        const touch = e.touches[0];
+        panStart(touch.clientX, touch.clientY);
+      }
+    }, { passive: true });
+    document.addEventListener("touchmove", (e) => {
       if (isDragging) {
-        const deltaX = e.clientX - startX;
-        const deltaY = e.clientY - startY;
-        const newTranslateX = startTranslateX + deltaX;
-        const newTranslateY = startTranslateY + deltaY;
-
-        this.offset.x = newTranslateX;
-        this.offset.y = newTranslateY;
-
-        viewport.style.transform =
-          `translate(${newTranslateX}px, ${newTranslateY}px) scale(${this.zoom})`;
+        e.preventDefault();
+        const touch = e.touches[0];
+        panMove(touch.clientX, touch.clientY);
       }
-    });
-
-    document.addEventListener("mouseup", () => {
-      if (isDragging) {
-        isDragging = false;
-        viewport.style.cursor = "grab";
-        const transform = viewport.style.transform;
-        const match = transform.match(/translate\(([^,]+),\s*([^)]+)\)/);
-        if (match) {
-          startTranslateX = parseFloat(match[1]);
-          startTranslateY = parseFloat(match[2]);
-          this.offset.x = startTranslateX;
-          this.offset.y = startTranslateY;
-        }
-      }
-    });
+    }, { passive: false });
+    document.addEventListener("touchend", panEnd);
   }
 
   createElement(stickyNote) {
@@ -122,48 +143,63 @@ export class CanvasModule {
     let isDragging = false;
     let startX, startY, startLeft, startTop;
 
-    const onMouseDown = (e) => {
-      if (e.target.contentEditable === "true") return;
+    const dragStart = (x, y) => {
       isDragging = true;
       element.classList.add("dragging");
-      startX = e.clientX;
-      startY = e.clientY;
+      startX = x;
+      startY = y;
       startLeft = parseInt(element.style.left) || 0;
       startTop = parseInt(element.style.top) || 0;
 
-      // Add document listeners only when dragging starts
       document.addEventListener("mousemove", onMouseMove);
       document.addEventListener("mouseup", onMouseUp);
+      document.addEventListener("touchmove", onTouchMove, { passive: false });
+      document.addEventListener("touchend", onTouchEnd);
     };
 
-    const onMouseMove = (e) => {
+    const dragMove = (x, y) => {
       if (!isDragging) return;
-      const newLeft = startLeft + (e.clientX - startX);
-      const newTop = startTop + (e.clientY - startY);
+      const newLeft = startLeft + (x - startX);
+      const newTop = startTop + (y - startY);
       element.style.left = `${newLeft}px`;
       element.style.top = `${newTop}px`;
     };
 
-    const onMouseUp = () => {
-      if (isDragging) {
-        isDragging = false;
-        element.classList.remove("dragging");
+    const dragEnd = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      element.classList.remove("dragging");
 
-        const newX = parseInt(element.style.left) || 0;
-        const newY = parseInt(element.style.top) || 0;
-        const id = element.dataset.id;
+      const newX = parseInt(element.style.left) || 0;
+      const newY = parseInt(element.style.top) || 0;
+      const id = element.dataset.id;
 
-        console.log("Canvas: Saving position for", id, "to", newX, newY);
+      this.updatePosition(id, { x: newX, y: newY });
 
-        this.updatePosition(id, { x: newX, y: newY });
-
-        // Remove document listeners when dragging ends
-        document.removeEventListener("mousemove", onMouseMove);
-        document.removeEventListener("mouseup", onMouseUp);
-      }
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+      document.removeEventListener("touchmove", onTouchMove);
+      document.removeEventListener("touchend", onTouchEnd);
     };
 
-    element.addEventListener("mousedown", onMouseDown);
+    const onMouseMove = (e) => dragMove(e.clientX, e.clientY);
+    const onMouseUp = () => dragEnd();
+    const onTouchMove = (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      dragMove(touch.clientX, touch.clientY);
+    };
+    const onTouchEnd = () => dragEnd();
+
+    element.addEventListener("mousedown", (e) => {
+      if (e.target.contentEditable === "true") return;
+      dragStart(e.clientX, e.clientY);
+    });
+    element.addEventListener("touchstart", (e) => {
+      if (e.target.contentEditable === "true") return;
+      const touch = e.touches[0];
+      dragStart(touch.clientX, touch.clientY);
+    }, { passive: true });
   }
 
   makeResizable(element) {

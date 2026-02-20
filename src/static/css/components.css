@@ -665,3 +665,21 @@ select.input {
   align-items: center;
   gap: var(--space-xs);
 }
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 640px) {
+  .dropdown-menu {
+    max-width: calc(100vw - 2rem);
+  }
+
+  .auto-save-indicator {
+    top: auto;
+    bottom: 1rem;
+    right: 1rem;
+    left: 1rem;
+    text-align: center;
+  }
+}

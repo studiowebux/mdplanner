@@ -294,3 +294,33 @@ body:not([data-current-view="c4"]) #c4Connections {
 .c4-target-dropdown-item:last-child {
   border-bottom: none;
 }
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .c4-component {
+    width: 140px;
+    max-width: 140px;
+    height: 100px;
+    padding: 8px 10px;
+  }
+
+  .c4-component-title {
+    font-size: 12px;
+  }
+
+  .c4-component-type {
+    font-size: 10px;
+  }
+
+  .c4-component-description {
+    font-size: 10px;
+    -webkit-line-clamp: 1;
+  }
+
+  .c4-component-controls {
+    display: flex;
+  }
+}

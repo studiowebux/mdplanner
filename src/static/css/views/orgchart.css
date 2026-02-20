@@ -305,6 +305,39 @@
   background-color: rgba(59, 130, 246, 0.2);
 }
 
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .orgchart-tree {
+    padding: 1rem;
+    overflow-x: auto;
+    align-items: flex-start;
+  }
+
+  .orgchart-children {
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Hide connector lines when wrapping */
+  .orgchart-children::after {
+    display: none;
+  }
+
+  .orgchart-node {
+    min-width: 150px;
+    max-width: 180px;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .orgchart-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Save Status Indicators */
 .orgchart-status-success {
   color: var(--color-success-text);

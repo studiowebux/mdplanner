@@ -409,41 +409,61 @@ export class MindmapModule {
       startTranslateX = 0,
       startTranslateY = 0;
 
+    const panStart = (x, y) => {
+      isDragging = true;
+      startX = x;
+      startY = y;
+      container.style.cursor = "grabbing";
+    };
+
+    const panMove = (x, y) => {
+      if (!isDragging) return;
+      const deltaX = x - startX;
+      const deltaY = y - startY;
+      const newTranslateX = startTranslateX + deltaX;
+      const newTranslateY = startTranslateY + deltaY;
+
+      viewport.style.transform =
+        `translate(${newTranslateX}px, ${newTranslateY}px) scale(${this.zoom})`;
+    };
+
+    const panEnd = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      container.style.cursor = "grab";
+      const transform = viewport.style.transform;
+      const match = transform.match(/translate\(([^,]+),\s*([^)]+)\)/);
+      if (match) {
+        startTranslateX = parseFloat(match[1]);
+        startTranslateY = parseFloat(match[2]);
+      }
+    };
+
+    // Mouse events
     container.addEventListener("mousedown", (e) => {
-      // Allow panning unless clicking on a mindmap node
       if (!e.target.closest(".mindmap-node")) {
-        isDragging = true;
-        startX = e.clientX;
-        startY = e.clientY;
-        container.style.cursor = "grabbing";
+        panStart(e.clientX, e.clientY);
         e.preventDefault();
       }
     });
+    document.addEventListener("mousemove", (e) => panMove(e.clientX, e.clientY));
+    document.addEventListener("mouseup", panEnd);
 
-    document.addEventListener("mousemove", (e) => {
-      if (isDragging) {
-        const deltaX = e.clientX - startX;
-        const deltaY = e.clientY - startY;
-        const newTranslateX = startTranslateX + deltaX;
-        const newTranslateY = startTranslateY + deltaY;
-
-        viewport.style.transform =
-          `translate(${newTranslateX}px, ${newTranslateY}px) scale(${this.zoom})`;
+    // Touch events
+    container.addEventListener("touchstart", (e) => {
+      if (!e.target.closest(".mindmap-node")) {
+        const touch = e.touches[0];
+        panStart(touch.clientX, touch.clientY);
       }
-    });
-
-    document.addEventListener("mouseup", () => {
+    }, { passive: true });
+    document.addEventListener("touchmove", (e) => {
       if (isDragging) {
-        isDragging = false;
-        container.style.cursor = "grab";
-        const transform = viewport.style.transform;
-        const match = transform.match(/translate\(([^,]+),\s*([^)]+)\)/);
-        if (match) {
-          startTranslateX = parseFloat(match[1]);
-          startTranslateY = parseFloat(match[2]);
-        }
+        e.preventDefault();
+        const touch = e.touches[0];
+        panMove(touch.clientX, touch.clientY);
       }
-    });
+    }, { passive: false });
+    document.addEventListener("touchend", panEnd);
   }
 
   editSelected() {

@@ -109,3 +109,25 @@
 .theme-dark .mindmap-connection {
   border-color: var(--color-border-strong);
 }
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  #mindmapContent {
+    width: 2000px;
+    height: 2000px;
+  }
+
+  .mindmap-node {
+    min-width: 80px;
+    max-width: 140px;
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  .mindmap-node.root {
+    font-size: 14px;
+  }
+}

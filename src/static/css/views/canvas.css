@@ -166,3 +166,26 @@
 .sticky-note-controls button:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .canvas-height {
+    height: calc(100vh - 180px);
+    min-height: 300px;
+  }
+
+  .sticky-note {
+    width: 160px;
+    min-width: 120px;
+    min-height: 80px;
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .sticky-note-controls {
+    display: flex;
+  }
+}

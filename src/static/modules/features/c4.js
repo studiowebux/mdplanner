@@ -553,10 +553,33 @@ export class C4Module {
       e.stopPropagation();
     };
 
+    const onTouchStart = (e) => {
+      if (
+        e.target.classList.contains("c4-component-drilldown") ||
+        e.target.classList.contains("c4-edit-btn") ||
+        e.target.classList.contains("c4-delete-btn")
+      ) return;
+
+      const touch = e.touches[0];
+      this.tm._c4ActiveDrag = {
+        element,
+        component,
+        startX: touch.clientX,
+        startY: touch.clientY,
+        initialX: component.position.x,
+        initialY: component.position.y,
+        dragStarted: false,
+      };
+
+      this.stopForceLayout();
+    };
+
     element.addEventListener("mousedown", onMouseDown);
+    element.addEventListener("touchstart", onTouchStart, { passive: true });
 
     element._c4Cleanup = () => {
       element.removeEventListener("mousedown", onMouseDown);
+      element.removeEventListener("touchstart", onTouchStart);
     };
   }
 
@@ -564,12 +587,12 @@ export class C4Module {
     if (this.tm._c4DragHandlersInitialized) return;
     this.tm._c4DragHandlersInitialized = true;
 
-    document.addEventListener("mousemove", (e) => {
+    const handleDragMove = (x, y) => {
       if (!this.tm._c4ActiveDrag) return;
 
       const drag = this.tm._c4ActiveDrag;
-      const deltaX = (e.clientX - drag.startX) / this.tm.c4Zoom;
-      const deltaY = (e.clientY - drag.startY) / this.tm.c4Zoom;
+      const deltaX = (x - drag.startX) / this.tm.c4Zoom;
+      const deltaY = (y - drag.startY) / this.tm.c4Zoom;
       const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
       if (!drag.dragStarted && distance > 5) {
@@ -591,9 +614,9 @@ export class C4Module {
           this.drawConnections(this.getCurrentLevelComponents());
         });
       }
-    });
+    };
 
-    document.addEventListener("mouseup", (e) => {
+    const handleDragEnd = (shouldDrillDown) => {
       if (!this.tm._c4ActiveDrag) return;
 
       const drag = this.tm._c4ActiveDrag;
@@ -605,8 +628,7 @@ export class C4Module {
       drag.element.style.transition = "";
       this.tm._c4ActiveDrag = null;
 
-      if (!wasDragging && this.canBeDrilledDown(component)) {
-        e.stopPropagation();
+      if (!wasDragging && shouldDrillDown && this.canBeDrilledDown(component)) {
         this.drillDown(component);
         return;
       }
@@ -615,7 +637,25 @@ export class C4Module {
         this.save();
         this.drawConnections(this.getCurrentLevelComponents());
       }
+    };
+
+    document.addEventListener("mousemove", (e) => handleDragMove(e.clientX, e.clientY));
+    document.addEventListener("mouseup", (e) => {
+      if (this.tm._c4ActiveDrag) {
+        e.stopPropagation();
+        handleDragEnd(true);
+      }
     });
+
+    // Touch equivalents
+    document.addEventListener("touchmove", (e) => {
+      if (this.tm._c4ActiveDrag) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        handleDragMove(touch.clientX, touch.clientY);
+      }
+    }, { passive: false });
+    document.addEventListener("touchend", () => handleDragEnd(true));
   }
 
   openModal() {
@@ -895,45 +935,66 @@ export class C4Module {
     let isPanning = false;
     let startX, startY, initialOffsetX, initialOffsetY;
 
-    container.addEventListener("mousedown", (e) => {
-      // Allow panning when clicking on background elements, not on components
-      const isBackground = e.target === container ||
-        e.target === viewport ||
-        e.target === content ||
-        e.target === componentsContainer ||
-        e.target.id === "c4Connections" ||
-        e.target.tagName === "svg";
+    const isBackgroundTarget = (target) => {
+      return (target === container ||
+        target === viewport ||
+        target === content ||
+        target === componentsContainer ||
+        target.id === "c4Connections" ||
+        target.tagName === "svg") &&
+        !target.closest(".c4-component");
+    };
 
-      if (isBackground && !e.target.closest(".c4-component")) {
-        isPanning = true;
-        startX = e.clientX;
-        startY = e.clientY;
-        initialOffsetX = this.tm.c4Offset.x;
-        initialOffsetY = this.tm.c4Offset.y;
+    const panStart = (x, y) => {
+      isPanning = true;
+      startX = x;
+      startY = y;
+      initialOffsetX = this.tm.c4Offset.x;
+      initialOffsetY = this.tm.c4Offset.y;
+      container.style.cursor = "grabbing";
+    };
 
-        container.style.cursor = "grabbing";
-        e.preventDefault();
-      }
-    });
-
-    document.addEventListener("mousemove", (e) => {
+    const panMove = (x, y) => {
       if (!isPanning) return;
-
-      const deltaX = (e.clientX - startX) / this.tm.c4Zoom;
-      const deltaY = (e.clientY - startY) / this.tm.c4Zoom;
-
+      const deltaX = (x - startX) / this.tm.c4Zoom;
+      const deltaY = (y - startY) / this.tm.c4Zoom;
       this.tm.c4Offset.x = initialOffsetX + deltaX;
       this.tm.c4Offset.y = initialOffsetY + deltaY;
-
       this.updateViewTransform();
-    });
+    };
 
-    document.addEventListener("mouseup", () => {
+    const panEnd = () => {
       if (isPanning) {
         isPanning = false;
         container.style.cursor = "grab";
       }
+    };
+
+    // Mouse events
+    container.addEventListener("mousedown", (e) => {
+      if (isBackgroundTarget(e.target)) {
+        panStart(e.clientX, e.clientY);
+        e.preventDefault();
+      }
     });
+    document.addEventListener("mousemove", (e) => panMove(e.clientX, e.clientY));
+    document.addEventListener("mouseup", panEnd);
+
+    // Touch events
+    container.addEventListener("touchstart", (e) => {
+      if (isBackgroundTarget(e.target)) {
+        const touch = e.touches[0];
+        panStart(touch.clientX, touch.clientY);
+      }
+    }, { passive: true });
+    document.addEventListener("touchmove", (e) => {
+      if (isPanning) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        panMove(touch.clientX, touch.clientY);
+      }
+    }, { passive: false });
+    document.addEventListener("touchend", panEnd);
 
     container.addEventListener("wheel", (e) => {
       e.preventDefault();

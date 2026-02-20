@@ -427,5 +427,130 @@ export class BoardView {
         this.draggedFromIndex = null;
       }
     });
+
+    // Touch drag support for mobile
+    this.bindTouchDrag();
+  }
+
+  /**
+   * Touch-based drag for task cards on mobile.
+   * Creates a visual clone and detects drop zones on touchend.
+   */
+  bindTouchDrag() {
+    let touchCard = null;
+    let clone = null;
+    let touchStartY = 0;
+    let touchStartX = 0;
+    let dragActive = false;
+
+    document.addEventListener("touchstart", (e) => {
+      const card = e.target.closest(".task-card, .task-list-item");
+      if (!card || !card.dataset.taskId) return;
+
+      touchCard = card;
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      dragActive = false;
+    }, { passive: true });
+
+    document.addEventListener("touchmove", (e) => {
+      if (!touchCard) return;
+
+      const touch = e.touches[0];
+      const dx = touch.clientX - touchStartX;
+      const dy = touch.clientY - touchStartY;
+
+      // Require 10px movement to start drag
+      if (!dragActive && Math.abs(dx) + Math.abs(dy) < 10) return;
+
+      if (!dragActive) {
+        dragActive = true;
+        e.preventDefault();
+
+        // Track source
+        this.draggedTaskId = touchCard.dataset.taskId;
+        const container = touchCard.closest("[data-section]");
+        if (container) {
+          this.draggedFromSection = container.dataset.section;
+          const cards = Array.from(container.querySelectorAll(".task-card"));
+          this.draggedFromIndex = cards.indexOf(touchCard);
+        }
+
+        this.showDropZones();
+        touchCard.style.opacity = "0.5";
+
+        // Create visual clone
+        clone = touchCard.cloneNode(true);
+        clone.style.position = "fixed";
+        clone.style.zIndex = "9999";
+        clone.style.pointerEvents = "none";
+        clone.style.opacity = "0.8";
+        clone.style.width = touchCard.offsetWidth + "px";
+        clone.style.transform = "rotate(3deg)";
+        document.body.appendChild(clone);
+      }
+
+      if (dragActive) {
+        e.preventDefault();
+        clone.style.left = (touch.clientX - 40) + "px";
+        clone.style.top = (touch.clientY - 20) + "px";
+
+        // Highlight drop zone under finger
+        const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+        const dropZone = elemBelow?.closest(".drop-zone");
+        document.querySelectorAll(".drop-zone").forEach((dz) => {
+          if (dz === dropZone) {
+            this.highlightDropZone(dz);
+          } else {
+            dz.style.background = "rgba(59, 130, 246, 0.1)";
+            dz.style.border = "2px dashed #3b82f6";
+          }
+        });
+      }
+    }, { passive: false });
+
+    document.addEventListener("touchend", (e) => {
+      if (!touchCard || !dragActive) {
+        touchCard = null;
+        return;
+      }
+
+      // Find drop zone under last touch position
+      const touch = e.changedTouches[0];
+      if (clone) {
+        clone.style.display = "none";
+      }
+      const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+      const dropZone = elemBelow?.closest(".drop-zone");
+
+      if (clone) {
+        clone.remove();
+        clone = null;
+      }
+      touchCard.style.opacity = "1";
+      this.hideDropZones();
+
+      if (dropZone && this.draggedTaskId) {
+        const targetSection = dropZone.dataset.section;
+        const zonePosition = parseInt(dropZone.dataset.position, 10);
+        let position = zonePosition;
+
+        const isSameSection = this.draggedFromSection === targetSection;
+        if (isSameSection && this.draggedFromIndex !== null && position > this.draggedFromIndex) {
+          position = position - 1;
+        }
+
+        if (targetSection !== undefined && !isNaN(position)) {
+          this.moveTask(this.draggedTaskId, targetSection, position);
+        }
+      }
+
+      this.draggedTaskId = null;
+      this.draggedFromSection = null;
+      this.draggedFromIndex = null;
+      touchCard = null;
+      dragActive = false;
+    });
   }
 }
