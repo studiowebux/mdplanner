@@ -45,6 +45,7 @@ export class ConfigView {
     this.renderSections();
     this.renderAssignees();
     this.renderTags();
+    this.renderFeatures();
     this.renderAccessibilitySettings();
   }
 
@@ -299,6 +300,106 @@ export class ConfigView {
     } catch (error) {
       console.error("Error updating sections in markdown:", error);
     }
+  }
+
+  renderFeatures() {
+    const container = document.getElementById("featuresContainer");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const featureGroups = {
+      "Tasks": [
+        { id: "summary", label: "Summary" },
+        { id: "list", label: "List" },
+        { id: "board", label: "Board" },
+        { id: "timeline", label: "Timeline" },
+      ],
+      "Planning": [
+        { id: "goals", label: "Goals" },
+        { id: "milestones", label: "Milestones" },
+        { id: "ideas", label: "Ideas" },
+        { id: "retrospectives", label: "Retrospectives" },
+      ],
+      "Analysis": [
+        { id: "swot", label: "SWOT Analysis" },
+        { id: "riskAnalysis", label: "Risk Analysis" },
+        { id: "leanCanvas", label: "Lean Canvas" },
+        { id: "businessModel", label: "Business Model" },
+        { id: "projectValue", label: "Value Board" },
+        { id: "brief", label: "Brief" },
+      ],
+      "Diagrams": [
+        { id: "canvas", label: "Canvas" },
+        { id: "mindmap", label: "Mindmap" },
+        { id: "c4", label: "C4 Architecture" },
+      ],
+      "Resources": [
+        { id: "timeTracking", label: "Time Tracking" },
+        { id: "capacity", label: "Capacity" },
+        { id: "billing", label: "Billing" },
+        { id: "crm", label: "CRM" },
+        { id: "orgchart", label: "Org Chart" },
+      ],
+      "Other": [
+        { id: "notes", label: "Notes" },
+        { id: "strategicLevels", label: "Strategic Levels" },
+        { id: "portfolio", label: "Portfolio" },
+      ],
+    };
+
+    const enabledFeatures = this.tm.projectConfig?.features || [];
+    const showAll = enabledFeatures.length === 0;
+
+    for (const [group, features] of Object.entries(featureGroups)) {
+      const groupDiv = document.createElement("div");
+
+      const groupTitle = document.createElement("h4");
+      groupTitle.className = "text-sm font-medium text-gray-700 dark:text-gray-300 mb-2";
+      groupTitle.textContent = group;
+      groupDiv.appendChild(groupTitle);
+
+      const checkboxes = document.createElement("div");
+      checkboxes.className = "space-y-1";
+
+      for (const feature of features) {
+        const isEnabled = showAll || enabledFeatures.includes(feature.id);
+        const label = document.createElement("label");
+        label.className = "flex items-center space-x-2 cursor-pointer";
+        label.innerHTML = `
+          <input type="checkbox" data-feature="${feature.id}"
+            class="feature-checkbox rounded border-gray-300 dark:border-gray-600 text-gray-900 focus:ring-gray-500"
+            ${isEnabled ? "checked" : ""}>
+          <span class="text-sm text-gray-700 dark:text-gray-300">${feature.label}</span>
+        `;
+        checkboxes.appendChild(label);
+      }
+
+      groupDiv.appendChild(checkboxes);
+      container.appendChild(groupDiv);
+    }
+
+    // Bind change events via delegation
+    container.addEventListener("change", (e) => {
+      if (e.target.classList.contains("feature-checkbox")) {
+        this.toggleFeature();
+      }
+    });
+  }
+
+  async toggleFeature() {
+    const checkboxes = document.querySelectorAll(".feature-checkbox");
+    const allChecked = document.querySelectorAll(".feature-checkbox:checked");
+
+    // If all are checked, store empty array (show all)
+    if (allChecked.length === checkboxes.length) {
+      this.tm.projectConfig.features = [];
+    } else {
+      const features = [];
+      allChecked.forEach((cb) => features.push(cb.dataset.feature));
+      this.tm.projectConfig.features = features;
+    }
+
+    await this.tm.saveProjectConfig();
   }
 
   bindEvents() {

@@ -238,6 +238,7 @@ class TaskManager {
     this.bindEvents();
     await this.loadProjects(); // Load projects first
     await this.loadProjectConfig();
+    this.applyFeatureVisibility();
     await this.loadSections();
     const savedView = localStorage.getItem("mdplanner_current_view") ||
       "summary";
@@ -757,6 +758,48 @@ class TaskManager {
       console.error("Error loading tasks:", error);
     } finally {
       document.getElementById("loading").classList.add("hidden");
+    }
+  }
+
+  /**
+   * Hide/show nav buttons based on project features config.
+   * If features is empty or undefined, all views are visible.
+   */
+  applyFeatureVisibility() {
+    const features = this.projectConfig?.features;
+    const allViews = [
+      "summary", "list", "board", "timeline",
+      "notes", "goals", "milestones", "ideas",
+      "canvas", "mindmap", "c4", "retrospectives",
+      "swot", "riskAnalysis", "leanCanvas", "businessModel",
+      "projectValue", "brief", "timeTracking", "capacity",
+      "strategicLevels", "billing", "crm", "orgchart", "portfolio",
+    ];
+
+    // If no features configured, show everything
+    const showAll = !features || features.length === 0;
+
+    for (const view of allViews) {
+      const enabled = showAll || features.includes(view);
+      const desktopBtn = document.getElementById(`${view}ViewBtn`);
+      const mobileBtn = document.getElementById(`${view}ViewBtnMobile`);
+
+      if (desktopBtn) desktopBtn.classList.toggle("hidden", !enabled);
+      if (mobileBtn) mobileBtn.classList.toggle("hidden", !enabled);
+    }
+
+    // Hide empty dropdown categories (desktop)
+    document.querySelectorAll(".nav-dropdown").forEach((dropdown) => {
+      const menu = dropdown.querySelector(".nav-dropdown-menu");
+      if (!menu) return;
+      const visibleButtons = menu.querySelectorAll("button:not(.hidden)");
+      dropdown.classList.toggle("hidden", visibleButtons.length === 0);
+    });
+
+    // If current view is hidden, fall back to first enabled view
+    if (!showAll && !features.includes(this.currentView) && this.currentView !== "config") {
+      const fallback = features[0] || "summary";
+      this.switchView(fallback);
     }
   }
 
@@ -1379,6 +1422,7 @@ class TaskManager {
       assignees: this.projectConfig?.assignees || [],
       tags: this.projectConfig?.tags || [],
       links: this.projectConfig?.links || [],
+      features: this.projectConfig?.features || [],
     };
 
     console.log("Saving config:", config);
@@ -1390,6 +1434,7 @@ class TaskManager {
 
       if (response.ok) {
         this.projectConfig = config;
+        this.applyFeatureVisibility();
         if (this.currentView === "timeline") {
           this.timelineView.generate();
         }

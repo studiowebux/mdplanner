@@ -19,6 +19,7 @@ interface ProjectFrontmatter {
   client?: string;
   revenue?: number;
   expenses?: number;
+  features?: string[];
 }
 
 export interface ProjectData {
@@ -144,6 +145,7 @@ export class ProjectDirectoryParser {
     if (frontmatter.expenses !== undefined) {
       config.expenses = frontmatter.expenses;
     }
+    if (frontmatter.features) config.features = frontmatter.features;
 
     return { name, description, config };
   }
@@ -175,6 +177,10 @@ export class ProjectDirectoryParser {
     }
     if (data.config.expenses !== undefined) {
       frontmatter.expenses = data.config.expenses;
+    }
+
+    if (data.config.features && data.config.features.length > 0) {
+      frontmatter.features = data.config.features;
     }
 
     // Always update last_updated

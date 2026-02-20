@@ -149,6 +149,7 @@ export interface ProjectConfig {
   client?: string;
   revenue?: number;
   expenses?: number;
+  features?: string[];
 }
 
 export interface Milestone {
