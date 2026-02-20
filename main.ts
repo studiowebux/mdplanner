@@ -3,6 +3,7 @@ import { serveStatic } from "hono/deno";
 import { dirname, fromFileUrl, join } from "@std/path";
 import { ProjectManager } from "./src/lib/project-manager.ts";
 import { createApiRouter } from "./src/api/routes/index.ts";
+import { initProject, printInitSuccess } from "./src/lib/init.ts";
 
 // Get the directory where this script is located (works for both dev and compiled)
 const __dirname = dirname(fromFileUrl(import.meta.url));
@@ -24,6 +25,10 @@ mdplanner v${VERSION}
 
 Usage:
   mdplanner [OPTIONS] <project-directory>
+  mdplanner init <directory>
+
+Commands:
+  init <directory>       Initialize a new project in the given directory
 
 Arguments:
   <project-directory>    Path to the project directory (must contain project.md)
@@ -34,10 +39,10 @@ Options:
   -h, --help             Show this help message
 
 Examples:
+  mdplanner init ./my-project
   mdplanner ./my-project
   mdplanner --port 8080 ./my-project
   mdplanner --cache ./my-project
-  deno task dev ./example/portfolio
 
 Repository: https://github.com/${GITHUB_REPO}
 `);
@@ -111,6 +116,19 @@ async function validateProjectPath(path: string): Promise<void> {
     console.error("Create a project.md file to initialize the project.");
     Deno.exit(1);
   }
+}
+
+// Handle `init` subcommand before normal arg parsing
+if (Deno.args[0] === "init") {
+  const initDir = Deno.args[1];
+  if (!initDir) {
+    console.error("Error: init requires a directory argument");
+    console.error("Usage: mdplanner init <directory>");
+    Deno.exit(1);
+  }
+  const result = await initProject(initDir);
+  printInitSuccess(result, VERSION);
+  Deno.exit(0);
 }
 
 // Parse CLI arguments
