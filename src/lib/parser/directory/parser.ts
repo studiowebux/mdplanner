@@ -31,8 +31,8 @@ import {
 } from "./portfolio.ts";
 // OrgChart types re-exported from people parser (orgchart delegates to people)
 import type {
-  PersonWithChildren as OrgChartMemberWithChildren,
   PeopleSummary as OrgChartSummary,
+  PersonWithChildren as OrgChartMemberWithChildren,
 } from "./people.ts";
 import {
   PeopleDirectoryParser,

@@ -29,8 +29,8 @@ export { BillingDirectoryParser } from "./billing.ts";
 export { CRMDirectoryParser } from "./crm.ts";
 export {
   PeopleDirectoryParser,
-  type PersonWithChildren,
   type PeopleSummary,
+  type PersonWithChildren,
 } from "./people.ts";
 export { DirectoryMarkdownParser } from "./parser.ts";
 export {

@@ -172,6 +172,7 @@ const ALL_TABLES = [
   "interactions",
   "portfolio",
   "org_members",
+  "people",
 ];
 
 // Table-specific sync functions
@@ -722,6 +723,32 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       );
     }
     return items.length;
+  },
+
+  people: async (parser, db) => {
+    const people = await parser.readPeople();
+    db.execute("DELETE FROM people");
+    for (const p of people) {
+      db.execute(
+        `INSERT INTO people (id, name, title, role, departments, reports_to, email, phone, start_date, hours_per_day, working_days, notes)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          val(p.id),
+          val(p.name),
+          val(p.title),
+          val(p.role),
+          json(p.departments),
+          val(p.reportsTo),
+          val(p.email),
+          val(p.phone),
+          val(p.startDate),
+          val(p.hoursPerDay),
+          json(p.workingDays),
+          val(p.notes),
+        ],
+      );
+    }
+    return people.length;
   },
 
   org_members: async (parser, db) => {
