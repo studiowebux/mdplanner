@@ -344,14 +344,14 @@ export class MindmapSidenavModule {
 
     if (!structure.trim()) {
       preview.innerHTML =
-        '<div class="text-gray-400 dark:text-gray-500 italic">Enter structure to see preview</div>';
+        '<div class="text-muted italic">Enter structure to see preview</div>';
       return;
     }
 
     const nodes = this.parseStructure(structure);
     if (nodes.length === 0) {
       preview.innerHTML =
-        '<div class="text-gray-400 dark:text-gray-500 italic">Enter structure to see preview</div>';
+        '<div class="text-muted italic">Enter structure to see preview</div>';
       return;
     }
 
@@ -360,10 +360,10 @@ export class MindmapSidenavModule {
       if (children.length === 0) return "";
 
       let html =
-        '<ul class="pl-3 border-l border-gray-300 dark:border-gray-600">';
+        '<ul class="pl-3 border-l border-strong">';
       for (const node of children) {
         html +=
-          `<li class="py-0.5"><span class="text-gray-800 dark:text-gray-200">${
+          `<li class="py-0.5"><span class="text-primary">${
             escapeHtml(node.text)
           }</span>`;
         html += buildTree(node.id, level + 1);
@@ -376,7 +376,7 @@ export class MindmapSidenavModule {
     const roots = nodes.filter((n) => !n.parent);
     let html = '<div class="space-y-1">';
     for (const root of roots) {
-      html += `<div class="font-medium text-gray-900 dark:text-gray-100">${
+      html += `<div class="font-medium text-primary">${
         escapeHtml(root.text)
       }</div>`;
       html += buildTree(root.id, 1);

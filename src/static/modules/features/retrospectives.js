@@ -34,60 +34,60 @@ export class RetrospectivesModule {
     container.innerHTML = this.taskManager.retrospectives
       .map((retro) => {
         const statusColor = retro.status === "open"
-          ? "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600"
-          : "bg-gray-900 text-white dark:bg-gray-600 dark:text-white";
+          ? "bg-tertiary text-primary border border-default"
+          : "bg-inverse text-white";
         return `
-      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden">
-        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600 flex justify-between items-center">
+      <div class="bg-secondary rounded-lg shadow-sm border border-default overflow-hidden">
+        <div class="px-4 py-3 bg-secondary border-b border-default flex justify-between items-center">
           <div>
-            <h3 class="font-medium text-gray-900 dark:text-gray-100">${retro.title}</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400">${retro.date}</p>
+            <h3 class="font-medium text-primary">${retro.title}</h3>
+            <p class="text-xs text-muted">${retro.date}</p>
           </div>
           <div class="flex items-center gap-2">
             <span class="px-2 py-1 text-xs rounded-full ${statusColor}">${retro.status}</span>
-            <button onclick="taskManager.retrospectiveSidenavModule.openEdit('${retro.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">Edit</button>
+            <button onclick="taskManager.retrospectiveSidenavModule.openEdit('${retro.id}')" class="text-sm text-secondary hover:text-primary">Edit</button>
           </div>
         </div>
         <div class="p-4 space-y-3">
           <div>
-            <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Continue</h4>
-            <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+            <h4 class="text-sm font-medium text-primary mb-1">Continue</h4>
+            <ul class="text-sm text-secondary space-y-1">
               ${
           retro.continue.length > 0
             ? retro.continue.map((item) =>
-              `<li class="flex items-start"><span class="text-gray-900 dark:text-gray-100 mr-2">+</span>${item}</li>`
+              `<li class="flex items-start"><span class="text-primary mr-2">+</span>${item}</li>`
             ).join("")
-            : '<li class="text-gray-400 italic">No items</li>'
+            : '<li class="text-muted italic">No items</li>'
         }
             </ul>
           </div>
           <div>
-            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stop</h4>
-            <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+            <h4 class="text-sm font-medium text-secondary mb-1">Stop</h4>
+            <ul class="text-sm text-secondary space-y-1">
               ${
           retro.stop.length > 0
             ? retro.stop.map((item) =>
-              `<li class="flex items-start"><span class="text-gray-500 dark:text-gray-400 mr-2">-</span>${item}</li>`
+              `<li class="flex items-start"><span class="text-muted mr-2">-</span>${item}</li>`
             ).join("")
-            : '<li class="text-gray-400 dark:text-gray-500 italic">No items</li>'
+            : '<li class="text-muted italic">No items</li>'
         }
             </ul>
           </div>
           <div>
-            <h4 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Start</h4>
-            <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+            <h4 class="text-sm font-medium text-secondary mb-1">Start</h4>
+            <ul class="text-sm text-secondary space-y-1">
               ${
           retro.start.length > 0
             ? retro.start.map((item) =>
-              `<li class="flex items-start"><span class="text-gray-400 dark:text-gray-500 mr-2">*</span>${item}</li>`
+              `<li class="flex items-start"><span class="text-muted mr-2">*</span>${item}</li>`
             ).join("")
-            : '<li class="text-gray-400 dark:text-gray-500 italic">No items</li>'
+            : '<li class="text-muted italic">No items</li>'
         }
             </ul>
           </div>
         </div>
-        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-600 flex justify-end">
-          <button onclick="taskManager.deleteRetrospective('${retro.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
+        <div class="px-4 py-3 bg-secondary border-t border-default flex justify-end">
+          <button onclick="taskManager.deleteRetrospective('${retro.id}')" class="text-sm text-error hover:text-error-text">Delete</button>
         </div>
       </div>
     `;

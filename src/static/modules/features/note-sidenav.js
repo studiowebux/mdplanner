@@ -285,56 +285,40 @@ export class NoteSidenavModule {
 
     if (mode === "enhanced") {
       basicBtn.classList.remove(
-        "bg-gray-900",
-        "dark:bg-gray-100",
+        "bg-inverse",
         "text-white",
-        "dark:text-gray-900",
       );
       basicBtn.classList.add(
-        "bg-white",
-        "dark:bg-gray-700",
-        "text-gray-700",
-        "dark:text-gray-300",
+        "bg-primary",
+        "text-secondary",
         "border",
-        "border-gray-300",
-        "dark:border-gray-600",
+        "border-strong",
       );
       enhancedBtn.classList.remove(
-        "bg-white",
-        "dark:bg-gray-700",
-        "text-gray-700",
-        "dark:text-gray-300",
+        "bg-primary",
+        "text-secondary",
         "border",
-        "border-gray-300",
-        "dark:border-gray-600",
+        "border-strong",
       );
-      enhancedBtn.classList.add("bg-purple-600", "text-white");
+      enhancedBtn.classList.add("bg-info", "text-white");
     } else {
       basicBtn.classList.add(
-        "bg-gray-900",
-        "dark:bg-gray-100",
+        "bg-inverse",
         "text-white",
-        "dark:text-gray-900",
       );
       basicBtn.classList.remove(
-        "bg-white",
-        "dark:bg-gray-700",
-        "text-gray-700",
-        "dark:text-gray-300",
+        "bg-primary",
+        "text-secondary",
         "border",
-        "border-gray-300",
-        "dark:border-gray-600",
+        "border-strong",
       );
       enhancedBtn.classList.add(
-        "bg-white",
-        "dark:bg-gray-700",
-        "text-gray-700",
-        "dark:text-gray-300",
+        "bg-primary",
+        "text-secondary",
         "border",
-        "border-gray-300",
-        "dark:border-gray-600",
+        "border-strong",
       );
-      enhancedBtn.classList.remove("bg-purple-600", "text-white");
+      enhancedBtn.classList.remove("bg-info", "text-white");
     }
   }
 
@@ -362,7 +346,7 @@ export class NoteSidenavModule {
 
     if (paragraphs.length === 0) {
       container.innerHTML = `
-        <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+        <div class="text-center py-8 text-muted">
           <p>No content yet. Click "+ Text" or "+ Code" to add a paragraph.</p>
         </div>
       `;
@@ -405,8 +389,8 @@ export class NoteSidenavModule {
     return `
       <div class="paragraph-item border ${
       isSelected
-        ? "border-purple-500 ring-2 ring-purple-200 dark:ring-purple-800"
-        : "border-gray-200 dark:border-gray-700"
+        ? "border-info ring-2 ring-2"
+        : "border-default"
     } rounded-lg mb-3 ${this.multiSelectMode ? "cursor-pointer" : ""}"
            data-paragraph-id="${paragraph.id}"
            draggable="true"
@@ -414,26 +398,26 @@ export class NoteSidenavModule {
            ondragover="taskManager.noteSidenav.handleDragOver(event)"
            ondrop="taskManager.noteSidenav.handleDrop(event, '${paragraph.id}')"
            ondragend="taskManager.noteSidenav.handleDragEnd(event)">
-        <div class="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 rounded-t-lg">
+        <div class="flex items-center justify-between px-3 py-2 bg-secondary border-b border-default rounded-t-lg">
           <div class="flex items-center gap-2">
             ${
       this.multiSelectMode
         ? `
-              <input type="checkbox" class="paragraph-checkbox rounded text-purple-600"
+              <input type="checkbox" class="paragraph-checkbox rounded text-info"
                      ${isSelected ? "checked" : ""}
                      onclick="taskManager.noteSidenav.toggleParagraphSelection('${paragraph.id}')">
             `
         : `
-              <span class="cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" title="Drag to reorder">⋮⋮</span>
+              <span class="cursor-grab text-muted hover:text-secondary" title="Drag to reorder">⋮⋮</span>
             `
     }
-            <span class="text-xs text-gray-500 dark:text-gray-400">${
+            <span class="text-xs text-muted">${
       isCode ? "Code" : "Text"
     }</span>
             ${
       isCode
         ? `
-              <select class="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              <select class="text-xs border border-strong rounded px-2 py-1 bg-primary text-primary"
                       onchange="taskManager.noteSidenav.updateParagraphLanguage('${paragraph.id}', this.value)">
                 ${languageOptions}
               </select>
@@ -443,21 +427,21 @@ export class NoteSidenavModule {
           </div>
           <div class="flex items-center gap-1">
             <button type="button" onclick="taskManager.noteSidenav.toggleParagraphType('${paragraph.id}')"
-                    class="px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200" title="Toggle type">
+                    class="px-2 py-1 text-xs text-secondary hover:text-primary" title="Toggle type">
               ${isCode ? "Text" : "Code"}
             </button>
             <button type="button" onclick="taskManager.noteSidenav.deleteParagraph('${paragraph.id}')"
-                    class="px-2 py-1 text-xs text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300" title="Delete">
+                    class="px-2 py-1 text-xs text-error hover:text-error-text" title="Delete">
               Del
             </button>
           </div>
         </div>
         <textarea rows="${isCode ? 8 : 4}"
-                  class="w-full p-3 border-0 resize-none focus:outline-none focus:ring-1 focus:ring-gray-400 rounded-b-lg text-sm ${
+                  class="w-full p-3 border-0 resize-none focus:outline-none focus:ring-1 focus:ring-1 rounded-b-lg text-sm ${
       isCode
-        ? "font-mono bg-gray-50 dark:bg-gray-800"
-        : "bg-white dark:bg-gray-700"
-    } text-gray-900 dark:text-gray-100"
+        ? "font-mono bg-secondary"
+        : "bg-primary"
+    } text-primary"
                   placeholder="${isCode ? "Enter code..." : "Enter text..."}"
                   onblur="taskManager.noteSidenav.updateParagraphContent('${paragraph.id}', this.value)">${
       escapeHtml(paragraph.content || "")
@@ -619,7 +603,7 @@ export class NoteSidenavModule {
   async save() {
     const title = document.getElementById("noteSidenavTitle").value.trim();
     const isEnhanced = document.getElementById("noteSidenavModeEnhanced")
-      .classList.contains("bg-purple-600");
+      .classList.contains("bg-info");
 
     if (!title) {
       this.showSaveStatus("Title required");
@@ -790,20 +774,16 @@ export class NoteSidenavModule {
 
     if (toggleBtn) {
       if (this.multiSelectMode) {
-        toggleBtn.classList.add("bg-purple-600", "text-white");
+        toggleBtn.classList.add("bg-info", "text-white");
         toggleBtn.classList.remove(
-          "bg-gray-100",
-          "dark:bg-gray-700",
-          "text-gray-700",
-          "dark:text-gray-300",
+          "bg-tertiary",
+          "text-secondary",
         );
       } else {
-        toggleBtn.classList.remove("bg-purple-600", "text-white");
+        toggleBtn.classList.remove("bg-info", "text-white");
         toggleBtn.classList.add(
-          "bg-gray-100",
-          "dark:bg-gray-700",
-          "text-gray-700",
-          "dark:text-gray-300",
+          "bg-tertiary",
+          "text-secondary",
         );
       }
     }
@@ -985,7 +965,7 @@ export class NoteSidenavModule {
     try {
       const content = await file.text();
       const isEnhanced = document.getElementById("noteSidenavModeEnhanced")
-        .classList.contains("bg-purple-600");
+        .classList.contains("bg-info");
 
       if (isEnhanced) {
         // Parse markdown into paragraphs
@@ -1179,16 +1159,16 @@ export class NoteSidenavModule {
     }
 
     container.innerHTML = sections.map((section) => `
-      <div class="custom-section border border-purple-200 dark:border-purple-800 rounded-lg mb-3 bg-purple-50 dark:bg-purple-900/20" data-section-id="${section.id}">
-        <div class="flex items-center justify-between px-3 py-2 border-b border-purple-200 dark:border-purple-800">
+      <div class="custom-section border border-info-border rounded-lg mb-3 bg-info-bg" data-section-id="${section.id}">
+        <div class="flex items-center justify-between px-3 py-2 border-b border-info-border">
           <div class="flex items-center gap-2">
-            <span class="text-xs px-2 py-0.5 rounded bg-purple-200 dark:bg-purple-800 text-purple-700 dark:text-purple-300">${section.type}</span>
+            <span class="text-xs px-2 py-0.5 rounded bg-info-bg text-info">${section.type}</span>
             <input type="text" value="${escapeHtml(section.title)}"
-                   class="text-sm font-medium bg-transparent border-0 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-purple-400 rounded px-1"
+                   class="text-sm font-medium bg-transparent border-0 text-primary focus:outline-none focus:ring-1 focus:ring-purple-400 rounded px-1"
                    onblur="taskManager.noteSidenav.updateSectionTitle('${section.id}', this.value)">
           </div>
           <div class="flex items-center gap-1">
-            <select class="text-xs border border-purple-300 dark:border-purple-700 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            <select class="text-xs border border-info-border rounded px-2 py-1 bg-primary text-primary"
                     onchange="taskManager.noteSidenav.updateSectionType('${section.id}', this.value)">
               <option value="tabs" ${
       section.type === "tabs" ? "selected" : ""
@@ -1201,9 +1181,9 @@ export class NoteSidenavModule {
     }>Split View</option>
             </select>
             <button type="button" onclick="taskManager.noteSidenav.addSectionItem('${section.id}')"
-                    class="px-2 py-1 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300">+ Item</button>
+                    class="px-2 py-1 text-xs text-info hover:text-info-text">+ Item</button>
             <button type="button" onclick="taskManager.noteSidenav.deleteSection('${section.id}')"
-                    class="px-2 py-1 text-xs text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">Del</button>
+                    class="px-2 py-1 text-xs text-error hover:text-error-text">Del</button>
           </div>
         </div>
         <div class="p-2">
@@ -1214,13 +1194,13 @@ export class NoteSidenavModule {
               <input type="text" value="${
           escapeHtml(item.title || "")
         }" placeholder="Item title"
-                     class="flex-1 text-sm px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                     class="flex-1 text-sm px-2 py-1 border border-strong rounded bg-primary text-primary"
                      onblur="taskManager.noteSidenav.updateSectionItem('${section.id}', ${idx}, 'title', this.value)">
               <button type="button" onclick="taskManager.noteSidenav.deleteSectionItem('${section.id}', ${idx})"
-                      class="text-red-500 hover:text-red-700 text-sm">&times;</button>
+                      class="text-error hover:text-error-text text-sm">&times;</button>
             </div>
           `).join("")
-        : '<div class="text-xs text-gray-400 italic">No items yet</div>'
+        : '<div class="text-xs text-muted italic">No items yet</div>'
     }
         </div>
       </div>

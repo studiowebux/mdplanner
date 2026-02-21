@@ -189,7 +189,7 @@ export class CRMSidenavModule {
         break;
       default:
         container.innerHTML =
-          '<div class="text-gray-500">Select an entity type</div>';
+          '<div class="text-muted">Select an entity type</div>';
     }
 
     // Bind auto-save to inputs
@@ -328,7 +328,7 @@ export class CRMSidenavModule {
             <input type="checkbox" id="crmSidenavContactPrimary" class="rounded" ${
       c.isPrimary ? "checked" : ""
     }>
-            <span class="text-sm text-gray-700 dark:text-gray-300">Primary Contact</span>
+            <span class="text-sm text-secondary">Primary Contact</span>
           </label>
         </div>
       </div>

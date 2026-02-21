@@ -861,25 +861,15 @@ class TaskManager {
     // Activate desktop button in dropdown
     const desktopBtn = document.getElementById(`${view}ViewBtn`);
     if (desktopBtn) {
-      desktopBtn.classList.add(
-        "text-gray-900",
-        "dark:text-white",
-        "bg-gray-100",
-        "dark:bg-gray-700",
-      );
-      desktopBtn.classList.remove("text-gray-600", "dark:text-gray-300");
+      desktopBtn.classList.add("text-primary", "bg-tertiary");
+      desktopBtn.classList.remove("text-secondary");
     }
 
     // Activate mobile button
     const mobileBtn = document.getElementById(`${view}ViewBtnMobile`);
     if (mobileBtn) {
-      mobileBtn.classList.add(
-        "text-gray-900",
-        "dark:text-white",
-        "bg-gray-100",
-        "dark:bg-gray-800",
-      );
-      mobileBtn.classList.remove("text-gray-600", "dark:text-gray-300");
+      mobileBtn.classList.add("text-primary", "bg-tertiary");
+      mobileBtn.classList.remove("text-secondary");
     }
   }
 
@@ -935,13 +925,8 @@ class TaskManager {
     desktopNavBtns.forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) {
-        btn.classList.remove(
-          "text-gray-900",
-          "dark:text-white",
-          "bg-gray-100",
-          "dark:bg-gray-700",
-        );
-        btn.classList.add("text-gray-600", "dark:text-gray-300");
+        btn.classList.remove("text-primary", "bg-tertiary");
+        btn.classList.add("text-secondary");
       }
     });
 
@@ -978,13 +963,8 @@ class TaskManager {
     mobileBtnIds.forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) {
-        btn.classList.remove(
-          "text-gray-900",
-          "dark:text-white",
-          "bg-gray-100",
-          "dark:bg-gray-800",
-        );
-        btn.classList.add("text-gray-600", "dark:text-gray-300");
+        btn.classList.remove("text-primary", "bg-tertiary");
+        btn.classList.add("text-secondary");
       }
     });
 
@@ -1484,10 +1464,10 @@ class TaskManager {
         const button = document.getElementById("saveProjectConfig");
         const originalText = button.textContent;
         button.textContent = "Saved!";
-        button.classList.add("bg-green-600");
+        button.classList.add("bg-success");
         setTimeout(() => {
           button.textContent = originalText;
-          button.classList.remove("bg-green-600");
+          button.classList.remove("bg-success");
         }, 2000);
       } else {
         console.error("Failed to save project config:", result);

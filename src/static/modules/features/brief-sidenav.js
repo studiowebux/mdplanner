@@ -127,14 +127,14 @@ export class BriefSidenavModule {
     const items = this.currentBrief[section] || [];
 
     container.innerHTML = items.length === 0
-      ? '<div class="text-gray-400 dark:text-gray-500 text-sm italic py-1">No items</div>'
+      ? '<div class="text-muted text-sm italic py-1">No items</div>'
       : items.map((item, idx) => `
         <div class="flex items-start gap-2 py-1 group">
-          <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">${
+          <span class="flex-1 text-sm text-secondary">${
         escapeHtml(item)
       }</span>
           <button onclick="taskManager.briefSidenavModule.removeItem('${section}', ${idx})"
-                  class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 flex-shrink-0">
+                  class="opacity-0 group-hover:opacity-100 text-muted hover:text-error flex-shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
@@ -153,9 +153,9 @@ export class BriefSidenavModule {
 
     const inputHtml = `
       <div class="brief-add-input flex gap-2 mt-1">
-        <input type="text" class="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+        <input type="text" class="flex-1 px-2 py-1 text-sm border border-strong rounded bg-primary text-primary"
                placeholder="Enter item..." autofocus>
-        <button type="button" class="px-2 py-1 text-xs bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded">Add</button>
+        <button type="button" class="px-2 py-1 text-xs bg-inverse text-white rounded">Add</button>
       </div>
     `;
     container.insertAdjacentHTML("beforeend", inputHtml);

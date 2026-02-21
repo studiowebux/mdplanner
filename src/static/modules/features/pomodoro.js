@@ -53,16 +53,16 @@ export class PomodoroModule {
 
     if (!("Notification" in window)) {
       statusEl.innerHTML =
-        '<span class="text-gray-400">Notifications not supported</span>';
+        '<span class="text-muted">Notifications not supported</span>';
     } else if (Notification.permission === "granted") {
       statusEl.innerHTML =
-        '<span class="text-green-600 dark:text-green-400">Notifications enabled</span>';
+        '<span class="text-success">Notifications enabled</span>';
     } else if (Notification.permission === "denied") {
       statusEl.innerHTML =
-        '<span class="text-red-600 dark:text-red-400">Notifications blocked - enable in browser settings</span>';
+        '<span class="text-error">Notifications blocked - enable in browser settings</span>';
     } else {
       statusEl.innerHTML =
-        '<button id="enableNotifBtn" class="text-gray-900 dark:text-gray-100 hover:underline">Enable notifications</button>';
+        '<button id="enableNotifBtn" class="text-primary hover:underline">Enable notifications</button>';
       document.getElementById("enableNotifBtn")?.addEventListener(
         "click",
         () => {
@@ -172,10 +172,10 @@ export class PomodoroModule {
       if (!btn) return;
       if (m.toLowerCase() === mode) {
         btn.className =
-          "px-3 py-1 rounded text-xs font-medium bg-gray-900 text-white dark:bg-gray-600 dark:text-white";
+          "px-3 py-1 rounded text-xs font-medium bg-inverse text-white";
       } else {
         btn.className =
-          "px-3 py-1 rounded text-xs font-medium bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300";
+          "px-3 py-1 rounded text-xs font-medium bg-active text-secondary";
       }
     });
 

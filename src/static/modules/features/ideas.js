@@ -30,13 +30,13 @@ export class IdeasModule {
     emptyState.classList.add("hidden");
     const statusColors = {
       new:
-        "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600",
+        "bg-tertiary text-primary border border-default",
       considering:
-        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-      planned: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+        "bg-warning-bg text-warning-text",
+      planned: "bg-info-bg text-info-text",
       approved:
-        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-      rejected: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+        "bg-success-bg text-success-text",
+      rejected: "bg-error-bg text-error-text",
     };
 
     container.innerHTML = this.taskManager.ideas
@@ -48,33 +48,33 @@ export class IdeasModule {
           .map((id) => this.taskManager.ideas.find((i) => i.id === id))
           .filter(Boolean);
         return `
-      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+      <div class="bg-secondary rounded-lg p-4 border border-default">
         <div class="flex justify-between items-start mb-2">
-          <h3 class="font-medium text-gray-900 dark:text-gray-100">${idea.title}</h3>
+          <h3 class="font-medium text-primary">${idea.title}</h3>
           <span class="px-2 py-1 text-xs rounded ${
           statusColors[idea.status] || statusColors.new
         }">${idea.status}</span>
         </div>
         ${
           idea.category
-            ? `<span class="inline-block px-2 py-0.5 text-xs bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded mb-2">${idea.category}</span>`
+            ? `<span class="inline-block px-2 py-0.5 text-xs bg-active text-secondary rounded mb-2">${idea.category}</span>`
             : ""
         }
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Created: ${idea.created}</p>
+        <p class="text-xs text-muted mb-2">Created: ${idea.created}</p>
         ${
           idea.description
-            ? `<p class="text-sm text-gray-600 dark:text-gray-300 mb-2">${idea.description}</p>`
+            ? `<p class="text-sm text-secondary mb-2">${idea.description}</p>`
             : ""
         }
         ${
           linkedIdeas.length > 0
             ? `
           <div class="mb-2">
-            <span class="text-xs text-gray-500 dark:text-gray-400">Links:</span>
+            <span class="text-xs text-muted">Links:</span>
             <div class="flex flex-wrap gap-1 mt-1">
               ${
               linkedIdeas.map((li) =>
-                `<span class="inline-block px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800" onclick="taskManager.openIdeaModal('${li.id}')">${li.title}</span>`
+                `<span class="inline-block px-2 py-0.5 text-xs bg-info-bg text-info-text rounded cursor-pointer hover:bg-info-bg" onclick="taskManager.openIdeaModal('${li.id}')">${li.title}</span>`
               ).join("")
             }
             </div>
@@ -86,11 +86,11 @@ export class IdeasModule {
           backlinkedIdeas.length > 0
             ? `
           <div class="mb-2">
-            <span class="text-xs text-gray-500 dark:text-gray-400">Backlinks:</span>
+            <span class="text-xs text-muted">Backlinks:</span>
             <div class="flex flex-wrap gap-1 mt-1">
               ${
               backlinkedIdeas.map((bi) =>
-                `<span class="inline-block px-2 py-0.5 text-xs bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded cursor-pointer hover:bg-purple-200 dark:hover:bg-purple-800" onclick="taskManager.openIdeaModal('${bi.id}')">${bi.title}</span>`
+                `<span class="inline-block px-2 py-0.5 text-xs bg-info-bg text-info rounded cursor-pointer hover:bg-info-bg" onclick="taskManager.openIdeaModal('${bi.id}')">${bi.title}</span>`
               ).join("")
             }
             </div>
@@ -99,8 +99,8 @@ export class IdeasModule {
             : ""
         }
         <div class="flex justify-end space-x-2 mt-3">
-          <button onclick="taskManager.openIdeaModal('${idea.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">Edit</button>
-          <button onclick="taskManager.deleteIdea('${idea.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200">Delete</button>
+          <button onclick="taskManager.openIdeaModal('${idea.id}')" class="text-sm text-secondary hover:text-primary">Edit</button>
+          <button onclick="taskManager.deleteIdea('${idea.id}')" class="text-sm text-error hover:text-error-text">Delete</button>
         </div>
       </div>
     `;
@@ -214,20 +214,20 @@ export class IdeasModule {
 
     if (filtered.length === 0) {
       container.innerHTML =
-        '<p class="text-gray-500 dark:text-gray-400 text-sm text-center">No other ideas found</p>';
+        '<p class="text-muted text-sm text-center">No other ideas found</p>';
       return;
     }
 
     container.innerHTML = filtered
       .map(
         (idea) => `
-      <label class="flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer">
-        <input type="checkbox" class="idea-link-checkbox h-4 w-4 text-gray-900 border-gray-300 rounded"
+      <label class="flex items-center p-2 hover:bg-tertiary rounded cursor-pointer">
+        <input type="checkbox" class="idea-link-checkbox h-4 w-4 text-primary border-strong rounded"
           value="${idea.id}" ${
           this.taskManager.tempIdeaLinks.includes(idea.id) ? "checked" : ""
         }>
-        <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">${idea.title}</span>
-        <span class="ml-2 text-xs px-2 py-0.5 bg-gray-200 dark:bg-gray-600 rounded">${idea.status}</span>
+        <span class="ml-3 text-sm text-secondary">${idea.title}</span>
+        <span class="ml-2 text-xs px-2 py-0.5 bg-active rounded">${idea.status}</span>
       </label>
     `,
       )
@@ -267,7 +267,7 @@ export class IdeasModule {
       this.taskManager.tempIdeaLinks.length === 0
     ) {
       container.innerHTML =
-        '<span class="text-gray-400 dark:text-gray-500 text-sm">No linked ideas</span>';
+        '<span class="text-muted text-sm">No linked ideas</span>';
       return;
     }
 
@@ -276,9 +276,9 @@ export class IdeasModule {
         const linkedIdea = this.taskManager.ideas.find((i) => i.id === linkId);
         return linkedIdea
           ? `
-        <span class="inline-flex items-center px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-sm">
+        <span class="inline-flex items-center px-2 py-1 bg-active rounded text-sm">
           ${linkedIdea.title}
-          <button type="button" onclick="taskManager.removeIdeaLink('${linkId}')" class="ml-1 text-gray-500 hover:text-gray-700">&times;</button>
+          <button type="button" onclick="taskManager.removeIdeaLink('${linkId}')" class="ml-1 text-muted hover:text-secondary">&times;</button>
         </span>
       `
           : "";

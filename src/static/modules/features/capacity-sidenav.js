@@ -124,7 +124,7 @@ export class CapacitySidenavModule {
 
     if (members.length === 0) {
       container.innerHTML =
-        '<div class="text-gray-400 dark:text-gray-500 text-sm italic py-2">No team members yet</div>';
+        '<div class="text-muted text-sm italic py-2">No team members yet</div>';
       return;
     }
 
@@ -134,28 +134,28 @@ export class CapacitySidenavModule {
       const hoursPerDay = this.tm.capacityModule?.getMemberHoursPerDay(member) || member.hoursPerDay || 8;
       const workingDays = this.tm.capacityModule?.getMemberWorkingDays(member) || member.workingDays || ["Mon", "Tue", "Wed", "Thu", "Fri"];
       return `
-      <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 mb-2">
+      <div class="bg-secondary rounded-lg p-3 border border-default mb-2">
         <div class="flex justify-between items-start">
           <div>
-            <div class="font-medium text-gray-900 dark:text-gray-100 text-sm">${
+            <div class="font-medium text-primary text-sm">${
       escapeHtml(name)
     }</div>
             ${
       role
-        ? `<div class="text-xs text-gray-500 dark:text-gray-400">${
+        ? `<div class="text-xs text-muted">${
           escapeHtml(role)
         }</div>`
         : ""
     }
-            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <div class="text-xs text-muted mt-1">
               ${hoursPerDay}h/day, ${workingDays.join(", ")}
             </div>
           </div>
           <div class="flex gap-1">
             <button onclick="taskManager.capacitySidenavModule.editMember('${member.id}')"
-                    class="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Edit</button>
+                    class="text-xs text-muted hover:text-secondary">Edit</button>
             <button onclick="taskManager.capacitySidenavModule.removeMember('${member.id}')"
-                    class="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-300">Del</button>
+                    class="text-xs text-error hover:text-error-text">Del</button>
           </div>
         </div>
       </div>
@@ -201,41 +201,41 @@ export class CapacitySidenavModule {
     }
 
     container.innerHTML = `
-      <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 mb-2 border border-gray-200 dark:border-gray-600">
-        <div class="text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">${
+      <div class="bg-tertiary rounded-lg p-3 mb-2 border border-default">
+        <div class="text-sm font-medium mb-2 text-primary">${
       this.editingMemberId ? "Edit" : "Add"
     } Team Member</div>
         <div class="space-y-2">
           <select id="memberFormPersonId"
-                  class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                  class="w-full px-2 py-1 text-sm border border-strong rounded bg-primary text-primary">
             ${personOptions}
           </select>
-          <div class="text-xs text-gray-500 dark:text-gray-400">Override defaults (leave blank to use person defaults):</div>
+          <div class="text-xs text-muted">Override defaults (leave blank to use person defaults):</div>
           <div class="flex gap-2">
             <input type="number" id="memberFormHours" value="${
       member.hoursPerDay || ""
     }" min="1" max="24" placeholder="Hours/day"
-                   class="w-20 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-            <span class="text-xs text-gray-500 self-center">hours/day override</span>
+                   class="w-20 px-2 py-1 text-sm border border-strong rounded bg-primary text-primary">
+            <span class="text-xs text-muted self-center">hours/day override</span>
           </div>
           <div class="flex flex-wrap gap-1">
             ${
       days.map((day) => `
               <label class="inline-flex items-center cursor-pointer">
-                <input type="checkbox" class="member-day-checkbox rounded text-gray-900" value="${day}"
+                <input type="checkbox" class="member-day-checkbox rounded text-primary" value="${day}"
                        ${memberDays.includes(day) ? "checked" : ""}>
-                <span class="ml-1 text-xs text-gray-600 dark:text-gray-400">${day}</span>
+                <span class="ml-1 text-xs text-secondary">${day}</span>
               </label>
             `).join("")
     }
           </div>
           <div class="flex gap-2 mt-2">
             <button type="button" onclick="taskManager.capacitySidenavModule.saveMember()"
-                    class="px-3 py-1 text-xs bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded hover:bg-gray-700 dark:hover:bg-gray-300">
+                    class="px-3 py-1 text-xs bg-inverse text-white rounded hover:bg-inverse">
               ${this.editingMemberId ? "Update" : "Add"}
             </button>
             <button type="button" onclick="taskManager.capacitySidenavModule.cancelMemberForm()"
-                    class="px-3 py-1 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Cancel</button>
+                    class="px-3 py-1 text-xs text-muted hover:text-secondary">Cancel</button>
           </div>
         </div>
       </div>
@@ -359,31 +359,31 @@ export class CapacitySidenavModule {
 
     if (availablePeople.length === 0) {
       container.innerHTML = `
-        <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 mb-2 border border-gray-200 dark:border-gray-600">
-          <div class="text-sm text-gray-500 dark:text-gray-400">
+        <div class="bg-tertiary rounded-lg p-3 mb-2 border border-default">
+          <div class="text-sm text-muted">
             All people are already added or no people configured.
           </div>
           <button type="button" onclick="taskManager.capacitySidenavModule.cancelMemberForm()"
-                  class="mt-2 px-3 py-1 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Close</button>
+                  class="mt-2 px-3 py-1 text-xs text-muted hover:text-secondary">Close</button>
         </div>
       `;
       return;
     }
 
     container.innerHTML = `
-      <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 mb-2 border border-gray-200 dark:border-gray-600">
-        <div class="text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Import from People</div>
+      <div class="bg-tertiary rounded-lg p-3 mb-2 border border-default">
+        <div class="text-sm font-medium mb-2 text-primary">Import from People</div>
         <div class="space-y-1 max-h-40 overflow-y-auto">
           ${
       availablePeople.map((person) => {
         const role = person.role || person.title || "";
         const label = role ? `${person.name} (${role})` : person.name;
         return `
-            <label class="flex items-center gap-2 p-1 hover:bg-gray-50 dark:hover:bg-gray-600 rounded cursor-pointer">
+            <label class="flex items-center gap-2 p-1 hover:bg-secondary rounded cursor-pointer">
               <input type="checkbox" class="import-people-cb rounded" value="${
           escapeHtml(person.id)
         }" checked>
-              <span class="text-sm text-gray-700 dark:text-gray-300">${
+              <span class="text-sm text-secondary">${
           escapeHtml(label)
         }</span>
             </label>
@@ -391,12 +391,12 @@ export class CapacitySidenavModule {
       }).join("")
     }
         </div>
-        <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">Uses person defaults for hours and working days</div>
+        <div class="text-xs text-muted mt-2">Uses person defaults for hours and working days</div>
         <div class="flex gap-2 mt-2">
           <button type="button" onclick="taskManager.capacitySidenavModule.applyImportPeople()"
-                  class="px-3 py-1 text-xs bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded hover:bg-gray-700 dark:hover:bg-gray-300">Import</button>
+                  class="px-3 py-1 text-xs bg-inverse text-white rounded hover:bg-inverse">Import</button>
           <button type="button" onclick="taskManager.capacitySidenavModule.cancelMemberForm()"
-                  class="px-3 py-1 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Cancel</button>
+                  class="px-3 py-1 text-xs text-muted hover:text-secondary">Cancel</button>
         </div>
       </div>
     `;

@@ -36,12 +36,10 @@ export class StickyNoteSidenavModule extends BaseSidenavModule {
     document.querySelectorAll("#stickySidenav .color-option").forEach((opt) => {
       opt.classList.remove(
         "selected", "ring-2", "ring-offset-2",
-        "ring-gray-900", "dark:ring-gray-100",
       );
       if (opt.dataset.color === color) {
         opt.classList.add(
           "selected", "ring-2", "ring-offset-2",
-          "ring-gray-900", "dark:ring-gray-100",
         );
       }
     });

@@ -92,7 +92,7 @@ export class BusinessModelModule {
           (item, idx) => `
         <li class="flex justify-between items-start group">
           <span class="break-words flex-1">${item}</span>
-          <button onclick="taskManager.removeBusinessModelItem('${key}', ${idx})" class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 ml-1 flex-shrink-0">
+          <button onclick="taskManager.removeBusinessModelItem('${key}', ${idx})" class="opacity-0 group-hover:opacity-100 text-muted hover:text-error ml-1 flex-shrink-0">
             <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
         </li>

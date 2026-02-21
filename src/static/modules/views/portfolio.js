@@ -92,39 +92,39 @@ export class PortfolioView {
     } = this.summary;
     const netProfit = totalRevenue - totalExpenses;
     const profitClass = netProfit >= 0
-      ? "text-green-600 dark:text-green-400"
-      : "text-red-600 dark:text-red-400";
+      ? "text-success"
+      : "text-error";
 
     container.innerHTML = `
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <div class="text-sm text-gray-500 dark:text-gray-400">Total Projects</div>
-        <div class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">${total}</div>
-        <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">${
+      <div class="bg-primary rounded-lg shadow-sm border border-default p-4">
+        <div class="text-sm text-muted">Total Projects</div>
+        <div class="text-2xl font-bold text-primary mt-1">${total}</div>
+        <div class="text-xs text-muted mt-1">${
       Object.keys(byCategory || {}).length
     } categories</div>
       </div>
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <div class="text-sm text-gray-500 dark:text-gray-400">Active</div>
-        <div class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">${
+      <div class="bg-primary rounded-lg shadow-sm border border-default p-4">
+        <div class="text-sm text-muted">Active</div>
+        <div class="text-2xl font-bold text-success mt-1">${
       byStatus?.active || 0
     }</div>
-        <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">${
+        <div class="text-xs text-muted mt-1">${
       byStatus?.["on-hold"] || 0
     } on hold</div>
       </div>
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <div class="text-sm text-gray-500 dark:text-gray-400">Avg Progress</div>
-        <div class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">${
+      <div class="bg-primary rounded-lg shadow-sm border border-default p-4">
+        <div class="text-sm text-muted">Avg Progress</div>
+        <div class="text-2xl font-bold text-primary mt-1">${
       avgProgress || 0
     }%</div>
-        <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">${total} projects</div>
+        <div class="text-xs text-muted mt-1">${total} projects</div>
       </div>
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <div class="text-sm text-gray-500 dark:text-gray-400">Net Revenue</div>
+      <div class="bg-primary rounded-lg shadow-sm border border-default p-4">
+        <div class="text-sm text-muted">Net Revenue</div>
         <div class="text-2xl font-bold ${profitClass} mt-1">${
       this.formatCurrency(netProfit)
     }</div>
-        <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">${
+        <div class="text-xs text-muted mt-1">${
       this.formatCurrency(totalRevenue)
     } rev / ${this.formatCurrency(totalExpenses)} exp</div>
       </div>
@@ -149,8 +149,8 @@ export class PortfolioView {
     const statusHtml = statusFilters.map((f) => {
       const isActive = this.currentFilter === f.key;
       const activeClass = isActive
-        ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
-        : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600";
+        ? "bg-inverse text-white"
+        : "bg-tertiary text-secondary hover:bg-active";
       return `
         <button data-portfolio-filter="${f.key}"
                 class="px-3 py-1.5 text-sm font-medium rounded transition-colors ${activeClass}">
@@ -163,20 +163,20 @@ export class PortfolioView {
     const listActive = this.currentViewMode === "list";
     const treeActive = this.currentViewMode === "tree";
     const viewToggleHtml = `
-      <span class="text-gray-300 dark:text-gray-600 mx-2">|</span>
+      <span class="text-muted mx-2">|</span>
       <button data-portfolio-view="list"
               class="px-3 py-1.5 text-sm font-medium rounded transition-colors ${
       listActive
-        ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
-        : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+        ? "bg-inverse text-white"
+        : "bg-tertiary text-secondary hover:bg-active"
     }">
         List
       </button>
       <button data-portfolio-view="tree"
               class="px-3 py-1.5 text-sm font-medium rounded transition-colors ${
       treeActive
-        ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
-        : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+        ? "bg-inverse text-white"
+        : "bg-tertiary text-secondary hover:bg-active"
     }">
         Tree
       </button>
@@ -266,31 +266,31 @@ export class PortfolioView {
       );
       const categoryNet = categoryRevenue - categoryExpenses;
       const netClass = categoryNet >= 0
-        ? "text-green-600 dark:text-green-400"
-        : "text-red-600 dark:text-red-400";
+        ? "text-success"
+        : "text-error";
 
       return `
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600 flex items-center justify-between">
+        <div class="bg-primary rounded-lg border border-default overflow-hidden">
+          <div class="px-4 py-3 bg-secondary border-b border-default flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <span class="text-base font-medium text-gray-900 dark:text-gray-100">${
+              <span class="text-base font-medium text-primary">${
         this.escapeHtml(category)
       }</span>
-              <span class="text-sm text-gray-500 dark:text-gray-400">${projects.length} project${
+              <span class="text-sm text-muted">${projects.length} project${
         projects.length !== 1 ? "s" : ""
       }</span>
             </div>
             <div class="text-sm">
-              <span class="text-gray-500 dark:text-gray-400">${
+              <span class="text-muted">${
         this.formatCurrency(categoryRevenue)
       } rev</span>
-              <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
+              <span class="mx-2 text-muted">|</span>
               <span class="${netClass} font-medium">${
         this.formatCurrency(categoryNet)
       } net</span>
             </div>
           </div>
-          <div class="divide-y divide-gray-100 dark:divide-gray-700">
+          <div class="divide-y divide-y border-default">
             ${projects.map((p) => this.renderProjectRow(p, true)).join("")}
           </div>
         </div>
@@ -318,40 +318,40 @@ export class PortfolioView {
     const hasFinancials = project.revenue !== undefined ||
       project.expenses !== undefined;
     const profitClass = netProfit >= 0
-      ? "text-green-600 dark:text-green-400"
-      : "text-red-600 dark:text-red-400";
+      ? "text-success"
+      : "text-error";
 
     // KPI indicator
     const hasKpis = project.kpis && project.kpis.length > 0;
 
     const containerClass = inTree
-      ? "px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/30 cursor-pointer transition-colors"
-      : "bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/30 cursor-pointer transition-colors";
+      ? "px-4 py-3 hover:bg-secondary cursor-pointer transition-colors"
+      : "bg-primary rounded-lg border border-default px-4 py-3 hover:bg-secondary cursor-pointer transition-colors";
 
     return `
       <div class="${containerClass}" data-portfolio-id="${project.id}">
         <div class="flex items-center justify-between gap-4">
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2">
-              <span class="font-medium text-gray-900 dark:text-gray-100 truncate">${
+              <span class="font-medium text-primary truncate">${
       this.escapeHtml(project.name)
     }</span>
               ${
       project.client
-        ? `<span class="text-xs text-gray-400 dark:text-gray-500">${
+        ? `<span class="text-xs text-muted">${
           this.escapeHtml(project.client)
         }</span>`
         : ""
     }
               ${
       hasKpis
-        ? '<span class="w-2 h-2 bg-purple-500 rounded-full" title="Has KPIs"></span>'
+        ? '<span class="w-2 h-2 bg-info-bg0 rounded-full" title="Has KPIs"></span>'
         : ""
     }
             </div>
             ${
       project.description
-        ? `<p class="text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5">${
+        ? `<p class="text-sm text-muted truncate mt-0.5">${
           this.escapeHtml(project.description)
         }</p>`
         : ""
@@ -359,16 +359,16 @@ export class PortfolioView {
           </div>
           <div class="flex items-center gap-4 flex-shrink-0">
             <div class="text-right w-20">
-              <div class="text-sm text-gray-900 dark:text-gray-100">${progressPercent}%</div>
-              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-1">
-                <div class="bg-green-500 dark:bg-green-400 h-1.5 rounded-full" style="width: ${progressPercent}%"></div>
+              <div class="text-sm text-primary">${progressPercent}%</div>
+              <div class="w-full bg-active rounded-full h-1.5 mt-1">
+                <div class="bg-success-bg0 h-1.5 rounded-full" style="width: ${progressPercent}%"></div>
               </div>
             </div>
             ${
       hasFinancials
         ? `
               <div class="text-right w-24">
-                <div class="text-xs text-gray-400 dark:text-gray-500">${
+                <div class="text-xs text-muted">${
           this.formatCurrency(revenue)
         }</div>
                 <div class="text-sm font-medium ${profitClass}">${
@@ -459,16 +459,16 @@ export class PortfolioView {
     const selected = new Set(selectedIds || []);
     const people = Array.from(this.peopleMap.values());
     if (people.length === 0) {
-      return '<p class="text-xs text-gray-500 dark:text-gray-400">No people configured. Add people in the People view first.</p>';
+      return '<p class="text-xs text-muted">No people configured. Add people in the People view first.</p>';
     }
     return people.map((person) => {
       const role = person.role || person.title || "";
       const label = role ? `${this.escapeHtml(person.name)} (${this.escapeHtml(role)})` : this.escapeHtml(person.name);
       const checked = selected.has(person.id) ? "checked" : "";
       return `
-        <label class="flex items-center gap-2 p-1 hover:bg-gray-50 dark:hover:bg-gray-600 rounded cursor-pointer">
+        <label class="flex items-center gap-2 p-1 hover:bg-secondary rounded cursor-pointer">
           <input type="checkbox" class="portfolio-team-cb rounded" value="${this.escapeHtml(person.id)}" ${checked}>
-          <span class="text-sm text-gray-700 dark:text-gray-300">${label}</span>
+          <span class="text-sm text-secondary">${label}</span>
         </label>
       `;
     }).join("");
@@ -560,8 +560,8 @@ export class PortfolioView {
     const kpis = project.kpis || [];
     const kpisHtml = kpis.length > 0
       ? kpis.map((kpi, idx) => `
-      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 relative" data-kpi-index="${idx}">
-        <button type="button" class="absolute top-2 right-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400" data-remove-kpi="${idx}">
+      <div class="bg-secondary rounded-lg p-3 relative" data-kpi-index="${idx}">
+        <button type="button" class="absolute top-2 right-2 text-muted hover:text-error" data-remove-kpi="${idx}">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
         <div class="grid grid-cols-2 gap-2">
@@ -578,12 +578,12 @@ export class PortfolioView {
         </div>
       </div>
     `).join("")
-      : '<p class="text-sm text-gray-500 dark:text-gray-400">No KPIs defined</p>';
+      : '<p class="text-sm text-muted">No KPIs defined</p>';
 
     // Team members (person IDs resolved to names)
     const team = project.team || [];
     const teamHtml = team.map((personId) =>
-      `<span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-sm rounded">${
+      `<span class="px-2 py-0.5 bg-tertiary text-sm rounded">${
         this.escapeHtml(this.getPersonName(personId))
       }</span>`
     ).join(" ");
@@ -651,10 +651,10 @@ export class PortfolioView {
             </div>
             <div>
               <label class="form-label">Net</label>
-              <div class="form-input bg-gray-100 dark:bg-gray-700 ${
+              <div class="form-input bg-tertiary ${
       (project.revenue || 0) - (project.expenses || 0) >= 0
-        ? "text-green-600 dark:text-green-400"
-        : "text-red-600 dark:text-red-400"
+        ? "text-success"
+        : "text-error"
     }">
                 ${
       this.formatCurrency((project.revenue || 0) - (project.expenses || 0))
@@ -702,7 +702,7 @@ export class PortfolioView {
         <section class="sidenav-section">
           <h3 class="sidenav-section-title flex items-center justify-between">
             <span>KPIs</span>
-            <button type="button" id="portfolioAddKpi" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">+ Add KPI</button>
+            <button type="button" id="portfolioAddKpi" class="text-sm text-info hover:underline">+ Add KPI</button>
           </h3>
           <div id="portfolioKpisList" class="space-y-3">
             ${kpisHtml}
@@ -721,10 +721,10 @@ export class PortfolioView {
 
     const idx = list.querySelectorAll("[data-kpi-index]").length;
     const div = document.createElement("div");
-    div.className = "bg-gray-50 dark:bg-gray-700 rounded-lg p-3 relative";
+    div.className = "bg-secondary rounded-lg p-3 relative";
     div.dataset.kpiIndex = idx.toString();
     div.innerHTML = `
-      <button type="button" class="absolute top-2 right-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400" data-remove-kpi="${idx}">
+      <button type="button" class="absolute top-2 right-2 text-muted hover:text-error" data-remove-kpi="${idx}">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
       </button>
       <div class="grid grid-cols-2 gap-2">

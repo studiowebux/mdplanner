@@ -168,7 +168,7 @@ export class StrategicLevelsSidenavModule {
         this.loadLinkOptions();
         break;
       default:
-        container.innerHTML = '<div class="text-gray-500">Unknown mode</div>';
+        container.innerHTML = '<div class="text-muted">Unknown mode</div>';
     }
 
     // Bind auto-save to inputs
@@ -278,19 +278,19 @@ export class StrategicLevelsSidenavModule {
     return `
       <div class="sidenav-section">
         <div class="sidenav-section-title">Linked Tasks</div>
-        <div id="strategicSidenavTasks" class="max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded p-2 bg-gray-50 dark:bg-gray-700/50">
-          <div class="text-gray-400 text-sm">Loading...</div>
+        <div id="strategicSidenavTasks" class="max-h-48 overflow-y-auto border border-default rounded p-2 bg-secondary">
+          <div class="text-muted text-sm">Loading...</div>
         </div>
       </div>
       <div class="sidenav-section">
         <div class="sidenav-section-title">Linked Milestones</div>
-        <div id="strategicSidenavMilestones" class="max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded p-2 bg-gray-50 dark:bg-gray-700/50">
-          <div class="text-gray-400 text-sm">Loading...</div>
+        <div id="strategicSidenavMilestones" class="max-h-48 overflow-y-auto border border-default rounded p-2 bg-secondary">
+          <div class="text-muted text-sm">Loading...</div>
         </div>
       </div>
       <div class="sidenav-section">
         <button type="button" onclick="taskManager.strategicLevelsSidenavModule.saveLinks()"
-                class="w-full px-4 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-md hover:bg-gray-700 dark:hover:bg-gray-300 text-sm font-medium">
+                class="w-full px-4 py-2 bg-inverse text-white rounded-md hover:bg-inverse text-sm font-medium">
           Save Links
         </button>
       </div>
@@ -307,19 +307,19 @@ export class StrategicLevelsSidenavModule {
     const allTasks = this.flattenTasks(this.tm.tasks);
     if (allTasks.length > 0) {
       tasksContainer.innerHTML = allTasks.map((task) => `
-        <label class="flex items-center gap-2 p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded cursor-pointer">
+        <label class="flex items-center gap-2 p-1 hover:bg-tertiary rounded cursor-pointer">
           <input type="checkbox" class="link-checkbox link-task rounded" value="${task.id}"
                  ${
         this.currentEntity.linkedTasks?.includes(task.id) ? "checked" : ""
       }>
-          <span class="text-sm text-gray-700 dark:text-gray-300 ${
+          <span class="text-sm text-secondary ${
         task.completed ? "line-through" : ""
       }">${escapeHtml(task.title)}</span>
         </label>
       `).join("");
     } else {
       tasksContainer.innerHTML =
-        '<div class="text-gray-400 dark:text-gray-500 text-sm italic">No tasks available</div>';
+        '<div class="text-muted text-sm italic">No tasks available</div>';
     }
 
     // Render milestones
@@ -327,23 +327,23 @@ export class StrategicLevelsSidenavModule {
       const milestones = await MilestonesAPI.fetchAll();
       if (milestones.length > 0) {
         milestonesContainer.innerHTML = milestones.map((m) => `
-          <label class="flex items-center gap-2 p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded cursor-pointer">
+          <label class="flex items-center gap-2 p-1 hover:bg-tertiary rounded cursor-pointer">
             <input type="checkbox" class="link-checkbox link-milestone rounded" value="${m.id}"
                    ${
           this.currentEntity.linkedMilestones?.includes(m.id) ? "checked" : ""
         }>
-            <span class="text-sm text-gray-700 dark:text-gray-300">${
+            <span class="text-sm text-secondary">${
           escapeHtml(m.title || m.name)
         }</span>
           </label>
         `).join("");
       } else {
         milestonesContainer.innerHTML =
-          '<div class="text-gray-400 dark:text-gray-500 text-sm italic">No milestones available</div>';
+          '<div class="text-muted text-sm italic">No milestones available</div>';
       }
     } catch (error) {
       milestonesContainer.innerHTML =
-        '<div class="text-red-500 text-sm">Error loading milestones</div>';
+        '<div class="text-error text-sm">Error loading milestones</div>';
     }
   }
 
