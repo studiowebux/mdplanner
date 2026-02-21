@@ -177,7 +177,7 @@ export class BillingModule {
     }/hr</p>
         ${
       r.assignee
-        ? `<p class="text-sm text-gray-600 dark:text-gray-400">Assignee: ${r.assignee}</p>`
+        ? `<p class="text-sm text-gray-600 dark:text-gray-400">Assignee: ${this.tm.getPersonName(r.assignee)}</p>`
         : ""
     }
         <div class="flex justify-end space-x-2 mt-3">

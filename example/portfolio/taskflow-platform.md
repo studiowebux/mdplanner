@@ -10,9 +10,9 @@ progress: 75
 startDate: 2025-01-15
 endDate: 2026-06-30
 team:
-  - Alice Chen
-  - Bob Smith
-  - Carol Davis
+  - alice
+  - bob
+  - charlie
 kpis:
   - name: MRR
     value: 10400

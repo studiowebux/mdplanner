@@ -844,6 +844,54 @@ export const CRMAPI = {
   },
 };
 
+// People Registry API
+export const PeopleAPI = {
+  async fetchAll() {
+    const response = await get("/api/people");
+    return response.json();
+  },
+
+  async fetchTree() {
+    const response = await get("/api/people/tree");
+    return response.json();
+  },
+
+  async getSummary() {
+    const response = await get("/api/people/summary");
+    return response.json();
+  },
+
+  async getDepartments() {
+    const response = await get("/api/people/departments");
+    return response.json();
+  },
+
+  async get(id) {
+    const response = await get(`/api/people/${id}`);
+    return response.json();
+  },
+
+  async getDirectReports(id) {
+    const response = await get(`/api/people/${id}/reports`);
+    return response.json();
+  },
+
+  async create(person) {
+    const response = await post("/api/people", person);
+    return response;
+  },
+
+  async update(id, person) {
+    const response = await put(`/api/people/${id}`, person);
+    return response;
+  },
+
+  async delete(id) {
+    const response = await del(`/api/people/${id}`);
+    return response;
+  },
+};
+
 // Org Chart API
 export const OrgChartAPI = {
   async fetchAll() {

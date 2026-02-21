@@ -36,6 +36,7 @@ import { strategicRouter } from "./features/strategic.ts";
 import { billingRouter } from "./features/billing.ts";
 import { crmRouter } from "./features/crm.ts";
 import { orgchartRouter } from "./features/orgchart.ts";
+import { peopleRouter } from "./features/people.ts";
 import { portfolioRouter } from "./portfolio.ts";
 
 // Export/Import routes
@@ -90,6 +91,9 @@ export function createApiRouter(
 
   // CRM routes (nested under various paths)
   api.route("/", crmRouter);
+
+  // People Registry routes
+  api.route("/people", peopleRouter);
 
   // Org Chart routes
   api.route("/orgchart", orgchartRouter);

@@ -336,6 +336,22 @@ CREATE TABLE IF NOT EXISTS portfolio (
   kpis TEXT             -- JSON array
 );
 
+-- People (shared registry)
+CREATE TABLE IF NOT EXISTS people (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  title TEXT,
+  role TEXT,
+  departments TEXT,  -- JSON array
+  reports_to TEXT,
+  email TEXT,
+  phone TEXT,
+  start_date TEXT,
+  hours_per_day REAL,
+  working_days TEXT,  -- JSON array
+  notes TEXT
+);
+
 -- Org Chart Members
 CREATE TABLE IF NOT EXISTS org_members (
   id TEXT PRIMARY KEY,
@@ -496,6 +512,9 @@ CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status);
 
 CREATE INDEX IF NOT EXISTS idx_org_reports_to ON org_members(reports_to);
 
+CREATE INDEX IF NOT EXISTS idx_people_departments ON people(departments);
+CREATE INDEX IF NOT EXISTS idx_people_reports_to ON people(reports_to);
+
 CREATE INDEX IF NOT EXISTS idx_portfolio_status ON portfolio(status);
 CREATE INDEX IF NOT EXISTS idx_portfolio_category ON portfolio(category);
 `;
@@ -503,6 +522,7 @@ CREATE INDEX IF NOT EXISTS idx_portfolio_category ON portfolio(category);
 // Drop all tables for rebuild
 const DROP_SQL = `
 DROP TABLE IF EXISTS cache_meta;
+DROP TABLE IF EXISTS people;
 DROP TABLE IF EXISTS org_members;
 DROP TABLE IF EXISTS portfolio;
 DROP TABLE IF EXISTS interactions;

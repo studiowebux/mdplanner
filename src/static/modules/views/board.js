@@ -21,6 +21,10 @@ export class BoardView {
     this.draggedFromIndex = null;
   }
 
+  getPersonName(personId) {
+    return this.tm.getPersonName(personId);
+  }
+
   render() {
     const sections = this.tm.sections || [];
     const container = document.getElementById("boardContainer");
@@ -214,7 +218,7 @@ export class BoardView {
                 <div class="text-xs font-mono text-gray-400">#${task.id}</div>
                 ${
       config.assignee
-        ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> ${config.assignee}</div>`
+        ? `<div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> ${this.getPersonName(config.assignee)}</div>`
         : ""
     }
                 ${

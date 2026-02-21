@@ -76,13 +76,16 @@ export class TaskSidenavModule {
       ).join("");
     }
 
-    // Assignees
+    // Assignees from people/ registry
     const assigneeSelect = document.getElementById("sidenavTaskAssignee");
-    if (assigneeSelect && this.tm.projectConfig?.assignees) {
+    if (assigneeSelect) {
+      const people = Array.from(this.tm.peopleMap.values());
       assigneeSelect.innerHTML = `<option value="">Unassigned</option>` +
-        this.tm.projectConfig.assignees.map((a) =>
-          `<option value="${a}">${a}</option>`
-        ).join("");
+        people.map((p) => {
+          const role = p.role || p.title || "";
+          const label = role ? `${p.name} (${role})` : p.name;
+          return `<option value="${p.id}">${label}</option>`;
+        }).join("");
     }
 
     // Tags

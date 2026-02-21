@@ -1,5 +1,6 @@
 /**
  * Capacity Planning routes.
+ * Team members reference people/ by personId.
  */
 
 import { Hono } from "hono";
@@ -9,7 +10,7 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
-import { Task } from "../../../lib/types.ts";
+import { Person, Task } from "../../../lib/types.ts";
 
 export const capacityRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -25,6 +26,18 @@ function getUnassignedTasks(tasks: Task[]): Task[] {
   };
   collect(tasks);
   return result;
+}
+
+// Helper: build a lookup map of personId -> Person
+async function getPeopleMap(
+  parser: ReturnType<typeof getParser>,
+): Promise<Map<string, Person>> {
+  const people = await parser.readPeople();
+  const map = new Map<string, Person>();
+  for (const person of people) {
+    map.set(person.id, person);
+  }
+  return map;
 }
 
 // GET /capacity - list all capacity plans
@@ -86,7 +99,7 @@ capacityRouter.delete("/:id", async (c) => {
   return jsonResponse({ success: true });
 });
 
-// POST /capacity/:id/members - add team member
+// POST /capacity/:id/members - add team member ref
 capacityRouter.post("/:id/members", async (c) => {
   const parser = getParser(c);
   const planId = c.req.param("id");
@@ -97,17 +110,16 @@ capacityRouter.post("/:id/members", async (c) => {
 
   const newMember = {
     id: crypto.randomUUID().substring(0, 8),
-    name: body.name,
-    role: body.role,
-    hoursPerDay: body.hoursPerDay || 8,
-    workingDays: body.workingDays || ["Mon", "Tue", "Wed", "Thu", "Fri"],
+    personId: body.personId,
+    hoursPerDay: body.hoursPerDay,
+    workingDays: body.workingDays,
   };
   plan.teamMembers.push(newMember);
   await parser.saveCapacityPlans(plans);
   return jsonResponse(newMember, 201);
 });
 
-// PUT /capacity/:id/members/:mid - update team member
+// PUT /capacity/:id/members/:mid - update team member ref
 capacityRouter.put("/:id/members/:mid", async (c) => {
   const parser = getParser(c);
   const planId = c.req.param("id");
@@ -125,7 +137,7 @@ capacityRouter.put("/:id/members/:mid", async (c) => {
   return jsonResponse(plan.teamMembers[memberIndex]);
 });
 
-// DELETE /capacity/:id/members/:mid - delete team member
+// DELETE /capacity/:id/members/:mid - delete team member ref
 capacityRouter.delete("/:id/members/:mid", async (c) => {
   const parser = getParser(c);
   const planId = c.req.param("id");
@@ -206,6 +218,7 @@ capacityRouter.delete("/:id/allocations/:aid", async (c) => {
 });
 
 // GET /capacity/:id/utilization - get utilization report
+// Resolves person names from people/ registry
 capacityRouter.get("/:id/utilization", async (c) => {
   const parser = getParser(c);
   const planId = c.req.param("id");
@@ -213,10 +226,15 @@ capacityRouter.get("/:id/utilization", async (c) => {
   const plan = plans.find((p) => p.id === planId);
   if (!plan) return errorResponse("Plan not found", 404);
 
+  const peopleMap = await getPeopleMap(parser);
   const timeEntries = await parser.readTimeEntries();
 
   const utilization = plan.teamMembers.map((member) => {
-    const weeklyCapacity = member.hoursPerDay * member.workingDays.length;
+    const person = peopleMap.get(member.personId);
+    const hoursPerDay = member.hoursPerDay ?? person?.hoursPerDay ?? 8;
+    const workingDays = member.workingDays ?? person?.workingDays ??
+      ["Mon", "Tue", "Wed", "Thu", "Fri"];
+    const weeklyCapacity = hoursPerDay * workingDays.length;
     const allocatedByWeek = new Map<string, number>();
 
     for (
@@ -226,10 +244,11 @@ capacityRouter.get("/:id/utilization", async (c) => {
       allocatedByWeek.set(alloc.weekStart, current + alloc.allocatedHours);
     }
 
+    // Match time entries by personId
     let actualHours = 0;
     for (const [, entries] of timeEntries) {
       for (const entry of entries) {
-        if (entry.person === member.name || entry.person === member.id) {
+        if (entry.person === member.personId) {
           actualHours += entry.hours;
         }
       }
@@ -242,7 +261,8 @@ capacityRouter.get("/:id/utilization", async (c) => {
 
     return {
       memberId: member.id,
-      memberName: member.name,
+      personId: member.personId,
+      memberName: person?.name || member.personId,
       weeklyCapacity,
       allocatedByWeek: Object.fromEntries(allocatedByWeek),
       totalAllocated,
@@ -264,6 +284,7 @@ capacityRouter.get("/:id/suggest-assignments", async (c) => {
   const plan = plans.find((p) => p.id === planId);
   if (!plan) return errorResponse("Plan not found", 404);
 
+  const peopleMap = await getPeopleMap(parser);
   const tasks = await parser.readTasks();
   const unassignedTasks = getUnassignedTasks(tasks).sort((a, b) =>
     (a.config.priority || 999) - (b.config.priority || 999)
@@ -276,7 +297,11 @@ capacityRouter.get("/:id/suggest-assignments", async (c) => {
 
   const memberCapacity = new Map<string, number>();
   for (const member of plan.teamMembers) {
-    const weeklyCapacity = member.hoursPerDay * member.workingDays.length;
+    const person = peopleMap.get(member.personId);
+    const hoursPerDay = member.hoursPerDay ?? person?.hoursPerDay ?? 8;
+    const workingDays = member.workingDays ?? person?.workingDays ??
+      ["Mon", "Tue", "Wed", "Thu", "Fri"];
+    const weeklyCapacity = hoursPerDay * workingDays.length;
     const allocated = plan.allocations
       .filter((a) => a.memberId === member.id && a.weekStart === weekStart)
       .reduce((sum, a) => sum + a.allocatedHours, 0);
@@ -288,6 +313,7 @@ capacityRouter.get("/:id/suggest-assignments", async (c) => {
       taskId: string;
       taskTitle: string;
       memberId: string;
+      personId: string;
       memberName: string;
       hours: number;
       weekStart: string;
@@ -297,14 +323,20 @@ capacityRouter.get("/:id/suggest-assignments", async (c) => {
   for (const task of unassignedTasks) {
     const effort = task.config.effort || 8;
 
-    let bestMember: { id: string; name: string } | null = null;
+    let bestMember: { id: string; personId: string; name: string } | null =
+      null;
     let maxCapacity = 0;
 
     for (const member of plan.teamMembers) {
       const remaining = memberCapacity.get(member.id) || 0;
       if (remaining >= effort && remaining > maxCapacity) {
         maxCapacity = remaining;
-        bestMember = { id: member.id, name: member.name };
+        const person = peopleMap.get(member.personId);
+        bestMember = {
+          id: member.id,
+          personId: member.personId,
+          name: person?.name || member.personId,
+        };
       }
     }
 
@@ -313,6 +345,7 @@ capacityRouter.get("/:id/suggest-assignments", async (c) => {
         taskId: task.id,
         taskTitle: task.title,
         memberId: bestMember.id,
+        personId: bestMember.personId,
         memberName: bestMember.name,
         hours: effort,
         weekStart,
@@ -338,6 +371,8 @@ capacityRouter.post("/:id/apply-assignments", async (c) => {
   const plan = plans.find((p) => p.id === planId);
   if (!plan) return errorResponse("Plan not found", 404);
 
+  const peopleMap = await getPeopleMap(parser);
+
   for (const suggestion of suggestions) {
     plan.allocations.push({
       id: crypto.randomUUID().substring(0, 8),
@@ -348,10 +383,11 @@ capacityRouter.post("/:id/apply-assignments", async (c) => {
       targetId: suggestion.taskId,
     });
 
-    const member = plan.teamMembers.find((m) => m.id === suggestion.memberId);
-    if (member) {
+    // Assign task to the person's ID
+    const personId = suggestion.personId;
+    if (personId) {
       await parser.updateTask(suggestion.taskId, {
-        config: { assignee: member.name },
+        config: { assignee: personId },
       });
     }
   }

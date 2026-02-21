@@ -2,7 +2,7 @@
 // Slide-in panel for capacity plan with team members and allocations
 
 import { Sidenav } from "../ui/sidenav.js";
-import { CapacityAPI, MilestonesAPI } from "../api.js";
+import { CapacityAPI, PeopleAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { escapeHtml } from "../utils.js";
 
@@ -51,9 +51,9 @@ export class CapacitySidenavModule {
       () => this.showAddMemberForm(),
     );
 
-    // Import assignees button
+    // Import from people button
     document.getElementById("capacitySidenav_importAssignees")
-      ?.addEventListener("click", () => this.showImportAssigneesForm());
+      ?.addEventListener("click", () => this.showImportPeopleForm());
   }
 
   openNew() {
@@ -108,6 +108,14 @@ export class CapacitySidenavModule {
     this.renderTeamMembers();
   }
 
+  getPersonName(personId) {
+    return this.tm.capacityModule?.getPersonName(personId) || personId;
+  }
+
+  getPersonRole(personId) {
+    return this.tm.capacityModule?.getPersonRole(personId) || "";
+  }
+
   renderTeamMembers() {
     const container = document.getElementById("capacitySidenav_members");
     if (!container) return;
@@ -120,24 +128,27 @@ export class CapacitySidenavModule {
       return;
     }
 
-    container.innerHTML = members.map((member) => `
+    container.innerHTML = members.map((member) => {
+      const name = this.getPersonName(member.personId);
+      const role = this.getPersonRole(member.personId);
+      const hoursPerDay = this.tm.capacityModule?.getMemberHoursPerDay(member) || member.hoursPerDay || 8;
+      const workingDays = this.tm.capacityModule?.getMemberWorkingDays(member) || member.workingDays || ["Mon", "Tue", "Wed", "Thu", "Fri"];
+      return `
       <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 mb-2">
         <div class="flex justify-between items-start">
           <div>
             <div class="font-medium text-gray-900 dark:text-gray-100 text-sm">${
-      escapeHtml(member.name)
+      escapeHtml(name)
     }</div>
             ${
-      member.role
+      role
         ? `<div class="text-xs text-gray-500 dark:text-gray-400">${
-          escapeHtml(member.role)
+          escapeHtml(role)
         }</div>`
         : ""
     }
             <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              ${member.hoursPerDay}h/day, ${
-      member.workingDays?.join(", ") || "Mon-Fri"
-    }
+              ${hoursPerDay}h/day, ${workingDays.join(", ")}
             </div>
           </div>
           <div class="flex gap-1">
@@ -148,16 +159,16 @@ export class CapacitySidenavModule {
           </div>
         </div>
       </div>
-    `).join("");
+    `;
+    }).join("");
   }
 
   showAddMemberForm() {
     this.editingMemberId = null;
     this.showMemberForm({
-      name: "",
-      role: "",
-      hoursPerDay: 8,
-      workingDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+      personId: "",
+      hoursPerDay: null,
+      workingDays: [],
     });
   }
 
@@ -175,26 +186,37 @@ export class CapacitySidenavModule {
     const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     const memberDays = member.workingDays || [];
 
+    // Build person picker options
+    const peopleMap = this.tm.capacityModule?.peopleMap || new Map();
+    const existingPersonIds = new Set(
+      (this.currentPlan.teamMembers || []).map((m) => m.personId),
+    );
+    let personOptions = '<option value="">Select person...</option>';
+    for (const [personId, person] of peopleMap) {
+      if (!this.editingMemberId && existingPersonIds.has(personId)) continue;
+      const role = person.role || person.title || "";
+      const label = role ? `${person.name} (${role})` : person.name;
+      const selected = member.personId === personId ? "selected" : "";
+      personOptions += `<option value="${escapeHtml(personId)}" ${selected}>${escapeHtml(label)}</option>`;
+    }
+
     container.innerHTML = `
       <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 mb-2 border border-gray-200 dark:border-gray-600">
         <div class="text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">${
       this.editingMemberId ? "Edit" : "Add"
     } Team Member</div>
         <div class="space-y-2">
-          <input type="text" id="memberFormName" value="${
-      escapeHtml(member.name)
-    }" placeholder="Name *"
-                 class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-          <input type="text" id="memberFormRole" value="${
-      escapeHtml(member.role || "")
-    }" placeholder="Role (optional)"
-                 class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+          <select id="memberFormPersonId"
+                  class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+            ${personOptions}
+          </select>
+          <div class="text-xs text-gray-500 dark:text-gray-400">Override defaults (leave blank to use person defaults):</div>
           <div class="flex gap-2">
             <input type="number" id="memberFormHours" value="${
-      member.hoursPerDay || 8
+      member.hoursPerDay || ""
     }" min="1" max="24" placeholder="Hours/day"
                    class="w-20 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-            <span class="text-xs text-gray-500 self-center">hours/day</span>
+            <span class="text-xs text-gray-500 self-center">hours/day override</span>
           </div>
           <div class="flex flex-wrap gap-1">
             ${
@@ -227,21 +249,23 @@ export class CapacitySidenavModule {
   }
 
   async saveMember() {
-    const name = document.getElementById("memberFormName")?.value.trim();
-    if (!name) {
-      showToast("Name is required", "error");
+    const personId = document.getElementById("memberFormPersonId")?.value;
+    if (!personId) {
+      showToast("Select a person", "error");
       return;
     }
 
-    const role = document.getElementById("memberFormRole")?.value.trim() ||
-      null;
-    const hoursPerDay =
-      parseInt(document.getElementById("memberFormHours")?.value) || 8;
+    const hoursVal = document.getElementById("memberFormHours")?.value;
+    const hoursPerDay = hoursVal ? parseInt(hoursVal) : undefined;
     const workingDays = Array.from(
       document.querySelectorAll(".member-day-checkbox:checked"),
     ).map((cb) => cb.value);
 
-    const memberData = { name, role, hoursPerDay, workingDays };
+    const memberData = {
+      personId,
+      hoursPerDay,
+      workingDays: workingDays.length > 0 ? workingDays : undefined,
+    };
 
     try {
       if (this.editingPlanId) {
@@ -321,23 +345,23 @@ export class CapacitySidenavModule {
     }
   }
 
-  showImportAssigneesForm() {
+  async showImportPeopleForm() {
     const container = document.getElementById("capacitySidenav_memberForm");
     if (!container) return;
 
-    const assignees = this.tm.projectConfig?.assignees || [];
-    const existingNames = (this.currentPlan.teamMembers || []).map((m) =>
-      m.name.toLowerCase()
+    const peopleMap = this.tm.capacityModule?.peopleMap || new Map();
+    const existingPersonIds = new Set(
+      (this.currentPlan.teamMembers || []).map((m) => m.personId),
     );
-    const availableAssignees = assignees.filter((name) =>
-      !existingNames.includes(name.toLowerCase())
+    const availablePeople = Array.from(peopleMap.values()).filter(
+      (p) => !existingPersonIds.has(p.id),
     );
 
-    if (availableAssignees.length === 0) {
+    if (availablePeople.length === 0) {
       container.innerHTML = `
         <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 mb-2 border border-gray-200 dark:border-gray-600">
           <div class="text-sm text-gray-500 dark:text-gray-400">
-            All assignees are already added or no assignees configured.
+            All people are already added or no people configured.
           </div>
           <button type="button" onclick="taskManager.capacitySidenavModule.cancelMemberForm()"
                   class="mt-2 px-3 py-1 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Close</button>
@@ -348,24 +372,28 @@ export class CapacitySidenavModule {
 
     container.innerHTML = `
       <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 mb-2 border border-gray-200 dark:border-gray-600">
-        <div class="text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Import Assignees</div>
+        <div class="text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Import from People</div>
         <div class="space-y-1 max-h-40 overflow-y-auto">
           ${
-      availableAssignees.map((name) => `
+      availablePeople.map((person) => {
+        const role = person.role || person.title || "";
+        const label = role ? `${person.name} (${role})` : person.name;
+        return `
             <label class="flex items-center gap-2 p-1 hover:bg-gray-50 dark:hover:bg-gray-600 rounded cursor-pointer">
-              <input type="checkbox" class="import-assignee-cb rounded" value="${
-        escapeHtml(name)
-      }" checked>
+              <input type="checkbox" class="import-people-cb rounded" value="${
+          escapeHtml(person.id)
+        }" checked>
               <span class="text-sm text-gray-700 dark:text-gray-300">${
-        escapeHtml(name)
-      }</span>
+          escapeHtml(label)
+        }</span>
             </label>
-          `).join("")
+          `;
+      }).join("")
     }
         </div>
-        <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">Default: 8h/day, Mon-Fri</div>
+        <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">Uses person defaults for hours and working days</div>
         <div class="flex gap-2 mt-2">
-          <button type="button" onclick="taskManager.capacitySidenavModule.applyImportAssignees()"
+          <button type="button" onclick="taskManager.capacitySidenavModule.applyImportPeople()"
                   class="px-3 py-1 text-xs bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded hover:bg-gray-700 dark:hover:bg-gray-300">Import</button>
           <button type="button" onclick="taskManager.capacitySidenavModule.cancelMemberForm()"
                   class="px-3 py-1 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Cancel</button>
@@ -374,22 +402,18 @@ export class CapacitySidenavModule {
     `;
   }
 
-  async applyImportAssignees() {
-    const selectedNames = Array.from(
-      document.querySelectorAll(".import-assignee-cb:checked"),
+  async applyImportPeople() {
+    const selectedIds = Array.from(
+      document.querySelectorAll(".import-people-cb:checked"),
     ).map((cb) => cb.value);
-    if (selectedNames.length === 0) {
+    if (selectedIds.length === 0) {
       this.cancelMemberForm();
       return;
     }
 
     try {
-      for (const name of selectedNames) {
-        const memberData = {
-          name,
-          hoursPerDay: 8,
-          workingDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-        };
+      for (const personId of selectedIds) {
+        const memberData = { personId };
 
         if (this.editingPlanId) {
           await CapacityAPI.createMember(this.editingPlanId, memberData);
@@ -411,10 +435,10 @@ export class CapacitySidenavModule {
       this.cancelMemberForm();
       this.renderTeamMembers();
       await this.tm.capacityModule?.load();
-      showToast(`Imported ${selectedNames.length} assignee(s)`, "success");
+      showToast(`Imported ${selectedIds.length} person(s)`, "success");
     } catch (error) {
-      console.error("Error importing assignees:", error);
-      showToast("Error importing assignees", "error");
+      console.error("Error importing people:", error);
+      showToast("Error importing people", "error");
     }
   }
 

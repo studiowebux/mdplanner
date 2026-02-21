@@ -28,10 +28,10 @@ export { StrategicLevelsDirectoryParser } from "./strategic-levels.ts";
 export { BillingDirectoryParser } from "./billing.ts";
 export { CRMDirectoryParser } from "./crm.ts";
 export {
-  OrgChartDirectoryParser,
-  type OrgChartMemberWithChildren,
-  type OrgChartSummary,
-} from "./orgchart.ts";
+  PeopleDirectoryParser,
+  type PeopleSummary,
+  type PersonWithChildren,
+} from "./people.ts";
 export { DirectoryMarkdownParser } from "./parser.ts";
 export {
   migrateFromDirectory,

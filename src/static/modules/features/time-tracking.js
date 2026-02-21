@@ -2,10 +2,31 @@ import { TimeTrackingAPI } from "../api.js";
 
 /**
  * TimeTrackingModule - Handles time entry tracking for tasks
+ * Person field stores person IDs from the people/ registry.
  */
 export class TimeTrackingModule {
   constructor(taskManager) {
     this.taskManager = taskManager;
+  }
+
+  /** Resolve person ID to display name via peopleMap */
+  getPersonName(personId) {
+    return this.taskManager.getPersonName(personId);
+  }
+
+  /** Populate the person select dropdown from peopleMap */
+  populatePersonSelect() {
+    const select = document.getElementById("timeEntryPerson");
+    if (!select) return;
+    const current = select.value;
+    select.innerHTML = '<option value="">-- Person --</option>';
+    for (const [id, person] of this.taskManager.peopleMap) {
+      const opt = document.createElement("option");
+      opt.value = id;
+      opt.textContent = person.name + (person.role ? ` (${person.role})` : "");
+      select.appendChild(opt);
+    }
+    select.value = current;
   }
 
   async load() {
@@ -67,11 +88,14 @@ export class TimeTrackingModule {
     document.getElementById("monthlyHours").textContent =
       monthlyTotal.toFixed(1) + "h";
 
-    // Hours by person
+    // Hours by person - resolve names from peopleMap
     const byPerson = {};
     for (const entry of allEntries) {
-      const person = entry.person || "Unassigned";
-      byPerson[person] = (byPerson[person] || 0) + entry.hours;
+      const personId = entry.person || "Unassigned";
+      const displayName = personId === "Unassigned"
+        ? "Unassigned"
+        : this.getPersonName(personId);
+      byPerson[displayName] = (byPerson[displayName] || 0) + entry.hours;
     }
     const personList = Object.entries(byPerson)
       .map(([name, hours]) => `${name}: ${hours.toFixed(1)}h`)
@@ -129,7 +153,7 @@ export class TimeTrackingModule {
                 <span class="text-gray-500 dark:text-gray-400 ml-2">${e.hours}h</span>
                 ${
                 e.person
-                  ? `<span class="text-gray-400 dark:text-gray-500 ml-2">by ${e.person}</span>`
+                  ? `<span class="text-gray-400 dark:text-gray-500 ml-2">by ${this.getPersonName(e.person)}</span>`
                   : ""
               }
               </div>
@@ -169,8 +193,9 @@ export class TimeTrackingModule {
       .toISOString()
       .split("T")[0];
     document.getElementById("timeEntryHours").value = "";
-    document.getElementById("timeEntryPerson").value = "";
     document.getElementById("timeEntryDescription").value = "";
+    this.populatePersonSelect();
+    document.getElementById("timeEntryPerson").value = "";
   }
 
   hideForm() {
@@ -182,7 +207,7 @@ export class TimeTrackingModule {
 
     const date = document.getElementById("timeEntryDate").value;
     const hours = parseFloat(document.getElementById("timeEntryHours").value);
-    const person = document.getElementById("timeEntryPerson").value.trim();
+    const person = document.getElementById("timeEntryPerson").value;
     const description = document
       .getElementById("timeEntryDescription")
       .value.trim();
@@ -238,7 +263,7 @@ export class TimeTrackingModule {
           <span class="font-medium ml-2">${e.hours}h</span>
           ${
           e.person
-            ? `<span class="text-gray-500 dark:text-gray-400 ml-2">by ${e.person}</span>`
+            ? `<span class="text-gray-500 dark:text-gray-400 ml-2">by ${this.getPersonName(e.person)}</span>`
             : ""
         }
         </div>

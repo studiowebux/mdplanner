@@ -148,7 +148,7 @@ export class OrgChartModule {
       <div class="orgchart-node-header" style="border-left: 4px solid ${deptColor};">
         <div class="orgchart-drag-handle" title="Drag to change reporting structure">⋮⋮</div>
         <div class="orgchart-node-name">${escapeHtml(node.name)}</div>
-        <div class="orgchart-node-title">${escapeHtml(node.title)}</div>
+        <div class="orgchart-node-title">${escapeHtml(node.title || node.role || "")}</div>
         <div class="orgchart-node-dept">${escapeHtml(deptText)}</div>
       </div>
     `;
@@ -399,7 +399,7 @@ export class OrgChartModule {
           html += `
           <div class="orgchart-card" data-member-id="${member.id}">
             <div class="orgchart-card-name">${escapeHtml(member.name)}</div>
-            <div class="orgchart-card-title">${escapeHtml(member.title)}</div>
+            <div class="orgchart-card-title">${escapeHtml(member.title || member.role || "")}</div>
             ${
             member.email
               ? `<div class="orgchart-card-email">${
