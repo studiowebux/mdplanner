@@ -7,7 +7,7 @@ import { Breadcrumb } from "./modules/ui/breadcrumb.js";
 import { Sidenav } from "./modules/ui/sidenav.js";
 import { Help } from "./modules/ui/help.js";
 import { TaskSidenavModule } from "./modules/features/task-sidenav.js";
-import { ProjectAPI, TasksAPI } from "./modules/api.js";
+import { PeopleAPI, ProjectAPI, TasksAPI } from "./modules/api.js";
 import { markdownToHtml as markdownToHtmlUtil } from "./modules/utils.js";
 import { SummaryView } from "./modules/views/summary.js";
 import { ListView } from "./modules/views/list.js";
@@ -70,6 +70,7 @@ class TaskManager {
     this.searchQuery = "";
     this.projectInfo = null;
     this.projectConfig = null;
+    this.peopleMap = new Map();
     this.sections = [];
     this.currentView = "summary";
     this.editingTask = null;
@@ -243,6 +244,7 @@ class TaskManager {
     await this.loadProjects(); // Load projects first
     await this.loadProjectConfig();
     this.applyFeatureVisibility();
+    await this.loadPeople();
     await this.loadSections();
     const savedView = localStorage.getItem("mdplanner_current_view") ||
       "summary";
@@ -1143,6 +1145,22 @@ class TaskManager {
     } else if (this.currentView === "summary") {
       this.renderSummaryView();
     }
+  }
+
+  async loadPeople() {
+    try {
+      const people = await PeopleAPI.fetchAll();
+      this.peopleMap.clear();
+      for (const person of people) {
+        this.peopleMap.set(person.id, person);
+      }
+    } catch { /* ignore - people may not be configured */ }
+  }
+
+  getPersonName(personId) {
+    if (!personId) return "";
+    const person = this.peopleMap.get(personId);
+    return person?.name || personId;
   }
 
   async loadProjectInfo() {

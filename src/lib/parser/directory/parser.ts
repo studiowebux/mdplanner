@@ -29,11 +29,11 @@ import {
   type PortfolioKPI,
   type PortfolioSummary,
 } from "./portfolio.ts";
-import {
-  OrgChartDirectoryParser,
-  type OrgChartMemberWithChildren,
-  type OrgChartSummary,
-} from "./orgchart.ts";
+// OrgChart types re-exported from people parser (orgchart delegates to people)
+import type {
+  PersonWithChildren as OrgChartMemberWithChildren,
+  PeopleSummary as OrgChartSummary,
+} from "./people.ts";
 import {
   PeopleDirectoryParser,
   type PeopleSummary,
@@ -57,7 +57,6 @@ import type {
   Milestone,
   Mindmap,
   Note,
-  OrgChartMember,
   Payment,
   Person,
   ProjectConfig,
@@ -72,7 +71,7 @@ import type {
   SwotAnalysis,
   Task,
   TaskConfig,
-  TeamMember,
+  TeamMemberRef,
   TimeEntry,
   WeeklyAllocation,
 } from "../../types.ts";
@@ -101,7 +100,6 @@ export class DirectoryMarkdownParser {
   protected billingParser: BillingDirectoryParser;
   protected crmParser: CRMDirectoryParser;
   protected portfolioParser: PortfolioDirectoryParser;
-  protected orgchartParser: OrgChartDirectoryParser;
   protected peopleParser: PeopleDirectoryParser;
 
   constructor(projectDir: string) {
@@ -127,7 +125,6 @@ export class DirectoryMarkdownParser {
     this.billingParser = new BillingDirectoryParser(projectDir);
     this.crmParser = new CRMDirectoryParser(projectDir);
     this.portfolioParser = new PortfolioDirectoryParser(projectDir);
-    this.orgchartParser = new OrgChartDirectoryParser(projectDir);
     this.peopleParser = new PeopleDirectoryParser(projectDir);
   }
 
@@ -709,7 +706,7 @@ export class DirectoryMarkdownParser {
 
   async addTeamMember(
     planId: string,
-    member: Omit<TeamMember, "id">,
+    member: Omit<TeamMemberRef, "id">,
   ): Promise<CapacityPlan | null> {
     return this.capacityParser.addTeamMember(planId, member);
   }
@@ -717,7 +714,7 @@ export class DirectoryMarkdownParser {
   async updateTeamMember(
     planId: string,
     memberId: string,
-    updates: Partial<TeamMember>,
+    updates: Partial<TeamMemberRef>,
   ): Promise<CapacityPlan | null> {
     return this.capacityParser.updateTeamMember(planId, memberId, updates);
   }
@@ -1305,61 +1302,62 @@ export class DirectoryMarkdownParser {
   }
 
   // ============================================================
-  // Org Chart
+  // Org Chart (delegates to People parser)
   // ============================================================
 
-  async readOrgChartMembers(): Promise<OrgChartMember[]> {
-    return this.orgchartParser.readAll();
+  async readOrgChartMembers(): Promise<Person[]> {
+    return this.peopleParser.readAll();
   }
 
-  async readOrgChartMember(id: string): Promise<OrgChartMember | null> {
-    return this.orgchartParser.read(id);
+  async readOrgChartMember(id: string): Promise<Person | null> {
+    return this.peopleParser.read(id);
   }
 
   async addOrgChartMember(
-    member: Omit<OrgChartMember, "id">,
-  ): Promise<OrgChartMember> {
-    return this.orgchartParser.add(member);
+    member: Omit<Person, "id">,
+  ): Promise<Person> {
+    return this.peopleParser.add(member);
   }
 
   async updateOrgChartMember(
     id: string,
-    updates: Partial<OrgChartMember>,
-  ): Promise<OrgChartMember | null> {
-    return this.orgchartParser.update(id, updates);
+    updates: Partial<Person>,
+  ): Promise<Person | null> {
+    return this.peopleParser.update(id, updates);
   }
 
   async deleteOrgChartMember(id: string): Promise<boolean> {
-    return this.orgchartParser.delete(id);
+    return this.peopleParser.delete(id);
   }
 
-  async getOrgChartByDepartment(department: string): Promise<OrgChartMember[]> {
-    return this.orgchartParser.getByDepartment(department);
+  async getOrgChartByDepartment(department: string): Promise<Person[]> {
+    return this.peopleParser.getByDepartment(department);
   }
 
-  async getOrgChartDirectReports(memberId: string): Promise<OrgChartMember[]> {
-    return this.orgchartParser.getDirectReports(memberId);
+  async getOrgChartDirectReports(memberId: string): Promise<Person[]> {
+    return this.peopleParser.getDirectReports(memberId);
   }
 
   async getOrgChartDepartments(): Promise<string[]> {
-    return this.orgchartParser.getDepartments();
+    return this.peopleParser.getDepartments();
   }
 
   async getOrgChartTree(): Promise<OrgChartMemberWithChildren[]> {
-    return this.orgchartParser.getTree();
+    return this.peopleParser.getTree();
   }
 
   async getOrgChartSummary(): Promise<OrgChartSummary> {
-    return this.orgchartParser.getSummary();
+    const summary = await this.peopleParser.getSummary();
+    return summary;
   }
 
   async hasOrgChart(): Promise<boolean> {
-    const members = await this.orgchartParser.readAll();
+    const members = await this.peopleParser.readAll();
     return members.length > 0;
   }
 
-  async saveOrgChartMembers(members: OrgChartMember[]): Promise<void> {
-    await this.orgchartParser.saveAll(members);
+  async saveOrgChartMembers(members: Person[]): Promise<void> {
+    await this.peopleParser.saveAll(members);
   }
 
   // ============================================================
@@ -1424,7 +1422,6 @@ export class DirectoryMarkdownParser {
     await Deno.mkdir(`${this.projectDir}/crm/interactions`, {
       recursive: true,
     });
-    await Deno.mkdir(`${this.projectDir}/orgchart`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/people`, { recursive: true });
 
     // Create project.md

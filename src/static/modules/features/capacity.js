@@ -1,4 +1,4 @@
-import { CapacityAPI, MilestonesAPI } from "../api.js";
+import { CapacityAPI, MilestonesAPI, PeopleAPI } from "../api.js";
 import { escapeHtml } from "../utils.js";
 
 /**
@@ -7,11 +7,20 @@ import { escapeHtml } from "../utils.js";
 export class CapacityModule {
   constructor(taskManager) {
     this.taskManager = taskManager;
+    this.peopleMap = new Map();
   }
 
   async load() {
     try {
-      this.taskManager.capacityPlans = await CapacityAPI.fetchAll();
+      const [plans, people] = await Promise.all([
+        CapacityAPI.fetchAll(),
+        PeopleAPI.fetchAll(),
+      ]);
+      this.taskManager.capacityPlans = plans;
+      this.peopleMap.clear();
+      for (const person of people) {
+        this.peopleMap.set(person.id, person);
+      }
       this.renderSelector();
       if (
         this.taskManager.capacityPlans.length > 0 &&
@@ -24,6 +33,30 @@ export class CapacityModule {
     } catch (error) {
       console.error("Error loading capacity plans:", error);
     }
+  }
+
+  getPersonName(personId) {
+    const person = this.peopleMap.get(personId);
+    return person?.name || personId;
+  }
+
+  getPersonRole(personId) {
+    const person = this.peopleMap.get(personId);
+    return person?.role || person?.title || "";
+  }
+
+  getMemberHoursPerDay(member) {
+    if (member.hoursPerDay) return member.hoursPerDay;
+    const person = this.peopleMap.get(member.personId);
+    return person?.hoursPerDay || 8;
+  }
+
+  getMemberWorkingDays(member) {
+    if (member.workingDays && member.workingDays.length > 0) {
+      return member.workingDays;
+    }
+    const person = this.peopleMap.get(member.personId);
+    return person?.workingDays || ["Mon", "Tue", "Wed", "Thu", "Fri"];
   }
 
   renderSelector() {
@@ -152,18 +185,22 @@ export class CapacityModule {
     }
 
     grid.innerHTML = plan.teamMembers
-      .map(
-        (member) => `
+      .map((member) => {
+        const name = this.getPersonName(member.personId);
+        const role = this.getPersonRole(member.personId);
+        const hoursPerDay = this.getMemberHoursPerDay(member);
+        const workingDays = this.getMemberWorkingDays(member);
+        return `
       <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
         <div class="flex justify-between items-start mb-2">
           <div>
             <h4 class="font-medium text-gray-900 dark:text-gray-100">${
-          escapeHtml(member.name)
+          escapeHtml(name)
         }</h4>
             ${
-          member.role
+          role
             ? `<p class="text-sm text-gray-500 dark:text-gray-400">${
-              escapeHtml(member.role)
+              escapeHtml(role)
             }</p>`
             : ""
         }
@@ -174,15 +211,15 @@ export class CapacityModule {
           </div>
         </div>
         <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-          <div>${member.hoursPerDay}h/day</div>
-          <div>${member.workingDays.join(", ")}</div>
+          <div>${hoursPerDay}h/day</div>
+          <div>${workingDays.join(", ")}</div>
           <div class="text-xs text-gray-500 dark:text-gray-500">${
-          member.hoursPerDay * member.workingDays.length
+          hoursPerDay * workingDays.length
         }h/week capacity</div>
         </div>
       </div>
-    `,
-      )
+    `;
+      })
       .join("");
   }
 
@@ -243,12 +280,15 @@ export class CapacityModule {
 
     body.innerHTML = plan.teamMembers
       .map((member) => {
-        const weeklyCapacity = member.hoursPerDay * member.workingDays.length;
+        const name = this.getPersonName(member.personId);
+        const hoursPerDay = this.getMemberHoursPerDay(member);
+        const workingDays = this.getMemberWorkingDays(member);
+        const weeklyCapacity = hoursPerDay * workingDays.length;
         return `
         <tr>
           <td class="px-4 py-3 whitespace-nowrap">
             <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${
-          escapeHtml(member.name)
+          escapeHtml(name)
         }</div>
             <div class="text-xs text-gray-500 dark:text-gray-400">${weeklyCapacity}h/week</div>
           </td>
@@ -385,34 +425,50 @@ export class CapacityModule {
     this.taskManager.editingTeamMemberId = editId;
     const modal = document.getElementById("teamMemberModal");
     const title = document.getElementById("teamMemberModalTitle");
-    const nameInput = document.getElementById("teamMemberName");
-    const roleInput = document.getElementById("teamMemberRole");
+    const personSelect = document.getElementById("teamMemberPersonId");
     const hoursInput = document.getElementById("teamMemberHours");
 
     const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     days.forEach((day) => {
-      document.getElementById(`work${day}`).checked = false;
+      const cb = document.getElementById(`work${day}`);
+      if (cb) cb.checked = false;
     });
 
+    // Populate person picker with people not already in this plan
+    const plan = this.taskManager.capacityPlans.find(
+      (p) => p.id === this.taskManager.selectedCapacityPlanId,
+    );
+    const existingPersonIds = new Set(
+      (plan?.teamMembers || []).map((m) => m.personId),
+    );
+
+    if (personSelect) {
+      personSelect.innerHTML = '<option value="">Select person...</option>';
+      for (const [personId, person] of this.peopleMap) {
+        if (!editId && existingPersonIds.has(personId)) continue;
+        const option = document.createElement("option");
+        option.value = personId;
+        const role = person.role || person.title || "";
+        option.textContent = role ? `${person.name} (${role})` : person.name;
+        personSelect.appendChild(option);
+      }
+    }
+
     if (editId) {
-      const plan = this.taskManager.capacityPlans.find(
-        (p) => p.id === this.taskManager.selectedCapacityPlanId,
-      );
       const member = plan?.teamMembers.find((m) => m.id === editId);
       if (member) {
         title.textContent = "Edit Team Member";
-        nameInput.value = member.name;
-        roleInput.value = member.role || "";
-        hoursInput.value = member.hoursPerDay;
-        member.workingDays.forEach((day) => {
+        if (personSelect) personSelect.value = member.personId;
+        const hoursPerDay = this.getMemberHoursPerDay(member);
+        const workingDays = this.getMemberWorkingDays(member);
+        hoursInput.value = hoursPerDay;
+        workingDays.forEach((day) => {
           const checkbox = document.getElementById(`work${day}`);
           if (checkbox) checkbox.checked = true;
         });
       }
     } else {
       title.textContent = "Add Team Member";
-      nameInput.value = "";
-      roleInput.value = "";
       hoursInput.value = 8;
       ["Mon", "Tue", "Wed", "Thu", "Fri"].forEach((day) => {
         document.getElementById(`work${day}`).checked = true;
@@ -431,10 +487,11 @@ export class CapacityModule {
 
   async saveTeamMember(e) {
     e.preventDefault();
-    const name = document.getElementById("teamMemberName").value;
-    const role = document.getElementById("teamMemberRole").value;
+    const personId = document.getElementById("teamMemberPersonId").value;
+    if (!personId) return;
+
     const hoursPerDay =
-      parseInt(document.getElementById("teamMemberHours").value) || 8;
+      parseInt(document.getElementById("teamMemberHours").value) || undefined;
 
     const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     const workingDays = days.filter(
@@ -442,10 +499,9 @@ export class CapacityModule {
     );
 
     const data = {
-      name,
-      role: role || undefined,
+      personId,
       hoursPerDay,
-      workingDays,
+      workingDays: workingDays.length > 0 ? workingDays : undefined,
     };
 
     try {
@@ -513,7 +569,8 @@ export class CapacityModule {
     const notesInput = document.getElementById("allocationNotes");
     const deleteBtn = document.getElementById("deleteAllocationBtn");
 
-    title.textContent = `Allocation: ${member?.name || "Member"} - ${
+    const memberName = member ? this.getPersonName(member.personId) : "Member";
+    title.textContent = `Allocation: ${memberName} - ${
       this.getWeekDates(weekStart)
     }`;
 
@@ -736,7 +793,7 @@ export class CapacityModule {
     }
   }
 
-  openImportAssigneesModal() {
+  openImportPeopleModal() {
     const plan = this.taskManager.capacityPlans.find(
       (p) => p.id === this.taskManager.selectedCapacityPlanId,
     );
@@ -746,33 +803,39 @@ export class CapacityModule {
     const list = document.getElementById("importAssigneesList");
     const empty = document.getElementById("importAssigneesEmpty");
 
-    // Get assignees from project config that aren't already team members
-    const assignees = this.taskManager.projectConfig?.assignees || [];
-    const existingNames = plan.teamMembers.map((m) => m.name.toLowerCase());
-    const availableAssignees = assignees.filter(
-      (name) => !existingNames.includes(name.toLowerCase()),
+    // Get people not already in this plan
+    const existingPersonIds = new Set(
+      plan.teamMembers.map((m) => m.personId),
+    );
+    const availablePeople = Array.from(this.peopleMap.values()).filter(
+      (p) => !existingPersonIds.has(p.id),
     );
 
-    if (availableAssignees.length === 0) {
+    if (availablePeople.length === 0) {
       empty?.classList.remove("hidden");
       list?.classList.add("hidden");
     } else {
       empty?.classList.add("hidden");
       list?.classList.remove("hidden");
-      list.innerHTML = availableAssignees
-        .map((name, i) => `
+      list.innerHTML = availablePeople
+        .map((person) => {
+          const role = person.role || person.title || "";
+          const hours = person.hoursPerDay || 8;
+          const days = person.workingDays?.join(", ") || "Mon-Fri";
+          return `
           <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
-            <input type="checkbox" checked data-name="${
-          escapeHtml(name)
-        }" class="import-assignee-checkbox rounded">
+            <input type="checkbox" checked data-person-id="${
+            escapeHtml(person.id)
+          }" class="import-assignee-checkbox rounded">
             <div class="flex-1">
               <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${
-          escapeHtml(name)
-        }</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">8h/day, Mon-Fri</div>
+            escapeHtml(person.name)
+          }${role ? ` (${escapeHtml(role)})` : ""}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">${hours}h/day, ${days}</div>
             </div>
           </label>
-        `)
+        `;
+        })
         .join("");
     }
 
@@ -780,40 +843,37 @@ export class CapacityModule {
     modal?.classList.add("flex");
   }
 
-  closeImportAssigneesModal() {
+  closeImportPeopleModal() {
     const modal = document.getElementById("importAssigneesModal");
     modal?.classList.add("hidden");
     modal?.classList.remove("flex");
   }
 
-  async applyImportAssignees() {
+  async applyImportPeople() {
     const checkboxes = document.querySelectorAll(
       ".import-assignee-checkbox:checked",
     );
-    const selectedNames = Array.from(checkboxes).map((cb) => cb.dataset.name);
+    const selectedIds = Array.from(checkboxes).map(
+      (cb) => cb.dataset.personId,
+    );
 
-    if (selectedNames.length === 0) {
-      this.closeImportAssigneesModal();
+    if (selectedIds.length === 0) {
+      this.closeImportPeopleModal();
       return;
     }
 
     try {
-      // Create team members with default settings
-      for (const name of selectedNames) {
+      for (const personId of selectedIds) {
         await CapacityAPI.createMember(
           this.taskManager.selectedCapacityPlanId,
-          {
-            name,
-            hoursPerDay: 8,
-            workingDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-          },
+          { personId },
         );
       }
-      this.closeImportAssigneesModal();
+      this.closeImportPeopleModal();
       await this.load();
       this.renderTeamMembers();
     } catch (error) {
-      console.error("Error importing assignees:", error);
+      console.error("Error importing people:", error);
     }
   }
 
@@ -872,16 +932,16 @@ export class CapacityModule {
         async (e) => await this.updateTargetOptions(e.target.value),
       );
 
-    // Import assignees modal events
+    // Import people modal events
     document
       .getElementById("importAssigneesBtn")
-      ?.addEventListener("click", () => this.openImportAssigneesModal());
+      ?.addEventListener("click", () => this.openImportPeopleModal());
     document
       .getElementById("cancelImportAssigneesBtn")
-      ?.addEventListener("click", () => this.closeImportAssigneesModal());
+      ?.addEventListener("click", () => this.closeImportPeopleModal());
     document
       .getElementById("applyImportAssigneesBtn")
-      ?.addEventListener("click", () => this.applyImportAssignees());
+      ?.addEventListener("click", () => this.applyImportPeople());
 
     // Tab switching
     document
@@ -942,7 +1002,7 @@ export class CapacityModule {
       "click",
       (e) => {
         if (e.target.id === "importAssigneesModal") {
-          this.closeImportAssigneesModal();
+          this.closeImportPeopleModal();
         }
       },
     );

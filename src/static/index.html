@@ -1647,31 +1647,16 @@
               </div>
             </div>
 
-            <!-- Assignees Management -->
+            <!-- Team Members (managed via People view) -->
             <div>
               <h3
-                class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4"
+                class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2"
               >
                 Team Members
               </h3>
-              <div id="assigneesContainer" class="flex flex-wrap gap-2 mb-4">
-                <!-- Assignees will be populated here -->
-              </div>
-              <div class="flex gap-2">
-                <input
-                  type="text"
-                  id="newAssigneeInput"
-                  placeholder="New assignee name"
-                  class="flex-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                >
-                <button
-                  type="button"
-                  id="addAssigneeBtn"
-                  class="px-3 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                >
-                  Add
-                </button>
-              </div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Team members are managed in the People view. The count shown above reflects the people directory.
+              </p>
             </div>
 
             <!-- Tags Management -->
@@ -4437,30 +4422,19 @@
               <div>
                 <label
                   class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                >Name</label>
-                <input
-                  type="text"
-                  id="teamMemberName"
+                >Person</label>
+                <select
+                  id="teamMemberPersonId"
                   required
                   class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                  placeholder="e.g., Alice"
                 >
+                  <option value="">Select person...</option>
+                </select>
               </div>
               <div>
                 <label
                   class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                >Role (optional)</label>
-                <input
-                  type="text"
-                  id="teamMemberRole"
-                  class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                  placeholder="e.g., Developer"
-                >
-              </div>
-              <div>
-                <label
-                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                >Hours Per Day</label>
+                >Hours Per Day (override)</label>
                 <input
                   type="number"
                   id="teamMemberHours"
@@ -4685,7 +4659,7 @@
         </div>
       </div>
 
-      <!-- Import Assignees Modal -->
+      <!-- Import People Modal -->
       <div
         id="importAssigneesModal"
         class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50"
@@ -4695,10 +4669,10 @@
         >
           <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-              Import from Assignees
+              Import from People
             </h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Add team members from your project configuration
+              Add team members from the people directory
             </p>
           </div>
           <div class="p-6">
@@ -4706,8 +4680,7 @@
               id="importAssigneesEmpty"
               class="text-center py-8 text-gray-500 dark:text-gray-400 hidden"
             >
-              All assignees are already team members, or no assignees
-              configured.
+              All people are already team members, or no people configured.
             </div>
             <div
               id="importAssigneesList"
@@ -4926,7 +4899,7 @@
                     id="importAssigneesBtn"
                     class="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300"
                   >
-                    Import from Config
+                    Import from People
                   </button>
                   <button
                     id="addTeamMemberBtn"
@@ -9037,12 +9010,12 @@
                     placeholder="Hours"
                     class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded px-2 py-1 text-sm"
                   >
-                  <input
-                    type="text"
+                  <select
                     id="timeEntryPerson"
-                    placeholder="Person"
                     class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded px-2 py-1 text-sm"
                   >
+                    <option value="">-- Person --</option>
+                  </select>
                   <input
                     type="text"
                     id="timeEntryDescription"

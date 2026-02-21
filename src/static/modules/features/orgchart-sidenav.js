@@ -65,7 +65,8 @@ export class OrgChartSidenavModule extends BaseSidenavModule {
       .forEach((m) => {
         const option = document.createElement("option");
         option.value = m.id;
-        option.textContent = `${m.name} (${m.title})`;
+        const label = m.title || m.role || "";
+        option.textContent = label ? `${m.name} (${label})` : m.name;
         select.appendChild(option);
       });
   }

@@ -1,5 +1,5 @@
 // Portfolio View Module - Cross-project dashboard
-import { PortfolioAPI } from "../api.js";
+import { PeopleAPI, PortfolioAPI } from "../api.js";
 import { PROJECT_STATUS_CLASSES, PROJECT_STATUS_LABELS } from "../constants.js";
 
 /**
@@ -12,6 +12,7 @@ export class PortfolioView {
     this.tm = taskManager;
     this.projects = [];
     this.summary = null;
+    this.peopleMap = new Map();
     this.currentFilter = "all";
     this.currentViewMode = "list"; // 'list' or 'tree'
     this.selectedProject = null;
@@ -19,17 +20,27 @@ export class PortfolioView {
     this.isCreating = false;
   }
 
+  getPersonName(personId) {
+    const person = this.peopleMap.get(personId);
+    return person?.name || personId;
+  }
+
   /**
    * Load projects and summary data from API.
    */
   async load() {
     try {
-      const [items, summary] = await Promise.all([
+      const [items, summary, people] = await Promise.all([
         PortfolioAPI.fetchAll(),
         PortfolioAPI.getSummary(),
+        PeopleAPI.fetchAll(),
       ]);
       this.projects = items;
       this.summary = summary;
+      this.peopleMap.clear();
+      for (const person of people) {
+        this.peopleMap.set(person.id, person);
+      }
       this.render();
     } catch (error) {
       console.error("Error loading portfolio data:", error);
@@ -442,6 +453,28 @@ export class PortfolioView {
   }
 
   /**
+   * Render person picker checkboxes for team selection.
+   */
+  renderTeamPicker(selectedIds) {
+    const selected = new Set(selectedIds || []);
+    const people = Array.from(this.peopleMap.values());
+    if (people.length === 0) {
+      return '<p class="text-xs text-gray-500 dark:text-gray-400">No people configured. Add people in the People view first.</p>';
+    }
+    return people.map((person) => {
+      const role = person.role || person.title || "";
+      const label = role ? `${this.escapeHtml(person.name)} (${this.escapeHtml(role)})` : this.escapeHtml(person.name);
+      const checked = selected.has(person.id) ? "checked" : "";
+      return `
+        <label class="flex items-center gap-2 p-1 hover:bg-gray-50 dark:hover:bg-gray-600 rounded cursor-pointer">
+          <input type="checkbox" class="portfolio-team-cb rounded" value="${this.escapeHtml(person.id)}" ${checked}>
+          <span class="text-sm text-gray-700 dark:text-gray-300">${label}</span>
+        </label>
+      `;
+    }).join("");
+  }
+
+  /**
    * Open detail panel for a new project.
    */
   openNewDetailPanel() {
@@ -547,11 +580,11 @@ export class PortfolioView {
     `).join("")
       : '<p class="text-sm text-gray-500 dark:text-gray-400">No KPIs defined</p>';
 
-    // Team members
+    // Team members (person IDs resolved to names)
     const team = project.team || [];
-    const teamHtml = team.map((member) =>
+    const teamHtml = team.map((personId) =>
       `<span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-sm rounded">${
-        this.escapeHtml(member)
+        this.escapeHtml(this.getPersonName(personId))
       }</span>`
     ).join(" ");
 
@@ -653,17 +686,16 @@ export class PortfolioView {
         <!-- Team -->
         <section class="sidenav-section">
           <h3 class="sidenav-section-title">Team</h3>
-          <div>
-            <label class="form-label">Team Members (comma-separated)</label>
-            <input type="text" id="portfolioDetailTeam" class="form-input" value="${
-      team.join(", ")
-    }" placeholder="John, Jane, Bob">
-          </div>
-          ${
+          <div class="space-y-2">
+            ${
       team.length > 0
-        ? `<div class="flex flex-wrap gap-2 mt-2">${teamHtml}</div>`
+        ? `<div class="flex flex-wrap gap-2">${teamHtml}</div>`
         : ""
     }
+            <div class="space-y-1 max-h-40 overflow-y-auto" id="portfolioTeamPicker">
+              ${this.renderTeamPicker(team)}
+            </div>
+          </div>
         </section>
 
         <!-- KPIs -->
@@ -747,12 +779,10 @@ export class PortfolioView {
       }
     });
 
-    // Collect team members
-    const teamInput = document.getElementById("portfolioDetailTeam")?.value ||
-      "";
-    const team = teamInput.split(",").map((t) => t.trim()).filter((t) =>
-      t.length > 0
-    );
+    // Collect team members (person IDs from checkboxes)
+    const team = Array.from(
+      document.querySelectorAll(".portfolio-team-cb:checked"),
+    ).map((cb) => cb.value);
 
     const updates = {
       name: document.getElementById("portfolioDetailName")?.value?.trim() ||

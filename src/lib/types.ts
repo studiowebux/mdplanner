@@ -260,12 +260,11 @@ export interface Brief {
   guidingPrinciples: string[];
 }
 
-export interface TeamMember {
+export interface TeamMemberRef {
   id: string;
-  name: string;
-  role?: string;
-  hoursPerDay: number;
-  workingDays: string[];
+  personId: string;
+  hoursPerDay?: number;
+  workingDays?: string[];
 }
 
 export interface WeeklyAllocation {
@@ -283,7 +282,7 @@ export interface CapacityPlan {
   title: string;
   date: string;
   budgetHours?: number;
-  teamMembers: TeamMember[];
+  teamMembers: TeamMemberRef[];
   allocations: WeeklyAllocation[];
 }
 
