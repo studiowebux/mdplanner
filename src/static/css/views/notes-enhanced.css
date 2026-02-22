@@ -430,6 +430,16 @@
   min-width: 0;
 }
 
+/* Enhanced note custom section tab nav: scroll horizontally instead of overflowing */
+.note-tab-nav {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.note-tab-nav::-webkit-scrollbar {
+  display: none;
+}
+
 @media (max-width: 640px) {
   .split-view-column {
     flex: none;
