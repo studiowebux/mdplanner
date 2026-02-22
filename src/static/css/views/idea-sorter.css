@@ -169,19 +169,6 @@
   gap: 0.2rem;
 }
 
-.idea-sorter-expand {
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--color-text-secondary);
-  font-size: 0.75rem;
-}
-
-.idea-sorter-expand:hover {
-  color: var(--color-text-primary);
-}
-
 /* Edit button inside table — use ghost style to avoid dark bg conflict */
 .idea-sorter-td .btn-secondary {
   font-size: 0.75rem;

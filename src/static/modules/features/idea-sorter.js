@@ -14,7 +14,6 @@ export class IdeaSorterModule {
     this.filterCategory = "";
     this.filterPriority = "";
     this.filterStatus = "";
-    this.expandedRows = new Set();
   }
 
   async load() {
@@ -143,10 +142,6 @@ export class IdeaSorterModule {
         e.stopPropagation();
         this.tm.ideaSidenavModule.openEdit(id);
       });
-      row.querySelector(".idea-sorter-expand")?.addEventListener("click", (e) => {
-        e.stopPropagation();
-        this.toggleExpand(id);
-      });
     });
   }
 
@@ -154,7 +149,6 @@ export class IdeaSorterModule {
     const priority = idea.priority || "";
     const priorityClass = priority ? `idea-priority-${priority}` : "idea-priority-none";
     const subtasks = idea.subtasks || [];
-    const expanded = this.expandedRows.has(idea.id);
 
     const dash = '<span style="color:var(--color-text-muted)">—</span>';
     return `
@@ -172,10 +166,7 @@ export class IdeaSorterModule {
         <td class="idea-sorter-td">${idea.resources ? escapeHtml(idea.resources) : dash}</td>
         <td class="idea-sorter-td">
           ${subtasks.length > 0
-            ? `<button class="idea-sorter-expand">
-                ${subtasks.length} task${subtasks.length > 1 ? "s" : ""} ${expanded ? "▲" : "▼"}
-               </button>
-               ${expanded ? `<ul class="idea-subtask-list">${subtasks.map((t) => `<li>${escapeHtml(t)}</li>`).join("")}</ul>` : ""}`
+            ? `<ul class="idea-subtask-list">${subtasks.map((t) => `<li>${escapeHtml(t)}</li>`).join("")}</ul>`
             : dash}
         </td>
         <td class="idea-sorter-td">
@@ -183,15 +174,6 @@ export class IdeaSorterModule {
         </td>
       </tr>
     `;
-  }
-
-  toggleExpand(id) {
-    if (this.expandedRows.has(id)) {
-      this.expandedRows.delete(id);
-    } else {
-      this.expandedRows.add(id);
-    }
-    this.renderView();
   }
 
   updateSortHeaders() {
