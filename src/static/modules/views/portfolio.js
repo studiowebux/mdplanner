@@ -332,8 +332,8 @@ export class PortfolioView {
       <div class="${containerClass}" data-portfolio-id="${project.id}">
         <div class="flex items-center justify-between gap-4">
           <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2">
-              <span class="font-medium text-primary truncate">${
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="portfolio-row-name font-medium text-primary truncate">${
       this.escapeHtml(project.name)
     }</span>
               ${
@@ -358,7 +358,7 @@ export class PortfolioView {
     }
           </div>
           <div class="flex items-center gap-4 flex-shrink-0">
-            <div class="text-right w-20">
+            <div class="portfolio-row-progress text-right w-20">
               <div class="text-sm text-primary">${progressPercent}%</div>
               <div class="w-full bg-active rounded-full h-1.5 mt-1">
                 <div class="bg-success h-1.5 rounded-full" style="width: ${progressPercent}%"></div>
@@ -367,7 +367,7 @@ export class PortfolioView {
             ${
       hasFinancials
         ? `
-              <div class="text-right w-24">
+              <div class="portfolio-row-financials text-right w-24">
                 <div class="text-xs text-muted">${
           this.formatCurrency(revenue)
         }</div>

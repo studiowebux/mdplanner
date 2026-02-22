@@ -1004,7 +1004,7 @@ export class EnhancedNotesModule {
     }
 
     let tabNavHtml =
-      '<div class="border-b border-default mb-4"><nav class="flex space-x-8">';
+      '<div class="border-b border-default mb-4"><nav class="flex space-x-8 note-tab-nav">';
     tabs.forEach((tab) => {
       const isActive = tab.id === activeTabId;
       tabNavHtml += `
@@ -1894,7 +1894,7 @@ export class EnhancedNotesModule {
       if (tabs.length > 0) {
         // Tab navigation
         sectionHtml +=
-          '<div class="border-b border-default mb-4"><nav class="flex space-x-8">';
+          '<div class="border-b border-default mb-4"><nav class="flex space-x-8 note-tab-nav">';
         tabs.forEach((tab, index) => {
           const isActive = index === 0;
           sectionHtml += `

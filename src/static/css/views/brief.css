@@ -1,0 +1,21 @@
+/* Brief View */
+
+/* RACI grid: 4 columns on desktop, 2 on tablet, 1 on mobile */
+@media (max-width: 48rem) {
+  .brief-raci-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 30rem) {
+  .brief-raci-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Budget/Timeline and Culture/Change Capacity: 2 columns → 1 on mobile */
+@media (max-width: 36rem) {
+  .brief-two-col-grid {
+    grid-template-columns: 1fr;
+  }
+}

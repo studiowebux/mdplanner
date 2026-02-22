@@ -425,6 +425,26 @@
    Responsive
    -------------------------------------------------------------------------- */
 
+/* Tab nav: allow overflow-x: auto to work inside a flex parent */
+#notesTabNav {
+  min-width: 0;
+}
+
+/* Note title input: allow it to shrink below its intrinsic width in the flex row */
+.note-title-row input {
+  min-width: 0;
+}
+
+/* Enhanced note custom section tab nav: scroll horizontally instead of overflowing */
+.note-tab-nav {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.note-tab-nav::-webkit-scrollbar {
+  display: none;
+}
+
 @media (max-width: 640px) {
   .split-view-column {
     flex: none;
@@ -433,8 +453,13 @@
     min-height: 150px;
   }
 
+  /* On mobile, take controls out of absolute positioning so they
+     flow inside the card and can wrap instead of overflowing it */
   .paragraph-controls {
     display: flex;
+    position: static;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
   }
 
   .paragraph-handle {
@@ -444,5 +469,17 @@
   .language-selector {
     right: 8px;
     top: 4px;
+  }
+
+  /* Note title + action buttons row: wrap on small screens */
+  .note-title-row {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  /* Enhanced editor toolbar: wrap add-block buttons on small screens */
+  .note-enhanced-toolbar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 }

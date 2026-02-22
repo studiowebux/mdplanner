@@ -1869,7 +1869,7 @@
       <div id="notesView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow">
           <div
-            class="px-6 py-4 border-b border-default flex justify-between items-center"
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
           >
             <h2 class="text-lg font-medium text-primary">
               Notes
@@ -1945,7 +1945,7 @@
                 </p>
               </div>
               <div id="activeNoteContent" class="hidden">
-                <div class="flex justify-between items-start mb-4">
+                <div class="flex justify-between items-start mb-4 note-title-row">
                   <input
                     id="activeNoteTitle"
                     class="text-xl font-semibold text-primary bg-transparent border-none outline-none flex-1"
@@ -2054,7 +2054,7 @@
                 <!-- Enhanced Editor Mode -->
                 <div id="enhancedNoteEditor" class="hidden">
                   <div
-                    class="flex justify-between items-center mb-4 p-3 bg-secondary rounded-lg"
+                    class="flex justify-between items-center mb-4 p-3 bg-secondary rounded-lg note-enhanced-toolbar"
                   >
                     <div class="flex space-x-2">
                       <button
@@ -2129,7 +2129,7 @@
       <div id="goalsView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow">
           <div
-            class="px-6 py-4 border-b border-default flex justify-between items-center"
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
           >
             <h2 class="text-lg font-medium text-primary">
               Goals
@@ -2197,7 +2197,7 @@
       <div id="milestonesView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow">
           <div
-            class="px-6 py-4 border-b border-default flex justify-between items-center"
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
           >
             <h2 class="text-lg font-medium text-primary">
               Milestones
@@ -2243,7 +2243,7 @@
       <div id="ideasView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow">
           <div
-            class="px-6 py-4 border-b border-default flex justify-between items-center"
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
           >
             <h2 class="text-lg font-medium text-primary">
               Ideas
@@ -2289,7 +2289,7 @@
       <div id="retrospectivesView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow">
           <div
-            class="px-6 py-4 border-b border-default flex justify-between items-center"
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
           >
             <h2 class="text-lg font-medium text-primary">
               Retrospectives
@@ -2338,7 +2338,7 @@
       <div id="moscowView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow">
           <div
-            class="px-6 py-4 border-b border-default flex justify-between items-center"
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
           >
             <div class="flex items-center gap-4">
               <h2 class="text-lg font-medium text-primary">
@@ -2466,7 +2466,7 @@
       <div id="eisenhowerView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow">
           <div
-            class="px-6 py-4 border-b border-default flex justify-between items-center"
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
           >
             <div class="flex items-center gap-4">
               <h2 class="text-lg font-medium text-primary">
@@ -2605,7 +2605,7 @@
       <!-- Idea Sorter View -->
       <div id="ideaSorterView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow">
-          <div class="px-6 py-4 border-b border-default flex justify-between items-center">
+          <div class="px-6 py-4 border-b border-default flex justify-between items-center view-header">
             <h2 class="text-lg font-medium text-primary">Idea Sorter</h2>
             <button id="addIdeaSorterBtn" class="btn-primary py-2 rounded-lg">+ New Idea</button>
           </div>
@@ -2691,7 +2691,7 @@
 
           <!-- SAFE Rounds tab -->
           <div id="fundraising-panel-safe" class="fundraising-tab-panel">
-            <div class="px-6 py-4 border-b border-default flex justify-between items-center">
+            <div class="px-6 py-4 border-b border-default flex justify-between items-center view-header">
               <h2 class="text-lg font-medium text-primary">Fundraising</h2>
               <div class="flex items-center gap-2">
                 <button class="fundraising-info-btn" data-action="fundraising-info" aria-label="Glossary">?</button>
@@ -2730,7 +2730,7 @@
 
           <!-- Pipeline tab -->
           <div id="fundraising-panel-pipeline" class="fundraising-tab-panel hidden">
-            <div class="px-6 py-4 border-b border-default flex justify-between items-center">
+            <div class="px-6 py-4 border-b border-default flex justify-between items-center view-header">
               <h2 class="text-lg font-medium text-primary">Fundraising</h2>
               <div class="flex items-center gap-2">
                 <button class="fundraising-info-btn" data-action="fundraising-info" aria-label="Glossary">?</button>
@@ -2774,7 +2774,7 @@
 
           <!-- KPI Tracker tab -->
           <div id="fundraising-panel-kpi" class="fundraising-tab-panel hidden">
-            <div class="px-6 py-4 border-b border-default flex justify-between items-center">
+            <div class="px-6 py-4 border-b border-default flex justify-between items-center view-header">
               <h2 class="text-lg font-medium text-primary">Fundraising</h2>
               <div class="flex items-center gap-2">
                 <button class="fundraising-info-btn" data-action="fundraising-info" aria-label="Glossary">?</button>
@@ -2807,7 +2807,7 @@
 
           <!-- Runway tab -->
           <div id="fundraising-panel-runway" class="fundraising-tab-panel hidden">
-            <div class="px-6 py-4 border-b border-default flex justify-between items-center">
+            <div class="px-6 py-4 border-b border-default flex justify-between items-center view-header">
               <h2 class="text-lg font-medium text-primary">Fundraising</h2>
               <button class="fundraising-info-btn" data-action="fundraising-info" aria-label="Glossary">?</button>
             </div>
@@ -2847,7 +2847,7 @@
 
           <!-- Targets tab -->
           <div id="fundraising-panel-targets" class="fundraising-tab-panel hidden">
-            <div class="px-6 py-4 border-b border-default flex justify-between items-center">
+            <div class="px-6 py-4 border-b border-default flex justify-between items-center view-header">
               <h2 class="text-lg font-medium text-primary">Fundraising</h2>
               <button class="fundraising-info-btn" data-action="fundraising-info" aria-label="Glossary">?</button>
             </div>
@@ -2883,7 +2883,7 @@
       <div id="swotView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow">
           <div
-            class="px-6 py-4 border-b border-default flex justify-between items-center"
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
           >
             <div class="flex items-center gap-4">
               <h2 class="text-lg font-medium text-primary">
@@ -3141,7 +3141,7 @@
       <div id="riskAnalysisView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow">
           <div
-            class="px-6 py-4 border-b border-default flex justify-between items-center"
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
           >
             <div class="flex items-center gap-4">
               <h2 class="text-lg font-medium text-primary">
@@ -3419,7 +3419,7 @@
       <div id="leanCanvasView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow">
           <div
-            class="px-6 py-4 border-b border-default flex justify-between items-center"
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
           >
             <div class="flex items-center gap-4">
               <h2 class="text-lg font-medium text-primary">
@@ -3865,7 +3865,7 @@
       <div id="businessModelView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow">
           <div
-            class="px-6 py-4 border-b border-default flex justify-between items-center"
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
           >
             <div class="flex items-center gap-4">
               <h2 class="text-lg font-medium text-primary">
@@ -4252,7 +4252,7 @@
       <div id="projectValueView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow">
           <div
-            class="px-6 py-4 border-b border-default flex justify-between items-center"
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
           >
             <div class="flex items-center gap-4">
               <h2 class="text-lg font-medium text-primary">
@@ -4518,7 +4518,7 @@
       <div id="briefView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow">
           <div
-            class="px-6 py-4 border-b border-default flex justify-between items-center"
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
           >
             <div class="flex items-center gap-4">
               <h2 class="text-lg font-medium text-primary">
@@ -4623,7 +4623,7 @@
               </div>
 
               <!-- Row 3: RACI -->
-              <div class="grid grid-cols-4 gap-4">
+              <div class="brief-raci-grid grid grid-cols-4 gap-4">
                 <div
                   class="bg-secondary/50 rounded-lg p-4 border border-default min-h-[140px]"
                 >
@@ -4715,7 +4715,7 @@
               </div>
 
               <!-- Row 4: Budget & Timeline -->
-              <div class="grid grid-cols-2 gap-4">
+              <div class="brief-two-col-grid grid grid-cols-2 gap-4">
                 <div
                   class="bg-secondary/50 rounded-lg p-4 border border-default min-h-[140px]"
                 >
@@ -4763,7 +4763,7 @@
               </div>
 
               <!-- Row 5: Culture & Change Capacity -->
-              <div class="grid grid-cols-2 gap-4">
+              <div class="brief-two-col-grid grid grid-cols-2 gap-4">
                 <div
                   class="bg-secondary/50 rounded-lg p-4 border border-default min-h-[140px]"
                 >
@@ -5325,7 +5325,7 @@
       <div id="timeTrackingView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow mb-6">
           <div
-            class="px-6 py-4 border-b border-default flex justify-between items-center"
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
           >
             <h2 class="text-lg font-medium text-primary">
               Time Tracking
@@ -5408,7 +5408,7 @@
       <div id="capacityView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow">
           <div
-            class="px-6 py-4 border-b border-default flex justify-between items-center"
+            class="px-6 py-4 border-b border-default flex justify-between items-center capacity-header view-header"
           >
             <div class="flex items-center gap-4">
               <h2 class="text-lg font-medium text-primary">
@@ -5445,7 +5445,7 @@
 
           <!-- Tabs -->
           <div class="border-b border-default">
-            <nav class="flex px-6" aria-label="Tabs">
+            <nav class="flex px-6 capacity-tabs" aria-label="Tabs">
               <button
                 id="capacityTeamTab"
                 class="py-3 px-4 text-sm font-medium border-b-2 border-strong text-primary"
@@ -5494,7 +5494,7 @@
 
             <!-- Team Members Tab Content -->
             <div id="capacityTeamContent" class="hidden">
-              <div class="flex justify-between items-center mb-4">
+              <div class="flex justify-between items-center mb-4 capacity-section-header">
                 <div>
                   <h3
                     class="text-sm font-medium text-secondary"
@@ -5530,7 +5530,7 @@
 
             <!-- Allocations Tab Content -->
             <div id="capacityAllocContent" class="hidden">
-              <div class="flex justify-between items-center mb-4">
+              <div class="flex justify-between items-center mb-4 capacity-section-header">
                 <div>
                   <div class="flex items-center gap-4">
                     <h3
@@ -5639,9 +5639,13 @@
 
       <!-- Strategic Levels View -->
       <div id="strategicLevelsView" class="hidden pb-16">
+        <div class="mobile-notice">
+          <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          <span>Strategic Levels requires a larger screen.</span>
+        </div>
         <div class="bg-primary rounded-lg shadow">
           <div
-            class="px-6 py-4 border-b border-default flex justify-between items-center"
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
           >
             <div class="flex items-center gap-4">
               <h2 class="text-lg font-medium text-primary">
@@ -6202,6 +6206,10 @@
 
       <!-- Org Chart View -->
       <div id="orgchartView" class="hidden pb-16">
+        <div class="mobile-notice">
+          <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          <span>Org Chart requires a larger screen.</span>
+        </div>
         <div class="bg-primary rounded-lg shadow">
           <div class="px-6 py-4 border-b border-default">
             <div class="flex justify-between items-center mb-4">
@@ -7861,7 +7869,7 @@
         </div>
         <div class="bg-primary rounded-lg shadow">
           <div
-            class="px-6 py-4 border-b border-default flex justify-between items-center"
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
           >
             <h2 class="text-lg font-medium text-primary">
               Canvas
@@ -7923,7 +7931,7 @@
         </div>
         <div class="bg-primary rounded-lg shadow">
           <div
-            class="px-6 py-4 border-b border-default flex justify-between items-center"
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
           >
             <h2 class="text-lg font-medium text-primary">
               Mindmap
@@ -8037,9 +8045,13 @@
 
       <!-- C4 Architecture View -->
       <div id="c4View" class="hidden pb-16">
+        <div class="mobile-notice">
+          <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          <span>C4 Architecture requires a larger screen.</span>
+        </div>
         <div class="bg-primary rounded-lg shadow">
           <div
-            class="px-6 py-4 border-b border-default flex justify-between items-center"
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
           >
             <div class="flex items-center space-x-4">
               <h2 class="text-lg font-medium text-primary">

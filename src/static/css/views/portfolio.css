@@ -1,0 +1,14 @@
+/* Portfolio View */
+
+/* Ensure the name span can shrink inside its flex container */
+.portfolio-row-name {
+  min-width: 0;
+}
+
+/* On mobile, hide progress and financials columns so the project name has room */
+@media (max-width: 36rem) {
+  .portfolio-row-progress,
+  .portfolio-row-financials {
+    display: none;
+  }
+}
