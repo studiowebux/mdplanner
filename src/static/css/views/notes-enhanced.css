@@ -430,6 +430,11 @@
   min-width: 0;
 }
 
+/* Note title input: allow it to shrink below its intrinsic width in the flex row */
+.note-title-row input {
+  min-width: 0;
+}
+
 /* Enhanced note custom section tab nav: scroll horizontally instead of overflowing */
 .note-tab-nav {
   overflow-x: auto;
