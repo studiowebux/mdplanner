@@ -1,971 +1,499 @@
 ---
 title: MD Planner User Guide
-description: Comprehensive guide for using MD Planner, a markdown-based project management tool with multi-project support, kanban boards, timelines, and strategic planning features.
-tags:
-  - project-management
-  - markdown
-  - task-tracking
-  - planning
-  - kanban
+description: Reference guide for MD Planner — markdown-based project management with directory storage.
 ---
 
 # MD Planner User Guide
 
-MD Planner is a markdown-based project management tool that stores all data in
-human-readable files. No database required.
+MD Planner stores all project data as markdown files in a directory. No external
+database required. Human-readable, git-trackable, portable.
 
 ## Core Concepts
 
-### Markdown Storage
+### Directory Storage
 
-All project data lives in a single markdown file. Tasks, notes, goals, and
-configurations are stored as structured markdown sections. Files are
-version-controllable, searchable, and portable.
+Each project is a directory. Each entity (task, note, goal, etc.) is one `.md`
+file with YAML frontmatter. The directory structure mirrors the entity type:
 
-### Multi-Project Management
+```
+my-project/
+  project.md          # Project config (required)
+  board/
+    todo/
+      task_auth.md
+    in_progress/
+      task_search.md
+    done/
+      task_cicd.md
+  notes/
+    note_architecture.md
+  goals/
+    mvp-launch.md
+  ideas/
+    idea_templates.md
+  milestones/
+    milestone_beta.md
+  people/
+    alice.md
+  moscow/
+    sprint1.md
+  eisenhower/
+    q1.md
+  portfolio/
+    project_alpha.md
+  ...
+```
 
-Load multiple markdown files as separate projects. Switch between projects via
-dropdown in the header. Each project maintains independent tasks, goals, and
-configurations.
+### project.md
 
-### Data Safety
+Every project directory must contain `project.md`. This file provides metadata
+and controls which views are enabled.
 
-**Automatic backups**: Timestamped backups created before each save operation.
+```yaml
+---
+start_date: 2026-01-01
+working_days_per_week: 5
+working_days: [Mon, Tue, Wed, Thu, Fri]
+assignees: [alice, bob, charlie]
+tags: [feature, bug, docs]
+status: active
+features:
+  - tasks
+  - notes
+  - goals
+  - ideas
+  - milestones
+  - retrospectives
+  - canvas
+  - mindmap
+  - c4
+  - swot
+  - risk
+  - leancanvas
+  - businessmodel
+  - projectvalue
+  - brief
+  - strategiclevels
+  - capacity
+  - billing
+  - crm
+  - timetracking
+  - portfolio
+  - orgchart
+  - people
+  - moscow
+  - eisenhower
+  - ideas-sorter
+links:
+  - title: Repository
+    url: "https://github.com/org/repo"
+---
 
-**Atomic writes**: Temp file + rename pattern prevents corruption during writes.
+# Project Name
 
-**Write locking**: Prevents race conditions when multiple operations modify the
-file.
+Project description.
+```
 
-**Hash-based deduplication**: Identical backups are not stored twice.
+Omit a feature from the `features` array to hide it from the navigation.
 
-**Configurable retention**: Control backup count via `MD_PLANNER_MAX_BACKUPS`
-environment variable (default: 10).
+## Getting Started
+
+### Initialize a project
+
+```bash
+mdplanner init ./my-project
+mdplanner ./my-project
+```
+
+`init` creates `project.md` and all standard subdirectories. Open
+`http://localhost:8003`.
+
+### Docker
+
+```bash
+mkdir -p data
+docker run --rm -v "$(pwd)/data:/data" $(docker build -q .) init /data
+docker compose up -d
+```
+
+See `deploy/README.md` for full Docker and systemd instructions.
 
 ## Views
 
-### Summary
+### Tasks (Board)
 
-Project overview dashboard displaying:
+Kanban board. Tasks live in `board/{status}/task_name.md`.
 
-- Project metadata (status, start date, last updated)
-- Task statistics (total, completed, pending, late)
-- Due date breakdown (today, late, upcoming)
-- Section progress visualization
-- Recent activity
+```yaml
+---
+id: task_auth
+completed: false
+tag: [feature, security]
+due_date: 2026-03-01
+assignee: alice
+priority: 1
+effort: 5
+milestone: milestone_beta
+blocked_by: [task_database]
+planned_start: 2026-02-20
+planned_end: 2026-02-25
+order: 0
+---
 
-**Access**: Click "Summary" in navigation bar.
+# Implement Authentication
 
-### List
+JWT-based auth with refresh tokens.
+```
 
-Filterable task list with drag-and-drop reordering.
+Directory structure determines status column:
 
-**Features**:
-
-- Filter by section, assignee, tag, priority, milestone
-- Search by title or description
-- Drag tasks to reorder within sections
-- Inline task editing
-- Bulk operations
-
-**Access**: Click "List" in navigation bar.
-
-### Board
-
-Kanban-style board with customizable sections.
-
-**Default sections**: Ideas, Todo, In Progress, Done
-
-**Features**:
-
-- Drag tasks between sections
-- Visual priority badges (1-5)
-- Color-coded assignee labels
-- Due date indicators
-- Dependency warnings
-- Quick task creation per section
-
-**Board Templates**:
-
-- **SWOT Analysis**: 2x2 grid (Strengths, Weaknesses, Opportunities, Threats)
-- **Risk Analysis**: 2x2 impact/probability matrix
-- **Lean Canvas**: 12-section startup planning board
-- **Business Model Canvas**: 9-section business model
-- **Project Value Board**: Customer Segments, Problem, Solution, Benefit
-- **Brief**: 11-section RACI-based project brief
-
-**Access**: Click "Board" in navigation bar.
-
-### Timeline
-
-Gantt-style schedule visualization.
-
-**Calculation based on**:
-
-- Task effort estimates (days)
-- Dependencies (blocked_by relationships)
-- Project start date
-- Working days configuration
-
-**Features**:
-
-- Automatic scheduling with dependency resolution
-- Due date verification
-- Critical path highlighting
-- Timeline zoom controls
-
-**Access**: Click "Timeline" in navigation bar.
+```
+board/
+  todo/
+  in_progress/
+  done/
+  backlog/       # custom sections work too
+```
 
 ### Notes
 
-Tabbed note interface with simple and enhanced modes.
+Tabbed markdown editor. Each note is `notes/note_name.md`.
 
-**Modes**:
+```yaml
+---
+id: note_architecture
+created: "2026-01-05T10:00:00Z"
+updated: "2026-02-16T02:39:51.384Z"
+revision: 7
+mode: simple    # or: enhanced
+---
 
-- **Simple**: Basic tabbed editing with markdown support
-- **Enhanced**: Split-view, timeline view, advanced formatting
+# Architecture Overview
 
-**Features**:
+Full markdown supported. Custom tab sections available in enhanced mode.
+```
 
-- Sequential IDs (note_1, note_2, etc.)
-- Click-to-edit inline editing
-- Auto-save (1-second debounce)
-- Full markdown rendering
-- Headers within note content supported
-- Horizontal tab scrolling for many notes
-
-**Access**: Click "Notes" in navigation bar.
+Enhanced mode supports custom tab sections with `<!-- Custom Section: Name -->`
+delimiters.
 
 ### Goals
 
-Track enterprise and project goals with KPIs.
-
-**Goal Types**:
-
-- **Enterprise**: Company-wide strategic goals
-- **Project**: Initiative-specific objectives
-
-**Attributes**:
-
-- KPI definition
-- Start/end dates
-- Status (planning, on-track, at-risk, late, success, failed)
-- Detailed description
-
-**Features**:
-
-- Filter by type and status
-- Visual status indicators
-- Progress tracking
-- Sequential IDs (goal_1, goal_2, etc.)
-
-**Access**: Click "Goals" in navigation bar.
-
-### Ideas
-
-Idea collection with Zettelkasten-style linking.
-
-**Workflow**: new → considering → planned | rejected
-
-**Features**:
-
-- Category organization
-- Status tracking
-- Link related ideas via IDs
-- Computed backlinks (automatically shows which ideas reference current idea)
-- Interactive navigation between linked ideas
-- Creation timestamps
-
-**Access**: Click "Ideas" in navigation bar.
-
-### Milestones
-
-Track target dates and milestone status.
-
-**Attributes**:
-
-- Target date
-- Status (open, completed)
-- Description
-- Linked tasks
-
-**Features**:
-
-- Task assignment to milestones
-- Progress visualization
-- Timeline integration
-
-**Access**: Click "Milestones" in navigation bar.
-
-### Retrospectives
-
-Continue/Stop/Start format retrospectives.
-
-**Structure**:
-
-- **Continue**: What's working
-- **Stop**: What to eliminate
-- **Start**: What to implement
-
-**Attributes**:
-
-- Date
-- Status (open, closed)
-- Per-section bullet lists
-
-**Access**: Click "Retrospectives" in navigation bar.
-
-### Canvas
-
-Visual brainstorming with draggable sticky notes.
-
-**Features**:
-
-- Drag to reposition
-- Color coding (yellow, pink, green, blue, purple, orange)
-- Resizable notes
-- Auto-save position and content
-- CSV export
-
-**Access**: Click "Canvas" in navigation bar.
-
-### Mindmap
-
-Hierarchical idea organization with tree visualization.
-
-**Layouts**:
-
-- Horizontal (left-to-right)
-- Vertical (top-to-bottom)
-
-**Features**:
-
-- Interactive editor with toolbar
-- Live preview
-- Keyboard shortcuts (Tab/Shift+Tab indent, Enter sibling, Alt+Up/Down move)
-- Zoom controls
-- Export to CSV
-
-**Access**: Click "Mindmap" in navigation bar.
-
-### C4 Architecture
-
-Context, Container, Component, Code diagrams with drill-down navigation.
-
-**Levels**:
-
-- Context (system landscape)
-- Container (application breakdown)
-- Component (detailed architecture)
-- Code (implementation details)
-
-**Features**:
-
-- Visual diagram view
-- List view toggle
-- Drill-down navigation
-- Component relationships
-- Connection labels
-
-**Access**: Click "C4 Architecture" in navigation bar.
-
-### Strategic Levels
-
-Vision-to-tactics hierarchy builder.
-
-**Hierarchy**: Vision → Mission → Goals → Objectives → Strategies → Tactics
-
-**Views**:
-
-- **Tree**: Hierarchical display with expandable nodes
-- **Pyramid**: Centered pyramid visualization
-
-**Features**:
-
-- Parent-child relationships
-- Task/milestone linking
-- Progress rollup (computed from children and linked items)
-- Delete protection (warns when level has children)
-
-**Access**: Click "Strategic Levels" in navigation bar.
-
-### Capacity Planning
-
-Team member allocation and utilization tracking.
-
-**Components**:
-
-- **Team Members**: Availability (hours/day, working days)
-- **Weekly Allocations**: Hours assigned per member per week
-- **Utilization**: Available vs allocated vs actual hours
-
-**Features**:
-
-- Color-coded grid (green <80%, yellow 80-100%, red >100%)
-- Auto-assignment algorithm (suggests allocations based on capacity and
-  priority)
-- Budget tracking
-- Utilization visualization
-
-**Access**: Click "Capacity Planning" in navigation bar.
-
-### Billing
-
-Customer management, quotes, invoices, and payment tracking.
-
-**Modules**:
-
-- **Customers**: Contact info, company details, billing address
-- **Billing Rates**: Hourly rates per assignee
-- **Quotes**: Draft/send/accept workflow with line items
-- **Invoices**: Generate from quotes or time entries
-- **Payments**: Record with method and reference
-
-**Features**:
-
-- Quote-to-invoice conversion
-- Payment tracking per invoice
-- Outstanding/overdue/paid summaries
-- Tax rate configuration
-- Time entry integration
-
-**Access**: Click "Billing" in navigation bar.
-
-## Task Management
-
-### Task Attributes
-
-| Attribute     | Description            | Format                             |
-| ------------- | ---------------------- | ---------------------------------- |
-| `id`          | Unique identifier      | `task-1`, `subtask-1`              |
-| `title`       | Task name              | Plain text                         |
-| `section`     | Board column           | Todo, In Progress, Done, custom    |
-| `completed`   | Completion status      | Boolean checkbox                   |
-| `priority`    | Importance (1=highest) | 1-5                                |
-| `assignee`    | Responsible person     | Team member name                   |
-| `due_date`    | Deadline               | `YYYY-MM-DD` or `YYYY-MM-DDTHH:MM` |
-| `effort`      | Estimate in days       | Integer                            |
-| `tags`        | Categories             | Array: `[Bug, Feature]`            |
-| `blocked_by`  | Dependencies           | Array: `[task-1, task-2]`          |
-| `milestone`   | Linked milestone       | Milestone name                     |
-| `description` | Details                | Markdown text                      |
-
-### Task Operations
-
-**Create**: Click "+ Task" button or use inline creation in Board view.
-
-**Edit**: Click task to open editor modal. Modify attributes and description.
-
-**Move**: Drag task to different section (Board/List views).
-
-**Delete**: Click delete icon in task editor.
-
-**Share**: Use URL format `#task=task-id` to link directly to a task.
-
-### Subtasks
-
-Nested task hierarchies for breaking down work.
-
-**Format**:
-
-```markdown
-- [ ] (task-1) Parent task
-  - [ ] (subtask-1) Child task
-  - [ ] (subtask-2) Another child task
-```
-
-**Features**:
-
-- Unlimited nesting depth
-- Independent completion tracking
-- Inherits parent section by default
-
-### Dependencies
-
-Define task relationships using `blocked_by` attribute.
-
-**Syntax**: `{blocked_by: [task-1, task-2]}`
-
-**Behavior**:
-
-- Timeline view respects dependencies for scheduling
-- Visual indicators show blocked tasks
-- Dependency validation prevents circular references
-
-### Time Tracking
-
-Log time entries per task with assignee and notes.
-
-**Format**: `YYYY-MM-DD: 2h by John - Description`
-
-**Features**:
-
-- Per-task time entries
-- Assignee attribution
-- Description/notes
-- Integration with billing rates for invoicing
-
-**Access**: Via Time Tracking view or task detail modal.
-
-## Tools
-
-### Pomodoro Timer
-
-Configurable focus timer with work/break cycles.
-
-**Features**:
-
-- Customizable duration
-- Audio notifications
-- Session tracking
-
-**Access**: Click timer icon in header.
-
-### Dark Mode
-
-System preference detection with manual toggle.
-
-**Toggle**: Click moon/sun icon in header.
-
-**Behavior**: Persists across sessions, applies to all views and components.
-
-### Import/Export
-
-#### CSV Import
-
-**Supported**: Tasks only (canvas/mindmap import not available).
-
-**Format**:
-
-```csv
-ID,Title,Section,Completed,Priority,Assignee,Due Date,Effort,Tags,Blocked By,Milestone,Description
-task1,Setup,Todo,FALSE,1,Alice,2025-08-20,2,"Backend, Infra","","Sprint 1","Install tools"
-```
-
-**Process**:
-
-1. Click import/export icon (⬇⬆) in header
-2. Select "Import Tasks CSV"
-3. Choose file
-4. System validates format, checks for duplicates by title
-5. New tasks appended to Todo section
-
-**Access**: Header → Import/Export icon → Import Tasks CSV.
-
-#### CSV Export
-
-**Available for**: Tasks, canvas sticky notes, mindmaps.
-
-**Tasks Export**:
-
-- Full metadata (all attributes)
-- Complete descriptions
-- Preserves IDs, dependencies, assignments
-
-**Canvas/Mindmap Export**: Via API endpoints (`/api/export/csv/canvas`,
-`/api/export/csv/mindmaps`).
-
-**Access**: Header → Import/Export icon → Export Tasks CSV.
-
-#### PDF Reports
-
-Single-page project overview for printing/sharing.
-
-**Includes**:
-
-- Project statistics
-- Task breakdown by section
-- Goals tracking
-- Milestone status
-- Section progress visualization
-
-**Access**: Header → Import/Export icon → Export PDF Report.
-
-### Version Checker
-
-Displays update badge when new version available.
-
-**Behavior**: Automatic check on page load, shows notification badge if update
-detected.
-
-## Configuration
-
-### Project Configuration
-
-Stored in `# Configurations` section of markdown file.
-
-**Attributes**:
-
-| Setting        | Description                             | Format                                     |
-| -------------- | --------------------------------------- | ------------------------------------------ |
-| `Start Date`   | Project start for timeline calculations | `YYYY-MM-DD`                               |
-| `Working Days` | Days per week                           | 5, 6, or 7                                 |
-| `Assignees`    | Team members                            | Bulleted list                              |
-| `Tags`         | Available tags                          | Bulleted list                              |
-| `Status`       | Project status                          | active, on-track, at-risk, late, completed |
-
-**Edit**: Configuration view provides UI for updating all settings.
-
-**Access**: Click "Config" in navigation bar.
-
-### Custom Board Sections
-
-Define custom sections beyond default (Ideas, Todo, In Progress, Done).
-
-**Format**: Create new `## Section Name` heading under `# Board` in markdown
-file.
-
-**Behavior**: UI dynamically displays all sections, supports drag-and-drop
-between custom sections.
-
-### Working Days Schedule
-
-Select specific days of the week for timeline calculations.
-
-**Options**: 5-day (Mon-Fri), 6-day, 7-day, or custom day selection.
-
-**Impact**: Affects effort-to-calendar-day conversion in Timeline view.
-
-## Markdown File Structure
-
-### Required Sections
-
-```markdown
-# Project Name
-
-Project description
-
-<!-- Configurations -->
-
-# Configurations
-
-Start Date: 2026-01-15 Working Days: 5
-
-Assignees:
-
-- Alice Smith
-
-Tags:
-
-- Bug
-
-<!-- Board -->
-
-# Board
-
-## Todo
-
-- [ ] (task-1) Task title {tag: [Bug]; priority: 1; assignee: Alice} Task
-      description
-```
-
-### Section Boundaries
-
-HTML comments mark section boundaries:
-
-- `<!-- Configurations -->`
-- `<!-- Notes -->`
-- `<!-- Goals -->`
-- `<!-- Canvas -->`
-- `<!-- Mindmap -->`
-- `<!-- Board -->`
-- `<!-- Milestones -->`
-- `<!-- Ideas -->`
-- `<!-- Retrospectives -->`
-- `<!-- SWOT Analysis -->`
-- `<!-- Risk Analysis -->`
-- `<!-- Lean Canvas -->`
-- `<!-- Business Model Canvas -->`
-- `<!-- Project Value Board -->`
-- `<!-- Brief -->`
-- `<!-- C4 Architecture -->`
-- `<!-- Time Tracking -->`
-- `<!-- Capacity Planning -->`
-- `<!-- Strategic Levels -->`
-- `<!-- Billing -->`
-
-**Purpose**: Prevents content from leaking between sections. System
-automatically maintains boundaries during file operations.
-
-### Task Format
-
-```markdown
-- [ ] (task-id) Task Title {tag: [Bug, Feature]; priority: 1; assignee: Alice
-      Smith; due_date: 2026-01-20; effort: 3; blocked_by: [task-1]; milestone:
-      Sprint 1} Detailed task description in markdown. Can span multiple lines.
-```
-
-### Note Format
-
-```markdown
-## Note Title
-
-<!-- id: note_1 -->
-
-Note content with full markdown support.
-
-# Headers within notes work
-
-## Subsections too
-
-- Lists
-- Code blocks
-```
-
-### Goal Format
-
-```markdown
-## Goal Title {type: enterprise; kpi: 25% increase in revenue; start: 2026-01-01; end: 2026-12-31; status: on-track}
-
-<!-- id: goal_1 -->
+Track enterprise and project goals. Each goal is `goals/goal_name.md`.
+
+```yaml
+---
+id: goal_revenue
+type: enterprise   # or: project
+kpi: "25% revenue increase"
+start: 2026-01-01
+end: 2026-12-31
+status: on-track   # planning | on-track | at-risk | late | success | failed
+---
+
+# Revenue Target
 
 Goal description and success criteria.
 ```
 
-### Canvas Sticky Note Format
+### Ideas
 
-```markdown
-## Sticky Note Title {color: yellow; position: {x: 200, y: 150}; size: {width: 250, height: 180}}
+Idea collection with Zettelkasten linking. Each idea is `ideas/idea_name.md`.
 
-<!-- id: sticky_note_1 -->
+```yaml
+---
+id: idea_templates
+title: Project Templates
+status: approved    # new | considering | planned | rejected | approved
+category: feature
+created: 2026-01-15
+links: [idea_ai, idea_onboarding]
+---
+
+# Project Templates
+
+Description and rationale.
 ```
 
-### Mindmap Format
+### Milestones
 
-```markdown
-## Mindmap Title
+Track target dates. Each milestone is `milestones/milestone_name.md`.
 
-<!-- id: mindmap_1 -->
+```yaml
+---
+id: milestone_beta
+title: Beta Launch
+target_date: 2026-04-01
+status: open    # open | completed
+---
 
-- Root Node
-  - Child 1
-    - Grandchild
-  - Child 2
+# Beta Launch
+
+Deliverables and acceptance criteria.
 ```
 
-### Milestone Format
+### Retrospectives
 
-```markdown
-## Milestone Name
+Continue/Stop/Start format. Each retro is `retrospectives/retro_name.md`.
 
-<!-- id: milestone_1 -->
+```yaml
+---
+id: retro_q1
+date: 2026-03-31
+status: open    # open | closed
+continue:
+  - Weekly syncs
+stop:
+  - Scope creep
+start:
+  - Daily standups
+---
 
-Target: 2026-03-01 Status: open Description of milestone deliverables.
+# Q1 Retrospective
 ```
 
-### Idea Format
+### Canvas
 
-```markdown
-## Idea Title
+Draggable sticky notes. Each canvas is `canvas/canvas_name.md` with sticky note
+files nested inside.
 
-<!-- id: idea_1 -->
-<!-- links: idea_2,idea_3 -->
+### Mindmap
 
-Status: considering Category: Feature Created: 2026-02-12 Idea description and
-rationale.
+Hierarchical tree visualization. Each mindmap is `mindmaps/mindmap_name.md`.
+
+```yaml
+---
+id: mindmap_product
+---
+
+# Product Features
+
+- Core
+  - Auth
+  - Tasks
+- Integrations
+  - Slack
+  - GitHub
 ```
 
-## Keyboard Shortcuts
+### C4 Architecture
 
-| Shortcut    | Action                   | Context        |
-| ----------- | ------------------------ | -------------- |
-| `Tab`       | Indent node              | Mindmap editor |
-| `Shift+Tab` | Outdent node             | Mindmap editor |
-| `Enter`     | New sibling node         | Mindmap editor |
-| `Alt+Up`    | Move node up             | Mindmap editor |
-| `Alt+Down`  | Move node down           | Mindmap editor |
-| `ESC`       | Close modal              | All modals     |
-| `F5`        | Refresh (preserves view) | All views      |
+Context/Container/Component/Code diagrams. Files in `c4/`.
 
-## Troubleshooting
+### People
 
-### Content Leaking Between Sections
+Shared registry of team members. Each person is `people/person_name.md`.
 
-**Symptom**: Note content appears in other sections or parsing fails.
+```yaml
+---
+id: person_alice
+name: Alice Smith
+title: Engineering Lead
+email: alice@company.com
+phone: "+1 555 0100"
+departments: [Engineering, Leadership]
+reportsTo: person_ceo
+role: developer
+hoursPerDay: 8
+workingDays: [Mon, Tue, Wed, Thu, Fri]
+startDate: 2024-01-15
+---
 
-**Solution**:
+# Alice Smith
+```
 
-1. Verify section boundary comments are present
-2. System auto-regenerates boundaries on save, but manual edits may remove them
-3. Ensure note IDs follow format `<!-- id: note_\d+ -->`
+People referenced by ID across capacity planning, org chart, and portfolio
+views.
 
-### CSV Import Issues
+### Org Chart
 
-**No tasks imported**:
+Visual hierarchy built from `people/` directory using `reportsTo` relationships.
 
-- Check CSV format matches specification
-- Verify UTF-8 encoding
-- Tasks with duplicate titles are skipped
-- Assignees must exist in project configuration
+### Capacity Planning
 
-**Data not appearing**:
+Team allocation tracking. Plans stored in `capacity/`.
 
-- Force refresh browser (Ctrl+F5 / Cmd+Shift+R)
-- Check Todo section (default import location)
-- Verify you're in Board or List view
+```yaml
+---
+id: capacity_q1
+weekStart: 2026-01-06
+allocations:
+  - personId: person_alice
+    hours: 32
+  - personId: person_bob
+    hours: 24
+---
+```
 
-### CSV Export Issues
+### Portfolio
 
-**Empty export**:
+Project portfolio view. Each item is `portfolio/project_name.md`.
 
-- Confirm tasks exist in project
-- Check browser download/popup settings
-- Verify browser can write to Downloads folder
+```yaml
+---
+id: portfolio_alpha
+name: Project Alpha
+status: active    # active | completed | on-hold | cancelled
+startDate: 2026-01-01
+endDate: 2026-06-30
+budget: 150000
+spent: 45000
+team: [person_alice, person_bob]
+---
 
-### PDF Report Issues
+# Project Alpha
 
-**Popup blocked**: Allow popups for application domain.
+Project description and objectives.
+```
 
-**Layout problems**: Report optimized for single page. Complex projects may
-require scrolling.
+### MoSCoW
 
-### Timeline Calculation Issues
+Prioritization analysis. Each analysis is `moscow/analysis_name.md`.
 
-**Tasks not scheduled**:
+```yaml
+---
+id: moscow_sprint1
+date: 2026-02-22
+must: [User authentication, Core API]
+should: [Dashboard, Notifications]
+could: [Dark mode, Export]
+wont: [Mobile app]
+---
 
-- Verify task has effort estimate
-- Check dependencies are valid (no circular references)
-- Confirm project start date is set
+# Sprint 1 Priorities
+```
 
-**Incorrect dates**:
+### Eisenhower Matrix
 
-- Review working days configuration
-- Check dependency chain for blocking tasks
-- Validate effort estimates are integers
+Urgency/importance quadrant. Each matrix is `eisenhower/matrix_name.md`.
 
-## API Reference
+```yaml
+---
+id: eisenhower_q1
+date: 2026-02-22
+urgentImportant: [Fix production bug, Deploy hotfix]
+notUrgentImportant: [Plan architecture, Write tests]
+urgentNotImportant: [Reply to emails, Schedule meetings]
+notUrgentNotImportant: [Reorganize docs, Update profiles]
+---
 
-All operations accessible via REST API for automation and integration.
+# Q1 Priorities
+```
 
-### Endpoints
+### Idea Sorter
 
-| Endpoint                    | Method                 | Purpose                  |
-| --------------------------- | ---------------------- | ------------------------ |
-| `/api/tasks`                | GET                    | Retrieve all tasks       |
-| `/api/tasks`                | POST                   | Create task              |
-| `/api/tasks/:id`            | PUT                    | Update task              |
-| `/api/tasks/:id`            | DELETE                 | Delete task              |
-| `/api/tasks/:id/move`       | PATCH                  | Move task to section     |
-| `/api/export/csv/tasks`     | GET                    | Export tasks as CSV      |
-| `/api/import/csv/tasks`     | POST                   | Import tasks from CSV    |
-| `/api/export/pdf/report`    | GET                    | Generate PDF report      |
-| `/api/notes`                | GET, POST, PUT, DELETE | Notes CRUD               |
-| `/api/goals`                | GET, POST, PUT, DELETE | Goals CRUD               |
-| `/api/canvas/sticky_notes`  | GET, POST, PUT, DELETE | Canvas CRUD              |
-| `/api/mindmaps`             | GET, POST, PUT, DELETE | Mindmaps CRUD            |
-| `/api/milestones`           | GET, POST, PUT, DELETE | Milestones CRUD          |
-| `/api/ideas`                | GET, POST, PUT, DELETE | Ideas CRUD               |
-| `/api/retrospectives`       | GET, POST, PUT, DELETE | Retrospectives CRUD      |
-| `/api/time-entries/:taskId` | GET, POST, DELETE      | Time tracking            |
-| `/api/capacity`             | GET, POST, PUT, DELETE | Capacity planning        |
-| `/api/customers`            | GET, POST, PUT, DELETE | Customer management      |
-| `/api/quotes`               | GET, POST, PUT, DELETE | Quote management         |
-| `/api/invoices`             | GET, POST, PUT, DELETE | Invoice management       |
-| `/api/projects`             | GET                    | List all projects        |
-| `/api/projects/switch`      | POST                   | Switch active project    |
-| `/api/project/config`       | GET, POST              | Get/update configuration |
+Sortable/filterable table over the `ideas/` directory. Uses the idea frontmatter
+fields: `priority`, `startDate`, `endDate`, `resources`, `subtasks`.
 
-Full API documentation available in README.md.
+### Strategic Levels
+
+Vision-to-tactics hierarchy. Files in `strategiclevels/`.
+
+### Billing
+
+Customer management, quotes, invoices. Customers in `billing/customers/`,
+quotes in `billing/quotes/`, invoices in `billing/invoices/`.
+
+### CRM
+
+Contact and deal management. Companies in `crm/companies/`, contacts in
+`crm/contacts/`, deals in `crm/deals/`, interactions in `crm/interactions/`.
+
+### Time Tracking
+
+Log time against tasks. Entries in `timetracking/`.
+
+### Lean Canvas, Business Model Canvas, SWOT, Risk, Project Value, Brief
+
+Strategic planning boards. Files in their respective directories
+(`leancanvas/`, `businessmodel/`, `swot/`, `risk/`, `projectvalue/`, `brief/`).
+
+## CLI Reference
+
+```
+mdplanner [OPTIONS] <project-directory>
+mdplanner init <directory>
+
+Commands:
+  init <directory>       Scaffold a new project directory
+
+Options:
+  -p, --port <port>      Server port (default: 8003)
+  -c, --cache            Enable SQLite cache for fast queries and search
+  -h, --help             Show help
+
+Examples:
+  mdplanner init ./my-project
+  mdplanner ./my-project
+  mdplanner --port 8080 --cache ./my-project
+```
 
 ## SQLite Cache
 
-Optional SQLite cache layer for fast queries and full-text search. Markdown
-remains source of truth.
-
-### Enabling Cache
-
-Start server with `--cache` flag:
+Optional performance layer. Enable with `--cache`.
 
 ```bash
 mdplanner --cache ./my-project
-deno task dev --cache ./example/portfolio
 ```
 
-Creates `.mdplanner.db` in project directory. Add to `.gitignore`.
+Creates `.mdplanner.db` in the project directory. Add to `.gitignore`. Markdown
+files remain the source of truth — cache is rebuildable at any time.
 
 ### Search API
 
-Full-text search across tasks, notes, goals, and ideas.
-
-| Endpoint              | Method | Purpose                     |
-| --------------------- | ------ | --------------------------- |
-| `/api/search?q=query` | GET    | Full-text search            |
-| `/api/search/stats`   | GET    | Entity counts               |
-| `/api/search/status`  | GET    | Cache status                |
-| `/api/search/rebuild` | POST   | Rebuild cache from markdown |
-| `/api/search/sync`    | POST   | Sync cache                  |
-
-**Search parameters:**
-
-| Parameter | Description                           |
-| --------- | ------------------------------------- |
-| `q`       | Search query (required)               |
-| `limit`   | Max results (default: 50, max: 100)   |
-| `offset`  | Pagination offset                     |
-| `types`   | Filter by type: `task,note,goal,idea` |
-
-**Example:**
-
-```bash
-curl "http://localhost:8003/api/search?q=login&types=task,note&limit=10"
+```
+GET /api/search?q=<query>&types=task,note,goal,idea&limit=50
+POST /api/search/rebuild
+GET  /api/search/status
 ```
 
-**Response:**
+## API Reference
 
-```json
-{
-  "query": "login",
-  "count": 3,
-  "results": [
-    {
-      "type": "task",
-      "id": "task-1",
-      "title": "Fix login bug",
-      "snippet": "Users cannot <mark>login</mark> with...",
-      "score": -1.5
-    }
-  ]
-}
+All data operations are available via REST. Base URL: `http://localhost:8003/api`
+
+| Endpoint                          | Methods              | Resource              |
+| --------------------------------- | -------------------- | --------------------- |
+| `/tasks`                          | GET, POST, PUT, DELETE | Tasks               |
+| `/tasks/:id/move`                 | PATCH                | Move task to section  |
+| `/notes`                          | GET, POST, PUT, DELETE | Notes               |
+| `/goals`                          | GET, POST, PUT, DELETE | Goals               |
+| `/ideas`                          | GET, POST, PUT, DELETE | Ideas               |
+| `/milestones`                     | GET, POST, PUT, DELETE | Milestones          |
+| `/retrospectives`                 | GET, POST, PUT, DELETE | Retrospectives      |
+| `/canvas/sticky_notes`            | GET, POST, PUT, DELETE | Canvas              |
+| `/mindmaps`                       | GET, POST, PUT, DELETE | Mindmaps            |
+| `/capacity`                       | GET, POST, PUT, DELETE | Capacity plans      |
+| `/people`                         | GET, POST, PUT, DELETE | People registry     |
+| `/portfolio`                      | GET, POST, PUT, DELETE | Portfolio projects  |
+| `/moscow`                         | GET, POST, PUT, DELETE | MoSCoW analyses     |
+| `/eisenhower`                     | GET, POST, PUT, DELETE | Eisenhower matrices |
+| `/billing/customers`              | GET, POST, PUT, DELETE | Customers           |
+| `/billing/quotes`                 | GET, POST, PUT, DELETE | Quotes              |
+| `/billing/invoices`               | GET, POST, PUT, DELETE | Invoices            |
+| `/crm/companies`                  | GET, POST, PUT, DELETE | CRM companies       |
+| `/crm/contacts`                   | GET, POST, PUT, DELETE | CRM contacts        |
+| `/crm/deals`                      | GET, POST, PUT, DELETE | CRM deals           |
+| `/time-entries/:taskId`           | GET, POST, DELETE    | Time entries          |
+| `/project/config`                 | GET, PUT             | Project config        |
+| `/search`                         | GET                  | Full-text search      |
+| `/export/csv/tasks`               | GET                  | CSV export            |
+| `/import/csv/tasks`               | POST                 | CSV import            |
+
+## Feature Visibility
+
+Control which views appear in the navigation via `project.md` frontmatter:
+
+```yaml
+features:
+  - tasks
+  - notes
+  - goals
 ```
 
-### Cache Architecture
+Any view not listed is hidden. To show all views, include all feature keys or
+omit the `features` key entirely.
 
-```
-Markdown Files (source of truth)
-       ↓ sync on startup / rebuild
-    SQLite DB (read cache)
-       ↓
-   Fast Queries / Search / Aggregations
-```
-
-**Tables synced:** tasks, notes, goals, milestones, ideas, retrospectives,
-sticky_notes, mindmaps, c4_components, swot, risk, lean_canvas, business_model,
-project_value, brief, capacity_plans, strategic_builders, customers, rates,
-quotes, invoices, companies, contacts, deals, interactions, portfolio,
-org_members.
-
-**FTS5 indexes:** tasks, notes, goals, ideas.
-
-### Cloud Migration
-
-All markdown data is stored 1:1 in SQLite. Complex nested structures (mindmap
-nodes, canvas data) are serialized as JSON. Schema supports future migration to
-SQLite-primary storage for cloud deployment.
-
-## Advanced Features
-
-### Zettelkasten Linking
-
-Link related ideas using `<!-- links: idea_id1,idea_id2 -->` syntax.
-
-**Backlinks**: Automatically computed. Shows which ideas reference current idea.
-
-**Navigation**: Click linked/backlinked idea to navigate directly.
-
-**Use case**: Build knowledge graph of related concepts, features, or decisions.
-
-### Dependency Management
-
-Chain tasks using `blocked_by` attribute.
-
-**Validation**: System prevents circular dependencies.
-
-**Timeline impact**: Dependent tasks automatically scheduled after blockers
-complete.
-
-**Visual indicators**: Board/List views show dependency warnings.
-
-### Progress Rollup
-
-Strategic Levels automatically calculates progress from:
-
-- Child levels
-- Linked tasks
-- Linked milestones
-
-**Calculation**: Percentage based on completion status of all connected items.
-
-**Display**: Visual progress bars in Tree and Pyramid views.
-
-### Auto-Assignment Algorithm
-
-Capacity Planning suggests task allocations.
-
-**Input**:
-
-- Team member availability (hours/day, working days)
-- Task effort estimates
-- Task priorities
-
-**Output**: Suggested weekly allocations maximizing utilization while respecting
-capacity.
-
-**Application**: Review suggestions, modify if needed, apply to create
-allocations.
-
-### Quote-to-Invoice Conversion
-
-Generate invoices from accepted quotes with one click.
-
-**Process**:
-
-1. Create quote with line items
-2. Mark as sent
-3. Mark as accepted
-4. Click "Convert to Invoice"
-5. System creates invoice with same line items, customer, and totals
-
-**Time Entry Integration**: Alternatively, generate invoices from logged time
-entries using billing rates.
-
-## Best Practices
-
-**Markdown files**: Use version control (Git) for history and collaboration.
-
-**Backups**: Export CSV regularly or rely on automatic backup system.
-
-**Dependencies**: Avoid deep dependency chains (>3 levels) to prevent scheduling
-complexity.
-
-**Tags**: Define tags in project configuration before using on tasks for
-consistency.
-
-**Milestones**: Link tasks to milestones for better progress tracking and
-reporting.
-
-**Capacity planning**: Update allocations weekly to reflect actual work
-patterns.
-
-**Strategic alignment**: Link tasks to strategic levels to maintain goal
-visibility.
-
-**Documentation**: Use Notes view for project documentation, meeting notes, and
-decision logs.
-
-## Environment Configuration
-
-Set environment variables for customization:
-
-```bash
-# Backup retention (default: 10)
-export MD_PLANNER_MAX_BACKUPS=20
-
-# Backup directory (default: ./backups)
-export MD_PLANNER_BACKUP_DIR="/path/to/backups"
-```
-
-## Use Cases
-
-**Solo developers**: Manage personal projects with minimal overhead.
-
-**Small teams**: Coordinate work without complex tool setup.
-
-**Consultants**: Track billable hours, generate quotes/invoices.
-
-**Startups**: Strategic planning (Lean Canvas, Business Model Canvas, Strategic
-Levels).
-
-**Product teams**: Roadmap planning with Ideas, Goals, and Milestones.
-
-**Enterprise**: Capacity planning, C4 architecture diagrams, multi-project
-tracking.
+Feature keys: `tasks`, `notes`, `goals`, `ideas`, `milestones`,
+`retrospectives`, `canvas`, `mindmap`, `c4`, `swot`, `risk`, `leancanvas`,
+`businessmodel`, `projectvalue`, `brief`, `strategiclevels`, `capacity`,
+`billing`, `crm`, `timetracking`, `portfolio`, `orgchart`, `people`, `moscow`,
+`eisenhower`, `ideas-sorter`.

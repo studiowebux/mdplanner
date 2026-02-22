@@ -1,0 +1,12 @@
+.git
+dist/
+example/
+docs/
+tests/
+__trash/
+deploy/
+README.md
+CHANGELOG.md
+LICENSE
+.DS_Store
+*.db

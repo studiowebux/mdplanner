@@ -1,0 +1,15 @@
+services:
+  mdplanner:
+    build: .
+    image: localhost:5000/mdplanner:latest
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8003/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
