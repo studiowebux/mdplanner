@@ -260,8 +260,10 @@ export class ConfigView {
     container.innerHTML = "";
 
     const featureGroups = {
-      "Tasks": [
+      "Summary": [
         { id: "summary", label: "Summary" },
+      ],
+      "Tasks": [
         { id: "list", label: "List" },
         { id: "board", label: "Board" },
         { id: "timeline", label: "Timeline" },
@@ -272,9 +274,10 @@ export class ConfigView {
         { id: "ideas", label: "Ideas" },
         { id: "retrospectives", label: "Retrospectives" },
         { id: "moscow", label: "MoSCoW" },
-      ],
-      "Analysis": [
         { id: "eisenhower", label: "Eisenhower Matrix" },
+        { id: "ideaSorter", label: "Idea Sorter" },
+      ],
+      "Strategy": [
         { id: "swot", label: "SWOT Analysis" },
         { id: "riskAnalysis", label: "Risk Analysis" },
         { id: "leanCanvas", label: "Lean Canvas" },
@@ -282,22 +285,27 @@ export class ConfigView {
         { id: "projectValue", label: "Value Board" },
         { id: "brief", label: "Brief" },
       ],
+      "Finances": [
+        { id: "fundraising", label: "Fundraising" },
+        { id: "billing", label: "Billing" },
+      ],
       "Diagrams": [
         { id: "canvas", label: "Canvas" },
         { id: "mindmap", label: "Mindmap" },
         { id: "c4", label: "C4 Architecture" },
       ],
-      "Resources": [
-        { id: "timeTracking", label: "Time Tracking" },
-        { id: "capacity", label: "Capacity" },
-        { id: "billing", label: "Billing" },
-        { id: "crm", label: "CRM" },
+      "Team": [
         { id: "orgchart", label: "Org Chart" },
         { id: "people", label: "People" },
+        { id: "capacity", label: "Capacity" },
+        { id: "timeTracking", label: "Time Tracking" },
+        { id: "crm", label: "CRM" },
       ],
-      "Other": [
+      "Notes": [
         { id: "notes", label: "Notes" },
         { id: "strategicLevels", label: "Strategic Levels" },
+      ],
+      "Portfolio": [
         { id: "portfolio", label: "Portfolio" },
       ],
     };
