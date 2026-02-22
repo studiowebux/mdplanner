@@ -1,0 +1,188 @@
+/* Idea Sorter — sortable/filterable table view */
+
+.idea-sorter-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.idea-sorter-filters input,
+.idea-sorter-filters select {
+  font-size: 0.8125rem;
+  padding: 0.375rem 0.625rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  transition: border-color var(--transition-fast);
+}
+
+.idea-sorter-filters input:focus,
+.idea-sorter-filters select:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+}
+
+.idea-sorter-filters input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Table */
+
+.idea-sorter-wrap {
+  overflow-x: auto;
+}
+
+.idea-sorter-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.idea-sorter-th {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border-default);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.idea-sorter-th[data-sort] {
+  cursor: pointer;
+}
+
+.idea-sorter-th[data-sort]:hover {
+  color: var(--color-text-primary);
+}
+
+.idea-sorter-th[data-sort]::after {
+  content: " ↕";
+  opacity: 0.3;
+}
+
+.idea-sorter-th.sort-asc::after {
+  content: " ↑";
+  opacity: 1;
+}
+
+.idea-sorter-th.sort-desc::after {
+  content: " ↓";
+  opacity: 1;
+}
+
+.idea-sorter-row {
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.idea-sorter-row:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.idea-sorter-td {
+  padding: 0.5rem 0.75rem;
+  color: var(--color-text-primary);
+  vertical-align: middle;
+}
+
+.idea-sorter-title {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+/* Priority badges */
+
+.idea-priority-badge {
+  display: inline-block;
+  font-size: 0.6875rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.idea-priority-high {
+  background-color: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.idea-priority-medium {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.idea-priority-low {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+/* Status badges */
+
+.idea-status-badge {
+  display: inline-block;
+  font-size: 0.6875rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+  text-transform: capitalize;
+}
+
+.idea-status-new {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+.idea-status-considering {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.idea-status-planned {
+  background-color: var(--color-info-bg);
+  color: var(--color-info-text);
+}
+
+.idea-status-approved {
+  background-color: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.idea-status-rejected {
+  background-color: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+/* Subtasks */
+
+.idea-subtask-list {
+  margin-top: 0.4rem;
+  padding-left: 1rem;
+  list-style: disc;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+/* Edit button inside table — fully self-contained, no btn-* inheritance */
+.idea-sorter-edit {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-default);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.idea-sorter-edit:hover {
+  background-color: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  border-color: var(--color-bg-inverse);
+}

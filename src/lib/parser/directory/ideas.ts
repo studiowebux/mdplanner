@@ -9,6 +9,11 @@ interface IdeaFrontmatter {
   id: string;
   status: "new" | "considering" | "planned" | "approved" | "rejected";
   category?: string;
+  priority?: "high" | "medium" | "low";
+  startDate?: string;
+  endDate?: string;
+  resources?: string;
+  subtasks?: string[];
   created: string;
   links?: string[];
 }
@@ -48,6 +53,11 @@ export class IdeasDirectoryParser extends DirectoryParser<Idea> {
       title,
       status: frontmatter.status || "new",
       category: frontmatter.category,
+      priority: frontmatter.priority,
+      startDate: frontmatter.startDate,
+      endDate: frontmatter.endDate,
+      resources: frontmatter.resources,
+      subtasks: frontmatter.subtasks,
       created: frontmatter.created || new Date().toISOString(),
       description: description || undefined,
       links: frontmatter.links,
@@ -61,12 +71,13 @@ export class IdeasDirectoryParser extends DirectoryParser<Idea> {
       created: idea.created,
     };
 
-    if (idea.category) {
-      frontmatter.category = idea.category;
-    }
-    if (idea.links && idea.links.length > 0) {
-      frontmatter.links = idea.links;
-    }
+    if (idea.category) frontmatter.category = idea.category;
+    if (idea.priority) frontmatter.priority = idea.priority;
+    if (idea.startDate) frontmatter.startDate = idea.startDate;
+    if (idea.endDate) frontmatter.endDate = idea.endDate;
+    if (idea.resources) frontmatter.resources = idea.resources;
+    if (idea.subtasks && idea.subtasks.length > 0) frontmatter.subtasks = idea.subtasks;
+    if (idea.links && idea.links.length > 0) frontmatter.links = idea.links;
 
     const body = `# ${idea.title}\n\n${idea.description || ""}`;
 

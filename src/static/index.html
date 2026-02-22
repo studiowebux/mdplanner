@@ -529,6 +529,13 @@
                 Eisenhower
               </button>
               <button
+                id="ideaSorterViewBtn"
+                data-view="ideaSorter"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                Idea Sorter
+              </button>
+              <button
                 id="swotViewBtn"
                 data-view="swot"
                 class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
@@ -846,6 +853,12 @@
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
             >
               Eisenhower
+            </button>
+            <button
+              id="ideaSorterViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              Idea Sorter
             </button>
             <button
               id="swotViewBtnMobile"
@@ -2534,6 +2547,64 @@
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Idea Sorter View -->
+      <div id="ideaSorterView" class="hidden pb-16">
+        <div class="bg-primary rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-default flex justify-between items-center">
+            <h2 class="text-lg font-medium text-primary">Idea Sorter</h2>
+            <button id="addIdeaSorterBtn" class="btn-primary py-2 rounded-lg">+ New Idea</button>
+          </div>
+          <div class="idea-sorter-filters">
+            <input
+              type="text"
+              id="ideaSorterFilterCategory"
+              placeholder="Filter by category"
+            >
+            <select id="ideaSorterFilterPriority">
+              <option value="">All priorities</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+            <select id="ideaSorterFilterStatus">
+              <option value="">All statuses</option>
+              <option value="new">New</option>
+              <option value="considering">Considering</option>
+              <option value="planned">Planned</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+            <button id="ideaSorterClearFilters" class="btn-secondary">Clear</button>
+          </div>
+          <div id="emptyIdeaSorterState" class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-primary">No ideas yet</h3>
+            <p class="mt-1 text-sm text-muted">Create an idea to get started.</p>
+          </div>
+          <div class="idea-sorter-wrap">
+            <table id="ideaSorterTable" class="idea-sorter-table hidden">
+              <thead>
+                <tr>
+                  <th class="idea-sorter-th" data-sort="title">Title</th>
+                  <th class="idea-sorter-th" data-sort="category">Category</th>
+                  <th class="idea-sorter-th" data-sort="priority">Priority</th>
+                  <th class="idea-sorter-th" data-sort="status">Status</th>
+                  <th class="idea-sorter-th" data-sort="startDate">Start</th>
+                  <th class="idea-sorter-th" data-sort="endDate">End</th>
+                  <th class="idea-sorter-th">Resources</th>
+                  <th class="idea-sorter-th">Subtasks</th>
+                  <th class="idea-sorter-th"></th>
+                </tr>
+              </thead>
+              <tbody id="ideaSorterBody"></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -11547,6 +11618,17 @@
               </select>
             </div>
             <div class="form-group">
+              <label class="form-label">Priority</label>
+              <select id="ideaSidenavPriority" class="form-input">
+                <option value="">None</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+          </div>
+          <div class="sidenav-grid">
+            <div class="form-group">
               <label class="form-label">Category</label>
               <input
                 type="text"
@@ -11555,6 +11637,46 @@
                 placeholder="e.g., feature, bug"
               >
             </div>
+            <div class="form-group">
+              <label class="form-label">Resources</label>
+              <input
+                type="text"
+                id="ideaSidenavResources"
+                class="form-input"
+                placeholder="e.g., 2 devs, $5k"
+              >
+            </div>
+          </div>
+          <div class="sidenav-grid">
+            <div class="form-group">
+              <label class="form-label">Start Date</label>
+              <input
+                type="date"
+                id="ideaSidenavStartDate"
+                class="form-input"
+              >
+            </div>
+            <div class="form-group">
+              <label class="form-label">End Date</label>
+              <input
+                type="date"
+                id="ideaSidenavEndDate"
+                class="form-input"
+              >
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Subtasks</label>
+            <div class="flex gap-2 mb-2">
+              <input
+                type="text"
+                id="ideaSidenavSubtaskInput"
+                class="form-input"
+                placeholder="Add a subtask and press Enter"
+              >
+              <button type="button" id="ideaSidenavSubtaskAdd" class="btn-secondary">Add</button>
+            </div>
+            <div id="ideaSidenavSubtaskList"></div>
           </div>
           <div class="form-group">
             <label class="form-label">Description</label>

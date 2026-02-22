@@ -165,6 +165,11 @@ export interface Idea {
   title: string;
   status: "new" | "considering" | "planned" | "approved" | "rejected";
   category?: string;
+  priority?: "high" | "medium" | "low";
+  startDate?: string;
+  endDate?: string;
+  resources?: string;
+  subtasks?: string[];
   created: string;
   description?: string;
   links?: string[]; // Zettelkasten-style linked idea IDs

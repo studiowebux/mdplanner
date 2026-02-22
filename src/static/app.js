@@ -45,6 +45,7 @@ import { IdeasModule } from "./modules/features/ideas.js";
 import { RetrospectivesModule } from "./modules/features/retrospectives.js";
 import { MoscowModule } from "./modules/features/moscow.js";
 import { EisenhowerModule } from "./modules/features/eisenhower.js";
+import { IdeaSorterModule } from "./modules/features/idea-sorter.js";
 import { SwotModule } from "./modules/features/swot.js";
 import { RiskModule } from "./modules/features/risk.js";
 import { LeanCanvasModule } from "./modules/features/lean-canvas.js";
@@ -220,6 +221,7 @@ class TaskManager {
     this.retrospectivesModule = new RetrospectivesModule(this);
     this.moscowModule = new MoscowModule(this);
     this.eisenhowerModule = new EisenhowerModule(this);
+    this.ideaSorterModule = new IdeaSorterModule(this);
     this.swotModule = new SwotModule(this);
     this.riskModule = new RiskModule(this);
     this.leanCanvasModule = new LeanCanvasModule(this);
@@ -342,6 +344,7 @@ class TaskManager {
       { id: "retrospectivesViewBtn", view: "retrospectives" },
       { id: "moscowViewBtn", view: "moscow" },
       { id: "eisenhowerViewBtn", view: "eisenhower" },
+      { id: "ideaSorterViewBtn", view: "ideaSorter" },
       { id: "swotViewBtn", view: "swot" },
       { id: "riskAnalysisViewBtn", view: "riskAnalysis" },
       { id: "leanCanvasViewBtn", view: "leanCanvas" },
@@ -484,6 +487,12 @@ class TaskManager {
       .getElementById("eisenhowerViewBtnMobile")
       ?.addEventListener("click", () => {
         this.switchView("eisenhower");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("ideaSorterViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("ideaSorter");
         this.closeMobileMenu();
       });
     document
@@ -704,6 +713,7 @@ class TaskManager {
     // SWOT Analysis events - delegated to SwotModule
     this.moscowModule.bindEvents();
     this.eisenhowerModule.bindEvents();
+    this.ideaSorterModule.bindEvents();
     this.swotModule.bindEvents();
 
     // Risk Analysis events - delegated to RiskModule
@@ -818,7 +828,7 @@ class TaskManager {
       "summary", "list", "board", "timeline",
       "notes", "goals", "milestones", "ideas",
       "canvas", "mindmap", "c4", "retrospectives",
-      "moscow", "eisenhower", "swot", "riskAnalysis", "leanCanvas", "businessModel",
+      "moscow", "eisenhower", "ideaSorter", "swot", "riskAnalysis", "leanCanvas", "businessModel",
       "projectValue", "brief", "timeTracking", "capacity",
       "strategicLevels", "billing", "crm", "orgchart", "people", "portfolio",
     ];
@@ -867,6 +877,7 @@ class TaskManager {
       retrospectives: "Retrospectives",
       moscow: "MoSCoW",
       eisenhower: "Eisenhower Matrix",
+      ideaSorter: "Idea Sorter",
       swot: "SWOT Analysis",
       riskAnalysis: "Risk Analysis",
       leanCanvas: "Lean Canvas",
@@ -941,6 +952,7 @@ class TaskManager {
       "retrospectivesViewBtn",
       "moscowViewBtn",
       "eisenhowerViewBtn",
+      "ideaSorterViewBtn",
       "swotViewBtn",
       "riskAnalysisViewBtn",
       "leanCanvasViewBtn",
@@ -980,6 +992,7 @@ class TaskManager {
       "retrospectivesViewBtnMobile",
       "moscowViewBtnMobile",
       "eisenhowerViewBtnMobile",
+      "ideaSorterViewBtnMobile",
       "swotViewBtnMobile",
       "riskAnalysisViewBtnMobile",
       "leanCanvasViewBtnMobile",
@@ -1016,6 +1029,7 @@ class TaskManager {
     document.getElementById("retrospectivesView").classList.add("hidden");
     document.getElementById("moscowView")?.classList.add("hidden");
     document.getElementById("eisenhowerView")?.classList.add("hidden");
+    document.getElementById("ideaSorterView")?.classList.add("hidden");
     document.getElementById("swotView").classList.add("hidden");
     document.getElementById("riskAnalysisView").classList.add("hidden");
     document.getElementById("leanCanvasView").classList.add("hidden");
@@ -1085,6 +1099,10 @@ class TaskManager {
       this.activateViewButton("eisenhower");
       document.getElementById("eisenhowerView").classList.remove("hidden");
       this.eisenhowerModule.load();
+    } else if (view === "ideaSorter") {
+      this.activateViewButton("ideaSorter");
+      document.getElementById("ideaSorterView").classList.remove("hidden");
+      this.ideaSorterModule.load();
     } else if (view === "swot") {
       this.activateViewButton("swot");
       document.getElementById("swotView").classList.remove("hidden");
