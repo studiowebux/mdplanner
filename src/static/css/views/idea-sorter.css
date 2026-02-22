@@ -169,8 +169,8 @@
   gap: 0.2rem;
 }
 
-/* Edit button inside table — use ghost style to avoid dark bg conflict */
-.idea-sorter-td .btn-secondary {
+/* Edit button inside table */
+.idea-sorter-td .btn-ghost {
   font-size: 0.75rem;
   padding: 0.2rem 0.5rem;
 }
