@@ -1020,6 +1020,7 @@ class TaskManager {
       "orgchartViewBtn",
       "peopleViewBtn",
       "portfolioViewBtn",
+      "meetingsViewBtn",
     ];
     desktopNavBtns.forEach((id) => {
       const btn = document.getElementById(id);

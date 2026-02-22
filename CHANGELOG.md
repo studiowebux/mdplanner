@@ -8,6 +8,23 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.3.6] - 2026-02-22
+
+### Added
+
+- Meetings view: meeting list with create/edit sidenav, action items per meeting
+  (description, owner, due date, status), actions sub-view with flat list of all
+  open action items filterable by owner and due date
+- Meetings stored in `meetings/` directory as one `.md` file per meeting with
+  YAML frontmatter for attendees and action items, markdown body for notes
+- API routes: `GET/POST /api/meetings`, `GET/PUT/DELETE /api/meetings/:id`
+
+### Fixed
+
+- Meetings feature visibility: registered `meetings` under the "Team" group in
+  the settings toggle so it can be enabled or disabled per project
+- Meetings nav button now correctly resets its active state when switching views
+
 ## [0.3.5] - 2026-02-22
 
 ### Fixed
