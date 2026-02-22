@@ -76,3 +76,19 @@
   border-color: var(--color-border-strong) !important;
   background-color: var(--color-bg-tertiary) !important;
 }
+
+/* --------------------------------------------------------------------------
+   Task file upload row (below description textarea in sidenav)
+   -------------------------------------------------------------------------- */
+
+.task-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.375rem;
+}
+
+.task-upload-status {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}

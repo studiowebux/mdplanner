@@ -37,6 +37,60 @@ export class TaskSidenavModule {
         await this.handleSubmit();
       },
     );
+
+    // File attach button triggers hidden input
+    document.getElementById("sidenavAttachBtn")?.addEventListener(
+      "click",
+      () => document.getElementById("sidenavFileInput")?.click(),
+    );
+
+    // File input change — upload each file and insert markdown into description
+    document.getElementById("sidenavFileInput")?.addEventListener(
+      "change",
+      async (e) => {
+        const files = Array.from(e.target.files ?? []);
+        if (!files.length) return;
+        await this.uploadFiles(files);
+        e.target.value = "";
+      },
+    );
+  }
+
+  async uploadFiles(files) {
+    const status = document.getElementById("sidenavUploadStatus");
+    const textarea = document.getElementById("sidenavTaskDescription");
+    if (status) status.textContent = "Uploading…";
+
+    for (const file of files) {
+      const form = new FormData();
+      form.append("file", file);
+
+      try {
+        const res = await fetch("/api/uploads", { method: "POST", body: form });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          showToast(`Upload failed: ${err.error ?? res.statusText}`, "error");
+          continue;
+        }
+        const { path } = await res.json();
+        const isImage = file.type.startsWith("image/");
+        const link = isImage
+          ? `![${file.name}](${path})`
+          : `[${file.name}](${path})`;
+
+        if (textarea) {
+          const pos = textarea.selectionStart ?? textarea.value.length;
+          const before = textarea.value.slice(0, pos);
+          const after = textarea.value.slice(pos);
+          const sep = before.length && !before.endsWith("\n") ? "\n" : "";
+          textarea.value = `${before}${sep}${link}\n${after}`;
+        }
+      } catch {
+        showToast(`Upload failed: ${file.name}`, "error");
+      }
+    }
+
+    if (status) status.textContent = "";
   }
 
   open(task = null, parentTaskId = null) {

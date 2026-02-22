@@ -9788,6 +9788,23 @@
                 rows="3"
                 class="form-textarea"
               ></textarea>
+              <div class="task-upload-row">
+                <input
+                  type="file"
+                  id="sidenavFileInput"
+                  class="hidden"
+                  accept="image/*,.pdf,.txt,.md,.csv,.json"
+                  multiple
+                >
+                <button
+                  type="button"
+                  id="sidenavAttachBtn"
+                  class="btn-secondary"
+                >
+                  Attach file
+                </button>
+                <span id="sidenavUploadStatus" class="task-upload-status"></span>
+              </div>
             </div>
           </div>
 
