@@ -6,10 +6,11 @@
 
 import { Hono } from "hono";
 import { join } from "@std/path";
-import { ensureDir } from "@std/fs";
+import { ensureDir, walk } from "@std/fs";
 import {
   AppVariables,
   errorResponse,
+  getParser,
   getProjectManager,
   jsonResponse,
 } from "./context.ts";
@@ -88,6 +89,57 @@ uploadsRouter.post("/", async (c) => {
   const relativePath = `uploads/${subdir}/${filename}`;
 
   return jsonResponse({ path: relativePath, filename, size: file.size }, 201);
+});
+
+type UploadFileEntry = { path: string; size: number; modified: string };
+
+async function listUploadFiles(
+  projectDir: string,
+): Promise<UploadFileEntry[]> {
+  const uploadsDir = join(projectDir, "uploads");
+  const files: UploadFileEntry[] = [];
+
+  try {
+    for await (const entry of walk(uploadsDir, { includeDirs: false })) {
+      const stat = await Deno.stat(entry.path);
+      files.push({
+        path: entry.path.slice(projectDir.length + 1),
+        size: stat.size,
+        modified: stat.mtime?.toISOString() ?? "",
+      });
+    }
+  } catch (error) {
+    if ((error as Deno.errors.NotFound)?.name !== "NotFound") throw error;
+  }
+
+  return files;
+}
+
+/** GET /api/uploads — list all uploaded files */
+uploadsRouter.get("/", async (c) => {
+  const pm = getProjectManager(c);
+  const files = await listUploadFiles(pm.getActiveProjectDir());
+  const total_size = files.reduce((sum, f) => sum + f.size, 0);
+  return jsonResponse({ files, total_size });
+});
+
+/** GET /api/uploads/orphans — files not referenced in any task's attachments */
+uploadsRouter.get("/orphans", async (c) => {
+  const pm = getProjectManager(c);
+  const parser = getParser(c);
+  const files = await listUploadFiles(pm.getActiveProjectDir());
+
+  const tasks = await parser.readTasks();
+  const referenced = new Set<string>();
+  for (const task of tasks) {
+    for (const p of task.config.attachments ?? []) {
+      referenced.add(p);
+    }
+  }
+
+  const orphans = files.filter((f) => !referenced.has(f.path));
+  const total_orphan_size = orphans.reduce((sum, f) => sum + f.size, 0);
+  return jsonResponse({ orphans, total_orphan_size });
 });
 
 /** DELETE /api/uploads/:year/:month/:day/:filename */
