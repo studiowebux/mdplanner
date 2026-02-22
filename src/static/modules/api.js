@@ -257,7 +257,6 @@ export const RetrospectivesAPI = {
   },
 };
 
-// SWOT API
 // MoSCoW Analysis API
 export const MoscowAPI = {
   async fetchAll() {
@@ -281,6 +280,30 @@ export const MoscowAPI = {
   },
 };
 
+// Eisenhower Matrix API
+export const EisenhowerAPI = {
+  async fetchAll() {
+    const response = await get("/api/eisenhower");
+    return response.json();
+  },
+
+  async create(matrix) {
+    const response = await post("/api/eisenhower", matrix);
+    return response;
+  },
+
+  async update(id, matrix) {
+    const response = await put(`/api/eisenhower/${id}`, matrix);
+    return response;
+  },
+
+  async delete(id) {
+    const response = await del(`/api/eisenhower/${id}`);
+    return response;
+  },
+};
+
+// SWOT API
 export const SwotAPI = {
   async fetchAll() {
     const response = await get("/api/swot");
