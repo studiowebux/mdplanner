@@ -236,6 +236,31 @@ export const MilestonesAPI = {
   },
 };
 
+// Meetings API
+export const MeetingsAPI = {
+  async fetchAll() {
+    const response = await get("/api/meetings");
+    return response.json();
+  },
+
+  async fetchOne(id) {
+    const response = await get(`/api/meetings/${id}`);
+    return response.json();
+  },
+
+  async create(meeting) {
+    return post("/api/meetings", meeting);
+  },
+
+  async update(id, meeting) {
+    return put(`/api/meetings/${id}`, meeting);
+  },
+
+  async delete(id) {
+    return del(`/api/meetings/${id}`);
+  },
+};
+
 // Ideas API
 export const IdeasAPI = {
   async fetchAll() {

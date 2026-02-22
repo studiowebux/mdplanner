@@ -300,6 +300,7 @@ export class ConfigView {
         { id: "capacity", label: "Capacity" },
         { id: "timeTracking", label: "Time Tracking" },
         { id: "crm", label: "CRM" },
+        { id: "meetings", label: "Meetings" },
       ],
       "Notes": [
         { id: "notes", label: "Notes" },
