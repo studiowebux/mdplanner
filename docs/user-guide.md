@@ -497,3 +497,32 @@ Feature keys: `tasks`, `notes`, `goals`, `ideas`, `milestones`,
 `businessmodel`, `projectvalue`, `brief`, `strategiclevels`, `capacity`,
 `billing`, `crm`, `timetracking`, `portfolio`, `orgchart`, `people`, `moscow`,
 `eisenhower`, `ideas-sorter`.
+
+## Mobile Support
+
+Most views work on mobile. Three views require a wide viewport and show a
+notice on screens narrower than 768px instead of a broken layout:
+
+| View | Mobile | Notes |
+| --------- | ------ | ----- |
+| Tasks (board) | Supported | Columns scroll horizontally |
+| Tasks (list) | Supported | Touch drag to change section |
+| Notes | Supported | |
+| Goals | Supported | |
+| Ideas | Supported | |
+| Idea sorter | Supported | Table scrolls horizontally |
+| Milestones | Supported | |
+| Retrospectives | Supported | |
+| MoSCoW | Supported | Stacks to 1 column below 36rem |
+| Eisenhower | Supported | |
+| People | Supported | Single column below 768px |
+| Org chart | Supported | |
+| Portfolio | Supported | |
+| Billing | Supported | Card layout stacks |
+| CRM | Supported | Card layout stacks |
+| Capacity | Supported | |
+| Strategic levels | Supported | |
+| C4 Architecture | Supported | |
+| Canvas | Not supported | Free-drag interaction requires pointer precision |
+| Mindmap | Not supported | Keyboard-centric editing (Tab, Shift+Tab, Alt+arrows) |
+| Timeline | Not supported | Gantt chart requires wide viewport by design |

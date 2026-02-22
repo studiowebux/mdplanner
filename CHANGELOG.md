@@ -8,8 +8,15 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-02-22
+
 ### Added
 
+- Desktop and touch drag-drop for list view (was wired `draggable=true` but had
+  zero event handlers)
+- Mobile-unsupported notice for Canvas, Mindmap, Timeline at < 768px — hides
+  broken layout, shows a message instead
+- Mobile support reference table in `docs/user-guide.md`
 - Dockerfile and docker-compose for containerized deployment with data volume
 - Health check on container startup (`wget` against `127.0.0.1`)
 - `deploy/Makefile` with `install`, `uninstall`, `start`, `stop`, `restart`,
@@ -20,6 +27,10 @@ and this project adheres to
 
 ### Fixed
 
+- `.w-80` and `.min-h-48` utility classes missing after Tailwind removal — board
+  kanban columns had no width so horizontal scroll was non-functional
+- `dragover` in list view only called `preventDefault` on explicit drop zones;
+  dragging over task items showed no-drop cursor and drop never fired
 - Docker healthcheck used `localhost` which fails in Alpine; switched to
   `127.0.0.1`
 
@@ -94,7 +105,8 @@ and this project adheres to
   Windows
 - GitHub Actions CI/CD pipeline
 
-[Unreleased]: https://github.com/studiowebux/mdplanner/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/studiowebux/mdplanner/compare/v0.3.3...HEAD
+[0.3.3]: https://github.com/studiowebux/mdplanner/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/studiowebux/mdplanner/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/studiowebux/mdplanner/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/studiowebux/mdplanner/compare/v0.2.1...v0.3.0

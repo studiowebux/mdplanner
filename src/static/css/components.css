@@ -855,3 +855,36 @@ select.input {
   }
 }
 
+/* --------------------------------------------------------------------------
+   Mobile-unsupported notice
+   Shown on narrow viewports for views that require a wide screen.
+   Hides all sibling content so the broken layout is never visible.
+   -------------------------------------------------------------------------- */
+
+.mobile-notice {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .mobile-notice {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--color-text-secondary);
+    font-size: 0.8125rem;
+  }
+
+  .mobile-notice svg {
+    opacity: 0.4;
+  }
+
+  /* Hide all siblings after the notice so broken layout never renders */
+  .mobile-notice ~ * {
+    display: none !important;
+  }
+}
+

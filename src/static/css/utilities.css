@@ -173,6 +173,7 @@
 .w-40 { width: 10rem; }
 .w-48 { width: 12rem; }
 .w-56 { width: 14rem; }
+.w-80 { width: 20rem; }
 .w-full { width: 100%; }
 
 .min-w-0 { min-width: 0; }
@@ -209,6 +210,7 @@
 .min-h-\[140px\] { min-height: 140px; }
 .min-h-\[180px\] { min-height: 180px; }
 .min-h-\[400px\] { min-height: 400px; }
+.min-h-48 { min-height: 12rem; }
 .min-h-96 { min-height: 24rem; }
 .min-h-screen { min-height: 100vh; }
 
