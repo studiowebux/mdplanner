@@ -556,6 +556,27 @@ export interface KPISnapshot {
   notes: string;
 }
 
+// Meeting Notes and Actions Tracker
+
+export interface MeetingAction {
+  id: string;
+  description: string;
+  owner?: string;
+  due?: string; // YYYY-MM-DD
+  status: "open" | "done";
+}
+
+export interface Meeting {
+  id: string;
+  title: string;
+  date: string; // YYYY-MM-DD
+  attendees?: string[];
+  agenda?: string;
+  notes?: string; // markdown body
+  actions: MeetingAction[];
+  created: string; // ISO timestamp
+}
+
 // Org Chart Types
 
 export interface OrgChartMember {

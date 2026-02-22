@@ -44,6 +44,7 @@ import {
   type PeopleSummary,
   type PersonWithChildren,
 } from "./people.ts";
+import { MeetingsDirectoryParser } from "./meetings.ts";
 import type {
   BillingRate,
   Brief,
@@ -64,6 +65,7 @@ import type {
   LeanCanvas,
   Milestone,
   Mindmap,
+  Meeting,
   MoscowAnalysis,
   Note,
   Payment,
@@ -116,6 +118,7 @@ export class DirectoryMarkdownParser {
   protected investorParser: InvestorDirectoryParser;
   protected kpiParser: KpiDirectoryParser;
   protected peopleParser: PeopleDirectoryParser;
+  protected meetingsParser: MeetingsDirectoryParser;
 
   constructor(projectDir: string) {
     this.projectDir = projectDir;
@@ -146,6 +149,7 @@ export class DirectoryMarkdownParser {
     this.investorParser = new InvestorDirectoryParser(projectDir);
     this.kpiParser = new KpiDirectoryParser(projectDir);
     this.peopleParser = new PeopleDirectoryParser(projectDir);
+    this.meetingsParser = new MeetingsDirectoryParser(projectDir);
   }
 
   // ============================================================
@@ -472,6 +476,32 @@ export class DirectoryMarkdownParser {
 
   async deleteMilestone(id: string): Promise<boolean> {
     return this.milestonesParser.delete(id);
+  }
+
+  // ============================================================
+  // Meetings
+  // ============================================================
+
+  async readMeetings(): Promise<Meeting[]> {
+    const meetings = await this.meetingsParser.readAll();
+    return meetings.sort((a, b) => b.date.localeCompare(a.date));
+  }
+
+  async addMeeting(
+    meeting: Omit<Meeting, "id" | "created">,
+  ): Promise<Meeting> {
+    return this.meetingsParser.add(meeting);
+  }
+
+  async updateMeeting(
+    id: string,
+    updates: Partial<Meeting>,
+  ): Promise<Meeting | null> {
+    return this.meetingsParser.update(id, updates);
+  }
+
+  async deleteMeeting(id: string): Promise<boolean> {
+    return this.meetingsParser.delete(id);
   }
 
   // ============================================================
@@ -1586,6 +1616,7 @@ export class DirectoryMarkdownParser {
     await Deno.mkdir(`${this.projectDir}/moscow`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/eisenhower`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/people`, { recursive: true });
+    await Deno.mkdir(`${this.projectDir}/meetings`, { recursive: true });
 
     // Create project.md
     await this.projectParser.write({

@@ -36,6 +36,7 @@ import { strategicRouter } from "./features/strategic.ts";
 import { billingRouter } from "./features/billing.ts";
 import { crmRouter } from "./features/crm.ts";
 import { moscowRouter } from "./features/moscow.ts";
+import { meetingsRouter } from "./features/meetings.ts";
 import { eisenhowerRouter } from "./features/eisenhower.ts";
 import { safeRouter } from "./features/safe.ts";
 import { investorsRouter } from "./features/investors.ts";
@@ -99,6 +100,9 @@ export function createApiRouter(
 
   // CRM routes (nested under various paths)
   api.route("/", crmRouter);
+
+  // Meetings routes
+  api.route("/meetings", meetingsRouter);
 
   // MoSCoW Analysis routes
   api.route("/moscow", moscowRouter);

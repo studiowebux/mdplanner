@@ -1,4 +1,5 @@
 import { showToast } from "./modules/ui/toast.js";
+import { initConfirmModal } from "./modules/ui/confirm.js";
 import { ThemeManager } from "./modules/ui/theme.js";
 import { closeMobileMenu, toggleMobileMenu } from "./modules/ui/mobile.js";
 import { AccessibilityManager } from "./modules/ui/accessibility.js";
@@ -51,6 +52,8 @@ import { StrategicLevelsSidenavModule } from "./modules/features/strategic-level
 import { GoalsModule } from "./modules/features/goals.js";
 import { MilestonesModule } from "./modules/features/milestones.js";
 import { IdeasModule } from "./modules/features/ideas.js";
+import { MeetingsModule } from "./modules/features/meetings.js";
+import { MeetingSidenavModule } from "./modules/features/meeting-sidenav.js";
 import { RetrospectivesModule } from "./modules/features/retrospectives.js";
 import { MoscowModule } from "./modules/features/moscow.js";
 import { EisenhowerModule } from "./modules/features/eisenhower.js";
@@ -227,6 +230,7 @@ class TaskManager {
     this.projectValueSidenavModule = new ProjectValueSidenavModule(this);
     this.briefSidenavModule = new BriefSidenavModule(this);
     this.ideaSidenavModule = new IdeaSidenavModule(this);
+    this.meetingSidenavModule = new MeetingSidenavModule(this);
     this.c4SidenavModule = new C4SidenavModule(this);
     this.capacitySidenavModule = new CapacitySidenavModule(this);
     this.crmSidenavModule = new CRMSidenavModule(this);
@@ -235,6 +239,7 @@ class TaskManager {
     this.goalsModule = new GoalsModule(this);
     this.milestonesModule = new MilestonesModule(this);
     this.ideasModule = new IdeasModule(this);
+    this.meetingsModule = new MeetingsModule(this);
     this.retrospectivesModule = new RetrospectivesModule(this);
     this.moscowModule = new MoscowModule(this);
     this.eisenhowerModule = new EisenhowerModule(this);
@@ -278,6 +283,7 @@ class TaskManager {
     AccessibilityManager.init();
     Sidenav.init();
     Help.init();
+    initConfirmModal();
     this.bindEvents();
     await this.loadProjects(); // Load projects first
     await this.loadProjectConfig();
@@ -385,6 +391,7 @@ class TaskManager {
       { id: "peopleViewBtn", view: "people" },
       { id: "portfolioViewBtn", view: "portfolio" },
       { id: "uploadsViewBtn", view: "uploads" },
+      { id: "meetingsViewBtn", view: "meetings" },
     ];
     additionalViews.forEach(({ id, view }) => {
       document.getElementById(id)?.addEventListener("click", () => {
@@ -609,6 +616,12 @@ class TaskManager {
       .getElementById("portfolioViewBtnMobile")
       ?.addEventListener("click", () => {
         this.switchView("portfolio");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("meetingsViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("meetings");
         this.closeMobileMenu();
       });
 
@@ -837,6 +850,8 @@ class TaskManager {
     // Board view drag and drop events - delegated to BoardView
     this.boardView.bindEvents();
     this.uploadsView.bindEvents();
+    this.meetingSidenavModule.bindEvents();
+    this.meetingsModule.bindEvents();
   }
 
   async loadTasks() {
@@ -866,6 +881,7 @@ class TaskManager {
       "projectValue", "brief", "timeTracking", "capacity",
       "strategicLevels", "billing", "crm", "orgchart", "people", "portfolio",
       "uploads",
+      "meetings",
     ];
 
     // If no features configured, show everything
@@ -927,6 +943,7 @@ class TaskManager {
       people: "People",
       portfolio: "Portfolio",
       fundraising: "Fundraising",
+      meetings: "Meetings",
       config: "Settings",
     };
     const label = document.getElementById("currentViewLabel");
@@ -1043,6 +1060,7 @@ class TaskManager {
       "orgchartViewBtnMobile",
       "peopleViewBtnMobile",
       "portfolioViewBtnMobile",
+      "meetingsViewBtnMobile",
       "configViewBtnMobile",
     ];
     mobileBtnIds.forEach((id) => {
@@ -1082,6 +1100,7 @@ class TaskManager {
     document.getElementById("peopleView")?.classList.add("hidden");
     document.getElementById("portfolioView")?.classList.add("hidden");
     document.getElementById("uploadsView")?.classList.add("hidden");
+    document.getElementById("meetingsView")?.classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
     document.getElementById("mindmapView").classList.add("hidden");
     document.getElementById("c4View").classList.add("hidden");
@@ -1218,6 +1237,10 @@ class TaskManager {
       this.activateViewButton("uploads");
       document.getElementById("uploadsView").classList.remove("hidden");
       this.uploadsView.load();
+    } else if (view === "meetings") {
+      this.activateViewButton("meetings");
+      document.getElementById("meetingsView").classList.remove("hidden");
+      this.meetingsModule.load();
     } else if (view === "config") {
       this.activateViewButton("config");
       document.getElementById("configView").classList.remove("hidden");

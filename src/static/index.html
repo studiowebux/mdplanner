@@ -771,6 +771,13 @@
               >
                 Strategic Levels
               </button>
+              <button
+                id="meetingsViewBtn"
+                data-view="meetings"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                Meetings
+              </button>
             </div>
           </div>
 
@@ -1052,6 +1059,12 @@
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
             >
               Uploads
+            </button>
+            <button
+              id="meetingsViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              Meetings
             </button>
             <button
               id="configViewBtnMobile"
@@ -1529,6 +1542,40 @@
           </div>
           <div class="p-6">
             <div id="uploadsContent"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Meetings View -->
+      <div id="meetingsView" class="hidden pb-16">
+        <div class="bg-primary rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-default flex justify-between items-center view-header">
+            <h2 class="text-lg font-medium text-primary">Meetings</h2>
+            <button id="addMeetingBtn" class="btn-primary py-2 rounded-lg">+ New Meeting</button>
+          </div>
+          <div class="p-6">
+            <!-- Tab bar -->
+            <div class="meetings-tabs">
+              <button id="meetingsTabMeetings" class="meetings-tab meetings-tab-active">Meetings</button>
+              <button id="meetingsTabActions" class="meetings-tab">Open Actions</button>
+            </div>
+            <!-- Meetings list -->
+            <div id="meetingsList">
+              <div id="emptyMeetingsState" class="hidden">
+                <p class="text-secondary text-sm">No meetings yet. Create your first meeting.</p>
+              </div>
+              <div id="meetingsContainer" class="meetings-grid"></div>
+            </div>
+            <!-- Actions list -->
+            <div id="meetingsActionsList" class="hidden">
+              <div class="meetings-actions-filter">
+                <input id="meetingsOwnerFilter" type="text" placeholder="Filter by owner..." />
+              </div>
+              <div id="emptyMeetingsActionsState" class="hidden">
+                <p class="text-secondary text-sm">No open action items.</p>
+              </div>
+              <div id="meetingsActionsContainer"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -12117,6 +12164,66 @@
     </div>
 
     <!-- Idea Sidenav -->
+    <!-- Meeting Sidenav -->
+    <div id="meetingSidenav" class="sidenav-panel sidenav-md">
+      <div class="sidenav-header">
+        <h2 id="meetingSidenavHeader" class="sidenav-title">New Meeting</h2>
+        <div class="flex items-center gap-2">
+          <span id="meetingSidenavSaveStatus" class="text-xs hidden"></span>
+          <button type="button" id="meetingSidenavClose" class="sidenav-close" aria-label="Close">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="flex flex-col flex-1 overflow-hidden">
+        <div class="sidenav-content">
+          <div class="sidenav-section">
+            <div class="form-group">
+              <label class="form-label" for="meetingSidenavTitle">Title</label>
+              <input id="meetingSidenavTitle" type="text" class="form-input" placeholder="Meeting title" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="meetingSidenavDate">Date</label>
+              <input id="meetingSidenavDate" type="date" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="meetingSidenavAttendeeInput">Attendees</label>
+              <div id="meetingSidenavAttendeePicker" class="attendee-tag-picker">
+                <input id="meetingSidenavAttendeeInput" type="text" class="attendee-tag-input" placeholder="Add person..." autocomplete="off" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="meetingSidenavAgenda">Agenda</label>
+              <textarea id="meetingSidenavAgenda" class="form-textarea" rows="2" placeholder="Meeting agenda..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="meetingSidenavNotes">Notes</label>
+              <textarea id="meetingSidenavNotes" class="form-textarea" rows="6" placeholder="Meeting notes (markdown supported)..."></textarea>
+            </div>
+          </div>
+          <div class="sidenav-section">
+            <div class="sidenav-section-title">Action Items</div>
+            <div class="meeting-action-input-row">
+              <input id="meetingSidenavActionInput" type="text" class="form-input" placeholder="Action description" />
+              <div class="meeting-action-meta-inputs">
+                <input id="meetingSidenavActionOwner" type="text" class="form-input" placeholder="Owner" autocomplete="off" />
+                <input id="meetingSidenavActionDue" type="date" class="form-input" />
+                <button id="meetingSidenavActionAdd" class="btn-primary py-2 rounded-lg">Add</button>
+              </div>
+            </div>
+            <div id="meetingSidenavActionList"></div>
+          </div>
+        </div>
+        <div class="sidenav-footer">
+          <button type="button" id="meetingSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+          <div class="flex-1"></div>
+          <button type="button" id="meetingSidenavCancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
+        </div>
+      </div>
+    </div>
+
     <div id="ideaSidenav" class="sidenav-panel sidenav-md">
       <div class="sidenav-header">
         <h2 id="ideaSidenavHeader" class="sidenav-title">New Idea</h2>
@@ -13054,6 +13161,39 @@
       <div class="sidenav-footer help-footer">
         <span class="help-footer-hint"
         >Press <kbd class="help-kbd">?</kbd> to toggle help</span>
+      </div>
+    </div>
+
+    <!-- Meeting View Modal -->
+    <div id="meetingViewModal" class="meeting-view-modal hidden">
+      <div class="meeting-view-content">
+        <div class="meeting-view-header">
+          <div>
+            <h2 id="meetingViewTitle" class="meeting-view-title"></h2>
+            <div id="meetingViewMeta" class="meeting-view-meta"></div>
+          </div>
+          <button id="meetingViewClose" class="meeting-view-close" aria-label="Close">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <div class="meeting-view-body">
+          <div id="meetingViewAgenda"></div>
+          <div id="meetingViewNotes"></div>
+          <div id="meetingViewActions"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirmModalOverlay" class="confirm-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="confirmModalMessage">
+      <div class="confirm-modal-box">
+        <p id="confirmModalMessage" class="confirm-modal-message"></p>
+        <div class="confirm-modal-footer">
+          <button id="confirmModalCancel" class="btn">Cancel</button>
+          <button id="confirmModalConfirm" class="btn-danger">Delete</button>
+        </div>
       </div>
     </div>
 
