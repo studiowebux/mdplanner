@@ -1,6 +1,8 @@
 // Focus Mode Module
 // Provides distraction-free single-task view for ADHD/autism accessibility
 
+import { markdownToHtml } from "../utils.js";
+
 /**
  * Focus Mode for single-task distraction-free view
  */
@@ -138,7 +140,7 @@ export class FocusMode {
       task.description
         ? `
               <div class="focus-mode-description">
-                ${this.escapeHtml(task.description)}
+                ${markdownToHtml(Array.isArray(task.description) ? task.description.join("\n") : (task.description || ""))}
               </div>
             `
         : ""

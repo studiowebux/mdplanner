@@ -10,6 +10,7 @@ export class TaskSidenavModule {
     this.tm = taskManager;
     this.editingTask = null;
     this.parentTaskId = null;
+    this.pendingAttachments = [];
   }
 
   bindEvents() {
@@ -37,6 +38,77 @@ export class TaskSidenavModule {
         await this.handleSubmit();
       },
     );
+
+    // File attach button triggers hidden input
+    document.getElementById("sidenavAttachBtn")?.addEventListener(
+      "click",
+      () => document.getElementById("sidenavFileInput")?.click(),
+    );
+
+    // File input change — upload each file and insert markdown into description
+    document.getElementById("sidenavFileInput")?.addEventListener(
+      "change",
+      async (e) => {
+        const files = Array.from(e.target.files ?? []);
+        if (!files.length) return;
+        await this.uploadFiles(files);
+        e.target.value = "";
+      },
+    );
+  }
+
+  async uploadFiles(files) {
+    const status = document.getElementById("sidenavUploadStatus");
+    const textarea = document.getElementById("sidenavTaskDescription");
+    if (status) status.textContent = "Uploading…";
+
+    for (const file of files) {
+      const form = new FormData();
+      form.append("file", file);
+
+      try {
+        const res = await fetch("/api/uploads", { method: "POST", body: form });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          showToast(`Upload failed: ${err.error ?? res.statusText}`, "error");
+          continue;
+        }
+        const { path } = await res.json();
+        const isImage = file.type.startsWith("image/");
+        // Use absolute path so the URL resolves correctly from any render context
+        const link = isImage
+          ? `![${file.name}](/${path})`
+          : `[${file.name}](/${path})`;
+
+        if (textarea) {
+          const pos = textarea.selectionStart ?? textarea.value.length;
+          const before = textarea.value.slice(0, pos);
+          const after = textarea.value.slice(pos);
+          // Ensure a blank line before the link so marked renders it as a
+          // block paragraph rather than inline inside surrounding text
+          const pre = before.length
+            ? before.endsWith("\n\n")
+              ? ""
+              : before.endsWith("\n")
+                ? "\n"
+                : "\n\n"
+            : "";
+          textarea.value = `${before}${pre}${link}\n\n${after}`;
+        }
+
+        // Link to task frontmatter immediately when editing an existing task;
+        // for new tasks, collect paths and link after create in handleSubmit.
+        if (this.editingTask) {
+          await TasksAPI.addAttachments(this.editingTask.id, [path]);
+        } else {
+          this.pendingAttachments.push(path);
+        }
+      } catch {
+        showToast(`Upload failed: ${file.name}`, "error");
+      }
+    }
+
+    if (status) status.textContent = "";
   }
 
   open(task = null, parentTaskId = null) {
@@ -104,7 +176,10 @@ export class TaskSidenavModule {
     };
 
     setValue("sidenavTaskTitleInput", task.title);
-    setValue("sidenavTaskDescription", task.description);
+    setValue(
+      "sidenavTaskDescription",
+      Array.isArray(task.description) ? task.description.join("\n") : (task.description || ""),
+    );
     setValue("sidenavTaskSection", task.section);
     setValue("sidenavTaskPriority", task.priority);
     setValue("sidenavTaskAssignee", task.assignee);
@@ -138,6 +213,8 @@ export class TaskSidenavModule {
     // Clear dependencies display
     const deps = document.getElementById("sidenavSelectedDependencies");
     if (deps) deps.innerHTML = "";
+
+    this.pendingAttachments = [];
   }
 
   async handleSubmit() {
@@ -178,13 +255,20 @@ export class TaskSidenavModule {
         if (this.parentTaskId) {
           taskData.parentId = this.parentTaskId;
         }
-        await TasksAPI.create(taskData);
+        const res = await TasksAPI.create(taskData);
+        if (res.ok && this.pendingAttachments.length) {
+          const { id: newId } = await res.json();
+          if (newId) {
+            await TasksAPI.addAttachments(newId, this.pendingAttachments);
+          }
+        }
+        this.pendingAttachments = [];
         showToast("Task created", "success");
       }
 
       this.close();
       await this.tm.loadTasks();
-      this.tm.renderCurrentView();
+      this.tm.renderTasks();
     } catch (error) {
       console.error("Error saving task:", error);
       showToast("Error saving task", "error");

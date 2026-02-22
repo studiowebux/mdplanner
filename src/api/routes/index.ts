@@ -50,6 +50,9 @@ import { exportImportRouter } from "./export-import.ts";
 // Search/Cache routes
 import { searchRouter } from "./search.ts";
 
+// Uploads routes
+import { uploadsRouter } from "./uploads.ts";
+
 export function createApiRouter(
   projectManager: ProjectManager,
 ): Hono<{ Variables: AppVariables }> {
@@ -122,6 +125,9 @@ export function createApiRouter(
 
   // Search/Cache routes
   api.route("/search", searchRouter);
+
+  // Uploads routes
+  api.route("/uploads", uploadsRouter);
 
   // 404 handler
   api.notFound((c) => {

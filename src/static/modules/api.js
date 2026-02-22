@@ -48,6 +48,26 @@ export async function patch(url, data) {
   });
 }
 
+/** Uploads management operations */
+export const UploadsAPI = {
+  async list() {
+    const response = await get("/api/uploads");
+    return response.json();
+  },
+
+  async orphans() {
+    const response = await get("/api/uploads/orphans");
+    return response.json();
+  },
+
+  async delete(year, month, day, filename) {
+    const response = await del(
+      `/api/uploads/${year}/${month}/${day}/${filename}`,
+    );
+    return response;
+  },
+};
+
 /** Tasks CRUD operations */
 export const TasksAPI = {
   async fetchAll() {
@@ -72,6 +92,11 @@ export const TasksAPI = {
 
   async move(id, data) {
     const response = await patch(`/api/tasks/${id}/move`, data);
+    return response;
+  },
+
+  async addAttachments(id, paths) {
+    const response = await patch(`/api/tasks/${id}/attachments`, { paths });
     return response;
   },
 };

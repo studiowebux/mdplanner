@@ -782,6 +782,13 @@
           >
             Portfolio
           </button>
+          <button
+            id="uploadsViewBtn"
+            data-view="uploads"
+            class="nav-dropdown-btn"
+          >
+            Uploads
+          </button>
         </div>
       </div>
 
@@ -1039,6 +1046,12 @@
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
             >
               Portfolio
+            </button>
+            <button
+              id="uploadsViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              Uploads
             </button>
             <button
               id="configViewBtnMobile"
@@ -1505,6 +1518,18 @@
           class="grid gap-4 lg:gap-6 auto-cols-min grid-flow-col overflow-x-auto pb-4"
         >
           <!-- Columns will be generated dynamically -->
+        </div>
+      </div>
+
+      <!-- Uploads Management View -->
+      <div id="uploadsView" class="hidden pb-16">
+        <div class="bg-primary rounded-lg shadow">
+          <div class="view-header">
+            <h2>Uploads</h2>
+          </div>
+          <div class="p-6">
+            <div id="uploadsContent"></div>
+          </div>
         </div>
       </div>
 
@@ -9788,6 +9813,23 @@
                 rows="3"
                 class="form-textarea"
               ></textarea>
+              <div class="task-upload-row">
+                <input
+                  type="file"
+                  id="sidenavFileInput"
+                  class="hidden"
+                  accept="image/*,.pdf,.txt,.md,.csv,.json"
+                  multiple
+                >
+                <button
+                  type="button"
+                  id="sidenavAttachBtn"
+                  class="btn-secondary"
+                >
+                  Attach file
+                </button>
+                <span id="sidenavUploadStatus" class="task-upload-status"></span>
+              </div>
             </div>
           </div>
 

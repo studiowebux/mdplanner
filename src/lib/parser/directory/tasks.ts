@@ -20,6 +20,7 @@ interface TaskFrontmatter {
   planned_start?: string;
   planned_end?: string;
   time_entries?: TimeEntry[];
+  attachments?: string[];
 }
 
 export class TasksDirectoryParser {
@@ -496,6 +497,9 @@ export class TasksDirectoryParser {
       config.time_entries = frontmatter.time_entries;
     }
     if (frontmatter.order !== undefined) config.order = frontmatter.order;
+    if (frontmatter.attachments?.length) {
+      config.attachments = frontmatter.attachments;
+    }
 
     return {
       id: frontmatter.id,
@@ -541,6 +545,9 @@ export class TasksDirectoryParser {
       frontmatter.time_entries = task.config.time_entries;
     }
     if (task.config.order !== undefined) frontmatter.order = task.config.order;
+    if (task.config.attachments?.length) {
+      frontmatter.attachments = task.config.attachments;
+    }
 
     let body = `# ${task.title}\n\n`;
 
@@ -604,6 +611,7 @@ export class TasksDirectoryParser {
   async add(task: Omit<Task, "id">): Promise<Task> {
     const newTask: Task = {
       ...task,
+      config: task.config ?? {}, // ensure config always exists
       id: this.generateId(),
     };
     await this.write(newTask);
@@ -624,6 +632,9 @@ export class TasksDirectoryParser {
     const updated: Task = {
       ...existing,
       ...updates,
+      // Deep merge config so callers can send partial config without
+      // clobbering time_entries, blocked_by, order, attachments, etc.
+      config: { ...existing.config, ...(updates.config ?? {}) },
       id: existing.id, // Prevent ID change
     };
 

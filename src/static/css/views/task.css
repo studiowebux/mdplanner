@@ -37,6 +37,16 @@
   transition: all var(--transition-base);
 }
 
+.task-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.625rem;
+  margin-top: 0.25rem;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
 .task-list-item.dragging {
   opacity: 0.5;
   background-color: var(--color-bg-tertiary);
@@ -75,4 +85,20 @@
 .drop-zone-active {
   border-color: var(--color-border-strong) !important;
   background-color: var(--color-bg-tertiary) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Task file upload row (below description textarea in sidenav)
+   -------------------------------------------------------------------------- */
+
+.task-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.375rem;
+}
+
+.task-upload-status {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
 }

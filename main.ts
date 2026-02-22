@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { serveStatic } from "hono/deno";
-import { dirname, fromFileUrl, join } from "@std/path";
+import { dirname, extname, fromFileUrl, join } from "@std/path";
 import { ProjectManager } from "./src/lib/project-manager.ts";
 import { createApiRouter } from "./src/api/routes/index.ts";
 import { initProject, printInitSuccess } from "./src/lib/init.ts";
@@ -154,6 +154,33 @@ const app = new Hono();
 // API routes
 const apiRouter = createApiRouter(projectManager);
 app.route("/api", apiRouter);
+
+// Serve uploaded files from the project directory
+const UPLOAD_MIME: Record<string, string> = {
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".webp": "image/webp",
+  ".svg": "image/svg+xml",
+  ".pdf": "application/pdf",
+  ".txt": "text/plain",
+  ".md": "text/markdown",
+  ".csv": "text/csv",
+  ".json": "application/json",
+};
+
+app.get("/uploads/*", async (c) => {
+  const filePath = join(cliArgs.projectPath, c.req.path);
+  try {
+    const data = await Deno.readFile(filePath);
+    const mime = UPLOAD_MIME[extname(filePath).toLowerCase()] ??
+      "application/octet-stream";
+    return new Response(data, { headers: { "Content-Type": mime } });
+  } catch {
+    return c.notFound();
+  }
+});
 
 // Static files with no-cache headers
 const staticRoot = join(__dirname, "src", "static");

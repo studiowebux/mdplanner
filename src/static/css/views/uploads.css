@@ -1,0 +1,119 @@
+/* Uploads Management View */
+
+.uploads-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.uploads-summary-sep {
+  color: var(--text-tertiary);
+}
+
+.uploads-orphan-badge {
+  color: var(--error);
+}
+
+.uploads-section {
+  margin-bottom: 2rem;
+}
+
+.uploads-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.uploads-section-header h3 {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.uploads-hint {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.uploads-empty {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  padding: 2rem 0;
+  text-align: center;
+}
+
+.uploads-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.uploads-table th {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  color: var(--text-tertiary);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+
+.uploads-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  max-width: 20rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uploads-table tr:last-child td {
+  border-bottom: none;
+}
+
+.uploads-link {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.uploads-link:hover {
+  text-decoration: underline;
+}
+
+.uploads-row-orphan td {
+  background: var(--error-bg);
+}
+
+.uploads-delete-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--error);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.uploads-delete-btn:hover {
+  background: var(--error-bg);
+  border-color: var(--error);
+}
+
+@media (max-width: 36rem) {
+  .uploads-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}

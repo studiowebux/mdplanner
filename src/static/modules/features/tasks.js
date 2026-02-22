@@ -208,60 +208,6 @@ export class TasksModule {
     }
   }
 
-  toggleDescription(taskId) {
-    const task = this.findById(taskId);
-    if (!task || !task.description || task.description.length === 0) return;
-
-    // Create or toggle description modal
-    let modal = document.getElementById("descriptionModal");
-    if (!modal) {
-      modal = document.createElement("div");
-      modal.id = "descriptionModal";
-      modal.className =
-        "fixed inset-0 bg-overlay flex items-center justify-center z-50";
-      modal.innerHTML = `
-        <div class="bg-primary rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-          <div class="px-6 py-4 border-b border-default flex justify-between items-center">
-            <h3 id="descriptionModalTitle" class="text-lg font-medium text-primary">Task Description</h3>
-            <button onclick="taskManager.closeDescriptionModal()" class="text-muted hover:text-muted">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
-          </div>
-          <div class="p-6">
-            <div id="descriptionContent" class="prose prose-gray max-w-none"></div>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(modal);
-
-      // Close on background click
-      modal.addEventListener("click", (e) => {
-        if (e.target === modal) {
-          this.closeDescriptionModal();
-        }
-      });
-    }
-
-    // Update content
-    document.getElementById("descriptionModalTitle").textContent =
-      `${task.title} - Description`;
-    const markdownText = task.description.join("\n");
-    document.getElementById("descriptionContent").innerHTML = markdownToHtml(
-      markdownText,
-    );
-
-    modal.classList.remove("hidden");
-  }
-
-  closeDescriptionModal() {
-    const modal = document.getElementById("descriptionModal");
-    if (modal) {
-      modal.classList.add("hidden");
-    }
-  }
-
   async delete(taskId) {
     if (confirm("Are you sure you want to delete this task?")) {
       try {
