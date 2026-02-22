@@ -17,11 +17,12 @@
   font-weight: 500;
   border: none;
   cursor: pointer;
-  transition: opacity var(--transition-base);
+  transition: background-color var(--transition-base), color var(--transition-base);
 }
 
 .btn-primary:hover {
-  opacity: 0.85;
+  background-color: var(--color-accent-hover);
+  color: var(--color-text-inverse);
 }
 
 .btn-primary:disabled {
@@ -43,6 +44,7 @@
 
 .btn-secondary:hover {
   background-color: var(--color-border-default);
+  color: var(--color-text-primary);
 }
 
 .btn-ghost {
