@@ -149,7 +149,7 @@ export class PortfolioView {
     const statusHtml = statusFilters.map((f) => {
       const isActive = this.currentFilter === f.key;
       const activeClass = isActive
-        ? "bg-inverse text-white"
+        ? "bg-inverse text-inverse"
         : "bg-tertiary text-secondary hover:bg-active";
       return `
         <button data-portfolio-filter="${f.key}"
@@ -167,7 +167,7 @@ export class PortfolioView {
       <button data-portfolio-view="list"
               class="px-3 py-1.5 text-sm font-medium rounded transition-colors ${
       listActive
-        ? "bg-inverse text-white"
+        ? "bg-inverse text-inverse"
         : "bg-tertiary text-secondary hover:bg-active"
     }">
         List
@@ -175,7 +175,7 @@ export class PortfolioView {
       <button data-portfolio-view="tree"
               class="px-3 py-1.5 text-sm font-medium rounded transition-colors ${
       treeActive
-        ? "bg-inverse text-white"
+        ? "bg-inverse text-inverse"
         : "bg-tertiary text-secondary hover:bg-active"
     }">
         Tree
@@ -345,7 +345,7 @@ export class PortfolioView {
     }
               ${
       hasKpis
-        ? '<span class="w-2 h-2 bg-info-bg0 rounded-full" title="Has KPIs"></span>'
+        ? '<span class="w-2 h-2 bg-info rounded-full" title="Has KPIs"></span>'
         : ""
     }
             </div>
@@ -361,7 +361,7 @@ export class PortfolioView {
             <div class="text-right w-20">
               <div class="text-sm text-primary">${progressPercent}%</div>
               <div class="w-full bg-active rounded-full h-1.5 mt-1">
-                <div class="bg-success-bg0 h-1.5 rounded-full" style="width: ${progressPercent}%"></div>
+                <div class="bg-success h-1.5 rounded-full" style="width: ${progressPercent}%"></div>
               </div>
             </div>
             ${

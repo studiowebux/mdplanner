@@ -153,7 +153,7 @@ export class BusinessModelSidenavModule {
       <div class="bmc-add-input flex gap-2 mt-1">
         <input type="text" class="flex-1 px-2 py-1 text-sm border border-strong rounded bg-primary text-primary"
                placeholder="Enter item..." autofocus>
-        <button type="button" class="px-2 py-1 text-xs bg-inverse text-white rounded">Add</button>
+        <button type="button" class="px-2 py-1 text-xs bg-inverse text-inverse rounded">Add</button>
       </div>
     `;
     container.insertAdjacentHTML("beforeend", inputHtml);

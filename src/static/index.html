@@ -155,7 +155,7 @@
                 <div class="flex justify-center gap-1 mb-3">
                   <button
                     id="pomodoroFocusBtn"
-                    class="px-2 py-1 rounded text-xs font-medium bg-inverse text-white"
+                    class="px-2 py-1 rounded text-xs font-medium bg-inverse text-inverse"
                   >
                     Focus
                   </button>
@@ -1058,10 +1058,11 @@
       <div id="breadcrumb"></div>
 
       <!-- Loading State -->
-      <div id="loading" class="hidden flex justify-center items-center h-64">
-        <div
-          class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"
-        >
+      <div id="loading" class="hidden">
+        <div class="flex justify-center items-center h-64">
+          <div
+            class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"
+          ></div>
         </div>
       </div>
 
@@ -1242,7 +1243,7 @@
                   <button
                     id="saveLinkBtn"
                     type="button"
-                    class="px-3 py-1.5 text-sm bg-inverse text-white rounded-md hover:bg-active"
+                    class="px-3 py-1.5 text-sm bg-inverse text-inverse rounded-md hover:bg-active"
                   >
                     Save
                   </button>
@@ -1786,7 +1787,7 @@
             <div class="flex space-x-2">
               <button
                 id="openMarkdownBtn"
-                class="bg-inverse text-white px-4 py-2 rounded-lg hover:bg-active transition-colors"
+                class="bg-inverse text-inverse px-4 py-2 rounded-lg hover:bg-active transition-colors"
               >
                 Open MD
               </button>
@@ -1974,7 +1975,7 @@
                       </button>
                       <button
                         id="addCodeBlockBtn"
-                        class="bg-inverse text-white px-3 py-1 rounded text-sm hover:bg-active"
+                        class="bg-inverse text-inverse px-3 py-1 rounded text-sm hover:bg-active"
                       >
                         + Code
                       </button>
@@ -2053,7 +2054,7 @@
             <div class="flex space-x-4">
               <button
                 id="allGoalsFilter"
-                class="px-3 py-1 rounded-md text-sm font-medium bg-inverse text-white"
+                class="px-3 py-1 rounded-md text-sm font-medium bg-inverse text-inverse"
               >
                 All Goals
               </button>
@@ -2396,7 +2397,7 @@
       <!-- SWOT Modal -->
       <div
         id="swotModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -2455,7 +2456,7 @@
       <!-- SWOT Item Modal -->
       <div
         id="swotItemModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -2573,10 +2574,7 @@
                 <span>High Impact</span>
               </div>
               <!-- High Probability Row -->
-              <div class="relative">
-                <span
-                  class="absolute -left-6 top-1/2 -translate-y-1/2 -rotate-90 text-xs text-muted whitespace-nowrap"
-                >High Prob</span>
+              <div>
                 <div
                   class="bg-secondary rounded-lg p-4 border border-default h-full"
                 >
@@ -2623,10 +2621,7 @@
                 </ul>
               </div>
               <!-- Low Probability Row -->
-              <div class="relative">
-                <span
-                  class="absolute -left-6 top-1/2 -translate-y-1/2 -rotate-90 text-xs text-muted whitespace-nowrap"
-                >Low Prob</span>
+              <div>
                 <div
                   class="bg-secondary rounded-lg p-4 border border-default h-full"
                 >
@@ -2680,7 +2675,7 @@
       <!-- Risk Analysis Modal -->
       <div
         id="riskAnalysisModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -2739,7 +2734,7 @@
       <!-- Risk Analysis Item Modal -->
       <div
         id="riskAnalysisItemModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -3126,7 +3121,7 @@
       <!-- Lean Canvas Modal -->
       <div
         id="leanCanvasModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -3185,7 +3180,7 @@
       <!-- Lean Canvas Item Modal -->
       <div
         id="leanCanvasItemModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -3513,7 +3508,7 @@
       <!-- Business Model Canvas Modal -->
       <div
         id="businessModelModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -3572,7 +3567,7 @@
       <!-- Business Model Canvas Item Modal -->
       <div
         id="businessModelItemModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -3779,7 +3774,7 @@
       <!-- Project Value Board Modal -->
       <div
         id="projectValueModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -3838,7 +3833,7 @@
       <!-- Project Value Board Item Modal -->
       <div
         id="projectValueItemModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -4211,7 +4206,7 @@
       <!-- Brief Modal -->
       <div
         id="briefModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -4270,7 +4265,7 @@
       <!-- Brief Item Modal -->
       <div
         id="briefItemModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -4316,7 +4311,7 @@
       <!-- Capacity Plan Modal -->
       <div
         id="capacityPlanModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -4386,7 +4381,7 @@
       <!-- Team Member Modal -->
       <div
         id="teamMemberModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -4495,7 +4490,7 @@
       <!-- Allocation Modal -->
       <div
         id="allocationModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -4596,7 +4591,7 @@
       <!-- Auto-Assign Modal -->
       <div
         id="autoAssignModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-2xl w-full mx-4"
@@ -4644,7 +4639,7 @@
       <!-- Import People Modal -->
       <div
         id="importAssigneesModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -4995,10 +4990,10 @@
                     class="w-3 h-3 rounded bg-active opacity-30"
                   ></span> Available capacity (4 weeks)</span>
                 <span class="flex items-center gap-1"><span
-                    class="w-3 h-3 rounded bg-info-bg0"
+                    class="w-3 h-3 rounded bg-info"
                   ></span> Allocated hours</span>
                 <span class="flex items-center gap-1"><span
-                    class="w-3 h-3 rounded bg-success-bg0"
+                    class="w-3 h-3 rounded bg-success"
                   ></span> Actual hours tracked</span>
               </div>
               <div id="utilizationBars" class="space-y-4"></div>
@@ -5796,7 +5791,7 @@
       <!-- CRM Company Modal -->
       <div
         id="crmCompanyModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto"
@@ -5932,7 +5927,7 @@
       <!-- CRM Contact Modal -->
       <div
         id="crmContactModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto"
@@ -6057,7 +6052,7 @@
       <!-- CRM Deal Modal -->
       <div
         id="crmDealModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto"
@@ -6194,7 +6189,7 @@
       <!-- CRM Interaction Modal -->
       <div
         id="crmInteractionModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto"
@@ -6337,7 +6332,7 @@
       <!-- Customer Modal -->
       <div
         id="customerModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto"
@@ -6472,7 +6467,7 @@
       <!-- Billing Rate Modal -->
       <div
         id="billingRateModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -6556,7 +6551,7 @@
       <!-- Quote Modal -->
       <div
         id="quoteModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
@@ -6687,7 +6682,7 @@
       <!-- Invoice Modal -->
       <div
         id="invoiceModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
@@ -6818,7 +6813,7 @@
       <!-- Generate Invoice Modal -->
       <div
         id="generateInvoiceModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto"
@@ -6920,7 +6915,7 @@
       <!-- Payment Modal -->
       <div
         id="paymentModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -7014,7 +7009,7 @@
       <!-- Strategic Levels Builder Modal -->
       <div
         id="strategicLevelsModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -7073,7 +7068,7 @@
       <!-- Strategic Level Item Modal -->
       <div
         id="strategicLevelModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -7161,7 +7156,7 @@
       <!-- Strategic Level Link Modal -->
       <div
         id="strategicLinkModal"
-        class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+        class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
       >
         <div
           class="bg-primary rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[80vh] flex flex-col"
@@ -7451,7 +7446,7 @@
             <div class="flex space-x-2">
               <button
                 id="c4BackBtn"
-                class="bg-inverse text-white px-4 py-2 rounded-lg hover:bg-active transition-colors hidden"
+                class="bg-inverse text-inverse px-4 py-2 rounded-lg hover:bg-active transition-colors hidden"
               >
                 ← Back
               </button>
@@ -7525,8 +7520,9 @@
               <div id="c4Content" class="relative w-full h-full">
                 <div
                   id="c4EmptyState"
-                  class="flex items-center justify-center h-full"
+                  class="h-full"
                 >
+                  <div class="flex items-center justify-center h-full">
                   <div class="text-center">
                     <svg
                       class="mx-auto h-12 w-12 text-muted"
@@ -7551,6 +7547,7 @@
                       diagram.
                     </p>
                   </div>
+                  </div>
                 </div>
                 <div id="c4ComponentsContainer" class="hidden">
                   <!-- C4 components will be rendered here -->
@@ -7569,7 +7566,7 @@
             <!-- Reset View Button - Outside the viewport -->
             <button
               id="c4ResetViewBtn"
-              class="absolute top-4 right-4 bg-inverse text-white p-2 rounded-full hover:bg-active transition-colors z-20"
+              class="absolute top-4 right-4 bg-inverse text-inverse p-2 rounded-full hover:bg-active transition-colors z-20"
               title="Reset View"
             >
               <svg
@@ -7685,7 +7682,7 @@
     <!-- Custom Section Modal -->
     <div
       id="customSectionModal"
-      class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+      class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
     >
       <div
         class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -7747,7 +7744,7 @@
     <!-- Note Modal -->
     <div
       id="noteModal"
-      class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+      class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
     >
       <div
         class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -7786,7 +7783,7 @@
                 <button
                   type="button"
                   id="noteModeBasic"
-                  class="flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors bg-inverse text-white"
+                  class="flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors bg-inverse text-inverse"
                 >
                   Basic
                 </button>
@@ -7829,7 +7826,7 @@
     <!-- Goal Modal -->
     <div
       id="goalModal"
-      class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+      class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
     >
       <div
         class="bg-primary rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col"
@@ -7964,7 +7961,7 @@
     <!-- Milestone Modal -->
     <div
       id="milestoneModal"
-      class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+      class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
     >
       <div
         class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -8047,7 +8044,7 @@
     <!-- Idea Modal -->
     <div
       id="ideaModal"
-      class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+      class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
     >
       <div
         class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4"
@@ -8153,7 +8150,7 @@
     <!-- Idea Link Picker Modal -->
     <div
       id="ideaLinkPickerModal"
-      class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+      class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
     >
       <div
         class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[80vh] flex flex-col"
@@ -8195,7 +8192,7 @@
     <!-- Retrospective Modal -->
     <div
       id="retrospectiveModal"
-      class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+      class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
     >
       <div
         class="bg-primary rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col"
@@ -8307,7 +8304,7 @@
     <!-- Mindmap Modal -->
     <div
       id="mindmapModal"
-      class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+      class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
     >
       <div
         class="bg-primary rounded-lg shadow-xl max-w-3xl w-full mx-4 flex flex-col max-h-[90vh]"
@@ -8546,7 +8543,7 @@
     <!-- Sticky Note Modal -->
     <div
       id="stickyNoteModal"
-      class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+      class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
     >
       <div
         class="bg-primary rounded-lg shadow-xl max-w-md w-full mx-4 flex flex-col max-h-[90vh]"
@@ -8651,7 +8648,7 @@
     <!-- C4 Component Modal -->
     <div
       id="c4ComponentModal"
-      class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+      class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
     >
       <div
         class="bg-primary rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
@@ -8822,7 +8819,7 @@
     <!-- Task Modal -->
     <div
       id="taskModal"
-      class="fixed inset-0 bg-inverse bg-opacity-50 hidden items-center justify-center z-50"
+      class="fixed inset-0 bg-overlay hidden items-center justify-center z-50"
     >
       <div
         class="bg-primary rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col"
@@ -9345,7 +9342,7 @@
             <button
               type="button"
               id="noteSidenavModeBasic"
-              class="px-4 py-2 text-sm font-medium rounded-md bg-inverse text-white"
+              class="px-4 py-2 text-sm font-medium rounded-md bg-inverse text-inverse"
             >
               Basic
             </button>
@@ -9382,14 +9379,14 @@
               <button
                 type="button"
                 id="noteSidenavAddParagraph"
-                class="px-2 py-1 text-xs font-medium bg-inverse text-white rounded hover:bg-active"
+                class="px-2 py-1 text-xs font-medium bg-inverse text-inverse rounded hover:bg-active"
               >
                 + Text
               </button>
               <button
                 type="button"
                 id="noteSidenavAddCode"
-                class="px-2 py-1 text-xs font-medium bg-secondary0 text-white rounded hover:bg-inverse"
+                class="px-2 py-1 text-xs font-medium bg-inverse text-inverse rounded hover:bg-inverse"
               >
                 + Code
               </button>
@@ -10039,7 +10036,7 @@
               </button>
               <button
                 type="button"
-                class="color-option w-8 h-8 rounded-full bg-pink-200"
+                class="color-option w-8 h-8 rounded-full" style="background-color: #fbcfe8"
                 data-color="pink"
               >
               </button>

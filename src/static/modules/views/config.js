@@ -291,6 +291,7 @@ export class ConfigView {
         { id: "billing", label: "Billing" },
         { id: "crm", label: "CRM" },
         { id: "orgchart", label: "Org Chart" },
+        { id: "people", label: "People" },
       ],
       "Other": [
         { id: "notes", label: "Notes" },

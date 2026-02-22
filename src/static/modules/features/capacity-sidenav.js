@@ -231,7 +231,7 @@ export class CapacitySidenavModule {
           </div>
           <div class="flex gap-2 mt-2">
             <button type="button" onclick="taskManager.capacitySidenavModule.saveMember()"
-                    class="px-3 py-1 text-xs bg-inverse text-white rounded hover:bg-inverse">
+                    class="px-3 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">
               ${this.editingMemberId ? "Update" : "Add"}
             </button>
             <button type="button" onclick="taskManager.capacitySidenavModule.cancelMemberForm()"
@@ -394,7 +394,7 @@ export class CapacitySidenavModule {
         <div class="text-xs text-muted mt-2">Uses person defaults for hours and working days</div>
         <div class="flex gap-2 mt-2">
           <button type="button" onclick="taskManager.capacitySidenavModule.applyImportPeople()"
-                  class="px-3 py-1 text-xs bg-inverse text-white rounded hover:bg-inverse">Import</button>
+                  class="px-3 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">Import</button>
           <button type="button" onclick="taskManager.capacitySidenavModule.cancelMemberForm()"
                   class="px-3 py-1 text-xs text-muted hover:text-secondary">Cancel</button>
         </div>

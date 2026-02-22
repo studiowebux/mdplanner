@@ -1124,15 +1124,15 @@ export class C4Module {
     if (!components || components.length === 0) return "";
 
     const levelColors = {
-      context: "border-l-gray-800",
-      container: "border-l-gray-600",
-      component: "border-l-gray-400",
-      code: "border-l-gray-300",
+      context: "c4-list-level-context",
+      container: "c4-list-level-container",
+      component: "c4-list-level-component",
+      code: "c4-list-level-code",
     };
 
     const levelBadgeColors = {
-      context: "bg-inverse text-white",
-      container: "bg-inverse text-white",
+      context: "bg-inverse text-inverse",
+      container: "bg-inverse text-inverse",
       component: "bg-active text-white",
       code: "bg-active text-primary",
     };
@@ -1215,15 +1215,15 @@ export class C4Module {
     const levelIndent = { context: 0, container: 1, component: 2, code: 3 };
 
     const levelColors = {
-      context: "border-l-gray-800",
-      container: "border-l-gray-600",
-      component: "border-l-gray-400",
-      code: "border-l-gray-300",
+      context: "c4-list-level-context",
+      container: "c4-list-level-container",
+      component: "c4-list-level-component",
+      code: "c4-list-level-code",
     };
 
     const levelBadgeColors = {
-      context: "bg-inverse text-white",
-      container: "bg-inverse text-white",
+      context: "bg-inverse text-inverse",
+      container: "bg-inverse text-inverse",
       component: "bg-active text-white",
       code: "bg-active text-primary",
     };

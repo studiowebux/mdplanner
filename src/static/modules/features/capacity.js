@@ -361,8 +361,8 @@ export class CapacityModule {
             </div>
             <div class="relative h-6 bg-active rounded overflow-hidden">
               <div class="absolute inset-y-0 left-0 bg-active opacity-30" style="width: ${capacityPct}%"></div>
-              <div class="absolute inset-y-0 left-0 bg-info-bg0" style="width: ${allocPct}%"></div>
-              <div class="absolute inset-y-0 left-0 bg-success-bg0" style="width: ${actualPct}%"></div>
+              <div class="absolute inset-y-0 left-0 bg-info" style="width: ${allocPct}%"></div>
+              <div class="absolute inset-y-0 left-0 bg-success" style="width: ${actualPct}%"></div>
             </div>
             <div class="flex gap-4 text-xs text-muted">
               <span>Available: ${u.weeklyCapacity * 4}h (4 weeks)</span>

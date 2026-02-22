@@ -101,7 +101,7 @@ export class GoalsModule {
 
   getTypeStyle(type) {
     return type === "enterprise"
-      ? "bg-inverse text-white"
+      ? "bg-inverse text-inverse"
       : "bg-tertiary text-primary border border-default";
   }
 

@@ -39,7 +39,7 @@ export class MilestonesModule {
           <h3 class="font-medium text-primary">${m.name}</h3>
           <span class="px-2 py-1 text-xs rounded ${
           m.status === "completed"
-            ? "bg-inverse text-white"
+            ? "bg-inverse text-inverse"
             : "bg-tertiary text-primary border border-default"
         }">${m.status}</span>
         </div>

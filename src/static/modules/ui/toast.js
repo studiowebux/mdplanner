@@ -11,7 +11,7 @@ export function showToast(message, isError = false) {
     `fixed bottom-16 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-md text-sm font-medium z-50 transition-opacity duration-300 ${
       isError
         ? "bg-error text-white"
-        : "bg-inverse text-white"
+        : "bg-inverse text-inverse"
     }`;
   toast.textContent = message;
   document.body.appendChild(toast);

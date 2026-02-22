@@ -156,7 +156,7 @@ export class BillingModule {
           <h3 class="font-medium text-primary">${r.name}</h3>
           ${
       r.isDefault
-        ? '<span class="text-xs px-2 py-0.5 bg-inverse text-white rounded">Default</span>'
+        ? '<span class="text-xs px-2 py-0.5 bg-inverse text-inverse rounded">Default</span>'
         : ""
     }
         </div>

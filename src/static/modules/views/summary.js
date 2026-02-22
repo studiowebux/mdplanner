@@ -372,7 +372,7 @@ export class SummaryView {
       // Alternate between different grey shades for visual distinction
       const dotShade = index % 2 === 0
         ? "bg-inverse"
-        : "bg-secondary0";
+        : "bg-active";
 
       const div = document.createElement("div");
       div.className = "flex items-center justify-between";
@@ -430,7 +430,7 @@ export class SummaryView {
       // Alternate between different grey shades for visual distinction
       const dotShade = index % 2 === 0
         ? "bg-inverse"
-        : "bg-secondary0";
+        : "bg-active";
 
       const div = document.createElement("div");
       div.className = "space-y-2";

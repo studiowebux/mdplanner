@@ -437,7 +437,7 @@ export class NoteSidenavModule {
           </div>
         </div>
         <textarea rows="${isCode ? 8 : 4}"
-                  class="w-full p-3 border-0 resize-none focus:outline-none focus:ring-1 focus:ring-1 rounded-b-lg text-sm ${
+                  class="w-full p-3 border-0 resize-none focus:outline-none focus:ring-1 rounded-b-lg text-sm ${
       isCode
         ? "font-mono bg-secondary"
         : "bg-primary"
@@ -1164,7 +1164,7 @@ export class NoteSidenavModule {
           <div class="flex items-center gap-2">
             <span class="text-xs px-2 py-0.5 rounded bg-info-bg text-info">${section.type}</span>
             <input type="text" value="${escapeHtml(section.title)}"
-                   class="text-sm font-medium bg-transparent border-0 text-primary focus:outline-none focus:ring-1 focus:ring-purple-400 rounded px-1"
+                   class="text-sm font-medium bg-transparent border-0 text-primary focus:outline-none focus:ring-1 rounded px-1"
                    onblur="taskManager.noteSidenav.updateSectionTitle('${section.id}', this.value)">
           </div>
           <div class="flex items-center gap-1">

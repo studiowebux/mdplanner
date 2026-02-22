@@ -172,7 +172,7 @@ export class PomodoroModule {
       if (!btn) return;
       if (m.toLowerCase() === mode) {
         btn.className =
-          "px-3 py-1 rounded text-xs font-medium bg-inverse text-white";
+          "px-3 py-1 rounded text-xs font-medium bg-inverse text-inverse";
       } else {
         btn.className =
           "px-3 py-1 rounded text-xs font-medium bg-active text-secondary";

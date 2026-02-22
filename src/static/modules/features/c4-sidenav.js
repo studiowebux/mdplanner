@@ -233,7 +233,7 @@ export class C4SidenavModule {
         </div>
         <input type="text" class="c4-conn-label form-input text-sm" placeholder="Relationship label (e.g., reads/writes)">
         <div class="flex gap-2">
-          <button type="button" class="c4-conn-save flex-1 px-2 py-1 text-xs bg-inverse text-white rounded hover:bg-inverse">Add</button>
+          <button type="button" class="c4-conn-save flex-1 px-2 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">Add</button>
           <button type="button" class="c4-conn-cancel flex-1 px-2 py-1 text-xs text-muted hover:text-secondary border border-strong rounded">Cancel</button>
         </div>
       </div>
@@ -344,7 +344,7 @@ export class C4SidenavModule {
       escapeHtml(conn.label || "")
     }">
         <div class="flex gap-2">
-          <button type="button" class="c4-conn-save flex-1 px-2 py-1 text-xs bg-inverse text-white rounded hover:bg-inverse">Save</button>
+          <button type="button" class="c4-conn-save flex-1 px-2 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">Save</button>
           <button type="button" class="c4-conn-cancel flex-1 px-2 py-1 text-xs text-muted hover:text-secondary border border-strong rounded">Cancel</button>
         </div>
       </div>

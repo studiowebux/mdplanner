@@ -290,7 +290,7 @@ export class StrategicLevelsSidenavModule {
       </div>
       <div class="sidenav-section">
         <button type="button" onclick="taskManager.strategicLevelsSidenavModule.saveLinks()"
-                class="w-full px-4 py-2 bg-inverse text-white rounded-md hover:bg-inverse text-sm font-medium">
+                class="w-full px-4 py-2 bg-inverse text-inverse rounded-md hover:bg-inverse text-sm font-medium">
           Save Links
         </button>
       </div>

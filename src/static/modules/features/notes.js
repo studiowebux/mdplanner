@@ -49,12 +49,12 @@ export class NotesModule {
         return `
           <button class="px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
           isActive
-            ? "bg-inverse text-white"
+            ? "bg-inverse text-inverse"
             : "text-secondary hover:text-primary hover:bg-tertiary"
         }" onclick="taskManager.selectNote(${index})" title="${note.title}">
               ${
           isEnhanced
-            ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-info-bg0 mr-1.5"></span>'
+            ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-info mr-1.5"></span>'
             : ""
         }${truncate(note.title)}
           </button>

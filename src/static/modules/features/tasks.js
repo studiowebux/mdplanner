@@ -218,7 +218,7 @@ export class TasksModule {
       modal = document.createElement("div");
       modal.id = "descriptionModal";
       modal.className =
-        "fixed inset-0 bg-inverse bg-opacity-50 flex items-center justify-center z-50";
+        "fixed inset-0 bg-overlay flex items-center justify-center z-50";
       modal.innerHTML = `
         <div class="bg-primary rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
           <div class="px-6 py-4 border-b border-default flex justify-between items-center">

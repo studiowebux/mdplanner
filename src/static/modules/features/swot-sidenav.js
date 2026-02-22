@@ -140,7 +140,7 @@ export class SwotSidenavModule {
       <div class="swot-add-input flex gap-2 mt-2">
         <input type="text" class="flex-1 px-2 py-1 text-sm border border-strong rounded bg-primary text-primary"
                placeholder="Enter item..." autofocus>
-        <button type="button" class="px-2 py-1 text-xs bg-inverse text-white rounded hover:bg-inverse">Add</button>
+        <button type="button" class="px-2 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">Add</button>
         <button type="button" class="px-2 py-1 text-xs text-muted hover:text-secondary">Cancel</button>
       </div>
     `;

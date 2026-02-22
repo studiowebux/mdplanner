@@ -479,13 +479,28 @@
    -------------------------------------------------------------------------- */
 
 .hover\:bg-hover:hover { background-color: var(--color-bg-hover); }
+.hover\:bg-secondary:hover { background-color: var(--color-bg-secondary); }
 .hover\:bg-tertiary:hover { background-color: var(--color-bg-tertiary); }
 .hover\:bg-active:hover { background-color: var(--color-bg-active); }
+.hover\:bg-inverse:hover { background-color: var(--color-bg-inverse); }
+.hover\:bg-error:hover { background-color: var(--color-error); }
 .hover\:bg-error-bg:hover { background-color: var(--color-error-bg); }
+.hover\:bg-success:hover { background-color: var(--color-success); }
+.hover\:bg-success-bg:hover { background-color: var(--color-success-bg); }
+.hover\:bg-info:hover { background-color: var(--color-info); }
+.hover\:bg-info-bg:hover { background-color: var(--color-info-bg); }
+.hover\:bg-warning:hover { background-color: var(--color-warning); }
 .hover\:text-primary:hover { color: var(--color-text-primary); }
 .hover\:text-secondary:hover { color: var(--color-text-secondary); }
+.hover\:text-muted:hover { color: var(--color-text-muted); }
 .hover\:text-error:hover { color: var(--color-error); }
+.hover\:text-error-text:hover { color: var(--color-error-text); }
+.hover\:text-info:hover { color: var(--color-info); }
+.hover\:text-info-text:hover { color: var(--color-info-text); }
+.hover\:text-success-text:hover { color: var(--color-success-text); }
+.hover\:border-strong:hover { border-color: var(--color-border-strong); }
 .hover\:opacity-80:hover { opacity: 0.8; }
+.hover\:opacity-100:hover { opacity: 1; }
 .hover\:underline:hover { text-decoration: underline; }
 
 /* --------------------------------------------------------------------------

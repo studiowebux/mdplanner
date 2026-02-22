@@ -35,7 +35,7 @@ export class RetrospectivesModule {
       .map((retro) => {
         const statusColor = retro.status === "open"
           ? "bg-tertiary text-primary border border-default"
-          : "bg-inverse text-white";
+          : "bg-inverse text-inverse";
         return `
       <div class="bg-secondary rounded-lg shadow-sm border border-default overflow-hidden">
         <div class="px-4 py-3 bg-secondary border-b border-default flex justify-between items-center">
@@ -48,7 +48,7 @@ export class RetrospectivesModule {
             <button onclick="taskManager.retrospectiveSidenavModule.openEdit('${retro.id}')" class="text-sm text-secondary hover:text-primary">Edit</button>
           </div>
         </div>
-        <div class="p-4 space-y-3">
+        <div class="px-4 pt-4 pb-2 space-y-3">
           <div>
             <h4 class="text-sm font-medium text-primary mb-1">Continue</h4>
             <ul class="text-sm text-secondary space-y-1">
@@ -86,7 +86,7 @@ export class RetrospectivesModule {
             </ul>
           </div>
         </div>
-        <div class="px-4 py-3 bg-secondary border-t border-default flex justify-end">
+        <div class="px-4 py-2 border-t border-default flex justify-end">
           <button onclick="taskManager.deleteRetrospective('${retro.id}')" class="text-sm text-error hover:text-error-text">Delete</button>
         </div>
       </div>

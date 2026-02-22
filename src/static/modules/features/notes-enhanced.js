@@ -465,9 +465,9 @@ export class EnhancedNotesModule {
         "fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-primary border border-strong rounded-lg shadow-lg p-3 flex space-x-2 z-50";
       actionBar.innerHTML = `
         <button onclick="taskManager.deleteSelectedParagraphs()" class="bg-error text-white px-3 py-1 rounded text-sm hover:bg-error">Delete Selected</button>
-        <button onclick="taskManager.duplicateSelectedParagraphs()" class="bg-inverse text-white px-3 py-1 rounded text-sm hover:bg-inverse">Duplicate Selected</button>
-        <button onclick="taskManager.moveSelectedParagraphs('up')" class="bg-inverse text-white px-3 py-1 rounded text-sm hover:bg-inverse">Move Up</button>
-        <button onclick="taskManager.moveSelectedParagraphs('down')" class="bg-inverse text-white px-3 py-1 rounded text-sm hover:bg-inverse">Move Down</button>
+        <button onclick="taskManager.duplicateSelectedParagraphs()" class="bg-inverse text-inverse px-3 py-1 rounded text-sm hover:bg-inverse">Duplicate Selected</button>
+        <button onclick="taskManager.moveSelectedParagraphs('up')" class="bg-inverse text-inverse px-3 py-1 rounded text-sm hover:bg-inverse">Move Up</button>
+        <button onclick="taskManager.moveSelectedParagraphs('down')" class="bg-inverse text-inverse px-3 py-1 rounded text-sm hover:bg-inverse">Move Down</button>
       `;
       document.body.appendChild(actionBar);
     }
@@ -890,13 +890,13 @@ export class EnhancedNotesModule {
     }
         <div class="flex gap-2">
           <button onclick="taskManager.duplicateParagraph('${paragraph.id}')"
-                  class="px-2 py-1 text-xs bg-inverse text-white rounded hover:bg-inverse" title="Duplicate">Copy</button>
+                  class="px-2 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse" title="Duplicate">Copy</button>
           <button onclick="taskManager.toggleParagraphType('${paragraph.id}')"
-                  class="px-2 py-1 text-xs bg-secondary0 text-white rounded hover:bg-inverse" title="Toggle Type">${
+                  class="px-2 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse" title="Toggle Type">${
       isCodeBlock ? "Text" : "Code"
     }</button>
           <button onclick="taskManager.deleteParagraph('${paragraph.id}')"
-                  class="px-2 py-1 text-xs bg-error-bg0 text-white rounded hover:bg-error" title="Delete">Delete</button>
+                  class="px-2 py-1 text-xs bg-error text-white rounded hover:bg-error" title="Delete">Delete</button>
         </div>
       </div>
       <div class="paragraph-content mt-2" style="margin-left: 40px;">
@@ -969,7 +969,7 @@ export class EnhancedNotesModule {
         <h3 class="text-lg font-semibold text-primary">${section.title}</h3>
         <div class="flex space-x-2">
           <button onclick="taskManager.deleteCustomSection('${section.id}')"
-                  class="px-2 py-1 text-xs bg-error-bg0 text-white rounded hover:bg-error">Delete</button>
+                  class="px-2 py-1 text-xs bg-error text-white rounded hover:bg-error">Delete</button>
         </div>
       </div>
     `;
@@ -1040,11 +1040,11 @@ export class EnhancedNotesModule {
           </div>
           <div class="space-y-2">
             <button onclick="taskManager.addContentToTab('${section.id}', '${tab.id}', 'text')"
-                    class="mr-2 px-3 py-1 text-xs bg-inverse text-white rounded hover:bg-inverse">+ Text</button>
+                    class="mr-2 px-3 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">+ Text</button>
             <button onclick="taskManager.addContentToTab('${section.id}', '${tab.id}', 'code')"
-                    class="mr-2 px-3 py-1 text-xs bg-secondary0 text-white rounded hover:bg-inverse">+ Code</button>
+                    class="mr-2 px-3 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">+ Code</button>
             <button onclick="taskManager.deleteTab('${section.id}', '${tab.id}')"
-                    class="px-3 py-1 text-xs bg-error-bg0 text-white rounded hover:bg-error">Delete Tab</button>
+                    class="px-3 py-1 text-xs bg-error text-white rounded hover:bg-error">Delete Tab</button>
           </div>
           <div class="mt-4 space-y-2" id="tab-content-${tab.id}">
             ${this.renderTabContent(tab.content)}
@@ -1063,7 +1063,7 @@ export class EnhancedNotesModule {
     let html = `
       <div class="mb-4">
         <button onclick="taskManager.addTimelineItem('${section.id}')"
-                class="px-3 py-1 text-sm bg-success-bg0 text-white rounded hover:bg-success">+ Add Step</button>
+                class="px-3 py-1 text-sm bg-success text-white rounded hover:bg-success">+ Add Step</button>
       </div>
       <div class="space-y-4">
     `;
@@ -1098,14 +1098,14 @@ export class EnhancedNotesModule {
       }>Failed</option>
               </select>
               <button onclick="taskManager.deleteTimelineItem('${section.id}', '${item.id}')"
-                      class="px-2 py-1 text-xs bg-error-bg0 text-white rounded hover:bg-error">Delete</button>
+                      class="px-2 py-1 text-xs bg-error text-white rounded hover:bg-error">Delete</button>
             </div>
           </div>
           <div class="space-y-2">
             <button onclick="taskManager.addContentToTimeline('${section.id}', '${item.id}', 'text')"
-                    class="mr-2 px-3 py-1 text-xs bg-inverse text-white rounded hover:bg-inverse">+ Text</button>
+                    class="mr-2 px-3 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">+ Text</button>
             <button onclick="taskManager.addContentToTimeline('${section.id}', '${item.id}', 'code')"
-                    class="px-3 py-1 text-xs bg-secondary0 text-white rounded hover:bg-inverse">+ Code</button>
+                    class="px-3 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">+ Code</button>
           </div>
           <div class="mt-2 space-y-2" id="timeline-content-${item.id}">
             ${this.renderTabContent(item.content)}
@@ -1124,7 +1124,7 @@ export class EnhancedNotesModule {
     let html = `
       <div class="mb-4 flex space-x-2">
         <button onclick="taskManager.addColumnToSplitView('${section.id}')"
-                class="px-3 py-1 text-sm bg-info-bg0 text-white rounded hover:bg-info">+ Add Column</button>
+                class="px-3 py-1 text-sm bg-info text-white rounded hover:bg-info">+ Add Column</button>
         <span class="text-sm text-secondary">${columns.length} columns</span>
       </div>
       <div class="flex space-x-4">
@@ -1138,13 +1138,13 @@ export class EnhancedNotesModule {
         columnIndex + 1
       }</h4>
             <button onclick="taskManager.removeColumnFromSplitView('${section.id}', ${columnIndex})"
-                    class="px-2 py-1 text-xs bg-error-bg0 text-white rounded hover:bg-error">Remove</button>
+                    class="px-2 py-1 text-xs bg-error text-white rounded hover:bg-error">Remove</button>
           </div>
           <div class="space-y-2 mb-4">
             <button onclick="taskManager.addContentToSplitView('${section.id}', ${columnIndex}, 'text')"
-                    class="mr-2 px-3 py-1 text-xs bg-inverse text-white rounded hover:bg-inverse">+ Text</button>
+                    class="mr-2 px-3 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">+ Text</button>
             <button onclick="taskManager.addContentToSplitView('${section.id}', ${columnIndex}, 'code')"
-                    class="px-3 py-1 text-xs bg-secondary0 text-white rounded hover:bg-inverse">+ Code</button>
+                    class="px-3 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">+ Code</button>
           </div>
           <div class="space-y-2" id="split-column-${section.id}-${columnIndex}">
             ${this.renderTabContent(column)}
@@ -1172,7 +1172,7 @@ export class EnhancedNotesModule {
                       onblur="taskManager.updateCustomContent('${item.id}', this.value)"
                       placeholder="Enter your code here...">${item.content}</textarea>
             <button onclick="taskManager.deleteTabContent('${item.id}')"
-                    class="absolute top-2 right-2 px-1 py-1 text-xs bg-error-bg0 text-white rounded hover:bg-error">x</button>
+                    class="absolute top-2 right-2 px-1 py-1 text-xs bg-error text-white rounded hover:bg-error">x</button>
           </div>
         `;
       } else {
@@ -1183,7 +1183,7 @@ export class EnhancedNotesModule {
                       onblur="taskManager.updateCustomContent('${item.id}', this.value)"
                       placeholder="Enter your text here...">${item.content}</textarea>
             <button onclick="taskManager.deleteTabContent('${item.id}')"
-                    class="absolute top-2 right-2 px-1 py-1 text-xs bg-error-bg0 text-white rounded hover:bg-error">x</button>
+                    class="absolute top-2 right-2 px-1 py-1 text-xs bg-error text-white rounded hover:bg-error">x</button>
           </div>
         `;
       }
