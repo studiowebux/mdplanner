@@ -98,12 +98,10 @@ export class MindmapModule {
       document.getElementById("mindmapEmptyState"),
       "mindmapViewport",
       "mindmapContainer",
-      false,
     );
   }
 
-  /** Render a mindmap into a given container. Reusable for primary and secondary viewports. */
-  renderMindmapInto(mindmap, content, emptyState, viewportId, containerId, isSecondary) {
+  renderMindmapInto(mindmap, content, emptyState, viewportId, containerId) {
     if (!content) {
       console.error(`${containerId} element not found`);
       return;
@@ -117,7 +115,7 @@ export class MindmapModule {
     if (emptyState) emptyState.style.display = "none";
     content.innerHTML = "";
 
-    this.setupPanningFor(viewportId, containerId, isSecondary);
+    this.setupPanningFor(viewportId, containerId);
 
     const rootNodes = mindmap.nodes.filter((node) => node.level === 0);
 
@@ -389,7 +387,7 @@ export class MindmapModule {
     });
   }
 
-  setupPanningFor(viewportId, containerId, isSecondary) {
+  setupPanningFor(viewportId, containerId) {
     const viewport = document.getElementById(viewportId);
     const container = document.getElementById(containerId);
     let isDragging = false;
@@ -929,16 +927,6 @@ export class MindmapModule {
     document
       .getElementById("mindmapLayout")
       ?.addEventListener("change", (e) => this.updateLayout(e.target.value));
-
-    // Split mode toggle
-    document
-      .getElementById("mindmapSplitToggle")
-      ?.addEventListener("click", () => this.toggleSplitMode());
-
-    // Secondary mindmap selector
-    document
-      .getElementById("mindmapSecondarySelector")
-      ?.addEventListener("change", (e) => this.selectSecondary(e.target.value));
 
     // Modal close on background click
     document.getElementById("mindmapModal")?.addEventListener("click", (e) => {
