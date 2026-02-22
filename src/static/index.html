@@ -487,6 +487,13 @@
               >
                 Retrospectives
               </button>
+              <button
+                id="moscowViewBtn"
+                data-view="moscow"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                MoSCoW
+              </button>
             </div>
           </div>
 
@@ -813,6 +820,12 @@
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
             >
               Retrospectives
+            </button>
+            <button
+              id="moscowViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              MoSCoW
             </button>
           </div>
           <div class="py-1 border-t border-default">
@@ -2239,6 +2252,134 @@
               id="retrospectivesContainer"
               class="grid grid-cols-1 lg:grid-cols-2 gap-6"
             >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MoSCoW Analysis View -->
+      <div id="moscowView" class="hidden pb-16">
+        <div class="bg-primary rounded-lg shadow">
+          <div
+            class="px-6 py-4 border-b border-default flex justify-between items-center"
+          >
+            <div class="flex items-center gap-4">
+              <h2 class="text-lg font-medium text-primary">
+                MoSCoW Prioritization
+              </h2>
+              <select
+                id="moscowSelector"
+                class="text-sm border border-strong rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-1"
+              >
+                <option value="">Select Analysis</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                id="editMoscowBtn"
+                class="btn-secondary py-1.5 rounded hidden"
+              >
+                Edit
+              </button>
+              <button
+                id="deleteMoscowBtn"
+                class="btn-danger py-1.5 rounded hidden"
+              >
+                Delete
+              </button>
+              <button id="addMoscowBtn" class="btn-primary py-2 rounded-lg">
+                + New Analysis
+              </button>
+            </div>
+          </div>
+          <div class="p-6">
+            <div id="emptyMoscowState" class="text-center py-12">
+              <svg
+                class="mx-auto h-12 w-12 text-muted"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                />
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-primary">
+                No MoSCoW analyses yet
+              </h3>
+              <p class="mt-1 text-sm text-muted">
+                Create a MoSCoW analysis to prioritize items as Must, Should,
+                Could, or Won't have.
+              </p>
+            </div>
+            <div id="moscowGrid" class="hidden moscow-grid">
+              <!-- Must Have -->
+              <div class="moscow-column moscow-must">
+                <div class="flex justify-between items-center mb-3">
+                  <h3 class="font-medium text-primary">Must Have</h3>
+                  <button
+                    data-category="must"
+                    class="moscow-add-btn text-secondary hover:text-primary text-sm"
+                  >
+                    + Add
+                  </button>
+                </div>
+                <ul
+                  id="moscowMust"
+                  class="space-y-2 text-sm text-primary"
+                ></ul>
+              </div>
+              <!-- Should Have -->
+              <div class="moscow-column moscow-should">
+                <div class="flex justify-between items-center mb-3">
+                  <h3 class="font-medium text-primary">Should Have</h3>
+                  <button
+                    data-category="should"
+                    class="moscow-add-btn text-secondary hover:text-primary text-sm"
+                  >
+                    + Add
+                  </button>
+                </div>
+                <ul
+                  id="moscowShould"
+                  class="space-y-2 text-sm text-primary"
+                ></ul>
+              </div>
+              <!-- Could Have -->
+              <div class="moscow-column moscow-could">
+                <div class="flex justify-between items-center mb-3">
+                  <h3 class="font-medium text-primary">Could Have</h3>
+                  <button
+                    data-category="could"
+                    class="moscow-add-btn text-secondary hover:text-primary text-sm"
+                  >
+                    + Add
+                  </button>
+                </div>
+                <ul
+                  id="moscowCould"
+                  class="space-y-2 text-sm text-primary"
+                ></ul>
+              </div>
+              <!-- Won't Have -->
+              <div class="moscow-column moscow-wont">
+                <div class="flex justify-between items-center mb-3">
+                  <h3 class="font-medium text-primary">Won't Have</h3>
+                  <button
+                    data-category="wont"
+                    class="moscow-add-btn text-secondary hover:text-primary text-sm"
+                  >
+                    + Add
+                  </button>
+                </div>
+                <ul
+                  id="moscowWont"
+                  class="space-y-2 text-sm text-primary"
+                ></ul>
+              </div>
             </div>
           </div>
         </div>
@@ -10052,6 +10193,71 @@
           <button type="submit" class="btn btn-primary ml-2">Save</button>
         </div>
       </form>
+    </div>
+
+    <!-- MoSCoW Analysis Sidenav -->
+    <div id="moscowSidenav" class="sidenav-panel sidenav-lg">
+      <div class="sidenav-header">
+        <h2 id="moscowSidenavHeader" class="sidenav-title">New MoSCoW Analysis</h2>
+        <div class="flex items-center gap-2">
+          <span id="moscowSidenavSaveStatus" class="text-xs hidden"></span>
+          <button type="button" id="moscowSidenavClose" class="sidenav-close" aria-label="Close">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="flex flex-col flex-1 overflow-hidden">
+        <div class="sidenav-content">
+          <div class="sidenav-section">
+            <div class="form-group">
+              <label class="form-label">Title</label>
+              <input type="text" id="moscowSidenavTitle" required class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date</label>
+              <input type="date" id="moscowSidenavDate" class="form-input">
+            </div>
+          </div>
+          <div class="sidenav-section">
+            <div class="sidenav-section-title flex justify-between items-center">
+              Must Have
+              <button type="button" id="moscowSidenav_add_must" class="text-sm text-secondary hover:text-primary">+ Add</button>
+            </div>
+            <div id="moscowSidenav_must" class="space-y-1"></div>
+          </div>
+          <div class="sidenav-section">
+            <div class="sidenav-section-title flex justify-between items-center">
+              Should Have
+              <button type="button" id="moscowSidenav_add_should" class="text-sm text-secondary hover:text-primary">+ Add</button>
+            </div>
+            <div id="moscowSidenav_should" class="space-y-1"></div>
+          </div>
+          <div class="sidenav-section">
+            <div class="sidenav-section-title flex justify-between items-center">
+              Could Have
+              <button type="button" id="moscowSidenav_add_could" class="text-sm text-secondary hover:text-primary">+ Add</button>
+            </div>
+            <div id="moscowSidenav_could" class="space-y-1"></div>
+          </div>
+          <div class="sidenav-section">
+            <div class="sidenav-section-title flex justify-between items-center">
+              Won't Have
+              <button type="button" id="moscowSidenav_add_wont" class="text-sm text-secondary hover:text-primary">+ Add</button>
+            </div>
+            <div id="moscowSidenav_wont" class="space-y-1"></div>
+          </div>
+        </div>
+        <div class="sidenav-footer">
+          <button type="button" id="moscowSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+          <div class="flex-1"></div>
+          <button type="button" id="moscowSidenavCancel"
+            class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">
+            Cancel
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- SWOT Analysis Sidenav -->

@@ -34,6 +34,7 @@ import type {
   PeopleSummary as OrgChartSummary,
   PersonWithChildren as OrgChartMemberWithChildren,
 } from "./people.ts";
+import { MoscowDirectoryParser } from "./moscow.ts";
 import {
   PeopleDirectoryParser,
   type PeopleSummary,
@@ -56,6 +57,7 @@ import type {
   LeanCanvas,
   Milestone,
   Mindmap,
+  MoscowAnalysis,
   Note,
   Payment,
   Person,
@@ -100,6 +102,7 @@ export class DirectoryMarkdownParser {
   protected billingParser: BillingDirectoryParser;
   protected crmParser: CRMDirectoryParser;
   protected portfolioParser: PortfolioDirectoryParser;
+  protected moscowParser: MoscowDirectoryParser;
   protected peopleParser: PeopleDirectoryParser;
 
   constructor(projectDir: string) {
@@ -125,6 +128,7 @@ export class DirectoryMarkdownParser {
     this.billingParser = new BillingDirectoryParser(projectDir);
     this.crmParser = new CRMDirectoryParser(projectDir);
     this.portfolioParser = new PortfolioDirectoryParser(projectDir);
+    this.moscowParser = new MoscowDirectoryParser(projectDir);
     this.peopleParser = new PeopleDirectoryParser(projectDir);
   }
 
@@ -548,6 +552,31 @@ export class DirectoryMarkdownParser {
     item: string,
   ): Promise<SwotAnalysis | null> {
     return this.swotParser.addItem(id, section, item);
+  }
+
+  // ============================================================
+  // MoSCoW Analysis
+  // ============================================================
+
+  async readMoscowAnalyses(): Promise<MoscowAnalysis[]> {
+    return this.moscowParser.readAll();
+  }
+
+  async addMoscowAnalysis(
+    analysis: Omit<MoscowAnalysis, "id">,
+  ): Promise<MoscowAnalysis> {
+    return this.moscowParser.add(analysis);
+  }
+
+  async updateMoscowAnalysis(
+    id: string,
+    updates: Partial<MoscowAnalysis>,
+  ): Promise<MoscowAnalysis | null> {
+    return this.moscowParser.update(id, updates);
+  }
+
+  async deleteMoscowAnalysis(id: string): Promise<boolean> {
+    return this.moscowParser.delete(id);
   }
 
   // ============================================================
@@ -1422,6 +1451,7 @@ export class DirectoryMarkdownParser {
     await Deno.mkdir(`${this.projectDir}/crm/interactions`, {
       recursive: true,
     });
+    await Deno.mkdir(`${this.projectDir}/moscow`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/people`, { recursive: true });
 
     // Create project.md

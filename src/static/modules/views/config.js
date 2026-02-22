@@ -271,6 +271,7 @@ export class ConfigView {
         { id: "milestones", label: "Milestones" },
         { id: "ideas", label: "Ideas" },
         { id: "retrospectives", label: "Retrospectives" },
+        { id: "moscow", label: "MoSCoW" },
       ],
       "Analysis": [
         { id: "swot", label: "SWOT Analysis" },

@@ -484,6 +484,18 @@ export interface Person {
   notes?: string;
 }
 
+// MoSCoW Analysis Types
+
+export interface MoscowAnalysis {
+  id: string;
+  title: string;
+  date: string;
+  must: string[];
+  should: string[];
+  could: string[];
+  wont: string[];
+}
+
 // Org Chart Types
 
 export interface OrgChartMember {

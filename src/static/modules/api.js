@@ -258,6 +258,29 @@ export const RetrospectivesAPI = {
 };
 
 // SWOT API
+// MoSCoW Analysis API
+export const MoscowAPI = {
+  async fetchAll() {
+    const response = await get("/api/moscow");
+    return response.json();
+  },
+
+  async create(analysis) {
+    const response = await post("/api/moscow", analysis);
+    return response;
+  },
+
+  async update(id, analysis) {
+    const response = await put(`/api/moscow/${id}`, analysis);
+    return response;
+  },
+
+  async delete(id) {
+    const response = await del(`/api/moscow/${id}`);
+    return response;
+  },
+};
+
 export const SwotAPI = {
   async fetchAll() {
     const response = await get("/api/swot");

@@ -35,6 +35,7 @@ import { capacityRouter } from "./features/capacity.ts";
 import { strategicRouter } from "./features/strategic.ts";
 import { billingRouter } from "./features/billing.ts";
 import { crmRouter } from "./features/crm.ts";
+import { moscowRouter } from "./features/moscow.ts";
 import { orgchartRouter } from "./features/orgchart.ts";
 import { peopleRouter } from "./features/people.ts";
 import { portfolioRouter } from "./portfolio.ts";
@@ -91,6 +92,9 @@ export function createApiRouter(
 
   // CRM routes (nested under various paths)
   api.route("/", crmRouter);
+
+  // MoSCoW Analysis routes
+  api.route("/moscow", moscowRouter);
 
   // People Registry routes
   api.route("/people", peopleRouter);

@@ -1,0 +1,27 @@
+/* MoSCoW Prioritization View */
+
+.moscow-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.moscow-column {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius);
+  padding: 1rem;
+  border: 1px solid var(--color-border-default);
+  min-height: 12rem;
+}
+
+@media (max-width: 64rem) {
+  .moscow-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 36rem) {
+  .moscow-grid {
+    grid-template-columns: 1fr;
+  }
+}
