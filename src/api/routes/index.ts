@@ -37,6 +37,8 @@ import { billingRouter } from "./features/billing.ts";
 import { crmRouter } from "./features/crm.ts";
 import { moscowRouter } from "./features/moscow.ts";
 import { meetingsRouter } from "./features/meetings.ts";
+import { onboardingRouter } from "./features/onboarding.ts";
+import { onboardingTemplatesRouter } from "./features/onboarding-templates.ts";
 import { eisenhowerRouter } from "./features/eisenhower.ts";
 import { safeRouter } from "./features/safe.ts";
 import { investorsRouter } from "./features/investors.ts";
@@ -103,6 +105,10 @@ export function createApiRouter(
 
   // Meetings routes
   api.route("/meetings", meetingsRouter);
+
+  // Onboarding routes
+  api.route("/onboarding", onboardingRouter);
+  api.route("/onboarding-templates", onboardingTemplatesRouter);
 
   // MoSCoW Analysis routes
   api.route("/moscow", moscowRouter);

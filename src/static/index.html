@@ -730,6 +730,13 @@
               >
                 CRM
               </button>
+              <button
+                id="onboardingViewBtn"
+                data-view="onboarding"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                Onboarding
+              </button>
             </div>
           </div>
 
@@ -1029,6 +1036,12 @@
             >
               CRM
             </button>
+            <button
+              id="onboardingViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              Onboarding
+            </button>
           </div>
           <div class="py-1 border-t border-default">
             <div
@@ -1049,6 +1062,12 @@
               Strategic Levels
             </button>
             <button
+              id="meetingsViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              Meetings
+            </button>
+            <button
               id="portfolioViewBtnMobile"
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
             >
@@ -1059,12 +1078,6 @@
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
             >
               Uploads
-            </button>
-            <button
-              id="meetingsViewBtnMobile"
-              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
-            >
-              Meetings
             </button>
             <button
               id="configViewBtnMobile"
@@ -1575,6 +1588,39 @@
                 <p class="text-secondary text-sm">No open action items.</p>
               </div>
               <div id="meetingsActionsContainer"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onboarding View -->
+      <div id="onboardingView" class="hidden pb-16">
+        <div class="bg-primary rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-default flex justify-between items-center view-header">
+            <h2 class="text-lg font-medium text-primary">Onboarding</h2>
+            <div class="flex gap-2">
+              <button id="addOnboardingTemplateBtn" class="btn-secondary py-2 rounded-lg">+ Template</button>
+              <button id="addOnboardingBtn" class="btn-primary py-2 rounded-lg">+ New Onboarding</button>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="meetings-tabs">
+              <button id="onboardingTabRecords" class="meetings-tab meetings-tab-active">Onboarding</button>
+              <button id="onboardingTabTemplates" class="meetings-tab">Templates</button>
+            </div>
+            <!-- Records -->
+            <div id="onboardingRecordsList">
+              <div id="emptyOnboardingState" class="hidden">
+                <p class="text-secondary text-sm">No onboarding records yet. Create one to get started.</p>
+              </div>
+              <div id="onboardingContainer" class="onboarding-list"></div>
+            </div>
+            <!-- Templates -->
+            <div id="onboardingTemplatesList" class="hidden">
+              <div id="emptyOnboardingTemplatesState" class="hidden">
+                <p class="text-secondary text-sm">No templates yet. Create a template to reuse onboarding steps.</p>
+              </div>
+              <div id="onboardingTemplatesContainer" class="onboarding-template-list"></div>
             </div>
           </div>
         </div>
@@ -12220,6 +12266,155 @@
           <button type="button" id="meetingSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
           <button type="button" id="meetingSidenavCancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onboarding Template Sidenav -->
+    <div id="onboardingTemplateSidenav" class="sidenav-panel sidenav-md">
+      <div class="sidenav-header">
+        <h2 id="onboardingTemplateSidenavHeader" class="sidenav-title">New Template</h2>
+        <div class="flex items-center gap-2">
+          <span id="onboardingTemplateSidenavSaveStatus" class="text-xs hidden"></span>
+          <button type="button" id="onboardingTemplateSidenavClose" class="sidenav-close" aria-label="Close">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="flex flex-col flex-1 overflow-hidden">
+        <div class="sidenav-content">
+          <div class="sidenav-section">
+            <div class="form-group">
+              <label class="form-label" for="onboardingTemplateName">Template Name</label>
+              <input id="onboardingTemplateName" type="text" class="form-input" placeholder="e.g. Engineering Onboarding" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="onboardingTemplateDescription">Description (optional)</label>
+              <input id="onboardingTemplateDescription" type="text" class="form-input" placeholder="Short description..." />
+            </div>
+          </div>
+          <div class="sidenav-section">
+            <div class="sidenav-section-title">Steps</div>
+            <div id="onboardingTemplateStepsList" class="onboarding-steps-list"></div>
+            <div class="onboarding-add-step">
+              <input id="onboardingTemplateNewStepTitle" type="text" class="form-input" placeholder="Step title..." />
+              <select id="onboardingTemplateNewStepCategory" class="form-input" style="max-width:8rem">
+                <option value="equipment">Equipment</option>
+                <option value="accounts">Accounts</option>
+                <option value="docs">Docs</option>
+                <option value="training">Training</option>
+                <option value="intro">Intro</option>
+                <option value="other">Other</option>
+              </select>
+              <button id="onboardingTemplateAddStepBtn" class="btn-primary py-2 rounded-lg">Add</button>
+            </div>
+          </div>
+        </div>
+        <div class="sidenav-footer">
+          <button type="button" id="onboardingTemplateDeleteBtn" class="btn-danger-ghost hidden">Delete</button>
+          <div class="flex-1"></div>
+          <button type="button" id="onboardingTemplateSidenavSave" class="btn-primary py-2 rounded-lg">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onboarding Create/Edit Sidenav (metadata only) -->
+    <div id="onboardingSidenav" class="sidenav-panel sidenav-md">
+      <div class="sidenav-header">
+        <h2 id="onboardingSidenavHeader" class="sidenav-title">New Onboarding</h2>
+        <div class="flex items-center gap-2">
+          <span id="onboardingSidenavSaveStatus" class="text-xs hidden"></span>
+          <button type="button" id="onboardingSidenavClose" class="sidenav-close" aria-label="Close">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="flex flex-col flex-1 overflow-hidden">
+        <div class="sidenav-content">
+          <div class="sidenav-section">
+            <div class="form-group">
+              <label class="form-label" for="onboardingSidenavName">Employee Name</label>
+              <input id="onboardingSidenavName" type="text" class="form-input" placeholder="Full name" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="onboardingSidenavRole">Role / Title</label>
+              <input id="onboardingSidenavRole" type="text" class="form-input" placeholder="e.g. Software Engineer" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="onboardingSidenavStartDate">Start Date</label>
+              <input id="onboardingSidenavStartDate" type="date" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="onboardingSidenavPersonId">People Registry ID (optional)</label>
+              <input id="onboardingSidenavPersonId" type="text" class="form-input" placeholder="person_..." />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="onboardingSidenavNotes">Notes</label>
+              <textarea id="onboardingSidenavNotes" class="form-textarea" rows="3" placeholder="Additional notes..."></textarea>
+            </div>
+          </div>
+          <div class="sidenav-section">
+            <div class="sidenav-section-title">Load from Template</div>
+            <div class="onboarding-template-load-row">
+              <select id="onboardingTemplateSelect" class="form-input">
+                <option value="">— pick a template —</option>
+              </select>
+              <button id="onboardingLoadTemplateBtn" class="btn-secondary py-2 rounded-lg" style="white-space:nowrap">Load</button>
+            </div>
+          </div>
+        </div>
+        <div class="sidenav-footer">
+          <button type="button" id="onboardingDeleteBtn" class="btn-danger-ghost hidden">Delete</button>
+          <div class="flex-1"></div>
+          <button type="button" id="onboardingSidenavSave" class="btn-primary py-2 rounded-lg">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onboarding Detail Sidenav (checklist) -->
+    <div id="onboardingDetailSidenav" class="sidenav-panel sidenav-lg">
+      <div class="sidenav-header">
+        <div>
+          <h2 id="onboardingDetailName" class="sidenav-title"></h2>
+          <p id="onboardingDetailMeta" class="text-sm text-secondary"></p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" id="onboardingDetailEditBtn" class="btn-secondary py-1 rounded-lg" style="font-size:var(--font-size-sm)">Edit</button>
+          <button type="button" id="onboardingDetailClose" class="sidenav-close" aria-label="Close">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="flex flex-col flex-1 overflow-hidden">
+        <div class="sidenav-content">
+          <div class="onboarding-detail-progress">
+            <div class="onboarding-progress-bar">
+              <div id="onboardingDetailProgressFill" class="onboarding-progress-fill"></div>
+            </div>
+            <span id="onboardingDetailProgressLabel" class="onboarding-progress-label"></span>
+          </div>
+          <div id="onboardingDetailChecklist" class="onboarding-checklist"></div>
+          <div class="sidenav-section" style="margin-top:1rem">
+            <div class="sidenav-section-title">Add Step</div>
+            <div class="onboarding-add-step">
+              <input id="onboardingDetailNewStep" type="text" class="form-input" placeholder="Step title..." />
+              <select id="onboardingDetailNewCategory" class="form-input" style="max-width:8rem">
+                <option value="equipment">Equipment</option>
+                <option value="accounts">Accounts</option>
+                <option value="docs">Docs</option>
+                <option value="training">Training</option>
+                <option value="intro">Intro</option>
+                <option value="other">Other</option>
+              </select>
+              <button id="onboardingDetailAddStepBtn" class="btn-primary py-2 rounded-lg">Add</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

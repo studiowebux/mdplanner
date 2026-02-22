@@ -261,6 +261,46 @@ export const MeetingsAPI = {
   },
 };
 
+// Onboarding API
+export const OnboardingAPI = {
+  async fetchAll() {
+    const response = await get("/api/onboarding");
+    return response.json();
+  },
+
+  async create(record) {
+    return post("/api/onboarding", record);
+  },
+
+  async update(id, record) {
+    return put(`/api/onboarding/${id}`, record);
+  },
+
+  async delete(id) {
+    return del(`/api/onboarding/${id}`);
+  },
+};
+
+// Onboarding Templates API
+export const OnboardingTemplatesAPI = {
+  async fetchAll() {
+    const response = await get("/api/onboarding-templates");
+    return response.json();
+  },
+
+  async create(template) {
+    return post("/api/onboarding-templates", template);
+  },
+
+  async update(id, template) {
+    return put(`/api/onboarding-templates/${id}`, template);
+  },
+
+  async delete(id) {
+    return del(`/api/onboarding-templates/${id}`);
+  },
+};
+
 // Ideas API
 export const IdeasAPI = {
   async fetchAll() {
