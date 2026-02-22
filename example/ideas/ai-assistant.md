@@ -3,6 +3,14 @@ id: idea_ai
 title: AI Task Assistant
 status: considering
 category: feature
+priority: high
+startDate: "2026-04-01"
+endDate: "2026-06-30"
+resources: 2 devs, API budget
+subtasks:
+  - Research LLM providers
+  - Design prompt templates
+  - Build feedback loop
 created: 2026-01-25
 links: [idea_automation, idea_templates]
 ---
