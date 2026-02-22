@@ -156,27 +156,27 @@ export class IdeaSorterModule {
     const subtasks = idea.subtasks || [];
     const expanded = this.expandedRows.has(idea.id);
 
+    const dash = '<span style="color:var(--color-text-muted)">—</span>';
     return `
       <tr class="idea-sorter-row" data-id="${escapeHtml(idea.id)}">
         <td class="idea-sorter-td">
           <span class="idea-sorter-title">${escapeHtml(idea.title)}</span>
-          ${idea.description ? `<p class="idea-sorter-desc">${escapeHtml(idea.description.slice(0, 80))}${idea.description.length > 80 ? "…" : ""}</p>` : ""}
         </td>
-        <td class="idea-sorter-td">${idea.category ? escapeHtml(idea.category) : '<span class="text-muted">—</span>'}</td>
+        <td class="idea-sorter-td">${idea.category ? escapeHtml(idea.category) : dash}</td>
         <td class="idea-sorter-td">
-          ${priority ? `<span class="idea-priority-badge ${priorityClass}">${priority}</span>` : '<span class="text-muted">—</span>'}
+          ${priority ? `<span class="idea-priority-badge ${priorityClass}">${priority}</span>` : dash}
         </td>
         <td class="idea-sorter-td"><span class="idea-status-badge idea-status-${idea.status}">${idea.status}</span></td>
-        <td class="idea-sorter-td">${idea.startDate || '<span class="text-muted">—</span>'}</td>
-        <td class="idea-sorter-td">${idea.endDate || '<span class="text-muted">—</span>'}</td>
-        <td class="idea-sorter-td">${idea.resources ? escapeHtml(idea.resources) : '<span class="text-muted">—</span>'}</td>
+        <td class="idea-sorter-td">${idea.startDate ? escapeHtml(idea.startDate) : dash}</td>
+        <td class="idea-sorter-td">${idea.endDate ? escapeHtml(idea.endDate) : dash}</td>
+        <td class="idea-sorter-td">${idea.resources ? escapeHtml(idea.resources) : dash}</td>
         <td class="idea-sorter-td">
           ${subtasks.length > 0
-            ? `<button class="idea-sorter-expand text-secondary hover:text-primary text-xs">
+            ? `<button class="idea-sorter-expand">
                 ${subtasks.length} task${subtasks.length > 1 ? "s" : ""} ${expanded ? "▲" : "▼"}
                </button>
                ${expanded ? `<ul class="idea-subtask-list">${subtasks.map((t) => `<li>${escapeHtml(t)}</li>`).join("")}</ul>` : ""}`
-            : '<span class="text-muted">—</span>'}
+            : dash}
         </td>
         <td class="idea-sorter-td">
           <button class="idea-sorter-edit btn-secondary">Edit</button>
