@@ -1,4 +1,5 @@
 // List View Module
+import { TasksAPI } from "../api.js";
 import { TAG_CLASSES } from "../constants.js";
 import {
   formatDate,
@@ -374,6 +375,174 @@ export class ListView {
     return div;
   }
 
+  async moveTask(taskId, targetSection) {
+    try {
+      const response = await TasksAPI.move(taskId, { section: targetSection });
+      if (response.ok) {
+        await this.tm.loadTasks();
+      } else {
+        console.error("Failed to move task");
+      }
+    } catch (error) {
+      console.error("Error moving task:", error);
+    }
+  }
+
+  /** Desktop HTML5 drag-drop between list sections. */
+  bindDrag() {
+    // Guard: prevent binding multiple times on re-render
+    if (this.dragBound) return;
+    this.dragBound = true;
+
+    document.addEventListener("dragstart", (e) => {
+      const item = e.target.closest(".task-list-item");
+      if (!item || !item.dataset.taskId || item.draggable === false) return;
+      item.classList.add("dragging");
+      e.dataTransfer.setData("text/plain", item.dataset.taskId);
+      e.dataTransfer.effectAllowed = "move";
+      this.draggedTaskId = item.dataset.taskId;
+    });
+
+    document.addEventListener("dragover", (e) => {
+      const zone = e.target.closest(".list-drop-zone, .list-section-header");
+      if (!zone) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      document.querySelectorAll(".list-drop-zone, .list-section-header")
+        .forEach((z) => z.classList.remove("drag-over"));
+      zone.classList.add("drag-over");
+    });
+
+    document.addEventListener("dragleave", (e) => {
+      const zone = e.target.closest(".list-drop-zone, .list-section-header");
+      if (zone && !zone.contains(e.relatedTarget)) {
+        zone.classList.remove("drag-over");
+      }
+    });
+
+    document.addEventListener("drop", (e) => {
+      const zone = e.target.closest(".list-drop-zone, .list-section-header");
+      if (!zone || !this.draggedTaskId) return;
+      e.preventDefault();
+      const targetSection = zone.dataset.section;
+      document.querySelectorAll(".list-drop-zone, .list-section-header")
+        .forEach((z) => z.classList.remove("drag-over"));
+      if (targetSection) {
+        this.moveTask(this.draggedTaskId, targetSection);
+      }
+      this.draggedTaskId = null;
+    });
+
+    document.addEventListener("dragend", (e) => {
+      const item = e.target.closest(".task-list-item");
+      if (item) item.classList.remove("dragging");
+      document.querySelectorAll(".list-drop-zone, .list-section-header")
+        .forEach((z) => z.classList.remove("drag-over"));
+      this.draggedTaskId = null;
+    });
+  }
+
+  /** Touch drag-and-drop for mobile — mirrors board.js bindTouchDrag pattern. */
+  bindTouchDrag() {
+    if (this.touchBound) return;
+    this.touchBound = true;
+
+    let touchItem = null;
+    let clone = null;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let dragActive = false;
+
+    document.addEventListener("touchstart", (e) => {
+      const item = e.target.closest(".task-list-item");
+      if (!item || !item.dataset.taskId || item.draggable === false) return;
+      touchItem = item;
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      dragActive = false;
+    }, { passive: true });
+
+    document.addEventListener("touchmove", (e) => {
+      if (!touchItem) return;
+      const touch = e.touches[0];
+      const dx = touch.clientX - touchStartX;
+      const dy = touch.clientY - touchStartY;
+
+      if (!dragActive && Math.abs(dx) + Math.abs(dy) < 10) return;
+
+      if (!dragActive) {
+        dragActive = true;
+        e.preventDefault();
+        this.draggedTaskId = touchItem.dataset.taskId;
+        touchItem.style.opacity = "0.5";
+
+        clone = touchItem.cloneNode(true);
+        clone.style.position = "fixed";
+        clone.style.zIndex = "9999";
+        clone.style.pointerEvents = "none";
+        clone.style.opacity = "0.8";
+        clone.style.width = touchItem.offsetWidth + "px";
+        clone.style.transform = "rotate(2deg)";
+        document.body.appendChild(clone);
+      }
+
+      if (dragActive) {
+        e.preventDefault();
+        clone.style.left = (touch.clientX - 40) + "px";
+        clone.style.top = (touch.clientY - 20) + "px";
+
+        // Highlight drop zone under finger
+        const elemBelow = document.elementFromPoint(
+          touch.clientX,
+          touch.clientY,
+        );
+        const activeZone = elemBelow?.closest(
+          ".list-drop-zone, .list-section-header",
+        );
+        document.querySelectorAll(".list-drop-zone, .list-section-header")
+          .forEach((z) => {
+            z.classList.toggle("drag-over", z === activeZone);
+          });
+      }
+    }, { passive: false });
+
+    document.addEventListener("touchend", (e) => {
+      if (!touchItem || !dragActive) {
+        touchItem = null;
+        return;
+      }
+
+      const touch = e.changedTouches[0];
+      if (clone) {
+        clone.style.display = "none";
+      }
+      const elemBelow = document.elementFromPoint(
+        touch.clientX,
+        touch.clientY,
+      );
+      const dropZone = elemBelow?.closest(
+        ".list-drop-zone, .list-section-header",
+      );
+
+      if (clone) {
+        clone.remove();
+        clone = null;
+      }
+      touchItem.style.opacity = "1";
+      document.querySelectorAll(".list-drop-zone, .list-section-header")
+        .forEach((z) => z.classList.remove("drag-over"));
+
+      if (dropZone?.dataset.section && this.draggedTaskId) {
+        this.moveTask(this.draggedTaskId, dropZone.dataset.section);
+      }
+
+      this.draggedTaskId = null;
+      touchItem = null;
+      dragActive = false;
+    });
+  }
+
   bindEvents() {
     // Filter change events
     document
@@ -394,5 +563,8 @@ export class ListView {
     document
       .getElementById("clearFilters")
       .addEventListener("click", () => this.clearFilters());
+
+    this.bindDrag();
+    this.bindTouchDrag();
   }
 }
