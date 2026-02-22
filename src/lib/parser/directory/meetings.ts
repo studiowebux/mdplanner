@@ -20,8 +20,9 @@ export class MeetingsDirectoryParser extends DirectoryParser<Meeting> {
   }
 
   protected parseFile(content: string, _filePath: string): Meeting | null {
-    const { frontmatter, content: body } =
-      parseFrontmatter<MeetingFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<MeetingFrontmatter>(
+      content,
+    );
 
     if (!frontmatter.id) {
       return null;
