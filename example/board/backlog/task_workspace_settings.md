@@ -15,7 +15,6 @@ order: 0
 # Workspace Settings Page
 
 Build settings page for workspace configuration.
-
 - General (name, description, logo)
 - Members and roles
 - Integrations

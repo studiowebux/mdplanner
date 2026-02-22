@@ -10,9 +10,6 @@ milestone: milestone_enterprise
 # Mobile App Development
 
 Build native mobile apps for iOS and Android.
-
-## Approach Options
-
 1. React Native (shared codebase)
 2. Native (separate iOS/Android teams)
 3. PWA enhancement first
