@@ -11668,16 +11668,19 @@
             </div>
             <div class="form-group">
               <label class="form-label">Departments *</label>
-              <input
-                type="text"
-                id="orgchartSidenavDepartments"
-                required
-                class="form-input"
-                placeholder="e.g., Engineering, Product"
-              >
-              <p class="text-xs text-muted mt-1">
-                Comma-separated for multiple departments
-              </p>
+              <div id="orgchartDeptChips" class="flex flex-wrap gap-1 mb-1"></div>
+              <div class="flex gap-1">
+                <input
+                  type="text"
+                  id="orgchartSidenavDeptInput"
+                  class="form-input flex-1"
+                  placeholder="Type department name..."
+                  list="orgchartDeptSuggestions"
+                >
+                <datalist id="orgchartDeptSuggestions"></datalist>
+                <button type="button" id="orgchartAddDeptBtn" class="btn-ghost text-sm px-2">+ Add</button>
+              </div>
+              <input type="hidden" id="orgchartSidenavDepartments">
             </div>
             <div class="form-group">
               <label class="form-label">Reports To</label>

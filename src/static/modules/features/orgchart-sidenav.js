@@ -10,6 +10,7 @@ import { OrgChartAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 
 export class OrgChartSidenavModule extends BaseSidenavModule {
+  selectedDepts = [];
   get prefix() { return "orgchart"; }
   get entityName() { return "Team Member"; }
   get api() { return OrgChartAPI; }
@@ -26,7 +27,10 @@ export class OrgChartSidenavModule extends BaseSidenavModule {
 
   openNew() {
     super.openNew();
+    this.selectedDepts = [];
     this.populateReportsToDropdown();
+    this.populateDeptSuggestions();
+    this.renderDeptChips();
   }
 
   /** Override: fetch member from API instead of local state */
@@ -38,6 +42,7 @@ export class OrgChartSidenavModule extends BaseSidenavModule {
       this.editingId = memberId;
       this.el("Header").textContent = this.editLabel;
       this.populateReportsToDropdown(memberId);
+      this.populateDeptSuggestions();
       this.fillForm(member);
       this.el("Delete")?.classList.remove("hidden");
 
@@ -51,6 +56,51 @@ export class OrgChartSidenavModule extends BaseSidenavModule {
   /** Alias for compatibility with callers using openEdit */
   openEdit(memberId) {
     return this.open(memberId);
+  }
+
+  populateDeptSuggestions() {
+    const datalist = document.getElementById("orgchartDeptSuggestions");
+    if (!datalist) return;
+    const allDepts = new Set();
+    const members = this.tm.orgchartModule?.members || [];
+    for (const m of members) {
+      if (m.departments) {
+        for (const d of m.departments) allDepts.add(d);
+      }
+    }
+    datalist.innerHTML = "";
+    for (const dept of [...allDepts].sort()) {
+      if (!this.selectedDepts.includes(dept)) {
+        const opt = document.createElement("option");
+        opt.value = dept;
+        datalist.appendChild(opt);
+      }
+    }
+  }
+
+  addDept(name) {
+    const trimmed = name.trim();
+    if (!trimmed || this.selectedDepts.includes(trimmed)) return;
+    this.selectedDepts.push(trimmed);
+    this.renderDeptChips();
+    this.populateDeptSuggestions();
+  }
+
+  removeDept(index) {
+    this.selectedDepts.splice(index, 1);
+    this.renderDeptChips();
+    this.populateDeptSuggestions();
+  }
+
+  renderDeptChips() {
+    const container = document.getElementById("orgchartDeptChips");
+    if (!container) return;
+    container.innerHTML = this.selectedDepts.map((dept, i) =>
+      `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs border border-default bg-tertiary text-primary">${dept}<button type="button" class="ml-1 text-muted hover:text-primary" data-dept-index="${i}">&times;</button></span>`
+    ).join("");
+    // Update hidden input
+    const hidden = document.getElementById("orgchartSidenavDepartments");
+    if (hidden) hidden.value = this.selectedDepts.join(", ");
   }
 
   populateReportsToDropdown(excludeId = null) {
@@ -75,18 +125,22 @@ export class OrgChartSidenavModule extends BaseSidenavModule {
     document.getElementById("orgchartSidenavName").value = "";
     document.getElementById("orgchartSidenavTitle").value = "";
     document.getElementById("orgchartSidenavDepartments").value = "";
+    document.getElementById("orgchartSidenavDeptInput").value = "";
     document.getElementById("orgchartSidenavReportsTo").value = "";
     document.getElementById("orgchartSidenavEmail").value = "";
     document.getElementById("orgchartSidenavPhone").value = "";
     document.getElementById("orgchartSidenavStartDate").value = "";
     document.getElementById("orgchartSidenavNotes").value = "";
+    this.selectedDepts = [];
+    this.renderDeptChips();
   }
 
   fillForm(member) {
     document.getElementById("orgchartSidenavName").value = member.name || "";
     document.getElementById("orgchartSidenavTitle").value = member.title || "";
-    document.getElementById("orgchartSidenavDepartments").value =
-      member.departments?.join(", ") || "";
+    this.selectedDepts = member.departments ? [...member.departments] : [];
+    this.renderDeptChips();
+    this.populateDeptSuggestions();
     document.getElementById("orgchartSidenavReportsTo").value =
       member.reportsTo || "";
     document.getElementById("orgchartSidenavEmail").value = member.email || "";
@@ -97,16 +151,10 @@ export class OrgChartSidenavModule extends BaseSidenavModule {
   }
 
   getFormData() {
-    const deptInput = document.getElementById("orgchartSidenavDepartments")
-      .value.trim();
-    const departments = deptInput
-      ? deptInput.split(",").map((d) => d.trim()).filter((d) => d)
-      : [];
-
     return {
       name: document.getElementById("orgchartSidenavName").value.trim(),
       title: document.getElementById("orgchartSidenavTitle").value.trim(),
-      departments,
+      departments: [...this.selectedDepts],
       reportsTo: document.getElementById("orgchartSidenavReportsTo").value ||
         undefined,
       email: document.getElementById("orgchartSidenavEmail").value.trim() ||
@@ -147,6 +195,38 @@ export class OrgChartSidenavModule extends BaseSidenavModule {
       console.error("Error saving member:", error);
       this.showSaveStatus("Error");
       showToast("Error saving team member", "error");
+    }
+  }
+
+  bindEvents() {
+    super.bindEvents();
+    const input = document.getElementById("orgchartSidenavDeptInput");
+    const addBtn = document.getElementById("orgchartAddDeptBtn");
+    const chips = document.getElementById("orgchartDeptChips");
+
+    if (addBtn) {
+      addBtn.addEventListener("click", () => {
+        if (input) {
+          this.addDept(input.value);
+          input.value = "";
+          input.focus();
+        }
+      });
+    }
+    if (input) {
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          this.addDept(input.value);
+          input.value = "";
+        }
+      });
+    }
+    if (chips) {
+      chips.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-dept-index]");
+        if (btn) this.removeDept(parseInt(btn.dataset.deptIndex));
+      });
     }
   }
 
