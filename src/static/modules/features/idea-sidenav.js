@@ -34,6 +34,10 @@ export class IdeaSidenavModule {
       "ideaSidenavTitle",
       "ideaSidenavStatus",
       "ideaSidenavCategory",
+      "ideaSidenavPriority",
+      "ideaSidenavStartDate",
+      "ideaSidenavEndDate",
+      "ideaSidenavResources",
       "ideaSidenavDescription",
     ];
     inputs.forEach((id) => {
@@ -45,6 +49,20 @@ export class IdeaSidenavModule {
         "change",
         () => this.scheduleAutoSave(),
       );
+    });
+
+    // Subtask add
+    const subtaskInput = document.getElementById("ideaSidenavSubtaskInput");
+    subtaskInput?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        this.addSubtask(subtaskInput.value);
+        subtaskInput.value = "";
+      }
+    });
+    document.getElementById("ideaSidenavSubtaskAdd")?.addEventListener("click", () => {
+      this.addSubtask(subtaskInput.value);
+      subtaskInput.value = "";
     });
 
     // Link section toggle
@@ -69,6 +87,11 @@ export class IdeaSidenavModule {
       title: "",
       status: "new",
       category: "",
+      priority: "",
+      startDate: "",
+      endDate: "",
+      resources: "",
+      subtasks: [],
       description: "",
       links: [],
       created: new Date().toISOString().split("T")[0],
@@ -122,10 +145,15 @@ export class IdeaSidenavModule {
     document.getElementById("ideaSidenavTitle").value = "";
     document.getElementById("ideaSidenavStatus").value = "new";
     document.getElementById("ideaSidenavCategory").value = "";
+    document.getElementById("ideaSidenavPriority").value = "";
+    document.getElementById("ideaSidenavStartDate").value = "";
+    document.getElementById("ideaSidenavEndDate").value = "";
+    document.getElementById("ideaSidenavResources").value = "";
     document.getElementById("ideaSidenavDescription").value = "";
     document.getElementById("ideaSidenavLinkedList").innerHTML = "";
     document.getElementById("ideaSidenavLinkOptions").innerHTML = "";
     document.getElementById("ideaSidenavLinkSearch").value = "";
+    this.renderSubtasks([]);
   }
 
   fillForm() {
@@ -135,13 +163,57 @@ export class IdeaSidenavModule {
       this.currentIdea.status || "new";
     document.getElementById("ideaSidenavCategory").value =
       this.currentIdea.category || "";
+    document.getElementById("ideaSidenavPriority").value =
+      this.currentIdea.priority || "";
+    document.getElementById("ideaSidenavStartDate").value =
+      this.currentIdea.startDate || "";
+    document.getElementById("ideaSidenavEndDate").value =
+      this.currentIdea.endDate || "";
+    document.getElementById("ideaSidenavResources").value =
+      this.currentIdea.resources || "";
     document.getElementById("ideaSidenavDescription").value =
       this.currentIdea.description || "";
+    this.renderSubtasks(this.currentIdea.subtasks || []);
 
     if (this.editingIdeaId) {
       this.renderLinkedIdeas();
       this.renderLinkOptions();
     }
+  }
+
+  renderSubtasks(subtasks) {
+    const container = document.getElementById("ideaSidenavSubtaskList");
+    if (!container) return;
+
+    container.innerHTML = subtasks.map((task, i) => `
+      <div class="flex items-center gap-2 py-1 group">
+        <span class="flex-1 text-sm text-secondary">${escapeHtml(task)}</span>
+        <button data-subtask-index="${i}"
+                class="subtask-remove-btn opacity-0 group-hover:opacity-100 text-muted hover:text-error flex-shrink-0">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    `).join("");
+
+    container.querySelectorAll(".subtask-remove-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.dataset.subtaskIndex, 10);
+        this.currentIdea.subtasks = (this.currentIdea.subtasks || []).filter((_, i) => i !== idx);
+        this.renderSubtasks(this.currentIdea.subtasks);
+        this.scheduleAutoSave();
+      });
+    });
+  }
+
+  addSubtask(text) {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    if (!this.currentIdea.subtasks) this.currentIdea.subtasks = [];
+    this.currentIdea.subtasks.push(trimmed);
+    this.renderSubtasks(this.currentIdea.subtasks);
+    this.scheduleAutoSave();
   }
 
   toggleLinksSection() {
@@ -257,10 +329,15 @@ export class IdeaSidenavModule {
     return {
       title: document.getElementById("ideaSidenavTitle").value.trim(),
       status: document.getElementById("ideaSidenavStatus").value,
-      category: document.getElementById("ideaSidenavCategory").value.trim() ||
-        null,
-      description:
-        document.getElementById("ideaSidenavDescription").value.trim() || null,
+      category: document.getElementById("ideaSidenavCategory").value.trim() || null,
+      priority: document.getElementById("ideaSidenavPriority").value || null,
+      startDate: document.getElementById("ideaSidenavStartDate").value || null,
+      endDate: document.getElementById("ideaSidenavEndDate").value || null,
+      resources: document.getElementById("ideaSidenavResources").value.trim() || null,
+      subtasks: this.currentIdea.subtasks && this.currentIdea.subtasks.length > 0
+        ? this.currentIdea.subtasks
+        : null,
+      description: document.getElementById("ideaSidenavDescription").value.trim() || null,
       links: this.currentIdea.links && this.currentIdea.links.length > 0
         ? this.currentIdea.links
         : null,
