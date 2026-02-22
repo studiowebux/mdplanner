@@ -8,7 +8,7 @@ import { initProject, printInitSuccess } from "./src/lib/init.ts";
 // Get the directory where this script is located (works for both dev and compiled)
 const __dirname = dirname(fromFileUrl(import.meta.url));
 
-export const VERSION = "0.3.1";
+export const VERSION = "0.3.2";
 export const GITHUB_REPO = "studiowebux/mdplanner";
 
 // CLI argument parsing
