@@ -17,12 +17,11 @@
   font-weight: 500;
   border: none;
   cursor: pointer;
-  transition: background-color var(--transition-base), color var(--transition-base);
+  transition: filter var(--transition-base);
 }
 
 .btn-primary:hover {
-  background-color: var(--color-accent-hover);
-  color: var(--color-text-inverse);
+  filter: brightness(0.85);
 }
 
 .btn-primary:disabled {
