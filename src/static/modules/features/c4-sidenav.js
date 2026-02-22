@@ -172,30 +172,30 @@ export class C4SidenavModule {
 
     if (connections.length === 0) {
       container.innerHTML =
-        '<div class="text-gray-400 dark:text-gray-500 text-sm italic py-2">No connections defined</div>';
+        '<div class="text-muted text-sm italic py-2">No connections defined</div>';
       return;
     }
 
     container.innerHTML = connections.map((conn, idx) => {
       const targetDisplay = this.getTargetDisplayName(conn.target);
       return `
-        <div class="flex items-center gap-2 py-1 group bg-gray-50 dark:bg-gray-700 rounded px-2">
+        <div class="flex items-center gap-2 py-1 group bg-secondary rounded px-2">
           <div class="flex-1 min-w-0">
-            <div class="text-sm text-gray-700 dark:text-gray-300 truncate">${
+            <div class="text-sm text-secondary truncate">${
         escapeHtml(targetDisplay)
       }</div>
-            <div class="text-xs text-gray-500 dark:text-gray-400 truncate">${
+            <div class="text-xs text-muted truncate">${
         escapeHtml(conn.label || "No label")
       }</div>
           </div>
           <button onclick="taskManager.c4SidenavModule.editConnection(${idx})"
-                  class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0">
+                  class="opacity-0 group-hover:opacity-100 text-muted hover:text-secondary flex-shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
             </svg>
           </button>
           <button onclick="taskManager.c4SidenavModule.removeConnection(${idx})"
-                  class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 flex-shrink-0">
+                  class="opacity-0 group-hover:opacity-100 text-muted hover:text-error flex-shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
@@ -221,20 +221,20 @@ export class C4SidenavModule {
     }
 
     // Clear "no connections" message
-    if (container.querySelector(".text-gray-400")) {
+    if (container.querySelector(".text-muted")) {
       container.innerHTML = "";
     }
 
     const inputHtml = `
-      <div class="c4-conn-input space-y-2 p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800">
+      <div class="c4-conn-input space-y-2 p-2 border border-strong rounded bg-primary">
         <div class="relative">
           <input type="text" class="c4-conn-target form-input text-sm" placeholder="Target component..." autocomplete="off">
-          <div class="c4-conn-dropdown hidden absolute top-full left-0 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-b-md max-h-32 overflow-y-auto z-50 shadow-lg"></div>
+          <div class="c4-conn-dropdown hidden absolute top-full left-0 right-0 bg-primary border border-strong rounded-b-md max-h-32 overflow-y-auto z-50 shadow-lg"></div>
         </div>
         <input type="text" class="c4-conn-label form-input text-sm" placeholder="Relationship label (e.g., reads/writes)">
         <div class="flex gap-2">
-          <button type="button" class="c4-conn-save flex-1 px-2 py-1 text-xs bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded hover:bg-gray-700 dark:hover:bg-gray-300">Add</button>
-          <button type="button" class="c4-conn-cancel flex-1 px-2 py-1 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border border-gray-300 dark:border-gray-600 rounded">Cancel</button>
+          <button type="button" class="c4-conn-save flex-1 px-2 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">Add</button>
+          <button type="button" class="c4-conn-cancel flex-1 px-2 py-1 text-xs text-muted hover:text-secondary border border-strong rounded">Cancel</button>
         </div>
       </div>
     `;
@@ -292,10 +292,10 @@ export class C4SidenavModule {
 
       if (matches.length > 0 && value.length > 0) {
         dropdown.innerHTML = matches.map((comp) => `
-          <div class="c4-dropdown-item px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer text-sm" data-id="${comp.id}" data-name="${comp.name}">
+          <div class="c4-dropdown-item px-3 py-2 hover:bg-tertiary cursor-pointer text-sm" data-id="${comp.id}" data-name="${comp.name}">
             ${
           escapeHtml(comp.name)
-        } <span class="text-xs text-gray-400">(${comp.level})</span>
+        } <span class="text-xs text-muted">(${comp.level})</span>
           </div>
         `).join("");
         dropdown.classList.remove("hidden");
@@ -338,14 +338,14 @@ export class C4SidenavModule {
           <input type="text" class="c4-conn-target form-input text-sm" value="${
       escapeHtml(conn.target)
     }" autocomplete="off">
-          <div class="c4-conn-dropdown hidden absolute top-full left-0 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-b-md max-h-32 overflow-y-auto z-50 shadow-lg"></div>
+          <div class="c4-conn-dropdown hidden absolute top-full left-0 right-0 bg-primary border border-strong rounded-b-md max-h-32 overflow-y-auto z-50 shadow-lg"></div>
         </div>
         <input type="text" class="c4-conn-label form-input text-sm" value="${
       escapeHtml(conn.label || "")
     }">
         <div class="flex gap-2">
-          <button type="button" class="c4-conn-save flex-1 px-2 py-1 text-xs bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded hover:bg-gray-700 dark:hover:bg-gray-300">Save</button>
-          <button type="button" class="c4-conn-cancel flex-1 px-2 py-1 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border border-gray-300 dark:border-gray-600 rounded">Cancel</button>
+          <button type="button" class="c4-conn-save flex-1 px-2 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">Save</button>
+          <button type="button" class="c4-conn-cancel flex-1 px-2 py-1 text-xs text-muted hover:text-secondary border border-strong rounded">Cancel</button>
         </div>
       </div>
     `;

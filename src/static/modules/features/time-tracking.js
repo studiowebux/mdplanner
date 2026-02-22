@@ -133,37 +133,37 @@ export class TimeTrackingModule {
       .map(([taskId, entries]) => {
         const taskTotal = entries.reduce((sum, e) => sum + e.hours, 0);
         return `
-      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
-        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
-          <span class="font-medium text-gray-900 dark:text-gray-100">${
+      <div class="bg-secondary rounded-lg border border-default overflow-hidden">
+        <div class="px-4 py-3 bg-secondary flex justify-between items-center">
+          <span class="font-medium text-primary">${
           taskMap[taskId]
         }</span>
-          <span class="text-sm text-gray-600 dark:text-gray-400">${
+          <span class="text-sm text-secondary">${
           taskTotal.toFixed(1)
         }h total</span>
         </div>
-        <div class="divide-y divide-gray-100 dark:divide-gray-600">
+        <div class="divide-y divide-y border-default">
           ${
           entries
             .map(
               (e) => `
             <div class="px-4 py-2 flex justify-between items-center text-sm">
               <div>
-                <span class="text-gray-900 dark:text-gray-100">${e.date}</span>
-                <span class="text-gray-500 dark:text-gray-400 ml-2">${e.hours}h</span>
+                <span class="text-primary">${e.date}</span>
+                <span class="text-muted ml-2">${e.hours}h</span>
                 ${
                 e.person
-                  ? `<span class="text-gray-400 dark:text-gray-500 ml-2">by ${this.getPersonName(e.person)}</span>`
+                  ? `<span class="text-muted ml-2">by ${this.getPersonName(e.person)}</span>`
                   : ""
               }
               </div>
               <div class="flex items-center gap-2">
                 ${
                 e.description
-                  ? `<span class="text-gray-500 dark:text-gray-400">${e.description}</span>`
+                  ? `<span class="text-muted">${e.description}</span>`
                   : ""
               }
-                <button onclick="taskManager.deleteTimeEntryFromView('${taskId}', '${e.id}')" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-xs">Delete</button>
+                <button onclick="taskManager.deleteTimeEntryFromView('${taskId}', '${e.id}')" class="text-error hover:text-error-text text-xs">Delete</button>
               </div>
             </div>
           `,
@@ -246,7 +246,7 @@ export class TimeTrackingModule {
 
     if (!entries || entries.length === 0) {
       container.innerHTML =
-        '<div class="text-sm text-gray-500 dark:text-gray-400">No time entries yet</div>';
+        '<div class="text-sm text-muted">No time entries yet</div>';
       totalDisplay.textContent = "0";
       return;
     }
@@ -257,23 +257,23 @@ export class TimeTrackingModule {
     container.innerHTML = entries
       .map(
         (e) => `
-      <div class="flex justify-between items-center text-sm bg-gray-50 dark:bg-gray-700 rounded px-2 py-1">
+      <div class="flex justify-between items-center text-sm bg-secondary rounded px-2 py-1">
         <div>
           <span>${e.date}</span>
           <span class="font-medium ml-2">${e.hours}h</span>
           ${
           e.person
-            ? `<span class="text-gray-500 dark:text-gray-400 ml-2">by ${this.getPersonName(e.person)}</span>`
+            ? `<span class="text-muted ml-2">by ${this.getPersonName(e.person)}</span>`
             : ""
         }
         </div>
         <div class="flex items-center gap-2">
           ${
           e.description
-            ? `<span class="text-gray-400 dark:text-gray-500 truncate max-w-32">${e.description}</span>`
+            ? `<span class="text-muted truncate max-w-32">${e.description}</span>`
             : ""
         }
-          <button type="button" onclick="taskManager.deleteTaskTimeEntry('${e.id}')" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">x</button>
+          <button type="button" onclick="taskManager.deleteTaskTimeEntry('${e.id}')" class="text-error hover:text-error-text">x</button>
         </div>
       </div>
     `,

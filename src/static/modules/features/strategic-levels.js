@@ -93,9 +93,11 @@ export class StrategicLevelsModule {
     this.renderView(builder);
 
     document.querySelectorAll(".strategic-view-toggle").forEach((btn) => {
-      btn.classList.remove("bg-gray-200", "dark:bg-gray-600");
+      btn.classList.remove("toggle-active");
+      btn.classList.add("toggle-inactive");
       if (btn.dataset.mode === mode) {
-        btn.classList.add("bg-gray-200", "dark:bg-gray-600");
+        btn.classList.remove("toggle-inactive");
+        btn.classList.add("toggle-active");
       }
     });
   }
@@ -170,52 +172,52 @@ export class StrategicLevelsModule {
         }\u2500</div>`
         : ""
     }
-        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border-l-4 ${
+        <div class="bg-secondary rounded-lg p-3 border-l-4 ${
       levelColors[node.level]
-    } border border-gray-200 dark:border-gray-600 mb-2">
+    } border border-default mb-2">
           <div class="flex items-start justify-between">
             <div class="flex-1">
               <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300">${
+                <span class="text-xs px-1.5 py-0.5 rounded bg-active text-secondary">${
       levelLabels[node.level]
     }</span>
-                <span class="font-medium text-gray-900 dark:text-gray-100">${
+                <span class="font-medium text-primary">${
       escapeHtml(node.title)
     }</span>
-                <span class="text-xs text-gray-500 dark:text-gray-400">(${
+                <span class="text-xs text-muted">(${
       Math.round(progress)
     }%)</span>
               </div>
               ${
       node.description
-        ? `<p class="text-sm text-gray-600 dark:text-gray-400 mt-1">${
+        ? `<p class="text-sm text-secondary mt-1">${
           escapeHtml(node.description)
         }</p>`
         : ""
     }
               ${
       linkedCount > 0
-        ? `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Linked: ${
+        ? `<div class="text-xs text-muted mt-1">Linked: ${
           node.linkedTasks?.length || 0
         } tasks, ${node.linkedMilestones?.length || 0} milestones</div>`
         : ""
     }
-              <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1.5 mt-2">
-                <div class="bg-gray-900 dark:bg-gray-100 h-1.5 rounded-full" style="width: ${progress}%"></div>
+              <div class="w-full bg-active rounded-full h-1.5 mt-2">
+                <div class="bg-inverse h-1.5 rounded-full" style="width: ${progress}%"></div>
               </div>
             </div>
             <div class="flex items-center gap-1 ml-4 flex-shrink-0">
               <button onclick="taskManager.openStrategicLevelModal('${node.level}', '${node.id}')"
-                      class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600">Edit</button>
+                      class="text-xs text-secondary hover:text-primary px-2 py-1 rounded hover:bg-active">Edit</button>
               <button onclick="taskManager.deleteStrategicLevel('${node.id}')"
-                      class="text-xs text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-200 px-2 py-1 rounded hover:bg-red-100 dark:hover:bg-red-900/20">Delete</button>
+                      class="text-xs text-error hover:text-error-text px-2 py-1 rounded hover:bg-error-bg">Delete</button>
               <button onclick="taskManager.openStrategicLinkModal('${node.id}')"
-                      class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600">Link</button>
+                      class="text-xs text-secondary hover:text-primary px-2 py-1 rounded hover:bg-active">Link</button>
               ${
       childLevelType
         ? `
               <button onclick="taskManager.openStrategicLevelModal('${childLevelType}', null, '${node.id}')"
-                      class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600">+ ${
+                      class="text-xs text-secondary hover:text-primary px-2 py-1 rounded hover:bg-active">+ ${
           levelLabels[childLevelType]
         }</button>
               `
@@ -313,7 +315,7 @@ export class StrategicLevelsModule {
 
       html += `
         <div class="pyramid-row ${pyramidWidths[levelType]} mx-auto mb-3">
-          <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 text-center">${
+          <div class="text-xs font-semibold text-muted uppercase tracking-wide mb-2 text-center">${
         levelLabels[levelType]
       }</div>
           <div class="flex flex-wrap justify-center gap-2">
@@ -324,27 +326,27 @@ export class StrategicLevelsModule {
         const childLevelType = this.getChildLevelType(levelType);
 
         html += `
-          <div class="pyramid-card bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 flex-1 min-w-[140px] max-w-[200px]">
+          <div class="pyramid-card bg-secondary rounded-lg p-3 border border-default flex-1 min-w-[140px] max-w-[200px]">
             <div class="text-center">
-              <div class="font-medium text-gray-900 dark:text-gray-100 text-sm truncate" title="${
+              <div class="font-medium text-primary text-sm truncate" title="${
           escapeHtml(level.title)
         }">${escapeHtml(level.title)}</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">${
+              <div class="text-xs text-muted mt-1">${
           Math.round(progress)
         }%</div>
-              <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1 mt-2">
-                <div class="bg-gray-900 dark:bg-gray-100 h-1 rounded-full" style="width: ${progress}%"></div>
+              <div class="w-full bg-active rounded-full h-1 mt-2">
+                <div class="bg-inverse h-1 rounded-full" style="width: ${progress}%"></div>
               </div>
               <div class="flex justify-center gap-1 mt-2">
                 <button onclick="taskManager.openStrategicLevelModal('${levelType}', '${level.id}')"
-                        class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Edit</button>
+                        class="text-xs text-secondary hover:text-primary">Edit</button>
                 <button onclick="taskManager.openStrategicLinkModal('${level.id}')"
-                        class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Link</button>
+                        class="text-xs text-secondary hover:text-primary">Link</button>
                 ${
           childLevelType
             ? `
                 <button onclick="taskManager.openStrategicLevelModal('${childLevelType}', null, '${level.id}')"
-                        class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">+</button>
+                        class="text-xs text-secondary hover:text-primary">+</button>
                 `
             : ""
         }
@@ -545,17 +547,17 @@ export class StrategicLevelsModule {
       ? allTasks
         .map(
           (task) => `
-      <label class="flex items-center gap-2 p-1 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
+      <label class="flex items-center gap-2 p-1 hover:bg-secondary rounded cursor-pointer">
         <input type="checkbox" class="strategic-link-task rounded" value="${task.id}"
                ${level?.linkedTasks?.includes(task.id) ? "checked" : ""}>
-        <span class="text-sm text-gray-700 dark:text-gray-300 ${
+        <span class="text-sm text-secondary ${
             task.completed ? "line-through" : ""
           }">${escapeHtml(task.title)}</span>
       </label>
     `,
         )
         .join("")
-      : '<p class="text-sm text-gray-500 dark:text-gray-400 p-2">No tasks available</p>';
+      : '<p class="text-sm text-muted p-2">No tasks available</p>';
 
     // Render milestone checkboxes
     try {
@@ -564,20 +566,20 @@ export class StrategicLevelsModule {
         ? milestones
           .map(
             (m) => `
-        <label class="flex items-center gap-2 p-1 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
+        <label class="flex items-center gap-2 p-1 hover:bg-secondary rounded cursor-pointer">
           <input type="checkbox" class="strategic-link-milestone rounded" value="${m.id}"
                  ${level?.linkedMilestones?.includes(m.id) ? "checked" : ""}>
-          <span class="text-sm text-gray-700 dark:text-gray-300">${
+          <span class="text-sm text-secondary">${
               escapeHtml(m.name)
             }</span>
         </label>
       `,
           )
           .join("")
-        : '<p class="text-sm text-gray-500 dark:text-gray-400 p-2">No milestones available</p>';
+        : '<p class="text-sm text-muted p-2">No milestones available</p>';
     } catch (error) {
       milestonesContainer.innerHTML =
-        '<p class="text-sm text-gray-500 dark:text-gray-400 p-2">Error loading milestones</p>';
+        '<p class="text-sm text-muted p-2">Error loading milestones</p>';
     }
 
     modal?.classList.remove("hidden");

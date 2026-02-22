@@ -73,14 +73,14 @@ export class SwotModule {
 
     const renderItems = (items, quadrant) => {
       if (!items || items.length === 0) {
-        return '<li class="text-gray-400 dark:text-gray-500 italic">No items yet</li>';
+        return '<li class="text-muted italic">No items yet</li>';
       }
       return items
         .map(
           (item, idx) => `
         <li class="flex justify-between items-start group">
           <span>${escapeHtml(item)}</span>
-          <button onclick="taskManager.removeSwotItem('${quadrant}', ${idx})" class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 ml-2">x</button>
+          <button onclick="taskManager.removeSwotItem('${quadrant}', ${idx})" class="opacity-0 group-hover:opacity-100 text-muted hover:text-error ml-2">x</button>
         </li>
       `,
         )

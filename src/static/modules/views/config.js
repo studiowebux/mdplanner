@@ -79,13 +79,13 @@ export class ConfigView {
     sections.forEach((section, index) => {
       const div = document.createElement("div");
       div.className =
-        "flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700 rounded border";
+        "flex items-center gap-2 p-2 bg-secondary rounded border";
       div.innerHTML = `
-                <span class="flex-1 text-gray-900 dark:text-gray-100">${section}</span>
+                <span class="flex-1 text-primary">${section}</span>
                 <div class="flex gap-1">
                     ${
         index > 0
-          ? `<button onclick="taskManager.configView.moveSectionUp(${index})" class="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" title="Move Up">
+          ? `<button onclick="taskManager.configView.moveSectionUp(${index})" class="p-1 text-muted hover:text-secondary" title="Move Up">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
                         </svg>
@@ -94,14 +94,14 @@ export class ConfigView {
       }
                     ${
         index < sections.length - 1
-          ? `<button onclick="taskManager.configView.moveSectionDown(${index})" class="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" title="Move Down">
+          ? `<button onclick="taskManager.configView.moveSectionDown(${index})" class="p-1 text-muted hover:text-secondary" title="Move Down">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </button>`
           : ""
       }
-                    <button onclick="taskManager.configView.removeSection(${index})" class="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300" title="Remove">
+                    <button onclick="taskManager.configView.removeSection(${index})" class="p-1 text-error hover:text-error-text" title="Remove">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
@@ -120,10 +120,10 @@ export class ConfigView {
     tags.forEach((tag, index) => {
       const chip = document.createElement("div");
       chip.className =
-        "inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200";
+        "inline-flex items-center px-3 py-1 rounded-full text-sm bg-success-bg text-success-text";
       chip.innerHTML = `
                 <span>${tag}</span>
-                <button onclick="taskManager.configView.removeTag(${index})" class="ml-2 text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200">
+                <button onclick="taskManager.configView.removeTag(${index})" class="ml-2 text-success hover:text-success-text">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -291,6 +291,7 @@ export class ConfigView {
         { id: "billing", label: "Billing" },
         { id: "crm", label: "CRM" },
         { id: "orgchart", label: "Org Chart" },
+        { id: "people", label: "People" },
       ],
       "Other": [
         { id: "notes", label: "Notes" },
@@ -306,7 +307,7 @@ export class ConfigView {
       const groupDiv = document.createElement("div");
 
       const groupTitle = document.createElement("h4");
-      groupTitle.className = "text-sm font-medium text-gray-700 dark:text-gray-300 mb-2";
+      groupTitle.className = "text-sm font-medium text-secondary mb-2";
       groupTitle.textContent = group;
       groupDiv.appendChild(groupTitle);
 
@@ -319,9 +320,9 @@ export class ConfigView {
         label.className = "flex items-center space-x-2 cursor-pointer";
         label.innerHTML = `
           <input type="checkbox" data-feature="${feature.id}"
-            class="feature-checkbox rounded border-gray-300 dark:border-gray-600 text-gray-900 focus:ring-gray-500"
+            class="feature-checkbox rounded border-strong text-primary focus:ring-1"
             ${isEnabled ? "checked" : ""}>
-          <span class="text-sm text-gray-700 dark:text-gray-300">${feature.label}</span>
+          <span class="text-sm text-secondary">${feature.label}</span>
         `;
         checkboxes.appendChild(label);
       }

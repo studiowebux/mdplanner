@@ -296,6 +296,15 @@ body:not([data-current-view="c4"]) #c4Connections {
 }
 
 /* --------------------------------------------------------------------------
+   C4 List View — Level Border Colors
+   -------------------------------------------------------------------------- */
+
+.c4-list-level-context { border-left-color: var(--color-text-primary); }
+.c4-list-level-container { border-left-color: var(--color-text-secondary); }
+.c4-list-level-component { border-left-color: var(--color-text-muted); }
+.c4-list-level-code { border-left-color: var(--color-border-strong); }
+
+/* --------------------------------------------------------------------------
    Responsive
    -------------------------------------------------------------------------- */
 

@@ -28,13 +28,13 @@ export class EnhancedNotesModule {
     const btn = document.getElementById("toggleModeBtn");
     const btnText = document.getElementById("toggleModeText");
     if (this.tm.enhancedMode) {
-      btn.classList.add("bg-purple-200", "dark:bg-purple-800");
-      btn.classList.remove("bg-purple-100", "dark:bg-purple-900");
+      btn.classList.add("toggle-active");
+      btn.classList.remove("toggle-inactive");
       btn.title = "Switch to Simple Mode";
       btnText.textContent = "Simple";
     } else {
-      btn.classList.remove("bg-purple-200", "dark:bg-purple-800");
-      btn.classList.add("bg-purple-100", "dark:bg-purple-900");
+      btn.classList.remove("toggle-active");
+      btn.classList.add("toggle-inactive");
       btn.title = "Switch to Enhanced Mode";
       btnText.textContent = "Enhanced";
     }
@@ -442,8 +442,8 @@ export class EnhancedNotesModule {
       ? "Exit Multi-Select"
       : "Multi-Select";
     btn.className = this.tm.multiSelectMode
-      ? "bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
-      : "bg-orange-600 text-white px-3 py-1 rounded text-sm hover:bg-orange-700";
+      ? "bg-error text-white px-3 py-1 rounded text-sm hover:bg-error"
+      : "bg-warning text-white px-3 py-1 rounded text-sm hover:bg-warning";
 
     if (!this.tm.multiSelectMode) {
       this.tm.selectedParagraphs = [];
@@ -462,12 +462,12 @@ export class EnhancedNotesModule {
       actionBar = document.createElement("div");
       actionBar.id = "multiSelectActions";
       actionBar.className =
-        "fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3 flex space-x-2 z-50";
+        "fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-primary border border-strong rounded-lg shadow-lg p-3 flex space-x-2 z-50";
       actionBar.innerHTML = `
-        <button onclick="taskManager.deleteSelectedParagraphs()" class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">Delete Selected</button>
-        <button onclick="taskManager.duplicateSelectedParagraphs()" class="bg-gray-900 text-white px-3 py-1 rounded text-sm hover:bg-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500">Duplicate Selected</button>
-        <button onclick="taskManager.moveSelectedParagraphs('up')" class="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700">Move Up</button>
-        <button onclick="taskManager.moveSelectedParagraphs('down')" class="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700">Move Down</button>
+        <button onclick="taskManager.deleteSelectedParagraphs()" class="bg-error text-white px-3 py-1 rounded text-sm hover:bg-error">Delete Selected</button>
+        <button onclick="taskManager.duplicateSelectedParagraphs()" class="bg-inverse text-inverse px-3 py-1 rounded text-sm hover:bg-inverse">Duplicate Selected</button>
+        <button onclick="taskManager.moveSelectedParagraphs('up')" class="bg-inverse text-inverse px-3 py-1 rounded text-sm hover:bg-inverse">Move Up</button>
+        <button onclick="taskManager.moveSelectedParagraphs('down')" class="bg-inverse text-inverse px-3 py-1 rounded text-sm hover:bg-inverse">Move Down</button>
       `;
       document.body.appendChild(actionBar);
     }
@@ -781,7 +781,7 @@ export class EnhancedNotesModule {
     if (!currentNote) return "";
 
     let html =
-      '<div class="enhanced-note-view prose dark:prose-invert max-w-none">';
+      '<div class="enhanced-note-view prose max-w-none">';
 
     // Render paragraphs as formatted content
     const sortedParagraphs = [...(currentNote.paragraphs || [])].sort((a, b) =>
@@ -791,7 +791,7 @@ export class EnhancedNotesModule {
       if (paragraph.type === "code") {
         const lang = paragraph.language || "text";
         html +=
-          `<pre class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 overflow-x-auto my-4"><code class="language-${lang} text-sm">${
+          `<pre class="bg-tertiary rounded-lg p-4 overflow-x-auto my-4"><code class="language-${lang} text-sm">${
             escapeHtml(paragraph.content)
           }</code></pre>`;
       } else {
@@ -848,7 +848,7 @@ export class EnhancedNotesModule {
       isCodeBlock
         ? `
           <div class="flex items-center gap-2">
-            <span class="text-xs text-gray-600 dark:text-gray-400">Language:</span>
+            <span class="text-xs text-secondary">Language:</span>
             <select class="language-selector text-xs border rounded px-2 py-1 min-w-24"
                     onchange="taskManager.updateParagraphLanguage('${paragraph.id}', this.value)"
                     onmousedown="event.stopPropagation()"
@@ -890,13 +890,13 @@ export class EnhancedNotesModule {
     }
         <div class="flex gap-2">
           <button onclick="taskManager.duplicateParagraph('${paragraph.id}')"
-                  class="px-2 py-1 text-xs bg-gray-900 text-white rounded hover:bg-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500" title="Duplicate">Copy</button>
+                  class="px-2 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse" title="Duplicate">Copy</button>
           <button onclick="taskManager.toggleParagraphType('${paragraph.id}')"
-                  class="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600" title="Toggle Type">${
+                  class="px-2 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse" title="Toggle Type">${
       isCodeBlock ? "Text" : "Code"
     }</button>
           <button onclick="taskManager.deleteParagraph('${paragraph.id}')"
-                  class="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600" title="Delete">Delete</button>
+                  class="px-2 py-1 text-xs bg-error text-white rounded hover:bg-error" title="Delete">Delete</button>
         </div>
       </div>
       <div class="paragraph-content mt-2" style="margin-left: 40px;">
@@ -933,8 +933,8 @@ export class EnhancedNotesModule {
     const isCodeBlock = paragraph.type === "code";
     const elementType = isCodeBlock ? "textarea" : "div";
     const attrs = isCodeBlock
-      ? `rows="10" class="w-full p-3 code-block border-0 resize-none focus:outline-none text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-800"`
-      : `contenteditable="true" class="w-full p-3 border-0 focus:outline-none min-h-[100px] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700"`;
+      ? `rows="10" class="w-full p-3 code-block border-0 resize-none focus:outline-none text-primary bg-secondary"`
+      : `contenteditable="true" class="w-full p-3 border-0 focus:outline-none min-h-[100px] text-primary bg-primary"`;
 
     return `<${elementType} ${attrs}
               onblur="taskManager.handleParagraphBlur(event, '${paragraph.id}', this.${
@@ -966,10 +966,10 @@ export class EnhancedNotesModule {
 
     const headerHtml = `
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">${section.title}</h3>
+        <h3 class="text-lg font-semibold text-primary">${section.title}</h3>
         <div class="flex space-x-2">
           <button onclick="taskManager.deleteCustomSection('${section.id}')"
-                  class="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
+                  class="px-2 py-1 text-xs bg-error text-white rounded hover:bg-error">Delete</button>
         </div>
       </div>
     `;
@@ -1004,15 +1004,15 @@ export class EnhancedNotesModule {
     }
 
     let tabNavHtml =
-      '<div class="border-b border-gray-200 dark:border-gray-700 mb-4"><nav class="flex space-x-8">';
+      '<div class="border-b border-default mb-4"><nav class="flex space-x-8">';
     tabs.forEach((tab) => {
       const isActive = tab.id === activeTabId;
       tabNavHtml += `
         <button onclick="taskManager.switchTab('${section.id}', '${tab.id}')"
                 class="py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
         isActive
-          ? "border-gray-900 text-gray-900 dark:border-gray-100 dark:text-gray-100"
-          : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
+          ? "border-strong text-primary"
+          : "border-transparent text-muted hover:text-secondary hover:border-strong"
       }"
                 data-tab-id="${tab.id}">
           ${tab.title}
@@ -1021,7 +1021,7 @@ export class EnhancedNotesModule {
     });
     tabNavHtml += `
       <button onclick="taskManager.addTab('${section.id}')"
-              class="py-2 px-1 text-sm text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100">
+              class="py-2 px-1 text-sm text-secondary hover:text-primary">
         + Add Tab
       </button>
     </nav></div>`;
@@ -1036,15 +1036,15 @@ export class EnhancedNotesModule {
           <div class="mb-2">
             <input type="text" value="${tab.title}"
                    onblur="taskManager.updateTabTitle('${section.id}', '${tab.id}', this.value)"
-                   class="text-sm font-medium border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-gray-500 rounded px-2 py-1">
+                   class="text-sm font-medium border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-1 rounded px-2 py-1">
           </div>
           <div class="space-y-2">
             <button onclick="taskManager.addContentToTab('${section.id}', '${tab.id}', 'text')"
-                    class="mr-2 px-3 py-1 text-xs bg-gray-900 text-white rounded hover:bg-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500">+ Text</button>
+                    class="mr-2 px-3 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">+ Text</button>
             <button onclick="taskManager.addContentToTab('${section.id}', '${tab.id}', 'code')"
-                    class="mr-2 px-3 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600">+ Code</button>
+                    class="mr-2 px-3 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">+ Code</button>
             <button onclick="taskManager.deleteTab('${section.id}', '${tab.id}')"
-                    class="px-3 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600">Delete Tab</button>
+                    class="px-3 py-1 text-xs bg-error text-white rounded hover:bg-error">Delete Tab</button>
           </div>
           <div class="mt-4 space-y-2" id="tab-content-${tab.id}">
             ${this.renderTabContent(tab.content)}
@@ -1063,30 +1063,30 @@ export class EnhancedNotesModule {
     let html = `
       <div class="mb-4">
         <button onclick="taskManager.addTimelineItem('${section.id}')"
-                class="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600">+ Add Step</button>
+                class="px-3 py-1 text-sm bg-success text-white rounded hover:bg-success">+ Add Step</button>
       </div>
       <div class="space-y-4">
     `;
 
     timeline.forEach((item) => {
       const statusColor = {
-        "success": "border-green-500 text-green-700",
-        "failed": "border-red-500 text-red-700",
-        "pending": "border-yellow-500 text-yellow-700",
-      }[item.status] || "border-gray-500 text-gray-700";
+        "success": "border-success text-success-text",
+        "failed": "border-error text-error-text",
+        "pending": "border-warning text-warning-text",
+      }[item.status] || "border-strong text-secondary";
 
       html += `
         <div class="timeline-item ${item.status}">
           <div class="flex items-center justify-between mb-2">
             <input type="text" value="${item.title}"
                    onblur="taskManager.updateTimelineItemTitle('${section.id}', '${item.id}', this.value)"
-                   class="font-medium text-sm border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-gray-500 rounded px-2 py-1 text-gray-900 dark:text-gray-100">
+                   class="font-medium text-sm border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-1 rounded px-2 py-1 text-primary">
             <div class="flex items-center space-x-2">
               <input type="date" value="${item.date}"
                      onchange="taskManager.updateTimelineItemDate('${section.id}', '${item.id}', this.value)"
-                     class="text-xs border rounded px-2 py-1 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                     class="text-xs border rounded px-2 py-1 border-strong bg-primary text-primary">
               <select onchange="taskManager.updateTimelineItemStatus('${section.id}', '${item.id}', this.value)"
-                      class="text-xs border rounded px-2 py-1 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${statusColor}">
+                      class="text-xs border rounded px-2 py-1 border-strong bg-primary text-primary ${statusColor}">
                 <option value="pending" ${
         item.status === "pending" ? "selected" : ""
       }>Pending</option>
@@ -1098,14 +1098,14 @@ export class EnhancedNotesModule {
       }>Failed</option>
               </select>
               <button onclick="taskManager.deleteTimelineItem('${section.id}', '${item.id}')"
-                      class="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
+                      class="px-2 py-1 text-xs bg-error text-white rounded hover:bg-error">Delete</button>
             </div>
           </div>
           <div class="space-y-2">
             <button onclick="taskManager.addContentToTimeline('${section.id}', '${item.id}', 'text')"
-                    class="mr-2 px-3 py-1 text-xs bg-gray-900 text-white rounded hover:bg-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500">+ Text</button>
+                    class="mr-2 px-3 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">+ Text</button>
             <button onclick="taskManager.addContentToTimeline('${section.id}', '${item.id}', 'code')"
-                    class="px-3 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600">+ Code</button>
+                    class="px-3 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">+ Code</button>
           </div>
           <div class="mt-2 space-y-2" id="timeline-content-${item.id}">
             ${this.renderTabContent(item.content)}
@@ -1124,8 +1124,8 @@ export class EnhancedNotesModule {
     let html = `
       <div class="mb-4 flex space-x-2">
         <button onclick="taskManager.addColumnToSplitView('${section.id}')"
-                class="px-3 py-1 text-sm bg-purple-500 text-white rounded hover:bg-purple-600">+ Add Column</button>
-        <span class="text-sm text-gray-600 dark:text-gray-400">${columns.length} columns</span>
+                class="px-3 py-1 text-sm bg-info text-white rounded hover:bg-info">+ Add Column</button>
+        <span class="text-sm text-secondary">${columns.length} columns</span>
       </div>
       <div class="flex space-x-4">
     `;
@@ -1134,17 +1134,17 @@ export class EnhancedNotesModule {
       html += `
         <div class="split-view-column flex-1">
           <div class="flex justify-between items-center mb-2">
-            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">Column ${
+            <h4 class="text-sm font-medium text-secondary">Column ${
         columnIndex + 1
       }</h4>
             <button onclick="taskManager.removeColumnFromSplitView('${section.id}', ${columnIndex})"
-                    class="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600">Remove</button>
+                    class="px-2 py-1 text-xs bg-error text-white rounded hover:bg-error">Remove</button>
           </div>
           <div class="space-y-2 mb-4">
             <button onclick="taskManager.addContentToSplitView('${section.id}', ${columnIndex}, 'text')"
-                    class="mr-2 px-3 py-1 text-xs bg-gray-900 text-white rounded hover:bg-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500">+ Text</button>
+                    class="mr-2 px-3 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">+ Text</button>
             <button onclick="taskManager.addContentToSplitView('${section.id}', ${columnIndex}, 'code')"
-                    class="px-3 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600">+ Code</button>
+                    class="px-3 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">+ Code</button>
           </div>
           <div class="space-y-2" id="split-column-${section.id}-${columnIndex}">
             ${this.renderTabContent(column)}
@@ -1159,31 +1159,31 @@ export class EnhancedNotesModule {
 
   renderTabContent(content) {
     if (!content || content.length === 0) {
-      return '<p class="text-sm text-gray-500 dark:text-gray-400 italic">No content yet</p>';
+      return '<p class="text-sm text-muted italic">No content yet</p>';
     }
 
     return content.map((item) => {
       const isCodeBlock = item.type === "code";
       if (isCodeBlock) {
         return `
-          <div class="relative border border-gray-200 dark:border-gray-600 rounded mb-2">
+          <div class="relative border border-default rounded mb-2">
             <textarea rows="8"
-                      class="w-full p-3 code-block border-0 resize-none focus:outline-none text-sm text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-800"
+                      class="w-full p-3 code-block border-0 resize-none focus:outline-none text-sm text-primary bg-secondary"
                       onblur="taskManager.updateCustomContent('${item.id}', this.value)"
                       placeholder="Enter your code here...">${item.content}</textarea>
             <button onclick="taskManager.deleteTabContent('${item.id}')"
-                    class="absolute top-2 right-2 px-1 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600">x</button>
+                    class="absolute top-2 right-2 px-1 py-1 text-xs bg-error text-white rounded hover:bg-error">x</button>
           </div>
         `;
       } else {
         return `
-          <div class="relative border border-gray-200 dark:border-gray-600 rounded mb-2">
+          <div class="relative border border-default rounded mb-2">
             <textarea rows="8"
-                      class="w-full p-3 border-0 resize-none focus:outline-none text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700"
+                      class="w-full p-3 border-0 resize-none focus:outline-none text-sm text-primary bg-primary"
                       onblur="taskManager.updateCustomContent('${item.id}', this.value)"
                       placeholder="Enter your text here...">${item.content}</textarea>
             <button onclick="taskManager.deleteTabContent('${item.id}')"
-                    class="absolute top-2 right-2 px-1 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600">x</button>
+                    class="absolute top-2 right-2 px-1 py-1 text-xs bg-error text-white rounded hover:bg-error">x</button>
           </div>
         `;
       }
@@ -1199,36 +1199,28 @@ export class EnhancedNotesModule {
 
     section.querySelectorAll("[data-tab-id]").forEach((btn) => {
       btn.classList.remove(
-        "border-gray-900",
-        "text-gray-900",
-        "dark:border-gray-100",
-        "dark:text-gray-100",
+        "border-strong",
+        "text-primary",
       );
       btn.classList.add(
         "border-transparent",
-        "text-gray-500",
-        "hover:text-gray-700",
-        "hover:border-gray-300",
-        "dark:text-gray-400",
-        "dark:hover:text-gray-300",
+        "text-muted",
+        "hover:text-secondary",
+        "hover:border-strong",
       );
     });
 
     const activeTab = section.querySelector(`button[data-tab-id="${tabId}"]`);
     if (activeTab) {
       activeTab.classList.add(
-        "border-gray-900",
-        "text-gray-900",
-        "dark:border-gray-100",
-        "dark:text-gray-100",
+        "border-strong",
+        "text-primary",
       );
       activeTab.classList.remove(
         "border-transparent",
-        "text-gray-500",
-        "hover:text-gray-700",
-        "hover:border-gray-300",
-        "dark:text-gray-400",
-        "dark:hover:text-gray-300",
+        "text-muted",
+        "hover:text-secondary",
+        "hover:border-strong",
       );
     }
 
@@ -1894,22 +1886,22 @@ export class EnhancedNotesModule {
   // Preview Rendering
   renderCustomSectionPreview(section) {
     let sectionHtml =
-      `<div class="mt-6 border border-gray-200 dark:border-gray-700 rounded-lg p-4" data-section-preview-id="${section.id}">
-      <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">${section.title}</h2>`;
+      `<div class="mt-6 border border-default rounded-lg p-4" data-section-preview-id="${section.id}">
+      <h2 class="text-xl font-bold text-primary mb-4">${section.title}</h2>`;
 
     if (section.type === "tabs") {
       const tabs = section.config.tabs || [];
       if (tabs.length > 0) {
         // Tab navigation
         sectionHtml +=
-          '<div class="border-b border-gray-200 dark:border-gray-700 mb-4"><nav class="flex space-x-8">';
+          '<div class="border-b border-default mb-4"><nav class="flex space-x-8">';
         tabs.forEach((tab, index) => {
           const isActive = index === 0;
           sectionHtml += `
             <button class="py-2 px-1 border-b-2 font-medium text-sm ${
             isActive
-              ? "border-gray-900 text-gray-900 dark:border-gray-100 dark:text-gray-100"
-              : "border-transparent text-gray-500"
+              ? "border-strong text-primary"
+              : "border-transparent text-muted"
           }" onclick="taskManager.switchPreviewTab('${section.id}', '${tab.id}')">
               ${tab.title}
             </button>`;
@@ -1925,7 +1917,7 @@ export class EnhancedNotesModule {
           tab.content.forEach((item) => {
             if (item.type === "code") {
               sectionHtml +=
-                `<pre class="bg-gray-100 dark:bg-gray-800 p-3 rounded mb-2 overflow-x-auto"><code class="text-sm text-gray-900 dark:text-gray-100">${
+                `<pre class="bg-tertiary p-3 rounded mb-2 overflow-x-auto"><code class="text-sm text-primary">${
                   escapeHtml(item.content)
                 }</code></pre>`;
             } else {
@@ -1940,23 +1932,23 @@ export class EnhancedNotesModule {
     } else if (section.type === "timeline") {
       section.config.timeline?.forEach((item) => {
         const statusClass = item.status === "success"
-          ? "text-green-600 dark:text-green-400"
+          ? "text-success"
           : item.status === "failed"
-          ? "text-red-600 dark:text-red-400"
-          : "text-yellow-600 dark:text-yellow-400";
+          ? "text-error"
+          : "text-warning";
         sectionHtml += `
-          <div class="mb-4 p-3 border-l-4 border-gray-500 bg-gray-50 dark:bg-gray-800">
+          <div class="mb-4 p-3 border-l-4 border-strong bg-secondary">
             <h3 class="font-semibold ${statusClass}">${item.title} (${item.status})</h3>
             ${
           item.date
-            ? `<p class="text-sm text-gray-600 dark:text-gray-400">Date: ${item.date}</p>`
+            ? `<p class="text-sm text-secondary">Date: ${item.date}</p>`
             : ""
         }
             <div class="mt-2">`;
         item.content?.forEach((contentItem) => {
           if (contentItem.type === "code") {
             sectionHtml +=
-              `<pre class="bg-gray-100 dark:bg-gray-800 p-3 rounded mb-2 overflow-x-auto"><code class="text-sm text-gray-900 dark:text-gray-100">${
+              `<pre class="bg-tertiary p-3 rounded mb-2 overflow-x-auto"><code class="text-sm text-primary">${
                 escapeHtml(contentItem.content)
               }</code></pre>`;
           } else {
@@ -1971,14 +1963,14 @@ export class EnhancedNotesModule {
       sectionHtml += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
       section.config.splitView?.columns?.forEach((column, index) => {
         sectionHtml +=
-          `<div class="border border-gray-200 dark:border-gray-700 rounded p-3">
-          <h4 class="font-medium mb-2 text-gray-900 dark:text-gray-100">Column ${
+          `<div class="border border-default rounded p-3">
+          <h4 class="font-medium mb-2 text-primary">Column ${
             index + 1
           }</h4>`;
         column.forEach((item) => {
           if (item.type === "code") {
             sectionHtml +=
-              `<pre class="bg-gray-100 dark:bg-gray-800 p-3 rounded mb-2 overflow-x-auto"><code class="text-sm">${
+              `<pre class="bg-tertiary p-3 rounded mb-2 overflow-x-auto"><code class="text-sm">${
                 escapeHtml(item.content)
               }</code></pre>`;
           } else {
@@ -2022,23 +2014,19 @@ export class EnhancedNotesModule {
     sectionElement.querySelectorAll('button[onclick*="switchPreviewTab"]')
       .forEach((btn) => {
         btn.classList.remove(
-          "border-gray-900",
-          "text-gray-900",
-          "dark:border-gray-100",
-          "dark:text-gray-100",
+          "border-strong",
+          "text-primary",
         );
-        btn.classList.add("border-transparent", "text-gray-500");
+        btn.classList.add("border-transparent", "text-muted");
       });
 
     const activeBtn = sectionElement.querySelector(`[onclick*="${tabId}"]`);
     if (activeBtn) {
       activeBtn.classList.add(
-        "border-gray-900",
-        "text-gray-900",
-        "dark:border-gray-100",
-        "dark:text-gray-100",
+        "border-strong",
+        "text-primary",
       );
-      activeBtn.classList.remove("border-transparent", "text-gray-500");
+      activeBtn.classList.remove("border-transparent", "text-muted");
     }
   }
 }

@@ -34,39 +34,39 @@ export class MilestonesModule {
     container.innerHTML = this.taskManager.milestones
       .map(
         (m) => `
-      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+      <div class="bg-secondary rounded-lg p-4 border border-default">
         <div class="flex justify-between items-start mb-2">
-          <h3 class="font-medium text-gray-900 dark:text-gray-100">${m.name}</h3>
+          <h3 class="font-medium text-primary">${m.name}</h3>
           <span class="px-2 py-1 text-xs rounded ${
           m.status === "completed"
-            ? "bg-gray-900 text-white dark:bg-gray-600 dark:text-white"
-            : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600"
+            ? "bg-inverse text-inverse"
+            : "bg-tertiary text-primary border border-default"
         }">${m.status}</span>
         </div>
         ${
           m.target
-            ? `<p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Target: ${
+            ? `<p class="text-sm text-muted mb-2">Target: ${
               new Date(m.target).toLocaleDateString()
             }</p>`
             : ""
         }
         <div class="mb-2">
-          <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+          <div class="flex justify-between text-xs text-muted mb-1">
             <span>${m.completedCount}/${m.taskCount} tasks</span>
             <span>${m.progress}%</span>
           </div>
-          <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-            <div class="bg-gray-900 dark:bg-gray-100 h-2 rounded-full" style="width: ${m.progress}%"></div>
+          <div class="w-full bg-active rounded-full h-2">
+            <div class="bg-inverse h-2 rounded-full" style="width: ${m.progress}%"></div>
           </div>
         </div>
         ${
           m.description
-            ? `<p class="text-sm text-gray-600 dark:text-gray-300 mt-2">${m.description}</p>`
+            ? `<p class="text-sm text-secondary mt-2">${m.description}</p>`
             : ""
         }
         <div class="flex justify-end space-x-2 mt-3">
-          <button onclick="taskManager.milestoneSidenavModule.openEdit('${m.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">Edit</button>
-          <button onclick="taskManager.deleteMilestone('${m.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
+          <button onclick="taskManager.milestoneSidenavModule.openEdit('${m.id}')" class="text-sm text-secondary hover:text-primary">Edit</button>
+          <button onclick="taskManager.deleteMilestone('${m.id}')" class="text-sm text-error hover:text-error-text">Delete</button>
         </div>
       </div>
     `,

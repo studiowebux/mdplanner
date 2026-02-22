@@ -184,7 +184,7 @@ export class BillingSidenavModule {
         break;
       default:
         container.innerHTML =
-          '<div class="text-gray-500">Select an entity type</div>';
+          '<div class="text-muted">Select an entity type</div>';
     }
 
     // Bind auto-save to inputs
@@ -302,7 +302,7 @@ export class BillingSidenavModule {
             <input type="checkbox" id="billingSidenavRateDefault" class="rounded" ${
       r.isDefault ? "checked" : ""
     }>
-            <span class="text-sm text-gray-700 dark:text-gray-300">Default Rate</span>
+            <span class="text-sm text-secondary">Default Rate</span>
           </label>
         </div>
       </div>
@@ -345,7 +345,7 @@ export class BillingSidenavModule {
       <div class="sidenav-section">
         <div class="flex justify-between items-center mb-2">
           <span class="sidenav-section-title">Line Items</span>
-          <button type="button" onclick="taskManager.billingSidenavModule.addLineItem()" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button>
+          <button type="button" onclick="taskManager.billingSidenavModule.addLineItem()" class="text-xs text-secondary hover:text-primary">+ Add</button>
         </div>
         <div id="billingSidenavLineItems" class="space-y-2">${this.renderLineItems()}</div>
       </div>
@@ -360,16 +360,16 @@ export class BillingSidenavModule {
           </div>
           <div class="form-group">
             <label class="form-label">Subtotal</label>
-            <div id="billingSidenavSubtotal" class="text-lg font-medium text-gray-900 dark:text-gray-100">$0.00</div>
+            <div id="billingSidenavSubtotal" class="text-lg font-medium text-primary">$0.00</div>
           </div>
         </div>
         <div class="flex justify-between items-center mt-2">
-          <span class="text-sm text-gray-600 dark:text-gray-400">Tax</span>
-          <span id="billingSidenavTax" class="text-sm text-gray-600 dark:text-gray-400">$0.00</span>
+          <span class="text-sm text-secondary">Tax</span>
+          <span id="billingSidenavTax" class="text-sm text-secondary">$0.00</span>
         </div>
-        <div class="flex justify-between items-center mt-1 pt-2 border-t border-gray-200 dark:border-gray-600">
-          <span class="font-medium text-gray-900 dark:text-gray-100">Total</span>
-          <span id="billingSidenavTotal" class="text-xl font-bold text-gray-900 dark:text-gray-100">$0.00</span>
+        <div class="flex justify-between items-center mt-1 pt-2 border-t border-default">
+          <span class="font-medium text-primary">Total</span>
+          <span id="billingSidenavTotal" class="text-xl font-bold text-primary">$0.00</span>
         </div>
       </div>
       <div class="sidenav-section">
@@ -419,7 +419,7 @@ export class BillingSidenavModule {
       <div class="sidenav-section">
         <div class="flex justify-between items-center mb-2">
           <span class="sidenav-section-title">Line Items</span>
-          <button type="button" onclick="taskManager.billingSidenavModule.addLineItem()" class="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">+ Add</button>
+          <button type="button" onclick="taskManager.billingSidenavModule.addLineItem()" class="text-xs text-secondary hover:text-primary">+ Add</button>
         </div>
         <div id="billingSidenavLineItems" class="space-y-2">${this.renderLineItems()}</div>
       </div>
@@ -434,16 +434,16 @@ export class BillingSidenavModule {
           </div>
           <div class="form-group">
             <label class="form-label">Subtotal</label>
-            <div id="billingSidenavSubtotal" class="text-lg font-medium text-gray-900 dark:text-gray-100">$0.00</div>
+            <div id="billingSidenavSubtotal" class="text-lg font-medium text-primary">$0.00</div>
           </div>
         </div>
         <div class="flex justify-between items-center mt-2">
-          <span class="text-sm text-gray-600 dark:text-gray-400">Tax</span>
-          <span id="billingSidenavTax" class="text-sm text-gray-600 dark:text-gray-400">$0.00</span>
+          <span class="text-sm text-secondary">Tax</span>
+          <span id="billingSidenavTax" class="text-sm text-secondary">$0.00</span>
         </div>
-        <div class="flex justify-between items-center mt-1 pt-2 border-t border-gray-200 dark:border-gray-600">
-          <span class="font-medium text-gray-900 dark:text-gray-100">Total</span>
-          <span id="billingSidenavTotal" class="text-xl font-bold text-gray-900 dark:text-gray-100">$0.00</span>
+        <div class="flex justify-between items-center mt-1 pt-2 border-t border-default">
+          <span class="font-medium text-primary">Total</span>
+          <span id="billingSidenavTotal" class="text-xl font-bold text-primary">$0.00</span>
         </div>
       </div>
       <div class="sidenav-section">
@@ -459,31 +459,31 @@ export class BillingSidenavModule {
 
   renderLineItems() {
     if (this.lineItems.length === 0) {
-      return '<div class="text-gray-400 dark:text-gray-500 text-sm italic py-2">No line items yet</div>';
+      return '<div class="text-muted text-sm italic py-2">No line items yet</div>';
     }
 
     return this.lineItems.map((item, idx) => `
-      <div class="flex gap-2 items-center bg-gray-50 dark:bg-gray-700/50 p-2 rounded" data-line-idx="${idx}">
+      <div class="flex gap-2 items-center bg-secondary p-2 rounded" data-line-idx="${idx}">
         <input type="text" placeholder="Description" value="${
       escapeHtml(item.description || "")
     }"
           onchange="taskManager.billingSidenavModule.updateLineItem(${idx}, 'description', this.value)"
-          class="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded">
+          class="flex-1 px-2 py-1 text-sm border border-strong rounded">
         <input type="number" placeholder="Qty" value="${
       item.quantity || 1
     }" step="0.01" min="0"
           onchange="taskManager.billingSidenavModule.updateLineItem(${idx}, 'quantity', this.value)"
-          class="w-14 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded text-right">
+          class="w-14 px-2 py-1 text-sm border border-strong rounded text-right">
         <input type="number" placeholder="Rate" value="${
       item.rate || 0
     }" step="0.01" min="0"
           onchange="taskManager.billingSidenavModule.updateLineItem(${idx}, 'rate', this.value)"
-          class="w-16 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded text-right">
-        <span class="w-16 text-sm text-right text-gray-900 dark:text-gray-100">$${
+          class="w-16 px-2 py-1 text-sm border border-strong rounded text-right">
+        <span class="w-16 text-sm text-right text-primary">$${
       (item.amount || 0).toFixed(2)
     }</span>
         <button type="button" onclick="taskManager.billingSidenavModule.removeLineItem(${idx})"
-                class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-lg">&times;</button>
+                class="text-error hover:text-error-text text-lg">&times;</button>
       </div>
     `).join("");
   }

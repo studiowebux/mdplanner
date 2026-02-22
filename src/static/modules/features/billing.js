@@ -64,26 +64,14 @@ export class BillingModule {
 
   switchTab(tab) {
     document.querySelectorAll(".billing-tab").forEach((t) => {
-      t.classList.remove(
-        "text-gray-900",
-        "dark:text-gray-100",
-        "border-b-2",
-        "border-gray-900",
-        "dark:border-gray-100",
-      );
-      t.classList.add("text-gray-500", "dark:text-gray-400");
+      t.classList.remove("tab-active");
+      t.classList.add("tab-inactive");
     });
-    document.querySelector(`[data-billing-tab="${tab}"]`)?.classList.add(
-      "text-gray-900",
-      "dark:text-gray-100",
-      "border-b-2",
-      "border-gray-900",
-      "dark:border-gray-100",
-    );
-    document.querySelector(`[data-billing-tab="${tab}"]`)?.classList.remove(
-      "text-gray-500",
-      "dark:text-gray-400",
-    );
+    const activeTab = document.querySelector(`[data-billing-tab="${tab}"]`);
+    if (activeTab) {
+      activeTab.classList.remove("tab-inactive");
+      activeTab.classList.add("tab-active");
+    }
 
     document.querySelectorAll(".billing-tab-content").forEach((c) =>
       c.classList.add("hidden")
@@ -104,28 +92,28 @@ export class BillingModule {
 
     emptyState?.classList.add("hidden");
     container.innerHTML = this.customers.map((c) => `
-      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+      <div class="bg-secondary rounded-lg p-4 border border-default">
         <div class="flex justify-between items-start mb-2">
-          <h3 class="font-medium text-gray-900 dark:text-gray-100">${c.name}</h3>
+          <h3 class="font-medium text-primary">${c.name}</h3>
           ${
       c.company
-        ? `<span class="text-xs px-2 py-0.5 bg-gray-200 dark:bg-gray-600 rounded">${c.company}</span>`
+        ? `<span class="text-xs px-2 py-0.5 bg-active rounded">${c.company}</span>`
         : ""
     }
         </div>
         ${
       c.email
-        ? `<p class="text-sm text-gray-600 dark:text-gray-400">${c.email}</p>`
+        ? `<p class="text-sm text-secondary">${c.email}</p>`
         : ""
     }
         ${
       c.phone
-        ? `<p class="text-sm text-gray-600 dark:text-gray-400">${c.phone}</p>`
+        ? `<p class="text-sm text-secondary">${c.phone}</p>`
         : ""
     }
         <div class="flex justify-end space-x-2 mt-3">
-          <button onclick="taskManager.openCustomerModal('${c.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Edit</button>
-          <button onclick="taskManager.deleteCustomer('${c.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
+          <button onclick="taskManager.openCustomerModal('${c.id}')" class="text-sm text-secondary hover:text-primary">Edit</button>
+          <button onclick="taskManager.deleteCustomer('${c.id}')" class="text-sm text-error hover:text-error-text">Delete</button>
         </div>
       </div>
     `).join("");
@@ -163,26 +151,26 @@ export class BillingModule {
 
     emptyState?.classList.add("hidden");
     container.innerHTML = this.billingRates.map((r) => `
-      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+      <div class="bg-secondary rounded-lg p-4 border border-default">
         <div class="flex justify-between items-start mb-2">
-          <h3 class="font-medium text-gray-900 dark:text-gray-100">${r.name}</h3>
+          <h3 class="font-medium text-primary">${r.name}</h3>
           ${
       r.isDefault
-        ? '<span class="text-xs px-2 py-0.5 bg-gray-900 text-white rounded">Default</span>'
+        ? '<span class="text-xs px-2 py-0.5 bg-inverse text-inverse rounded">Default</span>'
         : ""
     }
         </div>
-        <p class="text-xl font-bold text-gray-900 dark:text-gray-100">${
+        <p class="text-xl font-bold text-primary">${
       this.formatCurrency(r.hourlyRate)
     }/hr</p>
         ${
       r.assignee
-        ? `<p class="text-sm text-gray-600 dark:text-gray-400">Assignee: ${this.tm.getPersonName(r.assignee)}</p>`
+        ? `<p class="text-sm text-secondary">Assignee: ${this.tm.getPersonName(r.assignee)}</p>`
         : ""
     }
         <div class="flex justify-end space-x-2 mt-3">
-          <button onclick="taskManager.openBillingRateModal('${r.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Edit</button>
-          <button onclick="taskManager.deleteBillingRate('${r.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
+          <button onclick="taskManager.openBillingRateModal('${r.id}')" class="text-sm text-secondary hover:text-primary">Edit</button>
+          <button onclick="taskManager.deleteBillingRate('${r.id}')" class="text-sm text-error hover:text-error-text">Delete</button>
         </div>
       </div>
     `).join("");
@@ -220,22 +208,22 @@ export class BillingModule {
 
     emptyState?.classList.add("hidden");
     const statusColors = {
-      draft: "bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200",
-      sent: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+      draft: "bg-active text-primary",
+      sent: "bg-info-bg text-info-text",
       accepted:
-        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-      rejected: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+        "bg-success-bg text-success-text",
+      rejected: "bg-error-bg text-error-text",
     };
 
     container.innerHTML = this.quotes.map((q) => {
       const customer = this.customers.find((c) => c.id === q.customerId);
       return `
-        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+        <div class="bg-secondary rounded-lg border border-default p-4">
           <div class="flex justify-between items-start mb-2">
             <div>
-              <p class="text-xs text-gray-500 dark:text-gray-400">${q.number}</p>
-              <h3 class="font-medium text-gray-900 dark:text-gray-100">${q.title}</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400">${
+              <p class="text-xs text-muted">${q.number}</p>
+              <h3 class="font-medium text-primary">${q.title}</h3>
+              <p class="text-sm text-secondary">${
         customer?.name || "Unknown"
       }</p>
             </div>
@@ -243,28 +231,28 @@ export class BillingModule {
         statusColors[q.status] || statusColors.draft
       }">${q.status}</span>
           </div>
-          <p class="text-xl font-bold text-gray-900 dark:text-gray-100">${
+          <p class="text-xl font-bold text-primary">${
         this.formatCurrency(q.total)
       }</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Created: ${q.created}</p>
+          <p class="text-xs text-muted">Created: ${q.created}</p>
           <div class="flex justify-end space-x-2 mt-3">
             ${
         q.status === "draft"
-          ? `<button onclick="taskManager.sendQuote('${q.id}')" class="text-sm text-blue-600 hover:text-blue-800">Send</button>`
+          ? `<button onclick="taskManager.sendQuote('${q.id}')" class="text-sm text-info hover:text-info-text">Send</button>`
           : ""
       }
             ${
         q.status === "sent"
-          ? `<button onclick="taskManager.acceptQuote('${q.id}')" class="text-sm text-green-600 hover:text-green-800">Accept</button>`
+          ? `<button onclick="taskManager.acceptQuote('${q.id}')" class="text-sm text-success hover:text-success-text">Accept</button>`
           : ""
       }
             ${
         q.status === "accepted"
-          ? `<button onclick="taskManager.convertQuoteToInvoice('${q.id}')" class="text-sm text-purple-600 hover:text-purple-800">To Invoice</button>`
+          ? `<button onclick="taskManager.convertQuoteToInvoice('${q.id}')" class="text-sm text-info hover:text-info-text">To Invoice</button>`
           : ""
       }
-            <button onclick="taskManager.openQuoteModal('${q.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Edit</button>
-            <button onclick="taskManager.deleteQuote('${q.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
+            <button onclick="taskManager.openQuoteModal('${q.id}')" class="text-sm text-secondary hover:text-primary">Edit</button>
+            <button onclick="taskManager.deleteQuote('${q.id}')" class="text-sm text-error hover:text-error-text">Delete</button>
           </div>
         </div>
       `;
@@ -384,24 +372,24 @@ export class BillingModule {
 
     emptyState?.classList.add("hidden");
     const statusColors = {
-      draft: "bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200",
-      sent: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-      paid: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-      overdue: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+      draft: "bg-active text-primary",
+      sent: "bg-info-bg text-info-text",
+      paid: "bg-success-bg text-success-text",
+      overdue: "bg-error-bg text-error-text",
       cancelled:
-        "bg-gray-400 text-gray-800 dark:bg-gray-500 dark:text-gray-200",
+        "bg-active text-primary",
     };
 
     container.innerHTML = this.invoices.map((inv) => {
       const customer = this.customers.find((c) => c.id === inv.customerId);
       const balance = inv.total - inv.paidAmount;
       return `
-        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+        <div class="bg-secondary rounded-lg border border-default p-4">
           <div class="flex justify-between items-start mb-2">
             <div>
-              <p class="text-xs text-gray-500 dark:text-gray-400">${inv.number}</p>
-              <h3 class="font-medium text-gray-900 dark:text-gray-100">${inv.title}</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400">${
+              <p class="text-xs text-muted">${inv.number}</p>
+              <h3 class="font-medium text-primary">${inv.title}</h3>
+              <p class="text-sm text-secondary">${
         customer?.name || "Unknown"
       }</p>
             </div>
@@ -411,12 +399,12 @@ export class BillingModule {
           </div>
           <div class="flex justify-between items-center">
             <div>
-              <p class="text-xl font-bold text-gray-900 dark:text-gray-100">${
+              <p class="text-xl font-bold text-primary">${
         this.formatCurrency(inv.total)
       }</p>
               ${
         balance > 0
-          ? `<p class="text-sm text-red-600">Balance: ${
+          ? `<p class="text-sm text-error">Balance: ${
             this.formatCurrency(balance)
           }</p>`
           : ""
@@ -424,23 +412,23 @@ export class BillingModule {
             </div>
             ${
         inv.dueDate
-          ? `<p class="text-xs text-gray-500 dark:text-gray-400">Due: ${inv.dueDate}</p>`
+          ? `<p class="text-xs text-muted">Due: ${inv.dueDate}</p>`
           : ""
       }
           </div>
           <div class="flex justify-end space-x-2 mt-3">
             ${
         inv.status === "draft"
-          ? `<button onclick="taskManager.sendInvoice('${inv.id}')" class="text-sm text-blue-600 hover:text-blue-800">Send</button>`
+          ? `<button onclick="taskManager.sendInvoice('${inv.id}')" class="text-sm text-info hover:text-info-text">Send</button>`
           : ""
       }
             ${
         (inv.status === "sent" || inv.status === "overdue") && balance > 0
-          ? `<button onclick="taskManager.openPaymentModal('${inv.id}')" class="text-sm text-green-600 hover:text-green-800">Record Payment</button>`
+          ? `<button onclick="taskManager.openPaymentModal('${inv.id}')" class="text-sm text-success hover:text-success-text">Record Payment</button>`
           : ""
       }
-            <button onclick="taskManager.openInvoiceModal('${inv.id}')" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Edit</button>
-            <button onclick="taskManager.deleteInvoice('${inv.id}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
+            <button onclick="taskManager.openInvoiceModal('${inv.id}')" class="text-sm text-secondary hover:text-primary">Edit</button>
+            <button onclick="taskManager.deleteInvoice('${inv.id}')" class="text-sm text-error hover:text-error-text">Delete</button>
           </div>
         </div>
       `;
@@ -555,7 +543,7 @@ export class BillingModule {
 
     if (tasksWithTime.length === 0) {
       container.innerHTML =
-        '<p class="text-gray-500 dark:text-gray-400 text-sm">No tasks with time entries found</p>';
+        '<p class="text-muted text-sm">No tasks with time entries found</p>';
       return;
     }
 
@@ -565,10 +553,10 @@ export class BillingModule {
         0,
       );
       return `
-        <label class="flex items-center p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer">
-          <input type="checkbox" class="generate-invoice-task h-4 w-4 text-gray-900 border-gray-300 rounded" value="${t.id}">
-          <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">${t.title}</span>
-          <span class="ml-auto text-xs text-gray-500 dark:text-gray-400">${totalHours}h</span>
+        <label class="flex items-center p-1 hover:bg-tertiary rounded cursor-pointer">
+          <input type="checkbox" class="generate-invoice-task h-4 w-4 text-primary border-strong rounded" value="${t.id}">
+          <span class="ml-2 text-sm text-secondary">${t.title}</span>
+          <span class="ml-auto text-xs text-muted">${totalHours}h</span>
         </label>
       `;
     }).join("");

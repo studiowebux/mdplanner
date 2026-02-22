@@ -49,12 +49,12 @@ export class NotesModule {
         return `
           <button class="px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
           isActive
-            ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
-            : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-gray-700"
+            ? "bg-inverse text-inverse"
+            : "text-secondary hover:text-primary hover:bg-tertiary"
         }" onclick="taskManager.selectNote(${index})" title="${note.title}">
               ${
           isEnhanced
-            ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-purple-500 mr-1.5"></span>'
+            ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-info mr-1.5"></span>'
             : ""
         }${truncate(note.title)}
           </button>
@@ -107,22 +107,18 @@ export class NotesModule {
     const btnText = document.getElementById("toggleModeText");
     if (btn && btnText) {
       if (isEnhanced) {
-        btn.classList.add("bg-purple-600", "text-white");
+        btn.classList.add("bg-info", "text-white");
         btn.classList.remove(
-          "bg-gray-100",
-          "dark:bg-gray-700",
-          "text-gray-700",
-          "dark:text-gray-300",
+          "bg-tertiary",
+          "text-secondary",
         );
         btn.title = "Switch to Basic Mode";
         btnText.textContent = "Enhanced";
       } else {
-        btn.classList.remove("bg-purple-600", "text-white");
+        btn.classList.remove("bg-info", "text-white");
         btn.classList.add(
-          "bg-gray-100",
-          "dark:bg-gray-700",
-          "text-gray-700",
-          "dark:text-gray-300",
+          "bg-tertiary",
+          "text-secondary",
         );
         btn.title = "Switch to Enhanced Mode";
         btnText.textContent = "Basic";
@@ -188,7 +184,7 @@ export class NotesModule {
     // If content is empty or just whitespace, add a fallback
     if (!htmlContent.trim()) {
       htmlContent =
-        '<p class="text-gray-500 dark:text-gray-400 italic">No content</p>';
+        '<p class="text-muted italic">No content</p>';
     }
 
     document.getElementById("activeNoteBody").innerHTML = htmlContent;
@@ -205,15 +201,13 @@ export class NotesModule {
       titleInput.removeAttribute("readonly");
       titleInput.classList.add(
         "border-b",
-        "border-gray-300",
-        "dark:border-gray-600",
+        "border-strong",
       );
     } else {
       titleInput.setAttribute("readonly", "true");
       titleInput.classList.remove(
         "border-b",
-        "border-gray-300",
-        "dark:border-gray-600",
+        "border-strong",
       );
     }
 
@@ -244,22 +238,14 @@ export class NotesModule {
       statusEl.textContent = text;
       statusEl.classList.remove("hidden");
       if (text === "Saved") {
-        statusEl.classList.remove("text-gray-500", "text-red-500");
-        statusEl.classList.add("text-green-600", "dark:text-green-400");
+        statusEl.classList.remove("text-muted", "text-error");
+        statusEl.classList.add("text-success");
       } else if (text === "Error") {
-        statusEl.classList.remove(
-          "text-gray-500",
-          "text-green-600",
-          "dark:text-green-400",
-        );
-        statusEl.classList.add("text-red-500");
+        statusEl.classList.remove("text-muted", "text-success");
+        statusEl.classList.add("text-error");
       } else {
-        statusEl.classList.remove(
-          "text-green-600",
-          "dark:text-green-400",
-          "text-red-500",
-        );
-        statusEl.classList.add("text-gray-500", "dark:text-gray-400");
+        statusEl.classList.remove("text-success", "text-error");
+        statusEl.classList.add("text-muted");
       }
     }
   }
@@ -368,63 +354,43 @@ export class NotesModule {
 
     if (this.tm.newNoteEnhanced) {
       basicBtn.classList.remove(
-        "bg-gray-900",
-        "dark:bg-gray-100",
+        "bg-inverse",
         "text-white",
-        "dark:text-gray-900",
       );
       basicBtn.classList.add(
-        "bg-white",
-        "dark:bg-gray-600",
-        "text-gray-700",
-        "dark:text-gray-300",
+        "bg-primary",
+        "text-secondary",
         "border",
-        "border-gray-300",
-        "dark:border-gray-500",
-        "hover:bg-gray-100",
-        "dark:hover:bg-gray-500",
+        "border-strong",
+        "hover:bg-tertiary",
       );
       enhancedBtn.classList.remove(
-        "bg-white",
-        "dark:bg-gray-600",
-        "text-gray-700",
-        "dark:text-gray-300",
+        "bg-primary",
+        "text-secondary",
         "border",
-        "border-gray-300",
-        "dark:border-gray-500",
-        "hover:bg-gray-100",
-        "dark:hover:bg-gray-500",
+        "border-strong",
+        "hover:bg-tertiary",
       );
-      enhancedBtn.classList.add("bg-purple-600", "text-white");
+      enhancedBtn.classList.add("bg-info", "text-white");
     } else {
       basicBtn.classList.remove(
-        "bg-white",
-        "dark:bg-gray-600",
-        "text-gray-700",
-        "dark:text-gray-300",
+        "bg-primary",
+        "text-secondary",
         "border",
-        "border-gray-300",
-        "dark:border-gray-500",
-        "hover:bg-gray-100",
-        "dark:hover:bg-gray-500",
+        "border-strong",
+        "hover:bg-tertiary",
       );
       basicBtn.classList.add(
-        "bg-gray-900",
-        "dark:bg-gray-100",
+        "bg-inverse",
         "text-white",
-        "dark:text-gray-900",
       );
-      enhancedBtn.classList.remove("bg-purple-600", "text-white");
+      enhancedBtn.classList.remove("bg-info", "text-white");
       enhancedBtn.classList.add(
-        "bg-white",
-        "dark:bg-gray-600",
-        "text-gray-700",
-        "dark:text-gray-300",
+        "bg-primary",
+        "text-secondary",
         "border",
-        "border-gray-300",
-        "dark:border-gray-500",
-        "hover:bg-gray-100",
-        "dark:hover:bg-gray-500",
+        "border-strong",
+        "hover:bg-tertiary",
       );
     }
   }

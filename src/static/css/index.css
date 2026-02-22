@@ -12,6 +12,7 @@
 /* Core (always needed) */
 @import url("./variables.css");
 @import url("./base.css");
+@import url("./utilities.css");
 @import url("./components.css");
 
 /* Views (load per page or all together) */

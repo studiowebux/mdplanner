@@ -111,15 +111,12 @@ export class CapacityModule {
 
     [teamTab, allocTab, utilTab].forEach((t) => {
       t?.classList.remove(
-        "border-gray-900",
-        "dark:border-gray-100",
-        "text-gray-900",
-        "dark:text-gray-100",
+        "border-strong",
+        "text-primary",
       );
       t?.classList.add(
         "border-transparent",
-        "text-gray-500",
-        "dark:text-gray-400",
+        "text-muted",
       );
     });
     [teamContent, allocContent, utilContent].forEach((c) =>
@@ -128,43 +125,34 @@ export class CapacityModule {
 
     if (tab === "team") {
       teamTab?.classList.add(
-        "border-gray-900",
-        "dark:border-gray-100",
-        "text-gray-900",
-        "dark:text-gray-100",
+        "border-strong",
+        "text-primary",
       );
       teamTab?.classList.remove(
         "border-transparent",
-        "text-gray-500",
-        "dark:text-gray-400",
+        "text-muted",
       );
       teamContent?.classList.remove("hidden");
       this.renderTeamMembers();
     } else if (tab === "alloc") {
       allocTab?.classList.add(
-        "border-gray-900",
-        "dark:border-gray-100",
-        "text-gray-900",
-        "dark:text-gray-100",
+        "border-strong",
+        "text-primary",
       );
       allocTab?.classList.remove(
         "border-transparent",
-        "text-gray-500",
-        "dark:text-gray-400",
+        "text-muted",
       );
       allocContent?.classList.remove("hidden");
       this.renderAllocationsGrid();
     } else if (tab === "util") {
       utilTab?.classList.add(
-        "border-gray-900",
-        "dark:border-gray-100",
-        "text-gray-900",
-        "dark:text-gray-100",
+        "border-strong",
+        "text-primary",
       );
       utilTab?.classList.remove(
         "border-transparent",
-        "text-gray-500",
-        "dark:text-gray-400",
+        "text-muted",
       );
       utilContent?.classList.remove("hidden");
       this.renderUtilization();
@@ -180,7 +168,7 @@ export class CapacityModule {
 
     if (plan.teamMembers.length === 0) {
       grid.innerHTML =
-        '<div class="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">No team members yet. Click "+ Add Member" to add one.</div>';
+        '<div class="col-span-full text-center py-8 text-muted">No team members yet. Click "+ Add Member" to add one.</div>';
       return;
     }
 
@@ -191,29 +179,29 @@ export class CapacityModule {
         const hoursPerDay = this.getMemberHoursPerDay(member);
         const workingDays = this.getMemberWorkingDays(member);
         return `
-      <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+      <div class="bg-secondary rounded-lg p-4 border border-default">
         <div class="flex justify-between items-start mb-2">
           <div>
-            <h4 class="font-medium text-gray-900 dark:text-gray-100">${
+            <h4 class="font-medium text-primary">${
           escapeHtml(name)
         }</h4>
             ${
           role
-            ? `<p class="text-sm text-gray-500 dark:text-gray-400">${
+            ? `<p class="text-sm text-muted">${
               escapeHtml(role)
             }</p>`
             : ""
         }
           </div>
           <div class="flex gap-1">
-            <button onclick="taskManager.editTeamMember('${member.id}')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm">Edit</button>
-            <button onclick="taskManager.deleteTeamMember('${member.id}')" class="text-red-400 hover:text-red-600 text-sm">Delete</button>
+            <button onclick="taskManager.editTeamMember('${member.id}')" class="text-muted hover:text-secondary text-sm">Edit</button>
+            <button onclick="taskManager.deleteTeamMember('${member.id}')" class="text-error hover:text-error text-sm">Delete</button>
           </div>
         </div>
-        <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+        <div class="text-sm text-secondary space-y-1">
           <div>${hoursPerDay}h/day</div>
           <div>${workingDays.join(", ")}</div>
-          <div class="text-xs text-gray-500 dark:text-gray-500">${
+          <div class="text-xs text-muted">${
           hoursPerDay * workingDays.length
         }h/week capacity</div>
         </div>
@@ -262,10 +250,10 @@ export class CapacityModule {
     weekRange.textContent = this.getWeekDates(currentWeek);
 
     header.innerHTML = `
-      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Member</th>
+      <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Member</th>
       ${
       weeks.map((w) =>
-        `<th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">${
+        `<th class="px-4 py-3 text-center text-xs font-medium text-muted uppercase tracking-wider">${
           this.getWeekDates(w)
         }</th>`
       ).join("")
@@ -274,7 +262,7 @@ export class CapacityModule {
 
     if (plan.teamMembers.length === 0) {
       body.innerHTML =
-        '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">No team members. Add members in the Team tab first.</td></tr>';
+        '<tr><td colspan="5" class="px-4 py-8 text-center text-muted">No team members. Add members in the Team tab first.</td></tr>';
       return;
     }
 
@@ -287,10 +275,10 @@ export class CapacityModule {
         return `
         <tr>
           <td class="px-4 py-3 whitespace-nowrap">
-            <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${
+            <div class="text-sm font-medium text-primary">${
           escapeHtml(name)
         }</div>
-            <div class="text-xs text-gray-500 dark:text-gray-400">${weeklyCapacity}h/week</div>
+            <div class="text-xs text-muted">${weeklyCapacity}h/week</div>
           </td>
           ${
           weeks
@@ -306,19 +294,19 @@ export class CapacityModule {
                 ? (totalHours / weeklyCapacity) * 100
                 : 0;
               let bgClass =
-                "bg-green-100 dark:bg-green-900/30 border-green-300 dark:border-green-700";
+                "bg-success-bg border-success-border";
               if (utilPct >= 100) {
                 bgClass =
-                  "bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700";
+                  "bg-error-bg border-error-border";
               } else if (utilPct >= 80) {
                 bgClass =
-                  "bg-yellow-100 dark:bg-yellow-900/30 border-yellow-300 dark:border-yellow-700";
+                  "bg-warning-bg border-warning-border";
               }
 
               return `
               <td class="px-4 py-3 text-center">
                 <button onclick="taskManager.openAllocationModal('${member.id}', '${week}')"
-                  class="inline-block min-w-[60px] px-3 py-2 rounded border ${bgClass} text-sm font-medium text-gray-700 dark:text-gray-300 hover:opacity-80">
+                  class="inline-block min-w-[60px] px-3 py-2 rounded border ${bgClass} text-sm font-medium text-secondary hover:opacity-80">
                   ${totalHours}h
                 </button>
               </td>
@@ -344,7 +332,7 @@ export class CapacityModule {
 
       if (utilization.length === 0) {
         container.innerHTML =
-          '<div class="text-center py-8 text-gray-500 dark:text-gray-400">No team members to show utilization.</div>';
+          '<div class="text-center py-8 text-muted">No team members to show utilization.</div>';
         return;
       }
 
@@ -366,20 +354,20 @@ export class CapacityModule {
           return `
           <div class="space-y-2">
             <div class="flex justify-between items-center">
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">${
+              <span class="text-sm font-medium text-secondary">${
             escapeHtml(u.memberName)
           }</span>
-              <span class="text-sm text-gray-500 dark:text-gray-400">${u.utilizationPercent}% utilization</span>
+              <span class="text-sm text-muted">${u.utilizationPercent}% utilization</span>
             </div>
-            <div class="relative h-6 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden">
-              <div class="absolute inset-y-0 left-0 bg-gray-400 dark:bg-gray-500 opacity-30" style="width: ${capacityPct}%"></div>
-              <div class="absolute inset-y-0 left-0 bg-blue-500 dark:bg-blue-600" style="width: ${allocPct}%"></div>
-              <div class="absolute inset-y-0 left-0 bg-green-500 dark:bg-green-600" style="width: ${actualPct}%"></div>
+            <div class="relative h-6 bg-active rounded overflow-hidden">
+              <div class="absolute inset-y-0 left-0 bg-active opacity-30" style="width: ${capacityPct}%"></div>
+              <div class="absolute inset-y-0 left-0 bg-info" style="width: ${allocPct}%"></div>
+              <div class="absolute inset-y-0 left-0 bg-success" style="width: ${actualPct}%"></div>
             </div>
-            <div class="flex gap-4 text-xs text-gray-500 dark:text-gray-400">
+            <div class="flex gap-4 text-xs text-muted">
               <span>Available: ${u.weeklyCapacity * 4}h (4 weeks)</span>
-              <span class="text-blue-600 dark:text-blue-400">Allocated: ${u.totalAllocated}h</span>
-              <span class="text-green-600 dark:text-green-400">Actual: ${u.actualHours}h</span>
+              <span class="text-info">Allocated: ${u.totalAllocated}h</span>
+              <span class="text-success">Actual: ${u.actualHours}h</span>
             </div>
           </div>
         `;
@@ -388,7 +376,7 @@ export class CapacityModule {
     } catch (error) {
       console.error("Error loading utilization:", error);
       container.innerHTML =
-        '<div class="text-center py-8 text-red-500">Error loading utilization data.</div>';
+        '<div class="text-center py-8 text-error">Error loading utilization data.</div>';
     }
   }
 
@@ -734,13 +722,13 @@ export class CapacityModule {
         list.innerHTML = this.taskManager.autoAssignSuggestions
           .map(
             (s, i) => `
-          <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+          <label class="flex items-center gap-3 p-3 bg-secondary rounded-lg border border-default cursor-pointer hover:bg-tertiary">
             <input type="checkbox" checked data-index="${i}" class="auto-assign-checkbox rounded">
             <div class="flex-1">
-              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${
+              <div class="text-sm font-medium text-primary">${
               escapeHtml(s.taskTitle)
             }</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">
+              <div class="text-xs text-muted">
                 Assign to <span class="font-medium">${
               escapeHtml(s.memberName)
             }</span> for ${s.hours}h
@@ -823,15 +811,15 @@ export class CapacityModule {
           const hours = person.hoursPerDay || 8;
           const days = person.workingDays?.join(", ") || "Mon-Fri";
           return `
-          <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+          <label class="flex items-center gap-3 p-3 bg-secondary rounded-lg border border-default cursor-pointer hover:bg-tertiary">
             <input type="checkbox" checked data-person-id="${
             escapeHtml(person.id)
           }" class="import-assignee-checkbox rounded">
             <div class="flex-1">
-              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${
+              <div class="text-sm font-medium text-primary">${
             escapeHtml(person.name)
           }${role ? ` (${escapeHtml(role)})` : ""}</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">${hours}h/day, ${days}</div>
+              <div class="text-xs text-muted">${hours}h/day, ${days}</div>
             </div>
           </label>
         `;

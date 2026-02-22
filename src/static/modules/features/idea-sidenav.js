@@ -159,7 +159,7 @@ export class IdeaSidenavModule {
 
     if (links.length === 0) {
       container.innerHTML =
-        '<div class="text-gray-400 dark:text-gray-500 text-sm italic py-2">No linked ideas</div>';
+        '<div class="text-muted text-sm italic py-2">No linked ideas</div>';
       return;
     }
 
@@ -168,12 +168,12 @@ export class IdeaSidenavModule {
       if (!linkedIdea) return "";
       return `
         <div class="flex items-center gap-2 py-1 group">
-          <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">
+          <span class="flex-1 text-sm text-secondary">
             <span class="font-medium">${escapeHtml(linkedIdea.title)}</span>
-            <span class="text-xs text-gray-400 dark:text-gray-500 ml-1">(${linkedIdea.status})</span>
+            <span class="text-xs text-muted ml-1">(${linkedIdea.status})</span>
           </span>
           <button onclick="taskManager.ideaSidenavModule.removeLink('${linkId}')"
-                  class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 flex-shrink-0">
+                  class="opacity-0 group-hover:opacity-100 text-muted hover:text-error flex-shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
@@ -200,25 +200,25 @@ export class IdeaSidenavModule {
 
     if (available.length === 0) {
       container.innerHTML = filter
-        ? '<div class="text-gray-400 dark:text-gray-500 text-sm text-center py-2">No matching ideas</div>'
-        : '<div class="text-gray-400 dark:text-gray-500 text-sm text-center py-2">All ideas are already linked</div>';
+        ? '<div class="text-muted text-sm text-center py-2">No matching ideas</div>'
+        : '<div class="text-muted text-sm text-center py-2">All ideas are already linked</div>';
       return;
     }
 
     container.innerHTML = available.slice(0, 10).map((idea) => `
-      <label class="flex items-center gap-2 py-1.5 px-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer">
-        <input type="checkbox" class="idea-link-checkbox h-4 w-4 rounded border-gray-300 dark:border-gray-600"
+      <label class="flex items-center gap-2 py-1.5 px-2 hover:bg-tertiary rounded cursor-pointer">
+        <input type="checkbox" class="idea-link-checkbox h-4 w-4 rounded border-strong"
                value="${idea.id}">
-        <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">${
+        <span class="flex-1 text-sm text-secondary">${
       escapeHtml(idea.title)
     }</span>
-        <span class="text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300">${idea.status}</span>
+        <span class="text-xs px-1.5 py-0.5 rounded bg-active text-secondary">${idea.status}</span>
       </label>
     `).join("");
 
     if (available.length > 10) {
       container.innerHTML +=
-        `<div class="text-xs text-gray-400 text-center py-1">Showing 10 of ${available.length} - use search to filter</div>`;
+        `<div class="text-xs text-muted text-center py-1">Showing 10 of ${available.length} - use search to filter</div>`;
     }
 
     // Bind checkbox events

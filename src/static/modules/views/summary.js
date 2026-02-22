@@ -29,7 +29,7 @@ export class SummaryView {
       descriptionEl.innerHTML = markdownToHtml(markdownText);
     } else {
       descriptionEl.innerHTML =
-        '<p class="text-gray-500 dark:text-gray-400 italic">No project description available.</p>';
+        '<p class="text-muted italic">No project description available.</p>';
     }
 
     // Calculate task statistics
@@ -124,7 +124,7 @@ export class SummaryView {
 
     if (overdue.length === 0 && dueToday.length === 0 && dueSoon.length === 0) {
       container.innerHTML =
-        '<p class="text-sm text-gray-500 dark:text-gray-400 italic">No upcoming deadlines.</p>';
+        '<p class="text-sm text-muted italic">No upcoming deadlines.</p>';
       return;
     }
 
@@ -133,7 +133,7 @@ export class SummaryView {
     if (overdue.length > 0) {
       html += `
         <div>
-          <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Overdue (${overdue.length})</h4>
+          <h4 class="text-sm font-medium text-primary mb-2">Overdue (${overdue.length})</h4>
           <div class="space-y-2">
             ${
         overdue.map((task) => this.renderDeadlineTask(task, "overdue")).join("")
@@ -146,7 +146,7 @@ export class SummaryView {
     if (dueToday.length > 0) {
       html += `
         <div>
-          <h4 class="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Due Today (${dueToday.length})</h4>
+          <h4 class="text-sm font-medium text-primary mb-2">Due Today (${dueToday.length})</h4>
           <div class="space-y-2">
             ${
         dueToday.map((task) => this.renderDeadlineTask(task, "today")).join("")
@@ -159,7 +159,7 @@ export class SummaryView {
     if (dueSoon.length > 0) {
       html += `
         <div>
-          <h4 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Due This Week (${dueSoon.length})</h4>
+          <h4 class="text-sm font-medium text-secondary mb-2">Due This Week (${dueSoon.length})</h4>
           <div class="space-y-2">
             ${
         dueSoon.map((task) => this.renderDeadlineTask(task, "soon")).join("")
@@ -179,8 +179,8 @@ export class SummaryView {
       DEADLINE_CLASSES[urgency]
     } cursor-pointer hover:opacity-80 transition-opacity"
            onclick="taskManager.editTask('${task.id}')">
-        <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">${task.title}</div>
-        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+        <div class="text-sm font-medium text-primary truncate">${task.title}</div>
+        <div class="text-xs text-muted mt-1 flex items-center gap-1">
           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
           ${dateStr} · ${task.section || "No section"}
         </div>
@@ -216,18 +216,18 @@ export class SummaryView {
 
     if (links.length === 0) {
       container.innerHTML =
-        '<p class="text-sm text-gray-500 dark:text-gray-400 italic">No links added yet.</p>';
+        '<p class="text-sm text-muted italic">No links added yet.</p>';
       return;
     }
 
     container.innerHTML = links.map((link, index) => `
       <div class="flex items-center justify-between group">
         <a href="${link.url}" target="_blank" rel="noopener noreferrer"
-           class="text-sm text-gray-900 hover:text-gray-600 dark:text-gray-100 dark:hover:text-gray-300 truncate flex-1 underline">
+           class="text-sm text-primary hover:text-secondary truncate flex-1 underline">
           ${link.title}
         </a>
         <button onclick="taskManager.removeLink(${index})"
-                class="ml-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity"
+                class="ml-2 text-muted hover:text-secondary opacity-0 group-hover:opacity-100 transition-opacity"
                 title="Remove link">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -303,7 +303,7 @@ export class SummaryView {
     const status = select.value;
     const statusClass = `status-select-${status}`;
     select.className =
-      `text-sm border-2 rounded-md px-2 py-1 font-medium focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent ${statusClass}`;
+      `text-sm border-2 rounded-md px-2 py-1 font-medium focus:outline-none focus:ring-2 focus:ring-1 focus:border-transparent ${statusClass}`;
   }
 
   renderDynamicSectionCounts(allTasks) {
@@ -320,8 +320,8 @@ export class SummaryView {
       const div = document.createElement("div");
       div.className = "flex justify-between items-center";
       div.innerHTML = `
-                <span class="text-sm text-gray-600 dark:text-gray-400">${section}</span>
-                <span class="text-lg font-semibold text-gray-900 dark:text-gray-100">${sectionTasks.length}</span>
+                <span class="text-sm text-secondary">${section}</span>
+                <span class="text-lg font-semibold text-primary">${sectionTasks.length}</span>
             `;
       container.appendChild(div);
     });
@@ -371,17 +371,17 @@ export class SummaryView {
       const count = allTasks.filter((task) => task.section === section).length;
       // Alternate between different grey shades for visual distinction
       const dotShade = index % 2 === 0
-        ? "bg-gray-800 dark:bg-gray-200"
-        : "bg-gray-500 dark:bg-gray-400";
+        ? "bg-inverse"
+        : "bg-active";
 
       const div = document.createElement("div");
       div.className = "flex items-center justify-between";
       div.innerHTML = `
                 <div class="flex items-center space-x-2">
                     <div class="w-3 h-3 ${dotShade} rounded-full"></div>
-                    <span class="text-sm text-gray-600 dark:text-gray-400">${section}</span>
+                    <span class="text-sm text-secondary">${section}</span>
                 </div>
-                <span class="text-sm font-medium text-gray-900 dark:text-gray-100">${count}</span>
+                <span class="text-sm font-medium text-primary">${count}</span>
             `;
       container.appendChild(div);
     });
@@ -429,8 +429,8 @@ export class SummaryView {
         : 0;
       // Alternate between different grey shades for visual distinction
       const dotShade = index % 2 === 0
-        ? "bg-gray-800 dark:bg-gray-200"
-        : "bg-gray-500 dark:bg-gray-400";
+        ? "bg-inverse"
+        : "bg-active";
 
       const div = document.createElement("div");
       div.className = "space-y-2";
@@ -438,14 +438,14 @@ export class SummaryView {
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-2">
                         <div class="w-3 h-3 ${dotShade} rounded-full"></div>
-                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg>${milestone}</span>
+                        <span class="text-sm font-medium text-primary flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg>${milestone}</span>
                     </div>
-                    <span class="text-sm font-medium text-gray-900 dark:text-gray-100">${data.incomplete} remaining</span>
+                    <span class="text-sm font-medium text-primary">${data.incomplete} remaining</span>
                 </div>
-                <div class="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
+                <div class="flex items-center space-x-2 text-xs text-muted">
                     <span>${completedCount}/${data.total} completed</span>
-                    <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                        <div class="bg-gray-900 dark:bg-gray-100 h-1.5 rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
+                    <div class="flex-1 bg-active rounded-full h-1.5">
+                        <div class="bg-inverse h-1.5 rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
                     </div>
                     <span>${progressPercent}%</span>
                 </div>

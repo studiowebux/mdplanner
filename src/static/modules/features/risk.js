@@ -84,7 +84,7 @@ export class RiskModule {
           (item, idx) => `
         <li class="flex justify-between items-start group">
           <span>${item}</span>
-          <button onclick="taskManager.removeRiskAnalysisItem('${id}', ${idx})" class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 ml-2">
+          <button onclick="taskManager.removeRiskAnalysisItem('${id}', ${idx})" class="opacity-0 group-hover:opacity-100 text-muted hover:text-error ml-2">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
         </li>

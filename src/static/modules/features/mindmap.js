@@ -10,9 +10,6 @@ export class MindmapModule {
     this.zoom = 1;
     this.offset = { x: 0, y: 0 };
     this.currentLayout = "horizontal";
-    this.splitMode = false;
-    this.secondaryMindmap = null;
-    this.secondaryZoom = 1;
   }
 
   async load(autoSelect = true) {
@@ -49,17 +46,6 @@ export class MindmapModule {
       selector.appendChild(option);
     });
 
-    // Also populate secondary selector
-    const secondary = document.getElementById("mindmapSecondarySelector");
-    if (secondary) {
-      secondary.innerHTML = '<option value="">Select Mindmap</option>';
-      this.mindmaps.forEach((mindmap) => {
-        const option = document.createElement("option");
-        option.value = mindmap.id;
-        option.textContent = mindmap.title;
-        secondary.appendChild(option);
-      });
-    }
   }
 
   select(mindmapId) {
@@ -112,12 +98,10 @@ export class MindmapModule {
       document.getElementById("mindmapEmptyState"),
       "mindmapViewport",
       "mindmapContainer",
-      false,
     );
   }
 
-  /** Render a mindmap into a given container. Reusable for primary and secondary viewports. */
-  renderMindmapInto(mindmap, content, emptyState, viewportId, containerId, isSecondary) {
+  renderMindmapInto(mindmap, content, emptyState, viewportId, containerId) {
     if (!content) {
       console.error(`${containerId} element not found`);
       return;
@@ -131,7 +115,7 @@ export class MindmapModule {
     if (emptyState) emptyState.style.display = "none";
     content.innerHTML = "";
 
-    this.setupPanningFor(viewportId, containerId, isSecondary);
+    this.setupPanningFor(viewportId, containerId);
 
     const rootNodes = mindmap.nodes.filter((node) => node.level === 0);
 
@@ -403,7 +387,7 @@ export class MindmapModule {
     });
   }
 
-  setupPanningFor(viewportId, containerId, isSecondary) {
+  setupPanningFor(viewportId, containerId) {
     const viewport = document.getElementById(viewportId);
     const container = document.getElementById(containerId);
     let isDragging = false;
@@ -426,7 +410,7 @@ export class MindmapModule {
       const newTranslateX = startTranslateX + deltaX;
       const newTranslateY = startTranslateY + deltaY;
 
-      const currentZoom = isSecondary ? this.secondaryZoom : this.zoom;
+      const currentZoom = this.zoom;
       viewport.style.transform =
         `translate(${newTranslateX}px, ${newTranslateY}px) scale(${currentZoom})`;
     };
@@ -530,55 +514,6 @@ export class MindmapModule {
     if (this.selectedMindmap) {
       this.render();
     }
-    if (this.splitMode && this.secondaryMindmap) {
-      this.renderSecondary();
-    }
-  }
-
-  toggleSplitMode() {
-    this.splitMode = !this.splitMode;
-    const grid = document.getElementById("mindmapViewportGrid");
-    const secondaryPanel = document.getElementById("mindmapSecondaryPanel");
-    const toggleBtn = document.getElementById("mindmapSplitToggle");
-
-    if (this.splitMode) {
-      grid?.classList.add("split-mode");
-      if (secondaryPanel) secondaryPanel.style.display = "";
-      toggleBtn?.classList.add("active");
-    } else {
-      grid?.classList.remove("split-mode");
-      if (secondaryPanel) secondaryPanel.style.display = "none";
-      toggleBtn?.classList.remove("active");
-      this.secondaryMindmap = null;
-    }
-  }
-
-  selectSecondary(mindmapId) {
-    if (!mindmapId || mindmapId === "") {
-      this.secondaryMindmap = null;
-      const content = document.getElementById("mindmapSecondaryContent");
-      if (content) {
-        content.innerHTML =
-          '<div class="flex items-center justify-center h-full"><p class="text-sm" style="color:var(--color-text-muted)">Select a mindmap to compare</p></div>';
-      }
-      return;
-    }
-
-    this.secondaryMindmap = this.mindmaps.find((m) => m.id === mindmapId);
-    if (this.secondaryMindmap) {
-      this.renderSecondary();
-    }
-  }
-
-  renderSecondary() {
-    this.renderMindmapInto(
-      this.secondaryMindmap,
-      document.getElementById("mindmapSecondaryContent"),
-      null,
-      "mindmapSecondaryViewport",
-      "mindmapSecondaryContainer",
-      true,
-    );
   }
 
   openModal() {
@@ -817,14 +752,14 @@ export class MindmapModule {
 
     if (!structure.trim()) {
       preview.innerHTML =
-        '<div class="text-gray-400 dark:text-gray-500 italic">Enter structure to see preview</div>';
+        '<div class="text-muted italic">Enter structure to see preview</div>';
       return;
     }
 
     const nodes = this.parseStructure(structure);
     if (nodes.length === 0) {
       preview.innerHTML =
-        '<div class="text-gray-400 dark:text-gray-500 italic">Enter structure to see preview</div>';
+        '<div class="text-muted italic">Enter structure to see preview</div>';
       return;
     }
 
@@ -833,10 +768,10 @@ export class MindmapModule {
       if (children.length === 0) return "";
 
       let html =
-        '<ul class="pl-3 border-l border-gray-300 dark:border-gray-600">';
+        '<ul class="pl-3 border-l border-strong">';
       for (const node of children) {
         html +=
-          `<li class="py-0.5"><span class="text-gray-800 dark:text-gray-200">${
+          `<li class="py-0.5"><span class="text-primary">${
             escapeHtml(node.text)
           }</span>`;
         html += buildTree(node.id, level + 1);
@@ -849,7 +784,7 @@ export class MindmapModule {
     const roots = nodes.filter((n) => !n.parent);
     let html = '<div class="space-y-1">';
     for (const root of roots) {
-      html += `<div class="font-medium text-gray-900 dark:text-gray-100">${
+      html += `<div class="font-medium text-primary">${
         escapeHtml(root.text)
       }</div>`;
       html += buildTree(root.id, 1);
@@ -992,16 +927,6 @@ export class MindmapModule {
     document
       .getElementById("mindmapLayout")
       ?.addEventListener("change", (e) => this.updateLayout(e.target.value));
-
-    // Split mode toggle
-    document
-      .getElementById("mindmapSplitToggle")
-      ?.addEventListener("click", () => this.toggleSplitMode());
-
-    // Secondary mindmap selector
-    document
-      .getElementById("mindmapSecondarySelector")
-      ?.addEventListener("change", (e) => this.selectSecondary(e.target.value));
 
     // Modal close on background click
     document.getElementById("mindmapModal")?.addEventListener("click", (e) => {

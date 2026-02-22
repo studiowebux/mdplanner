@@ -2,7 +2,125 @@
    Base Styles
 
    Foundation styles applied globally.
+   Includes CSS reset (replaces Tailwind preflight).
    ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Reset (replaces Tailwind preflight)
+   -------------------------------------------------------------------------- */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
+  border-color: var(--color-border-default);
+}
+
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+}
+
+body {
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+p, h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+}
+
+ol, ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+button, input, optgroup, select, textarea {
+  font-family: inherit;
+  font-feature-settings: inherit;
+  font-variation-settings: inherit;
+  font-size: 100%;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+input, select, textarea {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  padding: 0.375rem 0.5rem;
+}
+
+input[type="checkbox"], input[type="radio"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--color-accent);
+  padding: 0;
+  border-radius: 2px;
+}
+
+button, select {
+  text-transform: none;
+}
+
+button, input[type="button"], input[type="reset"], input[type="submit"] {
+  -webkit-appearance: button;
+  background-color: transparent;
+  background-image: none;
+}
+
+img, svg, video, canvas, audio, iframe, embed, object {
+  display: block;
+  vertical-align: middle;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+table {
+  text-indent: 0;
+  border-color: inherit;
+  border-collapse: collapse;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--color-text-muted);
+  opacity: 1;
+}
+
+[role="button"], button {
+  cursor: pointer;
+}
+
+:disabled {
+  cursor: default;
+}
+
+[hidden] {
+  display: none;
+}
 
 /* --------------------------------------------------------------------------
    Typography
@@ -164,13 +282,16 @@ a:hover {
    Transitions
    -------------------------------------------------------------------------- */
 
-/* Smooth color transitions for theme switching */
-body,
-body * {
+/* Smooth color transitions for theme switching — targeted elements only */
+a,
+button,
+.nav-dropdown-btn,
+.c4-component,
+.c4-breadcrumb-item {
   transition:
-    background-color var(--transition-base),
-    border-color var(--transition-base),
-    color var(--transition-base);
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
 /* Disable transitions on page load to prevent flash */
@@ -180,107 +301,30 @@ body * {
 }
 
 /* --------------------------------------------------------------------------
-   Dark Mode Overrides - High Contrast Black/White
-   Clear section separation with visible borders
+   Navigation (MinimalDoc-style)
    -------------------------------------------------------------------------- */
 
-/* Page background - true black */
-.dark .bg-gray-50,
-.dark .dark\:bg-gray-900 {
-  background-color: #000000 !important;
+.nav-dropdown-btn {
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  padding: 0.375rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast);
 }
 
-/* Card/section backgrounds - slightly elevated */
-.dark .bg-gray-100,
-.dark .dark\:bg-gray-800 {
-  background-color: #111111 !important;
+.nav-dropdown-btn:hover {
+  color: var(--color-text-primary);
+  background: none;
 }
 
-.dark .dark\:bg-gray-700 {
-  background-color: #1a1a1a !important;
+.nav-dropdown-menu {
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
 }
 
-.dark .dark\:bg-gray-600 {
-  background-color: #222222 !important;
-}
 
-/* Borders - more visible for clear separation */
-.dark .dark\:border-gray-800 {
-  border-color: #333333 !important;
-}
-
-.dark .dark\:border-gray-700,
-.dark .dark\:border-gray-600 {
-  border-color: #3d3d3d !important;
-}
-
-/* Text colors */
-.dark .dark\:text-gray-100,
-.dark .dark\:text-white {
-  color: #ffffff !important;
-}
-
-.dark .dark\:text-gray-200,
-.dark .dark\:text-gray-300 {
-  color: #e0e0e0 !important;
-}
-
-.dark .dark\:text-gray-400 {
-  color: #999999 !important;
-}
-
-/* Hover states */
-.dark .dark\:hover\:bg-gray-700:hover,
-.dark .dark\:hover\:bg-gray-600:hover {
-  background-color: #2a2a2a !important;
-}
-
-/* Fix modal/overlay backgrounds */
-.dark .bg-black\/50 {
-  background-color: rgba(0, 0, 0, 0.8) !important;
-}
-
-/* Fix input/form backgrounds in dark mode */
-.dark input,
-.dark select,
-.dark textarea {
-  background-color: #111111 !important;
-  border-color: #3d3d3d !important;
-  color: #ffffff !important;
-}
-
-.dark input:focus,
-.dark select:focus,
-.dark textarea:focus {
-  border-color: #555555 !important;
-  box-shadow: 0 0 0 1px #555555 !important;
-}
-
-/* Fix button backgrounds */
-.dark .dark\:bg-gray-500 {
-  background-color: #444444 !important;
-}
-
-/* Cards and panels - add subtle border for separation */
-.dark .bg-white,
-.dark .rounded-lg.shadow {
-  background-color: #111111 !important;
-  border: 1px solid #2a2a2a !important;
-}
-
-/* Header border more visible */
-.dark header {
-  border-bottom-color: #333333 !important;
-}
-
-/* Dividers more visible */
-.dark .divide-gray-200 > * + *,
-.dark .dark\:divide-gray-700 > * + * {
-  border-color: #333333 !important;
-}
-
-/* Dropdown menus */
-.dark .nav-dropdown-menu {
-  background-color: #141414 !important;
-  border-color: #3d3d3d !important;
-}

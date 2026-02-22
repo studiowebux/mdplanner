@@ -44,7 +44,7 @@ export class TimelineView {
 
     if (!this.tm.projectConfig || !this.tm.projectConfig.startDate) {
       timelineContent.innerHTML =
-        '<div class="text-center text-gray-500 dark:text-gray-400 py-8">Please configure project start date first</div>';
+        '<div class="text-center text-muted py-8">Please configure project start date first</div>';
       return;
     }
 
@@ -59,19 +59,19 @@ export class TimelineView {
     // Add warning banner if there are tasks without effort
     if (tasksWithoutEffort.length > 0) {
       html +=
-        '<div class="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">';
+        '<div class="mb-4 p-3 bg-warning-bg border border-warning-border rounded-lg">';
       html += '<div class="flex items-center">';
       html +=
-        '<svg class="w-5 h-5 text-yellow-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">';
+        '<svg class="w-5 h-5 text-warning mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">';
       html +=
         '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"></path>';
       html += "</svg>";
       html +=
-        `<span class="text-sm font-medium text-yellow-800 dark:text-yellow-200">${tasksWithoutEffort.length} task${
+        `<span class="text-sm font-medium text-warning-text">${tasksWithoutEffort.length} task${
           tasksWithoutEffort.length !== 1 ? "s" : ""
         } without effort estimates (not shown in timeline)</span>`;
       html += "</div>";
-      html += '<div class="mt-2 text-xs text-yellow-700 dark:text-yellow-300">';
+      html += '<div class="mt-2 text-xs text-warning-text">';
       html += "Tasks missing effort: " +
         tasksWithoutEffort.map((t) => `${t.title} (${t.id})`).join(", ");
       html += "</div>";
@@ -80,7 +80,7 @@ export class TimelineView {
 
     if (scheduledTasks.length === 0) {
       html +=
-        '<div class="text-center text-gray-500 dark:text-gray-400 py-8">No tasks with effort estimates found</div>';
+        '<div class="text-center text-muted py-8">No tasks with effort estimates found</div>';
     } else {
       // Calculate chart width for consistent header/rows alignment
       const projectStart = new Date(
@@ -335,12 +335,12 @@ export class TimelineView {
     const endDate = new Date(Math.max(...scheduledTasks.map((t) => t.endDate)));
 
     let html =
-      '<div class="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">';
+      '<div class="flex border-b border-default bg-secondary">';
     html +=
-      '<div class="w-48 p-3 font-medium text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-700">Task</div>';
+      '<div class="w-48 p-3 font-medium text-primary border-r border-default">Task</div>';
     html += '<div class="flex-1 p-3">';
     html +=
-      '<div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">';
+      '<div class="flex justify-between text-sm text-secondary">';
     html += `<span>Start: ${startDate.toLocaleDateString()}</span>`;
     html += `<span>End: ${endDate.toLocaleDateString()}</span>`;
     html += "</div>";
@@ -379,14 +379,14 @@ export class TimelineView {
       const barColors = getTaskBarColors(task.config.priority, isOverdue);
 
       html +=
-        '<div class="flex border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">';
+        '<div class="flex border-b border-default hover:bg-secondary">';
       html +=
-        `<div class="w-48 p-3 border-r border-gray-200 dark:border-gray-700">`;
+        `<div class="w-48 p-3 border-r border-default">`;
       html +=
-        `<div class="font-medium text-gray-900 dark:text-gray-100 text-sm">${task.title}</div>`;
+        `<div class="font-medium text-primary text-sm">${task.title}</div>`;
       html +=
-        `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">ID: ${task.id}</div>`;
-      html += `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">`;
+        `<div class="text-xs text-muted mt-1">ID: ${task.id}</div>`;
+      html += `<div class="text-xs text-muted mt-1">`;
       html += `${task.config.effort} days • ${task.section}`;
       if (task.config.due_date) {
         const dueDate = new Date(task.config.due_date);
@@ -394,7 +394,7 @@ export class TimelineView {
         html += ` • Due: ${dueDate.toLocaleDateString()}`;
         if (isOverdue) {
           html +=
-            ` <span class="text-red-600 dark:text-red-400 font-medium inline-flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> OVERDUE</span>`;
+            ` <span class="text-error font-medium inline-flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> OVERDUE</span>`;
         }
       }
       if (task.config.blocked_by && task.config.blocked_by.length > 0) {
@@ -418,17 +418,17 @@ export class TimelineView {
             const arrowLength = leftPercent - depEndPercent;
             if (arrowLength > 0) {
               html +=
-                `<div class="absolute h-0.5 bg-red-400 dark:bg-red-500" style="left: ${depEndPercent}%; width: ${arrowLength}%; top: 50%; z-index: 10;">`;
+                `<div class="absolute h-0.5 bg-error" style="left: ${depEndPercent}%; width: ${arrowLength}%; top: 50%; z-index: 10;">`;
               html +=
                 `<div class="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1">`;
               html +=
-                `<svg class="w-3 h-3 text-red-400 dark:text-red-500" fill="currentColor" viewBox="0 0 20 20">`;
+                `<svg class="w-3 h-3 text-error" fill="currentColor" viewBox="0 0 20 20">`;
               html +=
                 `<path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>`;
               html += `</svg>`;
               html += `</div>`;
               html +=
-                `<div class="absolute left-1/2 -top-5 transform -translate-x-1/2 text-xs text-red-600 dark:text-red-400 font-medium">${depId}</div>`;
+                `<div class="absolute left-1/2 -top-5 transform -translate-x-1/2 text-xs text-error font-medium">${depId}</div>`;
               html += `</div>`;
             }
           }
@@ -464,9 +464,9 @@ export class TimelineView {
 
           if (dueDatePercent >= 0 && dueDatePercent <= 100) {
             html +=
-              `<div class="absolute w-0.5 bg-orange-500 dark:bg-orange-400" style="left: ${dueDatePercent}%; height: 100%; top: 0; z-index: 25;">`;
+              `<div class="absolute w-0.5 bg-warning" style="left: ${dueDatePercent}%; height: 100%; top: 0; z-index: 25;">`;
             html +=
-              `<div class="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs text-orange-600 dark:text-orange-400 font-medium whitespace-nowrap bg-white dark:bg-gray-800 px-1 rounded flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>${dueDate.toLocaleDateString()}</div>`;
+              `<div class="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs text-warning font-medium whitespace-nowrap bg-primary px-1 rounded flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>${dueDate.toLocaleDateString()}</div>`;
             html += `</div>`;
           }
         }

@@ -218,19 +218,19 @@ export class TasksModule {
       modal = document.createElement("div");
       modal.id = "descriptionModal";
       modal.className =
-        "fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50";
+        "fixed inset-0 bg-overlay flex items-center justify-center z-50";
       modal.innerHTML = `
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-            <h3 id="descriptionModalTitle" class="text-lg font-medium text-gray-900 dark:text-gray-100">Task Description</h3>
-            <button onclick="taskManager.closeDescriptionModal()" class="text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400">
+        <div class="bg-primary rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+          <div class="px-6 py-4 border-b border-default flex justify-between items-center">
+            <h3 id="descriptionModalTitle" class="text-lg font-medium text-primary">Task Description</h3>
+            <button onclick="taskManager.closeDescriptionModal()" class="text-muted hover:text-muted">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
               </svg>
             </button>
           </div>
           <div class="p-6">
-            <div id="descriptionContent" class="prose prose-gray dark:prose-invert max-w-none"></div>
+            <div id="descriptionContent" class="prose prose-gray max-w-none"></div>
           </div>
         </div>
       `;
@@ -435,16 +435,11 @@ export class TasksModule {
       const h4Title = card.querySelector("h4");
       if (h4Title) {
         if (task.completed) {
-          h4Title.classList.add("line-through");
-          h4Title.classList.remove("text-gray-900", "dark:text-gray-100");
-          h4Title.classList.add("text-gray-500", "dark:text-gray-400");
+          h4Title.classList.add("line-through", "text-muted");
+          h4Title.classList.remove("text-primary");
         } else {
-          h4Title.classList.remove(
-            "line-through",
-            "text-gray-500",
-            "dark:text-gray-400",
-          );
-          h4Title.classList.add("text-gray-900", "dark:text-gray-100");
+          h4Title.classList.remove("line-through", "text-muted");
+          h4Title.classList.add("text-primary");
         }
       }
 
@@ -452,19 +447,11 @@ export class TasksModule {
       const titleSpan = card.querySelector(".task-title");
       if (titleSpan) {
         if (task.completed) {
-          titleSpan.classList.add(
-            "line-through",
-            "text-gray-400",
-            "dark:text-gray-500",
-          );
-          titleSpan.classList.remove("text-gray-900", "dark:text-gray-100");
+          titleSpan.classList.add("line-through", "text-muted");
+          titleSpan.classList.remove("text-primary");
         } else {
-          titleSpan.classList.remove(
-            "line-through",
-            "text-gray-400",
-            "dark:text-gray-500",
-          );
-          titleSpan.classList.add("text-gray-900", "dark:text-gray-100");
+          titleSpan.classList.remove("line-through", "text-muted");
+          titleSpan.classList.add("text-primary");
         }
       }
     }

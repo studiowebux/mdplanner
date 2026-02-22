@@ -117,14 +117,14 @@ export class RiskSidenavModule {
     const items = this.currentRisk[quadrant] || [];
 
     container.innerHTML = items.length === 0
-      ? '<div class="text-gray-400 dark:text-gray-500 text-sm italic py-2">No risks</div>'
+      ? '<div class="text-muted text-sm italic py-2">No risks</div>'
       : items.map((item, idx) => `
         <div class="flex items-start gap-2 py-1 group">
-          <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">${
+          <span class="flex-1 text-sm text-secondary">${
         escapeHtml(item)
       }</span>
           <button onclick="taskManager.riskSidenavModule.removeItem('${quadrant}', ${idx})"
-                  class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 flex-shrink-0">
+                  class="opacity-0 group-hover:opacity-100 text-muted hover:text-error flex-shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
@@ -143,10 +143,10 @@ export class RiskSidenavModule {
 
     const inputHtml = `
       <div class="risk-add-input flex gap-2 mt-2">
-        <input type="text" class="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+        <input type="text" class="flex-1 px-2 py-1 text-sm border border-strong rounded bg-primary text-primary"
                placeholder="Enter risk..." autofocus>
-        <button type="button" class="px-2 py-1 text-xs bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded hover:bg-gray-700 dark:hover:bg-gray-300">Add</button>
-        <button type="button" class="px-2 py-1 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Cancel</button>
+        <button type="button" class="px-2 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse">Add</button>
+        <button type="button" class="px-2 py-1 text-xs text-muted hover:text-secondary">Cancel</button>
       </div>
     `;
     container.insertAdjacentHTML("beforeend", inputHtml);

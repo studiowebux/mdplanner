@@ -766,11 +766,11 @@ export class C4Module {
     div.className = "flex space-x-2";
     div.innerHTML = `
       <div class="flex-1 relative">
-        <input type="text" placeholder="Target component name" class="c4-target-input w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 text-sm" autocomplete="off">
-        <div class="c4-target-dropdown hidden absolute top-full left-0 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-b-md max-h-32 overflow-y-auto z-50"></div>
+        <input type="text" placeholder="Target component name" class="c4-target-input w-full border border-strong rounded-md px-3 py-2 text-sm" autocomplete="off">
+        <div class="c4-target-dropdown hidden absolute top-full left-0 right-0 bg-primary border border-strong rounded-b-md max-h-32 overflow-y-auto z-50"></div>
       </div>
-      <input type="text" placeholder="Relationship label" class="flex-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 text-sm">
-      <button type="button" class="px-2 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm" onclick="this.parentElement.remove()">X</button>
+      <input type="text" placeholder="Relationship label" class="flex-1 border border-strong rounded-md px-3 py-2 text-sm">
+      <button type="button" class="px-2 py-2 bg-error text-white rounded-md hover:bg-error text-sm" onclick="this.parentElement.remove()">X</button>
     `;
     container.appendChild(div);
 
@@ -1061,7 +1061,7 @@ export class C4Module {
 
     if (!this.tm.c4Components || this.tm.c4Components.length === 0) {
       container.innerHTML = `
-        <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+        <div class="text-center py-8 text-muted">
           <p>No C4 components yet. Add components to see them here.</p>
         </div>
       `;
@@ -1124,17 +1124,17 @@ export class C4Module {
     if (!components || components.length === 0) return "";
 
     const levelColors = {
-      context: "border-l-gray-800 dark:border-l-gray-200",
-      container: "border-l-gray-600 dark:border-l-gray-400",
-      component: "border-l-gray-400 dark:border-l-gray-500",
-      code: "border-l-gray-300 dark:border-l-gray-600",
+      context: "c4-list-level-context",
+      container: "c4-list-level-container",
+      component: "c4-list-level-component",
+      code: "c4-list-level-code",
     };
 
     const levelBadgeColors = {
-      context: "bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-800",
-      container: "bg-gray-600 text-white dark:bg-gray-400 dark:text-gray-800",
-      component: "bg-gray-400 text-white dark:bg-gray-500 dark:text-gray-100",
-      code: "bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200",
+      context: "bg-inverse text-inverse",
+      container: "bg-inverse text-inverse",
+      component: "bg-active text-white",
+      code: "bg-active text-primary",
     };
 
     return components.map((component) => {
@@ -1150,12 +1150,12 @@ export class C4Module {
         <div class="c4-list-item border-l-4 ${borderColor} mb-2" style="margin-left: ${
         level * 20
       }px;">
-          <div class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-r-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+          <div class="flex items-center gap-2 p-3 bg-primary rounded-r-lg hover:bg-secondary">
             ${
         hasChildren
           ? `
-              <button class="c4-list-toggle p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded">
-                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button class="c4-list-toggle p-1 hover:bg-active rounded">
+                <svg class="w-4 h-4 text-muted transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
               </button>
@@ -1164,19 +1164,19 @@ export class C4Module {
       }
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2">
-                <span class="font-medium text-gray-900 dark:text-gray-100">${component.name}</span>
+                <span class="font-medium text-primary">${component.name}</span>
                 <span class="px-2 py-0.5 text-xs rounded ${badgeColor}">${component.level}</span>
-                <span class="text-xs text-gray-500 dark:text-gray-400">${component.type}</span>
+                <span class="text-xs text-muted">${component.type}</span>
               </div>
               ${
         component.description
-          ? `<p class="text-sm text-gray-600 dark:text-gray-400 truncate">${component.description}</p>`
+          ? `<p class="text-sm text-secondary truncate">${component.description}</p>`
           : ""
       }
               ${
         component.connections && component.connections.length > 0
           ? `
-                <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                <div class="text-xs text-muted mt-1">
                   Connects to: ${
             component.connections.map((c) => c.target).join(", ")
           }
@@ -1186,12 +1186,12 @@ export class C4Module {
       }
             </div>
             <div class="flex items-center gap-1">
-              <button class="c4-list-edit p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded" data-component-id="${component.id}" title="Edit">
+              <button class="c4-list-edit p-1.5 text-muted hover:text-secondary hover:bg-active rounded" data-component-id="${component.id}" title="Edit">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                 </svg>
               </button>
-              <button class="c4-list-delete p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-200 dark:hover:bg-gray-600 rounded" data-component-id="${component.id}" title="Delete">
+              <button class="c4-list-delete p-1.5 text-muted hover:text-error hover:bg-active rounded" data-component-id="${component.id}" title="Delete">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                 </svg>
@@ -1215,17 +1215,17 @@ export class C4Module {
     const levelIndent = { context: 0, container: 1, component: 2, code: 3 };
 
     const levelColors = {
-      context: "border-l-gray-800 dark:border-l-gray-200",
-      container: "border-l-gray-600 dark:border-l-gray-400",
-      component: "border-l-gray-400 dark:border-l-gray-500",
-      code: "border-l-gray-300 dark:border-l-gray-600",
+      context: "c4-list-level-context",
+      container: "c4-list-level-container",
+      component: "c4-list-level-component",
+      code: "c4-list-level-code",
     };
 
     const levelBadgeColors = {
-      context: "bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-800",
-      container: "bg-gray-600 text-white dark:bg-gray-400 dark:text-gray-800",
-      component: "bg-gray-400 text-white dark:bg-gray-500 dark:text-gray-100",
-      code: "bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200",
+      context: "bg-inverse text-inverse",
+      container: "bg-inverse text-inverse",
+      component: "bg-active text-white",
+      code: "bg-active text-primary",
     };
 
     // Sort components by level order
@@ -1243,23 +1243,23 @@ export class C4Module {
         <div class="c4-list-item border-l-4 ${borderColor} mb-2" style="margin-left: ${
         indent * 24
       }px;">
-          <div class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-r-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+          <div class="flex items-center gap-2 p-3 bg-primary rounded-r-lg hover:bg-secondary">
             <div class="w-6"></div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2">
-                <span class="font-medium text-gray-900 dark:text-gray-100">${component.name}</span>
+                <span class="font-medium text-primary">${component.name}</span>
                 <span class="px-2 py-0.5 text-xs rounded ${badgeColor}">${component.level}</span>
-                <span class="text-xs text-gray-500 dark:text-gray-400">${component.type}</span>
+                <span class="text-xs text-muted">${component.type}</span>
               </div>
               ${
         component.description
-          ? `<p class="text-sm text-gray-600 dark:text-gray-400 truncate">${component.description}</p>`
+          ? `<p class="text-sm text-secondary truncate">${component.description}</p>`
           : ""
       }
               ${
         component.connections && component.connections.length > 0
           ? `
-                <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                <div class="text-xs text-muted mt-1">
                   Connects to: ${
             component.connections.map((c) => c.target).join(", ")
           }
@@ -1269,12 +1269,12 @@ export class C4Module {
       }
             </div>
             <div class="flex items-center gap-1">
-              <button class="c4-list-edit p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded" data-component-id="${component.id}" title="Edit">
+              <button class="c4-list-edit p-1.5 text-muted hover:text-secondary hover:bg-active rounded" data-component-id="${component.id}" title="Edit">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                 </svg>
               </button>
-              <button class="c4-list-delete p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-200 dark:hover:bg-gray-600 rounded" data-component-id="${component.id}" title="Delete">
+              <button class="c4-list-delete p-1.5 text-muted hover:text-error hover:bg-active rounded" data-component-id="${component.id}" title="Delete">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                 </svg>
