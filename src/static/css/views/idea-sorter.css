@@ -170,7 +170,11 @@
 }
 
 /* Edit button inside table */
-.idea-sorter-td .btn-ghost {
+.idea-sorter-td .btn-secondary {
   font-size: 0.75rem;
   padding: 0.2rem 0.5rem;
+}
+
+.idea-sorter-td .btn-secondary:hover {
+  color: var(--color-text-primary);
 }
