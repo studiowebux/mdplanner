@@ -19,11 +19,11 @@ Open `http://localhost:8003`. Project files are stored in `./data/` on the host.
 
 Edit `docker-compose.yml` to change options:
 
-| Option       | Default     | Description                   |
-| ------------ | ----------- | ----------------------------- |
-| Port         | 8003        | Host port mapping             |
-| Data path    | `./data`    | Host directory for project    |
-| `--cache`    | disabled    | Add flag in CMD to enable SQLite cache |
+| Option    | Default  | Description                            |
+| --------- | -------- | -------------------------------------- |
+| Port      | 8003     | Host port mapping                      |
+| Data path | `./data` | Host directory for project             |
+| `--cache` | disabled | Add flag in CMD to enable SQLite cache |
 
 To enable the cache, override the command in `docker-compose.yml`:
 
@@ -38,12 +38,21 @@ services:
       - ./data:/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8003/"]
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8003/"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 15s
-    command: ["run", "--allow-net", "--allow-read", "--allow-write", "--allow-env", "main.ts", "--cache", "/data"]
+    command: [
+      "run",
+      "--allow-net",
+      "--allow-read",
+      "--allow-write",
+      "--allow-env",
+      "main.ts",
+      "--cache",
+      "/data",
+    ]
 ```
 
 ### Management

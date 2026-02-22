@@ -101,5 +101,4 @@ GPL-3.0
 ## Contact
 
 [Studio Webux](https://studiowebux.com) |
-[Discord](https://discord.gg/BG5Erm9fNv) |
-tommy@studiowebux.com
+[Discord](https://discord.gg/BG5Erm9fNv) | tommy@studiowebux.com
