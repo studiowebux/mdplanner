@@ -684,6 +684,13 @@
               >
                 Org Chart
               </button>
+              <button
+                id="peopleViewBtn"
+                data-view="people"
+                class="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                People
+              </button>
             </div>
           </div>
 
@@ -929,6 +936,12 @@
               class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300"
             >
               Org Chart
+            </button>
+            <button
+              id="peopleViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300"
+            >
+              People
             </button>
           </div>
           <div class="py-1 border-t border-gray-100 dark:border-gray-800">
@@ -1634,31 +1647,16 @@
               </div>
             </div>
 
-            <!-- Assignees Management -->
+            <!-- Team Members (managed via People view) -->
             <div>
               <h3
-                class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4"
+                class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2"
               >
                 Team Members
               </h3>
-              <div id="assigneesContainer" class="flex flex-wrap gap-2 mb-4">
-                <!-- Assignees will be populated here -->
-              </div>
-              <div class="flex gap-2">
-                <input
-                  type="text"
-                  id="newAssigneeInput"
-                  placeholder="New assignee name"
-                  class="flex-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                >
-                <button
-                  type="button"
-                  id="addAssigneeBtn"
-                  class="px-3 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                >
-                  Add
-                </button>
-              </div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Team members are managed in the People view. The count shown above reflects the people directory.
+              </p>
             </div>
 
             <!-- Tags Management -->
@@ -4424,30 +4422,19 @@
               <div>
                 <label
                   class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                >Name</label>
-                <input
-                  type="text"
-                  id="teamMemberName"
+                >Person</label>
+                <select
+                  id="teamMemberPersonId"
                   required
                   class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                  placeholder="e.g., Alice"
                 >
+                  <option value="">Select person...</option>
+                </select>
               </div>
               <div>
                 <label
                   class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                >Role (optional)</label>
-                <input
-                  type="text"
-                  id="teamMemberRole"
-                  class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                  placeholder="e.g., Developer"
-                >
-              </div>
-              <div>
-                <label
-                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                >Hours Per Day</label>
+                >Hours Per Day (override)</label>
                 <input
                   type="number"
                   id="teamMemberHours"
@@ -4672,7 +4659,7 @@
         </div>
       </div>
 
-      <!-- Import Assignees Modal -->
+      <!-- Import People Modal -->
       <div
         id="importAssigneesModal"
         class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50"
@@ -4682,10 +4669,10 @@
         >
           <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-              Import from Assignees
+              Import from People
             </h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Add team members from your project configuration
+              Add team members from the people directory
             </p>
           </div>
           <div class="p-6">
@@ -4693,8 +4680,7 @@
               id="importAssigneesEmpty"
               class="text-center py-8 text-gray-500 dark:text-gray-400 hidden"
             >
-              All assignees are already team members, or no assignees
-              configured.
+              All people are already team members, or no people configured.
             </div>
             <div
               id="importAssigneesList"
@@ -4913,7 +4899,7 @@
                     id="importAssigneesBtn"
                     class="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300"
                   >
-                    Import from Config
+                    Import from People
                   </button>
                   <button
                     id="addTeamMemberBtn"
@@ -5765,6 +5751,62 @@
             <div id="orgchartUnlinkZone" class="orgchart-unlink-zone">
               Drop here to remove manager
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- People Directory View -->
+      <div id="peopleView" class="hidden pb-16">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                People
+              </h2>
+              <button id="addPersonBtn" class="btn-primary py-2 rounded-lg">
+                + Add Person
+              </button>
+            </div>
+            <!-- Summary Stats -->
+            <div class="people-summary-grid mb-4">
+              <div class="people-stat-card">
+                <div class="people-stat-label">Total People</div>
+                <div id="peopleTotalCount" class="people-stat-value">0</div>
+              </div>
+              <div class="people-stat-card">
+                <div class="people-stat-label">Departments</div>
+                <div id="peopleDeptCount" class="people-stat-value">0</div>
+              </div>
+              <div class="people-stat-card">
+                <div class="people-stat-label">Roles</div>
+                <div id="peopleRolesCount" class="people-stat-value">0</div>
+              </div>
+            </div>
+            <!-- Controls -->
+            <div class="flex items-center gap-4 flex-wrap">
+              <div class="people-search">
+                <svg class="people-search-icon" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input
+                  type="text"
+                  id="peopleSearchInput"
+                  class="people-search-input"
+                  placeholder="Search people..."
+                >
+              </div>
+              <div id="peopleDepartmentFilters" class="people-filter-pills"></div>
+            </div>
+          </div>
+          <div class="p-6">
+            <div id="peopleEmptyState" class="people-empty-state">
+              <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              </svg>
+              <div class="people-empty-title">No people yet</div>
+              <div class="people-empty-text">Add people to build your team directory.</div>
+            </div>
+            <div id="peopleCardGrid" class="people-card-grid"></div>
           </div>
         </div>
       </div>
@@ -8968,12 +9010,12 @@
                     placeholder="Hours"
                     class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded px-2 py-1 text-sm"
                   >
-                  <input
-                    type="text"
+                  <select
                     id="timeEntryPerson"
-                    placeholder="Person"
                     class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded px-2 py-1 text-sm"
                   >
+                    <option value="">-- Person --</option>
+                  </select>
                   <input
                     type="text"
                     id="timeEntryDescription"
@@ -11752,6 +11794,177 @@
           <button
             type="button"
             id="orgchartSidenavCancel"
+            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600"
+          >
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary ml-2">Save</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- People Sidenav -->
+    <div id="peopleSidenav" class="sidenav-panel sidenav-md">
+      <div class="sidenav-header">
+        <h2 id="peopleSidenavHeader" class="sidenav-title">
+          New Person
+        </h2>
+        <div class="flex items-center gap-2">
+          <span id="peopleSidenavSaveStatus" class="text-xs hidden"></span>
+          <button
+            type="button"
+            id="peopleSidenavClose"
+            class="sidenav-close"
+            aria-label="Close"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              >
+              </path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <form
+        id="peopleSidenavForm"
+        class="flex flex-col flex-1 overflow-hidden"
+      >
+        <div class="sidenav-content">
+          <div class="sidenav-section">
+            <div class="form-group">
+              <label class="form-label">Name *</label>
+              <input
+                type="text"
+                id="peopleSidenavName"
+                required
+                class="form-input"
+              >
+            </div>
+            <div class="form-group">
+              <label class="form-label">Title</label>
+              <input
+                type="text"
+                id="peopleSidenavTitle"
+                class="form-input"
+                placeholder="e.g., Engineering Manager"
+              >
+            </div>
+            <div class="form-group">
+              <label class="form-label">Role</label>
+              <input
+                type="text"
+                id="peopleSidenavRole"
+                class="form-input"
+                placeholder="e.g., Backend Developer"
+              >
+            </div>
+            <div class="form-group">
+              <label class="form-label">Departments</label>
+              <input
+                type="text"
+                id="peopleSidenavDepartments"
+                class="form-input"
+                placeholder="e.g., Engineering, Product"
+              >
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Comma-separated for multiple departments
+              </p>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Reports To</label>
+              <select id="peopleSidenavReportsTo" class="form-select">
+                <option value="">None</option>
+              </select>
+            </div>
+          </div>
+          <div class="sidenav-section">
+            <div class="sidenav-section-title">Contact Info</div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input
+                type="email"
+                id="peopleSidenavEmail"
+                class="form-input"
+                placeholder="name@example.com"
+              >
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone</label>
+              <input
+                type="tel"
+                id="peopleSidenavPhone"
+                class="form-input"
+                placeholder="+1-555-0100"
+              >
+            </div>
+          </div>
+          <div class="sidenav-section">
+            <div class="sidenav-section-title">Work Schedule</div>
+            <div class="form-group">
+              <label class="form-label">Hours Per Day</label>
+              <input
+                type="number"
+                id="peopleSidenavHoursPerDay"
+                class="form-input"
+                value="8"
+                min="1"
+                max="24"
+                step="0.5"
+              >
+            </div>
+            <div class="form-group">
+              <label class="form-label">Working Days</label>
+              <input
+                type="text"
+                id="peopleSidenavWorkingDays"
+                class="form-input"
+                value="Mon, Tue, Wed, Thu, Fri"
+              >
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Comma-separated day abbreviations
+              </p>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Start Date</label>
+              <input
+                type="date"
+                id="peopleSidenavStartDate"
+                class="form-input"
+              >
+            </div>
+          </div>
+          <div class="sidenav-section">
+            <div class="sidenav-section-title">Notes</div>
+            <div class="form-group">
+              <textarea
+                id="peopleSidenavNotes"
+                rows="3"
+                class="form-textarea"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="sidenav-footer">
+          <button
+            type="button"
+            id="peopleSidenavDelete"
+            class="btn-danger-ghost hidden"
+          >
+            Delete
+          </button>
+          <div class="flex-1"></div>
+          <button
+            type="button"
+            id="peopleSidenavCancel"
             class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600"
           >
             Cancel

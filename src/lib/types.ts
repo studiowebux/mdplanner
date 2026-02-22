@@ -260,12 +260,11 @@ export interface Brief {
   guidingPrinciples: string[];
 }
 
-export interface TeamMember {
+export interface TeamMemberRef {
   id: string;
-  name: string;
-  role?: string;
-  hoursPerDay: number;
-  workingDays: string[];
+  personId: string;
+  hoursPerDay?: number;
+  workingDays?: string[];
 }
 
 export interface WeeklyAllocation {
@@ -283,7 +282,7 @@ export interface CapacityPlan {
   title: string;
   date: string;
   budgetHours?: number;
-  teamMembers: TeamMember[];
+  teamMembers: TeamMemberRef[];
   allocations: WeeklyAllocation[];
 }
 
@@ -465,6 +464,23 @@ export interface Interaction {
   date: string;
   duration?: number;
   nextFollowUp?: string;
+  notes?: string;
+}
+
+// People Registry Types
+
+export interface Person {
+  id: string;
+  name: string;
+  title?: string;
+  role?: string;
+  departments?: string[];
+  reportsTo?: string;
+  email?: string;
+  phone?: string;
+  startDate?: string;
+  hoursPerDay?: number;
+  workingDays?: string[];
   notes?: string;
 }
 

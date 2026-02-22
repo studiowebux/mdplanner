@@ -268,6 +268,12 @@ export class BillingSidenavModule {
 
   renderRateForm() {
     const r = this.currentEntity;
+    const peopleOptions = Array.from(this.tm.peopleMap.entries())
+      .map(([id, person]) =>
+        `<option value="${id}" ${id === r.assignee ? "selected" : ""}>${
+          escapeHtml(person.name)
+        }${person.role ? ` (${escapeHtml(person.role)})` : ""}</option>`
+      ).join("");
     return `
       <div class="sidenav-section">
         <div class="form-group">
@@ -285,9 +291,10 @@ export class BillingSidenavModule {
           </div>
           <div class="form-group">
             <label class="form-label">Assignee</label>
-            <input type="text" id="billingSidenavRateAssignee" class="form-input" value="${
-      escapeHtml(r.assignee || "")
-    }" placeholder="Optional">
+            <select id="billingSidenavRateAssignee" class="form-input">
+              <option value="">-- None --</option>
+              ${peopleOptions}
+            </select>
           </div>
         </div>
         <div class="form-group">
@@ -583,8 +590,8 @@ export class BillingSidenavModule {
           hourlyRate: parseFloat(
             document.getElementById("billingSidenavRateHourly")?.value,
           ) || 0,
-          assignee: document.getElementById("billingSidenavRateAssignee")?.value
-            .trim() || null,
+          assignee: document.getElementById("billingSidenavRateAssignee")?.value ||
+            null,
           isDefault:
             document.getElementById("billingSidenavRateDefault")?.checked ||
             false,

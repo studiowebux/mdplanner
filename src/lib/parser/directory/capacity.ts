@@ -1,12 +1,13 @@
 /**
  * Directory-based parser for Capacity Planning.
  * Each capacity plan is stored as a separate markdown file.
- * Team members and allocations are stored as nested structures.
+ * Team members reference people/ by personId with optional overrides.
+ * Allocations are stored as nested structures.
  */
 import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
 import type {
   CapacityPlan,
-  TeamMember,
+  TeamMemberRef,
   WeeklyAllocation,
 } from "../../types.ts";
 
@@ -64,18 +65,44 @@ export class CapacityDirectoryParser extends DirectoryParser<CapacityPlan> {
         continue;
       }
 
-      // Parse team members: - Name | Role | 8h/day | Mon,Tue,Wed,Thu,Fri
+      // Parse team member refs: - ({id}) {personId} | {hoursPerDay}h/day | {days}
+      // hoursPerDay and days are optional overrides
       if (currentSection === "members") {
-        const memberMatch = line.match(
-          /^[-*]\s+\((\w+)\)\s+(.+?)\s*\|\s*(.+?)\s*\|\s*(\d+)h\/day\s*\|\s*(.+)$/,
+        // Full format with overrides: - (id) personId | 6h/day | Mon,Tue,Wed
+        const fullMatch = line.match(
+          /^[-*]\s+\((\w+)\)\s+(\w+)\s*\|\s*(\d+)h\/day\s*\|\s*(.+)$/,
         );
-        if (memberMatch) {
+        if (fullMatch) {
           result.teamMembers.push({
-            id: memberMatch[1],
-            name: memberMatch[2].trim(),
-            role: memberMatch[3].trim() || undefined,
-            hoursPerDay: parseInt(memberMatch[4], 10),
-            workingDays: memberMatch[5].split(",").map((d) => d.trim()),
+            id: fullMatch[1],
+            personId: fullMatch[2],
+            hoursPerDay: parseInt(fullMatch[3], 10),
+            workingDays: fullMatch[4].split(",").map((d) => d.trim()),
+          });
+          continue;
+        }
+
+        // Hours override only: - (id) personId | 6h/day
+        const hoursMatch = line.match(
+          /^[-*]\s+\((\w+)\)\s+(\w+)\s*\|\s*(\d+)h\/day\s*$/,
+        );
+        if (hoursMatch) {
+          result.teamMembers.push({
+            id: hoursMatch[1],
+            personId: hoursMatch[2],
+            hoursPerDay: parseInt(hoursMatch[3], 10),
+          });
+          continue;
+        }
+
+        // Minimal format (no overrides): - (id) personId
+        const minMatch = line.match(
+          /^[-*]\s+\((\w+)\)\s+(\w+)\s*$/,
+        );
+        if (minMatch) {
+          result.teamMembers.push({
+            id: minMatch[1],
+            personId: minMatch[2],
           });
         }
       }
@@ -114,16 +141,19 @@ export class CapacityDirectoryParser extends DirectoryParser<CapacityPlan> {
 
     const sections: string[] = [`# ${plan.title}`];
 
-    // Team Members
+    // Team Members (references to people/)
     sections.push("");
     sections.push("## Team Members");
     sections.push("");
     for (const member of plan.teamMembers) {
-      const role = member.role || "";
-      const days = member.workingDays.join(",");
-      sections.push(
-        `- (${member.id}) ${member.name} | ${role} | ${member.hoursPerDay}h/day | ${days}`,
-      );
+      const parts = [`- (${member.id}) ${member.personId}`];
+      if (member.hoursPerDay !== undefined) {
+        parts.push(`${member.hoursPerDay}h/day`);
+      }
+      if (member.workingDays !== undefined && member.workingDays.length > 0) {
+        parts.push(member.workingDays.join(","));
+      }
+      sections.push(parts.join(" | "));
     }
 
     // Allocations
@@ -169,12 +199,12 @@ export class CapacityDirectoryParser extends DirectoryParser<CapacityPlan> {
 
   async addTeamMember(
     planId: string,
-    member: Omit<TeamMember, "id">,
+    member: Omit<TeamMemberRef, "id">,
   ): Promise<CapacityPlan | null> {
     const plan = await this.read(planId);
     if (!plan) return null;
 
-    const newMember: TeamMember = {
+    const newMember: TeamMemberRef = {
       ...member,
       id: this.generateId("member"),
     };
@@ -186,7 +216,7 @@ export class CapacityDirectoryParser extends DirectoryParser<CapacityPlan> {
   async updateTeamMember(
     planId: string,
     memberId: string,
-    updates: Partial<TeamMember>,
+    updates: Partial<TeamMemberRef>,
   ): Promise<CapacityPlan | null> {
     const plan = await this.read(planId);
     if (!plan) return null;

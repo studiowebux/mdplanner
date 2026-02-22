@@ -1,6 +1,7 @@
 /**
  * Org Chart CRUD routes.
  * Pattern: Feature Router with CRUD operations.
+ * Delegates to people registry — orgchart is a view of people data.
  */
 
 import { Hono } from "hono";
@@ -70,11 +71,14 @@ orgchartRouter.post("/", async (c) => {
   const member = await parser.addOrgChartMember({
     name: body.name,
     title: body.title,
-    departments: body.departments || [],
+    role: body.role,
+    departments: body.departments,
     reportsTo: body.reportsTo,
     email: body.email,
     phone: body.phone,
     startDate: body.startDate,
+    hoursPerDay: body.hoursPerDay,
+    workingDays: body.workingDays,
     notes: body.notes,
   });
 

@@ -15,18 +15,23 @@ export class ListView {
     this.tm = taskManager;
   }
 
+  getPersonName(personId) {
+    return this.tm.getPersonName(personId);
+  }
+
   populateFilters() {
     const sections = this.tm.sections || [];
-    const assignees = this.tm.projectConfig?.assignees || [];
     const milestones = this.tm.projectConfig?.milestones || [];
 
     const sectionSelect = document.getElementById("filterSection");
     sectionSelect.innerHTML = '<option value="">All Sections</option>' +
       sections.map((s) => `<option value="${s}">${s}</option>`).join("");
 
+    // Populate assignee filter from people/ registry
     const assigneeSelect = document.getElementById("filterAssignee");
+    const people = Array.from(this.tm.peopleMap.values());
     assigneeSelect.innerHTML = '<option value="">All Assignees</option>' +
-      assignees.map((a) => `<option value="${a}">${a}</option>`).join("");
+      people.map((p) => `<option value="${p.id}">${p.name}</option>`).join("");
 
     const milestoneSelect = document.getElementById("filterMilestone");
     milestoneSelect.innerHTML = '<option value="">All Milestones</option>' +
@@ -281,7 +286,7 @@ export class ListView {
                             <span class="text-xs font-mono text-gray-400">#${task.id}</span>
                             ${
       config.assignee
-        ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>${config.assignee}</span>`
+        ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>${this.getPersonName(config.assignee)}</span>`
         : ""
     }
                             ${

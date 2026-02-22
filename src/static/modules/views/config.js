@@ -34,7 +34,7 @@ export class ConfigView {
     document.getElementById("configTotalSections").textContent =
       this.tm.projectConfig?.sections?.length || 0;
     document.getElementById("configTotalAssignees").textContent =
-      this.tm.projectConfig?.assignees?.length || 0;
+      this.tm.peopleMap?.size || 0;
     document.getElementById("configTotalTags").textContent =
       this.tm.projectConfig?.tags?.length || 0;
   }
@@ -43,7 +43,6 @@ export class ConfigView {
     if (!this.tm.projectConfig) return;
 
     this.renderSections();
-    this.renderAssignees();
     this.renderTags();
     this.renderFeatures();
     this.renderAccessibilitySettings();
@@ -110,27 +109,6 @@ export class ConfigView {
                 </div>
             `;
       container.appendChild(div);
-    });
-  }
-
-  renderAssignees() {
-    const container = document.getElementById("assigneesContainer");
-    container.innerHTML = "";
-
-    const assignees = this.tm.projectConfig.assignees || [];
-    assignees.forEach((assignee, index) => {
-      const chip = document.createElement("div");
-      chip.className =
-        "inline-flex items-center px-3 py-1 rounded-full text-sm border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700 text-gray-800 dark:text-gray-200";
-      chip.innerHTML = `
-                <span>${assignee}</span>
-                <button onclick="taskManager.configView.removeAssignee(${index})" class="ml-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            `;
-      container.appendChild(chip);
     });
   }
 
@@ -234,32 +212,6 @@ export class ConfigView {
       await this.tm.updateTask(task.id, { section: toSection });
     }
     await this.tm.loadTasks();
-  }
-
-  async addAssignee() {
-    const input = document.getElementById("newAssigneeInput");
-    const assigneeName = input.value.trim();
-
-    if (
-      assigneeName && !this.tm.projectConfig.assignees.includes(assigneeName)
-    ) {
-      this.tm.projectConfig.assignees.push(assigneeName);
-      // Sort assignees alphabetically
-      this.tm.projectConfig.assignees.sort();
-      input.value = "";
-      this.renderAssignees();
-      this.updateStats();
-      // Auto-save the configuration
-      await this.tm.saveProjectConfig();
-    }
-  }
-
-  async removeAssignee(index) {
-    this.tm.projectConfig.assignees.splice(index, 1);
-    this.renderAssignees();
-    this.updateStats();
-    // Auto-save the configuration
-    await this.tm.saveProjectConfig();
   }
 
   async addTag() {
@@ -430,19 +382,6 @@ export class ConfigView {
         if (e.key === "Enter") {
           e.preventDefault();
           this.addSection();
-        }
-      });
-
-    // Assignee management events
-    document
-      .getElementById("addAssigneeBtn")
-      .addEventListener("click", () => this.addAssignee());
-    document
-      .getElementById("newAssigneeInput")
-      .addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          this.addAssignee();
         }
       });
 
