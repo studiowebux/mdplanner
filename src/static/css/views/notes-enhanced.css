@@ -425,6 +425,11 @@
    Responsive
    -------------------------------------------------------------------------- */
 
+/* Tab nav: allow overflow-x: auto to work inside a flex parent */
+#notesTabNav {
+  min-width: 0;
+}
+
 @media (max-width: 640px) {
   .split-view-column {
     flex: none;
@@ -444,5 +449,17 @@
   .language-selector {
     right: 8px;
     top: 4px;
+  }
+
+  /* Note title + action buttons row: wrap on small screens */
+  .note-title-row {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  /* Enhanced editor toolbar: wrap add-block buttons on small screens */
+  .note-enhanced-toolbar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 }
