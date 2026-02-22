@@ -76,7 +76,9 @@ export class IdeasDirectoryParser extends DirectoryParser<Idea> {
     if (idea.startDate) frontmatter.startDate = idea.startDate;
     if (idea.endDate) frontmatter.endDate = idea.endDate;
     if (idea.resources) frontmatter.resources = idea.resources;
-    if (idea.subtasks && idea.subtasks.length > 0) frontmatter.subtasks = idea.subtasks;
+    if (idea.subtasks && idea.subtasks.length > 0) {
+      frontmatter.subtasks = idea.subtasks;
+    }
     if (idea.links && idea.links.length > 0) frontmatter.links = idea.links;
 
     const body = `# ${idea.title}\n\n${idea.description || ""}`;
