@@ -76,6 +76,7 @@ import { PeopleSidenavModule } from "./modules/features/people-sidenav.js";
 import { PomodoroModule } from "./modules/features/pomodoro.js";
 import { ImportExportModule } from "./modules/import-export.js";
 import { ProjectsModule } from "./modules/projects.js";
+import { UploadsView } from "./modules/views/uploads.js";
 
 class TaskManager {
   constructor() {
@@ -266,6 +267,7 @@ class TaskManager {
     this.pomodoroModule.initWorker();
     this.importExportModule = new ImportExportModule(this);
     this.projectsModule = new ProjectsModule(this);
+    this.uploadsView = new UploadsView(this);
 
     this.init();
   }
@@ -382,6 +384,7 @@ class TaskManager {
       { id: "orgchartViewBtn", view: "orgchart" },
       { id: "peopleViewBtn", view: "people" },
       { id: "portfolioViewBtn", view: "portfolio" },
+      { id: "uploadsViewBtn", view: "uploads" },
     ];
     additionalViews.forEach(({ id, view }) => {
       document.getElementById(id)?.addEventListener("click", () => {
@@ -833,6 +836,7 @@ class TaskManager {
 
     // Board view drag and drop events - delegated to BoardView
     this.boardView.bindEvents();
+    this.uploadsView.bindEvents();
   }
 
   async loadTasks() {
@@ -861,6 +865,7 @@ class TaskManager {
       "moscow", "eisenhower", "ideaSorter", "fundraising", "swot", "riskAnalysis", "leanCanvas", "businessModel",
       "projectValue", "brief", "timeTracking", "capacity",
       "strategicLevels", "billing", "crm", "orgchart", "people", "portfolio",
+      "uploads",
     ];
 
     // If no features configured, show everything
@@ -1208,6 +1213,10 @@ class TaskManager {
       this.activateViewButton("portfolio");
       document.getElementById("portfolioView").classList.remove("hidden");
       this.portfolioView.load();
+    } else if (view === "uploads") {
+      this.activateViewButton("uploads");
+      document.getElementById("uploadsView").classList.remove("hidden");
+      this.uploadsView.load();
     } else if (view === "config") {
       this.activateViewButton("config");
       document.getElementById("configView").classList.remove("hidden");
