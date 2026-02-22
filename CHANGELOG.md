@@ -20,19 +20,19 @@ and this project adheres to
   budget/timeline and culture grids collapse from 2 → 1 column
 - Mobile overflow: portfolio project name no longer truncates; progress and
   financials columns hidden on narrow screens to give name room
-- Mobile overlay: org chart canvas view disabled below 767px with a
-  "requires larger screen" notice; card view available on desktop only
+- Mobile overlay: org chart canvas view disabled below 767px with a "requires
+  larger screen" notice; card view available on desktop only
 - Mobile overlay: C4, canvas, mindmap, timeline, and strategic levels views
   already had mobile notices; org chart notice added for consistency
 - Enhanced note editor: paragraph controls toolbar switches from
   `position: absolute` to `position: static` on mobile so Language selector,
   Copy, and Delete buttons flow inside the card instead of overflowing it
-- Enhanced note editor: custom section tab nav now scrolls horizontally in
-  both editor and preview modes instead of causing page-level overflow
+- Enhanced note editor: custom section tab nav now scrolls horizontally in both
+  editor and preview modes instead of causing page-level overflow
 - Enhanced note editor: note title input given `min-width: 0` so it shrinks
   correctly in its flex row on narrow screens
-- Enhanced note editor: title/actions row and add-block toolbar wrap to a
-  second line below 640px
+- Enhanced note editor: title/actions row and add-block toolbar wrap to a second
+  line below 640px
 - Org chart example: all members now have valid `reportsTo` references,
   resulting in a fully connected tree with no floating nodes
 
