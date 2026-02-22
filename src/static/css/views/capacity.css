@@ -1,0 +1,24 @@
+/* Capacity Planning View */
+
+/* Tab bar: scroll horizontally on mobile instead of overflowing the page */
+.capacity-tabs {
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Header row: wrap action buttons below title + selector on small screens */
+@media (max-width: 36rem) {
+  .capacity-header {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+}
+
+/* Section sub-headers (Team Members, Allocations): wrap action buttons below description on small screens */
+@media (max-width: 36rem) {
+  .capacity-section-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
