@@ -170,7 +170,7 @@ export class IdeaSorterModule {
             : dash}
         </td>
         <td class="idea-sorter-td">
-          <button class="idea-sorter-edit btn-secondary">Edit</button>
+          <button class="idea-sorter-edit">Edit</button>
         </td>
       </tr>
     `;

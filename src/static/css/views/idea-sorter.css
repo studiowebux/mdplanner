@@ -169,12 +169,20 @@
   gap: 0.2rem;
 }
 
-/* Edit button inside table */
-.idea-sorter-td .btn-secondary {
+/* Edit button inside table — fully self-contained, no btn-* inheritance */
+.idea-sorter-edit {
   font-size: 0.75rem;
   padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-default);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
 }
 
-.idea-sorter-td .btn-secondary:hover {
-  color: var(--color-text-primary);
+.idea-sorter-edit:hover {
+  background-color: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  border-color: var(--color-bg-inverse);
 }
