@@ -8,6 +8,24 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.3.7] - 2026-02-22
+
+### Added
+
+- Employee onboarding flow: records view with checklist detail panel, templates
+  for reusable step sets, progress tracking per employee
+- Onboarding records stored in `onboarding/` directory as one `.md` file per
+  employee with YAML frontmatter for steps and metadata
+- Onboarding templates stored in `onboarding-templates/` directory
+- API routes: `GET/POST /api/onboarding`, `GET/PUT/DELETE /api/onboarding/:id`,
+  full CRUD for `/api/onboarding-templates`
+
+### Fixed
+
+- Onboarding API PUT route now performs safe partial update: only merges fields
+  explicitly present in the request body, preventing undefined values from
+  wiping existing frontmatter fields (employeeName, role, startDate)
+
 ## [0.3.6] - 2026-02-22
 
 ### Added

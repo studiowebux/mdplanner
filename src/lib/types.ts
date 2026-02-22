@@ -556,6 +556,41 @@ export interface KPISnapshot {
   notes: string;
 }
 
+// Employee Onboarding
+
+export interface OnboardingStepDefinition {
+  title: string;
+  category: "equipment" | "accounts" | "docs" | "training" | "intro" | "other";
+}
+
+export interface OnboardingTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  steps: OnboardingStepDefinition[];
+  created: string;
+}
+
+export interface OnboardingStep {
+  id: string;
+  title: string;
+  category: "equipment" | "accounts" | "docs" | "training" | "intro" | "other";
+  status: "not_started" | "in_progress" | "complete";
+  dueDate?: string; // YYYY-MM-DD
+  notes?: string;
+}
+
+export interface Onboarding {
+  id: string;
+  employeeName: string;
+  role: string;
+  startDate: string; // YYYY-MM-DD
+  personId?: string; // reference to people registry
+  steps: OnboardingStep[];
+  notes?: string; // markdown body
+  created: string; // ISO timestamp
+}
+
 // Meeting Notes and Actions Tracker
 
 export interface MeetingAction {

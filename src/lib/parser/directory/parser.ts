@@ -45,6 +45,8 @@ import {
   type PersonWithChildren,
 } from "./people.ts";
 import { MeetingsDirectoryParser } from "./meetings.ts";
+import { OnboardingDirectoryParser } from "./onboarding.ts";
+import { OnboardingTemplateDirectoryParser } from "./onboarding-template.ts";
 import type {
   BillingRate,
   Brief,
@@ -68,6 +70,8 @@ import type {
   Mindmap,
   MoscowAnalysis,
   Note,
+  Onboarding,
+  OnboardingTemplate,
   Payment,
   Person,
   ProjectConfig,
@@ -119,6 +123,8 @@ export class DirectoryMarkdownParser {
   protected kpiParser: KpiDirectoryParser;
   protected peopleParser: PeopleDirectoryParser;
   protected meetingsParser: MeetingsDirectoryParser;
+  protected onboardingParser: OnboardingDirectoryParser;
+  protected onboardingTemplateParser: OnboardingTemplateDirectoryParser;
 
   constructor(projectDir: string) {
     this.projectDir = projectDir;
@@ -150,6 +156,10 @@ export class DirectoryMarkdownParser {
     this.kpiParser = new KpiDirectoryParser(projectDir);
     this.peopleParser = new PeopleDirectoryParser(projectDir);
     this.meetingsParser = new MeetingsDirectoryParser(projectDir);
+    this.onboardingParser = new OnboardingDirectoryParser(projectDir);
+    this.onboardingTemplateParser = new OnboardingTemplateDirectoryParser(
+      projectDir,
+    );
   }
 
   // ============================================================
@@ -502,6 +512,58 @@ export class DirectoryMarkdownParser {
 
   async deleteMeeting(id: string): Promise<boolean> {
     return this.meetingsParser.delete(id);
+  }
+
+  // ============================================================
+  // Onboarding
+  // ============================================================
+
+  async readOnboardingRecords(): Promise<Onboarding[]> {
+    const records = await this.onboardingParser.readAll();
+    return records.sort((a, b) => b.startDate.localeCompare(a.startDate));
+  }
+
+  async addOnboardingRecord(
+    record: Omit<Onboarding, "id" | "created">,
+  ): Promise<Onboarding> {
+    return this.onboardingParser.add(record);
+  }
+
+  async updateOnboardingRecord(
+    id: string,
+    updates: Partial<Onboarding>,
+  ): Promise<Onboarding | null> {
+    return this.onboardingParser.update(id, updates);
+  }
+
+  async deleteOnboardingRecord(id: string): Promise<boolean> {
+    return this.onboardingParser.delete(id);
+  }
+
+  // ============================================================
+  // Onboarding Templates
+  // ============================================================
+
+  async readOnboardingTemplates(): Promise<OnboardingTemplate[]> {
+    const templates = await this.onboardingTemplateParser.readAll();
+    return templates.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  async addOnboardingTemplate(
+    template: Omit<OnboardingTemplate, "id" | "created">,
+  ): Promise<OnboardingTemplate> {
+    return this.onboardingTemplateParser.add(template);
+  }
+
+  async updateOnboardingTemplate(
+    id: string,
+    updates: Partial<OnboardingTemplate>,
+  ): Promise<OnboardingTemplate | null> {
+    return this.onboardingTemplateParser.update(id, updates);
+  }
+
+  async deleteOnboardingTemplate(id: string): Promise<boolean> {
+    return this.onboardingTemplateParser.delete(id);
   }
 
   // ============================================================

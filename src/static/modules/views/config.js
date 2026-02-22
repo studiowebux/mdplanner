@@ -300,11 +300,12 @@ export class ConfigView {
         { id: "capacity", label: "Capacity" },
         { id: "timeTracking", label: "Time Tracking" },
         { id: "crm", label: "CRM" },
-        { id: "meetings", label: "Meetings" },
+        { id: "onboarding", label: "Onboarding" },
       ],
       "Notes": [
         { id: "notes", label: "Notes" },
         { id: "strategicLevels", label: "Strategic Levels" },
+        { id: "meetings", label: "Meetings" },
       ],
       "Portfolio": [
         { id: "portfolio", label: "Portfolio" },
