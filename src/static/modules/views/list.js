@@ -404,29 +404,45 @@ export class ListView {
     });
 
     document.addEventListener("dragover", (e) => {
-      const zone = e.target.closest(".list-drop-zone, .list-section-header");
-      if (!zone) return;
+      // Must preventDefault anywhere inside the list container — restricting to
+      // .list-drop-zone means dragging over task items never enables drop
+      // (browser shows "no-drop" cursor and the drop event never fires).
+      if (!e.target.closest("#listContainer")) return;
       e.preventDefault();
       e.dataTransfer.dropEffect = "move";
-      document.querySelectorAll(".list-drop-zone, .list-section-header")
-        .forEach((z) => z.classList.remove("drag-over"));
-      zone.classList.add("drag-over");
-    });
 
-    document.addEventListener("dragleave", (e) => {
       const zone = e.target.closest(".list-drop-zone, .list-section-header");
-      if (zone && !zone.contains(e.relatedTarget)) {
-        zone.classList.remove("drag-over");
-      }
+      document.querySelectorAll(".list-drop-zone, .list-section-header")
+        .forEach((z) => z.classList.toggle("drag-over", z === zone));
     });
 
     document.addEventListener("drop", (e) => {
-      const zone = e.target.closest(".list-drop-zone, .list-section-header");
-      if (!zone || !this.draggedTaskId) return;
+      if (!e.target.closest("#listContainer") || !this.draggedTaskId) return;
       e.preventDefault();
-      const targetSection = zone.dataset.section;
+
+      // Prefer explicit drop zone; fall back to task item's containing section
+      const zone = e.target.closest(".list-drop-zone, .list-section-header");
+      let targetSection = zone?.dataset.section;
+
+      if (!targetSection) {
+        const taskItem = e.target.closest(".task-list-item");
+        const allNodes = Array.from(
+          document.querySelectorAll(
+            "#listContainer .list-section-header, #listContainer .task-list-item",
+          ),
+        );
+        const idx = allNodes.indexOf(taskItem);
+        for (let i = idx - 1; i >= 0; i--) {
+          if (allNodes[i].classList.contains("list-section-header")) {
+            targetSection = allNodes[i].dataset.section;
+            break;
+          }
+        }
+      }
+
       document.querySelectorAll(".list-drop-zone, .list-section-header")
         .forEach((z) => z.classList.remove("drag-over"));
+
       if (targetSection) {
         this.moveTask(this.draggedTaskId, targetSection);
       }
