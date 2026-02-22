@@ -235,6 +235,22 @@ export class DirectoryMarkdownParser {
     return this.tasksParser.update(id, { completed: !task.completed });
   }
 
+  async addAttachmentsToTask(
+    id: string,
+    paths: string[],
+  ): Promise<boolean> {
+    const task = await this.tasksParser.read(id);
+    if (!task) return false;
+    const existing = task.config.attachments ?? [];
+    const merged = [...new Set([...existing, ...paths])];
+    const updated = {
+      ...task,
+      config: { ...task.config, attachments: merged },
+    };
+    await this.tasksParser.write(updated);
+    return true;
+  }
+
   // ============================================================
   // Notes
   // ============================================================

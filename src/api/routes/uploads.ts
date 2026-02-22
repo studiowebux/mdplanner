@@ -7,7 +7,12 @@
 import { Hono } from "hono";
 import { join } from "@std/path";
 import { ensureDir } from "@std/fs";
-import { AppVariables, errorResponse, getProjectManager, jsonResponse } from "./context.ts";
+import {
+  AppVariables,
+  errorResponse,
+  getProjectManager,
+  jsonResponse,
+} from "./context.ts";
 
 export const uploadsRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -94,7 +99,9 @@ uploadsRouter.delete("/:year/:month/:day/:filename", async (c) => {
 
   // Reject path traversal attempts
   if (
-    [year, month, day, filename].some((s) => s.includes("..") || s.includes("/"))
+    [year, month, day, filename].some((s) =>
+      s.includes("..") || s.includes("/")
+    )
   ) {
     return errorResponse("Invalid path", 400);
   }

@@ -74,6 +74,11 @@ export const TasksAPI = {
     const response = await patch(`/api/tasks/${id}/move`, data);
     return response;
   },
+
+  async addAttachments(id, paths) {
+    const response = await patch(`/api/tasks/${id}/attachments`, { paths });
+    return response;
+  },
 };
 
 /** Project config and info operations */

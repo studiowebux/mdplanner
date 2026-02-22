@@ -10,6 +10,7 @@ export class TaskSidenavModule {
     this.tm = taskManager;
     this.editingTask = null;
     this.parentTaskId = null;
+    this.pendingAttachments = [];
   }
 
   bindEvents() {
@@ -84,6 +85,14 @@ export class TaskSidenavModule {
           const after = textarea.value.slice(pos);
           const sep = before.length && !before.endsWith("\n") ? "\n" : "";
           textarea.value = `${before}${sep}${link}\n${after}`;
+        }
+
+        // Link to task frontmatter immediately when editing an existing task;
+        // for new tasks, collect paths and link after create in handleSubmit.
+        if (this.editingTask) {
+          await TasksAPI.addAttachments(this.editingTask.id, [path]);
+        } else {
+          this.pendingAttachments.push(path);
         }
       } catch {
         showToast(`Upload failed: ${file.name}`, "error");
@@ -192,6 +201,8 @@ export class TaskSidenavModule {
     // Clear dependencies display
     const deps = document.getElementById("sidenavSelectedDependencies");
     if (deps) deps.innerHTML = "";
+
+    this.pendingAttachments = [];
   }
 
   async handleSubmit() {
@@ -232,7 +243,14 @@ export class TaskSidenavModule {
         if (this.parentTaskId) {
           taskData.parentId = this.parentTaskId;
         }
-        await TasksAPI.create(taskData);
+        const res = await TasksAPI.create(taskData);
+        if (res.ok && this.pendingAttachments.length) {
+          const { id: newId } = await res.json();
+          if (newId) {
+            await TasksAPI.addAttachments(newId, this.pendingAttachments);
+          }
+        }
+        this.pendingAttachments = [];
         showToast("Task created", "success");
       }
 

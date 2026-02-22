@@ -20,6 +20,7 @@ interface TaskFrontmatter {
   planned_start?: string;
   planned_end?: string;
   time_entries?: TimeEntry[];
+  attachments?: string[];
 }
 
 export class TasksDirectoryParser {
@@ -496,6 +497,9 @@ export class TasksDirectoryParser {
       config.time_entries = frontmatter.time_entries;
     }
     if (frontmatter.order !== undefined) config.order = frontmatter.order;
+    if (frontmatter.attachments?.length) {
+      config.attachments = frontmatter.attachments;
+    }
 
     return {
       id: frontmatter.id,
@@ -541,6 +545,9 @@ export class TasksDirectoryParser {
       frontmatter.time_entries = task.config.time_entries;
     }
     if (task.config.order !== undefined) frontmatter.order = task.config.order;
+    if (task.config.attachments?.length) {
+      frontmatter.attachments = task.config.attachments;
+    }
 
     let body = `# ${task.title}\n\n`;
 

@@ -79,6 +79,22 @@ tasksRouter.delete("/:id", async (c) => {
   return errorResponse("Task not found", 404);
 });
 
+// PATCH /tasks/:id/attachments - add file paths to task attachments frontmatter
+tasksRouter.patch("/:id/attachments", async (c) => {
+  const parser = getParser(c);
+  const taskId = c.req.param("id");
+  const body = await c.req.json();
+  const paths: string[] = Array.isArray(body.paths) ? body.paths : [];
+  if (!paths.length) {
+    return errorResponse("paths array is required", 400);
+  }
+  const success = await parser.addAttachmentsToTask(taskId, paths);
+  if (success) {
+    return jsonResponse({ success: true });
+  }
+  return errorResponse("Task not found", 404);
+});
+
 // PATCH /tasks/:id/move - move task to section with optional position
 tasksRouter.patch("/:id/move", async (c) => {
   const parser = getParser(c);
