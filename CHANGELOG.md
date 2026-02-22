@@ -8,6 +8,40 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.3.5] - 2026-02-22
+
+### Fixed
+
+- Mobile overflow: all 25 view header rows now wrap action buttons to a second
+  line below 36rem via shared `view-header` CSS class
+- Mobile overflow: capacity planning header, tab bar, import row, and
+  allocations sub-header all wrap correctly on small screens
+- Mobile overflow: brief view RACI grid collapses from 4 → 2 → 1 columns;
+  budget/timeline and culture grids collapse from 2 → 1 column
+- Mobile overflow: portfolio project name no longer truncates; progress and
+  financials columns hidden on narrow screens to give name room
+- Mobile overlay: org chart canvas view disabled below 767px with a
+  "requires larger screen" notice; card view available on desktop only
+- Mobile overlay: C4, canvas, mindmap, timeline, and strategic levels views
+  already had mobile notices; org chart notice added for consistency
+- Enhanced note editor: paragraph controls toolbar switches from
+  `position: absolute` to `position: static` on mobile so Language selector,
+  Copy, and Delete buttons flow inside the card instead of overflowing it
+- Enhanced note editor: custom section tab nav now scrolls horizontally in
+  both editor and preview modes instead of causing page-level overflow
+- Enhanced note editor: note title input given `min-width: 0` so it shrinks
+  correctly in its flex row on narrow screens
+- Enhanced note editor: title/actions row and add-block toolbar wrap to a
+  second line below 640px
+- Org chart example: all members now have valid `reportsTo` references,
+  resulting in a fully connected tree with no floating nodes
+
+### Added
+
+- Example enhanced note (`enhanced-components-demo.md`) covering all component
+  types: text paragraphs, code blocks, tabs with nested content, timeline with
+  five milestones, and split-view with two columns
+
 ## [0.3.4] - 2026-02-22
 
 ### Added
