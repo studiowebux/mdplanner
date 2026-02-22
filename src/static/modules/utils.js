@@ -94,6 +94,12 @@ export function escapeHtml(text) {
  */
 const markedRenderer = new marked.Renderer();
 
+// Images — explicit renderer so src passes through unmodified
+markedRenderer.image = function ({ href, title, text }) {
+  const titleAttr = title ? ` title="${title}"` : "";
+  return `<img src="${href}"${titleAttr} alt="${text}" class="markdown-image">`;
+};
+
 // Links open in new tab
 markedRenderer.link = function ({ href, title, text }) {
   const titleAttr = title ? ` title="${title}"` : "";

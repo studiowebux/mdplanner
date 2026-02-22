@@ -283,7 +283,7 @@ export class ListView {
         : ""
     }
                         </div>
-                        <div class="text-sm text-muted mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <div class="task-meta">
                             <span class="text-xs font-mono text-muted">#${task.id}</span>
                             ${
       config.assignee
@@ -333,18 +333,6 @@ export class ListView {
                                 class="text-muted hover:text-secondary transition-colors" title="Add Subtask">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                        </button>
-                    `
-        : ""
-    }
-                    ${
-      task.description && task.description.length > 0
-        ? `
-                        <button onclick="taskManager.toggleDescription('${task.id}')"
-                                class="text-muted hover:text-secondary transition-colors" title="View Description">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                         </button>
                     `

@@ -75,16 +75,25 @@ export class TaskSidenavModule {
         }
         const { path } = await res.json();
         const isImage = file.type.startsWith("image/");
+        // Use absolute path so the URL resolves correctly from any render context
         const link = isImage
-          ? `![${file.name}](${path})`
-          : `[${file.name}](${path})`;
+          ? `![${file.name}](/${path})`
+          : `[${file.name}](/${path})`;
 
         if (textarea) {
           const pos = textarea.selectionStart ?? textarea.value.length;
           const before = textarea.value.slice(0, pos);
           const after = textarea.value.slice(pos);
-          const sep = before.length && !before.endsWith("\n") ? "\n" : "";
-          textarea.value = `${before}${sep}${link}\n${after}`;
+          // Ensure a blank line before the link so marked renders it as a
+          // block paragraph rather than inline inside surrounding text
+          const pre = before.length
+            ? before.endsWith("\n\n")
+              ? ""
+              : before.endsWith("\n")
+                ? "\n"
+                : "\n\n"
+            : "";
+          textarea.value = `${before}${pre}${link}\n\n${after}`;
         }
 
         // Link to task frontmatter immediately when editing an existing task;
@@ -167,7 +176,10 @@ export class TaskSidenavModule {
     };
 
     setValue("sidenavTaskTitleInput", task.title);
-    setValue("sidenavTaskDescription", task.description);
+    setValue(
+      "sidenavTaskDescription",
+      Array.isArray(task.description) ? task.description.join("\n") : (task.description || ""),
+    );
     setValue("sidenavTaskSection", task.section);
     setValue("sidenavTaskPriority", task.priority);
     setValue("sidenavTaskAssignee", task.assignee);
@@ -256,7 +268,7 @@ export class TaskSidenavModule {
 
       this.close();
       await this.tm.loadTasks();
-      this.tm.renderCurrentView();
+      this.tm.renderTasks();
     } catch (error) {
       console.error("Error saving task:", error);
       showToast("Error saving task", "error");

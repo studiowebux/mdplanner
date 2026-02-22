@@ -1081,6 +1081,7 @@ class TaskManager {
     document.getElementById("orgchartView")?.classList.add("hidden");
     document.getElementById("peopleView")?.classList.add("hidden");
     document.getElementById("portfolioView")?.classList.add("hidden");
+    document.getElementById("uploadsView")?.classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
     document.getElementById("mindmapView").classList.add("hidden");
     document.getElementById("c4View").classList.add("hidden");
@@ -1432,14 +1433,6 @@ class TaskManager {
 
   async addSubtask(parentTaskId) {
     return this.tasksModule.addSubtask(parentTaskId);
-  }
-
-  toggleDescription(taskId) {
-    return this.tasksModule.toggleDescription(taskId);
-  }
-
-  closeDescriptionModal() {
-    return this.tasksModule.closeDescriptionModal();
   }
 
   async deleteTask(taskId) {

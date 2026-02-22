@@ -611,6 +611,7 @@ export class TasksDirectoryParser {
   async add(task: Omit<Task, "id">): Promise<Task> {
     const newTask: Task = {
       ...task,
+      config: task.config ?? {}, // ensure config always exists
       id: this.generateId(),
     };
     await this.write(newTask);
@@ -631,6 +632,9 @@ export class TasksDirectoryParser {
     const updated: Task = {
       ...existing,
       ...updates,
+      // Deep merge config so callers can send partial config without
+      // clobbering time_entries, blocked_by, order, attachments, etc.
+      config: { ...existing.config, ...(updates.config ?? {}) },
       id: existing.id, // Prevent ID change
     };
 
