@@ -453,8 +453,13 @@
     min-height: 150px;
   }
 
+  /* On mobile, take controls out of absolute positioning so they
+     flow inside the card and can wrap instead of overflowing it */
   .paragraph-controls {
     display: flex;
+    position: static;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
   }
 
   .paragraph-handle {
