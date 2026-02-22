@@ -42,8 +42,9 @@
 }
 
 .btn-secondary:hover {
-  background-color: var(--color-border-default);
-  color: var(--color-text-primary);
+  background-color: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  border-color: var(--color-bg-inverse);
 }
 
 .btn-ghost {
