@@ -11,10 +11,17 @@ and this project adheres to
 ### Added
 
 - Dockerfile and docker-compose for containerized deployment with data volume
-- Health check on container startup (`wget` against `/`)
+- Health check on container startup (`wget` against `127.0.0.1`)
+- `deploy/Makefile` with `install`, `uninstall`, `start`, `stop`, `restart`,
+  `status`, `logs` targets for systemd-managed installs
 - Rewrote `docs/user-guide.md` for current directory-based storage format
 - Updated `README.md` to include Docker quickstart, full structure per project
   conventions, and all contact/funding links
+
+### Fixed
+
+- Docker healthcheck used `localhost` which fails in Alpine; switched to
+  `127.0.0.1`
 
 ## [0.3.2] - 2026-02-22
 

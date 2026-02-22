@@ -72,26 +72,20 @@ Systemd service file for running MD Planner as a background service on Linux.
 
 ## Installation
 
+Using the Makefile (recommended):
+
 ```bash
-# Copy binary
+make -f deploy/Makefile install
+```
+
+Or manually:
+
+```bash
 sudo cp dist/mdplanner-linux /usr/local/bin/mdplanner
 sudo chmod +x /usr/local/bin/mdplanner
-
-# Create service user
 sudo useradd --system --create-home --home-dir /var/lib/mdplanner mdplanner
-
-# Create project directory
 sudo mkdir -p /var/lib/mdplanner/project
 sudo chown -R mdplanner:mdplanner /var/lib/mdplanner
-
-# Initialize a project (create project.md in /var/lib/mdplanner/project)
-sudo -u mdplanner bash -c 'cat > /var/lib/mdplanner/project/project.md << EOF
----
-name: My Project
----
-EOF'
-
-# Install and enable service
 sudo cp deploy/mdplanner.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable mdplanner
@@ -124,10 +118,10 @@ sudo systemctl restart mdplanner
 ## Management
 
 ```bash
-sudo systemctl status mdplanner    # Check status
-sudo systemctl stop mdplanner      # Stop
-sudo systemctl restart mdplanner   # Restart
-sudo journalctl -u mdplanner -f    # Follow logs
+make -f deploy/Makefile status
+make -f deploy/Makefile stop
+make -f deploy/Makefile restart
+make -f deploy/Makefile logs
 ```
 
 ## Reverse Proxy
@@ -152,10 +146,5 @@ server {
 ## Uninstall
 
 ```bash
-sudo systemctl stop mdplanner
-sudo systemctl disable mdplanner
-sudo rm /etc/systemd/system/mdplanner.service
-sudo systemctl daemon-reload
-sudo rm /usr/local/bin/mdplanner
-sudo userdel -r mdplanner
+make -f deploy/Makefile uninstall
 ```
