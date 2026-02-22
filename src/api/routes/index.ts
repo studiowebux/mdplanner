@@ -37,6 +37,9 @@ import { billingRouter } from "./features/billing.ts";
 import { crmRouter } from "./features/crm.ts";
 import { moscowRouter } from "./features/moscow.ts";
 import { eisenhowerRouter } from "./features/eisenhower.ts";
+import { safeRouter } from "./features/safe.ts";
+import { investorsRouter } from "./features/investors.ts";
+import { kpisRouter } from "./features/kpis.ts";
 import { orgchartRouter } from "./features/orgchart.ts";
 import { peopleRouter } from "./features/people.ts";
 import { portfolioRouter } from "./portfolio.ts";
@@ -99,6 +102,11 @@ export function createApiRouter(
 
   // Eisenhower Matrix routes
   api.route("/eisenhower", eisenhowerRouter);
+
+  // Fundraising routes
+  api.route("/safe", safeRouter);
+  api.route("/investors", investorsRouter);
+  api.route("/kpis", kpisRouter);
 
   // People Registry routes
   api.route("/people", peopleRouter);

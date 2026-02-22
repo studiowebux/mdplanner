@@ -36,6 +36,9 @@ import type {
 } from "./people.ts";
 import { MoscowDirectoryParser } from "./moscow.ts";
 import { EisenhowerDirectoryParser } from "./eisenhower.ts";
+import { SafeDirectoryParser } from "./safe.ts";
+import { InvestorDirectoryParser } from "./investors.ts";
+import { KpiDirectoryParser } from "./kpis.ts";
 import {
   PeopleDirectoryParser,
   type PeopleSummary,
@@ -55,7 +58,9 @@ import type {
   Goal,
   Idea,
   Interaction,
+  InvestorEntry,
   Invoice,
+  KPISnapshot,
   LeanCanvas,
   Milestone,
   Mindmap,
@@ -69,6 +74,7 @@ import type {
   Quote,
   Retrospective,
   RiskAnalysis,
+  SAFEAgreement,
   StickyNote,
   StrategicLevel,
   StrategicLevelsBuilder,
@@ -106,6 +112,9 @@ export class DirectoryMarkdownParser {
   protected portfolioParser: PortfolioDirectoryParser;
   protected moscowParser: MoscowDirectoryParser;
   protected eisenhowerParser: EisenhowerDirectoryParser;
+  protected safeParser: SafeDirectoryParser;
+  protected investorParser: InvestorDirectoryParser;
+  protected kpiParser: KpiDirectoryParser;
   protected peopleParser: PeopleDirectoryParser;
 
   constructor(projectDir: string) {
@@ -133,6 +142,9 @@ export class DirectoryMarkdownParser {
     this.portfolioParser = new PortfolioDirectoryParser(projectDir);
     this.moscowParser = new MoscowDirectoryParser(projectDir);
     this.eisenhowerParser = new EisenhowerDirectoryParser(projectDir);
+    this.safeParser = new SafeDirectoryParser(projectDir);
+    this.investorParser = new InvestorDirectoryParser(projectDir);
+    this.kpiParser = new KpiDirectoryParser(projectDir);
     this.peopleParser = new PeopleDirectoryParser(projectDir);
   }
 
@@ -606,6 +618,81 @@ export class DirectoryMarkdownParser {
 
   async deleteEisenhowerMatrix(id: string): Promise<boolean> {
     return this.eisenhowerParser.delete(id);
+  }
+
+  // ============================================================
+  // SAFE Agreements
+  // ============================================================
+
+  async readSafeAgreements(): Promise<SAFEAgreement[]> {
+    return this.safeParser.readAll();
+  }
+
+  async addSafeAgreement(
+    agreement: Omit<SAFEAgreement, "id">,
+  ): Promise<SAFEAgreement> {
+    return this.safeParser.add(agreement);
+  }
+
+  async updateSafeAgreement(
+    id: string,
+    updates: Partial<SAFEAgreement>,
+  ): Promise<SAFEAgreement | null> {
+    return this.safeParser.update(id, updates);
+  }
+
+  async deleteSafeAgreement(id: string): Promise<boolean> {
+    return this.safeParser.delete(id);
+  }
+
+  // ============================================================
+  // Investor Pipeline
+  // ============================================================
+
+  async readInvestors(): Promise<InvestorEntry[]> {
+    return this.investorParser.readAll();
+  }
+
+  async addInvestor(
+    investor: Omit<InvestorEntry, "id">,
+  ): Promise<InvestorEntry> {
+    return this.investorParser.add(investor);
+  }
+
+  async updateInvestor(
+    id: string,
+    updates: Partial<InvestorEntry>,
+  ): Promise<InvestorEntry | null> {
+    return this.investorParser.update(id, updates);
+  }
+
+  async deleteInvestor(id: string): Promise<boolean> {
+    return this.investorParser.delete(id);
+  }
+
+  // ============================================================
+  // KPI Snapshots
+  // ============================================================
+
+  async readKpiSnapshots(): Promise<KPISnapshot[]> {
+    return this.kpiParser.readAll();
+  }
+
+  async addKpiSnapshot(
+    snapshot: Omit<KPISnapshot, "id">,
+  ): Promise<KPISnapshot> {
+    return this.kpiParser.add(snapshot);
+  }
+
+  async updateKpiSnapshot(
+    id: string,
+    updates: Partial<KPISnapshot>,
+  ): Promise<KPISnapshot | null> {
+    return this.kpiParser.update(id, updates);
+  }
+
+  async deleteKpiSnapshot(id: string): Promise<boolean> {
+    return this.kpiParser.delete(id);
   }
 
   // ============================================================

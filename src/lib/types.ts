@@ -513,6 +513,48 @@ export interface EisenhowerMatrix {
   notUrgentNotImportant: string[];
 }
 
+// Fundraising Types
+
+export interface SAFEAgreement {
+  id: string;
+  investor: string;
+  amount: number;
+  valuation_cap: number;
+  discount: number;
+  type: "pre-money" | "post-money" | "mfn";
+  date: string;
+  status: "draft" | "signed" | "converted";
+  notes: string;
+}
+
+export interface InvestorEntry {
+  id: string;
+  name: string;
+  type: "vc" | "angel" | "family_office" | "corporate" | "accelerator";
+  stage: "lead" | "associate" | "partner" | "passed";
+  status: "not_started" | "in_progress" | "term_sheet" | "passed" | "invested";
+  amount_target: number;
+  contact: string;
+  intro_date: string;
+  last_contact: string;
+  notes: string;
+}
+
+export interface KPISnapshot {
+  id: string;
+  period: string;
+  mrr: number;
+  arr: number;
+  churn_rate: number;
+  ltv: number;
+  cac: number;
+  growth_rate: number;
+  active_users: number;
+  nrr: number;
+  gross_margin: number;
+  notes: string;
+}
+
 // Org Chart Types
 
 export interface OrgChartMember {

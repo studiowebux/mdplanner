@@ -8,6 +8,25 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.3.4] - 2026-02-22
+
+### Added
+
+- Fundraising view with four tabs: SAFE Rounds, Investor Pipeline, KPI Tracker,
+  Runway Calculator
+- SAFE agreements: cap table with computed ownership percentages
+- Investor pipeline: filterable table by status (not started, in progress, term
+  sheet, invested, passed)
+- KPI Tracker: MRR, ARR, churn rate, LTV, CAC, LTV/CAC ratio, growth rate,
+  active users — per period snapshots
+- Runway Calculator: cash on hand + monthly burn → months remaining and
+  projected runway-out date, persisted to localStorage
+- Three new markdown section directories: `safe/`, `investors/`, `kpis/`
+- Acronym glossary popover (SAFE, MFN, MRR, ARR, LTV, CAC, LTV/CAC, MoM, KPI)
+- Font size variable scale in CSS design system: `--font-size-xs` (10px),
+  `--font-size-sm` (12px), `--font-size-base` (14px), `--font-size-lg` (16px),
+  `--font-size-xl` (20px), `--font-size-xxl` (24px)
+
 ## [0.3.3] - 2026-02-22
 
 ### Added

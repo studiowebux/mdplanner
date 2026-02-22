@@ -23,6 +23,14 @@
   --font-sans: "Roboto", system-ui, sans-serif;
   --font-mono: "Roboto Mono", monospace;
 
+  /* Font size scale */
+  --font-size-xs: 0.625rem;      /* 10px — badges, micro labels */
+  --font-size-sm: 0.75rem;       /* 12px — captions, secondary info */
+  --font-size-base: 0.875rem;    /* 14px — body text, interactive elements */
+  --font-size-lg: 1rem;          /* 16px — subheadings, section titles */
+  --font-size-xl: 1.25rem;       /* 20px — headings */
+  --font-size-xxl: 1.5rem;       /* 24px — display numbers, hero values */
+
   /* Spacing scale */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;

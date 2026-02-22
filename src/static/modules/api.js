@@ -303,6 +303,75 @@ export const EisenhowerAPI = {
   },
 };
 
+// Fundraising — SAFE Agreements API
+export const SafeAPI = {
+  async fetchAll() {
+    const response = await get("/api/safe");
+    return response.json();
+  },
+
+  async create(agreement) {
+    const response = await post("/api/safe", agreement);
+    return response;
+  },
+
+  async update(id, agreement) {
+    const response = await put(`/api/safe/${id}`, agreement);
+    return response;
+  },
+
+  async delete(id) {
+    const response = await del(`/api/safe/${id}`);
+    return response;
+  },
+};
+
+// Fundraising — Investor Pipeline API
+export const InvestorAPI = {
+  async fetchAll() {
+    const response = await get("/api/investors");
+    return response.json();
+  },
+
+  async create(investor) {
+    const response = await post("/api/investors", investor);
+    return response;
+  },
+
+  async update(id, investor) {
+    const response = await put(`/api/investors/${id}`, investor);
+    return response;
+  },
+
+  async delete(id) {
+    const response = await del(`/api/investors/${id}`);
+    return response;
+  },
+};
+
+// Fundraising — KPI Snapshots API
+export const KpiAPI = {
+  async fetchAll() {
+    const response = await get("/api/kpis");
+    return response.json();
+  },
+
+  async create(snapshot) {
+    const response = await post("/api/kpis", snapshot);
+    return response;
+  },
+
+  async update(id, snapshot) {
+    const response = await put(`/api/kpis/${id}`, snapshot);
+    return response;
+  },
+
+  async delete(id) {
+    const response = await del(`/api/kpis/${id}`);
+    return response;
+  },
+};
+
 // SWOT API
 export const SwotAPI = {
   async fetchAll() {

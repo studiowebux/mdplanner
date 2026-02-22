@@ -380,6 +380,15 @@
         <div
           class="hidden lg:flex items-center gap-1 h-10 border-t border-default"
         >
+          <!-- Summary - Top level button -->
+          <button
+            id="summaryViewBtn"
+            data-view="summary"
+            class="nav-dropdown-btn"
+          >
+            Summary
+          </button>
+
           <!-- Tasks -->
           <div class="relative nav-dropdown">
             <button
@@ -404,13 +413,6 @@
             <div
               class="nav-dropdown-menu absolute left-0 mt-1 w-36 hidden z-50 py-1"
             >
-              <button
-                id="summaryViewBtn"
-                data-view="summary"
-                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
-              >
-                Summary
-              </button>
               <button
                 id="listViewBtn"
                 data-view="list"
@@ -494,15 +496,29 @@
               >
                 MoSCoW
               </button>
+              <button
+                id="eisenhowerViewBtn"
+                data-view="eisenhower"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                Eisenhower
+              </button>
+              <button
+                id="ideaSorterViewBtn"
+                data-view="ideaSorter"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                Idea Sorter
+              </button>
             </div>
           </div>
 
-          <!-- Analysis -->
+          <!-- Strategy -->
           <div class="relative nav-dropdown">
             <button
               class="nav-dropdown-btn flex items-center gap-1"
             >
-              Analysis
+              Strategy
               <svg
                 class="w-3 h-3"
                 fill="none"
@@ -521,20 +537,6 @@
             <div
               class="nav-dropdown-menu absolute left-0 mt-1 w-40 hidden z-50 py-1"
             >
-              <button
-                id="eisenhowerViewBtn"
-                data-view="eisenhower"
-                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
-              >
-                Eisenhower
-              </button>
-              <button
-                id="ideaSorterViewBtn"
-                data-view="ideaSorter"
-                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
-              >
-                Idea Sorter
-              </button>
               <button
                 id="swotViewBtn"
                 data-view="swot"
@@ -576,6 +578,47 @@
                 class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
               >
                 Brief
+              </button>
+            </div>
+          </div>
+
+          <!-- Finances -->
+          <div class="relative nav-dropdown">
+            <button
+              class="nav-dropdown-btn flex items-center gap-1"
+            >
+              Finances
+              <svg
+                class="w-3 h-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                >
+                </path>
+              </svg>
+            </button>
+            <div
+              class="nav-dropdown-menu absolute left-0 mt-1 w-40 hidden z-50 py-1"
+            >
+              <button
+                id="fundraisingViewBtn"
+                data-view="fundraising"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                Fundraising
+              </button>
+              <button
+                id="billingViewBtn"
+                data-view="billing"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                Billing
               </button>
             </div>
           </div>
@@ -628,12 +671,12 @@
             </div>
           </div>
 
-          <!-- Resources -->
+          <!-- Team -->
           <div class="relative nav-dropdown">
             <button
               class="nav-dropdown-btn flex items-center gap-1"
             >
-              Resources
+              Team
               <svg
                 class="w-3 h-3"
                 fill="none"
@@ -653,34 +696,6 @@
               class="nav-dropdown-menu absolute left-0 mt-1 w-40 hidden z-50 py-1"
             >
               <button
-                id="timeTrackingViewBtn"
-                data-view="timeTracking"
-                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
-              >
-                Time Tracking
-              </button>
-              <button
-                id="capacityViewBtn"
-                data-view="capacity"
-                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
-              >
-                Capacity
-              </button>
-              <button
-                id="billingViewBtn"
-                data-view="billing"
-                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
-              >
-                Billing
-              </button>
-              <button
-                id="crmViewBtn"
-                data-view="crm"
-                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
-              >
-                CRM
-              </button>
-              <button
                 id="orgchartViewBtn"
                 data-view="orgchart"
                 class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
@@ -694,6 +709,27 @@
               >
                 People
               </button>
+              <button
+                id="capacityViewBtn"
+                data-view="capacity"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                Capacity
+              </button>
+              <button
+                id="timeTrackingViewBtn"
+                data-view="timeTracking"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                Time Tracking
+              </button>
+              <button
+                id="crmViewBtn"
+                data-view="crm"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                CRM
+              </button>
             </div>
           </div>
 
@@ -702,7 +738,7 @@
             <button
               class="nav-dropdown-btn flex items-center gap-1"
             >
-              Other
+              Notes
               <svg
                 class="w-3 h-3"
                 fill="none"
@@ -775,17 +811,19 @@
 
           <!-- Navigation -->
           <div class="py-1">
-            <div
-              class="px-4 py-1 text-xs font-medium text-muted uppercase"
-            >
-              Tasks
-            </div>
             <button
               id="summaryViewBtnMobile"
               class="w-full text-left px-4 py-2.5 text-sm text-primary bg-tertiary"
             >
               Summary
             </button>
+          </div>
+          <div class="py-1 border-t border-default">
+            <div
+              class="px-4 py-1 text-xs font-medium text-muted uppercase"
+            >
+              Tasks
+            </div>
             <button
               id="listViewBtnMobile"
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
@@ -841,13 +879,6 @@
             >
               MoSCoW
             </button>
-          </div>
-          <div class="py-1 border-t border-default">
-            <div
-              class="px-4 py-1 text-xs font-medium text-muted uppercase"
-            >
-              Analysis
-            </div>
             <button
               id="eisenhowerViewBtnMobile"
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
@@ -860,6 +891,13 @@
             >
               Idea Sorter
             </button>
+          </div>
+          <div class="py-1 border-t border-default">
+            <div
+              class="px-4 py-1 text-xs font-medium text-muted uppercase"
+            >
+              Strategy
+            </div>
             <button
               id="swotViewBtnMobile"
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
@@ -901,6 +939,25 @@
             <div
               class="px-4 py-1 text-xs font-medium text-muted uppercase"
             >
+              Finances
+            </div>
+            <button
+              id="fundraisingViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              Fundraising
+            </button>
+            <button
+              id="billingViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              Billing
+            </button>
+          </div>
+          <div class="py-1 border-t border-default">
+            <div
+              class="px-4 py-1 text-xs font-medium text-muted uppercase"
+            >
               Diagrams
             </div>
             <button
@@ -926,32 +983,8 @@
             <div
               class="px-4 py-1 text-xs font-medium text-muted uppercase"
             >
-              Resources
+              Team
             </div>
-            <button
-              id="timeTrackingViewBtnMobile"
-              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
-            >
-              Time Tracking
-            </button>
-            <button
-              id="capacityViewBtnMobile"
-              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
-            >
-              Capacity
-            </button>
-            <button
-              id="billingViewBtnMobile"
-              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
-            >
-              Billing
-            </button>
-            <button
-              id="crmViewBtnMobile"
-              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
-            >
-              CRM
-            </button>
             <button
               id="orgchartViewBtnMobile"
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
@@ -964,12 +997,30 @@
             >
               People
             </button>
+            <button
+              id="capacityViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              Capacity
+            </button>
+            <button
+              id="timeTrackingViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              Time Tracking
+            </button>
+            <button
+              id="crmViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              CRM
+            </button>
           </div>
           <div class="py-1 border-t border-default">
             <div
               class="px-4 py-1 text-xs font-medium text-muted uppercase"
             >
-              Other
+              Notes
             </div>
             <button
               id="notesViewBtnMobile"
@@ -2606,6 +2657,225 @@
               <tbody id="ideaSorterBody"></tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <!-- Fundraising View -->
+      <div id="fundraisingView" class="hidden pb-16">
+        <div class="bg-primary rounded-lg shadow fundraising-wrapper">
+
+          <!-- Glossary popover -->
+          <div id="fundraising-glossary" class="fundraising-glossary hidden">
+            <p class="fundraising-glossary-title">Acronym Glossary</p>
+            <div class="fundraising-glossary-list">
+              <span class="fundraising-glossary-term">SAFE</span>
+              <span class="fundraising-glossary-def">Simple Agreement for Future Equity</span>
+              <span class="fundraising-glossary-term">MFN</span>
+              <span class="fundraising-glossary-def">Most Favored Nation (SAFE variant)</span>
+              <span class="fundraising-glossary-term">MRR</span>
+              <span class="fundraising-glossary-def">Monthly Recurring Revenue</span>
+              <span class="fundraising-glossary-term">ARR</span>
+              <span class="fundraising-glossary-def">Annual Recurring Revenue (MRR × 12)</span>
+              <span class="fundraising-glossary-term">LTV</span>
+              <span class="fundraising-glossary-def">Lifetime Value of a customer</span>
+              <span class="fundraising-glossary-term">CAC</span>
+              <span class="fundraising-glossary-def">Customer Acquisition Cost</span>
+              <span class="fundraising-glossary-term">LTV/CAC</span>
+              <span class="fundraising-glossary-def">Unit economics ratio (target &gt; 3x)</span>
+              <span class="fundraising-glossary-term">MoM</span>
+              <span class="fundraising-glossary-def">Month over Month growth rate</span>
+              <span class="fundraising-glossary-term">KPI</span>
+              <span class="fundraising-glossary-def">Key Performance Indicator</span>
+            </div>
+          </div>
+
+          <!-- SAFE Rounds tab -->
+          <div id="fundraising-panel-safe" class="fundraising-tab-panel">
+            <div class="px-6 py-4 border-b border-default flex justify-between items-center">
+              <h2 class="text-lg font-medium text-primary">Fundraising</h2>
+              <div class="flex items-center gap-2">
+                <button class="fundraising-info-btn" data-action="fundraising-info" aria-label="Glossary">?</button>
+                <button id="safe-add-btn" class="btn-primary py-2 rounded-lg">+ Add SAFE</button>
+              </div>
+            </div>
+            <nav class="fundraising-tabs">
+              <button class="fundraising-tab active" data-tab="safe">SAFE Rounds</button>
+              <button class="fundraising-tab" data-tab="pipeline">Pipeline</button>
+              <button class="fundraising-tab" data-tab="kpi">KPI Tracker</button>
+              <button class="fundraising-tab" data-tab="runway">Runway</button>
+              <button class="fundraising-tab" data-tab="targets">Targets</button>
+            </nav>
+            <div class="p-6">
+              <div id="safe-summary-card" class="safe-summary-card"></div>
+              <div class="fundraising-table-wrap">
+                <table class="safe-table">
+                  <thead>
+                    <tr>
+                      <th>Investor</th>
+                      <th>Amount</th>
+                      <th>Valuation Cap</th>
+                      <th>Discount</th>
+                      <th>Type</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody id="safe-table-body"></tbody>
+                </table>
+              </div>
+              <h3 class="text-sm font-medium text-primary mt-8 mb-3">Cap Table</h3>
+              <div id="safe-cap-table"></div>
+            </div>
+          </div>
+
+          <!-- Pipeline tab -->
+          <div id="fundraising-panel-pipeline" class="fundraising-tab-panel hidden">
+            <div class="px-6 py-4 border-b border-default flex justify-between items-center">
+              <h2 class="text-lg font-medium text-primary">Fundraising</h2>
+              <div class="flex items-center gap-2">
+                <button class="fundraising-info-btn" data-action="fundraising-info" aria-label="Glossary">?</button>
+                <button id="pipeline-add-btn" class="btn-primary py-2 rounded-lg">+ Add Investor</button>
+              </div>
+            </div>
+            <nav class="fundraising-tabs">
+              <button class="fundraising-tab" data-tab="safe">SAFE Rounds</button>
+              <button class="fundraising-tab active" data-tab="pipeline">Pipeline</button>
+              <button class="fundraising-tab" data-tab="kpi">KPI Tracker</button>
+              <button class="fundraising-tab" data-tab="runway">Runway</button>
+              <button class="fundraising-tab" data-tab="targets">Targets</button>
+            </nav>
+            <div class="p-6">
+              <div class="pipeline-filters">
+                <button class="pipeline-filter-btn active" data-status="all">All</button>
+                <button class="pipeline-filter-btn" data-status="not_started">Not Started</button>
+                <button class="pipeline-filter-btn" data-status="in_progress">In Progress</button>
+                <button class="pipeline-filter-btn" data-status="term_sheet">Term Sheet</button>
+                <button class="pipeline-filter-btn" data-status="invested">Invested</button>
+                <button class="pipeline-filter-btn" data-status="passed">Passed</button>
+              </div>
+              <p id="pipeline-summary" class="pipeline-summary"></p>
+              <div class="fundraising-table-wrap">
+                <table class="pipeline-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Type</th>
+                      <th>Target</th>
+                      <th>Status</th>
+                      <th>Last Contact</th>
+                      <th>Contact</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pipeline-table-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- KPI Tracker tab -->
+          <div id="fundraising-panel-kpi" class="fundraising-tab-panel hidden">
+            <div class="px-6 py-4 border-b border-default flex justify-between items-center">
+              <h2 class="text-lg font-medium text-primary">Fundraising</h2>
+              <div class="flex items-center gap-2">
+                <button class="fundraising-info-btn" data-action="fundraising-info" aria-label="Glossary">?</button>
+                <button id="kpi-edit-btn" class="btn-secondary py-1.5 rounded hidden">Edit</button>
+                <button id="kpi-delete-btn" class="btn-danger py-1.5 rounded hidden">Delete</button>
+                <button id="kpi-add-btn" class="btn-primary py-2 rounded-lg">+ Add Period</button>
+              </div>
+            </div>
+            <nav class="fundraising-tabs">
+              <button class="fundraising-tab" data-tab="safe">SAFE Rounds</button>
+              <button class="fundraising-tab" data-tab="pipeline">Pipeline</button>
+              <button class="fundraising-tab active" data-tab="kpi">KPI Tracker</button>
+              <button class="fundraising-tab" data-tab="runway">Runway</button>
+              <button class="fundraising-tab" data-tab="targets">Targets</button>
+            </nav>
+            <div class="p-6">
+              <div class="kpi-controls">
+                <select id="kpi-selector" class="kpi-selector">
+                  <option value="">Select period</option>
+                </select>
+              </div>
+              <p id="kpi-empty" class="text-center py-12 text-sm text-muted hidden">No KPI periods yet. Add one to track metrics over time.</p>
+              <div id="kpi-grid" class="kpi-grid hidden"></div>
+              <div class="kpi-notes-row hidden mt-2">
+                <span class="text-xs text-muted">Notes: </span>
+                <span id="kpi-notes" class="text-sm text-secondary"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Runway tab -->
+          <div id="fundraising-panel-runway" class="fundraising-tab-panel hidden">
+            <div class="px-6 py-4 border-b border-default flex justify-between items-center">
+              <h2 class="text-lg font-medium text-primary">Fundraising</h2>
+              <button class="fundraising-info-btn" data-action="fundraising-info" aria-label="Glossary">?</button>
+            </div>
+            <nav class="fundraising-tabs">
+              <button class="fundraising-tab" data-tab="safe">SAFE Rounds</button>
+              <button class="fundraising-tab" data-tab="pipeline">Pipeline</button>
+              <button class="fundraising-tab" data-tab="kpi">KPI Tracker</button>
+              <button class="fundraising-tab active" data-tab="runway">Runway</button>
+              <button class="fundraising-tab" data-tab="targets">Targets</button>
+            </nav>
+            <div class="p-6">
+              <div class="runway-calculator">
+                <div class="runway-inputs">
+                  <div class="runway-field">
+                    <label for="runway-cash">Cash on Hand ($)</label>
+                    <input type="number" id="runway-cash" placeholder="e.g. 500000" min="0">
+                  </div>
+                  <div class="runway-field">
+                    <label for="runway-debt">Existing Debt ($)</label>
+                    <input type="number" id="runway-debt" placeholder="e.g. 0" min="0">
+                  </div>
+                  <div class="runway-field">
+                    <label for="runway-burn">Monthly Burn ($)</label>
+                    <input type="number" id="runway-burn" placeholder="e.g. 50000" min="0">
+                  </div>
+                </div>
+                <p id="runway-effective-cash" class="runway-effective-cash"></p>
+                <div class="runway-result-block">
+                  <p class="runway-result-label">Runway</p>
+                  <p id="runway-result" class="runway-result">—</p>
+                  <p id="runway-date" class="runway-date"></p>
+                </div>
+                <p class="runway-migration-note">Inputs are saved locally. When the Finances view is available, monthly burn will be derived from your expense entries automatically.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Targets tab -->
+          <div id="fundraising-panel-targets" class="fundraising-tab-panel hidden">
+            <div class="px-6 py-4 border-b border-default flex justify-between items-center">
+              <h2 class="text-lg font-medium text-primary">Fundraising</h2>
+              <button class="fundraising-info-btn" data-action="fundraising-info" aria-label="Glossary">?</button>
+            </div>
+            <nav class="fundraising-tabs">
+              <button class="fundraising-tab" data-tab="safe">SAFE Rounds</button>
+              <button class="fundraising-tab" data-tab="pipeline">Pipeline</button>
+              <button class="fundraising-tab" data-tab="kpi">KPI Tracker</button>
+              <button class="fundraising-tab" data-tab="runway">Runway</button>
+              <button class="fundraising-tab active" data-tab="targets">Targets</button>
+            </nav>
+            <div class="p-6">
+              <p class="text-sm text-muted mb-4">Set targets for key metrics. Current values pull from the latest KPI period. Click a target cell to edit.</p>
+              <div class="fundraising-table-wrap">
+                <table class="targets-table" id="targets-table">
+                  <thead>
+                    <tr>
+                      <th>Metric</th>
+                      <th>Current</th>
+                      <th>Target</th>
+                      <th>Gap</th>
+                    </tr>
+                  </thead>
+                  <tbody id="targets-table-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -10429,6 +10699,221 @@
           <button type="submit" class="btn btn-primary ml-2">Save</button>
         </div>
       </form>
+    </div>
+
+    <!-- Fundraising — SAFE Agreement Sidenav -->
+    <div id="safe-sidenav" class="sidenav-panel sidenav-lg">
+      <div class="sidenav-header">
+        <h2 id="safe-sidenav-header" class="sidenav-title">New SAFE Agreement</h2>
+        <div class="flex items-center gap-2">
+          <span id="safe-sidenav-status" class="text-xs hidden"></span>
+          <button type="button" id="safe-sidenav-close" class="sidenav-close" aria-label="Close">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="flex flex-col flex-1 overflow-hidden">
+        <div class="sidenav-content">
+          <div class="sidenav-section">
+            <div class="form-group">
+              <label class="form-label">Investor Name</label>
+              <input type="text" id="safe-sidenav-investor" class="form-input" placeholder="e.g. Jane Smith">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Amount ($)</label>
+              <input type="number" id="safe-sidenav-amount" class="form-input" placeholder="e.g. 500000" min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Valuation Cap ($)</label>
+              <input type="number" id="safe-sidenav-valuation_cap" class="form-input" placeholder="e.g. 5000000" min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Discount (%)</label>
+              <input type="number" id="safe-sidenav-discount" class="form-input" placeholder="e.g. 20" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Type</label>
+              <select id="safe-sidenav-type" class="form-input">
+                <option value="post-money">Post-Money</option>
+                <option value="pre-money">Pre-Money</option>
+                <option value="mfn">MFN</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date</label>
+              <input type="date" id="safe-sidenav-date" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select id="safe-sidenav-status" class="form-input">
+                <option value="draft">Draft</option>
+                <option value="signed">Signed</option>
+                <option value="converted">Converted</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes</label>
+              <textarea id="safe-sidenav-notes" class="form-input" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="sidenav-footer">
+          <button type="button" id="safe-sidenav-delete" class="btn-danger-ghost hidden">Delete</button>
+          <div class="flex-1"></div>
+          <button type="button" id="safe-sidenav-cancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
+          <button type="button" id="safe-sidenav-save" class="btn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fundraising — Investor Pipeline Sidenav -->
+    <div id="pipeline-sidenav" class="sidenav-panel sidenav-lg">
+      <div class="sidenav-header">
+        <h2 id="pipeline-sidenav-header" class="sidenav-title">New Investor</h2>
+        <div class="flex items-center gap-2">
+          <span id="pipeline-sidenav-status" class="text-xs hidden"></span>
+          <button type="button" id="pipeline-sidenav-close" class="sidenav-close" aria-label="Close">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="flex flex-col flex-1 overflow-hidden">
+        <div class="sidenav-content">
+          <div class="sidenav-section">
+            <div class="form-group">
+              <label class="form-label">Name</label>
+              <input type="text" id="pipeline-sidenav-name" class="form-input" placeholder="e.g. Sequoia Capital">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Type</label>
+              <select id="pipeline-sidenav-type" class="form-input">
+                <option value="vc">VC</option>
+                <option value="angel">Angel</option>
+                <option value="family_office">Family Office</option>
+                <option value="corporate">Corporate</option>
+                <option value="accelerator">Accelerator</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Stage</label>
+              <select id="pipeline-sidenav-stage" class="form-input">
+                <option value="lead">Lead</option>
+                <option value="associate">Associate</option>
+                <option value="partner">Partner</option>
+                <option value="passed">Passed</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select id="pipeline-sidenav-status" class="form-input">
+                <option value="not_started">Not Started</option>
+                <option value="in_progress">In Progress</option>
+                <option value="term_sheet">Term Sheet</option>
+                <option value="passed">Passed</option>
+                <option value="invested">Invested</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Target Amount ($)</label>
+              <input type="number" id="pipeline-sidenav-amount_target" class="form-input" placeholder="e.g. 1000000" min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contact Email</label>
+              <input type="email" id="pipeline-sidenav-contact" class="form-input" placeholder="e.g. partner@firm.com">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Intro Date</label>
+              <input type="date" id="pipeline-sidenav-intro_date" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last Contact</label>
+              <input type="date" id="pipeline-sidenav-last_contact" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes</label>
+              <textarea id="pipeline-sidenav-notes" class="form-input" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="sidenav-footer">
+          <button type="button" id="pipeline-sidenav-delete" class="btn-danger-ghost hidden">Delete</button>
+          <div class="flex-1"></div>
+          <button type="button" id="pipeline-sidenav-cancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
+          <button type="button" id="pipeline-sidenav-save" class="btn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fundraising — KPI Snapshot Sidenav -->
+    <div id="kpi-sidenav" class="sidenav-panel sidenav-lg">
+      <div class="sidenav-header">
+        <h2 id="kpi-sidenav-header" class="sidenav-title">New KPI Period</h2>
+        <div class="flex items-center gap-2">
+          <span id="kpi-sidenav-status" class="text-xs hidden"></span>
+          <button type="button" id="kpi-sidenav-close" class="sidenav-close" aria-label="Close">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="flex flex-col flex-1 overflow-hidden">
+        <div class="sidenav-content">
+          <div class="sidenav-section">
+            <div class="form-group">
+              <label class="form-label">Period (YYYY-MM)</label>
+              <input type="text" id="kpi-sidenav-period" class="form-input" placeholder="e.g. 2026-02" pattern="\d{4}-\d{2}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">MRR ($)</label>
+              <input type="number" id="kpi-sidenav-mrr" class="form-input" placeholder="Monthly Recurring Revenue" min="0">
+              <p id="kpi-sidenav-arr-preview" class="kpi-arr-preview">ARR: —</p>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Churn Rate (%)</label>
+              <input type="number" id="kpi-sidenav-churn_rate" class="form-input" placeholder="e.g. 2.5" min="0" step="0.1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">LTV ($)</label>
+              <input type="number" id="kpi-sidenav-ltv" class="form-input" placeholder="Customer Lifetime Value" min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">CAC ($)</label>
+              <input type="number" id="kpi-sidenav-cac" class="form-input" placeholder="Customer Acquisition Cost" min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">MoM Growth Rate (%)</label>
+              <input type="number" id="kpi-sidenav-growth_rate" class="form-input" placeholder="e.g. 15" step="0.1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Active Users</label>
+              <input type="number" id="kpi-sidenav-active_users" class="form-input" placeholder="e.g. 1200" min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">NRR — Net Revenue Retention (%)</label>
+              <input type="number" id="kpi-sidenav-nrr" class="form-input" placeholder="e.g. 110" min="0" step="0.1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Gross Margin (%)</label>
+              <input type="number" id="kpi-sidenav-gross_margin" class="form-input" placeholder="e.g. 72" min="0" max="100" step="0.1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes</label>
+              <textarea id="kpi-sidenav-notes" class="form-input" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="sidenav-footer">
+          <button type="button" id="kpi-sidenav-delete" class="btn-danger-ghost hidden">Delete</button>
+          <div class="flex-1"></div>
+          <button type="button" id="kpi-sidenav-cancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
+          <button type="button" id="kpi-sidenav-save" class="btn">Save</button>
+        </div>
+      </div>
     </div>
 
     <!-- MoSCoW Analysis Sidenav -->

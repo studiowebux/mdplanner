@@ -27,6 +27,15 @@ import { MindmapSidenavModule } from "./modules/features/mindmap-sidenav.js";
 import { StickyNoteSidenavModule } from "./modules/features/sticky-note-sidenav.js";
 import { MoscowSidenavModule } from "./modules/features/moscow-sidenav.js";
 import { EisenhowerSidenavModule } from "./modules/features/eisenhower-sidenav.js";
+import { FundraisingModule } from "./modules/features/fundraising.js";
+import { FundraisingSafeModule } from "./modules/features/fundraising-safe.js";
+import { FundraisingSafeSidenavModule } from "./modules/features/fundraising-safe-sidenav.js";
+import { FundraisingPipelineModule } from "./modules/features/fundraising-pipeline.js";
+import { FundraisingPipelineSidenavModule } from "./modules/features/fundraising-pipeline-sidenav.js";
+import { FundraisingKpiModule } from "./modules/features/fundraising-kpi.js";
+import { FundraisingKpiSidenavModule } from "./modules/features/fundraising-kpi-sidenav.js";
+import { FundraisingRunwayModule } from "./modules/features/fundraising-runway.js";
+import { FundraisingTargetsModule } from "./modules/features/fundraising-targets.js";
 import { SwotSidenavModule } from "./modules/features/swot-sidenav.js";
 import { RiskSidenavModule } from "./modules/features/risk-sidenav.js";
 import { LeanCanvasSidenavModule } from "./modules/features/lean-canvas-sidenav.js";
@@ -111,6 +120,10 @@ class TaskManager {
     this.selectedMoscowId = null;
     this.eisenhowerMatrices = [];
     this.selectedEisenhowerId = null;
+    this.safeAgreements = [];
+    this.investors = [];
+    this.kpiSnapshots = [];
+    this.selectedKpiId = null;
     this.swotAnalyses = [];
     this.selectedSwotId = null;
     this.editingSwotId = null;
@@ -203,6 +216,9 @@ class TaskManager {
     this.stickyNoteSidenavModule = new StickyNoteSidenavModule(this);
     this.moscowSidenavModule = new MoscowSidenavModule(this);
     this.eisenhowerSidenavModule = new EisenhowerSidenavModule(this);
+    this.fundraisingSafeSidenavModule = new FundraisingSafeSidenavModule(this);
+    this.fundraisingPipelineSidenavModule = new FundraisingPipelineSidenavModule(this);
+    this.fundraisingKpiSidenavModule = new FundraisingKpiSidenavModule(this);
     this.swotSidenavModule = new SwotSidenavModule(this);
     this.riskSidenavModule = new RiskSidenavModule(this);
     this.leanCanvasSidenavModule = new LeanCanvasSidenavModule(this);
@@ -221,6 +237,12 @@ class TaskManager {
     this.retrospectivesModule = new RetrospectivesModule(this);
     this.moscowModule = new MoscowModule(this);
     this.eisenhowerModule = new EisenhowerModule(this);
+    this.fundraisingSafeModule = new FundraisingSafeModule(this);
+    this.fundraisingPipelineModule = new FundraisingPipelineModule(this);
+    this.fundraisingKpiModule = new FundraisingKpiModule(this);
+    this.fundraisingRunwayModule = new FundraisingRunwayModule(this);
+    this.fundraisingTargetsModule = new FundraisingTargetsModule(this);
+    this.fundraisingModule = new FundraisingModule(this);
     this.ideaSorterModule = new IdeaSorterModule(this);
     this.swotModule = new SwotModule(this);
     this.riskModule = new RiskModule(this);
@@ -345,6 +367,7 @@ class TaskManager {
       { id: "moscowViewBtn", view: "moscow" },
       { id: "eisenhowerViewBtn", view: "eisenhower" },
       { id: "ideaSorterViewBtn", view: "ideaSorter" },
+      { id: "fundraisingViewBtn", view: "fundraising" },
       { id: "swotViewBtn", view: "swot" },
       { id: "riskAnalysisViewBtn", view: "riskAnalysis" },
       { id: "leanCanvasViewBtn", view: "leanCanvas" },
@@ -493,6 +516,12 @@ class TaskManager {
       .getElementById("ideaSorterViewBtnMobile")
       ?.addEventListener("click", () => {
         this.switchView("ideaSorter");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("fundraisingViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("fundraising");
         this.closeMobileMenu();
       });
     document
@@ -714,6 +743,7 @@ class TaskManager {
     this.moscowModule.bindEvents();
     this.eisenhowerModule.bindEvents();
     this.ideaSorterModule.bindEvents();
+    this.fundraisingModule.bindEvents();
     this.swotModule.bindEvents();
 
     // Risk Analysis events - delegated to RiskModule
@@ -828,7 +858,7 @@ class TaskManager {
       "summary", "list", "board", "timeline",
       "notes", "goals", "milestones", "ideas",
       "canvas", "mindmap", "c4", "retrospectives",
-      "moscow", "eisenhower", "ideaSorter", "swot", "riskAnalysis", "leanCanvas", "businessModel",
+      "moscow", "eisenhower", "ideaSorter", "fundraising", "swot", "riskAnalysis", "leanCanvas", "businessModel",
       "projectValue", "brief", "timeTracking", "capacity",
       "strategicLevels", "billing", "crm", "orgchart", "people", "portfolio",
     ];
@@ -891,6 +921,7 @@ class TaskManager {
       orgchart: "Org Chart",
       people: "People",
       portfolio: "Portfolio",
+      fundraising: "Fundraising",
       config: "Settings",
     };
     const label = document.getElementById("currentViewLabel");
@@ -1030,6 +1061,7 @@ class TaskManager {
     document.getElementById("moscowView")?.classList.add("hidden");
     document.getElementById("eisenhowerView")?.classList.add("hidden");
     document.getElementById("ideaSorterView")?.classList.add("hidden");
+    document.getElementById("fundraisingView")?.classList.add("hidden");
     document.getElementById("swotView").classList.add("hidden");
     document.getElementById("riskAnalysisView").classList.add("hidden");
     document.getElementById("leanCanvasView").classList.add("hidden");
@@ -1103,6 +1135,10 @@ class TaskManager {
       this.activateViewButton("ideaSorter");
       document.getElementById("ideaSorterView").classList.remove("hidden");
       this.ideaSorterModule.load();
+    } else if (view === "fundraising") {
+      this.activateViewButton("fundraising");
+      document.getElementById("fundraisingView").classList.remove("hidden");
+      this.fundraisingModule.load();
     } else if (view === "swot") {
       this.activateViewButton("swot");
       document.getElementById("swotView").classList.remove("hidden");
