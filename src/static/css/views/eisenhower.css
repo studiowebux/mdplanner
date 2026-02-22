@@ -1,0 +1,71 @@
+/* Eisenhower Matrix View — 2x2 grid with axis labels */
+
+.eisenhower-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.eisenhower-axis-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding-left: 5rem;
+  text-align: center;
+}
+
+.eisenhower-axis-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+}
+
+.eisenhower-body {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.eisenhower-axis-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 4.5rem;
+  flex-shrink: 0;
+}
+
+.eisenhower-axis-left .eisenhower-axis-label {
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+  text-align: center;
+}
+
+.eisenhower-quadrants {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  flex: 1;
+}
+
+.eisenhower-quadrant {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius);
+  padding: 1rem;
+  border: 1px solid var(--color-border-default);
+  min-height: 10rem;
+}
+
+@media (max-width: 48rem) {
+  .eisenhower-axis-top {
+    padding-left: 0;
+  }
+
+  .eisenhower-axis-left {
+    display: none;
+  }
+
+  .eisenhower-quadrants {
+    grid-template-columns: 1fr;
+  }
+}

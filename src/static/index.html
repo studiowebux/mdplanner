@@ -522,6 +522,13 @@
               class="nav-dropdown-menu absolute left-0 mt-1 w-40 hidden z-50 py-1"
             >
               <button
+                id="eisenhowerViewBtn"
+                data-view="eisenhower"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                Eisenhower
+              </button>
+              <button
                 id="swotViewBtn"
                 data-view="swot"
                 class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
@@ -834,6 +841,12 @@
             >
               Analysis
             </div>
+            <button
+              id="eisenhowerViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              Eisenhower
+            </button>
             <button
               id="swotViewBtnMobile"
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
@@ -2379,6 +2392,146 @@
                   id="moscowWont"
                   class="space-y-2 text-sm text-primary"
                 ></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Eisenhower Matrix View -->
+      <div id="eisenhowerView" class="hidden pb-16">
+        <div class="bg-primary rounded-lg shadow">
+          <div
+            class="px-6 py-4 border-b border-default flex justify-between items-center"
+          >
+            <div class="flex items-center gap-4">
+              <h2 class="text-lg font-medium text-primary">
+                Eisenhower Matrix
+              </h2>
+              <select
+                id="eisenhowerSelector"
+                class="text-sm border border-strong rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-1"
+              >
+                <option value="">Select Matrix</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                id="editEisenhowerBtn"
+                class="btn-secondary py-1.5 rounded hidden"
+              >
+                Edit
+              </button>
+              <button
+                id="deleteEisenhowerBtn"
+                class="btn-danger py-1.5 rounded hidden"
+              >
+                Delete
+              </button>
+              <button id="addEisenhowerBtn" class="btn-primary py-2 rounded-lg">
+                + New Matrix
+              </button>
+            </div>
+          </div>
+          <div class="p-6">
+            <div id="emptyEisenhowerState" class="text-center py-12">
+              <svg
+                class="mx-auto h-12 w-12 text-muted"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                />
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-primary">
+                No Eisenhower matrices yet
+              </h3>
+              <p class="mt-1 text-sm text-muted">
+                Create a matrix to prioritize tasks by urgency and importance.
+              </p>
+            </div>
+            <div id="eisenhowerGrid" class="hidden eisenhower-grid">
+              <!-- Axis labels -->
+              <div class="eisenhower-axis-top">
+                <span class="eisenhower-axis-label">Urgent</span>
+                <span class="eisenhower-axis-label">Not Urgent</span>
+              </div>
+              <div class="eisenhower-body">
+                <div class="eisenhower-axis-left">
+                  <span class="eisenhower-axis-label">Important</span>
+                  <span class="eisenhower-axis-label">Not Important</span>
+                </div>
+                <div class="eisenhower-quadrants">
+                  <!-- Q1: Urgent + Important -->
+                  <div class="eisenhower-quadrant eisenhower-q1">
+                    <div class="flex justify-between items-center mb-3">
+                      <h3 class="font-medium text-primary">Do First</h3>
+                      <button
+                        data-quadrant="urgentImportant"
+                        class="eisenhower-add-btn text-secondary hover:text-primary text-sm"
+                      >
+                        + Add
+                      </button>
+                    </div>
+                    <ul
+                      id="eisenhowerUrgentImportant"
+                      class="space-y-2 text-sm text-primary"
+                    ></ul>
+                  </div>
+                  <!-- Q2: Not Urgent + Important -->
+                  <div class="eisenhower-quadrant eisenhower-q2">
+                    <div class="flex justify-between items-center mb-3">
+                      <h3 class="font-medium text-primary">Schedule</h3>
+                      <button
+                        data-quadrant="notUrgentImportant"
+                        class="eisenhower-add-btn text-secondary hover:text-primary text-sm"
+                      >
+                        + Add
+                      </button>
+                    </div>
+                    <ul
+                      id="eisenhowerNotUrgentImportant"
+                      class="space-y-2 text-sm text-primary"
+                    ></ul>
+                  </div>
+                  <!-- Q3: Urgent + Not Important -->
+                  <div class="eisenhower-quadrant eisenhower-q3">
+                    <div class="flex justify-between items-center mb-3">
+                      <h3 class="font-medium text-primary">Delegate</h3>
+                      <button
+                        data-quadrant="urgentNotImportant"
+                        class="eisenhower-add-btn text-secondary hover:text-primary text-sm"
+                      >
+                        + Add
+                      </button>
+                    </div>
+                    <ul
+                      id="eisenhowerUrgentNotImportant"
+                      class="space-y-2 text-sm text-primary"
+                    ></ul>
+                  </div>
+                  <!-- Q4: Not Urgent + Not Important -->
+                  <div class="eisenhower-quadrant eisenhower-q4">
+                    <div class="flex justify-between items-center mb-3">
+                      <h3 class="font-medium text-primary">Eliminate</h3>
+                      <button
+                        data-quadrant="notUrgentNotImportant"
+                        class="eisenhower-add-btn text-secondary hover:text-primary text-sm"
+                      >
+                        + Add
+                      </button>
+                    </div>
+                    <ul
+                      id="eisenhowerNotUrgentNotImportant"
+                      class="space-y-2 text-sm text-primary"
+                    ></ul>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -10253,6 +10406,71 @@
           <button type="button" id="moscowSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
           <button type="button" id="moscowSidenavCancel"
+            class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Eisenhower Matrix Sidenav -->
+    <div id="eisenhowerSidenav" class="sidenav-panel sidenav-lg">
+      <div class="sidenav-header">
+        <h2 id="eisenhowerSidenavHeader" class="sidenav-title">New Eisenhower Matrix</h2>
+        <div class="flex items-center gap-2">
+          <span id="eisenhowerSidenavSaveStatus" class="text-xs hidden"></span>
+          <button type="button" id="eisenhowerSidenavClose" class="sidenav-close" aria-label="Close">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="flex flex-col flex-1 overflow-hidden">
+        <div class="sidenav-content">
+          <div class="sidenav-section">
+            <div class="form-group">
+              <label class="form-label">Title</label>
+              <input type="text" id="eisenhowerSidenavTitle" required class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date</label>
+              <input type="date" id="eisenhowerSidenavDate" class="form-input">
+            </div>
+          </div>
+          <div class="sidenav-section">
+            <div class="sidenav-section-title flex justify-between items-center">
+              Do First (Urgent + Important)
+              <button type="button" id="eisenhowerSidenav_add_urgentImportant" class="text-sm text-secondary hover:text-primary">+ Add</button>
+            </div>
+            <div id="eisenhowerSidenav_urgentImportant" class="space-y-1"></div>
+          </div>
+          <div class="sidenav-section">
+            <div class="sidenav-section-title flex justify-between items-center">
+              Schedule (Not Urgent + Important)
+              <button type="button" id="eisenhowerSidenav_add_notUrgentImportant" class="text-sm text-secondary hover:text-primary">+ Add</button>
+            </div>
+            <div id="eisenhowerSidenav_notUrgentImportant" class="space-y-1"></div>
+          </div>
+          <div class="sidenav-section">
+            <div class="sidenav-section-title flex justify-between items-center">
+              Delegate (Urgent + Not Important)
+              <button type="button" id="eisenhowerSidenav_add_urgentNotImportant" class="text-sm text-secondary hover:text-primary">+ Add</button>
+            </div>
+            <div id="eisenhowerSidenav_urgentNotImportant" class="space-y-1"></div>
+          </div>
+          <div class="sidenav-section">
+            <div class="sidenav-section-title flex justify-between items-center">
+              Eliminate (Not Urgent + Not Important)
+              <button type="button" id="eisenhowerSidenav_add_notUrgentNotImportant" class="text-sm text-secondary hover:text-primary">+ Add</button>
+            </div>
+            <div id="eisenhowerSidenav_notUrgentNotImportant" class="space-y-1"></div>
+          </div>
+        </div>
+        <div class="sidenav-footer">
+          <button type="button" id="eisenhowerSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+          <div class="flex-1"></div>
+          <button type="button" id="eisenhowerSidenavCancel"
             class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">
             Cancel
           </button>

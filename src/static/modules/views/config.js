@@ -274,6 +274,7 @@ export class ConfigView {
         { id: "moscow", label: "MoSCoW" },
       ],
       "Analysis": [
+        { id: "eisenhower", label: "Eisenhower Matrix" },
         { id: "swot", label: "SWOT Analysis" },
         { id: "riskAnalysis", label: "Risk Analysis" },
         { id: "leanCanvas", label: "Lean Canvas" },

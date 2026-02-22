@@ -26,6 +26,7 @@ import { RetrospectiveSidenavModule } from "./modules/features/retrospective-sid
 import { MindmapSidenavModule } from "./modules/features/mindmap-sidenav.js";
 import { StickyNoteSidenavModule } from "./modules/features/sticky-note-sidenav.js";
 import { MoscowSidenavModule } from "./modules/features/moscow-sidenav.js";
+import { EisenhowerSidenavModule } from "./modules/features/eisenhower-sidenav.js";
 import { SwotSidenavModule } from "./modules/features/swot-sidenav.js";
 import { RiskSidenavModule } from "./modules/features/risk-sidenav.js";
 import { LeanCanvasSidenavModule } from "./modules/features/lean-canvas-sidenav.js";
@@ -43,6 +44,7 @@ import { MilestonesModule } from "./modules/features/milestones.js";
 import { IdeasModule } from "./modules/features/ideas.js";
 import { RetrospectivesModule } from "./modules/features/retrospectives.js";
 import { MoscowModule } from "./modules/features/moscow.js";
+import { EisenhowerModule } from "./modules/features/eisenhower.js";
 import { SwotModule } from "./modules/features/swot.js";
 import { RiskModule } from "./modules/features/risk.js";
 import { LeanCanvasModule } from "./modules/features/lean-canvas.js";
@@ -106,6 +108,8 @@ class TaskManager {
     this.editingRetrospectiveId = null;
     this.moscowAnalyses = [];
     this.selectedMoscowId = null;
+    this.eisenhowerMatrices = [];
+    this.selectedEisenhowerId = null;
     this.swotAnalyses = [];
     this.selectedSwotId = null;
     this.editingSwotId = null;
@@ -197,6 +201,7 @@ class TaskManager {
     this.mindmapSidenavModule = new MindmapSidenavModule(this);
     this.stickyNoteSidenavModule = new StickyNoteSidenavModule(this);
     this.moscowSidenavModule = new MoscowSidenavModule(this);
+    this.eisenhowerSidenavModule = new EisenhowerSidenavModule(this);
     this.swotSidenavModule = new SwotSidenavModule(this);
     this.riskSidenavModule = new RiskSidenavModule(this);
     this.leanCanvasSidenavModule = new LeanCanvasSidenavModule(this);
@@ -214,6 +219,7 @@ class TaskManager {
     this.ideasModule = new IdeasModule(this);
     this.retrospectivesModule = new RetrospectivesModule(this);
     this.moscowModule = new MoscowModule(this);
+    this.eisenhowerModule = new EisenhowerModule(this);
     this.swotModule = new SwotModule(this);
     this.riskModule = new RiskModule(this);
     this.leanCanvasModule = new LeanCanvasModule(this);
@@ -335,6 +341,7 @@ class TaskManager {
       { id: "ideasViewBtn", view: "ideas" },
       { id: "retrospectivesViewBtn", view: "retrospectives" },
       { id: "moscowViewBtn", view: "moscow" },
+      { id: "eisenhowerViewBtn", view: "eisenhower" },
       { id: "swotViewBtn", view: "swot" },
       { id: "riskAnalysisViewBtn", view: "riskAnalysis" },
       { id: "leanCanvasViewBtn", view: "leanCanvas" },
@@ -474,6 +481,12 @@ class TaskManager {
         this.closeMobileMenu();
       });
     document
+      .getElementById("eisenhowerViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("eisenhower");
+        this.closeMobileMenu();
+      });
+    document
       .getElementById("swotViewBtnMobile")
       ?.addEventListener("click", () => {
         this.switchView("swot");
@@ -610,6 +623,7 @@ class TaskManager {
 
     // Batch 2 sidenav bindings (Analysis Tools)
     this.moscowSidenavModule.bindEvents();
+    this.eisenhowerSidenavModule.bindEvents();
     this.swotSidenavModule.bindEvents();
     this.riskSidenavModule.bindEvents();
     this.leanCanvasSidenavModule.bindEvents();
@@ -689,6 +703,7 @@ class TaskManager {
 
     // SWOT Analysis events - delegated to SwotModule
     this.moscowModule.bindEvents();
+    this.eisenhowerModule.bindEvents();
     this.swotModule.bindEvents();
 
     // Risk Analysis events - delegated to RiskModule
@@ -803,7 +818,7 @@ class TaskManager {
       "summary", "list", "board", "timeline",
       "notes", "goals", "milestones", "ideas",
       "canvas", "mindmap", "c4", "retrospectives",
-      "moscow", "swot", "riskAnalysis", "leanCanvas", "businessModel",
+      "moscow", "eisenhower", "swot", "riskAnalysis", "leanCanvas", "businessModel",
       "projectValue", "brief", "timeTracking", "capacity",
       "strategicLevels", "billing", "crm", "orgchart", "people", "portfolio",
     ];
@@ -851,6 +866,7 @@ class TaskManager {
       c4: "C4 Architecture",
       retrospectives: "Retrospectives",
       moscow: "MoSCoW",
+      eisenhower: "Eisenhower Matrix",
       swot: "SWOT Analysis",
       riskAnalysis: "Risk Analysis",
       leanCanvas: "Lean Canvas",
@@ -924,6 +940,7 @@ class TaskManager {
       "c4ViewBtn",
       "retrospectivesViewBtn",
       "moscowViewBtn",
+      "eisenhowerViewBtn",
       "swotViewBtn",
       "riskAnalysisViewBtn",
       "leanCanvasViewBtn",
@@ -962,6 +979,7 @@ class TaskManager {
       "ideasViewBtnMobile",
       "retrospectivesViewBtnMobile",
       "moscowViewBtnMobile",
+      "eisenhowerViewBtnMobile",
       "swotViewBtnMobile",
       "riskAnalysisViewBtnMobile",
       "leanCanvasViewBtnMobile",
@@ -997,6 +1015,7 @@ class TaskManager {
     document.getElementById("ideasView").classList.add("hidden");
     document.getElementById("retrospectivesView").classList.add("hidden");
     document.getElementById("moscowView")?.classList.add("hidden");
+    document.getElementById("eisenhowerView")?.classList.add("hidden");
     document.getElementById("swotView").classList.add("hidden");
     document.getElementById("riskAnalysisView").classList.add("hidden");
     document.getElementById("leanCanvasView").classList.add("hidden");
@@ -1062,6 +1081,10 @@ class TaskManager {
       this.activateViewButton("moscow");
       document.getElementById("moscowView").classList.remove("hidden");
       this.moscowModule.load();
+    } else if (view === "eisenhower") {
+      this.activateViewButton("eisenhower");
+      document.getElementById("eisenhowerView").classList.remove("hidden");
+      this.eisenhowerModule.load();
     } else if (view === "swot") {
       this.activateViewButton("swot");
       document.getElementById("swotView").classList.remove("hidden");
@@ -2035,6 +2058,15 @@ class TaskManager {
 
   async removeMoscowItem(category, index) {
     return this.moscowModule.removeItem(category, index);
+  }
+
+  // Eisenhower Matrix functionality - delegated to EisenhowerModule
+  async loadEisenhowerMatrices() {
+    return this.eisenhowerModule.load();
+  }
+
+  async removeEisenhowerItem(quadrant, index) {
+    return this.eisenhowerModule.removeItem(quadrant, index);
   }
 
   // SWOT Analysis functionality - delegated to SwotModule

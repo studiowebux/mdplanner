@@ -35,6 +35,7 @@ import type {
   PersonWithChildren as OrgChartMemberWithChildren,
 } from "./people.ts";
 import { MoscowDirectoryParser } from "./moscow.ts";
+import { EisenhowerDirectoryParser } from "./eisenhower.ts";
 import {
   PeopleDirectoryParser,
   type PeopleSummary,
@@ -56,6 +57,7 @@ import type {
   Invoice,
   LeanCanvas,
   Milestone,
+  EisenhowerMatrix,
   Mindmap,
   MoscowAnalysis,
   Note,
@@ -103,6 +105,7 @@ export class DirectoryMarkdownParser {
   protected crmParser: CRMDirectoryParser;
   protected portfolioParser: PortfolioDirectoryParser;
   protected moscowParser: MoscowDirectoryParser;
+  protected eisenhowerParser: EisenhowerDirectoryParser;
   protected peopleParser: PeopleDirectoryParser;
 
   constructor(projectDir: string) {
@@ -129,6 +132,7 @@ export class DirectoryMarkdownParser {
     this.crmParser = new CRMDirectoryParser(projectDir);
     this.portfolioParser = new PortfolioDirectoryParser(projectDir);
     this.moscowParser = new MoscowDirectoryParser(projectDir);
+    this.eisenhowerParser = new EisenhowerDirectoryParser(projectDir);
     this.peopleParser = new PeopleDirectoryParser(projectDir);
   }
 
@@ -577,6 +581,31 @@ export class DirectoryMarkdownParser {
 
   async deleteMoscowAnalysis(id: string): Promise<boolean> {
     return this.moscowParser.delete(id);
+  }
+
+  // ============================================================
+  // Eisenhower Matrix
+  // ============================================================
+
+  async readEisenhowerMatrices(): Promise<EisenhowerMatrix[]> {
+    return this.eisenhowerParser.readAll();
+  }
+
+  async addEisenhowerMatrix(
+    matrix: Omit<EisenhowerMatrix, "id">,
+  ): Promise<EisenhowerMatrix> {
+    return this.eisenhowerParser.add(matrix);
+  }
+
+  async updateEisenhowerMatrix(
+    id: string,
+    updates: Partial<EisenhowerMatrix>,
+  ): Promise<EisenhowerMatrix | null> {
+    return this.eisenhowerParser.update(id, updates);
+  }
+
+  async deleteEisenhowerMatrix(id: string): Promise<boolean> {
+    return this.eisenhowerParser.delete(id);
   }
 
   // ============================================================
@@ -1452,6 +1481,7 @@ export class DirectoryMarkdownParser {
       recursive: true,
     });
     await Deno.mkdir(`${this.projectDir}/moscow`, { recursive: true });
+    await Deno.mkdir(`${this.projectDir}/eisenhower`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/people`, { recursive: true });
 
     // Create project.md

@@ -496,6 +496,18 @@ export interface MoscowAnalysis {
   wont: string[];
 }
 
+// Eisenhower Matrix Types
+
+export interface EisenhowerMatrix {
+  id: string;
+  title: string;
+  date: string;
+  urgentImportant: string[];
+  notUrgentImportant: string[];
+  urgentNotImportant: string[];
+  notUrgentNotImportant: string[];
+}
+
 // Org Chart Types
 
 export interface OrgChartMember {
