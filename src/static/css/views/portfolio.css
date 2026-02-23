@@ -51,6 +51,20 @@
   align-items: center;
 }
 
+/* Compact duration shown below the progress bar in list/tree rows */
+.portfolio-row-duration {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  margin-top: 0.125rem;
+}
+
+/* Full duration label in the detail panel Timeline section */
+.portfolio-duration-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: 0.5rem;
+}
+
 /* On mobile, hide progress and financials columns so the project name has room */
 @media (max-width: 36rem) {
   .portfolio-row-progress,

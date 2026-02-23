@@ -76,6 +76,40 @@ export class PortfolioView {
   }
 
   /**
+   * Compute human-readable duration between two date strings.
+   * Returns null when either date is missing or invalid.
+   * @param {string|undefined} startDate - YYYY-MM-DD
+   * @param {string|undefined} endDate   - YYYY-MM-DD
+   * @param {boolean} compact - compact form for row display ("3 mo", "1 yr 2 mo")
+   * @returns {string|null}
+   */
+  formatDuration(startDate, endDate, compact = false) {
+    if (!startDate || !endDate) return null;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    if (isNaN(start) || isNaN(end) || end <= start) return null;
+
+    const totalDays = Math.round((end - start) / 86400000);
+    const years = Math.floor(totalDays / 365);
+    const months = Math.floor((totalDays % 365) / 30);
+    const days = totalDays % 30;
+
+    if (compact) {
+      if (years > 0 && months > 0) return `${years} yr ${months} mo`;
+      if (years > 0) return `${years} yr`;
+      if (months > 0) return `${months} mo`;
+      return `${totalDays} d`;
+    }
+
+    const parts = [];
+    if (years > 0) parts.push(`${years} year${years !== 1 ? "s" : ""}`);
+    if (months > 0) parts.push(`${months} month${months !== 1 ? "s" : ""}`);
+    if (parts.length === 0) parts.push(`${totalDays} day${totalDays !== 1 ? "s" : ""}`);
+    else if (days > 0 && years === 0) parts.push(`${days} day${days !== 1 ? "s" : ""}`);
+    return parts.join(", ");
+  }
+
+  /**
    * Render summary cards with aggregate metrics.
    */
   renderSummaryCards() {
@@ -390,7 +424,12 @@ export class PortfolioView {
               <div class="w-full bg-active rounded-full h-1.5 mt-1">
                 <div class="bg-success h-1.5 rounded-full" style="width: ${progressPercent}%"></div>
               </div>
-            </div>
+              ${(() => {
+      const dur = this.formatDuration(project.startDate, project.endDate, true);
+      return dur
+        ? `<div class="portfolio-row-duration">${dur}</div>`
+        : "";
+    })()}</div>
             ${
       hasFinancials
         ? `
@@ -803,6 +842,12 @@ export class PortfolioView {
     }">
             </div>
           </div>
+          ${(() => {
+      const dur = this.formatDuration(project.startDate, project.endDate);
+      return dur
+        ? `<div class="portfolio-duration-label">Duration: ${dur}</div>`
+        : "";
+    })()}
         </section>
 
         <!-- Team -->
