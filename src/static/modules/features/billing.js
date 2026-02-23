@@ -63,15 +63,9 @@ export class BillingModule {
   }
 
   switchTab(tab) {
-    document.querySelectorAll(".billing-tab").forEach((t) => {
-      t.classList.remove("tab-active");
-      t.classList.add("tab-inactive");
+    document.querySelectorAll("[data-billing-tab]").forEach((t) => {
+      t.classList.toggle("active", t.dataset.billingTab === tab);
     });
-    const activeTab = document.querySelector(`[data-billing-tab="${tab}"]`);
-    if (activeTab) {
-      activeTab.classList.remove("tab-inactive");
-      activeTab.classList.add("tab-active");
-    }
 
     document.querySelectorAll(".billing-tab-content").forEach((c) =>
       c.classList.add("hidden")
@@ -596,7 +590,7 @@ export class BillingModule {
 
   bindEvents() {
     // Billing tab navigation
-    document.querySelectorAll(".billing-tab").forEach((tab) => {
+    document.querySelectorAll("[data-billing-tab]").forEach((tab) => {
       tab.addEventListener(
         "click",
         (e) => this.switchTab(e.target.dataset.billingTab),

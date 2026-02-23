@@ -230,11 +230,11 @@ export class MeetingsModule {
     this.activeTab = tab;
 
     document.getElementById("meetingsTabMeetings")?.classList.toggle(
-      "meetings-tab-active",
+      "active",
       tab === "meetings",
     );
     document.getElementById("meetingsTabActions")?.classList.toggle(
-      "meetings-tab-active",
+      "active",
       tab === "actions",
     );
 

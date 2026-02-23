@@ -286,7 +286,7 @@ export class FinancesModule {
   _switchTab(tab) {
     this.activeTab = tab;
     ["overview", "burnrate", "pl"].forEach((t) => {
-      document.getElementById(`financesTab-${t}`)?.classList.toggle("finances-tab-active", t === tab);
+      document.getElementById(`financesTab-${t}`)?.classList.toggle("active", t === tab);
       document.getElementById(`financesPanel-${t}`)?.classList.toggle("hidden", t !== tab);
     });
     this.renderView();

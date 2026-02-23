@@ -1,39 +1,6 @@
 /* Finances View */
 
 /* ----------------------------------------------------------------
-   Tab bar
----------------------------------------------------------------- */
-
-.finances-tabs {
-  display: flex;
-  gap: 0;
-  border-bottom: 1px solid var(--border);
-  padding: 0 1.5rem;
-  overflow-x: auto;
-  white-space: nowrap;
-}
-
-.finances-tab {
-  background: none;
-  border: none;
-  border-bottom: 1.5px solid transparent;
-  padding: 0.625rem 1rem;
-  font-size: var(--font-size-sm);
-  color: var(--text-tertiary);
-  cursor: pointer;
-  margin-bottom: -1px;
-}
-
-.finances-tab:hover {
-  color: var(--text-secondary);
-}
-
-.finances-tab-active {
-  color: var(--text);
-  border-bottom-color: var(--text);
-}
-
-/* ----------------------------------------------------------------
    Overview — period table
 ---------------------------------------------------------------- */
 

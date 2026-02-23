@@ -1,12 +1,5 @@
 /* Capacity Planning View */
 
-/* Tab bar: scroll horizontally on mobile instead of overflowing the page */
-.capacity-tabs {
-  overflow-x: auto;
-  white-space: nowrap;
-  -webkit-overflow-scrolling: touch;
-}
-
 /* Header row: wrap action buttons below title + selector on small screens */
 @media (max-width: 36rem) {
   .capacity-header {

@@ -32,7 +32,7 @@ export class FundraisingModule {
 
     const targetPanel = document.getElementById(`fundraising-panel-${tab}`);
     if (targetPanel) {
-      targetPanel.querySelectorAll(".fundraising-tab").forEach((btn) => {
+      targetPanel.querySelectorAll(".view-tab").forEach((btn) => {
         btn.classList.toggle("active", btn.dataset.tab === tab);
       });
     }
@@ -44,7 +44,8 @@ export class FundraisingModule {
   }
 
   bindEvents() {
-    document.querySelectorAll(".fundraising-tab").forEach((btn) => {
+    const container = document.getElementById("fundraisingView");
+    container?.querySelectorAll(".view-tab").forEach((btn) => {
       btn.addEventListener("click", () => this.switchTab(btn.dataset.tab));
     });
 

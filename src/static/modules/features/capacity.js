@@ -102,61 +102,18 @@ export class CapacityModule {
 
   switchTab(tab) {
     this.taskManager.capacityTab = tab;
-    const teamTab = document.getElementById("capacityTeamTab");
-    const allocTab = document.getElementById("capacityAllocTab");
-    const utilTab = document.getElementById("capacityUtilTab");
-    const teamContent = document.getElementById("capacityTeamContent");
-    const allocContent = document.getElementById("capacityAllocContent");
-    const utilContent = document.getElementById("capacityUtilContent");
+    const tabs = ["team", "alloc", "util"];
+    const btnIds = { team: "capacityTeamTab", alloc: "capacityAllocTab", util: "capacityUtilTab" };
+    const panelIds = { team: "capacityTeamContent", alloc: "capacityAllocContent", util: "capacityUtilContent" };
 
-    [teamTab, allocTab, utilTab].forEach((t) => {
-      t?.classList.remove(
-        "border-strong",
-        "text-primary",
-      );
-      t?.classList.add(
-        "border-transparent",
-        "text-muted",
-      );
+    tabs.forEach((t) => {
+      document.getElementById(btnIds[t])?.classList.toggle("active", t === tab);
+      document.getElementById(panelIds[t])?.classList.toggle("hidden", t !== tab);
     });
-    [teamContent, allocContent, utilContent].forEach((c) =>
-      c?.classList.add("hidden")
-    );
 
-    if (tab === "team") {
-      teamTab?.classList.add(
-        "border-strong",
-        "text-primary",
-      );
-      teamTab?.classList.remove(
-        "border-transparent",
-        "text-muted",
-      );
-      teamContent?.classList.remove("hidden");
-      this.renderTeamMembers();
-    } else if (tab === "alloc") {
-      allocTab?.classList.add(
-        "border-strong",
-        "text-primary",
-      );
-      allocTab?.classList.remove(
-        "border-transparent",
-        "text-muted",
-      );
-      allocContent?.classList.remove("hidden");
-      this.renderAllocationsGrid();
-    } else if (tab === "util") {
-      utilTab?.classList.add(
-        "border-strong",
-        "text-primary",
-      );
-      utilTab?.classList.remove(
-        "border-transparent",
-        "text-muted",
-      );
-      utilContent?.classList.remove("hidden");
-      this.renderUtilization();
-    }
+    if (tab === "team") this.renderTeamMembers();
+    else if (tab === "alloc") this.renderAllocationsGrid();
+    else if (tab === "util") this.renderUtilization();
   }
 
   renderTeamMembers() {

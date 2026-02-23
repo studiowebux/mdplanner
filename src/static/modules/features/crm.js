@@ -61,15 +61,9 @@ export class CRMModule {
   }
 
   switchTab(tab) {
-    document.querySelectorAll(".crm-tab").forEach((t) => {
-      t.classList.remove("tab-active");
-      t.classList.add("tab-inactive");
+    document.querySelectorAll("[data-crm-tab]").forEach((t) => {
+      t.classList.toggle("active", t.dataset.crmTab === tab);
     });
-    const activeTab = document.querySelector(`[data-crm-tab="${tab}"]`);
-    if (activeTab) {
-      activeTab.classList.remove("tab-inactive");
-      activeTab.classList.add("tab-active");
-    }
 
     document.querySelectorAll(".crm-tab-content").forEach((c) =>
       c.classList.add("hidden")
@@ -485,7 +479,7 @@ export class CRMModule {
 
   bindEvents() {
     // CRM tab navigation
-    document.querySelectorAll(".crm-tab").forEach((tab) => {
+    document.querySelectorAll("[data-crm-tab]").forEach((tab) => {
       tab.addEventListener(
         "click",
         (e) => this.switchTab(e.target.dataset.crmTab),
