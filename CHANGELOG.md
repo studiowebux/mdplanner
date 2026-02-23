@@ -8,6 +8,27 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-02-23
+
+### Added
+
+- AI Chat view: integrated ollamaui as an isolated, self-contained chat module
+  with streaming, model selection, image support, and config panel; scoped CSS
+  under `.ollama-view-root` using mdplanner theme variables
+- TTS proxy: `POST /api/tts/synthesize` and `POST /api/tts/voices` server-side
+  proxy to Chatterbox to avoid duplicate CORS headers
+- Full AI stack in `deploy/`: docker-compose with Caddy, Ollama, Chatterbox TTS,
+  and SearXNG; Caddy routes `/tts/*` and `/search*` to respective services
+- MCP server (`mcp.ts`): exposes mdplanner data as Model Context Protocol tools
+  and resources; compatible with Claude Desktop via stdio transport
+- AI Chat registered in feature visibility toggle under Tools group
+
+### Fixed
+
+- Search modal: stale CSS variable references (`--bg`, `--border`, `--text`,
+  `--surface`, `--radius`) replaced with current `--color-*` / `--radius-md`
+  names; modal was fully transparent with no borders
+
 ## [0.4.0] - 2026-02-22
 
 ### Added
