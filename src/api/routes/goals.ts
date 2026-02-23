@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cacheWriteThrough,
+  cachePurge,
   errorResponse,
   getParser,
   jsonResponse,
@@ -37,6 +39,7 @@ goalsRouter.post("/", async (c) => {
   const parser = getParser(c);
   const body = await c.req.json();
   const goalId = await parser.addGoal(body);
+  await cacheWriteThrough(c, "goals");
   return jsonResponse({ id: goalId }, 201);
 });
 
@@ -48,6 +51,7 @@ goalsRouter.put("/:id", async (c) => {
   const success = await parser.updateGoal(goalId, updates);
 
   if (success) {
+    await cacheWriteThrough(c, "goals");
     return jsonResponse({ success: true });
   }
   return errorResponse("Goal not found", 404);
@@ -60,6 +64,7 @@ goalsRouter.delete("/:id", async (c) => {
   const success = await parser.deleteGoal(goalId);
 
   if (success) {
+    cachePurge(c, "goals", goalId);
     return jsonResponse({ success: true });
   }
   return errorResponse("Goal not found", 404);

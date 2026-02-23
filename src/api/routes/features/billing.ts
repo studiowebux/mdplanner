@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cacheWriteThrough,
+  cachePurge,
   errorResponse,
   getParser,
   jsonResponse,
@@ -61,6 +63,7 @@ billingRouter.post("/customers", async (c) => {
   };
   customers.push(newCustomer);
   await parser.saveCustomers(customers);
+  await cacheWriteThrough(c, "customers");
   return jsonResponse(newCustomer, 201);
 });
 
@@ -74,6 +77,7 @@ billingRouter.put("/customers/:id", async (c) => {
   if (index === -1) return errorResponse("Not found", 404);
   customers[index] = { ...customers[index], ...body };
   await parser.saveCustomers(customers);
+  await cacheWriteThrough(c, "customers");
   return jsonResponse(customers[index]);
 });
 
@@ -87,6 +91,7 @@ billingRouter.delete("/customers/:id", async (c) => {
     return errorResponse("Not found", 404);
   }
   await parser.saveCustomers(filtered);
+  cachePurge(c, "customers", id);
   return jsonResponse({ success: true });
 });
 
@@ -114,6 +119,7 @@ billingRouter.post("/billing-rates", async (c) => {
   };
   rates.push(newRate);
   await parser.saveBillingRates(rates);
+  await cacheWriteThrough(c, "rates");
   return jsonResponse(newRate, 201);
 });
 
@@ -127,6 +133,7 @@ billingRouter.put("/billing-rates/:id", async (c) => {
   if (index === -1) return errorResponse("Not found", 404);
   rates[index] = { ...rates[index], ...body };
   await parser.saveBillingRates(rates);
+  await cacheWriteThrough(c, "rates");
   return jsonResponse(rates[index]);
 });
 
@@ -138,6 +145,7 @@ billingRouter.delete("/billing-rates/:id", async (c) => {
   const filtered = rates.filter((r) => r.id !== id);
   if (filtered.length === rates.length) return errorResponse("Not found", 404);
   await parser.saveBillingRates(filtered);
+  cachePurge(c, "rates", id);
   return jsonResponse({ success: true });
 });
 
@@ -190,6 +198,7 @@ billingRouter.post("/quotes", async (c) => {
   };
   quotes.push(newQuote);
   await parser.saveQuotes(quotes);
+  await cacheWriteThrough(c, "quotes");
   return jsonResponse(newQuote, 201);
 });
 
@@ -215,6 +224,7 @@ billingRouter.put("/quotes/:id", async (c) => {
   }
   quotes[index] = updated;
   await parser.saveQuotes(quotes);
+  await cacheWriteThrough(c, "quotes");
   return jsonResponse(quotes[index]);
 });
 
@@ -226,6 +236,7 @@ billingRouter.delete("/quotes/:id", async (c) => {
   const filtered = quotes.filter((q) => q.id !== id);
   if (filtered.length === quotes.length) return errorResponse("Not found", 404);
   await parser.saveQuotes(filtered);
+  cachePurge(c, "quotes", id);
   return jsonResponse({ success: true });
 });
 
@@ -239,6 +250,7 @@ billingRouter.post("/quotes/:id/send", async (c) => {
   quotes[index].status = "sent";
   quotes[index].sentAt = new Date().toISOString().split("T")[0];
   await parser.saveQuotes(quotes);
+  await cacheWriteThrough(c, "quotes");
   return jsonResponse(quotes[index]);
 });
 
@@ -252,6 +264,7 @@ billingRouter.post("/quotes/:id/accept", async (c) => {
   quotes[index].status = "accepted";
   quotes[index].acceptedAt = new Date().toISOString().split("T")[0];
   await parser.saveQuotes(quotes);
+  await cacheWriteThrough(c, "quotes");
   return jsonResponse(quotes[index]);
 });
 
@@ -287,6 +300,7 @@ billingRouter.post("/quotes/:id/to-invoice", async (c) => {
   };
   invoices.push(newInvoice);
   await parser.saveInvoices(invoices);
+  await cacheWriteThrough(c, "invoices");
   return jsonResponse(newInvoice, 201);
 });
 
@@ -341,6 +355,7 @@ billingRouter.post("/invoices", async (c) => {
   };
   invoices.push(newInvoice);
   await parser.saveInvoices(invoices);
+  await cacheWriteThrough(c, "invoices");
   return jsonResponse(newInvoice, 201);
 });
 
@@ -366,6 +381,7 @@ billingRouter.put("/invoices/:id", async (c) => {
   }
   invoices[index] = updated;
   await parser.saveInvoices(invoices);
+  await cacheWriteThrough(c, "invoices");
   return jsonResponse(invoices[index]);
 });
 
@@ -379,6 +395,7 @@ billingRouter.delete("/invoices/:id", async (c) => {
     return errorResponse("Not found", 404);
   }
   await parser.saveInvoices(filtered);
+  cachePurge(c, "invoices", id);
   return jsonResponse({ success: true });
 });
 
@@ -392,6 +409,7 @@ billingRouter.post("/invoices/:id/send", async (c) => {
   invoices[index].status = "sent";
   invoices[index].sentAt = new Date().toISOString().split("T")[0];
   await parser.saveInvoices(invoices);
+  await cacheWriteThrough(c, "invoices");
   return jsonResponse(invoices[index]);
 });
 
@@ -427,6 +445,7 @@ billingRouter.post("/invoices/:id/payments", async (c) => {
   };
   payments.push(newPayment);
   await parser.savePayments(payments);
+  await cacheWriteThrough(c, "payments");
 
   invoices[invoiceIndex].paidAmount += newPayment.amount;
   if (invoices[invoiceIndex].paidAmount >= invoices[invoiceIndex].total) {
@@ -434,6 +453,7 @@ billingRouter.post("/invoices/:id/payments", async (c) => {
     invoices[invoiceIndex].paidAt = new Date().toISOString().split("T")[0];
   }
   await parser.saveInvoices(invoices);
+  await cacheWriteThrough(c, "invoices");
 
   return jsonResponse(newPayment, 201);
 });
@@ -515,6 +535,7 @@ billingRouter.post("/invoices/generate", async (c) => {
 
   invoices.push(newInvoice);
   await parser.saveInvoices(invoices);
+  await cacheWriteThrough(c, "invoices");
   return jsonResponse(newInvoice, 201);
 });
 

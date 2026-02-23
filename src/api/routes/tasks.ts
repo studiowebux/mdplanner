@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cacheWriteThrough,
+  cachePurge,
   errorResponse,
   getParser,
   jsonResponse,
@@ -85,6 +87,7 @@ tasksRouter.post("/", async (c) => {
     ...(body.parentId && { parentId: body.parentId }),
   };
   const taskId = await parser.addTask(task);
+  await cacheWriteThrough(c, "tasks");
   return jsonResponse({ id: taskId }, 201);
 });
 
@@ -105,6 +108,7 @@ tasksRouter.put("/:id", async (c) => {
   const success = await parser.updateTask(taskId, updates);
 
   if (success) {
+    await cacheWriteThrough(c, "tasks");
     return jsonResponse({ success: true });
   }
   return errorResponse("Task not found", 404);
@@ -117,6 +121,7 @@ tasksRouter.delete("/:id", async (c) => {
   const success = await parser.deleteTask(taskId);
 
   if (success) {
+    cachePurge(c, "tasks", taskId);
     return jsonResponse({ success: true });
   }
   return errorResponse("Task not found", 404);
@@ -133,6 +138,7 @@ tasksRouter.patch("/:id/attachments", async (c) => {
   }
   const success = await parser.addAttachmentsToTask(taskId, paths);
   if (success) {
+    await cacheWriteThrough(c, "tasks");
     return jsonResponse({ success: true });
   }
   return errorResponse("Task not found", 404);
@@ -148,11 +154,13 @@ tasksRouter.patch("/:id/move", async (c) => {
   if (position !== undefined && position !== null) {
     const success = await parser.reorderTask(taskId, section, position);
     if (success) {
+      await cacheWriteThrough(c, "tasks");
       return jsonResponse({ success: true });
     }
   } else {
     const success = await parser.updateTask(taskId, { section });
     if (success) {
+      await cacheWriteThrough(c, "tasks");
       return jsonResponse({ success: true });
     }
   }

@@ -6,6 +6,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cacheWriteThrough,
+  cachePurge,
   errorResponse,
   getParser,
   jsonResponse,
@@ -34,6 +36,7 @@ safeRouter.post("/", async (c) => {
     status: body.status || "draft",
     notes: body.notes || "",
   });
+  await cacheWriteThrough(c, "safe_agreements");
   return jsonResponse(agreement, 201);
 });
 
@@ -44,6 +47,7 @@ safeRouter.put("/:id", async (c) => {
   const body = await c.req.json();
   const updated = await parser.updateSafeAgreement(id, body);
   if (!updated) return errorResponse("Not found", 404);
+  await cacheWriteThrough(c, "safe_agreements");
   return jsonResponse(updated);
 });
 
@@ -53,5 +57,6 @@ safeRouter.delete("/:id", async (c) => {
   const id = c.req.param("id");
   const success = await parser.deleteSafeAgreement(id);
   if (!success) return errorResponse("Not found", 404);
+  cachePurge(c, "safe_agreements", id);
   return jsonResponse({ success: true });
 });

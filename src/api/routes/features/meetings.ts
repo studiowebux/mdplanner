@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cacheWriteThrough,
+  cachePurge,
   errorResponse,
   getParser,
   jsonResponse,
@@ -41,6 +43,7 @@ meetingsRouter.post("/", async (c) => {
     notes: body.notes,
     actions: body.actions ?? [],
   });
+  await cacheWriteThrough(c, "meetings");
   return jsonResponse({ success: true, id: meeting.id }, 201);
 });
 
@@ -58,6 +61,7 @@ meetingsRouter.put("/:id", async (c) => {
     actions: body.actions,
   });
   if (!updated) return errorResponse("Not found", 404);
+  await cacheWriteThrough(c, "meetings");
   return jsonResponse({ success: true });
 });
 
@@ -67,5 +71,6 @@ meetingsRouter.delete("/:id", async (c) => {
   const id = c.req.param("id");
   const deleted = await parser.deleteMeeting(id);
   if (!deleted) return errorResponse("Not found", 404);
+  cachePurge(c, "meetings", id);
   return jsonResponse({ success: true });
 });

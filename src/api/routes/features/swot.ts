@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cacheWriteThrough,
+  cachePurge,
   errorResponse,
   getParser,
   jsonResponse,
@@ -35,6 +37,7 @@ swotRouter.post("/", async (c) => {
     threats: body.threats || [],
   });
   await parser.saveSwotAnalyses(swotAnalyses);
+  await cacheWriteThrough(c, "swot");
   return jsonResponse({ success: true, id }, 201);
 });
 
@@ -48,6 +51,7 @@ swotRouter.put("/:id", async (c) => {
   if (index === -1) return errorResponse("Not found", 404);
   swotAnalyses[index] = { ...swotAnalyses[index], ...body };
   await parser.saveSwotAnalyses(swotAnalyses);
+  await cacheWriteThrough(c, "swot");
   return jsonResponse({ success: true });
 });
 
@@ -61,5 +65,6 @@ swotRouter.delete("/:id", async (c) => {
     return errorResponse("Not found", 404);
   }
   await parser.saveSwotAnalyses(filtered);
+  cachePurge(c, "swot", id);
   return jsonResponse({ success: true });
 });

@@ -98,6 +98,46 @@ export class CacheSync {
   }
 
   /**
+   * INSERT OR REPLACE one row. Record keys must match column names exactly.
+   * Used for write-through on create/update when the caller has the flat row.
+   */
+  upsert(table: string, record: Record<string, unknown>): void {
+    const cols = Object.keys(record);
+    const placeholders = cols.map(() => "?").join(", ");
+    const values = cols.map((k) => {
+      const v = record[k];
+      if (v === undefined || v === null) return null;
+      if (
+        typeof v === "string" ||
+        typeof v === "number" ||
+        typeof v === "bigint"
+      ) return v as string | number | bigint;
+      if (v instanceof Uint8Array) return v;
+      return String(v);
+    });
+    this.db.execute(
+      `INSERT OR REPLACE INTO ${table} (${cols.join(", ")}) VALUES (${placeholders})`,
+      values,
+    );
+  }
+
+  /**
+   * DELETE one row by id. Used for write-through on delete mutations.
+   */
+  remove(table: string, id: string): void {
+    this.db.execute(`DELETE FROM ${table} WHERE id = ?`, [id]);
+  }
+
+  /**
+   * Re-sync a single table from markdown.
+   * Used for write-through on create/update — reuses the entity syncer
+   * so column mapping logic is never duplicated.
+   */
+  async syncOneTable(table: string): Promise<void> {
+    await this.fullSync({ tables: [table] });
+  }
+
+  /**
    * Get last sync time.
    */
   getLastSyncTime(): Date | null {

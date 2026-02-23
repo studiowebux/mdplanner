@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cacheWriteThrough,
+  cachePurge,
   errorResponse,
   getParser,
   jsonResponse,
@@ -35,6 +37,7 @@ retrospectivesRouter.post("/", async (c) => {
     start: body.start || [],
   });
   await parser.saveRetrospectives(retrospectives);
+  await cacheWriteThrough(c, "retrospectives");
   return jsonResponse({ success: true, id }, 201);
 });
 
@@ -48,6 +51,7 @@ retrospectivesRouter.put("/:id", async (c) => {
   if (index === -1) return errorResponse("Not found", 404);
   retrospectives[index] = { ...retrospectives[index], ...body };
   await parser.saveRetrospectives(retrospectives);
+  await cacheWriteThrough(c, "retrospectives");
   return jsonResponse({ success: true });
 });
 
@@ -61,5 +65,6 @@ retrospectivesRouter.delete("/:id", async (c) => {
     return errorResponse("Not found", 404);
   }
   await parser.saveRetrospectives(filtered);
+  cachePurge(c, "retrospectives", id);
   return jsonResponse({ success: true });
 });

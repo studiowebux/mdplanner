@@ -96,6 +96,35 @@ export class ProjectManager {
   }
 
   /**
+   * Write-through: re-sync one table after a create/update mutation.
+   * No-op when cache is disabled. Errors are logged, not thrown.
+   */
+  async writeThrough(table: string): Promise<void> {
+    if (!this.cache) return;
+    try {
+      await this.cache.sync.syncOneTable(table);
+    } catch (e) {
+      console.error(`[cache] write-through failed for table "${table}":`, e);
+    }
+  }
+
+  /**
+   * Purge: remove one row after a delete mutation.
+   * No-op when cache is disabled. Errors are logged, not thrown.
+   */
+  purge(table: string, id: string): void {
+    if (!this.cache) return;
+    try {
+      this.cache.sync.remove(table, id);
+    } catch (e) {
+      console.error(
+        `[cache] purge failed for table "${table}", id "${id}":`,
+        e,
+      );
+    }
+  }
+
+  /**
    * Rebuild cache from markdown.
    */
   async rebuildCache(): Promise<

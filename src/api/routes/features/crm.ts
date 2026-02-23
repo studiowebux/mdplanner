@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cacheWriteThrough,
+  cachePurge,
   errorResponse,
   getParser,
   jsonResponse,
@@ -49,6 +51,7 @@ crmRouter.post("/companies", async (c) => {
   };
   companies.push(newCompany);
   await parser.saveCompanies(companies);
+  await cacheWriteThrough(c, "companies");
   return jsonResponse(newCompany, 201);
 });
 
@@ -62,6 +65,7 @@ crmRouter.put("/companies/:id", async (c) => {
   if (index === -1) return errorResponse("Not found", 404);
   companies[index] = { ...companies[index], ...body };
   await parser.saveCompanies(companies);
+  await cacheWriteThrough(c, "companies");
   return jsonResponse(companies[index]);
 });
 
@@ -75,6 +79,7 @@ crmRouter.delete("/companies/:id", async (c) => {
     return errorResponse("Not found", 404);
   }
   await parser.saveCompanies(filtered);
+  cachePurge(c, "companies", id);
   return jsonResponse({ success: true });
 });
 
@@ -148,6 +153,7 @@ crmRouter.post("/contacts", async (c) => {
   };
   contacts.push(newContact);
   await parser.saveContacts(contacts);
+  await cacheWriteThrough(c, "contacts");
   return jsonResponse(newContact, 201);
 });
 
@@ -161,6 +167,7 @@ crmRouter.put("/contacts/:id", async (c) => {
   if (index === -1) return errorResponse("Not found", 404);
   contacts[index] = { ...contacts[index], ...body };
   await parser.saveContacts(contacts);
+  await cacheWriteThrough(c, "contacts");
   return jsonResponse(contacts[index]);
 });
 
@@ -174,6 +181,7 @@ crmRouter.delete("/contacts/:id", async (c) => {
     return errorResponse("Not found", 404);
   }
   await parser.saveContacts(filtered);
+  cachePurge(c, "contacts", id);
   return jsonResponse({ success: true });
 });
 
@@ -216,6 +224,7 @@ crmRouter.post("/deals", async (c) => {
   };
   deals.push(newDeal);
   await parser.saveDeals(deals);
+  await cacheWriteThrough(c, "deals");
   return jsonResponse(newDeal, 201);
 });
 
@@ -229,6 +238,7 @@ crmRouter.put("/deals/:id", async (c) => {
   if (index === -1) return errorResponse("Not found", 404);
   deals[index] = { ...deals[index], ...body };
   await parser.saveDeals(deals);
+  await cacheWriteThrough(c, "deals");
   return jsonResponse(deals[index]);
 });
 
@@ -240,6 +250,7 @@ crmRouter.delete("/deals/:id", async (c) => {
   const filtered = deals.filter((d) => d.id !== id);
   if (filtered.length === deals.length) return errorResponse("Not found", 404);
   await parser.saveDeals(filtered);
+  cachePurge(c, "deals", id);
   return jsonResponse({ success: true });
 });
 
@@ -274,6 +285,7 @@ crmRouter.post("/deals/:id/stage", async (c) => {
   }
 
   await parser.saveDeals(deals);
+  await cacheWriteThrough(c, "deals");
   return jsonResponse(deals[index]);
 });
 
@@ -325,6 +337,7 @@ crmRouter.post("/interactions", async (c) => {
   };
   interactions.push(newInteraction);
   await parser.saveInteractions(interactions);
+  await cacheWriteThrough(c, "interactions");
   return jsonResponse(newInteraction, 201);
 });
 
@@ -338,6 +351,7 @@ crmRouter.put("/interactions/:id", async (c) => {
   if (index === -1) return errorResponse("Not found", 404);
   interactions[index] = { ...interactions[index], ...body };
   await parser.saveInteractions(interactions);
+  await cacheWriteThrough(c, "interactions");
   return jsonResponse(interactions[index]);
 });
 
@@ -351,6 +365,7 @@ crmRouter.delete("/interactions/:id", async (c) => {
     return errorResponse("Not found", 404);
   }
   await parser.saveInteractions(filtered);
+  cachePurge(c, "interactions", id);
   return jsonResponse({ success: true });
 });
 

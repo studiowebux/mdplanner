@@ -6,6 +6,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cacheWriteThrough,
+  cachePurge,
   errorResponse,
   getParser,
   jsonResponse,
@@ -32,6 +34,7 @@ moscowRouter.post("/", async (c) => {
     could: body.could || [],
     wont: body.wont || [],
   });
+  await cacheWriteThrough(c, "moscow");
   return jsonResponse(analysis, 201);
 });
 
@@ -42,6 +45,7 @@ moscowRouter.put("/:id", async (c) => {
   const body = await c.req.json();
   const updated = await parser.updateMoscowAnalysis(id, body);
   if (!updated) return errorResponse("Not found", 404);
+  await cacheWriteThrough(c, "moscow");
   return jsonResponse(updated);
 });
 
@@ -51,5 +55,6 @@ moscowRouter.delete("/:id", async (c) => {
   const id = c.req.param("id");
   const success = await parser.deleteMoscowAnalysis(id);
   if (!success) return errorResponse("Not found", 404);
+  cachePurge(c, "moscow", id);
   return jsonResponse({ success: true });
 });
