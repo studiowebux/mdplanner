@@ -92,7 +92,12 @@ function setupTestData(db: CacheDatabase): void {
   );
   db.execute(
     "INSERT INTO people (id, name, title, notes) VALUES (?, ?, ?, ?)",
-    ["person-2", "Bob Chen", "Product Manager", "Owns product roadmap and sprint planning"],
+    [
+      "person-2",
+      "Bob Chen",
+      "Product Manager",
+      "Owns product roadmap and sprint planning",
+    ],
   );
 }
 
@@ -343,6 +348,161 @@ Deno.test("SearchEngine - search is case insensitive", () => {
   // All should find the same task
   assertEquals(lowerResults.length, upperResults.length);
   assertEquals(lowerResults.length, mixedResults.length);
+
+  db.close();
+});
+
+Deno.test("SearchEngine - search returns matching swot analyses", () => {
+  const db = new CacheDatabase(TEST_DB);
+  initSchema(db);
+
+  db.execute(
+    "INSERT INTO swot (id, title, date) VALUES (?, ?, ?)",
+    ["swot-1", "Market Opportunity Analysis", "2026-02-22"],
+  );
+
+  const search = new SearchEngine(db);
+  const results = search.search("Market");
+
+  const result = results.find((r) => r.type === "swot");
+  assertExists(result);
+  assertEquals(result!.id, "swot-1");
+  assertEquals(result!.title, "Market Opportunity Analysis");
+
+  db.close();
+});
+
+Deno.test("SearchEngine - search returns matching briefs", () => {
+  const db = new CacheDatabase(TEST_DB);
+  initSchema(db);
+
+  db.execute(
+    "INSERT INTO brief (id, title, date) VALUES (?, ?, ?)",
+    ["brief-1", "Q1 Product Launch Brief", "2026-02-22"],
+  );
+
+  const search = new SearchEngine(db);
+  const results = search.search("Product Launch");
+
+  const result = results.find((r) => r.type === "brief");
+  assertExists(result);
+  assertEquals(result!.id, "brief-1");
+
+  db.close();
+});
+
+Deno.test("SearchEngine - search returns matching retrospectives", () => {
+  const db = new CacheDatabase(TEST_DB);
+  initSchema(db);
+
+  db.execute(
+    "INSERT INTO retrospectives (id, title, date, status) VALUES (?, ?, ?, ?)",
+    ["retro-1", "Sprint 12 Retrospective", "2026-02-22", "closed"],
+  );
+
+  const search = new SearchEngine(db);
+  const results = search.search("Sprint");
+
+  const result = results.find((r) => r.type === "retrospective");
+  assertExists(result);
+  assertEquals(result!.id, "retro-1");
+
+  db.close();
+});
+
+Deno.test("SearchEngine - search returns matching companies", () => {
+  const db = new CacheDatabase(TEST_DB);
+  initSchema(db);
+
+  db.execute(
+    "INSERT INTO companies (id, name, notes, created) VALUES (?, ?, ?, ?)",
+    ["co-1", "Acme Corporation", "Enterprise software partner", "2026-01-01"],
+  );
+
+  const search = new SearchEngine(db);
+  const results = search.search("Acme");
+
+  const result = results.find((r) => r.type === "company");
+  assertExists(result);
+  assertEquals(result!.id, "co-1");
+  assertEquals(result!.title, "Acme Corporation");
+
+  db.close();
+});
+
+Deno.test("SearchEngine - search returns matching contacts", () => {
+  const db = new CacheDatabase(TEST_DB);
+  initSchema(db);
+
+  db.execute(
+    "INSERT INTO contacts (id, first_name, last_name, notes, created) VALUES (?, ?, ?, ?, ?)",
+    ["ct-1", "Sarah", "Johnson", "Senior buyer at Acme", "2026-01-01"],
+  );
+
+  const search = new SearchEngine(db);
+  const results = search.search("Sarah");
+
+  const result = results.find((r) => r.type === "contact");
+  assertExists(result);
+  assertEquals(result!.id, "ct-1");
+  assertEquals(result!.title, "Sarah");
+
+  db.close();
+});
+
+Deno.test("SearchEngine - search returns matching portfolio items", () => {
+  const db = new CacheDatabase(TEST_DB);
+  initSchema(db);
+
+  db.execute(
+    "INSERT INTO portfolio (id, name, status) VALUES (?, ?, ?)",
+    ["port-1", "Website Redesign Project", "active"],
+  );
+
+  const search = new SearchEngine(db);
+  const results = search.search("Website Redesign");
+
+  const result = results.find((r) => r.type === "portfolio");
+  assertExists(result);
+  assertEquals(result!.id, "port-1");
+
+  db.close();
+});
+
+Deno.test("SearchEngine - search returns matching moscow analyses", () => {
+  const db = new CacheDatabase(TEST_DB);
+  initSchema(db);
+
+  db.execute(
+    "INSERT INTO moscow (id, title, date) VALUES (?, ?, ?)",
+    ["moscow-1", "Feature Prioritization Q2", "2026-02-22"],
+  );
+
+  const search = new SearchEngine(db);
+  const results = search.search("Prioritization");
+
+  const result = results.find((r) => r.type === "moscow");
+  assertExists(result);
+  assertEquals(result!.id, "moscow-1");
+
+  db.close();
+});
+
+Deno.test("SearchEngine - search returns matching eisenhower matrices", () => {
+  const db = new CacheDatabase(TEST_DB);
+  initSchema(db);
+
+  db.execute(
+    "INSERT INTO eisenhower (id, title, date) VALUES (?, ?, ?)",
+    ["ei-1", "Weekly Task Matrix", "2026-02-22"],
+  );
+
+  const search = new SearchEngine(db);
+  const results = search.search("Weekly Task");
+
+  const result = results.find((r) => r.type === "eisenhower");
+  assertExists(result);
+  assertEquals(result!.id, "ei-1");
 
   db.close();
 });

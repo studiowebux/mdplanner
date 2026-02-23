@@ -10,8 +10,18 @@ const VIEW_BY_TYPE = {
   goal: "goals",
   idea: "ideas",
   meeting: "meetings",
-  finance: "finances",
   person: "people",
+  swot: "swot",
+  brief: "brief",
+  company: "crm",
+  contact: "crm",
+  retrospective: "retrospectives",
+  portfolio: "portfolio",
+  moscow: "moscow",
+  eisenhower: "eisenhower",
+  onboarding: "onboarding",
+  onboarding_template: "onboarding",
+  financial_period: "finances",
 };
 
 const TYPE_LABELS = {
@@ -20,8 +30,18 @@ const TYPE_LABELS = {
   goal: "Goal",
   idea: "Idea",
   meeting: "Meeting",
-  finance: "Finance",
   person: "Person",
+  swot: "SWOT",
+  brief: "Brief",
+  company: "Company",
+  contact: "Contact",
+  retrospective: "Retrospective",
+  portfolio: "Portfolio",
+  moscow: "MoSCoW",
+  eisenhower: "Eisenhower",
+  onboarding: "Onboarding",
+  onboarding_template: "Template",
+  financial_period: "Finance",
 };
 
 export class GlobalSearch {

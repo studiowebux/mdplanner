@@ -3,12 +3,33 @@
  * Pattern: Strategy pattern - search across multiple entity types
  *
  * Uses SQLite FTS5 for fast full-text search with ranking.
+ * Iterates ENTITIES registry for FTS-enabled types — no hardcoded methods.
  */
 
 import { CacheDatabase } from "./database.ts";
+import { ENTITIES, type EntityDef } from "./entities.ts";
+
+export type SearchResultType =
+  | "task"
+  | "note"
+  | "goal"
+  | "idea"
+  | "meeting"
+  | "person"
+  | "swot"
+  | "brief"
+  | "company"
+  | "contact"
+  | "retrospective"
+  | "portfolio"
+  | "moscow"
+  | "eisenhower"
+  | "onboarding"
+  | "onboarding_template"
+  | "financial_period";
 
 export interface SearchResult {
-  type: "task" | "note" | "goal" | "idea" | "meeting" | "person";
+  type: SearchResultType;
   id: string;
   title: string;
   snippet: string;
@@ -17,7 +38,7 @@ export interface SearchResult {
 
 export interface SearchOptions {
   limit?: number;
-  types?: ("task" | "note" | "goal" | "idea" | "meeting" | "person")[];
+  types?: SearchResultType[];
   offset?: number;
 }
 
@@ -34,6 +55,9 @@ export interface SearchStats {
   total: number;
 }
 
+/** FTS-enabled entities, derived from the registry. */
+const FTS_ENTITIES = ENTITIES.filter((e) => e.fts !== undefined);
+
 /**
  * Full-text search engine using FTS5.
  */
@@ -47,207 +71,54 @@ export class SearchEngine {
     if (!query.trim()) return [];
 
     const limit = options?.limit ?? 50;
-    const types = options?.types ??
-      ["task", "note", "goal", "idea", "meeting", "person"];
+    const activeTypes = options?.types ??
+      FTS_ENTITIES.map((e) => e.fts!.type as SearchResultType);
+
+    const safeQuery = this.escapeQuery(query);
     const results: SearchResult[] = [];
 
-    // Escape special FTS5 characters
-    const safeQuery = this.escapeQuery(query);
-
-    if (types.includes("task")) {
-      results.push(...this.searchTasks(safeQuery, limit));
-    }
-    if (types.includes("note")) {
-      results.push(...this.searchNotes(safeQuery, limit));
-    }
-    if (types.includes("goal")) {
-      results.push(...this.searchGoals(safeQuery, limit));
-    }
-    if (types.includes("idea")) {
-      results.push(...this.searchIdeas(safeQuery, limit));
-    }
-    if (types.includes("meeting")) {
-      results.push(...this.searchMeetings(safeQuery, limit));
-    }
-    if (types.includes("person")) {
-      results.push(...this.searchPeople(safeQuery, limit));
+    for (const entity of FTS_ENTITIES) {
+      if (!activeTypes.includes(entity.fts!.type as SearchResultType)) continue;
+      results.push(...this.searchEntity(entity, safeQuery, limit));
     }
 
     // Sort by score (lower is better in bm25)
     results.sort((a, b) => a.score - b.score);
 
-    // Apply global limit
+    // Apply global limit with offset
     return results.slice(options?.offset ?? 0, (options?.offset ?? 0) + limit);
   }
 
   /**
-   * Search tasks.
+   * Search a single FTS-enabled entity.
    */
-  private searchTasks(query: string, limit: number): SearchResult[] {
+  private searchEntity(
+    entity: EntityDef,
+    query: string,
+    limit: number,
+  ): SearchResult[] {
+    const { fts, table } = entity;
+    if (!fts) return [];
+    const contentColIdx = fts.columns.indexOf(fts.contentCol);
     try {
       const rows = this.db.query<{
-        id: string;
-        title: string;
-        snippet: string;
-        score: number;
+        [key: string]: unknown;
       }>(
-        `SELECT
-          id,
-          title,
-          snippet(tasks_fts, 2, '<mark>', '</mark>', '...', 32) as snippet,
-          bm25(tasks_fts) as score
-        FROM tasks_fts
-        WHERE tasks_fts MATCH ?
-        ORDER BY score
-        LIMIT ?`,
-        [query, limit],
-      );
-      return rows.map((r) => ({ ...r, type: "task" as const }));
-    } catch {
-      return [];
-    }
-  }
-
-  /**
-   * Search notes.
-   */
-  private searchNotes(query: string, limit: number): SearchResult[] {
-    try {
-      const rows = this.db.query<{
-        id: string;
-        title: string;
-        snippet: string;
-        score: number;
-      }>(
-        `SELECT
-          id,
-          title,
-          snippet(notes_fts, 2, '<mark>', '</mark>', '...', 32) as snippet,
-          bm25(notes_fts) as score
-        FROM notes_fts
-        WHERE notes_fts MATCH ?
-        ORDER BY score
-        LIMIT ?`,
-        [query, limit],
-      );
-      return rows.map((r) => ({ ...r, type: "note" as const }));
-    } catch {
-      return [];
-    }
-  }
-
-  /**
-   * Search goals.
-   */
-  private searchGoals(query: string, limit: number): SearchResult[] {
-    try {
-      const rows = this.db.query<{
-        id: string;
-        title: string;
-        snippet: string;
-        score: number;
-      }>(
-        `SELECT
-          id,
-          title,
-          snippet(goals_fts, 2, '<mark>', '</mark>', '...', 32) as snippet,
-          bm25(goals_fts) as score
-        FROM goals_fts
-        WHERE goals_fts MATCH ?
-        ORDER BY score
-        LIMIT ?`,
-        [query, limit],
-      );
-      return rows.map((r) => ({ ...r, type: "goal" as const }));
-    } catch {
-      return [];
-    }
-  }
-
-  /**
-   * Search ideas.
-   */
-  private searchIdeas(query: string, limit: number): SearchResult[] {
-    try {
-      const rows = this.db.query<{
-        id: string;
-        title: string;
-        snippet: string;
-        score: number;
-      }>(
-        `SELECT
-          id,
-          title,
-          snippet(ideas_fts, 2, '<mark>', '</mark>', '...', 32) as snippet,
-          bm25(ideas_fts) as score
-        FROM ideas_fts
-        WHERE ideas_fts MATCH ?
-        ORDER BY score
-        LIMIT ?`,
-        [query, limit],
-      );
-      return rows.map((r) => ({ ...r, type: "idea" as const }));
-    } catch {
-      return [];
-    }
-  }
-
-  /**
-   * Search meetings.
-   */
-  private searchMeetings(query: string, limit: number): SearchResult[] {
-    try {
-      const rows = this.db.query<{
-        id: string;
-        title: string;
-        snippet: string;
-        score: number;
-      }>(
-        `SELECT
-          id,
-          title,
-          snippet(meetings_fts, 2, '<mark>', '</mark>', '...', 32) as snippet,
-          bm25(meetings_fts) as score
-        FROM meetings_fts
-        WHERE meetings_fts MATCH ?
-        ORDER BY score
-        LIMIT ?`,
-        [query, limit],
-      );
-      return rows.map((r) => ({ ...r, type: "meeting" as const }));
-    } catch {
-      return [];
-    }
-  }
-
-  /**
-   * Search people.
-   */
-  private searchPeople(query: string, limit: number): SearchResult[] {
-    try {
-      const rows = this.db.query<{
-        id: string;
-        name: string;
-        snippet: string;
-        score: number;
-      }>(
-        `SELECT
-          id,
-          name,
-          snippet(people_fts, 2, '<mark>', '</mark>', '...', 32) as snippet,
-          bm25(people_fts) as score
-        FROM people_fts
-        WHERE people_fts MATCH ?
+        `SELECT ${fts.titleCol}, id,
+          snippet(${table}_fts, ${contentColIdx}, '<mark>', '</mark>', '...', 32) as snippet,
+          bm25(${table}_fts) as score
+        FROM ${table}_fts
+        WHERE ${table}_fts MATCH ?
         ORDER BY score
         LIMIT ?`,
         [query, limit],
       );
       return rows.map((r) => ({
-        id: r.id,
-        title: r.name,
-        snippet: r.snippet,
-        score: r.score,
-        type: "person" as const,
+        id: r.id as string,
+        title: r[fts.titleCol] as string,
+        snippet: r.snippet as string,
+        score: r.score as number,
+        type: fts.type as SearchResultType,
       }));
     } catch {
       return [];
@@ -255,7 +126,7 @@ export class SearchEngine {
   }
 
   /**
-   * Get search stats (counts).
+   * Get search stats (counts per key entity type + total across all entities).
    */
   getStats(): SearchStats {
     const count = (table: string): number => {
@@ -276,6 +147,9 @@ export class SearchEngine {
     const companies = count("companies");
     const deals = count("deals");
 
+    // Total includes every cached entity
+    const total = ENTITIES.reduce((sum, e) => sum + count(e.table), 0);
+
     return {
       tasks,
       notes,
@@ -286,8 +160,7 @@ export class SearchEngine {
       milestones,
       companies,
       deals,
-      total: tasks + notes + goals + ideas + meetings + people + milestones +
-        companies + deals,
+      total,
     };
   }
 
@@ -295,8 +168,6 @@ export class SearchEngine {
    * Escape special FTS5 characters.
    */
   private escapeQuery(query: string): string {
-    // FTS5 uses double quotes for phrase search
-    // Escape special characters: ^ $ * + ? . ( ) [ ] { } | \
     return query
       .replace(/[\\]/g, "\\\\")
       .replace(/["]/g, '""')
