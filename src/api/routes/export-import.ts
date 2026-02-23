@@ -5,6 +5,7 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cacheWriteThrough,
   corsHeaders,
   errorResponse,
   getParser,
@@ -459,6 +460,7 @@ exportImportRouter.post("/import/csv/tasks", async (c) => {
     importedCount++;
   }
 
+  await cacheWriteThrough(c, "tasks");
   return jsonResponse({ success: true, imported: importedCount });
 });
 
@@ -470,6 +472,7 @@ exportImportRouter.post("/import/csv/canvas", async (c) => {
   const projectInfo = await parser.readProjectInfo();
   projectInfo.stickyNotes = stickyNotes;
   await parser.saveProjectInfo(projectInfo);
+  await cacheWriteThrough(c, "sticky_notes");
   return jsonResponse({ success: true, imported: stickyNotes.length });
 });
 

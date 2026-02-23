@@ -5,6 +5,7 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -55,5 +56,6 @@ projectRouter.post("/rewrite", async (c) => {
   console.log("Current tasks count:", tasks.length);
   await parser.writeTasks(tasks, body.sections);
   console.log("Tasks rewritten with sections:", body.sections);
+  await cacheWriteThrough(c, "tasks");
   return jsonResponse({ success: true });
 });
