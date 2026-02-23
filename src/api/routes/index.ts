@@ -57,6 +57,9 @@ import { searchRouter } from "./search.ts";
 // Uploads routes
 import { uploadsRouter } from "./uploads.ts";
 
+// TTS proxy routes
+import { ttsRouter } from "./tts.ts";
+
 export function createApiRouter(
   projectManager: ProjectManager,
 ): Hono<{ Variables: AppVariables }> {
@@ -142,6 +145,9 @@ export function createApiRouter(
 
   // Uploads routes
   api.route("/uploads", uploadsRouter);
+
+  // TTS proxy routes (avoids browser CORS on cross-origin TTS services)
+  api.route("/tts", ttsRouter);
 
   // 404 handler
   api.notFound((c) => {

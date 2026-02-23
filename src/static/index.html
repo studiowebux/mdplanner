@@ -795,6 +795,13 @@
           >
             Uploads
           </button>
+          <button
+            id="ollamaViewBtn"
+            data-view="ollama"
+            class="nav-dropdown-btn"
+          >
+            AI Chat
+          </button>
         </div>
       </div>
 
@@ -1076,6 +1083,12 @@
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
             >
               Uploads
+            </button>
+            <button
+              id="ollamaViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              AI Chat
             </button>
             <button
               id="configViewBtnMobile"
@@ -1650,6 +1663,179 @@
           <!-- P&L tab -->
           <div id="financesPanel-pl" class="hidden">
             <div id="financesPLContainer"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Chat (Ollama) View -->
+      <div id="ollamaView" class="hidden">
+        <div class="ollama-view-root">
+
+          <!-- Main chat area — centered, full height -->
+          <div class="chat">
+
+            <!-- Config panel — overlay from the right, inside the chat container -->
+            <div class="config-panel" id="configPanel">
+              <div class="config-panel-header">
+                <span>Configuration</span>
+                <button class="btn-ghost" onclick="App.toggleConfig()">Close</button>
+              </div>
+              <div class="config-panel-body">
+                <div>
+                  <label>Ollama Base URL</label>
+                  <input id="configBaseUrl" placeholder="http://localhost:11434" />
+                </div>
+                <div class="config-row">
+                  <div>
+                    <label>Model</label>
+                    <select id="configModelSelect"></select>
+                  </div>
+                  <div class="config-btn-row">
+                    <button class="btn-ghost" onclick="App.loadModels()">Refresh</button>
+                    <button class="btn-ghost" onclick="App.unloadModel()" title="Unload model from VRAM">Unload</button>
+                  </div>
+                </div>
+                <div>
+                  <label>System Prompt</label>
+                  <textarea id="configSystemPrompt" rows="3" placeholder="Optional: set a system prompt..."></textarea>
+                </div>
+                <div class="slider-group">
+                  <div>
+                    <div class="slider-label">
+                      <label>Temperature</label>
+                      <span id="tempValue">0.7</span>
+                    </div>
+                    <input type="range" id="configTemperature" min="0" max="2" step="0.1" value="0.7" />
+                  </div>
+                  <div>
+                    <div class="slider-label">
+                      <label>Top P</label>
+                      <span id="topPValue">0.9</span>
+                    </div>
+                    <input type="range" id="configTopP" min="0" max="1" step="0.05" value="0.9" />
+                  </div>
+                </div>
+                <div>
+                  <div class="slider-label">
+                    <label>Context Size (num_ctx)</label>
+                    <span id="numCtxValue">8192</span>
+                  </div>
+                  <input type="range" id="configNumCtx" min="2048" max="131072" step="1024" value="8192" />
+                </div>
+                <div>
+                  <label>Search URL (SearXNG — optional)</label>
+                  <input id="configSearchUrl" placeholder="http://localhost:8888" />
+                </div>
+                <div>
+                  <label>Chatterbox TTS URL (optional)</label>
+                  <input id="configChatterboxUrl" placeholder="http://localhost:8001" />
+                </div>
+                <div class="config-row">
+                  <div>
+                    <label>TTS Voice</label>
+                    <select id="configChatterboxVoice"><option value="">-- select voice --</option></select>
+                  </div>
+                  <div class="config-tts-voice-refresh">
+                    <button class="btn-ghost" onclick="App.loadChatterboxVoices()">Refresh</button>
+                  </div>
+                </div>
+                <div>
+                  <label class="ollama-tts-label">
+                    <input type="checkbox" id="configChatterboxAutoUnload" class="ollama-checkbox" />
+                    Auto-unload Ollama
+                  </label>
+                </div>
+                <div>
+                  <label class="ollama-tts-label">
+                    <input type="checkbox" id="configChatterboxSplit" class="ollama-checkbox" />
+                    Split text <input type="number" id="configChatterboxSplitChars" min="100" max="2000" step="50" value="400" class="ollama-split-chars" /> chars
+                  </label>
+                </div>
+                <div class="slider-group">
+                  <div>
+                    <div class="slider-label">
+                      <label>TTS Exaggeration</label>
+                      <span id="ttsExagerationValue">0.5</span>
+                    </div>
+                    <input type="range" id="configChatterboxExageration" min="0" max="2" step="0.05" value="0.5" />
+                  </div>
+                  <div>
+                    <div class="slider-label">
+                      <label>TTS CFG Weight</label>
+                      <span id="ttsCfgWeightValue">0.5</span>
+                    </div>
+                    <input type="range" id="configChatterboxCfgWeight" min="0" max="1" step="0.05" value="0.5" />
+                  </div>
+                </div>
+                <div>
+                  <label>Storage Key</label>
+                  <input id="configStorageKey" placeholder="ollama-chat-history" />
+                </div>
+                <button class="btn-primary" onclick="App.saveConfig()">Save Config</button>
+              </div>
+            </div>
+
+            <!-- Prompt panel — overlay from the right, inside the chat container -->
+            <div class="prompt-panel" id="promptPanel" style="display:none">
+              <div class="config-panel-header">
+                <span>Saved Prompts</span>
+                <button class="btn-ghost" onclick="App.togglePromptPanel()">Close</button>
+              </div>
+              <div class="config-panel-body">
+                <div class="prompt-list" id="promptList"></div>
+                <div class="prompt-add">
+                  <input id="newPromptTitle" placeholder="Title" />
+                  <textarea id="newPromptContent" rows="2" placeholder="Prompt content..."></textarea>
+                  <div class="prompt-actions">
+                    <button class="btn-ghost" onclick="App.addPrompt()">Add</button>
+                    <button class="btn-ghost" onclick="App.exportPrompts()">Export JSON</button>
+                    <label class="prompt-import-label">
+                      Import
+                      <input type="file" accept=".json" style="display:none" onchange="App.importPrompts(this)" />
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <header>
+              <div class="left">
+                <span class="connection-dot" id="connectionDot" title="Connection status"></span>
+                <span>Ollama Chat</span>
+                <span class="badge" id="headerModel" style="display: none"></span>
+                <span class="badge" id="headerCtx" style="display: none"></span>
+                <span class="ctx-usage" id="ctxUsageWrap" style="display: none">
+                  <span class="ctx-usage-text" id="ctxUsage"></span>
+                  <span class="ctx-usage-track"><span class="ctx-usage-bar" id="ctxBar"></span></span>
+                </span>
+              </div>
+              <div class="right">
+                <button id="themeToggleBtn" onclick="App.toggleTheme()">Light</button>
+                <button class="btn-ghost" onclick="App.exportChat()">Export</button>
+                <button class="btn-ghost" onclick="App.togglePromptPanel()">Prompts</button>
+                <button class="btn-ghost" onclick="App.toggleConfig()">Config</button>
+                <button class="btn-ghost" onclick="App.clearChat()">Clear</button>
+              </div>
+            </header>
+
+            <div class="branch-nav" id="branchNav" style="display:none">
+              <button id="branchPrev" onclick="App.navigateBranch(-1)">&lt;</button>
+              <span id="branchLabel"></span>
+              <button id="branchNext" onclick="App.navigateBranch(1)">&gt;</button>
+            </div>
+
+            <div class="messages" id="messages"></div>
+            <button class="scroll-bottom-btn" id="scrollBottomBtn">Bottom</button>
+            <div class="typing" id="typing"></div>
+
+            <div id="imagePreview" class="image-preview"></div>
+
+            <div class="input-area" style="position:relative">
+              <button class="search-toggle-btn" id="searchToggleBtn" onclick="App.toggleSearch()" title="Toggle web search">Search</button>
+              <button class="attach-btn" id="attachBtn" title="Attach image">Attach</button>
+              <textarea id="input" rows="1" placeholder="Type a message... (Enter to send, Shift+Enter for newline)"></textarea>
+              <span id="charCount" class="char-count"></span>
+              <button class="send-btn" id="sendBtn">Send</button>
+            </div>
           </div>
         </div>
       </div>
@@ -13360,6 +13546,20 @@
     </div>
 
     <script src="vendor/marked/marked.min.js"></script>
+
+    <!-- OllamaUI vendors (highlight.js + marked-highlight; reuses marked above) -->
+    <script src="vendors/ollamaui/highlight.min.js"></script>
+    <script src="vendors/ollamaui/marked-highlight.umd.js"></script>
+
+    <!-- OllamaUI modules (load order matters: state first, input last) -->
+    <script src="modules/features/ollamaui/state.js"></script>
+    <script src="modules/features/ollamaui/markdown.js"></script>
+    <script src="modules/features/ollamaui/config.js"></script>
+    <script src="modules/features/ollamaui/messages.js"></script>
+    <script src="modules/features/ollamaui/chat.js"></script>
+    <script src="modules/features/ollamaui/actions.js"></script>
+    <script src="modules/features/ollamaui/input.js"></script>
+
     <script type="module" src="app.js"></script>
 
     <!-- Finances Sidenav -->

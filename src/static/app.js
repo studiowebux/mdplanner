@@ -86,6 +86,7 @@ import { ImportExportModule } from "./modules/import-export.js";
 import { ProjectsModule } from "./modules/projects.js";
 import { UploadsView } from "./modules/views/uploads.js";
 import { GlobalSearch } from "./modules/features/search.js";
+import { OllamaModule } from "./modules/features/ollama.js";
 
 class TaskManager {
   constructor() {
@@ -284,6 +285,7 @@ class TaskManager {
     this.importExportModule = new ImportExportModule(this);
     this.projectsModule = new ProjectsModule(this);
     this.uploadsView = new UploadsView(this);
+    this.ollamaModule = new OllamaModule(this);
     this.globalSearch = new GlobalSearch(this);
 
     this.init();
@@ -404,6 +406,7 @@ class TaskManager {
       { id: "peopleViewBtn", view: "people" },
       { id: "portfolioViewBtn", view: "portfolio" },
       { id: "uploadsViewBtn", view: "uploads" },
+      { id: "ollamaViewBtn", view: "ollama" },
       { id: "meetingsViewBtn", view: "meetings" },
       { id: "onboardingViewBtn", view: "onboarding" },
       { id: "financesViewBtn", view: "finances" },
@@ -649,6 +652,12 @@ class TaskManager {
       .getElementById("financesViewBtnMobile")
       ?.addEventListener("click", () => {
         this.switchView("finances");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("ollamaViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("ollama");
         this.closeMobileMenu();
       });
 
@@ -916,6 +925,7 @@ class TaskManager {
       "meetings",
       "onboarding",
       "finances",
+      "ollama",
     ];
 
     // If no features configured, show everything
@@ -980,6 +990,7 @@ class TaskManager {
       meetings: "Meetings",
       onboarding: "Onboarding",
       finances: "Finances",
+      ollama: "AI Chat",
       config: "Settings",
     };
     const label = document.getElementById("currentViewLabel");
@@ -1100,6 +1111,8 @@ class TaskManager {
       "portfolioViewBtnMobile",
       "meetingsViewBtnMobile",
       "onboardingViewBtnMobile",
+      "financesViewBtnMobile",
+      "ollamaViewBtnMobile",
       "configViewBtnMobile",
     ];
     mobileBtnIds.forEach((id) => {
@@ -1142,6 +1155,7 @@ class TaskManager {
     document.getElementById("meetingsView")?.classList.add("hidden");
     document.getElementById("onboardingView")?.classList.add("hidden");
     document.getElementById("financesView")?.classList.add("hidden");
+    document.getElementById("ollamaView")?.classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
     document.getElementById("mindmapView").classList.add("hidden");
     document.getElementById("c4View").classList.add("hidden");
@@ -1290,6 +1304,10 @@ class TaskManager {
       this.activateViewButton("finances");
       document.getElementById("financesView").classList.remove("hidden");
       this.financesModule.load();
+    } else if (view === "ollama") {
+      this.activateViewButton("ollama");
+      document.getElementById("ollamaView").classList.remove("hidden");
+      this.ollamaModule.load();
     } else if (view === "config") {
       this.activateViewButton("config");
       document.getElementById("configView").classList.remove("hidden");

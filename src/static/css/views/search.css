@@ -18,9 +18,9 @@
 }
 
 .search-box {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
   width: min(560px, calc(100vw - 2rem));
   max-height: 70vh;
@@ -38,13 +38,13 @@
   align-items: center;
   gap: 0.625rem;
   padding: 0.75rem 1rem;
-  border-block-end: 1px solid var(--border);
+  border-block-end: 1px solid var(--color-border-default);
   flex-shrink: 0;
 }
 
 .search-input-row svg {
   flex-shrink: 0;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .search-input-field {
@@ -53,19 +53,19 @@
   border: none;
   outline: none;
   font-size: var(--font-size-base);
-  color: var(--text);
+  color: var(--color-text-primary);
   font-family: inherit;
 }
 
 .search-input-field::placeholder {
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
 }
 
 .search-kbd-hint {
   font-size: var(--font-size-xs);
   color: var(--text-tertiary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
   padding: 0.1rem 0.35rem;
   font-family: var(--font-mono);
   flex-shrink: 0;
@@ -86,7 +86,7 @@
   gap: 0.75rem;
   padding: 0.625rem 1rem;
   cursor: pointer;
-  border-block-end: 1px solid var(--border);
+  border-block-end: 1px solid var(--color-border-default);
   transition: background var(--transition-fast, 0.1s);
 }
 
@@ -96,17 +96,17 @@
 
 .search-result-row:hover,
 .search-result-active {
-  background: var(--surface);
+  background: var(--color-bg-secondary);
 }
 
 .search-result-type {
   font-size: var(--font-size-xs);
   font-weight: 600;
   padding: 0.15rem 0.4rem;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  color: var(--text-secondary);
-  background: var(--surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
   white-space: nowrap;
   flex-shrink: 0;
   margin-block-start: 0.1rem;
@@ -121,7 +121,7 @@
 
 .search-result-title {
   font-size: var(--font-size-base);
-  color: var(--text);
+  color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -140,7 +140,7 @@
 
 .search-result-snippet mark {
   background: none;
-  color: var(--text);
+  color: var(--color-text-primary);
   font-weight: 600;
 }
 
@@ -153,9 +153,9 @@
 
 .search-empty code {
   font-family: var(--font-mono);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
   padding: 0.1rem 0.35rem;
 }
 
@@ -168,10 +168,10 @@
   align-items: center;
   gap: 0.375rem;
   padding: 0.3rem 0.625rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text-secondary);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   cursor: pointer;
   white-space: nowrap;
@@ -180,12 +180,12 @@
 }
 
 .search-trigger-btn:hover {
-  color: var(--text);
-  border-color: var(--text-secondary);
+  color: var(--color-text-primary);
+  border-color: var(--color-text-secondary);
 }
 
 .search-trigger-btn .search-trigger-kbd {
   font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   font-family: var(--font-mono);
 }
