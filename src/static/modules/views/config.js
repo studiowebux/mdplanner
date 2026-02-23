@@ -288,6 +288,7 @@ export class ConfigView {
       "Finances": [
         { id: "fundraising", label: "Fundraising" },
         { id: "billing", label: "Billing" },
+        { id: "finances", label: "Finances" },
       ],
       "Diagrams": [
         { id: "canvas", label: "Canvas" },
