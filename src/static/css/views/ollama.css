@@ -1,0 +1,1154 @@
+/* ollama.css — scoped styles for the Ollama chat view
+ *
+ * All rules are scoped under .ollama-view-root to avoid polluting
+ * mdplanner's global CSS. Uses mdplanner's theme variable system
+ * (--color-*, --font-size-*, --space-*) — dark mode is handled
+ * automatically via the .dark class on <html>.
+ *
+ * Source: adapted from ollamaui/style.css
+ */
+
+@import url("../../vendors/ollamaui/github-dark.min.css");
+
+/* Hide the chat's own theme toggle — mdplanner controls the theme */
+.ollama-view-root #themeToggleBtn {
+  display: none;
+}
+
+/* -------- Main layout sizing — hide nav header, full-screen chat -------- */
+
+body[data-current-view="ollama"] #main-content {
+  padding: 0;
+  max-width: none;
+}
+
+body[data-current-view="ollama"] #breadcrumb {
+  display: none;
+}
+
+/* -------- Layout -------- */
+
+.ollama-view-root {
+  position: relative; /* anchor for absolute overlay panels */
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  /* Mobile: header h-14 (3.5rem) + footer (2rem) + gaps (1.25rem * 2) = 8rem */
+  height: calc(100dvh - 8rem);
+  margin-top: 1.25rem;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Desktop: header h-12 + h-10 (5.5rem) + footer (2rem) + gaps (1.25rem * 2) = 10rem */
+@media (min-width: 1024px) {
+  .ollama-view-root {
+    height: calc(100dvh - 10rem);
+  }
+}
+
+.ollama-view-root .chat {
+  width: 100%;
+  max-width: 800px;
+  height: 100%;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* -------- Header -------- */
+
+.ollama-view-root header {
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--color-border-default);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+  letter-spacing: 0.01em;
+}
+
+.ollama-view-root header .left {
+  display: flex;
+  gap: 0.625rem;
+  align-items: center;
+  min-width: 0;
+}
+
+.ollama-view-root header .right {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.ollama-view-root .connection-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-text-muted);
+  background: transparent;
+  flex-shrink: 0;
+  transition: background var(--transition-fast);
+}
+
+.ollama-view-root .connection-dot.connected {
+  background: var(--color-text-primary);
+  border-color: var(--color-text-primary);
+}
+
+.ollama-view-root .connection-dot.disconnected {
+  background: transparent;
+  border-color: var(--color-text-muted);
+}
+
+/* Override mdplanner .badge defaults for the model/ctx header badges */
+.ollama-view-root .badge {
+  font-size: var(--font-size-xs);
+  padding: 2px var(--space-sm);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-default);
+  background: transparent;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  letter-spacing: 0.01em;
+  font-weight: normal;
+}
+
+.ollama-view-root .ctx-usage {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.ollama-view-root .ctx-usage-text {
+  min-width: 0;
+}
+
+.ollama-view-root .ctx-usage-track {
+  width: 60px;
+  height: 4px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-default);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ollama-view-root .ctx-usage-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--color-text-primary);
+  transition: width var(--transition-slow);
+}
+
+/* -------- Config Panel (right-side overlay, outside .chat) -------- */
+
+.ollama-view-root .config-panel,
+.ollama-view-root .prompt-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 360px;
+  max-width: 90vw;
+  background: var(--color-bg-secondary);
+  border-left: 1px solid var(--color-border-default);
+  z-index: 10;
+  display: none; /* JS sets display: flex to open */
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ollama-view-root .config-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--color-border-default);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  flex-shrink: 0;
+}
+
+.ollama-view-root .config-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.ollama-view-root .config-panel input,
+.ollama-view-root .config-panel select,
+.ollama-view-root .config-panel textarea {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-sm);
+  width: 100%;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+}
+
+.ollama-view-root .config-panel textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.ollama-view-root .config-panel label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  display: block;
+  margin-bottom: 2px;
+  letter-spacing: 0.02em;
+}
+
+.ollama-view-root .config-panel .config-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: flex-end;
+}
+
+.ollama-view-root .config-panel .config-row > div {
+  flex: 1;
+}
+
+/* Layout helpers for config rows */
+.ollama-view-root .config-btn-row {
+  flex: 0;
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.ollama-view-root .config-tts-voice-refresh {
+  flex: 0;
+  align-self: flex-start;
+  padding-top: 18px;
+}
+
+.ollama-view-root .config-tts-options {
+  flex: 0;
+  align-self: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* TTS option checkbox labels */
+.ollama-view-root .ollama-tts-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* Checkbox inside config panel — override the 100% width rule */
+.ollama-view-root .ollama-checkbox {
+  width: auto;
+  margin-right: var(--space-xs);
+}
+
+/* Small inline number input for split-chars setting */
+.ollama-view-root .ollama-split-chars {
+  width: 54px;
+  display: inline;
+  padding: 2px 4px;
+  font-size: var(--font-size-sm);
+}
+
+.ollama-view-root .slider-group {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.ollama-view-root .slider-group > div {
+  flex: 1;
+}
+
+.ollama-view-root .slider-group input[type="range"],
+.ollama-view-root .config-panel input[type="range"] {
+  width: 100%;
+  padding: 0;
+  margin-top: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--color-border-default);
+  outline: none;
+  cursor: pointer;
+}
+
+.ollama-view-root .slider-group input[type="range"]::-webkit-slider-thumb,
+.ollama-view-root .config-panel input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--color-text-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.ollama-view-root .slider-group input[type="range"]::-moz-range-thumb,
+.ollama-view-root .config-panel input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: var(--color-text-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.ollama-view-root .slider-group input[type="range"]::-moz-range-track,
+.ollama-view-root .config-panel input[type="range"]::-moz-range-track {
+  height: 4px;
+  background: var(--color-border-default);
+  border: none;
+}
+
+.ollama-view-root .slider-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* -------- Messages -------- */
+
+.ollama-view-root .messages {
+  flex: 1;
+  padding: var(--space-md);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.ollama-view-root .message {
+  padding: var(--space-sm) 0.875rem;
+  border-radius: var(--radius-sm);
+  max-width: 85%;
+  line-height: 1.6;
+  font-size: var(--font-size-base);
+  position: relative;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.ollama-view-root .message.user {
+  align-self: flex-end;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-default);
+  white-space: pre-wrap;
+}
+
+.ollama-view-root .message.assistant {
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.ollama-view-root .message.assistant p:first-child {
+  margin-top: 0;
+}
+
+.ollama-view-root .message.assistant p:last-child {
+  margin-bottom: 0;
+}
+
+.ollama-view-root .message-stats {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-border-default);
+  letter-spacing: 0.01em;
+}
+
+/* -------- Message Actions -------- */
+
+.ollama-view-root .message-actions {
+  display: flex;
+  gap: var(--space-xs);
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-border-default);
+}
+
+.ollama-view-root .msg-action-btn {
+  background: transparent;
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-muted);
+  padding: 2px var(--space-sm);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.02em;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.ollama-view-root .msg-action-btn:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.ollama-view-root .message.user .edit-btn {
+  position: absolute;
+  left: -30px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  font-size: var(--font-size-sm);
+  padding: 2px 4px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.ollama-view-root .message.user:hover .edit-btn {
+  opacity: 0.5;
+}
+
+.ollama-view-root .message.user .edit-btn:hover {
+  opacity: 1;
+}
+
+/* -------- Image Preview (below input) -------- */
+
+.ollama-view-root .image-preview {
+  display: flex;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md) 0;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.ollama-view-root .image-preview:empty {
+  display: none;
+  padding: 0;
+}
+
+.ollama-view-root .image-thumb {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--color-border-default);
+  flex-shrink: 0;
+}
+
+.ollama-view-root .image-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ollama-view-root .image-thumb-remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: rgba(0, 0, 0, 0.15);
+  border: none;
+  color: var(--color-text-primary);
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background var(--transition-fast);
+}
+
+.ollama-view-root .image-thumb-remove:hover {
+  background: var(--color-text-primary);
+  color: var(--color-bg-primary);
+}
+
+/* -------- User message images -------- */
+
+.ollama-view-root .user-msg-images {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-xs);
+}
+
+.ollama-view-root .user-msg-image {
+  max-width: 120px;
+  max-height: 120px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-default);
+  object-fit: cover;
+}
+
+/* -------- Search toggle button -------- */
+
+.ollama-view-root .search-toggle-btn {
+  background: none;
+  border: none;
+  border-right: 1px solid var(--color-border-default);
+  padding: var(--space-sm) var(--space-md);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  letter-spacing: 0.02em;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.ollama-view-root .search-toggle-btn:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.ollama-view-root .search-toggle-btn.active {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+
+/* -------- Search results -------- */
+
+.ollama-view-root .search-results {
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-border-default);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  white-space: normal;
+}
+
+.ollama-view-root .search-results summary {
+  cursor: pointer;
+  letter-spacing: 0.02em;
+}
+
+.ollama-view-root .search-results ol {
+  margin: var(--space-xs) 0 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ollama-view-root .search-results li {
+  line-height: 1.4;
+}
+
+.ollama-view-root .search-results a {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.ollama-view-root .search-results a:hover {
+  color: var(--color-text-muted);
+}
+
+.ollama-view-root .search-snippet {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+/* -------- Attach button -------- */
+
+.ollama-view-root .attach-btn {
+  background: none;
+  border: none;
+  border-right: 1px solid var(--color-border-default);
+  padding: var(--space-sm) var(--space-md);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  letter-spacing: 0.02em;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.ollama-view-root .attach-btn:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+/* -------- Markdown inside assistant messages -------- */
+
+.ollama-view-root .message.assistant h1,
+.ollama-view-root .message.assistant h2,
+.ollama-view-root .message.assistant h3,
+.ollama-view-root .message.assistant h4 {
+  margin: var(--space-md) 0 var(--space-sm) 0;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.ollama-view-root .message.assistant h1:first-child,
+.ollama-view-root .message.assistant h2:first-child,
+.ollama-view-root .message.assistant h3:first-child {
+  margin-top: 0;
+}
+
+.ollama-view-root .message.assistant h1 { font-size: 1.3em; }
+.ollama-view-root .message.assistant h2 { font-size: 1.15em; }
+.ollama-view-root .message.assistant h3 { font-size: 1.05em; }
+
+.ollama-view-root .message.assistant ul,
+.ollama-view-root .message.assistant ol {
+  padding-left: 20px;
+  margin: var(--space-sm) 0;
+}
+
+.ollama-view-root .message.assistant li {
+  margin: 3px 0;
+}
+
+.ollama-view-root .message.assistant blockquote {
+  border-left: 2px solid var(--color-border-default);
+  margin: var(--space-sm) 0;
+  padding: 4px 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.ollama-view-root .message.assistant .table-wrap {
+  overflow-x: auto;
+  margin: var(--space-sm) 0;
+}
+
+.ollama-view-root .message.assistant table {
+  border-collapse: collapse;
+  font-size: var(--font-size-base);
+  width: 100%;
+  min-width: 300px;
+}
+
+.ollama-view-root .message.assistant th,
+.ollama-view-root .message.assistant td {
+  border: 1px solid var(--color-border-default);
+  padding: var(--space-xs) var(--space-sm);
+  text-align: left;
+}
+
+.ollama-view-root .message.assistant th {
+  font-weight: 600;
+  background: var(--color-bg-secondary);
+}
+
+.ollama-view-root .message.assistant a {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.ollama-view-root .message.assistant a:hover {
+  color: var(--color-text-muted);
+}
+
+.ollama-view-root .message.assistant code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+}
+
+.ollama-view-root .message.assistant :not(pre) > code {
+  background: var(--color-bg-tertiary);
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-default);
+}
+
+.ollama-view-root .message.assistant pre {
+  margin: var(--space-sm) 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-default);
+  overflow-x: auto;
+  position: relative;
+}
+
+.ollama-view-root .message.assistant pre code {
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
+.ollama-view-root .code-block-wrapper {
+  position: relative;
+}
+
+/* Copy button: intentionally hardcoded dark colors since it overlays
+ * the highlight.js github-dark code block background. */
+.ollama-view-root .copy-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #888;
+  padding: 2px var(--space-sm);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  letter-spacing: 0.02em;
+}
+
+.ollama-view-root .code-block-wrapper:hover .copy-btn {
+  opacity: 1;
+}
+
+.ollama-view-root .copy-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ccc;
+}
+
+/* -------- Typing / Status -------- */
+
+.ollama-view-root .typing {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  padding: 0 var(--space-md) var(--space-xs);
+  min-height: 20px;
+  flex-shrink: 0;
+  letter-spacing: 0.01em;
+}
+
+/* -------- Input Area -------- */
+
+.ollama-view-root .input-area {
+  display: flex;
+  align-items: flex-end;
+  border-top: 1px solid var(--color-border-default);
+  flex-shrink: 0;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.ollama-view-root #input {
+  flex: 1;
+  padding: 0.875rem;
+  background: transparent;
+  border: none;
+  color: var(--color-text-primary);
+  outline: none;
+  font-family: inherit;
+  font-size: var(--font-size-lg);
+  resize: none;
+  min-height: 52px;
+  max-height: 150px;
+  line-height: 1.5;
+  overflow-y: auto;
+}
+
+.ollama-view-root #input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.ollama-view-root .send-btn {
+  background: var(--color-accent);
+  border: none;
+  padding: 0 var(--space-xl);
+  color: var(--color-text-inverse);
+  cursor: pointer;
+  align-self: stretch;
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  min-height: 48px;
+  letter-spacing: 0.02em;
+  transition: background var(--transition-fast);
+}
+
+.ollama-view-root .send-btn:hover {
+  background: var(--color-accent-hover);
+}
+
+.ollama-view-root .send-btn.stop {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.ollama-view-root .send-btn.stop:hover {
+  background: var(--color-bg-active);
+}
+
+/* -------- Scroll to bottom -------- */
+
+.ollama-view-root .scroll-bottom-btn {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-muted);
+  padding: 5px 0.875rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  display: none;
+  z-index: 10;
+  letter-spacing: 0.02em;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.ollama-view-root .scroll-bottom-btn:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+/* -------- TTS audio player -------- */
+
+.ollama-view-root .tts-player {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 2px 0;
+}
+
+.ollama-view-root .tts-btn {
+  background: transparent;
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-muted);
+  padding: 2px var(--space-sm);
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.ollama-view-root .tts-btn:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+/* -------- Branch navigation -------- */
+
+.ollama-view-root .branch-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-md);
+  border-bottom: 1px solid var(--color-border-default);
+  background: var(--color-bg-secondary);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+.ollama-view-root .branch-nav button {
+  background: transparent;
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-muted);
+  padding: 2px var(--space-sm);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.ollama-view-root .branch-nav button:hover:not(:disabled) {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.ollama-view-root .branch-nav button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* -------- Prompt panel content -------- */
+
+.ollama-view-root .prompt-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.ollama-view-root .prompt-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+}
+
+.ollama-view-root .prompt-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-primary);
+}
+
+.ollama-view-root .prompt-item button {
+  background: transparent;
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-muted);
+  padding: 2px var(--space-sm);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.ollama-view-root .prompt-item button:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.ollama-view-root .prompt-add {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-border-default);
+}
+
+.ollama-view-root .prompt-add input,
+.ollama-view-root .prompt-add textarea {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-sm);
+  width: 100%;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+}
+
+.ollama-view-root .prompt-add textarea {
+  resize: vertical;
+  min-height: 50px;
+}
+
+.ollama-view-root .prompt-actions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+/* Import prompt label (styled as ghost button) */
+.ollama-view-root .prompt-import-label {
+  cursor: pointer;
+  border: 1px solid var(--color-border-default);
+  padding: 0.3rem 0.625rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-md);
+  display: inline-block;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.ollama-view-root .prompt-import-label:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-strong);
+}
+
+/* -------- Character counter -------- */
+
+.ollama-view-root .char-count {
+  position: absolute;
+  bottom: 6px;
+  right: 72px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  opacity: 0.6;
+  pointer-events: none;
+  letter-spacing: 0.02em;
+}
+
+/* -------- Responsive -------- */
+
+@media (max-width: 840px) {
+  .ollama-view-root .chat {
+    max-width: 100%;
+    border-left: none;
+    border-right: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .ollama-view-root .chat {
+    border: none;
+    max-width: 100%;
+  }
+
+  .ollama-view-root header {
+    padding: var(--space-sm);
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .ollama-view-root header .left {
+    gap: var(--space-xs);
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .ollama-view-root header .right {
+    gap: 4px;
+  }
+
+  .ollama-view-root .badge {
+    max-width: 100px;
+    font-size: var(--font-size-xs);
+    padding: 2px var(--space-xs);
+  }
+
+  .ollama-view-root .ctx-usage {
+    display: none;
+  }
+
+  .ollama-view-root .config-panel {
+    padding: var(--space-sm) var(--space-md);
+    gap: var(--space-sm);
+    max-height: 50dvh;
+    overflow-y: auto;
+  }
+
+  .ollama-view-root .slider-group {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .ollama-view-root .config-panel .config-row {
+    flex-direction: column;
+    gap: var(--space-sm);
+    align-items: stretch;
+  }
+
+  .ollama-view-root .messages {
+    padding: var(--space-md);
+    gap: var(--space-sm);
+  }
+
+  .ollama-view-root .message {
+    max-width: 92%;
+    font-size: var(--font-size-base);
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .ollama-view-root .message.assistant {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .ollama-view-root .message.user .edit-btn {
+    position: static;
+    transform: none;
+    display: inline-block;
+    margin-top: var(--space-xs);
+    opacity: 0.5;
+    font-size: var(--font-size-xs);
+  }
+
+  .ollama-view-root .message.user:hover .edit-btn {
+    opacity: 1;
+  }
+
+  .ollama-view-root .message.assistant pre code {
+    font-size: var(--font-size-sm);
+  }
+
+  .ollama-view-root #input {
+    font-size: var(--font-size-base);
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .ollama-view-root .send-btn {
+    padding: 0 0.875rem;
+    font-size: var(--font-size-sm);
+    min-height: 48px;
+  }
+
+  .ollama-view-root .attach-btn {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-xs);
+  }
+
+  .ollama-view-root .image-preview {
+    padding: var(--space-xs) var(--space-md) 0;
+  }
+
+  .ollama-view-root .image-thumb {
+    width: 48px;
+    height: 48px;
+  }
+
+  .ollama-view-root .user-msg-image {
+    max-width: 80px;
+    max-height: 80px;
+  }
+
+  .ollama-view-root .scroll-bottom-btn {
+    bottom: 70px;
+    padding: 4px var(--space-md);
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 380px) {
+  .ollama-view-root header .left > span:not(.connection-dot) {
+    font-size: var(--font-size-sm);
+  }
+
+  .ollama-view-root header .right {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .ollama-view-root .badge {
+    display: none;
+  }
+
+  .ollama-view-root .message {
+    max-width: 96%;
+  }
+
+  .ollama-view-root .send-btn {
+    padding: 0 var(--space-sm);
+  }
+}

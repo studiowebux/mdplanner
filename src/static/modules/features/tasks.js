@@ -422,13 +422,17 @@ export class TasksModule {
     });
 
     // Search functionality - Desktop and Mobile
-    document.getElementById("searchInput").addEventListener("input", (e) => {
-      this.handleSearch(e.target.value);
-    });
-    document
-      .getElementById("searchInputMobile")
-      .addEventListener("input", (e) => {
+    const searchInput = document.getElementById("searchInput");
+    if (searchInput) {
+      searchInput.addEventListener("input", (e) => {
         this.handleSearch(e.target.value);
       });
+    }
+    const searchInputMobile = document.getElementById("searchInputMobile");
+    if (searchInputMobile) {
+      searchInputMobile.addEventListener("input", (e) => {
+        this.handleSearch(e.target.value);
+      });
+    }
   }
 }
