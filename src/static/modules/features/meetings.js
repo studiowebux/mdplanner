@@ -1,7 +1,7 @@
 // Meetings Module
 // Meeting list view with action items tracker
 
-import { MeetingsAPI } from "../api.js";
+import { MeetingsAPI, TasksAPI } from "../api.js";
 import { escapeHtml, markdownToHtml } from "../utils.js";
 
 export class MeetingsModule {
@@ -139,6 +139,14 @@ export class MeetingsModule {
             </span>
             ${action.owner ? `<span class="meeting-action-item-owner">@${escapeHtml(action.owner)}</span>` : ""}
             ${action.due ? `<span class="meeting-action-item-due ${overdue ? "meeting-action-item-due-overdue" : ""}">${action.due}</span>` : ""}
+            <button class="meeting-action-promote-btn"
+              data-description="${escapeHtml(action.description)}"
+              data-owner="${escapeHtml(action.owner || "")}"
+              data-due="${escapeHtml(action.due || "")}"
+              data-meeting="${escapeHtml(action.meetingTitle)}"
+              onclick="event.stopPropagation(); taskManager.meetingsModule.promoteToTask(this)">
+              Promote to task
+            </button>
           </div>
         </div>
       `;
@@ -199,7 +207,7 @@ export class MeetingsModule {
         <div class="meeting-view-section">
           <div class="meeting-view-section-title">Action Items</div>
           <div class="meeting-view-actions-list">
-            ${actions.map((a) => {
+            ${actions.map((a, idx) => {
         const overdue = a.status !== "done" && a.due && a.due < today;
         return `
                 <div class="meeting-view-action-row ${a.status === "done" ? "meeting-view-action-done" : ""}">
@@ -208,6 +216,7 @@ export class MeetingsModule {
                   <div class="meeting-view-action-meta">
                     ${a.owner ? `<span>@${escapeHtml(a.owner)}</span>` : ""}
                     ${a.due ? `<span class="${overdue ? "meeting-view-action-overdue" : ""}">${a.due}</span>` : ""}
+                    ${a.status !== "done" ? `<button class="meeting-action-promote-btn" data-description="${escapeHtml(a.description)}" data-owner="${escapeHtml(a.owner || "")}" data-due="${escapeHtml(a.due || "")}" data-meeting="${escapeHtml(meeting.title)}" onclick="taskManager.meetingsModule.promoteToTask(this)">Promote to task</button>` : ""}
                   </div>
                 </div>
               `;
@@ -220,6 +229,34 @@ export class MeetingsModule {
     }
 
     modal.classList.remove("hidden");
+  }
+
+  async promoteToTask(btn) {
+    const { description, owner, due, meeting } = btn.dataset;
+    btn.disabled = true;
+    btn.textContent = "Creating...";
+    try {
+      const payload = {
+        title: description,
+        section: "Backlog",
+        config: {
+          ...(owner ? { assignee: owner } : {}),
+          ...(due ? { due_date: due } : {}),
+        },
+        description: [`Promoted from meeting: ${meeting}`],
+      };
+      const res = await TasksAPI.create(payload);
+      if (res.ok) {
+        btn.textContent = "Promoted";
+        btn.classList.add("meeting-action-promoted");
+      } else {
+        btn.textContent = "Failed";
+        btn.disabled = false;
+      }
+    } catch {
+      btn.textContent = "Failed";
+      btn.disabled = false;
+    }
   }
 
   closeReadOnlyView() {
