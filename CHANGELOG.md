@@ -8,6 +8,27 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-02-22
+
+### Added
+
+- Promote meeting action items to tasks: "Promote to task" button on open action
+  items in the Actions tab and meeting read-only modal; creates a Backlog task
+  preserving assignee and due date, with a note linking back to the source
+  meeting
+
+### Changed
+
+- Unified tab navigation component across all views: canonical `.view-tabs` /
+  `.view-tab` / `.view-tab.active` in `components.css`; migrated Finances,
+  Meetings, Fundraising, Capacity, Onboarding, Billing, CRM
+
+### Fixed
+
+- Upload orphan detection now correctly computes relative paths using
+  `@std/path/relative`, resolving false positives when the project directory is
+  passed as a relative path (e.g. `./example`)
+
 ## [0.3.8] - 2026-02-22
 
 ### Added
