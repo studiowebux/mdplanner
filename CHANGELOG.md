@@ -8,6 +8,20 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.3.8] - 2026-02-22
+
+### Added
+
+- Startup financial dashboard: three-tab view with Overview (period table), Burn
+  Rate (runway cards + CSS bar chart), and P&L (category pivot table)
+- Financial periods stored in `finances/` directory as one `.md` file per month
+  with revenue and expense line items in YAML frontmatter
+- Derived metrics computed in browser: net, burn rate, runway months
+- API routes: `GET/POST /api/finances`, `GET/PUT/DELETE /api/finances/:id`
+- Sidenav: create/edit periods with dynamic add/remove revenue and expense line
+  items, cash on hand, and notes
+- Registered in feature visibility toggle under Finances group
+
 ## [0.3.7] - 2026-02-22
 
 ### Added
