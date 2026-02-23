@@ -11,6 +11,11 @@ export interface PortfolioKPI {
   unit?: string;
 }
 
+export interface PortfolioUrl {
+  label: string;
+  href: string;
+}
+
 export interface PortfolioItem {
   id: string;
   name: string;
@@ -25,6 +30,9 @@ export interface PortfolioItem {
   endDate?: string;
   team?: string[];
   kpis?: PortfolioKPI[];
+  urls?: PortfolioUrl[];
+  logo?: string;
+  license?: string;
 }
 
 interface PortfolioFrontmatter {
@@ -39,6 +47,9 @@ interface PortfolioFrontmatter {
   endDate?: string;
   team?: string[];
   kpis?: PortfolioKPI[];
+  urls?: PortfolioUrl[];
+  logo?: string;
+  license?: string;
 }
 
 export class PortfolioDirectoryParser {
@@ -145,6 +156,9 @@ export class PortfolioDirectoryParser {
       endDate: frontmatter.endDate,
       team: frontmatter.team,
       kpis: frontmatter.kpis,
+      urls: frontmatter.urls,
+      logo: frontmatter.logo,
+      license: frontmatter.license,
     };
   }
 
@@ -177,6 +191,9 @@ export class PortfolioDirectoryParser {
       endDate: item.endDate,
       team: item.team,
       kpis: item.kpis,
+      urls: item.urls,
+      logo: item.logo,
+      license: item.license,
     };
 
     for (
@@ -211,6 +228,12 @@ export class PortfolioDirectoryParser {
             if (kpi.unit) {
               yamlLines.push(`    unit: "${kpi.unit}"`);
             }
+          }
+        } else if (key === "urls") {
+          yamlLines.push(`${key}:`);
+          for (const url of value as PortfolioUrl[]) {
+            yamlLines.push(`  - label: "${url.label}"`);
+            yamlLines.push(`    href: "${url.href}"`);
           }
         } else {
           yamlLines.push(`${key}:`);
@@ -296,6 +319,9 @@ export class PortfolioDirectoryParser {
       endDate: data.endDate,
       team: data.team,
       kpis: data.kpis,
+      urls: data.urls,
+      logo: data.logo,
+      license: data.license,
     };
 
     // Write the file directly (update() reads the existing file first,
@@ -329,6 +355,9 @@ export class PortfolioDirectoryParser {
       active: 0,
       "on-hold": 0,
       completed: 0,
+      production: 0,
+      maintenance: 0,
+      cancelled: 0,
     };
 
     const byCategory: Record<string, number> = {};

@@ -29,6 +29,9 @@ export const PROJECT_STATUS_CLASSES = {
   active: "badge-status-active",
   "on-hold": "badge-status-on-hold",
   completed: "badge-status-completed",
+  production: "badge-status-production",
+  maintenance: "badge-status-maintenance",
+  cancelled: "badge-status-cancelled",
 };
 
 export const PROJECT_STATUS_LABELS = {
@@ -36,6 +39,9 @@ export const PROJECT_STATUS_LABELS = {
   active: "Active",
   "on-hold": "On Hold",
   completed: "Completed",
+  production: "Production",
+  maintenance: "Maintenance",
+  cancelled: "Cancelled",
 };
 
 // Priority hex colors for inline styles (timeline, charts)

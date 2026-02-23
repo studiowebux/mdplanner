@@ -8,6 +8,21 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-02-23
+
+### Added
+
+- Portfolio: `urls` field — list of labelled links (Website, Repo, Demo, etc.)
+  displayed as clickable links below the project name in list and tree views
+- Portfolio: `logo` field — image URL or relative path displayed as a small
+  thumbnail next to the project name
+- Portfolio: `license` field — free-text license identifier (MIT, Apache-2.0,
+  GPL-3.0, Proprietary, etc.) shown as a badge in the project row
+- Portfolio: three new status values — `production`, `maintenance`, `cancelled`
+  — with corresponding badge styles and filter buttons
+- Portfolio detail panel: Links & Identity section with logo, license, and
+  repeatable URL rows (label + href) with add/remove controls
+
 ## [0.5.1] - 2026-02-23
 
 ### Fixed

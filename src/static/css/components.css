@@ -801,6 +801,24 @@ select.input {
   border: 1px solid var(--color-border-default);
 }
 
+.badge-status-production {
+  background-color: var(--color-success-bg);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success-border);
+}
+
+.badge-status-maintenance {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  border: 1px solid var(--color-warning-border);
+}
+
+.badge-status-cancelled {
+  background-color: var(--color-error-bg);
+  color: var(--color-error-text);
+  border: 1px solid var(--color-error-border);
+}
+
 /* --------------------------------------------------------------------------
    Toggle States
    -------------------------------------------------------------------------- */
