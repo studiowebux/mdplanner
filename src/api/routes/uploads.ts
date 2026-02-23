@@ -5,7 +5,7 @@
  */
 
 import { Hono } from "hono";
-import { join } from "@std/path";
+import { join, relative } from "@std/path";
 import { ensureDir, walk } from "@std/fs";
 import {
   AppVariables,
@@ -103,7 +103,7 @@ async function listUploadFiles(
     for await (const entry of walk(uploadsDir, { includeDirs: false })) {
       const stat = await Deno.stat(entry.path);
       files.push({
-        path: entry.path.slice(projectDir.length + 1),
+        path: relative(projectDir, entry.path),
         size: stat.size,
         modified: stat.mtime?.toISOString() ?? "",
       });

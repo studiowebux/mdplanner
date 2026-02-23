@@ -1144,3 +1144,23 @@ export const OrgChartAPI = {
     return response;
   },
 };
+
+// Finances API
+export const FinancesAPI = {
+  async fetchAll() {
+    const response = await get("/api/finances");
+    return response.json();
+  },
+
+  async create(record) {
+    return post("/api/finances", record);
+  },
+
+  async update(id, record) {
+    return put(`/api/finances/${id}`, record);
+  },
+
+  async delete(id) {
+    return del(`/api/finances/${id}`);
+  },
+};

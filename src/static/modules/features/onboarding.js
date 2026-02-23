@@ -133,15 +133,15 @@ export class OnboardingModule {
     if (tab === "records") {
       recordsEl?.classList.remove("hidden");
       templatesEl?.classList.add("hidden");
-      tabRecords?.classList.add("meetings-tab-active");
-      tabTemplates?.classList.remove("meetings-tab-active");
+      tabRecords?.classList.add("active");
+      tabTemplates?.classList.remove("active");
       addBtn?.classList.remove("hidden");
       addTmplBtn?.classList.add("hidden");
     } else {
       recordsEl?.classList.add("hidden");
       templatesEl?.classList.remove("hidden");
-      tabRecords?.classList.remove("meetings-tab-active");
-      tabTemplates?.classList.add("meetings-tab-active");
+      tabRecords?.classList.remove("active");
+      tabTemplates?.classList.add("active");
       addBtn?.classList.add("hidden");
       addTmplBtn?.classList.remove("hidden");
     }

@@ -47,6 +47,7 @@ import {
 import { MeetingsDirectoryParser } from "./meetings.ts";
 import { OnboardingDirectoryParser } from "./onboarding.ts";
 import { OnboardingTemplateDirectoryParser } from "./onboarding-template.ts";
+import { FinancesDirectoryParser } from "./finances.ts";
 import type {
   BillingRate,
   Brief,
@@ -58,6 +59,7 @@ import type {
   Customer,
   Deal,
   EisenhowerMatrix,
+  FinancialPeriod,
   Goal,
   Idea,
   Interaction,
@@ -125,6 +127,7 @@ export class DirectoryMarkdownParser {
   protected meetingsParser: MeetingsDirectoryParser;
   protected onboardingParser: OnboardingDirectoryParser;
   protected onboardingTemplateParser: OnboardingTemplateDirectoryParser;
+  protected financesParser: FinancesDirectoryParser;
 
   constructor(projectDir: string) {
     this.projectDir = projectDir;
@@ -160,6 +163,7 @@ export class DirectoryMarkdownParser {
     this.onboardingTemplateParser = new OnboardingTemplateDirectoryParser(
       projectDir,
     );
+    this.financesParser = new FinancesDirectoryParser(projectDir);
   }
 
   // ============================================================
@@ -1689,5 +1693,31 @@ export class DirectoryMarkdownParser {
         workingDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
       },
     });
+  }
+
+  // ============================================================
+  // Finances
+  // ============================================================
+
+  async readFinancialPeriods(): Promise<FinancialPeriod[]> {
+    const records = await this.financesParser.readAll();
+    return records.sort((a, b) => b.period.localeCompare(a.period));
+  }
+
+  async addFinancialPeriod(
+    record: Omit<FinancialPeriod, "id" | "created">,
+  ): Promise<FinancialPeriod> {
+    return this.financesParser.add(record);
+  }
+
+  async updateFinancialPeriod(
+    id: string,
+    updates: Partial<FinancialPeriod>,
+  ): Promise<FinancialPeriod | null> {
+    return this.financesParser.update(id, updates);
+  }
+
+  async deleteFinancialPeriod(id: string): Promise<boolean> {
+    return this.financesParser.delete(id);
   }
 }

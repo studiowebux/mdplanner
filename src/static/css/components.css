@@ -802,26 +802,6 @@ select.input {
 }
 
 /* --------------------------------------------------------------------------
-   Tab States
-   -------------------------------------------------------------------------- */
-
-.tab-active {
-  color: var(--color-text-primary);
-  border-bottom: 2px solid var(--color-accent);
-  background-color: transparent;
-}
-
-.tab-inactive {
-  color: var(--color-text-muted);
-  border-bottom: 2px solid transparent;
-  background-color: transparent;
-}
-
-.tab-inactive:hover {
-  color: var(--color-text-secondary);
-}
-
-/* --------------------------------------------------------------------------
    Toggle States
    -------------------------------------------------------------------------- */
 
@@ -942,5 +922,42 @@ select.input {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   Tab navigation (canonical — shared by all multi-tab views)
+   -------------------------------------------------------------------------- */
+
+.view-tabs {
+  display: flex;
+  border-block-end: 1px solid var(--color-border-default);
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  white-space: nowrap;
+  padding-inline: 1.5rem;
+}
+
+.view-tab {
+  padding: 0.5rem 1rem;
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  border-block-end: 1.5px solid transparent;
+  margin-block-end: -1px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--transition-fast);
+}
+
+.view-tab:hover {
+  color: var(--color-text-secondary);
+}
+
+.view-tab.active {
+  color: var(--color-text-primary);
+  border-block-end-color: var(--color-text-primary);
 }
 

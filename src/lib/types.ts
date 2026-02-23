@@ -591,6 +591,23 @@ export interface Onboarding {
   created: string; // ISO timestamp
 }
 
+// Finances
+
+export interface FinancePeriodItem {
+  category: string;
+  amount: number;
+}
+
+export interface FinancialPeriod {
+  id: string;
+  period: string; // "YYYY-MM"
+  cash_on_hand: number; // end-of-period cash balance
+  revenue: FinancePeriodItem[];
+  expenses: FinancePeriodItem[];
+  notes?: string; // markdown body
+  created: string; // ISO timestamp
+}
+
 // Meeting Notes and Actions Tracker
 
 export interface MeetingAction {

@@ -620,6 +620,13 @@
               >
                 Billing
               </button>
+              <button
+                id="financesViewBtn"
+                data-view="finances"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                Finances
+              </button>
             </div>
           </div>
 
@@ -973,6 +980,12 @@
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
             >
               Billing
+            </button>
+            <button
+              id="financesViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              Finances
             </button>
           </div>
           <div class="py-1 border-t border-default">
@@ -1566,12 +1579,12 @@
             <h2 class="text-lg font-medium text-primary">Meetings</h2>
             <button id="addMeetingBtn" class="btn-primary py-2 rounded-lg">+ New Meeting</button>
           </div>
+          <!-- Tab bar -->
+          <nav class="view-tabs">
+            <button id="meetingsTabMeetings" class="view-tab active">Meetings</button>
+            <button id="meetingsTabActions" class="view-tab">Open Actions</button>
+          </nav>
           <div class="p-6">
-            <!-- Tab bar -->
-            <div class="meetings-tabs">
-              <button id="meetingsTabMeetings" class="meetings-tab meetings-tab-active">Meetings</button>
-              <button id="meetingsTabActions" class="meetings-tab">Open Actions</button>
-            </div>
             <!-- Meetings list -->
             <div id="meetingsList">
               <div id="emptyMeetingsState" class="hidden">
@@ -1603,11 +1616,11 @@
               <button id="addOnboardingBtn" class="btn-primary py-2 rounded-lg">+ New Onboarding</button>
             </div>
           </div>
+          <nav class="view-tabs">
+            <button id="onboardingTabRecords" class="view-tab active">Onboarding</button>
+            <button id="onboardingTabTemplates" class="view-tab">Templates</button>
+          </nav>
           <div class="p-6">
-            <div class="meetings-tabs">
-              <button id="onboardingTabRecords" class="meetings-tab meetings-tab-active">Onboarding</button>
-              <button id="onboardingTabTemplates" class="meetings-tab">Templates</button>
-            </div>
             <!-- Records -->
             <div id="onboardingRecordsList">
               <div id="emptyOnboardingState" class="hidden">
@@ -1622,6 +1635,36 @@
               </div>
               <div id="onboardingTemplatesContainer" class="onboarding-template-list"></div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Finances View -->
+      <div id="financesView" class="hidden pb-16">
+        <div class="bg-primary rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-default flex justify-between items-center view-header">
+            <h2 class="text-lg font-medium text-primary">Finances</h2>
+            <button id="addFinancesBtn" class="btn-primary py-2 rounded-lg">+ Add Period</button>
+          </div>
+          <nav class="view-tabs">
+            <button id="financesTab-overview" class="view-tab active">Overview</button>
+            <button id="financesTab-burnrate" class="view-tab">Burn Rate</button>
+            <button id="financesTab-pl" class="view-tab">P&amp;L</button>
+          </nav>
+          <!-- Overview tab -->
+          <div id="financesPanel-overview">
+            <div id="emptyFinancesState" class="hidden">
+              <p class="finances-empty-msg">No periods yet. Add your first monthly record to get started.</p>
+            </div>
+            <div id="financesOverviewContainer"></div>
+          </div>
+          <!-- Burn Rate tab -->
+          <div id="financesPanel-burnrate" class="hidden">
+            <div id="financesBurnRateContainer"></div>
+          </div>
+          <!-- P&L tab -->
+          <div id="financesPanel-pl" class="hidden">
+            <div id="financesPLContainer"></div>
           </div>
         </div>
       </div>
@@ -2816,12 +2859,12 @@
                 <button id="safe-add-btn" class="btn-primary py-2 rounded-lg">+ Add SAFE</button>
               </div>
             </div>
-            <nav class="fundraising-tabs">
-              <button class="fundraising-tab active" data-tab="safe">SAFE Rounds</button>
-              <button class="fundraising-tab" data-tab="pipeline">Pipeline</button>
-              <button class="fundraising-tab" data-tab="kpi">KPI Tracker</button>
-              <button class="fundraising-tab" data-tab="runway">Runway</button>
-              <button class="fundraising-tab" data-tab="targets">Targets</button>
+            <nav class="view-tabs">
+              <button class="view-tab active" data-tab="safe">SAFE Rounds</button>
+              <button class="view-tab" data-tab="pipeline">Pipeline</button>
+              <button class="view-tab" data-tab="kpi">KPI Tracker</button>
+              <button class="view-tab" data-tab="runway">Runway</button>
+              <button class="view-tab" data-tab="targets">Targets</button>
             </nav>
             <div class="p-6">
               <div id="safe-summary-card" class="safe-summary-card"></div>
@@ -2855,12 +2898,12 @@
                 <button id="pipeline-add-btn" class="btn-primary py-2 rounded-lg">+ Add Investor</button>
               </div>
             </div>
-            <nav class="fundraising-tabs">
-              <button class="fundraising-tab" data-tab="safe">SAFE Rounds</button>
-              <button class="fundraising-tab active" data-tab="pipeline">Pipeline</button>
-              <button class="fundraising-tab" data-tab="kpi">KPI Tracker</button>
-              <button class="fundraising-tab" data-tab="runway">Runway</button>
-              <button class="fundraising-tab" data-tab="targets">Targets</button>
+            <nav class="view-tabs">
+              <button class="view-tab" data-tab="safe">SAFE Rounds</button>
+              <button class="view-tab active" data-tab="pipeline">Pipeline</button>
+              <button class="view-tab" data-tab="kpi">KPI Tracker</button>
+              <button class="view-tab" data-tab="runway">Runway</button>
+              <button class="view-tab" data-tab="targets">Targets</button>
             </nav>
             <div class="p-6">
               <div class="pipeline-filters">
@@ -2901,12 +2944,12 @@
                 <button id="kpi-add-btn" class="btn-primary py-2 rounded-lg">+ Add Period</button>
               </div>
             </div>
-            <nav class="fundraising-tabs">
-              <button class="fundraising-tab" data-tab="safe">SAFE Rounds</button>
-              <button class="fundraising-tab" data-tab="pipeline">Pipeline</button>
-              <button class="fundraising-tab active" data-tab="kpi">KPI Tracker</button>
-              <button class="fundraising-tab" data-tab="runway">Runway</button>
-              <button class="fundraising-tab" data-tab="targets">Targets</button>
+            <nav class="view-tabs">
+              <button class="view-tab" data-tab="safe">SAFE Rounds</button>
+              <button class="view-tab" data-tab="pipeline">Pipeline</button>
+              <button class="view-tab active" data-tab="kpi">KPI Tracker</button>
+              <button class="view-tab" data-tab="runway">Runway</button>
+              <button class="view-tab" data-tab="targets">Targets</button>
             </nav>
             <div class="p-6">
               <div class="kpi-controls">
@@ -2929,12 +2972,12 @@
               <h2 class="text-lg font-medium text-primary">Fundraising</h2>
               <button class="fundraising-info-btn" data-action="fundraising-info" aria-label="Glossary">?</button>
             </div>
-            <nav class="fundraising-tabs">
-              <button class="fundraising-tab" data-tab="safe">SAFE Rounds</button>
-              <button class="fundraising-tab" data-tab="pipeline">Pipeline</button>
-              <button class="fundraising-tab" data-tab="kpi">KPI Tracker</button>
-              <button class="fundraising-tab active" data-tab="runway">Runway</button>
-              <button class="fundraising-tab" data-tab="targets">Targets</button>
+            <nav class="view-tabs">
+              <button class="view-tab" data-tab="safe">SAFE Rounds</button>
+              <button class="view-tab" data-tab="pipeline">Pipeline</button>
+              <button class="view-tab" data-tab="kpi">KPI Tracker</button>
+              <button class="view-tab active" data-tab="runway">Runway</button>
+              <button class="view-tab" data-tab="targets">Targets</button>
             </nav>
             <div class="p-6">
               <div class="runway-calculator">
@@ -2969,12 +3012,12 @@
               <h2 class="text-lg font-medium text-primary">Fundraising</h2>
               <button class="fundraising-info-btn" data-action="fundraising-info" aria-label="Glossary">?</button>
             </div>
-            <nav class="fundraising-tabs">
-              <button class="fundraising-tab" data-tab="safe">SAFE Rounds</button>
-              <button class="fundraising-tab" data-tab="pipeline">Pipeline</button>
-              <button class="fundraising-tab" data-tab="kpi">KPI Tracker</button>
-              <button class="fundraising-tab" data-tab="runway">Runway</button>
-              <button class="fundraising-tab active" data-tab="targets">Targets</button>
+            <nav class="view-tabs">
+              <button class="view-tab" data-tab="safe">SAFE Rounds</button>
+              <button class="view-tab" data-tab="pipeline">Pipeline</button>
+              <button class="view-tab" data-tab="kpi">KPI Tracker</button>
+              <button class="view-tab" data-tab="runway">Runway</button>
+              <button class="view-tab active" data-tab="targets">Targets</button>
             </nav>
             <div class="p-6">
               <p class="text-sm text-muted mb-4">Set targets for key metrics. Current values pull from the latest KPI period. Click a target cell to edit.</p>
@@ -5562,28 +5605,11 @@
           </div>
 
           <!-- Tabs -->
-          <div class="border-b border-default">
-            <nav class="flex px-6 capacity-tabs" aria-label="Tabs">
-              <button
-                id="capacityTeamTab"
-                class="py-3 px-4 text-sm font-medium border-b-2 border-strong text-primary"
-              >
-                Team Members
-              </button>
-              <button
-                id="capacityAllocTab"
-                class="py-3 px-4 text-sm font-medium border-b-2 border-transparent text-muted hover:text-secondary"
-              >
-                Allocations
-              </button>
-              <button
-                id="capacityUtilTab"
-                class="py-3 px-4 text-sm font-medium border-b-2 border-transparent text-muted hover:text-secondary"
-              >
-                Utilization
-              </button>
-            </nav>
-          </div>
+          <nav class="view-tabs" aria-label="Tabs">
+            <button id="capacityTeamTab" class="view-tab active">Team Members</button>
+            <button id="capacityAllocTab" class="view-tab">Allocations</button>
+            <button id="capacityUtilTab" class="view-tab">Utilization</button>
+          </nav>
 
           <div class="p-6">
             <div id="emptyCapacityState" class="text-center py-12">
@@ -5905,33 +5931,11 @@
               </div>
             </div>
             <!-- Billing Tabs -->
-            <nav
-              class="flex space-x-4 border-b border-default"
-            >
-              <button
-                data-billing-tab="customers"
-                class="billing-tab px-4 py-2 text-sm font-medium text-primary border-b-2 border-strong"
-              >
-                Customers
-              </button>
-              <button
-                data-billing-tab="rates"
-                class="billing-tab px-4 py-2 text-sm font-medium text-muted hover:text-secondary"
-              >
-                Rates
-              </button>
-              <button
-                data-billing-tab="quotes"
-                class="billing-tab px-4 py-2 text-sm font-medium text-muted hover:text-secondary"
-              >
-                Quotes
-              </button>
-              <button
-                data-billing-tab="invoices"
-                class="billing-tab px-4 py-2 text-sm font-medium text-muted hover:text-secondary"
-              >
-                Invoices
-              </button>
+            <nav class="view-tabs">
+              <button data-billing-tab="customers" class="view-tab active">Customers</button>
+              <button data-billing-tab="rates" class="view-tab">Rates</button>
+              <button data-billing-tab="quotes" class="view-tab">Quotes</button>
+              <button data-billing-tab="invoices" class="view-tab">Invoices</button>
             </nav>
           </div>
           <div class="p-6">
@@ -6139,33 +6143,11 @@
               </div>
             </div>
             <!-- CRM Tabs -->
-            <nav
-              class="flex space-x-4 border-b border-default"
-            >
-              <button
-                data-crm-tab="companies"
-                class="crm-tab px-4 py-2 text-sm font-medium text-primary border-b-2 border-strong"
-              >
-                Companies
-              </button>
-              <button
-                data-crm-tab="contacts"
-                class="crm-tab px-4 py-2 text-sm font-medium text-muted hover:text-secondary"
-              >
-                Contacts
-              </button>
-              <button
-                data-crm-tab="deals"
-                class="crm-tab px-4 py-2 text-sm font-medium text-muted hover:text-secondary"
-              >
-                Deals
-              </button>
-              <button
-                data-crm-tab="interactions"
-                class="crm-tab px-4 py-2 text-sm font-medium text-muted hover:text-secondary"
-              >
-                Interactions
-              </button>
+            <nav class="view-tabs">
+              <button data-crm-tab="companies" class="view-tab active">Companies</button>
+              <button data-crm-tab="contacts" class="view-tab">Contacts</button>
+              <button data-crm-tab="deals" class="view-tab">Deals</button>
+              <button data-crm-tab="interactions" class="view-tab">Interactions</button>
             </nav>
           </div>
           <div class="p-6">
@@ -13394,5 +13376,58 @@
 
     <script src="vendor/marked/marked.min.js"></script>
     <script type="module" src="app.js"></script>
+
+    <!-- Finances Sidenav -->
+    <div id="financesSidenav" class="sidenav-panel sidenav-md">
+      <div class="sidenav-header">
+        <h2 id="financesSidenavHeader" class="sidenav-title">New Period</h2>
+        <div class="flex items-center gap-2">
+          <span id="financesSidenavSaveStatus" class="text-xs hidden"></span>
+          <button type="button" id="financesSidenavClose" class="sidenav-close" aria-label="Close">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="flex flex-col flex-1 overflow-hidden">
+        <div class="sidenav-content">
+          <div class="sidenav-section">
+            <div class="form-group">
+              <label class="form-label" for="financesSidenavPeriod">Period (YYYY-MM)</label>
+              <input id="financesSidenavPeriod" type="text" class="form-input" placeholder="2026-01" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="financesSidenavCash">Cash on Hand ($)</label>
+              <input id="financesSidenavCash" type="number" class="form-input" placeholder="0" min="0" />
+            </div>
+          </div>
+          <div class="sidenav-section">
+            <div class="finances-sidenav-section">
+              <div class="finances-sidenav-section-label">Revenue</div>
+              <div id="financesRevenueItems"></div>
+              <button type="button" id="financesAddRevenueBtn" class="finances-add-item-btn">+ Add revenue item</button>
+            </div>
+          </div>
+          <div class="sidenav-section">
+            <div class="finances-sidenav-section">
+              <div class="finances-sidenav-section-label">Expenses</div>
+              <div id="financesExpenseItems"></div>
+              <button type="button" id="financesAddExpenseBtn" class="finances-add-item-btn">+ Add expense item</button>
+            </div>
+          </div>
+          <div class="sidenav-section">
+            <div class="form-group">
+              <label class="form-label" for="financesSidenavNotes">Notes</label>
+              <textarea id="financesSidenavNotes" class="form-input" rows="3" placeholder="Optional notes..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="sidenav-footer">
+          <button type="button" id="financesDeleteBtn" class="btn-danger hidden">Delete</button>
+          <button type="button" id="financesSidenavSave" class="btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

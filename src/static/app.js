@@ -57,6 +57,8 @@ import { MeetingSidenavModule } from "./modules/features/meeting-sidenav.js";
 import { OnboardingModule } from "./modules/features/onboarding.js";
 import { OnboardingSidenavModule } from "./modules/features/onboarding-sidenav.js";
 import { OnboardingTemplateSidenavModule } from "./modules/features/onboarding-template-sidenav.js";
+import { FinancesModule } from "./modules/features/finances.js";
+import { FinancesSidenavModule } from "./modules/features/finances-sidenav.js";
 import { RetrospectivesModule } from "./modules/features/retrospectives.js";
 import { MoscowModule } from "./modules/features/moscow.js";
 import { EisenhowerModule } from "./modules/features/eisenhower.js";
@@ -236,6 +238,7 @@ class TaskManager {
     this.meetingSidenavModule = new MeetingSidenavModule(this);
     this.onboardingSidenavModule = new OnboardingSidenavModule(this);
     this.onboardingTemplateSidenavModule = new OnboardingTemplateSidenavModule(this);
+    this.financesSidenavModule = new FinancesSidenavModule(this);
     this.c4SidenavModule = new C4SidenavModule(this);
     this.capacitySidenavModule = new CapacitySidenavModule(this);
     this.crmSidenavModule = new CRMSidenavModule(this);
@@ -246,6 +249,7 @@ class TaskManager {
     this.ideasModule = new IdeasModule(this);
     this.meetingsModule = new MeetingsModule(this);
     this.onboardingModule = new OnboardingModule(this);
+    this.financesModule = new FinancesModule(this);
     this.retrospectivesModule = new RetrospectivesModule(this);
     this.moscowModule = new MoscowModule(this);
     this.eisenhowerModule = new EisenhowerModule(this);
@@ -399,6 +403,7 @@ class TaskManager {
       { id: "uploadsViewBtn", view: "uploads" },
       { id: "meetingsViewBtn", view: "meetings" },
       { id: "onboardingViewBtn", view: "onboarding" },
+      { id: "financesViewBtn", view: "finances" },
     ];
     additionalViews.forEach(({ id, view }) => {
       document.getElementById(id)?.addEventListener("click", () => {
@@ -637,6 +642,12 @@ class TaskManager {
         this.switchView("onboarding");
         this.closeMobileMenu();
       });
+    document
+      .getElementById("financesViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("finances");
+        this.closeMobileMenu();
+      });
 
     // Dark mode toggle
     document
@@ -868,6 +879,8 @@ class TaskManager {
     this.onboardingSidenavModule.bindEvents();
     this.onboardingTemplateSidenavModule.bindEvents();
     this.onboardingModule.bindEvents();
+    this.financesSidenavModule.bindEvents();
+    this.financesModule.bindEvents();
   }
 
   async loadTasks() {
@@ -899,6 +912,7 @@ class TaskManager {
       "uploads",
       "meetings",
       "onboarding",
+      "finances",
     ];
 
     // If no features configured, show everything
@@ -962,6 +976,7 @@ class TaskManager {
       fundraising: "Fundraising",
       meetings: "Meetings",
       onboarding: "Onboarding",
+      finances: "Finances",
       config: "Settings",
     };
     const label = document.getElementById("currentViewLabel");
@@ -1123,6 +1138,7 @@ class TaskManager {
     document.getElementById("uploadsView")?.classList.add("hidden");
     document.getElementById("meetingsView")?.classList.add("hidden");
     document.getElementById("onboardingView")?.classList.add("hidden");
+    document.getElementById("financesView")?.classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
     document.getElementById("mindmapView").classList.add("hidden");
     document.getElementById("c4View").classList.add("hidden");
@@ -1267,6 +1283,10 @@ class TaskManager {
       this.activateViewButton("onboarding");
       document.getElementById("onboardingView").classList.remove("hidden");
       this.onboardingModule.load();
+    } else if (view === "finances") {
+      this.activateViewButton("finances");
+      document.getElementById("financesView").classList.remove("hidden");
+      this.financesModule.load();
     } else if (view === "config") {
       this.activateViewButton("config");
       document.getElementById("configView").classList.remove("hidden");
