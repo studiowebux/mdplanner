@@ -1,0 +1,28 @@
+:8080 {
+  handle /tts* {
+    header Access-Control-Allow-Origin *
+    header Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    header Access-Control-Allow-Headers "Content-Type"
+
+    @options method OPTIONS
+    respond @options 204
+
+    uri strip_prefix /tts
+    reverse_proxy chatterbox:8001
+  }
+
+  handle /search* {
+    header Access-Control-Allow-Origin *
+    header Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    header Access-Control-Allow-Headers "Content-Type, Authorization"
+
+    @options method OPTIONS
+    respond @options 204
+
+    reverse_proxy searxng:8080
+  }
+
+  handle {
+    reverse_proxy mdplanner:8003
+  }
+}

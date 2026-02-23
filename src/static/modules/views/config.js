@@ -311,6 +311,9 @@ export class ConfigView {
       "Portfolio": [
         { id: "portfolio", label: "Portfolio" },
       ],
+      "Tools": [
+        { id: "ollama", label: "AI Chat" },
+      ],
     };
 
     const enabledFeatures = this.tm.projectConfig?.features || [];

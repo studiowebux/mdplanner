@@ -1,0 +1,92 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: mdplanner-caddy
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - mdplanner
+      - ollama
+      - searxng
+      - chatterbox
+    restart: unless-stopped
+    networks:
+      - ai-net
+
+  mdplanner:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: mdplanner
+    volumes:
+      - mdplanner-data:/data
+    restart: unless-stopped
+    networks:
+      - ai-net
+
+  ollama:
+    image: ollama/ollama:0.16.2
+    container_name: ollama
+    volumes:
+      - ollama-data:/root/.ollama
+    environment:
+      - OLLAMA_ORIGINS=*
+    restart: unless-stopped
+    networks:
+      - ai-net
+    # ── GPU support (NVIDIA) ───────────────────────────────────────────────────
+    # Linux + NVIDIA GPU: requires NVIDIA Container Toolkit
+    #   https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html
+    # macOS / CPU-only: remove or comment out the entire deploy block below
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  chatterbox:
+    build:
+      context: ./chatterbox
+    container_name: chatterbox
+    volumes:
+      # Voice reference WAV files — add your .wav files here
+      - ./chatterbox/references:/app/references:ro
+      # Cache downloaded HuggingFace models across restarts
+      - huggingface-cache:/root/.cache/huggingface
+    restart: unless-stopped
+    networks:
+      - ai-net
+    # ── GPU support (NVIDIA) ───────────────────────────────────────────────────
+    # macOS / CPU-only: remove or comment out the entire deploy block below
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  searxng:
+    image: searxng/searxng:latest
+    container_name: searxng
+    volumes:
+      - ./searxng/settings.yml:/etc/searxng/settings.yml:ro
+      - searxng-data:/var/cache/searxng
+    restart: unless-stopped
+    networks:
+      - ai-net
+
+networks:
+  ai-net:
+    driver: bridge
+
+volumes:
+  mdplanner-data:
+  ollama-data:
+  huggingface-cache:
+  searxng-data:

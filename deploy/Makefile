@@ -4,7 +4,7 @@ SERVICE_FILE := deploy/mdplanner.service
 SERVICE_NAME := mdplanner
 DATA_DIR     := /var/lib/mdplanner
 
-.PHONY: install uninstall start stop restart status logs
+.PHONY: install uninstall start stop restart status logs stack-up stack-down stack-logs
 
 install:
 	sudo cp dist/$(BINARY_NAME)-linux $(INSTALL_DIR)/$(BINARY_NAME)
@@ -39,3 +39,12 @@ status:
 
 logs:
 	sudo journalctl -u $(SERVICE_NAME) -f
+
+stack-up:
+	docker compose -f deploy/docker-compose.yml up -d
+
+stack-down:
+	docker compose -f deploy/docker-compose.yml down
+
+stack-logs:
+	docker compose -f deploy/docker-compose.yml logs -f
