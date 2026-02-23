@@ -28,6 +28,7 @@
   --font-size-sm: 0.75rem;       /* 12px — captions, secondary info */
   --font-size-base: 0.875rem;    /* 14px — body text, interactive elements */
   --font-size-lg: 1rem;          /* 16px — subheadings, section titles */
+  --font-size-lg-plus: 1.125rem; /* 18px — section headers, sidenav titles */
   --font-size-xl: 1.25rem;       /* 20px — headings */
   --font-size-xxl: 1.5rem;       /* 24px — display numbers, hero values */
 
