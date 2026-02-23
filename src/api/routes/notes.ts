@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -37,6 +39,7 @@ notesRouter.post("/", async (c) => {
   const parser = getParser(c);
   const body = await c.req.json();
   const noteId = await parser.addNote(body);
+  await cacheWriteThrough(c, "notes");
   return jsonResponse({ id: noteId }, 201);
 });
 
@@ -48,6 +51,7 @@ notesRouter.put("/:id", async (c) => {
   const success = await parser.updateNote(noteId, updates);
 
   if (success) {
+    await cacheWriteThrough(c, "notes");
     return jsonResponse({ success: true });
   }
   return errorResponse("Note not found", 404);
@@ -60,6 +64,7 @@ notesRouter.delete("/:id", async (c) => {
   const success = await parser.deleteNote(noteId);
 
   if (success) {
+    cachePurge(c, "notes", noteId);
     return jsonResponse({ success: true });
   }
   return errorResponse("Note not found", 404);

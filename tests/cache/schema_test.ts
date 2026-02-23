@@ -35,15 +35,44 @@ const EXPECTED_TABLES = [
   "deals",
   "interactions",
   "portfolio",
+  "people",
   "org_members",
+  "meetings",
+  // Phase 3: previously missing entities
+  "moscow",
+  "eisenhower",
+  "safe_agreements",
+  "investors",
+  "kpi_snapshots",
+  "onboarding",
+  "onboarding_templates",
+  "financial_periods",
+  "payments",
+  "time_entries",
   "cache_meta",
 ];
 
 const FTS_TABLES = [
+  // Original 6
   "tasks_fts",
   "notes_fts",
   "goals_fts",
   "ideas_fts",
+  "meetings_fts",
+  "people_fts",
+  // Phase 4: added FTS to existing entities
+  "retrospectives_fts",
+  "swot_fts",
+  "brief_fts",
+  "companies_fts",
+  "contacts_fts",
+  "portfolio_fts",
+  // Phase 3: new entities with FTS
+  "moscow_fts",
+  "eisenhower_fts",
+  "onboarding_fts",
+  "onboarding_templates_fts",
+  "financial_periods_fts",
 ];
 
 Deno.test("initSchema - creates all entity tables", () => {
@@ -100,6 +129,8 @@ Deno.test("dropSchema - removes all tables", () => {
   // Verify tables are gone
   assertEquals(db.tableExists("tasks"), false);
   assertEquals(db.tableExists("notes"), false);
+  assertEquals(db.tableExists("meetings"), false);
+  assertEquals(db.tableExists("people"), false);
 
   db.close();
 });

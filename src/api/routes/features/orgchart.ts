@@ -7,6 +7,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -82,6 +84,7 @@ orgchartRouter.post("/", async (c) => {
     notes: body.notes,
   });
 
+  await cacheWriteThrough(c, "org_members");
   return jsonResponse(member, 201);
 });
 
@@ -97,6 +100,7 @@ orgchartRouter.put("/:id", async (c) => {
     return errorResponse("Member not found", 404);
   }
 
+  await cacheWriteThrough(c, "org_members");
   return jsonResponse(updated);
 });
 
@@ -111,5 +115,6 @@ orgchartRouter.delete("/:id", async (c) => {
     return errorResponse("Member not found", 404);
   }
 
+  cachePurge(c, "org_members", id);
   return jsonResponse({ success: true });
 });

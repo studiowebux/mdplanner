@@ -5,6 +5,7 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -29,6 +30,7 @@ c4Router.post("/", async (c) => {
 
   try {
     await parser.saveProjectInfo(projectInfo);
+    await cacheWriteThrough(c, "c4_components");
     return jsonResponse({ success: true });
   } catch (error) {
     console.error("Failed to save C4 components:", error);

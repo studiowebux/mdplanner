@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -34,6 +36,7 @@ ideasRouter.post("/", async (c) => {
     description: body.description,
   });
   await parser.saveIdeas(ideas);
+  await cacheWriteThrough(c, "ideas");
   return jsonResponse({ success: true, id }, 201);
 });
 
@@ -47,6 +50,7 @@ ideasRouter.put("/:id", async (c) => {
   if (index === -1) return errorResponse("Not found", 404);
   ideas[index] = { ...ideas[index], ...body };
   await parser.saveIdeas(ideas);
+  await cacheWriteThrough(c, "ideas");
   return jsonResponse({ success: true });
 });
 
@@ -58,5 +62,6 @@ ideasRouter.delete("/:id", async (c) => {
   const filtered = ideas.filter((i) => i.id !== id);
   if (filtered.length === ideas.length) return errorResponse("Not found", 404);
   await parser.saveIdeas(filtered);
+  cachePurge(c, "ideas", id);
   return jsonResponse({ success: true });
 });

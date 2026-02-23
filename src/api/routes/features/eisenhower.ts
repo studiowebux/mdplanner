@@ -6,6 +6,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -32,6 +34,7 @@ eisenhowerRouter.post("/", async (c) => {
     urgentNotImportant: body.urgentNotImportant || [],
     notUrgentNotImportant: body.notUrgentNotImportant || [],
   });
+  await cacheWriteThrough(c, "eisenhower");
   return jsonResponse(matrix, 201);
 });
 
@@ -42,6 +45,7 @@ eisenhowerRouter.put("/:id", async (c) => {
   const body = await c.req.json();
   const updated = await parser.updateEisenhowerMatrix(id, body);
   if (!updated) return errorResponse("Not found", 404);
+  await cacheWriteThrough(c, "eisenhower");
   return jsonResponse(updated);
 });
 
@@ -51,5 +55,6 @@ eisenhowerRouter.delete("/:id", async (c) => {
   const id = c.req.param("id");
   const success = await parser.deleteEisenhowerMatrix(id);
   if (!success) return errorResponse("Not found", 404);
+  cachePurge(c, "eisenhower", id);
   return jsonResponse({ success: true });
 });

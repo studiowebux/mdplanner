@@ -71,28 +71,13 @@
           <!-- Right: Actions -->
           <div class="flex items-center gap-2">
             <!-- Search -->
-            <div class="relative">
-              <input
-                type="text"
-                id="searchInput"
-                placeholder="Search..."
-                class="w-40 pl-8 pr-3 py-1.5 text-sm bg-tertiary border-0 rounded text-primary focus:outline-none focus:ring-1"
-              >
-              <svg
-                class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                >
-                </path>
+            <button id="globalSearchBtn" class="search-trigger-btn" title="Search (⌘K)">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
-            </div>
+              Search
+              <span class="search-trigger-kbd">⌘K</span>
+            </button>
 
             <!-- Pomodoro -->
             <div class="relative">
@@ -829,12 +814,12 @@
 
           <!-- Search -->
           <div class="px-4 py-2 border-b border-default">
-            <input
-              type="text"
-              id="searchInputMobile"
-              placeholder="Search tasks..."
-              class="w-full text-sm bg-tertiary border-0 rounded px-3 py-2 text-primary "
-            >
+            <button id="globalSearchBtnMobile" class="search-trigger-btn" style="width:100%;justify-content:flex-start;">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+              Search…
+            </button>
           </div>
 
           <!-- Navigation -->
@@ -13427,6 +13412,26 @@
           <button type="button" id="financesDeleteBtn" class="btn-danger hidden">Delete</button>
           <button type="button" id="financesSidenavSave" class="btn-primary">Save</button>
         </div>
+      </div>
+    </div>
+    <!-- Global Search Overlay -->
+    <div id="globalSearchOverlay" class="search-overlay hidden" role="dialog" aria-modal="true" aria-label="Search">
+      <div class="search-box">
+        <div class="search-input-row">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input
+            id="globalSearchInput"
+            type="text"
+            class="search-input-field"
+            placeholder="Search tasks, notes, goals, ideas…"
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <span class="search-kbd-hint">Esc</span>
+        </div>
+        <div id="globalSearchResults" role="listbox" aria-label="Search results"></div>
       </div>
     </div>
   </body>

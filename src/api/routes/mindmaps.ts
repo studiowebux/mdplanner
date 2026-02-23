@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -37,6 +39,7 @@ mindmapsRouter.post("/", async (c) => {
   const parser = getParser(c);
   const body = await c.req.json();
   const mindmapId = await parser.addMindmap(body);
+  await cacheWriteThrough(c, "mindmaps");
   return jsonResponse({ id: mindmapId }, 201);
 });
 
@@ -48,6 +51,7 @@ mindmapsRouter.put("/:id", async (c) => {
   const success = await parser.updateMindmap(mindmapId, updates);
 
   if (success) {
+    await cacheWriteThrough(c, "mindmaps");
     return jsonResponse({ success: true });
   }
   return errorResponse("Mindmap not found", 404);
@@ -60,6 +64,7 @@ mindmapsRouter.delete("/:id", async (c) => {
   const success = await parser.deleteMindmap(mindmapId);
 
   if (success) {
+    cachePurge(c, "mindmaps", mindmapId);
     return jsonResponse({ success: true });
   }
   return errorResponse("Mindmap not found", 404);

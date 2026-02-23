@@ -85,6 +85,7 @@ import { PomodoroModule } from "./modules/features/pomodoro.js";
 import { ImportExportModule } from "./modules/import-export.js";
 import { ProjectsModule } from "./modules/projects.js";
 import { UploadsView } from "./modules/views/uploads.js";
+import { GlobalSearch } from "./modules/features/search.js";
 
 class TaskManager {
   constructor() {
@@ -283,6 +284,7 @@ class TaskManager {
     this.importExportModule = new ImportExportModule(this);
     this.projectsModule = new ProjectsModule(this);
     this.uploadsView = new UploadsView(this);
+    this.globalSearch = new GlobalSearch(this);
 
     this.init();
   }
@@ -294,6 +296,7 @@ class TaskManager {
     Sidenav.init();
     Help.init();
     initConfirmModal();
+    await this.globalSearch.init();
     this.bindEvents();
     await this.loadProjects(); // Load projects first
     await this.loadProjectConfig();

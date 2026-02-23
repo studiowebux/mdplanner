@@ -6,6 +6,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -81,6 +83,7 @@ peopleRouter.post("/", async (c) => {
     notes: body.notes,
   });
 
+  await cacheWriteThrough(c, "people");
   return jsonResponse(person, 201);
 });
 
@@ -96,6 +99,7 @@ peopleRouter.put("/:id", async (c) => {
     return errorResponse("Person not found", 404);
   }
 
+  await cacheWriteThrough(c, "people");
   return jsonResponse(updated);
 });
 
@@ -110,5 +114,6 @@ peopleRouter.delete("/:id", async (c) => {
     return errorResponse("Person not found", 404);
   }
 
+  cachePurge(c, "people", id);
   return jsonResponse({ success: true });
 });

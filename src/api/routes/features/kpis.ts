@@ -6,6 +6,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -38,6 +40,7 @@ kpisRouter.post("/", async (c) => {
     gross_margin: Number(body.gross_margin) || 0,
     notes: body.notes || "",
   });
+  await cacheWriteThrough(c, "kpi_snapshots");
   return jsonResponse(snapshot, 201);
 });
 
@@ -48,6 +51,7 @@ kpisRouter.put("/:id", async (c) => {
   const body = await c.req.json();
   const updated = await parser.updateKpiSnapshot(id, body);
   if (!updated) return errorResponse("Not found", 404);
+  await cacheWriteThrough(c, "kpi_snapshots");
   return jsonResponse(updated);
 });
 
@@ -57,5 +61,6 @@ kpisRouter.delete("/:id", async (c) => {
   const id = c.req.param("id");
   const success = await parser.deleteKpiSnapshot(id);
   if (!success) return errorResponse("Not found", 404);
+  cachePurge(c, "kpi_snapshots", id);
   return jsonResponse({ success: true });
 });

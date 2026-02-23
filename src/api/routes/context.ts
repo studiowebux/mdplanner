@@ -28,6 +28,25 @@ export function isCacheEnabled(c: AppContext): boolean {
   return c.get("projectManager").isCacheEnabled();
 }
 
+/**
+ * Write-through helper: re-sync one table after a create/update mutation.
+ * No-op when cache is disabled. Safe to await — never throws.
+ */
+export async function cacheWriteThrough(
+  c: AppContext,
+  table: string,
+): Promise<void> {
+  return getProjectManager(c).writeThrough(table);
+}
+
+/**
+ * Purge helper: remove one row after a delete mutation.
+ * No-op when cache is disabled. Never throws.
+ */
+export function cachePurge(c: AppContext, table: string, id: string): void {
+  getProjectManager(c).purge(table, id);
+}
+
 export const corsHeaders = {
   "Content-Type": "application/json",
   "Access-Control-Allow-Origin": "*",

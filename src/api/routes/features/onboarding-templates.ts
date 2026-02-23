@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -40,6 +42,7 @@ onboardingTemplatesRouter.post("/", async (c) => {
     description: body.description,
     steps: body.steps ?? [],
   });
+  await cacheWriteThrough(c, "onboarding_templates");
   return jsonResponse({ success: true, id: template.id }, 201);
 });
 
@@ -54,6 +57,7 @@ onboardingTemplatesRouter.put("/:id", async (c) => {
     steps: body.steps,
   });
   if (!updated) return errorResponse("Not found", 404);
+  await cacheWriteThrough(c, "onboarding_templates");
   return jsonResponse({ success: true });
 });
 
@@ -63,5 +67,6 @@ onboardingTemplatesRouter.delete("/:id", async (c) => {
   const id = c.req.param("id");
   const deleted = await parser.deleteOnboardingTemplate(id);
   if (!deleted) return errorResponse("Not found", 404);
+  cachePurge(c, "onboarding_templates", id);
   return jsonResponse({ success: true });
 });

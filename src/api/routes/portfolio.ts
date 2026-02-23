@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -109,6 +111,7 @@ portfolioRouter.post("/", async (c) => {
     kpis: body.kpis,
   });
 
+  await cacheWriteThrough(c, "portfolio");
   return jsonResponse(item, 201);
 });
 
@@ -128,6 +131,7 @@ portfolioRouter.put("/:id", async (c) => {
     return errorResponse(`Portfolio item ${id} not found`, 404);
   }
 
+  await cacheWriteThrough(c, "portfolio");
   return jsonResponse(updated);
 });
 
@@ -146,5 +150,6 @@ portfolioRouter.delete("/:id", async (c) => {
     return errorResponse(`Portfolio item ${id} not found`, 404);
   }
 
+  cachePurge(c, "portfolio", id);
   return jsonResponse({ success: true });
 });

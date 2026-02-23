@@ -42,7 +42,7 @@ searchRouter.get("/", async (c) => {
     : 50;
   const offset = offsetParam ? Math.max(0, parseInt(offsetParam, 10) || 0) : 0;
   const types = typesParam?.split(",").filter(Boolean) as
-    | ("task" | "note" | "goal" | "idea")[]
+    | ("task" | "note" | "goal" | "idea" | "meeting" | "person")[]
     | undefined;
 
   const results = cache.search.search(query, { limit, offset, types });

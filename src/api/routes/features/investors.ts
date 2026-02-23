@@ -6,6 +6,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -35,6 +37,7 @@ investorsRouter.post("/", async (c) => {
     last_contact: body.last_contact || "",
     notes: body.notes || "",
   });
+  await cacheWriteThrough(c, "investors");
   return jsonResponse(investor, 201);
 });
 
@@ -45,6 +48,7 @@ investorsRouter.put("/:id", async (c) => {
   const body = await c.req.json();
   const updated = await parser.updateInvestor(id, body);
   if (!updated) return errorResponse("Not found", 404);
+  await cacheWriteThrough(c, "investors");
   return jsonResponse(updated);
 });
 
@@ -54,5 +58,6 @@ investorsRouter.delete("/:id", async (c) => {
   const id = c.req.param("id");
   const success = await parser.deleteInvestor(id);
   if (!success) return errorResponse("Not found", 404);
+  cachePurge(c, "investors", id);
   return jsonResponse({ success: true });
 });

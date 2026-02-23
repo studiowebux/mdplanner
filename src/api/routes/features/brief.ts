@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -42,6 +44,7 @@ briefRouter.post("/", async (c) => {
   };
   briefs.push(newBrief);
   await parser.saveBriefs(briefs);
+  await cacheWriteThrough(c, "brief");
   return jsonResponse(newBrief, 201);
 });
 
@@ -55,6 +58,7 @@ briefRouter.put("/:id", async (c) => {
   if (index === -1) return errorResponse("Not found", 404);
   briefs[index] = { ...briefs[index], ...body };
   await parser.saveBriefs(briefs);
+  await cacheWriteThrough(c, "brief");
   return jsonResponse(briefs[index]);
 });
 
@@ -66,5 +70,6 @@ briefRouter.delete("/:id", async (c) => {
   const filtered = briefs.filter((b) => b.id !== id);
   if (filtered.length === briefs.length) return errorResponse("Not found", 404);
   await parser.saveBriefs(filtered);
+  cachePurge(c, "brief", id);
   return jsonResponse({ success: true });
 });

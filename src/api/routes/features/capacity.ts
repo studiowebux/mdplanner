@@ -6,6 +6,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -62,6 +64,7 @@ capacityRouter.post("/", async (c) => {
   };
   plans.push(newPlan);
   await parser.saveCapacityPlans(plans);
+  await cacheWriteThrough(c, "capacity_plans");
   return jsonResponse(newPlan, 201);
 });
 
@@ -85,6 +88,7 @@ capacityRouter.put("/:id", async (c) => {
   if (index === -1) return errorResponse("Not found", 404);
   plans[index] = { ...plans[index], ...body };
   await parser.saveCapacityPlans(plans);
+  await cacheWriteThrough(c, "capacity_plans");
   return jsonResponse(plans[index]);
 });
 
@@ -96,6 +100,7 @@ capacityRouter.delete("/:id", async (c) => {
   const filtered = plans.filter((p) => p.id !== id);
   if (filtered.length === plans.length) return errorResponse("Not found", 404);
   await parser.saveCapacityPlans(filtered);
+  cachePurge(c, "capacity_plans", id);
   return jsonResponse({ success: true });
 });
 
@@ -116,6 +121,7 @@ capacityRouter.post("/:id/members", async (c) => {
   };
   plan.teamMembers.push(newMember);
   await parser.saveCapacityPlans(plans);
+  await cacheWriteThrough(c, "capacity_plans");
   return jsonResponse(newMember, 201);
 });
 
@@ -134,6 +140,7 @@ capacityRouter.put("/:id/members/:mid", async (c) => {
 
   plan.teamMembers[memberIndex] = { ...plan.teamMembers[memberIndex], ...body };
   await parser.saveCapacityPlans(plans);
+  await cacheWriteThrough(c, "capacity_plans");
   return jsonResponse(plan.teamMembers[memberIndex]);
 });
 
@@ -154,6 +161,7 @@ capacityRouter.delete("/:id/members/:mid", async (c) => {
   plan.teamMembers = filtered;
   plan.allocations = plan.allocations.filter((a) => a.memberId !== memberId);
   await parser.saveCapacityPlans(plans);
+  await cacheWriteThrough(c, "capacity_plans");
   return jsonResponse({ success: true });
 });
 
@@ -177,6 +185,7 @@ capacityRouter.post("/:id/allocations", async (c) => {
   };
   plan.allocations.push(newAllocation);
   await parser.saveCapacityPlans(plans);
+  await cacheWriteThrough(c, "capacity_plans");
   return jsonResponse(newAllocation, 201);
 });
 
@@ -195,6 +204,7 @@ capacityRouter.put("/:id/allocations/:aid", async (c) => {
 
   plan.allocations[allocIndex] = { ...plan.allocations[allocIndex], ...body };
   await parser.saveCapacityPlans(plans);
+  await cacheWriteThrough(c, "capacity_plans");
   return jsonResponse(plan.allocations[allocIndex]);
 });
 
@@ -214,6 +224,7 @@ capacityRouter.delete("/:id/allocations/:aid", async (c) => {
 
   plan.allocations = filtered;
   await parser.saveCapacityPlans(plans);
+  await cacheWriteThrough(c, "capacity_plans");
   return jsonResponse({ success: true });
 });
 
@@ -393,5 +404,6 @@ capacityRouter.post("/:id/apply-assignments", async (c) => {
   }
 
   await parser.saveCapacityPlans(plans);
+  await cacheWriteThrough(c, "capacity_plans");
   return jsonResponse({ success: true, applied: suggestions.length });
 });
