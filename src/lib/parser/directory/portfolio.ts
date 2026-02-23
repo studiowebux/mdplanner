@@ -162,34 +162,23 @@ export class PortfolioDirectoryParser {
   }
 
   /**
-   * Update a portfolio item.
+   * Serialize a portfolio item to markdown file content.
    */
-  async update(
-    id: string,
-    updates: Partial<PortfolioItem>,
-  ): Promise<PortfolioItem | null> {
-    const existing = await this.read(id);
-    if (!existing) return null;
-
-    const updated = { ...existing, ...updates };
-    const filePath = `${this.portfolioDir}/${id}.md`;
-
-    // Build frontmatter
+  private serialize(item: PortfolioItem): string {
     const frontmatter: PortfolioFrontmatter = {
-      name: updated.name,
-      category: updated.category,
-      status: updated.status,
-      client: updated.client,
-      revenue: updated.revenue,
-      expenses: updated.expenses,
-      progress: updated.progress,
-      startDate: updated.startDate,
-      endDate: updated.endDate,
-      team: updated.team,
-      kpis: updated.kpis,
+      name: item.name,
+      category: item.category,
+      status: item.status,
+      client: item.client,
+      revenue: item.revenue,
+      expenses: item.expenses,
+      progress: item.progress,
+      startDate: item.startDate,
+      endDate: item.endDate,
+      team: item.team,
+      kpis: item.kpis,
     };
 
-    // Clean undefined values
     for (
       const key of Object.keys(frontmatter) as Array<keyof PortfolioFrontmatter>
     ) {
@@ -198,7 +187,6 @@ export class PortfolioDirectoryParser {
       }
     }
 
-    // Build content
     const yamlLines = ["---"];
     for (const [key, value] of Object.entries(frontmatter)) {
       if (Array.isArray(value)) {
@@ -226,8 +214,8 @@ export class PortfolioDirectoryParser {
           }
         } else {
           yamlLines.push(`${key}:`);
-          for (const item of value) {
-            yamlLines.push(`  - ${item}`);
+          for (const v of value) {
+            yamlLines.push(`  - ${v}`);
           }
         }
       } else {
@@ -236,14 +224,29 @@ export class PortfolioDirectoryParser {
     }
     yamlLines.push("---");
     yamlLines.push("");
-    yamlLines.push(`# ${updated.name}`);
+    yamlLines.push(`# ${item.name}`);
     yamlLines.push("");
-    if (updated.description) {
-      yamlLines.push(updated.description);
+    if (item.description) {
+      yamlLines.push(item.description);
       yamlLines.push("");
     }
 
-    await Deno.writeTextFile(filePath, yamlLines.join("\n"));
+    return yamlLines.join("\n");
+  }
+
+  /**
+   * Update a portfolio item.
+   */
+  async update(
+    id: string,
+    updates: Partial<PortfolioItem>,
+  ): Promise<PortfolioItem | null> {
+    const existing = await this.read(id);
+    if (!existing) return null;
+
+    const updated = { ...existing, ...updates };
+    const filePath = `${this.portfolioDir}/${id}.md`;
+    await Deno.writeTextFile(filePath, this.serialize(updated));
     return updated;
   }
 
@@ -295,8 +298,10 @@ export class PortfolioDirectoryParser {
       kpis: data.kpis,
     };
 
-    // Write the file using the existing update logic
-    await this.update(finalId, item);
+    // Write the file directly (update() reads the existing file first,
+    // which does not exist yet on create — so we write it here directly)
+    const filePath = `${this.portfolioDir}/${finalId}.md`;
+    await Deno.writeTextFile(filePath, this.serialize(item));
 
     return item;
   }
