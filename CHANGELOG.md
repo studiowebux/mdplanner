@@ -8,6 +8,17 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-02-23
+
+### Fixed
+
+- Portfolio create: `create()` delegated to `update()` which reads the file
+  first — file doesn't exist on create so read returned null, nothing was
+  written, panel closed silently discarding all inputs
+- Docker: `init` subcommand now reaches `main.ts` correctly; previous CMD-only
+  setup caused `docker run ... init /data` to invoke `deno init` (Deno's own
+  scaffold) instead of `deno run main.ts init /data`
+
 ## [0.5.0] - 2026-02-23
 
 ### Added
