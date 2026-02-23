@@ -4,12 +4,11 @@ import { dirname, extname, fromFileUrl, join } from "@std/path";
 import { ProjectManager } from "./src/lib/project-manager.ts";
 import { createApiRouter } from "./src/api/routes/index.ts";
 import { initProject, printInitSuccess } from "./src/lib/init.ts";
+import { GITHUB_REPO, VERSION } from "./src/lib/version.ts";
+import { validateProjectPath } from "./src/lib/cli.ts";
 
 // Get the directory where this script is located (works for both dev and compiled)
 const __dirname = dirname(fromFileUrl(import.meta.url));
-
-export const VERSION = "0.3.8";
-export const GITHUB_REPO = "studiowebux/mdplanner";
 
 // CLI argument parsing
 interface CLIArgs {
@@ -91,31 +90,6 @@ function parseArgs(args: string[]): CLIArgs {
   }
 
   return result;
-}
-
-async function validateProjectPath(path: string): Promise<void> {
-  try {
-    const stat = await Deno.stat(path);
-    if (!stat.isDirectory) {
-      console.error(`Error: '${path}' is not a directory`);
-      Deno.exit(1);
-    }
-  } catch (error) {
-    if (error instanceof Deno.errors.NotFound) {
-      console.error(`Error: Directory '${path}' does not exist`);
-      Deno.exit(1);
-    }
-    throw error;
-  }
-
-  // Check for project.md
-  try {
-    await Deno.stat(`${path}/project.md`);
-  } catch {
-    console.error(`Error: '${path}' does not contain a project.md file`);
-    console.error("Create a project.md file to initialize the project.");
-    Deno.exit(1);
-  }
 }
 
 // Handle `init` subcommand before normal arg parsing

@@ -148,3 +148,85 @@ server {
 ```bash
 make -f deploy/Makefile uninstall
 ```
+
+---
+
+## MCP Server
+
+The MCP server exposes mdplanner project data to Claude Desktop (or any
+MCP-compatible client) via the stdio transport.
+
+### Run with Deno
+
+```bash
+deno task mcp ./my-project
+deno task mcp --cache ./my-project
+```
+
+### Compile a binary
+
+```bash
+deno task compile:mcp:macos-arm    # Apple Silicon
+deno task compile:mcp:macos-intel  # Intel Mac
+deno task compile:mcp:linux        # Linux x86_64
+deno task compile:mcp:windows      # Windows x86_64
+deno task compile:mcp:all          # All platforms
+```
+
+Binaries are written to `dist/mdplanner-mcp-*`.
+
+### Claude Desktop configuration
+
+Add to `~/.claude_desktop_config.json` (macOS) or the equivalent config file on
+your platform:
+
+```json
+{
+  "mcpServers": {
+    "mdplanner": {
+      "command": "/path/to/mdplanner-mcp-macos-arm",
+      "args": ["/path/to/your/project"]
+    }
+  }
+}
+```
+
+To enable full-text search, add `--cache`:
+
+```json
+{
+  "mcpServers": {
+    "mdplanner": {
+      "command": "/path/to/mdplanner-mcp-macos-arm",
+      "args": ["--cache", "/path/to/your/project"]
+    }
+  }
+}
+```
+
+### Available tools
+
+| Tool                 | Description                                    |
+| -------------------- | ---------------------------------------------- |
+| `list_tasks`         | List all tasks, optionally filtered by section |
+| `get_task`           | Get a single task by ID                        |
+| `create_task`        | Create a new task                              |
+| `update_task`        | Update task fields                             |
+| `delete_task`        | Delete a task by ID                            |
+| `list_notes`         | List all notes (summary)                       |
+| `get_note`           | Get a single note with full content            |
+| `list_goals`         | List all goals, optionally filtered by status  |
+| `list_meetings`      | List all meetings sorted by date descending    |
+| `get_meeting`        | Get a single meeting with action items         |
+| `list_people`        | List all people in the registry                |
+| `get_project_config` | Get project metadata and configuration         |
+| `search`             | Full-text search (requires `--cache`)          |
+
+### Available resources
+
+| URI                   | Description                         |
+| --------------------- | ----------------------------------- |
+| `mdplanner://project` | Project config and metadata as JSON |
+| `mdplanner://tasks`   | All tasks as JSON                   |
+| `mdplanner://notes`   | All notes as JSON                   |
+| `mdplanner://goals`   | All goals as JSON                   |

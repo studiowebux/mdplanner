@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "mdplanner": {
+      "command": "/path/to/mdplanner-mcp",
+      "args": ["/path/to/your/project"]
+    }
+  }
+}
