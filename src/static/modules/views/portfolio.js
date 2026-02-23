@@ -174,6 +174,8 @@ export class PortfolioView {
 
     const statusFilters = [
       { key: "all", label: "All" },
+      { key: "discovery", label: "Discovery" },
+      { key: "scoping", label: "Scoping" },
       { key: "planning", label: "Planning" },
       { key: "active", label: "Active" },
       { key: "on-hold", label: "On Hold" },
@@ -674,6 +676,8 @@ export class PortfolioView {
     titleEl.textContent = project.name;
 
     const statusOptions = [
+      "discovery",
+      "scoping",
       "planning",
       "active",
       "on-hold",

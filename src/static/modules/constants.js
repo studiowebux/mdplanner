@@ -25,6 +25,8 @@ export const DEADLINE_CLASSES = {
 };
 
 export const PROJECT_STATUS_CLASSES = {
+  discovery: "badge-status-discovery",
+  scoping: "badge-status-scoping",
   planning: "badge-status-planning",
   active: "badge-status-active",
   "on-hold": "badge-status-on-hold",
@@ -35,6 +37,8 @@ export const PROJECT_STATUS_CLASSES = {
 };
 
 export const PROJECT_STATUS_LABELS = {
+  discovery: "Discovery",
+  scoping: "Scoping",
   planning: "Planning",
   active: "Active",
   "on-hold": "On Hold",

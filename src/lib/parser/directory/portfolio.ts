@@ -351,6 +351,8 @@ export class PortfolioDirectoryParser {
     const items = await this.readAll();
 
     const byStatus: Record<string, number> = {
+      discovery: 0,
+      scoping: 0,
       planning: 0,
       active: 0,
       "on-hold": 0,
