@@ -90,7 +90,7 @@
 }
 
 .focus-mode-hint {
-  font-size: 0.75rem;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
 }
 
@@ -126,7 +126,7 @@
 }
 
 .focus-mode-title {
-  font-size: 1.5rem;
+  font-size: var(--font-size-xxl);
   font-weight: 600;
   color: var(--color-text-primary);
   line-height: 1.3;
@@ -143,7 +143,7 @@
   align-items: center;
   gap: var(--space-sm);
   color: var(--color-text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-base);
 }
 
 .focus-mode-meta svg {
@@ -155,7 +155,7 @@
   background-color: var(--color-bg-secondary);
   border-radius: var(--radius-md);
   color: var(--color-text-secondary);
-  font-size: 0.9375rem;
+  font-size: var(--font-size-lg);
   line-height: 1.6;
   white-space: pre-wrap;
 }
@@ -170,7 +170,7 @@
 }
 
 .focus-mode-subtasks-header {
-  font-size: 0.875rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--color-text-secondary);
   margin-bottom: var(--space-md);
@@ -202,7 +202,7 @@
 .focus-mode-subtask label {
   flex: 1;
   color: var(--color-text-primary);
-  font-size: 0.9375rem;
+  font-size: var(--font-size-lg);
   cursor: pointer;
 }
 
@@ -231,7 +231,7 @@
   color: var(--color-text-primary);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
-  font-size: 0.875rem;
+  font-size: var(--font-size-base);
   cursor: pointer;
   transition: background-color var(--transition-fast);
 }
@@ -260,6 +260,6 @@
   }
 
   .focus-mode-title {
-    font-size: 1.25rem;
+    font-size: var(--font-size-xl);
   }
 }

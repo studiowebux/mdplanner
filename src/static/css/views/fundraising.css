@@ -151,7 +151,7 @@
 }
 
 .kpi-metric-value {
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg-plus);
   color: var(--color-text-primary);
   font-weight: 500;
 }
@@ -243,7 +243,7 @@
 }
 
 .runway-result {
-  font-size: 1.5rem;
+  font-size: var(--font-size-xxl);
   color: var(--color-text-primary);
   font-weight: 500;
 }
@@ -371,7 +371,7 @@
 }
 
 .safe-summary-value {
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg-plus);
   color: var(--color-text-primary);
   font-weight: 500;
   display: flex;
@@ -390,7 +390,7 @@
 }
 
 .safe-target-input {
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg-plus);
   font-weight: 500;
   color: var(--color-text-primary);
   background: none;

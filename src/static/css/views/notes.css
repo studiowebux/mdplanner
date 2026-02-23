@@ -21,7 +21,7 @@
   #notesTabNav button {
     min-height: 40px;
     padding: 0.5rem 1rem;
-    font-size: 0.875rem;
+    font-size: var(--font-size-base);
   }
 
   #addNoteTabBtn {
@@ -63,7 +63,7 @@
   }
 
   #activeNoteTitle {
-    font-size: 1.125rem;
+    font-size: var(--font-size-lg-plus);
   }
 
   /* Stack action buttons */
@@ -83,7 +83,7 @@
    -------------------------------------------------------------------------- */
 
 #activeNoteEditor {
-  font-size: 1rem;
+  font-size: var(--font-size-lg);
   line-height: 1.6;
   resize: vertical;
   min-height: 300px;

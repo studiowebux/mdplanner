@@ -242,13 +242,13 @@
    Typography — Size
    -------------------------------------------------------------------------- */
 
-.text-\[10px\] { font-size: 10px; }
-.text-xs { font-size: 0.75rem; line-height: 1rem; }
-.text-sm { font-size: 0.875rem; line-height: 1.25rem; }
-.text-base { font-size: 1rem; line-height: 1.5rem; }
-.text-lg { font-size: 1.125rem; line-height: 1.75rem; }
-.text-xl { font-size: 1.25rem; line-height: 1.75rem; }
-.text-2xl { font-size: 1.5rem; line-height: 2rem; }
+.text-\[10px\] { font-size: var(--font-size-xs); }
+.text-xs { font-size: var(--font-size-sm); line-height: 1rem; }
+.text-sm { font-size: var(--font-size-base); line-height: 1.25rem; }
+.text-base { font-size: var(--font-size-lg); line-height: 1.5rem; }
+.text-lg { font-size: var(--font-size-lg-plus); line-height: 1.75rem; }
+.text-xl { font-size: var(--font-size-xl); line-height: 1.75rem; }
+.text-2xl { font-size: var(--font-size-xxl); line-height: 2rem; }
 .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
 
 /* --------------------------------------------------------------------------
@@ -563,7 +563,7 @@
   .sm\:p-6 { padding: 1.5rem; }
   .sm\:px-4 { padding-inline: 1rem; }
   .sm\:py-8 { padding-block: 2rem; }
-  .sm\:text-2xl { font-size: 1.5rem; line-height: 2rem; }
+  .sm\:text-2xl { font-size: var(--font-size-xxl); line-height: 2rem; }
   .sm\:space-y-6 > * + * { margin-top: 1.5rem; }
 }
 

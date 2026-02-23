@@ -216,7 +216,7 @@ code, pre, .font-mono {
   padding: var(--space-sm) var(--space-md);
   background-color: var(--color-bg-inverse);
   color: var(--color-text-inverse);
-  font-size: 0.875rem;
+  font-size: var(--font-size-base);
   font-weight: 500;
   border-radius: var(--radius-md);
   text-decoration: none;
@@ -307,7 +307,7 @@ button,
 .nav-dropdown-btn {
   background: none;
   border: none;
-  font-size: 0.875rem;
+  font-size: var(--font-size-base);
   font-weight: 500;
   color: var(--color-text-secondary);
   padding: 0.375rem 0.5rem;

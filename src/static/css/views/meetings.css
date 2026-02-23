@@ -365,7 +365,7 @@
   cursor: pointer;
   color: var(--color-text-muted);
   line-height: 1;
-  font-size: 0.875rem;
+  font-size: var(--font-size-base);
 }
 
 .attendee-chip-remove:hover {
