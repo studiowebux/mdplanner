@@ -11,4 +11,5 @@ VOLUME ["/data"]
 
 EXPOSE 8003
 
-CMD ["run", "--allow-net", "--allow-read", "--allow-write", "--allow-env", "main.ts", "/data"]
+ENTRYPOINT ["deno", "run", "--allow-net", "--allow-read", "--allow-write", "--allow-env", "main.ts"]
+CMD ["/data"]
