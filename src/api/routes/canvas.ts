@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -24,6 +26,7 @@ canvasRouter.post("/sticky_notes", async (c) => {
   const parser = getParser(c);
   const body = await c.req.json();
   const stickyNoteId = await parser.addStickyNote(body);
+  await cacheWriteThrough(c, "sticky_notes");
   return jsonResponse({ id: stickyNoteId }, 201);
 });
 
@@ -35,6 +38,7 @@ canvasRouter.put("/sticky_notes/:id", async (c) => {
   const success = await parser.updateStickyNote(stickyNoteId, updates);
 
   if (success) {
+    await cacheWriteThrough(c, "sticky_notes");
     return jsonResponse({ success: true });
   }
   return errorResponse("Sticky note not found", 404);
@@ -47,6 +51,7 @@ canvasRouter.delete("/sticky_notes/:id", async (c) => {
   const success = await parser.deleteStickyNote(stickyNoteId);
 
   if (success) {
+    cachePurge(c, "sticky_notes", stickyNoteId);
     return jsonResponse({ success: true });
   }
   return errorResponse("Sticky note not found", 404);

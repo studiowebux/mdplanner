@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -40,6 +42,7 @@ businessModelRouter.post("/", async (c) => {
   };
   canvases.push(newCanvas);
   await parser.saveBusinessModelCanvases(canvases);
+  await cacheWriteThrough(c, "business_model");
   return jsonResponse(newCanvas, 201);
 });
 
@@ -53,6 +56,7 @@ businessModelRouter.put("/:id", async (c) => {
   if (index === -1) return errorResponse("Not found", 404);
   canvases[index] = { ...canvases[index], ...body };
   await parser.saveBusinessModelCanvases(canvases);
+  await cacheWriteThrough(c, "business_model");
   return jsonResponse({ success: true });
 });
 
@@ -66,5 +70,6 @@ businessModelRouter.delete("/:id", async (c) => {
     return errorResponse("Not found", 404);
   }
   await parser.saveBusinessModelCanvases(filtered);
+  cachePurge(c, "business_model", id);
   return jsonResponse({ success: true });
 });

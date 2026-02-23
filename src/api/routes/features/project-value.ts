@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -35,6 +37,7 @@ projectValueRouter.post("/", async (c) => {
   };
   boards.push(newBoard);
   await parser.saveProjectValueBoards(boards);
+  await cacheWriteThrough(c, "project_value");
   return jsonResponse(newBoard, 201);
 });
 
@@ -48,6 +51,7 @@ projectValueRouter.put("/:id", async (c) => {
   if (index === -1) return errorResponse("Not found", 404);
   boards[index] = { ...boards[index], ...body };
   await parser.saveProjectValueBoards(boards);
+  await cacheWriteThrough(c, "project_value");
   return jsonResponse(boards[index]);
 });
 
@@ -59,5 +63,6 @@ projectValueRouter.delete("/:id", async (c) => {
   const filtered = boards.filter((b) => b.id !== id);
   if (filtered.length === boards.length) return errorResponse("Not found", 404);
   await parser.saveProjectValueBoards(filtered);
+  cachePurge(c, "project_value", id);
   return jsonResponse({ success: true });
 });

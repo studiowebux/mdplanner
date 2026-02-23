@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -62,6 +64,7 @@ milestonesRouter.post("/", async (c) => {
     description: body.description,
   });
   await parser.saveMilestones(milestones);
+  await cacheWriteThrough(c, "milestones");
   return jsonResponse({ success: true, id }, 201);
 });
 
@@ -75,6 +78,7 @@ milestonesRouter.put("/:id", async (c) => {
   if (index === -1) return errorResponse("Not found", 404);
   milestones[index] = { ...milestones[index], ...body };
   await parser.saveMilestones(milestones);
+  await cacheWriteThrough(c, "milestones");
   return jsonResponse({ success: true });
 });
 
@@ -88,5 +92,6 @@ milestonesRouter.delete("/:id", async (c) => {
     return errorResponse("Not found", 404);
   }
   await parser.saveMilestones(filtered);
+  cachePurge(c, "milestones", id);
   return jsonResponse({ success: true });
 });

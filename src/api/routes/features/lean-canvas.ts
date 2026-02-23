@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -43,6 +45,7 @@ leanCanvasRouter.post("/", async (c) => {
   };
   leanCanvases.push(newCanvas);
   await parser.saveLeanCanvases(leanCanvases);
+  await cacheWriteThrough(c, "lean_canvas");
   return jsonResponse(newCanvas, 201);
 });
 
@@ -56,6 +59,7 @@ leanCanvasRouter.put("/:id", async (c) => {
   if (index === -1) return errorResponse("Not found", 404);
   leanCanvases[index] = { ...leanCanvases[index], ...body };
   await parser.saveLeanCanvases(leanCanvases);
+  await cacheWriteThrough(c, "lean_canvas");
   return jsonResponse({ success: true });
 });
 
@@ -69,5 +73,6 @@ leanCanvasRouter.delete("/:id", async (c) => {
     return errorResponse("Not found", 404);
   }
   await parser.saveLeanCanvases(filtered);
+  cachePurge(c, "lean_canvas", id);
   return jsonResponse({ success: true });
 });

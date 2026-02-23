@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -35,6 +37,7 @@ riskRouter.post("/", async (c) => {
   };
   riskAnalyses.push(newRisk);
   await parser.saveRiskAnalyses(riskAnalyses);
+  await cacheWriteThrough(c, "risk");
   return jsonResponse(newRisk, 201);
 });
 
@@ -48,6 +51,7 @@ riskRouter.put("/:id", async (c) => {
   if (index === -1) return errorResponse("Not found", 404);
   riskAnalyses[index] = { ...riskAnalyses[index], ...body };
   await parser.saveRiskAnalyses(riskAnalyses);
+  await cacheWriteThrough(c, "risk");
   return jsonResponse({ success: true });
 });
 
@@ -61,5 +65,6 @@ riskRouter.delete("/:id", async (c) => {
     return errorResponse("Not found", 404);
   }
   await parser.saveRiskAnalyses(filtered);
+  cachePurge(c, "risk", id);
   return jsonResponse({ success: true });
 });

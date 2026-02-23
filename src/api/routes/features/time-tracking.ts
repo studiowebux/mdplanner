@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -42,6 +44,7 @@ timeTrackingRouter.post("/:taskId", async (c) => {
     person: body.person,
     description: body.description,
   });
+  await cacheWriteThrough(c, "time_entries");
   return jsonResponse({ success: true, id }, 201);
 });
 
@@ -52,5 +55,6 @@ timeTrackingRouter.delete("/:taskId/:entryId", async (c) => {
   const entryId = c.req.param("entryId");
   const success = await parser.deleteTimeEntry(taskId, entryId);
   if (!success) return errorResponse("Not found", 404);
+  cachePurge(c, "time_entries", entryId);
   return jsonResponse({ success: true });
 });

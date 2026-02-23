@@ -116,7 +116,9 @@ export class CacheSync {
       return String(v);
     });
     this.db.execute(
-      `INSERT OR REPLACE INTO ${table} (${cols.join(", ")}) VALUES (${placeholders})`,
+      `INSERT OR REPLACE INTO ${table} (${
+        cols.join(", ")
+      }) VALUES (${placeholders})`,
       values,
     );
   }

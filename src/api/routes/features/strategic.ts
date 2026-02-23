@@ -5,6 +5,8 @@
 import { Hono } from "hono";
 import {
   AppVariables,
+  cachePurge,
+  cacheWriteThrough,
   errorResponse,
   getParser,
   jsonResponse,
@@ -32,6 +34,7 @@ strategicRouter.post("/", async (c) => {
   };
   builders.push(newBuilder);
   await parser.saveStrategicLevelsBuilders(builders);
+  await cacheWriteThrough(c, "strategic_builders");
   return jsonResponse(newBuilder, 201);
 });
 
@@ -55,6 +58,7 @@ strategicRouter.put("/:id", async (c) => {
   if (index === -1) return errorResponse("Not found", 404);
   builders[index] = { ...builders[index], ...body };
   await parser.saveStrategicLevelsBuilders(builders);
+  await cacheWriteThrough(c, "strategic_builders");
   return jsonResponse(builders[index]);
 });
 
@@ -68,6 +72,7 @@ strategicRouter.delete("/:id", async (c) => {
     return errorResponse("Not found", 404);
   }
   await parser.saveStrategicLevelsBuilders(filtered);
+  cachePurge(c, "strategic_builders", id);
   return jsonResponse({ success: true });
 });
 
@@ -92,6 +97,7 @@ strategicRouter.post("/:id/levels", async (c) => {
   };
   builder.levels.push(newLevel);
   await parser.saveStrategicLevelsBuilders(builders);
+  await cacheWriteThrough(c, "strategic_builders");
   return jsonResponse(newLevel, 201);
 });
 
@@ -110,6 +116,7 @@ strategicRouter.put("/:id/levels/:levelId", async (c) => {
 
   builder.levels[levelIndex] = { ...builder.levels[levelIndex], ...body };
   await parser.saveStrategicLevelsBuilders(builders);
+  await cacheWriteThrough(c, "strategic_builders");
   return jsonResponse(builder.levels[levelIndex]);
 });
 
@@ -134,5 +141,6 @@ strategicRouter.delete("/:id/levels/:levelId", async (c) => {
     return l;
   });
   await parser.saveStrategicLevelsBuilders(builders);
+  await cacheWriteThrough(c, "strategic_builders");
   return jsonResponse({ success: true });
 });
