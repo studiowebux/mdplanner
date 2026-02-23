@@ -1145,6 +1145,21 @@ export const OrgChartAPI = {
   },
 };
 
+// Search API
+export const SearchAPI = {
+  async search(query, { limit = 20, types } = {}) {
+    const params = new URLSearchParams({ q: query, limit: String(limit) });
+    if (types) params.set("types", types.join(","));
+    const response = await get(`/api/search?${params}`);
+    return response.json();
+  },
+
+  async status() {
+    const response = await get("/api/search/status");
+    return response.json();
+  },
+};
+
 // Finances API
 export const FinancesAPI = {
   async fetchAll() {

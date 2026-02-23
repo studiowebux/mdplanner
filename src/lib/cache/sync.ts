@@ -59,22 +59,28 @@ export class CacheSync {
   }
 
   /**
-   * Full sync: rebuild entire cache from markdown.
+   * Full sync: rebuild entire cache from markdown in a single transaction.
+   * If any table fails, the entire sync is rolled back so the cache
+   * never lands in a partially-synced state.
    */
   async fullSync(options?: SyncOptions): Promise<SyncResult> {
     const start = Date.now();
     const result: SyncResult = { tables: 0, items: 0, duration: 0, errors: [] };
-
     const tables = options?.tables ?? ALL_TABLES;
 
-    for (const table of tables) {
-      try {
+    this.db.exec("BEGIN TRANSACTION");
+    try {
+      for (const table of tables) {
         const count = await this.syncTable(table);
         result.tables++;
         result.items += count;
-      } catch (error) {
-        result.errors.push(`${table}: ${error}`);
       }
+      this.db.exec("COMMIT");
+    } catch (error) {
+      this.db.exec("ROLLBACK");
+      result.errors.push(`sync rolled back: ${error}`);
+      result.duration = Date.now() - start;
+      return result;
     }
 
     this.lastSyncTime = new Date();
@@ -114,11 +120,11 @@ export class CacheSync {
   }
 
   /**
-   * Check if cache needs sync (no data or stale).
+   * Check if cache needs sync.
+   * Returns true if a successful full sync has never been recorded.
    */
   needsSync(): boolean {
-    const taskCount = this.db.count("tasks");
-    return taskCount === 0;
+    return this.getMeta("last_sync") === null;
   }
 
   /**
@@ -173,6 +179,7 @@ const ALL_TABLES = [
   "portfolio",
   "org_members",
   "people",
+  "meetings",
 ];
 
 // Table-specific sync functions
@@ -749,6 +756,28 @@ const TABLE_SYNCERS: Record<string, TableSyncer> = {
       );
     }
     return people.length;
+  },
+
+  meetings: async (parser, db) => {
+    const meetings = await parser.readMeetings();
+    db.execute("DELETE FROM meetings");
+    for (const m of meetings) {
+      db.execute(
+        `INSERT INTO meetings (id, title, date, attendees, agenda, notes, actions, created)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          val(m.id),
+          val(m.title),
+          val(m.date),
+          json(m.attendees),
+          val(m.agenda),
+          val(m.notes),
+          json(m.actions),
+          val(m.created),
+        ],
+      );
+    }
+    return meetings.length;
   },
 
   org_members: async (parser, db) => {

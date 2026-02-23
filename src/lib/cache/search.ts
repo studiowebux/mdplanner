@@ -8,7 +8,7 @@
 import { CacheDatabase } from "./database.ts";
 
 export interface SearchResult {
-  type: "task" | "note" | "goal" | "idea";
+  type: "task" | "note" | "goal" | "idea" | "meeting" | "person";
   id: string;
   title: string;
   snippet: string;
@@ -17,7 +17,7 @@ export interface SearchResult {
 
 export interface SearchOptions {
   limit?: number;
-  types?: ("task" | "note" | "goal" | "idea")[];
+  types?: ("task" | "note" | "goal" | "idea" | "meeting" | "person")[];
   offset?: number;
 }
 
@@ -26,6 +26,8 @@ export interface SearchStats {
   notes: number;
   goals: number;
   ideas: number;
+  meetings: number;
+  people: number;
   milestones: number;
   companies: number;
   deals: number;
@@ -45,7 +47,8 @@ export class SearchEngine {
     if (!query.trim()) return [];
 
     const limit = options?.limit ?? 50;
-    const types = options?.types ?? ["task", "note", "goal", "idea"];
+    const types = options?.types ??
+      ["task", "note", "goal", "idea", "meeting", "person"];
     const results: SearchResult[] = [];
 
     // Escape special FTS5 characters
@@ -62,6 +65,12 @@ export class SearchEngine {
     }
     if (types.includes("idea")) {
       results.push(...this.searchIdeas(safeQuery, limit));
+    }
+    if (types.includes("meeting")) {
+      results.push(...this.searchMeetings(safeQuery, limit));
+    }
+    if (types.includes("person")) {
+      results.push(...this.searchPeople(safeQuery, limit));
     }
 
     // Sort by score (lower is better in bm25)
@@ -184,6 +193,68 @@ export class SearchEngine {
   }
 
   /**
+   * Search meetings.
+   */
+  private searchMeetings(query: string, limit: number): SearchResult[] {
+    try {
+      const rows = this.db.query<{
+        id: string;
+        title: string;
+        snippet: string;
+        score: number;
+      }>(
+        `SELECT
+          id,
+          title,
+          snippet(meetings_fts, 2, '<mark>', '</mark>', '...', 32) as snippet,
+          bm25(meetings_fts) as score
+        FROM meetings_fts
+        WHERE meetings_fts MATCH ?
+        ORDER BY score
+        LIMIT ?`,
+        [query, limit],
+      );
+      return rows.map((r) => ({ ...r, type: "meeting" as const }));
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Search people.
+   */
+  private searchPeople(query: string, limit: number): SearchResult[] {
+    try {
+      const rows = this.db.query<{
+        id: string;
+        name: string;
+        snippet: string;
+        score: number;
+      }>(
+        `SELECT
+          id,
+          name,
+          snippet(people_fts, 2, '<mark>', '</mark>', '...', 32) as snippet,
+          bm25(people_fts) as score
+        FROM people_fts
+        WHERE people_fts MATCH ?
+        ORDER BY score
+        LIMIT ?`,
+        [query, limit],
+      );
+      return rows.map((r) => ({
+        id: r.id,
+        title: r.name,
+        snippet: r.snippet,
+        score: r.score,
+        type: "person" as const,
+      }));
+    } catch {
+      return [];
+    }
+  }
+
+  /**
    * Get search stats (counts).
    */
   getStats(): SearchStats {
@@ -199,6 +270,8 @@ export class SearchEngine {
     const notes = count("notes");
     const goals = count("goals");
     const ideas = count("ideas");
+    const meetings = count("meetings");
+    const people = count("people");
     const milestones = count("milestones");
     const companies = count("companies");
     const deals = count("deals");
@@ -208,10 +281,13 @@ export class SearchEngine {
       notes,
       goals,
       ideas,
+      meetings,
+      people,
       milestones,
       companies,
       deals,
-      total: tasks + notes + goals + ideas + milestones + companies + deals,
+      total: tasks + notes + goals + ideas + meetings + people + milestones +
+        companies + deals,
     };
   }
 

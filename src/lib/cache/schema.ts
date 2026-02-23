@@ -365,6 +365,18 @@ CREATE TABLE IF NOT EXISTS org_members (
   notes TEXT
 );
 
+-- Meetings
+CREATE TABLE IF NOT EXISTS meetings (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  date TEXT,
+  attendees TEXT,   -- JSON array
+  agenda TEXT,
+  notes TEXT,       -- markdown body
+  actions TEXT,     -- JSON array of MeetingAction
+  created TEXT
+);
+
 -- Cache metadata
 CREATE TABLE IF NOT EXISTS cache_meta (
   key TEXT PRIMARY KEY,
@@ -408,6 +420,24 @@ CREATE VIRTUAL TABLE IF NOT EXISTS ideas_fts USING fts5(
   title,
   description,
   content='ideas',
+  content_rowid='rowid'
+);
+
+-- FTS for meetings
+CREATE VIRTUAL TABLE IF NOT EXISTS meetings_fts USING fts5(
+  id,
+  title,
+  notes,
+  content='meetings',
+  content_rowid='rowid'
+);
+
+-- FTS for people
+CREATE VIRTUAL TABLE IF NOT EXISTS people_fts USING fts5(
+  id,
+  name,
+  notes,
+  content='people',
   content_rowid='rowid'
 );
 
@@ -479,6 +509,40 @@ CREATE TRIGGER IF NOT EXISTS ideas_au AFTER UPDATE ON ideas BEGIN
   INSERT INTO ideas_fts(rowid, id, title, description)
   VALUES (new.rowid, new.id, new.title, new.description);
 END;
+
+CREATE TRIGGER IF NOT EXISTS meetings_ai AFTER INSERT ON meetings BEGIN
+  INSERT INTO meetings_fts(rowid, id, title, notes)
+  VALUES (new.rowid, new.id, new.title, new.notes);
+END;
+
+CREATE TRIGGER IF NOT EXISTS meetings_ad AFTER DELETE ON meetings BEGIN
+  INSERT INTO meetings_fts(meetings_fts, rowid, id, title, notes)
+  VALUES ('delete', old.rowid, old.id, old.title, old.notes);
+END;
+
+CREATE TRIGGER IF NOT EXISTS meetings_au AFTER UPDATE ON meetings BEGIN
+  INSERT INTO meetings_fts(meetings_fts, rowid, id, title, notes)
+  VALUES ('delete', old.rowid, old.id, old.title, old.notes);
+  INSERT INTO meetings_fts(rowid, id, title, notes)
+  VALUES (new.rowid, new.id, new.title, new.notes);
+END;
+
+CREATE TRIGGER IF NOT EXISTS people_ai AFTER INSERT ON people BEGIN
+  INSERT INTO people_fts(rowid, id, name, notes)
+  VALUES (new.rowid, new.id, new.name, new.notes);
+END;
+
+CREATE TRIGGER IF NOT EXISTS people_ad AFTER DELETE ON people BEGIN
+  INSERT INTO people_fts(people_fts, rowid, id, name, notes)
+  VALUES ('delete', old.rowid, old.id, old.name, old.notes);
+END;
+
+CREATE TRIGGER IF NOT EXISTS people_au AFTER UPDATE ON people BEGIN
+  INSERT INTO people_fts(people_fts, rowid, id, name, notes)
+  VALUES ('delete', old.rowid, old.id, old.name, old.notes);
+  INSERT INTO people_fts(rowid, id, name, notes)
+  VALUES (new.rowid, new.id, new.name, new.notes);
+END;
 `;
 
 // Indexes for common queries
@@ -522,6 +586,7 @@ CREATE INDEX IF NOT EXISTS idx_portfolio_category ON portfolio(category);
 // Drop all tables for rebuild
 const DROP_SQL = `
 DROP TABLE IF EXISTS cache_meta;
+DROP TABLE IF EXISTS meetings;
 DROP TABLE IF EXISTS people;
 DROP TABLE IF EXISTS org_members;
 DROP TABLE IF EXISTS portfolio;
@@ -563,7 +628,15 @@ DROP TRIGGER IF EXISTS goals_au;
 DROP TRIGGER IF EXISTS ideas_ai;
 DROP TRIGGER IF EXISTS ideas_ad;
 DROP TRIGGER IF EXISTS ideas_au;
+DROP TRIGGER IF EXISTS meetings_ai;
+DROP TRIGGER IF EXISTS meetings_ad;
+DROP TRIGGER IF EXISTS meetings_au;
+DROP TRIGGER IF EXISTS people_ai;
+DROP TRIGGER IF EXISTS people_ad;
+DROP TRIGGER IF EXISTS people_au;
 
+DROP TABLE IF EXISTS people_fts;
+DROP TABLE IF EXISTS meetings_fts;
 DROP TABLE IF EXISTS ideas_fts;
 DROP TABLE IF EXISTS goals_fts;
 DROP TABLE IF EXISTS notes_fts;

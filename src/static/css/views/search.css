@@ -1,0 +1,191 @@
+/* ==========================================================================
+   Global Search Overlay
+   ========================================================================== */
+
+.search-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-block-start: 10vh;
+  z-index: 500;
+}
+
+.search-overlay.hidden {
+  display: none;
+}
+
+.search-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  width: min(560px, calc(100vw - 2rem));
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   Input row
+   -------------------------------------------------------------------------- */
+
+.search-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  border-block-end: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.search-input-row svg {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.search-input-field {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: var(--font-size-base);
+  color: var(--text);
+  font-family: inherit;
+}
+
+.search-input-field::placeholder {
+  color: var(--text-tertiary);
+}
+
+.search-kbd-hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.1rem 0.35rem;
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Results list
+   -------------------------------------------------------------------------- */
+
+#globalSearchResults {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.search-result-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  cursor: pointer;
+  border-block-end: 1px solid var(--border);
+  transition: background var(--transition-fast, 0.1s);
+}
+
+.search-result-row:last-child {
+  border-block-end: none;
+}
+
+.search-result-row:hover,
+.search-result-active {
+  background: var(--surface);
+}
+
+.search-result-type {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  background: var(--surface);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-block-start: 0.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.search-result-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-result-title {
+  font-size: var(--font-size-base);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-result-snippet {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-block-start: 0.2rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
+}
+
+.search-result-snippet mark {
+  background: none;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.search-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.search-empty code {
+  font-family: var(--font-mono);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.1rem 0.35rem;
+}
+
+/* --------------------------------------------------------------------------
+   Header trigger button
+   -------------------------------------------------------------------------- */
+
+.search-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3rem 0.625rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color var(--transition-fast, 0.1s),
+    color var(--transition-fast, 0.1s);
+}
+
+.search-trigger-btn:hover {
+  color: var(--text);
+  border-color: var(--text-secondary);
+}
+
+.search-trigger-btn .search-trigger-kbd {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+}

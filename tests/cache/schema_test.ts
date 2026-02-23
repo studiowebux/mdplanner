@@ -14,6 +14,7 @@ const EXPECTED_TABLES = [
   "goals",
   "milestones",
   "ideas",
+  "meetings",
   "retrospectives",
   "sticky_notes",
   "mindmaps",
@@ -36,6 +37,7 @@ const EXPECTED_TABLES = [
   "interactions",
   "portfolio",
   "org_members",
+  "people",
   "cache_meta",
 ];
 
@@ -44,6 +46,8 @@ const FTS_TABLES = [
   "notes_fts",
   "goals_fts",
   "ideas_fts",
+  "meetings_fts",
+  "people_fts",
 ];
 
 Deno.test("initSchema - creates all entity tables", () => {
@@ -100,6 +104,8 @@ Deno.test("dropSchema - removes all tables", () => {
   // Verify tables are gone
   assertEquals(db.tableExists("tasks"), false);
   assertEquals(db.tableExists("notes"), false);
+  assertEquals(db.tableExists("meetings"), false);
+  assertEquals(db.tableExists("people"), false);
 
   db.close();
 });

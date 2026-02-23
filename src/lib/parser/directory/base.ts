@@ -57,21 +57,18 @@ export abstract class DirectoryParser<T extends { id: string }> {
    */
   async readAll(): Promise<T[]> {
     const files = await this.listFiles();
-    const items: T[] = [];
-
-    for (const filePath of files) {
-      try {
-        const content = await Deno.readTextFile(filePath);
-        const item = this.parseFile(content, filePath);
-        if (item) {
-          items.push(item);
+    const results = await Promise.all(
+      files.map(async (filePath) => {
+        try {
+          const content = await Deno.readTextFile(filePath);
+          return this.parseFile(content, filePath);
+        } catch (error) {
+          console.warn(`Failed to parse ${filePath}:`, error);
+          return null;
         }
-      } catch (error) {
-        console.warn(`Failed to parse ${filePath}:`, error);
-      }
-    }
-
-    return items;
+      }),
+    );
+    return results.filter((item) => item !== null) as T[];
   }
 
   /**
