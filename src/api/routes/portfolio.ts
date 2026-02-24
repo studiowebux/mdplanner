@@ -109,6 +109,9 @@ portfolioRouter.post("/", async (c) => {
     endDate: body.endDate,
     team: body.team,
     kpis: body.kpis,
+    urls: body.urls,
+    logo: body.logo,
+    license: body.license,
   });
 
   await cacheWriteThrough(c, "portfolio");
