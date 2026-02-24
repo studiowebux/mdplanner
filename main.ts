@@ -3,6 +3,7 @@ import { serveStatic } from "hono/deno";
 import { dirname, extname, fromFileUrl, join } from "@std/path";
 import { ProjectManager } from "./src/lib/project-manager.ts";
 import { createApiRouter } from "./src/api/routes/index.ts";
+import { createMcpHonoRouter } from "./src/mcp/http.ts";
 import { initProject, printInitSuccess } from "./src/lib/init.ts";
 import { GITHUB_REPO, VERSION } from "./src/lib/version.ts";
 import { validateProjectPath } from "./src/lib/cli.ts";
@@ -16,6 +17,7 @@ interface CLIArgs {
   port: number;
   help: boolean;
   cache: boolean;
+  mcpToken?: string;
 }
 
 function printHelp(): void {
@@ -35,6 +37,7 @@ Arguments:
 Options:
   -p, --port <port>      Port to run the server on (default: 8003)
   -c, --cache            Enable SQLite cache for fast search and queries
+      --mcp-token <tok>  Protect the /mcp endpoint with a bearer token
   -h, --help             Show this help message
 
 Examples:
@@ -53,6 +56,7 @@ function parseArgs(args: string[]): CLIArgs {
     port: 8003,
     help: false,
     cache: false,
+    mcpToken: undefined,
   };
 
   let i = 0;
@@ -65,6 +69,14 @@ function parseArgs(args: string[]): CLIArgs {
     } else if (arg === "-c" || arg === "--cache") {
       result.cache = true;
       i++;
+    } else if (arg === "--mcp-token") {
+      const tok = args[i + 1];
+      if (!tok || tok.startsWith("-")) {
+        console.error("Error: --mcp-token requires a value");
+        Deno.exit(1);
+      }
+      result.mcpToken = tok;
+      i += 2;
     } else if (arg === "-p" || arg === "--port") {
       const portValue = args[i + 1];
       if (!portValue || portValue.startsWith("-")) {
@@ -129,6 +141,10 @@ const app = new Hono();
 const apiRouter = createApiRouter(projectManager);
 app.route("/api", apiRouter);
 
+// MCP HTTP endpoint (Model Context Protocol — remote AI client access)
+const mcpRouter = await createMcpHonoRouter(projectManager, cliArgs.mcpToken);
+app.route("/mcp", mcpRouter);
+
 // Serve uploaded files from the project directory
 const UPLOAD_MIME: Record<string, string> = {
   ".png": "image/png",
@@ -171,10 +187,14 @@ app.use(
 );
 
 console.log(`mdplanner v${VERSION}`);
-console.log(`Server running on http://localhost:${cliArgs.port}`);
-console.log(`Project: ${cliArgs.projectPath}`);
+console.log(`Server  http://localhost:${cliArgs.port}`);
+console.log(`MCP     http://localhost:${cliArgs.port}/mcp`);
+console.log(`Project ${cliArgs.projectPath}`);
 if (cliArgs.cache) {
-  console.log(`Cache: enabled (${cliArgs.projectPath}/.mdplanner.db)`);
+  console.log(`Cache   ${cliArgs.projectPath}/.mdplanner.db`);
+}
+if (cliArgs.mcpToken) {
+  console.log(`MCP auth enabled (bearer token)`);
 }
 
 const projects = await projectManager.scanProjects();
