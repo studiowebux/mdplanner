@@ -10,9 +10,9 @@ and this project adheres to
 
 ### Added
 
-- MCP HTTP transport: `/mcp` endpoint embedded in the existing Hono server
-  (same port as REST API); connects any MCP client over the network without
-  requiring SSH or a local process
+- MCP HTTP transport: `/mcp` endpoint embedded in the existing Hono server (same
+  port as REST API); connects any MCP client over the network without requiring
+  SSH or a local process
 - `--mcp-token <secret>` CLI flag: optional bearer token protection for the
   `/mcp` endpoint; when set, requests without a matching `Authorization: Bearer`
   header receive 401
