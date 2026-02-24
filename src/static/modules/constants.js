@@ -25,17 +25,27 @@ export const DEADLINE_CLASSES = {
 };
 
 export const PROJECT_STATUS_CLASSES = {
+  discovery: "badge-status-discovery",
+  scoping: "badge-status-scoping",
   planning: "badge-status-planning",
   active: "badge-status-active",
   "on-hold": "badge-status-on-hold",
   completed: "badge-status-completed",
+  production: "badge-status-production",
+  maintenance: "badge-status-maintenance",
+  cancelled: "badge-status-cancelled",
 };
 
 export const PROJECT_STATUS_LABELS = {
+  discovery: "Discovery",
+  scoping: "Scoping",
   planning: "Planning",
   active: "Active",
   "on-hold": "On Hold",
   completed: "Completed",
+  production: "Production",
+  maintenance: "Maintenance",
+  cancelled: "Cancelled",
 };
 
 // Priority hex colors for inline styles (timeline, charts)

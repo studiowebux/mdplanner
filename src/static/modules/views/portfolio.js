@@ -76,6 +76,40 @@ export class PortfolioView {
   }
 
   /**
+   * Compute human-readable duration between two date strings.
+   * Returns null when either date is missing or invalid.
+   * @param {string|undefined} startDate - YYYY-MM-DD
+   * @param {string|undefined} endDate   - YYYY-MM-DD
+   * @param {boolean} compact - compact form for row display ("3 mo", "1 yr 2 mo")
+   * @returns {string|null}
+   */
+  formatDuration(startDate, endDate, compact = false) {
+    if (!startDate || !endDate) return null;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    if (isNaN(start) || isNaN(end) || end <= start) return null;
+
+    const totalDays = Math.round((end - start) / 86400000);
+    const years = Math.floor(totalDays / 365);
+    const months = Math.floor((totalDays % 365) / 30);
+    const days = totalDays % 30;
+
+    if (compact) {
+      if (years > 0 && months > 0) return `${years} yr ${months} mo`;
+      if (years > 0) return `${years} yr`;
+      if (months > 0) return `${months} mo`;
+      return `${totalDays} d`;
+    }
+
+    const parts = [];
+    if (years > 0) parts.push(`${years} year${years !== 1 ? "s" : ""}`);
+    if (months > 0) parts.push(`${months} month${months !== 1 ? "s" : ""}`);
+    if (parts.length === 0) parts.push(`${totalDays} day${totalDays !== 1 ? "s" : ""}`);
+    else if (days > 0 && years === 0) parts.push(`${days} day${days !== 1 ? "s" : ""}`);
+    return parts.join(", ");
+  }
+
+  /**
    * Render summary cards with aggregate metrics.
    */
   renderSummaryCards() {
@@ -140,10 +174,15 @@ export class PortfolioView {
 
     const statusFilters = [
       { key: "all", label: "All" },
+      { key: "discovery", label: "Discovery" },
+      { key: "scoping", label: "Scoping" },
       { key: "planning", label: "Planning" },
       { key: "active", label: "Active" },
       { key: "on-hold", label: "On Hold" },
       { key: "completed", label: "Completed" },
+      { key: "production", label: "Production" },
+      { key: "maintenance", label: "Maintenance" },
+      { key: "cancelled", label: "Cancelled" },
     ];
 
     const statusHtml = statusFilters.map((f) => {
@@ -328,11 +367,33 @@ export class PortfolioView {
       ? "px-4 py-3 hover:bg-secondary cursor-pointer transition-colors"
       : "bg-primary rounded-lg border border-default px-4 py-3 hover:bg-secondary cursor-pointer transition-colors";
 
+    // Logo thumbnail
+    const logoHtml = project.logo
+      ? `<img src="${this.escapeHtml(project.logo)}" alt="" class="portfolio-logo">`
+      : "";
+
+    // URL links
+    const urlsHtml = project.urls && project.urls.length > 0
+      ? `<div class="portfolio-urls">${
+        project.urls.map((u) =>
+          `<a href="${this.escapeHtml(u.href)}" class="portfolio-url-link" target="_blank" rel="noopener noreferrer" data-stop-propagation>${
+            this.escapeHtml(u.label)
+          }</a>`
+        ).join("")
+      }</div>`
+      : "";
+
+    // License badge
+    const licenseHtml = project.license
+      ? `<span class="portfolio-license">${this.escapeHtml(project.license)}</span>`
+      : "";
+
     return `
       <div class="${containerClass}" data-portfolio-id="${project.id}">
         <div class="flex items-center justify-between gap-4">
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 min-w-0">
+              ${logoHtml}
               <span class="portfolio-row-name font-medium text-primary truncate">${
       this.escapeHtml(project.name)
     }</span>
@@ -343,6 +404,7 @@ export class PortfolioView {
         }</span>`
         : ""
     }
+              ${licenseHtml}
               ${
       hasKpis
         ? '<span class="w-2 h-2 bg-info rounded-full" title="Has KPIs"></span>'
@@ -356,6 +418,7 @@ export class PortfolioView {
         }</p>`
         : ""
     }
+            ${urlsHtml}
           </div>
           <div class="flex items-center gap-4 flex-shrink-0">
             <div class="portfolio-row-progress text-right w-20">
@@ -363,7 +426,12 @@ export class PortfolioView {
               <div class="w-full bg-active rounded-full h-1.5 mt-1">
                 <div class="bg-success h-1.5 rounded-full" style="width: ${progressPercent}%"></div>
               </div>
-            </div>
+              ${(() => {
+      const dur = this.formatDuration(project.startDate, project.endDate, true);
+      return dur
+        ? `<div class="portfolio-row-duration">${dur}</div>`
+        : "";
+    })()}</div>
             ${
       hasFinancials
         ? `
@@ -475,6 +543,62 @@ export class PortfolioView {
   }
 
   /**
+   * Render URL input rows for the detail panel.
+   * @param {Array<{label: string, href: string}>} urls
+   * @returns {string} HTML string
+   */
+  renderUrlRows(urls) {
+    if (urls.length === 0) {
+      return '<p class="text-sm text-muted" id="portfolioUrlsEmpty">No URLs defined</p>';
+    }
+    return urls.map((url, idx) => this.buildUrlRow(idx, url.label, url.href)).join("");
+  }
+
+  /**
+   * Build a single URL row HTML string.
+   * @param {number} idx
+   * @param {string} label
+   * @param {string} href
+   * @returns {string}
+   */
+  buildUrlRow(idx, label = "", href = "") {
+    return `
+      <div class="portfolio-url-row" data-url-index="${idx}">
+        <input type="text" class="form-input text-sm" placeholder="Label" value="${
+      this.escapeHtml(label)
+    }" data-url-field="label" data-url-idx="${idx}">
+        <input type="text" class="form-input text-sm" placeholder="https://..." value="${
+      this.escapeHtml(href)
+    }" data-url-field="href" data-url-idx="${idx}">
+        <button type="button" class="text-muted hover:text-error" data-remove-url="${idx}">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+    `;
+  }
+
+  /**
+   * Add a new URL row to the form.
+   */
+  addUrl() {
+    const list = document.getElementById("portfolioUrlsList");
+    if (!list) return;
+    const empty = list.querySelector("#portfolioUrlsEmpty");
+    if (empty) empty.remove();
+    const idx = list.querySelectorAll("[data-url-index]").length;
+    list.insertAdjacentHTML("beforeend", this.buildUrlRow(idx));
+  }
+
+  /**
+   * Remove a URL row from the form.
+   * @param {string} idx
+   */
+  removeUrl(idx) {
+    const el = document.querySelector(`[data-url-index="${idx}"]`);
+    if (el) el.remove();
+  }
+
+  /**
    * Open detail panel for a new project.
    */
   openNewDetailPanel() {
@@ -495,6 +619,9 @@ export class PortfolioView {
       endDate: "",
       team: [],
       kpis: [],
+      urls: [],
+      logo: "",
+      license: "",
     };
 
     this.renderDetailPanel(newProject);
@@ -548,7 +675,17 @@ export class PortfolioView {
 
     titleEl.textContent = project.name;
 
-    const statusOptions = ["planning", "active", "on-hold", "completed"]
+    const statusOptions = [
+      "discovery",
+      "scoping",
+      "planning",
+      "active",
+      "on-hold",
+      "completed",
+      "production",
+      "maintenance",
+      "cancelled",
+    ]
       .map((s) =>
         `<option value="${s}" ${project.status === s ? "selected" : ""}>${
           PROJECT_STATUS_LABELS[s] || s
@@ -627,6 +764,34 @@ export class PortfolioView {
           </div>
         </section>
 
+        <!-- Links & Identity -->
+        <section class="sidenav-section">
+          <h3 class="sidenav-section-title">Links &amp; Identity</h3>
+          <div class="space-y-4">
+            <div>
+              <label class="form-label">Logo URL or Path</label>
+              <input type="text" id="portfolioDetailLogo" class="form-input" value="${
+      this.escapeHtml(project.logo || "")
+    }" placeholder="https://... or uploads/logo.png">
+            </div>
+            <div>
+              <label class="form-label">License</label>
+              <input type="text" id="portfolioDetailLicense" class="form-input" value="${
+      this.escapeHtml(project.license || "")
+    }" placeholder="MIT, Apache-2.0, GPL-3.0, Proprietary...">
+            </div>
+            <div>
+              <label class="form-label flex items-center justify-between">
+                <span>URLs</span>
+                <button type="button" id="portfolioAddUrl" class="text-sm text-info hover:underline">+ Add URL</button>
+              </label>
+              <div id="portfolioUrlsList" class="space-y-2">
+                ${this.renderUrlRows(project.urls || [])}
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- Progress & Financials -->
         <section class="sidenav-section">
           <h3 class="sidenav-section-title">Progress & Financials</h3>
@@ -681,6 +846,12 @@ export class PortfolioView {
     }">
             </div>
           </div>
+          ${(() => {
+      const dur = this.formatDuration(project.startDate, project.endDate);
+      return dur
+        ? `<div class="portfolio-duration-label">Duration: ${dur}</div>`
+        : "";
+    })()}
         </section>
 
         <!-- Team -->
@@ -784,9 +955,19 @@ export class PortfolioView {
       document.querySelectorAll(".portfolio-team-cb:checked"),
     ).map((cb) => cb.value);
 
+    // Collect URLs
+    const urls = [];
+    document.querySelectorAll("[data-url-index]").forEach((el) => {
+      const label = el.querySelector('[data-url-field="label"]')?.value?.trim();
+      const href = el.querySelector('[data-url-field="href"]')?.value?.trim();
+      if (href) {
+        urls.push({ label: label || href, href });
+      }
+    });
+
     const updates = {
       name: document.getElementById("portfolioDetailName")?.value?.trim() ||
-        this.selectedProject.name,
+        this.selectedProject?.name || "",
       category:
         document.getElementById("portfolioDetailCategory")?.value?.trim() ||
         "Uncategorized",
@@ -811,6 +992,12 @@ export class PortfolioView {
         undefined,
       team: team.length > 0 ? team : undefined,
       kpis: kpis.length > 0 ? kpis : undefined,
+      urls: urls.length > 0 ? urls : undefined,
+      logo: document.getElementById("portfolioDetailLogo")?.value?.trim() ||
+        undefined,
+      license:
+        document.getElementById("portfolioDetailLicense")?.value?.trim() ||
+        undefined,
     };
 
     try {
@@ -862,6 +1049,8 @@ export class PortfolioView {
 
     // Project row clicks
     document.getElementById("portfolioGrid")?.addEventListener("click", (e) => {
+      // Don't open detail panel when clicking URL links
+      if (e.target.closest("[data-stop-propagation]")) return;
       const row = e.target.closest("[data-portfolio-id]");
       if (row) {
         const projectId = row.dataset.portfolioId;
@@ -896,10 +1085,22 @@ export class PortfolioView {
         }
 
         // Remove KPI button
-        const removeBtn = e.target.closest("[data-remove-kpi]");
-        if (removeBtn) {
-          const idx = removeBtn.dataset.removeKpi;
-          this.removeKpi(idx);
+        const removeKpiBtn = e.target.closest("[data-remove-kpi]");
+        if (removeKpiBtn) {
+          this.removeKpi(removeKpiBtn.dataset.removeKpi);
+          return;
+        }
+
+        // Add URL button
+        if (e.target.closest("#portfolioAddUrl")) {
+          this.addUrl();
+          return;
+        }
+
+        // Remove URL button
+        const removeUrlBtn = e.target.closest("[data-remove-url]");
+        if (removeUrlBtn) {
+          this.removeUrl(removeUrlBtn.dataset.removeUrl);
         }
       },
     );

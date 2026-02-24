@@ -2,13 +2,19 @@
 id: portfolio_taskflow_platform
 name: TaskFlow Platform
 category: SaaS Products
-status: active
+status: production
 client: Multiple
 revenue: 125000
 expenses: 45000
 progress: 75
 startDate: 2025-01-15
 endDate: 2026-06-30
+license: MIT
+urls:
+  - label: "Website"
+    href: "https://example.com/taskflow"
+  - label: "GitHub"
+    href: "https://github.com/example/taskflow"
 team:
   - alice
   - bob
