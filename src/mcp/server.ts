@@ -16,7 +16,11 @@ import { registerProjectTools } from "./tools/project.ts";
 import { registerSearchTools } from "./tools/search.ts";
 import { registerResources } from "./resources.ts";
 
-export async function startMcpServer(pm: ProjectManager): Promise<void> {
+/**
+ * Factory: create and configure an McpServer instance (transport-agnostic).
+ * Pattern: Factory Method
+ */
+export function createMcpServer(pm: ProjectManager): McpServer {
   const server = new McpServer({
     name: "mdplanner",
     version: VERSION,
@@ -31,6 +35,12 @@ export async function startMcpServer(pm: ProjectManager): Promise<void> {
   registerSearchTools(server, pm);
   registerResources(server, pm);
 
+  return server;
+}
+
+/** Start MCP server over stdio (local use, Claude Desktop / mcp.ts binary). */
+export async function startMcpServer(pm: ProjectManager): Promise<void> {
+  const server = createMcpServer(pm);
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }

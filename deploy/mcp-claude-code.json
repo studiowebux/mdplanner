@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "mdplanner": {
+      "type": "http",
+      "url": "http://your-server:8003/mcp"
+    }
+  }
+}
