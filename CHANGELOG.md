@@ -10,6 +10,14 @@ and this project adheres to
 
 ### Added
 
+- WebDAV server: `--webdav` flag mounts the project directory at `/webdav` on
+  the same port as the REST API; compatible with Obsidian, macOS Finder, and any
+  RFC 4918 WebDAV client — edit markdown files directly without SSH
+- `--webdav-user <user>` / `--webdav-pass <pass>`: optional Basic Auth for the
+  WebDAV endpoint; unauthenticated when omitted
+- WebDAV features: atomic writes, soft delete to `.trash/`, per-path write
+  mutex, persistent lock store, dead property storage, range requests, ETags,
+  RFC 4918 Class 1/2/3 compliance
 - MCP HTTP transport: `/mcp` endpoint embedded in the existing Hono server (same
   port as REST API); connects any MCP client over the network without requiring
   SSH or a local process
