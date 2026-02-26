@@ -2,6 +2,11 @@
    Summary View
    ========================================================================== */
 
+#summaryView {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 .summary-empty-text {
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);

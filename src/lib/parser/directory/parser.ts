@@ -198,6 +198,14 @@ export class DirectoryMarkdownParser {
     await this.projectParser.updateConfig(config);
   }
 
+  /**
+   * Bump lastUpdated in project.md without changing any other config fields.
+   * Call after any user-visible mutation (task, note, goal, etc.).
+   */
+  async touchLastUpdated(): Promise<void> {
+    await this.projectParser.updateConfig({});
+  }
+
   async saveProjectName(name: string): Promise<void> {
     await this.projectParser.updateName(name);
   }

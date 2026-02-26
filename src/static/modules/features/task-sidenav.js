@@ -170,6 +170,7 @@ export class TaskSidenavModule {
   }
 
   fillForm(task) {
+    const cfg = task.config || {};
     const setValue = (id, value) => {
       const el = document.getElementById(id);
       if (el) el.value = value || "";
@@ -178,28 +179,35 @@ export class TaskSidenavModule {
     setValue("sidenavTaskTitleInput", task.title);
     setValue(
       "sidenavTaskDescription",
-      Array.isArray(task.description) ? task.description.join("\n") : (task.description || ""),
+      Array.isArray(task.description)
+        ? task.description.join("\n")
+        : (task.description || ""),
     );
     setValue("sidenavTaskSection", task.section);
-    setValue("sidenavTaskPriority", task.priority);
-    setValue("sidenavTaskAssignee", task.assignee);
-    setValue("sidenavTaskEffort", task.effort);
-    setValue("sidenavTaskMilestone", task.milestone);
+    setValue("sidenavTaskPriority", cfg.priority);
+    setValue("sidenavTaskAssignee", cfg.assignee);
+    setValue("sidenavTaskEffort", cfg.effort);
+    setValue("sidenavTaskMilestone", cfg.milestone);
 
-    // Due date
-    if (task.due_date) {
-      const dueDate = new Date(task.due_date);
-      setValue("sidenavTaskDueDate", dueDate.toISOString().slice(0, 16));
+    // Due date — datetime-local requires YYYY-MM-DDTHH:MM (local, no seconds)
+    if (cfg.due_date) {
+      const dueDate = new Date(cfg.due_date);
+      if (!isNaN(dueDate.getTime())) {
+        // Produce local time string without seconds/timezone suffix
+        const pad = (n) => String(n).padStart(2, "0");
+        const local = `${dueDate.getFullYear()}-${pad(dueDate.getMonth() + 1)}-${pad(dueDate.getDate())}T${pad(dueDate.getHours())}:${pad(dueDate.getMinutes())}`;
+        setValue("sidenavTaskDueDate", local);
+      }
     }
 
     // Planned dates
-    setValue("sidenavTaskPlannedStart", task.planned_start || "");
-    setValue("sidenavTaskPlannedEnd", task.planned_end || "");
+    setValue("sidenavTaskPlannedStart", cfg.planned_start || "");
+    setValue("sidenavTaskPlannedEnd", cfg.planned_end || "");
 
-    // Tags (multi-select)
+    // Tags (multi-select) — use options iteration for cross-browser safety
     const tagsSelect = document.getElementById("sidenavTaskTags");
-    if (tagsSelect && task.tag) {
-      const tags = Array.isArray(task.tag) ? task.tag : [task.tag];
+    if (tagsSelect && cfg.tag) {
+      const tags = Array.isArray(cfg.tag) ? cfg.tag : [cfg.tag];
       Array.from(tagsSelect.options).forEach((opt) => {
         opt.selected = tags.includes(opt.value);
       });
@@ -226,7 +234,9 @@ export class TaskSidenavModule {
     const getSelectedValues = (id) => {
       const el = document.getElementById(id);
       if (!el) return [];
-      return Array.from(el.selectedOptions).map((o) => o.value);
+      return Array.from(el.options).filter((o) => o.selected).map((o) =>
+        o.value
+      );
     };
 
     const taskData = {

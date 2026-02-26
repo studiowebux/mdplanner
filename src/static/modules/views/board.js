@@ -434,6 +434,41 @@ export class BoardView {
     let touchStartY = 0;
     let touchStartX = 0;
     let dragActive = false;
+    let longPressTimer = null;
+    const LONG_PRESS_MS = 400;
+    const SCROLL_CANCEL_PX = 8;
+
+    const cancelLongPress = () => {
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    };
+
+    const activateDrag = () => {
+      if (!touchCard || dragActive) return;
+      dragActive = true;
+
+      this.draggedTaskId = touchCard.dataset.taskId;
+      const container = touchCard.closest("[data-section]");
+      if (container) {
+        this.draggedFromSection = container.dataset.section;
+        const cards = Array.from(container.querySelectorAll(".task-card"));
+        this.draggedFromIndex = cards.indexOf(touchCard);
+      }
+
+      this.showDropZones();
+      touchCard.style.opacity = "0.5";
+
+      clone = touchCard.cloneNode(true);
+      clone.style.position = "fixed";
+      clone.style.zIndex = "9999";
+      clone.style.pointerEvents = "none";
+      clone.style.opacity = "0.8";
+      clone.style.width = touchCard.offsetWidth + "px";
+      clone.style.transform = "rotate(3deg)";
+      document.body.appendChild(clone);
+    };
 
     document.addEventListener("touchstart", (e) => {
       const card = e.target.closest(".task-card, .task-list-item");
@@ -444,6 +479,9 @@ export class BoardView {
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
       dragActive = false;
+
+      // Long-press activates drag so normal scroll is not blocked
+      longPressTimer = setTimeout(activateDrag, LONG_PRESS_MS);
     }, { passive: true });
 
     document.addEventListener("touchmove", (e) => {
@@ -453,56 +491,34 @@ export class BoardView {
       const dx = touch.clientX - touchStartX;
       const dy = touch.clientY - touchStartY;
 
-      // Require 10px movement to start drag
-      if (!dragActive && Math.abs(dx) + Math.abs(dy) < 10) return;
+      // Cancel long-press if the finger moved — user is scrolling
+      if (!dragActive && Math.abs(dx) + Math.abs(dy) > SCROLL_CANCEL_PX) {
+        cancelLongPress();
+        touchCard = null;
+        return;
+      }
 
-      if (!dragActive) {
-        dragActive = true;
-        e.preventDefault();
+      if (!dragActive) return;
 
-        // Track source
-        this.draggedTaskId = touchCard.dataset.taskId;
-        const container = touchCard.closest("[data-section]");
-        if (container) {
-          this.draggedFromSection = container.dataset.section;
-          const cards = Array.from(container.querySelectorAll(".task-card"));
-          this.draggedFromIndex = cards.indexOf(touchCard);
+      e.preventDefault();
+      clone.style.left = (touch.clientX - 40) + "px";
+      clone.style.top = (touch.clientY - 20) + "px";
+
+      // Highlight drop zone under finger
+      const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+      const dropZone = elemBelow?.closest(".drop-zone");
+      document.querySelectorAll(".drop-zone").forEach((dz) => {
+        if (dz === dropZone) {
+          this.highlightDropZone(dz);
+        } else {
+          dz.style.background = "rgba(59, 130, 246, 0.1)";
+          dz.style.border = "2px dashed #3b82f6";
         }
-
-        this.showDropZones();
-        touchCard.style.opacity = "0.5";
-
-        // Create visual clone
-        clone = touchCard.cloneNode(true);
-        clone.style.position = "fixed";
-        clone.style.zIndex = "9999";
-        clone.style.pointerEvents = "none";
-        clone.style.opacity = "0.8";
-        clone.style.width = touchCard.offsetWidth + "px";
-        clone.style.transform = "rotate(3deg)";
-        document.body.appendChild(clone);
-      }
-
-      if (dragActive) {
-        e.preventDefault();
-        clone.style.left = (touch.clientX - 40) + "px";
-        clone.style.top = (touch.clientY - 20) + "px";
-
-        // Highlight drop zone under finger
-        const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-        const dropZone = elemBelow?.closest(".drop-zone");
-        document.querySelectorAll(".drop-zone").forEach((dz) => {
-          if (dz === dropZone) {
-            this.highlightDropZone(dz);
-          } else {
-            dz.style.background = "rgba(59, 130, 246, 0.1)";
-            dz.style.border = "2px dashed #3b82f6";
-          }
-        });
-      }
+      });
     }, { passive: false });
 
     document.addEventListener("touchend", (e) => {
+      cancelLongPress();
       if (!touchCard || !dragActive) {
         touchCard = null;
         return;

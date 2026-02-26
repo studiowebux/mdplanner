@@ -456,6 +456,32 @@ export class ListView {
     let touchStartX = 0;
     let touchStartY = 0;
     let dragActive = false;
+    let longPressTimer = null;
+    const LONG_PRESS_MS = 400;
+    const SCROLL_CANCEL_PX = 8;
+
+    const cancelLongPress = () => {
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    };
+
+    const activateDrag = () => {
+      if (!touchItem || dragActive) return;
+      dragActive = true;
+      this.draggedTaskId = touchItem.dataset.taskId;
+      touchItem.style.opacity = "0.5";
+
+      clone = touchItem.cloneNode(true);
+      clone.style.position = "fixed";
+      clone.style.zIndex = "9999";
+      clone.style.pointerEvents = "none";
+      clone.style.opacity = "0.8";
+      clone.style.width = touchItem.offsetWidth + "px";
+      clone.style.transform = "rotate(2deg)";
+      document.body.appendChild(clone);
+    };
 
     document.addEventListener("touchstart", (e) => {
       const item = e.target.closest(".task-list-item");
@@ -465,6 +491,8 @@ export class ListView {
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
       dragActive = false;
+
+      longPressTimer = setTimeout(activateDrag, LONG_PRESS_MS);
     }, { passive: true });
 
     document.addEventListener("touchmove", (e) => {
@@ -473,45 +501,35 @@ export class ListView {
       const dx = touch.clientX - touchStartX;
       const dy = touch.clientY - touchStartY;
 
-      if (!dragActive && Math.abs(dx) + Math.abs(dy) < 10) return;
-
-      if (!dragActive) {
-        dragActive = true;
-        e.preventDefault();
-        this.draggedTaskId = touchItem.dataset.taskId;
-        touchItem.style.opacity = "0.5";
-
-        clone = touchItem.cloneNode(true);
-        clone.style.position = "fixed";
-        clone.style.zIndex = "9999";
-        clone.style.pointerEvents = "none";
-        clone.style.opacity = "0.8";
-        clone.style.width = touchItem.offsetWidth + "px";
-        clone.style.transform = "rotate(2deg)";
-        document.body.appendChild(clone);
+      // Cancel long-press if the finger moved — user is scrolling
+      if (!dragActive && Math.abs(dx) + Math.abs(dy) > SCROLL_CANCEL_PX) {
+        cancelLongPress();
+        touchItem = null;
+        return;
       }
 
-      if (dragActive) {
-        e.preventDefault();
-        clone.style.left = (touch.clientX - 40) + "px";
-        clone.style.top = (touch.clientY - 20) + "px";
+      if (!dragActive) return;
 
-        // Highlight drop zone under finger
-        const elemBelow = document.elementFromPoint(
-          touch.clientX,
-          touch.clientY,
-        );
-        const activeZone = elemBelow?.closest(
-          ".list-drop-zone, .list-section-header",
-        );
-        document.querySelectorAll(".list-drop-zone, .list-section-header")
-          .forEach((z) => {
-            z.classList.toggle("drag-over", z === activeZone);
-          });
-      }
+      e.preventDefault();
+      clone.style.left = (touch.clientX - 40) + "px";
+      clone.style.top = (touch.clientY - 20) + "px";
+
+      // Highlight drop zone under finger
+      const elemBelow = document.elementFromPoint(
+        touch.clientX,
+        touch.clientY,
+      );
+      const activeZone = elemBelow?.closest(
+        ".list-drop-zone, .list-section-header",
+      );
+      document.querySelectorAll(".list-drop-zone, .list-section-header")
+        .forEach((z) => {
+          z.classList.toggle("drag-over", z === activeZone);
+        });
     }, { passive: false });
 
     document.addEventListener("touchend", (e) => {
+      cancelLongPress();
       if (!touchItem || !dragActive) {
         touchItem = null;
         return;
