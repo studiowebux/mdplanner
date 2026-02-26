@@ -134,7 +134,12 @@ export class ProjectDirectoryParser {
     if (frontmatter.assignees) config.assignees = frontmatter.assignees;
     if (frontmatter.tags) config.tags = frontmatter.tags;
     if (frontmatter.last_updated) config.lastUpdated = frontmatter.last_updated;
-    if (frontmatter.links) config.links = frontmatter.links;
+    if (frontmatter.links) {
+      config.links = frontmatter.links.filter(
+        (l) =>
+          l != null && typeof l.url === "string" && typeof l.title === "string",
+      );
+    }
     if (frontmatter.status) config.status = frontmatter.status;
     if (frontmatter.status_comment) {
       config.statusComment = frontmatter.status_comment;

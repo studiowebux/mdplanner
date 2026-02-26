@@ -39,6 +39,15 @@ projectRouter.post("/config", async (c) => {
   const parser = getParser(c);
   const config = await c.req.json();
   try {
+    // Strip null/malformed link entries before saving
+    if (Array.isArray(config.links)) {
+      config.links = config.links.filter(
+        (l: unknown) =>
+          l != null &&
+          typeof (l as Record<string, unknown>).url === "string" &&
+          typeof (l as Record<string, unknown>).title === "string",
+      );
+    }
     await parser.saveProjectConfig(config);
     return jsonResponse({ success: true });
   } catch (error) {

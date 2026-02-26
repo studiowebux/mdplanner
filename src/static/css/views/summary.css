@@ -1,0 +1,52 @@
+/* ==========================================================================
+   Summary View
+   ========================================================================== */
+
+.summary-empty-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.summary-link-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.summary-link-row:hover .summary-link-remove {
+  opacity: 1;
+}
+
+.summary-link-anchor {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summary-link-anchor:hover {
+  color: var(--color-text-secondary);
+}
+
+.summary-link-remove {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  opacity: 0;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
+  display: flex;
+  align-items: center;
+}
+
+.summary-link-remove:hover {
+  color: var(--color-text-secondary);
+}

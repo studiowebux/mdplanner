@@ -212,24 +212,26 @@ export class SummaryView {
 
   renderProjectLinks() {
     const container = document.getElementById("projectLinks");
-    const links = this.tm.projectConfig?.links || [];
+    const links = (this.tm.projectConfig?.links || []).filter(
+      (l) => l != null && l.url && l.title,
+    );
 
     if (links.length === 0) {
       container.innerHTML =
-        '<p class="text-sm text-muted italic">No links added yet.</p>';
+        '<p class="summary-empty-text">No links added yet.</p>';
       return;
     }
 
     container.innerHTML = links.map((link, index) => `
-      <div class="flex items-center justify-between group">
+      <div class="summary-link-row">
         <a href="${link.url}" target="_blank" rel="noopener noreferrer"
-           class="text-sm text-primary hover:text-secondary truncate flex-1 underline">
+           class="summary-link-anchor">
           ${link.title}
         </a>
         <button onclick="taskManager.removeLink(${index})"
-                class="ml-2 text-muted hover:text-secondary opacity-0 group-hover:opacity-100 transition-opacity"
+                class="summary-link-remove"
                 title="Remove link">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
