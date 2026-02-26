@@ -23,6 +23,24 @@ services:
     container_name: mdplanner
     volumes:
       - mdplanner-data:/data
+    # Default: serve /data with no extra flags.
+    # Uncomment and edit the command block to enable optional features.
+    # All secrets should be set in a .env file next to this docker-compose.yml:
+    #   MDPLANNER_WEBDAV_USER=obsidian
+    #   MDPLANNER_WEBDAV_PASS=changeme
+    #   MDPLANNER_MCP_TOKEN=secret
+    #
+    # Example — WebDAV with auth + SQLite cache + MCP token:
+    # command:
+    #   - /data
+    #   - --cache
+    #   - --webdav
+    #   - --webdav-user
+    #   - ${MDPLANNER_WEBDAV_USER}
+    #   - --webdav-pass
+    #   - ${MDPLANNER_WEBDAV_PASS}
+    #   - --mcp-token
+    #   - ${MDPLANNER_MCP_TOKEN}
     restart: unless-stopped
     networks:
       - ai-net
