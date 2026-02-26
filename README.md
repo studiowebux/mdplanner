@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="icon.png" alt="MD Planner" width="120" />
+</div>
+
 # MD Planner
 
 Markdown-based project management with directory storage.
