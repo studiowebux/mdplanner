@@ -12,7 +12,14 @@
  * Methods: OPTIONS HEAD GET PUT DELETE MKCOL COPY MOVE PROPFIND PROPPATCH LOCK UNLOCK
  */
 
-import { basename, dirname, join, normalize, relative, resolve } from "@std/path";
+import {
+  basename,
+  dirname,
+  join,
+  normalize,
+  relative,
+  resolve,
+} from "@std/path";
 import { ensureDir } from "@std/fs";
 
 // ============================================================================
@@ -24,11 +31,11 @@ export interface WebDavConfig {
   authUser?: string | null;
   authPass?: string | null;
   logFormat?: "json" | "pretty";
-  lockTimeout?: number;       // seconds, default 3600
-  maxUploadBytes?: number;    // 0 = unlimited
-  maxDepth?: number;          // default 20
-  trashDir?: string;          // default rootDir/.trash
-  stateDir?: string;          // default rootDir/.state
+  lockTimeout?: number; // seconds, default 3600
+  maxUploadBytes?: number; // 0 = unlimited
+  maxDepth?: number; // default 20
+  trashDir?: string; // default rootDir/.trash
+  stateDir?: string; // default rootDir/.state
 }
 
 // ============================================================================
@@ -162,9 +169,16 @@ function parsePropPatch(body: string): PropPatchOp[] {
       ops.push({ type: "set", ns: ns[p[1]] ?? p[1], local: p[2], value: p[3] });
     }
   }
-  for (const r of body.matchAll(/<(?:\w+:)?remove>(.*?)<\/(?:\w+:)?remove>/gs)) {
+  for (
+    const r of body.matchAll(/<(?:\w+:)?remove>(.*?)<\/(?:\w+:)?remove>/gs)
+  ) {
     for (const p of r[1].matchAll(/<(\w+):(\w+)/g)) {
-      ops.push({ type: "remove", ns: ns[p[1]] ?? p[1], local: p[2], value: "" });
+      ops.push({
+        type: "remove",
+        ns: ns[p[1]] ?? p[1],
+        local: p[2],
+        value: "",
+      });
     }
   }
   return ops;
@@ -227,7 +241,10 @@ async function atomicWriteStream(
         reader.releaseLock();
         file.close();
         await Deno.remove(tmp).catch(() => {});
-        throw new HttpError(413, `Payload too large (limit: ${maxBytes} bytes)`);
+        throw new HttpError(
+          413,
+          `Payload too large (limit: ${maxBytes} bytes)`,
+        );
       }
       await file.write(value);
     }
@@ -352,7 +369,11 @@ export async function createWebDavHandler(
 
   type LogLevel = "INFO" | "WARN" | "ERROR" | "DEBUG";
 
-  function log(level: LogLevel, msg: string, extra?: Record<string, unknown>): void {
+  function log(
+    level: LogLevel,
+    msg: string,
+    extra?: Record<string, unknown>,
+  ): void {
     const ts = new Date().toISOString();
     if (cfg.logFormat === "json") {
       console.log(JSON.stringify({ ts, level, msg, ...extra }));
@@ -722,12 +743,16 @@ export async function createWebDavHandler(
   <D:href>${xe(disp)}</D:href>
   ${
       p200.length
-        ? `<D:propstat><D:prop>${p200.join("")}</D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat>`
+        ? `<D:propstat><D:prop>${
+          p200.join("")
+        }</D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat>`
         : ""
     }
   ${
       p404.length
-        ? `<D:propstat><D:prop>${p404.join("")}</D:prop><D:status>HTTP/1.1 404 Not Found</D:status></D:propstat>`
+        ? `<D:propstat><D:prop>${
+          p404.join("")
+        }</D:prop><D:status>HTTP/1.1 404 Not Found</D:status></D:propstat>`
         : ""
     }
 </D:response>`;
@@ -988,7 +1013,9 @@ ${rows}</table></body></html>`;
       return httpErr(415, "Unsupported Media Type: MKCOL body not supported");
     }
     const existing = await fsStat(fsPath);
-    if (existing) return httpErr(405, "Method Not Allowed: resource already exists");
+    if (existing) {
+      return httpErr(405, "Method Not Allowed: resource already exists");
+    }
     const parent = await fsStat(dirname(fsPath));
     if (!parent?.isDirectory) {
       return httpErr(409, "Conflict: parent collection does not exist");
@@ -1260,8 +1287,7 @@ ${rows}</table></body></html>`;
 
     const info = await fsStat(fsPath);
     if (!info) {
-      await withWriteLock(fsPath, () =>
-        atomicWrite(fsPath, new Uint8Array(0)));
+      await withWriteLock(fsPath, () => atomicWrite(fsPath, new Uint8Array(0)));
     }
 
     const scope: "exclusive" | "shared" = bodyText.includes("exclusive")

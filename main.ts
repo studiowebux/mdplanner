@@ -58,15 +58,18 @@ Repository: https://github.com/${GITHUB_REPO}
 }
 
 function parseArgs(args: string[]): CLIArgs {
+  // Environment variable fallbacks (CLI flags take precedence)
   const result: CLIArgs = {
     projectPath: ".",
-    port: 8003,
+    port: Deno.env.get("MDPLANNER_PORT")
+      ? parseInt(Deno.env.get("MDPLANNER_PORT")!, 10)
+      : 8003,
     help: false,
-    cache: false,
-    mcpToken: undefined,
-    webdav: false,
-    webdavUser: undefined,
-    webdavPass: undefined,
+    cache: !!Deno.env.get("MDPLANNER_CACHE"),
+    mcpToken: Deno.env.get("MDPLANNER_MCP_TOKEN") ?? undefined,
+    webdav: !!Deno.env.get("MDPLANNER_WEBDAV"),
+    webdavUser: Deno.env.get("MDPLANNER_WEBDAV_USER") ?? undefined,
+    webdavPass: Deno.env.get("MDPLANNER_WEBDAV_PASS") ?? undefined,
   };
 
   let i = 0;

@@ -6,16 +6,12 @@ services:
       - "8003:8003"
     volumes:
       - ./data:/data
-    # Default: serve project at /data with no extra flags.
-    # Override command to enable optional features:
-    #   WebDAV only:
-    #     command: ["/data", "--webdav"]
-    #   WebDAV with Basic Auth:
-    #     command: ["/data", "--webdav", "--webdav-user", "obsidian", "--webdav-pass", "changeme"]
-    #   SQLite cache + WebDAV:
-    #     command: ["/data", "--cache", "--webdav"]
-    #   MCP token + WebDAV with auth:
-    #     command: ["/data", "--mcp-token", "secret", "--webdav", "--webdav-user", "u", "--webdav-pass", "p"]
+    environment:
+      - MDPLANNER_CACHE=${MDPLANNER_CACHE:-}
+      - MDPLANNER_WEBDAV=${MDPLANNER_WEBDAV:-1}
+      - MDPLANNER_WEBDAV_USER=${MDPLANNER_WEBDAV_USER:-}
+      - MDPLANNER_WEBDAV_PASS=${MDPLANNER_WEBDAV_PASS:-}
+      - MDPLANNER_MCP_TOKEN=${MDPLANNER_MCP_TOKEN:-}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8003/"]
