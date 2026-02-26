@@ -2,6 +2,7 @@
 import { DEADLINE_CLASSES } from "../constants.js";
 import { markdownToHtml } from "../utils.js";
 import { showToast } from "../ui/toast.js";
+import { ProjectAPI } from "../api.js";
 
 /**
  * Project summary dashboard - stats, deadlines, links, status
@@ -478,5 +479,101 @@ export class SummaryView {
     document
       .getElementById("statusCommentText")
       .addEventListener("blur", () => this.saveStatusComment());
+
+    // Inline name editing — save on blur and Enter
+    const nameEl = document.getElementById("projectName");
+    if (nameEl) {
+      nameEl.contentEditable = "true";
+      nameEl.classList.add("summary-editable-name");
+
+      nameEl.addEventListener("blur", () => this.saveName(nameEl));
+      nameEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          nameEl.blur();
+        }
+        if (e.key === "Escape") {
+          nameEl.textContent = this.tm.projectInfo?.name || "";
+          nameEl.blur();
+        }
+      });
+    }
+
+    // Description edit button
+    const editDescBtn = document.getElementById("editDescriptionBtn");
+    if (editDescBtn) {
+      editDescBtn.addEventListener("click", () => this.toggleDescriptionEdit());
+    }
+    const saveDescBtn = document.getElementById("saveDescriptionBtn");
+    if (saveDescBtn) {
+      saveDescBtn.addEventListener("click", () => this.saveDescription());
+    }
+    const cancelDescBtn = document.getElementById("cancelDescriptionBtn");
+    if (cancelDescBtn) {
+      cancelDescBtn.addEventListener(
+        "click",
+        () => this.cancelDescriptionEdit(),
+      );
+    }
+  }
+
+  async saveName(nameEl) {
+    const newName = nameEl.textContent.trim();
+    if (!newName || newName === this.tm.projectInfo?.name) return;
+    try {
+      await ProjectAPI.saveInfo({ name: newName });
+      this.tm.projectInfo.name = newName;
+      // Update nav header too
+      const navName = document.getElementById("projectNameMobile");
+      if (navName) navName.textContent = newName;
+      showToast("Project name updated");
+    } catch {
+      showToast("Failed to save name", true);
+      nameEl.textContent = this.tm.projectInfo?.name || "";
+    }
+  }
+
+  toggleDescriptionEdit() {
+    const rendered = document.getElementById("projectDescription");
+    const editor = document.getElementById("projectDescriptionEditor");
+    if (!rendered || !editor) return;
+
+    const textarea = editor.querySelector("textarea");
+    if (textarea) {
+      textarea.value = this.tm.projectInfo?.description?.join("\n") || "";
+    }
+    rendered.classList.add("hidden");
+    editor.classList.remove("hidden");
+    textarea?.focus();
+  }
+
+  cancelDescriptionEdit() {
+    document.getElementById("projectDescription")?.classList.remove("hidden");
+    document.getElementById("projectDescriptionEditor")?.classList.add(
+      "hidden",
+    );
+  }
+
+  async saveDescription() {
+    const textarea = document.getElementById("projectDescriptionEditor")
+      ?.querySelector("textarea");
+    if (!textarea) return;
+
+    const lines = textarea.value.split("\n").filter((l) => l.trim());
+    try {
+      await ProjectAPI.saveInfo({ description: lines });
+      this.tm.projectInfo.description = lines;
+      // Re-render the description area
+      const rendered = document.getElementById("projectDescription");
+      if (rendered) {
+        rendered.innerHTML = lines.length
+          ? markdownToHtml(lines.join("\n"))
+          : '<p class="summary-empty-text">No project description available.</p>';
+      }
+      this.cancelDescriptionEdit();
+      showToast("Description updated");
+    } catch {
+      showToast("Failed to save description", true);
+    }
   }
 }

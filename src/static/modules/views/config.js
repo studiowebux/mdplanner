@@ -32,7 +32,7 @@ export class ConfigView {
 
     document.getElementById("configTotalTasks").textContent = allTasks.length;
     document.getElementById("configTotalSections").textContent =
-      this.tm.projectConfig?.sections?.length || 0;
+      this.tm.sections?.length || 0;
     document.getElementById("configTotalAssignees").textContent =
       this.tm.peopleMap?.size || 0;
     document.getElementById("configTotalTags").textContent =

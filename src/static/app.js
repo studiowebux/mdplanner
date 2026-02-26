@@ -1585,13 +1585,11 @@ class TaskManager {
       }
     } catch (error) {
       console.error("Error loading project config:", error);
-      // Set defaults
+      // Set defaults — no startDate so we never write today's date implicitly
       this.projectConfig = {
-        startDate: new Date().toISOString().split("T")[0],
         workingDaysPerWeek: 5,
       };
-      document.getElementById("projectStartDate").value =
-        this.projectConfig.startDate;
+      document.getElementById("projectStartDate").value = "";
       document.getElementById("workingDays").value =
         this.projectConfig.workingDaysPerWeek;
       document.getElementById("customDaysContainer").classList.add("hidden");
@@ -1628,9 +1626,8 @@ class TaskManager {
     }
 
     const config = {
-      startDate: startDateInput
-        ? startDateInput.value
-        : this.projectConfig?.startDate,
+      // Only write startDate when explicitly provided; fall back to stored value
+      startDate: startDateInput?.value || this.projectConfig?.startDate || undefined,
       workingDaysPerWeek,
       workingDays,
       assignees: this.projectConfig?.assignees || [],

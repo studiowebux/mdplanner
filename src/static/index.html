@@ -1308,6 +1308,14 @@
                   class="w-full text-sm border border-strong rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-1 focus:border-transparent"
                 ></textarea>
               </div>
+              <div class="summary-description-header">
+                <button
+                  id="editDescriptionBtn"
+                  type="button"
+                  class="summary-edit-btn"
+                  title="Edit description"
+                >Edit</button>
+              </div>
               <div
                 id="projectDescription"
                 class="prose prose-gray max-w-none"
@@ -1315,6 +1323,25 @@
                 <p class="text-secondary">
                   Loading project description...
                 </p>
+              </div>
+              <div id="projectDescriptionEditor" class="hidden">
+                <textarea
+                  rows="5"
+                  class="summary-description-textarea"
+                  placeholder="Project description (markdown supported)"
+                ></textarea>
+                <div class="summary-description-actions">
+                  <button
+                    id="cancelDescriptionBtn"
+                    type="button"
+                    class="btn-ghost"
+                  >Cancel</button>
+                  <button
+                    id="saveDescriptionBtn"
+                    type="button"
+                    class="btn-secondary"
+                  >Save</button>
+                </div>
               </div>
 
               <!-- Project Dates -->
