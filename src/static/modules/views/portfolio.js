@@ -15,6 +15,7 @@ export class PortfolioView {
     this.peopleMap = new Map();
     this.currentFilter = "all";
     this.currentViewMode = "list"; // 'list' or 'tree'
+    this.searchQuery = "";
     this.selectedProject = null;
     this.isDetailOpen = false;
     this.isCreating = false;
@@ -232,12 +233,12 @@ export class PortfolioView {
     const emptyState = document.getElementById("portfolioEmpty");
     if (!container || !emptyState) return;
 
-    // Apply status filter
-    const filtered = this.currentFilter === "all"
-      ? this.projects
-      : this.projects.filter((p) =>
-        (p.status || "active") === this.currentFilter
-      );
+    // Apply status + search filters
+    const filtered = this.projects.filter((p) =>
+      (this.currentFilter === "all" ||
+        (p.status || "active") === this.currentFilter) &&
+      this.matchesSearch(p)
+    );
 
     if (filtered.length === 0) {
       container.innerHTML = "";
@@ -260,12 +261,12 @@ export class PortfolioView {
     const emptyState = document.getElementById("portfolioEmpty");
     if (!container || !emptyState) return;
 
-    // Apply status filter
-    const filtered = this.currentFilter === "all"
-      ? this.projects
-      : this.projects.filter((p) =>
-        (p.status || "active") === this.currentFilter
-      );
+    // Apply status + search filters
+    const filtered = this.projects.filter((p) =>
+      (this.currentFilter === "all" ||
+        (p.status || "active") === this.currentFilter) &&
+      this.matchesSearch(p)
+    );
 
     if (filtered.length === 0) {
       container.innerHTML = "";
@@ -453,6 +454,22 @@ export class PortfolioView {
         </div>
       </div>
     `;
+  }
+
+  /**
+   * Test whether a project matches the current search query.
+   * @param {Object} project
+   * @returns {boolean}
+   */
+  matchesSearch(project) {
+    if (!this.searchQuery) return true;
+    const q = this.searchQuery.toLowerCase();
+    return (
+      (project.name || "").toLowerCase().includes(q) ||
+      (project.category || "").toLowerCase().includes(q) ||
+      (project.client || "").toLowerCase().includes(q) ||
+      (project.description || "").toLowerCase().includes(q)
+    );
   }
 
   /**
@@ -1020,6 +1037,16 @@ export class PortfolioView {
    * Bind event listeners for the portfolio view.
    */
   bindEvents() {
+    // Search input
+    document.getElementById("portfolioSearch")?.addEventListener("input", (e) => {
+      this.searchQuery = e.target.value.trim();
+      if (this.currentViewMode === "tree") {
+        this.renderTreeView();
+      } else {
+        this.renderListView();
+      }
+    });
+
     // Add Project button
     document.getElementById("portfolioAddBtn")?.addEventListener(
       "click",

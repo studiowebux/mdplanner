@@ -1216,7 +1216,16 @@
           <!-- Cards rendered by JS -->
         </div>
 
-        <!-- Filter Bar -->
+        <!-- Search + Filter Bar -->
+        <div class="flex flex-wrap items-center gap-2 mb-2">
+          <input
+            type="search"
+            id="portfolioSearch"
+            class="form-input"
+            placeholder="Search projects…"
+            style="max-width: 18rem"
+          >
+        </div>
         <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
           <div
             id="portfolioFilterBar"
@@ -10179,9 +10188,12 @@
               <input
                 type="text"
                 id="sidenavTaskMilestone"
+                list="milestonesList"
                 placeholder="e.g., v1.0, Sprint 2"
                 class="form-input"
+                autocomplete="off"
               >
+              <datalist id="milestonesList"></datalist>
             </div>
             <div class="form-group">
               <label class="form-label">Tags</label>

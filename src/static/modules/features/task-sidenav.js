@@ -2,7 +2,7 @@
 // Handles task creation/editing via slide-in panel
 
 import { Sidenav } from "../ui/sidenav.js";
-import { TasksAPI } from "../api.js";
+import { MilestonesAPI, TasksAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 
 export class TaskSidenavModule {
@@ -167,6 +167,22 @@ export class TaskSidenavModule {
         `<option value="${t}">${t}</option>`
       ).join("");
     }
+
+    // Milestones datalist — existing milestone files + unique names referenced in tasks
+    const datalist = document.getElementById("milestonesList");
+    if (datalist) {
+      const names = new Set();
+      (this.tm.milestones || []).forEach((m) => { if (m.name) names.add(m.name); });
+      // Infer milestones from tasks that have no backing file
+      (this.tm.tasks || []).forEach((t) => {
+        const ms = t.config?.milestone || t.milestone;
+        if (ms) names.add(ms);
+      });
+      datalist.innerHTML = Array.from(names)
+        .sort()
+        .map((n) => `<option value="${n}">`)
+        .join("");
+    }
   }
 
   fillForm(task) {
@@ -258,6 +274,20 @@ export class TaskSidenavModule {
     };
 
     try {
+      // Auto-create milestone file if the name is new
+      if (taskData.milestone) {
+        const existing = (this.tm.milestones || []).some(
+          (m) => m.name === taskData.milestone,
+        );
+        if (!existing) {
+          await MilestonesAPI.create({
+            name: taskData.milestone,
+            status: "planned",
+          });
+          await this.tm.loadMilestones();
+        }
+      }
+
       if (this.editingTask) {
         await TasksAPI.update(this.editingTask.id, taskData);
         showToast("Task updated", "success");
