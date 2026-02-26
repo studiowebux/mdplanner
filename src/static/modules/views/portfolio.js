@@ -87,9 +87,9 @@ export class PortfolioView {
     if (!startDate || !endDate) return null;
     const start = new Date(startDate);
     const end = new Date(endDate);
-    if (isNaN(start) || isNaN(end) || end <= start) return null;
+    if (isNaN(start) || isNaN(end) || end < start) return null;
 
-    const totalDays = Math.round((end - start) / 86400000);
+    const totalDays = Math.max(1, Math.round((end - start) / 86400000));
     const years = Math.floor(totalDays / 365);
     const months = Math.floor((totalDays % 365) / 30);
     const days = totalDays % 30;

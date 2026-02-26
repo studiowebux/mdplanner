@@ -34,6 +34,39 @@ App.wrapTables = function (container) {
   });
 };
 
+function _copyToClipboard(text, btn) {
+  // Clipboard API requires a secure context (HTTPS or localhost).
+  // Fall back to execCommand for plain HTTP LAN access.
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(function () {
+      btn.textContent = "Copied!";
+      setTimeout(function () { btn.textContent = "Copy"; }, 1500);
+    }).catch(function () {
+      _execCommandCopy(text, btn);
+    });
+  } else {
+    _execCommandCopy(text, btn);
+  }
+}
+
+function _execCommandCopy(text, btn) {
+  var textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  try {
+    document.execCommand("copy");
+    btn.textContent = "Copied!";
+  } catch (_) {
+    btn.textContent = "Failed";
+  }
+  setTimeout(function () { btn.textContent = "Copy"; }, 1500);
+  document.body.removeChild(textarea);
+}
+
 App.addCopyButtons = function (container) {
   container.querySelectorAll("pre code").forEach(function (block) {
     if (block.closest(".code-block-wrapper")) return;
@@ -47,12 +80,7 @@ App.addCopyButtons = function (container) {
     btn.className = "copy-btn";
     btn.textContent = "Copy";
     btn.addEventListener("click", function () {
-      navigator.clipboard.writeText(block.textContent).then(function () {
-        btn.textContent = "Copied!";
-        setTimeout(function () {
-          btn.textContent = "Copy";
-        }, 1500);
-      });
+      _copyToClipboard(block.textContent, btn);
     });
     wrapper.appendChild(btn);
   });
