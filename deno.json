@@ -55,6 +55,7 @@
     "@modelcontextprotocol/sdk/server/mcp.js": "npm:@modelcontextprotocol/sdk@1.26.0/server/mcp.js",
     "@modelcontextprotocol/sdk/server/stdio.js": "npm:@modelcontextprotocol/sdk@1.26.0/server/stdio.js",
     "@modelcontextprotocol/sdk/server/streamableHttp.js": "npm:@modelcontextprotocol/sdk@1.26.0/server/streamableHttp.js",
+    "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js": "npm:@modelcontextprotocol/sdk@1.26.0/server/webStandardStreamableHttp.js",
     "@modelcontextprotocol/sdk/client/index.js": "npm:@modelcontextprotocol/sdk@1.26.0/client/index.js",
     "@modelcontextprotocol/sdk/inMemory.js": "npm:@modelcontextprotocol/sdk@1.26.0/inMemory.js"
   },

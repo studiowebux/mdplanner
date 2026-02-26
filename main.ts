@@ -142,7 +142,7 @@ const apiRouter = createApiRouter(projectManager);
 app.route("/api", apiRouter);
 
 // MCP HTTP endpoint (Model Context Protocol — remote AI client access)
-const mcpRouter = await createMcpHonoRouter(projectManager, cliArgs.mcpToken);
+const mcpRouter = createMcpHonoRouter(projectManager, cliArgs.mcpToken);
 app.route("/mcp", mcpRouter);
 
 // Serve uploaded files from the project directory
