@@ -27,7 +27,8 @@ export type SearchResultType =
   | "onboarding"
   | "onboarding_template"
   | "financial_period"
-  | "journal";
+  | "journal"
+  | "dns_domain";
 
 export interface SearchResult {
   type: SearchResultType;

@@ -1734,4 +1734,54 @@ export const ENTITIES: EntityDef[] = [
       return entries.length;
     },
   },
+
+  // ----------------------------------------------------------
+  // DNS Domains
+  // ----------------------------------------------------------
+  {
+    table: "dns_domains",
+    schema: `CREATE TABLE IF NOT EXISTS dns_domains (
+  id TEXT PRIMARY KEY,
+  domain TEXT NOT NULL,
+  expiry_date TEXT,
+  auto_renew INTEGER,  -- 0/1
+  renewal_cost_usd REAL,
+  provider TEXT,
+  nameservers TEXT,    -- JSON array
+  last_fetched_at TEXT,
+  notes TEXT,
+  created TEXT,
+  updated TEXT
+)`,
+    fts: {
+      type: "dns_domain",
+      columns: ["id", "domain", "notes"],
+      titleCol: "domain",
+      contentCol: "notes",
+    },
+    sync: async (parser, db) => {
+      const domains = await parser.readDnsDomains();
+      db.execute("DELETE FROM dns_domains");
+      for (const d of domains) {
+        db.execute(
+          `INSERT INTO dns_domains (id, domain, expiry_date, auto_renew, renewal_cost_usd, provider, nameservers, last_fetched_at, notes, created, updated)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            val(d.id),
+            val(d.domain),
+            val(d.expiryDate),
+            d.autoRenew !== undefined ? (d.autoRenew ? 1 : 0) : null,
+            val(d.renewalCostUsd),
+            val(d.provider),
+            json(d.nameservers),
+            val(d.lastFetchedAt),
+            val(d.notes),
+            val(d.created),
+            val(d.updated),
+          ],
+        );
+      }
+      return domains.length;
+    },
+  },
 ];

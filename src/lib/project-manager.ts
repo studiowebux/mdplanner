@@ -145,6 +145,55 @@ export class ProjectManager {
   }
 
   /**
+   * Store an integration secret (encrypted when MDPLANNER_SECRET_KEY is set).
+   */
+  async setIntegrationSecret(
+    integrationId: string,
+    key: string,
+    value: string,
+  ): Promise<void> {
+    return this.parser.setIntegrationSecret(integrationId, key, value);
+  }
+
+  /**
+   * Retrieve and decrypt an integration secret.
+   */
+  async getIntegrationSecret(
+    integrationId: string,
+    key: string,
+  ): Promise<string | null> {
+    return this.parser.getIntegrationSecret(integrationId, key);
+  }
+
+  /**
+   * Delete all secrets for an integration.
+   */
+  async deleteIntegrationSecrets(integrationId: string): Promise<void> {
+    return this.parser.deleteIntegrationSecrets(integrationId);
+  }
+
+  // ---- DNS Domains --------------------------------------------------------
+
+  async readDnsDomains() {
+    return this.parser.readDnsDomains();
+  }
+
+  async addDnsDomain(domain: Parameters<typeof this.parser.addDnsDomain>[0]) {
+    return this.parser.addDnsDomain(domain);
+  }
+
+  async updateDnsDomain(
+    id: string,
+    updates: Parameters<typeof this.parser.updateDnsDomain>[1],
+  ) {
+    return this.parser.updateDnsDomain(id, updates);
+  }
+
+  async deleteDnsDomain(id: string): Promise<boolean> {
+    return this.parser.deleteDnsDomain(id);
+  }
+
+  /**
    * Rebuild cache from markdown.
    */
   async rebuildCache(): Promise<

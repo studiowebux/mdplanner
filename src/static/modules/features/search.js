@@ -23,6 +23,7 @@ const VIEW_BY_TYPE = {
   onboarding_template: "onboarding",
   financial_period: "finances",
   journal: "journal",
+  dns_domain: "dns",
 };
 
 const TYPE_LABELS = {
@@ -44,6 +45,7 @@ const TYPE_LABELS = {
   onboarding_template: "Template",
   financial_period: "Finance",
   journal: "Journal",
+  dns_domain: "Domain",
 };
 
 export class GlobalSearch {

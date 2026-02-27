@@ -152,6 +152,8 @@ export interface ProjectConfig {
   revenue?: number;
   expenses?: number;
   features?: string[];
+  /** Integration secrets: Record<integrationId, Record<key, encrypted-or-plaintext-value>> */
+  integrations?: Record<string, Record<string, string>>;
 }
 
 export interface Milestone {
@@ -659,4 +661,22 @@ export interface OrgChartMember {
   phone?: string;
   startDate?: string;
   notes?: string;
+}
+
+// DNS Domain
+
+export type DnsProvider = "cloudflare" | "manual" | string;
+
+export interface DnsDomain {
+  id: string;
+  domain: string;
+  expiryDate?: string;        // ISO date YYYY-MM-DD
+  autoRenew?: boolean;
+  renewalCostUsd?: number;
+  provider?: DnsProvider;
+  nameservers?: string[];
+  notes?: string;
+  lastFetchedAt?: string;     // ISO timestamp — set by Cloudflare sync
+  created: string;
+  updated: string;
 }
