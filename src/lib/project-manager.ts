@@ -28,6 +28,7 @@ export interface ProjectMeta {
 export interface ProjectManagerOptions {
   enableCache?: boolean;
   dbPath?: string;
+  readOnly?: boolean;
 }
 
 export interface CacheLayer {
@@ -40,9 +41,11 @@ export class ProjectManager {
   private projectPath: string;
   private parser: DirectoryMarkdownParser;
   private cache: CacheLayer | null = null;
+  private readOnly: boolean;
 
   constructor(projectPath: string, options?: ProjectManagerOptions) {
     this.projectPath = projectPath;
+    this.readOnly = options?.readOnly ?? false;
     this.parser = new DirectoryMarkdownParser(projectPath);
 
     if (options?.enableCache) {
@@ -79,6 +82,13 @@ export class ProjectManager {
    */
   getActiveParser(): DirectoryMarkdownParser {
     return this.parser;
+  }
+
+  /**
+   * Check if server is in read-only mode.
+   */
+  isReadOnly(): boolean {
+    return this.readOnly;
   }
 
   /**

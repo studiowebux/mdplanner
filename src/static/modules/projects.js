@@ -19,6 +19,9 @@ export class ProjectsModule {
         document.getElementById("updateBadge").textContent =
           `v${data.latest} available`;
       }
+      if (data.readOnly) {
+        document.getElementById("readOnlyBadge").classList.remove("hidden");
+      }
     } catch (error) {
       console.error("Error checking version:", error);
     }

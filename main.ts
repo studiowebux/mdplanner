@@ -18,6 +18,7 @@ interface CLIArgs {
   port: number;
   help: boolean;
   cache: boolean;
+  readOnly: boolean;
   mcpToken?: string;
   webdav: boolean;
   webdavUser?: string;
@@ -41,6 +42,7 @@ Arguments:
 Options:
   -p, --port <port>      Port to run the server on (default: 8003)
   -c, --cache            Enable SQLite cache for fast search and queries
+      --read-only        Block all mutations (public demo mode)
       --mcp-token <tok>  Protect the /mcp endpoint with a bearer token
       --webdav           Enable WebDAV server at /webdav (mount project dir)
       --webdav-user <u>  WebDAV basic auth username (requires --webdav-pass)
@@ -66,6 +68,7 @@ function parseArgs(args: string[]): CLIArgs {
       : 8003,
     help: false,
     cache: !!Deno.env.get("MDPLANNER_CACHE"),
+    readOnly: !!Deno.env.get("MDPLANNER_READ_ONLY"),
     mcpToken: Deno.env.get("MDPLANNER_MCP_TOKEN") ?? undefined,
     webdav: !!Deno.env.get("MDPLANNER_WEBDAV"),
     webdavUser: Deno.env.get("MDPLANNER_WEBDAV_USER") ?? undefined,
@@ -81,6 +84,9 @@ function parseArgs(args: string[]): CLIArgs {
       i++;
     } else if (arg === "-c" || arg === "--cache") {
       result.cache = true;
+      i++;
+    } else if (arg === "--read-only") {
+      result.readOnly = true;
       i++;
     } else if (arg === "--mcp-token") {
       const tok = args[i + 1];
@@ -163,6 +169,7 @@ await validateProjectPath(cliArgs.projectPath);
 const projectManager = new ProjectManager(cliArgs.projectPath, {
   enableCache: cliArgs.cache,
   dbPath: `${cliArgs.projectPath}/.mdplanner.db`,
+  readOnly: cliArgs.readOnly,
 });
 await projectManager.init();
 
@@ -248,6 +255,9 @@ if (cliArgs.cache) {
 }
 if (cliArgs.mcpToken) {
   console.log(`MCP auth enabled (bearer token)`);
+}
+if (cliArgs.readOnly) {
+  console.log(`Mode    read-only (mutations blocked)`);
 }
 if (cliArgs.webdav) {
   console.log(`WebDAV http://localhost:${cliArgs.port}/webdav`);

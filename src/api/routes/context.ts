@@ -28,6 +28,10 @@ export function isCacheEnabled(c: AppContext): boolean {
   return c.get("projectManager").isCacheEnabled();
 }
 
+export function isReadOnly(c: AppContext): boolean {
+  return c.get("projectManager").isReadOnly();
+}
+
 /**
  * Write-through helper: re-sync one table after a create/update mutation.
  * No-op when cache is disabled. Safe to await — never throws.
