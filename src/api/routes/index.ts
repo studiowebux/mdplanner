@@ -5,7 +5,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { ProjectManager } from "../../lib/project-manager.ts";
-import { AppVariables } from "./context.ts";
+import { AppVariables, isReadOnly } from "./context.ts";
 
 // Core routes
 import { versionRouter } from "./version.ts";
@@ -71,6 +71,18 @@ export function createApiRouter(
   // Inject projectManager into context
   api.use("/*", async (c, next) => {
     c.set("projectManager", projectManager);
+    await next();
+  });
+
+  // Read-only guard: block all mutations when --read-only is active
+  api.use("/*", async (c, next) => {
+    const mutatingMethods = ["POST", "PUT", "DELETE", "PATCH"];
+    if (isReadOnly(c) && mutatingMethods.includes(c.req.method)) {
+      return c.json(
+        { error: "READ_ONLY_MODE", message: "Server is in read-only mode" },
+        405,
+      );
+    }
     await next();
   });
 

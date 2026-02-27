@@ -3,13 +3,13 @@
  */
 
 import { Hono } from "hono";
-import { AppVariables, jsonResponse } from "./context.ts";
+import { AppVariables, isReadOnly, jsonResponse } from "./context.ts";
 import { GITHUB_REPO, VERSION } from "../../lib/version.ts";
 
 export const versionRouter = new Hono<{ Variables: AppVariables }>();
 
 // GET /version - get current version and check for updates
-versionRouter.get("/", async () => {
+versionRouter.get("/", async (c) => {
   let latestVersion = null;
   let updateAvailable = false;
 
@@ -43,5 +43,6 @@ versionRouter.get("/", async () => {
     latest: latestVersion,
     updateAvailable,
     repo: GITHUB_REPO,
+    readOnly: isReadOnly(c),
   });
 });
