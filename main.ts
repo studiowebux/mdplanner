@@ -8,6 +8,8 @@ import { initProject, printInitSuccess } from "./src/lib/init.ts";
 import { createWebDavHandler } from "./src/lib/webdav/handler.ts";
 import { GITHUB_REPO, VERSION } from "./src/lib/version.ts";
 import { validateProjectPath } from "./src/lib/cli.ts";
+import { generateKeyPair } from "./src/lib/backup/crypto.ts";
+import { initScheduler } from "./src/lib/backup/scheduler.ts";
 
 // Get the directory where this script is located (works for both dev and compiled)
 const __dirname = dirname(fromFileUrl(import.meta.url));
@@ -23,6 +25,9 @@ interface CLIArgs {
   webdav: boolean;
   webdavUser?: string;
   webdavPass?: string;
+  backupDir?: string;
+  backupIntervalHours: number;
+  backupPublicKey?: string;
 }
 
 function printHelp(): void {
@@ -32,28 +37,35 @@ mdplanner v${VERSION}
 Usage:
   mdplanner [OPTIONS] <project-directory>
   mdplanner init <directory>
+  mdplanner keygen
 
 Commands:
   init <directory>       Initialize a new project in the given directory
+  keygen                 Generate a hex-encoded RSA-OAEP-4096 key pair for backup encryption
 
 Arguments:
   <project-directory>    Path to the project directory (must contain project.md)
 
 Options:
-  -p, --port <port>      Port to run the server on (default: 8003)
-  -c, --cache            Enable SQLite cache for fast search and queries
-      --read-only        Block all mutations (public demo mode)
-      --mcp-token <tok>  Protect the /mcp endpoint with a bearer token
-      --webdav           Enable WebDAV server at /webdav (mount project dir)
-      --webdav-user <u>  WebDAV basic auth username (requires --webdav-pass)
-      --webdav-pass <p>  WebDAV basic auth password
-  -h, --help             Show this help message
+  -p, --port <port>            Port to run the server on (default: 8003)
+  -c, --cache                  Enable SQLite cache for fast search and queries
+      --read-only              Block all mutations (public demo mode)
+      --mcp-token <tok>        Protect the /mcp endpoint with a bearer token
+      --webdav                 Enable WebDAV server at /webdav (mount project dir)
+      --webdav-user <u>        WebDAV basic auth username (requires --webdav-pass)
+      --webdav-pass <p>        WebDAV basic auth password
+      --backup-dir <path>      Directory for automated backups
+      --backup-interval <hrs>  Backup frequency in hours (requires --backup-dir)
+      --backup-public-key <h>  Hex RSA public key — encrypts all backups
+  -h, --help                   Show this help message
 
 Examples:
   mdplanner init ./my-project
+  mdplanner keygen
   mdplanner ./my-project
   mdplanner --port 8080 ./my-project
   mdplanner --cache ./my-project
+  mdplanner --backup-dir /var/backups/myproject --backup-interval 24 ./my-project
 
 Repository: https://github.com/${GITHUB_REPO}
 `);
@@ -73,6 +85,11 @@ function parseArgs(args: string[]): CLIArgs {
     webdav: !!Deno.env.get("MDPLANNER_WEBDAV"),
     webdavUser: Deno.env.get("MDPLANNER_WEBDAV_USER") ?? undefined,
     webdavPass: Deno.env.get("MDPLANNER_WEBDAV_PASS") ?? undefined,
+    backupDir: Deno.env.get("MDPLANNER_BACKUP_DIR") ?? undefined,
+    backupIntervalHours: Deno.env.get("MDPLANNER_BACKUP_INTERVAL")
+      ? parseInt(Deno.env.get("MDPLANNER_BACKUP_INTERVAL")!, 10)
+      : 0,
+    backupPublicKey: Deno.env.get("MDPLANNER_BACKUP_PUBLIC_KEY") ?? undefined,
   };
 
   let i = 0;
@@ -115,6 +132,35 @@ function parseArgs(args: string[]): CLIArgs {
       }
       result.webdavPass = pass;
       i += 2;
+    } else if (arg === "--backup-dir") {
+      const dir = args[i + 1];
+      if (!dir || dir.startsWith("-")) {
+        console.error("Error: --backup-dir requires a path");
+        Deno.exit(1);
+      }
+      result.backupDir = dir;
+      i += 2;
+    } else if (arg === "--backup-interval") {
+      const val = args[i + 1];
+      if (!val || val.startsWith("-")) {
+        console.error("Error: --backup-interval requires a number of hours");
+        Deno.exit(1);
+      }
+      const hrs = parseInt(val, 10);
+      if (isNaN(hrs) || hrs < 1) {
+        console.error("Error: --backup-interval must be a positive integer");
+        Deno.exit(1);
+      }
+      result.backupIntervalHours = hrs;
+      i += 2;
+    } else if (arg === "--backup-public-key") {
+      const key = args[i + 1];
+      if (!key || key.startsWith("-")) {
+        console.error("Error: --backup-public-key requires a hex value");
+        Deno.exit(1);
+      }
+      result.backupPublicKey = key;
+      i += 2;
     } else if (arg === "-p" || arg === "--port") {
       const portValue = args[i + 1];
       if (!portValue || portValue.startsWith("-")) {
@@ -155,6 +201,24 @@ if (Deno.args[0] === "init") {
   Deno.exit(0);
 }
 
+// Handle `keygen` subcommand — generate a hex-encoded RSA-OAEP-4096 key pair
+if (Deno.args[0] === "keygen") {
+  console.log("Generating RSA-OAEP-4096 key pair...");
+  const { publicKeyHex, privateKeyHex } = await generateKeyPair();
+  console.log(
+    "\nPUBLIC KEY (hex) — store in --backup-public-key or MDPLANNER_BACKUP_PUBLIC_KEY:",
+  );
+  console.log(publicKeyHex);
+  console.log(
+    "\nPRIVATE KEY (hex) — keep secret, used to decrypt backups (X-Backup-Private-Key header):",
+  );
+  console.log(privateKeyHex);
+  console.log(
+    "\nKeep the private key in a safe place. It cannot be recovered if lost.",
+  );
+  Deno.exit(0);
+}
+
 // Parse CLI arguments
 const cliArgs = parseArgs(Deno.args);
 
@@ -170,8 +234,23 @@ const projectManager = new ProjectManager(cliArgs.projectPath, {
   enableCache: cliArgs.cache,
   dbPath: `${cliArgs.projectPath}/.mdplanner.db`,
   readOnly: cliArgs.readOnly,
+  backupPublicKey: cliArgs.backupPublicKey,
 });
 await projectManager.init();
+
+// Start automated backup scheduler when --backup-dir is configured
+if (cliArgs.backupDir && cliArgs.backupIntervalHours > 0) {
+  initScheduler({
+    projectDir: cliArgs.projectPath,
+    backupDir: cliArgs.backupDir,
+    intervalHours: cliArgs.backupIntervalHours,
+    publicKeyHex: cliArgs.backupPublicKey,
+  });
+} else if (cliArgs.backupDir && cliArgs.backupIntervalHours === 0) {
+  console.warn(
+    "[backup] --backup-dir set but --backup-interval not provided — automated backups disabled. Use POST /api/backup/trigger for manual backups.",
+  );
+}
 
 // Create main app
 const app = new Hono();

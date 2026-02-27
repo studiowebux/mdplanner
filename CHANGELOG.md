@@ -8,6 +8,30 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- Backup system: `GET /api/backup/export` streams the project as a TAR archive;
+  `POST /api/backup/import` extracts an archive into the project directory (pass
+  `?overwrite=true` to clobber existing files)
+- Backup encryption: start the server with `--backup-public-key <hex>` and all
+  exports are encrypted with AES-256-GCM (key wrapped with RSA-OAEP-4096); no
+  external dependencies — uses the built-in Web Crypto API (`crypto.subtle`)
+- `mdplanner keygen` subcommand generates a hex-encoded RSA-OAEP-4096 key pair
+  and prints both keys; the public key goes to `--backup-public-key`, the
+  private key is used as the `X-Backup-Private-Key` header when importing an
+  encrypted archive
+- Automated backup scheduler: `--backup-dir <path>` combined with
+  `--backup-interval <hours>` writes backup files to the given directory at the
+  configured interval; env vars `MDPLANNER_BACKUP_DIR`,
+  `MDPLANNER_BACKUP_INTERVAL`, `MDPLANNER_BACKUP_PUBLIC_KEY` are supported
+- `POST /api/backup/trigger` writes an on-demand backup to `--backup-dir`
+  (requires `--backup-dir` to be set)
+- `GET /api/backup/status` returns last backup time, size, encryption flag,
+  interval, and last error
+- Backup panel in the Settings view: export button, import file picker with
+  optional private key input, manual trigger button, and status summary
+- `backup` feature toggle registered in feature visibility settings
+
 ## [0.6.0] - 2026-02-26
 
 ### Added

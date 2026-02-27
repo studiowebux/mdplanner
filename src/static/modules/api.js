@@ -68,6 +68,34 @@ export const UploadsAPI = {
   },
 };
 
+export const BackupAPI = {
+  async status() {
+    const response = await get("/api/backup/status");
+    return response.json();
+  },
+
+  async trigger() {
+    const response = await post("/api/backup/trigger", {});
+    return response.json();
+  },
+
+  /** Returns a Blob of the archive. */
+  async exportArchive() {
+    const response = await get("/api/backup/export");
+    if (!response.ok) throw new Error("Export failed");
+    return response.blob();
+  },
+
+  /** data: ArrayBuffer of the archive, privateKeyHex optional, overwrite bool */
+  async importArchive(data, privateKeyHex, overwrite) {
+    const headers = { "Content-Type": "application/octet-stream" };
+    if (privateKeyHex) headers["X-Backup-Private-Key"] = privateKeyHex;
+    const url = `/api/backup/import${overwrite ? "?overwrite=true" : ""}`;
+    const response = await fetch(url, { method: "POST", headers, body: data });
+    return response.json();
+  },
+};
+
 /** Tasks CRUD operations */
 export const TasksAPI = {
   async fetchAll() {

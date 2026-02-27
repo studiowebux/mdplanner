@@ -1,6 +1,14 @@
 // Config View Module
-import { ProjectAPI } from "../api.js";
+import { BackupAPI, ProjectAPI } from "../api.js";
 import { AccessibilityManager } from "../ui/accessibility.js";
+
+function formatBytes(bytes) {
+  if (!bytes || bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
+}
 
 /**
  * Project configuration - sections, assignees, tags management
@@ -46,6 +54,123 @@ export class ConfigView {
     this.renderTags();
     this.renderFeatures();
     this.renderAccessibilitySettings();
+    this.initBackupPanel();
+  }
+
+  async initBackupPanel() {
+    try {
+      const status = await BackupAPI.status();
+      const statusRow = document.getElementById("backupStatusRow");
+      const triggerBtn = document.getElementById("backupTriggerBtn");
+
+      if (status.enabled && statusRow) {
+        statusRow.classList.remove("hidden");
+        const lastTime = document.getElementById("backupLastTime");
+        const lastSize = document.getElementById("backupLastSize");
+        const encrypted = document.getElementById("backupEncrypted");
+        const interval = document.getElementById("backupInterval");
+        const lastError = document.getElementById("backupLastError");
+
+        if (lastTime) {
+          lastTime.textContent = status.lastBackupTime
+            ? new Date(status.lastBackupTime).toLocaleString()
+            : "Never";
+        }
+        if (lastSize) {
+          lastSize.textContent = status.lastBackupSize
+            ? formatBytes(status.lastBackupSize)
+            : "—";
+        }
+        if (encrypted) encrypted.textContent = status.encrypted ? "Yes" : "No";
+        if (interval) {
+          interval.textContent = status.intervalHours
+            ? `${status.intervalHours}h`
+            : "Manual only";
+        }
+        if (lastError && status.lastError) {
+          lastError.textContent = `Last error: ${status.lastError}`;
+          lastError.classList.remove("hidden");
+        }
+        if (triggerBtn) triggerBtn.classList.remove("hidden");
+      }
+    } catch {
+      // Status endpoint unavailable — panel still works for export/import
+    }
+  }
+
+  async exportBackup() {
+    const btn = document.getElementById("backupExportBtn");
+    if (btn) btn.textContent = "Exporting...";
+    try {
+      const blob = await BackupAPI.exportArchive();
+      const encrypted = blob.type === "application/octet-stream" &&
+        blob.size > 0;
+      const ext = encrypted ? "tar.enc" : "tar";
+      const filename = `backup-${new Date().toISOString().slice(0, 10)}.${ext}`;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert(`Export failed: ${err.message}`);
+    } finally {
+      if (btn) btn.textContent = "Export backup";
+    }
+  }
+
+  async triggerScheduledBackup() {
+    const btn = document.getElementById("backupTriggerBtn");
+    if (btn) btn.textContent = "Running...";
+    try {
+      const result = await BackupAPI.trigger();
+      alert(`Backup written: ${result.file} (${formatBytes(result.size)})`);
+      await this.initBackupPanel();
+    } catch (err) {
+      alert(`Trigger failed: ${err.message}`);
+    } finally {
+      if (btn) btn.textContent = "Trigger scheduled backup";
+    }
+  }
+
+  async importBackup() {
+    const fileInput = document.getElementById("backupImportFile");
+    const privateKeyInput = document.getElementById("backupPrivateKey");
+    const overwriteInput = document.getElementById("backupImportOverwrite");
+    const resultEl = document.getElementById("backupImportResult");
+    const btn = document.getElementById("backupImportBtn");
+
+    if (!fileInput?.files?.length) {
+      alert("Select a .tar or .tar.enc file first.");
+      return;
+    }
+
+    const file = fileInput.files[0];
+    const privateKeyHex = privateKeyInput?.value?.trim() || null;
+    const overwrite = overwriteInput?.checked ?? false;
+
+    if (btn) btn.textContent = "Importing...";
+    if (resultEl) resultEl.classList.add("hidden");
+
+    try {
+      const data = await file.arrayBuffer();
+      const result = await BackupAPI.importArchive(data, privateKeyHex, overwrite);
+
+      if (resultEl) {
+        resultEl.textContent = `Extracted ${result.extracted} file(s), skipped ${result.skipped}.`;
+        resultEl.className = "mt-3 text-sm text-success-text";
+        resultEl.classList.remove("hidden");
+      }
+    } catch (err) {
+      if (resultEl) {
+        resultEl.textContent = `Import failed: ${err.message}`;
+        resultEl.className = "mt-3 text-sm text-error";
+        resultEl.classList.remove("hidden");
+      }
+    } finally {
+      if (btn) btn.textContent = "Import";
+    }
   }
 
   renderAccessibilitySettings() {
@@ -315,6 +440,7 @@ export class ConfigView {
       "Tools": [
         { id: "quick-search", label: "Quick Search (⌘K)" },
         { id: "ollama", label: "AI Chat" },
+        { id: "backup", label: "Backup" },
       ],
     };
 
@@ -416,6 +542,17 @@ export class ConfigView {
           this.addTag();
         }
       });
+
+    // Backup events
+    document
+      .getElementById("backupExportBtn")
+      ?.addEventListener("click", () => this.exportBackup());
+    document
+      .getElementById("backupTriggerBtn")
+      ?.addEventListener("click", () => this.triggerScheduledBackup());
+    document
+      .getElementById("backupImportBtn")
+      ?.addEventListener("click", () => this.importBackup());
 
     // Accessibility settings events
     document
