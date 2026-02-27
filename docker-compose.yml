@@ -6,6 +6,12 @@ services:
       - "8003:8003"
     volumes:
       - ./data:/data
+    environment:
+      - MDPLANNER_CACHE=${MDPLANNER_CACHE:-}
+      - MDPLANNER_WEBDAV=${MDPLANNER_WEBDAV:-1}
+      - MDPLANNER_WEBDAV_USER=${MDPLANNER_WEBDAV_USER:-}
+      - MDPLANNER_WEBDAV_PASS=${MDPLANNER_WEBDAV_PASS:-}
+      - MDPLANNER_MCP_TOKEN=${MDPLANNER_MCP_TOKEN:-}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8003/"]

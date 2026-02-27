@@ -124,10 +124,14 @@ export class C4SidenavModule {
     Sidenav.open("c4Sidenav");
   }
 
-  close() {
+  async close() {
     if (this.autoSaveTimeout) {
       clearTimeout(this.autoSaveTimeout);
       this.autoSaveTimeout = null;
+      // Flush pending save before closing so changes are not lost
+      if (this.currentComponent?.name) {
+        await this.save();
+      }
     }
     Sidenav.close("c4Sidenav");
     this.editingComponentId = null;

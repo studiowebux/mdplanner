@@ -2,6 +2,7 @@
 import { DEADLINE_CLASSES } from "../constants.js";
 import { markdownToHtml } from "../utils.js";
 import { showToast } from "../ui/toast.js";
+import { ProjectAPI } from "../api.js";
 
 /**
  * Project summary dashboard - stats, deadlines, links, status
@@ -212,24 +213,26 @@ export class SummaryView {
 
   renderProjectLinks() {
     const container = document.getElementById("projectLinks");
-    const links = this.tm.projectConfig?.links || [];
+    const links = (this.tm.projectConfig?.links || []).filter(
+      (l) => l != null && l.url && l.title,
+    );
 
     if (links.length === 0) {
       container.innerHTML =
-        '<p class="text-sm text-muted italic">No links added yet.</p>';
+        '<p class="summary-empty-text">No links added yet.</p>';
       return;
     }
 
     container.innerHTML = links.map((link, index) => `
-      <div class="flex items-center justify-between group">
+      <div class="summary-link-row">
         <a href="${link.url}" target="_blank" rel="noopener noreferrer"
-           class="text-sm text-primary hover:text-secondary truncate flex-1 underline">
+           class="summary-link-anchor">
           ${link.title}
         </a>
         <button onclick="taskManager.removeLink(${index})"
-                class="ml-2 text-muted hover:text-secondary opacity-0 group-hover:opacity-100 transition-opacity"
+                class="summary-link-remove"
                 title="Remove link">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
@@ -476,5 +479,101 @@ export class SummaryView {
     document
       .getElementById("statusCommentText")
       .addEventListener("blur", () => this.saveStatusComment());
+
+    // Inline name editing — save on blur and Enter
+    const nameEl = document.getElementById("projectName");
+    if (nameEl) {
+      nameEl.contentEditable = "true";
+      nameEl.classList.add("summary-editable-name");
+
+      nameEl.addEventListener("blur", () => this.saveName(nameEl));
+      nameEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          nameEl.blur();
+        }
+        if (e.key === "Escape") {
+          nameEl.textContent = this.tm.projectInfo?.name || "";
+          nameEl.blur();
+        }
+      });
+    }
+
+    // Description edit button
+    const editDescBtn = document.getElementById("editDescriptionBtn");
+    if (editDescBtn) {
+      editDescBtn.addEventListener("click", () => this.toggleDescriptionEdit());
+    }
+    const saveDescBtn = document.getElementById("saveDescriptionBtn");
+    if (saveDescBtn) {
+      saveDescBtn.addEventListener("click", () => this.saveDescription());
+    }
+    const cancelDescBtn = document.getElementById("cancelDescriptionBtn");
+    if (cancelDescBtn) {
+      cancelDescBtn.addEventListener(
+        "click",
+        () => this.cancelDescriptionEdit(),
+      );
+    }
+  }
+
+  async saveName(nameEl) {
+    const newName = nameEl.textContent.trim();
+    if (!newName || newName === this.tm.projectInfo?.name) return;
+    try {
+      await ProjectAPI.saveInfo({ name: newName });
+      this.tm.projectInfo.name = newName;
+      // Update nav header too
+      const navName = document.getElementById("projectNameMobile");
+      if (navName) navName.textContent = newName;
+      showToast("Project name updated");
+    } catch {
+      showToast("Failed to save name", true);
+      nameEl.textContent = this.tm.projectInfo?.name || "";
+    }
+  }
+
+  toggleDescriptionEdit() {
+    const rendered = document.getElementById("projectDescription");
+    const editor = document.getElementById("projectDescriptionEditor");
+    if (!rendered || !editor) return;
+
+    const textarea = editor.querySelector("textarea");
+    if (textarea) {
+      textarea.value = this.tm.projectInfo?.description?.join("\n") || "";
+    }
+    rendered.classList.add("hidden");
+    editor.classList.remove("hidden");
+    textarea?.focus();
+  }
+
+  cancelDescriptionEdit() {
+    document.getElementById("projectDescription")?.classList.remove("hidden");
+    document.getElementById("projectDescriptionEditor")?.classList.add(
+      "hidden",
+    );
+  }
+
+  async saveDescription() {
+    const textarea = document.getElementById("projectDescriptionEditor")
+      ?.querySelector("textarea");
+    if (!textarea) return;
+
+    const lines = textarea.value.split("\n").filter((l) => l.trim());
+    try {
+      await ProjectAPI.saveInfo({ description: lines });
+      this.tm.projectInfo.description = lines;
+      // Re-render the description area
+      const rendered = document.getElementById("projectDescription");
+      if (rendered) {
+        rendered.innerHTML = lines.length
+          ? markdownToHtml(lines.join("\n"))
+          : '<p class="summary-empty-text">No project description available.</p>';
+      }
+      this.cancelDescriptionEdit();
+      showToast("Description updated");
+    } catch {
+      showToast("Failed to save description", true);
+    }
   }
 }

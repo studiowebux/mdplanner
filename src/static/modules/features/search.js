@@ -85,7 +85,8 @@ export class GlobalSearch {
 
   close() {
     document.getElementById("globalSearchOverlay")?.classList.add("hidden");
-    document.getElementById("globalSearchInput").value = "";
+    const input = document.getElementById("globalSearchInput");
+    if (input) input.value = "";
     this.results = [];
     this.activeIndex = -1;
   }
@@ -194,8 +195,12 @@ export class GlobalSearch {
       },
     );
 
-    // Header button
+    // Header button (desktop + mobile)
     document.getElementById("globalSearchBtn")?.addEventListener(
+      "click",
+      () => this.open(),
+    );
+    document.getElementById("globalSearchBtnMobile")?.addEventListener(
       "click",
       () => this.open(),
     );

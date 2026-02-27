@@ -75,39 +75,23 @@ export class MindmapSidenavModule {
       },
     );
 
-    // Toolbar buttons
-    document.getElementById("mmSidenavAddRoot")?.addEventListener(
-      "click",
-      () => this.addRoot(),
-    );
-    document.getElementById("mmSidenavAddChild")?.addEventListener(
-      "click",
-      () => this.addChild(),
-    );
-    document.getElementById("mmSidenavAddSibling")?.addEventListener(
-      "click",
-      () => this.addSibling(),
-    );
-    document.getElementById("mmSidenavIndent")?.addEventListener(
-      "click",
-      () => this.indent(),
-    );
-    document.getElementById("mmSidenavUnindent")?.addEventListener(
-      "click",
-      () => this.unindent(),
-    );
-    document.getElementById("mmSidenavMoveUp")?.addEventListener(
-      "click",
-      () => this.moveLine(-1),
-    );
-    document.getElementById("mmSidenavMoveDown")?.addEventListener(
-      "click",
-      () => this.moveLine(1),
-    );
-    document.getElementById("mmSidenavDeleteLine")?.addEventListener(
-      "click",
-      () => this.deleteLine(),
-    );
+    // Toolbar buttons — mousedown preventDefault keeps focus in textarea
+    const toolbarActions = [
+      ["mmSidenavAddRoot", () => this.addRoot()],
+      ["mmSidenavAddChild", () => this.addChild()],
+      ["mmSidenavAddSibling", () => this.addSibling()],
+      ["mmSidenavIndent", () => this.indent()],
+      ["mmSidenavUnindent", () => this.unindent()],
+      ["mmSidenavMoveUp", () => this.moveLine(-1)],
+      ["mmSidenavMoveDown", () => this.moveLine(1)],
+      ["mmSidenavDeleteLine", () => this.deleteLine()],
+    ];
+    toolbarActions.forEach(([id, handler]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("mousedown", (e) => e.preventDefault());
+      el.addEventListener("click", handler);
+    });
   }
 
   openNew() {

@@ -5,6 +5,7 @@ import { ProjectManager } from "./src/lib/project-manager.ts";
 import { createApiRouter } from "./src/api/routes/index.ts";
 import { createMcpHonoRouter } from "./src/mcp/http.ts";
 import { initProject, printInitSuccess } from "./src/lib/init.ts";
+import { createWebDavHandler } from "./src/lib/webdav/handler.ts";
 import { GITHUB_REPO, VERSION } from "./src/lib/version.ts";
 import { validateProjectPath } from "./src/lib/cli.ts";
 
@@ -18,6 +19,9 @@ interface CLIArgs {
   help: boolean;
   cache: boolean;
   mcpToken?: string;
+  webdav: boolean;
+  webdavUser?: string;
+  webdavPass?: string;
 }
 
 function printHelp(): void {
@@ -38,6 +42,9 @@ Options:
   -p, --port <port>      Port to run the server on (default: 8003)
   -c, --cache            Enable SQLite cache for fast search and queries
       --mcp-token <tok>  Protect the /mcp endpoint with a bearer token
+      --webdav           Enable WebDAV server at /webdav (mount project dir)
+      --webdav-user <u>  WebDAV basic auth username (requires --webdav-pass)
+      --webdav-pass <p>  WebDAV basic auth password
   -h, --help             Show this help message
 
 Examples:
@@ -51,12 +58,18 @@ Repository: https://github.com/${GITHUB_REPO}
 }
 
 function parseArgs(args: string[]): CLIArgs {
+  // Environment variable fallbacks (CLI flags take precedence)
   const result: CLIArgs = {
     projectPath: ".",
-    port: 8003,
+    port: Deno.env.get("MDPLANNER_PORT")
+      ? parseInt(Deno.env.get("MDPLANNER_PORT")!, 10)
+      : 8003,
     help: false,
-    cache: false,
-    mcpToken: undefined,
+    cache: !!Deno.env.get("MDPLANNER_CACHE"),
+    mcpToken: Deno.env.get("MDPLANNER_MCP_TOKEN") ?? undefined,
+    webdav: !!Deno.env.get("MDPLANNER_WEBDAV"),
+    webdavUser: Deno.env.get("MDPLANNER_WEBDAV_USER") ?? undefined,
+    webdavPass: Deno.env.get("MDPLANNER_WEBDAV_PASS") ?? undefined,
   };
 
   let i = 0;
@@ -76,6 +89,25 @@ function parseArgs(args: string[]): CLIArgs {
         Deno.exit(1);
       }
       result.mcpToken = tok;
+      i += 2;
+    } else if (arg === "--webdav") {
+      result.webdav = true;
+      i++;
+    } else if (arg === "--webdav-user") {
+      const user = args[i + 1];
+      if (!user || user.startsWith("-")) {
+        console.error("Error: --webdav-user requires a value");
+        Deno.exit(1);
+      }
+      result.webdavUser = user;
+      i += 2;
+    } else if (arg === "--webdav-pass") {
+      const pass = args[i + 1];
+      if (!pass || pass.startsWith("-")) {
+        console.error("Error: --webdav-pass requires a value");
+        Deno.exit(1);
+      }
+      result.webdavPass = pass;
       i += 2;
     } else if (arg === "-p" || arg === "--port") {
       const portValue = args[i + 1];
@@ -145,6 +177,27 @@ app.route("/api", apiRouter);
 const mcpRouter = createMcpHonoRouter(projectManager, cliArgs.mcpToken);
 app.route("/mcp", mcpRouter);
 
+// WebDAV — mount project directory as a WebDAV volume (e.g. for Obsidian)
+if (cliArgs.webdav) {
+  const webdavHandler = await createWebDavHandler({
+    rootDir: cliArgs.projectPath,
+    authUser: cliArgs.webdavUser ?? null,
+    authPass: cliArgs.webdavPass ?? null,
+  });
+
+  // Redirect /webdav → /webdav/ so DAV clients hit the root collection
+  app.get("/webdav", (c) => c.redirect("/webdav/", 301));
+
+  // Strip /webdav prefix and forward the raw request to the WebDAV handler
+  app.all("/webdav/*", async (c) => {
+    const orig = new URL(c.req.raw.url);
+    const davPath = orig.pathname.replace(/^\/webdav/, "") || "/";
+    const davUrl = new URL(davPath + orig.search, orig.origin);
+    const davReq = new Request(davUrl.toString(), c.req.raw);
+    return webdavHandler(davReq);
+  });
+}
+
 // Serve uploaded files from the project directory
 const UPLOAD_MIME: Record<string, string> = {
   ".png": "image/png",
@@ -195,6 +248,10 @@ if (cliArgs.cache) {
 }
 if (cliArgs.mcpToken) {
   console.log(`MCP auth enabled (bearer token)`);
+}
+if (cliArgs.webdav) {
+  console.log(`WebDAV http://localhost:${cliArgs.port}/webdav`);
+  if (cliArgs.webdavUser) console.log(`WebDAV auth enabled (basic auth)`);
 }
 
 const projects = await projectManager.scanProjects();

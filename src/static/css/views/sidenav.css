@@ -44,6 +44,7 @@
   z-index: 50;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
   transform: translateX(100%);
   visibility: hidden;
   transition:
@@ -109,6 +110,10 @@
   font-weight: 600;
   color: var(--color-text-primary, #111827);
   margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .dark .sidenav-title {

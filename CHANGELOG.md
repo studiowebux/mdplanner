@@ -8,8 +8,18 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-02-26
+
 ### Added
 
+- WebDAV server: `--webdav` flag mounts the project directory at `/webdav` on
+  the same port as the REST API; compatible with Obsidian, macOS Finder, and any
+  RFC 4918 WebDAV client — edit markdown files directly without SSH
+- `--webdav-user <user>` / `--webdav-pass <pass>`: optional Basic Auth for the
+  WebDAV endpoint; unauthenticated when omitted
+- WebDAV features: atomic writes, soft delete to `.trash/`, per-path write
+  mutex, persistent lock store, dead property storage, range requests, ETags,
+  RFC 4918 Class 1/2/3 compliance
 - MCP HTTP transport: `/mcp` endpoint embedded in the existing Hono server (same
   port as REST API); connects any MCP client over the network without requiring
   SSH or a local process
@@ -18,6 +28,72 @@ and this project adheres to
   header receive 401
 - `deploy/mcp-claude-code.json`: Claude Code HTTP client config example
 - Startup log now shows the MCP endpoint URL alongside the server URL
+- Summary view: inline title and description editing without opening a modal
+- Milestone field in task sidenav: datalist autocomplete from existing
+  milestones plus milestones inferred from task frontmatter; auto-creates a
+  milestone file when a new name is typed and the task is saved
+- Portfolio search: real-time filter by name, category, client, and description
+- docker-compose: commented examples for `--webdav`, `--cache`, and
+  `--mcp-token` in both root and `deploy/` compose files
+
+### Fixed
+
+- Summary view crash: `renderProjectLinks` threw when a link entry was null or
+  missing a `url` property; null links are now filtered in the parser, API
+  route, and frontend
+- Task sidenav not populating on open: all config fields (`due_date`,
+  `priority`, `assignee`, `tags`, `milestone`, etc.) were read from `task.*`
+  instead of `task.config.*` where the parser stores them
+- Due date field empty when editing: `datetime-local` input requires
+  `YYYY-MM-DDTHH:MM` format; stored dates with seconds or timezone suffix were
+  silently rejected and the field showed blank
+- Tags returning null on mobile: `getSelectedValues` now iterates `options`
+  instead of `selectedOptions` which is unreliable on some mobile browsers
+- Sidenav wider than viewport on mobile: `overflow-x: hidden` on
+  `.sidenav-panel`
+- Summary page horizontal overflow on mobile: `overflow-x: hidden` on
+  `#summaryView`
+- Touch scroll in list and board views triggering drag and drop: drag now
+  requires a 400 ms long-press before activating; touchmove within the grace
+  period scrolls normally
+- File upload button unresponsive on mobile: hidden file input now uses
+  position-based hiding instead of `display: none`, which blocked programmatic
+  `click()` on iOS Safari
+- `lastUpdated` in project.md not written on task mutations:
+  `touchLastUpdated()` called from create, update, and delete routes
+- Summary stats showing wrong section count: `updateStats()` now reads
+  `tm.sections.length` instead of `projectConfig.sections` which does not exist
+- Project start date set to today when not provided: removed today's date from
+  the error-path default in `loadProjectConfig`; `saveProjectConfig` only writes
+  `startDate` when the input is non-empty
+- Portfolio project name truncated to one character on mobile: removed fixed
+  width constraint on the name column
+- Portfolio duration showing 0d when start equals end: `Math.max(1, diffDays)`
+  ensures same-day projects show 1d
+- Portfolio header overflow on desktop: `sidenav-title` gets
+  `overflow: hidden; text-overflow: ellipsis` to prevent long names breaking the
+  layout
+- Global search button missing on mobile: `globalSearchBtnMobile` wired in
+  `search.js`; `close()` null-deref on missing overlay element guarded
+- C4 diagram context lost on page reload: `c4-sidenav` `close()` now flushes any
+  pending auto-save before closing the panel
+- Auto-save race condition: `BaseSidenavModule.save()` sets an `isSaving` flag
+  to prevent concurrent writes; `close()` flushes rather than cancels a pending
+  auto-save
+- Ollama chat copy button broken on HTTP/LAN: `navigator.clipboard` is
+  unavailable in non-secure contexts; fallback to `document.execCommand('copy')`
+  via a temporary textarea
+
+### Changed
+
+- Mindmap toolbar buttons use `mousedown` + `preventDefault` to keep textarea
+  focus and cursor position when clicking indent, unindent, add-child, etc.;
+  previously clicking a button stole focus and reset the cursor to position 0
+- Mindmap node spacing increased: `nodeSpacing` 20 → 40 px, `levelSpacing` 180 →
+  220 px for less cramped layouts
+- Mindmap zoom+pan desync fixed: `panEnd()` now writes back to `this.offset` so
+  `updateZoom()` reads the post-pan position instead of the stale `{0, 0}`
+  origin, preventing the viewport from snapping back when zooming after a pan
 
 ## [0.5.2] - 2026-02-23
 

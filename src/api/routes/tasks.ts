@@ -87,7 +87,10 @@ tasksRouter.post("/", async (c) => {
     ...(body.parentId && { parentId: body.parentId }),
   };
   const taskId = await parser.addTask(task);
-  await cacheWriteThrough(c, "tasks");
+  await Promise.all([
+    cacheWriteThrough(c, "tasks"),
+    parser.touchLastUpdated(),
+  ]);
   return jsonResponse({ id: taskId }, 201);
 });
 
@@ -108,7 +111,10 @@ tasksRouter.put("/:id", async (c) => {
   const success = await parser.updateTask(taskId, updates);
 
   if (success) {
-    await cacheWriteThrough(c, "tasks");
+    await Promise.all([
+      cacheWriteThrough(c, "tasks"),
+      parser.touchLastUpdated(),
+    ]);
     return jsonResponse({ success: true });
   }
   return errorResponse("Task not found", 404);
@@ -122,6 +128,9 @@ tasksRouter.delete("/:id", async (c) => {
 
   if (success) {
     cachePurge(c, "tasks", taskId);
+    parser.touchLastUpdated().catch((e) =>
+      console.error("[lastUpdated] touch failed:", e)
+    );
     return jsonResponse({ success: true });
   }
   return errorResponse("Task not found", 404);

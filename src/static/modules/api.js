@@ -118,6 +118,11 @@ export const ProjectAPI = {
     return response;
   },
 
+  async saveInfo(info) {
+    const response = await put("/api/project/info", info);
+    return response;
+  },
+
   async getSections() {
     const response = await get("/api/project/sections");
     return response.json();

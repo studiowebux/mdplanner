@@ -132,8 +132,8 @@ export class MindmapModule {
 
   renderTreeLayoutFor(rootNodes, content, mindmap) {
     const isVertical = this.currentLayout === "vertical";
-    const levelSpacing = 180;
-    const nodeSpacing = 20;
+    const levelSpacing = 220;
+    const nodeSpacing = 40;
     const nodeWidth = 150;
     const nodeHeight = 40;
 
@@ -424,6 +424,9 @@ export class MindmapModule {
       if (match) {
         startTranslateX = parseFloat(match[1]);
         startTranslateY = parseFloat(match[2]);
+        // Sync to module-level offset so updateZoom() reads the post-pan position
+        this.offset.x = startTranslateX;
+        this.offset.y = startTranslateY;
       }
     };
 
@@ -889,31 +892,23 @@ export class MindmapModule {
       .getElementById("mindmapStructure")
       ?.addEventListener("input", () => this.updatePreview());
 
-    // Toolbar buttons
-    document
-      .getElementById("mmAddRootBtn")
-      ?.addEventListener("click", () => this.addRoot());
-    document
-      .getElementById("mmAddChildBtn")
-      ?.addEventListener("click", () => this.addChild());
-    document
-      .getElementById("mmAddSiblingBtn")
-      ?.addEventListener("click", () => this.addSibling());
-    document
-      .getElementById("mmIndentBtn")
-      ?.addEventListener("click", () => this.indent());
-    document
-      .getElementById("mmUnindentBtn")
-      ?.addEventListener("click", () => this.unindent());
-    document
-      .getElementById("mmMoveUpBtn")
-      ?.addEventListener("click", () => this.moveLine(-1));
-    document
-      .getElementById("mmMoveDownBtn")
-      ?.addEventListener("click", () => this.moveLine(1));
-    document
-      .getElementById("mmDeleteLineBtn")
-      ?.addEventListener("click", () => this.deleteLine());
+    // Toolbar buttons — mousedown preventDefault keeps focus in textarea
+    const toolbarActions = [
+      ["mmAddRootBtn", () => this.addRoot()],
+      ["mmAddChildBtn", () => this.addChild()],
+      ["mmAddSiblingBtn", () => this.addSibling()],
+      ["mmIndentBtn", () => this.indent()],
+      ["mmUnindentBtn", () => this.unindent()],
+      ["mmMoveUpBtn", () => this.moveLine(-1)],
+      ["mmMoveDownBtn", () => this.moveLine(1)],
+      ["mmDeleteLineBtn", () => this.deleteLine()],
+    ];
+    toolbarActions.forEach(([id, handler]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("mousedown", (e) => e.preventDefault());
+      el.addEventListener("click", handler);
+    });
 
     document
       .getElementById("editMindmapBtn")

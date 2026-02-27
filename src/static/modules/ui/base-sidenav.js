@@ -33,6 +33,7 @@ export class BaseSidenavModule {
     this.tm = taskManager;
     this.editingId = null;
     this.autoSaveTimeout = null;
+    this.isSaving = false;
   }
 
   /** @abstract */ get prefix() { throw new Error("override prefix"); }
@@ -96,10 +97,12 @@ export class BaseSidenavModule {
     this.onAfterOpen();
   }
 
-  close() {
+  async close() {
     if (this.autoSaveTimeout) {
       clearTimeout(this.autoSaveTimeout);
       this.autoSaveTimeout = null;
+      // Flush pending save before closing so in-progress edits are not lost
+      await this.save();
     }
     Sidenav.close(this.panelId);
     this.editingId = null;
@@ -108,12 +111,15 @@ export class BaseSidenavModule {
   // --- Auto-save ---
 
   scheduleAutoSave() {
+    if (this.isSaving) return;
     if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
     this.showSaveStatus("Saving...");
     this.autoSaveTimeout = setTimeout(() => this.save(), AUTO_SAVE_DELAY);
   }
 
   async save() {
+    if (this.isSaving) return;
+
     const data = this.getFormData();
 
     const requiredValue = data[this.titleField];
@@ -122,6 +128,7 @@ export class BaseSidenavModule {
       return;
     }
 
+    this.isSaving = true;
     try {
       if (this.editingId) {
         await this.api.update(this.editingId, data);
@@ -142,6 +149,8 @@ export class BaseSidenavModule {
       console.error(`Error saving ${this.entityName}:`, error);
       this.showSaveStatus("Error");
       showToast(`Error saving ${this.entityName}`, "error");
+    } finally {
+      this.isSaving = false;
     }
   }
 
