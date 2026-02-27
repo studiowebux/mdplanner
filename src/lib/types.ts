@@ -631,6 +631,21 @@ export interface Meeting {
   created: string; // ISO timestamp
 }
 
+// Journal
+
+export type JournalMood = "great" | "good" | "neutral" | "bad" | "terrible";
+
+export interface JournalEntry {
+  id: string;
+  date: string; // YYYY-MM-DD
+  title?: string; // optional; view shows date when absent
+  mood?: JournalMood;
+  tags?: string[];
+  body: string; // markdown prose stored as file body
+  created: string; // ISO timestamp
+  updated: string; // ISO timestamp
+}
+
 // Org Chart Types
 
 export interface OrgChartMember {

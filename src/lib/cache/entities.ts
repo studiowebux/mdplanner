@@ -1688,4 +1688,48 @@ export const ENTITIES: EntityDef[] = [
       return count;
     },
   },
+
+  // ----------------------------------------------------------
+  // Journal
+  // ----------------------------------------------------------
+  {
+    table: "journal",
+    schema: `CREATE TABLE IF NOT EXISTS journal (
+  id TEXT PRIMARY KEY,
+  date TEXT NOT NULL,
+  title TEXT,
+  mood TEXT,
+  tags TEXT,    -- JSON array
+  body TEXT,
+  created TEXT,
+  updated TEXT
+)`,
+    fts: {
+      type: "journal",
+      columns: ["id", "title", "body"],
+      titleCol: "title",
+      contentCol: "body",
+    },
+    sync: async (parser, db) => {
+      const entries = await parser.readJournalEntries();
+      db.execute("DELETE FROM journal");
+      for (const e of entries) {
+        db.execute(
+          `INSERT INTO journal (id, date, title, mood, tags, body, created, updated)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            val(e.id),
+            val(e.date),
+            val(e.title),
+            val(e.mood),
+            json(e.tags),
+            val(e.body),
+            val(e.created),
+            val(e.updated),
+          ],
+        );
+      }
+      return entries.length;
+    },
+  },
 ];

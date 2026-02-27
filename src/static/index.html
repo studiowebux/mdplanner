@@ -777,6 +777,13 @@
               >
                 Meetings
               </button>
+              <button
+                id="journalViewBtn"
+                data-view="journal"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                Journal
+              </button>
             </div>
           </div>
 
@@ -1071,6 +1078,12 @@
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
             >
               Meetings
+            </button>
+            <button
+              id="journalViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              Journal
             </button>
             <button
               id="portfolioViewBtnMobile"
@@ -1680,6 +1693,22 @@
               </div>
               <div id="onboardingTemplatesContainer" class="onboarding-template-list"></div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Journal View -->
+      <div id="journalView" class="hidden pb-16">
+        <div class="bg-primary rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-default flex justify-between items-center view-header">
+            <h2 class="text-lg font-medium text-primary">Journal</h2>
+            <button id="addJournalEntryBtn" class="btn-primary py-2 rounded-lg">+ New Entry</button>
+          </div>
+          <div class="p-6">
+            <div id="emptyJournalState" class="hidden">
+              <p class="text-secondary text-sm">No journal entries yet. Write your first entry.</p>
+            </div>
+            <div id="journalContainer"></div>
           </div>
         </div>
       </div>
@@ -12497,6 +12526,56 @@
           <button type="button" id="meetingSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
           <button type="button" id="meetingSidenavCancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Journal Sidenav -->
+    <div id="journalSidenav" class="sidenav-panel sidenav-md">
+      <div class="sidenav-header">
+        <h2 id="journalSidenavHeader" class="sidenav-title">New Journal Entry</h2>
+        <button type="button" id="journalSidenavClose" class="sidenav-close" aria-label="Close">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="flex flex-col flex-1 overflow-hidden">
+        <div class="sidenav-content">
+          <div class="sidenav-section">
+            <div class="form-group">
+              <label class="form-label" for="journalSidenavDate">Date</label>
+              <input id="journalSidenavDate" type="date" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="journalSidenavTitle">Title <span class="text-tertiary">(optional)</span></label>
+              <input id="journalSidenavTitle" type="text" class="form-input" placeholder="Entry title..." />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="journalSidenavMood">Mood <span class="text-tertiary">(optional)</span></label>
+              <select id="journalSidenavMood" class="form-input">
+                <option value="">— No mood —</option>
+                <option value="great">Great</option>
+                <option value="good">Good</option>
+                <option value="neutral">Neutral</option>
+                <option value="bad">Bad</option>
+                <option value="terrible">Terrible</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="journalSidenavTags">Tags <span class="text-tertiary">(comma-separated, optional)</span></label>
+              <input id="journalSidenavTags" type="text" class="form-input" placeholder="work, reflection, ideas..." />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="journalSidenavBody">Entry</label>
+              <textarea id="journalSidenavBody" class="form-textarea" rows="12" placeholder="Write your thoughts (markdown supported)..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="sidenav-footer">
+          <button type="button" id="journalSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+          <div class="flex-1"></div>
+          <button type="button" id="journalSidenavCancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
         </div>
       </div>
     </div>

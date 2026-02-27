@@ -11,6 +11,7 @@ import { registerTaskTools } from "./tools/tasks.ts";
 import { registerNoteTools } from "./tools/notes.ts";
 import { registerGoalTools } from "./tools/goals.ts";
 import { registerMeetingTools } from "./tools/meetings.ts";
+import { registerJournalTools } from "./tools/journal.ts";
 import { registerPeopleTools } from "./tools/people.ts";
 import { registerProjectTools } from "./tools/project.ts";
 import { registerSearchTools } from "./tools/search.ts";
@@ -46,6 +47,7 @@ export function createMcpServer(pm: ProjectManager): McpServer {
   registerNoteTools(server, pm);
   registerGoalTools(server, pm);
   registerMeetingTools(server, pm);
+  registerJournalTools(server, pm);
   registerPeopleTools(server, pm);
   registerProjectTools(server, pm);
   registerSearchTools(server, pm);
