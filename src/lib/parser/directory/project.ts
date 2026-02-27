@@ -3,6 +3,7 @@
  * Stores project name, description, and config in project.md at root.
  */
 import { buildFileContent, parseFrontmatter } from "./base.ts";
+import { decryptSecret, encryptSecret } from "../../secrets.ts";
 import type { ProjectConfig, ProjectLink } from "../../types.ts";
 
 interface ProjectFrontmatter {
@@ -20,6 +21,8 @@ interface ProjectFrontmatter {
   revenue?: number;
   expenses?: number;
   features?: string[];
+  /** Integration secrets: Record<integrationId, Record<key, encrypted-or-plaintext-value>> */
+  integrations?: Record<string, Record<string, string>>;
 }
 
 export interface ProjectData {
@@ -151,6 +154,7 @@ export class ProjectDirectoryParser {
       config.expenses = frontmatter.expenses;
     }
     if (frontmatter.features) config.features = frontmatter.features;
+    if (frontmatter.integrations) config.integrations = frontmatter.integrations;
 
     return { name, description, config };
   }
@@ -187,6 +191,9 @@ export class ProjectDirectoryParser {
     if (data.config.features && data.config.features.length > 0) {
       frontmatter.features = data.config.features;
     }
+    if (data.config.integrations) {
+      frontmatter.integrations = data.config.integrations;
+    }
 
     // Always update last_updated
     frontmatter.last_updated = new Date().toISOString();
@@ -197,6 +204,50 @@ export class ProjectDirectoryParser {
     }
 
     return buildFileContent(frontmatter, body.trim());
+  }
+
+  /**
+   * Store an integration secret (key/value pair under an integration ID).
+   * Encrypts with AES-256-GCM when MDPLANNER_SECRET_KEY is set.
+   */
+  async setIntegrationSecret(
+    integrationId: string,
+    key: string,
+    value: string,
+  ): Promise<void> {
+    const data = await this.read();
+    const encrypted = await encryptSecret(value);
+    if (!data.config.integrations) data.config.integrations = {};
+    if (!data.config.integrations[integrationId]) {
+      data.config.integrations[integrationId] = {};
+    }
+    data.config.integrations[integrationId][key] = encrypted;
+    await this.write(data);
+  }
+
+  /**
+   * Retrieve and decrypt an integration secret.
+   * Returns null if the secret does not exist or cannot be decrypted.
+   */
+  async getIntegrationSecret(
+    integrationId: string,
+    key: string,
+  ): Promise<string | null> {
+    const data = await this.read();
+    const stored = data.config.integrations?.[integrationId]?.[key];
+    if (!stored) return null;
+    return decryptSecret(stored);
+  }
+
+  /**
+   * Delete all secrets for an integration.
+   */
+  async deleteIntegrationSecrets(integrationId: string): Promise<void> {
+    const data = await this.read();
+    if (data.config.integrations?.[integrationId]) {
+      delete data.config.integrations[integrationId];
+      await this.write(data);
+    }
   }
 
   /**

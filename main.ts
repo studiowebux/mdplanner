@@ -9,6 +9,7 @@ import { createWebDavHandler } from "./src/lib/webdav/handler.ts";
 import { GITHUB_REPO, VERSION } from "./src/lib/version.ts";
 import { validateProjectPath } from "./src/lib/cli.ts";
 import { generateKeyPair } from "./src/lib/backup/crypto.ts";
+import { generateSecretKey } from "./src/lib/secrets.ts";
 import { initScheduler } from "./src/lib/backup/scheduler.ts";
 
 // Get the directory where this script is located (works for both dev and compiled)
@@ -38,10 +39,12 @@ Usage:
   mdplanner [OPTIONS] <project-directory>
   mdplanner init <directory>
   mdplanner keygen
+  mdplanner keygen-secret
 
 Commands:
   init <directory>       Initialize a new project in the given directory
   keygen                 Generate a hex-encoded RSA-OAEP-4096 key pair for backup encryption
+  keygen-secret          Generate a 32-byte AES-256-GCM key for integration secret encryption
 
 Arguments:
   <project-directory>    Path to the project directory (must contain project.md)
@@ -198,6 +201,20 @@ if (Deno.args[0] === "init") {
   }
   const result = await initProject(initDir);
   printInitSuccess(result, VERSION);
+  Deno.exit(0);
+}
+
+// Handle `keygen-secret` subcommand — generate a symmetric key for integration secrets
+if (Deno.args[0] === "keygen-secret") {
+  const key = generateSecretKey();
+  console.log("Generated 32-byte AES-256-GCM key:");
+  console.log(key);
+  console.log(
+    "\nSet as environment variable: MDPLANNER_SECRET_KEY=" + key,
+  );
+  console.log(
+    "Keep this key safe. Losing it means losing access to encrypted integration tokens.",
+  );
   Deno.exit(0);
 }
 

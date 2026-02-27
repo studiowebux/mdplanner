@@ -49,6 +49,7 @@ import { OnboardingDirectoryParser } from "./onboarding.ts";
 import { OnboardingTemplateDirectoryParser } from "./onboarding-template.ts";
 import { FinancesDirectoryParser } from "./finances.ts";
 import { JournalDirectoryParser } from "./journal.ts";
+import { DnsDomainParser } from "./dns.ts";
 import type {
   BillingRate,
   Brief,
@@ -66,6 +67,7 @@ import type {
   Interaction,
   InvestorEntry,
   Invoice,
+  DnsDomain,
   JournalEntry,
   KPISnapshot,
   LeanCanvas,
@@ -131,6 +133,7 @@ export class DirectoryMarkdownParser {
   protected onboardingTemplateParser: OnboardingTemplateDirectoryParser;
   protected financesParser: FinancesDirectoryParser;
   protected journalParser: JournalDirectoryParser;
+  protected dnsParser: DnsDomainParser;
 
   constructor(projectDir: string) {
     this.projectDir = projectDir;
@@ -168,6 +171,7 @@ export class DirectoryMarkdownParser {
     );
     this.financesParser = new FinancesDirectoryParser(projectDir);
     this.journalParser = new JournalDirectoryParser(projectDir);
+    this.dnsParser = new DnsDomainParser(projectDir);
   }
 
   // ============================================================
@@ -216,6 +220,25 @@ export class DirectoryMarkdownParser {
 
   async saveProjectDescription(description: string[]): Promise<void> {
     await this.projectParser.updateDescription(description);
+  }
+
+  async setIntegrationSecret(
+    integrationId: string,
+    key: string,
+    value: string,
+  ): Promise<void> {
+    return this.projectParser.setIntegrationSecret(integrationId, key, value);
+  }
+
+  async getIntegrationSecret(
+    integrationId: string,
+    key: string,
+  ): Promise<string | null> {
+    return this.projectParser.getIntegrationSecret(integrationId, key);
+  }
+
+  async deleteIntegrationSecrets(integrationId: string): Promise<void> {
+    return this.projectParser.deleteIntegrationSecrets(integrationId);
   }
 
   // ============================================================
@@ -1761,5 +1784,31 @@ export class DirectoryMarkdownParser {
 
   async deleteJournalEntry(id: string): Promise<boolean> {
     return this.journalParser.delete(id);
+  }
+
+  // ============================================================
+  // DNS Domains
+  // ============================================================
+
+  async readDnsDomains(): Promise<DnsDomain[]> {
+    const domains = await this.dnsParser.readAll();
+    return domains.sort((a, b) => a.domain.localeCompare(b.domain));
+  }
+
+  async addDnsDomain(
+    domain: Omit<DnsDomain, "id" | "created" | "updated">,
+  ): Promise<DnsDomain> {
+    return this.dnsParser.add(domain);
+  }
+
+  async updateDnsDomain(
+    id: string,
+    updates: Partial<DnsDomain>,
+  ): Promise<DnsDomain | null> {
+    return this.dnsParser.update(id, updates);
+  }
+
+  async deleteDnsDomain(id: string): Promise<boolean> {
+    return this.dnsParser.delete(id);
   }
 }

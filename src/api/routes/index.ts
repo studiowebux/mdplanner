@@ -41,6 +41,7 @@ import { onboardingRouter } from "./features/onboarding.ts";
 import { onboardingTemplatesRouter } from "./features/onboarding-templates.ts";
 import { financesRouter } from "./features/finances.ts";
 import { journalRouter } from "./features/journal.ts";
+import { dnsRouter } from "./features/dns.ts";
 import { eisenhowerRouter } from "./features/eisenhower.ts";
 import { safeRouter } from "./features/safe.ts";
 import { investorsRouter } from "./features/investors.ts";
@@ -63,6 +64,9 @@ import { backupRouter } from "./backup.ts";
 
 // TTS proxy routes
 import { ttsRouter } from "./tts.ts";
+
+// Integrations routes
+import { integrationsRouter } from "./integrations.ts";
 
 export function createApiRouter(
   projectManager: ProjectManager,
@@ -170,6 +174,12 @@ export function createApiRouter(
 
   // TTS proxy routes (avoids browser CORS on cross-origin TTS services)
   api.route("/tts", ttsRouter);
+
+  // Integration secrets routes
+  api.route("/integrations", integrationsRouter);
+
+  // DNS routes
+  api.route("/dns", dnsRouter);
 
   // 404 handler
   api.notFound((c) => {

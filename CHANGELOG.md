@@ -10,6 +10,27 @@ and this project adheres to
 
 ### Added
 
+- DNS Tracker: new view to track domain names, expiry dates, auto-renew status,
+  renewal costs, nameservers, and notes; stored as `dns/*.md` files
+- DNS expiry color-coded badges: CRITICAL (<14d), URGENT (<31d), SOON (<61d),
+  UPCOMING (<91d), OK; auto-renew flag shown as a shield icon
+- DNS batch actions: multi-select rows to set renewal cost or delete in bulk via
+  a floating action bar
+- Cloudflare Registrar integration: sync domain expiry and auto-renew status
+  from the Cloudflare API via "Scan from Cloudflare" button; sync contract
+  enforced at the API level (only `expiryDate`, `autoRenew`, `lastFetchedAt` are
+  written — `renewalCostUsd`, `notes`, and other manual fields are never
+  overwritten)
+- Integration secrets infrastructure:
+  `POST/GET/DELETE /api/integrations/cloudflare` stores Cloudflare API tokens in
+  `project.md`
+- AES-256-GCM encryption for integration tokens: set `MDPLANNER_SECRET_KEY`
+  (32-byte hex) to encrypt stored tokens; plaintext fallback when the key is not
+  set; Settings shows an encryption status banner
+- `mdplanner keygen-secret` subcommand generates a random 32-byte hex key for
+  use as `MDPLANNER_SECRET_KEY`
+- DNS domains indexed in SQLite FTS cache: `domain` and `notes` are searchable
+  via the global Cmd+K overlay and `/api/search`
 - Backup system: `GET /api/backup/export` streams the project as a TAR archive;
   `POST /api/backup/import` extracts an archive into the project directory (pass
   `?overwrite=true` to clobber existing files)

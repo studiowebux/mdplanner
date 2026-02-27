@@ -1,5 +1,5 @@
 // Config View Module
-import { BackupAPI, ProjectAPI } from "../api.js";
+import { BackupAPI, IntegrationsAPI, ProjectAPI } from "../api.js";
 import { AccessibilityManager } from "../ui/accessibility.js";
 
 function formatBytes(bytes) {
@@ -55,6 +55,7 @@ export class ConfigView {
     this.renderFeatures();
     this.renderAccessibilitySettings();
     this.initBackupPanel();
+    this.initIntegrationsPanel();
   }
 
   async initBackupPanel() {
@@ -442,6 +443,9 @@ export class ConfigView {
         { id: "ollama", label: "AI Chat" },
         { id: "backup", label: "Backup" },
       ],
+      "Infrastructure": [
+        { id: "dns", label: "DNS Tracker" },
+      ],
     };
 
     const enabledFeatures = this.tm.projectConfig?.features || [];
@@ -499,6 +503,66 @@ export class ConfigView {
     await this.tm.saveProjectConfig();
   }
 
+  async initIntegrationsPanel() {
+    try {
+      const status = await IntegrationsAPI.getCloudflare();
+      const banner = document.getElementById("cfEncryptionBanner");
+      const statusEl = document.getElementById("cfStatus");
+      const deleteBtn = document.getElementById("cfDeleteBtn");
+
+      if (banner) {
+        if (status.encrypted) {
+          banner.className = "integration-encryption-banner encryption-ok";
+          banner.textContent = "Credentials encrypted with AES-256-GCM";
+        } else {
+          banner.className = "integration-encryption-banner encryption-warn";
+          banner.textContent =
+            "No encryption key set — token stored in plain text. Set MDPLANNER_SECRET_KEY to encrypt.";
+        }
+      }
+      if (statusEl) {
+        statusEl.textContent = status.configured ? "Token configured" : "Not configured";
+        statusEl.className = status.configured ? "text-sm text-success" : "text-sm text-secondary";
+      }
+      if (deleteBtn) {
+        deleteBtn.classList.toggle("hidden", !status.configured);
+      }
+    } catch {
+      // Panel absent or API not reachable — silent
+    }
+  }
+
+  async saveCloudflareToken() {
+    const input = document.getElementById("cfTokenInput");
+    const btn = document.getElementById("cfSaveBtn");
+    if (!input || !btn) return;
+    const token = input.value.trim();
+    if (!token) return;
+
+    btn.disabled = true;
+    btn.textContent = "Saving...";
+    try {
+      await IntegrationsAPI.saveCloudflare(token);
+      input.value = "";
+      await this.initIntegrationsPanel();
+    } catch {
+      alert("Failed to save Cloudflare token");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Save token";
+    }
+  }
+
+  async deleteCloudflareToken() {
+    if (!confirm("Remove Cloudflare credentials?")) return;
+    try {
+      await IntegrationsAPI.deleteCloudflare();
+      await this.initIntegrationsPanel();
+    } catch {
+      alert("Failed to remove Cloudflare credentials");
+    }
+  }
+
   bindEvents() {
     // Save project config button
     document
@@ -553,6 +617,22 @@ export class ConfigView {
     document
       .getElementById("backupImportBtn")
       ?.addEventListener("click", () => this.importBackup());
+
+    // Cloudflare integration events
+    document
+      .getElementById("cfSaveBtn")
+      ?.addEventListener("click", () => this.saveCloudflareToken());
+    document
+      .getElementById("cfDeleteBtn")
+      ?.addEventListener("click", () => this.deleteCloudflareToken());
+    document
+      .getElementById("cfTokenInput")
+      ?.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          this.saveCloudflareToken();
+        }
+      });
 
     // Accessibility settings events
     document

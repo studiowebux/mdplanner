@@ -803,6 +803,13 @@
             Uploads
           </button>
           <button
+            id="dnsViewBtn"
+            data-view="dns"
+            class="nav-dropdown-btn"
+          >
+            DNS
+          </button>
+          <button
             id="ollamaViewBtn"
             data-view="ollama"
             class="nav-dropdown-btn"
@@ -1096,6 +1103,12 @@
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
             >
               Uploads
+            </button>
+            <button
+              id="dnsViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              DNS
             </button>
             <button
               id="ollamaViewBtnMobile"
@@ -1743,6 +1756,97 @@
         </div>
       </div>
 
+      <!-- DNS Tracker View -->
+      <div id="dnsView" class="hidden pb-16">
+        <div class="bg-primary rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-default flex justify-between items-center view-header">
+            <h2 class="text-lg font-medium text-primary">DNS Tracker</h2>
+          </div>
+          <div class="p-6">
+            <div id="dnsContainer"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DNS Sidenav -->
+      <div id="dnsSidenav" class="sidenav-overlay hidden">
+        <div class="sidenav-panel">
+          <div class="sidenav-header">
+            <h3 class="sidenav-title" id="dnsSidenavTitle">Add Domain</h3>
+            <button class="sidenav-close" id="dnsSidenavCloseBtn" aria-label="Close">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          <div class="sidenav-body">
+
+            <!-- Cloudflare synced block (read-only) -->
+            <div id="dnsCfSyncedBlock" class="hidden mb-5 p-3 bg-secondary rounded border border-default">
+              <p class="text-xs font-medium text-secondary mb-2">Cloudflare (synced)</p>
+              <p class="text-xs text-tertiary">
+                Last synced: <span id="dnsCfLastFetched">—</span>
+              </p>
+              <p class="text-xs text-tertiary mt-1">
+                Expiry date and auto-renew are managed by Cloudflare sync and shown as read-only here.
+              </p>
+            </div>
+
+            <!-- Domain -->
+            <div class="form-group">
+              <label class="form-label" for="dnsFieldDomain">Domain name <span class="text-error">*</span></label>
+              <input type="text" id="dnsFieldDomain" class="form-input" placeholder="example.com" autocomplete="off">
+            </div>
+
+            <!-- Expiry date -->
+            <div class="form-group">
+              <label class="form-label" for="dnsFieldExpiryDate">Expiry date</label>
+              <input type="date" id="dnsFieldExpiryDate" class="form-input">
+            </div>
+
+            <!-- Auto-renew -->
+            <div class="form-group">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="dnsFieldAutoRenew">
+                <span class="form-label mb-0">Auto-renew</span>
+              </label>
+            </div>
+
+            <!-- Manual block -->
+            <p class="text-xs font-medium text-secondary mt-4 mb-2">Manual</p>
+
+            <!-- Renewal cost -->
+            <div class="form-group">
+              <label class="form-label" for="dnsFieldRenewalCost">Renewal cost (USD)</label>
+              <input type="number" id="dnsFieldRenewalCost" class="form-input" min="0" step="0.01" placeholder="12.99">
+            </div>
+
+            <!-- Provider -->
+            <div class="form-group">
+              <label class="form-label" for="dnsFieldProvider">Provider / Registrar</label>
+              <input type="text" id="dnsFieldProvider" class="form-input" placeholder="cloudflare, namecheap, …" autocomplete="off">
+            </div>
+
+            <!-- Nameservers -->
+            <div class="form-group">
+              <label class="form-label" for="dnsFieldNameservers">Nameservers (one per line)</label>
+              <textarea id="dnsFieldNameservers" class="form-input" rows="3" placeholder="ns1.example.com&#10;ns2.example.com"></textarea>
+            </div>
+
+            <!-- Notes -->
+            <div class="form-group">
+              <label class="form-label" for="dnsFieldNotes">Notes</label>
+              <textarea id="dnsFieldNotes" class="form-input" rows="4" placeholder="Additional notes…"></textarea>
+            </div>
+
+          </div>
+          <div class="sidenav-footer">
+            <button id="dnsSidenavSaveBtn" class="btn-primary">Save</button>
+            <button id="dnsSidenavDeleteBtn" class="btn-secondary hidden" style="color:var(--error)">Delete</button>
+          </div>
+        </div>
+      </div>
+
       <!-- AI Chat (Ollama) View -->
       <div id="ollamaView" class="hidden">
         <div class="ollama-view-root">
@@ -2345,6 +2449,43 @@
                 </div>
               </div>
               <p id="backupImportResult" class="mt-3 text-sm hidden"></p>
+            </div>
+          </div>
+
+          <!-- Integrations -->
+          <div class="mt-8 pt-8 border-t border-default" id="integrationsSection">
+            <h3 class="text-lg font-semibold text-primary mb-4">Integrations</h3>
+
+            <!-- Cloudflare -->
+            <div class="border border-default rounded p-4">
+              <h4 class="text-sm font-medium text-primary mb-1">Cloudflare</h4>
+              <p class="text-xs text-secondary mb-4">
+                API token for syncing domain expiry and auto-renew status from Cloudflare Registrar.
+                The token is stored in project.md and encrypted when
+                <code>MDPLANNER_SECRET_KEY</code> is set.
+              </p>
+              <div id="cfEncryptionBanner" class="integration-encryption-banner encryption-warn mb-4 hidden"></div>
+              <div class="flex items-center gap-3 mb-4">
+                <span id="cfStatus" class="text-sm text-secondary">Checking...</span>
+              </div>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs text-muted mb-1" for="cfTokenInput">
+                    API Token
+                  </label>
+                  <input
+                    type="password"
+                    id="cfTokenInput"
+                    placeholder="Paste Cloudflare API token"
+                    class="w-full border border-strong rounded px-3 py-2 text-sm font-mono"
+                    autocomplete="off"
+                  >
+                </div>
+                <div class="flex gap-2">
+                  <button id="cfSaveBtn" class="btn-secondary">Save token</button>
+                  <button id="cfDeleteBtn" class="btn-secondary hidden">Remove credentials</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
