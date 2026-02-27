@@ -6,14 +6,10 @@ import { JournalAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { showConfirm } from "../ui/confirm.js";
 
-const MOOD_OPTIONS = ["", "great", "good", "neutral", "bad", "terrible"];
-
 export class JournalSidenavModule {
   constructor(taskManager) {
     this.tm = taskManager;
     this.editingId = null;
-    this.autoSaveTimeout = null;
-    this.isSaving = false;
   }
 
   bindEvents() {
@@ -25,24 +21,14 @@ export class JournalSidenavModule {
       "click",
       () => this.close(),
     );
+    document.getElementById("journalSidenavSave")?.addEventListener(
+      "click",
+      () => this.handleSave(),
+    );
     document.getElementById("journalSidenavDelete")?.addEventListener(
       "click",
       () => this.handleDelete(),
     );
-
-    const inputs = [
-      "journalSidenavDate",
-      "journalSidenavTitle",
-      "journalSidenavMood",
-      "journalSidenavTags",
-      "journalSidenavBody",
-    ];
-    inputs.forEach((id) => {
-      document.getElementById(id)?.addEventListener(
-        "input",
-        () => this.scheduleAutoSave(),
-      );
-    });
   }
 
   openNew() {
@@ -50,8 +36,11 @@ export class JournalSidenavModule {
     document.getElementById("journalSidenavHeader").textContent =
       "New Journal Entry";
     this._clearForm();
+    const now = new Date();
     document.getElementById("journalSidenavDate").value =
-      new Date().toISOString().split("T")[0];
+      now.toISOString().split("T")[0];
+    document.getElementById("journalSidenavTime").value =
+      now.toTimeString().slice(0, 5); // HH:MM
     document.getElementById("journalSidenavDelete").classList.add("hidden");
     Sidenav.open("journalSidenav");
     document.getElementById("journalSidenavBody")?.focus();
@@ -70,16 +59,13 @@ export class JournalSidenavModule {
   }
 
   close() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-    }
     Sidenav.close("journalSidenav");
     this.editingId = null;
   }
 
   _clearForm() {
     document.getElementById("journalSidenavDate").value = "";
+    document.getElementById("journalSidenavTime").value = "";
     document.getElementById("journalSidenavTitle").value = "";
     document.getElementById("journalSidenavMood").value = "";
     document.getElementById("journalSidenavTags").value = "";
@@ -88,6 +74,7 @@ export class JournalSidenavModule {
 
   _fillForm(entry) {
     document.getElementById("journalSidenavDate").value = entry.date || "";
+    document.getElementById("journalSidenavTime").value = entry.time || "";
     document.getElementById("journalSidenavTitle").value = entry.title || "";
     document.getElementById("journalSidenavMood").value = entry.mood || "";
     document.getElementById("journalSidenavTags").value =
@@ -105,6 +92,7 @@ export class JournalSidenavModule {
     return {
       date: document.getElementById("journalSidenavDate").value ||
         new Date().toISOString().split("T")[0],
+      time: document.getElementById("journalSidenavTime").value || undefined,
       title: document.getElementById("journalSidenavTitle").value.trim() ||
         undefined,
       mood: document.getElementById("journalSidenavMood").value || undefined,
@@ -113,34 +101,19 @@ export class JournalSidenavModule {
     };
   }
 
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.autoSaveTimeout = setTimeout(() => this.autoSave(), 1500);
-  }
-
-  async autoSave() {
-    if (this.isSaving) return;
-    this.isSaving = true;
-    try {
-      await this._save(true);
-    } finally {
-      this.isSaving = false;
-    }
-  }
-
-  async _save(silent = false) {
+  async handleSave() {
     const data = this._collectForm();
 
     if (this.editingId) {
       const res = await JournalAPI.update(this.editingId, data);
-      if (!res.ok && !silent) {
+      if (!res.ok) {
         showToast("Failed to save entry", "error");
         return;
       }
     } else {
       const res = await JournalAPI.create(data);
       if (!res.ok) {
-        if (!silent) showToast("Failed to create entry", "error");
+        showToast("Failed to create entry", "error");
         return;
       }
       const json = await res.json();
@@ -152,11 +125,9 @@ export class JournalSidenavModule {
       );
     }
 
-    // Refresh list
     this.tm.journal = await JournalAPI.fetchAll();
     this.tm.journalModule.renderView();
-
-    if (!silent) showToast("Entry saved");
+    showToast("Entry saved");
   }
 
   async handleDelete() {

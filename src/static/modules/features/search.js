@@ -174,7 +174,7 @@ export class GlobalSearch {
   }
 
   _isEnabled() {
-    const features = this.tm.projectConfig?.features;
+    const features = this.taskManager.projectConfig?.features;
     return !features || features.length === 0 || features.includes("quick-search");
   }
 

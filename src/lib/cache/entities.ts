@@ -1697,6 +1697,7 @@ export const ENTITIES: EntityDef[] = [
     schema: `CREATE TABLE IF NOT EXISTS journal (
   id TEXT PRIMARY KEY,
   date TEXT NOT NULL,
+  time TEXT,
   title TEXT,
   mood TEXT,
   tags TEXT,    -- JSON array
@@ -1715,11 +1716,12 @@ export const ENTITIES: EntityDef[] = [
       db.execute("DELETE FROM journal");
       for (const e of entries) {
         db.execute(
-          `INSERT INTO journal (id, date, title, mood, tags, body, created, updated)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO journal (id, date, time, title, mood, tags, body, created, updated)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             val(e.id),
             val(e.date),
+            val(e.time),
             val(e.title),
             val(e.mood),
             json(e.tags),

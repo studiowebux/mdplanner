@@ -8,6 +8,7 @@ import type { JournalEntry, JournalMood } from "../../types.ts";
 interface JournalFrontmatter {
   id: string;
   date: string;
+  time?: string;
   title?: string;
   mood?: JournalMood;
   tags?: string[];
@@ -32,6 +33,7 @@ export class JournalDirectoryParser extends DirectoryParser<JournalEntry> {
     return {
       id: frontmatter.id,
       date: frontmatter.date || new Date().toISOString().split("T")[0],
+      time: frontmatter.time,
       title: frontmatter.title,
       mood: frontmatter.mood,
       tags: frontmatter.tags,
@@ -49,6 +51,7 @@ export class JournalDirectoryParser extends DirectoryParser<JournalEntry> {
       updated: entry.updated,
     };
 
+    if (entry.time) frontmatter.time = entry.time;
     if (entry.title) frontmatter.title = entry.title;
     if (entry.mood) frontmatter.mood = entry.mood;
     if (entry.tags && entry.tags.length > 0) frontmatter.tags = entry.tags;

@@ -638,6 +638,7 @@ export type JournalMood = "great" | "good" | "neutral" | "bad" | "terrible";
 export interface JournalEntry {
   id: string;
   date: string; // YYYY-MM-DD
+  time?: string; // HH:MM (optional)
   title?: string; // optional; view shows date when absent
   mood?: JournalMood;
   tags?: string[];

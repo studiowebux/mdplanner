@@ -12543,9 +12543,15 @@
       <div class="flex flex-col flex-1 overflow-hidden">
         <div class="sidenav-content">
           <div class="sidenav-section">
-            <div class="form-group">
-              <label class="form-label" for="journalSidenavDate">Date</label>
-              <input id="journalSidenavDate" type="date" class="form-input" />
+            <div class="journal-sidenav-datetime-row">
+              <div class="form-group">
+                <label class="form-label" for="journalSidenavDate">Date</label>
+                <input id="journalSidenavDate" type="date" class="form-input" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="journalSidenavTime">Time <span class="text-tertiary">(optional)</span></label>
+                <input id="journalSidenavTime" type="time" class="form-input" />
+              </div>
             </div>
             <div class="form-group">
               <label class="form-label" for="journalSidenavTitle">Title <span class="text-tertiary">(optional)</span></label>
@@ -12576,6 +12582,7 @@
           <button type="button" id="journalSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
           <button type="button" id="journalSidenavCancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
+          <button type="button" id="journalSidenavSave" class="btn-primary py-2 rounded-lg">Save</button>
         </div>
       </div>
     </div>

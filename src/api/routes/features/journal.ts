@@ -37,6 +37,7 @@ journalRouter.post("/", async (c) => {
   const body = await c.req.json();
   const entry = await parser.addJournalEntry({
     date: body.date || new Date().toISOString().split("T")[0],
+    time: body.time,
     title: body.title,
     mood: body.mood,
     tags: body.tags,
@@ -53,6 +54,7 @@ journalRouter.put("/:id", async (c) => {
   const body = await c.req.json();
   const updated = await parser.updateJournalEntry(id, {
     date: body.date,
+    time: body.time,
     title: body.title,
     mood: body.mood,
     tags: body.tags,
