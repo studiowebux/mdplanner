@@ -12541,7 +12541,15 @@
         </button>
       </div>
       <div class="flex flex-col flex-1 overflow-hidden">
-        <div class="sidenav-content">
+        <!-- View mode: rendered markdown entry -->
+        <div id="journalSidenavViewSection" class="sidenav-content hidden">
+          <div class="sidenav-section">
+            <div id="journalViewMeta" class="journal-view-meta"></div>
+            <div id="journalViewBody" class="journal-view-body"></div>
+          </div>
+        </div>
+        <!-- Edit mode: form fields -->
+        <div id="journalSidenavFormSection" class="sidenav-content">
           <div class="sidenav-section">
             <div class="journal-sidenav-datetime-row">
               <div class="form-group">
@@ -12582,6 +12590,7 @@
           <button type="button" id="journalSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
           <button type="button" id="journalSidenavCancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
+          <button type="button" id="journalSidenavEditBtn" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active hidden">Edit</button>
           <button type="button" id="journalSidenavSave" class="btn-primary py-2 rounded-lg">Save</button>
         </div>
       </div>

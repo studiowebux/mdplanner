@@ -101,7 +101,7 @@ export class JournalModule {
       : "";
 
     return `
-      <div class="journal-entry-card" onclick="taskManager.journalSidenavModule.openEdit('${entry.id}')">
+      <div class="journal-entry-card" onclick="taskManager.journalSidenavModule.openView('${entry.id}')">
         <div class="journal-entry-card-header">
           <div class="journal-entry-meta-row">
             <span class="journal-entry-datetime">${datetime}</span>

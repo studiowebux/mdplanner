@@ -18,7 +18,7 @@
 /* Entry card — clear border + background separation */
 .journal-entry-card {
   padding: 0.875rem 1rem;
-  border: 1px solid var(--border);
+  border: 1px solid #cccccc;
   border-radius: var(--radius);
   background-color: var(--bg-editor);
   margin-block-end: 0.5rem;
@@ -26,8 +26,12 @@
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
+[data-theme="dark"] .journal-entry-card {
+  border-color: var(--border);
+}
+
 .journal-entry-card:hover {
-  border-color: var(--text-tertiary);
+  border-color: var(--text-secondary);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
@@ -125,4 +129,70 @@
   .journal-sidenav-datetime-row {
     grid-template-columns: 1fr;
   }
+}
+
+/* -----------------------------------------------------------------------
+   View mode (read-only rendered entry in sidenav)
+   ----------------------------------------------------------------------- */
+
+.journal-view-meta {
+  padding-block-end: 0.75rem;
+  border-block-end: 1px solid var(--border);
+  margin-block-end: 1rem;
+}
+
+.journal-view-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-block-end: 0.375rem;
+}
+
+.journal-view-body {
+  font-size: var(--font-size-base);
+  line-height: 1.75;
+  color: var(--text);
+}
+
+.journal-view-body p { margin-block-end: 0.875rem; }
+.journal-view-body h1,
+.journal-view-body h2,
+.journal-view-body h3 {
+  font-weight: 600;
+  margin-block: 1.25rem 0.5rem;
+  color: var(--text);
+}
+.journal-view-body code {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.1em 0.35em;
+}
+.journal-view-body pre {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.875rem 1rem;
+  overflow-x: auto;
+  margin-block-end: 0.875rem;
+}
+.journal-view-body pre code {
+  background: none;
+  border: none;
+  padding: 0;
+}
+.journal-view-body ul,
+.journal-view-body ol {
+  padding-inline-start: 1.5rem;
+  margin-block-end: 0.875rem;
+}
+.journal-view-body blockquote {
+  border-inline-start: 3px solid var(--border);
+  padding-inline-start: 1rem;
+  color: var(--text-secondary);
+  margin-inline-start: 0;
+  margin-block-end: 0.875rem;
 }
