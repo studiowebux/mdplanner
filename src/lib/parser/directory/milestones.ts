@@ -9,6 +9,7 @@ interface MilestoneFrontmatter {
   id: string;
   target?: string;
   status: "open" | "completed";
+  project?: string;
 }
 
 export class MilestonesDirectoryParser extends DirectoryParser<Milestone> {
@@ -47,6 +48,7 @@ export class MilestonesDirectoryParser extends DirectoryParser<Milestone> {
       target: frontmatter.target,
       status: frontmatter.status || "open",
       description: description || undefined,
+      project: frontmatter.project,
     };
   }
 
@@ -58,6 +60,10 @@ export class MilestonesDirectoryParser extends DirectoryParser<Milestone> {
 
     if (milestone.target) {
       frontmatter.target = milestone.target;
+    }
+
+    if (milestone.project) {
+      frontmatter.project = milestone.project;
     }
 
     const body = `# ${milestone.name}\n\n${milestone.description || ""}`;

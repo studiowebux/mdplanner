@@ -37,6 +37,20 @@ export class ListView {
     const milestoneSelect = document.getElementById("filterMilestone");
     milestoneSelect.innerHTML = '<option value="">All Milestones</option>' +
       milestones.map((m) => `<option value="${m}">${m}</option>`).join("");
+
+    // Project filter — unique project names from tasks + portfolio
+    const projectSelect = document.getElementById("filterProject");
+    if (projectSelect) {
+      const projects = new Set();
+      (this.tm.tasks || []).forEach((t) => {
+        if (t.config?.project) projects.add(t.config.project);
+      });
+      (this.tm.portfolio || []).forEach((p) => { if (p.name) projects.add(p.name); });
+      projectSelect.innerHTML = '<option value="">All Projects</option>' +
+        Array.from(projects).sort().map((p) =>
+          `<option value="${p}">${p}</option>`
+        ).join("");
+    }
   }
 
   applyFilters() {
@@ -47,11 +61,14 @@ export class ListView {
     this.tm.listFilters.milestone =
       document.getElementById("filterMilestone").value;
     this.tm.listFilters.status = document.getElementById("filterStatus").value;
+    this.tm.listFilters.project =
+      document.getElementById("filterProject")?.value || "";
     this.tm.listFilters.sort = document.getElementById("sortTasks").value;
 
     const hasFilters = this.tm.listFilters.section ||
       this.tm.listFilters.assignee ||
-      this.tm.listFilters.milestone || this.tm.listFilters.status ||
+      this.tm.listFilters.milestone || this.tm.listFilters.project ||
+      this.tm.listFilters.status ||
       this.tm.listFilters.sort !== "default";
     document.getElementById("clearFilters").classList.toggle(
       "hidden",
@@ -66,11 +83,14 @@ export class ListView {
     document.getElementById("filterAssignee").value = "";
     document.getElementById("filterMilestone").value = "";
     document.getElementById("filterStatus").value = "";
+    const fp = document.getElementById("filterProject");
+    if (fp) fp.value = "";
     document.getElementById("sortTasks").value = "default";
     this.tm.listFilters = {
       section: "",
       assignee: "",
       milestone: "",
+      project: "",
       status: "",
       sort: "default",
     };
@@ -93,6 +113,11 @@ export class ListView {
     if (this.tm.listFilters.milestone) {
       result = result.filter((t) =>
         t.config.milestone === this.tm.listFilters.milestone
+      );
+    }
+    if (this.tm.listFilters.project) {
+      result = result.filter((t) =>
+        t.config.project === this.tm.listFilters.project
       );
     }
     if (this.tm.listFilters.status === "completed") {

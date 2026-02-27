@@ -45,6 +45,21 @@ export class TaskSidenavModule {
       () => document.getElementById("sidenavFileInput")?.click(),
     );
 
+    // Milestone → auto-fill project when milestone has a linked project
+    document.getElementById("sidenavTaskMilestone")?.addEventListener(
+      "change",
+      (e) => {
+        const milestoneName = e.target.value;
+        if (!milestoneName) return;
+        const projectField = document.getElementById("sidenavTaskProject");
+        if (!projectField || projectField.value) return; // don't overwrite manual entry
+        const milestone = (this.tm.milestones || []).find(
+          (m) => m.name === milestoneName,
+        );
+        if (milestone?.project) projectField.value = milestone.project;
+      },
+    );
+
     // File input change — upload each file and insert markdown into description
     document.getElementById("sidenavFileInput")?.addEventListener(
       "change",
@@ -183,6 +198,17 @@ export class TaskSidenavModule {
         .map((n) => `<option value="${n}">`)
         .join("");
     }
+
+    // Projects datalist — portfolio item names
+    const projectsDatalist = document.getElementById("projectsList");
+    if (projectsDatalist) {
+      const names = new Set();
+      (this.tm.portfolio || []).forEach((p) => { if (p.name) names.add(p.name); });
+      projectsDatalist.innerHTML = Array.from(names)
+        .sort()
+        .map((n) => `<option value="${n}">`)
+        .join("");
+    }
   }
 
   fillForm(task) {
@@ -204,6 +230,7 @@ export class TaskSidenavModule {
     setValue("sidenavTaskAssignee", cfg.assignee);
     setValue("sidenavTaskEffort", cfg.effort);
     setValue("sidenavTaskMilestone", cfg.milestone);
+    setValue("sidenavTaskProject", cfg.project);
 
     // Due date — datetime-local requires YYYY-MM-DDTHH:MM (local, no seconds)
     if (cfg.due_date) {
@@ -270,6 +297,7 @@ export class TaskSidenavModule {
       planned_start: getValue("sidenavTaskPlannedStart") || null,
       planned_end: getValue("sidenavTaskPlannedEnd") || null,
       milestone: getValue("sidenavTaskMilestone"),
+      project: getValue("sidenavTaskProject") || null,
       tag: getSelectedValues("sidenavTaskTags"),
     };
 

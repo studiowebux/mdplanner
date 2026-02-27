@@ -5,7 +5,7 @@ tag: [infra]
 priority: 1
 effort: 8
 assignee: diana
-milestone: milestone_alpha
+milestone: Alpha Release
 ---
 
 # CI/CD Pipeline

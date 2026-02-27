@@ -1,5 +1,5 @@
 // Portfolio View Module - Cross-project dashboard
-import { PeopleAPI, PortfolioAPI } from "../api.js";
+import { BillingAPI, PeopleAPI, PortfolioAPI } from "../api.js";
 import { PROJECT_STATUS_CLASSES, PROJECT_STATUS_LABELS } from "../constants.js";
 
 /**
@@ -13,6 +13,7 @@ export class PortfolioView {
     this.projects = [];
     this.summary = null;
     this.peopleMap = new Map();
+    this.customers = [];
     this.currentFilter = "all";
     this.currentViewMode = "list"; // 'list' or 'tree'
     this.searchQuery = "";
@@ -31,13 +32,16 @@ export class PortfolioView {
    */
   async load() {
     try {
-      const [items, summary, people] = await Promise.all([
+      const [items, summary, people, customers] = await Promise.all([
         PortfolioAPI.fetchAll(),
         PortfolioAPI.getSummary(),
         PeopleAPI.fetchAll(),
+        BillingAPI.fetchCustomers().catch(() => []),
       ]);
       this.projects = items;
+      this.tm.portfolio = items;
       this.summary = summary;
+      this.customers = customers;
       this.peopleMap.clear();
       for (const person of people) {
         this.peopleMap.set(person.id, person);
@@ -53,6 +57,7 @@ export class PortfolioView {
    */
   render() {
     this.renderSummaryCards();
+    this.renderAnalytics();
     this.renderFilterBar();
     if (this.currentViewMode === "tree") {
       this.renderTreeView();
@@ -162,6 +167,94 @@ export class PortfolioView {
         <div class="text-xs text-muted mt-1">${
       this.formatCurrency(totalRevenue)
     } rev / ${this.formatCurrency(totalExpenses)} exp</div>
+      </div>
+    `;
+  }
+
+  /**
+   * Render analytics panel — status breakdown, category breakdown, tech stack frequency.
+   */
+  renderAnalytics() {
+    const container = document.getElementById("portfolioAnalytics");
+    if (!container || !this.projects.length) return;
+
+    // Status breakdown
+    const statusCounts = {};
+    for (const p of this.projects) {
+      statusCounts[p.status] = (statusCounts[p.status] || 0) + 1;
+    }
+    const maxStatus = Math.max(...Object.values(statusCounts));
+
+    // Category breakdown
+    const catCounts = {};
+    for (const p of this.projects) {
+      if (p.category) catCounts[p.category] = (catCounts[p.category] || 0) + 1;
+    }
+    const maxCat = Math.max(...Object.values(catCounts));
+
+    // Tech stack frequency
+    const techCounts = {};
+    for (const p of this.projects) {
+      for (const t of p.techStack || []) {
+        techCounts[t] = (techCounts[t] || 0) + 1;
+      }
+    }
+    const topTech = Object.entries(techCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8);
+    const maxTech = topTech[0]?.[1] || 1;
+
+    const bar = (count, max) => {
+      const pct = Math.round((count / max) * 100);
+      return `<div class="portfolio-bar-track"><div class="portfolio-bar-fill" style="width:${pct}%"></div></div>`;
+    };
+
+    const statusRows = Object.entries(statusCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([s, n]) =>
+        `<div class="portfolio-bar-row">
+          <span class="portfolio-bar-label">${PROJECT_STATUS_LABELS[s] || s}</span>
+          ${bar(n, maxStatus)}
+          <span class="portfolio-bar-count">${n}</span>
+        </div>`
+      ).join("");
+
+    const catRows = Object.entries(catCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([c, n]) =>
+        `<div class="portfolio-bar-row">
+          <span class="portfolio-bar-label">${this.escapeHtml(c)}</span>
+          ${bar(n, maxCat)}
+          <span class="portfolio-bar-count">${n}</span>
+        </div>`
+      ).join("");
+
+    const techRows = topTech.map(([t, n]) =>
+      `<div class="portfolio-bar-row">
+        <span class="portfolio-bar-label">${this.escapeHtml(t)}</span>
+        ${bar(n, maxTech)}
+        <span class="portfolio-bar-count">${n}</span>
+      </div>`
+    ).join("");
+
+    container.innerHTML = `
+      <div class="portfolio-analytics-grid">
+        <div class="portfolio-analytics-panel">
+          <div class="portfolio-analytics-title">By Status</div>
+          ${statusRows || '<p class="text-sm text-muted">No data</p>'}
+        </div>
+        <div class="portfolio-analytics-panel">
+          <div class="portfolio-analytics-title">By Category</div>
+          ${catRows || '<p class="text-sm text-muted">No data</p>'}
+        </div>
+        ${
+      topTech.length
+        ? `<div class="portfolio-analytics-panel">
+          <div class="portfolio-analytics-title">Tech Stack</div>
+          ${techRows}
+        </div>`
+        : ""
+    }
       </div>
     `;
   }
@@ -756,9 +849,14 @@ export class PortfolioView {
             </div>
             <div>
               <label class="form-label">Category</label>
-              <input type="text" id="portfolioDetailCategory" class="form-input" value="${
+              <input type="text" id="portfolioDetailCategory" class="form-input" list="portfolioCategoryList" autocomplete="off" value="${
       this.escapeHtml(project.category)
     }">
+              <datalist id="portfolioCategoryList">${
+      [...new Set(this.projects.map((p) => p.category).filter(Boolean))].sort()
+        .map((c) => `<option value="${this.escapeHtml(c)}">`)
+        .join("")
+    }</datalist>
             </div>
             <div>
               <label class="form-label">Status</label>
@@ -796,6 +894,26 @@ export class PortfolioView {
               <input type="text" id="portfolioDetailLicense" class="form-input" value="${
       this.escapeHtml(project.license || "")
     }" placeholder="MIT, Apache-2.0, GPL-3.0, Proprietary...">
+            </div>
+            <div>
+              <label class="form-label">Tech Stack</label>
+              <input type="text" id="portfolioDetailTechStack" class="form-input" value="${
+      this.escapeHtml((project.techStack || []).join(", "))
+    }" placeholder="Deno, TypeScript, SQLite, ...">
+            </div>
+            <div>
+              <label class="form-label">Billing Customer</label>
+              <input type="text" id="portfolioDetailBillingCustomer" class="form-input" list="portfolioCustomerList" autocomplete="off" value="${
+      this.escapeHtml(
+        this.customers.find((c) => c.id === project.billingCustomerId)?.name ||
+          project.billingCustomerId || "",
+      )
+    }" placeholder="Link to a billing customer">
+              <datalist id="portfolioCustomerList">${
+      this.customers.map((c) =>
+        `<option value="${this.escapeHtml(c.name)}" data-id="${c.id}">`
+      ).join("")
+    }</datalist>
             </div>
             <div>
               <label class="form-label flex items-center justify-between">
@@ -874,15 +992,8 @@ export class PortfolioView {
         <!-- Team -->
         <section class="sidenav-section">
           <h3 class="sidenav-section-title">Team</h3>
-          <div class="space-y-2">
-            ${
-      team.length > 0
-        ? `<div class="flex flex-wrap gap-2">${teamHtml}</div>`
-        : ""
-    }
-            <div class="space-y-1 max-h-40 overflow-y-auto" id="portfolioTeamPicker">
-              ${this.renderTeamPicker(team)}
-            </div>
+          <div class="space-y-1 max-h-40 overflow-y-auto" id="portfolioTeamPicker">
+            ${this.renderTeamPicker(team)}
           </div>
         </section>
 
@@ -1015,6 +1126,21 @@ export class PortfolioView {
       license:
         document.getElementById("portfolioDetailLicense")?.value?.trim() ||
         undefined,
+      techStack: (() => {
+        const raw =
+          document.getElementById("portfolioDetailTechStack")?.value?.trim();
+        if (!raw) return undefined;
+        return raw.split(",").map((s) => s.trim()).filter(Boolean);
+      })(),
+      billingCustomerId: (() => {
+        const name = document.getElementById("portfolioDetailBillingCustomer")
+          ?.value?.trim();
+        if (!name) return undefined;
+        const match = this.customers.find(
+          (c) => c.name.toLowerCase() === name.toLowerCase(),
+        );
+        return match?.id || undefined;
+      })(),
     };
 
     try {

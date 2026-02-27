@@ -72,3 +72,64 @@
     display: none;
   }
 }
+
+/* Analytics panel */
+.portfolio-analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.portfolio-analytics-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.875rem 1rem;
+}
+
+.portfolio-analytics-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.portfolio-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.375rem;
+}
+
+.portfolio-bar-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  min-width: 6rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portfolio-bar-track {
+  flex: 1;
+  height: 0.375rem;
+  background: var(--surface);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.portfolio-bar-fill {
+  height: 100%;
+  background: var(--text-secondary);
+  border-radius: 2px;
+  min-width: 2px;
+}
+
+.portfolio-bar-count {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  min-width: 1.25rem;
+  text-align: right;
+}

@@ -5,7 +5,7 @@ tag: [feature]
 priority: 1
 effort: 8
 assignee: bob
-milestone: milestone_alpha
+milestone: Alpha Release
 ---
 
 # Task CRUD Operations

@@ -49,6 +49,8 @@ export class MilestoneSidenavModule extends BaseSidenavModule {
     document.getElementById("milestoneSidenavTarget").value = "";
     document.getElementById("milestoneSidenavStatus").value = "pending";
     document.getElementById("milestoneSidenavDescription").value = "";
+    document.getElementById("milestoneSidenavProject").value = "";
+    this._populateProjectList();
   }
 
   fillForm(milestone) {
@@ -56,6 +58,8 @@ export class MilestoneSidenavModule extends BaseSidenavModule {
     document.getElementById("milestoneSidenavTarget").value = milestone.target || "";
     document.getElementById("milestoneSidenavStatus").value = milestone.status || "pending";
     document.getElementById("milestoneSidenavDescription").value = milestone.description || "";
+    document.getElementById("milestoneSidenavProject").value = milestone.project || "";
+    this._populateProjectList();
   }
 
   getFormData() {
@@ -64,7 +68,15 @@ export class MilestoneSidenavModule extends BaseSidenavModule {
       target: document.getElementById("milestoneSidenavTarget").value || null,
       status: document.getElementById("milestoneSidenavStatus").value,
       description: document.getElementById("milestoneSidenavDescription").value.trim() || null,
+      project: document.getElementById("milestoneSidenavProject").value.trim() || null,
     };
+  }
+
+  _populateProjectList() {
+    const datalist = document.getElementById("milestoneSidenavProjectList");
+    if (!datalist) return;
+    const names = new Set((this.tm.portfolio || []).map((p) => p.name).filter(Boolean));
+    datalist.innerHTML = Array.from(names).sort().map((n) => `<option value="${n}">`).join("");
   }
 
   findEntity(id) {

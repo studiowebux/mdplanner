@@ -5,7 +5,7 @@ tag: [feature, api]
 assignee: bob
 priority: 2
 effort: 8
-milestone: milestone_v1
+milestone: Version 1.0
 ---
 
 # Implement API Versioning

@@ -5,7 +5,7 @@ tag: [feature, security]
 priority: 1
 effort: 12
 assignee: alice
-milestone: milestone_alpha
+milestone: Alpha Release
 ---
 
 # Authentication System

@@ -818,6 +818,11 @@ export const BillingAPI = {
   },
 
   // Customers
+  async fetchCustomers() {
+    const response = await get("/api/customers");
+    return response.json();
+  },
+
   async createCustomer(customer) {
     const response = await post("/api/customers", customer);
     return response;

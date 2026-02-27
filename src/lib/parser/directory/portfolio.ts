@@ -33,6 +33,8 @@ export interface PortfolioItem {
   urls?: PortfolioUrl[];
   logo?: string;
   license?: string;
+  techStack?: string[];
+  billingCustomerId?: string;
 }
 
 interface PortfolioFrontmatter {
@@ -50,6 +52,8 @@ interface PortfolioFrontmatter {
   urls?: PortfolioUrl[];
   logo?: string;
   license?: string;
+  techStack?: string[];
+  billingCustomerId?: string;
 }
 
 export class PortfolioDirectoryParser {
@@ -159,6 +163,8 @@ export class PortfolioDirectoryParser {
       urls: frontmatter.urls,
       logo: frontmatter.logo,
       license: frontmatter.license,
+      techStack: frontmatter.techStack,
+      billingCustomerId: frontmatter.billingCustomerId,
     };
   }
 
@@ -194,6 +200,8 @@ export class PortfolioDirectoryParser {
       urls: item.urls,
       logo: item.logo,
       license: item.license,
+      techStack: item.techStack,
+      billingCustomerId: item.billingCustomerId,
     };
 
     for (

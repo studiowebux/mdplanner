@@ -19,6 +19,7 @@ export interface TaskConfig {
   time_entries?: TimeEntry[];
   order?: number;
   attachments?: string[];
+  project?: string;
 }
 
 export interface Task {
@@ -159,6 +160,7 @@ export interface Milestone {
   target?: string;
   status: "open" | "completed";
   description?: string;
+  project?: string;
 }
 
 export interface Idea {

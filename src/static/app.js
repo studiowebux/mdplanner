@@ -8,7 +8,7 @@ import { Breadcrumb } from "./modules/ui/breadcrumb.js";
 import { Sidenav } from "./modules/ui/sidenav.js";
 import { Help } from "./modules/ui/help.js";
 import { TaskSidenavModule } from "./modules/features/task-sidenav.js";
-import { PeopleAPI, ProjectAPI, TasksAPI } from "./modules/api.js";
+import { PeopleAPI, PortfolioAPI, ProjectAPI, TasksAPI } from "./modules/api.js";
 import { markdownToHtml as markdownToHtmlUtil } from "./modules/utils.js";
 import { SummaryView } from "./modules/views/summary.js";
 import { ListView } from "./modules/views/list.js";
@@ -102,6 +102,7 @@ class TaskManager {
     this.selectedDependencies = [];
     this.notes = [];
     this.goals = [];
+    this.portfolio = [];
     this.activeNote = null;
     this.editingNote = null;
     this.editingGoal = null;
@@ -192,6 +193,7 @@ class TaskManager {
       section: "",
       assignee: "",
       milestone: "",
+      project: "",
       status: "",
       sort: "default",
     };
@@ -309,6 +311,7 @@ class TaskManager {
       "summary";
     this.switchView(savedView);
     await this.loadTasks();
+    this.loadPortfolio();
     this.checkTaskHashOnLoad();
     this.checkVersion();
   }
@@ -893,6 +896,14 @@ class TaskManager {
     this.onboardingModule.bindEvents();
     this.financesSidenavModule.bindEvents();
     this.financesModule.bindEvents();
+  }
+
+  async loadPortfolio() {
+    try {
+      this.portfolio = await PortfolioAPI.fetchAll();
+    } catch {
+      // non-critical — task sidenav falls back to empty datalist
+    }
   }
 
   async loadTasks() {
