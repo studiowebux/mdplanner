@@ -19,6 +19,7 @@ export interface TaskConfig {
   time_entries?: TimeEntry[];
   order?: number;
   attachments?: string[];
+  project?: string;
 }
 
 export interface Task {

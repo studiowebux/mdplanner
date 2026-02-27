@@ -1216,6 +1216,11 @@
           <!-- Cards rendered by JS -->
         </div>
 
+        <!-- Analytics Panel -->
+        <div id="portfolioAnalytics" class="mb-6">
+          <!-- Rendered by JS -->
+        </div>
+
         <!-- Search + Filter Bar -->
         <div class="flex flex-wrap items-center gap-2 mb-2">
           <input
@@ -1551,6 +1556,12 @@
                   class="text-sm border border-strong rounded-md px-2 py-1"
                 >
                   <option value="">All Milestones</option>
+                </select>
+                <select
+                  id="filterProject"
+                  class="text-sm border border-strong rounded-md px-2 py-1"
+                >
+                  <option value="">All Projects</option>
                 </select>
                 <select
                   id="filterStatus"
@@ -10194,6 +10205,18 @@
                 autocomplete="off"
               >
               <datalist id="milestonesList"></datalist>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Project</label>
+              <input
+                type="text"
+                id="sidenavTaskProject"
+                list="projectsList"
+                placeholder="Link to a portfolio project"
+                class="form-input"
+                autocomplete="off"
+              >
+              <datalist id="projectsList"></datalist>
             </div>
             <div class="form-group">
               <label class="form-label">Tags</label>

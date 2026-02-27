@@ -227,6 +227,11 @@ export class BoardView {
         : ""
     }
                 ${
+      config.project
+        ? `<div class="text-xs text-muted flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"></path></svg> ${config.project}</div>`
+        : ""
+    }
+                ${
       config.blocked_by && config.blocked_by.length > 0
         ? `<div class="text-xs text-muted flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg> ${
           config.blocked_by.join(", ")

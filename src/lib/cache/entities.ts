@@ -141,6 +141,7 @@ export const ENTITIES: EntityDef[] = [
   planned_start TEXT,
   planned_end TEXT,
   parent_id TEXT,
+  project TEXT,
   config TEXT,         -- Full config as JSON
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT DEFAULT CURRENT_TIMESTAMP
@@ -159,8 +160,8 @@ export const ENTITIES: EntityDef[] = [
       const insertTask = (task: any, parentId?: string) => {
         const config = task.config ?? {};
         db.execute(
-          `INSERT INTO tasks (id, title, completed, section, description, tags, due_date, assignee, priority, effort, milestone, blocked_by, planned_start, planned_end, parent_id, config)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO tasks (id, title, completed, section, description, tags, due_date, assignee, priority, effort, milestone, blocked_by, planned_start, planned_end, parent_id, project, config)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             val(task.id),
             val(task.title),
@@ -179,6 +180,7 @@ export const ENTITIES: EntityDef[] = [
             val(config.planned_start),
             val(config.planned_end),
             val(parentId),
+            val(config.project),
             JSON.stringify(config),
           ],
         );
@@ -1100,7 +1102,9 @@ export const ENTITIES: EntityDef[] = [
   start_date TEXT,
   end_date TEXT,
   team TEXT,            -- JSON array
-  kpis TEXT             -- JSON array
+  kpis TEXT,            -- JSON array
+  tech_stack TEXT,      -- JSON array
+  billing_customer_id TEXT
 )`,
     fts: {
       type: "portfolio",
@@ -1113,8 +1117,8 @@ export const ENTITIES: EntityDef[] = [
       db.execute("DELETE FROM portfolio");
       for (const p of items) {
         db.execute(
-          `INSERT INTO portfolio (id, name, category, status, client, revenue, expenses, progress, start_date, end_date, team, kpis)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO portfolio (id, name, category, status, client, revenue, expenses, progress, start_date, end_date, team, kpis, tech_stack, billing_customer_id)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             val(p.id),
             val(p.name),
@@ -1128,6 +1132,8 @@ export const ENTITIES: EntityDef[] = [
             val(p.endDate),
             json(p.team),
             json(p.kpis),
+            json(p.techStack),
+            val(p.billingCustomerId),
           ],
         );
       }

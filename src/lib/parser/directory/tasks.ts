@@ -21,6 +21,7 @@ interface TaskFrontmatter {
   planned_end?: string;
   time_entries?: TimeEntry[];
   attachments?: string[];
+  project?: string;
 }
 
 export class TasksDirectoryParser {
@@ -500,6 +501,7 @@ export class TasksDirectoryParser {
     if (frontmatter.attachments?.length) {
       config.attachments = frontmatter.attachments;
     }
+    if (frontmatter.project) config.project = frontmatter.project;
 
     return {
       id: frontmatter.id,
@@ -548,6 +550,7 @@ export class TasksDirectoryParser {
     if (task.config.attachments?.length) {
       frontmatter.attachments = task.config.attachments;
     }
+    if (task.config.project) frontmatter.project = task.config.project;
 
     let body = `# ${task.title}\n\n`;
 

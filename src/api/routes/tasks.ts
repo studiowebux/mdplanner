@@ -31,6 +31,7 @@ function bodyToConfig(body: Record<string, any>): TaskConfig {
   if (body.milestone) config.milestone = body.milestone;
   if (body.planned_start) config.planned_start = body.planned_start;
   if (body.planned_end) config.planned_end = body.planned_end;
+  if (body.project) config.project = body.project;
   return config;
 }
 
