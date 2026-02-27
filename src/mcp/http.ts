@@ -46,6 +46,16 @@ export function createMcpHonoRouter(
     });
   }
 
+  // Read-only guard: MCP all calls are POST — block when --read-only is active.
+  if (pm.isReadOnly()) {
+    router.post("*", (c) => {
+      return c.json(
+        { error: "READ_ONLY_MODE", message: "Server is in read-only mode" },
+        405,
+      );
+    });
+  }
+
   // MCP endpoint — handles POST (tool calls), GET (SSE), DELETE (close).
   // Stateless: fresh transport + server per request. sessionIdGenerator:
   // undefined disables session tracking in the SDK.
