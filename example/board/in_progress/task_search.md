@@ -6,7 +6,7 @@ due_date: 2026-02-22
 assignee: diana
 priority: 1
 effort: 8
-milestone: milestone_beta
+milestone: Public Beta
 order: 0
 ---
 

@@ -6,7 +6,7 @@ due_date: 2026-02-20
 assignee: alice
 priority: 1
 effort: 10
-milestone: milestone_beta
+milestone: Public Beta
 planned_start: 2026-02-10
 planned_end: 2026-02-20
 time_entries:

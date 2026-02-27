@@ -62,6 +62,7 @@ milestonesRouter.post("/", async (c) => {
     target: body.target,
     status: body.status || "open",
     description: body.description,
+    project: body.project,
   });
   await parser.saveMilestones(milestones);
   await cacheWriteThrough(c, "milestones");

@@ -992,15 +992,8 @@ export class PortfolioView {
         <!-- Team -->
         <section class="sidenav-section">
           <h3 class="sidenav-section-title">Team</h3>
-          <div class="space-y-2">
-            ${
-      team.length > 0
-        ? `<div class="flex flex-wrap gap-2">${teamHtml}</div>`
-        : ""
-    }
-            <div class="space-y-1 max-h-40 overflow-y-auto" id="portfolioTeamPicker">
-              ${this.renderTeamPicker(team)}
-            </div>
+          <div class="space-y-1 max-h-40 overflow-y-auto" id="portfolioTeamPicker">
+            ${this.renderTeamPicker(team)}
           </div>
         </section>
 

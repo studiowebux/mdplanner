@@ -2,11 +2,11 @@
 id: task_workspace_settings
 completed: false
 tag: [feature]
-due_date: 2026-02-18
+due_date: "2026-02-17T19:00"
 assignee: bob
 priority: 1
 effort: 6
-milestone: milestone_beta
+milestone: Alpha Release
 planned_start: 2026-02-12
 planned_end: 2026-02-18
 order: 0

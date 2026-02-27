@@ -45,6 +45,21 @@ export class TaskSidenavModule {
       () => document.getElementById("sidenavFileInput")?.click(),
     );
 
+    // Milestone → auto-fill project when milestone has a linked project
+    document.getElementById("sidenavTaskMilestone")?.addEventListener(
+      "change",
+      (e) => {
+        const milestoneName = e.target.value;
+        if (!milestoneName) return;
+        const projectField = document.getElementById("sidenavTaskProject");
+        if (!projectField || projectField.value) return; // don't overwrite manual entry
+        const milestone = (this.tm.milestones || []).find(
+          (m) => m.name === milestoneName,
+        );
+        if (milestone?.project) projectField.value = milestone.project;
+      },
+    );
+
     // File input change — upload each file and insert markdown into description
     document.getElementById("sidenavFileInput")?.addEventListener(
       "change",

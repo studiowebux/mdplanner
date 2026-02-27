@@ -6,7 +6,7 @@ due_date: 2026-02-28
 assignee: bob
 priority: 2
 effort: 6
-milestone: milestone_beta
+milestone: Public Beta
 order: 2
 ---
 

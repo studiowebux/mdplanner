@@ -5,7 +5,7 @@ tag: [feature]
 priority: 1
 effort: 6
 assignee: charlie
-milestone: milestone_alpha
+milestone: Alpha Release
 ---
 
 # Project Structure

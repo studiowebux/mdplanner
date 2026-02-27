@@ -160,6 +160,7 @@ export interface Milestone {
   target?: string;
   status: "open" | "completed";
   description?: string;
+  project?: string;
 }
 
 export interface Idea {

@@ -5,7 +5,7 @@ tag: [feature, security, enterprise]
 priority: 2
 effort: 16
 assignee: diana
-milestone: milestone_enterprise
+milestone: Enterprise Features
 ---
 
 # SSO/SAML Integration

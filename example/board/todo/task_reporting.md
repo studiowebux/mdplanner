@@ -6,7 +6,7 @@ due_date: 2026-03-10
 assignee: charlie
 priority: 2
 effort: 12
-milestone: milestone_beta
+milestone: Public Beta
 order: 1
 ---
 
