@@ -1,24 +1,12 @@
 /**
  * MCP tools for note operations.
- * Tools: list_notes, get_note
+ * Tools: list_notes, get_note, create_note, update_note, delete_note
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { ProjectManager } from "../../lib/project-manager.ts";
-
-function ok(data: unknown) {
-  return {
-    content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }],
-  };
-}
-
-function err(message: string) {
-  return {
-    content: [{ type: "text" as const, text: `Error: ${message}` }],
-    isError: true as const,
-  };
-}
+import { err, ok } from "./utils.ts";
 
 export function registerNoteTools(server: McpServer, pm: ProjectManager): void {
   const parser = pm.getActiveParser();
@@ -51,6 +39,56 @@ export function registerNoteTools(server: McpServer, pm: ProjectManager): void {
       const note = notes.find((n) => n.id === id);
       if (!note) return err(`Note '${id}' not found`);
       return ok(note);
+    },
+  );
+
+  server.registerTool(
+    "create_note",
+    {
+      description: "Create a new note.",
+      inputSchema: {
+        title: z.string().describe("Note title"),
+        content: z.string().optional().describe("Note body (markdown)"),
+      },
+    },
+    async ({ title, content }) => {
+      const id = await parser.addNote({ title, content: content ?? "" });
+      return ok({ id });
+    },
+  );
+
+  server.registerTool(
+    "update_note",
+    {
+      description: "Update an existing note's title or content.",
+      inputSchema: {
+        id: z.string().describe("Note ID"),
+        title: z.string().optional(),
+        content: z.string().optional().describe(
+          "Full replacement content (markdown)",
+        ),
+      },
+    },
+    async ({ id, title, content }) => {
+      const success = await parser.updateNote(id, {
+        ...(title !== undefined && { title }),
+        ...(content !== undefined && { content }),
+      });
+      if (!success) return err(`Note '${id}' not found`);
+      return ok({ success: true });
+    },
+  );
+
+  server.registerTool(
+    "delete_note",
+    {
+      description: "Delete a note by its ID.",
+      inputSchema: { id: z.string().describe("Note ID") },
+    },
+    async ({ id }) => {
+      const success = await parser.deleteNote(id);
+      if (!success) return err(`Note '${id}' not found`);
+      return ok({ success: true });
     },
   );
 }

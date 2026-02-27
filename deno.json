@@ -25,7 +25,7 @@
     }
   },
   "tasks": {
-    "dev": "deno run --allow-net --allow-read --allow-write --allow-env --watch main.ts ./example",
+    "dev": "deno run --allow-net --allow-read --allow-write --allow-env --watch main.ts --cache --webdav ./example",
     "start": "deno run --allow-net --allow-read --allow-write --allow-env main.ts",
     "mcp": "deno run --allow-read --allow-write --allow-env mcp.ts",
     "test": "deno test --allow-read --allow-write --allow-env tests/",
