@@ -951,6 +951,11 @@ class TaskManager {
       if (mobileBtn) mobileBtn.classList.toggle("hidden", !enabled);
     }
 
+    // Quick search header button (not a nav view — handled separately)
+    const searchEnabled = showAll || (features && features.includes("quick-search"));
+    document.getElementById("globalSearchBtn")?.classList.toggle("hidden", !searchEnabled);
+    document.getElementById("globalSearchBtnMobile")?.classList.toggle("hidden", !searchEnabled);
+
     // Hide empty dropdown categories (desktop)
     document.querySelectorAll(".nav-dropdown").forEach((dropdown) => {
       const menu = dropdown.querySelector(".nav-dropdown-menu");
