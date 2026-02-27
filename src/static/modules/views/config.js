@@ -312,6 +312,7 @@ export class ConfigView {
         { id: "portfolio", label: "Portfolio" },
       ],
       "Tools": [
+        { id: "quick-search", label: "Quick Search (⌘K)" },
         { id: "ollama", label: "AI Chat" },
       ],
     };

@@ -173,11 +173,17 @@ export class GlobalSearch {
     });
   }
 
+  _isEnabled() {
+    const features = this.tm.projectConfig?.features;
+    return !features || features.length === 0 || features.includes("quick-search");
+  }
+
   bindEvents() {
-    // Cmd+K / Ctrl+K to open
+    // Cmd+K / Ctrl+K to open (respects feature visibility)
     document.addEventListener("keydown", (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
+        if (!this._isEnabled()) return;
         const overlay = document.getElementById("globalSearchOverlay");
         if (overlay?.classList.contains("hidden")) {
           this.open();
