@@ -553,6 +553,7 @@
 .prose hr { border: none; border-top: 1px solid var(--color-border-default); margin: 2em 0; }
 
 .prose-gray { color: var(--color-text-secondary); }
+.prose.max-w-none { max-width: none; }
 
 /* --------------------------------------------------------------------------
    Responsive — sm (640px)
