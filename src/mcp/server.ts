@@ -14,6 +14,22 @@ import { registerMeetingTools } from "./tools/meetings.ts";
 import { registerPeopleTools } from "./tools/people.ts";
 import { registerProjectTools } from "./tools/project.ts";
 import { registerSearchTools } from "./tools/search.ts";
+import { registerMilestoneTools } from "./tools/milestones.ts";
+import { registerIdeaTools } from "./tools/ideas.ts";
+import { registerPortfolioTools } from "./tools/portfolio.ts";
+import { registerMoscowTools } from "./tools/moscow.ts";
+import { registerEisenhowerTools } from "./tools/eisenhower.ts";
+import { registerRetrospectiveTools } from "./tools/retrospectives.ts";
+import { registerSwotTools } from "./tools/swot.ts";
+import { registerRiskTools } from "./tools/risk.ts";
+import { registerBriefTools } from "./tools/brief.ts";
+import { registerSafeTools } from "./tools/safe.ts";
+import { registerFinanceTools } from "./tools/finances.ts";
+import { registerOnboardingTools } from "./tools/onboarding.ts";
+import { registerCrmTools } from "./tools/crm.ts";
+import { registerBillingTools } from "./tools/billing.ts";
+import { registerCanvasTools } from "./tools/canvas.ts";
+import { registerCapacityTools } from "./tools/capacity.ts";
 import { registerResources } from "./resources.ts";
 
 /**
@@ -33,6 +49,22 @@ export function createMcpServer(pm: ProjectManager): McpServer {
   registerPeopleTools(server, pm);
   registerProjectTools(server, pm);
   registerSearchTools(server, pm);
+  registerMilestoneTools(server, pm);
+  registerIdeaTools(server, pm);
+  registerPortfolioTools(server, pm);
+  registerMoscowTools(server, pm);
+  registerEisenhowerTools(server, pm);
+  registerRetrospectiveTools(server, pm);
+  registerSwotTools(server, pm);
+  registerRiskTools(server, pm);
+  registerBriefTools(server, pm);
+  registerSafeTools(server, pm);
+  registerFinanceTools(server, pm);
+  registerOnboardingTools(server, pm);
+  registerCrmTools(server, pm);
+  registerBillingTools(server, pm);
+  registerCanvasTools(server, pm);
+  registerCapacityTools(server, pm);
   registerResources(server, pm);
 
   return server;

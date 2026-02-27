@@ -3,9 +3,10 @@
  * Mounts an MCP-over-HTTP endpoint on the existing Hono server.
  * Pattern: Factory Method
  *
- * Uses WebStandardStreamableHTTPServerTransport (MCP SDK v1.26.0), the
- * public web-standard API designed for Deno/Hono/Cloudflare Workers.
- * One transport instance is created per client session.
+ * Uses WebStandardStreamableHTTPServerTransport in stateless mode (MCP SDK
+ * v1.26.0). Each request gets a fresh transport + server instance. No session
+ * tracking — avoids stale-session failures when the dev server restarts and
+ * the client holds a cached session ID it can no longer invalidate.
  */
 
 import { Hono } from "hono";
@@ -18,8 +19,8 @@ import { createMcpServer } from "./server.ts";
  * Create a Hono router that serves the MCP HTTP endpoint.
  * Mount it at "/mcp" in the main Hono app.
  *
- * Stateful mode: one transport + server per session, tracked by session ID.
- * Requests without a session ID start a new session (initialize flow).
+ * Stateless mode: one transport + server per request. No session registry.
+ * Resilient to server restarts — the client never holds stale session state.
  *
  * @param pm    ProjectManager instance (shared with REST API)
  * @param token Optional bearer token. When set, requests without a matching
@@ -29,9 +30,6 @@ export function createMcpHonoRouter(
   pm: ProjectManager,
   token?: string,
 ): Hono {
-  // Session registry: session ID → transport (Pattern: Registry)
-  const sessions = new Map<string, WebStandardStreamableHTTPServerTransport>();
-
   const router = new Hono();
 
   // CORS: allow any origin so remote MCP clients can connect.
@@ -48,28 +46,16 @@ export function createMcpHonoRouter(
     });
   }
 
-  // MCP endpoint — handles POST (tool calls), GET (SSE stream), DELETE (close).
-  // Route pattern "*" matches both "/mcp" (empty suffix) and "/mcp/" (slash suffix).
+  // MCP endpoint — handles POST (tool calls), GET (SSE), DELETE (close).
+  // Stateless: fresh transport + server per request. sessionIdGenerator:
+  // undefined disables session tracking in the SDK.
   router.all("*", async (c) => {
-    const sessionId = c.req.header("mcp-session-id");
+    const transport = new WebStandardStreamableHTTPServerTransport({
+      sessionIdGenerator: undefined,
+    });
 
-    let transport = sessionId ? sessions.get(sessionId) : undefined;
-
-    if (!transport) {
-      // New session: create transport + server pair.
-      transport = new WebStandardStreamableHTTPServerTransport({
-        sessionIdGenerator: () => crypto.randomUUID(),
-        onsessioninitialized: (id) => {
-          sessions.set(id, transport!);
-        },
-        onsessionclosed: (id) => {
-          sessions.delete(id);
-        },
-      });
-
-      const server = createMcpServer(pm);
-      await server.connect(transport);
-    }
+    const server = createMcpServer(pm);
+    await server.connect(transport);
 
     return transport.handleRequest(c.req.raw);
   });
