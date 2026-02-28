@@ -332,7 +332,11 @@ export class TasksModule {
   }
 
   getToRender() {
-    return this.tm.searchQuery ? this.tm.filteredTasks : this.tm.tasks;
+    const base = this.tm.searchQuery ? this.tm.filteredTasks : this.tm.tasks;
+    if (localStorage.getItem("hideCompletedTasks") === "true") {
+      return base.filter((t) => !t.completed);
+    }
+    return base;
   }
 
   /** @param {string} taskId - Toggles task completion status */
