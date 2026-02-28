@@ -1,0 +1,162 @@
+/* Fishbone (Ishikawa) Diagram View */
+
+.fishbone-view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.fishbone-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 42rem), 1fr));
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.fishbone-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-editor);
+  cursor: pointer;
+  transition: border-color 0.15s;
+  overflow: hidden;
+}
+
+.fishbone-card:hover {
+  border-color: var(--text-tertiary);
+}
+
+.fishbone-card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem 0;
+}
+
+.fishbone-card-title {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.fishbone-card-count {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.fishbone-card-desc {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin: 0.25rem 1rem 0;
+}
+
+.fishbone-card-svg {
+  padding: 0.5rem;
+}
+
+.fishbone-empty {
+  padding: 3rem;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-sm);
+}
+
+/* ---------------------------------------------------------------
+   SVG styles — use currentColor for dark mode compatibility
+   --------------------------------------------------------------- */
+
+.fb-svg {
+  display: block;
+}
+
+.fb-spine {
+  stroke: var(--text);
+  stroke-width: 2;
+}
+
+.fb-spine-arrow {
+  fill: var(--text);
+}
+
+.fb-effect-box {
+  fill: var(--surface);
+  stroke: var(--text);
+  stroke-width: 1.5;
+}
+
+.fb-effect-text {
+  font-size: 0.75rem;
+  fill: var(--text);
+  font-weight: 600;
+  font-family: var(--font-sans);
+}
+
+.fb-bone {
+  stroke: var(--text-secondary);
+  stroke-width: 1.5;
+}
+
+.fb-cat-label {
+  font-size: 0.7rem;
+  fill: var(--text);
+  font-weight: 700;
+  font-family: var(--font-sans);
+}
+
+.fb-sub-line {
+  stroke: var(--text-tertiary);
+  stroke-width: 1;
+}
+
+.fb-sub-label {
+  font-size: 0.625rem;
+  fill: var(--text-secondary);
+  font-family: var(--font-sans);
+}
+
+.fb-empty-hint {
+  font-size: 0.75rem;
+  fill: var(--text-tertiary);
+  font-family: var(--font-sans);
+}
+
+/* ---------------------------------------------------------------
+   Sidenav styles
+   --------------------------------------------------------------- */
+
+.fishbone-sidenav-svg-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-editor);
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.fishbone-causes-hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  margin-top: 0.25rem;
+}
+
+.fishbone-causes-textarea {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  min-height: 12rem;
+}
+
+@media (max-width: 36rem) {
+  .fishbone-grid {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+
+  .fishbone-view-header {
+    padding: 0.75rem 1rem;
+  }
+}

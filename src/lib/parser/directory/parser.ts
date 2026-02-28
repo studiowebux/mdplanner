@@ -51,6 +51,7 @@ import { FinancesDirectoryParser } from "./finances.ts";
 import { JournalDirectoryParser } from "./journal.ts";
 import { DnsDomainParser } from "./dns.ts";
 import { HabitsDirectoryParser } from "./habits.ts";
+import { FishboneDirectoryParser } from "./fishbone.ts";
 import type {
   BillingRate,
   Brief,
@@ -64,6 +65,8 @@ import type {
   DnsDomain,
   EisenhowerMatrix,
   FinancialPeriod,
+  Fishbone,
+  FishboneCause,
   Goal,
   Habit,
   Idea,
@@ -137,6 +140,7 @@ export class DirectoryMarkdownParser {
   protected journalParser: JournalDirectoryParser;
   protected dnsParser: DnsDomainParser;
   protected habitsParser: HabitsDirectoryParser;
+  protected fishboneParser: FishboneDirectoryParser;
 
   constructor(projectDir: string) {
     this.projectDir = projectDir;
@@ -176,6 +180,7 @@ export class DirectoryMarkdownParser {
     this.journalParser = new JournalDirectoryParser(projectDir);
     this.dnsParser = new DnsDomainParser(projectDir);
     this.habitsParser = new HabitsDirectoryParser(projectDir);
+    this.fishboneParser = new FishboneDirectoryParser(projectDir);
   }
 
   // ============================================================
@@ -1854,5 +1859,31 @@ export class DirectoryMarkdownParser {
 
   async deleteHabit(id: string): Promise<boolean> {
     return this.habitsParser.delete(id);
+  }
+
+  // ============================================================
+  // Fishbone (Ishikawa) Diagrams
+  // ============================================================
+
+  async readFishbones(): Promise<Fishbone[]> {
+    const diagrams = await this.fishboneParser.readAll();
+    return diagrams.sort((a, b) => a.title.localeCompare(b.title));
+  }
+
+  async addFishbone(
+    data: Omit<Fishbone, "id" | "created" | "updated">,
+  ): Promise<Fishbone> {
+    return this.fishboneParser.add(data);
+  }
+
+  async updateFishbone(
+    id: string,
+    updates: Partial<Omit<Fishbone, "id" | "created" | "updated">>,
+  ): Promise<Fishbone | null> {
+    return this.fishboneParser.update(id, updates);
+  }
+
+  async deleteFishbone(id: string): Promise<boolean> {
+    return this.fishboneParser.delete(id);
   }
 }

@@ -420,6 +420,7 @@ export class ConfigView {
         { id: "canvas", label: "Canvas" },
         { id: "mindmap", label: "Mindmap" },
         { id: "c4", label: "C4 Architecture" },
+        { id: "fishbone", label: "Ishikawa Diagram" },
       ],
       "Team": [
         { id: "orgchart", label: "Org Chart" },

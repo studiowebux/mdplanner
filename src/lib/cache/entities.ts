@@ -1834,4 +1834,44 @@ export const ENTITIES: EntityDef[] = [
       return domains.length;
     },
   },
+
+  // ----------------------------------------------------------
+  // Fishbone (Ishikawa) Diagrams
+  // ----------------------------------------------------------
+  {
+    table: "fishbone",
+    schema: `CREATE TABLE IF NOT EXISTS fishbone (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  causes TEXT,   -- JSON array of {category, subcauses[]}
+  created TEXT,
+  updated TEXT
+)`,
+    fts: {
+      type: "fishbone",
+      columns: ["id", "title", "description"],
+      titleCol: "title",
+      contentCol: "description",
+    },
+    sync: async (parser, db) => {
+      const diagrams = await parser.readFishbones();
+      db.execute("DELETE FROM fishbone");
+      for (const d of diagrams) {
+        db.execute(
+          `INSERT INTO fishbone (id, title, description, causes, created, updated)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+          [
+            val(d.id),
+            val(d.title),
+            val(d.description),
+            json(d.causes),
+            val(d.created),
+            val(d.updated),
+          ],
+        );
+      }
+      return diagrams.length;
+    },
+  },
 ];

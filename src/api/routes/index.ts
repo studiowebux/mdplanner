@@ -43,6 +43,7 @@ import { financesRouter } from "./features/finances.ts";
 import { journalRouter } from "./features/journal.ts";
 import { dnsRouter } from "./features/dns.ts";
 import { habitsRouter } from "./features/habits.ts";
+import { fishboneRouter } from "./features/fishbone.ts";
 import { eisenhowerRouter } from "./features/eisenhower.ts";
 import { safeRouter } from "./features/safe.ts";
 import { investorsRouter } from "./features/investors.ts";
@@ -184,6 +185,9 @@ export function createApiRouter(
 
   // Habits routes
   api.route("/habits", habitsRouter);
+
+  // Fishbone routes
+  api.route("/fishbone", fishboneRouter);
 
   // 404 handler
   api.notFound((c) => {

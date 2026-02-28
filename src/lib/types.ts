@@ -696,3 +696,19 @@ export interface Habit {
   created: string;
   updated: string;
 }
+
+// Fishbone (Ishikawa) Diagram
+
+export interface FishboneCause {
+  category: string;
+  subcauses: string[];
+}
+
+export interface Fishbone {
+  id: string;
+  title: string; // problem/effect statement at the right end of the spine
+  description?: string;
+  causes: FishboneCause[];
+  created: string;
+  updated: string;
+}
