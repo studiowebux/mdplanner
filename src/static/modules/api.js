@@ -1325,3 +1325,27 @@ export const HabitsAPI = {
     return del(`/api/habits/${id}`);
   },
 };
+
+export const FishboneAPI = {
+  async fetchAll() {
+    const response = await get("/api/fishbone");
+    return response.json();
+  },
+
+  async fetchOne(id) {
+    const response = await get(`/api/fishbone/${id}`);
+    return response.json();
+  },
+
+  async create(diagram) {
+    return post("/api/fishbone", diagram);
+  },
+
+  async update(id, diagram) {
+    return put(`/api/fishbone/${id}`, diagram);
+  },
+
+  async delete(id) {
+    return del(`/api/fishbone/${id}`);
+  },
+};

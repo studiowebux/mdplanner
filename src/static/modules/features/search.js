@@ -25,6 +25,7 @@ const VIEW_BY_TYPE = {
   journal: "journal",
   dns_domain: "dns",
   habit: "habits",
+  fishbone: "fishbone",
 };
 
 const TYPE_LABELS = {
@@ -48,6 +49,7 @@ const TYPE_LABELS = {
   journal: "Journal",
   dns_domain: "Domain",
   habit: "Habit",
+  fishbone: "Fishbone",
 };
 
 export class GlobalSearch {

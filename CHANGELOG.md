@@ -10,6 +10,18 @@ and this project adheres to
 
 ### Added
 
+- Ishikawa (fishbone) diagram view: create cause-and-effect diagrams with a
+  problem statement, named cause categories, and sub-causes; rendered as an
+  inline SVG fishbone with spine, angled bones, and sub-cause lines; stored as
+  `fishbone/*.md` files with categories as `## Category` / `- subcause` markdown
+  sections
+- Fishbone API: `GET/POST /api/fishbone`, `PUT /api/fishbone/:id`,
+  `DELETE /api/fishbone/:id`; default categories (People, Process, Machine,
+  Material, Method, Measurement) pre-populated on create
+- Fishbone sidenav: view mode with full SVG diagram and cause/sub-cause counts;
+  edit mode with title, description, and a markdown-format textarea for causes
+- Fishbone registered in feature visibility toggle (key: `fishbone`, group:
+  Diagrams) and Cmd+K search
 - Habit Tracker: new view to define habits (daily or weekly), mark completions,
   track streaks, and view a 12-week calendar heatmap per habit; stored as
   `habits/*.md` files with completions as a flat date array in frontmatter

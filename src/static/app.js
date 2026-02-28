@@ -58,6 +58,8 @@ import { JournalModule } from "./modules/features/journal.js";
 import { JournalSidenavModule } from "./modules/features/journal-sidenav.js";
 import { HabitsModule } from "./modules/features/habits.js";
 import { HabitSidenavModule } from "./modules/features/habit-sidenav.js";
+import { FishboneModule } from "./modules/features/fishbone.js";
+import { FishboneSidenavModule } from "./modules/features/fishbone-sidenav.js";
 import { DnsModule } from "./modules/views/dns.js";
 import { DnsSidenavModule } from "./modules/features/dns-sidenav.js";
 import { OnboardingModule } from "./modules/features/onboarding.js";
@@ -264,6 +266,8 @@ class TaskManager {
     this.journalModule = new JournalModule(this);
     this.dnsModule = new DnsModule(this);
     this.habitsModule = new HabitsModule(this);
+    this.fishboneModule = new FishboneModule(this);
+    this.fishboneSidenavModule = new FishboneSidenavModule(this);
     this.onboardingModule = new OnboardingModule(this);
     this.financesModule = new FinancesModule(this);
     this.retrospectivesModule = new RetrospectivesModule(this);
@@ -425,6 +429,7 @@ class TaskManager {
       { id: "meetingsViewBtn", view: "meetings" },
       { id: "journalViewBtn", view: "journal" },
       { id: "habitsViewBtn", view: "habits" },
+      { id: "fishboneViewBtn", view: "fishbone" },
       { id: "onboardingViewBtn", view: "onboarding" },
       { id: "financesViewBtn", view: "finances" },
     ];
@@ -669,6 +674,12 @@ class TaskManager {
       .getElementById("habitsViewBtnMobile")
       ?.addEventListener("click", () => {
         this.switchView("habits");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("fishboneViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("fishbone");
         this.closeMobileMenu();
       });
     document
@@ -921,6 +932,8 @@ class TaskManager {
     this.journalModule.bindEvents();
     this.habitSidenavModule.bindEvents();
     this.habitsModule.bindEvents();
+    this.fishboneSidenavModule.bindEvents();
+    this.fishboneModule.bindEvents();
     this.dnsSidenavModule.bindEvents();
     this.dnsModule.bindEvents();
     this.onboardingSidenavModule.bindEvents();
@@ -968,6 +981,7 @@ class TaskManager {
       "meetings",
       "journal",
       "habits",
+      "fishbone",
       "onboarding",
       "finances",
       "ollama",
@@ -1041,6 +1055,7 @@ class TaskManager {
       meetings: "Meetings",
       journal: "Journal",
       habits: "Habits",
+      fishbone: "Ishikawa Diagram",
       onboarding: "Onboarding",
       finances: "Finances",
       ollama: "AI Chat",
@@ -1124,6 +1139,7 @@ class TaskManager {
       "meetingsViewBtn",
       "journalViewBtn",
       "habitsViewBtn",
+      "fishboneViewBtn",
       "onboardingViewBtn",
       "dnsViewBtn",
     ];
@@ -1169,6 +1185,7 @@ class TaskManager {
       "meetingsViewBtnMobile",
       "journalViewBtnMobile",
       "habitsViewBtnMobile",
+      "fishboneViewBtnMobile",
       "onboardingViewBtnMobile",
       "financesViewBtnMobile",
       "ollamaViewBtnMobile",
@@ -1215,6 +1232,7 @@ class TaskManager {
     document.getElementById("meetingsView")?.classList.add("hidden");
     document.getElementById("journalView")?.classList.add("hidden");
     document.getElementById("habitsView")?.classList.add("hidden");
+    document.getElementById("fishboneView")?.classList.add("hidden");
     document.getElementById("onboardingView")?.classList.add("hidden");
     document.getElementById("financesView")?.classList.add("hidden");
     document.getElementById("ollamaView")?.classList.add("hidden");
@@ -1367,6 +1385,10 @@ class TaskManager {
       this.activateViewButton("habits");
       document.getElementById("habitsView").classList.remove("hidden");
       this.habitsModule.load();
+    } else if (view === "fishbone") {
+      this.activateViewButton("fishbone");
+      document.getElementById("fishboneView").classList.remove("hidden");
+      this.fishboneModule.load();
     } else if (view === "dns") {
       this.activateViewButton("dns");
       document.getElementById("dnsView").classList.remove("hidden");

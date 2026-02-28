@@ -791,6 +791,13 @@
               >
                 Habits
               </button>
+              <button
+                id="fishboneViewBtn"
+                data-view="fishbone"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                Ishikawa Diagram
+              </button>
             </div>
           </div>
 
@@ -1104,6 +1111,12 @@
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
             >
               Habits
+            </button>
+            <button
+              id="fishboneViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              Ishikawa Diagram
             </button>
             <button
               id="portfolioViewBtnMobile"
@@ -1750,6 +1763,20 @@
             <p>No habits yet. Create your first habit to start tracking.</p>
           </div>
           <div id="habitsContainer" class="habits-grid"></div>
+        </div>
+      </div>
+
+      <!-- Fishbone View -->
+      <div id="fishboneView" class="hidden pb-16">
+        <div class="bg-primary rounded-lg shadow">
+          <div class="fishbone-view-header">
+            <h2 class="text-lg font-medium text-primary">Ishikawa Diagrams</h2>
+            <button id="addFishboneBtn" class="btn-primary py-2 rounded-lg">+ New Diagram</button>
+          </div>
+          <div id="emptyFishboneState" class="hidden fishbone-empty">
+            <p>No diagrams yet. Create your first fishbone diagram to start analyzing root causes.</p>
+          </div>
+          <div id="fishboneContainer" class="fishbone-grid"></div>
         </div>
       </div>
 
@@ -12888,6 +12915,47 @@
           <button type="button" id="habitSidenavCancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
           <button type="button" id="habitSidenavEditBtn" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active hidden">Edit</button>
           <button type="button" id="habitSidenavSave" class="btn-primary py-2 rounded-lg">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fishbone Sidenav -->
+    <div id="fishboneSidenav" class="sidenav-panel sidenav-md">
+      <div class="sidenav-header">
+        <h2 id="fishboneSidenavHeader" class="sidenav-title">New Diagram</h2>
+        <button type="button" id="fishboneSidenavClose" class="sidenav-close" aria-label="Close">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="flex flex-col flex-1 overflow-hidden">
+        <!-- View mode: SVG diagram -->
+        <div id="fishboneSidenavViewSection" class="sidenav-content hidden"></div>
+        <!-- Edit mode: form fields -->
+        <div id="fishboneSidenavFormSection" class="sidenav-content">
+          <div class="sidenav-section">
+            <div class="form-group">
+              <label class="form-label" for="fishboneSidenavTitle">Problem / Effect</label>
+              <input id="fishboneSidenavTitle" type="text" class="form-input" placeholder="e.g. High defect rate, Customer churn..." />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="fishboneSidenavDescription">Description <span class="text-tertiary">(optional)</span></label>
+              <input id="fishboneSidenavDescription" type="text" class="form-input" placeholder="Short context or scope..." />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="fishboneSidenavCauses">Causes</label>
+              <textarea id="fishboneSidenavCauses" class="form-textarea fishbone-causes-textarea" rows="12" placeholder="## People&#10;- Insufficient training&#10;&#10;## Process&#10;- No standardization"></textarea>
+              <p class="fishbone-causes-hint">Use ## Category for each cause group and - item for sub-causes.</p>
+            </div>
+          </div>
+        </div>
+        <div class="sidenav-footer">
+          <button type="button" id="fishboneSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+          <div class="flex-1"></div>
+          <button type="button" id="fishboneSidenavCancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
+          <button type="button" id="fishboneSidenavEditBtn" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active hidden">Edit</button>
+          <button type="button" id="fishboneSidenavSave" class="btn-primary py-2 rounded-lg">Save</button>
         </div>
       </div>
     </div>
