@@ -98,9 +98,9 @@ export class IdeasModule {
         `
             : ""
         }
-        <div class="flex justify-end space-x-2 mt-3">
-          <button onclick="taskManager.openIdeaModal('${idea.id}')" class="text-sm text-secondary hover:text-primary">Edit</button>
-          <button onclick="taskManager.deleteIdea('${idea.id}')" class="text-sm text-error hover:text-error-text">Delete</button>
+        <div class="flex justify-end gap-1 mt-3">
+          <button type="button" onclick="taskManager.openIdeaModal('${idea.id}')" class="btn-ghost">Edit</button>
+          <button type="button" onclick="taskManager.deleteIdea('${idea.id}')" class="btn-danger-ghost">Delete</button>
         </div>
       </div>
     `;

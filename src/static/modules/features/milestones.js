@@ -1,4 +1,5 @@
 import { MilestonesAPI } from "../api.js";
+import { markdownToHtml } from "../utils.js";
 
 /**
  * MilestonesModule - Handles milestone CRUD operations
@@ -61,12 +62,12 @@ export class MilestonesModule {
         </div>
         ${
           m.description
-            ? `<p class="text-sm text-secondary mt-2">${m.description}</p>`
+            ? `<div class="mt-2">${markdownToHtml(m.description)}</div>`
             : ""
         }
-        <div class="flex justify-end space-x-2 mt-3">
-          <button onclick="taskManager.milestoneSidenavModule.openEdit('${m.id}')" class="text-sm text-secondary hover:text-primary">Edit</button>
-          <button onclick="taskManager.deleteMilestone('${m.id}')" class="text-sm text-error hover:text-error-text">Delete</button>
+        <div class="flex justify-end gap-1 mt-3">
+          <button type="button" onclick="taskManager.milestoneSidenavModule.openEdit('${m.id}')" class="btn-ghost">Edit</button>
+          <button type="button" onclick="taskManager.deleteMilestone('${m.id}')" class="btn-danger-ghost">Delete</button>
         </div>
       </div>
     `,

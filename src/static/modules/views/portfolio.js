@@ -238,24 +238,29 @@ export class PortfolioView {
     ).join("");
 
     container.innerHTML = `
-      <div class="portfolio-analytics-grid">
-        <div class="portfolio-analytics-panel">
-          <div class="portfolio-analytics-title">By Status</div>
-          ${statusRows || '<p class="text-sm text-muted">No data</p>'}
-        </div>
-        <div class="portfolio-analytics-panel">
-          <div class="portfolio-analytics-title">By Category</div>
-          ${catRows || '<p class="text-sm text-muted">No data</p>'}
-        </div>
-        ${
+      <details class="portfolio-analytics-collapsible" open>
+        <summary>Portfolio Analytics</summary>
+        <div class="portfolio-analytics-collapsible-body">
+          <div class="portfolio-analytics-grid">
+            <div class="portfolio-analytics-panel">
+              <div class="portfolio-analytics-title">By Status</div>
+              ${statusRows || '<p class="text-sm text-muted">No data</p>'}
+            </div>
+            <div class="portfolio-analytics-panel">
+              <div class="portfolio-analytics-title">By Category</div>
+              ${catRows || '<p class="text-sm text-muted">No data</p>'}
+            </div>
+            ${
       topTech.length
         ? `<div class="portfolio-analytics-panel">
-          <div class="portfolio-analytics-title">Tech Stack</div>
-          ${techRows}
-        </div>`
+              <div class="portfolio-analytics-title">Tech Stack</div>
+              ${techRows}
+            </div>`
         : ""
     }
-      </div>
+          </div>
+        </div>
+      </details>
     `;
   }
 

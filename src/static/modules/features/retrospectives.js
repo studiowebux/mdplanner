@@ -45,7 +45,7 @@ export class RetrospectivesModule {
           </div>
           <div class="flex items-center gap-2">
             <span class="px-2 py-1 text-xs rounded-full ${statusColor}">${retro.status}</span>
-            <button onclick="taskManager.retrospectiveSidenavModule.openEdit('${retro.id}')" class="text-sm text-secondary hover:text-primary">Edit</button>
+            <button type="button" onclick="taskManager.retrospectiveSidenavModule.openEdit('${retro.id}')" class="btn-ghost">Edit</button>
           </div>
         </div>
         <div class="px-4 pt-4 pb-2 space-y-3">
@@ -86,8 +86,8 @@ export class RetrospectivesModule {
             </ul>
           </div>
         </div>
-        <div class="px-4 py-2 border-t border-default flex justify-end">
-          <button onclick="taskManager.deleteRetrospective('${retro.id}')" class="text-sm text-error hover:text-error-text">Delete</button>
+        <div class="px-4 py-2 border-t border-default flex justify-end items-center">
+          <button type="button" onclick="taskManager.deleteRetrospective('${retro.id}')" class="btn-danger-ghost">Delete</button>
         </div>
       </div>
     `;
