@@ -830,6 +830,13 @@
           >
             AI Chat
           </button>
+          <button
+            id="analyticsViewBtn"
+            data-view="analytics"
+            class="nav-dropdown-btn"
+          >
+            Analytics
+          </button>
         </div>
       </div>
 
@@ -1141,6 +1148,12 @@
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
             >
               AI Chat
+            </button>
+            <button
+              id="analyticsViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              Analytics
             </button>
             <button
               id="configViewBtnMobile"
@@ -1778,6 +1791,18 @@
           </div>
           <div id="fishboneContainer" class="fishbone-grid"></div>
         </div>
+      </div>
+
+      <!-- Analytics View -->
+      <div id="analyticsView" class="hidden pb-16">
+        <div class="analytics-header">
+          <h2 class="analytics-title">Analytics</h2>
+          <div style="display:flex;align-items:center;gap:0.75rem">
+            <span id="analyticsTimestamp" class="analytics-timestamp"></span>
+            <button id="analyticsRefreshBtn" class="btn-secondary">Refresh</button>
+          </div>
+        </div>
+        <div id="analyticsGrid" class="analytics-grid"></div>
       </div>
 
       <!-- Finances View -->
