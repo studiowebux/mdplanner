@@ -6,12 +6,27 @@ services:
       - "8003:8003"
     volumes:
       - ./data:/data
+      - ./backups:/backups
     environment:
       - MDPLANNER_CACHE=${MDPLANNER_CACHE:-}
       - MDPLANNER_WEBDAV=${MDPLANNER_WEBDAV:-1}
       - MDPLANNER_WEBDAV_USER=${MDPLANNER_WEBDAV_USER:-}
       - MDPLANNER_WEBDAV_PASS=${MDPLANNER_WEBDAV_PASS:-}
       - MDPLANNER_MCP_TOKEN=${MDPLANNER_MCP_TOKEN:-}
+      - MDPLANNER_READ_ONLY=${MDPLANNER_READ_ONLY:-}
+      # Encryption key for integration secrets (e.g. Cloudflare API token stored in project.md).
+      # Generate with: mdplanner keygen-secret
+      # Set to a 32-byte hex string (64 hex chars). Leave empty to store tokens in plaintext.
+      - MDPLANNER_SECRET_KEY=${MDPLANNER_SECRET_KEY:-}
+      # Backup: output directory for scheduled and on-demand exports.
+      # Must be mounted as a volume if you want backups to persist outside the container.
+      - MDPLANNER_BACKUP_DIR=${MDPLANNER_BACKUP_DIR:-}
+      # Backup schedule interval. Accepted values: daily, weekly. Leave empty to disable.
+      - MDPLANNER_BACKUP_INTERVAL=${MDPLANNER_BACKUP_INTERVAL:-}
+      # RSA-OAEP-4096 public key (PEM) for encrypted backups.
+      # Generate keypair with: mdplanner keygen
+      # Store only the PUBLIC key here. Private key stays with you — never in this file.
+      # - MDPLANNER_BACKUP_PUBLIC_KEY=${MDPLANNER_BACKUP_PUBLIC_KEY:-}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8003/"]

@@ -17,13 +17,23 @@ Open `http://localhost:8003`. Project files are stored in `./data/` on the host.
 
 ### Configuration
 
-Edit `docker-compose.yml` to change options:
+Edit `docker-compose.yml` or create a `.env` file next to it to configure the
+server.
 
-| Option    | Default  | Description                            |
-| --------- | -------- | -------------------------------------- |
-| Port      | 8003     | Host port mapping                      |
-| Data path | `./data` | Host directory for project             |
-| `--cache` | disabled | Add flag in CMD to enable SQLite cache |
+| Variable                      | Default  | Description                                                                                        |
+| ----------------------------- | -------- | -------------------------------------------------------------------------------------------------- |
+| Port mapping                  | 8003     | Change `ports` in `docker-compose.yml`                                                             |
+| Data path                     | `./data` | Host directory for project files (bind mount)                                                      |
+| `MDPLANNER_CACHE`             | disabled | Set to `1` to enable SQLite cache                                                                  |
+| `MDPLANNER_WEBDAV`            | disabled | Set to `1` to enable WebDAV endpoint                                                               |
+| `MDPLANNER_WEBDAV_USER`       | —        | WebDAV basic auth username                                                                         |
+| `MDPLANNER_WEBDAV_PASS`       | —        | WebDAV basic auth password                                                                         |
+| `MDPLANNER_MCP_TOKEN`         | —        | Bearer token for MCP HTTP endpoint (`/mcp`)                                                        |
+| `MDPLANNER_READ_ONLY`         | disabled | Set to `1` to block all write operations (public demo mode)                                        |
+| `MDPLANNER_SECRET_KEY`        | —        | 32-byte hex key for AES-256-GCM integration secret encryption. Generate: `mdplanner keygen-secret` |
+| `MDPLANNER_BACKUP_DIR`        | —        | Directory where scheduled backups are written. Mount a volume for persistence                      |
+| `MDPLANNER_BACKUP_INTERVAL`   | —        | Backup frequency: `daily` or `weekly`. Requires `MDPLANNER_BACKUP_DIR`                             |
+| `MDPLANNER_BACKUP_PUBLIC_KEY` | —        | RSA-OAEP-4096 public key (hex) for encrypted backups. Generate: `mdplanner keygen`                 |
 
 To enable the cache, override the command in `docker-compose.yml`:
 
@@ -116,6 +126,28 @@ service. Requires
 Voice reference WAV files for Chatterbox are bind-mounted from
 `deploy/chatterbox/references/`. Add `.wav` files there before starting the
 stack.
+
+### Cloudflare integration
+
+The DNS tracker can sync domain expiry and auto-renew data from Cloudflare
+Registrar. The Cloudflare API token is saved through the Settings UI and stored
+in `project.md`. To encrypt it at rest, set `MDPLANNER_SECRET_KEY` before
+starting the server:
+
+```yaml
+environment:
+  - MDPLANNER_SECRET_KEY=${MDPLANNER_SECRET_KEY}
+```
+
+```bash
+# Generate a key and add to .env
+echo "MDPLANNER_SECRET_KEY=$(mdplanner keygen-secret)" >> .env
+```
+
+Once the server is running, navigate to Settings → Cloudflare and paste your API
+token. The server encrypts it with AES-256-GCM and stores the ciphertext in
+`project.md`. Without `MDPLANNER_SECRET_KEY`, the token is stored in plaintext —
+suitable for single-user local deployments, not for shared or public instances.
 
 ### Security note
 
