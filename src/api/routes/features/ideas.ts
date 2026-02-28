@@ -34,6 +34,8 @@ ideasRouter.post("/", async (c) => {
     category: body.category,
     created: new Date().toISOString().split("T")[0],
     description: body.description,
+    implementedAt: body.implementedAt,
+    cancelledAt: body.cancelledAt,
   });
   await parser.saveIdeas(ideas);
   await cacheWriteThrough(c, "ideas");

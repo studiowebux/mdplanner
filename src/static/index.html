@@ -2970,6 +2970,30 @@
               + Add Idea
             </button>
           </div>
+          <div class="ideas-view-filters" id="ideasFilterBar">
+            <input
+              type="text"
+              id="ideasFilterSearch"
+              placeholder="Search ideas..."
+            >
+            <select id="ideasFilterStatus">
+              <option value="">All statuses</option>
+              <option value="new">New</option>
+              <option value="considering">Considering</option>
+              <option value="planned">Planned</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="implemented">Implemented</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <select id="ideasFilterCategory">
+              <option value="">All categories</option>
+            </select>
+            <label class="ideas-filter-archive-label">
+              <input type="checkbox" id="ideasShowArchived">
+              Show archived
+            </label>
+          </div>
           <div class="p-6">
             <div id="emptyIdeasState" class="text-center py-12 hidden">
               <svg
@@ -3346,6 +3370,8 @@
               <option value="planned">Planned</option>
               <option value="approved">Approved</option>
               <option value="rejected">Rejected</option>
+              <option value="implemented">Implemented</option>
+              <option value="cancelled">Cancelled</option>
             </select>
             <button id="ideaSorterClearFilters" class="btn-secondary">Clear</button>
           </div>
@@ -13197,6 +13223,8 @@
                 <option value="planned">Planned</option>
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
+                <option value="implemented">Implemented</option>
+                <option value="cancelled">Cancelled</option>
               </select>
             </div>
             <div class="form-group">
@@ -13246,6 +13274,14 @@
                 class="form-input"
               >
             </div>
+          </div>
+          <div id="ideaSidenavArchiveDateRow" class="form-group hidden">
+            <label class="form-label" id="ideaSidenavArchiveDateLabel">Archive Date</label>
+            <input
+              type="date"
+              id="ideaSidenavArchiveDate"
+              class="form-input"
+            >
           </div>
           <div class="form-group">
             <label class="form-label">Subtasks</label>

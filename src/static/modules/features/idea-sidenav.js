@@ -29,6 +29,12 @@ export class IdeaSidenavModule {
       () => this.handleDelete(),
     );
 
+    // Show/hide archive date when status changes
+    document.getElementById("ideaSidenavStatus")?.addEventListener(
+      "change",
+      () => this._updateArchiveDateVisibility(),
+    );
+
     // Auto-save on input changes
     const inputs = [
       "ideaSidenavTitle",
@@ -39,6 +45,7 @@ export class IdeaSidenavModule {
       "ideaSidenavEndDate",
       "ideaSidenavResources",
       "ideaSidenavDescription",
+      "ideaSidenavArchiveDate",
     ];
     inputs.forEach((id) => {
       document.getElementById(id)?.addEventListener(
@@ -153,6 +160,8 @@ export class IdeaSidenavModule {
     document.getElementById("ideaSidenavLinkedList").innerHTML = "";
     document.getElementById("ideaSidenavLinkOptions").innerHTML = "";
     document.getElementById("ideaSidenavLinkSearch").value = "";
+    document.getElementById("ideaSidenavArchiveDate").value = "";
+    document.getElementById("ideaSidenavArchiveDateRow")?.classList.add("hidden");
     this.renderSubtasks([]);
   }
 
@@ -173,6 +182,7 @@ export class IdeaSidenavModule {
       this.currentIdea.resources || "";
     document.getElementById("ideaSidenavDescription").value =
       this.currentIdea.description || "";
+    this._updateArchiveDateVisibility();
     this.renderSubtasks(this.currentIdea.subtasks || []);
 
     if (this.editingIdeaId) {
@@ -325,10 +335,37 @@ export class IdeaSidenavModule {
     this.scheduleAutoSave();
   }
 
+  _updateArchiveDateVisibility() {
+    const status = document.getElementById("ideaSidenavStatus")?.value;
+    const row = document.getElementById("ideaSidenavArchiveDateRow");
+    const label = document.getElementById("ideaSidenavArchiveDateLabel");
+    const input = document.getElementById("ideaSidenavArchiveDate");
+    if (!row || !label || !input) return;
+
+    if (status === "implemented") {
+      row.classList.remove("hidden");
+      label.textContent = "Implemented Date";
+      if (!input.value && this.currentIdea) {
+        input.value = this.currentIdea.implementedAt || "";
+      }
+    } else if (status === "cancelled") {
+      row.classList.remove("hidden");
+      label.textContent = "Cancelled Date";
+      if (!input.value && this.currentIdea) {
+        input.value = this.currentIdea.cancelledAt || "";
+      }
+    } else {
+      row.classList.add("hidden");
+      input.value = "";
+    }
+  }
+
   getFormData() {
+    const status = document.getElementById("ideaSidenavStatus").value;
+    const archiveDate = document.getElementById("ideaSidenavArchiveDate").value || null;
     return {
       title: document.getElementById("ideaSidenavTitle").value.trim(),
-      status: document.getElementById("ideaSidenavStatus").value,
+      status,
       category: document.getElementById("ideaSidenavCategory").value.trim() || null,
       priority: document.getElementById("ideaSidenavPriority").value || null,
       startDate: document.getElementById("ideaSidenavStartDate").value || null,
@@ -341,6 +378,8 @@ export class IdeaSidenavModule {
       links: this.currentIdea.links && this.currentIdea.links.length > 0
         ? this.currentIdea.links
         : null,
+      implementedAt: status === "implemented" ? archiveDate : null,
+      cancelledAt: status === "cancelled" ? archiveDate : null,
     };
   }
 
