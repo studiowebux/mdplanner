@@ -11,8 +11,6 @@ export class RiskSidenavModule {
     this.tm = taskManager;
     this.editingRiskId = null;
     this.currentRisk = null;
-    this.autoSaveTimeout = null;
-
     this.quadrants = [
       "highImpactHighProb",
       "highImpactLowProb",
@@ -40,14 +38,9 @@ export class RiskSidenavModule {
       "click",
       () => this.handleDelete(),
     );
-
-    document.getElementById("riskSidenavTitle")?.addEventListener(
-      "input",
-      () => this.scheduleAutoSave(),
-    );
-    document.getElementById("riskSidenavDate")?.addEventListener(
-      "change",
-      () => this.scheduleAutoSave(),
+    document.getElementById("riskSidenavSave")?.addEventListener(
+      "click",
+      () => this.save(),
     );
 
     this.quadrants.forEach((quadrant) => {
@@ -93,10 +86,6 @@ export class RiskSidenavModule {
   }
 
   close() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-    }
     Sidenav.close("riskSidenav");
     this.editingRiskId = null;
     this.currentRisk = null;
@@ -161,7 +150,6 @@ export class RiskSidenavModule {
       if (text) {
         this.currentRisk[quadrant].push(text);
         this.renderQuadrant(quadrant);
-        this.scheduleAutoSave();
       }
       inputWrapper.remove();
     };
@@ -178,13 +166,6 @@ export class RiskSidenavModule {
   removeItem(quadrant, index) {
     this.currentRisk[quadrant].splice(index, 1);
     this.renderQuadrant(quadrant);
-    this.scheduleAutoSave();
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {

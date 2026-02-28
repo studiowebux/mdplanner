@@ -11,7 +11,6 @@ export class IdeaSidenavModule {
     this.tm = taskManager;
     this.editingIdeaId = null;
     this.currentIdea = null;
-    this.autoSaveTimeout = null;
     this.linkSearchFilter = "";
   }
 
@@ -29,27 +28,17 @@ export class IdeaSidenavModule {
       () => this.handleDelete(),
     );
 
-    // Auto-save on input changes
-    const inputs = [
-      "ideaSidenavTitle",
-      "ideaSidenavStatus",
-      "ideaSidenavCategory",
-      "ideaSidenavPriority",
-      "ideaSidenavStartDate",
-      "ideaSidenavEndDate",
-      "ideaSidenavResources",
-      "ideaSidenavDescription",
-    ];
-    inputs.forEach((id) => {
-      document.getElementById(id)?.addEventListener(
-        "input",
-        () => this.scheduleAutoSave(),
-      );
-      document.getElementById(id)?.addEventListener(
-        "change",
-        () => this.scheduleAutoSave(),
-      );
-    });
+    // Show/hide archive date when status changes
+    document.getElementById("ideaSidenavStatus")?.addEventListener(
+      "change",
+      () => this._updateArchiveDateVisibility(),
+    );
+
+    // Save button
+    document.getElementById("ideaSidenavSave")?.addEventListener(
+      "click",
+      () => this.save(),
+    );
 
     // Subtask add
     const subtaskInput = document.getElementById("ideaSidenavSubtaskInput");
@@ -131,10 +120,6 @@ export class IdeaSidenavModule {
   }
 
   close() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-    }
     Sidenav.close("ideaSidenav");
     this.editingIdeaId = null;
     this.currentIdea = null;
@@ -153,6 +138,8 @@ export class IdeaSidenavModule {
     document.getElementById("ideaSidenavLinkedList").innerHTML = "";
     document.getElementById("ideaSidenavLinkOptions").innerHTML = "";
     document.getElementById("ideaSidenavLinkSearch").value = "";
+    document.getElementById("ideaSidenavArchiveDate").value = "";
+    document.getElementById("ideaSidenavArchiveDateRow")?.classList.add("hidden");
     this.renderSubtasks([]);
   }
 
@@ -173,6 +160,7 @@ export class IdeaSidenavModule {
       this.currentIdea.resources || "";
     document.getElementById("ideaSidenavDescription").value =
       this.currentIdea.description || "";
+    this._updateArchiveDateVisibility();
     this.renderSubtasks(this.currentIdea.subtasks || []);
 
     if (this.editingIdeaId) {
@@ -202,7 +190,6 @@ export class IdeaSidenavModule {
         const idx = parseInt(btn.dataset.subtaskIndex, 10);
         this.currentIdea.subtasks = (this.currentIdea.subtasks || []).filter((_, i) => i !== idx);
         this.renderSubtasks(this.currentIdea.subtasks);
-        this.scheduleAutoSave();
       });
     });
   }
@@ -213,7 +200,6 @@ export class IdeaSidenavModule {
     if (!this.currentIdea.subtasks) this.currentIdea.subtasks = [];
     this.currentIdea.subtasks.push(trimmed);
     this.renderSubtasks(this.currentIdea.subtasks);
-    this.scheduleAutoSave();
   }
 
   toggleLinksSection() {
@@ -312,7 +298,6 @@ export class IdeaSidenavModule {
       this.currentIdea.links.push(ideaId);
       this.renderLinkedIdeas();
       this.renderLinkOptions();
-      this.scheduleAutoSave();
     }
   }
 
@@ -322,13 +307,39 @@ export class IdeaSidenavModule {
     );
     this.renderLinkedIdeas();
     this.renderLinkOptions();
-    this.scheduleAutoSave();
+  }
+
+  _updateArchiveDateVisibility() {
+    const status = document.getElementById("ideaSidenavStatus")?.value;
+    const row = document.getElementById("ideaSidenavArchiveDateRow");
+    const label = document.getElementById("ideaSidenavArchiveDateLabel");
+    const input = document.getElementById("ideaSidenavArchiveDate");
+    if (!row || !label || !input) return;
+
+    if (status === "implemented") {
+      row.classList.remove("hidden");
+      label.textContent = "Implemented Date";
+      if (!input.value && this.currentIdea) {
+        input.value = this.currentIdea.implementedAt || "";
+      }
+    } else if (status === "cancelled") {
+      row.classList.remove("hidden");
+      label.textContent = "Cancelled Date";
+      if (!input.value && this.currentIdea) {
+        input.value = this.currentIdea.cancelledAt || "";
+      }
+    } else {
+      row.classList.add("hidden");
+      input.value = "";
+    }
   }
 
   getFormData() {
+    const status = document.getElementById("ideaSidenavStatus").value;
+    const archiveDate = document.getElementById("ideaSidenavArchiveDate").value || null;
     return {
       title: document.getElementById("ideaSidenavTitle").value.trim(),
-      status: document.getElementById("ideaSidenavStatus").value,
+      status,
       category: document.getElementById("ideaSidenavCategory").value.trim() || null,
       priority: document.getElementById("ideaSidenavPriority").value || null,
       startDate: document.getElementById("ideaSidenavStartDate").value || null,
@@ -341,13 +352,9 @@ export class IdeaSidenavModule {
       links: this.currentIdea.links && this.currentIdea.links.length > 0
         ? this.currentIdea.links
         : null,
+      implementedAt: status === "implemented" ? archiveDate : null,
+      cancelledAt: status === "cancelled" ? archiveDate : null,
     };
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {

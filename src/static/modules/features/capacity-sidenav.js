@@ -11,7 +11,6 @@ export class CapacitySidenavModule {
     this.tm = taskManager;
     this.editingPlanId = null;
     this.currentPlan = null;
-    this.autoSaveTimeout = null;
     this.editingMemberId = null;
     this.editingAllocMemberId = null;
     this.editingAllocWeek = null;
@@ -26,23 +25,13 @@ export class CapacitySidenavModule {
       "click",
       () => this.close(),
     );
+    document.getElementById("capacitySidenavSave")?.addEventListener(
+      "click",
+      () => this.save(),
+    );
     document.getElementById("capacitySidenavDelete")?.addEventListener(
       "click",
       () => this.handleDelete(),
-    );
-
-    // Plan fields auto-save
-    document.getElementById("capacitySidenavTitle")?.addEventListener(
-      "input",
-      () => this.scheduleAutoSave(),
-    );
-    document.getElementById("capacitySidenavDate")?.addEventListener(
-      "change",
-      () => this.scheduleAutoSave(),
-    );
-    document.getElementById("capacitySidenavBudget")?.addEventListener(
-      "input",
-      () => this.scheduleAutoSave(),
     );
 
     // Add team member button
@@ -88,10 +77,6 @@ export class CapacitySidenavModule {
   }
 
   close() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-    }
     Sidenav.close("capacitySidenav");
     this.editingPlanId = null;
     this.currentPlan = null;
@@ -440,12 +425,6 @@ export class CapacitySidenavModule {
       console.error("Error importing people:", error);
       showToast("Error importing people", "error");
     }
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {

@@ -12,7 +12,6 @@ export class MeetingSidenavModule {
     this.tm = taskManager;
     this.editingMeetingId = null;
     this.currentMeeting = null;
-    this.autoSaveTimeout = null;
     this.attendeeNames = [];
     this._dropdowns = []; // fixed-position dropdowns appended to body
   }
@@ -92,19 +91,11 @@ export class MeetingSidenavModule {
       () => this.handleDelete(),
     );
 
-    // Auto-save on field changes
-    const inputs = [
-      "meetingSidenavTitle",
-      "meetingSidenavDate",
-      "meetingSidenavAgenda",
-      "meetingSidenavNotes",
-    ];
-    inputs.forEach((id) => {
-      document.getElementById(id)?.addEventListener(
-        "input",
-        () => this.scheduleAutoSave(),
-      );
-    });
+    // Save button
+    document.getElementById("meetingSidenavSave")?.addEventListener(
+      "click",
+      () => this.save(),
+    );
 
     // Attendee tag picker
     const attendeePicker = document.getElementById(
@@ -226,10 +217,6 @@ export class MeetingSidenavModule {
   }
 
   close() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-    }
     // Hide all custom autocomplete dropdowns
     for (const el of this._dropdowns) el.style.display = "none";
     Sidenav.close("meetingSidenav");
@@ -254,13 +241,11 @@ export class MeetingSidenavModule {
     if (!name || this.attendeeNames.includes(name)) return;
     this.attendeeNames.push(name);
     this.renderAttendeeTags();
-    this.scheduleAutoSave();
   }
 
   removeAttendee(index) {
     this.attendeeNames.splice(index, 1);
     this.renderAttendeeTags();
-    this.scheduleAutoSave();
   }
 
   renderAttendeeTags() {
@@ -362,7 +347,6 @@ export class MeetingSidenavModule {
         const action = this.currentMeeting.actions[idx];
         action.status = action.status === "done" ? "open" : "done";
         this.renderActions(this.currentMeeting.actions);
-        this.scheduleAutoSave();
       });
     });
 
@@ -371,7 +355,6 @@ export class MeetingSidenavModule {
         const idx = parseInt(btn.dataset.index, 10);
         this.currentMeeting.actions.splice(idx, 1);
         this.renderActions(this.currentMeeting.actions);
-        this.scheduleAutoSave();
       });
     });
   }
@@ -401,8 +384,6 @@ export class MeetingSidenavModule {
     if (ownerInput) ownerInput.value = "";
     if (dueInput) dueInput.value = "";
     descInput.focus();
-
-    this.scheduleAutoSave();
   }
 
   getFormData() {
@@ -420,12 +401,6 @@ export class MeetingSidenavModule {
         undefined,
       actions: this.currentMeeting.actions ?? [],
     };
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {

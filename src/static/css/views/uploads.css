@@ -6,22 +6,25 @@
   gap: 0.5rem;
   padding: 0.75rem 0;
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  border-bottom: 1px solid var(--border);
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border-default);
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
 }
 
 .uploads-summary-sep {
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
 }
 
 .uploads-orphan-badge {
-  color: var(--error);
+  color: var(--color-error);
 }
 
 .uploads-section {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
 }
 
 .uploads-section-header {
@@ -36,19 +39,19 @@
 .uploads-section-header h3 {
   font-size: var(--font-size-base);
   font-weight: 600;
-  color: var(--text);
+  color: var(--color-text-primary);
   margin: 0;
 }
 
 .uploads-hint {
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   margin-bottom: 0.75rem;
 }
 
 .uploads-empty {
   font-size: var(--font-size-sm);
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   padding: 2rem 0;
   text-align: center;
 }
@@ -62,14 +65,14 @@
 .uploads-table th {
   text-align: left;
   padding: 0.5rem 0.75rem;
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   font-weight: 500;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border-default);
 }
 
 .uploads-table td {
   padding: 0.5rem 0.75rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border-default);
   vertical-align: middle;
   max-width: 20rem;
   overflow: hidden;
@@ -82,7 +85,7 @@
 }
 
 .uploads-link {
-  color: var(--text);
+  color: var(--color-text-primary);
   text-decoration: none;
 }
 
@@ -91,23 +94,23 @@
 }
 
 .uploads-row-orphan td {
-  background: var(--error-bg);
+  background: var(--color-error-bg);
 }
 
 .uploads-delete-btn {
   background: transparent;
-  border: 1px solid var(--border);
-  color: var(--error);
+  border: 1px solid var(--color-border-default);
+  color: var(--color-error);
   padding: 0.2rem 0.5rem;
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   font-size: var(--font-size-xs);
   cursor: pointer;
   white-space: nowrap;
 }
 
 .uploads-delete-btn:hover {
-  background: var(--error-bg);
-  border-color: var(--error);
+  background: var(--color-error-bg);
+  border-color: var(--color-error);
 }
 
 @media (max-width: 36rem) {

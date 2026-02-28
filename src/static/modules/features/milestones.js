@@ -1,4 +1,5 @@
 import { MilestonesAPI } from "../api.js";
+import { markdownToHtml } from "../utils.js";
 
 /**
  * MilestonesModule - Handles milestone CRUD operations
@@ -6,6 +7,7 @@ import { MilestonesAPI } from "../api.js";
 export class MilestonesModule {
   constructor(taskManager) {
     this.taskManager = taskManager;
+    this.currentView = localStorage.getItem("milestonesView") || "table";
   }
 
   async load() {
@@ -20,6 +22,9 @@ export class MilestonesModule {
   renderView() {
     const container = document.getElementById("milestonesContainer");
     const emptyState = document.getElementById("emptyMilestonesState");
+    const toggle = document.getElementById("milestoneViewToggle");
+
+    if (toggle) toggle.textContent = this.currentView === "table" ? "Card view" : "Table view";
 
     if (
       !this.taskManager.milestones ||
@@ -31,6 +36,71 @@ export class MilestonesModule {
     }
 
     emptyState.classList.add("hidden");
+
+    if (this.currentView === "table") {
+      this._renderTable(container);
+    } else {
+      this._renderCards(container);
+    }
+  }
+
+  _renderTable(container) {
+    container.className = "milestones-table-wrap";
+    const rows = this.taskManager.milestones.map((m) => {
+      const statusClass = m.status === "completed"
+        ? "milestone-status-completed"
+        : m.status === "at-risk"
+        ? "milestone-status-risk"
+        : "milestone-status-active";
+      return `
+        <tr class="milestones-tr">
+          <td class="milestones-td milestones-td-name">${m.name}</td>
+          <td class="milestones-td">
+            <span class="milestone-status-badge ${statusClass}">${m.status}</span>
+          </td>
+          <td class="milestones-td">${
+        m.target ? new Date(m.target).toLocaleDateString() : "—"
+      }</td>
+          <td class="milestones-td">
+            <div class="milestones-progress-wrap">
+              <div class="milestones-progress-bar">
+                <div class="milestones-progress-fill" style="width:${m.progress}%"></div>
+              </div>
+              <span class="milestones-progress-label">${m.progress}%</span>
+            </div>
+          </td>
+          <td class="milestones-td milestones-td-tasks">${m.completedCount}/${m.taskCount}</td>
+          <td class="milestones-td milestones-td-actions">
+            <button type="button"
+                    onclick="taskManager.milestoneSidenavModule.openEdit('${m.id}')"
+                    class="btn-ghost">Edit</button>
+            <button type="button"
+                    onclick="taskManager.deleteMilestone('${m.id}')"
+                    class="btn-danger-ghost">Delete</button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    container.innerHTML = `
+      <table class="milestones-table">
+        <thead>
+          <tr>
+            <th class="milestones-th">Name</th>
+            <th class="milestones-th">Status</th>
+            <th class="milestones-th">Target</th>
+            <th class="milestones-th">Progress</th>
+            <th class="milestones-th">Tasks</th>
+            <th class="milestones-th"></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  _renderCards(container) {
+    container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4";
     container.innerHTML = this.taskManager.milestones
       .map(
         (m) => `
@@ -61,12 +131,12 @@ export class MilestonesModule {
         </div>
         ${
           m.description
-            ? `<p class="text-sm text-secondary mt-2">${m.description}</p>`
+            ? `<div class="mt-2">${markdownToHtml(m.description)}</div>`
             : ""
         }
-        <div class="flex justify-end space-x-2 mt-3">
-          <button onclick="taskManager.milestoneSidenavModule.openEdit('${m.id}')" class="text-sm text-secondary hover:text-primary">Edit</button>
-          <button onclick="taskManager.deleteMilestone('${m.id}')" class="text-sm text-error hover:text-error-text">Delete</button>
+        <div class="flex justify-end gap-1 mt-3">
+          <button type="button" onclick="taskManager.milestoneSidenavModule.openEdit('${m.id}')" class="btn-ghost">Edit</button>
+          <button type="button" onclick="taskManager.deleteMilestone('${m.id}')" class="btn-danger-ghost">Delete</button>
         </div>
       </div>
     `,
@@ -89,8 +159,8 @@ export class MilestonesModule {
         document.getElementById("milestoneName").value = m.name;
         document.getElementById("milestoneTarget").value = m.target || "";
         document.getElementById("milestoneStatus").value = m.status;
-        document.getElementById("milestoneDescription").value = m.description ||
-          "";
+        document.getElementById("milestoneDescription").value =
+          m.description || "";
       }
     }
 
@@ -139,7 +209,6 @@ export class MilestonesModule {
   }
 
   bindEvents() {
-    // View button
     document
       .getElementById("milestonesViewBtn")
       .addEventListener(
@@ -147,7 +216,6 @@ export class MilestonesModule {
         () => this.taskManager.switchView("milestones"),
       );
 
-    // Add milestone button - opens sidenav
     document
       .getElementById("addMilestoneBtn")
       .addEventListener(
@@ -155,21 +223,25 @@ export class MilestonesModule {
         () => this.taskManager.milestoneSidenavModule.openNew(),
       );
 
-    // Cancel milestone modal
+    document.getElementById("milestoneViewToggle")?.addEventListener(
+      "click",
+      () => {
+        this.currentView = this.currentView === "table" ? "card" : "table";
+        localStorage.setItem("milestonesView", this.currentView);
+        this.renderView();
+      },
+    );
+
     document
       .getElementById("cancelMilestoneBtn")
       .addEventListener("click", () => this.closeModal());
 
-    // Milestone form submission
     document
       .getElementById("milestoneForm")
       .addEventListener("submit", (e) => this.save(e));
 
-    // Close modal on background click
     document.getElementById("milestoneModal").addEventListener("click", (e) => {
-      if (e.target.id === "milestoneModal") {
-        this.closeModal();
-      }
+      if (e.target.id === "milestoneModal") this.closeModal();
     });
   }
 }

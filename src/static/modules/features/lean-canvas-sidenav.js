@@ -11,8 +11,6 @@ export class LeanCanvasSidenavModule {
     this.tm = taskManager;
     this.editingCanvasId = null;
     this.currentCanvas = null;
-    this.autoSaveTimeout = null;
-
     this.sections = [
       "problem",
       "solution",
@@ -57,14 +55,9 @@ export class LeanCanvasSidenavModule {
       "click",
       () => this.handleDelete(),
     );
-
-    document.getElementById("leanCanvasSidenavTitle")?.addEventListener(
-      "input",
-      () => this.scheduleAutoSave(),
-    );
-    document.getElementById("leanCanvasSidenavDate")?.addEventListener(
-      "change",
-      () => this.scheduleAutoSave(),
+    document.getElementById("leanCanvasSidenavSave")?.addEventListener(
+      "click",
+      () => this.save(),
     );
 
     this.sections.forEach((section) => {
@@ -109,10 +102,6 @@ export class LeanCanvasSidenavModule {
   }
 
   close() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-    }
     Sidenav.close("leanCanvasSidenav");
     this.editingCanvasId = null;
     this.currentCanvas = null;
@@ -175,7 +164,6 @@ export class LeanCanvasSidenavModule {
       if (text) {
         this.currentCanvas[section].push(text);
         this.renderSection(section);
-        this.scheduleAutoSave();
       }
       inputWrapper.remove();
     };
@@ -191,13 +179,6 @@ export class LeanCanvasSidenavModule {
   removeItem(section, index) {
     this.currentCanvas[section].splice(index, 1);
     this.renderSection(section);
-    this.scheduleAutoSave();
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {

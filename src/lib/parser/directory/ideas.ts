@@ -7,7 +7,14 @@ import type { Idea } from "../../types.ts";
 
 interface IdeaFrontmatter {
   id: string;
-  status: "new" | "considering" | "planned" | "approved" | "rejected";
+  status:
+    | "new"
+    | "considering"
+    | "planned"
+    | "approved"
+    | "rejected"
+    | "implemented"
+    | "cancelled";
   category?: string;
   priority?: "high" | "medium" | "low";
   startDate?: string;
@@ -16,6 +23,8 @@ interface IdeaFrontmatter {
   subtasks?: string[];
   created: string;
   links?: string[];
+  implementedAt?: string;
+  cancelledAt?: string;
 }
 
 export class IdeasDirectoryParser extends DirectoryParser<Idea> {
@@ -61,6 +70,8 @@ export class IdeasDirectoryParser extends DirectoryParser<Idea> {
       created: frontmatter.created || new Date().toISOString(),
       description: description || undefined,
       links: frontmatter.links,
+      implementedAt: frontmatter.implementedAt,
+      cancelledAt: frontmatter.cancelledAt,
     };
   }
 
@@ -80,6 +91,8 @@ export class IdeasDirectoryParser extends DirectoryParser<Idea> {
       frontmatter.subtasks = idea.subtasks;
     }
     if (idea.links && idea.links.length > 0) frontmatter.links = idea.links;
+    if (idea.implementedAt) frontmatter.implementedAt = idea.implementedAt;
+    if (idea.cancelledAt) frontmatter.cancelledAt = idea.cancelledAt;
 
     const body = `# ${idea.title}\n\n${idea.description || ""}`;
 

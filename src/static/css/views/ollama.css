@@ -715,7 +715,7 @@ body[data-current-view="ollama"] #breadcrumb {
   right: 4px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #888;
+  color: var(--color-text-secondary);
   padding: 2px var(--space-sm);
   border-radius: var(--radius-sm);
   cursor: pointer;

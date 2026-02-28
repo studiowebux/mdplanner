@@ -168,7 +168,14 @@ export interface Milestone {
 export interface Idea {
   id: string;
   title: string;
-  status: "new" | "considering" | "planned" | "approved" | "rejected";
+  status:
+    | "new"
+    | "considering"
+    | "planned"
+    | "approved"
+    | "rejected"
+    | "implemented"
+    | "cancelled";
   category?: string;
   priority?: "high" | "medium" | "low";
   startDate?: string;
@@ -178,6 +185,8 @@ export interface Idea {
   created: string;
   description?: string;
   links?: string[]; // Zettelkasten-style linked idea IDs
+  implementedAt?: string;
+  cancelledAt?: string;
 }
 
 export interface Retrospective {

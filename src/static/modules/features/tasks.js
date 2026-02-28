@@ -193,12 +193,31 @@ export class TasksModule {
   copyLink(taskId) {
     const url =
       `${window.location.origin}${window.location.pathname}#task=${taskId}`;
-    navigator.clipboard.writeText(url).then(() => {
-      showToast("Link copied to clipboard");
-    }).catch((err) => {
-      console.error("Failed to copy link:", err);
-      showToast("Failed to copy link", true);
-    });
+
+    const fallback = () => {
+      const ta = document.createElement("textarea");
+      ta.value = url;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      if (ok) {
+        showToast("Link copied to clipboard");
+      } else {
+        showToast("Failed to copy link", true);
+      }
+    };
+
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => {
+        showToast("Link copied to clipboard");
+      }).catch(() => fallback());
+    } else {
+      fallback();
+    }
   }
 
   async addSubtask(parentTaskId) {
@@ -332,7 +351,11 @@ export class TasksModule {
   }
 
   getToRender() {
-    return this.tm.searchQuery ? this.tm.filteredTasks : this.tm.tasks;
+    const base = this.tm.searchQuery ? this.tm.filteredTasks : this.tm.tasks;
+    if (localStorage.getItem("hideCompletedTasks") === "true") {
+      return base.filter((t) => !t.completed);
+    }
+    return base;
   }
 
   /** @param {string} taskId - Toggles task completion status */

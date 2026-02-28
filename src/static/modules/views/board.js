@@ -124,6 +124,7 @@ export class BoardView {
 
   createTaskElement(task) {
     const config = task.config || {};
+    const sections = this.tm.sections || [];
     const div = document.createElement("div");
     div.className =
       "task-card bg-primary border border-default rounded-lg p-3 cursor-move my-1";
@@ -236,6 +237,19 @@ export class BoardView {
         ? `<div class="text-xs text-muted flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg> ${
           config.blocked_by.join(", ")
         }</div>`
+        : ""
+    }
+
+                ${
+      sections.length > 1
+        ? `<div class="mt-2">
+                    <select class="task-section-select text-xs text-muted border border-default rounded px-1 py-0.5 bg-primary w-full"
+                            title="Move to section"
+                            onchange="(function(el){if(el.value)taskManager.boardView.moveTask('${task.id}',el.value);el.value=''})(this)">
+                      <option value="">Move to...</option>
+                      ${sections.filter((s) => s !== task.section).map((s) => `<option value="${s}">${s}</option>`).join("")}
+                    </select>
+                  </div>`
         : ""
     }
 

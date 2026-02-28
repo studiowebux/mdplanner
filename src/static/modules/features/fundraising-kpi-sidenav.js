@@ -24,7 +24,6 @@ export class FundraisingKpiSidenavModule {
   constructor(taskManager) {
     this.tm = taskManager;
     this.editingId = null;
-    this.autoSaveTimeout = null;
   }
 
   openNew() {
@@ -108,15 +107,6 @@ export class FundraisingKpiSidenavModule {
     );
   }
 
-  scheduleAutoSave() {
-    const mrrEl = document.getElementById("kpi-sidenav-mrr");
-    if (mrrEl) this._updateArrPreview(mrrEl.value);
-
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this._showStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
-  }
-
   async save() {
     const data = this._readForm();
 
@@ -196,10 +186,5 @@ export class FundraisingKpiSidenavModule {
       () => this.save(),
     );
 
-    FIELDS.forEach((field) => {
-      const el = document.getElementById(`kpi-sidenav-${field}`);
-      el?.addEventListener("input", () => this.scheduleAutoSave());
-      el?.addEventListener("change", () => this.scheduleAutoSave());
-    });
   }
 }
