@@ -2920,9 +2920,12 @@
             <h2 class="text-lg font-medium text-primary">
               Milestones
             </h2>
-            <button id="addMilestoneBtn" class="btn-primary py-2 rounded-lg">
-              + Add Milestone
-            </button>
+            <div class="flex gap-2 items-center">
+              <button id="milestoneViewToggle" class="btn-secondary">Card view</button>
+              <button id="addMilestoneBtn" class="btn-primary py-2 rounded-lg">
+                + Add Milestone
+              </button>
+            </div>
           </div>
           <div class="p-6">
             <div id="emptyMilestonesState" class="text-center py-12 hidden">
@@ -3036,12 +3039,15 @@
             <h2 class="text-lg font-medium text-primary">
               Retrospectives
             </h2>
-            <button
-              id="addRetrospectiveBtn"
-              class="btn-primary py-2 rounded-lg"
-            >
-              + Add Retrospective
-            </button>
+            <div class="flex gap-2 items-center">
+              <button id="retroViewToggle" class="btn-secondary">Card view</button>
+              <button
+                id="addRetrospectiveBtn"
+                class="btn-primary py-2 rounded-lg"
+              >
+                + Add Retrospective
+              </button>
+            </div>
           </div>
           <div class="p-6">
             <div id="emptyRetrospectivesState" class="text-center py-12 hidden">
@@ -13009,9 +13015,8 @@
               <input id="fishboneSidenavDescription" type="text" class="form-input" placeholder="Short context or scope..." />
             </div>
             <div class="form-group">
-              <label class="form-label" for="fishboneSidenavCauses">Causes</label>
-              <textarea id="fishboneSidenavCauses" class="form-textarea fishbone-causes-textarea" rows="12" placeholder="## People&#10;- Insufficient training&#10;&#10;## Process&#10;- No standardization"></textarea>
-              <p class="fishbone-causes-hint">Use ## Category for each cause group and - item for sub-causes.</p>
+              <label class="form-label">Causes</label>
+              <div id="fishboneSidenavCausesEditor" class="fb-causes-editor"></div>
             </div>
           </div>
         </div>
