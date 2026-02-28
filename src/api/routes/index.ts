@@ -58,6 +58,9 @@ import { searchRouter } from "./search.ts";
 // Uploads routes
 import { uploadsRouter } from "./uploads.ts";
 
+// Backup routes
+import { backupRouter } from "./backup.ts";
+
 // TTS proxy routes
 import { ttsRouter } from "./tts.ts";
 
@@ -161,6 +164,9 @@ export function createApiRouter(
 
   // Uploads routes
   api.route("/uploads", uploadsRouter);
+
+  // Backup routes
+  api.route("/backup", backupRouter);
 
   // TTS proxy routes (avoids browser CORS on cross-origin TTS services)
   api.route("/tts", ttsRouter);

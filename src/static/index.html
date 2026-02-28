@@ -2270,6 +2270,83 @@
               </div>
             </div>
           </div>
+
+          <!-- Backup -->
+          <div class="mt-8 pt-8 border-t border-default" id="backupSection">
+            <h3 class="text-lg font-semibold text-primary mb-4">Backup</h3>
+            <p class="text-sm text-muted mb-6">
+              Export a TAR archive of all project files. When the server is
+              started with <code>--backup-public-key</code> the archive is
+              encrypted and can only be decrypted with the matching private key.
+            </p>
+
+            <!-- Status row -->
+            <div id="backupStatusRow" class="mb-6 p-4 bg-secondary rounded border border-default text-sm hidden">
+              <div class="flex flex-wrap gap-4">
+                <span>
+                  Last backup:
+                  <strong id="backupLastTime">—</strong>
+                </span>
+                <span>
+                  Size:
+                  <strong id="backupLastSize">—</strong>
+                </span>
+                <span>
+                  Encrypted:
+                  <strong id="backupEncrypted">—</strong>
+                </span>
+                <span>
+                  Interval:
+                  <strong id="backupInterval">—</strong>
+                </span>
+              </div>
+              <div id="backupLastError" class="mt-2 text-error hidden"></div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-wrap gap-3 mb-6">
+              <button id="backupExportBtn" class="btn-secondary">
+                Export backup
+              </button>
+              <button id="backupTriggerBtn" class="btn-secondary hidden">
+                Trigger scheduled backup
+              </button>
+            </div>
+
+            <!-- Import -->
+            <div class="border border-default rounded p-4">
+              <h4 class="text-sm font-medium text-primary mb-3">Import backup</h4>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs text-muted mb-1" for="backupImportFile">
+                    TAR archive (.tar or .tar.enc)
+                  </label>
+                  <input type="file" id="backupImportFile" accept=".tar,.enc" class="text-sm text-secondary">
+                </div>
+                <div id="backupPrivateKeyRow">
+                  <label class="block text-xs text-muted mb-1" for="backupPrivateKey">
+                    Private key hex (required for .tar.enc)
+                  </label>
+                  <input
+                    type="password"
+                    id="backupPrivateKey"
+                    placeholder="Paste hex private key here"
+                    class="w-full border border-strong rounded px-3 py-2 text-sm font-mono"
+                  >
+                </div>
+                <div class="flex items-center gap-3">
+                  <label class="flex items-center gap-2 text-sm text-secondary cursor-pointer">
+                    <input type="checkbox" id="backupImportOverwrite">
+                    Overwrite existing files
+                  </label>
+                  <button id="backupImportBtn" class="btn-secondary">
+                    Import
+                  </button>
+                </div>
+              </div>
+              <p id="backupImportResult" class="mt-3 text-sm hidden"></p>
+            </div>
+          </div>
         </div>
       </div>
 

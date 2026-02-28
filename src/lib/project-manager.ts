@@ -29,6 +29,7 @@ export interface ProjectManagerOptions {
   enableCache?: boolean;
   dbPath?: string;
   readOnly?: boolean;
+  backupPublicKey?: string;
 }
 
 export interface CacheLayer {
@@ -42,10 +43,12 @@ export class ProjectManager {
   private parser: DirectoryMarkdownParser;
   private cache: CacheLayer | null = null;
   private readOnly: boolean;
+  private backupPublicKey: string | undefined;
 
   constructor(projectPath: string, options?: ProjectManagerOptions) {
     this.projectPath = projectPath;
     this.readOnly = options?.readOnly ?? false;
+    this.backupPublicKey = options?.backupPublicKey;
     this.parser = new DirectoryMarkdownParser(projectPath);
 
     if (options?.enableCache) {
@@ -89,6 +92,13 @@ export class ProjectManager {
    */
   isReadOnly(): boolean {
     return this.readOnly;
+  }
+
+  /**
+   * Return the RSA public key hex for backup encryption, or undefined if not set.
+   */
+  getBackupPublicKey(): string | undefined {
+    return this.backupPublicKey;
   }
 
   /**

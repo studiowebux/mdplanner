@@ -217,6 +217,88 @@ make -f deploy/Makefile uninstall
 
 ---
 
+## Backup
+
+### Key generation
+
+Before using encrypted backups, generate a key pair:
+
+```bash
+mdplanner keygen
+```
+
+Output:
+
+```
+PUBLIC KEY (hex)  — store in --backup-public-key or MDPLANNER_BACKUP_PUBLIC_KEY:
+<long hex string>
+
+PRIVATE KEY (hex) — keep secret, used to decrypt backups (X-Backup-Private-Key header):
+<long hex string>
+```
+
+Store the private key in a password manager or secret store. It cannot be
+recovered if lost. The public key is safe to include in the server
+configuration.
+
+### Server flags
+
+| Flag                        | Env var                       | Description                                         |
+| --------------------------- | ----------------------------- | --------------------------------------------------- |
+| `--backup-public-key <hex>` | `MDPLANNER_BACKUP_PUBLIC_KEY` | RSA public key hex — enables encrypted exports      |
+| `--backup-dir <path>`       | `MDPLANNER_BACKUP_DIR`        | Directory where scheduled backups are written       |
+| `--backup-interval <hrs>`   | `MDPLANNER_BACKUP_INTERVAL`   | Backup frequency in hours (requires `--backup-dir`) |
+
+### Plain export
+
+```bash
+# Download a plaintext TAR archive via curl
+curl -o backup.tar http://localhost:8003/api/backup/export
+```
+
+### Encrypted export
+
+```bash
+# Start server with encryption enabled
+mdplanner --backup-public-key <public-key-hex> ./my-project
+
+# Download encrypted archive
+curl -o backup.tar.enc http://localhost:8003/api/backup/export
+```
+
+### Import (plain)
+
+```bash
+curl -X POST http://localhost:8003/api/backup/import \
+  --data-binary @backup.tar
+```
+
+### Import (encrypted)
+
+```bash
+curl -X POST http://localhost:8003/api/backup/import \
+  -H "X-Backup-Private-Key: <private-key-hex>" \
+  --data-binary @backup.tar.enc
+```
+
+Add `?overwrite=true` to overwrite existing files on import.
+
+### Scheduled backups
+
+```bash
+mdplanner \
+  --backup-dir /var/backups/myproject \
+  --backup-interval 24 \
+  --backup-public-key <public-key-hex> \
+  ./my-project
+```
+
+Backups are written as `backup-YYYY-MM-DD-HH-MM-SS.tar` (plain) or `.tar.enc`
+(encrypted). A manual backup can be triggered at any time via
+`POST /api/backup/trigger`. Status is available at `GET /api/backup/status`.
+
+---
+
 ## MCP Server
 
 The MCP server exposes mdplanner project data to Claude Desktop (or any
