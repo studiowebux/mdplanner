@@ -11,7 +11,8 @@ import {
   getParser,
   jsonResponse,
 } from "./context.ts";
-import { Task } from "../../lib/types.ts";
+import { Goal, Meeting, Note, Person, Task } from "../../lib/types.ts";
+import { PortfolioItem } from "../../lib/parser/directory/portfolio.ts";
 
 export const exportImportRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -120,6 +121,135 @@ function convertTasksToCSV(tasks: Task[]): string {
   return csv;
 }
 
+function convertNotesToCSV(notes: Note[]): string {
+  const headers = ["ID", "Title", "Created At", "Updated At", "Tags", "Body"];
+  let csv = headers.join(",") + "\n";
+  for (const note of notes) {
+    const tags = (note as unknown as { tags?: string[] }).tags?.join(", ") ??
+      "";
+    const body = note.content ?? "";
+    csv += [
+      escapeCSV(note.id),
+      escapeCSV(note.title),
+      escapeCSV(note.createdAt),
+      escapeCSV(note.updatedAt),
+      escapeCSV(tags),
+      escapeCSV(body.replace(/\n/g, " ").slice(0, 500)),
+    ].join(",") + "\n";
+  }
+  return csv;
+}
+
+function convertGoalsToCSV(goals: Goal[]): string {
+  const headers = [
+    "ID",
+    "Title",
+    "Type",
+    "Status",
+    "KPI",
+    "Start Date",
+    "End Date",
+    "Description",
+  ];
+  let csv = headers.join(",") + "\n";
+  for (const goal of goals) {
+    csv += [
+      escapeCSV(goal.id),
+      escapeCSV(goal.title),
+      escapeCSV(goal.type),
+      escapeCSV(goal.status),
+      escapeCSV(goal.kpi),
+      escapeCSV(goal.startDate),
+      escapeCSV(goal.endDate),
+      escapeCSV(goal.description ?? ""),
+    ].join(",") + "\n";
+  }
+  return csv;
+}
+
+function convertMeetingsToCSV(meetings: Meeting[]): string {
+  const headers = [
+    "ID",
+    "Title",
+    "Date",
+    "Attendees",
+    "Open Actions",
+    "Done Actions",
+  ];
+  let csv = headers.join(",") + "\n";
+  for (const meeting of meetings) {
+    const open = meeting.actions.filter((a) => a.status === "open").length;
+    const done = meeting.actions.filter((a) => a.status === "done").length;
+    csv += [
+      escapeCSV(meeting.id),
+      escapeCSV(meeting.title),
+      escapeCSV(meeting.date),
+      escapeCSV(meeting.attendees?.join(", ") ?? ""),
+      open.toString(),
+      done.toString(),
+    ].join(",") + "\n";
+  }
+  return csv;
+}
+
+function convertPeopleToCSV(people: Person[]): string {
+  const headers = [
+    "ID",
+    "Name",
+    "Title",
+    "Role",
+    "Departments",
+    "Email",
+    "Phone",
+    "Start Date",
+  ];
+  let csv = headers.join(",") + "\n";
+  for (const person of people) {
+    csv += [
+      escapeCSV(person.id),
+      escapeCSV(person.name),
+      escapeCSV(person.title ?? ""),
+      escapeCSV(person.role ?? ""),
+      escapeCSV(person.departments?.join(", ") ?? ""),
+      escapeCSV(person.email ?? ""),
+      escapeCSV(person.phone ?? ""),
+      escapeCSV(person.startDate ?? ""),
+    ].join(",") + "\n";
+  }
+  return csv;
+}
+
+function convertPortfolioToCSV(items: PortfolioItem[]): string {
+  const headers = [
+    "ID",
+    "Name",
+    "Category",
+    "Status",
+    "Client",
+    "Progress",
+    "Start Date",
+    "End Date",
+    "Tech Stack",
+    "License",
+  ];
+  let csv = headers.join(",") + "\n";
+  for (const item of items) {
+    csv += [
+      escapeCSV(item.id),
+      escapeCSV(item.name),
+      escapeCSV(item.category),
+      escapeCSV(item.status),
+      escapeCSV(item.client ?? ""),
+      item.progress?.toString() ?? "",
+      escapeCSV(item.startDate ?? ""),
+      escapeCSV(item.endDate ?? ""),
+      escapeCSV(item.techStack?.join(", ") ?? ""),
+      escapeCSV(item.license ?? ""),
+    ].join(",") + "\n";
+  }
+  return csv;
+}
+
 function buildTaskHierarchy(
   flatTasks: Array<Task & { parentId?: string }>,
 ): Task[] {
@@ -146,42 +276,63 @@ function buildTaskHierarchy(
   return rootTasks;
 }
 
-function parseTasksCSV(csvContent: string): Task[] {
+interface ParseResult {
+  tasks: Task[];
+  errors: Array<{ row: number; message: string }>;
+}
+
+function parseTasksCSV(csvContent: string): ParseResult {
   const lines = csvContent.trim().split("\n");
-  if (lines.length < 2) return [];
+  if (lines.length < 2) return { tasks: [], errors: [] };
 
   const tasks: Array<Task & { parentId?: string }> = [];
+  const errors: Array<{ row: number; message: string }> = [];
 
   for (let i = 1; i < lines.length; i++) {
-    const values = parseCSVLine(lines[i]);
-    if (values.length >= 4) {
-      const task: Task & { parentId?: string } = {
-        id: values[0] || `task_${Date.now()}_${i}`,
-        title: values[1] || "",
-        section: values[2] || "Backlog",
-        completed: values[3]?.toUpperCase() === "TRUE",
-        config: {
-          priority: values[4] ? parseInt(values[4]) : undefined,
-          assignee: values[5] || undefined,
-          due_date: values[6] || undefined,
-          effort: values[7] ? parseInt(values[7]) : undefined,
-          tag: values[8]
-            ? values[8].split(", ").filter((t) => t.trim())
-            : undefined,
-          blocked_by: values[9]
-            ? values[9].split(", ").filter((t) => t.trim())
-            : undefined,
-          milestone: values[10] || undefined,
-        },
-        description: values[11] ? [values[11]] : undefined,
-        parentId: values[12] || undefined,
-      };
+    const line = lines[i].trim();
+    if (!line) continue;
 
-      tasks.push(task);
+    const values = parseCSVLine(line);
+    if (values.length < 4) {
+      errors.push({
+        row: i + 1,
+        message: "Not enough columns (expected at least 4)",
+      });
+      continue;
     }
+
+    const title = values[1]?.trim();
+    if (!title) {
+      errors.push({ row: i + 1, message: "Missing title" });
+      continue;
+    }
+
+    const task: Task & { parentId?: string } = {
+      id: values[0]?.trim() || `task_${Date.now()}_${i}`,
+      title,
+      section: values[2]?.trim() || "Backlog",
+      completed: values[3]?.toUpperCase() === "TRUE",
+      config: {
+        priority: values[4]?.trim() ? parseInt(values[4]) : undefined,
+        assignee: values[5]?.trim() || undefined,
+        due_date: values[6]?.trim() || undefined,
+        effort: values[7]?.trim() ? parseInt(values[7]) : undefined,
+        tag: values[8]?.trim()
+          ? values[8].split(", ").filter((t) => t.trim())
+          : undefined,
+        blocked_by: values[9]?.trim()
+          ? values[9].split(", ").filter((t) => t.trim())
+          : undefined,
+        milestone: values[10]?.trim() || undefined,
+      },
+      description: values[11]?.trim() ? [values[11]] : undefined,
+      parentId: values[12]?.trim() || undefined,
+    };
+
+    tasks.push(task);
   }
 
-  return buildTaskHierarchy(tasks);
+  return { tasks: buildTaskHierarchy(tasks), errors };
 }
 
 type StickyNoteColor =
@@ -421,16 +572,74 @@ function generateProjectReportHTML(
 
 // Routes
 
-// GET /export/csv/tasks - export tasks as CSV
-exportImportRouter.get("/export/csv/tasks", async (c) => {
+// GET /export/csv/:entity - export any supported entity type as CSV
+const CSV_SUPPORTED = [
+  "tasks",
+  "notes",
+  "goals",
+  "meetings",
+  "people",
+  "portfolio",
+] as const;
+type CsvEntity = (typeof CSV_SUPPORTED)[number];
+
+exportImportRouter.get("/export/csv/:entity", async (c) => {
+  const entity = c.req.param("entity") as CsvEntity;
+  if (!CSV_SUPPORTED.includes(entity)) {
+    return errorResponse(
+      `Unsupported entity. Supported: ${CSV_SUPPORTED.join(", ")}`,
+      400,
+    );
+  }
+
   const parser = getParser(c);
-  const tasks = await parser.readTasks();
-  const csv = convertTasksToCSV(tasks);
-  return new Response(csv, {
+  let csv: string;
+  let filename: string;
+
+  switch (entity) {
+    case "tasks": {
+      const tasks = await parser.readTasks();
+      csv = convertTasksToCSV(tasks);
+      filename = "tasks.csv";
+      break;
+    }
+    case "notes": {
+      const notes = await parser.readNotes();
+      csv = convertNotesToCSV(notes);
+      filename = "notes.csv";
+      break;
+    }
+    case "goals": {
+      const goals = await parser.readGoals();
+      csv = convertGoalsToCSV(goals);
+      filename = "goals.csv";
+      break;
+    }
+    case "meetings": {
+      const meetings = await parser.readMeetings();
+      csv = convertMeetingsToCSV(meetings);
+      filename = "meetings.csv";
+      break;
+    }
+    case "people": {
+      const people = await parser.readPeople();
+      csv = convertPeopleToCSV(people);
+      filename = "people.csv";
+      break;
+    }
+    case "portfolio": {
+      const items = await parser.readPortfolioItems();
+      csv = convertPortfolioToCSV(items);
+      filename = "portfolio.csv";
+      break;
+    }
+  }
+
+  return new Response(csv!, {
     headers: {
       ...corsHeaders,
       "Content-Type": "text/csv",
-      "Content-Disposition": "attachment; filename=tasks.csv",
+      "Content-Disposition": `attachment; filename=${filename!}`,
     },
   });
 });
@@ -439,29 +648,22 @@ exportImportRouter.get("/export/csv/tasks", async (c) => {
 exportImportRouter.post("/import/csv/tasks", async (c) => {
   const parser = getParser(c);
   const body = await c.req.text();
-  const importedTasks = parseTasksCSV(body);
+  const { tasks: parsedTasks, errors } = parseTasksCSV(body);
   const existingTasks = await parser.readTasks();
 
   const existingTitles = new Set(existingTasks.map((t) => t.title));
-  const newTasks = importedTasks.filter((t) => !existingTitles.has(t.title));
+  const newTasks = parsedTasks.filter((t) => !existingTitles.has(t.title));
+  const skipped = parsedTasks.length - newTasks.length;
 
-  if (newTasks.length === 0) {
-    return jsonResponse({
-      success: true,
-      imported: 0,
-      message: "No new tasks to import (all tasks already exist)",
-    });
-  }
-
-  // Add tasks using the parser's addTask method
-  let importedCount = 0;
+  let imported = 0;
   for (const task of newTasks) {
     await parser.addTask(task);
-    importedCount++;
+    imported++;
   }
 
-  await cacheWriteThrough(c, "tasks");
-  return jsonResponse({ success: true, imported: importedCount });
+  if (imported > 0) await cacheWriteThrough(c, "tasks");
+
+  return jsonResponse({ success: true, imported, skipped, errors });
 });
 
 // POST /import/csv/canvas - import canvas sticky notes from CSV

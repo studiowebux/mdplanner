@@ -1095,6 +1095,43 @@ select.input {
   cursor: pointer;
 }
 
+/* Import preview table */
+
+.import-preview-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+}
+
+.import-preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.import-preview-th {
+  padding: 0.4rem 0.625rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  border-block-end: 1px solid var(--color-border-default);
+  background: var(--color-bg-tertiary);
+}
+
+.import-preview-cell {
+  padding: 0.4rem 0.625rem;
+  border-block-end: 1px solid var(--color-border-default);
+  color: var(--color-text-primary);
+  max-width: 16rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.import-preview-table tbody tr:last-child .import-preview-cell {
+  border-block-end: none;
+}
+
 /* Small button variant */
 
 .btn-sm {

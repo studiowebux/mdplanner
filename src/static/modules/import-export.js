@@ -57,22 +57,48 @@ export class ImportExportModule {
     document.getElementById("exportDataModal").classList.add("hidden");
   }
 
+  _getExportFormat() {
+    return document.querySelector('input[name="exportFormat"]:checked')?.value ?? "json";
+  }
+
+  _onFormatChange() {
+    const isCsv = this._getExportFormat() === "csv";
+    document.querySelectorAll(".export-json-only").forEach((el) => {
+      el.classList.toggle("hidden", isCsv);
+      const cb = el.querySelector("input[type=checkbox]");
+      if (cb && isCsv) cb.checked = false;
+    });
+    document.getElementById("exportCsvNote")?.classList.toggle("hidden", !isCsv);
+  }
+
+  _triggerDownload(url) {
+    const link = document.createElement("a");
+    link.href = url;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   downloadExportData() {
-    const checked = [
-      ...document.querySelectorAll(".export-entity-cb:checked"),
-    ].map((cb) => cb.value);
+    const checked = [...document.querySelectorAll(".export-entity-cb:checked")]
+      .map((cb) => cb.value);
 
     if (checked.length === 0) {
       showToast("Select at least one entity to export.", "error");
       return;
     }
 
-    const url = `/api/export/json?entities=${checked.join(",")}`;
-    const link = document.createElement("a");
-    link.href = url;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const format = this._getExportFormat();
+
+    if (format === "csv") {
+      // One download per entity — fire sequentially with small delay to avoid browser blocking
+      checked.forEach((entity, i) => {
+        setTimeout(() => this._triggerDownload(`/api/export/csv/${entity}`), i * 300);
+      });
+    } else {
+      this._triggerDownload(`/api/export/json?entities=${checked.join(",")}`);
+    }
+
     this.closeExportDataModal();
   }
 
@@ -81,61 +107,119 @@ export class ImportExportModule {
     if (!file) return;
 
     if (!file.name.endsWith(".csv")) {
-      alert("Please select a CSV file.");
+      showToast("Please select a CSV file.", "error");
+      e.target.value = "";
       return;
     }
 
     try {
       const csvContent = await this.readFileAsText(file);
-      console.log("CSV content to import:", csvContent);
+      this._showImportPreview(file.name, csvContent);
+    } catch {
+      showToast("Error reading file. Please try again.", "error");
+    }
 
+    e.target.value = "";
+  }
+
+  _parseCSVPreview(csvContent) {
+    const lines = csvContent.trim().split("\n");
+    if (lines.length < 2) return { headers: [], rows: [], total: 0 };
+
+    const headers = lines[0].split(",").map((h) => h.replace(/^"|"$/g, "").trim());
+    const dataLines = lines.slice(1);
+    const rows = dataLines.slice(0, 10).map((line) => {
+      const values = this._parseCSVLine(line);
+      const obj = {};
+      headers.forEach((h, i) => { obj[h] = values[i] || ""; });
+      return obj;
+    });
+
+    return { headers, rows, total: dataLines.length };
+  }
+
+  _parseCSVLine(line) {
+    const result = [];
+    let current = "";
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        if (inQuotes && line[i + 1] === '"') { current += '"'; i++; }
+        else { inQuotes = !inQuotes; }
+      } else if (char === "," && !inQuotes) {
+        result.push(current); current = "";
+      } else {
+        current += char;
+      }
+    }
+    result.push(current);
+    return result;
+  }
+
+  _showImportPreview(filename, csvContent) {
+    const { rows, total } = this._parseCSVPreview(csvContent);
+    const modal = document.getElementById("importPreviewModal");
+    if (!modal) { this._doImport(csvContent); return; }
+
+    document.getElementById("importPreviewFilename").textContent = filename;
+    document.getElementById("importPreviewCount").textContent = total;
+
+    const tbody = document.getElementById("importPreviewBody");
+    tbody.innerHTML = rows.map((row) => `
+      <tr>
+        <td class="import-preview-cell">${row["Title"] || ""}</td>
+        <td class="import-preview-cell">${row["Section"] || ""}</td>
+        <td class="import-preview-cell">${row["Completed"] === "TRUE" ? "Done" : "Open"}</td>
+      </tr>
+    `).join("");
+
+    const more = document.getElementById("importPreviewMore");
+    if (more) {
+      more.textContent = total > 10 ? `Showing 10 of ${total} rows.` : "";
+    }
+
+    this._pendingCSV = csvContent;
+    modal.classList.remove("hidden");
+  }
+
+  async _doImport(csvContent) {
+    try {
       const response = await fetch("/api/import/csv/tasks", {
         method: "POST",
-        headers: {
-          "Content-Type": "text/plain",
-        },
+        headers: { "Content-Type": "text/plain" },
         body: csvContent,
       });
 
-      console.log("Import response status:", response.status);
-
       if (response.ok) {
         const result = await response.json();
-        console.log("Import result:", result);
-        showToast(
-          `Successfully imported ${result.imported} task(s).`,
-          "success",
-        );
+        let msg = `Imported ${result.imported} task(s)`;
+        if (result.skipped > 0) msg += `, ${result.skipped} skipped (duplicates)`;
+        if (result.errors?.length > 0) msg += `, ${result.errors.length} row error(s)`;
+        showToast(msg + ".", result.errors?.length > 0 ? "warning" : "success");
 
-        // Reload tasks to show imported ones
-        console.log("Reloading tasks...");
         await this.tm.loadTasks();
-        console.log("Tasks after reload:", this.tm.tasks);
-
-        // Also reload project info and sections to ensure everything is fresh
         await this.tm.loadProjectInfo();
         await this.tm.loadSections();
-
-        // Refresh the current view to show imported tasks
-        console.log("Refreshing current view:", this.tm.currentView);
         this.tm.renderTasks();
       } else {
         const error = await response.json();
-        console.error("Import error:", error);
-
-        // Show a more user-friendly error message
         showToast(`Import failed: ${error.error || "Unknown error"}`, "error");
       }
-    } catch (error) {
-      console.error("Error importing CSV:", error);
-      showToast(
-        "Error importing CSV file. Please check the file format.",
-        "error",
-      );
+    } catch {
+      showToast("Error importing CSV. Please check the file format.", "error");
     }
+  }
 
-    // Clear the file input
-    e.target.value = "";
+  closeImportPreviewModal() {
+    document.getElementById("importPreviewModal")?.classList.add("hidden");
+    this._pendingCSV = null;
+  }
+
+  confirmImport() {
+    const csv = this._pendingCSV;
+    this.closeImportPreviewModal();
+    if (csv) this._doImport(csv);
   }
 
   readFileAsText(file) {
@@ -191,6 +275,9 @@ export class ImportExportModule {
     // Export Data modal
     document.getElementById("exportDataBtn")
       ?.addEventListener("click", () => this.openExportDataModal());
+    document.querySelectorAll('input[name="exportFormat"]').forEach((radio) => {
+      radio.addEventListener("change", () => this._onFormatChange());
+    });
     document.getElementById("exportDataModalClose")
       ?.addEventListener("click", () => this.closeExportDataModal());
     document.getElementById("exportDataModalCancel")
@@ -208,6 +295,18 @@ export class ImportExportModule {
     document.getElementById("exportDataSelectNone")
       ?.addEventListener("click", () => {
         document.querySelectorAll(".export-entity-cb").forEach((cb) => { cb.checked = false; });
+      });
+
+    // Import preview modal
+    document.getElementById("importPreviewClose")
+      ?.addEventListener("click", () => this.closeImportPreviewModal());
+    document.getElementById("importPreviewCancel")
+      ?.addEventListener("click", () => this.closeImportPreviewModal());
+    document.getElementById("importPreviewConfirm")
+      ?.addEventListener("click", () => this.confirmImport());
+    document.getElementById("importPreviewModal")
+      ?.addEventListener("click", (e) => {
+        if (e.target === e.currentTarget) this.closeImportPreviewModal();
       });
 
     // CSV file input
