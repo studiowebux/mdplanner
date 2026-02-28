@@ -6,6 +6,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { NotesAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { escapeHtml, markdownToHtml } from "../utils.js";
+import { UndoManager } from "../ui/undo-manager.js";
 
 export class NoteSidenavModule {
   constructor(taskManager) {
@@ -18,6 +19,8 @@ export class NoteSidenavModule {
     this.selectedParagraphs = new Set();
     // Enhancement: Drag and drop
     this.draggedParagraphId = null;
+    /** @type {Map<string, UndoManager>} keyed by element ID */
+    this._undoManagers = new Map();
   }
 
   bindEvents() {
@@ -190,6 +193,7 @@ export class NoteSidenavModule {
 
     // Open sidenav
     Sidenav.open("noteSidenav");
+    this._attachNoteUndoManagers();
   }
 
   /**
@@ -225,9 +229,11 @@ export class NoteSidenavModule {
 
     // Open sidenav
     Sidenav.open("noteSidenav");
+    this._attachNoteUndoManagers();
   }
 
   close() {
+    this._detachNoteUndoManagers();
     // Clear any pending auto-save
     if (this.autoSaveTimeout) {
       clearTimeout(this.autoSaveTimeout);
@@ -629,6 +635,7 @@ export class NoteSidenavModule {
 
         const response = await NotesAPI.create(noteData);
         if (response.ok) {
+          this._markAllNoteSaved();
           this.showSaveStatus("Saved");
           this._clearTempNote();
           this.isNewNote = false;
@@ -672,6 +679,7 @@ export class NoteSidenavModule {
 
         const response = await NotesAPI.update(note.id, saveData);
         if (response.ok) {
+          this._markAllNoteSaved();
           this.showSaveStatus("Saved");
           this.tm.renderNotesView();
         } else {
@@ -717,13 +725,57 @@ export class NoteSidenavModule {
         statusEl.classList.add("sidenav-status-saving");
       }
 
-      // Hide after delay for success/error
+      // Hide after delay for success/error; show "Modified" if there are unsaved changes
       if (text === "Saved" || text === "Error") {
         setTimeout(() => {
-          statusEl.classList.add("hidden");
+          if (this._hasNoteUnsavedChanges()) {
+            statusEl.textContent = "Modified";
+            statusEl.classList.remove(
+              "hidden",
+              "sidenav-status-saved",
+              "sidenav-status-error",
+              "sidenav-status-saving",
+            );
+            statusEl.classList.add("sidenav-status-unsaved");
+          } else {
+            statusEl.classList.add("hidden");
+          }
         }, 2000);
       }
     }
+  }
+
+  // --- Undo/Redo helpers (note sidenav only attaches to title + basic editor) ---
+
+  _attachNoteUndoManagers() {
+    this._detachNoteUndoManagers();
+    for (const id of ["noteSidenavTitle", "noteSidenavEditor"]) {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      const manager = new UndoManager();
+      manager.attach(el);
+      this._undoManagers.set(id, manager);
+    }
+  }
+
+  _detachNoteUndoManagers() {
+    for (const manager of this._undoManagers.values()) {
+      manager.detach();
+    }
+    this._undoManagers.clear();
+  }
+
+  _markAllNoteSaved() {
+    for (const manager of this._undoManagers.values()) {
+      manager.markSaved();
+    }
+  }
+
+  _hasNoteUnsavedChanges() {
+    for (const manager of this._undoManagers.values()) {
+      if (manager.hasUnsavedChanges()) return true;
+    }
+    return false;
   }
 
   async handleDelete() {

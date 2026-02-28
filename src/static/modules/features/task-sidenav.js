@@ -4,6 +4,7 @@
 import { Sidenav } from "../ui/sidenav.js";
 import { MilestonesAPI, TasksAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
+import { UndoManager } from "../ui/undo-manager.js";
 
 export class TaskSidenavModule {
   constructor(taskManager) {
@@ -11,6 +12,8 @@ export class TaskSidenavModule {
     this.editingTask = null;
     this.parentTaskId = null;
     this.pendingAttachments = [];
+    /** @type {UndoManager | null} */
+    this._descUndoManager = null;
   }
 
   bindEvents() {
@@ -37,6 +40,12 @@ export class TaskSidenavModule {
         e.preventDefault();
         await this.handleSubmit();
       },
+    );
+
+    // Update "Modified" dot when description changes
+    document.getElementById("sidenavTaskDescription")?.addEventListener(
+      "input",
+      () => this._updateDescUnsavedDot(),
     );
 
     // File attach button triggers hidden input
@@ -146,9 +155,11 @@ export class TaskSidenavModule {
 
     // Open sidenav
     Sidenav.open("taskSidenav");
+    this._attachDescUndo();
   }
 
   close() {
+    this._detachDescUndo();
     Sidenav.close("taskSidenav");
     this.editingTask = null;
     this.parentTaskId = null;
@@ -334,6 +345,7 @@ export class TaskSidenavModule {
         showToast("Task created", "success");
       }
 
+      this._descUndoManager?.markSaved();
       this.close();
       await this.tm.loadTasks();
       this.tm.renderTasks();
@@ -341,6 +353,28 @@ export class TaskSidenavModule {
       console.error("Error saving task:", error);
       showToast("Error saving task", "error");
     }
+  }
+
+  // --- Undo/Redo helpers ---
+
+  _attachDescUndo() {
+    const el = document.getElementById("sidenavTaskDescription");
+    if (!el) return;
+    if (!this._descUndoManager) this._descUndoManager = new UndoManager();
+    this._descUndoManager.attach(el);
+    this._updateDescUnsavedDot();
+  }
+
+  _detachDescUndo() {
+    this._descUndoManager?.detach();
+    this._updateDescUnsavedDot();
+  }
+
+  _updateDescUnsavedDot() {
+    const dot = document.getElementById("taskDescUnsavedDot");
+    if (!dot) return;
+    const show = this._descUndoManager?.hasUnsavedChanges() ?? false;
+    dot.classList.toggle("hidden", !show);
   }
 }
 

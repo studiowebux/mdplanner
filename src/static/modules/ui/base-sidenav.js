@@ -4,6 +4,7 @@
 
 import { Sidenav } from "./sidenav.js";
 import { showToast } from "./toast.js";
+import { UndoManager } from "./undo-manager.js";
 
 const AUTO_SAVE_DELAY = 1000;
 
@@ -34,6 +35,8 @@ export class BaseSidenavModule {
     this.editingId = null;
     this.autoSaveTimeout = null;
     this.isSaving = false;
+    /** @type {Map<string, UndoManager>} keyed by element ID */
+    this._undoManagers = new Map();
   }
 
   /** @abstract */ get prefix() { throw new Error("override prefix"); }
@@ -70,7 +73,9 @@ export class BaseSidenavModule {
     this.inputIds.forEach((id) => {
       const el = document.getElementById(id);
       if (!el) return;
-      const handler = () => { if (this.editingId) this.scheduleAutoSave(); };
+      const handler = (e) => {
+        if (this.editingId) this.scheduleAutoSave(e._fromUndo === true);
+      };
       el.addEventListener("input", handler);
       el.addEventListener("change", handler);
     });
@@ -82,6 +87,7 @@ export class BaseSidenavModule {
     this.clearForm();
     this.el("Delete")?.classList.add("hidden");
     Sidenav.open(this.panelId);
+    this._attachUndoManagers();
     this.onAfterOpen();
   }
 
@@ -94,10 +100,12 @@ export class BaseSidenavModule {
     this.fillForm(entity);
     this.el("Delete")?.classList.remove("hidden");
     Sidenav.open(this.panelId);
+    this._attachUndoManagers();
     this.onAfterOpen();
   }
 
   async close() {
+    this._detachUndoManagers();
     if (this.autoSaveTimeout) {
       clearTimeout(this.autoSaveTimeout);
       this.autoSaveTimeout = null;
@@ -110,8 +118,12 @@ export class BaseSidenavModule {
 
   // --- Auto-save ---
 
-  scheduleAutoSave() {
-    if (this.isSaving) return;
+  /**
+   * @param {boolean} [forceQueue=false] - when true, schedules even if a save
+   *   is already in-flight (used by undo/redo to ensure restored state persists)
+   */
+  scheduleAutoSave(forceQueue = false) {
+    if (this.isSaving && !forceQueue) return;
     if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
     this.showSaveStatus("Saving...");
     this.autoSaveTimeout = setTimeout(() => this.save(), AUTO_SAVE_DELAY);
@@ -132,11 +144,13 @@ export class BaseSidenavModule {
     try {
       if (this.editingId) {
         await this.api.update(this.editingId, data);
+        this._markAllSaved();
         this.showSaveStatus("Saved");
       } else {
         const response = await this.api.create(data);
         const result = await response.json();
         this.editingId = result.id;
+        this._markAllSaved();
         this.showSaveStatus("Created");
 
         this.el("Header").textContent = this.editLabel;
@@ -197,8 +211,72 @@ export class BaseSidenavModule {
     }
 
     if (text === "Saved" || text === "Created" || text === "Error") {
-      setTimeout(() => statusEl.classList.add("hidden"), 2000);
+      setTimeout(() => {
+        if (this._hasAnyUnsavedChanges()) {
+          statusEl.textContent = "Modified";
+          statusEl.classList.remove(
+            "hidden",
+            "sidenav-status-saved",
+            "sidenav-status-error",
+            "sidenav-status-saving",
+          );
+          statusEl.classList.add("sidenav-status-unsaved");
+        } else {
+          statusEl.classList.add("hidden");
+        }
+      }, 2000);
     }
+  }
+
+  // --- Undo/Redo support ---
+
+  /** Attach one UndoManager per text-like field in inputIds. */
+  _attachUndoManagers() {
+    this._detachUndoManagers();
+    for (const id of this.inputIds) {
+      const el = document.getElementById(id);
+      if (!el || !this._isTextLike(el)) continue;
+      const manager = new UndoManager();
+      manager.attach(el);
+      this._undoManagers.set(id, manager);
+    }
+  }
+
+  /** Detach all UndoManagers and clear the map. */
+  _detachUndoManagers() {
+    for (const manager of this._undoManagers.values()) {
+      manager.detach();
+    }
+    this._undoManagers.clear();
+  }
+
+  /** Mark the current value as saved in every active UndoManager. */
+  _markAllSaved() {
+    for (const manager of this._undoManagers.values()) {
+      manager.markSaved();
+    }
+  }
+
+  /** Returns true if any text field has diverged from its saved baseline. */
+  _hasAnyUnsavedChanges() {
+    for (const manager of this._undoManagers.values()) {
+      if (manager.hasUnsavedChanges()) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Returns true for textarea and text-like input elements.
+   * Skips selects, date pickers, checkboxes, number inputs — undo on those is odd UX.
+   * @param {HTMLElement} el
+   */
+  _isTextLike(el) {
+    if (el.tagName === "TEXTAREA") return true;
+    if (el.tagName === "INPUT") {
+      const textTypes = ["text", "email", "url", "search", ""];
+      return textTypes.includes((el.type ?? "").toLowerCase());
+    }
+    return false;
   }
 
   // --- Hooks (override in subclass as needed) ---

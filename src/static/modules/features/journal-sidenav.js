@@ -7,6 +7,7 @@ import { JournalAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { showConfirm } from "../ui/confirm.js";
 import { escapeHtml } from "../utils.js";
+import { UndoManager } from "../ui/undo-manager.js";
 
 const MOOD_LABELS = {
   great: "Great",
@@ -20,6 +21,8 @@ export class JournalSidenavModule {
   constructor(taskManager) {
     this.tm = taskManager;
     this.editingId = null;
+    /** @type {UndoManager | null} */
+    this._undoManager = null;
   }
 
   bindEvents() {
@@ -42,6 +45,12 @@ export class JournalSidenavModule {
     document.getElementById("journalSidenavEditBtn")?.addEventListener(
       "click",
       () => this._switchToEdit(),
+    );
+
+    // Update "Modified" dot whenever the body changes in edit mode
+    document.getElementById("journalSidenavBody")?.addEventListener(
+      "input",
+      () => this._updateUnsavedDot(),
     );
   }
 
@@ -97,6 +106,7 @@ export class JournalSidenavModule {
   }
 
   close() {
+    this._detachJournalUndo();
     Sidenav.close("journalSidenav");
     this.editingId = null;
   }
@@ -106,6 +116,7 @@ export class JournalSidenavModule {
   // ------------------------------------------------------------------
 
   _showViewMode() {
+    this._detachJournalUndo();
     document.getElementById("journalSidenavViewSection").classList.remove(
       "hidden",
     );
@@ -115,6 +126,7 @@ export class JournalSidenavModule {
     document.getElementById("journalSidenavCancel").classList.add("hidden");
     document.getElementById("journalSidenavEditBtn").classList.remove("hidden");
     document.getElementById("journalSidenavSave").classList.add("hidden");
+    this._updateUnsavedDot();
   }
 
   _showEditMode() {
@@ -127,6 +139,7 @@ export class JournalSidenavModule {
     document.getElementById("journalSidenavCancel").classList.remove("hidden");
     document.getElementById("journalSidenavEditBtn").classList.add("hidden");
     document.getElementById("journalSidenavSave").classList.remove("hidden");
+    this._attachJournalUndo();
   }
 
   _switchToEdit() {
@@ -244,6 +257,8 @@ export class JournalSidenavModule {
 
     this.tm.journal = await JournalAPI.fetchAll();
     this.tm.journalModule.renderView();
+    this._undoManager?.markSaved();
+    this._updateUnsavedDot();
     showToast("Entry saved");
 
     // After save, switch to view mode to show the rendered result
@@ -277,5 +292,26 @@ export class JournalSidenavModule {
     this.tm.journalModule.renderView();
     this.close();
     showToast("Entry deleted");
+  }
+
+  // --- Undo/Redo helpers ---
+
+  _attachJournalUndo() {
+    const el = document.getElementById("journalSidenavBody");
+    if (!el) return;
+    if (!this._undoManager) this._undoManager = new UndoManager();
+    this._undoManager.attach(el);
+  }
+
+  _detachJournalUndo() {
+    this._undoManager?.detach();
+    this._updateUnsavedDot();
+  }
+
+  _updateUnsavedDot() {
+    const dot = document.getElementById("journalSidenavUnsavedDot");
+    if (!dot) return;
+    const show = this._undoManager?.hasUnsavedChanges() ?? false;
+    dot.classList.toggle("hidden", !show);
   }
 }
