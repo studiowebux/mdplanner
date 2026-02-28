@@ -57,6 +57,7 @@ import { MeetingSidenavModule } from "./modules/features/meeting-sidenav.js";
 import { JournalModule } from "./modules/features/journal.js";
 import { JournalSidenavModule } from "./modules/features/journal-sidenav.js";
 import { HabitsModule } from "./modules/features/habits.js";
+import { AnalyticsModule } from "./modules/views/analytics.js";
 import { HabitSidenavModule } from "./modules/features/habit-sidenav.js";
 import { FishboneModule } from "./modules/features/fishbone.js";
 import { FishboneSidenavModule } from "./modules/features/fishbone-sidenav.js";
@@ -266,6 +267,7 @@ class TaskManager {
     this.journalModule = new JournalModule(this);
     this.dnsModule = new DnsModule(this);
     this.habitsModule = new HabitsModule(this);
+    this.analyticsModule = new AnalyticsModule(this);
     this.fishboneModule = new FishboneModule(this);
     this.fishboneSidenavModule = new FishboneSidenavModule(this);
     this.onboardingModule = new OnboardingModule(this);
@@ -432,6 +434,7 @@ class TaskManager {
       { id: "fishboneViewBtn", view: "fishbone" },
       { id: "onboardingViewBtn", view: "onboarding" },
       { id: "financesViewBtn", view: "finances" },
+      { id: "analyticsViewBtn", view: "analytics" },
     ];
     additionalViews.forEach(({ id, view }) => {
       document.getElementById(id)?.addEventListener("click", () => {
@@ -695,6 +698,12 @@ class TaskManager {
         this.closeMobileMenu();
       });
     document
+      .getElementById("analyticsViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("analytics");
+        this.closeMobileMenu();
+      });
+    document
       .getElementById("ollamaViewBtnMobile")
       ?.addEventListener("click", () => {
         this.switchView("ollama");
@@ -941,6 +950,7 @@ class TaskManager {
     this.onboardingModule.bindEvents();
     this.financesSidenavModule.bindEvents();
     this.financesModule.bindEvents();
+    this.analyticsModule.bindEvents();
   }
 
   async loadPortfolio() {
@@ -986,6 +996,7 @@ class TaskManager {
       "finances",
       "ollama",
       "dns",
+      "analytics",
     ];
 
     // If no features configured, show everything
@@ -1188,6 +1199,7 @@ class TaskManager {
       "fishboneViewBtnMobile",
       "onboardingViewBtnMobile",
       "financesViewBtnMobile",
+      "analyticsViewBtnMobile",
       "ollamaViewBtnMobile",
       "dnsViewBtnMobile",
       "configViewBtnMobile",
@@ -1235,6 +1247,7 @@ class TaskManager {
     document.getElementById("fishboneView")?.classList.add("hidden");
     document.getElementById("onboardingView")?.classList.add("hidden");
     document.getElementById("financesView")?.classList.add("hidden");
+    document.getElementById("analyticsView")?.classList.add("hidden");
     document.getElementById("ollamaView")?.classList.add("hidden");
     document.getElementById("dnsView")?.classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
@@ -1401,6 +1414,10 @@ class TaskManager {
       this.activateViewButton("finances");
       document.getElementById("financesView").classList.remove("hidden");
       this.financesModule.load();
+    } else if (view === "analytics") {
+      this.activateViewButton("analytics");
+      document.getElementById("analyticsView").classList.remove("hidden");
+      this.analyticsModule.load();
     } else if (view === "ollama") {
       this.activateViewButton("ollama");
       document.getElementById("ollamaView").classList.remove("hidden");
