@@ -11,8 +11,6 @@ export class ProjectValueSidenavModule {
     this.tm = taskManager;
     this.editingBoardId = null;
     this.currentBoard = null;
-    this.autoSaveTimeout = null;
-
     this.sections = ["customerSegments", "problem", "solution", "benefit"];
 
     this.sectionNames = {
@@ -36,14 +34,9 @@ export class ProjectValueSidenavModule {
       "click",
       () => this.handleDelete(),
     );
-
-    document.getElementById("pvbSidenavTitle")?.addEventListener(
-      "input",
-      () => this.scheduleAutoSave(),
-    );
-    document.getElementById("pvbSidenavDate")?.addEventListener(
-      "change",
-      () => this.scheduleAutoSave(),
+    document.getElementById("pvbSidenavSave")?.addEventListener(
+      "click",
+      () => this.save(),
     );
 
     this.sections.forEach((section) => {
@@ -86,10 +79,6 @@ export class ProjectValueSidenavModule {
   }
 
   close() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-    }
     Sidenav.close("pvbSidenav");
     this.editingBoardId = null;
     this.currentBoard = null;
@@ -152,7 +141,6 @@ export class ProjectValueSidenavModule {
       if (text) {
         this.currentBoard[section].push(text);
         this.renderSection(section);
-        this.scheduleAutoSave();
       }
       inputWrapper.remove();
     };
@@ -168,13 +156,6 @@ export class ProjectValueSidenavModule {
   removeItem(section, index) {
     this.currentBoard[section].splice(index, 1);
     this.renderSection(section);
-    this.scheduleAutoSave();
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {

@@ -13,15 +13,15 @@
   min-width: 12rem;
   padding: 0.35rem 0.625rem;
   font-size: var(--font-size-sm);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
   background: var(--bg);
-  color: var(--text);
+  color: var(--color-text-primary);
 }
 
 .dns-search:focus {
   outline: none;
-  border-color: var(--text-secondary);
+  border-color: var(--color-text-secondary);
 }
 
 .dns-filter-chips {
@@ -33,23 +33,23 @@
 .dns-chip {
   font-size: var(--font-size-xs);
   padding: 0.2rem 0.5rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-border-default);
   border-radius: 9999px;
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: background 0.1s, color 0.1s;
 }
 
 .dns-chip:hover {
-  background: var(--surface);
-  color: var(--text);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
 }
 
 .dns-chip.active {
-  background: var(--text);
+  background: var(--color-text-primary);
   color: var(--bg);
-  border-color: var(--text);
+  border-color: var(--color-text-primary);
 }
 
 /* Table */
@@ -69,14 +69,14 @@
   padding: 0.5rem 0.75rem;
   font-size: var(--font-size-xs);
   font-weight: 600;
-  color: var(--text-secondary);
-  border-bottom: 1px solid var(--border);
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border-default);
   white-space: nowrap;
 }
 
 .dns-table td {
   padding: 0.6rem 0.75rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border-default);
   vertical-align: middle;
 }
 
@@ -85,7 +85,7 @@
 }
 
 .dns-table tr:hover td {
-  background: var(--surface);
+  background: var(--color-bg-tertiary);
 }
 
 .dns-table input[type="checkbox"] {
@@ -95,12 +95,12 @@
 /* Domain name cell */
 .dns-domain-name {
   font-weight: 500;
-  color: var(--text);
+  color: var(--color-text-primary);
 }
 
 .dns-provider-badge {
   font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   margin-top: 0.125rem;
 }
 
@@ -117,9 +117,9 @@
 }
 
 .dns-badge-critical {
-  background: var(--error-bg);
-  color: var(--error);
-  border: 1px solid var(--error);
+  background: var(--color-error-bg);
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
 }
 
 .dns-badge-urgent {
@@ -148,8 +148,8 @@
 
 .dns-badge-upcoming {
   background: #fefce8;
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-default);
   opacity: 0.75;
 }
 
@@ -160,9 +160,9 @@
 }
 
 .dns-badge-unknown {
-  background: var(--surface);
-  color: var(--text-tertiary);
-  border: 1px solid var(--border);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border-default);
 }
 
 /* Auto-renew shield icon */
@@ -176,14 +176,14 @@
 
 /* Renewal cost */
 .dns-cost {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
 /* Last fetched */
 .dns-fetched {
   font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   white-space: nowrap;
 }
 
@@ -197,9 +197,9 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.6rem 1rem;
-  background: var(--bg-editor);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   z-index: 100;
   font-size: var(--font-size-sm);
@@ -210,14 +210,14 @@
 }
 
 .dns-batch-count {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
 .dns-batch-sep {
   width: 1px;
   height: 1.25rem;
-  background: var(--border);
+  background: var(--color-border-default);
 }
 
 /* Inline price popover */
@@ -231,17 +231,17 @@
   width: 6rem;
   padding: 0.25rem 0.5rem;
   font-size: var(--font-size-sm);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
   background: var(--bg);
-  color: var(--text);
+  color: var(--color-text-primary);
 }
 
 /* Empty state */
 .dns-empty {
   padding: 3rem 1rem;
   text-align: center;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
 }
 
@@ -256,7 +256,7 @@
 
 .dns-last-sync {
   font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
 }
 
 @media (max-width: 36rem) {

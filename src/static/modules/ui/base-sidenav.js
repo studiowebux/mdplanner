@@ -6,8 +6,6 @@ import { Sidenav } from "./sidenav.js";
 import { showToast } from "./toast.js";
 import { UndoManager } from "./undo-manager.js";
 
-const AUTO_SAVE_DELAY = 1000;
-
 /**
  * Base class for sidenav modules that follow the standard CRUD pattern.
  *
@@ -33,10 +31,11 @@ export class BaseSidenavModule {
   constructor(taskManager) {
     this.tm = taskManager;
     this.editingId = null;
-    this.autoSaveTimeout = null;
     this.isSaving = false;
     /** @type {Map<string, UndoManager>} keyed by element ID */
     this._undoManagers = new Map();
+    /** ESC key handler — bound once, removed on close */
+    this._escHandler = (e) => { if (e.key === "Escape") this.close(); };
   }
 
   /** @abstract */ get prefix() { throw new Error("override prefix"); }
@@ -70,15 +69,6 @@ export class BaseSidenavModule {
       });
     }
 
-    this.inputIds.forEach((id) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      const handler = (e) => {
-        if (this.editingId) this.scheduleAutoSave(e._fromUndo === true);
-      };
-      el.addEventListener("input", handler);
-      el.addEventListener("change", handler);
-    });
   }
 
   openNew() {
@@ -86,7 +76,9 @@ export class BaseSidenavModule {
     this.el("Header").textContent = this.newLabel;
     this.clearForm();
     this.el("Delete")?.classList.add("hidden");
+    document.addEventListener("keydown", this._escHandler);
     Sidenav.open(this.panelId);
+    this._ensureFullscreenToggle();
     this._attachUndoManagers();
     this.onAfterOpen();
   }
@@ -99,34 +91,18 @@ export class BaseSidenavModule {
     this.el("Header").textContent = this.editLabel;
     this.fillForm(entity);
     this.el("Delete")?.classList.remove("hidden");
+    document.addEventListener("keydown", this._escHandler);
     Sidenav.open(this.panelId);
+    this._ensureFullscreenToggle();
     this._attachUndoManagers();
     this.onAfterOpen();
   }
 
-  async close() {
+  close() {
+    document.removeEventListener("keydown", this._escHandler);
     this._detachUndoManagers();
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-      // Flush pending save before closing so in-progress edits are not lost
-      await this.save();
-    }
     Sidenav.close(this.panelId);
     this.editingId = null;
-  }
-
-  // --- Auto-save ---
-
-  /**
-   * @param {boolean} [forceQueue=false] - when true, schedules even if a save
-   *   is already in-flight (used by undo/redo to ensure restored state persists)
-   */
-  scheduleAutoSave(forceQueue = false) {
-    if (this.isSaving && !forceQueue) return;
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), AUTO_SAVE_DELAY);
   }
 
   async save() {
@@ -277,6 +253,53 @@ export class BaseSidenavModule {
       return textTypes.includes((el.type ?? "").toLowerCase());
     }
     return false;
+  }
+
+  // --- Fullscreen toggle ---
+
+  /**
+   * Inject a fullscreen toggle button into the sidenav header (once per panel).
+   * Restores the user's stored preference on every open.
+   */
+  _ensureFullscreenToggle() {
+    const panel = document.getElementById(this.panelId);
+    if (!panel) return;
+
+    // Restore stored fullscreen state
+    const stored = localStorage.getItem("sidenavFullscreen") === "1";
+    panel.classList.toggle("sidenav-fullscreen", stored);
+
+    // Inject button only once
+    if (panel.querySelector(".sidenav-fullscreen-toggle")) return;
+
+    const headerGroup = panel.querySelector(".sidenav-header > div") ||
+      panel.querySelector(".sidenav-header");
+    if (!headerGroup) return;
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "sidenav-fullscreen-toggle";
+    btn.title = "Toggle fullscreen";
+    btn.setAttribute("aria-label", "Toggle fullscreen");
+    btn.innerHTML =
+      `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 3 21 3 21 9"></polyline>
+        <polyline points="9 21 3 21 3 15"></polyline>
+        <line x1="21" y1="3" x2="14" y2="10"></line>
+        <line x1="3" y1="21" x2="10" y2="14"></line>
+      </svg>`;
+
+    btn.addEventListener("click", () => {
+      const isFullscreen = panel.classList.toggle("sidenav-fullscreen");
+      localStorage.setItem("sidenavFullscreen", isFullscreen ? "1" : "0");
+    });
+
+    const closeBtn = headerGroup.querySelector('[id$="SidenavClose"], .sidenav-close');
+    if (closeBtn) {
+      headerGroup.insertBefore(btn, closeBtn);
+    } else {
+      headerGroup.appendChild(btn);
+    }
   }
 
   // --- Hooks (override in subclass as needed) ---

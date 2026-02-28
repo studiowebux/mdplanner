@@ -6,6 +6,7 @@ import { RetrospectivesAPI } from "../api.js";
 export class RetrospectivesModule {
   constructor(taskManager) {
     this.taskManager = taskManager;
+    this.currentView = localStorage.getItem("retrospectivesView") || "table";
   }
 
   async load() {
@@ -20,6 +21,9 @@ export class RetrospectivesModule {
   renderView() {
     const container = document.getElementById("retrospectivesContainer");
     const emptyState = document.getElementById("emptyRetrospectivesState");
+    const toggle = document.getElementById("retroViewToggle");
+
+    if (toggle) toggle.textContent = this.currentView === "table" ? "Card view" : "Table view";
 
     if (
       !this.taskManager.retrospectives ||
@@ -31,6 +35,60 @@ export class RetrospectivesModule {
     }
 
     emptyState?.classList.add("hidden");
+
+    if (this.currentView === "table") {
+      this._renderTable(container);
+    } else {
+      this._renderCards(container);
+    }
+  }
+
+  _renderTable(container) {
+    container.className = "retro-table-wrap";
+    const rows = this.taskManager.retrospectives.map((retro) => {
+      const statusClass = retro.status === "open" ? "retro-status-open" : "retro-status-closed";
+      return `
+        <tr class="retro-tr">
+          <td class="retro-td retro-td-title">${retro.title}</td>
+          <td class="retro-td">${retro.date}</td>
+          <td class="retro-td">
+            <span class="retro-status-badge ${statusClass}">${retro.status}</span>
+          </td>
+          <td class="retro-td retro-td-count">${retro.continue.length}</td>
+          <td class="retro-td retro-td-count">${retro.stop.length}</td>
+          <td class="retro-td retro-td-count">${retro.start.length}</td>
+          <td class="retro-td retro-td-actions">
+            <button type="button"
+                    onclick="taskManager.retrospectiveSidenavModule.openEdit('${retro.id}')"
+                    class="btn-ghost">Edit</button>
+            <button type="button"
+                    onclick="taskManager.deleteRetrospective('${retro.id}')"
+                    class="btn-danger-ghost">Delete</button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    container.innerHTML = `
+      <table class="retro-table">
+        <thead>
+          <tr>
+            <th class="retro-th">Title</th>
+            <th class="retro-th">Date</th>
+            <th class="retro-th">Status</th>
+            <th class="retro-th">Continue</th>
+            <th class="retro-th">Stop</th>
+            <th class="retro-th">Start</th>
+            <th class="retro-th"></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  _renderCards(container) {
+    container.className = "grid grid-cols-1 lg:grid-cols-2 gap-6";
     container.innerHTML = this.taskManager.retrospectives
       .map((retro) => {
         const statusColor = retro.status === "open"
@@ -45,7 +103,7 @@ export class RetrospectivesModule {
           </div>
           <div class="flex items-center gap-2">
             <span class="px-2 py-1 text-xs rounded-full ${statusColor}">${retro.status}</span>
-            <button onclick="taskManager.retrospectiveSidenavModule.openEdit('${retro.id}')" class="text-sm text-secondary hover:text-primary">Edit</button>
+            <button type="button" onclick="taskManager.retrospectiveSidenavModule.openEdit('${retro.id}')" class="btn-ghost">Edit</button>
           </div>
         </div>
         <div class="px-4 pt-4 pb-2 space-y-3">
@@ -86,8 +144,8 @@ export class RetrospectivesModule {
             </ul>
           </div>
         </div>
-        <div class="px-4 py-2 border-t border-default flex justify-end">
-          <button onclick="taskManager.deleteRetrospective('${retro.id}')" class="text-sm text-error hover:text-error-text">Delete</button>
+        <div class="px-4 py-2 border-t border-default flex justify-end items-center">
+          <button type="button" onclick="taskManager.deleteRetrospective('${retro.id}')" class="btn-danger-ghost">Delete</button>
         </div>
       </div>
     `;
@@ -191,6 +249,15 @@ export class RetrospectivesModule {
           "hidden",
         );
       });
+
+    document.getElementById("retroViewToggle")?.addEventListener(
+      "click",
+      () => {
+        this.currentView = this.currentView === "table" ? "card" : "table";
+        localStorage.setItem("retrospectivesView", this.currentView);
+        this.renderView();
+      },
+    );
 
     // Add retrospective button - opens sidenav
     document

@@ -45,7 +45,7 @@
   gap: 0.75rem;
   padding: 1rem;
   border: 1px solid var(--color-border-default);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   background-color: var(--color-bg-primary);
   cursor: pointer;
   transition: box-shadow 0.15s ease-out, border-color 0.15s ease-out;
@@ -127,7 +127,7 @@
   padding: 0.375rem 0.75rem 0.375rem 2rem;
   font-size: var(--font-size-sm);
   border: 1px solid var(--color-border-default);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
 }
@@ -160,7 +160,7 @@
 .people-stat-card {
   padding: 1rem;
   background-color: var(--color-bg-secondary);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
 }
 
 .people-stat-label {

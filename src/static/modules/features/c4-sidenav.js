@@ -11,7 +11,6 @@ export class C4SidenavModule {
     this.tm = taskManager;
     this.editingComponentId = null;
     this.currentComponent = null;
-    this.autoSaveTimeout = null;
   }
 
   bindEvents() {
@@ -23,31 +22,14 @@ export class C4SidenavModule {
       "click",
       () => this.close(),
     );
+    document.getElementById("c4SidenavSave")?.addEventListener(
+      "click",
+      () => this.save(),
+    );
     document.getElementById("c4SidenavDelete")?.addEventListener(
       "click",
       () => this.handleDelete(),
     );
-
-    // Auto-save on input changes
-    const inputs = [
-      "c4SidenavName",
-      "c4SidenavLevel",
-      "c4SidenavType",
-      "c4SidenavTechnology",
-      "c4SidenavDescription",
-      "c4SidenavX",
-      "c4SidenavY",
-    ];
-    inputs.forEach((id) => {
-      document.getElementById(id)?.addEventListener(
-        "input",
-        () => this.scheduleAutoSave(),
-      );
-      document.getElementById(id)?.addEventListener(
-        "change",
-        () => this.scheduleAutoSave(),
-      );
-    });
 
     // Level change updates default type
     document.getElementById("c4SidenavLevel")?.addEventListener(
@@ -124,15 +106,7 @@ export class C4SidenavModule {
     Sidenav.open("c4Sidenav");
   }
 
-  async close() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-      // Flush pending save before closing so changes are not lost
-      if (this.currentComponent?.name) {
-        await this.save();
-      }
-    }
+  close() {
     Sidenav.close("c4Sidenav");
     this.editingComponentId = null;
     this.currentComponent = null;
@@ -264,7 +238,6 @@ export class C4SidenavModule {
         this.currentComponent.connections.push({ target, label });
         inputWrapper.remove();
         this.renderConnections();
-        this.scheduleAutoSave();
       }
     };
 
@@ -369,7 +342,6 @@ export class C4SidenavModule {
       if (target && label) {
         this.currentComponent.connections[index] = { target, label };
         this.renderConnections();
-        this.scheduleAutoSave();
       }
     };
 
@@ -385,7 +357,6 @@ export class C4SidenavModule {
   removeConnection(index) {
     this.currentComponent.connections.splice(index, 1);
     this.renderConnections();
-    this.scheduleAutoSave();
   }
 
   getDefaultTypeForLevel(level) {
@@ -417,12 +388,6 @@ export class C4SidenavModule {
       connections: this.currentComponent.connections || [],
       children: this.currentComponent.children || [],
     };
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {

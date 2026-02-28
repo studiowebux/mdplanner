@@ -257,18 +257,6 @@ export class NotesModule {
     }
   }
 
-  scheduleAutoSave() {
-    // Clear existing timeout
-    if (this.tm.autoSaveTimeout) {
-      clearTimeout(this.tm.autoSaveTimeout);
-    }
-
-    // Schedule auto-save after 1 second of inactivity
-    this.tm.autoSaveTimeout = setTimeout(() => {
-      this.autoSave();
-    }, 1000);
-  }
-
   async autoSave() {
     if (this.tm.activeNote === null) return;
 
@@ -519,13 +507,10 @@ export class NotesModule {
       .getElementById("deleteNoteBtn")
       .addEventListener("click", () => this.deleteCurrent());
 
-    // Auto-save events for note editing
+    // Save button for inline note editor
     document
-      .getElementById("activeNoteTitle")
-      .addEventListener("input", () => this.scheduleAutoSave());
-    document
-      .getElementById("activeNoteEditor")
-      .addEventListener("input", () => this.scheduleAutoSave());
+      .getElementById("notesInlineSave")
+      ?.addEventListener("click", () => this.autoSave());
 
     // Close modal on background click
     document.getElementById("noteModal").addEventListener("click", (e) => {

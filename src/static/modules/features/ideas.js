@@ -1,11 +1,17 @@
 import { IdeasAPI } from "../api.js";
 
+const ARCHIVED_STATUSES = ["implemented", "cancelled"];
+
 /**
  * IdeasModule - Handles ideas CRUD and Zettelkasten-style linking
  */
 export class IdeasModule {
   constructor(taskManager) {
     this.taskManager = taskManager;
+    this.currentStatusFilter = "";
+    this.currentCategoryFilter = "";
+    this.searchQuery = "";
+    this.showArchived = localStorage.getItem("showArchivedIdeas") === "true";
   }
 
   async load() {
@@ -17,9 +23,59 @@ export class IdeasModule {
     }
   }
 
+  _getVisible() {
+    return (this.taskManager.ideas || []).filter((idea) => {
+      if (!this.showArchived && ARCHIVED_STATUSES.includes(idea.status)) {
+        return false;
+      }
+      if (this.currentStatusFilter && idea.status !== this.currentStatusFilter) {
+        return false;
+      }
+      if (
+        this.currentCategoryFilter &&
+        (idea.category || "") !== this.currentCategoryFilter
+      ) {
+        return false;
+      }
+      if (this.searchQuery) {
+        const q = this.searchQuery.toLowerCase();
+        const inTitle = (idea.title || "").toLowerCase().includes(q);
+        const inDesc = (idea.description || "").toLowerCase().includes(q);
+        if (!inTitle && !inDesc) return false;
+      }
+      return true;
+    });
+  }
+
+  _updateCategoryFilter() {
+    const sel = document.getElementById("ideasFilterCategory");
+    if (!sel) return;
+
+    const categories = [
+      ...new Set(
+        (this.taskManager.ideas || [])
+          .map((i) => i.category)
+          .filter(Boolean)
+          .sort(),
+      ),
+    ];
+
+    // Preserve current selection
+    const current = sel.value;
+    sel.innerHTML =
+      '<option value="">All categories</option>' +
+      categories.map((c) => `<option value="${c}">${c}</option>`).join("");
+
+    if (categories.includes(current)) sel.value = current;
+  }
+
   renderView() {
     const container = document.getElementById("ideasContainer");
     const emptyState = document.getElementById("emptyIdeasState");
+
+    this._updateCategoryFilter();
+
+    const visible = this._getVisible();
 
     if (!this.taskManager.ideas || this.taskManager.ideas.length === 0) {
       emptyState.classList.remove("hidden");
@@ -28,18 +84,24 @@ export class IdeasModule {
     }
 
     emptyState.classList.add("hidden");
+
     const statusColors = {
-      new:
-        "bg-tertiary text-primary border border-default",
-      considering:
-        "bg-warning-bg text-warning-text",
+      new: "bg-tertiary text-primary border border-default",
+      considering: "bg-warning-bg text-warning-text",
       planned: "bg-info-bg text-info-text",
-      approved:
-        "bg-success-bg text-success-text",
+      approved: "bg-success-bg text-success-text",
       rejected: "bg-error-bg text-error-text",
+      implemented: "bg-success-bg text-success-text idea-status-implemented-badge",
+      cancelled: "bg-tertiary text-muted idea-status-cancelled-badge",
     };
 
-    container.innerHTML = this.taskManager.ideas
+    if (visible.length === 0) {
+      container.innerHTML =
+        '<p class="text-sm text-muted col-span-full text-center py-8">No ideas match the current filters.</p>';
+      return;
+    }
+
+    container.innerHTML = visible
       .map((idea) => {
         const linkedIdeas = (idea.links || [])
           .map((id) => this.taskManager.ideas.find((i) => i.id === id))
@@ -47,8 +109,9 @@ export class IdeasModule {
         const backlinkedIdeas = (idea.backlinks || [])
           .map((id) => this.taskManager.ideas.find((i) => i.id === id))
           .filter(Boolean);
+        const isArchived = ARCHIVED_STATUSES.includes(idea.status);
         return `
-      <div class="bg-secondary rounded-lg p-4 border border-default">
+      <div class="bg-secondary rounded-lg p-4 border border-default${isArchived ? " idea-card-archived" : ""}">
         <div class="flex justify-between items-start mb-2">
           <h3 class="font-medium text-primary">${idea.title}</h3>
           <span class="px-2 py-1 text-xs rounded ${
@@ -61,6 +124,16 @@ export class IdeasModule {
             : ""
         }
         <p class="text-xs text-muted mb-2">Created: ${idea.created}</p>
+        ${
+          idea.implementedAt
+            ? `<p class="text-xs text-muted mb-1">Implemented: ${idea.implementedAt}</p>`
+            : ""
+        }
+        ${
+          idea.cancelledAt
+            ? `<p class="text-xs text-muted mb-1">Cancelled: ${idea.cancelledAt}</p>`
+            : ""
+        }
         ${
           idea.description
             ? `<p class="text-sm text-secondary mb-2">${idea.description}</p>`
@@ -98,9 +171,9 @@ export class IdeasModule {
         `
             : ""
         }
-        <div class="flex justify-end space-x-2 mt-3">
-          <button onclick="taskManager.openIdeaModal('${idea.id}')" class="text-sm text-secondary hover:text-primary">Edit</button>
-          <button onclick="taskManager.deleteIdea('${idea.id}')" class="text-sm text-error hover:text-error-text">Delete</button>
+        <div class="flex justify-end gap-1 mt-3">
+          <button type="button" onclick="taskManager.openIdeaModal('${idea.id}')" class="btn-ghost">Edit</button>
+          <button type="button" onclick="taskManager.deleteIdea('${idea.id}')" class="btn-danger-ghost">Delete</button>
         </div>
       </div>
     `;
@@ -311,6 +384,41 @@ export class IdeasModule {
         "click",
         () => this.taskManager.ideaSidenavModule.openNew(),
       );
+
+    // Filter bar
+    document.getElementById("ideasFilterSearch")?.addEventListener(
+      "input",
+      (e) => {
+        this.searchQuery = e.target.value.trim();
+        this.renderView();
+      },
+    );
+
+    document.getElementById("ideasFilterStatus")?.addEventListener(
+      "change",
+      (e) => {
+        this.currentStatusFilter = e.target.value;
+        this.renderView();
+      },
+    );
+
+    document.getElementById("ideasFilterCategory")?.addEventListener(
+      "change",
+      (e) => {
+        this.currentCategoryFilter = e.target.value;
+        this.renderView();
+      },
+    );
+
+    const archivedCb = document.getElementById("ideasShowArchived");
+    if (archivedCb) {
+      archivedCb.checked = this.showArchived;
+      archivedCb.addEventListener("change", (e) => {
+        this.showArchived = e.target.checked;
+        localStorage.setItem("showArchivedIdeas", this.showArchived);
+        this.renderView();
+      });
+    }
 
     // Legacy modal bindings (keep for backwards compatibility)
     document

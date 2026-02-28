@@ -2133,6 +2133,19 @@
                   >
                 </div>
                 <div>
+                  <label class="block text-sm font-medium text-secondary mb-1">
+                    Task Display
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      id="hideCompletedTasks"
+                      class="rounded border-strong"
+                    >
+                    <span class="text-sm text-secondary">Hide completed tasks in board and list views</span>
+                  </label>
+                </div>
+                <div>
                   <label
                     class="flex items-center text-sm font-medium text-secondary mb-1"
                   >
@@ -2738,6 +2751,14 @@
                         />
                       </svg>
                     </button>
+                    <!-- Save -->
+                    <button
+                      type="button"
+                      id="notesInlineSave"
+                      class="btn"
+                    >
+                      Save
+                    </button>
                   </div>
                 </div>
 
@@ -2907,9 +2928,12 @@
             <h2 class="text-lg font-medium text-primary">
               Milestones
             </h2>
-            <button id="addMilestoneBtn" class="btn-primary py-2 rounded-lg">
-              + Add Milestone
-            </button>
+            <div class="flex gap-2 items-center">
+              <button id="milestoneViewToggle" class="btn-secondary">Card view</button>
+              <button id="addMilestoneBtn" class="btn-primary py-2 rounded-lg">
+                + Add Milestone
+              </button>
+            </div>
           </div>
           <div class="p-6">
             <div id="emptyMilestonesState" class="text-center py-12 hidden">
@@ -2957,6 +2981,30 @@
               + Add Idea
             </button>
           </div>
+          <div class="ideas-view-filters" id="ideasFilterBar">
+            <input
+              type="text"
+              id="ideasFilterSearch"
+              placeholder="Search ideas..."
+            >
+            <select id="ideasFilterStatus">
+              <option value="">All statuses</option>
+              <option value="new">New</option>
+              <option value="considering">Considering</option>
+              <option value="planned">Planned</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="implemented">Implemented</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <select id="ideasFilterCategory">
+              <option value="">All categories</option>
+            </select>
+            <label class="ideas-filter-archive-label">
+              <input type="checkbox" id="ideasShowArchived">
+              Show archived
+            </label>
+          </div>
           <div class="p-6">
             <div id="emptyIdeasState" class="text-center py-12 hidden">
               <svg
@@ -2999,12 +3047,15 @@
             <h2 class="text-lg font-medium text-primary">
               Retrospectives
             </h2>
-            <button
-              id="addRetrospectiveBtn"
-              class="btn-primary py-2 rounded-lg"
-            >
-              + Add Retrospective
-            </button>
+            <div class="flex gap-2 items-center">
+              <button id="retroViewToggle" class="btn-secondary">Card view</button>
+              <button
+                id="addRetrospectiveBtn"
+                class="btn-primary py-2 rounded-lg"
+              >
+                + Add Retrospective
+              </button>
+            </div>
           </div>
           <div class="p-6">
             <div id="emptyRetrospectivesState" class="text-center py-12 hidden">
@@ -3333,6 +3384,8 @@
               <option value="planned">Planned</option>
               <option value="approved">Approved</option>
               <option value="rejected">Rejected</option>
+              <option value="implemented">Implemented</option>
+              <option value="cancelled">Cancelled</option>
             </select>
             <button id="ideaSorterClearFilters" class="btn-secondary">Clear</button>
           </div>
@@ -6420,7 +6473,7 @@
       <!-- Billing View -->
       <div id="billingView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow">
-          <div class="px-6 py-4 border-b border-default">
+          <div class="px-6 py-4">
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-lg font-medium text-primary">
                 Billing
@@ -6635,7 +6688,7 @@
       <!-- CRM View -->
       <div id="crmView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow">
-          <div class="px-6 py-4 border-b border-default">
+          <div class="px-6 py-4">
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-lg font-medium text-primary">
                 CRM
@@ -10796,6 +10849,7 @@
           Full Editor
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="noteSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="noteSidenavCancel"
@@ -11290,7 +11344,7 @@
           >
             Cancel
           </button>
-          <button type="submit" class="btn btn-primary ml-2">Save</button>
+          <button type="submit" id="mindmapSidenavSave" class="btn ml-2">Save</button>
         </div>
       </form>
     </div>
@@ -11673,6 +11727,7 @@
         <div class="sidenav-footer">
           <button type="button" id="moscowSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
+          <button type="button" id="moscowSidenavSave" class="btn">Save</button>
           <button type="button" id="moscowSidenavCancel"
             class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">
             Cancel
@@ -11738,6 +11793,7 @@
         <div class="sidenav-footer">
           <button type="button" id="eisenhowerSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
+          <button type="button" id="eisenhowerSidenavSave" class="btn">Save</button>
           <button type="button" id="eisenhowerSidenavCancel"
             class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">
             Cancel
@@ -11853,6 +11909,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="swotSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="swotSidenavCancel"
@@ -11974,6 +12031,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="riskSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="riskSidenavCancel"
@@ -12191,6 +12249,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="leanCanvasSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="leanCanvasSidenavCancel"
@@ -12371,6 +12430,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="bmcSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="bmcSidenavCancel"
@@ -12490,6 +12550,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="pvbSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="pvbSidenavCancel"
@@ -12692,6 +12753,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="briefSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="briefSidenavCancel"
@@ -12822,6 +12884,7 @@
         <div class="sidenav-footer">
           <button type="button" id="meetingSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
+          <button type="button" id="meetingSidenavSave" class="btn">Save</button>
           <button type="button" id="meetingSidenavCancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
         </div>
       </div>
@@ -12970,9 +13033,8 @@
               <input id="fishboneSidenavDescription" type="text" class="form-input" placeholder="Short context or scope..." />
             </div>
             <div class="form-group">
-              <label class="form-label" for="fishboneSidenavCauses">Causes</label>
-              <textarea id="fishboneSidenavCauses" class="form-textarea fishbone-causes-textarea" rows="12" placeholder="## People&#10;- Insufficient training&#10;&#10;## Process&#10;- No standardization"></textarea>
-              <p class="fishbone-causes-hint">Use ## Category for each cause group and - item for sub-causes.</p>
+              <label class="form-label">Causes</label>
+              <div id="fishboneSidenavCausesEditor" class="fb-causes-editor"></div>
             </div>
           </div>
         </div>
@@ -13184,6 +13246,8 @@
                 <option value="planned">Planned</option>
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
+                <option value="implemented">Implemented</option>
+                <option value="cancelled">Cancelled</option>
               </select>
             </div>
             <div class="form-group">
@@ -13233,6 +13297,14 @@
                 class="form-input"
               >
             </div>
+          </div>
+          <div id="ideaSidenavArchiveDateRow" class="form-group hidden">
+            <label class="form-label" id="ideaSidenavArchiveDateLabel">Archive Date</label>
+            <input
+              type="date"
+              id="ideaSidenavArchiveDate"
+              class="form-input"
+            >
           </div>
           <div class="form-group">
             <label class="form-label">Subtasks</label>
@@ -13318,6 +13390,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="ideaSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="ideaSidenavCancel"
@@ -13457,6 +13530,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="c4SidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="c4SidenavCancel"
@@ -13510,6 +13584,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="strategicSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="strategicSidenavCancel"
@@ -13561,6 +13636,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="billingSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="billingSidenavCancel"
@@ -13612,6 +13688,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="crmSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="crmSidenavCancel"
@@ -13715,6 +13792,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="capacitySidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="capacitySidenavCancel"

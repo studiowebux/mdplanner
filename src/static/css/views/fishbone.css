@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border-default);
   flex-wrap: wrap;
   gap: 0.5rem;
 }
@@ -17,17 +17,21 @@
   padding: 1.5rem;
 }
 
+/* ---------------------------------------------------------------
+   Card view
+   --------------------------------------------------------------- */
+
 .fishbone-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg-editor);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-primary);
   cursor: pointer;
   transition: border-color 0.15s;
   overflow: hidden;
 }
 
 .fishbone-card:hover {
-  border-color: var(--text-tertiary);
+  border-color: var(--color-text-muted);
 }
 
 .fishbone-card-header {
@@ -35,119 +39,223 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.75rem 1rem 0;
+  padding: 0.75rem 1rem 0.5rem;
 }
 
 .fishbone-card-title {
   font-size: var(--font-size-base);
   font-weight: 600;
-  color: var(--text);
+  color: var(--color-text-primary);
 }
 
 .fishbone-card-count {
   font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .fishbone-card-desc {
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  margin: 0.25rem 1rem 0;
+  color: var(--color-text-secondary);
+  margin: 0 1rem 0.25rem;
 }
 
-.fishbone-card-svg {
-  padding: 0.5rem;
+.fishbone-card-causes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem 0.75rem;
+}
+
+.fishbone-cause-tag {
+  font-size: var(--font-size-xs);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-default);
+}
+
+.fishbone-cause-empty {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
 }
 
 .fishbone-empty {
   padding: 3rem;
   text-align: center;
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
 
 /* ---------------------------------------------------------------
-   SVG styles — use currentColor for dark mode compatibility
+   Sidenav — view mode (CSS layout, no SVG)
    --------------------------------------------------------------- */
 
-.fb-svg {
-  display: block;
-}
-
-.fb-spine {
-  stroke: var(--text);
-  stroke-width: 2;
-}
-
-.fb-spine-arrow {
-  fill: var(--text);
-}
-
-.fb-effect-box {
-  fill: var(--surface);
-  stroke: var(--text);
-  stroke-width: 1.5;
-}
-
-.fb-effect-text {
-  font-size: 0.75rem;
-  fill: var(--text);
+.fb-view-problem {
+  background: var(--color-bg-tertiary);
+  border: 1.5px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  font-size: var(--font-size-lg);
   font-weight: 600;
-  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  text-align: center;
+  margin-bottom: 1rem;
 }
 
-.fb-bone {
-  stroke: var(--text-secondary);
-  stroke-width: 1.5;
+.fb-causes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.625rem;
 }
 
-.fb-cat-label {
-  font-size: 0.7rem;
-  fill: var(--text);
-  font-weight: 700;
-  font-family: var(--font-sans);
-}
-
-.fb-sub-line {
-  stroke: var(--text-tertiary);
-  stroke-width: 1;
-}
-
-.fb-sub-label {
-  font-size: 0.625rem;
-  fill: var(--text-secondary);
-  font-family: var(--font-sans);
-}
-
-.fb-empty-hint {
-  font-size: 0.75rem;
-  fill: var(--text-tertiary);
-  font-family: var(--font-sans);
-}
-
-/* ---------------------------------------------------------------
-   Sidenav styles
-   --------------------------------------------------------------- */
-
-.fishbone-sidenav-svg-wrap {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg-editor);
+.fb-cause-section {
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
   overflow: hidden;
-  margin-top: 0.5rem;
 }
 
-.fishbone-causes-hint {
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+.fb-cause-header {
+  background: var(--color-bg-tertiary);
+  border-bottom: 1px solid var(--color-border-default);
+  padding: 0.375rem 0.75rem;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.fb-cause-items {
+  list-style: disc;
+  margin: 0;
+  padding: 0.5rem 0.75rem 0.5rem 1.5rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.fb-cause-items li + li {
   margin-top: 0.25rem;
 }
 
-.fishbone-causes-textarea {
-  font-family: var(--font-mono);
+.fb-cause-empty {
+  padding: 0.5rem 0.75rem;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+/* ---------------------------------------------------------------
+   Sidenav — edit mode (inline cause editor)
+   --------------------------------------------------------------- */
+
+.fb-causes-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.fb-cat-item {
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.fb-cat-item-header {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.375rem 0.5rem;
+  background: var(--color-bg-tertiary);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.fb-cat-name-input {
+  flex: 1;
   font-size: var(--font-size-sm);
-  min-height: 12rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+}
+
+.fb-cat-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-sm);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.fb-cat-remove:hover {
+  color: var(--color-error);
+  background: var(--color-error-bg);
+}
+
+.fb-subcauses-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.fb-sub-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.3rem 0.75rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.fb-sub-item:last-child {
+  border-bottom: none;
+}
+
+.fb-sub-text {
+  flex: 1;
+}
+
+.fb-sub-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  padding: 0 0.25rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.fb-sub-remove:hover {
+  color: var(--color-error);
+}
+
+.fb-add-sub-row {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+}
+
+.fb-add-sub-row .form-input {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  padding: 0.25rem 0.5rem;
+}
+
+.fb-add-cat-btn {
+  align-self: flex-start;
+  margin-top: 0.25rem;
+}
+
+.fishbone-sidenav-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: 0.75rem;
 }
 
 @media (max-width: 36rem) {
@@ -158,5 +266,9 @@
 
   .fishbone-view-header {
     padding: 0.75rem 1rem;
+  }
+
+  .fb-causes-grid {
+    grid-template-columns: 1fr;
   }
 }

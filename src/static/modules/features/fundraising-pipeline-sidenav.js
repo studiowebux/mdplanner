@@ -23,7 +23,6 @@ export class FundraisingPipelineSidenavModule {
   constructor(taskManager) {
     this.tm = taskManager;
     this.editingId = null;
-    this.autoSaveTimeout = null;
   }
 
   openNew() {
@@ -77,12 +76,6 @@ export class FundraisingPipelineSidenavModule {
     });
     data.amount_target = Number(data.amount_target) || 0;
     return data;
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this._showStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {
@@ -156,10 +149,5 @@ export class FundraisingPipelineSidenavModule {
       () => this.save(),
     );
 
-    FIELDS.forEach((field) => {
-      const el = document.getElementById(`pipeline-sidenav-${field}`);
-      el?.addEventListener("input", () => this.scheduleAutoSave());
-      el?.addEventListener("change", () => this.scheduleAutoSave());
-    });
   }
 }

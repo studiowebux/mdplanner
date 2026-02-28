@@ -18,7 +18,6 @@ export class EisenhowerSidenavModule {
     this.tm = taskManager;
     this.editingEisenhowerId = null;
     this.currentMatrix = null;
-    this.autoSaveTimeout = null;
   }
 
   bindEvents() {
@@ -34,14 +33,9 @@ export class EisenhowerSidenavModule {
       "click",
       () => this.handleDelete(),
     );
-
-    document.getElementById("eisenhowerSidenavTitle")?.addEventListener(
-      "input",
-      () => this.scheduleAutoSave(),
-    );
-    document.getElementById("eisenhowerSidenavDate")?.addEventListener(
-      "change",
-      () => this.scheduleAutoSave(),
+    document.getElementById("eisenhowerSidenavSave")?.addEventListener(
+      "click",
+      () => this.save(),
     );
 
     QUADRANTS.forEach((quadrant) => {
@@ -87,10 +81,6 @@ export class EisenhowerSidenavModule {
   }
 
   close() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-    }
     Sidenav.close("eisenhowerSidenav");
     this.editingEisenhowerId = null;
     this.currentMatrix = null;
@@ -163,7 +153,6 @@ export class EisenhowerSidenavModule {
       if (text) {
         this.currentMatrix[quadrant].push(text);
         this.renderQuadrant(quadrant);
-        this.scheduleAutoSave();
       }
       inputWrapper.remove();
     };
@@ -180,13 +169,6 @@ export class EisenhowerSidenavModule {
   removeItem(quadrant, index) {
     this.currentMatrix[quadrant].splice(index, 1);
     this.renderQuadrant(quadrant);
-    this.scheduleAutoSave();
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {

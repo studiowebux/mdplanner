@@ -12,7 +12,6 @@ export class BillingSidenavModule {
     this.entityType = null; // 'customer', 'rate', 'quote', 'invoice'
     this.editingId = null;
     this.currentEntity = null;
-    this.autoSaveTimeout = null;
     this.lineItems = [];
   }
 
@@ -28,6 +27,12 @@ export class BillingSidenavModule {
     document.getElementById("billingSidenavDelete")?.addEventListener(
       "click",
       () => this.handleDelete(),
+    );
+
+    // Save button
+    document.getElementById("billingSidenavSave")?.addEventListener(
+      "click",
+      () => this.save(),
     );
   }
 
@@ -154,10 +159,6 @@ export class BillingSidenavModule {
   }
 
   close() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-    }
     Sidenav.close("billingSidenav");
     this.entityType = null;
     this.editingId = null;
@@ -187,11 +188,6 @@ export class BillingSidenavModule {
           '<div class="text-muted">Select an entity type</div>';
     }
 
-    // Bind auto-save to inputs
-    container.querySelectorAll("input, select, textarea").forEach((el) => {
-      el.addEventListener("input", () => this.scheduleAutoSave());
-      el.addEventListener("change", () => this.scheduleAutoSave());
-    });
   }
 
   renderCustomerForm() {
@@ -497,7 +493,6 @@ export class BillingSidenavModule {
       amount: 0,
     });
     this.refreshLineItems();
-    this.scheduleAutoSave();
   }
 
   updateLineItem(idx, field, value) {
@@ -513,14 +508,12 @@ export class BillingSidenavModule {
 
     this.refreshLineItems();
     this.updateTotals();
-    this.scheduleAutoSave();
   }
 
   removeLineItem(idx) {
     this.lineItems.splice(idx, 1);
     this.refreshLineItems();
     this.updateTotals();
-    this.scheduleAutoSave();
   }
 
   refreshLineItems() {
@@ -638,12 +631,6 @@ export class BillingSidenavModule {
       default:
         return {};
     }
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {

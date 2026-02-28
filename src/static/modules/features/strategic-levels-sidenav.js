@@ -14,7 +14,6 @@ export class StrategicLevelsSidenavModule {
     this.editingLevelId = null;
     this.linkingLevelId = null;
     this.currentEntity = null;
-    this.autoSaveTimeout = null;
     this.parentLevelId = null;
     this.levelType = null;
   }
@@ -27,6 +26,10 @@ export class StrategicLevelsSidenavModule {
     document.getElementById("strategicSidenavCancel")?.addEventListener(
       "click",
       () => this.close(),
+    );
+    document.getElementById("strategicSidenavSave")?.addEventListener(
+      "click",
+      () => this.save(),
     );
     document.getElementById("strategicSidenavDelete")?.addEventListener(
       "click",
@@ -138,10 +141,6 @@ export class StrategicLevelsSidenavModule {
   }
 
   close() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-    }
     Sidenav.close("strategicSidenav");
     this.mode = null;
     this.editingBuilderId = null;
@@ -171,13 +170,6 @@ export class StrategicLevelsSidenavModule {
         container.innerHTML = '<div class="text-muted">Unknown mode</div>';
     }
 
-    // Bind auto-save to inputs
-    container.querySelectorAll("input, select, textarea").forEach((el) => {
-      if (!el.classList.contains("link-checkbox")) {
-        el.addEventListener("input", () => this.scheduleAutoSave());
-        el.addEventListener("change", () => this.scheduleAutoSave());
-      }
-    });
   }
 
   renderBuilderForm() {
@@ -396,7 +388,6 @@ export class StrategicLevelsSidenavModule {
           `<option value="${p.id}">${escapeHtml(p.title)}</option>`
         ).join("");
     }
-    this.scheduleAutoSave();
   }
 
   getFormData() {
@@ -425,12 +416,6 @@ export class StrategicLevelsSidenavModule {
       default:
         return {};
     }
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {

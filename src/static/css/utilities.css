@@ -483,7 +483,7 @@
 .hover\:bg-hover:hover { background-color: var(--color-bg-hover); }
 .hover\:bg-secondary:hover { background-color: var(--color-bg-secondary); }
 .hover\:bg-tertiary:hover { background-color: var(--color-bg-tertiary); }
-.hover\:bg-active:hover { background-color: var(--color-bg-active); }
+.hover\:bg-active:hover { background-color: var(--color-bg-active); color: var(--color-text-primary); }
 .hover\:bg-inverse:hover { background-color: var(--color-bg-inverse); }
 .hover\:bg-error:hover { background-color: var(--color-error); }
 .hover\:bg-error-bg:hover { background-color: var(--color-error-bg); }
@@ -615,7 +615,7 @@
 .integration-encryption-banner {
   font-size: var(--font-size-sm);
   padding: 0.5rem 0.75rem;
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   border: 1px solid;
 }
 .integration-encryption-banner.encryption-ok {

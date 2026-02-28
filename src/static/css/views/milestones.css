@@ -1,0 +1,207 @@
+/* Milestones + Retrospectives table views */
+
+/* ---------------------------------------------------------------
+   Milestones table
+   --------------------------------------------------------------- */
+
+.milestones-table-wrap {
+  overflow-x: auto;
+  margin: 1.5rem;
+}
+
+.milestones-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.milestones-th {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--color-border-default);
+  white-space: nowrap;
+}
+
+.milestones-tr:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.milestones-td {
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid var(--color-border-default);
+  color: var(--color-text-primary);
+  vertical-align: middle;
+  font-size: var(--font-size-sm);
+}
+
+.milestones-table tbody tr:last-child .milestones-td {
+  border-bottom: none;
+}
+
+.milestones-td-name {
+  font-weight: 500;
+  min-width: 10rem;
+}
+
+.milestones-td-tasks {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.milestones-td-actions {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.milestone-status-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  border: 1px solid var(--color-border-default);
+}
+
+.milestone-status-completed {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+.milestone-status-risk {
+  color: #d97706;
+  border-color: #d97706;
+  background: transparent;
+}
+
+[data-theme="dark"] .milestone-status-risk {
+  color: #fbbf24;
+  border-color: #fbbf24;
+}
+
+.milestone-status-active {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+.milestones-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 6rem;
+}
+
+.milestones-progress-bar {
+  flex: 1;
+  height: 0.375rem;
+  background: var(--color-bg-tertiary);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.milestones-progress-fill {
+  height: 100%;
+  background: var(--color-text-secondary);
+  border-radius: 99px;
+  transition: width 0.2s;
+}
+
+.milestones-progress-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  min-width: 2.5rem;
+  text-align: right;
+}
+
+/* ---------------------------------------------------------------
+   Retrospectives table
+   --------------------------------------------------------------- */
+
+.retro-table-wrap {
+  overflow-x: auto;
+  margin: 1.5rem;
+}
+
+.retro-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.retro-th {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--color-border-default);
+  white-space: nowrap;
+}
+
+.retro-tr:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.retro-td {
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid var(--color-border-default);
+  color: var(--color-text-primary);
+  vertical-align: middle;
+  font-size: var(--font-size-sm);
+}
+
+.retro-table tbody tr:last-child .retro-td {
+  border-bottom: none;
+}
+
+.retro-td-title {
+  font-weight: 500;
+  min-width: 10rem;
+}
+
+.retro-td-count {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  text-align: center;
+}
+
+.retro-td-actions {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.retro-status-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  border: 1px solid var(--color-border-default);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+.retro-status-open {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+.retro-status-closed {
+  color: var(--color-text-muted);
+  border-color: var(--color-border-default);
+  background: transparent;
+}
+
+@media (max-width: 36rem) {
+  .milestones-table-wrap,
+  .retro-table-wrap {
+    margin: 1rem;
+  }
+}

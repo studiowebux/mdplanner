@@ -88,6 +88,32 @@
   max-width: 900px;
 }
 
+.sidenav-panel.sidenav-fullscreen {
+  max-width: 100vw;
+  width: 100vw;
+}
+
+.sidenav-fullscreen-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.sidenav-fullscreen-toggle:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-default);
+}
+
 /* --------------------------------------------------------------------------
    Header
    -------------------------------------------------------------------------- */
@@ -341,7 +367,7 @@
 }
 
 .sidenav-status-unsaved {
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
 }
 
 /* --------------------------------------------------------------------------

@@ -15,6 +15,7 @@ export class PortfolioView {
     this.peopleMap = new Map();
     this.customers = [];
     this.currentFilter = "all";
+    this.currentCategoryFilter = "all";
     this.currentViewMode = "list"; // 'list' or 'tree'
     this.searchQuery = "";
     this.selectedProject = null;
@@ -238,24 +239,29 @@ export class PortfolioView {
     ).join("");
 
     container.innerHTML = `
-      <div class="portfolio-analytics-grid">
-        <div class="portfolio-analytics-panel">
-          <div class="portfolio-analytics-title">By Status</div>
-          ${statusRows || '<p class="text-sm text-muted">No data</p>'}
-        </div>
-        <div class="portfolio-analytics-panel">
-          <div class="portfolio-analytics-title">By Category</div>
-          ${catRows || '<p class="text-sm text-muted">No data</p>'}
-        </div>
-        ${
+      <details class="portfolio-analytics-collapsible" open>
+        <summary>Portfolio Analytics</summary>
+        <div class="portfolio-analytics-collapsible-body">
+          <div class="portfolio-analytics-grid">
+            <div class="portfolio-analytics-panel">
+              <div class="portfolio-analytics-title">By Status</div>
+              ${statusRows || '<p class="text-sm text-muted">No data</p>'}
+            </div>
+            <div class="portfolio-analytics-panel">
+              <div class="portfolio-analytics-title">By Category</div>
+              ${catRows || '<p class="text-sm text-muted">No data</p>'}
+            </div>
+            ${
       topTech.length
         ? `<div class="portfolio-analytics-panel">
-          <div class="portfolio-analytics-title">Tech Stack</div>
-          ${techRows}
-        </div>`
+              <div class="portfolio-analytics-title">Tech Stack</div>
+              ${techRows}
+            </div>`
         : ""
     }
-      </div>
+          </div>
+        </div>
+      </details>
     `;
   }
 
@@ -315,7 +321,24 @@ export class PortfolioView {
       </button>
     `;
 
-    container.innerHTML = statusHtml + viewToggleHtml;
+    // Category filter dropdown — only shown when categories exist
+    const uniqueCategories = [
+      ...new Set(this.projects.map((p) => p.category).filter(Boolean)),
+    ].sort();
+    const categoryHtml = uniqueCategories.length > 0
+      ? `<select id="portfolioCategoryFilter" class="portfolio-category-select">
+          <option value="all">All categories</option>
+          ${
+        uniqueCategories.map((c) =>
+          `<option value="${this.escapeHtml(c)}" ${
+            this.currentCategoryFilter === c ? "selected" : ""
+          }>${this.escapeHtml(c)}</option>`
+        ).join("")
+      }
+        </select>`
+      : "";
+
+    container.innerHTML = statusHtml + viewToggleHtml + categoryHtml;
   }
 
   /**
@@ -326,10 +349,12 @@ export class PortfolioView {
     const emptyState = document.getElementById("portfolioEmpty");
     if (!container || !emptyState) return;
 
-    // Apply status + search filters
+    // Apply status + category + search filters
     const filtered = this.projects.filter((p) =>
       (this.currentFilter === "all" ||
         (p.status || "active") === this.currentFilter) &&
+      (this.currentCategoryFilter === "all" ||
+        (p.category || "") === this.currentCategoryFilter) &&
       this.matchesSearch(p)
     );
 
@@ -354,10 +379,12 @@ export class PortfolioView {
     const emptyState = document.getElementById("portfolioEmpty");
     if (!container || !emptyState) return;
 
-    // Apply status + search filters
+    // Apply status + category + search filters
     const filtered = this.projects.filter((p) =>
       (this.currentFilter === "all" ||
         (p.status || "active") === this.currentFilter) &&
+      (this.currentCategoryFilter === "all" ||
+        (p.category || "") === this.currentCategoryFilter) &&
       this.matchesSearch(p)
     );
 
@@ -1196,6 +1223,21 @@ export class PortfolioView {
         if (viewBtn) {
           const mode = viewBtn.dataset.portfolioView;
           this.setViewMode(mode);
+        }
+      },
+    );
+
+    // Category filter select change
+    document.getElementById("portfolioFilterBar")?.addEventListener(
+      "change",
+      (e) => {
+        if (e.target.id === "portfolioCategoryFilter") {
+          this.currentCategoryFilter = e.target.value;
+          if (this.currentViewMode === "tree") {
+            this.renderTreeView();
+          } else {
+            this.renderListView();
+          }
         }
       },
     );

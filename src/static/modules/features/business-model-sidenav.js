@@ -11,8 +11,6 @@ export class BusinessModelSidenavModule {
     this.tm = taskManager;
     this.editingCanvasId = null;
     this.currentCanvas = null;
-    this.autoSaveTimeout = null;
-
     this.sections = [
       "keyPartners",
       "keyActivities",
@@ -51,14 +49,9 @@ export class BusinessModelSidenavModule {
       "click",
       () => this.handleDelete(),
     );
-
-    document.getElementById("bmcSidenavTitle")?.addEventListener(
-      "input",
-      () => this.scheduleAutoSave(),
-    );
-    document.getElementById("bmcSidenavDate")?.addEventListener(
-      "change",
-      () => this.scheduleAutoSave(),
+    document.getElementById("bmcSidenavSave")?.addEventListener(
+      "click",
+      () => this.save(),
     );
 
     this.sections.forEach((section) => {
@@ -101,10 +94,6 @@ export class BusinessModelSidenavModule {
   }
 
   close() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-    }
     Sidenav.close("bmcSidenav");
     this.editingCanvasId = null;
     this.currentCanvas = null;
@@ -167,7 +156,6 @@ export class BusinessModelSidenavModule {
       if (text) {
         this.currentCanvas[section].push(text);
         this.renderSection(section);
-        this.scheduleAutoSave();
       }
       inputWrapper.remove();
     };
@@ -183,13 +171,6 @@ export class BusinessModelSidenavModule {
   removeItem(section, index) {
     this.currentCanvas[section].splice(index, 1);
     this.renderSection(section);
-    this.scheduleAutoSave();
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {

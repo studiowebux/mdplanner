@@ -54,8 +54,16 @@ export class ConfigView {
     this.renderTags();
     this.renderFeatures();
     this.renderAccessibilitySettings();
+    this.renderTaskDisplaySettings();
     this.initBackupPanel();
     this.initIntegrationsPanel();
+  }
+
+  renderTaskDisplaySettings() {
+    const checkbox = document.getElementById("hideCompletedTasks");
+    if (checkbox) {
+      checkbox.checked = localStorage.getItem("hideCompletedTasks") === "true";
+    }
   }
 
   async initBackupPanel() {
@@ -634,6 +642,16 @@ export class ConfigView {
           e.preventDefault();
           this.saveCloudflareToken();
         }
+      });
+
+    // Task display settings
+    document
+      .getElementById("hideCompletedTasks")
+      ?.addEventListener("change", (e) => {
+        localStorage.setItem("hideCompletedTasks", e.target.checked);
+        // Re-render whichever task view is active
+        if (this.tm.currentView === "board") this.tm.renderBoardView();
+        else if (this.tm.currentView === "list") this.tm.renderListView();
       });
 
     // Accessibility settings events

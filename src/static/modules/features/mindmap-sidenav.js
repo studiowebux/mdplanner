@@ -10,7 +10,6 @@ export class MindmapSidenavModule {
   constructor(taskManager) {
     this.tm = taskManager;
     this.editingMindmapId = null;
-    this.autoSaveTimeout = null;
   }
 
   bindEvents() {
@@ -47,23 +46,16 @@ export class MindmapSidenavModule {
       },
     );
 
-    // Auto-save on input changes
-    document.getElementById("mindmapSidenavTitle")?.addEventListener(
-      "input",
-      () => {
-        if (this.editingMindmapId) {
-          this.scheduleAutoSave();
-        }
-      },
+    // Save button
+    document.getElementById("mindmapSidenavSave")?.addEventListener(
+      "click",
+      () => this.save(),
     );
 
     document.getElementById("mindmapSidenavStructure")?.addEventListener(
       "input",
       () => {
         this.updatePreview();
-        if (this.editingMindmapId) {
-          this.scheduleAutoSave();
-        }
       },
     );
 
@@ -139,11 +131,6 @@ export class MindmapSidenavModule {
   }
 
   close() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-    }
-
     Sidenav.close("mindmapSidenav");
     this.editingMindmapId = null;
   }
@@ -222,18 +209,6 @@ export class MindmapSidenavModule {
       title: document.getElementById("mindmapSidenavTitle").value.trim(),
       nodes: this.parseStructure(structure),
     };
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-    }
-
-    this.showSaveStatus("Saving...");
-
-    this.autoSaveTimeout = setTimeout(async () => {
-      await this.save();
-    }, 1000);
   }
 
   async save() {

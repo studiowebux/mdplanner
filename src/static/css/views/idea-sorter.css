@@ -156,6 +156,65 @@
   color: var(--color-error-text);
 }
 
+.idea-status-implemented {
+  background-color: var(--color-success-bg);
+  color: var(--color-success-text);
+  opacity: 0.8;
+}
+
+.idea-status-cancelled {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+}
+
+/* Archived idea cards (implemented / cancelled) */
+
+.idea-card-archived {
+  opacity: 0.65;
+}
+
+/* Ideas view filter bar */
+
+.ideas-view-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.ideas-view-filters input,
+.ideas-view-filters select {
+  font-size: var(--font-size-sm);
+  padding: 0.375rem 0.625rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  transition: border-color var(--transition-fast);
+}
+
+.ideas-view-filters input:focus,
+.ideas-view-filters select:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+}
+
+.ideas-view-filters input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.ideas-filter-archive-label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
 /* Subtasks */
 
 .idea-subtask-list {
