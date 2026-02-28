@@ -154,7 +154,9 @@ export class ProjectDirectoryParser {
       config.expenses = frontmatter.expenses;
     }
     if (frontmatter.features) config.features = frontmatter.features;
-    if (frontmatter.integrations) config.integrations = frontmatter.integrations;
+    if (frontmatter.integrations) {
+      config.integrations = frontmatter.integrations;
+    }
 
     return { name, description, config };
   }

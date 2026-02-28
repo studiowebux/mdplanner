@@ -25,10 +25,15 @@ function hexToBytes(hex: string): Uint8Array {
 
 async function deriveKey(hexKey: string): Promise<CryptoKey> {
   const raw = hexToBytes(hexKey);
-  if (raw.length !== 32) throw new Error("MDPLANNER_SECRET_KEY must be 32 bytes (64 hex chars)");
+  if (raw.length !== 32) {
+    throw new Error("MDPLANNER_SECRET_KEY must be 32 bytes (64 hex chars)");
+  }
   return crypto.subtle.importKey(
     "raw",
-    raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength) as ArrayBuffer,
+    raw.buffer.slice(
+      raw.byteOffset,
+      raw.byteOffset + raw.byteLength,
+    ) as ArrayBuffer,
     { name: "AES-GCM" },
     false,
     ["encrypt", "decrypt"],
@@ -69,7 +74,10 @@ export async function encryptSecret(plaintext: string): Promise<string> {
   const ct = await crypto.subtle.encrypt(
     { name: "AES-GCM", iv },
     key,
-    encoded.buffer.slice(encoded.byteOffset, encoded.byteOffset + encoded.byteLength) as ArrayBuffer,
+    encoded.buffer.slice(
+      encoded.byteOffset,
+      encoded.byteOffset + encoded.byteLength,
+    ) as ArrayBuffer,
   );
 
   const ivB64 = btoa(String.fromCharCode(...iv));
@@ -109,7 +117,10 @@ export async function decryptSecret(stored: string): Promise<string | null> {
     const plain = await crypto.subtle.decrypt(
       { name: "AES-GCM", iv },
       key,
-      ct.buffer.slice(ct.byteOffset, ct.byteOffset + ct.byteLength) as ArrayBuffer,
+      ct.buffer.slice(
+        ct.byteOffset,
+        ct.byteOffset + ct.byteLength,
+      ) as ArrayBuffer,
     );
     return new TextDecoder().decode(plain);
   } catch {

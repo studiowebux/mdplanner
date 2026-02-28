@@ -434,6 +434,7 @@ export class ConfigView {
         { id: "strategicLevels", label: "Strategic Levels" },
         { id: "meetings", label: "Meetings" },
         { id: "journal", label: "Journal" },
+        { id: "habits", label: "Habits" },
       ],
       "Portfolio": [
         { id: "portfolio", label: "Portfolio" },

@@ -1292,3 +1292,36 @@ export const DnsAPI = {
     return response.json();
   },
 };
+
+// Habits API
+export const HabitsAPI = {
+  async fetchAll() {
+    const response = await get("/api/habits");
+    return response.json();
+  },
+
+  async fetchOne(id) {
+    const response = await get(`/api/habits/${id}`);
+    return response.json();
+  },
+
+  async create(habit) {
+    return post("/api/habits", habit);
+  },
+
+  async update(id, habit) {
+    return put(`/api/habits/${id}`, habit);
+  },
+
+  async markComplete(id, date) {
+    return post(`/api/habits/${id}/complete`, date ? { date } : {});
+  },
+
+  async unmarkComplete(id, date) {
+    return del(`/api/habits/${id}/complete/${date}`);
+  },
+
+  async delete(id) {
+    return del(`/api/habits/${id}`);
+  },
+};

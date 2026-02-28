@@ -670,13 +670,29 @@ export type DnsProvider = "cloudflare" | "manual" | string;
 export interface DnsDomain {
   id: string;
   domain: string;
-  expiryDate?: string;        // ISO date YYYY-MM-DD
+  expiryDate?: string; // ISO date YYYY-MM-DD
   autoRenew?: boolean;
   renewalCostUsd?: number;
   provider?: DnsProvider;
   nameservers?: string[];
   notes?: string;
-  lastFetchedAt?: string;     // ISO timestamp — set by Cloudflare sync
+  lastFetchedAt?: string; // ISO timestamp — set by Cloudflare sync
+  created: string;
+  updated: string;
+}
+
+// Habit Tracker
+
+export interface Habit {
+  id: string;
+  name: string;
+  description?: string;
+  frequency: "daily" | "weekly";
+  targetDays?: string[]; // ["Mon","Tue","Wed","Thu","Fri"] for weekly habits
+  completions: string[]; // ISO date strings: ["2026-02-27","2026-02-26",...]
+  streakCount: number; // current streak (recalculated on every write)
+  longestStreak: number; // all-time best streak
+  notes?: string; // markdown body
   created: string;
   updated: string;
 }

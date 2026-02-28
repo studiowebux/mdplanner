@@ -10,6 +10,19 @@ and this project adheres to
 
 ### Added
 
+- Habit Tracker: new view to define habits (daily or weekly), mark completions,
+  track streaks, and view a 12-week calendar heatmap per habit; stored as
+  `habits/*.md` files with completions as a flat date array in frontmatter
+- Habit streak logic: server-side calculation of current streak and all-time
+  best streak on every read/write; weekly habits count consecutive weeks with at
+  least one completion
+- Habit API: `GET/POST /api/habits`, `PUT /api/habits/:id`,
+  `POST /api/habits/:id/complete`, `DELETE /api/habits/:id/complete/:date`,
+  `DELETE /api/habits/:id`; mark-as-done is idempotent
+- Habit sidenav: view mode with full heatmap + streak stats, edit mode with
+  name, description, frequency, target days (weekly), and notes (markdown)
+- Habits registered in feature visibility toggle (key: `habits`) and Cmd+K
+  search
 - DNS Tracker: new view to track domain names, expiry dates, auto-renew status,
   renewal costs, nameservers, and notes; stored as `dns/*.md` files
 - DNS expiry color-coded badges: CRITICAL (<14d), URGENT (<31d), SOON (<61d),

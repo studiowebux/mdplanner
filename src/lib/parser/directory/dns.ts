@@ -27,8 +27,9 @@ export class DnsDomainParser extends DirectoryParser<DnsDomain> {
     content: string,
     _filePath: string,
   ): DnsDomain | null {
-    const { frontmatter, content: body } =
-      parseFrontmatter<DnsFrontmatter>(content);
+    const { frontmatter, content: body } = parseFrontmatter<DnsFrontmatter>(
+      content,
+    );
 
     if (!frontmatter.id || !frontmatter.domain) return null;
 
@@ -56,7 +57,9 @@ export class DnsDomainParser extends DirectoryParser<DnsDomain> {
     };
 
     if (domain.expiryDate) frontmatter.expiry_date = domain.expiryDate;
-    if (domain.autoRenew !== undefined) frontmatter.auto_renew = domain.autoRenew;
+    if (domain.autoRenew !== undefined) {
+      frontmatter.auto_renew = domain.autoRenew;
+    }
     if (domain.renewalCostUsd !== undefined) {
       frontmatter.renewal_cost_usd = domain.renewalCostUsd;
     }
@@ -64,7 +67,9 @@ export class DnsDomainParser extends DirectoryParser<DnsDomain> {
     if (domain.nameservers && domain.nameservers.length > 0) {
       frontmatter.nameservers = domain.nameservers;
     }
-    if (domain.lastFetchedAt) frontmatter.last_fetched_at = domain.lastFetchedAt;
+    if (domain.lastFetchedAt) {
+      frontmatter.last_fetched_at = domain.lastFetchedAt;
+    }
 
     return buildFileContent(frontmatter, domain.notes ?? "");
   }

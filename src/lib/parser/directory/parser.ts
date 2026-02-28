@@ -50,6 +50,7 @@ import { OnboardingTemplateDirectoryParser } from "./onboarding-template.ts";
 import { FinancesDirectoryParser } from "./finances.ts";
 import { JournalDirectoryParser } from "./journal.ts";
 import { DnsDomainParser } from "./dns.ts";
+import { HabitsDirectoryParser } from "./habits.ts";
 import type {
   BillingRate,
   Brief,
@@ -60,14 +61,15 @@ import type {
   Contact,
   Customer,
   Deal,
+  DnsDomain,
   EisenhowerMatrix,
   FinancialPeriod,
   Goal,
+  Habit,
   Idea,
   Interaction,
   InvestorEntry,
   Invoice,
-  DnsDomain,
   JournalEntry,
   KPISnapshot,
   LeanCanvas,
@@ -134,6 +136,7 @@ export class DirectoryMarkdownParser {
   protected financesParser: FinancesDirectoryParser;
   protected journalParser: JournalDirectoryParser;
   protected dnsParser: DnsDomainParser;
+  protected habitsParser: HabitsDirectoryParser;
 
   constructor(projectDir: string) {
     this.projectDir = projectDir;
@@ -172,6 +175,7 @@ export class DirectoryMarkdownParser {
     this.financesParser = new FinancesDirectoryParser(projectDir);
     this.journalParser = new JournalDirectoryParser(projectDir);
     this.dnsParser = new DnsDomainParser(projectDir);
+    this.habitsParser = new HabitsDirectoryParser(projectDir);
   }
 
   // ============================================================
@@ -1810,5 +1814,45 @@ export class DirectoryMarkdownParser {
 
   async deleteDnsDomain(id: string): Promise<boolean> {
     return this.dnsParser.delete(id);
+  }
+
+  // ============================================================
+  // Habits
+  // ============================================================
+
+  async readHabits(): Promise<Habit[]> {
+    const habits = await this.habitsParser.readAll();
+    return habits.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  async addHabit(
+    habit: Omit<
+      Habit,
+      "id" | "created" | "updated" | "streakCount" | "longestStreak"
+    >,
+  ): Promise<Habit> {
+    return this.habitsParser.add(habit);
+  }
+
+  async updateHabit(
+    id: string,
+    updates: Partial<Habit>,
+  ): Promise<Habit | null> {
+    return this.habitsParser.update(id, updates);
+  }
+
+  async markHabitComplete(id: string, date?: string): Promise<Habit | null> {
+    return this.habitsParser.markComplete(id, date);
+  }
+
+  async unmarkHabitComplete(
+    id: string,
+    date: string,
+  ): Promise<Habit | null> {
+    return this.habitsParser.unmarkComplete(id, date);
+  }
+
+  async deleteHabit(id: string): Promise<boolean> {
+    return this.habitsParser.delete(id);
   }
 }
