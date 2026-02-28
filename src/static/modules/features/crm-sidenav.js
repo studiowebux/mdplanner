@@ -12,7 +12,6 @@ export class CRMSidenavModule {
     this.entityType = null; // 'company', 'contact', 'deal', 'interaction'
     this.editingId = null;
     this.currentEntity = null;
-    this.autoSaveTimeout = null;
   }
 
   bindEvents() {
@@ -27,6 +26,12 @@ export class CRMSidenavModule {
     document.getElementById("crmSidenavDelete")?.addEventListener(
       "click",
       () => this.handleDelete(),
+    );
+
+    // Save button
+    document.getElementById("crmSidenavSave")?.addEventListener(
+      "click",
+      () => this.save(),
     );
 
     // Entity type selector
@@ -160,10 +165,6 @@ export class CRMSidenavModule {
   }
 
   close() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-    }
     Sidenav.close("crmSidenav");
     this.entityType = null;
     this.editingId = null;
@@ -192,11 +193,6 @@ export class CRMSidenavModule {
           '<div class="text-muted">Select an entity type</div>';
     }
 
-    // Bind auto-save to inputs
-    container.querySelectorAll("input, select, textarea").forEach((el) => {
-      el.addEventListener("input", () => this.scheduleAutoSave());
-      el.addEventListener("change", () => this.scheduleAutoSave());
-    });
   }
 
   renderCompanyForm() {
@@ -693,12 +689,6 @@ export class CRMSidenavModule {
       default:
         return {};
     }
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {

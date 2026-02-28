@@ -11,7 +11,6 @@ export class IdeaSidenavModule {
     this.tm = taskManager;
     this.editingIdeaId = null;
     this.currentIdea = null;
-    this.autoSaveTimeout = null;
     this.linkSearchFilter = "";
   }
 
@@ -35,28 +34,11 @@ export class IdeaSidenavModule {
       () => this._updateArchiveDateVisibility(),
     );
 
-    // Auto-save on input changes
-    const inputs = [
-      "ideaSidenavTitle",
-      "ideaSidenavStatus",
-      "ideaSidenavCategory",
-      "ideaSidenavPriority",
-      "ideaSidenavStartDate",
-      "ideaSidenavEndDate",
-      "ideaSidenavResources",
-      "ideaSidenavDescription",
-      "ideaSidenavArchiveDate",
-    ];
-    inputs.forEach((id) => {
-      document.getElementById(id)?.addEventListener(
-        "input",
-        () => this.scheduleAutoSave(),
-      );
-      document.getElementById(id)?.addEventListener(
-        "change",
-        () => this.scheduleAutoSave(),
-      );
-    });
+    // Save button
+    document.getElementById("ideaSidenavSave")?.addEventListener(
+      "click",
+      () => this.save(),
+    );
 
     // Subtask add
     const subtaskInput = document.getElementById("ideaSidenavSubtaskInput");
@@ -138,10 +120,6 @@ export class IdeaSidenavModule {
   }
 
   close() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-    }
     Sidenav.close("ideaSidenav");
     this.editingIdeaId = null;
     this.currentIdea = null;
@@ -212,7 +190,6 @@ export class IdeaSidenavModule {
         const idx = parseInt(btn.dataset.subtaskIndex, 10);
         this.currentIdea.subtasks = (this.currentIdea.subtasks || []).filter((_, i) => i !== idx);
         this.renderSubtasks(this.currentIdea.subtasks);
-        this.scheduleAutoSave();
       });
     });
   }
@@ -223,7 +200,6 @@ export class IdeaSidenavModule {
     if (!this.currentIdea.subtasks) this.currentIdea.subtasks = [];
     this.currentIdea.subtasks.push(trimmed);
     this.renderSubtasks(this.currentIdea.subtasks);
-    this.scheduleAutoSave();
   }
 
   toggleLinksSection() {
@@ -322,7 +298,6 @@ export class IdeaSidenavModule {
       this.currentIdea.links.push(ideaId);
       this.renderLinkedIdeas();
       this.renderLinkOptions();
-      this.scheduleAutoSave();
     }
   }
 
@@ -332,7 +307,6 @@ export class IdeaSidenavModule {
     );
     this.renderLinkedIdeas();
     this.renderLinkOptions();
-    this.scheduleAutoSave();
   }
 
   _updateArchiveDateVisibility() {
@@ -381,12 +355,6 @@ export class IdeaSidenavModule {
       implementedAt: status === "implemented" ? archiveDate : null,
       cancelledAt: status === "cancelled" ? archiveDate : null,
     };
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {

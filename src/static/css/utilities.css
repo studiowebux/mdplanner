@@ -615,7 +615,7 @@
 .integration-encryption-banner {
   font-size: var(--font-size-sm);
   padding: 0.5rem 0.75rem;
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   border: 1px solid;
 }
 .integration-encryption-banner.encryption-ok {

@@ -11,8 +11,6 @@ export class BriefSidenavModule {
     this.tm = taskManager;
     this.editingBriefId = null;
     this.currentBrief = null;
-    this.autoSaveTimeout = null;
-
     this.sections = [
       "summary",
       "mission",
@@ -55,14 +53,9 @@ export class BriefSidenavModule {
       "click",
       () => this.handleDelete(),
     );
-
-    document.getElementById("briefSidenavTitle")?.addEventListener(
-      "input",
-      () => this.scheduleAutoSave(),
-    );
-    document.getElementById("briefSidenavDate")?.addEventListener(
-      "change",
-      () => this.scheduleAutoSave(),
+    document.getElementById("briefSidenavSave")?.addEventListener(
+      "click",
+      () => this.save(),
     );
 
     this.sections.forEach((section) => {
@@ -103,10 +96,6 @@ export class BriefSidenavModule {
   }
 
   close() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-    }
     Sidenav.close("briefSidenav");
     this.editingBriefId = null;
     this.currentBrief = null;
@@ -169,7 +158,6 @@ export class BriefSidenavModule {
       if (text) {
         this.currentBrief[section].push(text);
         this.renderSection(section);
-        this.scheduleAutoSave();
       }
       inputWrapper.remove();
     };
@@ -185,13 +173,6 @@ export class BriefSidenavModule {
   removeItem(section, index) {
     this.currentBrief[section].splice(index, 1);
     this.renderSection(section);
-    this.scheduleAutoSave();
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {

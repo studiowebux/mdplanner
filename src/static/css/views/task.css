@@ -46,7 +46,7 @@
   gap: 0.375rem 0.625rem;
   margin-top: 0.25rem;
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .task-list-item.dragging {

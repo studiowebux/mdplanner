@@ -63,7 +63,7 @@
 
 .search-kbd-hint {
   font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
   padding: 0.1rem 0.35rem;
@@ -131,7 +131,7 @@
 
 .search-result-snippet {
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   margin-block-start: 0.2rem;
   overflow: hidden;
   display: -webkit-box;
@@ -150,7 +150,7 @@
   padding: 2rem 1rem;
   text-align: center;
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .search-empty code {

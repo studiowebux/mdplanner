@@ -22,7 +22,6 @@ export class FundraisingSafeSidenavModule {
   constructor(taskManager) {
     this.tm = taskManager;
     this.editingId = null;
-    this.autoSaveTimeout = null;
   }
 
   openNew() {
@@ -75,12 +74,6 @@ export class FundraisingSafeSidenavModule {
     data.valuation_cap = Number(data.valuation_cap) || 0;
     data.discount = Number(data.discount) || 0;
     return data;
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this._showStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {
@@ -154,10 +147,5 @@ export class FundraisingSafeSidenavModule {
       () => this.save(),
     );
 
-    FIELDS.forEach((field) => {
-      const el = document.getElementById(`safe-sidenav-${field}`);
-      el?.addEventListener("input", () => this.scheduleAutoSave());
-      el?.addEventListener("change", () => this.scheduleAutoSave());
-    });
   }
 }

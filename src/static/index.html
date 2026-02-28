@@ -2751,6 +2751,14 @@
                         />
                       </svg>
                     </button>
+                    <!-- Save -->
+                    <button
+                      type="button"
+                      id="notesInlineSave"
+                      class="btn"
+                    >
+                      Save
+                    </button>
                   </div>
                 </div>
 
@@ -10841,6 +10849,7 @@
           Full Editor
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="noteSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="noteSidenavCancel"
@@ -11335,7 +11344,7 @@
           >
             Cancel
           </button>
-          <button type="submit" class="btn btn-primary ml-2">Save</button>
+          <button type="submit" id="mindmapSidenavSave" class="btn ml-2">Save</button>
         </div>
       </form>
     </div>
@@ -11718,6 +11727,7 @@
         <div class="sidenav-footer">
           <button type="button" id="moscowSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
+          <button type="button" id="moscowSidenavSave" class="btn">Save</button>
           <button type="button" id="moscowSidenavCancel"
             class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">
             Cancel
@@ -11783,6 +11793,7 @@
         <div class="sidenav-footer">
           <button type="button" id="eisenhowerSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
+          <button type="button" id="eisenhowerSidenavSave" class="btn">Save</button>
           <button type="button" id="eisenhowerSidenavCancel"
             class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">
             Cancel
@@ -11898,6 +11909,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="swotSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="swotSidenavCancel"
@@ -12019,6 +12031,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="riskSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="riskSidenavCancel"
@@ -12236,6 +12249,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="leanCanvasSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="leanCanvasSidenavCancel"
@@ -12416,6 +12430,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="bmcSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="bmcSidenavCancel"
@@ -12535,6 +12550,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="pvbSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="pvbSidenavCancel"
@@ -12737,6 +12753,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="briefSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="briefSidenavCancel"
@@ -12867,6 +12884,7 @@
         <div class="sidenav-footer">
           <button type="button" id="meetingSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
+          <button type="button" id="meetingSidenavSave" class="btn">Save</button>
           <button type="button" id="meetingSidenavCancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
         </div>
       </div>
@@ -13372,6 +13390,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="ideaSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="ideaSidenavCancel"
@@ -13511,6 +13530,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="c4SidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="c4SidenavCancel"
@@ -13564,6 +13584,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="strategicSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="strategicSidenavCancel"
@@ -13615,6 +13636,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="billingSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="billingSidenavCancel"
@@ -13666,6 +13688,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="crmSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="crmSidenavCancel"
@@ -13769,6 +13792,7 @@
           Delete
         </button>
         <div class="flex-1"></div>
+        <button type="button" id="capacitySidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="capacitySidenavCancel"

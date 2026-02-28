@@ -6,8 +6,6 @@ import { Sidenav } from "./sidenav.js";
 import { showToast } from "./toast.js";
 import { UndoManager } from "./undo-manager.js";
 
-const AUTO_SAVE_DELAY = 1000;
-
 /**
  * Base class for sidenav modules that follow the standard CRUD pattern.
  *
@@ -33,7 +31,6 @@ export class BaseSidenavModule {
   constructor(taskManager) {
     this.tm = taskManager;
     this.editingId = null;
-    this.autoSaveTimeout = null;
     this.isSaving = false;
     /** @type {Map<string, UndoManager>} keyed by element ID */
     this._undoManagers = new Map();
@@ -72,15 +69,6 @@ export class BaseSidenavModule {
       });
     }
 
-    this.inputIds.forEach((id) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      const handler = (e) => {
-        if (this.editingId) this.scheduleAutoSave(e._fromUndo === true);
-      };
-      el.addEventListener("input", handler);
-      el.addEventListener("change", handler);
-    });
   }
 
   openNew() {
@@ -110,30 +98,11 @@ export class BaseSidenavModule {
     this.onAfterOpen();
   }
 
-  async close() {
+  close() {
     document.removeEventListener("keydown", this._escHandler);
     this._detachUndoManagers();
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-      // Flush pending save before closing so in-progress edits are not lost
-      await this.save();
-    }
     Sidenav.close(this.panelId);
     this.editingId = null;
-  }
-
-  // --- Auto-save ---
-
-  /**
-   * @param {boolean} [forceQueue=false] - when true, schedules even if a save
-   *   is already in-flight (used by undo/redo to ensure restored state persists)
-   */
-  scheduleAutoSave(forceQueue = false) {
-    if (this.isSaving && !forceQueue) return;
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), AUTO_SAVE_DELAY);
   }
 
   async save() {

@@ -11,7 +11,6 @@ export class SwotSidenavModule {
     this.tm = taskManager;
     this.editingSwotId = null;
     this.currentSwot = null;
-    this.autoSaveTimeout = null;
   }
 
   bindEvents() {
@@ -27,15 +26,9 @@ export class SwotSidenavModule {
       "click",
       () => this.handleDelete(),
     );
-
-    // Title and date auto-save
-    document.getElementById("swotSidenavTitle")?.addEventListener(
-      "input",
-      () => this.scheduleAutoSave(),
-    );
-    document.getElementById("swotSidenavDate")?.addEventListener(
-      "change",
-      () => this.scheduleAutoSave(),
+    document.getElementById("swotSidenavSave")?.addEventListener(
+      "click",
+      () => this.save(),
     );
 
     // Add item buttons
@@ -82,10 +75,6 @@ export class SwotSidenavModule {
   }
 
   close() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-    }
     Sidenav.close("swotSidenav");
     this.editingSwotId = null;
     this.currentSwot = null;
@@ -156,7 +145,6 @@ export class SwotSidenavModule {
       if (text) {
         this.currentSwot[quadrant].push(text);
         this.renderQuadrant(quadrant);
-        this.scheduleAutoSave();
       }
       inputWrapper.remove();
     };
@@ -173,13 +161,6 @@ export class SwotSidenavModule {
   removeItem(quadrant, index) {
     this.currentSwot[quadrant].splice(index, 1);
     this.renderQuadrant(quadrant);
-    this.scheduleAutoSave();
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {

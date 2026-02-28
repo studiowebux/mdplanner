@@ -367,7 +367,7 @@
 }
 
 .sidenav-status-unsaved {
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
 }
 
 /* --------------------------------------------------------------------------

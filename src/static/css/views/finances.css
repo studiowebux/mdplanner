@@ -19,10 +19,10 @@
   padding: 0.5rem 0.75rem;
   text-align: left;
   font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border-default);
 }
 
 .finances-table th.num,
@@ -32,8 +32,8 @@
 
 .finances-table td {
   padding: 0.75rem;
-  border-bottom: 1px solid var(--border);
-  color: var(--text);
+  border-bottom: 1px solid var(--color-border-default);
+  color: var(--color-text-primary);
   vertical-align: middle;
 }
 
@@ -47,7 +47,7 @@
 }
 
 .finances-row:hover {
-  background: var(--surface);
+  background: var(--color-bg-tertiary);
 }
 
 .finances-period {
@@ -64,7 +64,7 @@
 }
 
 .finances-negative {
-  color: var(--error);
+  color: var(--color-error);
 }
 
 .finances-warn {
@@ -89,15 +89,15 @@
 .finances-card {
   flex: 1;
   min-width: 10rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
   padding: 1rem 1.25rem;
   background: var(--bg);
 }
 
 .finances-card-label {
   font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin-bottom: 0.375rem;
@@ -106,13 +106,13 @@
 .finances-card-value {
   font-size: var(--font-size-xl);
   font-weight: 600;
-  color: var(--text);
+  color: var(--color-text-primary);
   line-height: 1.2;
 }
 
 .finances-card-sub {
   font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   margin-top: 0.25rem;
 }
 
@@ -122,7 +122,7 @@
 
 .finances-chart-title {
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   margin-bottom: 0.75rem;
 }
 
@@ -131,8 +131,8 @@
   align-items: flex-end;
   gap: 0.375rem;
   height: 8rem;
-  border-left: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  border-left: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-default);
   padding: 0.25rem 0.25rem 0;
 }
 
@@ -172,13 +172,13 @@
 }
 
 .finances-bar-exp {
-  background: var(--error);
+  background: var(--color-error);
   opacity: 0.7;
 }
 
 .finances-chart-label {
   font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   text-align: center;
   white-space: nowrap;
 }
@@ -188,7 +188,7 @@
   gap: 1rem;
   margin-top: 0.5rem;
   font-size: var(--font-size-xs);
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .finances-legend-rev::before {
@@ -211,7 +211,7 @@
   display: inline-block;
   width: 0.625rem;
   height: 0.625rem;
-  background: var(--error);
+  background: var(--color-error);
   border-radius: 2px;
   margin-right: 0.25rem;
   vertical-align: middle;
@@ -224,28 +224,28 @@
 .finances-pl-table .finances-pl-section-header td {
   padding: 0.5rem 0.75rem;
   font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: var(--color-bg-tertiary);
+  border-bottom: 1px solid var(--color-border-default);
   font-weight: 600;
 }
 
 .finances-pl-cat {
   padding-left: 1.5rem !important;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .finances-pl-subtotal td {
   font-weight: 600;
-  border-top: 1px solid var(--border);
-  border-bottom: 2px solid var(--border);
+  border-top: 1px solid var(--color-border-default);
+  border-bottom: 2px solid var(--color-border-default);
 }
 
 .finances-pl-net td {
   font-weight: 700;
-  border-top: 2px solid var(--border);
+  border-top: 2px solid var(--color-border-default);
   font-size: var(--font-size-base);
 }
 
@@ -263,7 +263,7 @@
 
 .finances-sidenav-section-label {
   font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin-bottom: 0.5rem;
@@ -281,10 +281,10 @@
 .finances-item-amt {
   font-size: var(--font-size-sm);
   padding: 0.375rem 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
   background: var(--bg);
-  color: var(--text);
+  color: var(--color-text-primary);
   width: 100%;
 }
 
@@ -295,7 +295,7 @@
 .finances-item-remove {
   background: none;
   border: none;
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   cursor: pointer;
   font-size: var(--font-size-base);
   padding: 0;
@@ -304,23 +304,23 @@
 }
 
 .finances-item-remove:hover {
-  color: var(--error);
+  color: var(--color-error);
 }
 
 .finances-add-item-btn {
   font-size: var(--font-size-xs);
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   background: none;
-  border: 1px dashed var(--border);
-  border-radius: var(--radius);
+  border: 1px dashed var(--color-border-default);
+  border-radius: var(--radius-md);
   padding: 0.25rem 0.625rem;
   cursor: pointer;
   margin-top: 0.25rem;
 }
 
 .finances-add-item-btn:hover {
-  border-color: var(--text-secondary);
-  color: var(--text);
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-primary);
 }
 
 /* ----------------------------------------------------------------
@@ -330,7 +330,7 @@
 .finances-empty-msg {
   padding: 3rem 1.5rem;
   text-align: center;
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
 

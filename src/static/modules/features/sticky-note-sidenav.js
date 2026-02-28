@@ -26,7 +26,7 @@ export class StickyNoteSidenavModule extends BaseSidenavModule {
     document.querySelectorAll("#stickySidenav .color-option").forEach((opt) => {
       opt.addEventListener("click", () => {
         this.selectColor(opt.dataset.color);
-        if (this.editingId) this.scheduleAutoSave();
+        if (this.editingId) this.save();
       });
     });
   }

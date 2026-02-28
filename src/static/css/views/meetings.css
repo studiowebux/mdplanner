@@ -557,19 +557,19 @@
 
 .meeting-action-promote-btn {
   background: none;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
   padding: 0.15rem 0.5rem;
   font-size: var(--font-size-xs);
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .meeting-action-promote-btn:hover:not(:disabled) {
-  color: var(--text);
-  border-color: var(--text-secondary);
+  color: var(--color-text-primary);
+  border-color: var(--color-text-secondary);
 }
 
 .meeting-action-promote-btn:disabled {
@@ -578,7 +578,7 @@
 }
 
 .meeting-action-promote-btn.meeting-action-promoted {
-  color: var(--text-tertiary);
-  border-color: var(--border);
+  color: var(--color-text-muted);
+  border-color: var(--color-border-default);
   opacity: 0.7;
 }

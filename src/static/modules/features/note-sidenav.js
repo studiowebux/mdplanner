@@ -13,7 +13,6 @@ export class NoteSidenavModule {
     this.tm = taskManager;
     this.editingNoteIndex = null;
     this.isNewNote = false;
-    this.autoSaveTimeout = null;
     // Enhancement: Multi-select mode
     this.multiSelectMode = false;
     this.selectedParagraphs = new Set();
@@ -48,20 +47,10 @@ export class NoteSidenavModule {
       },
     );
 
-    // Title input auto-save
-    document.getElementById("noteSidenavTitle")?.addEventListener(
-      "input",
-      () => {
-        this.scheduleAutoSave();
-      },
-    );
-
-    // Basic mode editor auto-save
-    document.getElementById("noteSidenavEditor")?.addEventListener(
-      "input",
-      () => {
-        this.scheduleAutoSave();
-      },
+    // Save button
+    document.getElementById("noteSidenavSave")?.addEventListener(
+      "click",
+      () => this.save(),
     );
 
     // Mode toggle buttons
@@ -234,11 +223,6 @@ export class NoteSidenavModule {
 
   close() {
     this._detachNoteUndoManagers();
-    // Clear any pending auto-save
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-    }
 
     // Reset multi-select state
     this.multiSelectMode = false;
@@ -280,7 +264,6 @@ export class NoteSidenavModule {
           note.customSections = parsed.customSections;
           this.renderEnhancedContent(note);
         }
-        this.scheduleAutoSave();
       }
     }
   }
@@ -487,7 +470,6 @@ export class NoteSidenavModule {
     }
 
     this.renderEnhancedContent(note);
-    this.scheduleAutoSave();
 
     // Focus the new paragraph
     setTimeout(() => {
@@ -510,7 +492,6 @@ export class NoteSidenavModule {
       if (this.isNewNote) {
         this._setTempNote(note);
       }
-      this.scheduleAutoSave();
     }
   }
 
@@ -526,7 +507,6 @@ export class NoteSidenavModule {
       if (this.isNewNote) {
         this._setTempNote(note);
       }
-      this.scheduleAutoSave();
     }
   }
 
@@ -546,7 +526,6 @@ export class NoteSidenavModule {
         this._setTempNote(note);
       }
       this.renderEnhancedContent(note);
-      this.scheduleAutoSave();
     }
   }
 
@@ -566,7 +545,6 @@ export class NoteSidenavModule {
     }
 
     this.renderEnhancedContent(note);
-    this.scheduleAutoSave();
   }
 
   // Temporary note storage for new notes
@@ -591,19 +569,6 @@ export class NoteSidenavModule {
 
   _clearTempNote() {
     this._tempNote = null;
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-    }
-
-    // Show saving indicator
-    this.showSaveStatus("Saving...");
-
-    this.autoSaveTimeout = setTimeout(async () => {
-      await this.save();
-    }, 1000);
   }
 
   async save() {
@@ -886,7 +851,6 @@ export class NoteSidenavModule {
 
     this.selectedParagraphs.clear();
     this.renderEnhancedContent(note);
-    this.scheduleAutoSave();
     showToast("Paragraphs deleted", "success");
   }
 
@@ -937,7 +901,6 @@ export class NoteSidenavModule {
     }
 
     this.renderEnhancedContent(note);
-    this.scheduleAutoSave();
   }
 
   // ============================================
@@ -993,7 +956,6 @@ export class NoteSidenavModule {
     }
 
     this.renderEnhancedContent(note);
-    this.scheduleAutoSave();
   }
 
   handleDragEnd(event) {
@@ -1036,7 +998,6 @@ export class NoteSidenavModule {
           }
 
           this.renderEnhancedContent(note);
-          this.scheduleAutoSave();
         }
       } else {
         // Append to basic editor
@@ -1045,7 +1006,6 @@ export class NoteSidenavModule {
           editor.value = editor.value
             ? editor.value + "\n\n" + content
             : content;
-          this.scheduleAutoSave();
         }
       }
 
@@ -1195,7 +1155,6 @@ export class NoteSidenavModule {
     }
 
     this.renderCustomSections(note);
-    this.scheduleAutoSave();
     showToast(`Added ${sectionType} section`, "success");
   }
 
@@ -1269,7 +1228,6 @@ export class NoteSidenavModule {
     if (section) {
       section.title = title;
       if (this.isNewNote) this._setTempNote(note);
-      this.scheduleAutoSave();
     }
   }
 
@@ -1284,7 +1242,6 @@ export class NoteSidenavModule {
       section.type = type;
       if (this.isNewNote) this._setTempNote(note);
       this.renderCustomSections(note);
-      this.scheduleAutoSave();
     }
   }
 
@@ -1300,7 +1257,6 @@ export class NoteSidenavModule {
       section.items.push({ title: "", content: "" });
       if (this.isNewNote) this._setTempNote(note);
       this.renderCustomSections(note);
-      this.scheduleAutoSave();
     }
   }
 
@@ -1314,7 +1270,6 @@ export class NoteSidenavModule {
     if (section && section.items && section.items[itemIdx]) {
       section.items[itemIdx][field] = value;
       if (this.isNewNote) this._setTempNote(note);
-      this.scheduleAutoSave();
     }
   }
 
@@ -1329,7 +1284,6 @@ export class NoteSidenavModule {
       section.items.splice(itemIdx, 1);
       if (this.isNewNote) this._setTempNote(note);
       this.renderCustomSections(note);
-      this.scheduleAutoSave();
     }
   }
 
@@ -1344,7 +1298,6 @@ export class NoteSidenavModule {
     note.customSections = note.customSections.filter((s) => s.id !== sectionId);
     if (this.isNewNote) this._setTempNote(note);
     this.renderCustomSections(note);
-    this.scheduleAutoSave();
   }
 }
 

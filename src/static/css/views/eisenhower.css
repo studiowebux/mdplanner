@@ -50,7 +50,7 @@
 
 .eisenhower-quadrant {
   background: var(--color-bg-secondary);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   padding: 1rem;
   border: 1px solid var(--color-border-default);
   min-height: 10rem;

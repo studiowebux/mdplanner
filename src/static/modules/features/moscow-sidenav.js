@@ -19,7 +19,6 @@ export class MoscowSidenavModule {
     this.tm = taskManager;
     this.editingMoscowId = null;
     this.currentAnalysis = null;
-    this.autoSaveTimeout = null;
   }
 
   bindEvents() {
@@ -35,15 +34,9 @@ export class MoscowSidenavModule {
       "click",
       () => this.handleDelete(),
     );
-
-    // Title and date auto-save
-    document.getElementById("moscowSidenavTitle")?.addEventListener(
-      "input",
-      () => this.scheduleAutoSave(),
-    );
-    document.getElementById("moscowSidenavDate")?.addEventListener(
-      "change",
-      () => this.scheduleAutoSave(),
+    document.getElementById("moscowSidenavSave")?.addEventListener(
+      "click",
+      () => this.save(),
     );
 
     // Add item buttons
@@ -88,10 +81,6 @@ export class MoscowSidenavModule {
   }
 
   close() {
-    if (this.autoSaveTimeout) {
-      clearTimeout(this.autoSaveTimeout);
-      this.autoSaveTimeout = null;
-    }
     Sidenav.close("moscowSidenav");
     this.editingMoscowId = null;
     this.currentAnalysis = null;
@@ -160,7 +149,6 @@ export class MoscowSidenavModule {
       if (text) {
         this.currentAnalysis[category].push(text);
         this.renderCategory(category);
-        this.scheduleAutoSave();
       }
       inputWrapper.remove();
     };
@@ -177,13 +165,6 @@ export class MoscowSidenavModule {
   removeItem(category, index) {
     this.currentAnalysis[category].splice(index, 1);
     this.renderCategory(category);
-    this.scheduleAutoSave();
-  }
-
-  scheduleAutoSave() {
-    if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
-    this.showSaveStatus("Saving...");
-    this.autoSaveTimeout = setTimeout(() => this.save(), 1000);
   }
 
   async save() {
