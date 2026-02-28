@@ -69,7 +69,7 @@
 
 .btn-danger {
   background-color: var(--color-error);
-  color: white;
+  color: var(--color-static-white);
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-md);
   font-size: var(--font-size-base);
