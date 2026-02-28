@@ -70,6 +70,7 @@ function buildHeatmapHTML(completions) {
 export class HabitsModule {
   constructor(taskManager) {
     this.taskManager = taskManager;
+    this.currentView = "card"; // "card" | "calendar"
   }
 
   async load() {
@@ -91,11 +92,70 @@ export class HabitsModule {
     if (habits.length === 0) {
       emptyState?.classList.remove("hidden");
       container.innerHTML = "";
+      container.className = "habits-grid";
+      this._syncToggleUI();
       return;
     }
 
     emptyState?.classList.add("hidden");
-    container.innerHTML = habits.map((h) => this._renderCard(h)).join("");
+    this._syncToggleUI();
+
+    if (this.currentView === "calendar") {
+      this._renderCalendar(container, habits);
+    } else {
+      container.className = "habits-grid";
+      container.innerHTML = habits.map((h) => this._renderCard(h)).join("");
+    }
+  }
+
+  // Sync the active state on toggle buttons after view change
+  _syncToggleUI() {
+    document.querySelectorAll(".habits-toggle-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.habitsView === this.currentView);
+    });
+  }
+
+  // Calendar view: rows = habits, columns = days of current month
+  _renderCalendar(container, habits) {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const todayDay = today.getDate();
+    const monthLabel = today.toLocaleString("default", { month: "long", year: "numeric" });
+
+    // Header row — day numbers
+    let headerCells = `<th class="cal-habit-col"></th>`;
+    for (let d = 1; d <= daysInMonth; d++) {
+      headerCells += `<th class="cal-day-cell${d === todayDay ? " cal-today" : ""}">${d}</th>`;
+    }
+
+    // Data rows — one per habit
+    const rows = habits.map((h) => {
+      const completionSet = new Set(h.completions || []);
+      let cells = `<td class="cal-habit-name" title="${escapeHtml(h.name)}">${escapeHtml(h.name)}</td>`;
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+        const isFuture = d > todayDay;
+        const isDone = completionSet.has(dateStr);
+        let cls = "cal-cell";
+        if (isDone) cls += " cal-done";
+        else if (isFuture) cls += " cal-future";
+        cells += `<td class="${cls}" title="${dateStr}">${isDone ? "•" : ""}</td>`;
+      }
+      return `<tr class="cal-row">${cells}</tr>`;
+    }).join("");
+
+    container.className = "habits-calendar-wrap";
+    container.innerHTML = `
+      <p class="cal-month-label">${escapeHtml(monthLabel)}</p>
+      <div class="cal-table-wrap">
+        <table class="cal-table">
+          <thead><tr>${headerCells}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
   }
 
   _renderCard(habit) {
@@ -141,6 +201,27 @@ export class HabitsModule {
   }
 
   bindEvents() {
+    // Inject view toggle (Cards / Calendar) into the habits header once
+    const header = document.querySelector(".habits-view-header");
+    if (header && !header.querySelector(".habits-view-toggle")) {
+      const toggle = document.createElement("div");
+      toggle.className = "habits-view-toggle";
+      toggle.innerHTML = `
+        <button class="habits-toggle-btn active" data-habits-view="card">Cards</button>
+        <button class="habits-toggle-btn" data-habits-view="calendar">Calendar</button>
+      `;
+      // Insert before the Add button
+      const addBtn = header.querySelector("#addHabitBtn");
+      header.insertBefore(toggle, addBtn);
+
+      toggle.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-habits-view]");
+        if (!btn) return;
+        this.currentView = btn.dataset.habitsView;
+        this.renderView();
+      });
+    }
+
     document.getElementById("addHabitBtn")?.addEventListener(
       "click",
       () => this.taskManager.habitSidenavModule.openNew(),

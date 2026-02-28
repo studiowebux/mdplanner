@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border-default);
   flex-wrap: wrap;
   gap: 0.5rem;
 }
@@ -18,16 +18,16 @@
 }
 
 .fishbone-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg-editor);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-primary);
   cursor: pointer;
   transition: border-color 0.15s;
   overflow: hidden;
 }
 
 .fishbone-card:hover {
-  border-color: var(--text-tertiary);
+  border-color: var(--color-text-muted);
 }
 
 .fishbone-card-header {
@@ -41,18 +41,18 @@
 .fishbone-card-title {
   font-size: var(--font-size-base);
   font-weight: 600;
-  color: var(--text);
+  color: var(--color-text-primary);
 }
 
 .fishbone-card-count {
   font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   white-space: nowrap;
 }
 
 .fishbone-card-desc {
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   margin: 0.25rem 1rem 0;
 }
 
@@ -63,12 +63,12 @@
 .fishbone-empty {
   padding: 3rem;
   text-align: center;
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
 
 /* ---------------------------------------------------------------
-   SVG styles — use currentColor for dark mode compatibility
+   SVG styles — use CSS variables for dark mode compatibility
    --------------------------------------------------------------- */
 
 .fb-svg {
@@ -76,53 +76,53 @@
 }
 
 .fb-spine {
-  stroke: var(--text);
+  stroke: var(--color-text-primary);
   stroke-width: 2;
 }
 
 .fb-spine-arrow {
-  fill: var(--text);
+  fill: var(--color-text-primary);
 }
 
 .fb-effect-box {
-  fill: var(--surface);
-  stroke: var(--text);
+  fill: var(--color-bg-tertiary);
+  stroke: var(--color-text-primary);
   stroke-width: 1.5;
 }
 
 .fb-effect-text {
   font-size: 0.75rem;
-  fill: var(--text);
+  fill: var(--color-text-primary);
   font-weight: 600;
   font-family: var(--font-sans);
 }
 
 .fb-bone {
-  stroke: var(--text-secondary);
+  stroke: var(--color-text-secondary);
   stroke-width: 1.5;
 }
 
 .fb-cat-label {
   font-size: 0.7rem;
-  fill: var(--text);
+  fill: var(--color-text-primary);
   font-weight: 700;
   font-family: var(--font-sans);
 }
 
 .fb-sub-line {
-  stroke: var(--text-tertiary);
+  stroke: var(--color-text-muted);
   stroke-width: 1;
 }
 
 .fb-sub-label {
   font-size: 0.625rem;
-  fill: var(--text-secondary);
+  fill: var(--color-text-secondary);
   font-family: var(--font-sans);
 }
 
 .fb-empty-hint {
   font-size: 0.75rem;
-  fill: var(--text-tertiary);
+  fill: var(--color-text-muted);
   font-family: var(--font-sans);
 }
 
@@ -131,16 +131,16 @@
    --------------------------------------------------------------- */
 
 .fishbone-sidenav-svg-wrap {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg-editor);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-primary);
   overflow: hidden;
   margin-top: 0.5rem;
 }
 
 .fishbone-causes-hint {
   font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   margin-top: 0.25rem;
 }
 

@@ -10,6 +10,10 @@ export class MindmapModule {
     this.zoom = 1;
     this.offset = { x: 0, y: 0 };
     this.currentLayout = "horizontal";
+    // Panning state — managed by _initPanning(), updated on every pan gesture
+    this._isPanning = false;
+    this._panStart = { x: 0, y: 0 };
+    this._panTranslate = { x: 0, y: 0 };
   }
 
   async load(autoSelect = true) {
@@ -387,74 +391,92 @@ export class MindmapModule {
     });
   }
 
-  setupPanningFor(viewportId, containerId) {
-    const viewport = document.getElementById(viewportId);
-    const container = document.getElementById(containerId);
-    let isDragging = false;
-    let startX,
-      startY,
-      startTranslateX = 0,
-      startTranslateY = 0;
+  // Reset pan translate on each new render so position starts fresh.
+  // The actual event listeners are wired once in _initPanning().
+  setupPanningFor(_viewportId, _containerId) {
+    this._panTranslate = { x: 0, y: 0 };
+    this.offset = { x: 0, y: 0 };
+  }
 
-    const panStart = (x, y) => {
-      isDragging = true;
-      startX = x;
-      startY = y;
-      container.style.cursor = "grabbing";
-    };
+  // Wire panning event listeners once — called from bindEvents().
+  // Uses document-level move/end so fast drags never lose tracking.
+  _initPanning() {
+    const container = document.getElementById("mindmapContainer");
+    if (!container) return;
 
-    const panMove = (x, y) => {
-      if (!isDragging) return;
-      const deltaX = x - startX;
-      const deltaY = y - startY;
-      const newTranslateX = startTranslateX + deltaX;
-      const newTranslateY = startTranslateY + deltaY;
+    // Prevent page scroll when wheel is used over the canvas
+    container.addEventListener("wheel", (e) => e.preventDefault(), { passive: false });
 
-      const currentZoom = this.zoom;
-      viewport.style.transform =
-        `translate(${newTranslateX}px, ${newTranslateY}px) scale(${currentZoom})`;
-    };
-
-    const panEnd = () => {
-      if (!isDragging) return;
-      isDragging = false;
-      container.style.cursor = "grab";
-      const transform = viewport.style.transform;
-      const match = transform.match(/translate\(([^,]+),\s*([^)]+)\)/);
-      if (match) {
-        startTranslateX = parseFloat(match[1]);
-        startTranslateY = parseFloat(match[2]);
-        // Sync to module-level offset so updateZoom() reads the post-pan position
-        this.offset.x = startTranslateX;
-        this.offset.y = startTranslateY;
-      }
-    };
-
-    // Mouse events
+    // Mouse drag start
     container.addEventListener("mousedown", (e) => {
       if (!e.target.closest(".mindmap-node")) {
-        panStart(e.clientX, e.clientY);
+        this._isPanning = true;
+        this._panStart = { x: e.clientX, y: e.clientY };
+        container.style.cursor = "grabbing";
         e.preventDefault();
       }
     });
-    document.addEventListener("mousemove", (e) => panMove(e.clientX, e.clientY));
-    document.addEventListener("mouseup", panEnd);
 
-    // Touch events
+    // Touch drag start
     container.addEventListener("touchstart", (e) => {
       if (!e.target.closest(".mindmap-node")) {
-        const touch = e.touches[0];
-        panStart(touch.clientX, touch.clientY);
+        const t = e.touches[0];
+        this._isPanning = true;
+        this._panStart = { x: t.clientX, y: t.clientY };
       }
     }, { passive: true });
-    document.addEventListener("touchmove", (e) => {
-      if (isDragging) {
-        e.preventDefault();
-        const touch = e.touches[0];
-        panMove(touch.clientX, touch.clientY);
+
+    // Document-level move — single registration, no accumulation on re-render
+    document.addEventListener("mousemove", (e) => {
+      if (!this._isPanning) return;
+      const vp = document.getElementById("mindmapViewport");
+      if (!vp) return;
+      const tx = this._panTranslate.x + (e.clientX - this._panStart.x);
+      const ty = this._panTranslate.y + (e.clientY - this._panStart.y);
+      vp.style.transform = `translate(${tx}px, ${ty}px) scale(${this.zoom})`;
+    });
+
+    document.addEventListener("mouseup", () => {
+      if (!this._isPanning) return;
+      this._isPanning = false;
+      container.style.cursor = "grab";
+      const vp = document.getElementById("mindmapViewport");
+      if (vp) {
+        const m = vp.style.transform.match(/translate\(([^,]+),\s*([^)]+)\)/);
+        if (m) {
+          this._panTranslate.x = parseFloat(m[1]);
+          this._panTranslate.y = parseFloat(m[2]);
+          this.offset.x = this._panTranslate.x;
+          this.offset.y = this._panTranslate.y;
+        }
       }
+    });
+
+    document.addEventListener("touchmove", (e) => {
+      if (!this._isPanning) return;
+      e.preventDefault();
+      const t = e.touches[0];
+      const vp = document.getElementById("mindmapViewport");
+      if (!vp) return;
+      const tx = this._panTranslate.x + (t.clientX - this._panStart.x);
+      const ty = this._panTranslate.y + (t.clientY - this._panStart.y);
+      vp.style.transform = `translate(${tx}px, ${ty}px) scale(${this.zoom})`;
     }, { passive: false });
-    document.addEventListener("touchend", panEnd);
+
+    document.addEventListener("touchend", () => {
+      if (!this._isPanning) return;
+      this._isPanning = false;
+      const vp = document.getElementById("mindmapViewport");
+      if (vp) {
+        const m = vp.style.transform.match(/translate\(([^,]+),\s*([^)]+)\)/);
+        if (m) {
+          this._panTranslate.x = parseFloat(m[1]);
+          this._panTranslate.y = parseFloat(m[2]);
+          this.offset.x = this._panTranslate.x;
+          this.offset.y = this._panTranslate.y;
+        }
+      }
+    });
   }
 
   editSelected() {
@@ -929,5 +951,8 @@ export class MindmapModule {
         this.closeModal();
       }
     });
+
+    // Initialize panning once — avoids accumulating listeners on each render
+    this._initPanning();
   }
 }
