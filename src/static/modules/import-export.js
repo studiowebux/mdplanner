@@ -48,6 +48,34 @@ export class ImportExportModule {
     document.getElementById("importExportDropdown").classList.add("hidden");
   }
 
+  openExportDataModal() {
+    document.getElementById("importExportDropdown").classList.add("hidden");
+    document.getElementById("exportDataModal").classList.remove("hidden");
+  }
+
+  closeExportDataModal() {
+    document.getElementById("exportDataModal").classList.add("hidden");
+  }
+
+  downloadExportData() {
+    const checked = [
+      ...document.querySelectorAll(".export-entity-cb:checked"),
+    ].map((cb) => cb.value);
+
+    if (checked.length === 0) {
+      showToast("Select at least one entity to export.", "error");
+      return;
+    }
+
+    const url = `/api/export/json?entities=${checked.join(",")}`;
+    const link = document.createElement("a");
+    link.href = url;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    this.closeExportDataModal();
+  }
+
   async handleCSVFileSelect(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -158,6 +186,28 @@ export class ImportExportModule {
       ?.addEventListener("click", () => {
         this.exportPDFReport();
         this.tm.closeMobileMenu();
+      });
+
+    // Export Data modal
+    document.getElementById("exportDataBtn")
+      ?.addEventListener("click", () => this.openExportDataModal());
+    document.getElementById("exportDataModalClose")
+      ?.addEventListener("click", () => this.closeExportDataModal());
+    document.getElementById("exportDataModalCancel")
+      ?.addEventListener("click", () => this.closeExportDataModal());
+    document.getElementById("exportDataModalDownload")
+      ?.addEventListener("click", () => this.downloadExportData());
+    document.getElementById("exportDataModal")
+      ?.addEventListener("click", (e) => {
+        if (e.target === e.currentTarget) this.closeExportDataModal();
+      });
+    document.getElementById("exportDataSelectAll")
+      ?.addEventListener("click", () => {
+        document.querySelectorAll(".export-entity-cb").forEach((cb) => { cb.checked = true; });
+      });
+    document.getElementById("exportDataSelectNone")
+      ?.addEventListener("click", () => {
+        document.querySelectorAll(".export-entity-cb").forEach((cb) => { cb.checked = false; });
       });
 
     // CSV file input

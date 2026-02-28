@@ -228,6 +228,13 @@
                 >
                   Export PDF
                 </button>
+                <div class="dropdown-divider"></div>
+                <button
+                  id="exportDataBtn"
+                  class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+                >
+                  Export Data...
+                </button>
               </div>
             </div>
 
@@ -14255,6 +14262,46 @@
         </div>
       </div>
     </div>
+    <!-- Export Data Modal -->
+    <div id="exportDataModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Export Data">
+      <div class="modal-box" style="max-width:28rem;">
+        <div class="modal-header">
+          <h2 class="modal-title">Export Data</h2>
+          <button type="button" id="exportDataModalClose" class="sidenav-close" aria-label="Close">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="text-sm text-secondary mb-3">Select which data to include in the JSON export.</p>
+          <fieldset class="export-entity-grid">
+            <legend class="form-label mb-2">Entities</legend>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="tasks" checked> Tasks</label>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="notes" checked> Notes</label>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="goals" checked> Goals</label>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="meetings" checked> Meetings</label>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="people" checked> People</label>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="portfolio" checked> Portfolio</label>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="ideas" checked> Ideas</label>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="habits" checked> Habits</label>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="journal" checked> Journal</label>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="dns"> DNS</label>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="fishbone"> Fishbone</label>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="contacts"> Contacts</label>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="companies"> Companies</label>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="deals"> Deals</label>
+          </fieldset>
+          <div class="mt-3 flex gap-2">
+            <button type="button" id="exportDataSelectAll" class="btn-sm">Select all</button>
+            <button type="button" id="exportDataSelectNone" class="btn-sm">Clear</button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="exportDataModalCancel" class="btn-sm">Cancel</button>
+          <button type="button" id="exportDataModalDownload" class="btn-primary btn-sm">Download JSON</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Global Search Overlay -->
     <div id="globalSearchOverlay" class="search-overlay hidden" role="dialog" aria-modal="true" aria-label="Search">
       <div class="search-box">

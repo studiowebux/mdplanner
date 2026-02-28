@@ -476,6 +476,91 @@ exportImportRouter.post("/import/csv/canvas", async (c) => {
   return jsonResponse({ success: true, imported: stickyNotes.length });
 });
 
+// GET /export/json - export one or more entity types as a JSON bundle
+// Query params:
+//   entities — comma-separated list (default: all)
+//   Supported: tasks, notes, goals, meetings, people, portfolio, ideas,
+//              habits, journal, dns, fishbone, contacts, companies, deals
+exportImportRouter.get("/export/json", async (c) => {
+  const parser = getParser(c);
+  const projectInfo = await parser.readProjectInfo();
+
+  const SUPPORTED = [
+    "tasks",
+    "notes",
+    "goals",
+    "meetings",
+    "people",
+    "portfolio",
+    "ideas",
+    "habits",
+    "journal",
+    "dns",
+    "fishbone",
+    "contacts",
+    "companies",
+    "deals",
+  ] as const;
+
+  type EntityKey = (typeof SUPPORTED)[number];
+
+  const rawEntities = c.req.query("entities");
+  const requested: EntityKey[] = rawEntities
+    ? (rawEntities.split(",").map((s) => s.trim()).filter((s) =>
+      SUPPORTED.includes(s as EntityKey)
+    ) as EntityKey[])
+    : [...SUPPORTED];
+
+  if (requested.length === 0) {
+    return errorResponse(
+      "No valid entity types specified. Supported: " + SUPPORTED.join(", "),
+      400,
+    );
+  }
+
+  const entityFetchers: Record<EntityKey, () => Promise<unknown>> = {
+    tasks: () => parser.readTasks(),
+    notes: () => parser.readNotes(),
+    goals: () => parser.readGoals(),
+    meetings: () => parser.readMeetings(),
+    people: () => parser.readPeople(),
+    portfolio: () => parser.readPortfolioItems(),
+    ideas: () => parser.readIdeas(),
+    habits: () => parser.readHabits(),
+    journal: () => parser.readJournalEntries(),
+    dns: () => parser.readDnsDomains(),
+    fishbone: () => parser.readFishbones(),
+    contacts: () => parser.readContacts(),
+    companies: () => parser.readCompanies(),
+    deals: () => parser.readDeals(),
+  };
+
+  const results = await Promise.all(
+    requested.map(async (key) => {
+      const data = await entityFetchers[key]();
+      return [key, data] as [EntityKey, unknown];
+    }),
+  );
+
+  const bundle: Record<string, unknown> = {
+    exportedAt: new Date().toISOString(),
+    projectName: projectInfo.name,
+    entities: Object.fromEntries(results),
+  };
+
+  const filename = `${
+    (projectInfo.name || "project").replace(/\s+/g, "-").toLowerCase()
+  }-export-${new Date().toISOString().split("T")[0]}.json`;
+
+  return new Response(JSON.stringify(bundle, null, 2), {
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json",
+      "Content-Disposition": `attachment; filename="${filename}"`,
+    },
+  });
+});
+
 // GET /export/pdf/report - export project report as HTML (for PDF printing)
 exportImportRouter.get("/export/pdf/report", async (c) => {
   const parser = getParser(c);
