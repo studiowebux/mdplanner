@@ -56,6 +56,8 @@ import { MeetingsModule } from "./modules/features/meetings.js";
 import { MeetingSidenavModule } from "./modules/features/meeting-sidenav.js";
 import { JournalModule } from "./modules/features/journal.js";
 import { JournalSidenavModule } from "./modules/features/journal-sidenav.js";
+import { DnsModule } from "./modules/views/dns.js";
+import { DnsSidenavModule } from "./modules/features/dns-sidenav.js";
 import { OnboardingModule } from "./modules/features/onboarding.js";
 import { OnboardingSidenavModule } from "./modules/features/onboarding-sidenav.js";
 import { OnboardingTemplateSidenavModule } from "./modules/features/onboarding-template-sidenav.js";
@@ -243,6 +245,7 @@ class TaskManager {
     this.ideaSidenavModule = new IdeaSidenavModule(this);
     this.meetingSidenavModule = new MeetingSidenavModule(this);
     this.journalSidenavModule = new JournalSidenavModule(this);
+    this.dnsSidenavModule = new DnsSidenavModule(this);
     this.onboardingSidenavModule = new OnboardingSidenavModule(this);
     this.onboardingTemplateSidenavModule = new OnboardingTemplateSidenavModule(this);
     this.financesSidenavModule = new FinancesSidenavModule(this);
@@ -256,6 +259,7 @@ class TaskManager {
     this.ideasModule = new IdeasModule(this);
     this.meetingsModule = new MeetingsModule(this);
     this.journalModule = new JournalModule(this);
+    this.dnsModule = new DnsModule(this);
     this.onboardingModule = new OnboardingModule(this);
     this.financesModule = new FinancesModule(this);
     this.retrospectivesModule = new RetrospectivesModule(this);
@@ -904,6 +908,8 @@ class TaskManager {
     this.meetingsModule.bindEvents();
     this.journalSidenavModule.bindEvents();
     this.journalModule.bindEvents();
+    this.dnsSidenavModule.bindEvents();
+    this.dnsModule.bindEvents();
     this.onboardingSidenavModule.bindEvents();
     this.onboardingTemplateSidenavModule.bindEvents();
     this.onboardingModule.bindEvents();
@@ -951,6 +957,7 @@ class TaskManager {
       "onboarding",
       "finances",
       "ollama",
+      "dns",
     ];
 
     // If no features configured, show everything
@@ -1022,6 +1029,7 @@ class TaskManager {
       onboarding: "Onboarding",
       finances: "Finances",
       ollama: "AI Chat",
+      dns: "DNS",
       config: "Settings",
     };
     const label = document.getElementById("currentViewLabel");
@@ -1101,6 +1109,7 @@ class TaskManager {
       "meetingsViewBtn",
       "journalViewBtn",
       "onboardingViewBtn",
+      "dnsViewBtn",
     ];
     desktopNavBtns.forEach((id) => {
       const btn = document.getElementById(id);
@@ -1146,6 +1155,7 @@ class TaskManager {
       "onboardingViewBtnMobile",
       "financesViewBtnMobile",
       "ollamaViewBtnMobile",
+      "dnsViewBtnMobile",
       "configViewBtnMobile",
     ];
     mobileBtnIds.forEach((id) => {
@@ -1190,6 +1200,7 @@ class TaskManager {
     document.getElementById("onboardingView")?.classList.add("hidden");
     document.getElementById("financesView")?.classList.add("hidden");
     document.getElementById("ollamaView")?.classList.add("hidden");
+    document.getElementById("dnsView")?.classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
     document.getElementById("mindmapView").classList.add("hidden");
     document.getElementById("c4View").classList.add("hidden");
@@ -1334,6 +1345,10 @@ class TaskManager {
       this.activateViewButton("journal");
       document.getElementById("journalView").classList.remove("hidden");
       this.journalModule.load();
+    } else if (view === "dns") {
+      this.activateViewButton("dns");
+      document.getElementById("dnsView").classList.remove("hidden");
+      this.dnsModule.load();
     } else if (view === "onboarding") {
       this.activateViewButton("onboarding");
       document.getElementById("onboardingView").classList.remove("hidden");

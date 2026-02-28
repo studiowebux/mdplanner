@@ -243,11 +243,36 @@ configuration.
 
 ### Server flags
 
-| Flag                        | Env var                       | Description                                         |
-| --------------------------- | ----------------------------- | --------------------------------------------------- |
-| `--backup-public-key <hex>` | `MDPLANNER_BACKUP_PUBLIC_KEY` | RSA public key hex — enables encrypted exports      |
-| `--backup-dir <path>`       | `MDPLANNER_BACKUP_DIR`        | Directory where scheduled backups are written       |
-| `--backup-interval <hrs>`   | `MDPLANNER_BACKUP_INTERVAL`   | Backup frequency in hours (requires `--backup-dir`) |
+| Flag                        | Env var                       | Description                                                                                       |
+| --------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------- |
+| `--backup-public-key <hex>` | `MDPLANNER_BACKUP_PUBLIC_KEY` | RSA public key hex — enables encrypted exports                                                    |
+| `--backup-dir <path>`       | `MDPLANNER_BACKUP_DIR`        | Directory where scheduled backups are written                                                     |
+| `--backup-interval <hrs>`   | `MDPLANNER_BACKUP_INTERVAL`   | Backup frequency in hours (requires `--backup-dir`)                                               |
+| _(env only)_                | `MDPLANNER_SECRET_KEY`        | 32-byte hex key — encrypts integration tokens (Cloudflare API token, etc.) stored in `project.md` |
+
+### Integration secret encryption
+
+When `MDPLANNER_SECRET_KEY` is set, any integration token saved through the
+Settings UI is encrypted with AES-256-GCM before being written to `project.md`.
+Tokens saved without the key are stored in plain text. The Settings UI shows a
+banner indicating the current encryption status.
+
+Generate a key:
+
+```bash
+mdplanner keygen-secret
+# Outputs a 64-character hex string — set as MDPLANNER_SECRET_KEY
+```
+
+In the systemd unit file:
+
+```ini
+[Service]
+Environment=MDPLANNER_SECRET_KEY=<your-64-char-hex-key>
+```
+
+To migrate an existing plain-text token to encrypted storage: set the key, then
+re-save the token through the Settings UI.
 
 ### Plain export
 

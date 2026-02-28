@@ -1242,3 +1242,53 @@ export const JournalAPI = {
     return del(`/api/journal/${id}`);
   },
 };
+
+// Integrations API
+export const IntegrationsAPI = {
+  async getCloudflare() {
+    const response = await get("/api/integrations/cloudflare");
+    return response.json();
+  },
+
+  async saveCloudflare(token) {
+    return post("/api/integrations/cloudflare", { token });
+  },
+
+  async deleteCloudflare() {
+    return del("/api/integrations/cloudflare");
+  },
+};
+
+// DNS API
+export const DnsAPI = {
+  async fetchAll() {
+    const response = await get("/api/dns");
+    return response.json();
+  },
+
+  async fetchOne(id) {
+    const response = await get(`/api/dns/${id}`);
+    return response.json();
+  },
+
+  async create(domain) {
+    return post("/api/dns", domain);
+  },
+
+  async update(id, domain) {
+    return put(`/api/dns/${id}`, domain);
+  },
+
+  async delete(id) {
+    return del(`/api/dns/${id}`);
+  },
+
+  async syncCloudflare() {
+    return post("/api/dns/sync/cloudflare", {});
+  },
+
+  async previewCloudflare() {
+    const response = await get("/api/integrations/cloudflare/zones");
+    return response.json();
+  },
+};

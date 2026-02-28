@@ -610,3 +610,26 @@
   white-space: nowrap;
   border-width: 0;
 }
+
+/* Integration encryption status banner */
+.integration-encryption-banner {
+  font-size: var(--font-size-sm);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid;
+}
+.integration-encryption-banner.encryption-ok {
+  color: var(--color-success-text);
+  background-color: var(--color-success-bg);
+  border-color: var(--color-success-border, var(--color-success));
+}
+.integration-encryption-banner.encryption-warn {
+  color: #92400e;
+  background-color: #fefce8;
+  border-color: #fde68a;
+}
+[data-theme="dark"] .integration-encryption-banner.encryption-warn {
+  color: #fbbf24;
+  background-color: #1c1a09;
+  border-color: #78350f;
+}
