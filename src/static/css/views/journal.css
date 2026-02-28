@@ -18,7 +18,7 @@
 /* Entry card — clear border + background separation */
 .journal-entry-card {
   padding: 0.875rem 1rem;
-  border: 1px solid #cccccc;
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   background-color: var(--bg-editor);
   margin-block-end: 0.5rem;
@@ -101,8 +101,8 @@
   color: var(--text-tertiary);
   background-color: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 0.1em 0.4em;
+  border-radius: 999px;
+  padding: 0.1em 0.5em;
 }
 
 /* Body preview */

@@ -435,6 +435,7 @@ class TaskManager {
       { id: "onboardingViewBtn", view: "onboarding" },
       { id: "financesViewBtn", view: "finances" },
       { id: "analyticsViewBtn", view: "analytics" },
+      { id: "dnsViewBtn", view: "dns" },
     ];
     additionalViews.forEach(({ id, view }) => {
       document.getElementById(id)?.addEventListener("click", () => {
@@ -1152,7 +1153,13 @@ class TaskManager {
       "habitsViewBtn",
       "fishboneViewBtn",
       "onboardingViewBtn",
+      "fundraisingViewBtn",
+      "financesViewBtn",
+      "analyticsViewBtn",
+      "ollamaViewBtn",
+      "uploadsViewBtn",
       "dnsViewBtn",
+      "configViewBtn",
     ];
     desktopNavBtns.forEach((id) => {
       const btn = document.getElementById(id);

@@ -255,9 +255,17 @@ function escapeHtml(str) {
     .replace(/"/g, "&quot;");
 }
 
-// Allow <mark> tags from the server snippet, escape everything else
+// Strip markdown syntax then allow <mark> tags from the server snippet
 function sanitizeSnippet(snippet) {
   return snippet
+    .replace(/#{1,6}\s+/g, "")       // headings
+    .replace(/\*\*(.+?)\*\*/g, "$1") // bold
+    .replace(/\*(.+?)\*/g, "$1")     // italic
+    .replace(/__(.+?)__/g, "$1")     // bold alt
+    .replace(/_(.+?)_/g, "$1")       // italic alt
+    .replace(/`{1,3}[^`]*`{1,3}/g, "") // code
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // links
+    .replace(/^[-*+]\s+/gm, "")      // list bullets
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
