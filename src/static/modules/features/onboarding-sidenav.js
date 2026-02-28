@@ -5,6 +5,7 @@
 
 import { OnboardingAPI } from "../api.js";
 import { Sidenav } from "../ui/sidenav.js";
+import { bindAutocomplete } from "../ui/autocomplete.js";
 
 const CATEGORY_ORDER = ["equipment", "accounts", "docs", "training", "intro", "other"];
 
@@ -249,6 +250,23 @@ export class OnboardingSidenavModule {
     document.getElementById("onboardingDeleteBtn")?.addEventListener("click", () =>
       this._deleteMeta(),
     );
+
+    // Employee name autocomplete — suggests from people registry, auto-fills personId
+    const nameInput = document.getElementById("onboardingSidenavName");
+    if (nameInput) {
+      bindAutocomplete(
+        nameInput,
+        () => [...(this.taskManager.peopleMap?.values() ?? [])].map((p) => p.name).filter(Boolean).sort(),
+        (name) => {
+          nameInput.value = name;
+          const person = [...(this.taskManager.peopleMap?.values() ?? [])].find((p) => p.name === name);
+          if (person) {
+            const personIdInput = document.getElementById("onboardingSidenavPersonId");
+            if (personIdInput) personIdInput.value = person.id;
+          }
+        },
+      );
+    }
 
     // Detail panel close
     document.getElementById("onboardingDetailClose")?.addEventListener("click", () =>

@@ -6,6 +6,7 @@ import { MeetingsAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { showConfirm } from "../ui/confirm.js";
 import { escapeHtml } from "../utils.js";
+import { bindAutocomplete } from "../ui/autocomplete.js";
 
 export class MeetingSidenavModule {
   constructor(taskManager) {
@@ -13,68 +14,6 @@ export class MeetingSidenavModule {
     this.editingMeetingId = null;
     this.currentMeeting = null;
     this.attendeeNames = [];
-    this._dropdowns = []; // fixed-position dropdowns appended to body
-  }
-
-  // --- Custom autocomplete (position:fixed, appended to body) ---
-  // Returns a hide() function. getNames() is called on each keystroke.
-  _bindAutocomplete(inputEl, getNames, onSelect) {
-    const dropdown = document.createElement("ul");
-    dropdown.className = "meeting-autocomplete-dropdown";
-    dropdown.style.cssText = "position:fixed;display:none;";
-    document.body.appendChild(dropdown);
-    this._dropdowns.push(dropdown);
-
-    const hide = () => {
-      dropdown.style.display = "none";
-    };
-
-    const show = () => {
-      const query = inputEl.value.toLowerCase().trim();
-      const names = getNames();
-      const matches = names
-        .filter((n) => !query || n.toLowerCase().includes(query))
-        .slice(0, 8);
-
-      if (matches.length === 0) {
-        hide();
-        return;
-      }
-
-      dropdown.innerHTML = matches
-        .map((n) =>
-          `<li class="meeting-autocomplete-item">${escapeHtml(n)}</li>`
-        )
-        .join("");
-
-      // Position: prefer below, flip above if not enough room
-      const rect = inputEl.getBoundingClientRect();
-      const estHeight = Math.min(matches.length * 32 + 8, 160);
-      dropdown.style.left = `${rect.left}px`;
-      dropdown.style.width = `${rect.width}px`;
-      if (window.innerHeight - rect.bottom >= estHeight) {
-        dropdown.style.top = `${rect.bottom + 2}px`;
-        dropdown.style.bottom = "auto";
-      } else {
-        dropdown.style.top = "auto";
-        dropdown.style.bottom = `${window.innerHeight - rect.top + 2}px`;
-      }
-      dropdown.style.display = "block";
-
-      dropdown.querySelectorAll(".meeting-autocomplete-item").forEach((item) => {
-        item.addEventListener("mousedown", (e) => {
-          e.preventDefault(); // keep focus on input so blur doesn't race
-          onSelect(item.textContent);
-          hide();
-        });
-      });
-    };
-
-    inputEl.addEventListener("input", show);
-    inputEl.addEventListener("focus", show);
-    inputEl.addEventListener("blur", () => setTimeout(hide, 150));
-
-    return hide;
   }
 
   bindEvents() {
@@ -128,7 +67,7 @@ export class MeetingSidenavModule {
 
     // Attendee autocomplete
     if (attendeeInput) {
-      this._bindAutocomplete(
+      bindAutocomplete(
         attendeeInput,
         () =>
           [...this.tm.peopleMap.values()]
@@ -161,7 +100,7 @@ export class MeetingSidenavModule {
 
     // Owner autocomplete
     if (ownerInput) {
-      this._bindAutocomplete(
+      bindAutocomplete(
         ownerInput,
         () =>
           [...this.tm.peopleMap.values()]
@@ -217,8 +156,6 @@ export class MeetingSidenavModule {
   }
 
   close() {
-    // Hide all custom autocomplete dropdowns
-    for (const el of this._dropdowns) el.style.display = "none";
     Sidenav.close("meetingSidenav");
     this.editingMeetingId = null;
     this.currentMeeting = null;
