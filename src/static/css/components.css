@@ -620,9 +620,9 @@ select.input {
 }
 
 .dark .help-kbd {
-  background-color: #1a1a1a;
-  border-color: #3d3d3d;
-  box-shadow: 0 1px 0 #2a2a2a;
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-border-strong);
+  box-shadow: 0 1px 0 var(--color-border-default);
 }
 
 .help-links-list {
@@ -680,13 +680,13 @@ select.input {
 
 .badge-priority-1 {
   background-color: var(--color-error);
-  color: #ffffff;
+  color: var(--color-static-white);
   border: 1px solid var(--color-error-border);
 }
 
 .badge-priority-2 {
   background-color: var(--color-warning);
-  color: #ffffff;
+  color: var(--color-static-white);
   border: 1px solid var(--color-warning-border);
 }
 
