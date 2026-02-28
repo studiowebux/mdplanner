@@ -4,6 +4,43 @@
    Sticky notes canvas view.
    ========================================================================== */
 
+/* Sticky note palette vars */
+:root {
+  --sticky-yellow-bg: #fef9c3;
+  --sticky-yellow-accent: #eab308;
+  --sticky-yellow-text: #713f12;
+  --sticky-pink-bg: #fce7f3;
+  --sticky-pink-accent: #ec4899;
+  --sticky-pink-text: #831843;
+  --sticky-blue-bg: #dbeafe;
+  --sticky-blue-accent: #3b82f6;
+  --sticky-blue-text: #1e40af;
+  --sticky-green-bg: #dcfce7;
+  --sticky-green-accent: #22c55e;
+  --sticky-green-text: #166534;
+  --sticky-purple-bg: #f3e8ff;
+  --sticky-purple-accent: #a855f7;
+  --sticky-purple-text: #6b21a8;
+  --sticky-orange-bg: #ffedd5;
+  --sticky-orange-accent: #f97316;
+  --sticky-orange-text: #9a3412;
+}
+
+.dark {
+  --sticky-yellow-bg: #422006;
+  --sticky-yellow-text: #fef9c3;
+  --sticky-pink-bg: #500724;
+  --sticky-pink-text: #fce7f3;
+  --sticky-blue-bg: #1e3a5f;
+  --sticky-blue-text: #dbeafe;
+  --sticky-green-bg: #14532d;
+  --sticky-green-text: #dcfce7;
+  --sticky-purple-bg: #3b0764;
+  --sticky-purple-text: #f3e8ff;
+  --sticky-orange-bg: #431407;
+  --sticky-orange-text: #ffedd5;
+}
+
 /* --------------------------------------------------------------------------
    Canvas Container
    -------------------------------------------------------------------------- */
@@ -57,82 +94,70 @@
 
 /* Sticky note colors - Light theme */
 .sticky-note.yellow {
-  background-color: #fef9c3;
-  border-left: 4px solid #eab308;
-  color: #713f12;
+  background-color: var(--sticky-yellow-bg);
+  border-left: 4px solid var(--sticky-yellow-accent);
+  color: var(--sticky-yellow-text);
 }
 
 .sticky-note.pink {
-  background-color: #fce7f3;
-  border-left: 4px solid #ec4899;
-  color: #831843;
+  background-color: var(--sticky-pink-bg);
+  border-left: 4px solid var(--sticky-pink-accent);
+  color: var(--sticky-pink-text);
 }
 
 .sticky-note.blue {
-  background-color: #dbeafe;
-  border-left: 4px solid #3b82f6;
-  color: #1e40af;
+  background-color: var(--sticky-blue-bg);
+  border-left: 4px solid var(--sticky-blue-accent);
+  color: var(--sticky-blue-text);
 }
 
 .sticky-note.green {
-  background-color: #dcfce7;
-  border-left: 4px solid #22c55e;
-  color: #166534;
+  background-color: var(--sticky-green-bg);
+  border-left: 4px solid var(--sticky-green-accent);
+  color: var(--sticky-green-text);
 }
 
 .sticky-note.purple {
-  background-color: #f3e8ff;
-  border-left: 4px solid #a855f7;
-  color: #6b21a8;
+  background-color: var(--sticky-purple-bg);
+  border-left: 4px solid var(--sticky-purple-accent);
+  color: var(--sticky-purple-text);
 }
 
 .sticky-note.orange {
-  background-color: #ffedd5;
-  border-left: 4px solid #f97316;
-  color: #9a3412;
+  background-color: var(--sticky-orange-bg);
+  border-left: 4px solid var(--sticky-orange-accent);
+  color: var(--sticky-orange-text);
 }
 
-/* Sticky note colors - Dark theme */
-.dark .sticky-note.yellow,
-.theme-dark .sticky-note.yellow {
-  background-color: #422006;
-  border-left-color: #eab308;
-  color: #fef9c3;
+/* Sticky note colors - Dark theme (vars redefined in .dark block above) */
+.dark .sticky-note.yellow {
+  background-color: var(--sticky-yellow-bg);
+  color: var(--sticky-yellow-text);
 }
 
-.dark .sticky-note.pink,
-.theme-dark .sticky-note.pink {
-  background-color: #500724;
-  border-left-color: #ec4899;
-  color: #fce7f3;
+.dark .sticky-note.pink {
+  background-color: var(--sticky-pink-bg);
+  color: var(--sticky-pink-text);
 }
 
-.dark .sticky-note.blue,
-.theme-dark .sticky-note.blue {
-  background-color: #1e3a5f;
-  border-left-color: #3b82f6;
-  color: #dbeafe;
+.dark .sticky-note.blue {
+  background-color: var(--sticky-blue-bg);
+  color: var(--sticky-blue-text);
 }
 
-.dark .sticky-note.green,
-.theme-dark .sticky-note.green {
-  background-color: #14532d;
-  border-left-color: #22c55e;
-  color: #dcfce7;
+.dark .sticky-note.green {
+  background-color: var(--sticky-green-bg);
+  color: var(--sticky-green-text);
 }
 
-.dark .sticky-note.purple,
-.theme-dark .sticky-note.purple {
-  background-color: #3b0764;
-  border-left-color: #a855f7;
-  color: #f3e8ff;
+.dark .sticky-note.purple {
+  background-color: var(--sticky-purple-bg);
+  color: var(--sticky-purple-text);
 }
 
-.dark .sticky-note.orange,
-.theme-dark .sticky-note.orange {
-  background-color: #431407;
-  border-left-color: #f97316;
-  color: #ffedd5;
+.dark .sticky-note.orange {
+  background-color: var(--sticky-orange-bg);
+  color: var(--sticky-orange-text);
 }
 
 /* --------------------------------------------------------------------------
