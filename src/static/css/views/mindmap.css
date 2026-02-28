@@ -65,32 +65,28 @@
 }
 
 /* Dark theme overrides */
-.dark .mindmap-node,
-.theme-dark .mindmap-node {
-  background: #1a1a1a;
-  border-color: #404040;
-  color: #ffffff;
+.dark .mindmap-node {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
 }
 
-.dark .mindmap-node.root,
-.theme-dark .mindmap-node.root {
-  background: #ffffff;
-  color: #000000;
-  border-color: #ffffff;
+.dark .mindmap-node.root {
+  background: var(--color-static-white);
+  color: var(--color-static-black);
+  border-color: var(--color-static-white);
 }
 
-.dark .mindmap-node.level-1,
-.theme-dark .mindmap-node.level-1 {
-  background: #262626;
-  border-color: #525252;
-  color: #ffffff;
+.dark .mindmap-node.level-1 {
+  background: var(--color-bg-active);
+  border-color: var(--color-border-focus);
+  color: var(--color-text-primary);
 }
 
-.dark .mindmap-node.level-2,
-.theme-dark .mindmap-node.level-2 {
-  background: #1a1a1a;
-  border-color: #404040;
-  color: #e5e5e5;
+.dark .mindmap-node.level-2 {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-strong);
+  color: var(--color-text-secondary);
 }
 
 /* --------------------------------------------------------------------------
@@ -105,8 +101,7 @@
   pointer-events: none;
 }
 
-.dark .mindmap-connection,
-.theme-dark .mindmap-connection {
+.dark .mindmap-connection {
   border-color: var(--color-border-strong);
 }
 
