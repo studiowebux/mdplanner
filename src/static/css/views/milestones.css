@@ -73,14 +73,9 @@
 }
 
 .milestone-status-risk {
-  color: #d97706;
-  border-color: #d97706;
+  color: var(--color-warning);
+  border-color: var(--color-warning);
   background: transparent;
-}
-
-[data-theme="dark"] .milestone-status-risk {
-  color: #fbbf24;
-  border-color: #fbbf24;
 }
 
 .milestone-status-active {

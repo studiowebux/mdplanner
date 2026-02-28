@@ -624,12 +624,7 @@
   border-color: var(--color-success-border, var(--color-success));
 }
 .integration-encryption-banner.encryption-warn {
-  color: #92400e;
-  background-color: #fefce8;
-  border-color: #fde68a;
-}
-[data-theme="dark"] .integration-encryption-banner.encryption-warn {
-  color: #fbbf24;
-  background-color: #1c1a09;
-  border-color: #78350f;
+  color: var(--color-warning-text);
+  background-color: var(--color-warning-bg);
+  border-color: var(--color-warning-border);
 }
