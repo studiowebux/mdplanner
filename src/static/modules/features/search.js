@@ -22,6 +22,7 @@ const VIEW_BY_TYPE = {
   onboarding: "onboarding",
   onboarding_template: "onboarding",
   financial_period: "finances",
+  journal: "journal",
 };
 
 const TYPE_LABELS = {
@@ -42,6 +43,7 @@ const TYPE_LABELS = {
   onboarding: "Onboarding",
   onboarding_template: "Template",
   financial_period: "Finance",
+  journal: "Journal",
 };
 
 export class GlobalSearch {
@@ -174,7 +176,7 @@ export class GlobalSearch {
   }
 
   _isEnabled() {
-    const features = this.tm.projectConfig?.features;
+    const features = this.taskManager.projectConfig?.features;
     return !features || features.length === 0 || features.includes("quick-search");
   }
 

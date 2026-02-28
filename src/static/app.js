@@ -54,6 +54,8 @@ import { MilestonesModule } from "./modules/features/milestones.js";
 import { IdeasModule } from "./modules/features/ideas.js";
 import { MeetingsModule } from "./modules/features/meetings.js";
 import { MeetingSidenavModule } from "./modules/features/meeting-sidenav.js";
+import { JournalModule } from "./modules/features/journal.js";
+import { JournalSidenavModule } from "./modules/features/journal-sidenav.js";
 import { OnboardingModule } from "./modules/features/onboarding.js";
 import { OnboardingSidenavModule } from "./modules/features/onboarding-sidenav.js";
 import { OnboardingTemplateSidenavModule } from "./modules/features/onboarding-template-sidenav.js";
@@ -240,6 +242,7 @@ class TaskManager {
     this.briefSidenavModule = new BriefSidenavModule(this);
     this.ideaSidenavModule = new IdeaSidenavModule(this);
     this.meetingSidenavModule = new MeetingSidenavModule(this);
+    this.journalSidenavModule = new JournalSidenavModule(this);
     this.onboardingSidenavModule = new OnboardingSidenavModule(this);
     this.onboardingTemplateSidenavModule = new OnboardingTemplateSidenavModule(this);
     this.financesSidenavModule = new FinancesSidenavModule(this);
@@ -252,6 +255,7 @@ class TaskManager {
     this.milestonesModule = new MilestonesModule(this);
     this.ideasModule = new IdeasModule(this);
     this.meetingsModule = new MeetingsModule(this);
+    this.journalModule = new JournalModule(this);
     this.onboardingModule = new OnboardingModule(this);
     this.financesModule = new FinancesModule(this);
     this.retrospectivesModule = new RetrospectivesModule(this);
@@ -411,6 +415,7 @@ class TaskManager {
       { id: "uploadsViewBtn", view: "uploads" },
       { id: "ollamaViewBtn", view: "ollama" },
       { id: "meetingsViewBtn", view: "meetings" },
+      { id: "journalViewBtn", view: "journal" },
       { id: "onboardingViewBtn", view: "onboarding" },
       { id: "financesViewBtn", view: "finances" },
     ];
@@ -643,6 +648,12 @@ class TaskManager {
       .getElementById("meetingsViewBtnMobile")
       ?.addEventListener("click", () => {
         this.switchView("meetings");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("journalViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("journal");
         this.closeMobileMenu();
       });
     document
@@ -891,6 +902,8 @@ class TaskManager {
     this.uploadsView.bindEvents();
     this.meetingSidenavModule.bindEvents();
     this.meetingsModule.bindEvents();
+    this.journalSidenavModule.bindEvents();
+    this.journalModule.bindEvents();
     this.onboardingSidenavModule.bindEvents();
     this.onboardingTemplateSidenavModule.bindEvents();
     this.onboardingModule.bindEvents();
@@ -934,6 +947,7 @@ class TaskManager {
       "strategicLevels", "billing", "crm", "orgchart", "people", "portfolio",
       "uploads",
       "meetings",
+      "journal",
       "onboarding",
       "finances",
       "ollama",
@@ -1004,6 +1018,7 @@ class TaskManager {
       portfolio: "Portfolio",
       fundraising: "Fundraising",
       meetings: "Meetings",
+      journal: "Journal",
       onboarding: "Onboarding",
       finances: "Finances",
       ollama: "AI Chat",
@@ -1084,6 +1099,7 @@ class TaskManager {
       "peopleViewBtn",
       "portfolioViewBtn",
       "meetingsViewBtn",
+      "journalViewBtn",
       "onboardingViewBtn",
     ];
     desktopNavBtns.forEach((id) => {
@@ -1126,6 +1142,7 @@ class TaskManager {
       "peopleViewBtnMobile",
       "portfolioViewBtnMobile",
       "meetingsViewBtnMobile",
+      "journalViewBtnMobile",
       "onboardingViewBtnMobile",
       "financesViewBtnMobile",
       "ollamaViewBtnMobile",
@@ -1169,6 +1186,7 @@ class TaskManager {
     document.getElementById("portfolioView")?.classList.add("hidden");
     document.getElementById("uploadsView")?.classList.add("hidden");
     document.getElementById("meetingsView")?.classList.add("hidden");
+    document.getElementById("journalView")?.classList.add("hidden");
     document.getElementById("onboardingView")?.classList.add("hidden");
     document.getElementById("financesView")?.classList.add("hidden");
     document.getElementById("ollamaView")?.classList.add("hidden");
@@ -1312,6 +1330,10 @@ class TaskManager {
       this.activateViewButton("meetings");
       document.getElementById("meetingsView").classList.remove("hidden");
       this.meetingsModule.load();
+    } else if (view === "journal") {
+      this.activateViewButton("journal");
+      document.getElementById("journalView").classList.remove("hidden");
+      this.journalModule.load();
     } else if (view === "onboarding") {
       this.activateViewButton("onboarding");
       document.getElementById("onboardingView").classList.remove("hidden");

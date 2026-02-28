@@ -40,6 +40,7 @@ import { meetingsRouter } from "./features/meetings.ts";
 import { onboardingRouter } from "./features/onboarding.ts";
 import { onboardingTemplatesRouter } from "./features/onboarding-templates.ts";
 import { financesRouter } from "./features/finances.ts";
+import { journalRouter } from "./features/journal.ts";
 import { eisenhowerRouter } from "./features/eisenhower.ts";
 import { safeRouter } from "./features/safe.ts";
 import { investorsRouter } from "./features/investors.ts";
@@ -128,6 +129,9 @@ export function createApiRouter(
 
   // Finances routes
   api.route("/finances", financesRouter);
+
+  // Journal routes
+  api.route("/journal", journalRouter);
 
   // MoSCoW Analysis routes
   api.route("/moscow", moscowRouter);

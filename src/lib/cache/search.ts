@@ -26,7 +26,8 @@ export type SearchResultType =
   | "eisenhower"
   | "onboarding"
   | "onboarding_template"
-  | "financial_period";
+  | "financial_period"
+  | "journal";
 
 export interface SearchResult {
   type: SearchResultType;

@@ -3,3 +3,6 @@ backups/*.md
 .mdplanner_active
 dist/
 mdplanner
+*.mdplanner.db
+*.mdplanner.db-shm
+*.mdplanner.db-wal

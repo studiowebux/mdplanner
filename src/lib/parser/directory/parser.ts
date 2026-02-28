@@ -48,6 +48,7 @@ import { MeetingsDirectoryParser } from "./meetings.ts";
 import { OnboardingDirectoryParser } from "./onboarding.ts";
 import { OnboardingTemplateDirectoryParser } from "./onboarding-template.ts";
 import { FinancesDirectoryParser } from "./finances.ts";
+import { JournalDirectoryParser } from "./journal.ts";
 import type {
   BillingRate,
   Brief,
@@ -65,6 +66,7 @@ import type {
   Interaction,
   InvestorEntry,
   Invoice,
+  JournalEntry,
   KPISnapshot,
   LeanCanvas,
   Meeting,
@@ -128,6 +130,7 @@ export class DirectoryMarkdownParser {
   protected onboardingParser: OnboardingDirectoryParser;
   protected onboardingTemplateParser: OnboardingTemplateDirectoryParser;
   protected financesParser: FinancesDirectoryParser;
+  protected journalParser: JournalDirectoryParser;
 
   constructor(projectDir: string) {
     this.projectDir = projectDir;
@@ -164,6 +167,7 @@ export class DirectoryMarkdownParser {
       projectDir,
     );
     this.financesParser = new FinancesDirectoryParser(projectDir);
+    this.journalParser = new JournalDirectoryParser(projectDir);
   }
 
   // ============================================================
@@ -1727,5 +1731,35 @@ export class DirectoryMarkdownParser {
 
   async deleteFinancialPeriod(id: string): Promise<boolean> {
     return this.financesParser.delete(id);
+  }
+
+  // ============================================================
+  // Journal
+  // ============================================================
+
+  async readJournalEntries(): Promise<JournalEntry[]> {
+    const entries = await this.journalParser.readAll();
+    return entries.sort((a, b) => {
+      const dateCmp = b.date.localeCompare(a.date);
+      if (dateCmp !== 0) return dateCmp;
+      return b.created.localeCompare(a.created);
+    });
+  }
+
+  async addJournalEntry(
+    entry: Omit<JournalEntry, "id" | "created" | "updated">,
+  ): Promise<JournalEntry> {
+    return this.journalParser.add(entry);
+  }
+
+  async updateJournalEntry(
+    id: string,
+    updates: Partial<JournalEntry>,
+  ): Promise<JournalEntry | null> {
+    return this.journalParser.update(id, updates);
+  }
+
+  async deleteJournalEntry(id: string): Promise<boolean> {
+    return this.journalParser.delete(id);
   }
 }

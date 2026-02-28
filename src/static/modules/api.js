@@ -1189,3 +1189,28 @@ export const FinancesAPI = {
     return del(`/api/finances/${id}`);
   },
 };
+
+// Journal API
+export const JournalAPI = {
+  async fetchAll() {
+    const response = await get("/api/journal");
+    return response.json();
+  },
+
+  async fetchOne(id) {
+    const response = await get(`/api/journal/${id}`);
+    return response.json();
+  },
+
+  async create(entry) {
+    return post("/api/journal", entry);
+  },
+
+  async update(id, entry) {
+    return put(`/api/journal/${id}`, entry);
+  },
+
+  async delete(id) {
+    return del(`/api/journal/${id}`);
+  },
+};

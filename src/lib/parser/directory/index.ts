@@ -32,6 +32,7 @@ export {
   type PeopleSummary,
   type PersonWithChildren,
 } from "./people.ts";
+export { JournalDirectoryParser } from "./journal.ts";
 export { DirectoryMarkdownParser } from "./parser.ts";
 export {
   migrateFromDirectory,
