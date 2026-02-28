@@ -73,7 +73,9 @@ export class BaseSidenavModule {
     this.inputIds.forEach((id) => {
       const el = document.getElementById(id);
       if (!el) return;
-      const handler = () => { if (this.editingId) this.scheduleAutoSave(); };
+      const handler = (e) => {
+        if (this.editingId) this.scheduleAutoSave(e._fromUndo === true);
+      };
       el.addEventListener("input", handler);
       el.addEventListener("change", handler);
     });
@@ -116,8 +118,12 @@ export class BaseSidenavModule {
 
   // --- Auto-save ---
 
-  scheduleAutoSave() {
-    if (this.isSaving) return;
+  /**
+   * @param {boolean} [forceQueue=false] - when true, schedules even if a save
+   *   is already in-flight (used by undo/redo to ensure restored state persists)
+   */
+  scheduleAutoSave(forceQueue = false) {
+    if (this.isSaving && !forceQueue) return;
     if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
     this.showSaveStatus("Saving...");
     this.autoSaveTimeout = setTimeout(() => this.save(), AUTO_SAVE_DELAY);

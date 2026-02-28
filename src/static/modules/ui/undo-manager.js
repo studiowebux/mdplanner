@@ -187,8 +187,14 @@ export class UndoManager {
   }
 
   _onKeydown(e) {
-    const isMac = navigator.platform?.toLowerCase().includes("mac") ||
-      navigator.userAgent?.toLowerCase().includes("mac");
+    // userAgentData is available in Chromium-based browsers; fall back to
+    // navigator.platform (Safari/Firefox) then userAgent string as last resort.
+    const platform = (
+      navigator.userAgentData?.platform ??
+      navigator.platform ??
+      navigator.userAgent
+    ).toLowerCase();
+    const isMac = platform.includes("mac");
     const mod = isMac ? e.metaKey : e.ctrlKey;
 
     if (!mod) return;
@@ -249,8 +255,13 @@ export class UndoManager {
     } catch {
       // Some input types don't support setSelectionRange — ignore
     }
-    // Dispatch input so auto-save schedules itself and UI stays in sync
-    this._el.dispatchEvent(new Event("input", { bubbles: true }));
+    // Dispatch input so auto-save schedules itself and UI stays in sync.
+    // The _fromUndo flag lets the sidenav layer bypass the isSaving guard
+    // so that a restored state is always queued for saving — even if a save
+    // is currently in-flight.
+    const evt = new Event("input", { bubbles: true });
+    evt._fromUndo = true;
+    this._el.dispatchEvent(evt);
   }
 
   // ------------------------------------------------------------------
