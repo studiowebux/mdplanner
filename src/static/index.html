@@ -784,6 +784,13 @@
               >
                 Journal
               </button>
+              <button
+                id="habitsViewBtn"
+                data-view="habits"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                Habits
+              </button>
             </div>
           </div>
 
@@ -1091,6 +1098,12 @@
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
             >
               Journal
+            </button>
+            <button
+              id="habitsViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              Habits
             </button>
             <button
               id="portfolioViewBtnMobile"
@@ -1723,6 +1736,20 @@
             </div>
             <div id="journalContainer"></div>
           </div>
+        </div>
+      </div>
+
+      <!-- Habits View -->
+      <div id="habitsView" class="hidden pb-16">
+        <div class="bg-primary rounded-lg shadow">
+          <div class="habits-view-header">
+            <h2 class="text-lg font-medium text-primary">Habits</h2>
+            <button id="addHabitBtn" class="btn-primary py-2 rounded-lg">+ New Habit</button>
+          </div>
+          <div id="emptyHabitsState" class="hidden habits-empty">
+            <p>No habits yet. Create your first habit to start tracking.</p>
+          </div>
+          <div id="habitsContainer" class="habits-grid"></div>
         </div>
       </div>
 
@@ -12810,6 +12837,57 @@
           <button type="button" id="journalSidenavCancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
           <button type="button" id="journalSidenavEditBtn" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active hidden">Edit</button>
           <button type="button" id="journalSidenavSave" class="btn-primary py-2 rounded-lg">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Habit Sidenav -->
+    <div id="habitSidenav" class="sidenav-panel sidenav-md">
+      <div class="sidenav-header">
+        <h2 id="habitSidenavHeader" class="sidenav-title">New Habit</h2>
+        <button type="button" id="habitSidenavClose" class="sidenav-close" aria-label="Close">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="flex flex-col flex-1 overflow-hidden">
+        <!-- View mode: heatmap + streaks -->
+        <div id="habitSidenavViewSection" class="sidenav-content hidden"></div>
+        <!-- Edit mode: form fields -->
+        <div id="habitSidenavFormSection" class="sidenav-content">
+          <div class="sidenav-section">
+            <div class="form-group">
+              <label class="form-label" for="habitSidenavName">Name</label>
+              <input id="habitSidenavName" type="text" class="form-input" placeholder="Exercise, Reading, Meditation..." />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="habitSidenavDescription">Description <span class="text-tertiary">(optional)</span></label>
+              <input id="habitSidenavDescription" type="text" class="form-input" placeholder="Short description..." />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="habitSidenavFrequency">Frequency</label>
+              <select id="habitSidenavFrequency" class="form-input">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+              </select>
+            </div>
+            <div id="habitTargetDaysRow" class="form-group hidden">
+              <label class="form-label">Target days <span class="text-tertiary">(optional)</span></label>
+              <div id="habitTargetDaysContainer" class="habit-target-days"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="habitSidenavNotes">Notes <span class="text-tertiary">(markdown, optional)</span></label>
+              <textarea id="habitSidenavNotes" class="form-textarea" rows="6" placeholder="Additional notes..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="sidenav-footer">
+          <button type="button" id="habitSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+          <div class="flex-1"></div>
+          <button type="button" id="habitSidenavCancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
+          <button type="button" id="habitSidenavEditBtn" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active hidden">Edit</button>
+          <button type="button" id="habitSidenavSave" class="btn-primary py-2 rounded-lg">Save</button>
         </div>
       </div>
     </div>

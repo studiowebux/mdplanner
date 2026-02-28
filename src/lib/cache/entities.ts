@@ -1736,6 +1736,56 @@ export const ENTITIES: EntityDef[] = [
   },
 
   // ----------------------------------------------------------
+  // Habits
+  // ----------------------------------------------------------
+  {
+    table: "habits",
+    schema: `CREATE TABLE IF NOT EXISTS habits (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  frequency TEXT,
+  target_days TEXT,   -- JSON array
+  completions TEXT,   -- JSON array
+  streak_count INTEGER,
+  longest_streak INTEGER,
+  notes TEXT,
+  created TEXT,
+  updated TEXT
+)`,
+    fts: {
+      type: "habit",
+      columns: ["id", "name", "description", "notes"],
+      titleCol: "name",
+      contentCol: "notes",
+    },
+    sync: async (parser, db) => {
+      const habits = await parser.readHabits();
+      db.execute("DELETE FROM habits");
+      for (const h of habits) {
+        db.execute(
+          `INSERT INTO habits (id, name, description, frequency, target_days, completions, streak_count, longest_streak, notes, created, updated)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            val(h.id),
+            val(h.name),
+            val(h.description),
+            val(h.frequency),
+            json(h.targetDays),
+            json(h.completions),
+            h.streakCount,
+            h.longestStreak,
+            val(h.notes),
+            val(h.created),
+            val(h.updated),
+          ],
+        );
+      }
+      return habits.length;
+    },
+  },
+
+  // ----------------------------------------------------------
   // DNS Domains
   // ----------------------------------------------------------
   {

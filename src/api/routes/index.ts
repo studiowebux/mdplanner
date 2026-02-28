@@ -42,6 +42,7 @@ import { onboardingTemplatesRouter } from "./features/onboarding-templates.ts";
 import { financesRouter } from "./features/finances.ts";
 import { journalRouter } from "./features/journal.ts";
 import { dnsRouter } from "./features/dns.ts";
+import { habitsRouter } from "./features/habits.ts";
 import { eisenhowerRouter } from "./features/eisenhower.ts";
 import { safeRouter } from "./features/safe.ts";
 import { investorsRouter } from "./features/investors.ts";
@@ -180,6 +181,9 @@ export function createApiRouter(
 
   // DNS routes
   api.route("/dns", dnsRouter);
+
+  // Habits routes
+  api.route("/habits", habitsRouter);
 
   // 404 handler
   api.notFound((c) => {

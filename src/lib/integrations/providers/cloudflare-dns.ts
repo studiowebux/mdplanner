@@ -66,9 +66,7 @@ export class CloudflareDnsProvider implements DnsProvider {
     return cfDomains.map((d) => ({
       domain: d.name,
       synced: {
-        expiryDate: d.expires_at
-          ? d.expires_at.split("T")[0]
-          : undefined,
+        expiryDate: d.expires_at ? d.expires_at.split("T")[0] : undefined,
         autoRenew: d.auto_renew,
         lastFetchedAt: now,
       },

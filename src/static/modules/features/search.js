@@ -24,6 +24,7 @@ const VIEW_BY_TYPE = {
   financial_period: "finances",
   journal: "journal",
   dns_domain: "dns",
+  habit: "habits",
 };
 
 const TYPE_LABELS = {
@@ -46,6 +47,7 @@ const TYPE_LABELS = {
   financial_period: "Finance",
   journal: "Journal",
   dns_domain: "Domain",
+  habit: "Habit",
 };
 
 export class GlobalSearch {

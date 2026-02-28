@@ -92,7 +92,9 @@ dnsRouter.post("/sync/cloudflare", async (c) => {
   } catch (err) {
     return errorResponse(
       err instanceof Error ? err.message : "Sync failed",
-      err instanceof Error && err.message.includes("not configured") ? 400 : 502,
+      err instanceof Error && err.message.includes("not configured")
+        ? 400
+        : 502,
     );
   }
 });

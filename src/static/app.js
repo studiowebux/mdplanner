@@ -56,6 +56,8 @@ import { MeetingsModule } from "./modules/features/meetings.js";
 import { MeetingSidenavModule } from "./modules/features/meeting-sidenav.js";
 import { JournalModule } from "./modules/features/journal.js";
 import { JournalSidenavModule } from "./modules/features/journal-sidenav.js";
+import { HabitsModule } from "./modules/features/habits.js";
+import { HabitSidenavModule } from "./modules/features/habit-sidenav.js";
 import { DnsModule } from "./modules/views/dns.js";
 import { DnsSidenavModule } from "./modules/features/dns-sidenav.js";
 import { OnboardingModule } from "./modules/features/onboarding.js";
@@ -246,6 +248,7 @@ class TaskManager {
     this.meetingSidenavModule = new MeetingSidenavModule(this);
     this.journalSidenavModule = new JournalSidenavModule(this);
     this.dnsSidenavModule = new DnsSidenavModule(this);
+    this.habitSidenavModule = new HabitSidenavModule(this);
     this.onboardingSidenavModule = new OnboardingSidenavModule(this);
     this.onboardingTemplateSidenavModule = new OnboardingTemplateSidenavModule(this);
     this.financesSidenavModule = new FinancesSidenavModule(this);
@@ -260,6 +263,7 @@ class TaskManager {
     this.meetingsModule = new MeetingsModule(this);
     this.journalModule = new JournalModule(this);
     this.dnsModule = new DnsModule(this);
+    this.habitsModule = new HabitsModule(this);
     this.onboardingModule = new OnboardingModule(this);
     this.financesModule = new FinancesModule(this);
     this.retrospectivesModule = new RetrospectivesModule(this);
@@ -420,6 +424,7 @@ class TaskManager {
       { id: "ollamaViewBtn", view: "ollama" },
       { id: "meetingsViewBtn", view: "meetings" },
       { id: "journalViewBtn", view: "journal" },
+      { id: "habitsViewBtn", view: "habits" },
       { id: "onboardingViewBtn", view: "onboarding" },
       { id: "financesViewBtn", view: "finances" },
     ];
@@ -658,6 +663,12 @@ class TaskManager {
       .getElementById("journalViewBtnMobile")
       ?.addEventListener("click", () => {
         this.switchView("journal");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("habitsViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("habits");
         this.closeMobileMenu();
       });
     document
@@ -908,6 +919,8 @@ class TaskManager {
     this.meetingsModule.bindEvents();
     this.journalSidenavModule.bindEvents();
     this.journalModule.bindEvents();
+    this.habitSidenavModule.bindEvents();
+    this.habitsModule.bindEvents();
     this.dnsSidenavModule.bindEvents();
     this.dnsModule.bindEvents();
     this.onboardingSidenavModule.bindEvents();
@@ -954,6 +967,7 @@ class TaskManager {
       "uploads",
       "meetings",
       "journal",
+      "habits",
       "onboarding",
       "finances",
       "ollama",
@@ -1026,6 +1040,7 @@ class TaskManager {
       fundraising: "Fundraising",
       meetings: "Meetings",
       journal: "Journal",
+      habits: "Habits",
       onboarding: "Onboarding",
       finances: "Finances",
       ollama: "AI Chat",
@@ -1108,6 +1123,7 @@ class TaskManager {
       "portfolioViewBtn",
       "meetingsViewBtn",
       "journalViewBtn",
+      "habitsViewBtn",
       "onboardingViewBtn",
       "dnsViewBtn",
     ];
@@ -1152,6 +1168,7 @@ class TaskManager {
       "portfolioViewBtnMobile",
       "meetingsViewBtnMobile",
       "journalViewBtnMobile",
+      "habitsViewBtnMobile",
       "onboardingViewBtnMobile",
       "financesViewBtnMobile",
       "ollamaViewBtnMobile",
@@ -1197,6 +1214,7 @@ class TaskManager {
     document.getElementById("uploadsView")?.classList.add("hidden");
     document.getElementById("meetingsView")?.classList.add("hidden");
     document.getElementById("journalView")?.classList.add("hidden");
+    document.getElementById("habitsView")?.classList.add("hidden");
     document.getElementById("onboardingView")?.classList.add("hidden");
     document.getElementById("financesView")?.classList.add("hidden");
     document.getElementById("ollamaView")?.classList.add("hidden");
@@ -1345,6 +1363,10 @@ class TaskManager {
       this.activateViewButton("journal");
       document.getElementById("journalView").classList.remove("hidden");
       this.journalModule.load();
+    } else if (view === "habits") {
+      this.activateViewButton("habits");
+      document.getElementById("habitsView").classList.remove("hidden");
+      this.habitsModule.load();
     } else if (view === "dns") {
       this.activateViewButton("dns");
       document.getElementById("dnsView").classList.remove("hidden");
