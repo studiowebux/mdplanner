@@ -101,7 +101,7 @@
   color: var(--text-tertiary);
   background-color: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   padding: 0.1em 0.5em;
 }
 

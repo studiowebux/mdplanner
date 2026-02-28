@@ -109,7 +109,7 @@
   background: var(--color-bg-secondary);
   white-space: nowrap;
   flex-shrink: 0;
-  min-width: 5.5rem;
+  min-width: max-content;
   text-align: center;
   margin-block-start: 0.1rem;
   text-transform: uppercase;
