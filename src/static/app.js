@@ -711,6 +711,24 @@ class TaskManager {
         this.switchView("ollama");
         this.closeMobileMenu();
       });
+    document
+      .getElementById("uploadsViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("uploads");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("dnsViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("dns");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("githubViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("github");
+        this.closeMobileMenu();
+      });
 
     // Dark mode toggle
     document
@@ -1212,6 +1230,7 @@ class TaskManager {
       "financesViewBtnMobile",
       "analyticsViewBtnMobile",
       "ollamaViewBtnMobile",
+      "uploadsViewBtnMobile",
       "dnsViewBtnMobile",
       "githubViewBtnMobile",
       "configViewBtnMobile",

@@ -8,6 +8,22 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.7.2] - 2026-03-01
+
+### Fixed
+
+- AI chat copy button invisible on mobile: added `@media (hover: none)` rule so
+  the copy button is always visible on touch devices (was `opacity: 0` with no
+  hover trigger on mobile)
+- Mobile nav: uploads, DNS, and GitHub view buttons did not respond to taps
+  (`uploadsViewBtnMobile`, `dnsViewBtnMobile`, `githubViewBtnMobile` were
+  missing click handlers and active-state registration)
+- Comment section stuck at bottom of task sidenav instead of scrolling with
+  content: moved `#taskCommentsSection` inside `.sidenav-content`
+- Section reorder showing "undefined" after adding a new section: added
+  `renderSections()` after `loadSections()` in
+  `rewriteTasksWithUpdatedSections()`
+
 ## [0.7.1] - 2026-03-01
 
 ### Added

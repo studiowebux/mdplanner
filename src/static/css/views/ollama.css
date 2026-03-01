@@ -730,6 +730,13 @@ body[data-current-view="ollama"] #breadcrumb {
   opacity: 1;
 }
 
+/* Touch devices have no hover state — always show copy button */
+@media (hover: none) {
+  .ollama-view-root .copy-btn {
+    opacity: 1;
+  }
+}
+
 .ollama-view-root .copy-btn:hover {
   background: rgba(255, 255, 255, 0.15);
   color: #ccc;
