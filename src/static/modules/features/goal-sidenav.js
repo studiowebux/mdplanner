@@ -4,7 +4,7 @@
 import { BaseSidenavModule } from "../ui/base-sidenav.js";
 import { GitHubAPI, GoalsAPI } from "../api.js";
 import { bindAutocomplete } from "../ui/autocomplete.js";
-import { showToast } from "../utils.js";
+import { showToast } from "../ui/toast.js";
 
 export class GoalSidenavModule extends BaseSidenavModule {
   get prefix() { return "goal"; }
