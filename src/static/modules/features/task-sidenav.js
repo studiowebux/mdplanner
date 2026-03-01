@@ -200,11 +200,14 @@ export class TaskSidenavModule {
         }).join("");
     }
 
-    // Tags
-    const tagsSelect = document.getElementById("sidenavTaskTags");
-    if (tagsSelect && this.tm.projectConfig?.tags) {
-      tagsSelect.innerHTML = this.tm.projectConfig.tags.map((t) =>
-        `<option value="${t}">${t}</option>`
+    // Tags — render as checkboxes (mobile-safe, avoids <select multiple> issues on iOS)
+    const tagsContainer = document.getElementById("sidenavTaskTags");
+    if (tagsContainer && this.tm.projectConfig?.tags) {
+      tagsContainer.innerHTML = this.tm.projectConfig.tags.map((t) =>
+        `<label class="tag-checkbox-item">
+          <input type="checkbox" value="${t}" name="sidenavTag">
+          <span>${t}</span>
+        </label>`
       ).join("");
     }
 
@@ -264,11 +267,11 @@ export class TaskSidenavModule {
     this._resetGitHubBadge();
     this._resetGitHubPRBadge();
 
-    // Due date — datetime-local requires YYYY-MM-DDTHH:MM (local, no seconds)
+    // Due date — always clear first to avoid stale value from a previous edit session
+    setValue("sidenavTaskDueDate", "");
     if (cfg.due_date) {
       const dueDate = new Date(cfg.due_date);
       if (!isNaN(dueDate.getTime())) {
-        // Produce local time string without seconds/timezone suffix
         const pad = (n) => String(n).padStart(2, "0");
         const local = `${dueDate.getFullYear()}-${pad(dueDate.getMonth() + 1)}-${pad(dueDate.getDate())}T${pad(dueDate.getHours())}:${pad(dueDate.getMinutes())}`;
         setValue("sidenavTaskDueDate", local);
@@ -279,12 +282,12 @@ export class TaskSidenavModule {
     setValue("sidenavTaskPlannedStart", cfg.planned_start || "");
     setValue("sidenavTaskPlannedEnd", cfg.planned_end || "");
 
-    // Tags (multi-select) — use options iteration for cross-browser safety
-    const tagsSelect = document.getElementById("sidenavTaskTags");
-    if (tagsSelect && cfg.tag) {
-      const tags = Array.isArray(cfg.tag) ? cfg.tag : [cfg.tag];
-      Array.from(tagsSelect.options).forEach((opt) => {
-        opt.selected = tags.includes(opt.value);
+    // Tags — check matching checkboxes in the tag-checkbox-list container
+    const tagsContainer = document.getElementById("sidenavTaskTags");
+    if (tagsContainer) {
+      const tags = Array.isArray(cfg.tag) ? cfg.tag : (cfg.tag ? [cfg.tag] : []);
+      tagsContainer.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+        cb.checked = tags.includes(cb.value);
       });
     }
   }
@@ -311,7 +314,15 @@ export class TaskSidenavModule {
     const getSelectedValues = (id) => {
       const el = document.getElementById(id);
       if (!el) return [];
-      return Array.from(el.options).filter((o) => o.selected).map((o) =>
+      // Checkbox list (tag-checkbox-list div)
+      const checkboxes = el.querySelectorAll('input[type="checkbox"]');
+      if (checkboxes.length > 0) {
+        return Array.from(checkboxes).filter((c) => c.checked).map((c) =>
+          c.value
+        );
+      }
+      // Fallback: legacy <select multiple>
+      return Array.from(el.options ?? []).filter((o) => o.selected).map((o) =>
         o.value
       );
     };
