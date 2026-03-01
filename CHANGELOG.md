@@ -8,6 +8,20 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.7.5] - 2026-03-01
+
+### Fixed
+
+- Comment author: replaced free-text input with a `<select>` populated from the
+  people registry; last selection persisted in localStorage
+- Sidenav button order: canonical order (Delete | spacer | Cancel | Save)
+  applied to all panels; "Close" labels renamed to "Cancel" for consistency
+- SSE events: tasks and portfolio parsers override `write()`/`delete()` without
+  calling `super` — added explicit `eventBus.emit()` to each override so MCP
+  mutations correctly trigger live browser refresh
+- Finances sidenav delete button: changed from `btn-danger` to
+  `btn-danger-ghost` with flex spacer for layout consistency
+
 ## [0.7.4] - 2026-03-01
 
 ### Fixed
