@@ -286,19 +286,14 @@ if (cliArgs.webdav) {
     rootDir: cliArgs.projectPath,
     authUser: cliArgs.webdavUser ?? null,
     authPass: cliArgs.webdavPass ?? null,
+    pathPrefix: "/webdav",
   });
 
   // Redirect /webdav → /webdav/ so DAV clients hit the root collection
   app.get("/webdav", (c) => c.redirect("/webdav/", 301));
 
-  // Strip /webdav prefix and forward the raw request to the WebDAV handler
-  app.all("/webdav/*", async (c) => {
-    const orig = new URL(c.req.raw.url);
-    const davPath = orig.pathname.replace(/^\/webdav/, "") || "/";
-    const davUrl = new URL(davPath + orig.search, orig.origin);
-    const davReq = new Request(davUrl.toString(), c.req.raw);
-    return webdavHandler(davReq);
-  });
+  // Forward raw request — handler strips /webdav prefix internally
+  app.all("/webdav/*", (c) => webdavHandler(c.req.raw));
 }
 
 // Serve uploaded files from the project directory
