@@ -582,3 +582,50 @@
   border-color: var(--color-border-default);
   opacity: 0.7;
 }
+
+/* Meetings table view */
+
+.meetings-table-wrap {
+  overflow-x: auto;
+}
+
+.meetings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-base);
+}
+
+.meetings-table-th {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border-default);
+  white-space: nowrap;
+}
+
+.meetings-table-row {
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.meetings-table-row:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.meetings-table-td {
+  padding: 0.5rem 0.75rem;
+  color: var(--color-text-primary);
+  vertical-align: middle;
+  font-size: var(--font-size-base);
+}
+
+.meetings-table-title {
+  font-weight: 500;
+}
+
+.meetings-table-date {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}
