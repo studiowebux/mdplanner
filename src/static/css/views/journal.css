@@ -26,10 +26,6 @@
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-[data-theme="dark"] .journal-entry-card {
-  border-color: var(--color-border-default);
-}
-
 .journal-entry-card:hover {
   border-color: var(--color-text-secondary);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
@@ -76,17 +72,11 @@
   flex-shrink: 0;
 }
 
-.journal-mood-great    { color: #16a34a; background: #f0fdf4; border-color: #bbf7d0; }
-.journal-mood-good     { color: #2563eb; background: #eff6ff; border-color: #bfdbfe; }
+.journal-mood-great    { color: var(--color-success); background: var(--color-success-bg); border-color: var(--color-success-border); }
+.journal-mood-good     { color: var(--color-info); background: var(--color-info-bg); border-color: var(--color-info-border); }
 .journal-mood-neutral  { color: var(--color-text-secondary); background: var(--color-bg-tertiary); border-color: var(--color-border-default); }
-.journal-mood-bad      { color: #d97706; background: #fffbeb; border-color: #fde68a; }
-.journal-mood-terrible { color: #dc2626; background: #fef2f2; border-color: #fecaca; }
-
-[data-theme="dark"] .journal-mood-great    { color: #4ade80; background: #052e16; border-color: #166534; }
-[data-theme="dark"] .journal-mood-good     { color: #60a5fa; background: #0c1a3a; border-color: #1e3a8a; }
-[data-theme="dark"] .journal-mood-neutral  { color: var(--color-text-secondary); background: var(--color-bg-tertiary); border-color: var(--color-border-default); }
-[data-theme="dark"] .journal-mood-bad      { color: #fbbf24; background: #1c0e00; border-color: #78350f; }
-[data-theme="dark"] .journal-mood-terrible { color: #f87171; background: #1c0000; border-color: #7f1d1d; }
+.journal-mood-bad      { color: var(--color-warning); background: var(--color-warning-bg); border-color: var(--color-warning-border); }
+.journal-mood-terrible { color: var(--color-error); background: var(--color-error-bg); border-color: var(--color-error-border); }
 
 /* Tags */
 .journal-entry-tags {

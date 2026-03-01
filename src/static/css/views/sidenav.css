@@ -60,12 +60,12 @@
 }
 
 .dark .sidenav-panel {
-  background-color: #111111;
+  background-color: var(--color-bg-primary);
 }
 
 .dark .sidenav-panel.active {
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0.5);
-  border-left: 1px solid #2a2a2a;
+  border-left: 1px solid var(--color-border-default);
 }
 
 /* --------------------------------------------------------------------------
@@ -128,7 +128,7 @@
 }
 
 .dark .sidenav-header {
-  border-bottom-color: #2a2a2a;
+  border-bottom-color: var(--color-border-default);
 }
 
 .sidenav-title {
@@ -140,10 +140,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.dark .sidenav-title {
-  color: #ffffff;
 }
 
 .sidenav-close {
@@ -166,8 +162,8 @@
 }
 
 .dark .sidenav-close:hover {
-  background-color: #222222;
-  color: #ffffff;
+  background-color: var(--color-bg-active);
+  color: var(--color-text-primary);
 }
 
 /* --------------------------------------------------------------------------
@@ -195,7 +191,7 @@
 }
 
 .dark .sidenav-footer {
-  border-top-color: #2a2a2a;
+  border-top-color: var(--color-border-default);
 }
 
 /* --------------------------------------------------------------------------
@@ -215,7 +211,7 @@
 }
 
 .dark .sidenav-content .form-label {
-  color: #e0e0e0;
+  color: var(--color-text-secondary);
 }
 
 .sidenav-content .form-input,
@@ -239,19 +235,11 @@
   box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.2);
 }
 
-.dark .sidenav-content .form-input,
-.dark .sidenav-content .form-select,
-.dark .sidenav-content .form-textarea {
-  background-color: #111111;
-  border-color: #3d3d3d;
-  color: #ffffff;
-}
-
 .dark .sidenav-content .form-input:focus,
 .dark .sidenav-content .form-select:focus,
 .dark .sidenav-content .form-textarea:focus {
-  border-color: #555555;
-  box-shadow: 0 0 0 2px rgba(85, 85, 85, 0.3);
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 2px rgba(82, 82, 82, 0.3);
 }
 
 /* --------------------------------------------------------------------------
@@ -287,7 +275,7 @@
 }
 
 .dark .sidenav-section {
-  border-bottom-color: #2a2a2a;
+  border-bottom-color: var(--color-border-default);
 }
 
 .sidenav-section-title {

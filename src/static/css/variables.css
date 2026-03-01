@@ -58,6 +58,14 @@
   /* Static colors — never change across themes */
   --color-static-white: #ffffff;
   --color-static-black: #000000;
+
+  /* Strategic level accent colors — semantic constants, not theme-dependent */
+  --color-level-vision: #8b5cf6;
+  --color-level-mission: #3b82f6;
+  --color-level-objective: #22c55e;
+  --color-level-key-result: #eab308;
+  --color-level-initiative: #f97316;
+  --color-level-project: #ef4444;
 }
 
 /* --------------------------------------------------------------------------

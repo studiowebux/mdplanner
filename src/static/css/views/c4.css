@@ -74,43 +74,6 @@
   border-color: var(--color-text-muted);
 }
 
-/* Dark theme */
-.dark .c4-component,
-.theme-dark .c4-component {
-  background: #1f2937;
-  color: #f3f4f6;
-  border-color: #4b5563;
-}
-
-.dark .c4-component:hover,
-.theme-dark .c4-component:hover {
-  border-color: #9ca3af;
-}
-
-.dark .c4-component.c4-level-context,
-.theme-dark .c4-component.c4-level-context {
-  background: #1f2937;
-  border-color: #6b7280;
-}
-
-.dark .c4-component.c4-level-container,
-.theme-dark .c4-component.c4-level-container {
-  background: #374151;
-  border-color: #6b7280;
-}
-
-.dark .c4-component.c4-level-component,
-.theme-dark .c4-component.c4-level-component {
-  background: #4b5563;
-  border-color: #9ca3af;
-}
-
-.dark .c4-component.c4-level-code,
-.theme-dark .c4-component.c4-level-code {
-  background: #6b7280;
-  border-color: #9ca3af;
-}
-
 /* --------------------------------------------------------------------------
    C4 Component Text
    -------------------------------------------------------------------------- */
@@ -161,8 +124,7 @@
   color: var(--color-text-secondary);
 }
 
-.dark .c4-component-drilldown,
-.theme-dark .c4-component-drilldown {
+.dark .c4-component-drilldown {
   background: rgba(255, 255, 255, 0.1);
   color: var(--color-text-secondary);
 }
@@ -205,16 +167,12 @@
 }
 
 .dark .c4-edit-btn,
-.dark .c4-delete-btn,
-.theme-dark .c4-edit-btn,
-.theme-dark .c4-delete-btn {
+.dark .c4-delete-btn {
   background: rgba(255, 255, 255, 0.2);
 }
 
 .dark .c4-edit-btn:hover,
-.dark .c4-delete-btn:hover,
-.theme-dark .c4-edit-btn:hover,
-.theme-dark .c4-delete-btn:hover {
+.dark .c4-delete-btn:hover {
   background: rgba(255, 255, 255, 0.4);
 }
 
@@ -235,13 +193,11 @@
   text-anchor: middle;
 }
 
-.dark .c4-connection,
-.theme-dark .c4-connection {
+.dark .c4-connection {
   stroke: var(--color-text-muted);
 }
 
-.dark .c4-connection-label,
-.theme-dark .c4-connection-label {
+.dark .c4-connection-label {
   fill: var(--color-text-muted);
 }
 
