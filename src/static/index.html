@@ -3031,9 +3031,10 @@
             <h2 class="text-lg font-medium text-primary">
               Ideas
             </h2>
-            <button id="addIdeaBtn" class="btn-primary py-2 rounded-lg">
-              + Add Idea
-            </button>
+            <div class="flex gap-2">
+              <button id="ideasViewToggle" class="btn-secondary">Table view</button>
+              <button id="addIdeaBtn" class="btn-primary py-2 rounded-lg">+ Add Idea</button>
+            </div>
           </div>
           <div class="ideas-view-filters" id="ideasFilterBar">
             <input
@@ -13341,6 +13342,17 @@
                 <option value="low">Low</option>
               </select>
             </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Project</label>
+            <input
+              type="text"
+              id="ideaSidenavProject"
+              class="form-input"
+              list="projectsList"
+              placeholder="Link to a portfolio project"
+              autocomplete="off"
+            >
           </div>
           <div class="sidenav-grid">
             <div class="form-group">

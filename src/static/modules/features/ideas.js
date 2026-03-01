@@ -12,6 +12,7 @@ export class IdeasModule {
     this.currentCategoryFilter = "";
     this.searchQuery = "";
     this.showArchived = localStorage.getItem("showArchivedIdeas") === "true";
+    this.currentView = localStorage.getItem("ideasView") || "card";
   }
 
   async load() {
@@ -72,18 +73,39 @@ export class IdeasModule {
   renderView() {
     const container = document.getElementById("ideasContainer");
     const emptyState = document.getElementById("emptyIdeasState");
+    const toggle = document.getElementById("ideasViewToggle");
 
     this._updateCategoryFilter();
+
+    if (toggle) toggle.textContent = this.currentView === "table" ? "Card view" : "Table view";
 
     const visible = this._getVisible();
 
     if (!this.taskManager.ideas || this.taskManager.ideas.length === 0) {
       emptyState.classList.remove("hidden");
       container.innerHTML = "";
+      container.className = "";
       return;
     }
 
     emptyState.classList.add("hidden");
+
+    if (visible.length === 0) {
+      container.className = "";
+      container.innerHTML =
+        '<p class="text-sm text-muted col-span-full text-center py-8">No ideas match the current filters.</p>';
+      return;
+    }
+
+    if (this.currentView === "table") {
+      this._renderTable(container, visible);
+    } else {
+      this._renderCards(container, visible);
+    }
+  }
+
+  _renderCards(container, visible) {
+    container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4";
 
     const statusColors = {
       new: "bg-tertiary text-primary border border-default",
@@ -94,12 +116,6 @@ export class IdeasModule {
       implemented: "bg-success-bg text-success-text idea-status-implemented-badge",
       cancelled: "bg-tertiary text-muted idea-status-cancelled-badge",
     };
-
-    if (visible.length === 0) {
-      container.innerHTML =
-        '<p class="text-sm text-muted col-span-full text-center py-8">No ideas match the current filters.</p>';
-      return;
-    }
 
     container.innerHTML = visible
       .map((idea) => {
@@ -114,71 +130,70 @@ export class IdeasModule {
       <div class="bg-secondary rounded-lg p-4 border border-default${isArchived ? " idea-card-archived" : ""}">
         <div class="flex justify-between items-start mb-2">
           <h3 class="font-medium text-primary">${idea.title}</h3>
-          <span class="px-2 py-1 text-xs rounded ${
-          statusColors[idea.status] || statusColors.new
-        }">${idea.status}</span>
+          <span class="px-2 py-1 text-xs rounded ${statusColors[idea.status] || statusColors.new}">${idea.status}</span>
         </div>
-        ${
-          idea.category
-            ? `<span class="inline-block px-2 py-0.5 text-xs bg-active text-secondary rounded mb-2">${idea.category}</span>`
-            : ""
-        }
+        <div class="flex flex-wrap gap-1 mb-2">
+          ${idea.category ? `<span class="inline-block px-2 py-0.5 text-xs bg-active text-secondary rounded">${idea.category}</span>` : ""}
+          ${idea.project ? `<span class="inline-block px-2 py-0.5 text-xs bg-info-bg text-info-text rounded">${idea.project}</span>` : ""}
+        </div>
         <p class="text-xs text-muted mb-2">Created: ${idea.created}</p>
-        ${
-          idea.implementedAt
-            ? `<p class="text-xs text-muted mb-1">Implemented: ${idea.implementedAt}</p>`
-            : ""
-        }
-        ${
-          idea.cancelledAt
-            ? `<p class="text-xs text-muted mb-1">Cancelled: ${idea.cancelledAt}</p>`
-            : ""
-        }
-        ${
-          idea.description
-            ? `<p class="text-sm text-secondary mb-2">${idea.description}</p>`
-            : ""
-        }
-        ${
-          linkedIdeas.length > 0
-            ? `
+        ${idea.implementedAt ? `<p class="text-xs text-muted mb-1">Implemented: ${idea.implementedAt}</p>` : ""}
+        ${idea.cancelledAt ? `<p class="text-xs text-muted mb-1">Cancelled: ${idea.cancelledAt}</p>` : ""}
+        ${idea.description ? `<p class="text-sm text-secondary mb-2">${idea.description}</p>` : ""}
+        ${linkedIdeas.length > 0 ? `
           <div class="mb-2">
             <span class="text-xs text-muted">Links:</span>
             <div class="flex flex-wrap gap-1 mt-1">
-              ${
-              linkedIdeas.map((li) =>
-                `<span class="inline-block px-2 py-0.5 text-xs bg-info-bg text-info-text rounded cursor-pointer hover:bg-info-bg" onclick="taskManager.openIdeaModal('${li.id}')">${li.title}</span>`
-              ).join("")
-            }
+              ${linkedIdeas.map((li) => `<span class="inline-block px-2 py-0.5 text-xs bg-info-bg text-info-text rounded cursor-pointer" onclick="taskManager.ideaSidenavModule.openEdit('${li.id}')">${li.title}</span>`).join("")}
             </div>
-          </div>
-        `
-            : ""
-        }
-        ${
-          backlinkedIdeas.length > 0
-            ? `
+          </div>` : ""}
+        ${backlinkedIdeas.length > 0 ? `
           <div class="mb-2">
             <span class="text-xs text-muted">Backlinks:</span>
             <div class="flex flex-wrap gap-1 mt-1">
-              ${
-              backlinkedIdeas.map((bi) =>
-                `<span class="inline-block px-2 py-0.5 text-xs bg-info-bg text-info rounded cursor-pointer hover:bg-info-bg" onclick="taskManager.openIdeaModal('${bi.id}')">${bi.title}</span>`
-              ).join("")
-            }
+              ${backlinkedIdeas.map((bi) => `<span class="inline-block px-2 py-0.5 text-xs bg-info-bg text-info-text rounded cursor-pointer" onclick="taskManager.ideaSidenavModule.openEdit('${bi.id}')">${bi.title}</span>`).join("")}
             </div>
-          </div>
-        `
-            : ""
-        }
+          </div>` : ""}
         <div class="flex justify-end gap-1 mt-3">
-          <button type="button" onclick="taskManager.openIdeaModal('${idea.id}')" class="btn-ghost">Edit</button>
+          <button type="button" onclick="taskManager.ideaSidenavModule.openEdit('${idea.id}')" class="btn-ghost">Edit</button>
           <button type="button" onclick="taskManager.deleteIdea('${idea.id}')" class="btn-danger-ghost">Delete</button>
         </div>
-      </div>
-    `;
+      </div>`;
       })
       .join("");
+  }
+
+  _renderTable(container, visible) {
+    container.className = "ideas-table-wrap";
+    const rows = visible.map((idea) => {
+      const isArchived = ARCHIVED_STATUSES.includes(idea.status);
+      return `<tr class="ideas-table-row${isArchived ? " idea-card-archived" : ""}">
+        <td class="ideas-table-td ideas-table-title">${idea.title}</td>
+        <td class="ideas-table-td"><span class="idea-status-badge idea-status-${idea.status}">${idea.status}</span></td>
+        <td class="ideas-table-td">${idea.category ? `<span class="ideas-table-tag">${idea.category}</span>` : ""}</td>
+        <td class="ideas-table-td">${idea.project ? `<span class="ideas-table-tag ideas-table-tag-project">${idea.project}</span>` : ""}</td>
+        <td class="ideas-table-td">${idea.priority ? `<span class="idea-priority-badge idea-priority-${idea.priority}">${idea.priority}</span>` : ""}</td>
+        <td class="ideas-table-td ideas-table-date">${idea.created ? idea.created.slice(0, 10) : ""}</td>
+        <td class="ideas-table-td">
+          <button type="button" onclick="taskManager.ideaSidenavModule.openEdit('${idea.id}')" class="btn-ghost">Edit</button>
+        </td>
+      </tr>`;
+    }).join("");
+
+    container.innerHTML = `<table class="ideas-table">
+      <thead>
+        <tr>
+          <th class="ideas-table-th">Title</th>
+          <th class="ideas-table-th">Status</th>
+          <th class="ideas-table-th">Category</th>
+          <th class="ideas-table-th">Project</th>
+          <th class="ideas-table-th">Priority</th>
+          <th class="ideas-table-th">Created</th>
+          <th class="ideas-table-th"></th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
   }
 
   openModal(id = null) {
@@ -376,6 +391,13 @@ export class IdeasModule {
           "hidden",
         );
       });
+
+    // View toggle
+    document.getElementById("ideasViewToggle")?.addEventListener("click", () => {
+      this.currentView = this.currentView === "table" ? "card" : "table";
+      localStorage.setItem("ideasView", this.currentView);
+      this.renderView();
+    });
 
     // Add idea button - opens sidenav instead of modal
     document

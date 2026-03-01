@@ -77,6 +77,7 @@ export class IdeaSidenavModule {
       status: "new",
       category: "",
       priority: "",
+      project: "",
       startDate: "",
       endDate: "",
       resources: "",
@@ -129,6 +130,7 @@ export class IdeaSidenavModule {
   clearForm() {
     document.getElementById("ideaSidenavTitle").value = "";
     document.getElementById("ideaSidenavStatus").value = "new";
+    document.getElementById("ideaSidenavProject").value = "";
     document.getElementById("ideaSidenavCategory").value = "";
     document.getElementById("ideaSidenavPriority").value = "";
     document.getElementById("ideaSidenavStartDate").value = "";
@@ -148,6 +150,8 @@ export class IdeaSidenavModule {
       this.currentIdea.title || "";
     document.getElementById("ideaSidenavStatus").value =
       this.currentIdea.status || "new";
+    document.getElementById("ideaSidenavProject").value =
+      this.currentIdea.project || "";
     document.getElementById("ideaSidenavCategory").value =
       this.currentIdea.category || "";
     document.getElementById("ideaSidenavPriority").value =
@@ -340,6 +344,7 @@ export class IdeaSidenavModule {
     return {
       title: document.getElementById("ideaSidenavTitle").value.trim(),
       status,
+      project: document.getElementById("ideaSidenavProject").value.trim() || null,
       category: document.getElementById("ideaSidenavCategory").value.trim() || null,
       priority: document.getElementById("ideaSidenavPriority").value || null,
       startDate: document.getElementById("ideaSidenavStartDate").value || null,

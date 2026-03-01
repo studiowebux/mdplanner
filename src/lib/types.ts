@@ -180,6 +180,7 @@ export interface Idea {
     | "cancelled";
   category?: string;
   priority?: "high" | "medium" | "low";
+  project?: string;
   startDate?: string;
   endDate?: string;
   resources?: string;
