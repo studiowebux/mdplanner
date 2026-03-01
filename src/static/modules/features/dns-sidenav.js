@@ -10,18 +10,20 @@ export class DnsSidenavModule {
   open(domain) {
     this.editingId = domain?.id ?? null;
     this.populate(domain);
-    const panel = document.getElementById("dnsSidenav");
-    if (panel) {
-      panel.classList.remove("hidden");
-      panel.classList.add("active");
+    const overlay = document.getElementById("dnsSidenav");
+    if (overlay) {
+      overlay.classList.remove("hidden");
+      overlay.classList.add("active");
+      overlay.querySelector(".sidenav-panel")?.classList.add("active");
     }
   }
 
   close() {
-    const panel = document.getElementById("dnsSidenav");
-    if (panel) {
-      panel.classList.remove("active");
-      panel.classList.add("hidden");
+    const overlay = document.getElementById("dnsSidenav");
+    if (overlay) {
+      overlay.classList.remove("active");
+      overlay.classList.add("hidden");
+      overlay.querySelector(".sidenav-panel")?.classList.remove("active");
     }
     this.editingId = null;
   }

@@ -51,21 +51,24 @@ dnsRouter.post("/", async (c) => {
   return jsonResponse({ success: true, id: domain.id }, 201);
 });
 
-// PUT /dns/:id — update domain
+// PUT /dns/:id — update domain (partial: only fields present in body are written)
 dnsRouter.put("/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const body = await c.req.json();
-  const updated = await parser.updateDnsDomain(id, {
-    domain: body.domain,
-    expiryDate: body.expiryDate,
-    autoRenew: body.autoRenew,
-    renewalCostUsd: body.renewalCostUsd,
-    provider: body.provider,
-    nameservers: body.nameservers,
-    notes: body.notes,
-    lastFetchedAt: body.lastFetchedAt,
-  });
+
+  // Build a partial update — omit keys absent from the request body so that
+  // batch operations (e.g. set renewal cost) do not overwrite unrelated fields.
+  const updates: Record<string, unknown> = {};
+  const allowed = [
+    "domain", "expiryDate", "autoRenew", "renewalCostUsd",
+    "provider", "nameservers", "notes", "lastFetchedAt",
+  ];
+  for (const key of allowed) {
+    if (key in body) updates[key] = body[key];
+  }
+
+  const updated = await parser.updateDnsDomain(id, updates);
   if (!updated) return errorResponse("Not found", 404);
   await cacheWriteThrough(c, "dns_domains");
   return jsonResponse({ success: true });
