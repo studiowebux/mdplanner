@@ -1,4 +1,4 @@
-import { GoalsAPI, ProjectAPI } from "../api.js";
+import { GitHubAPI, GoalsAPI, ProjectAPI } from "../api.js";
 
 /**
  * GoalsModule - Handles goal CRUD and filtering
@@ -52,6 +52,16 @@ export class GoalsModule {
         }">
                                 ${goal.status}
                             </span>
+                            ${goal.githubMilestone && goal.githubRepo
+                              ? `<a href="https://github.com/${goal.githubRepo}/milestone/${goal.githubMilestone}"
+                                    target="_blank" rel="noopener noreferrer"
+                                    class="github-milestone-badge"
+                                    data-gh-milestone="${goal.githubMilestone}"
+                                    data-gh-repo="${goal.githubRepo}">
+                                   <span class="github-milestone-progress"><span class="github-milestone-fill" style="width:0%"></span></span>
+                                   Milestone #${goal.githubMilestone}
+                                 </a>`
+                              : ""}
                         </div>
                         <p class="text-sm text-secondary mb-3">${goal.description}</p>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -88,6 +98,9 @@ export class GoalsModule {
         `,
       )
       .join("");
+
+    // Lazy-load milestone progress after render
+    this._loadMilestoneProgress();
   }
 
   getFiltered() {
@@ -119,6 +132,31 @@ export class GoalsModule {
       failed: "bg-error-bg text-error-text",
     };
     return styles[status] || styles["planning"];
+  }
+
+  async _loadMilestoneProgress() {
+    const badges = document.querySelectorAll("[data-gh-milestone][data-gh-repo]");
+    for (const el of badges) {
+      const num = parseInt(el.dataset.ghMilestone, 10);
+      const repo = el.dataset.ghRepo;
+      if (!repo || !repo.includes("/")) continue;
+      const [owner, repoName] = repo.split("/");
+      try {
+        const milestones = await GitHubAPI.listMilestones(owner, repoName);
+        const m = milestones.find((ms) => ms.number === num);
+        if (m) {
+          const total = m.openIssues + m.closedIssues;
+          const pct = total > 0 ? Math.round((m.closedIssues / total) * 100) : 0;
+          const fill = el.querySelector(".github-milestone-fill");
+          if (fill) fill.style.width = `${pct}%`;
+          el.title = `${m.title}: ${m.closedIssues}/${total} issues closed`;
+          const textNode = el.childNodes[el.childNodes.length - 1];
+          if (textNode) textNode.textContent = ` ${m.closedIssues}/${total}`;
+        }
+      } catch {
+        // Silently skip
+      }
+    }
   }
 
   filter(type) {

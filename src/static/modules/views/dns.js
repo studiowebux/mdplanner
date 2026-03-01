@@ -176,6 +176,12 @@ export class DnsModule {
         <td>
           <div class="dns-domain-name">${this.escHtml(domain.domain)}</div>
           ${domain.provider ? `<div class="dns-provider-badge">${this.escHtml(domain.provider)}</div>` : ""}
+          ${domain.nameservers && domain.nameservers.length > 0
+            ? `<div class="dns-nameservers">${domain.nameservers.slice(0, 2).map((ns) => this.escHtml(ns)).join(", ")}${domain.nameservers.length > 2 ? ` +${domain.nameservers.length - 2} more` : ""}</div>`
+            : ""}
+          ${domain.dnsRecords && domain.dnsRecords.length > 0
+            ? `<div class="dns-records-count">${domain.dnsRecords.length} DNS record${domain.dnsRecords.length !== 1 ? "s" : ""}</div>`
+            : ""}
         </td>
         <td>${expiryBadge(domain)}</td>
         <td class="dns-cost">${cost}</td>

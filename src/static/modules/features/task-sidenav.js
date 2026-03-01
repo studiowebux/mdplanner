@@ -63,6 +63,10 @@ export class TaskSidenavModule {
       "click",
       () => this.createGitHubIssue(),
     );
+    document.getElementById("sidenavFetchPRBtn")?.addEventListener(
+      "click",
+      () => this.fetchGitHubPRStatus(),
+    );
 
     // Milestone → auto-fill project when milestone has a linked project
     document.getElementById("sidenavTaskMilestone")?.addEventListener(
@@ -254,9 +258,11 @@ export class TaskSidenavModule {
     setValue("sidenavTaskProject", cfg.project);
     setValue("sidenavTaskGithubRepo", cfg.githubRepo || "");
     setValue("sidenavTaskGithubIssue", cfg.githubIssue ?? "");
+    setValue("sidenavTaskGithubPR", cfg.githubPR ?? "");
 
-    // Reset badge — user can click "Fetch status" to refresh
+    // Reset badges — user can click "Fetch status" to refresh
     this._resetGitHubBadge();
+    this._resetGitHubPRBadge();
 
     // Due date — datetime-local requires YYYY-MM-DDTHH:MM (local, no seconds)
     if (cfg.due_date) {
@@ -292,6 +298,7 @@ export class TaskSidenavModule {
     if (deps) deps.innerHTML = "";
 
     this._resetGitHubBadge();
+    this._resetGitHubPRBadge();
     this.pendingAttachments = [];
   }
 
@@ -329,6 +336,9 @@ export class TaskSidenavModule {
       githubRepo: getValue("sidenavTaskGithubRepo") || null,
       githubIssue: getValue("sidenavTaskGithubIssue")
         ? parseInt(getValue("sidenavTaskGithubIssue"))
+        : null,
+      githubPR: getValue("sidenavTaskGithubPR")
+        ? parseInt(getValue("sidenavTaskGithubPR"))
         : null,
     };
 
@@ -388,6 +398,55 @@ export class TaskSidenavModule {
   _resolveRepo() {
     const taskRepo = document.getElementById("sidenavTaskGithubRepo")?.value?.trim();
     return taskRepo || null;
+  }
+
+  _resetGitHubPRBadge() {
+    const badge = document.getElementById("githubPRBadge");
+    if (badge) badge.classList.add("hidden");
+  }
+
+  async fetchGitHubPRStatus() {
+    const prInput = document.getElementById("sidenavTaskGithubPR");
+    const badge = document.getElementById("githubPRBadge");
+    const stateEl = document.getElementById("githubPRState");
+    const linkEl = document.getElementById("githubPRLink");
+    const btn = document.getElementById("sidenavFetchPRBtn");
+
+    const prNum = parseInt(prInput?.value);
+    if (!prNum) { showToast("Enter a PR number first", "error"); return; }
+
+    const repo = this._resolveRepo();
+    if (!repo || !repo.includes("/")) {
+      showToast("Set a GitHub repo first", "error");
+      return;
+    }
+    const [owner, repoName] = repo.split("/");
+    if (btn) { btn.disabled = true; btn.textContent = "Fetching..."; }
+
+    try {
+      const pr = await GitHubAPI.getPR(owner, repoName, prNum);
+      const stateClass = pr.merged
+        ? "github-pr-merged"
+        : pr.state === "open"
+        ? "github-pr-open"
+        : "github-pr-closed";
+      const stateText = pr.merged ? "merged" : pr.state;
+      if (stateEl) {
+        stateEl.textContent = stateText;
+        stateEl.className = `github-pr-badge ${stateClass}`;
+      }
+      if (linkEl) linkEl.href = pr.htmlUrl;
+      if (badge) badge.classList.remove("hidden");
+    } catch (err) {
+      showToast(
+        err?.message?.includes("404")
+          ? `PR #${prNum} not found`
+          : "Failed to fetch PR",
+        "error",
+      );
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = "Fetch PR status"; }
+    }
   }
 
   async fetchGitHubIssueStatus() {

@@ -1299,6 +1299,31 @@ export const GitHubAPI = {
     );
     return response.json();
   },
+
+  /** List repos accessible to the authenticated user, optionally filtered. */
+  async listRepos(query) {
+    const url = query
+      ? `/api/integrations/github/repos?query=${encodeURIComponent(query)}`
+      : "/api/integrations/github/repos";
+    const response = await get(url);
+    return response.json();
+  },
+
+  /** List open milestones for owner/repo. */
+  async listMilestones(owner, repo) {
+    const response = await get(
+      `/api/integrations/github/repo/${owner}/${repo}/milestones`,
+    );
+    return response.json();
+  },
+
+  /** Fetch a single PR by number. */
+  async getPR(owner, repo, number) {
+    const response = await get(
+      `/api/integrations/github/repo/${owner}/${repo}/pulls/${number}`,
+    );
+    return response.json();
+  },
 };
 
 // DNS API

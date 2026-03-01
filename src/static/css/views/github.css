@@ -69,3 +69,77 @@
   background: #a371f7;
   color: #000000;
 }
+
+/* PR state badges */
+.github-pr-badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+
+.github-pr-open {
+  background: #1a7f37;
+  color: #ffffff;
+}
+
+.github-pr-closed {
+  background: #cf222e;
+  color: #ffffff;
+}
+
+.github-pr-merged {
+  background: #8250df;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .github-pr-open {
+  background: #2ea043;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .github-pr-closed {
+  background: #f85149;
+  color: #000000;
+}
+
+[data-theme="dark"] .github-pr-merged {
+  background: #a371f7;
+  color: #000000;
+}
+
+/* Milestone progress bar */
+.github-milestone-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.github-milestone-badge:hover {
+  color: var(--color-text-primary);
+}
+
+.github-milestone-progress {
+  display: inline-block;
+  width: 3rem;
+  height: 0.375rem;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-default);
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.github-milestone-fill {
+  height: 100%;
+  background: #1a7f37;
+  border-radius: var(--radius-md);
+}
+
+[data-theme="dark"] .github-milestone-fill {
+  background: #2ea043;
+}

@@ -22,6 +22,7 @@ export interface TaskConfig {
   project?: string;
   githubIssue?: number;
   githubRepo?: string;
+  githubPR?: number;
 }
 
 export interface Task {
@@ -87,6 +88,8 @@ export interface Goal {
   startDate: string;
   endDate: string;
   status: "planning" | "on-track" | "at-risk" | "late" | "success" | "failed";
+  githubRepo?: string;
+  githubMilestone?: number;
 }
 
 export interface StickyNote {
@@ -679,6 +682,14 @@ export interface OrgChartMember {
 
 export type DnsProvider = "cloudflare" | "manual" | string;
 
+export interface DnsRecord {
+  type: string;
+  name: string;
+  value: string;
+  ttl: number;
+  proxied?: boolean;
+}
+
 export interface DnsDomain {
   id: string;
   domain: string;
@@ -687,6 +698,8 @@ export interface DnsDomain {
   renewalCostUsd?: number;
   provider?: DnsProvider;
   nameservers?: string[];
+  dnsRecords?: DnsRecord[]; // DNS records synced from Cloudflare
+  status?: string; // Zone status (e.g. "active") synced from Cloudflare
   notes?: string;
   lastFetchedAt?: string; // ISO timestamp — set by Cloudflare sync
   created: string;

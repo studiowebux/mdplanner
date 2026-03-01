@@ -2644,6 +2644,13 @@
                     class="w-full border border-strong rounded px-3 py-2 text-sm font-mono"
                     autocomplete="off"
                   >
+                  <p class="text-xs text-muted mt-1">
+                    Required scope: <code>repo</code> &mdash;
+                    <a href="https://github.com/settings/tokens/new?scopes=repo&description=mdplanner"
+                       target="_blank" rel="noopener noreferrer" class="text-info hover:underline">
+                      Create token &rarr;
+                    </a>
+                  </p>
                 </div>
                 <div class="flex gap-2 flex-wrap items-center">
                   <button id="ghSaveBtn" class="btn-secondary">Save token</button>
@@ -10698,6 +10705,14 @@
                 </div>
                 <button type="button" id="sidenavCreateIssueBtn" class="btn-secondary text-xs w-full">Create GitHub issue from task</button>
                 <div id="githubActionResult" class="text-xs hidden"></div>
+                <div class="flex items-center gap-2 mt-2">
+                  <input type="number" id="sidenavTaskGithubPR" placeholder="PR #" min="1" class="form-input w-28">
+                  <div id="githubPRBadge" class="hidden flex items-center gap-1">
+                    <span id="githubPRState" class="github-pr-badge"></span>
+                    <a id="githubPRLink" href="#" target="_blank" rel="noopener noreferrer" class="text-xs text-info hover:underline">Open in GitHub</a>
+                  </div>
+                  <button type="button" id="sidenavFetchPRBtn" class="btn-secondary text-xs">Fetch PR status</button>
+                </div>
               </div>
             </div>
             <div class="form-group">
@@ -11053,6 +11068,35 @@
                 <label class="form-label">End Date</label>
                 <input type="date" id="goalSidenavEndDate" class="form-input">
               </div>
+            </div>
+          </div>
+          <div class="sidenav-section">
+            <div class="form-group">
+              <label class="form-label">GitHub Repo</label>
+              <input
+                type="text"
+                id="goalSidenavGithubRepo"
+                class="form-input"
+                placeholder="owner/repo"
+                autocomplete="off"
+              >
+            </div>
+            <div class="form-group">
+              <label class="form-label">GitHub Milestone</label>
+              <div class="flex items-center gap-2">
+                <input
+                  type="number"
+                  id="goalSidenavGithubMilestone"
+                  class="form-input w-24"
+                  min="1"
+                  placeholder="#"
+                >
+                <button type="button" id="goalFetchMilestonesBtn" class="btn-secondary text-xs">Load milestones</button>
+              </div>
+              <select id="goalMilestoneSelect" class="form-select mt-1">
+                <option value="">Select milestone...</option>
+              </select>
+              <div id="goalMilestonePanel"></div>
             </div>
           </div>
         </div>

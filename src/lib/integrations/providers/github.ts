@@ -13,8 +13,11 @@
 import type {
   GitHubCreatedIssue,
   GitHubIssue,
+  GitHubMilestone,
+  GitHubPR,
   GitHubProvider,
   GitHubRepo,
+  GitHubRepoSummary,
   GitHubUser,
 } from "./github-provider.ts";
 
@@ -113,6 +116,67 @@ export class GitHubApiProvider implements GitHubProvider {
 
     return {
       number: data.number,
+      htmlUrl: data.html_url,
+    };
+  }
+
+  async listRepos(query?: string): Promise<GitHubRepoSummary[]> {
+    // deno-lint-ignore no-explicit-any
+    const data = await this.ghGet(
+      "/user/repos?per_page=100&sort=pushed&affiliation=owner,collaborator",
+    ) as any;
+
+    const repos: { full_name: string; description: string | null }[] = data ??
+      [];
+
+    const q = query?.toLowerCase().trim();
+    const filtered = q
+      ? repos.filter((r) => r.full_name.toLowerCase().includes(q))
+      : repos;
+
+    return filtered.map((r) => ({
+      fullName: r.full_name,
+      description: r.description ?? "",
+    }));
+  }
+
+  async listMilestones(
+    owner: string,
+    repo: string,
+  ): Promise<GitHubMilestone[]> {
+    // deno-lint-ignore no-explicit-any
+    const data = await this.ghGet(
+      `/repos/${owner}/${repo}/milestones?state=open&per_page=50`,
+    ) as any;
+
+    const milestones: {
+      number: number;
+      title: string;
+      open_issues: number;
+      closed_issues: number;
+      html_url: string;
+    }[] = data ?? [];
+
+    return milestones.map((m) => ({
+      number: m.number,
+      title: m.title,
+      openIssues: m.open_issues,
+      closedIssues: m.closed_issues,
+      htmlUrl: m.html_url,
+    }));
+  }
+
+  async getPR(owner: string, repo: string, number: number): Promise<GitHubPR> {
+    // deno-lint-ignore no-explicit-any
+    const data = await this.ghGet(
+      `/repos/${owner}/${repo}/pulls/${number}`,
+    ) as any;
+
+    return {
+      number: data.number,
+      title: data.title,
+      state: data.state === "closed" ? "closed" : "open",
+      merged: data.merged === true,
       htmlUrl: data.html_url,
     };
   }
