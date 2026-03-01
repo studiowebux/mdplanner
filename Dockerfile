@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM denoland/deno:alpine-2.6.10
 
 WORKDIR /app
@@ -5,7 +6,9 @@ WORKDIR /app
 COPY deno.json deno.lock main.ts ./
 COPY src/ ./src/
 
-RUN deno cache main.ts
+# BuildKit inline cache: persists the Deno module store across builds so
+# re-runs of deno cache skip network downloads when deps haven't changed.
+RUN --mount=type=cache,target=/root/.cache/deno deno cache main.ts
 
 VOLUME ["/data"]
 
