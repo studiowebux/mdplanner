@@ -52,6 +52,10 @@ export class Sidenav {
     panel.classList.add("active");
     this.activePanel = panel;
 
+    // Reset scroll position on every open
+    const content = panel.querySelector(".sidenav-content");
+    if (content) content.scrollTop = 0;
+
     // Focus first input if requested
     if (options.focusFirst !== false) {
       setTimeout(() => {

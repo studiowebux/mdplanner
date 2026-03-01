@@ -7,6 +7,9 @@ import { cors } from "hono/cors";
 import { ProjectManager } from "../../lib/project-manager.ts";
 import { AppVariables, isReadOnly } from "./context.ts";
 
+// SSE events route
+import { eventsRouter } from "./events.ts";
+
 // Core routes
 import { versionRouter } from "./version.ts";
 import { projectsRouter } from "./projects.ts";
@@ -97,6 +100,9 @@ export function createApiRouter(
     }
     await next();
   });
+
+  // SSE events
+  api.route("/events", eventsRouter);
 
   // Core routes
   api.route("/version", versionRouter);
