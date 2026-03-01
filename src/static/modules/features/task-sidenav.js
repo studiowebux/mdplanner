@@ -83,6 +83,21 @@ export class TaskSidenavModule {
       },
     );
 
+    // Comment submit button
+    document.getElementById("taskCommentSubmitBtn")?.addEventListener(
+      "click",
+      () => this._handleAddComment(),
+    );
+
+    // Comment thread — delegate delete clicks
+    document.getElementById("taskCommentThread")?.addEventListener(
+      "click",
+      (e) => {
+        const btn = e.target.closest("[data-delete-comment]");
+        if (btn) this._handleDeleteComment(btn.dataset.deleteComment);
+      },
+    );
+
     // File input change — upload each file and insert markdown into description
     document.getElementById("sidenavFileInput")?.addEventListener(
       "change",
@@ -290,6 +305,11 @@ export class TaskSidenavModule {
         cb.checked = tags.includes(cb.value);
       });
     }
+
+    // Comments — show section and render thread when editing
+    const commentsSection = document.getElementById("taskCommentsSection");
+    if (commentsSection) commentsSection.classList.remove("hidden");
+    this._renderCommentThread(task);
   }
 
   clearForm() {
@@ -299,6 +319,14 @@ export class TaskSidenavModule {
     // Clear dependencies display
     const deps = document.getElementById("sidenavSelectedDependencies");
     if (deps) deps.innerHTML = "";
+
+    // Hide comments section (only shown when editing)
+    const commentsSection = document.getElementById("taskCommentsSection");
+    if (commentsSection) commentsSection.classList.add("hidden");
+    const thread = document.getElementById("taskCommentThread");
+    if (thread) thread.innerHTML = "";
+    const commentInput = document.getElementById("taskCommentInput");
+    if (commentInput) commentInput.value = "";
 
     this._resetGitHubBadge();
     this._resetGitHubPRBadge();
@@ -553,6 +581,77 @@ export class TaskSidenavModule {
       }
     } finally {
       if (btn) { btn.disabled = false; btn.textContent = "Create GitHub issue from task"; }
+    }
+  }
+
+  // --- Comment thread ---
+
+  _renderCommentThread(task) {
+    const thread = document.getElementById("taskCommentThread");
+    if (!thread) return;
+
+    const comments = task?.config?.comments ?? [];
+    if (comments.length === 0) {
+      thread.innerHTML = `<p class="task-comment-empty">No comments yet.</p>`;
+      return;
+    }
+
+    thread.innerHTML = comments.map((c) => `
+      <div class="task-comment" data-comment-id="${c.id}">
+        <div class="task-comment-meta">
+          <span class="task-comment-author">${c.author ?? "Unknown"}</span>
+          <span class="task-comment-timestamp">${c.timestamp}</span>
+          <button type="button" class="task-comment-delete" data-delete-comment="${c.id}" title="Delete comment">&times;</button>
+        </div>
+        <div class="task-comment-body">${c.body}</div>
+      </div>
+    `).join("");
+  }
+
+  async _handleAddComment() {
+    if (!this.editingTask) return;
+    const input = document.getElementById("taskCommentInput");
+    const body = input?.value?.trim();
+    if (!body) return;
+
+    const btn = document.getElementById("taskCommentSubmitBtn");
+    if (btn) { btn.disabled = true; btn.textContent = "Adding…"; }
+
+    try {
+      const res = await TasksAPI.addComment(this.editingTask.id, body);
+      if (!res.ok) throw new Error("Failed to add comment");
+
+      input.value = "";
+      // Re-fetch the task so the comment thread reflects the saved state
+      const tasks = await TasksAPI.fetchAll();
+      const updated = tasks.find((t) => t.id === this.editingTask.id);
+      if (updated) {
+        this.editingTask = updated;
+        this._renderCommentThread(updated);
+      }
+      showToast("Comment added", "success");
+    } catch {
+      showToast("Failed to add comment", "error");
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = "Add Comment"; }
+    }
+  }
+
+  async _handleDeleteComment(commentId) {
+    if (!this.editingTask || !commentId) return;
+
+    try {
+      const res = await TasksAPI.deleteComment(this.editingTask.id, commentId);
+      if (!res.ok) throw new Error("Failed to delete comment");
+
+      const tasks = await TasksAPI.fetchAll();
+      const updated = tasks.find((t) => t.id === this.editingTask.id);
+      if (updated) {
+        this.editingTask = updated;
+        this._renderCommentThread(updated);
+      }
+    } catch {
+      showToast("Failed to delete comment", "error");
     }
   }
 

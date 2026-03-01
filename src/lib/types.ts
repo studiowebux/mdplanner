@@ -6,6 +6,13 @@ export interface TimeEntry {
   description?: string;
 }
 
+export interface TaskComment {
+  id: string;
+  author?: string;
+  timestamp: string; // ISO date string
+  body: string; // single-line text
+}
+
 export interface TaskConfig {
   tag?: string[];
   due_date?: string;
@@ -23,6 +30,7 @@ export interface TaskConfig {
   githubIssue?: number;
   githubRepo?: string;
   githubPR?: number;
+  comments?: TaskComment[];
 }
 
 export interface Task {

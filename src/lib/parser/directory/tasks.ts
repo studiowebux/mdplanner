@@ -4,7 +4,7 @@
  * Subtasks are stored inline in the parent task file.
  */
 import { buildFileContent, parseFrontmatter } from "./base.ts";
-import type { Task, TaskConfig, TimeEntry } from "../../types.ts";
+import type { Task, TaskComment, TaskConfig, TimeEntry } from "../../types.ts";
 
 interface TaskFrontmatter {
   id: string;
@@ -24,6 +24,8 @@ interface TaskFrontmatter {
   project?: string;
   githubIssue?: number;
   githubRepo?: string;
+  githubPR?: number;
+  comments?: TaskComment[];
 }
 
 export class TasksDirectoryParser {
@@ -508,6 +510,12 @@ export class TasksDirectoryParser {
       config.githubIssue = frontmatter.githubIssue;
     }
     if (frontmatter.githubRepo) config.githubRepo = frontmatter.githubRepo;
+    if (frontmatter.githubPR !== undefined) {
+      config.githubPR = frontmatter.githubPR;
+    }
+    if (frontmatter.comments?.length) {
+      config.comments = frontmatter.comments;
+    }
 
     return {
       id: frontmatter.id,
@@ -561,6 +569,12 @@ export class TasksDirectoryParser {
       frontmatter.githubIssue = task.config.githubIssue;
     }
     if (task.config.githubRepo) frontmatter.githubRepo = task.config.githubRepo;
+    if (task.config.githubPR !== undefined) {
+      frontmatter.githubPR = task.config.githubPR;
+    }
+    if (task.config.comments?.length) {
+      frontmatter.comments = task.config.comments;
+    }
 
     let body = `# ${task.title}\n\n`;
 
@@ -629,6 +643,52 @@ export class TasksDirectoryParser {
     };
     await this.write(newTask);
     return newTask;
+  }
+
+  /**
+   * Add a comment to a task. Returns the new comment or null if task not found.
+   */
+  async addComment(
+    id: string,
+    body: string,
+    author?: string,
+  ): Promise<TaskComment | null> {
+    const task = await this.read(id);
+    if (!task) return null;
+
+    const comment: TaskComment = {
+      id: `comment_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      timestamp: new Date().toISOString().split("T")[0],
+      body: body.replace(/\n/g, " ").trim(),
+      ...(author && { author }),
+    };
+
+    const existing = task.config.comments ?? [];
+    const updated: Task = {
+      ...task,
+      config: { ...task.config, comments: [...existing, comment] },
+    };
+    await this.write(updated);
+    return comment;
+  }
+
+  /**
+   * Delete a comment from a task. Returns true if deleted, false if task/comment not found.
+   */
+  async deleteComment(id: string, commentId: string): Promise<boolean> {
+    const task = await this.read(id);
+    if (!task) return false;
+
+    const existing = task.config.comments ?? [];
+    const filtered = existing.filter((c) => c.id !== commentId);
+    if (filtered.length === existing.length) return false; // not found
+
+    const updated: Task = {
+      ...task,
+      config: { ...task.config, comments: filtered },
+    };
+    await this.write(updated);
+    return true;
   }
 
   /**

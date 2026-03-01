@@ -177,5 +177,43 @@ tasksRouter.patch("/:id/move", async (c) => {
   return errorResponse("Task not found", 404);
 });
 
+// POST /tasks/:id/comments - add a comment to a task
+tasksRouter.post("/:id/comments", async (c) => {
+  const parser = getParser(c);
+  const taskId = c.req.param("id");
+  const body = await c.req.json();
+  const commentBody: string = String(body.body ?? "").trim();
+  const author: string | undefined = body.author
+    ? String(body.author)
+    : undefined;
+
+  if (!commentBody) {
+    return errorResponse("comment body is required", 400);
+  }
+
+  const comment = await parser.addComment(taskId, commentBody, author);
+  if (!comment) {
+    return errorResponse("Task not found", 404);
+  }
+
+  await cacheWriteThrough(c, "tasks");
+  return jsonResponse(comment, 201);
+});
+
+// DELETE /tasks/:id/comments/:commentId - delete a comment from a task
+tasksRouter.delete("/:id/comments/:commentId", async (c) => {
+  const parser = getParser(c);
+  const taskId = c.req.param("id");
+  const commentId = c.req.param("commentId");
+
+  const success = await parser.deleteComment(taskId, commentId);
+  if (!success) {
+    return errorResponse("Task or comment not found", 404);
+  }
+
+  await cacheWriteThrough(c, "tasks");
+  return jsonResponse({ success: true });
+});
+
 // Export for use in billing routes
 export { findTaskById };

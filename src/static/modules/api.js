@@ -127,6 +127,16 @@ export const TasksAPI = {
     const response = await patch(`/api/tasks/${id}/attachments`, { paths });
     return response;
   },
+
+  async addComment(id, body, author) {
+    const response = await post(`/api/tasks/${id}/comments`, { body, author });
+    return response;
+  },
+
+  async deleteComment(id, commentId) {
+    const response = await del(`/api/tasks/${id}/comments/${commentId}`);
+    return response;
+  },
 };
 
 /** Project config and info operations */

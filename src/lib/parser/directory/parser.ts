@@ -297,6 +297,18 @@ export class DirectoryMarkdownParser {
     return this.tasksParser.update(id, { completed: !task.completed });
   }
 
+  async addComment(
+    taskId: string,
+    body: string,
+    author?: string,
+  ) {
+    return this.tasksParser.addComment(taskId, body, author);
+  }
+
+  async deleteComment(taskId: string, commentId: string): Promise<boolean> {
+    return this.tasksParser.deleteComment(taskId, commentId);
+  }
+
   async addAttachmentsToTask(
     id: string,
     paths: string[],

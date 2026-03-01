@@ -199,32 +199,25 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
     "add_task_comment",
     {
       description:
-        "Append a comment to a task's description without replacing existing content. Use this to track progress, note what was done, or record a commit hash.",
+        "Add a comment to a task's comment thread. Use this to track progress, note what was done, or record a commit hash. Comments are stored separately from the task description.",
       inputSchema: {
         id: z.string().describe("Task ID"),
         comment: z.string().describe(
-          "Comment to append (markdown). E.g. '[v0.7.1] Fixed by commit abc1234 — ...'",
+          "Comment text. E.g. '[v0.7.1] Fixed by commit abc1234 — ...'",
+        ),
+        author: z.string().optional().describe(
+          "Author name (defaults to 'Claude' when called from MCP)",
         ),
       },
     },
-    async ({ id, comment }) => {
-      const tasks = await parser.readTasks();
-      const task = findTaskById(tasks, id);
-      if (!task) return err(`Task '${id}' not found`);
-
-      const existing = Array.isArray(task.description)
-        ? task.description.join("\n")
-        : (task.description ?? "");
-      const timestamp = new Date().toISOString().split("T")[0];
-      const appended = existing
-        ? `${existing}\n\n---\n**${timestamp}**: ${comment}`
-        : `**${timestamp}**: ${comment}`;
-
-      const success = await parser.updateTask(id, {
-        description: appended.split("\n"),
-      });
-      if (!success) return err(`Task '${id}' not found`);
-      return ok({ success: true });
+    async ({ id, comment, author }) => {
+      const result = await parser.addComment(
+        id,
+        comment,
+        author ?? "Claude",
+      );
+      if (!result) return err(`Task '${id}' not found`);
+      return ok({ success: true, commentId: result.id });
     },
   );
 
