@@ -70,6 +70,7 @@ import { ttsRouter } from "./tts.ts";
 
 // Integrations routes
 import { integrationsRouter } from "./integrations.ts";
+import { githubRouter } from "./github.ts";
 
 export function createApiRouter(
   projectManager: ProjectManager,
@@ -180,6 +181,9 @@ export function createApiRouter(
 
   // Integration secrets routes
   api.route("/integrations", integrationsRouter);
+
+  // GitHub integration routes (repo summary, issues)
+  api.route("/integrations/github", githubRouter);
 
   // DNS routes
   api.route("/dns", dnsRouter);

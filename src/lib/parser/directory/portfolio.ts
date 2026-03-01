@@ -35,6 +35,7 @@ export interface PortfolioItem {
   license?: string;
   techStack?: string[];
   billingCustomerId?: string;
+  githubRepo?: string;
 }
 
 interface PortfolioFrontmatter {
@@ -54,6 +55,7 @@ interface PortfolioFrontmatter {
   license?: string;
   techStack?: string[];
   billingCustomerId?: string;
+  githubRepo?: string;
 }
 
 export class PortfolioDirectoryParser {
@@ -165,6 +167,7 @@ export class PortfolioDirectoryParser {
       license: frontmatter.license,
       techStack: frontmatter.techStack,
       billingCustomerId: frontmatter.billingCustomerId,
+      githubRepo: frontmatter.githubRepo,
     };
   }
 
@@ -202,6 +205,7 @@ export class PortfolioDirectoryParser {
       license: item.license,
       techStack: item.techStack,
       billingCustomerId: item.billingCustomerId,
+      githubRepo: item.githubRepo,
     };
 
     for (

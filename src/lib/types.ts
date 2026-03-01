@@ -20,6 +20,8 @@ export interface TaskConfig {
   order?: number;
   attachments?: string[];
   project?: string;
+  githubIssue?: number;
+  githubRepo?: string;
 }
 
 export interface Task {

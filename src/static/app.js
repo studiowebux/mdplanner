@@ -436,6 +436,7 @@ class TaskManager {
       { id: "financesViewBtn", view: "finances" },
       { id: "analyticsViewBtn", view: "analytics" },
       { id: "dnsViewBtn", view: "dns" },
+      { id: "githubViewBtn", view: "github" },
     ];
     additionalViews.forEach(({ id, view }) => {
       document.getElementById(id)?.addEventListener("click", () => {
@@ -998,6 +999,7 @@ class TaskManager {
       "ollama",
       "dns",
       "analytics",
+      "github",
     ];
 
     // If no features configured, show everything
@@ -1072,6 +1074,7 @@ class TaskManager {
       finances: "Finances",
       ollama: "AI Chat",
       dns: "DNS",
+      github: "GitHub",
       config: "Settings",
     };
     const label = document.getElementById("currentViewLabel");
@@ -1159,6 +1162,7 @@ class TaskManager {
       "ollamaViewBtn",
       "uploadsViewBtn",
       "dnsViewBtn",
+      "githubViewBtn",
       "configViewBtn",
     ];
     desktopNavBtns.forEach((id) => {
@@ -1209,6 +1213,7 @@ class TaskManager {
       "analyticsViewBtnMobile",
       "ollamaViewBtnMobile",
       "dnsViewBtnMobile",
+      "githubViewBtnMobile",
       "configViewBtnMobile",
     ];
     mobileBtnIds.forEach((id) => {
@@ -1409,6 +1414,16 @@ class TaskManager {
       this.activateViewButton("fishbone");
       document.getElementById("fishboneView").classList.remove("hidden");
       this.fishboneModule.load();
+    } else if (view === "github") {
+      // GitHub has no standalone view — redirect to Settings → Integrations
+      this.switchView("config");
+      setTimeout(() => {
+        document.getElementById("integrationsSection")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+      return;
     } else if (view === "dns") {
       this.activateViewButton("dns");
       document.getElementById("dnsView").classList.remove("hidden");

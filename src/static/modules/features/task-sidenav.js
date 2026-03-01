@@ -2,7 +2,7 @@
 // Handles task creation/editing via slide-in panel
 
 import { Sidenav } from "../ui/sidenav.js";
-import { MilestonesAPI, TasksAPI } from "../api.js";
+import { GitHubAPI, MilestonesAPI, TasksAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { UndoManager } from "../ui/undo-manager.js";
 
@@ -52,6 +52,16 @@ export class TaskSidenavModule {
     document.getElementById("sidenavAttachBtn")?.addEventListener(
       "click",
       () => document.getElementById("sidenavFileInput")?.click(),
+    );
+
+    // GitHub issue actions
+    document.getElementById("sidenavFetchIssueBtn")?.addEventListener(
+      "click",
+      () => this.fetchGitHubIssueStatus(),
+    );
+    document.getElementById("sidenavCreateIssueBtn")?.addEventListener(
+      "click",
+      () => this.createGitHubIssue(),
     );
 
     // Milestone → auto-fill project when milestone has a linked project
@@ -242,6 +252,11 @@ export class TaskSidenavModule {
     setValue("sidenavTaskEffort", cfg.effort);
     setValue("sidenavTaskMilestone", cfg.milestone);
     setValue("sidenavTaskProject", cfg.project);
+    setValue("sidenavTaskGithubRepo", cfg.githubRepo || "");
+    setValue("sidenavTaskGithubIssue", cfg.githubIssue ?? "");
+
+    // Reset badge — user can click "Fetch status" to refresh
+    this._resetGitHubBadge();
 
     // Due date — datetime-local requires YYYY-MM-DDTHH:MM (local, no seconds)
     if (cfg.due_date) {
@@ -276,6 +291,7 @@ export class TaskSidenavModule {
     const deps = document.getElementById("sidenavSelectedDependencies");
     if (deps) deps.innerHTML = "";
 
+    this._resetGitHubBadge();
     this.pendingAttachments = [];
   }
 
@@ -310,6 +326,10 @@ export class TaskSidenavModule {
       milestone: getValue("sidenavTaskMilestone"),
       project: getValue("sidenavTaskProject") || null,
       tag: getSelectedValues("sidenavTaskTags"),
+      githubRepo: getValue("sidenavTaskGithubRepo") || null,
+      githubIssue: getValue("sidenavTaskGithubIssue")
+        ? parseInt(getValue("sidenavTaskGithubIssue"))
+        : null,
     };
 
     try {
@@ -352,6 +372,123 @@ export class TaskSidenavModule {
     } catch (error) {
       console.error("Error saving task:", error);
       showToast("Error saving task", "error");
+    }
+  }
+
+  // --- GitHub helpers ---
+
+  _resetGitHubBadge() {
+    const badge = document.getElementById("githubIssueBadge");
+    const result = document.getElementById("githubActionResult");
+    if (badge) badge.classList.add("hidden");
+    if (result) { result.textContent = ""; result.classList.add("hidden"); }
+  }
+
+  /** Resolve effective repo: task field > project default */
+  async _resolveRepo() {
+    const taskRepo = document.getElementById("sidenavTaskGithubRepo")?.value?.trim();
+    if (taskRepo) return taskRepo;
+    try {
+      const status = await GitHubAPI.getStatus();
+      return status.defaultRepo || null;
+    } catch {
+      return null;
+    }
+  }
+
+  async fetchGitHubIssueStatus() {
+    const issueInput = document.getElementById("sidenavTaskGithubIssue");
+    const badge = document.getElementById("githubIssueBadge");
+    const stateEl = document.getElementById("githubIssueState");
+    const linkEl = document.getElementById("githubIssueLink");
+    const result = document.getElementById("githubActionResult");
+    const btn = document.getElementById("sidenavFetchIssueBtn");
+
+    const issueNum = parseInt(issueInput?.value);
+    if (!issueNum) { showToast("Enter an issue number first", "error"); return; }
+
+    const repo = await this._resolveRepo();
+    if (!repo || !repo.includes("/")) {
+      showToast("Set a GitHub repo (task field or project default)", "error");
+      return;
+    }
+
+    const [owner, repoName] = repo.split("/");
+    if (btn) { btn.disabled = true; btn.textContent = "Fetching..."; }
+
+    try {
+      const issue = await GitHubAPI.getIssue(owner, repoName, issueNum);
+      if (stateEl) {
+        stateEl.textContent = issue.state;
+        stateEl.className = `github-issue-badge github-issue-${issue.state}`;
+      }
+      if (linkEl) linkEl.href = issue.htmlUrl;
+      if (badge) badge.classList.remove("hidden");
+    } catch (err) {
+      if (result) {
+        result.textContent = err?.message?.includes("404")
+          ? `Issue #${issueNum} not found`
+          : "Failed to fetch issue";
+        result.className = "text-xs text-error";
+        result.classList.remove("hidden");
+      }
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = "Fetch status"; }
+    }
+  }
+
+  async createGitHubIssue() {
+    const title = document.getElementById("sidenavTaskTitleInput")?.value?.trim();
+    const body = document.getElementById("sidenavTaskDescription")?.value?.trim() || "";
+    const result = document.getElementById("githubActionResult");
+    const btn = document.getElementById("sidenavCreateIssueBtn");
+
+    if (!title) { showToast("Add a task title first", "error"); return; }
+
+    const repo = await this._resolveRepo();
+    if (!repo || !repo.includes("/")) {
+      showToast("Set a GitHub repo (task field or project default)", "error");
+      return;
+    }
+
+    const [owner, repoName] = repo.split("/");
+    if (btn) { btn.disabled = true; btn.textContent = "Creating..."; }
+
+    try {
+      const created = await GitHubAPI.createIssue(owner, repoName, title, body);
+
+      // Save issue number to the task field immediately
+      const issueInput = document.getElementById("sidenavTaskGithubIssue");
+      if (issueInput) issueInput.value = created.number;
+
+      // Set repo field if it was resolved from default (so it gets saved)
+      const repoInput = document.getElementById("sidenavTaskGithubRepo");
+      if (repoInput && !repoInput.value.trim()) repoInput.value = repo;
+
+      // If editing an existing task, persist immediately
+      if (this.editingTask) {
+        await TasksAPI.update(this.editingTask.id, {
+          githubIssue: created.number,
+          githubRepo: repo,
+        });
+        showToast(`Issue #${created.number} created`, "success");
+      } else {
+        showToast(`Issue #${created.number} created — save task to link it`, "success");
+      }
+
+      if (result) {
+        result.innerHTML = `Created <a href="${created.htmlUrl}" target="_blank" rel="noopener noreferrer" class="text-info hover:underline">#${created.number}</a>`;
+        result.className = "text-xs text-success";
+        result.classList.remove("hidden");
+      }
+    } catch (err) {
+      if (result) {
+        result.textContent = `Failed: ${err?.message || "GitHub API error"}`;
+        result.className = "text-xs text-error";
+        result.classList.remove("hidden");
+      }
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = "Create GitHub issue from task"; }
     }
   }
 

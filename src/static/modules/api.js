@@ -1259,6 +1259,52 @@ export const IntegrationsAPI = {
   },
 };
 
+export const GitHubAPI = {
+  async getStatus() {
+    const response = await get("/api/integrations/github");
+    return response.json();
+  },
+
+  async saveToken(token) {
+    return post("/api/integrations/github", { token });
+  },
+
+  async deleteToken() {
+    return del("/api/integrations/github");
+  },
+
+  async saveDefaultRepo(defaultRepo) {
+    return post("/api/integrations/github", { defaultRepo });
+  },
+
+  async testConnection() {
+    const response = await get("/api/integrations/github/test");
+    return response.json();
+  },
+
+  async getRepo(owner, repo) {
+    const response = await get(
+      `/api/integrations/github/repo/${owner}/${repo}`,
+    );
+    return response.json();
+  },
+
+  async getIssue(owner, repo, number) {
+    const response = await get(
+      `/api/integrations/github/repo/${owner}/${repo}/issues/${number}`,
+    );
+    return response.json();
+  },
+
+  async createIssue(owner, repo, title, body) {
+    const response = await post(
+      `/api/integrations/github/repo/${owner}/${repo}/issues`,
+      { title, body },
+    );
+    return response.json();
+  },
+};
+
 // DNS API
 export const DnsAPI = {
   async fetchAll() {
