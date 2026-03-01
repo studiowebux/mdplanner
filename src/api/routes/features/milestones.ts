@@ -12,6 +12,7 @@ import {
   jsonResponse,
 } from "../context.ts";
 import { Task } from "../../../lib/types.ts";
+import { eventBus } from "../../../lib/event-bus.ts";
 
 export const milestonesRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -66,6 +67,7 @@ milestonesRouter.post("/", async (c) => {
   });
   await parser.saveMilestones(milestones);
   await cacheWriteThrough(c, "milestones");
+  eventBus.emit({ entity: "milestones", action: "created", id });
   return jsonResponse({ success: true, id }, 201);
 });
 
@@ -80,6 +82,7 @@ milestonesRouter.put("/:id", async (c) => {
   milestones[index] = { ...milestones[index], ...body };
   await parser.saveMilestones(milestones);
   await cacheWriteThrough(c, "milestones");
+  eventBus.emit({ entity: "milestones", action: "updated", id });
   return jsonResponse({ success: true });
 });
 
@@ -94,5 +97,6 @@ milestonesRouter.delete("/:id", async (c) => {
   }
   await parser.saveMilestones(filtered);
   cachePurge(c, "milestones", id);
+  eventBus.emit({ entity: "milestones", action: "deleted", id });
   return jsonResponse({ success: true });
 });

@@ -96,6 +96,7 @@ import { ProjectsModule } from "./modules/projects.js";
 import { UploadsView } from "./modules/views/uploads.js";
 import { GlobalSearch } from "./modules/features/search.js";
 import { OllamaModule } from "./modules/features/ollama.js";
+import { SSEClient } from "./modules/ui/sse-client.js";
 
 class TaskManager {
   constructor() {
@@ -307,6 +308,9 @@ class TaskManager {
     this.uploadsView = new UploadsView(this);
     this.ollamaModule = new OllamaModule(this);
     this.globalSearch = new GlobalSearch(this);
+    this.sseClient = new SSEClient();
+    /** @type {Map<string, number>} debounce timer per entity */
+    this._sseDebounce = new Map();
 
     this.init();
   }
@@ -332,6 +336,68 @@ class TaskManager {
     this.loadPortfolio();
     this.checkTaskHashOnLoad();
     this.checkVersion();
+    this._initSSE();
+  }
+
+  // SSE — auto-reload active view on server-side mutations
+  _initSSE() {
+    this.sseClient.connect();
+    document.addEventListener("mdplanner:change", (e) => {
+      this._handleSSEChange(e.detail);
+    });
+  }
+
+  _handleSSEChange({ entity }) {
+    // Debounce per entity: collapse rapid bursts into a single reload.
+    const existing = this._sseDebounce.get(entity);
+    if (existing) clearTimeout(existing);
+    this._sseDebounce.set(
+      entity,
+      setTimeout(() => {
+        this._sseDebounce.delete(entity);
+        this._reloadEntityIfVisible(entity);
+      }, 300),
+    );
+  }
+
+  _reloadEntityIfVisible(entity) {
+    const view = this.currentView;
+    const taskViews = ["list", "board", "timeline", "summary"];
+    switch (entity) {
+      case "tasks":
+        if (taskViews.includes(view)) this.loadTasks();
+        break;
+      case "notes":
+        if (view === "notes") this.loadNotes();
+        break;
+      case "goals":
+        if (view === "goals") this.loadGoals();
+        break;
+      case "milestones":
+        if (view === "milestones") this.loadMilestones();
+        break;
+      case "meetings":
+        if (view === "meetings") this.meetingsModule.load();
+        break;
+      case "portfolio":
+        if (view === "portfolio") this.portfolioView.load();
+        break;
+      case "people":
+        if (view === "people") this.peopleModule.load();
+        break;
+      case "ideas":
+        if (view === "ideas") this.loadIdeas();
+        break;
+      case "journal":
+        if (view === "journal") this.journalModule.load();
+        break;
+      case "habits":
+        if (view === "habits") this.habitsModule.load();
+        break;
+      case "fishbone":
+        if (view === "fishbone") this.fishboneModule.load();
+        break;
+    }
   }
 
   // Projects functionality - delegated to ProjectsModule

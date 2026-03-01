@@ -11,6 +11,7 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
+import { eventBus } from "../../../lib/event-bus.ts";
 
 export const meetingsRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -44,6 +45,7 @@ meetingsRouter.post("/", async (c) => {
     actions: body.actions ?? [],
   });
   await cacheWriteThrough(c, "meetings");
+  eventBus.emit({ entity: "meetings", action: "created", id: meeting.id });
   return jsonResponse({ success: true, id: meeting.id }, 201);
 });
 
@@ -62,6 +64,7 @@ meetingsRouter.put("/:id", async (c) => {
   });
   if (!updated) return errorResponse("Not found", 404);
   await cacheWriteThrough(c, "meetings");
+  eventBus.emit({ entity: "meetings", action: "updated", id });
   return jsonResponse({ success: true });
 });
 
@@ -72,5 +75,6 @@ meetingsRouter.delete("/:id", async (c) => {
   const deleted = await parser.deleteMeeting(id);
   if (!deleted) return errorResponse("Not found", 404);
   cachePurge(c, "meetings", id);
+  eventBus.emit({ entity: "meetings", action: "deleted", id });
   return jsonResponse({ success: true });
 });

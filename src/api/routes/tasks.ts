@@ -11,6 +11,7 @@ import {
   getParser,
   jsonResponse,
 } from "./context.ts";
+import { eventBus } from "../../lib/event-bus.ts";
 import { Task, TaskConfig } from "../../lib/types.ts";
 
 export const tasksRouter = new Hono<{ Variables: AppVariables }>();
@@ -92,6 +93,7 @@ tasksRouter.post("/", async (c) => {
     cacheWriteThrough(c, "tasks"),
     parser.touchLastUpdated(),
   ]);
+  eventBus.emit({ entity: "tasks", action: "created", id: taskId });
   return jsonResponse({ id: taskId }, 201);
 });
 
@@ -116,6 +118,7 @@ tasksRouter.put("/:id", async (c) => {
       cacheWriteThrough(c, "tasks"),
       parser.touchLastUpdated(),
     ]);
+    eventBus.emit({ entity: "tasks", action: "updated", id: taskId });
     return jsonResponse({ success: true });
   }
   return errorResponse("Task not found", 404);
@@ -132,6 +135,7 @@ tasksRouter.delete("/:id", async (c) => {
     parser.touchLastUpdated().catch((e) =>
       console.error("[lastUpdated] touch failed:", e)
     );
+    eventBus.emit({ entity: "tasks", action: "deleted", id: taskId });
     return jsonResponse({ success: true });
   }
   return errorResponse("Task not found", 404);

@@ -12,6 +12,7 @@ import {
   jsonResponse,
 } from "./context.ts";
 import { DirectoryMarkdownParser } from "../../lib/parser/directory/parser.ts";
+import { eventBus } from "../../lib/event-bus.ts";
 
 export const portfolioRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -117,6 +118,7 @@ portfolioRouter.post("/", async (c) => {
   });
 
   await cacheWriteThrough(c, "portfolio");
+  eventBus.emit({ entity: "portfolio", action: "created", id: item.id });
   return jsonResponse(item, 201);
 });
 
@@ -137,6 +139,7 @@ portfolioRouter.put("/:id", async (c) => {
   }
 
   await cacheWriteThrough(c, "portfolio");
+  eventBus.emit({ entity: "portfolio", action: "updated", id });
   return jsonResponse(updated);
 });
 
@@ -156,5 +159,6 @@ portfolioRouter.delete("/:id", async (c) => {
   }
 
   cachePurge(c, "portfolio", id);
+  eventBus.emit({ entity: "portfolio", action: "deleted", id });
   return jsonResponse({ success: true });
 });

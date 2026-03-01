@@ -11,6 +11,7 @@ import {
   getParser,
   jsonResponse,
 } from "./context.ts";
+import { eventBus } from "../../lib/event-bus.ts";
 
 export const goalsRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -40,6 +41,7 @@ goalsRouter.post("/", async (c) => {
   const body = await c.req.json();
   const goalId = await parser.addGoal(body);
   await cacheWriteThrough(c, "goals");
+  eventBus.emit({ entity: "goals", action: "created", id: goalId });
   return jsonResponse({ id: goalId }, 201);
 });
 
@@ -52,6 +54,7 @@ goalsRouter.put("/:id", async (c) => {
 
   if (success) {
     await cacheWriteThrough(c, "goals");
+    eventBus.emit({ entity: "goals", action: "updated", id: goalId });
     return jsonResponse({ success: true });
   }
   return errorResponse("Goal not found", 404);
@@ -65,6 +68,7 @@ goalsRouter.delete("/:id", async (c) => {
 
   if (success) {
     cachePurge(c, "goals", goalId);
+    eventBus.emit({ entity: "goals", action: "deleted", id: goalId });
     return jsonResponse({ success: true });
   }
   return errorResponse("Goal not found", 404);
