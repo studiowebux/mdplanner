@@ -1481,7 +1481,10 @@ class TaskManager {
 
   async loadProjectInfo() {
     try {
-      this.projectInfo = await ProjectAPI.getInfo();
+      [this.projectInfo, this.projectConfig] = await Promise.all([
+        ProjectAPI.getInfo(),
+        ProjectAPI.getConfig(),
+      ]);
       this.renderSummaryView();
     } catch (error) {
       console.error("Error loading project info:", error);

@@ -323,10 +323,10 @@ export class SummaryView {
       );
 
       const div = document.createElement("div");
-      div.className = "flex justify-between items-center";
+      div.className = "flex justify-between items-center gap-2";
       div.innerHTML = `
-                <span class="text-sm text-secondary">${section}</span>
-                <span class="text-lg font-semibold text-primary">${sectionTasks.length}</span>
+                <span class="text-sm text-secondary min-w-0 truncate">${section}</span>
+                <span class="text-lg font-semibold text-primary flex-shrink-0">${sectionTasks.length}</span>
             `;
       container.appendChild(div);
     });
@@ -380,13 +380,13 @@ export class SummaryView {
         : "bg-active";
 
       const div = document.createElement("div");
-      div.className = "flex items-center justify-between";
+      div.className = "flex items-center justify-between gap-2";
       div.innerHTML = `
-                <div class="flex items-center space-x-2">
-                    <div class="w-3 h-3 ${dotShade} rounded-full"></div>
-                    <span class="text-sm text-secondary">${section}</span>
+                <div class="flex items-center space-x-2 min-w-0">
+                    <div class="w-3 h-3 ${dotShade} rounded-full flex-shrink-0"></div>
+                    <span class="text-sm text-secondary truncate">${section}</span>
                 </div>
-                <span class="text-sm font-medium text-primary">${count}</span>
+                <span class="text-sm font-medium text-primary flex-shrink-0">${count}</span>
             `;
       container.appendChild(div);
     });
@@ -440,19 +440,19 @@ export class SummaryView {
       const div = document.createElement("div");
       div.className = "space-y-2";
       div.innerHTML = `
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-3 h-3 ${dotShade} rounded-full"></div>
-                        <span class="text-sm font-medium text-primary flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg>${milestone}</span>
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center space-x-2 min-w-0">
+                        <div class="w-3 h-3 ${dotShade} rounded-full flex-shrink-0"></div>
+                        <span class="text-sm font-medium text-primary flex items-center gap-1 min-w-0"><svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg><span class="truncate">${milestone}</span></span>
                     </div>
-                    <span class="text-sm font-medium text-primary">${data.incomplete} remaining</span>
+                    <span class="text-sm font-medium text-primary flex-shrink-0">${data.incomplete} remaining</span>
                 </div>
                 <div class="flex items-center space-x-2 text-xs text-muted">
-                    <span>${completedCount}/${data.total} completed</span>
+                    <span class="flex-shrink-0">${completedCount}/${data.total} completed</span>
                     <div class="flex-1 bg-active rounded-full h-1.5">
                         <div class="bg-inverse h-1.5 rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
                     </div>
-                    <span>${progressPercent}%</span>
+                    <span class="flex-shrink-0">${progressPercent}%</span>
                 </div>
             `;
       container.appendChild(div);
