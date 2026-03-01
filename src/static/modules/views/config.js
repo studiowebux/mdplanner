@@ -454,6 +454,8 @@ export class ConfigView {
       "Tools": [
         { id: "quick-search", label: "Quick Search (⌘K)" },
         { id: "ollama", label: "AI Chat" },
+        { id: "analytics", label: "Analytics" },
+        { id: "uploads", label: "Uploads" },
         { id: "backup", label: "Backup" },
       ],
       "Infrastructure": [

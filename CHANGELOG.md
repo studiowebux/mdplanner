@@ -8,6 +8,14 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.7.7] - 2026-03-01
+
+### Fixed
+
+- Feature visibility: Analytics and Uploads were missing from the Settings
+  feature toggle list, causing them to be hidden in projects with an explicit
+  features config; both are now listed under the Tools group
+
 ## [0.7.6] - 2026-03-01
 
 ### Fixed
