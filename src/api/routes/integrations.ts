@@ -161,12 +161,25 @@ export async function handleCloudflareDnsSync(
     const key = result.domain.toLowerCase();
     const current = byDomain.get(key);
 
-    // Sync contract: only write expiryDate, autoRenew, lastFetchedAt
-    const syncFields = {
-      expiryDate: result.synced.expiryDate,
-      autoRenew: result.synced.autoRenew,
+    // CF is authoritative: write all fields it provides (skip undefined keys only)
+    const syncFields: Record<string, unknown> = {
       lastFetchedAt: result.synced.lastFetchedAt,
     };
+    if (result.synced.nameservers !== undefined) {
+      syncFields.nameservers = result.synced.nameservers;
+    }
+    if (result.synced.dnsRecords !== undefined) {
+      syncFields.dnsRecords = result.synced.dnsRecords;
+    }
+    if (result.synced.status !== undefined) {
+      syncFields.status = result.synced.status;
+    }
+    if (result.synced.expiryDate !== undefined) {
+      syncFields.expiryDate = result.synced.expiryDate;
+    }
+    if (result.synced.autoRenew !== undefined) {
+      syncFields.autoRenew = result.synced.autoRenew;
+    }
 
     if (current) {
       await parser.updateDnsDomain(current.id, syncFields);

@@ -12,6 +12,8 @@ interface GoalFrontmatter {
   start: string;
   end: string;
   status: "planning" | "on-track" | "at-risk" | "late" | "success" | "failed";
+  github_repo?: string;
+  github_milestone?: number;
 }
 
 export class GoalsDirectoryParser extends DirectoryParser<Goal> {
@@ -53,6 +55,8 @@ export class GoalsDirectoryParser extends DirectoryParser<Goal> {
       startDate: frontmatter.start || "",
       endDate: frontmatter.end || "",
       status: frontmatter.status || "planning",
+      githubRepo: frontmatter.github_repo,
+      githubMilestone: frontmatter.github_milestone,
     };
   }
 
@@ -65,6 +69,11 @@ export class GoalsDirectoryParser extends DirectoryParser<Goal> {
       end: goal.endDate,
       status: goal.status,
     };
+
+    if (goal.githubRepo) frontmatter.github_repo = goal.githubRepo;
+    if (goal.githubMilestone !== undefined) {
+      frontmatter.github_milestone = goal.githubMilestone;
+    }
 
     const body = `# ${goal.title}\n\n${goal.description || ""}`;
 

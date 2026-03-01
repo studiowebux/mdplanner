@@ -3,7 +3,15 @@
  * Each domain is stored as a separate markdown file under dns/.
  */
 import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
-import type { DnsDomain } from "../../types.ts";
+import type { DnsDomain, DnsRecord } from "../../types.ts";
+
+interface DnsDnsRecord {
+  type: string;
+  name: string;
+  value: string;
+  ttl: number;
+  proxied?: boolean;
+}
 
 interface DnsFrontmatter {
   id: string;
@@ -13,6 +21,8 @@ interface DnsFrontmatter {
   renewal_cost_usd?: number;
   provider?: string;
   nameservers?: string[];
+  dns_records?: DnsDnsRecord[];
+  status?: string;
   last_fetched_at?: string;
   created: string;
   updated: string;
@@ -33,6 +43,17 @@ export class DnsDomainParser extends DirectoryParser<DnsDomain> {
 
     if (!frontmatter.id || !frontmatter.domain) return null;
 
+    const dnsRecords: DnsRecord[] | undefined =
+      frontmatter.dns_records && frontmatter.dns_records.length > 0
+        ? frontmatter.dns_records.map((r) => ({
+          type: r.type,
+          name: r.name,
+          value: r.value,
+          ttl: r.ttl,
+          proxied: r.proxied,
+        }))
+        : undefined;
+
     return {
       id: frontmatter.id,
       domain: frontmatter.domain,
@@ -41,6 +62,8 @@ export class DnsDomainParser extends DirectoryParser<DnsDomain> {
       renewalCostUsd: frontmatter.renewal_cost_usd,
       provider: frontmatter.provider,
       nameservers: frontmatter.nameservers,
+      dnsRecords,
+      status: frontmatter.status,
       lastFetchedAt: frontmatter.last_fetched_at,
       notes: body.trim() || undefined,
       created: frontmatter.created || new Date().toISOString(),
@@ -67,6 +90,16 @@ export class DnsDomainParser extends DirectoryParser<DnsDomain> {
     if (domain.nameservers && domain.nameservers.length > 0) {
       frontmatter.nameservers = domain.nameservers;
     }
+    if (domain.dnsRecords && domain.dnsRecords.length > 0) {
+      frontmatter.dns_records = domain.dnsRecords.map((r) => ({
+        type: r.type,
+        name: r.name,
+        value: r.value,
+        ttl: r.ttl,
+        ...(r.proxied !== undefined ? { proxied: r.proxied } : {}),
+      }));
+    }
+    if (domain.status) frontmatter.status = domain.status;
     if (domain.lastFetchedAt) {
       frontmatter.last_fetched_at = domain.lastFetchedAt;
     }

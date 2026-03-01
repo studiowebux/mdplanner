@@ -61,8 +61,14 @@ dnsRouter.put("/:id", async (c) => {
   // batch operations (e.g. set renewal cost) do not overwrite unrelated fields.
   const updates: Record<string, unknown> = {};
   const allowed = [
-    "domain", "expiryDate", "autoRenew", "renewalCostUsd",
-    "provider", "nameservers", "notes", "lastFetchedAt",
+    "domain",
+    "expiryDate",
+    "autoRenew",
+    "renewalCostUsd",
+    "provider",
+    "nameservers",
+    "notes",
+    "lastFetchedAt",
   ];
   for (const key of allowed) {
     if (key in body) updates[key] = body[key];

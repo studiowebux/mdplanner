@@ -1,20 +1,44 @@
 /**
- * Cloudflare Registrar DNS provider.
+ * Cloudflare DNS provider.
  * Pattern: Provider pattern — implements DnsProvider for Cloudflare.
  *
- * Sync contract (enforced here, not just in UI):
- *   Only expiryDate, autoRenew, and lastFetchedAt are written per domain.
- *   renewalCostUsd, notes, domain name, id, and provider are never touched.
+ * Sync strategy:
+ *   1. Fetch all zones via GET /zones (covers DNS-only zones, not just registrar domains)
+ *   2. Fetch DNS records per zone via GET /zones/{id}/dns_records
+ *   3. Optionally enrich with Registrar data (expiry, auto_renew) via
+ *      GET /accounts/{accountId}/registrar/domains/{domain} — graceful 404 skip
  *
- * Cloudflare notes:
- *   - expires_at is only populated for CF Registrar domains (not DNS-only zones)
- *   - Renewal price is not in CF API — always manual
- *   - Account ID is auto-fetched via GET /accounts on first use
+ * Required token permissions:
+ *   Zone:Read, Zone DNS:Read, Registrar:Read (optional, for expiry/auto-renew data)
+ *
+ * Note: expires_at and auto_renew are only available for domains registered
+ * through Cloudflare Registrar. DNS-only zones will not have these fields.
  */
 
-import type { DnsProvider, DnsSyncResult } from "./dns-provider.ts";
+import type { DnsProvider, DnsRecord, DnsSyncResult } from "./dns-provider.ts";
 
 const CF_API = "https://api.cloudflare.com/client/v4";
+
+interface CfZone {
+  id: string;
+  name: string;
+  status: string;
+  name_servers: string[];
+}
+
+interface CfDnsRecord {
+  type: string;
+  name: string;
+  content: string;
+  ttl: number;
+  proxied?: boolean;
+}
+
+interface CfRegistrarDomain {
+  name: string;
+  expires_at?: string;
+  auto_renew?: boolean;
+}
 
 export class CloudflareDnsProvider implements DnsProvider {
   private token: string;
@@ -48,23 +72,19 @@ export class CloudflareDnsProvider implements DnsProvider {
     return this.accountId;
   }
 
-  async fetchDomains(): Promise<DnsSyncResult[]> {
-    const accountId = await this.resolveAccountId();
+  private async fetchAllZones(): Promise<CfZone[]> {
     const perPage = 50;
     let page = 1;
     let totalPages = 1;
-
-    const cfDomains: { name: string; expires_at?: string; auto_renew?: boolean }[] = [];
+    const zones: CfZone[] = [];
 
     do {
       // deno-lint-ignore no-explicit-any
       const data = await this.cfGet(
-        `/accounts/${accountId}/registrar/domains?page=${page}&per_page=${perPage}`,
+        `/zones?page=${page}&per_page=${perPage}`,
       ) as any;
-
-      const results: { name: string; expires_at?: string; auto_renew?: boolean }[] =
-        data?.result ?? [];
-      cfDomains.push(...results);
+      const results: CfZone[] = data?.result ?? [];
+      zones.push(...results);
 
       const info = data?.result_info;
       if (info?.total_count && info?.per_page) {
@@ -73,15 +93,71 @@ export class CloudflareDnsProvider implements DnsProvider {
       page++;
     } while (page <= totalPages);
 
+    return zones;
+  }
+
+  private async fetchDnsRecords(zoneId: string): Promise<DnsRecord[]> {
+    try {
+      // deno-lint-ignore no-explicit-any
+      const data = await this.cfGet(
+        `/zones/${zoneId}/dns_records?per_page=100`,
+      ) as any;
+      const raw: CfDnsRecord[] = data?.result ?? [];
+      return raw.map((r) => ({
+        type: r.type,
+        name: r.name,
+        value: r.content,
+        ttl: r.ttl,
+        proxied: r.proxied,
+      }));
+    } catch {
+      // Non-fatal: return empty if DNS records fetch fails (e.g. missing permission)
+      return [];
+    }
+  }
+
+  private async fetchRegistrarDomain(
+    accountId: string,
+    domainName: string,
+  ): Promise<CfRegistrarDomain | null> {
+    try {
+      // deno-lint-ignore no-explicit-any
+      const data = await this.cfGet(
+        `/accounts/${accountId}/registrar/domains/${domainName}`,
+      ) as any;
+      return (data?.result ?? null) as CfRegistrarDomain | null;
+    } catch {
+      // Graceful skip — domain not registered through CF Registrar, or missing permission
+      return null;
+    }
+  }
+
+  async fetchDomains(): Promise<DnsSyncResult[]> {
+    const accountId = await this.resolveAccountId();
+    const zones = await this.fetchAllZones();
     const now = new Date().toISOString();
 
-    return cfDomains.map((d) => ({
-      domain: d.name,
-      synced: {
-        expiryDate: d.expires_at ? d.expires_at.split("T")[0] : undefined,
-        autoRenew: d.auto_renew,
-        lastFetchedAt: now,
-      },
-    }));
+    return Promise.all(
+      zones.map(async (zone) => {
+        const [dnsRecords, registrar] = await Promise.all([
+          this.fetchDnsRecords(zone.id),
+          this.fetchRegistrarDomain(accountId, zone.name),
+        ]);
+
+        return {
+          domain: zone.name,
+          synced: {
+            status: zone.status,
+            nameservers: zone.name_servers,
+            dnsRecords,
+            expiryDate: registrar?.expires_at
+              ? registrar.expires_at.split("T")[0]
+              : undefined,
+            autoRenew: registrar?.auto_renew,
+            lastFetchedAt: now,
+          },
+        };
+      }),
+    );
   }
 }

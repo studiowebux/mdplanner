@@ -5,7 +5,7 @@ import {
   getPriorityBadgeClasses,
   getPriorityText,
 } from "../utils.js";
-import { TasksAPI } from "../api.js";
+import { GitHubAPI, TasksAPI } from "../api.js";
 
 /**
  * Kanban board view with drag-drop between sections
@@ -100,6 +100,55 @@ export class BoardView {
 
       container.appendChild(column);
     });
+
+    // Lazily load GitHub badge states after render (non-blocking)
+    this._loadGitHubBadgeStates();
+  }
+
+  /**
+   * After board render, fetch GitHub issue/PR states for badges that have a repo.
+   * Updates badge color classes without blocking the UI.
+   */
+  async _loadGitHubBadgeStates() {
+    if (!this.tm.githubConfigured) return;
+
+    const issueBadges = document.querySelectorAll("[data-gh-issue][data-gh-repo]");
+    const prBadges = document.querySelectorAll("[data-gh-pr][data-gh-repo]");
+
+    // Issue states
+    for (const el of issueBadges) {
+      const issueNum = parseInt(el.dataset.ghIssue, 10);
+      const repo = el.dataset.ghRepo;
+      if (!repo || !repo.includes("/")) continue;
+      const [owner, repoName] = repo.split("/");
+      try {
+        const issue = await GitHubAPI.getIssue(owner, repoName, issueNum);
+        el.className = `github-issue-badge github-issue-${issue.state}`;
+        el.title = issue.title;
+      } catch {
+        // Silently skip — badge stays neutral
+      }
+    }
+
+    // PR states
+    for (const el of prBadges) {
+      const prNum = parseInt(el.dataset.ghPr, 10);
+      const repo = el.dataset.ghRepo;
+      if (!repo || !repo.includes("/")) continue;
+      const [owner, repoName] = repo.split("/");
+      try {
+        const pr = await GitHubAPI.getPR(owner, repoName, prNum);
+        const stateClass = pr.merged
+          ? "github-pr-merged"
+          : pr.state === "open"
+          ? "github-pr-open"
+          : "github-pr-closed";
+        el.className = `github-pr-badge ${stateClass}`;
+        el.title = pr.title;
+      } catch {
+        // Silently skip — badge stays neutral
+      }
+    }
   }
 
   createDropZone(section, position, expandable = false) {
@@ -237,6 +286,23 @@ export class BoardView {
         ? `<div class="text-xs text-muted flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg> ${
           config.blocked_by.join(", ")
         }</div>`
+        : ""
+    }
+
+                ${
+      (config.githubIssue || config.githubPR)
+        ? `<div class="flex flex-wrap gap-1 mt-1">
+              ${config.githubIssue
+                ? config.githubRepo
+                  ? `<a href="https://github.com/${config.githubRepo}/issues/${config.githubIssue}" target="_blank" rel="noopener noreferrer" class="github-issue-badge" data-gh-issue="${config.githubIssue}" data-gh-repo="${config.githubRepo}">#${config.githubIssue}</a>`
+                  : `<span class="github-issue-badge" data-gh-issue="${config.githubIssue}">Issue #${config.githubIssue}</span>`
+                : ""}
+              ${config.githubPR
+                ? config.githubRepo
+                  ? `<a href="https://github.com/${config.githubRepo}/pull/${config.githubPR}" target="_blank" rel="noopener noreferrer" class="github-pr-badge" data-gh-pr="${config.githubPR}" data-gh-repo="${config.githubRepo}">PR #${config.githubPR}</a>`
+                  : `<span class="github-pr-badge" data-gh-pr="${config.githubPR}">PR #${config.githubPR}</span>`
+                : ""}
+            </div>`
         : ""
     }
 

@@ -29,6 +29,28 @@ export interface GitHubUser {
   login: string;
 }
 
+export interface GitHubRepoSummary {
+  fullName: string;
+  description: string;
+}
+
+export interface GitHubMilestone {
+  number: number;
+  title: string;
+  openIssues: number;
+  closedIssues: number;
+  htmlUrl: string;
+}
+
+export interface GitHubPR {
+  number: number;
+  title: string;
+  /** "open" | "closed" — use merged to distinguish closed+merged */
+  state: "open" | "closed";
+  merged: boolean;
+  htmlUrl: string;
+}
+
 export interface GitHubProvider {
   /** Verify the PAT and return the authenticated user. */
   getAuthenticatedUser(): Promise<GitHubUser>;
@@ -46,4 +68,20 @@ export interface GitHubProvider {
     title: string,
     body: string,
   ): Promise<GitHubCreatedIssue>;
+
+  /** List repos accessible to the authenticated user, optionally filtered by query. */
+  listRepos(query?: string): Promise<GitHubRepoSummary[]>;
+
+  /** List open milestones for a repository. */
+  listMilestones(
+    owner: string,
+    repo: string,
+  ): Promise<GitHubMilestone[]>;
+
+  /** Fetch a single pull request by number. */
+  getPR(
+    owner: string,
+    repo: string,
+    number: number,
+  ): Promise<GitHubPR>;
 }

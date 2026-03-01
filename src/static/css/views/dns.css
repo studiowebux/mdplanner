@@ -105,6 +105,17 @@
   margin-top: 0.125rem;
 }
 
+.dns-nameservers {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: 0.1rem;
+}
+
+.dns-records-count {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
 /* Expiry badges */
 .dns-expiry-badge {
   display: inline-flex;
