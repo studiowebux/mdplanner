@@ -658,7 +658,7 @@ export class TasksDirectoryParser {
 
     const comment: TaskComment = {
       id: `comment_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-      timestamp: new Date().toISOString().split("T")[0],
+      timestamp: new Date().toISOString(),
       body: body.replace(/\n/g, " ").trim(),
       ...(author && { author }),
     };
@@ -689,6 +689,38 @@ export class TasksDirectoryParser {
     };
     await this.write(updated);
     return true;
+  }
+
+  /**
+   * Update the body of an existing comment. Returns the updated comment or null if not found.
+   */
+  async updateComment(
+    id: string,
+    commentId: string,
+    body: string,
+  ): Promise<TaskComment | null> {
+    const task = await this.read(id);
+    if (!task) return null;
+
+    const existing = task.config.comments ?? [];
+    const idx = existing.findIndex((c) => c.id === commentId);
+    if (idx === -1) return null;
+
+    const updated_comment: TaskComment = {
+      ...existing[idx],
+      body: body.replace(/\n/g, " ").trim(),
+    };
+    const updatedComments = [
+      ...existing.slice(0, idx),
+      updated_comment,
+      ...existing.slice(idx + 1),
+    ];
+    const updated: Task = {
+      ...task,
+      config: { ...task.config, comments: updatedComments },
+    };
+    await this.write(updated);
+    return updated_comment;
   }
 
   /**
