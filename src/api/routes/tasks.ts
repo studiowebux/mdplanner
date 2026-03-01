@@ -13,8 +13,23 @@ import {
 } from "./context.ts";
 import { eventBus } from "../../lib/event-bus.ts";
 import { Task, TaskConfig } from "../../lib/types.ts";
+import type { DirectoryMarkdownParser } from "../../lib/parser/directory/parser.ts";
 
 export const tasksRouter = new Hono<{ Variables: AppVariables }>();
+
+/**
+ * Auto-create a milestone file if the given name is not already tracked.
+ * Called after task create/update so every milestone reference has a backing file.
+ */
+async function ensureMilestoneExists(
+  parser: DirectoryMarkdownParser,
+  name: string,
+): Promise<void> {
+  const milestones = await parser.readMilestones();
+  if (!milestones.some((m) => m.name === name)) {
+    await parser.addMilestone({ name, status: "open" });
+  }
+}
 
 /**
  * Map flat request body fields into a TaskConfig object.
@@ -92,6 +107,9 @@ tasksRouter.post("/", async (c) => {
   await Promise.all([
     cacheWriteThrough(c, "tasks"),
     parser.touchLastUpdated(),
+    ...(task.config.milestone
+      ? [ensureMilestoneExists(parser, task.config.milestone)]
+      : []),
   ]);
   eventBus.emit({ entity: "tasks", action: "created", id: taskId });
   return jsonResponse({ id: taskId }, 201);
@@ -117,6 +135,9 @@ tasksRouter.put("/:id", async (c) => {
     await Promise.all([
       cacheWriteThrough(c, "tasks"),
       parser.touchLastUpdated(),
+      ...(updates.config?.milestone
+        ? [ensureMilestoneExists(parser, updates.config.milestone)]
+        : []),
     ]);
     eventBus.emit({ entity: "tasks", action: "updated", id: taskId });
     return jsonResponse({ success: true });

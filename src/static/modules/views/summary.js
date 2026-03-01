@@ -18,7 +18,7 @@ export class SummaryView {
     if (!this.tm.projectInfo) return;
 
     // Update project name and description
-    document.getElementById("projectName").textContent =
+    document.getElementById("summaryProjectName").textContent =
       this.tm.projectInfo.name;
     const descriptionEl = document.getElementById("projectDescription");
 
@@ -483,7 +483,7 @@ export class SummaryView {
       .addEventListener("blur", () => this.saveStatusComment());
 
     // Inline name editing — save on blur and Enter
-    const nameEl = document.getElementById("projectName");
+    const nameEl = document.getElementById("summaryProjectName");
     if (nameEl) {
       nameEl.contentEditable = "true";
       nameEl.classList.add("summary-editable-name");
