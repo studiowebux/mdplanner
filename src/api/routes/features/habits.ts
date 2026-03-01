@@ -57,6 +57,7 @@ habitsRouter.put("/:id", async (c) => {
     description: body.description,
     frequency: body.frequency,
     targetDays: body.targetDays,
+    dayNotes: body.dayNotes,
     notes: body.notes,
   });
   if (!updated) return errorResponse("Not found", 404);

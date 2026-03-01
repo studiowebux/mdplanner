@@ -217,11 +217,33 @@
   padding: 1.5rem;
 }
 
+.cal-month-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-block-end: 0.75rem;
+}
+
+.cal-nav-btn {
+  background: transparent;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  padding: 0.1rem 0.5rem;
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+.cal-nav-btn:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-text-secondary);
+}
+
 .cal-month-label {
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text-secondary);
-  margin-block-end: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -288,6 +310,49 @@
 
 .cal-cell.cal-future {
   opacity: 0.25;
+}
+
+.cal-cell.cal-has-note {
+  position: relative;
+}
+
+/* Note popup */
+.cal-note-popup {
+  z-index: 1000;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  padding: 0.75rem;
+  width: 15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cal-note-popup-header {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.cal-note-textarea {
+  width: 100%;
+  resize: vertical;
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  box-sizing: border-box;
+}
+
+.cal-note-popup-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
 }
 
 /* ------------------------------------------------------------------

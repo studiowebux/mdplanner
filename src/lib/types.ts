@@ -704,6 +704,7 @@ export interface Habit {
   completions: string[]; // ISO date strings: ["2026-02-27","2026-02-26",...]
   streakCount: number; // current streak (recalculated on every write)
   longestStreak: number; // all-time best streak
+  dayNotes?: Record<string, string>; // per-day notes keyed by ISO date
   notes?: string; // markdown body
   created: string;
   updated: string;

@@ -1363,6 +1363,17 @@ export const HabitsAPI = {
     return del(`/api/habits/${id}/complete/${date}`);
   },
 
+  async setDayNote(id, date, note) {
+    const habit = await this.fetchOne(id);
+    const dayNotes = { ...(habit.dayNotes || {}) };
+    if (note) {
+      dayNotes[date] = note;
+    } else {
+      delete dayNotes[date];
+    }
+    return put(`/api/habits/${id}`, { dayNotes });
+  },
+
   async delete(id) {
     return del(`/api/habits/${id}`);
   },

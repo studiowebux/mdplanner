@@ -56,12 +56,25 @@ function parseYamlSimple<T = Record<string, unknown>>(yaml: string): T {
   let currentArrayObject: Record<string, unknown> | null = null;
   let baseArrayIndent = 0;
 
+  // Tracks the pending nested object context when a key has an empty value
+  // and subsequent indented lines are key-value pairs (not array items).
+  let pendingObjKey = "";
+  let pendingObjTarget: Record<string, unknown> | null = null;
+  let pendingObjIndent = -1;
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const trimmed = line.trim();
     if (!trimmed) continue;
 
     const indent = line.search(/\S/);
+
+    // Reset pending object context when back at or above its indent level
+    if (pendingObjTarget !== null && indent <= pendingObjIndent) {
+      pendingObjKey = "";
+      pendingObjTarget = null;
+      pendingObjIndent = -1;
+    }
 
     // Check if we're exiting an array (back to base indent)
     if (inArray && indent <= baseArrayIndent && !trimmed.startsWith("-")) {
@@ -114,27 +127,40 @@ function parseYamlSimple<T = Record<string, unknown>>(yaml: string): T {
       continue;
     }
 
-    // Key: value pair at root level
+    // Key: value pair
     const colonIndex = trimmed.indexOf(":");
     if (colonIndex !== -1) {
       const key = trimmed.slice(0, colonIndex).trim();
       const valueStr = trimmed.slice(colonIndex + 1).trim();
 
+      // Determine write target: if indented under a pending nested object, write there
+      const writeTarget: Record<string, unknown> =
+        (!inArray && pendingObjTarget !== null && indent > pendingObjIndent)
+          ? pendingObjTarget
+          : result;
+
       if (valueStr === "" || valueStr === "|" || valueStr === ">") {
-        // Empty value - next lines might be array or object
+        // Empty value — next lines are array items or nested object key-value pairs
         currentKey = key;
         baseArrayIndent = indent;
+        // Initialize a nested object in the write target; array will overwrite if needed
+        const newObj: Record<string, unknown> = {};
+        writeTarget[key] = newObj;
+        // Push pending context so indented non-array lines go into newObj
+        pendingObjKey = key;
+        pendingObjTarget = newObj;
+        pendingObjIndent = indent;
       } else if (valueStr.startsWith("[") && valueStr.endsWith("]")) {
         // Inline array: [item1, item2]
         const items = valueStr.slice(1, -1).split(",").map((s) =>
           parseValue(s.trim())
         );
-        result[key] = items;
+        writeTarget[key] = items;
       } else if (valueStr.startsWith("{") && valueStr.endsWith("}")) {
         // Inline object: {x: 1, y: 2}
-        result[key] = parseInlineObject(valueStr);
+        writeTarget[key] = parseInlineObject(valueStr);
       } else {
-        result[key] = parseValue(valueStr);
+        writeTarget[key] = parseValue(valueStr);
       }
     }
   }
@@ -183,15 +209,26 @@ function parseInlineObject(str: string): Record<string, unknown> {
   const inner = str.slice(1, -1).trim();
   if (!inner) return result;
 
-  // Split by comma, handling nested structures
+  // Split by comma, handling nested structures and quoted strings
   const parts: string[] = [];
   let depth = 0;
+  let inQuote = false;
   let current = "";
 
   for (const char of inner) {
-    if (char === "{" || char === "[") depth++;
-    if (char === "}" || char === "]") depth--;
-    if (char === "," && depth === 0) {
+    if (char === '"' && !inQuote) {
+      inQuote = true;
+      current += char;
+      continue;
+    }
+    if (char === '"' && inQuote) {
+      inQuote = false;
+      current += char;
+      continue;
+    }
+    if (!inQuote && (char === "{" || char === "[")) depth++;
+    if (!inQuote && (char === "}" || char === "]")) depth--;
+    if (!inQuote && char === "," && depth === 0) {
       parts.push(current.trim());
       current = "";
     } else {

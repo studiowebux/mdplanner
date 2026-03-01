@@ -3,6 +3,7 @@
 
 import { HabitsAPI } from "../api.js";
 import { escapeHtml } from "../utils.js";
+import { showToast } from "../ui/toast.js";
 
 // ---------------------------------------------------------------
 // Date helpers (JS-side — mirrors the server-side logic)
@@ -71,6 +72,10 @@ export class HabitsModule {
   constructor(taskManager) {
     this.taskManager = taskManager;
     this.currentView = "card"; // "card" | "calendar"
+    const now = new Date();
+    this.currentCalYear = now.getFullYear();
+    this.currentCalMonth = now.getMonth(); // 0-indexed
+    this._notePopup = null; // active note popup element
   }
 
   async load() {
@@ -115,14 +120,20 @@ export class HabitsModule {
     });
   }
 
-  // Calendar view: rows = habits, columns = days of current month
+  // Calendar view: rows = habits, columns = days of selected month
   _renderCalendar(container, habits) {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
+    const year = this.currentCalYear;
+    const month = this.currentCalMonth;
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const todayDay = today.getDate();
-    const monthLabel = today.toLocaleString("default", { month: "long", year: "numeric" });
+
+    const today = new Date();
+    const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+    const todayDay = isCurrentMonth ? today.getDate() : -1;
+
+    const monthLabel = new Date(year, month, 1).toLocaleString("default", {
+      month: "long",
+      year: "numeric",
+    });
 
     // Header row — day numbers
     let headerCells = `<th class="cal-habit-col"></th>`;
@@ -133,22 +144,41 @@ export class HabitsModule {
     // Data rows — one per habit
     const rows = habits.map((h) => {
       const completionSet = new Set(h.completions || []);
+      const dayNotes = h.dayNotes || {};
       let cells = `<td class="cal-habit-name" title="${escapeHtml(h.name)}">${escapeHtml(h.name)}</td>`;
       for (let d = 1; d <= daysInMonth; d++) {
         const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-        const isFuture = d > todayDay;
+        const isFuture = isCurrentMonth && d > today.getDate();
         const isDone = completionSet.has(dateStr);
+        const note = dayNotes[dateStr] || "";
         let cls = "cal-cell";
         if (isDone) cls += " cal-done";
         else if (isFuture) cls += " cal-future";
-        cells += `<td class="${cls}" title="${dateStr}">${isDone ? "•" : ""}</td>`;
+        if (note) cls += " cal-has-note";
+
+        const tooltip = [
+          h.name,
+          dateStr,
+          isDone ? "done" : (isFuture ? "future" : "not done"),
+          note ? `Note: ${note}` : "",
+        ].filter(Boolean).join(" — ");
+
+        const clickAttr = isDone
+          ? `onclick="taskManager.habitsModule._openNotePopup(event,'${h.id}','${dateStr}',${JSON.stringify(note)})"`
+          : "";
+
+        cells += `<td class="${cls}" title="${escapeHtml(tooltip)}" ${clickAttr}>${isDone ? (note ? "★" : "•") : ""}</td>`;
       }
       return `<tr class="cal-row">${cells}</tr>`;
     }).join("");
 
     container.className = "habits-calendar-wrap";
     container.innerHTML = `
-      <p class="cal-month-label">${escapeHtml(monthLabel)}</p>
+      <div class="cal-month-nav">
+        <button class="cal-nav-btn" id="calPrevMonth" title="Previous month">&#8592;</button>
+        <span class="cal-month-label">${escapeHtml(monthLabel)}</span>
+        <button class="cal-nav-btn" id="calNextMonth" title="Next month">&#8594;</button>
+      </div>
       <div class="cal-table-wrap">
         <table class="cal-table">
           <thead><tr>${headerCells}</tr></thead>
@@ -156,6 +186,75 @@ export class HabitsModule {
         </table>
       </div>
     `;
+
+    document.getElementById("calPrevMonth")?.addEventListener("click", () => {
+      this.currentCalMonth--;
+      if (this.currentCalMonth < 0) { this.currentCalMonth = 11; this.currentCalYear--; }
+      this.renderView();
+    });
+    document.getElementById("calNextMonth")?.addEventListener("click", () => {
+      this.currentCalMonth++;
+      if (this.currentCalMonth > 11) { this.currentCalMonth = 0; this.currentCalYear++; }
+      this.renderView();
+    });
+  }
+
+  // Open inline note popup on a done cell
+  _openNotePopup(event, habitId, date, currentNote) {
+    event.stopPropagation();
+    this._closeNotePopup();
+
+    const cell = event.currentTarget;
+    const popup = document.createElement("div");
+    popup.className = "cal-note-popup";
+    popup.innerHTML = `
+      <div class="cal-note-popup-header">Note for ${escapeHtml(date)}</div>
+      <textarea class="cal-note-textarea" rows="3" placeholder="Add a note for this day...">${escapeHtml(currentNote || "")}</textarea>
+      <div class="cal-note-popup-actions">
+        <button class="cal-note-save btn-primary">Save</button>
+        <button class="cal-note-cancel btn-secondary">Cancel</button>
+      </div>
+    `;
+
+    // Position near the cell
+    const rect = cell.getBoundingClientRect();
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    popup.style.position = "absolute";
+    popup.style.top = `${rect.bottom + scrollTop + 4}px`;
+    popup.style.left = `${Math.min(rect.left, window.innerWidth - 260)}px`;
+
+    document.body.appendChild(popup);
+    this._notePopup = popup;
+    popup.querySelector(".cal-note-textarea")?.focus();
+
+    popup.querySelector(".cal-note-save")?.addEventListener("click", async () => {
+      const note = popup.querySelector(".cal-note-textarea").value.trim();
+      await HabitsAPI.setDayNote(habitId, date, note);
+      this.taskManager.habits = await HabitsAPI.fetchAll();
+      this.renderView();
+      showToast("Note saved");
+      this._closeNotePopup();
+    });
+
+    popup.querySelector(".cal-note-cancel")?.addEventListener("click", () => {
+      this._closeNotePopup();
+    });
+
+    // Close on outside click
+    const outsideClick = (e) => {
+      if (!popup.contains(e.target)) {
+        this._closeNotePopup();
+        document.removeEventListener("click", outsideClick);
+      }
+    };
+    setTimeout(() => document.addEventListener("click", outsideClick), 0);
+  }
+
+  _closeNotePopup() {
+    if (this._notePopup) {
+      this._notePopup.remove();
+      this._notePopup = null;
+    }
   }
 
   _renderCard(habit) {
