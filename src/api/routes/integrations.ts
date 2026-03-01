@@ -84,24 +84,17 @@ integrationsRouter.get("/cloudflare/zones", async (c) => {
 
 // --- GitHub integration ---
 
-// POST /integrations/github — save PAT and/or defaultRepo
+// POST /integrations/github — save PAT
 integrationsRouter.post("/github", async (c) => {
   const pm = getProjectManager(c);
   const body = await c.req.json();
   const token = body.token?.trim();
-  const defaultRepo = body.defaultRepo?.trim();
 
-  if (!token && !defaultRepo) {
-    return errorResponse("token or defaultRepo is required", 400);
+  if (!token) {
+    return errorResponse("token is required", 400);
   }
 
-  if (token) {
-    await pm.setIntegrationSecret("github", "token", token);
-  }
-  if (defaultRepo !== undefined) {
-    // defaultRepo is not sensitive — stored as plain text via same mechanism
-    await pm.setIntegrationSecret("github", "defaultRepo", defaultRepo);
-  }
+  await pm.setIntegrationSecret("github", "token", token);
 
   return jsonResponse({
     success: true,
@@ -109,16 +102,14 @@ integrationsRouter.post("/github", async (c) => {
   });
 });
 
-// GET /integrations/github — presence + encryption status + defaultRepo (never the token)
+// GET /integrations/github — presence + encryption status (never the token)
 integrationsRouter.get("/github", async (c) => {
   const pm = getProjectManager(c);
   const token = await pm.getIntegrationSecret("github", "token");
-  const defaultRepo = await pm.getIntegrationSecret("github", "defaultRepo");
 
   return jsonResponse({
     configured: token !== null,
     encrypted: isEncryptionEnabled(),
-    defaultRepo: defaultRepo ?? "",
   });
 });
 

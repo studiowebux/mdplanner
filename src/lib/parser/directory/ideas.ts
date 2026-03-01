@@ -17,6 +17,7 @@ interface IdeaFrontmatter {
     | "cancelled";
   category?: string;
   priority?: "high" | "medium" | "low";
+  project?: string;
   startDate?: string;
   endDate?: string;
   resources?: string;
@@ -63,6 +64,7 @@ export class IdeasDirectoryParser extends DirectoryParser<Idea> {
       status: frontmatter.status || "new",
       category: frontmatter.category,
       priority: frontmatter.priority,
+      project: frontmatter.project,
       startDate: frontmatter.startDate,
       endDate: frontmatter.endDate,
       resources: frontmatter.resources,
@@ -84,6 +86,7 @@ export class IdeasDirectoryParser extends DirectoryParser<Idea> {
 
     if (idea.category) frontmatter.category = idea.category;
     if (idea.priority) frontmatter.priority = idea.priority;
+    if (idea.project) frontmatter.project = idea.project;
     if (idea.startDate) frontmatter.startDate = idea.startDate;
     if (idea.endDate) frontmatter.endDate = idea.endDate;
     if (idea.resources) frontmatter.resources = idea.resources;

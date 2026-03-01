@@ -13,6 +13,7 @@ interface HabitFrontmatter {
   frequency: "daily" | "weekly";
   target_days?: string[];
   completions?: string[];
+  day_notes?: Record<string, string>;
   streak_count?: number;
   longest_streak?: number;
   created: string;
@@ -221,6 +222,10 @@ export class HabitsDirectoryParser extends DirectoryParser<Habit> {
       completions,
       streakCount,
       longestStreak,
+      dayNotes:
+        frontmatter.day_notes && Object.keys(frontmatter.day_notes).length > 0
+          ? frontmatter.day_notes
+          : undefined,
       notes: body.trim() || undefined,
       created: frontmatter.created || new Date().toISOString(),
       updated: frontmatter.updated || new Date().toISOString(),
@@ -242,6 +247,9 @@ export class HabitsDirectoryParser extends DirectoryParser<Habit> {
     if (habit.description) frontmatter.description = habit.description;
     if (habit.targetDays && habit.targetDays.length > 0) {
       frontmatter.target_days = habit.targetDays;
+    }
+    if (habit.dayNotes && Object.keys(habit.dayNotes).length > 0) {
+      frontmatter.day_notes = habit.dayNotes;
     }
 
     return buildFileContent(frontmatter, habit.notes ?? "");

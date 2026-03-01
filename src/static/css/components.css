@@ -86,13 +86,13 @@
 /* Ghost variant for inline delete links */
 /* Pattern: use in table rows, list items, inline actions */
 .btn-danger-ghost {
-  background-color: transparent;
-  color: var(--color-error-text);
+  background-color: var(--color-error-bg);
+  color: var(--color-error);
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-md);
   font-size: var(--font-size-base);
   font-weight: 500;
-  border: none;
+  border: 1px solid var(--color-error);
   cursor: pointer;
   transition:
     background-color var(--transition-base),
@@ -100,8 +100,8 @@
 }
 
 .btn-danger-ghost:hover {
-  background-color: var(--color-error-bg);
-  color: var(--color-error);
+  background-color: var(--color-error);
+  color: var(--color-bg-primary);
 }
 
 /* --------------------------------------------------------------------------

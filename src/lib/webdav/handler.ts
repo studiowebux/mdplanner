@@ -36,6 +36,10 @@ export interface WebDavConfig {
   maxDepth?: number; // default 20
   trashDir?: string; // default rootDir/.trash
   stateDir?: string; // default rootDir/.state
+  /** URL prefix under which the handler is mounted (e.g. "/webdav").
+   *  Stripped from request paths before filesystem resolution so that
+   *  PROPFIND hrefs and Destination headers all resolve correctly. */
+  pathPrefix?: string;
 }
 
 // ============================================================================
@@ -341,6 +345,7 @@ export async function createWebDavHandler(
     maxDepth: opts.maxDepth ?? 20,
     trashDir: resolve(opts.trashDir ?? join(opts.rootDir, ".trash")),
     stateDir: resolve(opts.stateDir ?? join(opts.rootDir, ".state")),
+    pathPrefix: opts.pathPrefix?.replace(/\/$/, "") ?? "",
   };
 
   // ── Per-path write mutex ──────────────────────────────────────────────────
@@ -573,7 +578,12 @@ export async function createWebDavHandler(
   // ── Path resolution ───────────────────────────────────────────────────────
 
   function resolvePath(requestPath: string): string {
-    const decoded = decodeURIComponent(requestPath);
+    // Strip mount prefix so /webdav/tasks/x.md → /tasks/x.md before fs join
+    const stripped = cfg.pathPrefix &&
+        requestPath.startsWith(cfg.pathPrefix)
+      ? requestPath.slice(cfg.pathPrefix.length) || "/"
+      : requestPath;
+    const decoded = decodeURIComponent(stripped);
     const full = resolve(join(cfg.rootDir, normalize(decoded)));
     const rootWithSep = cfg.rootDir.endsWith("/")
       ? cfg.rootDir

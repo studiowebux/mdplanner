@@ -58,6 +58,7 @@ export class MilestonesModule {
           <td class="milestones-td">
             <span class="milestone-status-badge ${statusClass}">${m.status}</span>
           </td>
+          <td class="milestones-td milestones-td-tasks">${m.project || "—"}</td>
           <td class="milestones-td">${
         m.target ? new Date(m.target).toLocaleDateString() : "—"
       }</td>
@@ -88,6 +89,7 @@ export class MilestonesModule {
           <tr>
             <th class="milestones-th">Name</th>
             <th class="milestones-th">Status</th>
+            <th class="milestones-th">Project</th>
             <th class="milestones-th">Target</th>
             <th class="milestones-th">Progress</th>
             <th class="milestones-th">Tasks</th>
@@ -101,21 +103,23 @@ export class MilestonesModule {
 
   _renderCards(container) {
     container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4";
+    container.style.padding = "1.5rem";
     container.innerHTML = this.taskManager.milestones
       .map(
         (m) => `
-      <div class="bg-secondary rounded-lg p-4 border border-default">
+      <div class="bg-secondary rounded-lg p-4 border border-default" style="display:flex;flex-direction:column">
         <div class="flex justify-between items-start mb-2">
-          <h3 class="font-medium text-primary">${m.name}</h3>
-          <span class="px-2 py-1 text-xs rounded ${
-          m.status === "completed"
-            ? "bg-inverse text-inverse"
-            : "bg-tertiary text-primary border border-default"
-        }">${m.status}</span>
+          <h3 class="font-medium text-primary" style="font-size:var(--font-size-base)">${m.name}</h3>
+          <span class="px-2 py-1 text-xs rounded border border-default bg-tertiary text-secondary">${m.status}</span>
         </div>
         ${
+          m.project
+            ? `<span class="text-xs text-muted mb-1" style="font-size:var(--font-size-sm)">${m.project}</span>`
+            : ""
+        }
+        ${
           m.target
-            ? `<p class="text-sm text-muted mb-2">Target: ${
+            ? `<p class="text-sm text-muted mb-2" style="font-size:var(--font-size-sm)">Target: ${
               new Date(m.target).toLocaleDateString()
             }</p>`
             : ""
@@ -125,16 +129,16 @@ export class MilestonesModule {
             <span>${m.completedCount}/${m.taskCount} tasks</span>
             <span>${m.progress}%</span>
           </div>
-          <div class="w-full bg-active rounded-full h-2">
-            <div class="bg-inverse h-2 rounded-full" style="width: ${m.progress}%"></div>
+          <div class="milestones-progress-bar">
+            <div class="milestones-progress-fill" style="width:${m.progress}%"></div>
           </div>
         </div>
         ${
           m.description
-            ? `<div class="mt-2">${markdownToHtml(m.description)}</div>`
+            ? `<div class="mt-2" style="font-size:var(--font-size-sm)">${markdownToHtml(m.description)}</div>`
             : ""
         }
-        <div class="flex justify-end gap-1 mt-3">
+        <div class="flex justify-end gap-1" style="margin-top:auto;padding-top:0.75rem">
           <button type="button" onclick="taskManager.milestoneSidenavModule.openEdit('${m.id}')" class="btn-ghost">Edit</button>
           <button type="button" onclick="taskManager.deleteMilestone('${m.id}')" class="btn-danger-ghost">Delete</button>
         </div>

@@ -1273,10 +1273,6 @@ export const GitHubAPI = {
     return del("/api/integrations/github");
   },
 
-  async saveDefaultRepo(defaultRepo) {
-    return post("/api/integrations/github", { defaultRepo });
-  },
-
   async testConnection() {
     const response = await get("/api/integrations/github/test");
     return response.json();
@@ -1365,6 +1361,17 @@ export const HabitsAPI = {
 
   async unmarkComplete(id, date) {
     return del(`/api/habits/${id}/complete/${date}`);
+  },
+
+  async setDayNote(id, date, note) {
+    const habit = await this.fetchOne(id);
+    const dayNotes = { ...(habit.dayNotes || {}) };
+    if (note) {
+      dayNotes[date] = note;
+    } else {
+      delete dayNotes[date];
+    }
+    return put(`/api/habits/${id}`, { dayNotes });
   },
 
   async delete(id) {

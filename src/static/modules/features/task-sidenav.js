@@ -384,16 +384,10 @@ export class TaskSidenavModule {
     if (result) { result.textContent = ""; result.classList.add("hidden"); }
   }
 
-  /** Resolve effective repo: task field > project default */
-  async _resolveRepo() {
+  /** Resolve effective repo from the task's githubRepo field */
+  _resolveRepo() {
     const taskRepo = document.getElementById("sidenavTaskGithubRepo")?.value?.trim();
-    if (taskRepo) return taskRepo;
-    try {
-      const status = await GitHubAPI.getStatus();
-      return status.defaultRepo || null;
-    } catch {
-      return null;
-    }
+    return taskRepo || null;
   }
 
   async fetchGitHubIssueStatus() {
@@ -407,7 +401,7 @@ export class TaskSidenavModule {
     const issueNum = parseInt(issueInput?.value);
     if (!issueNum) { showToast("Enter an issue number first", "error"); return; }
 
-    const repo = await this._resolveRepo();
+    const repo = this._resolveRepo();
     if (!repo || !repo.includes("/")) {
       showToast("Set a GitHub repo (task field or project default)", "error");
       return;
@@ -445,7 +439,7 @@ export class TaskSidenavModule {
 
     if (!title) { showToast("Add a task title first", "error"); return; }
 
-    const repo = await this._resolveRepo();
+    const repo = this._resolveRepo();
     if (!repo || !repo.includes("/")) {
       showToast("Set a GitHub repo (task field or project default)", "error");
       return;

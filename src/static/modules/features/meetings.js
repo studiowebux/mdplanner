@@ -9,6 +9,7 @@ export class MeetingsModule {
     this.taskManager = taskManager;
     this.activeTab = "meetings"; // "meetings" | "actions"
     this.ownerFilter = "";
+    this.currentView = localStorage.getItem("meetingsView") || "card";
   }
 
   async load() {
@@ -31,18 +32,28 @@ export class MeetingsModule {
   renderMeetings() {
     const container = document.getElementById("meetingsContainer");
     const emptyState = document.getElementById("emptyMeetingsState");
+    const toggle = document.getElementById("meetingsViewToggle");
     if (!container) return;
+
+    if (toggle) toggle.textContent = this.currentView === "table" ? "Card view" : "Table view";
 
     const meetings = this.taskManager.meetings || [];
 
     if (meetings.length === 0) {
       emptyState?.classList.remove("hidden");
       container.innerHTML = "";
+      container.className = "meetings-grid";
       return;
     }
 
     emptyState?.classList.add("hidden");
 
+    if (this.currentView === "table") {
+      this._renderTable(container, meetings);
+      return;
+    }
+
+    container.className = "meetings-grid";
     container.innerHTML = meetings.map((meeting) => {
       const openActions = (meeting.actions || []).filter((a) =>
         a.status === "open"
@@ -81,6 +92,36 @@ export class MeetingsModule {
         </div>
       `;
     }).join("");
+  }
+
+  _renderTable(container, meetings) {
+    container.className = "meetings-table-wrap";
+    const rows = meetings.map((m) => {
+      const open = (m.actions || []).filter((a) => a.status === "open").length;
+      const attendees = (m.attendees || []).length;
+      return `<tr class="meetings-table-row" onclick="taskManager.meetingSidenavModule.openEdit('${m.id}')" style="cursor:pointer">
+        <td class="meetings-table-td meetings-table-title">${escapeHtml(m.title)}</td>
+        <td class="meetings-table-td meetings-table-date">${m.date || ""}</td>
+        <td class="meetings-table-td">${attendees > 0 ? attendees : "—"}</td>
+        <td class="meetings-table-td">${open > 0 ? `<span class="meeting-badge meeting-badge-open">${open} open</span>` : "—"}</td>
+        <td class="meetings-table-td">
+          <button class="btn-ghost" onclick="event.stopPropagation(); taskManager.meetingsModule.openReadOnlyView('${m.id}')" title="View notes">View</button>
+        </td>
+      </tr>`;
+    }).join("");
+
+    container.innerHTML = `<table class="meetings-table">
+      <thead>
+        <tr>
+          <th class="meetings-table-th">Title</th>
+          <th class="meetings-table-th">Date</th>
+          <th class="meetings-table-th">Attendees</th>
+          <th class="meetings-table-th">Open actions</th>
+          <th class="meetings-table-th"></th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
   }
 
   renderActions() {
@@ -297,6 +338,12 @@ export class MeetingsModule {
         );
       },
     );
+
+    document.getElementById("meetingsViewToggle")?.addEventListener("click", () => {
+      this.currentView = this.currentView === "table" ? "card" : "table";
+      localStorage.setItem("meetingsView", this.currentView);
+      this.renderMeetings();
+    });
 
     document.getElementById("addMeetingBtn")?.addEventListener(
       "click",
