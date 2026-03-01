@@ -196,7 +196,7 @@
   padding: 0.1rem 0.35rem;
   border-radius: 3px;
   border: 1px solid var(--color-border-default);
-  background: var(--bg);
+  background: var(--color-bg-primary);
   color: var(--color-text-secondary);
   cursor: pointer;
   white-space: nowrap;

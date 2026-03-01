@@ -228,6 +228,13 @@
                 >
                   Export PDF
                 </button>
+                <div class="dropdown-divider"></div>
+                <button
+                  id="exportDataBtn"
+                  class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+                >
+                  Export Data...
+                </button>
               </div>
             </div>
 
@@ -14255,6 +14262,87 @@
         </div>
       </div>
     </div>
+    <!-- Import Preview Modal -->
+    <div id="importPreviewModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Import Preview">
+      <div class="modal-box" style="max-width:36rem;">
+        <div class="modal-header">
+          <h2 class="modal-title">Import Preview</h2>
+          <button type="button" id="importPreviewClose" class="sidenav-close" aria-label="Close">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="text-sm text-secondary" style="margin-block-end:0.75rem;">
+            <strong id="importPreviewCount">0</strong> row(s) found in <strong id="importPreviewFilename">file.csv</strong>.
+            Existing tasks with the same title will be skipped.
+          </p>
+          <div class="import-preview-table-wrap">
+            <table class="import-preview-table">
+              <thead>
+                <tr>
+                  <th class="import-preview-th">Title</th>
+                  <th class="import-preview-th">Section</th>
+                  <th class="import-preview-th">Status</th>
+                </tr>
+              </thead>
+              <tbody id="importPreviewBody"></tbody>
+            </table>
+          </div>
+          <p id="importPreviewMore" class="text-sm text-secondary" style="margin-block-start:0.5rem;"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="importPreviewCancel" class="btn-sm">Cancel</button>
+          <button type="button" id="importPreviewConfirm" class="btn-primary btn-sm">Import</button>
+        </div>
+      </div>
+    </div>
+    <!-- Export Data Modal -->
+    <div id="exportDataModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Export Data">
+      <div class="modal-box" style="max-width:28rem;">
+        <div class="modal-header">
+          <h2 class="modal-title">Export Data</h2>
+          <button type="button" id="exportDataModalClose" class="sidenav-close" aria-label="Close">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group" style="margin-block-end:0.75rem;">
+            <label class="form-label">Format</label>
+            <div class="flex gap-3" style="margin-block-start:0.25rem;">
+              <label class="export-entity-label"><input type="radio" name="exportFormat" value="json" checked> JSON (all entities)</label>
+              <label class="export-entity-label"><input type="radio" name="exportFormat" value="csv"> CSV (one file per entity)</label>
+            </div>
+          </div>
+          <fieldset class="export-entity-grid">
+            <legend class="form-label mb-2">Entities</legend>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="tasks" checked> Tasks</label>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="notes" checked> Notes</label>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="goals" checked> Goals</label>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="meetings" checked> Meetings</label>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="people" checked> People</label>
+            <label class="export-entity-label"><input type="checkbox" class="export-entity-cb" value="portfolio" checked> Portfolio</label>
+            <label class="export-entity-label export-json-only"><input type="checkbox" class="export-entity-cb" value="ideas" checked> Ideas</label>
+            <label class="export-entity-label export-json-only"><input type="checkbox" class="export-entity-cb" value="habits" checked> Habits</label>
+            <label class="export-entity-label export-json-only"><input type="checkbox" class="export-entity-cb" value="journal" checked> Journal</label>
+            <label class="export-entity-label export-json-only"><input type="checkbox" class="export-entity-cb" value="dns"> DNS</label>
+            <label class="export-entity-label export-json-only"><input type="checkbox" class="export-entity-cb" value="fishbone"> Fishbone</label>
+            <label class="export-entity-label export-json-only"><input type="checkbox" class="export-entity-cb" value="contacts"> Contacts</label>
+            <label class="export-entity-label export-json-only"><input type="checkbox" class="export-entity-cb" value="companies"> Companies</label>
+            <label class="export-entity-label export-json-only"><input type="checkbox" class="export-entity-cb" value="deals"> Deals</label>
+          </fieldset>
+          <p id="exportCsvNote" class="text-sm text-secondary hidden" style="margin-block-start:0.5rem;">CSV exports one file per entity. Each file downloads separately.</p>
+          <div class="mt-3 flex gap-2">
+            <button type="button" id="exportDataSelectAll" class="btn-sm">Select all</button>
+            <button type="button" id="exportDataSelectNone" class="btn-sm">Clear</button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="exportDataModalCancel" class="btn-sm">Cancel</button>
+          <button type="button" id="exportDataModalDownload" class="btn-primary btn-sm">Download</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Global Search Overlay -->
     <div id="globalSearchOverlay" class="search-overlay hidden" role="dialog" aria-modal="true" aria-label="Search">
       <div class="search-box">
