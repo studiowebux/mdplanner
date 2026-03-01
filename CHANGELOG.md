@@ -8,6 +8,18 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.7.4] - 2026-03-01
+
+### Fixed
+
+- Comment author: added name input to comment form, persisted in localStorage;
+  old comments without an author display "Anonymous" instead of "Unknown"
+- Comment timestamp: stored as full ISO datetime instead of date-only; rendered
+  with locale-aware date + time (e.g. "Mar 1, 2026, 2:32 PM")
+- Comment delete: requires confirmation via modal before calling the API
+- Comment edit: pencil button enters inline edit mode per comment; saves via new
+  `PUT /api/tasks/:id/comments/:commentId` route
+
 ## [0.7.3] - 2026-03-01
 
 ### Added
