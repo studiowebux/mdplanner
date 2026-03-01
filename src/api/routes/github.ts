@@ -8,7 +8,12 @@
 
 import { Hono } from "hono";
 import { GitHubApiProvider } from "../../lib/integrations/providers/github.ts";
-import { AppVariables, errorResponse, getProjectManager, jsonResponse } from "./context.ts";
+import {
+  AppVariables,
+  errorResponse,
+  getProjectManager,
+  jsonResponse,
+} from "./context.ts";
 
 export const githubRouter = new Hono<{ Variables: AppVariables }>();
 
