@@ -381,6 +381,8 @@ export class ConfigView {
         // Reload tasks and sections to reflect changes
         await this.tm.loadTasks();
         await this.tm.loadSections();
+        // Re-render so DOM indices stay in sync with the reloaded sections array
+        this.renderSections();
       } else {
         console.error("Failed to rewrite tasks with updated sections");
       }
