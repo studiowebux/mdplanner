@@ -8,6 +8,21 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.7.6] - 2026-03-01
+
+### Fixed
+
+- Summary page: project name heading is now editable inline — the element ID
+  collision with the nav span was causing `contentEditable` to bind to the wrong
+  element
+
+### Added
+
+- Milestones inferred from tasks: when a task is saved with a `milestone` field,
+  an empty milestone file is auto-created if one does not exist yet;
+  `GET /api/milestones` also scans existing tasks on first load and creates any
+  missing files, so older projects are migrated automatically
+
 ## [0.7.5] - 2026-03-01
 
 ### Fixed
