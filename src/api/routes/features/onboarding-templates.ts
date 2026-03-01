@@ -11,6 +11,7 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
+import { eventBus } from "../../../lib/event-bus.ts";
 
 export const onboardingTemplatesRouter = new Hono<
   { Variables: AppVariables }
@@ -43,6 +44,11 @@ onboardingTemplatesRouter.post("/", async (c) => {
     steps: body.steps ?? [],
   });
   await cacheWriteThrough(c, "onboarding_templates");
+  eventBus.emit({
+    entity: "onboardingTemplates",
+    action: "created",
+    id: template.id,
+  });
   return jsonResponse({ success: true, id: template.id }, 201);
 });
 
@@ -58,6 +64,7 @@ onboardingTemplatesRouter.put("/:id", async (c) => {
   });
   if (!updated) return errorResponse("Not found", 404);
   await cacheWriteThrough(c, "onboarding_templates");
+  eventBus.emit({ entity: "onboardingTemplates", action: "updated", id });
   return jsonResponse({ success: true });
 });
 
@@ -68,5 +75,6 @@ onboardingTemplatesRouter.delete("/:id", async (c) => {
   const deleted = await parser.deleteOnboardingTemplate(id);
   if (!deleted) return errorResponse("Not found", 404);
   cachePurge(c, "onboarding_templates", id);
+  eventBus.emit({ entity: "onboardingTemplates", action: "deleted", id });
   return jsonResponse({ success: true });
 });

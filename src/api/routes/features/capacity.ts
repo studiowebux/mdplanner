@@ -13,6 +13,7 @@ import {
   jsonResponse,
 } from "../context.ts";
 import { Person, Task } from "../../../lib/types.ts";
+import { eventBus } from "../../../lib/event-bus.ts";
 
 export const capacityRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -65,6 +66,7 @@ capacityRouter.post("/", async (c) => {
   plans.push(newPlan);
   await parser.saveCapacityPlans(plans);
   await cacheWriteThrough(c, "capacity_plans");
+  eventBus.emit({ entity: "capacity", action: "created", id: newPlan.id });
   return jsonResponse(newPlan, 201);
 });
 
@@ -89,6 +91,7 @@ capacityRouter.put("/:id", async (c) => {
   plans[index] = { ...plans[index], ...body };
   await parser.saveCapacityPlans(plans);
   await cacheWriteThrough(c, "capacity_plans");
+  eventBus.emit({ entity: "capacity", action: "updated", id });
   return jsonResponse(plans[index]);
 });
 
@@ -101,6 +104,7 @@ capacityRouter.delete("/:id", async (c) => {
   if (filtered.length === plans.length) return errorResponse("Not found", 404);
   await parser.saveCapacityPlans(filtered);
   cachePurge(c, "capacity_plans", id);
+  eventBus.emit({ entity: "capacity", action: "deleted", id });
   return jsonResponse({ success: true });
 });
 
@@ -122,6 +126,7 @@ capacityRouter.post("/:id/members", async (c) => {
   plan.teamMembers.push(newMember);
   await parser.saveCapacityPlans(plans);
   await cacheWriteThrough(c, "capacity_plans");
+  eventBus.emit({ entity: "capacity", action: "updated", id: planId });
   return jsonResponse(newMember, 201);
 });
 
@@ -141,6 +146,7 @@ capacityRouter.put("/:id/members/:mid", async (c) => {
   plan.teamMembers[memberIndex] = { ...plan.teamMembers[memberIndex], ...body };
   await parser.saveCapacityPlans(plans);
   await cacheWriteThrough(c, "capacity_plans");
+  eventBus.emit({ entity: "capacity", action: "updated", id: planId });
   return jsonResponse(plan.teamMembers[memberIndex]);
 });
 
@@ -162,6 +168,7 @@ capacityRouter.delete("/:id/members/:mid", async (c) => {
   plan.allocations = plan.allocations.filter((a) => a.memberId !== memberId);
   await parser.saveCapacityPlans(plans);
   await cacheWriteThrough(c, "capacity_plans");
+  eventBus.emit({ entity: "capacity", action: "updated", id: planId });
   return jsonResponse({ success: true });
 });
 
@@ -186,6 +193,7 @@ capacityRouter.post("/:id/allocations", async (c) => {
   plan.allocations.push(newAllocation);
   await parser.saveCapacityPlans(plans);
   await cacheWriteThrough(c, "capacity_plans");
+  eventBus.emit({ entity: "capacity", action: "updated", id: planId });
   return jsonResponse(newAllocation, 201);
 });
 
@@ -205,6 +213,7 @@ capacityRouter.put("/:id/allocations/:aid", async (c) => {
   plan.allocations[allocIndex] = { ...plan.allocations[allocIndex], ...body };
   await parser.saveCapacityPlans(plans);
   await cacheWriteThrough(c, "capacity_plans");
+  eventBus.emit({ entity: "capacity", action: "updated", id: planId });
   return jsonResponse(plan.allocations[allocIndex]);
 });
 
@@ -225,6 +234,7 @@ capacityRouter.delete("/:id/allocations/:aid", async (c) => {
   plan.allocations = filtered;
   await parser.saveCapacityPlans(plans);
   await cacheWriteThrough(c, "capacity_plans");
+  eventBus.emit({ entity: "capacity", action: "updated", id: planId });
   return jsonResponse({ success: true });
 });
 
@@ -405,5 +415,6 @@ capacityRouter.post("/:id/apply-assignments", async (c) => {
 
   await parser.saveCapacityPlans(plans);
   await cacheWriteThrough(c, "capacity_plans");
+  eventBus.emit({ entity: "capacity", action: "updated", id: planId });
   return jsonResponse({ success: true, applied: suggestions.length });
 });

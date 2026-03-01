@@ -8,6 +8,19 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.7.3] - 2026-03-01
+
+### Added
+
+- SSE event emission for all remaining route mutations: ideas, retrospectives,
+  swot, risk, lean canvas, business model, project value, brief, time tracking,
+  capacity, strategic levels, billing, CRM, MoSCoW, eisenhower, onboarding,
+  finances, journal, DNS, habits, fishbone, safe, investors, KPIs, orgchart,
+  people, C4, canvas, mindmaps — every mutation now pushes a change event to
+  connected browsers
+- `_reloadEntityIfVisible` in app.js updated to handle all 34 entity types, so
+  the active view auto-reloads for any entity when an SSE event arrives
+
 ## [0.7.2] - 2026-03-01
 
 ### Added

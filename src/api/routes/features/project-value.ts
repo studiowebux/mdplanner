@@ -11,6 +11,7 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
+import { eventBus } from "../../../lib/event-bus.ts";
 
 export const projectValueRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -38,6 +39,7 @@ projectValueRouter.post("/", async (c) => {
   boards.push(newBoard);
   await parser.saveProjectValueBoards(boards);
   await cacheWriteThrough(c, "project_value");
+  eventBus.emit({ entity: "projectValue", action: "created", id: newBoard.id });
   return jsonResponse(newBoard, 201);
 });
 
@@ -52,6 +54,7 @@ projectValueRouter.put("/:id", async (c) => {
   boards[index] = { ...boards[index], ...body };
   await parser.saveProjectValueBoards(boards);
   await cacheWriteThrough(c, "project_value");
+  eventBus.emit({ entity: "projectValue", action: "updated", id });
   return jsonResponse(boards[index]);
 });
 
@@ -64,5 +67,6 @@ projectValueRouter.delete("/:id", async (c) => {
   if (filtered.length === boards.length) return errorResponse("Not found", 404);
   await parser.saveProjectValueBoards(filtered);
   cachePurge(c, "project_value", id);
+  eventBus.emit({ entity: "projectValue", action: "deleted", id });
   return jsonResponse({ success: true });
 });
