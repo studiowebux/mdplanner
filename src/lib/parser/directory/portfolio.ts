@@ -3,6 +3,7 @@
  * Reads portfolio project files from portfolio/ directory.
  */
 import { parseFrontmatter } from "./base.ts";
+import { eventBus } from "../../event-bus.ts";
 
 export interface PortfolioKPI {
   name: string;
@@ -350,6 +351,7 @@ export class PortfolioDirectoryParser {
   async delete(id: string): Promise<boolean> {
     try {
       await Deno.remove(`${this.portfolioDir}/${id}.md`);
+      eventBus.emit({ entity: "portfolio", action: "deleted", id });
       return true;
     } catch {
       return false;

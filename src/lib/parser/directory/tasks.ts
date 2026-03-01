@@ -4,6 +4,7 @@
  * Subtasks are stored inline in the parent task file.
  */
 import { buildFileContent, parseFrontmatter } from "./base.ts";
+import { eventBus } from "../../event-bus.ts";
 import type { Task, TaskComment, TaskConfig, TimeEntry } from "../../types.ts";
 
 interface TaskFrontmatter {
@@ -228,6 +229,7 @@ export class TasksDirectoryParser {
         }
       }
     });
+    eventBus.emit({ entity: "tasks", action: "updated", id: task.id });
   }
 
   /**
@@ -242,6 +244,7 @@ export class TasksDirectoryParser {
       const directPath = this.getFilePath(id, section);
       try {
         await Deno.remove(directPath);
+        eventBus.emit({ entity: "tasks", action: "deleted", id });
         return true;
       } catch {
         // File not found at direct path
@@ -255,6 +258,7 @@ export class TasksDirectoryParser {
           const task = this.parseFile(content, section);
           if (task && task.id === id) {
             await Deno.remove(file);
+            eventBus.emit({ entity: "tasks", action: "deleted", id });
             return true;
           }
         } catch {
