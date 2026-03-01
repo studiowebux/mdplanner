@@ -67,7 +67,7 @@
 .dns-table th {
   text-align: left;
   padding: 0.5rem 0.75rem;
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text-secondary);
   border-bottom: 1px solid var(--color-border-default);
@@ -94,6 +94,7 @@
 
 /* Domain name cell */
 .dns-domain-name {
+  font-size: var(--font-size-base);
   font-weight: 500;
   color: var(--color-text-primary);
 }

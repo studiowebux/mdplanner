@@ -62,7 +62,9 @@ export class SummaryView {
     const lastUpdatedEl = document.getElementById("summaryLastUpdated");
 
     if (this.tm.projectConfig && this.tm.projectConfig.startDate) {
-      const date = new Date(this.tm.projectConfig.startDate);
+      // Parse date-only strings as local date (not UTC) to avoid ±1 day shift
+      const [y, m, d] = this.tm.projectConfig.startDate.split("-").map(Number);
+      const date = new Date(y, m - 1, d);
       startDateEl.textContent = date.toLocaleDateString();
     } else {
       startDateEl.textContent = "-";

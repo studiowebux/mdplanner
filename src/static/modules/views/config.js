@@ -581,8 +581,6 @@ export class ConfigView {
       const banner = document.getElementById("ghEncryptionBanner");
       const statusEl = document.getElementById("ghStatus");
       const deleteBtn = document.getElementById("ghDeleteBtn");
-      const defaultRepoInput = document.getElementById("ghDefaultRepo");
-
       if (banner) {
         if (status.encrypted) {
           banner.className = "integration-encryption-banner encryption-ok";
@@ -604,28 +602,8 @@ export class ConfigView {
       if (deleteBtn) {
         deleteBtn.classList.toggle("hidden", !status.configured);
       }
-      if (defaultRepoInput && status.defaultRepo) {
-        defaultRepoInput.value = status.defaultRepo;
-      }
     } catch {
       // Panel absent or API not reachable — silent
-    }
-  }
-
-  async saveDefaultRepo() {
-    const input = document.getElementById("ghDefaultRepo");
-    const btn = document.getElementById("ghSaveDefaultRepoBtn");
-    if (!input || !btn) return;
-
-    btn.disabled = true;
-    btn.textContent = "Saving...";
-    try {
-      await GitHubAPI.saveDefaultRepo(input.value.trim());
-    } catch {
-      alert("Failed to save default repository");
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "Save";
     }
   }
 
@@ -780,18 +758,6 @@ export class ConfigView {
           this.saveGitHubToken();
         }
       });
-    document
-      .getElementById("ghSaveDefaultRepoBtn")
-      ?.addEventListener("click", () => this.saveDefaultRepo());
-    document
-      .getElementById("ghDefaultRepo")
-      ?.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          this.saveDefaultRepo();
-        }
-      });
-
     // Task display settings
     document
       .getElementById("hideCompletedTasks")

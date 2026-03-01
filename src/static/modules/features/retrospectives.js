@@ -106,7 +106,7 @@ export class RetrospectivesModule {
             <button type="button" onclick="taskManager.retrospectiveSidenavModule.openEdit('${retro.id}')" class="btn-ghost">Edit</button>
           </div>
         </div>
-        <div class="px-4 pt-4 pb-2 space-y-3">
+        <div class="px-4 py-4 space-y-3">
           <div>
             <h4 class="text-sm font-medium text-primary mb-1">Continue</h4>
             <ul class="text-sm text-secondary space-y-1">
@@ -144,7 +144,7 @@ export class RetrospectivesModule {
             </ul>
           </div>
         </div>
-        <div class="px-4 py-2 border-t border-default flex justify-end items-center">
+        <div class="px-4 py-3 border-t border-default flex justify-end items-center">
           <button type="button" onclick="taskManager.deleteRetrospective('${retro.id}')" class="btn-danger-ghost">Delete</button>
         </div>
       </div>

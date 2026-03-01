@@ -11,12 +11,18 @@ export class DnsSidenavModule {
     this.editingId = domain?.id ?? null;
     this.populate(domain);
     const panel = document.getElementById("dnsSidenav");
-    if (panel) panel.classList.remove("hidden");
+    if (panel) {
+      panel.classList.remove("hidden");
+      panel.classList.add("active");
+    }
   }
 
   close() {
     const panel = document.getElementById("dnsSidenav");
-    if (panel) panel.classList.add("hidden");
+    if (panel) {
+      panel.classList.remove("active");
+      panel.classList.add("hidden");
+    }
     this.editingId = null;
   }
 

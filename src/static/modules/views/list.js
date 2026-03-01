@@ -343,7 +343,20 @@ export class ListView {
                         </div>
                     </div>
                 </div>
-                <div class="flex space-x-2">
+                <div class="flex items-center space-x-2">
+                    ${
+      (() => {
+        const sections = this.tm.sections || [];
+        const others = sections.filter((s) => s !== task.section);
+        if (others.length === 0) return "";
+        return `<select class="task-section-select text-xs text-muted border border-default rounded px-1 bg-primary"
+                        title="Move to section"
+                        onchange="(function(el){if(el.value)taskManager.listView.moveTask('${task.id}',el.value);el.value=''})(this)">
+                  <option value="">Move to…</option>
+                  ${others.map((s) => `<option value="${s}">${s}</option>`).join("")}
+                </select>`;
+      })()
+    }
                     <button onclick="taskManager.enterFocusMode('${task.id}')"
                             class="focus-task-btn text-muted hover:text-secondary transition-colors" title="Focus Mode">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

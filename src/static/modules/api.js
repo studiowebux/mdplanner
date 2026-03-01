@@ -1273,10 +1273,6 @@ export const GitHubAPI = {
     return del("/api/integrations/github");
   },
 
-  async saveDefaultRepo(defaultRepo) {
-    return post("/api/integrations/github", { defaultRepo });
-  },
-
   async testConnection() {
     const response = await get("/api/integrations/github/test");
     return response.json();
