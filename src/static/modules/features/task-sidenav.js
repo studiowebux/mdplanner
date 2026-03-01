@@ -90,10 +90,10 @@ export class TaskSidenavModule {
       () => this._handleAddComment(),
     );
 
-    // Persist author name to localStorage on change
+    // Persist author selection to localStorage on change
     document.getElementById("taskCommentAuthorInput")?.addEventListener(
-      "input",
-      (e) => localStorage.setItem("commentAuthorName", e.target.value.trim()),
+      "change",
+      (e) => localStorage.setItem("commentAuthorName", e.target.value),
     );
 
     // Comment thread — delegate delete and edit clicks
@@ -606,10 +606,23 @@ export class TaskSidenavModule {
     const thread = document.getElementById("taskCommentThread");
     if (!thread) return;
 
-    // Restore author name from localStorage
-    const authorInput = document.getElementById("taskCommentAuthorInput");
-    if (authorInput && !authorInput.value) {
-      authorInput.value = localStorage.getItem("commentAuthorName") ?? "";
+    // Populate author select from people registry, restore last selection
+    const authorSelect = document.getElementById("taskCommentAuthorInput");
+    if (authorSelect) {
+      const people = Array.from(this.tm.peopleMap?.values() ?? []);
+      const saved = localStorage.getItem("commentAuthorName") ?? "";
+      authorSelect.innerHTML = people
+        .map((p) => `<option value="${p.name}"${p.name === saved ? " selected" : ""}>${p.name}</option>`)
+        .join("");
+      // If saved name not in list, prepend it as a custom option
+      if (saved && !people.some((p) => p.name === saved)) {
+        authorSelect.innerHTML =
+          `<option value="${saved}" selected>${saved}</option>` +
+          authorSelect.innerHTML;
+      }
+      if (!authorSelect.value && people.length > 0) {
+        authorSelect.value = people[0].name;
+      }
     }
 
     const comments = task?.config?.comments ?? [];
@@ -685,11 +698,13 @@ export class TaskSidenavModule {
     const body = input?.value?.trim();
     if (!body) return;
 
+    const author = document.getElementById("taskCommentAuthorInput")?.value?.trim() || undefined;
+
     const btn = document.getElementById("taskCommentSubmitBtn");
     if (btn) { btn.disabled = true; btn.textContent = "Adding…"; }
 
     try {
-      const res = await TasksAPI.addComment(this.editingTask.id, body);
+      const res = await TasksAPI.addComment(this.editingTask.id, body, author);
       if (!res.ok) throw new Error("Failed to add comment");
 
       input.value = "";

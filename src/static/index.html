@@ -10746,12 +10746,7 @@
             <div class="sidenav-section-title">Comments</div>
             <div id="taskCommentThread" class="task-comment-thread"></div>
             <div class="task-comment-form">
-              <input
-                type="text"
-                id="taskCommentAuthorInput"
-                class="form-input"
-                placeholder="Your name"
-              />
+              <select id="taskCommentAuthorInput" class="form-select"></select>
               <textarea
                 id="taskCommentInput"
                 rows="2"
@@ -10771,13 +10766,13 @@
           <button
             type="button"
             id="sidenavTaskCancel"
-            class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+            class="btn-secondary"
           >
             Cancel
           </button>
           <button
             type="submit"
-            class="px-4 py-2 text-sm font-medium text-white bg-inverse rounded-md hover:bg-active"
+            class="btn btn-primary"
           >
             Save Task
           </button>
@@ -11893,11 +11888,11 @@
         <div class="sidenav-footer">
           <button type="button" id="moscowSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
-          <button type="button" id="moscowSidenavSave" class="btn">Save</button>
           <button type="button" id="moscowSidenavCancel"
             class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">
             Cancel
           </button>
+          <button type="button" id="moscowSidenavSave" class="btn">Save</button>
         </div>
       </div>
     </div>
@@ -11959,11 +11954,11 @@
         <div class="sidenav-footer">
           <button type="button" id="eisenhowerSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
-          <button type="button" id="eisenhowerSidenavSave" class="btn">Save</button>
           <button type="button" id="eisenhowerSidenavCancel"
             class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">
             Cancel
           </button>
+          <button type="button" id="eisenhowerSidenavSave" class="btn">Save</button>
         </div>
       </div>
     </div>
@@ -12075,14 +12070,14 @@
           Delete
         </button>
         <div class="flex-1"></div>
-        <button type="button" id="swotSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="swotSidenavCancel"
           class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
         >
-          Close
+          Cancel
         </button>
+        <button type="button" id="swotSidenavSave" class="btn">Save</button>
       </div>
     </div>
 
@@ -12197,14 +12192,14 @@
           Delete
         </button>
         <div class="flex-1"></div>
-        <button type="button" id="riskSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="riskSidenavCancel"
           class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
         >
-          Close
+          Cancel
         </button>
+        <button type="button" id="riskSidenavSave" class="btn">Save</button>
       </div>
     </div>
 
@@ -12415,14 +12410,14 @@
           Delete
         </button>
         <div class="flex-1"></div>
-        <button type="button" id="leanCanvasSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="leanCanvasSidenavCancel"
           class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
         >
-          Close
+          Cancel
         </button>
+        <button type="button" id="leanCanvasSidenavSave" class="btn">Save</button>
       </div>
     </div>
 
@@ -12596,14 +12591,14 @@
           Delete
         </button>
         <div class="flex-1"></div>
-        <button type="button" id="bmcSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="bmcSidenavCancel"
           class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
         >
-          Close
+          Cancel
         </button>
+        <button type="button" id="bmcSidenavSave" class="btn">Save</button>
       </div>
     </div>
 
@@ -12716,14 +12711,14 @@
           Delete
         </button>
         <div class="flex-1"></div>
-        <button type="button" id="pvbSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="pvbSidenavCancel"
           class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
         >
-          Close
+          Cancel
         </button>
+        <button type="button" id="pvbSidenavSave" class="btn">Save</button>
       </div>
     </div>
 
@@ -12919,14 +12914,14 @@
           Delete
         </button>
         <div class="flex-1"></div>
-        <button type="button" id="briefSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="briefSidenavCancel"
           class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
         >
-          Close
+          Cancel
         </button>
+        <button type="button" id="briefSidenavSave" class="btn">Save</button>
       </div>
     </div>
 
@@ -13050,8 +13045,8 @@
         <div class="sidenav-footer">
           <button type="button" id="meetingSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
-          <button type="button" id="meetingSidenavSave" class="btn">Save</button>
           <button type="button" id="meetingSidenavCancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
+          <button type="button" id="meetingSidenavSave" class="btn">Save</button>
         </div>
       </div>
     </div>
@@ -13567,14 +13562,14 @@
           Delete
         </button>
         <div class="flex-1"></div>
-        <button type="button" id="ideaSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="ideaSidenavCancel"
           class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
         >
-          Close
+          Cancel
         </button>
+        <button type="button" id="ideaSidenavSave" class="btn">Save</button>
       </div>
     </div>
 
@@ -13707,14 +13702,14 @@
           Delete
         </button>
         <div class="flex-1"></div>
-        <button type="button" id="c4SidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="c4SidenavCancel"
           class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
         >
-          Close
+          Cancel
         </button>
+        <button type="button" id="c4SidenavSave" class="btn">Save</button>
       </div>
     </div>
 
@@ -13761,14 +13756,14 @@
           Delete
         </button>
         <div class="flex-1"></div>
-        <button type="button" id="strategicSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="strategicSidenavCancel"
           class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
         >
-          Close
+          Cancel
         </button>
+        <button type="button" id="strategicSidenavSave" class="btn">Save</button>
       </div>
     </div>
 
@@ -13813,14 +13808,14 @@
           Delete
         </button>
         <div class="flex-1"></div>
-        <button type="button" id="billingSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="billingSidenavCancel"
           class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
         >
-          Close
+          Cancel
         </button>
+        <button type="button" id="billingSidenavSave" class="btn">Save</button>
       </div>
     </div>
 
@@ -13865,14 +13860,14 @@
           Delete
         </button>
         <div class="flex-1"></div>
-        <button type="button" id="crmSidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="crmSidenavCancel"
           class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
         >
-          Close
+          Cancel
         </button>
+        <button type="button" id="crmSidenavSave" class="btn">Save</button>
       </div>
     </div>
 
@@ -13969,14 +13964,14 @@
           Delete
         </button>
         <div class="flex-1"></div>
-        <button type="button" id="capacitySidenavSave" class="btn">Save</button>
         <button
           type="button"
           id="capacitySidenavCancel"
           class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
         >
-          Close
+          Cancel
         </button>
+        <button type="button" id="capacitySidenavSave" class="btn">Save</button>
       </div>
     </div>
 
@@ -14427,7 +14422,8 @@
           </div>
         </div>
         <div class="sidenav-footer">
-          <button type="button" id="financesDeleteBtn" class="btn-danger hidden">Delete</button>
+          <button type="button" id="financesDeleteBtn" class="btn-danger-ghost hidden">Delete</button>
+          <div style="flex:1"></div>
           <button type="button" id="financesSidenavSave" class="btn-primary">Save</button>
         </div>
       </div>
