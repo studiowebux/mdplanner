@@ -8,6 +8,7 @@ import {
   parseFrontmatter,
   serializeFrontmatter,
 } from "./frontmatter.ts";
+import { eventBus } from "../../event-bus.ts";
 
 export interface DirectoryParserOptions {
   projectDir: string;
@@ -126,6 +127,7 @@ export abstract class DirectoryParser<T extends { id: string }> {
     await this.withWriteLock(item.id, async () => {
       await this.atomicWriteFile(filePath, content);
     });
+    eventBus.emit({ entity: this.sectionName, action: "updated", id: item.id });
   }
 
   /**
@@ -160,6 +162,7 @@ export abstract class DirectoryParser<T extends { id: string }> {
 
     try {
       await Deno.remove(filePath);
+      eventBus.emit({ entity: this.sectionName, action: "deleted", id });
       return true;
     } catch (error) {
       if ((error as Deno.errors.NotFound)?.name === "NotFound") {
