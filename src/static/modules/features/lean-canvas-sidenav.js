@@ -11,6 +11,7 @@ export class LeanCanvasSidenavModule {
     this.tm = taskManager;
     this.editingCanvasId = null;
     this.currentCanvas = null;
+    this._originalCanvas = null;
     this.sections = [
       "problem",
       "solution",
@@ -43,6 +44,27 @@ export class LeanCanvasSidenavModule {
   }
 
   bindEvents() {
+    // Intercept ESC before sidenav.js closeActive() — capture phase fires first
+    this._escCapture = (e) => {
+      if (e.key === "Escape" && Sidenav.isOpen("leanCanvasSidenav")) {
+        e.stopImmediatePropagation();
+        this.close();
+      }
+    };
+    document.addEventListener("keydown", this._escCapture, true);
+
+    // Intercept overlay click before sidenav.js handler
+    this._overlayCapture = (e) => {
+      if (
+        e.target.classList.contains("sidenav-overlay") &&
+        Sidenav.isOpen("leanCanvasSidenav")
+      ) {
+        e.stopImmediatePropagation();
+        this.close();
+      }
+    };
+    document.addEventListener("click", this._overlayCapture, true);
+
     document.getElementById("leanCanvasSidenavClose")?.addEventListener(
       "click",
       () => this.close(),
@@ -77,6 +99,7 @@ export class LeanCanvasSidenavModule {
       date: new Date().toISOString().split("T")[0],
     };
     this.sections.forEach((s) => this.currentCanvas[s] = []);
+    this._originalCanvas = JSON.parse(JSON.stringify(this.currentCanvas));
 
     document.getElementById("leanCanvasSidenavHeader").textContent =
       "New Lean Canvas";
@@ -91,6 +114,7 @@ export class LeanCanvasSidenavModule {
 
     this.editingCanvasId = canvasId;
     this.currentCanvas = JSON.parse(JSON.stringify(canvas));
+    this._originalCanvas = JSON.parse(JSON.stringify(canvas));
 
     document.getElementById("leanCanvasSidenavHeader").textContent =
       "Edit Lean Canvas";
@@ -101,10 +125,28 @@ export class LeanCanvasSidenavModule {
     Sidenav.open("leanCanvasSidenav");
   }
 
+  _isDirty() {
+    if (!this.currentCanvas) return false;
+    const title =
+      document.getElementById("leanCanvasSidenavTitle")?.value.trim() ?? "";
+    if (title !== (this._originalCanvas?.title ?? "")) return true;
+    for (const s of this.sections) {
+      if (
+        JSON.stringify(this.currentCanvas[s] || []) !==
+          JSON.stringify(this._originalCanvas?.[s] || [])
+      ) return true;
+    }
+    return false;
+  }
+
   close() {
+    if (this._isDirty() && !confirm("You have unsaved changes. Close anyway?")) {
+      return;
+    }
     Sidenav.close("leanCanvasSidenav");
     this.editingCanvasId = null;
     this.currentCanvas = null;
+    this._originalCanvas = null;
   }
 
   fillForm() {
@@ -124,18 +166,58 @@ export class LeanCanvasSidenavModule {
     container.innerHTML = items.length === 0
       ? '<div class="text-muted text-sm italic py-1">No items</div>'
       : items.map((item, idx) => `
-        <div class="flex items-start gap-2 py-1 group">
-          <span class="flex-1 text-sm text-secondary">${
-        escapeHtml(item)
-      }</span>
+        <div class="flex items-start gap-2 py-1 group" data-item-idx="${idx}">
+          <span class="flex-1 text-sm text-secondary">${escapeHtml(item)}</span>
+          <button onclick="taskManager.leanCanvasSidenavModule.editItem('${section}', ${idx})"
+                  class="opacity-0 group-hover:opacity-100 text-muted hover:text-primary flex-shrink-0" title="Edit">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+            </svg>
+          </button>
           <button onclick="taskManager.leanCanvasSidenavModule.removeItem('${section}', ${idx})"
-                  class="opacity-0 group-hover:opacity-100 text-muted hover:text-error flex-shrink-0">
+                  class="opacity-0 group-hover:opacity-100 text-muted hover:text-error flex-shrink-0" title="Remove">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
           </button>
         </div>
       `).join("");
+  }
+
+  editItem(section, index) {
+    const container = document.getElementById(`leanSidenav_${section}`);
+    const row = container.querySelector(`[data-item-idx="${index}"]`);
+    if (!row) return;
+
+    const currentText = this.currentCanvas[section][index];
+    const inputHtml = `
+      <div class="lean-edit-input flex gap-2 w-full mt-1">
+        <input type="text" class="flex-1 px-2 py-1 text-sm border border-strong rounded bg-primary text-primary"
+               value="${escapeHtml(currentText)}">
+        <button type="button" class="px-2 py-1 text-xs bg-inverse text-inverse rounded">Save</button>
+        <button type="button" class="px-2 py-1 text-xs border border-default rounded">Cancel</button>
+      </div>
+    `;
+    row.outerHTML = inputHtml;
+
+    const inputWrapper = container.querySelector(".lean-edit-input");
+    const input = inputWrapper.querySelector("input");
+    const [saveBtn, cancelBtn] = inputWrapper.querySelectorAll("button");
+
+    const saveEdit = () => {
+      const text = input.value.trim();
+      if (text) this.currentCanvas[section][index] = text;
+      this.renderSection(section);
+    };
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); saveEdit(); }
+      if (e.key === "Escape") { e.stopPropagation(); this.renderSection(section); }
+    });
+    saveBtn.addEventListener("click", saveEdit);
+    cancelBtn.addEventListener("click", () => this.renderSection(section));
+    input.focus();
+    input.select();
   }
 
   showAddItemInput(section) {
