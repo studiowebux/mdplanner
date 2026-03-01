@@ -5,6 +5,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { GitHubAPI, MilestonesAPI, TasksAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { UndoManager } from "../ui/undo-manager.js";
+import { showConfirm } from "../ui/confirm.js";
 
 export class TaskSidenavModule {
   constructor(taskManager) {
@@ -89,12 +90,27 @@ export class TaskSidenavModule {
       () => this._handleAddComment(),
     );
 
-    // Comment thread — delegate delete clicks
+    // Persist author name to localStorage on change
+    document.getElementById("taskCommentAuthorInput")?.addEventListener(
+      "input",
+      (e) => localStorage.setItem("commentAuthorName", e.target.value.trim()),
+    );
+
+    // Comment thread — delegate delete and edit clicks
     document.getElementById("taskCommentThread")?.addEventListener(
       "click",
       (e) => {
-        const btn = e.target.closest("[data-delete-comment]");
-        if (btn) this._handleDeleteComment(btn.dataset.deleteComment);
+        const deleteBtn = e.target.closest("[data-delete-comment]");
+        if (deleteBtn) {
+          this._handleDeleteComment(deleteBtn.dataset.deleteComment);
+          return;
+        }
+        const editBtn = e.target.closest("[data-edit-comment]");
+        if (editBtn) this._handleEditComment(editBtn.dataset.editComment);
+        const saveBtn = e.target.closest("[data-save-comment]");
+        if (saveBtn) this._handleSaveComment(saveBtn.dataset.saveComment);
+        const cancelBtn = e.target.closest("[data-cancel-edit-comment]");
+        if (cancelBtn) this._renderCommentThread(this.editingTask);
       },
     );
 
@@ -590,22 +606,77 @@ export class TaskSidenavModule {
     const thread = document.getElementById("taskCommentThread");
     if (!thread) return;
 
+    // Restore author name from localStorage
+    const authorInput = document.getElementById("taskCommentAuthorInput");
+    if (authorInput && !authorInput.value) {
+      authorInput.value = localStorage.getItem("commentAuthorName") ?? "";
+    }
+
     const comments = task?.config?.comments ?? [];
     if (comments.length === 0) {
       thread.innerHTML = `<p class="task-comment-empty">No comments yet.</p>`;
       return;
     }
 
-    thread.innerHTML = comments.map((c) => `
-      <div class="task-comment" data-comment-id="${c.id}">
-        <div class="task-comment-meta">
-          <span class="task-comment-author">${c.author ?? "Unknown"}</span>
-          <span class="task-comment-timestamp">${c.timestamp}</span>
-          <button type="button" class="task-comment-delete" data-delete-comment="${c.id}" title="Delete comment">&times;</button>
+    thread.innerHTML = comments.map((c) => {
+      const author = c.author ?? "Anonymous";
+      const ts = c.timestamp
+        ? new Date(c.timestamp).toLocaleString(undefined, {
+            year: "numeric", month: "short", day: "numeric",
+            hour: "2-digit", minute: "2-digit",
+          })
+        : "";
+      return `
+        <div class="task-comment" data-comment-id="${c.id}">
+          <div class="task-comment-meta">
+            <span class="task-comment-author">${author}</span>
+            <span class="task-comment-timestamp">${ts}</span>
+            <button type="button" class="task-comment-edit" data-edit-comment="${c.id}" title="Edit comment">&#9998;</button>
+            <button type="button" class="task-comment-delete" data-delete-comment="${c.id}" title="Delete comment">&times;</button>
+          </div>
+          <div class="task-comment-body">${c.body}</div>
         </div>
-        <div class="task-comment-body">${c.body}</div>
+      `;
+    }).join("");
+  }
+
+  _handleEditComment(commentId) {
+    const commentEl = document.querySelector(`[data-comment-id="${commentId}"]`);
+    if (!commentEl) return;
+    const bodyEl = commentEl.querySelector(".task-comment-body");
+    const current = bodyEl?.textContent ?? "";
+
+    bodyEl.innerHTML = `
+      <textarea class="form-textarea task-comment-edit-textarea" rows="2">${current}</textarea>
+      <div class="task-comment-edit-actions">
+        <button type="button" class="btn-secondary" data-save-comment="${commentId}">Save</button>
+        <button type="button" class="btn-ghost" data-cancel-edit-comment="${commentId}">Cancel</button>
       </div>
-    `).join("");
+    `;
+    commentEl.querySelector("textarea")?.focus();
+  }
+
+  async _handleSaveComment(commentId) {
+    if (!this.editingTask || !commentId) return;
+    const commentEl = document.querySelector(`[data-comment-id="${commentId}"]`);
+    const textarea = commentEl?.querySelector("textarea");
+    const body = textarea?.value?.trim();
+    if (!body) return;
+
+    try {
+      const res = await TasksAPI.updateComment(this.editingTask.id, commentId, body);
+      if (!res.ok) throw new Error("Failed to update comment");
+
+      const tasks = await TasksAPI.fetchAll();
+      const updated = tasks.find((t) => t.id === this.editingTask.id);
+      if (updated) {
+        this.editingTask = updated;
+        this._renderCommentThread(updated);
+      }
+      showToast("Comment updated", "success");
+    } catch {
+      showToast("Failed to update comment", "error");
+    }
   }
 
   async _handleAddComment() {
@@ -639,6 +710,9 @@ export class TaskSidenavModule {
 
   async _handleDeleteComment(commentId) {
     if (!this.editingTask || !commentId) return;
+
+    const confirmed = await showConfirm("Delete this comment?");
+    if (!confirmed) return;
 
     try {
       const res = await TasksAPI.deleteComment(this.editingTask.id, commentId);

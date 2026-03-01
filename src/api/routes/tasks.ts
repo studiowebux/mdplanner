@@ -219,5 +219,26 @@ tasksRouter.delete("/:id/comments/:commentId", async (c) => {
   return jsonResponse({ success: true });
 });
 
+// PUT /tasks/:id/comments/:commentId - update a comment body
+tasksRouter.put("/:id/comments/:commentId", async (c) => {
+  const parser = getParser(c);
+  const taskId = c.req.param("id");
+  const commentId = c.req.param("commentId");
+  const body = await c.req.json();
+  const commentBody: string = String(body.body ?? "").trim();
+
+  if (!commentBody) {
+    return errorResponse("comment body is required", 400);
+  }
+
+  const comment = await parser.updateComment(taskId, commentId, commentBody);
+  if (!comment) {
+    return errorResponse("Task or comment not found", 404);
+  }
+
+  await cacheWriteThrough(c, "tasks");
+  return jsonResponse(comment);
+});
+
 // Export for use in billing routes
 export { findTaskById };

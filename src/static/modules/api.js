@@ -137,6 +137,11 @@ export const TasksAPI = {
     const response = await del(`/api/tasks/${id}/comments/${commentId}`);
     return response;
   },
+
+  async updateComment(id, commentId, body) {
+    const response = await put(`/api/tasks/${id}/comments/${commentId}`, { body });
+    return response;
+  },
 };
 
 /** Project config and info operations */

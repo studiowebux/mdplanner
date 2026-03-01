@@ -309,6 +309,10 @@ export class DirectoryMarkdownParser {
     return this.tasksParser.deleteComment(taskId, commentId);
   }
 
+  async updateComment(taskId: string, commentId: string, body: string) {
+    return this.tasksParser.updateComment(taskId, commentId, body);
+  }
+
   async addAttachmentsToTask(
     id: string,
     paths: string[],
