@@ -28,11 +28,14 @@ function getTasksByMilestone(tasks: Task[], milestone: string): Task[] {
   return result;
 }
 
-// GET /milestones - list all milestones with progress
+// GET /milestones - list all milestones with progress, including names inferred from tasks
 milestonesRouter.get("/", async (c) => {
   const parser = getParser(c);
-  const milestones = await parser.readMilestones();
-  const tasks = await parser.readTasks();
+  const [milestones, tasks] = await Promise.all([
+    parser.readMilestones(),
+    parser.readTasks(),
+  ]);
+
   const result = milestones.map((m) => {
     const linkedTasks = getTasksByMilestone(tasks, m.name);
     const completedCount = linkedTasks.filter((t) => t.completed).length;
@@ -45,6 +48,35 @@ milestonesRouter.get("/", async (c) => {
         : 0,
     };
   });
+
+  // Auto-create milestone files for any names referenced in tasks but missing a file.
+  // This handles projects created before this feature was added.
+  const existingNames = new Set(milestones.map((m) => m.name));
+  const inferredNames = new Set<string>();
+  const collectNames = (taskList: Task[]) => {
+    for (const task of taskList) {
+      if (task.config.milestone && !existingNames.has(task.config.milestone)) {
+        inferredNames.add(task.config.milestone);
+      }
+      if (task.children) collectNames(task.children);
+    }
+  };
+  collectNames(tasks);
+
+  for (const name of inferredNames) {
+    const created = await parser.addMilestone({ name, status: "open" });
+    const linkedTasks = getTasksByMilestone(tasks, name);
+    const completedCount = linkedTasks.filter((t) => t.completed).length;
+    result.push({
+      ...created,
+      taskCount: linkedTasks.length,
+      completedCount,
+      progress: linkedTasks.length > 0
+        ? Math.round((completedCount / linkedTasks.length) * 100)
+        : 0,
+    });
+  }
+
   return jsonResponse(result);
 });
 
