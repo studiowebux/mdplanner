@@ -12,6 +12,7 @@ import {
   jsonResponse,
 } from "../context.ts";
 import { Task } from "../../../lib/types.ts";
+import { eventBus } from "../../../lib/event-bus.ts";
 
 export const billingRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -64,6 +65,7 @@ billingRouter.post("/customers", async (c) => {
   customers.push(newCustomer);
   await parser.saveCustomers(customers);
   await cacheWriteThrough(c, "customers");
+  eventBus.emit({ entity: "billing", action: "created", id });
   return jsonResponse(newCustomer, 201);
 });
 
@@ -78,6 +80,7 @@ billingRouter.put("/customers/:id", async (c) => {
   customers[index] = { ...customers[index], ...body };
   await parser.saveCustomers(customers);
   await cacheWriteThrough(c, "customers");
+  eventBus.emit({ entity: "billing", action: "updated", id });
   return jsonResponse(customers[index]);
 });
 
@@ -92,6 +95,7 @@ billingRouter.delete("/customers/:id", async (c) => {
   }
   await parser.saveCustomers(filtered);
   cachePurge(c, "customers", id);
+  eventBus.emit({ entity: "billing", action: "deleted", id });
   return jsonResponse({ success: true });
 });
 
@@ -120,6 +124,7 @@ billingRouter.post("/billing-rates", async (c) => {
   rates.push(newRate);
   await parser.saveBillingRates(rates);
   await cacheWriteThrough(c, "rates");
+  eventBus.emit({ entity: "billing", action: "created", id });
   return jsonResponse(newRate, 201);
 });
 
@@ -134,6 +139,7 @@ billingRouter.put("/billing-rates/:id", async (c) => {
   rates[index] = { ...rates[index], ...body };
   await parser.saveBillingRates(rates);
   await cacheWriteThrough(c, "rates");
+  eventBus.emit({ entity: "billing", action: "updated", id });
   return jsonResponse(rates[index]);
 });
 
@@ -146,6 +152,7 @@ billingRouter.delete("/billing-rates/:id", async (c) => {
   if (filtered.length === rates.length) return errorResponse("Not found", 404);
   await parser.saveBillingRates(filtered);
   cachePurge(c, "rates", id);
+  eventBus.emit({ entity: "billing", action: "deleted", id });
   return jsonResponse({ success: true });
 });
 
@@ -199,6 +206,7 @@ billingRouter.post("/quotes", async (c) => {
   quotes.push(newQuote);
   await parser.saveQuotes(quotes);
   await cacheWriteThrough(c, "quotes");
+  eventBus.emit({ entity: "billing", action: "created", id });
   return jsonResponse(newQuote, 201);
 });
 
@@ -225,6 +233,7 @@ billingRouter.put("/quotes/:id", async (c) => {
   quotes[index] = updated;
   await parser.saveQuotes(quotes);
   await cacheWriteThrough(c, "quotes");
+  eventBus.emit({ entity: "billing", action: "updated", id });
   return jsonResponse(quotes[index]);
 });
 
@@ -237,6 +246,7 @@ billingRouter.delete("/quotes/:id", async (c) => {
   if (filtered.length === quotes.length) return errorResponse("Not found", 404);
   await parser.saveQuotes(filtered);
   cachePurge(c, "quotes", id);
+  eventBus.emit({ entity: "billing", action: "deleted", id });
   return jsonResponse({ success: true });
 });
 
@@ -251,6 +261,7 @@ billingRouter.post("/quotes/:id/send", async (c) => {
   quotes[index].sentAt = new Date().toISOString().split("T")[0];
   await parser.saveQuotes(quotes);
   await cacheWriteThrough(c, "quotes");
+  eventBus.emit({ entity: "billing", action: "updated", id });
   return jsonResponse(quotes[index]);
 });
 
@@ -265,6 +276,7 @@ billingRouter.post("/quotes/:id/accept", async (c) => {
   quotes[index].acceptedAt = new Date().toISOString().split("T")[0];
   await parser.saveQuotes(quotes);
   await cacheWriteThrough(c, "quotes");
+  eventBus.emit({ entity: "billing", action: "updated", id });
   return jsonResponse(quotes[index]);
 });
 
@@ -301,6 +313,7 @@ billingRouter.post("/quotes/:id/to-invoice", async (c) => {
   invoices.push(newInvoice);
   await parser.saveInvoices(invoices);
   await cacheWriteThrough(c, "invoices");
+  eventBus.emit({ entity: "billing", action: "created", id: invoiceId });
   return jsonResponse(newInvoice, 201);
 });
 
@@ -356,6 +369,7 @@ billingRouter.post("/invoices", async (c) => {
   invoices.push(newInvoice);
   await parser.saveInvoices(invoices);
   await cacheWriteThrough(c, "invoices");
+  eventBus.emit({ entity: "billing", action: "created", id });
   return jsonResponse(newInvoice, 201);
 });
 
@@ -382,6 +396,7 @@ billingRouter.put("/invoices/:id", async (c) => {
   invoices[index] = updated;
   await parser.saveInvoices(invoices);
   await cacheWriteThrough(c, "invoices");
+  eventBus.emit({ entity: "billing", action: "updated", id });
   return jsonResponse(invoices[index]);
 });
 
@@ -396,6 +411,7 @@ billingRouter.delete("/invoices/:id", async (c) => {
   }
   await parser.saveInvoices(filtered);
   cachePurge(c, "invoices", id);
+  eventBus.emit({ entity: "billing", action: "deleted", id });
   return jsonResponse({ success: true });
 });
 
@@ -410,6 +426,7 @@ billingRouter.post("/invoices/:id/send", async (c) => {
   invoices[index].sentAt = new Date().toISOString().split("T")[0];
   await parser.saveInvoices(invoices);
   await cacheWriteThrough(c, "invoices");
+  eventBus.emit({ entity: "billing", action: "updated", id });
   return jsonResponse(invoices[index]);
 });
 
@@ -455,6 +472,7 @@ billingRouter.post("/invoices/:id/payments", async (c) => {
   await parser.saveInvoices(invoices);
   await cacheWriteThrough(c, "invoices");
 
+  eventBus.emit({ entity: "billing", action: "created", id: paymentId });
   return jsonResponse(newPayment, 201);
 });
 
@@ -536,6 +554,7 @@ billingRouter.post("/invoices/generate", async (c) => {
   invoices.push(newInvoice);
   await parser.saveInvoices(invoices);
   await cacheWriteThrough(c, "invoices");
+  eventBus.emit({ entity: "billing", action: "created", id });
   return jsonResponse(newInvoice, 201);
 });
 

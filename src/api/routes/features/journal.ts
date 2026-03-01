@@ -11,6 +11,7 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
+import { eventBus } from "../../../lib/event-bus.ts";
 
 export const journalRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -44,6 +45,7 @@ journalRouter.post("/", async (c) => {
     body: body.body || "",
   });
   await cacheWriteThrough(c, "journal");
+  eventBus.emit({ entity: "journal", action: "created", id: entry.id });
   return jsonResponse({ success: true, id: entry.id }, 201);
 });
 
@@ -62,6 +64,7 @@ journalRouter.put("/:id", async (c) => {
   });
   if (!updated) return errorResponse("Not found", 404);
   await cacheWriteThrough(c, "journal");
+  eventBus.emit({ entity: "journal", action: "updated", id });
   return jsonResponse({ success: true });
 });
 
@@ -72,5 +75,6 @@ journalRouter.delete("/:id", async (c) => {
   const deleted = await parser.deleteJournalEntry(id);
   if (!deleted) return errorResponse("Not found", 404);
   cachePurge(c, "journal", id);
+  eventBus.emit({ entity: "journal", action: "deleted", id });
   return jsonResponse({ success: true });
 });

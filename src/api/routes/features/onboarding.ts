@@ -11,6 +11,7 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
+import { eventBus } from "../../../lib/event-bus.ts";
 
 export const onboardingRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -44,6 +45,7 @@ onboardingRouter.post("/", async (c) => {
     notes: body.notes,
   });
   await cacheWriteThrough(c, "onboarding");
+  eventBus.emit({ entity: "onboarding", action: "created", id: record.id });
   return jsonResponse({ success: true, id: record.id }, 201);
 });
 
@@ -64,6 +66,7 @@ onboardingRouter.put("/:id", async (c) => {
   const updated = await parser.updateOnboardingRecord(id, updates);
   if (!updated) return errorResponse("Not found", 404);
   await cacheWriteThrough(c, "onboarding");
+  eventBus.emit({ entity: "onboarding", action: "updated", id });
   return jsonResponse({ success: true });
 });
 
@@ -74,5 +77,6 @@ onboardingRouter.delete("/:id", async (c) => {
   const deleted = await parser.deleteOnboardingRecord(id);
   if (!deleted) return errorResponse("Not found", 404);
   cachePurge(c, "onboarding", id);
+  eventBus.emit({ entity: "onboarding", action: "deleted", id });
   return jsonResponse({ success: true });
 });

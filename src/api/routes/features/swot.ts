@@ -11,6 +11,7 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
+import { eventBus } from "../../../lib/event-bus.ts";
 
 export const swotRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -38,6 +39,7 @@ swotRouter.post("/", async (c) => {
   });
   await parser.saveSwotAnalyses(swotAnalyses);
   await cacheWriteThrough(c, "swot");
+  eventBus.emit({ entity: "swot", action: "created", id });
   return jsonResponse({ success: true, id }, 201);
 });
 
@@ -52,6 +54,7 @@ swotRouter.put("/:id", async (c) => {
   swotAnalyses[index] = { ...swotAnalyses[index], ...body };
   await parser.saveSwotAnalyses(swotAnalyses);
   await cacheWriteThrough(c, "swot");
+  eventBus.emit({ entity: "swot", action: "updated", id });
   return jsonResponse({ success: true });
 });
 
@@ -66,5 +69,6 @@ swotRouter.delete("/:id", async (c) => {
   }
   await parser.saveSwotAnalyses(filtered);
   cachePurge(c, "swot", id);
+  eventBus.emit({ entity: "swot", action: "deleted", id });
   return jsonResponse({ success: true });
 });

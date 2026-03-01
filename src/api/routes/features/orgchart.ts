@@ -13,6 +13,7 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
+import { eventBus } from "../../../lib/event-bus.ts";
 
 export const orgchartRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -85,6 +86,7 @@ orgchartRouter.post("/", async (c) => {
   });
 
   await cacheWriteThrough(c, "org_members");
+  eventBus.emit({ entity: "orgchart", action: "created", id: member.id });
   return jsonResponse(member, 201);
 });
 
@@ -101,6 +103,7 @@ orgchartRouter.put("/:id", async (c) => {
   }
 
   await cacheWriteThrough(c, "org_members");
+  eventBus.emit({ entity: "orgchart", action: "updated", id });
   return jsonResponse(updated);
 });
 
@@ -116,5 +119,6 @@ orgchartRouter.delete("/:id", async (c) => {
   }
 
   cachePurge(c, "org_members", id);
+  eventBus.emit({ entity: "orgchart", action: "deleted", id });
   return jsonResponse({ success: true });
 });

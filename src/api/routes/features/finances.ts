@@ -11,6 +11,7 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
+import { eventBus } from "../../../lib/event-bus.ts";
 
 export const financesRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -43,6 +44,7 @@ financesRouter.post("/", async (c) => {
     notes: body.notes,
   });
   await cacheWriteThrough(c, "financial_periods");
+  eventBus.emit({ entity: "finances", action: "created", id: record.id });
   return jsonResponse({ success: true, id: record.id }, 201);
 });
 
@@ -63,6 +65,7 @@ financesRouter.put("/:id", async (c) => {
   const updated = await parser.updateFinancialPeriod(id, updates);
   if (!updated) return errorResponse("Not found", 404);
   await cacheWriteThrough(c, "financial_periods");
+  eventBus.emit({ entity: "finances", action: "updated", id });
   return jsonResponse({ success: true });
 });
 
@@ -73,5 +76,6 @@ financesRouter.delete("/:id", async (c) => {
   const deleted = await parser.deleteFinancialPeriod(id);
   if (!deleted) return errorResponse("Not found", 404);
   cachePurge(c, "financial_periods", id);
+  eventBus.emit({ entity: "finances", action: "deleted", id });
   return jsonResponse({ success: true });
 });

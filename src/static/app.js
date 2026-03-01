@@ -397,6 +397,75 @@ class TaskManager {
       case "fishbone":
         if (view === "fishbone") this.fishboneModule.load();
         break;
+      case "retrospectives":
+        if (view === "retrospectives") this.loadRetrospectives();
+        break;
+      case "swot":
+        if (view === "swot") this.loadSwotAnalyses();
+        break;
+      case "risk":
+        if (view === "riskAnalysis") this.loadRiskAnalyses();
+        break;
+      case "leanCanvas":
+        if (view === "leanCanvas") this.loadLeanCanvases();
+        break;
+      case "businessModel":
+        if (view === "businessModel") this.loadBusinessModelCanvases();
+        break;
+      case "projectValue":
+        if (view === "projectValue") this.projectValueModule.load();
+        break;
+      case "brief":
+        if (view === "brief") this.briefModule.load();
+        break;
+      case "timeTracking":
+        if (view === "timeTracking") this.timeTrackingModule.load();
+        break;
+      case "capacity":
+        if (view === "capacity") this.capacityModule.load();
+        break;
+      case "strategic":
+        if (view === "strategicLevels") this.strategicLevelsModule.load();
+        break;
+      case "billing":
+        if (view === "billing") this.billingModule.load();
+        break;
+      case "crm":
+        if (view === "crm") this.crmModule.load();
+        break;
+      case "moscow":
+        if (view === "moscow") this.moscowModule.load();
+        break;
+      case "eisenhower":
+        if (view === "eisenhower") this.eisenhowerModule.load();
+        break;
+      case "onboarding":
+      case "onboardingTemplates":
+        if (view === "onboarding") this.onboardingModule.load();
+        break;
+      case "finances":
+        if (view === "finances") this.financesModule.load();
+        break;
+      case "dns":
+        if (view === "dns") this.dnsModule.load();
+        break;
+      case "safe":
+      case "investors":
+      case "kpis":
+        if (view === "fundraising") this.fundraisingModule.load();
+        break;
+      case "orgchart":
+        if (view === "orgchart") this.orgchartModule.load();
+        break;
+      case "c4":
+        if (view === "c4") this.loadC4Components();
+        break;
+      case "canvas":
+        if (view === "canvas") this.canvasModule.load();
+        break;
+      case "mindmaps":
+        if (view === "mindmap") this.mindmapModule.load();
+        break;
     }
   }
 

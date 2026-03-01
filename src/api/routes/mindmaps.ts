@@ -11,6 +11,7 @@ import {
   getParser,
   jsonResponse,
 } from "./context.ts";
+import { eventBus } from "../../lib/event-bus.ts";
 
 export const mindmapsRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -40,6 +41,7 @@ mindmapsRouter.post("/", async (c) => {
   const body = await c.req.json();
   const mindmapId = await parser.addMindmap(body);
   await cacheWriteThrough(c, "mindmaps");
+  eventBus.emit({ entity: "mindmaps", action: "created", id: mindmapId });
   return jsonResponse({ id: mindmapId }, 201);
 });
 
@@ -52,6 +54,7 @@ mindmapsRouter.put("/:id", async (c) => {
 
   if (success) {
     await cacheWriteThrough(c, "mindmaps");
+    eventBus.emit({ entity: "mindmaps", action: "updated", id: mindmapId });
     return jsonResponse({ success: true });
   }
   return errorResponse("Mindmap not found", 404);
@@ -65,6 +68,7 @@ mindmapsRouter.delete("/:id", async (c) => {
 
   if (success) {
     cachePurge(c, "mindmaps", mindmapId);
+    eventBus.emit({ entity: "mindmaps", action: "deleted", id: mindmapId });
     return jsonResponse({ success: true });
   }
   return errorResponse("Mindmap not found", 404);

@@ -11,6 +11,7 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
+import { eventBus } from "../../../lib/event-bus.ts";
 
 export const riskRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -38,6 +39,7 @@ riskRouter.post("/", async (c) => {
   riskAnalyses.push(newRisk);
   await parser.saveRiskAnalyses(riskAnalyses);
   await cacheWriteThrough(c, "risk");
+  eventBus.emit({ entity: "risk", action: "created", id: newRisk.id });
   return jsonResponse(newRisk, 201);
 });
 
@@ -52,6 +54,7 @@ riskRouter.put("/:id", async (c) => {
   riskAnalyses[index] = { ...riskAnalyses[index], ...body };
   await parser.saveRiskAnalyses(riskAnalyses);
   await cacheWriteThrough(c, "risk");
+  eventBus.emit({ entity: "risk", action: "updated", id });
   return jsonResponse({ success: true });
 });
 
@@ -66,5 +69,6 @@ riskRouter.delete("/:id", async (c) => {
   }
   await parser.saveRiskAnalyses(filtered);
   cachePurge(c, "risk", id);
+  eventBus.emit({ entity: "risk", action: "deleted", id });
   return jsonResponse({ success: true });
 });

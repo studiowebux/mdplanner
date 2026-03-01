@@ -12,6 +12,7 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
+import { eventBus } from "../../../lib/event-bus.ts";
 
 export const kpisRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -41,6 +42,7 @@ kpisRouter.post("/", async (c) => {
     notes: body.notes || "",
   });
   await cacheWriteThrough(c, "kpi_snapshots");
+  eventBus.emit({ entity: "kpis", action: "created", id: snapshot.id });
   return jsonResponse(snapshot, 201);
 });
 
@@ -52,6 +54,7 @@ kpisRouter.put("/:id", async (c) => {
   const updated = await parser.updateKpiSnapshot(id, body);
   if (!updated) return errorResponse("Not found", 404);
   await cacheWriteThrough(c, "kpi_snapshots");
+  eventBus.emit({ entity: "kpis", action: "updated", id });
   return jsonResponse(updated);
 });
 
@@ -62,5 +65,6 @@ kpisRouter.delete("/:id", async (c) => {
   const success = await parser.deleteKpiSnapshot(id);
   if (!success) return errorResponse("Not found", 404);
   cachePurge(c, "kpi_snapshots", id);
+  eventBus.emit({ entity: "kpis", action: "deleted", id });
   return jsonResponse({ success: true });
 });

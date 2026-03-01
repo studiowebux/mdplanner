@@ -11,6 +11,7 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
+import { eventBus } from "../../../lib/event-bus.ts";
 
 export const businessModelRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -43,6 +44,11 @@ businessModelRouter.post("/", async (c) => {
   canvases.push(newCanvas);
   await parser.saveBusinessModelCanvases(canvases);
   await cacheWriteThrough(c, "business_model");
+  eventBus.emit({
+    entity: "businessModel",
+    action: "created",
+    id: newCanvas.id,
+  });
   return jsonResponse(newCanvas, 201);
 });
 
@@ -57,6 +63,7 @@ businessModelRouter.put("/:id", async (c) => {
   canvases[index] = { ...canvases[index], ...body };
   await parser.saveBusinessModelCanvases(canvases);
   await cacheWriteThrough(c, "business_model");
+  eventBus.emit({ entity: "businessModel", action: "updated", id });
   return jsonResponse({ success: true });
 });
 
@@ -71,5 +78,6 @@ businessModelRouter.delete("/:id", async (c) => {
   }
   await parser.saveBusinessModelCanvases(filtered);
   cachePurge(c, "business_model", id);
+  eventBus.emit({ entity: "businessModel", action: "deleted", id });
   return jsonResponse({ success: true });
 });

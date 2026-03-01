@@ -12,6 +12,7 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
+import { eventBus } from "../../../lib/event-bus.ts";
 
 export const peopleRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -84,6 +85,7 @@ peopleRouter.post("/", async (c) => {
   });
 
   await cacheWriteThrough(c, "people");
+  eventBus.emit({ entity: "people", action: "created", id: person.id });
   return jsonResponse(person, 201);
 });
 
@@ -100,6 +102,7 @@ peopleRouter.put("/:id", async (c) => {
   }
 
   await cacheWriteThrough(c, "people");
+  eventBus.emit({ entity: "people", action: "updated", id });
   return jsonResponse(updated);
 });
 
@@ -115,5 +118,6 @@ peopleRouter.delete("/:id", async (c) => {
   }
 
   cachePurge(c, "people", id);
+  eventBus.emit({ entity: "people", action: "deleted", id });
   return jsonResponse({ success: true });
 });
