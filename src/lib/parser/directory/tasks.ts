@@ -22,6 +22,8 @@ interface TaskFrontmatter {
   time_entries?: TimeEntry[];
   attachments?: string[];
   project?: string;
+  githubIssue?: number;
+  githubRepo?: string;
 }
 
 export class TasksDirectoryParser {
@@ -502,6 +504,10 @@ export class TasksDirectoryParser {
       config.attachments = frontmatter.attachments;
     }
     if (frontmatter.project) config.project = frontmatter.project;
+    if (frontmatter.githubIssue !== undefined) {
+      config.githubIssue = frontmatter.githubIssue;
+    }
+    if (frontmatter.githubRepo) config.githubRepo = frontmatter.githubRepo;
 
     return {
       id: frontmatter.id,
@@ -551,6 +557,10 @@ export class TasksDirectoryParser {
       frontmatter.attachments = task.config.attachments;
     }
     if (task.config.project) frontmatter.project = task.config.project;
+    if (task.config.githubIssue !== undefined) {
+      frontmatter.githubIssue = task.config.githubIssue;
+    }
+    if (task.config.githubRepo) frontmatter.githubRepo = task.config.githubRepo;
 
     let body = `# ${task.title}\n\n`;
 

@@ -2586,6 +2586,55 @@
                 </div>
               </div>
             </div>
+
+            <!-- GitHub -->
+            <div class="border border-default rounded p-4 mt-4">
+              <h4 class="text-sm font-medium text-primary mb-1">GitHub</h4>
+              <p class="text-xs text-secondary mb-4">
+                Personal Access Token (PAT) for linking tasks to issues and showing repo stats in portfolio.
+                The token is stored in project.md and encrypted when
+                <code>MDPLANNER_SECRET_KEY</code> is set.
+              </p>
+              <div id="ghEncryptionBanner" class="integration-encryption-banner encryption-warn mb-4 hidden"></div>
+              <div class="flex items-center gap-3 mb-4">
+                <span id="ghStatus" class="text-sm text-secondary">Checking...</span>
+              </div>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs text-muted mb-1" for="ghTokenInput">
+                    Personal Access Token
+                  </label>
+                  <input
+                    type="password"
+                    id="ghTokenInput"
+                    placeholder="Paste GitHub PAT (ghp_...)"
+                    class="w-full border border-strong rounded px-3 py-2 text-sm font-mono"
+                    autocomplete="off"
+                  >
+                </div>
+                <div class="flex gap-2 flex-wrap items-center">
+                  <button id="ghSaveBtn" class="btn-secondary">Save token</button>
+                  <button id="ghTestBtn" class="btn-secondary">Test connection</button>
+                  <button id="ghDeleteBtn" class="btn-secondary hidden">Remove credentials</button>
+                  <span id="ghTestResult" class="text-sm"></span>
+                </div>
+                <div>
+                  <label class="block text-xs text-muted mb-1" for="ghDefaultRepo">
+                    Default Repository (owner/repo)
+                  </label>
+                  <div class="flex gap-2">
+                    <input
+                      type="text"
+                      id="ghDefaultRepo"
+                      placeholder="e.g. studiowebux/mdplanner"
+                      class="flex-1 border border-strong rounded px-3 py-2 text-sm font-mono"
+                      autocomplete="off"
+                    >
+                    <button id="ghSaveDefaultRepoBtn" class="btn-secondary">Save</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -10603,6 +10652,34 @@
                 autocomplete="off"
               >
               <datalist id="projectsList"></datalist>
+            </div>
+            <div class="form-group">
+              <label class="form-label">GitHub</label>
+              <div class="space-y-2">
+                <input
+                  type="text"
+                  id="sidenavTaskGithubRepo"
+                  placeholder="owner/repo (overrides default)"
+                  class="form-input font-mono"
+                  autocomplete="off"
+                >
+                <div class="flex items-center gap-2 flex-wrap">
+                  <input
+                    type="number"
+                    id="sidenavTaskGithubIssue"
+                    placeholder="Issue #"
+                    class="form-input w-28"
+                    min="1"
+                  >
+                  <div id="githubIssueBadge" class="hidden flex items-center gap-1">
+                    <span id="githubIssueState" class="github-issue-badge"></span>
+                    <a id="githubIssueLink" href="#" target="_blank" rel="noopener noreferrer" class="text-xs text-info hover:underline">Open in GitHub</a>
+                  </div>
+                  <button type="button" id="sidenavFetchIssueBtn" class="btn-secondary text-xs">Fetch status</button>
+                </div>
+                <button type="button" id="sidenavCreateIssueBtn" class="btn-secondary text-xs w-full">Create GitHub issue from task</button>
+                <div id="githubActionResult" class="text-xs hidden"></div>
+              </div>
             </div>
             <div class="form-group">
               <label class="form-label">Tags</label>

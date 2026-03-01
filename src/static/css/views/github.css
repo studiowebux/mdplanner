@@ -1,0 +1,71 @@
+/* GitHub integration styles */
+
+.github-stats {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.github-stats-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.github-stats-link:hover {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+}
+
+.github-stat-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: var(--color-text-secondary);
+}
+
+.github-license-badge {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-tertiary);
+}
+
+/* Issue state badges */
+.github-issue-badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.github-issue-open {
+  background: #1a7f37;
+  color: #ffffff;
+}
+
+.github-issue-closed {
+  background: #8250df;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .github-issue-open {
+  background: #2ea043;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .github-issue-closed {
+  background: #a371f7;
+  color: #000000;
+}

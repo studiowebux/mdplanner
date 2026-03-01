@@ -7,11 +7,17 @@
  * DELETE /api/integrations/cloudflare           — remove Cloudflare credentials
  * GET    /api/integrations/cloudflare/zones     — preview domains from CF API
  * POST   /api/dns/sync/cloudflare               — upsert all CF registrar domains
+ *
+ * POST   /api/integrations/github              — save GitHub PAT
+ * GET    /api/integrations/github              — check if token is configured
+ * DELETE /api/integrations/github              — remove GitHub credentials
+ * GET    /api/integrations/github/test         — verify token (calls GET /user)
  */
 
 import { Hono } from "hono";
 import { isEncryptionEnabled } from "../../lib/secrets.ts";
 import { CloudflareDnsProvider } from "../../lib/integrations/providers/cloudflare-dns.ts";
+import { GitHubApiProvider } from "../../lib/integrations/providers/github.ts";
 import { ProjectManager } from "../../lib/project-manager.ts";
 import { DirectoryMarkdownParser } from "../../lib/parser/directory/parser.ts";
 import {
@@ -71,6 +77,71 @@ integrationsRouter.get("/cloudflare/zones", async (c) => {
   } catch (err) {
     return errorResponse(
       err instanceof Error ? err.message : "Cloudflare API error",
+      502,
+    );
+  }
+});
+
+// --- GitHub integration ---
+
+// POST /integrations/github — save PAT and/or defaultRepo
+integrationsRouter.post("/github", async (c) => {
+  const pm = getProjectManager(c);
+  const body = await c.req.json();
+  const token = body.token?.trim();
+  const defaultRepo = body.defaultRepo?.trim();
+
+  if (!token && !defaultRepo) {
+    return errorResponse("token or defaultRepo is required", 400);
+  }
+
+  if (token) {
+    await pm.setIntegrationSecret("github", "token", token);
+  }
+  if (defaultRepo !== undefined) {
+    // defaultRepo is not sensitive — stored as plain text via same mechanism
+    await pm.setIntegrationSecret("github", "defaultRepo", defaultRepo);
+  }
+
+  return jsonResponse({
+    success: true,
+    encrypted: isEncryptionEnabled(),
+  });
+});
+
+// GET /integrations/github — presence + encryption status + defaultRepo (never the token)
+integrationsRouter.get("/github", async (c) => {
+  const pm = getProjectManager(c);
+  const token = await pm.getIntegrationSecret("github", "token");
+  const defaultRepo = await pm.getIntegrationSecret("github", "defaultRepo");
+
+  return jsonResponse({
+    configured: token !== null,
+    encrypted: isEncryptionEnabled(),
+    defaultRepo: defaultRepo ?? "",
+  });
+});
+
+// DELETE /integrations/github — remove GitHub credentials
+integrationsRouter.delete("/github", async (c) => {
+  const pm = getProjectManager(c);
+  await pm.deleteIntegrationSecrets("github");
+  return jsonResponse({ success: true });
+});
+
+// GET /integrations/github/test — verify PAT by calling GET /user
+integrationsRouter.get("/github/test", async (c) => {
+  const pm = getProjectManager(c);
+  const token = await pm.getIntegrationSecret("github", "token");
+  if (!token) return errorResponse("GitHub token not configured", 400);
+
+  try {
+    const provider = new GitHubApiProvider(token);
+    const user = await provider.getAuthenticatedUser();
+    return jsonResponse({ login: user.login });
+  } catch (err) {
+    return errorResponse(
+      err instanceof Error ? err.message : "GitHub API error",
       502,
     );
   }

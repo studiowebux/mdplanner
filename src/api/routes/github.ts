@@ -1,0 +1,82 @@
+/**
+ * GitHub integration routes — repo summary, issue operations.
+ *
+ * GET    /api/integrations/github/repo/:owner/:repo            — repo summary
+ * GET    /api/integrations/github/repo/:owner/:repo/issues/:n  — single issue status
+ * POST   /api/integrations/github/repo/:owner/:repo/issues     — create issue
+ */
+
+import { Hono } from "hono";
+import { GitHubApiProvider } from "../../lib/integrations/providers/github.ts";
+import { AppVariables, errorResponse, getProjectManager, jsonResponse } from "./context.ts";
+
+export const githubRouter = new Hono<{ Variables: AppVariables }>();
+
+/** Resolve token or return 400 */
+async function resolveToken(
+  c: Parameters<typeof getProjectManager>[0],
+): Promise<string | null> {
+  const pm = getProjectManager(c);
+  return pm.getIntegrationSecret("github", "token");
+}
+
+// GET /integrations/github/repo/:owner/:repo — fetch repo summary
+githubRouter.get("/repo/:owner/:repo", async (c) => {
+  const token = await resolveToken(c);
+  if (!token) return errorResponse("GitHub token not configured", 400);
+
+  const { owner, repo } = c.req.param();
+
+  try {
+    const provider = new GitHubApiProvider(token);
+    const data = await provider.getRepo(owner, repo);
+    return jsonResponse(data);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "GitHub API error";
+    const status = msg.includes("404") ? 404 : msg.includes("401") ? 401 : 502;
+    return errorResponse(msg, status);
+  }
+});
+
+// GET /integrations/github/repo/:owner/:repo/issues/:number — single issue
+githubRouter.get("/repo/:owner/:repo/issues/:number", async (c) => {
+  const token = await resolveToken(c);
+  if (!token) return errorResponse("GitHub token not configured", 400);
+
+  const { owner, repo, number } = c.req.param();
+  const issueNum = parseInt(number, 10);
+  if (isNaN(issueNum)) return errorResponse("Invalid issue number", 400);
+
+  try {
+    const provider = new GitHubApiProvider(token);
+    const data = await provider.getIssue(owner, repo, issueNum);
+    return jsonResponse(data);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "GitHub API error";
+    const status = msg.includes("404") ? 404 : msg.includes("401") ? 401 : 502;
+    return errorResponse(msg, status);
+  }
+});
+
+// POST /integrations/github/repo/:owner/:repo/issues — create issue
+githubRouter.post("/repo/:owner/:repo/issues", async (c) => {
+  const token = await resolveToken(c);
+  if (!token) return errorResponse("GitHub token not configured", 400);
+
+  const { owner, repo } = c.req.param();
+  const body = await c.req.json();
+  const title = body.title?.trim();
+  const issueBody = body.body?.trim() || "";
+
+  if (!title) return errorResponse("title is required", 400);
+
+  try {
+    const provider = new GitHubApiProvider(token);
+    const created = await provider.createIssue(owner, repo, title, issueBody);
+    return jsonResponse(created, 201);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "GitHub API error";
+    const status = msg.includes("404") ? 404 : msg.includes("401") ? 401 : 502;
+    return errorResponse(msg, status);
+  }
+});

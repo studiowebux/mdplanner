@@ -1,0 +1,49 @@
+/**
+ * GitHubProvider interface — provider pattern for GitHub REST API v3.
+ * Pattern: Provider pattern — define interface, implement per vendor.
+ */
+
+export interface GitHubRepo {
+  owner: string;
+  repo: string;
+  stars: number;
+  openIssues: number;
+  lastCommitAt: string | null;
+  license: string | null;
+  htmlUrl: string;
+}
+
+export interface GitHubIssue {
+  number: number;
+  title: string;
+  state: "open" | "closed";
+  htmlUrl: string;
+}
+
+export interface GitHubCreatedIssue {
+  number: number;
+  htmlUrl: string;
+}
+
+export interface GitHubUser {
+  login: string;
+}
+
+export interface GitHubProvider {
+  /** Verify the PAT and return the authenticated user. */
+  getAuthenticatedUser(): Promise<GitHubUser>;
+
+  /** Fetch repository summary (stars, open issues, last commit, license). */
+  getRepo(owner: string, repo: string): Promise<GitHubRepo>;
+
+  /** Fetch a single issue by number. */
+  getIssue(owner: string, repo: string, number: number): Promise<GitHubIssue>;
+
+  /** Create a new issue and return the created issue number and URL. */
+  createIssue(
+    owner: string,
+    repo: string,
+    title: string,
+    body: string,
+  ): Promise<GitHubCreatedIssue>;
+}

@@ -1,5 +1,5 @@
 // Config View Module
-import { BackupAPI, IntegrationsAPI, ProjectAPI } from "../api.js";
+import { BackupAPI, GitHubAPI, IntegrationsAPI, ProjectAPI } from "../api.js";
 import { AccessibilityManager } from "../ui/accessibility.js";
 
 function formatBytes(bytes) {
@@ -57,6 +57,7 @@ export class ConfigView {
     this.renderTaskDisplaySettings();
     this.initBackupPanel();
     this.initIntegrationsPanel();
+    this.initGitHubPanel();
   }
 
   renderTaskDisplaySettings() {
@@ -455,6 +456,7 @@ export class ConfigView {
       ],
       "Infrastructure": [
         { id: "dns", label: "DNS Tracker" },
+        { id: "github", label: "GitHub Integration" },
       ],
     };
 
@@ -573,6 +575,122 @@ export class ConfigView {
     }
   }
 
+  async initGitHubPanel() {
+    try {
+      const status = await GitHubAPI.getStatus();
+      const banner = document.getElementById("ghEncryptionBanner");
+      const statusEl = document.getElementById("ghStatus");
+      const deleteBtn = document.getElementById("ghDeleteBtn");
+      const defaultRepoInput = document.getElementById("ghDefaultRepo");
+
+      if (banner) {
+        if (status.encrypted) {
+          banner.className = "integration-encryption-banner encryption-ok";
+          banner.textContent = "Credentials encrypted with AES-256-GCM";
+        } else {
+          banner.className = "integration-encryption-banner encryption-warn";
+          banner.textContent =
+            "No encryption key set — token stored in plain text. Set MDPLANNER_SECRET_KEY to encrypt.";
+        }
+      }
+      if (statusEl) {
+        statusEl.textContent = status.configured
+          ? "Token configured"
+          : "Not configured";
+        statusEl.className = status.configured
+          ? "text-sm text-success"
+          : "text-sm text-secondary";
+      }
+      if (deleteBtn) {
+        deleteBtn.classList.toggle("hidden", !status.configured);
+      }
+      if (defaultRepoInput && status.defaultRepo) {
+        defaultRepoInput.value = status.defaultRepo;
+      }
+    } catch {
+      // Panel absent or API not reachable — silent
+    }
+  }
+
+  async saveDefaultRepo() {
+    const input = document.getElementById("ghDefaultRepo");
+    const btn = document.getElementById("ghSaveDefaultRepoBtn");
+    if (!input || !btn) return;
+
+    btn.disabled = true;
+    btn.textContent = "Saving...";
+    try {
+      await GitHubAPI.saveDefaultRepo(input.value.trim());
+    } catch {
+      alert("Failed to save default repository");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Save";
+    }
+  }
+
+  async saveGitHubToken() {
+    const input = document.getElementById("ghTokenInput");
+    const btn = document.getElementById("ghSaveBtn");
+    if (!input || !btn) return;
+    const token = input.value.trim();
+    if (!token) return;
+
+    btn.disabled = true;
+    btn.textContent = "Saving...";
+    try {
+      await GitHubAPI.saveToken(token);
+      input.value = "";
+      await this.initGitHubPanel();
+    } catch {
+      alert("Failed to save GitHub token");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Save token";
+    }
+  }
+
+  async deleteGitHubToken() {
+    if (!confirm("Remove GitHub credentials?")) return;
+    try {
+      await GitHubAPI.deleteToken();
+      await this.initGitHubPanel();
+    } catch {
+      alert("Failed to remove GitHub credentials");
+    }
+  }
+
+  async testGitHubConnection() {
+    const btn = document.getElementById("ghTestBtn");
+    const resultEl = document.getElementById("ghTestResult");
+    if (!btn) return;
+
+    btn.disabled = true;
+    btn.textContent = "Testing...";
+    if (resultEl) {
+      resultEl.textContent = "";
+      resultEl.className = "text-sm";
+    }
+
+    try {
+      const result = await GitHubAPI.testConnection();
+      if (resultEl) {
+        resultEl.textContent = `Connected as @${result.login}`;
+        resultEl.className = "text-sm text-success";
+      }
+    } catch (err) {
+      if (resultEl) {
+        resultEl.textContent = err?.message?.includes("401")
+          ? "Invalid token"
+          : "Connection failed";
+        resultEl.className = "text-sm text-error";
+      }
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Test connection";
+    }
+  }
+
   bindEvents() {
     // Save project config button
     document
@@ -641,6 +759,36 @@ export class ConfigView {
         if (e.key === "Enter") {
           e.preventDefault();
           this.saveCloudflareToken();
+        }
+      });
+
+    // GitHub integration events
+    document
+      .getElementById("ghSaveBtn")
+      ?.addEventListener("click", () => this.saveGitHubToken());
+    document
+      .getElementById("ghDeleteBtn")
+      ?.addEventListener("click", () => this.deleteGitHubToken());
+    document
+      .getElementById("ghTestBtn")
+      ?.addEventListener("click", () => this.testGitHubConnection());
+    document
+      .getElementById("ghTokenInput")
+      ?.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          this.saveGitHubToken();
+        }
+      });
+    document
+      .getElementById("ghSaveDefaultRepoBtn")
+      ?.addEventListener("click", () => this.saveDefaultRepo());
+    document
+      .getElementById("ghDefaultRepo")
+      ?.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          this.saveDefaultRepo();
         }
       });
 
