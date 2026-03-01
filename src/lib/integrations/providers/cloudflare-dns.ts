@@ -50,16 +50,28 @@ export class CloudflareDnsProvider implements DnsProvider {
 
   async fetchDomains(): Promise<DnsSyncResult[]> {
     const accountId = await this.resolveAccountId();
-    // deno-lint-ignore no-explicit-any
-    const data = await this.cfGet(
-      `/accounts/${accountId}/registrar/domains`,
-    ) as any;
+    const perPage = 50;
+    let page = 1;
+    let totalPages = 1;
 
-    const cfDomains: {
-      name: string;
-      expires_at?: string;
-      auto_renew?: boolean;
-    }[] = data?.result ?? [];
+    const cfDomains: { name: string; expires_at?: string; auto_renew?: boolean }[] = [];
+
+    do {
+      // deno-lint-ignore no-explicit-any
+      const data = await this.cfGet(
+        `/accounts/${accountId}/registrar/domains?page=${page}&per_page=${perPage}`,
+      ) as any;
+
+      const results: { name: string; expires_at?: string; auto_renew?: boolean }[] =
+        data?.result ?? [];
+      cfDomains.push(...results);
+
+      const info = data?.result_info;
+      if (info?.total_count && info?.per_page) {
+        totalPages = Math.ceil(info.total_count / info.per_page);
+      }
+      page++;
+    } while (page <= totalPages);
 
     const now = new Date().toISOString();
 
