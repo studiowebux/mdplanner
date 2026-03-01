@@ -39,20 +39,38 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
     "list_tasks",
     {
       description:
-        "List all tasks in the project. Optionally filter by section (status).",
+        "List all tasks in the project. Filter by section, project, or milestone.",
       inputSchema: {
         section: z.string().optional().describe(
           "Filter by section name e.g. 'Todo', 'In Progress', 'Done'",
         ),
+        project: z.string().optional().describe(
+          "Filter by project name (matches config.project)",
+        ),
+        milestone: z.string().optional().describe(
+          "Filter by milestone name (matches config.milestone)",
+        ),
       },
     },
-    async ({ section }) => {
+    async ({ section, project, milestone }) => {
       const tasks = await parser.readTasks();
-      const flat = flattenTasks(tasks);
-      const filtered = section
-        ? flat.filter((t) => t.section.toLowerCase() === section.toLowerCase())
-        : flat;
-      return ok(filtered);
+      let flat = flattenTasks(tasks);
+      if (section) {
+        flat = flat.filter((t) =>
+          t.section.toLowerCase() === section.toLowerCase()
+        );
+      }
+      if (project) {
+        flat = flat.filter((t) =>
+          (t.config?.project ?? "").toLowerCase() === project.toLowerCase()
+        );
+      }
+      if (milestone) {
+        flat = flat.filter((t) =>
+          (t.config?.milestone ?? "").toLowerCase() === milestone.toLowerCase()
+        );
+      }
+      return ok(flat);
     },
   );
 
@@ -86,10 +104,22 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         due_date: z.string().optional().describe("Due date (YYYY-MM-DD)"),
         priority: z.number().int().min(1).max(5).optional(),
         tag: z.array(z.string()).optional(),
+        milestone: z.string().optional().describe("Milestone name"),
+        project: z.string().optional().describe("Project name"),
       },
     },
     async (
-      { title, section, description, assignee, due_date, priority, tag },
+      {
+        title,
+        section,
+        description,
+        assignee,
+        due_date,
+        priority,
+        tag,
+        milestone,
+        project,
+      },
     ) => {
       const id = await parser.addTask({
         title,
@@ -101,6 +131,8 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
           ...(due_date && { due_date }),
           ...(priority != null && { priority }),
           ...(tag?.length && { tag }),
+          ...(milestone && { milestone }),
+          ...(project && { project }),
         },
       });
       return ok({ id });
@@ -123,6 +155,8 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         due_date: z.string().optional(),
         priority: z.number().int().min(1).max(5).optional(),
         tag: z.array(z.string()).optional(),
+        milestone: z.string().optional().describe("Milestone name"),
+        project: z.string().optional().describe("Project name"),
       },
     },
     async (
@@ -136,6 +170,8 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         due_date,
         priority,
         tag,
+        milestone,
+        project,
       },
     ) => {
       const success = await parser.updateTask(id, {
@@ -150,7 +186,42 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
           ...(due_date !== undefined && { due_date }),
           ...(priority !== undefined && { priority }),
           ...(tag !== undefined && { tag }),
+          ...(milestone !== undefined && { milestone }),
+          ...(project !== undefined && { project }),
         },
+      });
+      if (!success) return err(`Task '${id}' not found`);
+      return ok({ success: true });
+    },
+  );
+
+  server.registerTool(
+    "add_task_comment",
+    {
+      description:
+        "Append a comment to a task's description without replacing existing content. Use this to track progress, note what was done, or record a commit hash.",
+      inputSchema: {
+        id: z.string().describe("Task ID"),
+        comment: z.string().describe(
+          "Comment to append (markdown). E.g. '[v0.7.1] Fixed by commit abc1234 — ...'",
+        ),
+      },
+    },
+    async ({ id, comment }) => {
+      const tasks = await parser.readTasks();
+      const task = findTaskById(tasks, id);
+      if (!task) return err(`Task '${id}' not found`);
+
+      const existing = Array.isArray(task.description)
+        ? task.description.join("\n")
+        : (task.description ?? "");
+      const timestamp = new Date().toISOString().split("T")[0];
+      const appended = existing
+        ? `${existing}\n\n---\n**${timestamp}**: ${comment}`
+        : `**${timestamp}**: ${comment}`;
+
+      const success = await parser.updateTask(id, {
+        description: appended.split("\n"),
       });
       if (!success) return err(`Task '${id}' not found`);
       return ok({ success: true });
