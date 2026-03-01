@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-03-01
+
 ### Added
 
 - Ishikawa (fishbone) diagram view: create cause-and-effect diagrams with a
@@ -77,6 +79,72 @@ and this project adheres to
 - Backup panel in the Settings view: export button, import file picker with
   optional private key input, manual trigger button, and status summary
 - `backup` feature toggle registered in feature visibility settings
+- GitHub integration: link tasks to GitHub issues (create issue from task
+  sidenav, store issue URL in task frontmatter); link portfolio items to a
+  GitHub repository (show stars, open issues, last commit); PAT stored encrypted
+  in `project.md`; GitHub settings panel in Settings view
+- `GET /api/integrations/github/test` verifies the stored PAT by calling
+  `GET /user` on the GitHub API
+- Global autofill/suggest utility (`AutocompleteInput`) applied to people fields
+  across meetings, onboarding, and other free-text fields with known data
+  sources
+- Multi-entity CSV export: `GET /api/export/csv/:entity` for tasks, notes,
+  goals, meetings, people, and portfolio; export modal with JSON/CSV radio
+  selector
+- Import preview modal: shows first 10 rows before confirming; per-row
+  validation with structured error reporting (`{imported, skipped, errors}`)
+- Cloudflare Registrar domain fetch now paginates (`per_page=50`) to retrieve
+  all domains when an account has more than the default page size
+- Cloudflare settings panel now documents the required token permissions:
+  Account Settings: Read (to resolve account ID) and Registrar: Read (to list
+  domains)
+
+### Changed
+
+- Ideas view: added table/card view toggle (persisted in localStorage); added
+  optional `project` field linking an idea to a portfolio item; both card and
+  table views display the project as a badge
+- Idea sorter: font sizes raised to `var(--font-size-sm)` /
+  `var(--font-size-base)` throughout
+- Milestones view: progress bar track has
+  `1px solid var(--color-border-default)` border; all text uses CSS font-size
+  variables; delete button uses `btn-danger-ghost` error styling; card action
+  buttons anchored to card bottom via `margin-top: auto`; optional `project`
+  field added with badge display
+- Retrospective view: same delete button and font-size fixes as milestones
+- Meetings view: table/card view toggle (persisted in localStorage)
+- Habits calendar: prev/next month navigation arrows; hover tooltips showing
+  habit name, date, and completion status; per-day notes (click a completed cell
+  to add or edit a note, stored in `day_notes` frontmatter field)
+- DNS view: font sizes raised to CSS variables; "Add domain" button now opens
+  the create sidenav correctly; edit sidenav now slides in correctly (inner
+  `.sidenav-panel` receives the `active` class)
+- Settings view: GitHub default repository field removed (repo is now set
+  per-task in the task sidenav)
+- Summary view: project start date parsed as local date (not UTC midnight) to
+  avoid ±1 day timezone shift
+- DNS PUT route now performs a partial update — only fields present in the
+  request body are written, preventing batch operations (e.g. set renewal cost)
+  from overwriting unrelated fields such as Cloudflare-synced expiry and
+  auto-renew data
+- Infrastructure nav group: DNS and GitHub entries grouped under a collapsible
+  "Infrastructure" section in the desktop sidenav and mobile menu
+
+### Fixed
+
+- Cloudflare API token save bug: nested YAML objects (`integrations.cloudflare`)
+  were not parsed correctly on read, causing `getIntegrationSecret` to always
+  return `null`; fixed by extending `parseYamlSimple` to track pending nested
+  object targets
+- `parseInlineObject` no longer splits on commas inside quoted strings,
+  preventing corruption of values such as encrypted tokens that contain colons
+  and commas
+- Copy-link toast now fires on both the Clipboard API success path and the
+  `execCommand` fallback path
+- Section-move `<select>` added to list view task rows (was board-only)
+- WebDAV PROPFIND responses now include the correct `/webdav` path prefix in all
+  `<href>` elements; DAV clients (Obsidian, Cyberduck) no longer navigate to
+  wrong paths
 
 ## [0.6.0] - 2026-02-26
 
