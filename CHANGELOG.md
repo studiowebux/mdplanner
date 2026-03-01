@@ -10,6 +10,15 @@ and this project adheres to
 
 ## [0.7.2] - 2026-03-01
 
+### Added
+
+- SSE live view refresh: `GET /api/events` streams change events to all
+  connected browsers; mutations in tasks, notes, goals, milestones, meetings,
+  and portfolio emit events; the active view auto-reloads within 300 ms,
+  enabling live sync between browser and MCP agent
+- Sidenav scroll reset: every panel scrolls back to the top on open so
+  previously visited positions are not retained across open/close cycles
+
 ### Fixed
 
 - AI chat copy button invisible on mobile: added `@media (hover: none)` rule so
