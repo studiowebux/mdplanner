@@ -496,7 +496,7 @@ export class ListView {
     let dragActive = false;
     let longPressTimer = null;
     const LONG_PRESS_MS = 400;
-    const SCROLL_CANCEL_PX = 8;
+    const SCROLL_CANCEL_PX = 10;
 
     const cancelLongPress = () => {
       if (longPressTimer) {
@@ -539,8 +539,12 @@ export class ListView {
       const dx = touch.clientX - touchStartX;
       const dy = touch.clientY - touchStartY;
 
-      // Cancel long-press if the finger moved — user is scrolling
-      if (!dragActive && Math.abs(dx) + Math.abs(dy) > SCROLL_CANCEL_PX) {
+      // Cancel long-press if movement exceeds threshold or is primarily vertical (scrolling)
+      if (
+        !dragActive &&
+        (Math.abs(dx) + Math.abs(dy) > SCROLL_CANCEL_PX ||
+          Math.abs(dy) > Math.abs(dx))
+      ) {
         cancelLongPress();
         touchItem = null;
         return;
