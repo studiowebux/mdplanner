@@ -1,5 +1,6 @@
 /**
- * MCP tools for canvas (sticky notes) and mindmap operations.
+ * MCP tools for canvas (sticky notes) operations.
+ * Tools: list_sticky_notes, create_sticky_note, delete_sticky_note
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -52,60 +53,6 @@ export function registerCanvasTools(
     async ({ id }) => {
       const success = await parser.deleteStickyNote(id);
       if (!success) return err(`Sticky note '${id}' not found`);
-      return ok({ success: true });
-    },
-  );
-
-  // --- Mindmaps ---
-
-  server.registerTool(
-    "list_mindmaps",
-    { description: "List all mindmaps in the project.", inputSchema: {} },
-    async () =>
-      ok((await parser.readMindmaps()).map((m) => ({
-        id: m.id,
-        title: m.title,
-        nodeCount: m.nodes?.length ?? 0,
-      }))),
-  );
-
-  server.registerTool(
-    "get_mindmap",
-    {
-      description: "Get a single mindmap by its ID, including all nodes.",
-      inputSchema: { id: z.string().describe("Mindmap ID") },
-    },
-    async ({ id }) => {
-      const mindmaps = await parser.readMindmaps();
-      const m = mindmaps.find((m) => m.id === id);
-      if (!m) return err(`Mindmap '${id}' not found`);
-      return ok(m);
-    },
-  );
-
-  server.registerTool(
-    "create_mindmap",
-    {
-      description: "Create a new mindmap.",
-      inputSchema: {
-        title: z.string().describe("Mindmap title"),
-      },
-    },
-    async ({ title }) => {
-      const id = await parser.addMindmap({ title, nodes: [] });
-      return ok({ id });
-    },
-  );
-
-  server.registerTool(
-    "delete_mindmap",
-    {
-      description: "Delete a mindmap by its ID.",
-      inputSchema: { id: z.string().describe("Mindmap ID") },
-    },
-    async ({ id }) => {
-      const success = await parser.deleteMindmap(id);
-      if (!success) return err(`Mindmap '${id}' not found`);
       return ok({ success: true });
     },
   );

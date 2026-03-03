@@ -1,6 +1,6 @@
 /**
  * MCP tools for KPI snapshot operations.
- * Tools: list_kpis, create_kpi, update_kpi, delete_kpi
+ * Tools: list_kpis, get_kpi, create_kpi, update_kpi, delete_kpi
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -21,6 +21,20 @@ export function registerKpiTools(
       inputSchema: {},
     },
     async () => ok(await parser.readKpiSnapshots()),
+  );
+
+  server.registerTool(
+    "get_kpi",
+    {
+      description: "Get a single KPI snapshot by its ID.",
+      inputSchema: { id: z.string().describe("KPI snapshot ID") },
+    },
+    async ({ id }) => {
+      const items = await parser.readKpiSnapshots();
+      const item = items.find((i) => i.id === id);
+      if (!item) return err(`KPI snapshot '${id}' not found`);
+      return ok(item);
+    },
   );
 
   server.registerTool(
