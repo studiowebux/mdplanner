@@ -31,6 +31,12 @@ import { registerCrmTools } from "./tools/crm.ts";
 import { registerBillingTools } from "./tools/billing.ts";
 import { registerCanvasTools } from "./tools/canvas.ts";
 import { registerCapacityTools } from "./tools/capacity.ts";
+import { registerHabitTools } from "./tools/habits.ts";
+import { registerKpiTools } from "./tools/kpis.ts";
+import { registerInvestorTools } from "./tools/investors.ts";
+import { registerFishboneTools } from "./tools/fishbone.ts";
+import { registerDnsTools } from "./tools/dns.ts";
+import { registerMindmapTools } from "./tools/mindmaps.ts";
 import { registerResources } from "./resources.ts";
 
 /**
@@ -67,6 +73,12 @@ export function createMcpServer(pm: ProjectManager): McpServer {
   registerBillingTools(server, pm);
   registerCanvasTools(server, pm);
   registerCapacityTools(server, pm);
+  registerHabitTools(server, pm);
+  registerKpiTools(server, pm);
+  registerInvestorTools(server, pm);
+  registerFishboneTools(server, pm);
+  registerDnsTools(server, pm);
+  registerMindmapTools(server, pm);
   registerResources(server, pm);
 
   return server;
