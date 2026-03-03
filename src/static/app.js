@@ -334,6 +334,7 @@ class TaskManager {
     this.switchView(savedView);
     await this.loadTasks();
     this.loadPortfolio();
+    this.milestonesModule.load();
     this.checkTaskHashOnLoad();
     this.checkVersion();
     this._initSSE();
