@@ -122,7 +122,7 @@ export abstract class DirectoryParser<T extends { id: string }> {
       // Directory doesn't exist yet, use default path
     }
 
-    const content = this.serializeItem(item);
+    const content = this.injectModuleTag(this.serializeItem(item));
 
     await this.withWriteLock(item.id, async () => {
       await this.atomicWriteFile(filePath, content);
@@ -261,6 +261,25 @@ export abstract class DirectoryParser<T extends { id: string }> {
     const tempPath = filePath + ".tmp";
     await Deno.writeTextFile(tempPath, content);
     await Deno.rename(tempPath, filePath);
+  }
+
+  /**
+   * Inject the mdplanner module tag into file content frontmatter.
+   * Ensures `tags` always contains `mdplanner/<sectionName>`.
+   * Preserves any existing tags written by the serializer or added externally.
+   */
+  private injectModuleTag(content: string): string {
+    const { frontmatter, content: body } = parseFrontmatter<
+      Record<string, unknown>
+    >(content);
+    const moduleTag = `mdplanner/${this.sectionName}`;
+    const existing = Array.isArray(frontmatter.tags)
+      ? (frontmatter.tags as unknown[]).map(String)
+      : [];
+    if (!existing.includes(moduleTag)) {
+      frontmatter.tags = [moduleTag, ...existing];
+    }
+    return buildFileContent(frontmatter, body);
   }
 
   /**

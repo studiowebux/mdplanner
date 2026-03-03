@@ -32,6 +32,7 @@ export interface BackupStatus {
   lastBackupSize: number | null;
   lastBackupFile: string | null;
   lastError: string | null;
+  nextBackupTime: string | null;
 }
 
 function timestamp(): string {
@@ -41,6 +42,7 @@ function timestamp(): string {
 export class BackupScheduler {
   private readonly options: SchedulerOptions;
   private timer: ReturnType<typeof setInterval> | null = null;
+  private startTime: number = Date.now();
   private status: BackupStatus;
 
   constructor(options: SchedulerOptions) {
@@ -54,6 +56,9 @@ export class BackupScheduler {
       lastBackupSize: null,
       lastBackupFile: null,
       lastError: null,
+      nextBackupTime: new Date(
+        Date.now() + options.intervalHours * 60 * 60 * 1000,
+      ).toISOString(),
     };
   }
 
@@ -95,10 +100,14 @@ export class BackupScheduler {
 
     try {
       await Deno.writeFile(filePath, payload);
-      this.status.lastBackupTime = new Date().toISOString();
+      const now = new Date();
+      this.status.lastBackupTime = now.toISOString();
       this.status.lastBackupSize = payload.length;
       this.status.lastBackupFile = filename;
       this.status.lastError = null;
+      this.status.nextBackupTime = new Date(
+        now.getTime() + this.options.intervalHours * 60 * 60 * 1000,
+      ).toISOString();
       console.log(`[backup] wrote ${filename} (${payload.length} bytes)`);
       return { file: filename, size: payload.length };
     } catch (err) {

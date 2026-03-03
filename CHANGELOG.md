@@ -8,6 +8,16 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-03-03
+
+### Added
+
+- Backup status panel now shows backup file count, next scheduled backup time,
+  and schedule interval alongside last backup time and size
+- All markdown files now include a `tags: [mdplanner/<module>]` frontmatter
+  field on every write, making files discoverable by module type in Obsidian and
+  other tools; user-added tags in the file are preserved across saves
+
 ## [0.7.8] - 2026-03-02
 
 ### Fixed
