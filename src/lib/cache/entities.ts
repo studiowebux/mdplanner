@@ -170,7 +170,7 @@ export const ENTITIES: EntityDef[] = [
             Array.isArray(task.description)
               ? task.description.join("\n")
               : null,
-            json(config.tag),
+            json(config.tags),
             val(config.due_date),
             val(config.assignee),
             val(config.priority),

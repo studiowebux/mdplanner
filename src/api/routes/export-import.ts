@@ -109,7 +109,7 @@ function convertTasksToCSV(tasks: Task[]): string {
       escapeCSV(task.config.assignee || ""),
       escapeCSV(task.config.due_date || ""),
       escapeCSV(task.config.effort?.toString() || ""),
-      escapeCSV(task.config.tag?.join(", ") || ""),
+      escapeCSV(task.config.tags?.join(", ") || ""),
       escapeCSV(task.config.blocked_by?.join(", ") || ""),
       escapeCSV(task.config.milestone || ""),
       escapeCSV(task.description?.join(" ") || ""),
@@ -317,7 +317,7 @@ function parseTasksCSV(csvContent: string): ParseResult {
         assignee: values[5]?.trim() || undefined,
         due_date: values[6]?.trim() || undefined,
         effort: values[7]?.trim() ? parseInt(values[7]) : undefined,
-        tag: values[8]?.trim()
+        tags: values[8]?.trim()
           ? values[8].split(", ").filter((t) => t.trim())
           : undefined,
         blocked_by: values[9]?.trim()

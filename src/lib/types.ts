@@ -14,7 +14,7 @@ export interface TaskComment {
 }
 
 export interface TaskConfig {
-  tag?: string[];
+  tags?: string[];
   due_date?: string;
   assignee?: string;
   priority?: number;

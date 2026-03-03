@@ -52,7 +52,7 @@ async function main() {
   const task1 = await parser.addTask(
     "Implement CanvasDirectoryParser",
     "Todo",
-    { priority: 1, effort: 3, tag: ["Backend", "Parser"] },
+    { priority: 1, effort: 3, tags: ["Backend", "Parser"] },
     ["Create parser for sticky notes", "Support position and color"],
   );
   console.log(`   Created: ${DEMO_DIR}/board/todo/${task1.id}.md`);
@@ -60,14 +60,14 @@ async function main() {
   const task2 = await parser.addTask(
     "Implement MindmapsDirectoryParser",
     "Todo",
-    { priority: 2, effort: 4, tag: ["Backend", "Parser"] },
+    { priority: 2, effort: 4, tags: ["Backend", "Parser"] },
   );
   console.log(`   Created: ${DEMO_DIR}/board/todo/${task2.id}.md`);
 
   const task3 = await parser.addTask(
     "Write unit tests",
     "In Progress",
-    { priority: 1, effort: 2, tag: ["Testing"] },
+    { priority: 1, effort: 2, tags: ["Testing"] },
     ["Test YAML frontmatter parsing", "Test each parser"],
   );
   console.log(`   Created: ${DEMO_DIR}/board/in_progress/${task3.id}.md`);

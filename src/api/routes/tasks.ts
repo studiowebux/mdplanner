@@ -39,7 +39,7 @@ async function ensureMilestoneExists(
 // deno-lint-ignore no-explicit-any
 function bodyToConfig(body: Record<string, any>): TaskConfig {
   const config: TaskConfig = {};
-  if (Array.isArray(body.tag) && body.tag.length) config.tag = body.tag;
+  if (Array.isArray(body.tags) && body.tags.length) config.tags = body.tags;
   if (body.due_date) config.due_date = body.due_date;
   if (body.assignee) config.assignee = body.assignee;
   if (body.priority != null) config.priority = Number(body.priority);

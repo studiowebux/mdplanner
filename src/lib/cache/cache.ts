@@ -203,7 +203,7 @@ export const CacheConfigs = {
         Array.isArray(t.description)
           ? t.description.join("\n")
           : (t.description as BindValue),
-        JSON.stringify(config?.tag ?? []),
+        JSON.stringify(config?.tags ?? []),
         (config?.due_date as BindValue) ?? null,
         (config?.assignee as BindValue) ?? null,
         (config?.priority as BindValue) ?? null,
