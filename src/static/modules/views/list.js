@@ -1,5 +1,5 @@
 // List View Module
-import { TasksAPI } from "../api.js";
+import { GitHubAPI, TasksAPI } from "../api.js";
 import { TAG_CLASSES } from "../constants.js";
 import {
   formatDate,
@@ -265,6 +265,9 @@ export class ListView {
         container.appendChild(dropZone);
       }
     });
+
+    // Lazy-load live GitHub issue/PR states after render
+    if (this.tm.githubConfigured) this._loadGitHubBadgeStates();
   }
 
   createTaskElement(task, isChild = false) {
@@ -344,6 +347,22 @@ export class ListView {
         ? `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>${config.project}</span>`
         : ""
     }
+                            ${
+      (config.githubIssue || config.githubPR)
+        ? `<span class="github-badges">
+              ${config.githubIssue
+                ? config.githubRepo
+                  ? `<a href="https://github.com/${config.githubRepo}/issues/${config.githubIssue}" target="_blank" rel="noopener noreferrer" class="github-issue-badge" data-gh-issue="${config.githubIssue}" data-gh-repo="${config.githubRepo}">#${config.githubIssue}</a>`
+                  : `<span class="github-issue-badge" data-gh-issue="${config.githubIssue}">Issue #${config.githubIssue}</span>`
+                : ""}
+              ${config.githubPR
+                ? config.githubRepo
+                  ? `<a href="https://github.com/${config.githubRepo}/pull/${config.githubPR}" target="_blank" rel="noopener noreferrer" class="github-pr-badge" data-gh-pr="${config.githubPR}" data-gh-repo="${config.githubRepo}">PR #${config.githubPR}</a>`
+                  : `<span class="github-pr-badge" data-gh-pr="${config.githubPR}">PR #${config.githubPR}</span>`
+                : ""}
+           </span>`
+        : ""
+    }
                             <span class="text-muted">${task.section}</span>
                         </div>
                     </div>
@@ -404,6 +423,50 @@ export class ListView {
         `;
 
     return div;
+  }
+
+  /**
+   * Fetch live GitHub issue/PR states and update badge classes.
+   * Mirrors board.js _loadGitHubBadgeStates — runs non-blocking after render.
+   */
+  async _loadGitHubBadgeStates() {
+    if (!this.tm.githubConfigured) return;
+
+    const issueBadges = document.querySelectorAll("[data-gh-issue][data-gh-repo]");
+    const prBadges = document.querySelectorAll("[data-gh-pr][data-gh-repo]");
+
+    for (const el of issueBadges) {
+      const issueNum = parseInt(el.dataset.ghIssue, 10);
+      const repo = el.dataset.ghRepo;
+      if (!repo || !repo.includes("/")) continue;
+      const [owner, repoName] = repo.split("/");
+      try {
+        const issue = await GitHubAPI.getIssue(owner, repoName, issueNum);
+        el.className = `github-issue-badge github-issue-${issue.state}`;
+        el.title = issue.title;
+      } catch {
+        // Silently skip — badge stays neutral
+      }
+    }
+
+    for (const el of prBadges) {
+      const prNum = parseInt(el.dataset.ghPr, 10);
+      const repo = el.dataset.ghRepo;
+      if (!repo || !repo.includes("/")) continue;
+      const [owner, repoName] = repo.split("/");
+      try {
+        const pr = await GitHubAPI.getPR(owner, repoName, prNum);
+        const stateClass = pr.merged
+          ? "github-pr-merged"
+          : pr.state === "open"
+          ? "github-pr-open"
+          : "github-pr-closed";
+        el.className = `github-pr-badge ${stateClass}`;
+        el.title = pr.title;
+      } catch {
+        // Silently skip — badge stays neutral
+      }
+    }
   }
 
   async moveTask(taskId, targetSection) {
