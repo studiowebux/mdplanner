@@ -40,17 +40,33 @@ export function registerMilestoneTools(
   server.registerTool(
     "create_milestone",
     {
-      description: "Create a new milestone.",
+      description:
+        "Create a new milestone. project and name together must be unique — creating a duplicate returns an error.",
       inputSchema: {
         name: z.string().describe("Milestone name"),
-        description: z.string().optional(),
+        project: z.string().describe(
+          "Project this milestone belongs to (required to keep milestones unique per project)",
+        ),
+        description: z.string().describe(
+          "Short description of what this milestone delivers (strongly recommended)",
+        ).optional(),
         target: z.string().optional().describe("Target date (YYYY-MM-DD)"),
         status: z.enum(["open", "completed"]).optional(),
       },
     },
-    async ({ name, description, target, status }) => {
+    async ({ name, project, description, target, status }) => {
+      const existing = await parser.readMilestones();
+      const duplicate = existing.find(
+        (m) => m.name === name && m.project === project,
+      );
+      if (duplicate) {
+        return err(
+          `Milestone '${name}' already exists for project '${project}' (id: ${duplicate.id})`,
+        );
+      }
       const m = await parser.addMilestone({
         name,
+        project,
         ...(description && { description }),
         ...(target && { target }),
         status: status ?? "open",
@@ -66,14 +82,16 @@ export function registerMilestoneTools(
       inputSchema: {
         id: z.string().describe("Milestone ID"),
         name: z.string().optional(),
+        project: z.string().optional(),
         description: z.string().optional(),
         target: z.string().optional().describe("Target date (YYYY-MM-DD)"),
         status: z.enum(["open", "completed"]).optional(),
       },
     },
-    async ({ id, name, description, target, status }) => {
+    async ({ id, name, project, description, target, status }) => {
       const success = await parser.updateMilestone(id, {
         ...(name !== undefined && { name }),
+        ...(project !== undefined && { project }),
         ...(description !== undefined && { description }),
         ...(target !== undefined && { target }),
         ...(status !== undefined && { status }),

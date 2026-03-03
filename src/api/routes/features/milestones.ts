@@ -87,6 +87,20 @@ milestonesRouter.post("/", async (c) => {
   const parser = getParser(c);
   const body = await c.req.json();
   const milestones = await parser.readMilestones();
+
+  // Prevent duplicate name+project combinations
+  if (body.project) {
+    const duplicate = milestones.find(
+      (m) => m.name === body.name && m.project === body.project,
+    );
+    if (duplicate) {
+      return errorResponse(
+        `Milestone '${body.name}' already exists for project '${body.project}'`,
+        409,
+      );
+    }
+  }
+
   const id = body.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(
     /^-|-$/g,
     "",

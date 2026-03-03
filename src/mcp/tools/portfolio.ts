@@ -85,6 +85,7 @@ export function registerPortfolioTools(
         ...(start_date && { startDate: start_date }),
         ...(end_date && { endDate: end_date }),
         ...(team?.length && { team }),
+        ...(tech_stack?.length && { techStack: tech_stack }),
       });
       return ok({ id: item.id });
     },
@@ -107,8 +108,13 @@ export function registerPortfolioTools(
         tech_stack: z.array(z.string()).optional(),
       },
     },
-    async ({ id, ...updates }) => {
-      const result = await parser.updatePortfolioItem(id, updates);
+    async ({ id, tech_stack, start_date, end_date, ...rest }) => {
+      const result = await parser.updatePortfolioItem(id, {
+        ...rest,
+        ...(tech_stack !== undefined && { techStack: tech_stack }),
+        ...(start_date !== undefined && { startDate: start_date }),
+        ...(end_date !== undefined && { endDate: end_date }),
+      });
       if (!result) return err(`Portfolio item '${id}' not found`);
       return ok({ success: true });
     },
