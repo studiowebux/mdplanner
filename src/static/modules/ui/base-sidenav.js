@@ -6,6 +6,13 @@ import { Sidenav } from "./sidenav.js";
 import { showToast } from "./toast.js";
 import { UndoManager } from "./undo-manager.js";
 
+/** Global set of BaseSidenavModule instances that have unsaved changes. */
+const _dirtyModules = new Set();
+
+export function hasDirtyBaseSidenav() {
+  return _dirtyModules.size > 0;
+}
+
 /**
  * Base class for sidenav modules that follow the standard CRUD pattern.
  *
@@ -34,8 +41,12 @@ export class BaseSidenavModule {
     this.isSaving = false;
     /** @type {Map<string, UndoManager>} keyed by element ID */
     this._undoManagers = new Map();
+    /** True when any form field has been changed since last save/open. */
+    this._formDirty = false;
+    /** Delegated change listener for dirty tracking — removed on close. */
+    this._dirtyListener = () => this._setDirty(true);
     /** ESC key handler — bound once, removed on close */
-    this._escHandler = (e) => { if (e.key === "Escape") this.close(); };
+    this._escHandler = (e) => { if (e.key === "Escape") this._confirmAndClose(); };
   }
 
   /** @abstract */ get prefix() { throw new Error("override prefix"); }
@@ -59,8 +70,8 @@ export class BaseSidenavModule {
   // --- Lifecycle ---
 
   bindEvents() {
-    this.el("Close")?.addEventListener("click", () => this.close());
-    this.el("Cancel")?.addEventListener("click", () => this.close());
+    this.el("Close")?.addEventListener("click", () => this._confirmAndClose());
+    this.el("Cancel")?.addEventListener("click", () => this._confirmAndClose());
     this.el("Delete")?.addEventListener("click", () => this.handleDelete());
 
     const form = this.el("Form");
@@ -70,11 +81,11 @@ export class BaseSidenavModule {
         await this.save();
       });
     }
-
   }
 
   openNew() {
     this.editingId = null;
+    this._setDirty(false);
     this.el("Header").textContent = this.newLabel;
     this.clearForm();
     this.el("Delete")?.classList.add("hidden");
@@ -82,6 +93,7 @@ export class BaseSidenavModule {
     Sidenav.open(this.panelId);
     this._ensureFullscreenToggle();
     this._attachUndoManagers();
+    this._attachDirtyWatcher();
     this.onAfterOpen();
   }
 
@@ -90,6 +102,7 @@ export class BaseSidenavModule {
     if (!entity) return;
 
     this.editingId = entityId;
+    this._setDirty(false);
     this.el("Header").textContent = this.editLabel;
     this.fillForm(entity);
     this.el("Delete")?.classList.remove("hidden");
@@ -97,14 +110,23 @@ export class BaseSidenavModule {
     Sidenav.open(this.panelId);
     this._ensureFullscreenToggle();
     this._attachUndoManagers();
+    this._attachDirtyWatcher();
     this.onAfterOpen();
   }
 
   close() {
     document.removeEventListener("keydown", this._escHandler);
     this._detachUndoManagers();
+    this._detachDirtyWatcher();
+    this._setDirty(false);
     Sidenav.close(this.panelId);
     this.editingId = null;
+  }
+
+  /** Close with dirty-state guard — used by ESC, Cancel, Close button. */
+  _confirmAndClose() {
+    if (this._formDirty && !confirm("You have unsaved changes. Close anyway?")) return;
+    this.close();
   }
 
   async save() {
@@ -123,6 +145,7 @@ export class BaseSidenavModule {
       if (this.editingId) {
         await this.api.update(this.editingId, data);
         this._markAllSaved();
+        this._setDirty(false);
         this.showSaveStatus("Saved");
       } else {
         const response = await this.api.create(data);
@@ -134,6 +157,7 @@ export class BaseSidenavModule {
         }
         this.editingId = result.id;
         this._markAllSaved();
+        this._setDirty(false);
         this.showSaveStatus("Created");
 
         this.el("Header").textContent = this.editLabel;
@@ -212,6 +236,33 @@ export class BaseSidenavModule {
         }
       }, 2000);
     }
+  }
+
+  // --- Dirty state tracking ---
+
+  _setDirty(value) {
+    this._formDirty = value;
+    if (value) {
+      _dirtyModules.add(this);
+    } else {
+      _dirtyModules.delete(this);
+    }
+  }
+
+  /** Attach a delegated input/change listener on the panel to detect any user edits. */
+  _attachDirtyWatcher() {
+    const panel = document.getElementById(this.panelId);
+    if (!panel) return;
+    panel.addEventListener("input", this._dirtyListener);
+    panel.addEventListener("change", this._dirtyListener);
+  }
+
+  /** Remove the delegated dirty listener. */
+  _detachDirtyWatcher() {
+    const panel = document.getElementById(this.panelId);
+    if (!panel) return;
+    panel.removeEventListener("input", this._dirtyListener);
+    panel.removeEventListener("change", this._dirtyListener);
   }
 
   // --- Undo/Redo support ---

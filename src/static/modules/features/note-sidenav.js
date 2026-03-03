@@ -27,7 +27,7 @@ export class NoteSidenavModule {
     document.getElementById("noteSidenavClose")?.addEventListener(
       "click",
       () => {
-        this.close();
+        this._confirmAndClose();
       },
     );
 
@@ -35,7 +35,7 @@ export class NoteSidenavModule {
     document.getElementById("noteSidenavCancel")?.addEventListener(
       "click",
       () => {
-        this.close();
+        this._confirmAndClose();
       },
     );
 
@@ -232,6 +232,11 @@ export class NoteSidenavModule {
     Sidenav.close("noteSidenav");
     this.editingNoteIndex = null;
     this.isNewNote = false;
+  }
+
+  _confirmAndClose() {
+    if (this._hasAnyUnsavedChanges() && !confirm("You have unsaved changes. Close anyway?")) return;
+    this.close();
   }
 
   setMode(mode) {

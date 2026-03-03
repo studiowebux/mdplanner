@@ -28,11 +28,11 @@ export class JournalSidenavModule {
   bindEvents() {
     document.getElementById("journalSidenavClose")?.addEventListener(
       "click",
-      () => this.close(),
+      () => this._confirmAndClose(),
     );
     document.getElementById("journalSidenavCancel")?.addEventListener(
       "click",
-      () => this.close(),
+      () => this._confirmAndClose(),
     );
     document.getElementById("journalSidenavSave")?.addEventListener(
       "click",
@@ -109,6 +109,14 @@ export class JournalSidenavModule {
     this._detachJournalUndo();
     Sidenav.close("journalSidenav");
     this.editingId = null;
+  }
+
+  _confirmAndClose() {
+    if (
+      this._undoManager?.hasUnsavedChanges() &&
+      !confirm("You have unsaved changes. Close anyway?")
+    ) return;
+    this.close();
   }
 
   // ------------------------------------------------------------------
