@@ -11,7 +11,6 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
-import { eventBus } from "../../../lib/event-bus.ts";
 
 export const leanCanvasRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -47,7 +46,6 @@ leanCanvasRouter.post("/", async (c) => {
   leanCanvases.push(newCanvas);
   await parser.saveLeanCanvases(leanCanvases);
   await cacheWriteThrough(c, "lean_canvas");
-  eventBus.emit({ entity: "leanCanvas", action: "created", id: newCanvas.id });
   return jsonResponse(newCanvas, 201);
 });
 
@@ -62,7 +60,6 @@ leanCanvasRouter.put("/:id", async (c) => {
   leanCanvases[index] = { ...leanCanvases[index], ...body };
   await parser.saveLeanCanvases(leanCanvases);
   await cacheWriteThrough(c, "lean_canvas");
-  eventBus.emit({ entity: "leanCanvas", action: "updated", id });
   return jsonResponse({ success: true });
 });
 
@@ -77,6 +74,5 @@ leanCanvasRouter.delete("/:id", async (c) => {
   }
   await parser.saveLeanCanvases(filtered);
   cachePurge(c, "lean_canvas", id);
-  eventBus.emit({ entity: "leanCanvas", action: "deleted", id });
   return jsonResponse({ success: true });
 });

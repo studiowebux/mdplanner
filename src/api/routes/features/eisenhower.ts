@@ -12,7 +12,6 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
-import { eventBus } from "../../../lib/event-bus.ts";
 
 export const eisenhowerRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -36,7 +35,6 @@ eisenhowerRouter.post("/", async (c) => {
     notUrgentNotImportant: body.notUrgentNotImportant || [],
   });
   await cacheWriteThrough(c, "eisenhower");
-  eventBus.emit({ entity: "eisenhower", action: "created", id: matrix.id });
   return jsonResponse(matrix, 201);
 });
 
@@ -48,7 +46,6 @@ eisenhowerRouter.put("/:id", async (c) => {
   const updated = await parser.updateEisenhowerMatrix(id, body);
   if (!updated) return errorResponse("Not found", 404);
   await cacheWriteThrough(c, "eisenhower");
-  eventBus.emit({ entity: "eisenhower", action: "updated", id });
   return jsonResponse(updated);
 });
 
@@ -59,6 +56,5 @@ eisenhowerRouter.delete("/:id", async (c) => {
   const success = await parser.deleteEisenhowerMatrix(id);
   if (!success) return errorResponse("Not found", 404);
   cachePurge(c, "eisenhower", id);
-  eventBus.emit({ entity: "eisenhower", action: "deleted", id });
   return jsonResponse({ success: true });
 });

@@ -12,7 +12,6 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
-import { eventBus } from "../../../lib/event-bus.ts";
 
 export const investorsRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -39,7 +38,6 @@ investorsRouter.post("/", async (c) => {
     notes: body.notes || "",
   });
   await cacheWriteThrough(c, "investors");
-  eventBus.emit({ entity: "investors", action: "created", id: investor.id });
   return jsonResponse(investor, 201);
 });
 
@@ -51,7 +49,6 @@ investorsRouter.put("/:id", async (c) => {
   const updated = await parser.updateInvestor(id, body);
   if (!updated) return errorResponse("Not found", 404);
   await cacheWriteThrough(c, "investors");
-  eventBus.emit({ entity: "investors", action: "updated", id });
   return jsonResponse(updated);
 });
 
@@ -62,6 +59,5 @@ investorsRouter.delete("/:id", async (c) => {
   const success = await parser.deleteInvestor(id);
   if (!success) return errorResponse("Not found", 404);
   cachePurge(c, "investors", id);
-  eventBus.emit({ entity: "investors", action: "deleted", id });
   return jsonResponse({ success: true });
 });

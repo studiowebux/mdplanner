@@ -136,6 +136,7 @@ export class BaseSidenavModule {
       }
 
       await this.reloadData();
+      this.tm.suppressSSE?.(this.entityName);
       this.onAfterSave();
       if (this.closeAfterSave) this.close();
     } catch (error) {
@@ -160,6 +161,7 @@ export class BaseSidenavModule {
       await this.api.delete(this.editingId);
       showToast(`${this.entityName} deleted`, "success");
       await this.reloadData();
+      this.tm.suppressSSE?.(this.entityName);
       this.close();
     } catch (error) {
       console.error(`Error deleting ${this.entityName}:`, error);

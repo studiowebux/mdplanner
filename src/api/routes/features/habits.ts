@@ -11,7 +11,6 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
-import { eventBus } from "../../../lib/event-bus.ts";
 
 export const habitsRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -45,7 +44,6 @@ habitsRouter.post("/", async (c) => {
     notes: body.notes,
   });
   await cacheWriteThrough(c, "habits");
-  eventBus.emit({ entity: "habits", action: "created", id: habit.id });
   return jsonResponse({ success: true, id: habit.id }, 201);
 });
 
@@ -64,7 +62,6 @@ habitsRouter.put("/:id", async (c) => {
   });
   if (!updated) return errorResponse("Not found", 404);
   await cacheWriteThrough(c, "habits");
-  eventBus.emit({ entity: "habits", action: "updated", id });
   return jsonResponse({ success: true });
 });
 
@@ -82,7 +79,6 @@ habitsRouter.post("/:id/complete", async (c) => {
   const updated = await parser.markHabitComplete(id, date);
   if (!updated) return errorResponse("Not found", 404);
   await cacheWriteThrough(c, "habits");
-  eventBus.emit({ entity: "habits", action: "updated", id });
   return jsonResponse(updated);
 });
 
@@ -94,7 +90,6 @@ habitsRouter.delete("/:id/complete/:date", async (c) => {
   const updated = await parser.unmarkHabitComplete(id, date);
   if (!updated) return errorResponse("Not found", 404);
   await cacheWriteThrough(c, "habits");
-  eventBus.emit({ entity: "habits", action: "updated", id });
   return jsonResponse(updated);
 });
 
@@ -105,6 +100,5 @@ habitsRouter.delete("/:id", async (c) => {
   const deleted = await parser.deleteHabit(id);
   if (!deleted) return errorResponse("Not found", 404);
   cachePurge(c, "habits", id);
-  eventBus.emit({ entity: "habits", action: "deleted", id });
   return jsonResponse({ success: true });
 });

@@ -11,7 +11,6 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
-import { eventBus } from "../../../lib/event-bus.ts";
 
 export const briefRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -46,7 +45,6 @@ briefRouter.post("/", async (c) => {
   briefs.push(newBrief);
   await parser.saveBriefs(briefs);
   await cacheWriteThrough(c, "brief");
-  eventBus.emit({ entity: "brief", action: "created", id: newBrief.id });
   return jsonResponse(newBrief, 201);
 });
 
@@ -61,7 +59,6 @@ briefRouter.put("/:id", async (c) => {
   briefs[index] = { ...briefs[index], ...body };
   await parser.saveBriefs(briefs);
   await cacheWriteThrough(c, "brief");
-  eventBus.emit({ entity: "brief", action: "updated", id });
   return jsonResponse(briefs[index]);
 });
 
@@ -74,6 +71,5 @@ briefRouter.delete("/:id", async (c) => {
   if (filtered.length === briefs.length) return errorResponse("Not found", 404);
   await parser.saveBriefs(filtered);
   cachePurge(c, "brief", id);
-  eventBus.emit({ entity: "brief", action: "deleted", id });
   return jsonResponse({ success: true });
 });

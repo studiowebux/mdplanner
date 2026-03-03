@@ -11,7 +11,6 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
-import { eventBus } from "../../../lib/event-bus.ts";
 
 export const retrospectivesRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -39,7 +38,6 @@ retrospectivesRouter.post("/", async (c) => {
   });
   await parser.saveRetrospectives(retrospectives);
   await cacheWriteThrough(c, "retrospectives");
-  eventBus.emit({ entity: "retrospectives", action: "created", id });
   return jsonResponse({ success: true, id }, 201);
 });
 
@@ -54,7 +52,6 @@ retrospectivesRouter.put("/:id", async (c) => {
   retrospectives[index] = { ...retrospectives[index], ...body };
   await parser.saveRetrospectives(retrospectives);
   await cacheWriteThrough(c, "retrospectives");
-  eventBus.emit({ entity: "retrospectives", action: "updated", id });
   return jsonResponse({ success: true });
 });
 
@@ -69,6 +66,5 @@ retrospectivesRouter.delete("/:id", async (c) => {
   }
   await parser.saveRetrospectives(filtered);
   cachePurge(c, "retrospectives", id);
-  eventBus.emit({ entity: "retrospectives", action: "deleted", id });
   return jsonResponse({ success: true });
 });

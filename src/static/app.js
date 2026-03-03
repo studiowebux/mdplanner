@@ -311,6 +311,12 @@ class TaskManager {
     this.sseClient = new SSEClient();
     /** @type {Map<string, number>} debounce timer per entity */
     this._sseDebounce = new Map();
+    /**
+     * SSE suppression: when a view explicitly reloads (after a user mutation),
+     * call suppressSSE(entity) so the SSE-triggered reload 300ms later is skipped.
+     * @type {Map<string, number>} entity → timestamp until which SSE is suppressed
+     */
+    this._sseSuppress = new Map();
 
     this.init();
   }
@@ -348,7 +354,25 @@ class TaskManager {
     });
   }
 
+  /**
+   * Call after an explicit user-initiated reload to prevent the imminent
+   * SSE-triggered reload from firing a second time.
+   * @param {string} entity
+   */
+  suppressSSE(entity) {
+    this._sseSuppress.set(entity, Date.now() + 1000);
+    const existing = this._sseDebounce.get(entity);
+    if (existing) {
+      clearTimeout(existing);
+      this._sseDebounce.delete(entity);
+    }
+  }
+
   _handleSSEChange({ entity }) {
+    // Skip if a self-initiated reload just happened for this entity.
+    const suppressUntil = this._sseSuppress.get(entity) || 0;
+    if (Date.now() < suppressUntil) return;
+
     // Debounce per entity: collapse rapid bursts into a single reload.
     const existing = this._sseDebounce.get(entity);
     if (existing) clearTimeout(existing);

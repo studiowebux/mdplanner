@@ -10,7 +10,6 @@ import {
   getParser,
   jsonResponse,
 } from "./context.ts";
-import { eventBus } from "../../lib/event-bus.ts";
 
 export const c4Router = new Hono<{ Variables: AppVariables }>();
 
@@ -32,7 +31,6 @@ c4Router.post("/", async (c) => {
   try {
     await parser.saveProjectInfo(projectInfo);
     await cacheWriteThrough(c, "c4_components");
-    eventBus.emit({ entity: "c4", action: "updated" });
     return jsonResponse({ success: true });
   } catch (error) {
     console.error("Failed to save C4 components:", error);
