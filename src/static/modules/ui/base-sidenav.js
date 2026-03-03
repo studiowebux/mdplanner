@@ -127,6 +127,11 @@ export class BaseSidenavModule {
       } else {
         const response = await this.api.create(data);
         const result = await response.json();
+        if (!response.ok) {
+          this.showSaveStatus(result.error || "Error");
+          showToast(result.error || `Error creating ${this.entityName}`, "error");
+          return;
+        }
         this.editingId = result.id;
         this._markAllSaved();
         this.showSaveStatus("Created");

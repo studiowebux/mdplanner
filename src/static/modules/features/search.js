@@ -119,13 +119,15 @@ export class GlobalSearch {
     this.taskManager.switchView(view);
     this.close();
 
-    // For tasks: open the sidenav after the view renders so the user lands on the item
+    // For tasks: open the sidenav and scroll to the row after the view renders
     if (result.type === "task") {
       setTimeout(() => {
         const task = this.taskManager.findTaskById(result.id);
         if (task && this.taskManager.taskSidenavModule) {
           this.taskManager.taskSidenavModule.open(task);
         }
+        const row = document.querySelector(`[data-task-id="${result.id}"]`);
+        if (row) row.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 150);
     }
   }
