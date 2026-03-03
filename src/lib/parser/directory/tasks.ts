@@ -747,9 +747,19 @@ export class TasksDirectoryParser {
       id: existing.id, // Prevent ID change
     };
 
-    // If section changed, use moveToSection
+    // If section changed, move file: write to new section dir then remove old file.
+    // Do NOT call moveToSection() here — it re-reads the task from disk and would
+    // discard all other field updates (assignee, priority, etc.) in `updated`.
     if (newSection !== oldSection) {
-      await this.moveToSection(id, newSection);
+      const oldFilePath = await this.findTaskFilePath(id, oldSection);
+      await this.write(updated);
+      if (oldFilePath) {
+        try {
+          await Deno.remove(oldFilePath);
+        } catch {
+          // Ignore — file may already be removed
+        }
+      }
     } else {
       // write() handles cleanup of mismatched filenames
       await this.write(updated);

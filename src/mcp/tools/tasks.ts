@@ -50,9 +50,15 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         milestone: z.string().optional().describe(
           "Filter by milestone name (matches config.milestone)",
         ),
+        assignee: z.string().optional().describe(
+          "Filter by assignee person ID (matches config.assignee)",
+        ),
+        priority: z.number().int().min(1).max(5).optional().describe(
+          "Filter by priority level (1 = highest, 5 = lowest)",
+        ),
       },
     },
-    async ({ section, project, milestone }) => {
+    async ({ section, project, milestone, assignee, priority }) => {
       const tasks = await parser.readTasks();
       let flat = flattenTasks(tasks);
       if (section) {
@@ -69,6 +75,12 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         flat = flat.filter((t) =>
           (t.config?.milestone ?? "").toLowerCase() === milestone.toLowerCase()
         );
+      }
+      if (assignee) {
+        flat = flat.filter((t) => t.config?.assignee === assignee);
+      }
+      if (priority !== undefined) {
+        flat = flat.filter((t) => t.config?.priority === priority);
       }
       return ok(flat);
     },

@@ -8,6 +8,22 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-03-03
+
+### Fixed
+
+- MCP `update_task`: when `section` and other fields (e.g. `assignee`) were
+  combined in one call, the section moved correctly but all other field changes
+  were silently dropped; the task was re-read from disk on move, discarding the
+  merged update payload — now the fully merged task is written before the old
+  file is removed
+
+### Added
+
+- MCP `list_tasks`: new `assignee` filter (person ID) and `priority` filter
+  (integer 1–5) so Claude can query tasks assigned to itself or by priority
+  without fetching all tasks and filtering client-side
+
 ## [0.8.0] - 2026-03-03
 
 ### Added
