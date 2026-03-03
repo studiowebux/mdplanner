@@ -36,6 +36,7 @@ import { registerKpiTools } from "./tools/kpis.ts";
 import { registerInvestorTools } from "./tools/investors.ts";
 import { registerFishboneTools } from "./tools/fishbone.ts";
 import { registerDnsTools } from "./tools/dns.ts";
+import { registerGitHubTools } from "./tools/github.ts";
 import { registerMindmapTools } from "./tools/mindmaps.ts";
 import { registerResources } from "./resources.ts";
 
@@ -78,6 +79,7 @@ export function createMcpServer(pm: ProjectManager): McpServer {
   registerInvestorTools(server, pm);
   registerFishboneTools(server, pm);
   registerDnsTools(server, pm);
+  registerGitHubTools(server, pm);
   registerMindmapTools(server, pm);
   registerResources(server, pm);
 
