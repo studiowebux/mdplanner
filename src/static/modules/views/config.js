@@ -363,7 +363,7 @@ export class ConfigView {
     const input = document.getElementById("newTagInput");
     const tagName = input.value.trim();
 
-    if (tagName && !this.tm.projectConfig.tags.includes(tagName)) {
+    if (tagName && !/\s/.test(tagName) && !this.tm.projectConfig.tags.includes(tagName)) {
       this.tm.projectConfig.tags.push(tagName);
       // Sort tags alphabetically
       this.tm.projectConfig.tags.sort();

@@ -16,6 +16,11 @@ and this project adheres to
   tools, cache, CSV export/import, and frontend; existing task files must be
   migrated with `find board -name "*.md" -exec sed -i 's/^tag:/tags:/' {} \;`
 
+### Fixed
+
+- Settings: tag names containing spaces are now rejected; placeholder updated to
+  "New tag name (no spaces)"
+
 ### Added
 
 - MCP `update_task`: new fields `effort`, `blocked_by`, `planned_start`,
