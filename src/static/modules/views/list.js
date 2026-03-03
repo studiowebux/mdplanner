@@ -301,8 +301,8 @@ export class ListView {
         : ""
     }
                             ${
-      config.tag
-        ? config.tag.map((tag) =>
+      config.tags
+        ? config.tags.map((tag) =>
           `<span class="px-2 py-0.5 text-xs font-medium rounded border ${TAG_CLASSES}">${tag}</span>`
         ).join("")
         : ""

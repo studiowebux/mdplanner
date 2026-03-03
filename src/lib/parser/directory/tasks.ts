@@ -11,7 +11,7 @@ interface TaskFrontmatter {
   id: string;
   completed: boolean;
   order?: number;
-  tag?: string[];
+  tags?: string[];
   due_date?: string;
   assignee?: string;
   priority?: number;
@@ -489,7 +489,7 @@ export class TasksDirectoryParser {
     }
 
     const config: TaskConfig = {};
-    if (frontmatter.tag) config.tag = frontmatter.tag;
+    if (frontmatter.tags) config.tags = frontmatter.tags;
     if (frontmatter.due_date) config.due_date = frontmatter.due_date;
     if (frontmatter.assignee) config.assignee = frontmatter.assignee;
     if (frontmatter.priority !== undefined) {
@@ -542,7 +542,7 @@ export class TasksDirectoryParser {
     };
 
     // Add config fields
-    if (task.config.tag?.length) frontmatter.tag = task.config.tag;
+    if (task.config.tags?.length) frontmatter.tags = task.config.tags;
     if (task.config.due_date) frontmatter.due_date = task.config.due_date;
     if (task.config.assignee) frontmatter.assignee = task.config.assignee;
     if (task.config.priority !== undefined) {

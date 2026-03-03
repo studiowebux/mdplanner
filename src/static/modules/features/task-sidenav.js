@@ -314,7 +314,7 @@ export class TaskSidenavModule {
     // Tags — check matching checkboxes in the tag-checkbox-list container
     const tagsContainer = document.getElementById("sidenavTaskTags");
     if (tagsContainer) {
-      const tags = Array.isArray(cfg.tag) ? cfg.tag : (cfg.tag ? [cfg.tag] : []);
+      const tags = Array.isArray(cfg.tags) ? cfg.tags : [];
       tagsContainer.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
         cb.checked = tags.includes(cb.value);
       });
@@ -385,7 +385,7 @@ export class TaskSidenavModule {
       planned_end: getValue("sidenavTaskPlannedEnd") || null,
       milestone: getValue("sidenavTaskMilestone"),
       project: getValue("sidenavTaskProject") || null,
-      tag: getSelectedValues("sidenavTaskTags"),
+      tags: getSelectedValues("sidenavTaskTags"),
       githubRepo: getValue("sidenavTaskGithubRepo") || null,
       githubIssue: getValue("sidenavTaskGithubIssue")
         ? parseInt(getValue("sidenavTaskGithubIssue"))

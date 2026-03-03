@@ -242,8 +242,8 @@ export class BoardView {
         : ""
     }
                     ${
-      config.tag
-        ? config.tag
+      config.tags
+        ? config.tags
           .map(
             (tag) =>
               `<span class="inline-block px-2 py-0.5 text-xs font-medium rounded border ${TAG_CLASSES}">${tag}</span>`,

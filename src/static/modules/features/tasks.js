@@ -81,7 +81,7 @@ export class TasksModule {
       // Set selected tags
       const tagSelect = document.getElementById("taskTags");
       Array.from(tagSelect.options).forEach((option) => {
-        option.selected = config.tag && config.tag.includes(option.value);
+        option.selected = config.tags && config.tags.includes(option.value);
       });
 
       // Set selected dependencies
@@ -343,8 +343,8 @@ export class TasksModule {
         task.config.assignee.toLowerCase().includes(query)) ||
       (task.config.milestone &&
         task.config.milestone.toLowerCase().includes(query)) ||
-      (task.config.tag &&
-        task.config.tag.some((tag) => tag.toLowerCase().includes(query))) ||
+      (task.config.tags &&
+        task.config.tags.some((tag) => tag.toLowerCase().includes(query))) ||
       (task.description &&
         task.description.some((desc) => desc.toLowerCase().includes(query)))
     );

@@ -8,6 +8,29 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.8.2] - 2026-03-03
+
+### Changed
+
+- Task `tag` field renamed to `tags` across all layers: parser, REST API, MCP
+  tools, cache, CSV export/import, and frontend; existing task files must be
+  migrated with `find board -name "*.md" -exec sed -i 's/^tag:/tags:/' {} \;`
+
+### Fixed
+
+- Settings: tag names containing spaces are now rejected; placeholder updated to
+  "New tag name (no spaces)"
+
+### Added
+
+- MCP `update_task`: new fields `effort`, `blocked_by`, `planned_start`,
+  `planned_end` so task scheduling and dependency tracking can be set via MCP
+- MCP `list_tasks`: new `completed` boolean filter to exclude or isolate
+  completed tasks without fetching everything
+- MCP `create_meeting` and `update_meeting`: `actions` array field so meeting
+  action items can be written via MCP (each action: description, owner, due,
+  status)
+
 ## [0.8.1] - 2026-03-03
 
 ### Fixed

@@ -56,9 +56,12 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         priority: z.number().int().min(1).max(5).optional().describe(
           "Filter by priority level (1 = highest, 5 = lowest)",
         ),
+        completed: z.boolean().optional().describe(
+          "Filter by completion state (false = open only, true = completed only)",
+        ),
       },
     },
-    async ({ section, project, milestone, assignee, priority }) => {
+    async ({ section, project, milestone, assignee, priority, completed }) => {
       const tasks = await parser.readTasks();
       let flat = flattenTasks(tasks);
       if (section) {
@@ -81,6 +84,9 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
       }
       if (priority !== undefined) {
         flat = flat.filter((t) => t.config?.priority === priority);
+      }
+      if (completed !== undefined) {
+        flat = flat.filter((t) => t.completed === completed);
       }
       return ok(flat);
     },
@@ -115,7 +121,7 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         assignee: z.string().optional(),
         due_date: z.string().optional().describe("Due date (YYYY-MM-DD)"),
         priority: z.number().int().min(1).max(5).optional(),
-        tag: z.array(z.string()).optional(),
+        tags: z.array(z.string()).optional(),
         milestone: z.string().optional().describe("Milestone name"),
         project: z.string().optional().describe("Project name"),
       },
@@ -128,7 +134,7 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         assignee,
         due_date,
         priority,
-        tag,
+        tags,
         milestone,
         project,
       },
@@ -142,7 +148,7 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
           ...(assignee && { assignee }),
           ...(due_date && { due_date }),
           ...(priority != null && { priority }),
-          ...(tag?.length && { tag }),
+          ...(tags?.length && { tags }),
           ...(milestone && { milestone }),
           ...(project && { project }),
         },
@@ -166,9 +172,21 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         assignee: z.string().optional(),
         due_date: z.string().optional(),
         priority: z.number().int().min(1).max(5).optional(),
-        tag: z.array(z.string()).optional(),
+        effort: z.number().int().optional().describe(
+          "Effort estimate (story points or hours)",
+        ),
+        tags: z.array(z.string()).optional(),
         milestone: z.string().optional().describe("Milestone name"),
         project: z.string().optional().describe("Project name"),
+        blocked_by: z.array(z.string()).optional().describe(
+          "List of task IDs this task is blocked by",
+        ),
+        planned_start: z.string().optional().describe(
+          "Planned start date (YYYY-MM-DD)",
+        ),
+        planned_end: z.string().optional().describe(
+          "Planned end date (YYYY-MM-DD)",
+        ),
       },
     },
     async (
@@ -181,9 +199,13 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         assignee,
         due_date,
         priority,
-        tag,
+        effort,
+        tags,
         milestone,
         project,
+        blocked_by,
+        planned_start,
+        planned_end,
       },
     ) => {
       const success = await parser.updateTask(id, {
@@ -197,9 +219,13 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
           ...(assignee !== undefined && { assignee }),
           ...(due_date !== undefined && { due_date }),
           ...(priority !== undefined && { priority }),
-          ...(tag !== undefined && { tag }),
+          ...(effort !== undefined && { effort }),
+          ...(tags !== undefined && { tags }),
           ...(milestone !== undefined && { milestone }),
           ...(project !== undefined && { project }),
+          ...(blocked_by !== undefined && { blocked_by }),
+          ...(planned_start !== undefined && { planned_start }),
+          ...(planned_end !== undefined && { planned_end }),
         },
       });
       if (!success) return err(`Task '${id}' not found`);

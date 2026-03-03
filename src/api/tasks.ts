@@ -2874,7 +2874,7 @@ export class TaskAPI {
         this.escapeCSV(task.config.assignee || ""),
         this.escapeCSV(task.config.due_date || ""),
         this.escapeCSV(task.config.effort?.toString() || ""),
-        this.escapeCSV(task.config.tag?.join(", ") || ""),
+        this.escapeCSV(task.config.tags?.join(", ") || ""),
         this.escapeCSV(task.config.blocked_by?.join(", ") || ""),
         this.escapeCSV(task.config.milestone || ""),
         this.escapeCSV(task.description?.join(" ") || ""),
@@ -2905,7 +2905,7 @@ export class TaskAPI {
             assignee: values[5] || undefined,
             due_date: values[6] || undefined,
             effort: values[7] ? parseInt(values[7]) : undefined,
-            tag: values[8]
+            tags: values[8]
               ? values[8].split(", ").filter((t) => t.trim())
               : undefined,
             blocked_by: values[9]
@@ -3501,8 +3501,8 @@ export class TaskAPI {
       const checkbox = task.completed ? "[x]" : "[ ]";
       const configParts: string[] = [];
 
-      if (task.config.tag && task.config.tag.length > 0) {
-        configParts.push(`tag: [${task.config.tag.join(", ")}]`);
+      if (task.config.tags && task.config.tags.length > 0) {
+        configParts.push(`tags: [${task.config.tags.join(", ")}]`);
       }
       if (task.config.due_date) {
         configParts.push(`due_date: ${task.config.due_date}`);

@@ -8,6 +8,13 @@ import { z } from "zod";
 import { ProjectManager } from "../../lib/project-manager.ts";
 import { err, ok } from "./utils.ts";
 
+const ActionSchema = z.object({
+  description: z.string(),
+  owner: z.string().optional(),
+  due: z.string().optional().describe("Due date (YYYY-MM-DD)"),
+  status: z.enum(["open", "done"]).optional().default("open"),
+});
+
 export function registerMeetingTools(
   server: McpServer,
   pm: ProjectManager,
@@ -60,16 +67,25 @@ export function registerMeetingTools(
         ),
         agenda: z.string().optional().describe("Meeting agenda (markdown)"),
         notes: z.string().optional().describe("Meeting notes (markdown body)"),
+        actions: z.array(ActionSchema).optional().describe(
+          "Action items for this meeting",
+        ),
       },
     },
-    async ({ title, date, attendees, agenda, notes }) => {
+    async ({ title, date, attendees, agenda, notes, actions }) => {
       const id = await parser.addMeeting({
         title,
         date,
         attendees: attendees ?? [],
         agenda: agenda ?? "",
         notes: notes ?? "",
-        actions: [],
+        actions: (actions ?? []).map((a, i) => ({
+          id: `action_${Date.now()}_${i}`,
+          description: a.description,
+          owner: a.owner,
+          due: a.due,
+          status: a.status ?? "open",
+        })),
       });
       return ok({ id });
     },
@@ -86,15 +102,27 @@ export function registerMeetingTools(
         attendees: z.array(z.string()).optional(),
         agenda: z.string().optional(),
         notes: z.string().optional(),
+        actions: z.array(ActionSchema).optional().describe(
+          "Full replacement list of action items",
+        ),
       },
     },
-    async ({ id, title, date, attendees, agenda, notes }) => {
+    async ({ id, title, date, attendees, agenda, notes, actions }) => {
       const success = await parser.updateMeeting(id, {
         ...(title !== undefined && { title }),
         ...(date !== undefined && { date }),
         ...(attendees !== undefined && { attendees }),
         ...(agenda !== undefined && { agenda }),
         ...(notes !== undefined && { notes }),
+        ...(actions !== undefined && {
+          actions: actions.map((a, i) => ({
+            id: `action_${Date.now()}_${i}`,
+            description: a.description,
+            owner: a.owner,
+            due: a.due,
+            status: a.status ?? "open",
+          })),
+        }),
       });
       if (!success) return err(`Meeting '${id}' not found`);
       return ok({ success: true });
