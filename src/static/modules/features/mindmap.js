@@ -563,60 +563,33 @@ export class MindmapModule {
   handleKeyDown(e) {
     const textarea = e.target;
     const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
     const value = textarea.value;
 
     if (e.key === "Tab") {
       e.preventDefault();
 
+      // Always operate on the current line only — ignore text selection.
+      // This prevents accidentally indenting the entire textarea when all
+      // text is selected, which is the common "select-all then Tab" trap.
+      const lines = value.split("\n");
+      const currentLineIndex =
+        value.substring(0, start).split("\n").length - 1;
+
       if (e.shiftKey) {
-        const lines = value.split("\n");
-        const startLine = value.substring(0, start).split("\n").length - 1;
-        const endLine = value.substring(0, end).split("\n").length - 1;
-
-        let newValue = "";
-        let cursorOffset = 0;
-
-        for (let i = 0; i < lines.length; i++) {
-          if (i >= startLine && i <= endLine) {
-            if (lines[i].startsWith("  ")) {
-              lines[i] = lines[i].substring(2);
-              if (i === startLine) cursorOffset = -2;
-            }
-          }
-          newValue += lines[i] + (i < lines.length - 1 ? "\n" : "");
+        // Unindent current line only
+        if (lines[currentLineIndex].startsWith("  ")) {
+          lines[currentLineIndex] = lines[currentLineIndex].substring(2);
+          textarea.value = lines.join("\n");
+          textarea.selectionStart = textarea.selectionEnd = Math.max(
+            0,
+            start - 2,
+          );
         }
-
-        textarea.value = newValue;
-        textarea.selectionStart = Math.max(0, start + cursorOffset);
-        textarea.selectionEnd = Math.max(0, end + cursorOffset);
       } else {
-        if (start === end) {
-          const newValue = value.substring(0, start) + "  " +
-            value.substring(end);
-          textarea.value = newValue;
-          textarea.selectionStart = textarea.selectionEnd = start + 2;
-        } else {
-          const lines = value.split("\n");
-          const startLine = value.substring(0, start).split("\n").length - 1;
-          const endLine = value.substring(0, end).split("\n").length - 1;
-
-          let newValue = "";
-          let cursorOffset = 0;
-
-          for (let i = 0; i < lines.length; i++) {
-            if (i >= startLine && i <= endLine) {
-              lines[i] = "  " + lines[i];
-              if (i === startLine) cursorOffset = 2;
-            }
-            newValue += lines[i] + (i < lines.length - 1 ? "\n" : "");
-          }
-
-          textarea.value = newValue;
-          textarea.selectionStart = start + cursorOffset;
-          textarea.selectionEnd = end +
-            (cursorOffset * (endLine - startLine + 1));
-        }
+        // Indent current line only — add 2 spaces at start of line
+        lines[currentLineIndex] = "  " + lines[currentLineIndex];
+        textarea.value = lines.join("\n");
+        textarea.selectionStart = textarea.selectionEnd = start + 2;
       }
       this.updatePreview();
     } else if (e.key === "Enter" && !e.shiftKey) {
@@ -704,29 +677,24 @@ export class MindmapModule {
   }
 
   indent() {
-    const { textarea, value, start, lines, lineIndex } = this
-      .getCurrentLineInfo();
-    if (
-      lines[lineIndex].startsWith("  ") ||
-      lines[lineIndex].trim().startsWith("-")
-    ) {
+    const { textarea, start, lines, lineIndex } = this.getCurrentLineInfo();
+    if (lines[lineIndex].trim() !== "") {
       lines[lineIndex] = "  " + lines[lineIndex];
       textarea.value = lines.join("\n");
-      textarea.selectionStart = start + 2;
-      textarea.selectionEnd = (textarea.selectionEnd || start) + 2;
+      // Collapse selection — cursor shifts right by 2 (chars added at line start)
+      textarea.selectionStart = textarea.selectionEnd = start + 2;
       this.updatePreview();
     }
     textarea.focus();
   }
 
   unindent() {
-    const { textarea, value, start, lines, lineIndex } = this
-      .getCurrentLineInfo();
+    const { textarea, start, lines, lineIndex } = this.getCurrentLineInfo();
     if (lines[lineIndex].startsWith("  ")) {
       lines[lineIndex] = lines[lineIndex].substring(2);
       textarea.value = lines.join("\n");
-      textarea.selectionStart = Math.max(0, start - 2);
-      textarea.selectionEnd = Math.max(0, (textarea.selectionEnd || start) - 2);
+      // Collapse selection — cursor shifts left by 2 (chars removed at line start)
+      textarea.selectionStart = textarea.selectionEnd = Math.max(0, start - 2);
       this.updatePreview();
     }
     textarea.focus();
