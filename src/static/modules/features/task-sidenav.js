@@ -22,7 +22,7 @@ export class TaskSidenavModule {
     document.getElementById("sidenavTaskClose")?.addEventListener(
       "click",
       () => {
-        this.close();
+        this._confirmAndClose();
       },
     );
 
@@ -30,7 +30,7 @@ export class TaskSidenavModule {
     document.getElementById("sidenavTaskCancel")?.addEventListener(
       "click",
       () => {
-        this.close();
+        this._confirmAndClose();
       },
     );
 
@@ -214,6 +214,14 @@ export class TaskSidenavModule {
     Sidenav.close("taskSidenav");
     this.editingTask = null;
     this.parentTaskId = null;
+  }
+
+  _confirmAndClose() {
+    if (
+      this._descUndoManager?.hasUnsavedChanges() &&
+      !confirm("You have unsaved changes. Close anyway?")
+    ) return;
+    this.close();
   }
 
   populateSelects() {

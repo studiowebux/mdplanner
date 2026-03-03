@@ -1,4 +1,5 @@
 import { showToast } from "./modules/ui/toast.js";
+import { hasDirtyBaseSidenav } from "./modules/ui/base-sidenav.js";
 import { initConfirmModal } from "./modules/ui/confirm.js";
 import { ThemeManager } from "./modules/ui/theme.js";
 import { closeMobileMenu, toggleMobileMenu } from "./modules/ui/mobile.js";
@@ -3832,3 +3833,10 @@ if (document.readyState === "loading") {
   taskManager = new TaskManager();
   window.taskManager = taskManager;
 }
+
+// Warn before unload if any sidenav has unsaved changes
+window.addEventListener("beforeunload", (e) => {
+  if (hasDirtyBaseSidenav()) {
+    e.preventDefault();
+  }
+});
