@@ -85,4 +85,12 @@ export interface GitHubProvider {
     repo: string,
     number: number,
   ): Promise<GitHubPR>;
+
+  /** Set an issue's state to "open" or "closed". */
+  setIssueState(
+    owner: string,
+    repo: string,
+    number: number,
+    state: "open" | "closed",
+  ): Promise<GitHubIssue>;
 }

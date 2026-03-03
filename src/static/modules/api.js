@@ -1307,6 +1307,14 @@ export const GitHubAPI = {
     return response.json();
   },
 
+  async setIssueState(owner, repo, number, state) {
+    const response = await patch(
+      `/api/integrations/github/repo/${owner}/${repo}/issues/${number}`,
+      { state },
+    );
+    return response.json();
+  },
+
   async createIssue(owner, repo, title, body) {
     const response = await post(
       `/api/integrations/github/repo/${owner}/${repo}/issues`,

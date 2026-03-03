@@ -453,6 +453,7 @@ export class TaskSidenavModule {
     const result = document.getElementById("githubActionResult");
     if (badge) badge.classList.add("hidden");
     if (result) { result.textContent = ""; result.classList.add("hidden"); }
+    this._currentIssueState = null;
   }
 
   /** Resolve effective repo from the task's githubRepo field */
@@ -537,6 +538,9 @@ export class TaskSidenavModule {
         stateEl.className = `github-issue-badge github-issue-${issue.state}`;
       }
       if (linkEl) linkEl.href = issue.htmlUrl;
+      this._currentIssueState = issue.state;
+      const stateBtn = document.getElementById("sidenavIssueStateBtn");
+      if (stateBtn) stateBtn.textContent = issue.state === "open" ? "Close issue" : "Reopen issue";
       if (badge) badge.classList.remove("hidden");
     } catch (err) {
       if (result) {
@@ -548,6 +552,40 @@ export class TaskSidenavModule {
       }
     } finally {
       if (btn) { btn.disabled = false; btn.textContent = "Fetch status"; }
+    }
+  }
+
+  async toggleGitHubIssueState() {
+    if (!this._currentIssueState) return;
+    const issueInput = document.getElementById("sidenavTaskGithubIssue");
+    const stateEl = document.getElementById("githubIssueState");
+    const stateBtn = document.getElementById("sidenavIssueStateBtn");
+    const issueNum = parseInt(issueInput?.value);
+    if (!issueNum) return;
+
+    const repo = this._resolveRepo();
+    if (!repo || !repo.includes("/")) {
+      showToast("Set a GitHub repo first", "error");
+      return;
+    }
+    const [owner, repoName] = repo.split("/");
+    const newState = this._currentIssueState === "open" ? "closed" : "open";
+
+    if (stateBtn) { stateBtn.disabled = true; stateBtn.textContent = "Updating…"; }
+
+    try {
+      const issue = await GitHubAPI.setIssueState(owner, repoName, issueNum, newState);
+      this._currentIssueState = issue.state;
+      if (stateEl) {
+        stateEl.textContent = issue.state;
+        stateEl.className = `github-issue-badge github-issue-${issue.state}`;
+      }
+      if (stateBtn) stateBtn.textContent = issue.state === "open" ? "Close issue" : "Reopen issue";
+      showToast(`Issue #${issueNum} ${issue.state === "closed" ? "closed" : "reopened"}`, "success");
+    } catch (err) {
+      showToast(`Failed: ${err?.message || "GitHub API error"}`, "error");
+    } finally {
+      if (stateBtn) stateBtn.disabled = false;
     }
   }
 

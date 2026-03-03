@@ -125,6 +125,32 @@ githubRouter.get("/repo/:owner/:repo/milestones", async (c) => {
   }
 });
 
+// PATCH /integrations/github/repo/:owner/:repo/issues/:number — close or reopen an issue
+githubRouter.patch("/repo/:owner/:repo/issues/:number", async (c) => {
+  const token = await resolveToken(c);
+  if (!token) return errorResponse("GitHub token not configured", 400);
+
+  const { owner, repo, number } = c.req.param();
+  const issueNum = parseInt(number, 10);
+  if (isNaN(issueNum)) return errorResponse("Invalid issue number", 400);
+
+  const body = await c.req.json();
+  const state = body.state;
+  if (state !== "open" && state !== "closed") {
+    return errorResponse("state must be 'open' or 'closed'", 400);
+  }
+
+  try {
+    const provider = new GitHubApiProvider(token);
+    const issue = await provider.setIssueState(owner, repo, issueNum, state);
+    return jsonResponse(issue);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "GitHub API error";
+    const status = msg.includes("404") ? 404 : msg.includes("401") ? 401 : 502;
+    return errorResponse(msg, status);
+  }
+});
+
 // GET /integrations/github/repo/:owner/:repo/pulls/:number — single PR status
 githubRouter.get("/repo/:owner/:repo/pulls/:number", async (c) => {
   const token = await resolveToken(c);

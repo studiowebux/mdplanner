@@ -45,6 +45,24 @@ export class GitHubApiProvider implements GitHubProvider {
     return res.json();
   }
 
+  private async ghPatch(path: string, body: unknown): Promise<unknown> {
+    const res = await fetch(`${GITHUB_API}${path}`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => res.statusText);
+      throw new Error(`GitHub API error ${res.status}: ${text}`);
+    }
+    return res.json();
+  }
+
   private async ghPost(path: string, body: unknown): Promise<unknown> {
     const res = await fetch(`${GITHUB_API}${path}`, {
       method: "POST",
@@ -171,6 +189,25 @@ export class GitHubApiProvider implements GitHubProvider {
       closedIssues: m.closed_issues,
       htmlUrl: m.html_url,
     }));
+  }
+
+  async setIssueState(
+    owner: string,
+    repo: string,
+    number: number,
+    state: "open" | "closed",
+  ): Promise<GitHubIssue> {
+    // deno-lint-ignore no-explicit-any
+    const data = await this.ghPatch(
+      `/repos/${owner}/${repo}/issues/${number}`,
+      { state },
+    ) as any;
+    return {
+      number: data.number,
+      title: data.title,
+      state: data.state === "closed" ? "closed" : "open",
+      htmlUrl: data.html_url,
+    };
   }
 
   async getPR(owner: string, repo: string, number: number): Promise<GitHubPR> {
