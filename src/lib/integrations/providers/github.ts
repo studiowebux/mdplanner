@@ -71,13 +71,20 @@ export class GitHubApiProvider implements GitHubProvider {
 
   async getRepo(owner: string, repo: string): Promise<GitHubRepo> {
     // deno-lint-ignore no-explicit-any
-    const data = await this.ghGet(`/repos/${owner}/${repo}`) as any;
+    const [data, prs] = await Promise.all([
+      this.ghGet(`/repos/${owner}/${repo}`) as Promise<any>,
+      // Fetch open PR count — per_page=1 keeps the payload tiny
+      this.ghGet(
+        `/repos/${owner}/${repo}/pulls?state=open&per_page=100`,
+      ) as Promise<any[]>,
+    ]);
 
     return {
       owner,
       repo,
       stars: data.stargazers_count ?? 0,
       openIssues: data.open_issues_count ?? 0,
+      openPRs: Array.isArray(prs) ? prs.length : 0,
       lastCommitAt: data.pushed_at ?? null,
       license: data.license?.spdx_id ?? null,
       htmlUrl: data.html_url,

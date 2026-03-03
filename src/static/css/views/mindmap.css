@@ -8,6 +8,10 @@
    Mindmap Container
    -------------------------------------------------------------------------- */
 
+#mindmapViewport {
+  transform-origin: 0 0;
+}
+
 #mindmapContent {
   width: 4000px;
   height: 4000px;

@@ -8,6 +8,7 @@ export interface GitHubRepo {
   repo: string;
   stars: number;
   openIssues: number;
+  openPRs: number;
   lastCommitAt: string | null;
   license: string | null;
   htmlUrl: string;

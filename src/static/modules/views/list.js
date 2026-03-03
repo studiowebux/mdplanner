@@ -288,7 +288,7 @@ export class ListView {
                            class="rounded border-strong text-primary focus:ring-1">
                     <div>
                         <div class="flex items-center space-x-2 flex-wrap gap-1">
-                            <span class="${
+                            <span class="task-title ${
       task.completed
         ? "line-through text-muted"
         : "text-primary"

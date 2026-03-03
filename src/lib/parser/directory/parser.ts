@@ -529,6 +529,10 @@ export class DirectoryMarkdownParser {
     return this.c4Parser.getByLevel(level);
   }
 
+  async saveC4Components(components: C4Component[]): Promise<void> {
+    await this.c4Parser.saveAll(components);
+  }
+
   // ============================================================
   // Milestones
   // ============================================================

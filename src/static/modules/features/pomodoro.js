@@ -209,8 +209,8 @@ export class PomodoroModule {
     ) {
       if (this.tm.pomodoro.mode === "focus") {
         this.tm.pomodoro.count++;
-        document.getElementById("pomodoroCount").textContent =
-          this.tm.pomodoro.count;
+        const countEl = document.getElementById("pomodoroCount");
+        if (countEl) countEl.textContent = this.tm.pomodoro.count;
       }
       title = "Pomodoro Complete!";
       body = "Great work! Time for a break.";
@@ -226,6 +226,13 @@ export class PomodoroModule {
     }
 
     this.showNotification(title, body);
+
+    // Reset timer state so a new session can start
+    this.tm.pomodoro.timeLeft = this.tm.pomodoro.duration;
+    this.updateDisplay();
+    document.getElementById("pomodoroStartBtn")?.classList.remove("hidden");
+    document.getElementById("pomodoroStopBtn")?.classList.add("hidden");
+    document.getElementById("pomodoroDisplay")?.classList.add("hidden");
   }
 
   showNotification(title, body) {

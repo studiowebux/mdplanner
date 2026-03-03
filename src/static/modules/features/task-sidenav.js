@@ -96,6 +96,9 @@ export class TaskSidenavModule {
       () => this._handleAddComment(),
     );
 
+    // @mention autocomplete on comment input
+    this._attachMentionAutocomplete();
+
     // Persist author selection to localStorage on change
     document.getElementById("taskCommentAuthorInput")?.addEventListener(
       "change",
@@ -650,7 +653,7 @@ export class TaskSidenavModule {
             <button type="button" class="task-comment-edit" data-edit-comment="${c.id}" title="Edit comment">&#9998;</button>
             <button type="button" class="task-comment-delete" data-delete-comment="${c.id}" title="Delete comment">&times;</button>
           </div>
-          <div class="task-comment-body">${c.body}</div>
+          <div class="task-comment-body">${this._formatCommentBody(c.body)}</div>
         </div>
       `;
     }).join("");
@@ -745,6 +748,110 @@ export class TaskSidenavModule {
     } catch {
       showToast("Failed to delete comment", "error");
     }
+  }
+
+  // --- @mention helpers ---
+
+  /**
+   * Format a comment body: escape HTML, then highlight @name mentions.
+   * @param {string} body
+   * @returns {string} safe HTML
+   */
+  _formatCommentBody(body) {
+    const escaped = String(body ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    return escaped.replace(/@([\w.-]+)/g, (_, name) =>
+      `<span class="comment-mention">@${name}</span>`);
+  }
+
+  /** Attach @mention autocomplete to the comment textarea. */
+  _attachMentionAutocomplete() {
+    const textarea = document.getElementById("taskCommentInput");
+    if (!textarea || textarea._mentionBound) return;
+    textarea._mentionBound = true;
+
+    // Create dropdown element (appended once)
+    let dropdown = document.getElementById("mentionDropdown");
+    if (!dropdown) {
+      dropdown = document.createElement("div");
+      dropdown.id = "mentionDropdown";
+      dropdown.className = "mention-dropdown hidden";
+      document.body.appendChild(dropdown);
+    }
+
+    const close = () => dropdown.classList.add("hidden");
+
+    textarea.addEventListener("input", (e) => {
+      const val = textarea.value;
+      const pos = textarea.selectionStart;
+      // Find the last @ before the cursor
+      const before = val.slice(0, pos);
+      const match = before.match(/@([\w.-]*)$/);
+      if (!match) { close(); return; }
+
+      const query = match[1].toLowerCase();
+      const people = Array.from(this.tm.peopleMap?.values() ?? []);
+      const filtered = people.filter((p) =>
+        p.name.toLowerCase().includes(query)
+      ).slice(0, 6);
+
+      if (filtered.length === 0) { close(); return; }
+
+      // Position dropdown near textarea
+      const rect = textarea.getBoundingClientRect();
+      dropdown.style.top = `${rect.bottom + window.scrollY + 4}px`;
+      dropdown.style.left = `${rect.left + window.scrollX}px`;
+      dropdown.style.minWidth = `${Math.max(rect.width * 0.6, 160)}px`;
+
+      dropdown.innerHTML = filtered.map((p) =>
+        `<div class="mention-option" data-name="${p.name}">${p.name}</div>`
+      ).join("");
+      dropdown.classList.remove("hidden");
+    });
+
+    textarea.addEventListener("keydown", (e) => {
+      if (dropdown.classList.contains("hidden")) return;
+      const items = dropdown.querySelectorAll(".mention-option");
+      if (e.key === "Escape") { e.preventDefault(); close(); return; }
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        const active = dropdown.querySelector(".mention-option.active");
+        const idx = active ? Array.from(items).indexOf(active) : -1;
+        const next = e.key === "ArrowDown"
+          ? Math.min(idx + 1, items.length - 1)
+          : Math.max(idx - 1, 0);
+        items.forEach((el, i) => el.classList.toggle("active", i === next));
+        return;
+      }
+      if (e.key === "Enter" || e.key === "Tab") {
+        const active = dropdown.querySelector(".mention-option.active") || items[0];
+        if (active) { e.preventDefault(); this._insertMention(textarea, active.dataset.name, dropdown); }
+      }
+    });
+
+    dropdown.addEventListener("click", (e) => {
+      const opt = e.target.closest(".mention-option");
+      if (opt) this._insertMention(textarea, opt.dataset.name, dropdown);
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!dropdown.contains(e.target) && e.target !== textarea) close();
+    }, { capture: true });
+  }
+
+  _insertMention(textarea, name, dropdown) {
+    const val = textarea.value;
+    const pos = textarea.selectionStart;
+    const before = val.slice(0, pos);
+    const atIdx = before.lastIndexOf("@");
+    const after = val.slice(pos);
+    textarea.value = before.slice(0, atIdx) + `@${name} ` + after;
+    const newPos = atIdx + name.length + 2;
+    textarea.setSelectionRange(newPos, newPos);
+    dropdown.classList.add("hidden");
+    textarea.focus();
   }
 
   // --- Undo/Redo helpers ---

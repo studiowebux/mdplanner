@@ -314,9 +314,18 @@ export class HabitSidenavModule {
   // ------------------------------------------------------------------
 
   async handleComplete(habitId) {
-    const res = await HabitsAPI.markComplete(habitId);
+    let res;
+    try {
+      res = await HabitsAPI.markComplete(habitId);
+    } catch (err) {
+      showToast("Network error marking habit as done", "error");
+      console.error("[Habits] markComplete network error:", err);
+      return;
+    }
     if (!res.ok) {
-      showToast("Failed to mark habit as done", "error");
+      const msg = await res.text().catch(() => "");
+      showToast(`Failed to mark habit as done (${res.status})`, "error");
+      console.error("[Habits] markComplete error:", res.status, msg);
       return;
     }
 
