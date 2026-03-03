@@ -8,6 +8,20 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.8.3] - 2026-03-03
+
+### Fixed
+
+- SSE double refresh: task create/update/delete was emitting two server-sent
+  events per mutation (once from the parser's write() and once from the route
+  handler); removed the redundant route-level emits
+- Task sidenav: clearing assignee, milestone, due date, project, or planned
+  dates now persists correctly; previously empty values were ignored by
+  bodyToConfig, leaving the old value in place after save
+- Task sidenav: milestone select is now populated at app startup instead of only
+  after visiting the Milestones view; milestones are also filtered by the
+  selected project when a project is set
+
 ## [0.8.2] - 2026-03-03
 
 ### Changed

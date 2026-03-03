@@ -69,6 +69,12 @@ export class TaskSidenavModule {
       () => this.fetchGitHubPRStatus(),
     );
 
+    // Project → re-filter milestone select when project changes
+    document.getElementById("sidenavTaskProject")?.addEventListener(
+      "input",
+      () => this._populateSidenavSelects(),
+    );
+
     // Milestone → auto-fill project when milestone has a linked project
     document.getElementById("sidenavTaskMilestone")?.addEventListener(
       "change",
@@ -242,12 +248,17 @@ export class TaskSidenavModule {
       ).join("");
     }
 
-    // Milestones select — populated from existing milestone files only (no free-text)
+    // Milestones select — filtered by selected project if one is set
     const milestoneSelect = document.getElementById("sidenavTaskMilestone");
     if (milestoneSelect) {
       const currentVal = milestoneSelect.value;
+      const selectedProject = document.getElementById("sidenavTaskProject")?.value || "";
+      const allMilestones = this.tm.milestones || [];
+      const filtered = selectedProject
+        ? allMilestones.filter((m) => !m.project || m.project === selectedProject)
+        : allMilestones;
       const names = Array.from(
-        new Set((this.tm.milestones || []).map((m) => m.name).filter(Boolean))
+        new Set(filtered.map((m) => m.name).filter(Boolean))
       ).sort();
       milestoneSelect.innerHTML =
         '<option value="">— No milestone —</option>' +

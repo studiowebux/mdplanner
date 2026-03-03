@@ -11,7 +11,6 @@ import {
   getParser,
   jsonResponse,
 } from "./context.ts";
-import { eventBus } from "../../lib/event-bus.ts";
 import { Task, TaskConfig } from "../../lib/types.ts";
 import type { DirectoryMarkdownParser } from "../../lib/parser/directory/parser.ts";
 
@@ -40,14 +39,16 @@ async function ensureMilestoneExists(
 function bodyToConfig(body: Record<string, any>): TaskConfig {
   const config: TaskConfig = {};
   if (Array.isArray(body.tags) && body.tags.length) config.tags = body.tags;
-  if (body.due_date) config.due_date = body.due_date;
-  if (body.assignee) config.assignee = body.assignee;
   if (body.priority != null) config.priority = Number(body.priority);
   if (body.effort != null) config.effort = Number(body.effort);
-  if (body.milestone) config.milestone = body.milestone;
-  if (body.planned_start) config.planned_start = body.planned_start;
-  if (body.planned_end) config.planned_end = body.planned_end;
-  if (body.project) config.project = body.project;
+  // Clearable string fields: include empty string so the merge layer can
+  // overwrite (and the serializer's truthiness check drops them from file).
+  if ("due_date" in body) config.due_date = body.due_date;
+  if ("assignee" in body) config.assignee = body.assignee;
+  if ("milestone" in body) config.milestone = body.milestone;
+  if ("planned_start" in body) config.planned_start = body.planned_start;
+  if ("planned_end" in body) config.planned_end = body.planned_end;
+  if ("project" in body) config.project = body.project;
   return config;
 }
 
@@ -111,7 +112,6 @@ tasksRouter.post("/", async (c) => {
       ? [ensureMilestoneExists(parser, task.config.milestone)]
       : []),
   ]);
-  eventBus.emit({ entity: "tasks", action: "created", id: taskId });
   return jsonResponse({ id: taskId }, 201);
 });
 
@@ -139,7 +139,6 @@ tasksRouter.put("/:id", async (c) => {
         ? [ensureMilestoneExists(parser, updates.config.milestone)]
         : []),
     ]);
-    eventBus.emit({ entity: "tasks", action: "updated", id: taskId });
     return jsonResponse({ success: true });
   }
   return errorResponse("Task not found", 404);
@@ -156,7 +155,6 @@ tasksRouter.delete("/:id", async (c) => {
     parser.touchLastUpdated().catch((e) =>
       console.error("[lastUpdated] touch failed:", e)
     );
-    eventBus.emit({ entity: "tasks", action: "deleted", id: taskId });
     return jsonResponse({ success: true });
   }
   return errorResponse("Task not found", 404);
