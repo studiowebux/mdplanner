@@ -60,6 +60,7 @@ export class GoalsModule {
                                     data-gh-repo="${goal.githubRepo}">
                                    <span class="github-milestone-progress"><span class="github-milestone-fill" style="width:0%"></span></span>
                                    Milestone #${goal.githubMilestone}
+                                   <span class="github-milestone-counts"></span>
                                  </a>`
                               : ""}
                         </div>
@@ -142,16 +143,21 @@ export class GoalsModule {
       if (!repo || !repo.includes("/")) continue;
       const [owner, repoName] = repo.split("/");
       try {
-        const milestones = await GitHubAPI.listMilestones(owner, repoName);
+        const [milestones, repoData] = await Promise.all([
+          GitHubAPI.listMilestones(owner, repoName),
+          GitHubAPI.getRepo(owner, repoName),
+        ]);
         const m = milestones.find((ms) => ms.number === num);
         if (m) {
           const total = m.openIssues + m.closedIssues;
           const pct = total > 0 ? Math.round((m.closedIssues / total) * 100) : 0;
           const fill = el.querySelector(".github-milestone-fill");
           if (fill) fill.style.width = `${pct}%`;
-          el.title = `${m.title}: ${m.closedIssues}/${total} issues closed`;
-          const textNode = el.childNodes[el.childNodes.length - 1];
-          if (textNode) textNode.textContent = ` ${m.closedIssues}/${total}`;
+          el.title = `${m.title}: ${m.openIssues} open · ${m.closedIssues} closed · ${repoData.openPRs ?? 0} PRs`;
+          const counts = el.querySelector(".github-milestone-counts");
+          if (counts) {
+            counts.textContent = `${m.openIssues} open · ${repoData.openPRs ?? 0} PRs`;
+          }
         }
       } catch {
         // Silently skip
