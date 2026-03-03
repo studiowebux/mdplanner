@@ -1,6 +1,6 @@
 /**
  * Fundraising — SAFE Agreement sidenav (create / edit).
- * Pattern: Sidenav Module with auto-save debounce
+ * Pattern: Sidenav Module with explicit save button
  */
 
 import { Sidenav } from "../ui/sidenav.js";

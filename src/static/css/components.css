@@ -318,30 +318,6 @@ select.input {
 }
 
 /* --------------------------------------------------------------------------
-   Auto-save Indicator
-   -------------------------------------------------------------------------- */
-
-.auto-save-indicator {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: var(--color-success);
-  color: white;
-  padding: 8px 16px;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-base);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--transition-slow);
-  z-index: 1000;
-}
-
-.auto-save-indicator.show {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* --------------------------------------------------------------------------
    Project Status Colors
    -------------------------------------------------------------------------- */
 
@@ -855,14 +831,6 @@ select.input {
 @media (max-width: 640px) {
   .dropdown-menu {
     max-width: calc(100vw - 2rem);
-  }
-
-  .auto-save-indicator {
-    top: auto;
-    bottom: 1rem;
-    right: 1rem;
-    left: 1rem;
-    text-align: center;
   }
 }
 

@@ -120,7 +120,7 @@ class TaskManager {
     this.editingGoal = null;
     this.currentGoalFilter = "all";
     this.noteEditMode = false;
-    this.autoSaveTimeout = null;
+
     this.enhancedMode = false;
     this.previewMode = true;
     this.multiSelectMode = false;
@@ -2082,8 +2082,8 @@ class TaskManager {
     await this.notesModule.deleteCurrent();
   }
 
-  async autoSaveNote() {
-    return this.notesModule.autoSave();
+  async saveNote() {
+    return this.notesModule.save();
   }
 
   // Note Sidenav - delegation to NoteSidenavModule
@@ -2126,10 +2126,6 @@ class TaskManager {
 
   moveSelectedParagraphs(direction) {
     this.enhancedNotesModule.moveSelectedParagraphs(direction);
-  }
-
-  showAutoSaveIndicator() {
-    this.enhancedNotesModule.showAutoSaveIndicator();
   }
 
   addCustomSection() {

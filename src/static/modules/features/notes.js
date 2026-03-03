@@ -2,7 +2,7 @@
 import { NotesAPI, ProjectAPI } from "../api.js";
 
 /**
- * Notes management - CRUD, selection, auto-save
+ * Notes management - CRUD, selection, save
  */
 export class NotesModule {
   /** @param {TaskManager} taskManager */
@@ -257,7 +257,7 @@ export class NotesModule {
     }
   }
 
-  async autoSave() {
+  async save() {
     if (this.tm.activeNote === null) return;
 
     const activeNote = this.tm.notes[this.tm.activeNote];
@@ -308,7 +308,7 @@ export class NotesModule {
         this.hideSaveStatus();
       }, 2000);
     } catch (error) {
-      console.error("Error auto-saving note:", error);
+      console.error("Error saving note:", error);
       this.showSaveStatus("Error");
     }
   }
@@ -510,7 +510,7 @@ export class NotesModule {
     // Save button for inline note editor
     document
       .getElementById("notesInlineSave")
-      ?.addEventListener("click", () => this.autoSave());
+      ?.addEventListener("click", () => this.save());
 
     // Close modal on background click
     document.getElementById("noteModal").addEventListener("click", (e) => {

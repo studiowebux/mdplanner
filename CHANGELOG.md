@@ -8,6 +8,15 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-03-03
+
+### Removed
+
+- Notes editor auto-save: all automatic saves on structural changes in the
+  enhanced notes editor have been removed. Content is now only saved when the
+  user explicitly clicks the Save button. The auto-saved indicator overlay and
+  its CSS have been deleted.
+
 ## [0.8.9] - 2026-03-03
 
 ### Fixed

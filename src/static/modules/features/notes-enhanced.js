@@ -274,9 +274,6 @@ export class EnhancedNotesModule {
     currentNote.paragraphs.push(newParagraph);
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
-    this.tm.autoSaveNote().then(() => {
-      this.showAutoSaveIndicator();
-    });
 
     setTimeout(() => {
       const paragraphElement = document.querySelector(
@@ -309,9 +306,6 @@ export class EnhancedNotesModule {
 
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
-    this.tm.autoSaveNote().then(() => {
-      this.showAutoSaveIndicator();
-    });
   }
 
   deleteParagraph(paragraphId) {
@@ -327,9 +321,6 @@ export class EnhancedNotesModule {
 
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
-    this.tm.autoSaveNote().then(() => {
-      this.showAutoSaveIndicator();
-    });
   }
 
   toggleParagraphType(paragraphId) {
@@ -346,9 +337,6 @@ export class EnhancedNotesModule {
 
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
-    this.tm.autoSaveNote().then(() => {
-      this.showAutoSaveIndicator();
-    });
   }
 
   updateParagraphContent(paragraphId, content) {
@@ -359,9 +347,6 @@ export class EnhancedNotesModule {
     if (paragraph && paragraph.content !== content) {
       paragraph.content = content;
       this.syncParagraphsToContent();
-      this.tm.autoSaveNote().then(() => {
-        this.showAutoSaveIndicator();
-      });
     }
   }
 
@@ -373,9 +358,6 @@ export class EnhancedNotesModule {
     if (paragraph && paragraph.language !== language) {
       paragraph.language = language;
       this.syncParagraphsToContent();
-      this.tm.autoSaveNote().then(() => {
-        this.showAutoSaveIndicator();
-      });
       this.tm.renderActiveNote();
     }
   }
@@ -500,9 +482,6 @@ export class EnhancedNotesModule {
 
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
-    this.tm.autoSaveNote().then(() => {
-      this.showAutoSaveIndicator();
-    });
   }
 
   duplicateSelectedParagraphs() {
@@ -527,9 +506,6 @@ export class EnhancedNotesModule {
 
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
-    this.tm.autoSaveNote().then(() => {
-      this.showAutoSaveIndicator();
-    });
   }
 
   moveSelectedParagraphs(direction) {
@@ -571,9 +547,6 @@ export class EnhancedNotesModule {
       sortedParagraphs.forEach((p, index) => p.order = index);
       this.syncParagraphsToContent();
       this.tm.renderActiveNote();
-      this.tm.autoSaveNote().then(() => {
-        this.showAutoSaveIndicator();
-      });
     }
   }
 
@@ -665,16 +638,6 @@ export class EnhancedNotesModule {
     return markdown;
   }
 
-  // Auto Save Indicator
-  showAutoSaveIndicator() {
-    const indicator = document.getElementById("autoSaveIndicator");
-    if (indicator) {
-      indicator.classList.add("show");
-      setTimeout(() => {
-        indicator.classList.remove("show");
-      }, 2000);
-    }
-  }
 
   // Custom Section Management
   addCustomSection() {
@@ -720,9 +683,6 @@ export class EnhancedNotesModule {
     currentNote.customSections.push(newSection);
     this.closeCustomSectionModal();
     this.tm.renderActiveNote();
-    this.tm.autoSaveNote().then(() => {
-      this.showAutoSaveIndicator();
-    });
   }
 
   getInitialSectionConfig(type) {
@@ -768,9 +728,6 @@ export class EnhancedNotesModule {
 
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
-    this.tm.autoSaveNote().then(() => {
-      this.showAutoSaveIndicator();
-    });
   }
 
   // Rendering
@@ -1252,9 +1209,6 @@ export class EnhancedNotesModule {
     section.config.tabs.push(newTab);
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
-    this.tm.autoSaveNote().then(() => {
-      this.showAutoSaveIndicator();
-    });
   }
 
   updateTabTitle(sectionId, tabId, title) {
@@ -1268,9 +1222,6 @@ export class EnhancedNotesModule {
     if (tab) {
       tab.title = title;
       this.syncParagraphsToContent();
-      this.tm.autoSaveNote().then(() => {
-        this.showAutoSaveIndicator();
-      });
     }
   }
 
@@ -1290,9 +1241,6 @@ export class EnhancedNotesModule {
 
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
-    this.tm.autoSaveNote().then(() => {
-      this.showAutoSaveIndicator();
-    });
   }
 
   addContentToTab(sectionId, tabId, type) {
@@ -1317,9 +1265,6 @@ export class EnhancedNotesModule {
     tab.content.push(newContent);
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
-    this.tm.autoSaveNote().then(() => {
-      this.showAutoSaveIndicator();
-    });
   }
 
   // Timeline Functions
@@ -1341,9 +1286,6 @@ export class EnhancedNotesModule {
     section.config.timeline.push(newItem);
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
-    this.tm.autoSaveNote().then(() => {
-      this.showAutoSaveIndicator();
-    });
   }
 
   updateTimelineItemTitle(sectionId, itemId, title) {
@@ -1357,9 +1299,6 @@ export class EnhancedNotesModule {
     if (item) {
       item.title = title;
       this.syncParagraphsToContent();
-      this.tm.autoSaveNote().then(() => {
-        this.showAutoSaveIndicator();
-      });
     }
   }
 
@@ -1374,9 +1313,6 @@ export class EnhancedNotesModule {
     if (item) {
       item.date = date;
       this.syncParagraphsToContent();
-      this.tm.autoSaveNote().then(() => {
-        this.showAutoSaveIndicator();
-      });
     }
   }
 
@@ -1392,9 +1328,6 @@ export class EnhancedNotesModule {
       item.status = status;
       this.syncParagraphsToContent();
       this.tm.renderActiveNote();
-      this.tm.autoSaveNote().then(() => {
-        this.showAutoSaveIndicator();
-      });
     }
   }
 
@@ -1412,9 +1345,6 @@ export class EnhancedNotesModule {
     );
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
-    this.tm.autoSaveNote().then(() => {
-      this.showAutoSaveIndicator();
-    });
   }
 
   addContentToTimeline(sectionId, itemId, type) {
@@ -1439,9 +1369,6 @@ export class EnhancedNotesModule {
     item.content.push(newContent);
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
-    this.tm.autoSaveNote().then(() => {
-      this.showAutoSaveIndicator();
-    });
   }
 
   // Split View Functions
@@ -1455,9 +1382,6 @@ export class EnhancedNotesModule {
     section.config.splitView.columns.push([]);
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
-    this.tm.autoSaveNote().then(() => {
-      this.showAutoSaveIndicator();
-    });
   }
 
   removeColumnFromSplitView(sectionId, columnIndex) {
@@ -1472,9 +1396,6 @@ export class EnhancedNotesModule {
     section.config.splitView.columns.splice(columnIndex, 1);
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
-    this.tm.autoSaveNote().then(() => {
-      this.showAutoSaveIndicator();
-    });
   }
 
   addContentToSplitView(sectionId, columnIndex, type) {
@@ -1498,9 +1419,6 @@ export class EnhancedNotesModule {
     section.config.splitView.columns[columnIndex].push(newContent);
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
-    this.tm.autoSaveNote().then(() => {
-      this.showAutoSaveIndicator();
-    });
   }
 
   // Debounced save for custom content (saves after 1 second of no typing)
@@ -1554,9 +1472,6 @@ export class EnhancedNotesModule {
 
     if (found && oldContent !== content) {
       this.syncParagraphsToContent();
-      this.tm.autoSaveNote().then(() => {
-        this.showAutoSaveIndicator();
-      });
     }
   }
 
@@ -1594,9 +1509,6 @@ export class EnhancedNotesModule {
     if (found) {
       this.syncParagraphsToContent();
       this.tm.renderActiveNote();
-      this.tm.autoSaveNote().then(() => {
-        this.showAutoSaveIndicator();
-      });
     }
   }
 
@@ -1628,7 +1540,6 @@ export class EnhancedNotesModule {
         this.tm.activeNote = this.tm.notes.length - 1;
         this.tm.enhancedMode = true;
         this.tm.renderNotesView();
-        this.showAutoSaveIndicator();
       }
     } catch (error) {
       console.error("Error importing markdown file:", error);
@@ -1734,9 +1645,6 @@ export class EnhancedNotesModule {
 
     if (orderChanged) {
       this.syncParagraphsToContent();
-      this.tm.autoSaveNote().then(() => {
-        this.showAutoSaveIndicator();
-      });
     }
   }
 
@@ -1768,9 +1676,6 @@ export class EnhancedNotesModule {
       lastParagraph.content = imageMarkdown;
       this.syncParagraphsToContent();
       this.tm.renderActiveNote();
-      this.tm.autoSaveNote().then(() => {
-        this.showAutoSaveIndicator();
-      });
     };
     reader.readAsDataURL(file);
   }
@@ -1806,9 +1711,6 @@ export class EnhancedNotesModule {
 
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
-    this.tm.autoSaveNote().then(() => {
-      this.showAutoSaveIndicator();
-    });
   }
 
   async addFileReference(file) {
@@ -1820,9 +1722,6 @@ export class EnhancedNotesModule {
     lastParagraph.content = fileRef;
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
-    this.tm.autoSaveNote().then(() => {
-      this.showAutoSaveIndicator();
-    });
   }
 
   preventDefaults(e) {
