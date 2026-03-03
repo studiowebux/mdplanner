@@ -11,7 +11,6 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
-import { eventBus } from "../../../lib/event-bus.ts";
 
 export const strategicRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -36,7 +35,6 @@ strategicRouter.post("/", async (c) => {
   builders.push(newBuilder);
   await parser.saveStrategicLevelsBuilders(builders);
   await cacheWriteThrough(c, "strategic_builders");
-  eventBus.emit({ entity: "strategic", action: "created", id: newBuilder.id });
   return jsonResponse(newBuilder, 201);
 });
 
@@ -61,7 +59,6 @@ strategicRouter.put("/:id", async (c) => {
   builders[index] = { ...builders[index], ...body };
   await parser.saveStrategicLevelsBuilders(builders);
   await cacheWriteThrough(c, "strategic_builders");
-  eventBus.emit({ entity: "strategic", action: "updated", id });
   return jsonResponse(builders[index]);
 });
 
@@ -76,7 +73,6 @@ strategicRouter.delete("/:id", async (c) => {
   }
   await parser.saveStrategicLevelsBuilders(filtered);
   cachePurge(c, "strategic_builders", id);
-  eventBus.emit({ entity: "strategic", action: "deleted", id });
   return jsonResponse({ success: true });
 });
 
@@ -102,7 +98,6 @@ strategicRouter.post("/:id/levels", async (c) => {
   builder.levels.push(newLevel);
   await parser.saveStrategicLevelsBuilders(builders);
   await cacheWriteThrough(c, "strategic_builders");
-  eventBus.emit({ entity: "strategic", action: "updated", id: builderId });
   return jsonResponse(newLevel, 201);
 });
 
@@ -122,7 +117,6 @@ strategicRouter.put("/:id/levels/:levelId", async (c) => {
   builder.levels[levelIndex] = { ...builder.levels[levelIndex], ...body };
   await parser.saveStrategicLevelsBuilders(builders);
   await cacheWriteThrough(c, "strategic_builders");
-  eventBus.emit({ entity: "strategic", action: "updated", id: builderId });
   return jsonResponse(builder.levels[levelIndex]);
 });
 
@@ -148,6 +142,5 @@ strategicRouter.delete("/:id/levels/:levelId", async (c) => {
   });
   await parser.saveStrategicLevelsBuilders(builders);
   await cacheWriteThrough(c, "strategic_builders");
-  eventBus.emit({ entity: "strategic", action: "updated", id: builderId });
   return jsonResponse({ success: true });
 });

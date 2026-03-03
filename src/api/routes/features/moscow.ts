@@ -12,7 +12,6 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
-import { eventBus } from "../../../lib/event-bus.ts";
 
 export const moscowRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -36,7 +35,6 @@ moscowRouter.post("/", async (c) => {
     wont: body.wont || [],
   });
   await cacheWriteThrough(c, "moscow");
-  eventBus.emit({ entity: "moscow", action: "created", id: analysis.id });
   return jsonResponse(analysis, 201);
 });
 
@@ -48,7 +46,6 @@ moscowRouter.put("/:id", async (c) => {
   const updated = await parser.updateMoscowAnalysis(id, body);
   if (!updated) return errorResponse("Not found", 404);
   await cacheWriteThrough(c, "moscow");
-  eventBus.emit({ entity: "moscow", action: "updated", id });
   return jsonResponse(updated);
 });
 
@@ -59,6 +56,5 @@ moscowRouter.delete("/:id", async (c) => {
   const success = await parser.deleteMoscowAnalysis(id);
   if (!success) return errorResponse("Not found", 404);
   cachePurge(c, "moscow", id);
-  eventBus.emit({ entity: "moscow", action: "deleted", id });
   return jsonResponse({ success: true });
 });

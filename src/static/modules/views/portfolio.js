@@ -1236,7 +1236,7 @@ export class PortfolioView {
       })(),
       githubRepo:
         document.getElementById("portfolioDetailGithubRepo")?.value?.trim() ||
-        undefined,
+        "",
     };
 
     try {
@@ -1250,6 +1250,7 @@ export class PortfolioView {
       }
       this.closeDetailPanel();
       await this.load();
+      this.app.suppressSSE?.("portfolio");
     } catch (error) {
       console.error("Error saving project:", error);
     }

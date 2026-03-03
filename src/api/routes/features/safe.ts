@@ -12,7 +12,6 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
-import { eventBus } from "../../../lib/event-bus.ts";
 
 export const safeRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -38,7 +37,6 @@ safeRouter.post("/", async (c) => {
     notes: body.notes || "",
   });
   await cacheWriteThrough(c, "safe_agreements");
-  eventBus.emit({ entity: "safe", action: "created", id: agreement.id });
   return jsonResponse(agreement, 201);
 });
 
@@ -50,7 +48,6 @@ safeRouter.put("/:id", async (c) => {
   const updated = await parser.updateSafeAgreement(id, body);
   if (!updated) return errorResponse("Not found", 404);
   await cacheWriteThrough(c, "safe_agreements");
-  eventBus.emit({ entity: "safe", action: "updated", id });
   return jsonResponse(updated);
 });
 
@@ -61,6 +58,5 @@ safeRouter.delete("/:id", async (c) => {
   const success = await parser.deleteSafeAgreement(id);
   if (!success) return errorResponse("Not found", 404);
   cachePurge(c, "safe_agreements", id);
-  eventBus.emit({ entity: "safe", action: "deleted", id });
   return jsonResponse({ success: true });
 });

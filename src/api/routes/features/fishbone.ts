@@ -11,7 +11,6 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
-import { eventBus } from "../../../lib/event-bus.ts";
 
 export const fishboneRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -42,7 +41,6 @@ fishboneRouter.post("/", async (c) => {
     causes: body.causes ?? [],
   });
   await cacheWriteThrough(c, "fishbone");
-  eventBus.emit({ entity: "fishbone", action: "created", id: diagram.id });
   return jsonResponse({ success: true, id: diagram.id }, 201);
 });
 
@@ -58,7 +56,6 @@ fishboneRouter.put("/:id", async (c) => {
   });
   if (!updated) return errorResponse("Not found", 404);
   await cacheWriteThrough(c, "fishbone");
-  eventBus.emit({ entity: "fishbone", action: "updated", id });
   return jsonResponse({ success: true });
 });
 
@@ -69,6 +66,5 @@ fishboneRouter.delete("/:id", async (c) => {
   const deleted = await parser.deleteFishbone(id);
   if (!deleted) return errorResponse("Not found", 404);
   cachePurge(c, "fishbone", id);
-  eventBus.emit({ entity: "fishbone", action: "deleted", id });
   return jsonResponse({ success: true });
 });

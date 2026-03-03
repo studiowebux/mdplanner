@@ -127,6 +127,11 @@ export class BaseSidenavModule {
       } else {
         const response = await this.api.create(data);
         const result = await response.json();
+        if (!response.ok) {
+          this.showSaveStatus(result.error || "Error");
+          showToast(result.error || `Error creating ${this.entityName}`, "error");
+          return;
+        }
         this.editingId = result.id;
         this._markAllSaved();
         this.showSaveStatus("Created");
@@ -136,6 +141,7 @@ export class BaseSidenavModule {
       }
 
       await this.reloadData();
+      this.tm.suppressSSE?.(this.entityName);
       this.onAfterSave();
       if (this.closeAfterSave) this.close();
     } catch (error) {
@@ -160,6 +166,7 @@ export class BaseSidenavModule {
       await this.api.delete(this.editingId);
       showToast(`${this.entityName} deleted`, "success");
       await this.reloadData();
+      this.tm.suppressSSE?.(this.entityName);
       this.close();
     } catch (error) {
       console.error(`Error deleting ${this.entityName}:`, error);

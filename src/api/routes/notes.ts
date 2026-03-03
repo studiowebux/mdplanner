@@ -11,7 +11,6 @@ import {
   getParser,
   jsonResponse,
 } from "./context.ts";
-import { eventBus } from "../../lib/event-bus.ts";
 
 export const notesRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -41,7 +40,6 @@ notesRouter.post("/", async (c) => {
   const body = await c.req.json();
   const noteId = await parser.addNote(body);
   await cacheWriteThrough(c, "notes");
-  eventBus.emit({ entity: "notes", action: "created", id: noteId });
   return jsonResponse({ id: noteId }, 201);
 });
 
@@ -54,7 +52,6 @@ notesRouter.put("/:id", async (c) => {
 
   if (success) {
     await cacheWriteThrough(c, "notes");
-    eventBus.emit({ entity: "notes", action: "updated", id: noteId });
     return jsonResponse({ success: true });
   }
   return errorResponse("Note not found", 404);
@@ -68,7 +65,6 @@ notesRouter.delete("/:id", async (c) => {
 
   if (success) {
     cachePurge(c, "notes", noteId);
-    eventBus.emit({ entity: "notes", action: "deleted", id: noteId });
     return jsonResponse({ success: true });
   }
   return errorResponse("Note not found", 404);

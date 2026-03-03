@@ -11,7 +11,6 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
-import { eventBus } from "../../../lib/event-bus.ts";
 
 export const ideasRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -40,7 +39,6 @@ ideasRouter.post("/", async (c) => {
   });
   await parser.saveIdeas(ideas);
   await cacheWriteThrough(c, "ideas");
-  eventBus.emit({ entity: "ideas", action: "created", id });
   return jsonResponse({ success: true, id }, 201);
 });
 
@@ -55,7 +53,6 @@ ideasRouter.put("/:id", async (c) => {
   ideas[index] = { ...ideas[index], ...body };
   await parser.saveIdeas(ideas);
   await cacheWriteThrough(c, "ideas");
-  eventBus.emit({ entity: "ideas", action: "updated", id });
   return jsonResponse({ success: true });
 });
 
@@ -68,6 +65,5 @@ ideasRouter.delete("/:id", async (c) => {
   if (filtered.length === ideas.length) return errorResponse("Not found", 404);
   await parser.saveIdeas(filtered);
   cachePurge(c, "ideas", id);
-  eventBus.emit({ entity: "ideas", action: "deleted", id });
   return jsonResponse({ success: true });
 });

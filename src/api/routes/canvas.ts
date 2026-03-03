@@ -11,7 +11,6 @@ import {
   getParser,
   jsonResponse,
 } from "./context.ts";
-import { eventBus } from "../../lib/event-bus.ts";
 
 export const canvasRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -28,7 +27,6 @@ canvasRouter.post("/sticky_notes", async (c) => {
   const body = await c.req.json();
   const stickyNoteId = await parser.addStickyNote(body);
   await cacheWriteThrough(c, "sticky_notes");
-  eventBus.emit({ entity: "canvas", action: "created", id: stickyNoteId });
   return jsonResponse({ id: stickyNoteId }, 201);
 });
 
@@ -41,7 +39,6 @@ canvasRouter.put("/sticky_notes/:id", async (c) => {
 
   if (success) {
     await cacheWriteThrough(c, "sticky_notes");
-    eventBus.emit({ entity: "canvas", action: "updated", id: stickyNoteId });
     return jsonResponse({ success: true });
   }
   return errorResponse("Sticky note not found", 404);
@@ -55,7 +52,6 @@ canvasRouter.delete("/sticky_notes/:id", async (c) => {
 
   if (success) {
     cachePurge(c, "sticky_notes", stickyNoteId);
-    eventBus.emit({ entity: "canvas", action: "deleted", id: stickyNoteId });
     return jsonResponse({ success: true });
   }
   return errorResponse("Sticky note not found", 404);

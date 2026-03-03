@@ -13,7 +13,6 @@ import {
   getProjectManager,
   jsonResponse,
 } from "../context.ts";
-import { eventBus } from "../../../lib/event-bus.ts";
 
 export const dnsRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -49,7 +48,6 @@ dnsRouter.post("/", async (c) => {
     lastFetchedAt: body.lastFetchedAt,
   });
   await cacheWriteThrough(c, "dns_domains");
-  eventBus.emit({ entity: "dns", action: "created", id: domain.id });
   return jsonResponse({ success: true, id: domain.id }, 201);
 });
 
@@ -79,7 +77,6 @@ dnsRouter.put("/:id", async (c) => {
   const updated = await parser.updateDnsDomain(id, updates);
   if (!updated) return errorResponse("Not found", 404);
   await cacheWriteThrough(c, "dns_domains");
-  eventBus.emit({ entity: "dns", action: "updated", id });
   return jsonResponse({ success: true });
 });
 
@@ -90,7 +87,6 @@ dnsRouter.delete("/:id", async (c) => {
   const deleted = await parser.deleteDnsDomain(id);
   if (!deleted) return errorResponse("Not found", 404);
   cachePurge(c, "dns_domains", id);
-  eventBus.emit({ entity: "dns", action: "deleted", id });
   return jsonResponse({ success: true });
 });
 
@@ -101,7 +97,6 @@ dnsRouter.post("/sync/cloudflare", async (c) => {
   try {
     const result = await handleCloudflareDnsSync(pm, parser);
     await cacheWriteThrough(c, "dns_domains");
-    eventBus.emit({ entity: "dns", action: "updated" });
     return jsonResponse({ success: true, ...result });
   } catch (err) {
     return errorResponse(

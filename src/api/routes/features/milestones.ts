@@ -12,7 +12,6 @@ import {
   jsonResponse,
 } from "../context.ts";
 import { Task } from "../../../lib/types.ts";
-import { eventBus } from "../../../lib/event-bus.ts";
 
 export const milestonesRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -88,35 +87,30 @@ milestonesRouter.post("/", async (c) => {
   const body = await c.req.json();
   const milestones = await parser.readMilestones();
 
-  // Prevent duplicate name+project combinations
-  if (body.project) {
-    const duplicate = milestones.find(
+  // Prevent duplicate name (optionally scoped to project)
+  const duplicate = body.project
+    ? milestones.find(
       (m) => m.name === body.name && m.project === body.project,
+    )
+    : milestones.find((m) => m.name === body.name);
+  if (duplicate) {
+    return errorResponse(
+      body.project
+        ? `Milestone '${body.name}' already exists for project '${body.project}'`
+        : `Milestone '${body.name}' already exists`,
+      409,
     );
-    if (duplicate) {
-      return errorResponse(
-        `Milestone '${body.name}' already exists for project '${body.project}'`,
-        409,
-      );
-    }
   }
 
-  const id = body.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(
-    /^-|-$/g,
-    "",
-  );
-  milestones.push({
-    id,
+  const created = await parser.addMilestone({
     name: body.name,
     target: body.target,
     status: body.status || "open",
     description: body.description,
     project: body.project,
   });
-  await parser.saveMilestones(milestones);
   await cacheWriteThrough(c, "milestones");
-  eventBus.emit({ entity: "milestones", action: "created", id });
-  return jsonResponse({ success: true, id }, 201);
+  return jsonResponse({ success: true, id: created.id }, 201);
 });
 
 // PUT /milestones/:id - update milestone
@@ -130,7 +124,6 @@ milestonesRouter.put("/:id", async (c) => {
   milestones[index] = { ...milestones[index], ...body };
   await parser.saveMilestones(milestones);
   await cacheWriteThrough(c, "milestones");
-  eventBus.emit({ entity: "milestones", action: "updated", id });
   return jsonResponse({ success: true });
 });
 
@@ -138,13 +131,8 @@ milestonesRouter.put("/:id", async (c) => {
 milestonesRouter.delete("/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
-  const milestones = await parser.readMilestones();
-  const filtered = milestones.filter((m) => m.id !== id);
-  if (filtered.length === milestones.length) {
-    return errorResponse("Not found", 404);
-  }
-  await parser.saveMilestones(filtered);
+  const deleted = await parser.deleteMilestone(id);
+  if (!deleted) return errorResponse("Not found", 404);
   cachePurge(c, "milestones", id);
-  eventBus.emit({ entity: "milestones", action: "deleted", id });
   return jsonResponse({ success: true });
 });

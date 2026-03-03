@@ -213,7 +213,11 @@ export class PortfolioDirectoryParser {
       const key of Object.keys(frontmatter) as Array<keyof PortfolioFrontmatter>
     ) {
       const val = frontmatter[key];
-      if (val === undefined || (Array.isArray(val) && val.length === 0)) {
+      if (
+        val === undefined ||
+        val === "" ||
+        (Array.isArray(val) && val.length === 0)
+      ) {
         delete frontmatter[key];
       }
     }

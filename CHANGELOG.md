@@ -8,6 +8,34 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.8.6] - 2026-03-03
+
+### Added
+
+- Backup status panel in Settings now always visible (previously hidden when
+  backup was not configured); shows enabled/disabled state, backup count,
+  interval, encryption status, last backup time, next scheduled time.
+- Task list rows now display the `project` field when set, alongside assignee,
+  milestone, and other meta.
+
+### Fixed
+
+- SSE double refresh: removed 32 redundant route-level `eventBus.emit()` calls;
+  `DirectoryParser.write()` / `delete()` in `base.ts` is now the single SSE
+  source for all non-custom-serializer entities.
+- Portfolio: clearing the GitHub repo URL now sends an explicit empty string so
+  the server strips it from the frontmatter on save.
+- Milestone create: duplicate name check now applies regardless of whether a
+  project is set (previously only checked when `project` was provided).
+- Milestone delete: replaced the `readAll → filter → saveAll` approach (which
+  emitted spurious SSE events for every remaining milestone) with a direct
+  `deleteMilestone(id)` call — single clean delete with one SSE event.
+- Milestone create: `BaseSidenavModule.save()` now checks `response.ok` before
+  using the result; 409 errors surface as an inline status and toast instead of
+  silently closing the sidenav with no feedback.
+- Search result navigation: clicking a task result now scrolls the list view to
+  the matching row in addition to opening the sidenav.
+
 ## [0.8.5] - 2026-03-03
 
 ### Fixed

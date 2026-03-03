@@ -11,7 +11,6 @@ import {
   getParser,
   jsonResponse,
 } from "../context.ts";
-import { eventBus } from "../../../lib/event-bus.ts";
 
 export const timeTrackingRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -46,7 +45,6 @@ timeTrackingRouter.post("/:taskId", async (c) => {
     description: body.description,
   });
   await cacheWriteThrough(c, "time_entries");
-  eventBus.emit({ entity: "timeTracking", action: "created", id });
   return jsonResponse({ success: true, id }, 201);
 });
 
@@ -58,6 +56,5 @@ timeTrackingRouter.delete("/:taskId/:entryId", async (c) => {
   const success = await parser.deleteTimeEntry(taskId, entryId);
   if (!success) return errorResponse("Not found", 404);
   cachePurge(c, "time_entries", entryId);
-  eventBus.emit({ entity: "timeTracking", action: "deleted", id: entryId });
   return jsonResponse({ success: true });
 });
