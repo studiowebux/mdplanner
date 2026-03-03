@@ -8,6 +8,18 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.8.5] - 2026-03-03
+
+### Fixed
+
+- MCP HTTP transport crash on startup: `investors` and `kpis` tools were
+  registered twice — once in `safe.ts` (legacy) and again in the dedicated
+  `investors.ts` / `kpis.ts` modules added in v0.8.4. Same issue for `mindmaps`
+  tools registered in both `canvas.ts` (legacy) and `mindmaps.ts`. Removed the
+  stale registrations from `safe.ts` and `canvas.ts`.
+- MCP `get_kpi` tool was missing from `kpis.ts` (it only existed in the
+  now-removed legacy copy in `safe.ts`); restored in `kpis.ts`.
+
 ## [0.8.4] - 2026-03-03
 
 ### Added
