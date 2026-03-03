@@ -212,7 +212,8 @@ export class PortfolioDirectoryParser {
     for (
       const key of Object.keys(frontmatter) as Array<keyof PortfolioFrontmatter>
     ) {
-      if (frontmatter[key] === undefined) {
+      const val = frontmatter[key];
+      if (val === undefined || (Array.isArray(val) && val.length === 0)) {
         delete frontmatter[key];
       }
     }

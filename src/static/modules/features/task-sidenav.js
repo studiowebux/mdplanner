@@ -2,7 +2,7 @@
 // Handles task creation/editing via slide-in panel
 
 import { Sidenav } from "../ui/sidenav.js";
-import { GitHubAPI, MilestonesAPI, TasksAPI } from "../api.js";
+import { GitHubAPI, TasksAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { UndoManager } from "../ui/undo-manager.js";
 import { showConfirm } from "../ui/confirm.js";
@@ -242,20 +242,18 @@ export class TaskSidenavModule {
       ).join("");
     }
 
-    // Milestones datalist — existing milestone files + unique names referenced in tasks
-    const datalist = document.getElementById("milestonesList");
-    if (datalist) {
-      const names = new Set();
-      (this.tm.milestones || []).forEach((m) => { if (m.name) names.add(m.name); });
-      // Infer milestones from tasks that have no backing file
-      (this.tm.tasks || []).forEach((t) => {
-        const ms = t.config?.milestone || t.milestone;
-        if (ms) names.add(ms);
-      });
-      datalist.innerHTML = Array.from(names)
-        .sort()
-        .map((n) => `<option value="${n}">`)
-        .join("");
+    // Milestones select — populated from existing milestone files only (no free-text)
+    const milestoneSelect = document.getElementById("sidenavTaskMilestone");
+    if (milestoneSelect) {
+      const currentVal = milestoneSelect.value;
+      const names = Array.from(
+        new Set((this.tm.milestones || []).map((m) => m.name).filter(Boolean))
+      ).sort();
+      milestoneSelect.innerHTML =
+        '<option value="">— No milestone —</option>' +
+        names.map((n) => `<option value="${n}">${n}</option>`).join("");
+      // Restore selection if still valid
+      if (currentVal && names.includes(currentVal)) milestoneSelect.value = currentVal;
     }
 
     // Projects datalist — portfolio item names
@@ -398,20 +396,6 @@ export class TaskSidenavModule {
     };
 
     try {
-      // Auto-create milestone file if the name is new
-      if (taskData.milestone) {
-        const existing = (this.tm.milestones || []).some(
-          (m) => m.name === taskData.milestone,
-        );
-        if (!existing) {
-          await MilestonesAPI.create({
-            name: taskData.milestone,
-            status: "planned",
-          });
-          await this.tm.loadMilestones();
-        }
-      }
-
       if (this.editingTask) {
         await TasksAPI.update(this.editingTask.id, taskData);
         showToast("Task updated", "success");

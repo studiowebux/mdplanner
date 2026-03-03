@@ -5,7 +5,7 @@
 import { SearchAPI } from "../api.js";
 
 const VIEW_BY_TYPE = {
-  task: "board",
+  task: "list",
   note: "notes",
   goal: "goals",
   idea: "ideas",
@@ -115,9 +115,19 @@ export class GlobalSearch {
   }
 
   _navigate(result) {
-    const view = VIEW_BY_TYPE[result.type] ?? "board";
+    const view = VIEW_BY_TYPE[result.type] ?? "list";
     this.taskManager.switchView(view);
     this.close();
+
+    // For tasks: open the sidenav after the view renders so the user lands on the item
+    if (result.type === "task") {
+      setTimeout(() => {
+        const task = this.taskManager.findTaskById(result.id);
+        if (task && this.taskManager.taskSidenavModule) {
+          this.taskManager.taskSidenavModule.open(task);
+        }
+      }, 150);
+    }
   }
 
   _renderEmpty() {
