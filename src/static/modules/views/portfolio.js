@@ -201,8 +201,7 @@ export class PortfolioView {
       }
     }
     const topTech = Object.entries(techCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 8);
+      .sort((a, b) => b[1] - a[1]);
     const maxTech = topTech[0]?.[1] || 1;
 
     const bar = (count, max) => {
