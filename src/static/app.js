@@ -1,5 +1,5 @@
 import { showToast } from "./modules/ui/toast.js";
-import { hasDirtyBaseSidenav } from "./modules/ui/base-sidenav.js";
+import { clearAllDirtyModules, hasDirtyBaseSidenav } from "./modules/ui/base-sidenav.js";
 import { initConfirmModal } from "./modules/ui/confirm.js";
 import { ThemeManager } from "./modules/ui/theme.js";
 import { closeMobileMenu, toggleMobileMenu } from "./modules/ui/mobile.js";
@@ -1282,6 +1282,13 @@ class TaskManager {
   }
 
   async switchView(view) {
+    // Clear any sidenav dirty-state that leaked via overlay-click close or
+    // view-switching without an explicit BaseSidenavModule.close() call.
+    // The beforeunload handler guards against genuine unsaved changes on page
+    // close; clearing here prevents false positives when navigating within the
+    // SPA after a sidenav was dismissed non-interactively.
+    clearAllDirtyModules();
+
     this.currentView = view;
     localStorage.setItem("mdplanner_current_view", view);
     // Set data attribute on body for CSS targeting

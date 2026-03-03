@@ -14,6 +14,16 @@ export function hasDirtyBaseSidenav() {
 }
 
 /**
+ * Clear all dirty-module state without showing any confirmation.
+ * Called by switchView() so that navigating between SPA views never leaves
+ * stale dirty flags from a sidenav that was closed via the overlay or via
+ * view-switching (i.e. without going through BaseSidenavModule.close()).
+ */
+export function clearAllDirtyModules() {
+  _dirtyModules.forEach((m) => m._setDirty(false));
+}
+
+/**
  * Base class for sidenav modules that follow the standard CRUD pattern.
  *
  * Subclass contract — override these:

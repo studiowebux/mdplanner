@@ -8,6 +8,21 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.8.9] - 2026-03-03
+
+### Fixed
+
+- Mindmap editor: Tab key now indents only the current line regardless of text
+  selection, preventing the "Tab selects all then indents everything" trap.
+  Shift+Tab likewise unindents the current line only.
+- Mindmap toolbar: Indent and Unindent buttons now collapse the selection after
+  operating (no more accidental full-document selection expansion).
+- Navigation dirty-state false positive: switching views now clears stale
+  sidenav dirty flags that leaked when a panel was closed via overlay click or
+  view-switching (rather than via the Cancel/Close button). This prevents the
+  `beforeunload` "unsaved changes" prompt from firing incorrectly after
+  navigating to Settings or any other view.
+
 ## [0.8.8] - 2026-03-03
 
 ### Added
