@@ -47,6 +47,8 @@ export class BaseSidenavModule {
   get titleField() { return "title"; }
   get newLabel() { return `New ${this.entityName}`; }
   get editLabel() { return `Edit ${this.entityName}`; }
+  /** Override to false in subclasses that should stay open after save (e.g. task sidenav). */
+  get closeAfterSave() { return true; }
 
   // --- Element accessors (derived from prefix) ---
 
@@ -135,6 +137,7 @@ export class BaseSidenavModule {
 
       await this.reloadData();
       this.onAfterSave();
+      if (this.closeAfterSave) this.close();
     } catch (error) {
       console.error(`Error saving ${this.entityName}:`, error);
       this.showSaveStatus("Error");

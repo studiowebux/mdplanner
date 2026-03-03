@@ -49,33 +49,35 @@ milestonesRouter.get("/", async (c) => {
     };
   });
 
-  // Auto-create milestone files for any names referenced in tasks but missing a file.
-  // This handles projects created before this feature was added.
+  // Surface milestone names referenced in tasks but with no backing file,
+  // as virtual (read-only) entries — without writing any files.
+  // Writing files in GET caused race-condition duplicates on concurrent requests.
   const existingNames = new Set(milestones.map((m) => m.name));
-  const inferredNames = new Set<string>();
   const collectNames = (taskList: Task[]) => {
     for (const task of taskList) {
       if (task.config.milestone && !existingNames.has(task.config.milestone)) {
-        inferredNames.add(task.config.milestone);
+        const name = task.config.milestone;
+        existingNames.add(name); // prevent duplicates across sibling calls
+        const linkedTasks = getTasksByMilestone(tasks, name);
+        const completedCount = linkedTasks.filter((t) => t.completed).length;
+        result.push({
+          id: name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(
+            /^-|-$/g,
+            "",
+          ),
+          name,
+          status: "open" as const,
+          taskCount: linkedTasks.length,
+          completedCount,
+          progress: linkedTasks.length > 0
+            ? Math.round((completedCount / linkedTasks.length) * 100)
+            : 0,
+        });
       }
       if (task.children) collectNames(task.children);
     }
   };
   collectNames(tasks);
-
-  for (const name of inferredNames) {
-    const created = await parser.addMilestone({ name, status: "open" });
-    const linkedTasks = getTasksByMilestone(tasks, name);
-    const completedCount = linkedTasks.filter((t) => t.completed).length;
-    result.push({
-      ...created,
-      taskCount: linkedTasks.length,
-      completedCount,
-      progress: linkedTasks.length > 0
-        ? Math.round((completedCount / linkedTasks.length) * 100)
-        : 0,
-    });
-  }
 
   return jsonResponse(result);
 });

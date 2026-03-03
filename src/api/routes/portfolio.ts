@@ -115,6 +115,7 @@ portfolioRouter.post("/", async (c) => {
     license: body.license,
     techStack: body.techStack,
     billingCustomerId: body.billingCustomerId,
+    githubRepo: body.githubRepo,
   });
 
   await cacheWriteThrough(c, "portfolio");

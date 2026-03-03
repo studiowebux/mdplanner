@@ -1213,7 +1213,7 @@ export class PortfolioView {
         undefined,
       team: team.length > 0 ? team : undefined,
       kpis: kpis.length > 0 ? kpis : undefined,
-      urls: urls.length > 0 ? urls : undefined,
+      urls: urls.length > 0 ? urls : [],
       logo: document.getElementById("portfolioDetailLogo")?.value?.trim() ||
         undefined,
       license:
