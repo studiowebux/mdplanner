@@ -2514,22 +2514,15 @@
             <!-- Status row -->
             <div id="backupStatusRow" class="mb-6 p-4 bg-secondary rounded border border-default text-sm hidden">
               <div class="flex flex-wrap gap-4">
-                <span>
-                  Last backup:
-                  <strong id="backupLastTime">—</strong>
-                </span>
-                <span>
-                  Size:
-                  <strong id="backupLastSize">—</strong>
-                </span>
-                <span>
-                  Encrypted:
-                  <strong id="backupEncrypted">—</strong>
-                </span>
-                <span>
-                  Interval:
-                  <strong id="backupInterval">—</strong>
-                </span>
+                <span>Enabled: <strong>yes</strong></span>
+                <span>Backups stored: <strong id="backupCount">—</strong></span>
+                <span>Interval: <strong id="backupInterval">—</strong></span>
+                <span>Encrypted: <strong id="backupEncrypted">—</strong></span>
+              </div>
+              <div class="flex flex-wrap gap-4 mt-2">
+                <span>Last backup: <strong id="backupLastTime">—</strong></span>
+                <span>Size: <strong id="backupLastSize">—</strong></span>
+                <span>Next backup: <strong id="backupNextTime">—</strong></span>
               </div>
               <div id="backupLastError" class="mt-2 text-error hidden"></div>
             </div>

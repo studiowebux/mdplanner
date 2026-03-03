@@ -77,8 +77,10 @@ export class ConfigView {
         statusRow.classList.remove("hidden");
         const lastTime = document.getElementById("backupLastTime");
         const lastSize = document.getElementById("backupLastSize");
+        const nextTime = document.getElementById("backupNextTime");
         const encrypted = document.getElementById("backupEncrypted");
         const interval = document.getElementById("backupInterval");
+        const count = document.getElementById("backupCount");
         const lastError = document.getElementById("backupLastError");
 
         if (lastTime) {
@@ -91,11 +93,19 @@ export class ConfigView {
             ? formatBytes(status.lastBackupSize)
             : "—";
         }
+        if (nextTime) {
+          nextTime.textContent = status.nextBackupTime
+            ? new Date(status.nextBackupTime).toLocaleString()
+            : "—";
+        }
         if (encrypted) encrypted.textContent = status.encrypted ? "Yes" : "No";
         if (interval) {
           interval.textContent = status.intervalHours
             ? `${status.intervalHours}h`
             : "Manual only";
+        }
+        if (count) {
+          count.textContent = status.backupCount ?? "0";
         }
         if (lastError && status.lastError) {
           lastError.textContent = `Last error: ${status.lastError}`;

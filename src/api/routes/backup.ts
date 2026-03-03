@@ -115,11 +115,11 @@ backupRouter.post("/trigger", async (c) => {
 });
 
 /** GET /api/backup/status */
-backupRouter.get("/status", (c) => {
+backupRouter.get("/status", async (c) => {
   const pm = getProjectManager(c);
   const scheduler = getScheduler();
 
-  const status = scheduler ? scheduler.getStatus() : {
+  const base = scheduler ? scheduler.getStatus() : {
     enabled: false,
     backupDir: null,
     intervalHours: null,
@@ -128,9 +128,27 @@ backupRouter.get("/status", (c) => {
     lastBackupSize: null,
     lastBackupFile: null,
     lastError: null,
+    nextBackupTime: null,
   };
 
-  return new Response(JSON.stringify(status), {
+  // Count backup files in backupDir
+  let backupCount = 0;
+  if (base.backupDir) {
+    try {
+      for await (const entry of Deno.readDir(base.backupDir)) {
+        if (
+          entry.isFile &&
+          (entry.name.endsWith(".tar") || entry.name.endsWith(".tar.enc"))
+        ) {
+          backupCount++;
+        }
+      }
+    } catch {
+      // Directory doesn't exist yet — count stays 0
+    }
+  }
+
+  return new Response(JSON.stringify({ ...base, backupCount }), {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });
