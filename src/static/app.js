@@ -96,6 +96,7 @@ import { ImportExportModule } from "./modules/import-export.js";
 import { ProjectsModule } from "./modules/projects.js";
 import { UploadsView } from "./modules/views/uploads.js";
 import { GlobalSearch } from "./modules/features/search.js";
+import { GitHubView } from "./modules/views/github.js";
 import { OllamaModule } from "./modules/features/ollama.js";
 import { SSEClient } from "./modules/ui/sse-client.js";
 
@@ -270,6 +271,7 @@ class TaskManager {
     this.dnsModule = new DnsModule(this);
     this.habitsModule = new HabitsModule(this);
     this.analyticsModule = new AnalyticsModule(this);
+    this.githubView = new GitHubView(this);
     this.fishboneModule = new FishboneModule(this);
     this.fishboneSidenavModule = new FishboneSidenavModule(this);
     this.onboardingModule = new OnboardingModule(this);
@@ -1442,6 +1444,7 @@ class TaskManager {
     document.getElementById("analyticsView")?.classList.add("hidden");
     document.getElementById("ollamaView")?.classList.add("hidden");
     document.getElementById("dnsView")?.classList.add("hidden");
+    document.getElementById("githubView")?.classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
     document.getElementById("mindmapView").classList.add("hidden");
     document.getElementById("c4View").classList.add("hidden");
@@ -1595,15 +1598,9 @@ class TaskManager {
       document.getElementById("fishboneView").classList.remove("hidden");
       this.fishboneModule.load();
     } else if (view === "github") {
-      // GitHub has no standalone view — redirect to Settings → Integrations
-      this.switchView("config");
-      setTimeout(() => {
-        document.getElementById("integrationsSection")?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }, 100);
-      return;
+      this.activateViewButton("github");
+      document.getElementById("githubView").classList.remove("hidden");
+      this.githubView.load();
     } else if (view === "dns") {
       this.activateViewButton("dns");
       document.getElementById("dnsView").classList.remove("hidden");
