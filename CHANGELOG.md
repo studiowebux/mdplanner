@@ -8,6 +8,34 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.9.3] - 2026-03-04
+
+### Added
+
+- Habit tracker: calendar cells for today and past days are now clickable —
+  opens a day popup to toggle completion and log a per-day note. Notes appear as
+  a tooltip on hover.
+- DNS view: domain records can now be linked to a portfolio project via an
+  autocomplete field in the sidenav; a project badge is shown in the domain
+  table.
+- MCP: `list_tasks` supports `tags` filter; `list_notes` supports `search`
+  filter; `list_goals` supports `type` filter; `list_milestones` supports
+  `status` and `project` filters; `list_meetings` supports `date_from`,
+  `date_to`, and `open_actions_only` filters.
+
+## [0.9.2] - 2026-03-04
+
+### Fixed
+
+- Notes editor: save button now correctly persists content after the first save
+  without requiring a page reload.
+- Notes editor: multi-select mode toolbar now appears reliably when selecting
+  multiple notes.
+- Notes sidenav: view-only mode is now enforced when the sidenav is opened from
+  the read view; the editor is not mounted unnecessarily.
+- Notes drag handle: drag-to-reorder handle is now visible and functional across
+  all note list rows.
+
 ## [0.9.1] - 2026-03-03
 
 ### Added
