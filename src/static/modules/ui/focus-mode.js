@@ -47,6 +47,10 @@ export class FocusMode {
    * Exit focus mode and return to previous view
    */
   static exit() {
+    // No-op if focus mode is not active — prevents spurious scrollTo(0,0)
+    // when closeAllModals() calls exit() on every ESC press.
+    if (!document.body.classList.contains("focus-mode-active")) return;
+
     this.currentTaskId = null;
 
     // Remove focus mode class
