@@ -163,9 +163,11 @@ export class HabitsModule {
           note ? `Note: ${note}` : "",
         ].filter(Boolean).join(" — ");
 
-        const clickAttr = isDone
-          ? `onclick="taskManager.habitsModule._openNotePopup(event,'${h.id}','${dateStr}',${JSON.stringify(note)})"`
+        const canClick = !isFuture;
+        const clickAttr = canClick
+          ? `onclick="taskManager.habitsModule._openDayPopup(event,'${h.id}','${dateStr}',${isDone},${JSON.stringify(note)})"`
           : "";
+        if (canClick) cls += " cal-clickable";
 
         cells += `<td class="${cls}" title="${escapeHtml(tooltip)}" ${clickAttr}>${isDone ? (note ? "★" : "•") : ""}</td>`;
       }
@@ -199,8 +201,8 @@ export class HabitsModule {
     });
   }
 
-  // Open inline note popup on a done cell
-  _openNotePopup(event, habitId, date, currentNote) {
+  // Open inline day popup on any non-future cell: toggle done + edit note
+  _openDayPopup(event, habitId, date, isDone, currentNote) {
     event.stopPropagation();
     this._closeNotePopup();
 
@@ -208,11 +210,14 @@ export class HabitsModule {
     const popup = document.createElement("div");
     popup.className = "cal-note-popup";
     popup.innerHTML = `
-      <div class="cal-note-popup-header">Note for ${escapeHtml(date)}</div>
+      <div class="cal-note-popup-header">${escapeHtml(date)}</div>
+      <label class="cal-done-toggle">
+        <input type="checkbox" id="calDoneCheck" ${isDone ? "checked" : ""}> Done on this day
+      </label>
       <textarea class="cal-note-textarea" rows="3" placeholder="Add a note for this day...">${escapeHtml(currentNote || "")}</textarea>
       <div class="cal-note-popup-actions">
         <button class="cal-note-save btn-primary">Save</button>
-        <button class="cal-note-cancel btn-secondary">Cancel</button>
+        <button class="cal-note-cancel btn-ghost">Cancel</button>
       </div>
     `;
 
@@ -228,11 +233,27 @@ export class HabitsModule {
     popup.querySelector(".cal-note-textarea")?.focus();
 
     popup.querySelector(".cal-note-save")?.addEventListener("click", async () => {
+      const newDone = popup.querySelector("#calDoneCheck").checked;
       const note = popup.querySelector(".cal-note-textarea").value.trim();
-      await HabitsAPI.setDayNote(habitId, date, note);
+      try {
+        if (newDone !== isDone) {
+          if (newDone) {
+            await HabitsAPI.markComplete(habitId, date);
+          } else {
+            await HabitsAPI.unmarkComplete(habitId, date);
+          }
+        }
+        if (note !== (currentNote || "")) {
+          await HabitsAPI.setDayNote(habitId, date, note);
+        }
+      } catch (err) {
+        showToast("Failed to save", "error");
+        console.error("[Habits] day popup save error:", err);
+        return;
+      }
       this.taskManager.habits = await HabitsAPI.fetchAll();
       this.renderView();
-      showToast("Note saved");
+      showToast("Saved");
       this._closeNotePopup();
     });
 

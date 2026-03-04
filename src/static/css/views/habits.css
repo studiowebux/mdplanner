@@ -316,6 +316,14 @@
   position: relative;
 }
 
+.cal-cell.cal-clickable {
+  cursor: pointer;
+}
+
+.cal-cell.cal-clickable:hover {
+  background-color: var(--color-bg-tertiary);
+}
+
 /* Note popup */
 .cal-note-popup {
   z-index: 1000;
@@ -347,6 +355,15 @@
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
   box-sizing: border-box;
+}
+
+.cal-done-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
 }
 
 .cal-note-popup-actions {
