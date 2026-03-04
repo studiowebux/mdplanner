@@ -154,6 +154,7 @@
   /* Accent */
   --color-accent: #ffffff;
   --color-accent-hover: #e5e5e5;
+  --color-accent-control: #818cf8;
 
   /* Success */
   --color-success: #22c55e;

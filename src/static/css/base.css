@@ -71,7 +71,7 @@ input, select, textarea {
 input[type="checkbox"], input[type="radio"] {
   width: 1rem;
   height: 1rem;
-  accent-color: var(--color-accent);
+  accent-color: var(--color-accent-control, var(--color-accent));
   color-scheme: inherit;
   padding: 0;
   border-radius: 2px;
