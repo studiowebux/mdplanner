@@ -209,6 +209,13 @@ class TaskManager {
       status: "",
       sort: "default",
     };
+    this.boardFilters = {
+      section: "",
+      assignee: "",
+      milestone: "",
+      project: "",
+      status: "",
+    };
     this.pomodoro = {
       duration: 25 * 60,
       timeLeft: 25 * 60,
@@ -1117,8 +1124,9 @@ class TaskManager {
       }
     });
 
-    // Board view drag and drop events - delegated to BoardView
+    // Board view drag and drop + filter events - delegated to BoardView
     this.boardView.bindEvents();
+    this.boardView.bindFilterEvents();
     this.uploadsView.bindEvents();
     this.meetingSidenavModule.bindEvents();
     this.meetingsModule.bindEvents();
@@ -1717,6 +1725,23 @@ class TaskManager {
 
   clearListFilters() {
     this.listView.clearFilters();
+  }
+
+  clearBoardFilters() {
+    this.boardView.clearFilters();
+  }
+
+  async quickUpdate(taskId, field, value) {
+    try {
+      const payload = {};
+      payload[field] = value || undefined;
+      const response = await TasksAPI.update(taskId, payload);
+      if (response.ok) {
+        await this.loadTasks();
+      }
+    } catch (err) {
+      console.error("quickUpdate failed:", err);
+    }
   }
 
   // Pomodoro Timer - delegated to PomodoroModule

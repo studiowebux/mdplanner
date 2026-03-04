@@ -430,6 +430,32 @@ export class ListView {
                 </select>`;
       })()
     }
+                    ${
+      (() => {
+        const people = Array.from(this.tm.peopleMap.values());
+        if (people.length === 0) return "";
+        const currentAssignee = config.assignee || "";
+        return `<select class="text-xs text-muted border border-default rounded px-1 bg-primary"
+                        title="Assign person"
+                        onchange="(function(el){taskManager.quickUpdate('${task.id}','assignee',el.value)})(this)">
+                  <option value="">Assign…</option>
+                  ${people.map((p) => `<option value="${p.id}"${currentAssignee === p.id ? " selected" : ""}>${p.name}</option>`).join("")}
+                </select>`;
+      })()
+    }
+                    ${
+      (() => {
+        const portfolio = this.tm.portfolio || [];
+        if (portfolio.length === 0) return "";
+        const currentProject = config.project || "";
+        return `<select class="text-xs text-muted border border-default rounded px-1 bg-primary"
+                        title="Assign project"
+                        onchange="(function(el){taskManager.quickUpdate('${task.id}','project',el.value)})(this)">
+                  <option value="">Project…</option>
+                  ${portfolio.map((p) => `<option value="${p.name}"${currentProject === p.name ? " selected" : ""}>${p.name}</option>`).join("")}
+                </select>`;
+      })()
+    }
                     <button onclick="taskManager.enterFocusMode('${task.id}')"
                             class="focus-task-btn text-muted hover:text-secondary transition-colors" title="Focus Mode">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -16,6 +16,7 @@ export class BoardView {
   constructor(taskManager) {
     this.tm = taskManager;
     this.eventsBound = false;
+    this.filterEventsBound = false;
     this.draggedTaskId = null;
     this.draggedFromSection = null;
     this.draggedFromIndex = null;
@@ -25,9 +26,129 @@ export class BoardView {
     return this.tm.getPersonName(personId);
   }
 
-  render() {
+  // ── Filter helpers ───────────────────────────────────────────────────────
+
+  _saveFilters() {
+    try {
+      localStorage.setItem("boardFilters", JSON.stringify(this.tm.boardFilters));
+    } catch { /* ignore */ }
+  }
+
+  _restoreFilters() {
+    try {
+      const saved = JSON.parse(localStorage.getItem("boardFilters") || "{}");
+      if (saved && typeof saved === "object") {
+        this.tm.boardFilters = {
+          section: saved.section || "",
+          assignee: saved.assignee || "",
+          milestone: saved.milestone || "",
+          project: saved.project || "",
+          status: saved.status || "",
+        };
+      }
+    } catch { /* ignore */ }
+  }
+
+  populateFilters() {
+    this._restoreFilters();
+    const f = this.tm.boardFilters;
     const sections = this.tm.sections || [];
+    const milestones = this.tm.projectConfig?.milestones || [];
+
+    const sectionSel = document.getElementById("boardFilterSection");
+    if (sectionSel) {
+      sectionSel.innerHTML = '<option value="">All Sections</option>' +
+        sections.map((s) => `<option value="${s}">${s}</option>`).join("");
+      sectionSel.value = f.section || "";
+    }
+
+    const assigneeSel = document.getElementById("boardFilterAssignee");
+    if (assigneeSel) {
+      const people = Array.from(this.tm.peopleMap.values());
+      assigneeSel.innerHTML = '<option value="">All Assignees</option>' +
+        people.map((p) => `<option value="${p.id}">${p.name}</option>`).join("");
+      assigneeSel.value = f.assignee || "";
+    }
+
+    const milestoneSel = document.getElementById("boardFilterMilestone");
+    if (milestoneSel) {
+      milestoneSel.innerHTML = '<option value="">All Milestones</option>' +
+        milestones.map((m) => `<option value="${m}">${m}</option>`).join("");
+      milestoneSel.value = f.milestone || "";
+    }
+
+    const projectSel = document.getElementById("boardFilterProject");
+    if (projectSel) {
+      const projects = new Set();
+      (this.tm.tasks || []).forEach((t) => { if (t.config?.project) projects.add(t.config.project); });
+      (this.tm.portfolio || []).forEach((p) => { if (p.name) projects.add(p.name); });
+      projectSel.innerHTML = '<option value="">All Projects</option>' +
+        Array.from(projects).sort().map((p) => `<option value="${p}">${p}</option>`).join("");
+      projectSel.value = f.project || "";
+    }
+
+    const statusSel = document.getElementById("boardFilterStatus");
+    if (statusSel) statusSel.value = f.status || "";
+
+    const hasFilters = f.section || f.assignee || f.milestone || f.project || f.status;
+    document.getElementById("boardClearFilters")?.classList.toggle("hidden", !hasFilters);
+  }
+
+  applyFilters() {
+    this.tm.boardFilters.section = document.getElementById("boardFilterSection")?.value || "";
+    this.tm.boardFilters.assignee = document.getElementById("boardFilterAssignee")?.value || "";
+    this.tm.boardFilters.milestone = document.getElementById("boardFilterMilestone")?.value || "";
+    this.tm.boardFilters.project = document.getElementById("boardFilterProject")?.value || "";
+    this.tm.boardFilters.status = document.getElementById("boardFilterStatus")?.value || "";
+    const hasFilters = this.tm.boardFilters.section || this.tm.boardFilters.assignee ||
+      this.tm.boardFilters.milestone || this.tm.boardFilters.project || this.tm.boardFilters.status;
+    document.getElementById("boardClearFilters")?.classList.toggle("hidden", !hasFilters);
+    this._saveFilters();
+    this.render();
+  }
+
+  clearFilters() {
+    ["boardFilterSection", "boardFilterAssignee", "boardFilterMilestone",
+      "boardFilterProject", "boardFilterStatus"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.value = "";
+    });
+    this.tm.boardFilters = { section: "", assignee: "", milestone: "", project: "", status: "" };
+    document.getElementById("boardClearFilters")?.classList.add("hidden");
+    this._saveFilters();
+    this.render();
+  }
+
+  getFilteredTasks(tasks) {
+    const f = this.tm.boardFilters;
+    let result = [...tasks];
+    if (f.assignee) result = result.filter((t) => t.config?.assignee === f.assignee);
+    if (f.milestone) result = result.filter((t) => t.config?.milestone === f.milestone);
+    if (f.project) result = result.filter((t) => t.config?.project === f.project);
+    if (f.status === "completed") result = result.filter((t) => t.completed);
+    else if (f.status === "incomplete") result = result.filter((t) => !t.completed);
+    return result;
+  }
+
+  bindFilterEvents() {
+    if (this.filterEventsBound) return;
+    this.filterEventsBound = true;
+    ["boardFilterSection", "boardFilterAssignee", "boardFilterMilestone",
+      "boardFilterProject", "boardFilterStatus"].forEach((id) => {
+      document.getElementById(id)?.addEventListener("change", () => this.applyFilters());
+    });
+    document.getElementById("boardClearFilters")?.addEventListener("click", () => this.clearFilters());
+  }
+
+  render() {
+    this.populateFilters();
+    let sections = this.tm.sections || [];
     const container = document.getElementById("boardContainer");
+
+    // Apply section filter — hide other columns
+    if (this.tm.boardFilters.section) {
+      sections = sections.filter((s) => s === this.tm.boardFilters.section);
+    }
 
     // Show no results message when search is active but no tasks match
     if (this.tm.searchQuery && this.tm.filteredTasks.length === 0) {
@@ -55,7 +176,7 @@ export class BoardView {
     container.innerHTML = "";
 
     sections.forEach((section) => {
-      const tasksToRender = this.tm.getTasksToRender();
+      const tasksToRender = this.getFilteredTasks(this.tm.getTasksToRender());
       const sectionTasks = tasksToRender.filter(
         (task) => task.section === section && !task.parentId,
       );
@@ -326,6 +447,31 @@ export class BoardView {
                   </div>`
         : ""
     }
+
+                <div class="mt-1 flex flex-col gap-1">
+                  ${(() => {
+                    const people = Array.from(this.tm.peopleMap.values());
+                    if (people.length === 0) return "";
+                    const currentAssignee = config.assignee || "";
+                    return `<select class="text-xs text-muted border border-default rounded px-1 py-0.5 bg-primary w-full"
+                              title="Assign person"
+                              onchange="(function(el){taskManager.quickUpdate('${task.id}','assignee',el.value)})(this)">
+                        <option value="">Assign…</option>
+                        ${people.map((p) => `<option value="${p.id}"${currentAssignee === p.id ? " selected" : ""}>${p.name}</option>`).join("")}
+                      </select>`;
+                  })()}
+                  ${(() => {
+                    const portfolio = this.tm.portfolio || [];
+                    if (portfolio.length === 0) return "";
+                    const currentProject = config.project || "";
+                    return `<select class="text-xs text-muted border border-default rounded px-1 py-0.5 bg-primary w-full"
+                              title="Assign project"
+                              onchange="(function(el){taskManager.quickUpdate('${task.id}','project',el.value)})(this)">
+                        <option value="">Project…</option>
+                        ${portfolio.map((p) => `<option value="${p.name}"${currentProject === p.name ? " selected" : ""}>${p.name}</option>`).join("")}
+                      </select>`;
+                  })()}
+                </div>
 
                 ${
       task.children && task.children.length > 0

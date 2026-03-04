@@ -1704,9 +1704,53 @@
 
       <!-- Board View -->
       <div id="boardView" class="hidden pb-16">
+        <div class="mb-4 bg-primary rounded-lg shadow">
+          <div class="px-6 py-4">
+            <div class="flex flex-wrap items-center gap-2">
+              <select
+                id="boardFilterSection"
+                class="text-sm border border-strong rounded-md px-2 py-1"
+              >
+                <option value="">All Sections</option>
+              </select>
+              <select
+                id="boardFilterAssignee"
+                class="text-sm border border-strong rounded-md px-2 py-1"
+              >
+                <option value="">All Assignees</option>
+              </select>
+              <select
+                id="boardFilterMilestone"
+                class="text-sm border border-strong rounded-md px-2 py-1"
+              >
+                <option value="">All Milestones</option>
+              </select>
+              <select
+                id="boardFilterProject"
+                class="text-sm border border-strong rounded-md px-2 py-1"
+              >
+                <option value="">All Projects</option>
+              </select>
+              <select
+                id="boardFilterStatus"
+                class="text-sm border border-strong rounded-md px-2 py-1"
+              >
+                <option value="">All Status</option>
+                <option value="incomplete">Incomplete</option>
+                <option value="completed">Completed</option>
+              </select>
+              <button
+                id="boardClearFilters"
+                class="text-sm text-muted hover:text-secondary hidden"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
         <div
           id="boardContainer"
-          class="grid gap-4 lg:gap-6 auto-cols-min grid-flow-col overflow-x-auto pb-4"
+          class="flex gap-6 overflow-x-auto pb-4 items-stretch"
         >
           <!-- Columns will be generated dynamically -->
         </div>
@@ -1898,8 +1942,32 @@
 
       <div id="githubView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow">
-          <div class="px-6 py-4 border-b border-default flex justify-between items-center view-header">
-            <h2 class="text-lg font-medium text-primary">GitHub</h2>
+          <div class="px-6 py-4 border-b border-default view-header">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <h2 class="text-lg font-medium text-primary">GitHub</h2>
+              <div class="flex flex-wrap items-center gap-2">
+                <input
+                  id="githubSearch"
+                  type="search"
+                  placeholder="Search repos…"
+                  class="text-sm border border-strong rounded-md px-2 py-1"
+                />
+                <select
+                  id="githubSort"
+                  class="text-sm border border-strong rounded-md px-2 py-1"
+                >
+                  <option value="default">Default order</option>
+                  <option value="stars_desc">Stars ↓</option>
+                  <option value="stars_asc">Stars ↑</option>
+                  <option value="issues_desc">Issues ↓</option>
+                  <option value="issues_asc">Issues ↑</option>
+                  <option value="prs_desc">PRs ↓</option>
+                  <option value="prs_asc">PRs ↑</option>
+                  <option value="push_desc">Last push ↓</option>
+                  <option value="push_asc">Last push ↑</option>
+                </select>
+              </div>
+            </div>
           </div>
           <div class="p-6">
             <div id="githubViewContainer"></div>
