@@ -2217,6 +2217,18 @@
                     >
                     <span class="text-sm text-secondary">days (leave blank to always show)</span>
                   </div>
+                  <div class="flex items-center gap-2" style="margin-top:0.5rem">
+                    <label for="hideCompletedMilestonesAfterDays" class="text-sm text-secondary">Hide completed milestones after</label>
+                    <input
+                      type="number"
+                      id="hideCompletedMilestonesAfterDays"
+                      min="0"
+                      max="365"
+                      placeholder="—"
+                      class="w-16 px-2 py-1 border border-default rounded text-sm text-center"
+                    >
+                    <span class="text-sm text-secondary">days (leave blank to always show)</span>
+                  </div>
                 </div>
                 <div>
                   <label
@@ -10749,6 +10761,11 @@
             </div>
           </div>
 
+          <!-- Created date — only visible when editing an existing task -->
+          <div id="taskCreatedAtRow" class="hidden" style="padding:0 1rem 0.5rem;font-size:var(--font-size-sm);color:var(--color-text-muted)">
+            Created: <span id="sidenavTaskCreatedAt"></span>
+          </div>
+
           <!-- Comments section — only visible when editing an existing task -->
           <div id="taskCommentsSection" class="sidenav-section hidden">
             <div class="sidenav-section-title">Comments</div>
@@ -11220,6 +11237,11 @@
               </div>
             </div>
           </div>
+          <!-- Completed date — only visible when status is completed -->
+          <div id="milestoneSidenavCompletedAtRow" class="hidden" style="padding:0 1rem 0.5rem;font-size:var(--font-size-sm);color:var(--color-text-muted)">
+            Completed: <span id="milestoneSidenavCompletedAt"></span>
+          </div>
+
           <div id="milestoneSidenavProgress" class="sidenav-section hidden">
             <div class="sidenav-section-title">Progress</div>
             <div

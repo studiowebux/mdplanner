@@ -11,6 +11,7 @@ interface TaskFrontmatter {
   id: string;
   completed: boolean;
   completedAt?: string;
+  createdAt?: string;
   order?: number;
   tags?: string[];
   due_date?: string;
@@ -550,6 +551,7 @@ export class TasksDirectoryParser {
       title,
       completed: frontmatter.completed || false,
       ...(frontmatter.completedAt && { completedAt: frontmatter.completedAt }),
+      ...(frontmatter.createdAt && { createdAt: frontmatter.createdAt }),
       section,
       config,
       description: description.length > 0 ? description : undefined,
@@ -565,6 +567,7 @@ export class TasksDirectoryParser {
       id: task.id,
       completed: task.completed,
       ...(task.completedAt && { completedAt: task.completedAt }),
+      ...(task.createdAt && { createdAt: task.createdAt }),
     };
 
     // Add config fields

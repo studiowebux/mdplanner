@@ -66,6 +66,10 @@ export class ConfigView {
       const stored = localStorage.getItem("hideCompletedAfterDays");
       input.value = stored ?? "";
     }
+    const msInput = document.getElementById("hideCompletedMilestonesAfterDays");
+    if (msInput) {
+      msInput.value = localStorage.getItem("hideCompletedMilestonesAfterDays") ?? "";
+    }
   }
 
   async initBackupPanel() {
@@ -789,6 +793,21 @@ export class ConfigView {
         // Re-render whichever task view is active
         if (this.tm.currentView === "board") this.tm.renderBoardView();
         else if (this.tm.currentView === "list") this.tm.renderListView();
+      });
+
+    document
+      .getElementById("hideCompletedMilestonesAfterDays")
+      ?.addEventListener("change", (e) => {
+        const val = e.target.value.trim();
+        if (val === "") {
+          localStorage.removeItem("hideCompletedMilestonesAfterDays");
+        } else {
+          localStorage.setItem("hideCompletedMilestonesAfterDays", val);
+        }
+        // Re-render milestones if currently visible
+        if (this.tm.currentView === "milestones") {
+          this.tm.milestonesModule?.renderView();
+        }
       });
 
     // Accessibility settings events

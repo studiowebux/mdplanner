@@ -76,6 +76,39 @@ export class Sidenav {
     const content = panel.querySelector(".sidenav-content");
     if (content) content.scrollTop = 0;
 
+    // Inject fullscreen toggle button into the sidenav header (once per panel)
+    const header = panel.querySelector(".sidenav-header");
+    if (header && !header.querySelector(".sidenav-fullscreen-toggle")) {
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "sidenav-fullscreen-toggle";
+      toggle.setAttribute("aria-label", "Toggle fullscreen");
+      toggle.title = "Toggle fullscreen";
+      toggle.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>`;
+      // Restore persisted state
+      if (localStorage.getItem("sidenavFullscreen") === "1") {
+        panel.classList.add("sidenav-fullscreen");
+      }
+      toggle.addEventListener("click", () => {
+        const isFullscreen = panel.classList.toggle("sidenav-fullscreen");
+        localStorage.setItem("sidenavFullscreen", isFullscreen ? "1" : "0");
+      });
+      // Insert before the close button so the order is: title, spacer, fullscreen, close
+      const closeBtn = header.querySelector(".sidenav-close");
+      if (closeBtn) {
+        header.insertBefore(toggle, closeBtn);
+      } else {
+        header.appendChild(toggle);
+      }
+    } else if (header) {
+      // Reapply persisted state for already-injected button on subsequent opens
+      if (localStorage.getItem("sidenavFullscreen") === "1") {
+        panel.classList.add("sidenav-fullscreen");
+      } else {
+        panel.classList.remove("sidenav-fullscreen");
+      }
+    }
+
     // Focus first input if requested
     if (options.focusFirst !== false) {
       setTimeout(() => {

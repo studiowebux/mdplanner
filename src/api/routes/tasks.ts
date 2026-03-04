@@ -99,6 +99,7 @@ tasksRouter.post("/", async (c) => {
   const task: Omit<Task, "id"> = {
     title: body.title || "Untitled",
     completed: false,
+    createdAt: new Date().toISOString(),
     section: body.section || "Todo",
     description: bodyToDescription(body),
     config: bodyToConfig(body),

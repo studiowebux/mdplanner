@@ -121,7 +121,18 @@ milestonesRouter.put("/:id", async (c) => {
   const milestones = await parser.readMilestones();
   const index = milestones.findIndex((m) => m.id === id);
   if (index === -1) return errorResponse("Not found", 404);
-  milestones[index] = { ...milestones[index], ...body };
+
+  const existing = milestones[index];
+  const merged = { ...existing, ...body };
+
+  // Auto-manage completedAt: set when transitioning to completed, clear otherwise
+  if (body.status === "completed" && !existing.completedAt) {
+    merged.completedAt = new Date().toISOString().split("T")[0];
+  } else if (body.status && body.status !== "completed") {
+    delete merged.completedAt;
+  }
+
+  milestones[index] = merged;
   await parser.saveMilestones(milestones);
   await cacheWriteThrough(c, "milestones");
   return jsonResponse({ success: true });

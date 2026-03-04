@@ -38,6 +38,7 @@ export interface Task {
   title: string;
   completed: boolean;
   completedAt?: string; // ISO date set when task is marked complete, cleared when uncompleted
+  createdAt?: string; // ISO date set once at task creation
   section: string;
   config: TaskConfig;
   description?: string[];
@@ -175,6 +176,7 @@ export interface Milestone {
   name: string;
   target?: string;
   status: "open" | "completed";
+  completedAt?: string; // ISO date auto-set when status → completed, cleared otherwise
   description?: string;
   project?: string;
 }

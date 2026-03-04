@@ -50,6 +50,7 @@ export class MilestoneSidenavModule extends BaseSidenavModule {
     document.getElementById("milestoneSidenavStatus").value = "pending";
     document.getElementById("milestoneSidenavDescription").value = "";
     document.getElementById("milestoneSidenavProject").value = "";
+    document.getElementById("milestoneSidenavCompletedAtRow")?.classList.add("hidden");
     this._populateProjectList();
   }
 
@@ -60,6 +61,21 @@ export class MilestoneSidenavModule extends BaseSidenavModule {
     document.getElementById("milestoneSidenavDescription").value = milestone.description || "";
     document.getElementById("milestoneSidenavProject").value = milestone.project || "";
     this._populateProjectList();
+    this._renderCompletedAt(milestone);
+  }
+
+  _renderCompletedAt(milestone) {
+    const row = document.getElementById("milestoneSidenavCompletedAtRow");
+    const span = document.getElementById("milestoneSidenavCompletedAt");
+    if (!row || !span) return;
+    if (milestone.completedAt) {
+      span.textContent = new Date(milestone.completedAt).toLocaleDateString(undefined, {
+        year: "numeric", month: "short", day: "numeric",
+      });
+      row.classList.remove("hidden");
+    } else {
+      row.classList.add("hidden");
+    }
   }
 
   getFormData() {

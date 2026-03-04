@@ -9,6 +9,7 @@ interface MilestoneFrontmatter {
   id: string;
   target?: string;
   status: "open" | "completed";
+  completedAt?: string;
   project?: string;
 }
 
@@ -47,6 +48,7 @@ export class MilestonesDirectoryParser extends DirectoryParser<Milestone> {
       name,
       target: frontmatter.target,
       status: frontmatter.status || "open",
+      ...(frontmatter.completedAt && { completedAt: frontmatter.completedAt }),
       description: description || undefined,
       project: frontmatter.project,
     };
@@ -60,6 +62,10 @@ export class MilestonesDirectoryParser extends DirectoryParser<Milestone> {
 
     if (milestone.target) {
       frontmatter.target = milestone.target;
+    }
+
+    if (milestone.completedAt) {
+      frontmatter.completedAt = milestone.completedAt;
     }
 
     if (milestone.project) {

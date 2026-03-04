@@ -371,6 +371,21 @@ export class TaskSidenavModule {
       });
     }
 
+    // Created date
+    const createdAtRow = document.getElementById("taskCreatedAtRow");
+    const createdAtSpan = document.getElementById("sidenavTaskCreatedAt");
+    if (createdAtRow && createdAtSpan) {
+      if (task.createdAt) {
+        createdAtSpan.textContent = new Date(task.createdAt).toLocaleString(undefined, {
+          year: "numeric", month: "short", day: "numeric",
+          hour: "2-digit", minute: "2-digit",
+        });
+        createdAtRow.classList.remove("hidden");
+      } else {
+        createdAtRow.classList.add("hidden");
+      }
+    }
+
     // Comments — show section and render thread when editing
     const commentsSection = document.getElementById("taskCommentsSection");
     if (commentsSection) commentsSection.classList.remove("hidden");
@@ -396,6 +411,7 @@ export class TaskSidenavModule {
     this._resetGitHubBadge();
     this._resetGitHubPRBadge();
     this.pendingAttachments = [];
+    document.getElementById("taskCreatedAtRow")?.classList.add("hidden");
   }
 
   async handleSubmit() {

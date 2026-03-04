@@ -26,10 +26,10 @@ export class MilestonesModule {
 
     if (toggle) toggle.textContent = this.currentView === "table" ? "Card view" : "Table view";
 
-    if (
-      !this.taskManager.milestones ||
-      this.taskManager.milestones.length === 0
-    ) {
+    const allMilestones = this.taskManager.milestones || [];
+    const visible = this._applyHideFilter(allMilestones);
+
+    if (visible.length === 0) {
       emptyState.classList.remove("hidden");
       container.innerHTML = "";
       return;
@@ -37,11 +37,27 @@ export class MilestonesModule {
 
     emptyState.classList.add("hidden");
 
+    // Temporarily replace for rendering
+    const original = this.taskManager.milestones;
+    this.taskManager.milestones = visible;
     if (this.currentView === "table") {
       this._renderTable(container);
     } else {
       this._renderCards(container);
     }
+    this.taskManager.milestones = original;
+  }
+
+  _applyHideFilter(milestones) {
+    const days = parseInt(localStorage.getItem("hideCompletedMilestonesAfterDays") ?? "", 10);
+    if (isNaN(days)) return milestones;
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    return milestones.filter((m) => {
+      if (m.status !== "completed") return true;
+      if (!m.completedAt) return days === 0 ? false : true;
+      return new Date(m.completedAt) >= cutoff;
+    });
   }
 
   _renderTable(container) {
