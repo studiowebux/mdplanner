@@ -31,14 +31,11 @@ export class C4SidenavModule {
       () => this.handleDelete(),
     );
 
-    // Level change updates default type
+    // Level change updates type options
     document.getElementById("c4SidenavLevel")?.addEventListener(
       "change",
       (e) => {
-        if (!this.editingComponentId) {
-          document.getElementById("c4SidenavType").value = this
-            .getDefaultTypeForLevel(e.target.value);
-        }
+        this.updateTypeOptions(e.target.value);
       },
     );
 
@@ -115,7 +112,7 @@ export class C4SidenavModule {
   clearForm() {
     document.getElementById("c4SidenavName").value = "";
     document.getElementById("c4SidenavLevel").value = "context";
-    document.getElementById("c4SidenavType").value = "System";
+    this.updateTypeOptions("context", "System");
     document.getElementById("c4SidenavTechnology").value = "";
     document.getElementById("c4SidenavDescription").value = "";
     document.getElementById("c4SidenavX").value = "100";
@@ -124,13 +121,12 @@ export class C4SidenavModule {
   }
 
   fillForm() {
+    const level = this.currentComponent.level || "context";
+    const type = this.currentComponent.type || this.getDefaultTypeForLevel(level);
     document.getElementById("c4SidenavName").value =
       this.currentComponent.name || "";
-    document.getElementById("c4SidenavLevel").value =
-      this.currentComponent.level || "context";
-    document.getElementById("c4SidenavType").value =
-      this.currentComponent.type ||
-      this.getDefaultTypeForLevel(this.currentComponent.level);
+    document.getElementById("c4SidenavLevel").value = level;
+    this.updateTypeOptions(level, type);
     document.getElementById("c4SidenavTechnology").value =
       this.currentComponent.technology || "";
     document.getElementById("c4SidenavDescription").value =
@@ -371,6 +367,35 @@ export class C4SidenavModule {
         return "Class";
       default:
         return "System";
+    }
+  }
+
+  getTypeOptionsForLevel(level) {
+    switch (level) {
+      case "context":
+        return ["System", "Person", "External System"];
+      case "container":
+        return ["Web Application", "Mobile App", "Desktop App", "Database", "Message Bus", "File System", "Container", "Service"];
+      case "component":
+        return ["Component", "Service", "Repository", "Controller", "Facade", "Factory"];
+      case "code":
+        return ["Class", "Interface", "Enum", "Function", "Module"];
+      default:
+        return ["System"];
+    }
+  }
+
+  updateTypeOptions(level, currentValue) {
+    const select = document.getElementById("c4SidenavType");
+    if (!select) return;
+    const options = this.getTypeOptionsForLevel(level);
+    const current = currentValue ?? select.value;
+    select.innerHTML = options.map((o) =>
+      `<option value="${o}"${o === current ? " selected" : ""}>${o}</option>`
+    ).join("");
+    // If the current value is not in the new options, default to first
+    if (!options.includes(current)) {
+      select.value = options[0];
     }
   }
 

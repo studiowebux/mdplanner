@@ -61,6 +61,8 @@ function relativeTime(isoStr) {
   return `${days}d ago`;
 }
 
+const LS_DNS_FILTERS = "dnsFilters";
+
 export class DnsModule {
   constructor(taskManager) {
     this.tm = taskManager;
@@ -69,7 +71,33 @@ export class DnsModule {
     this.filterExpiry = "all";
     this.filterAutoRenew = "all";
     this.searchQuery = "";
+    this.sortField = null;
+    this.sortDir = "asc";
     this.cfConfigured = false;
+    this._loadFilters();
+  }
+
+  _loadFilters() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(LS_DNS_FILTERS) || "{}");
+      if (saved.filterExpiry) this.filterExpiry = saved.filterExpiry;
+      if (saved.filterAutoRenew) this.filterAutoRenew = saved.filterAutoRenew;
+      if (saved.searchQuery) this.searchQuery = saved.searchQuery;
+      if (saved.sortField) this.sortField = saved.sortField;
+      if (saved.sortDir) this.sortDir = saved.sortDir;
+    } catch { /* ignore */ }
+  }
+
+  _saveFilters() {
+    try {
+      localStorage.setItem(LS_DNS_FILTERS, JSON.stringify({
+        filterExpiry: this.filterExpiry,
+        filterAutoRenew: this.filterAutoRenew,
+        searchQuery: this.searchQuery,
+        sortField: this.sortField,
+        sortDir: this.sortDir,
+      }));
+    } catch { /* ignore */ }
   }
 
   async load() {
@@ -132,10 +160,10 @@ export class DnsModule {
               <thead>
                 <tr>
                   <th><input type="checkbox" id="dnsSelectAll" title="Select all"></th>
-                  <th>Domain</th>
-                  <th>Expiry</th>
-                  <th>Renewal cost</th>
-                  <th>Last synced</th>
+                  <th class="dns-sortable" data-sort="domain">Domain ${this._sortIndicator("domain")}</th>
+                  <th class="dns-sortable" data-sort="expiry">Expiry ${this._sortIndicator("expiry")}</th>
+                  <th class="dns-sortable" data-sort="cost">Renewal cost ${this._sortIndicator("cost")}</th>
+                  <th class="dns-sortable" data-sort="synced">Last synced ${this._sortIndicator("synced")}</th>
                   <th></th>
                 </tr>
               </thead>
@@ -208,8 +236,25 @@ export class DnsModule {
     }
   }
 
+  _sortIndicator(field) {
+    if (this.sortField !== field) return '<span class="dns-sort-icon">⇅</span>';
+    return this.sortDir === "asc"
+      ? '<span class="dns-sort-icon active">↑</span>'
+      : '<span class="dns-sort-icon active">↓</span>';
+  }
+
+  _sortValue(domain, field) {
+    switch (field) {
+      case "domain": return domain.domain?.toLowerCase() ?? "";
+      case "expiry": return daysUntil(domain.expiryDate) ?? 99999;
+      case "cost": return domain.renewalCostUsd ?? -1;
+      case "synced": return domain.lastFetchedAt ? new Date(domain.lastFetchedAt).getTime() : 0;
+      default: return "";
+    }
+  }
+
   filtered() {
-    return this.domains.filter(d => {
+    let result = this.domains.filter(d => {
       if (this.searchQuery) {
         const q = this.searchQuery.toLowerCase();
         if (!d.domain.toLowerCase().includes(q) &&
@@ -220,6 +265,19 @@ export class DnsModule {
       if (this.filterAutoRenew === "off" && d.autoRenew) return false;
       return true;
     });
+
+    if (this.sortField) {
+      const dir = this.sortDir === "asc" ? 1 : -1;
+      result = result.slice().sort((a, b) => {
+        const va = this._sortValue(a, this.sortField);
+        const vb = this._sortValue(b, this.sortField);
+        if (va < vb) return -1 * dir;
+        if (va > vb) return 1 * dir;
+        return 0;
+      });
+    }
+
+    return result;
   }
 
   bindEvents() {
@@ -233,6 +291,7 @@ export class DnsModule {
 
     document.getElementById("dnsSearch")?.addEventListener("input", (e) => {
       this.searchQuery = e.target.value;
+      this._saveFilters();
       this.renderTable();
     });
 
@@ -243,6 +302,7 @@ export class DnsModule {
       document.querySelectorAll("[data-expiry]").forEach(b =>
         b.classList.toggle("active", b.dataset.expiry === this.filterExpiry)
       );
+      this._saveFilters();
       this.renderTable();
     });
 
@@ -253,7 +313,22 @@ export class DnsModule {
       document.querySelectorAll("[data-autorenew]").forEach(b =>
         b.classList.toggle("active", b.dataset.autorenew === this.filterAutoRenew)
       );
+      this._saveFilters();
       this.renderTable();
+    });
+
+    document.querySelector(".dns-table thead")?.addEventListener("click", (e) => {
+      const th = e.target.closest("[data-sort]");
+      if (!th) return;
+      const field = th.dataset.sort;
+      if (this.sortField === field) {
+        this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
+      } else {
+        this.sortField = field;
+        this.sortDir = "asc";
+      }
+      this._saveFilters();
+      this.render();
     });
 
     document.getElementById("dnsSelectAll")?.addEventListener("change", (e) => {

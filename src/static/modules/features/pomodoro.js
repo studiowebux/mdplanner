@@ -53,13 +53,16 @@ export class PomodoroModule {
 
     if (!("Notification" in window)) {
       statusEl.innerHTML =
-        '<span class="text-muted">Notifications not supported</span>';
+        '<span class="text-muted">Notifications not supported in this browser</span>';
+    } else if (!window.isSecureContext) {
+      statusEl.innerHTML =
+        '<span class="text-muted">Notifications require HTTPS — not available on plain HTTP</span>';
     } else if (Notification.permission === "granted") {
       statusEl.innerHTML =
         '<span class="text-success">Notifications enabled</span>';
     } else if (Notification.permission === "denied") {
       statusEl.innerHTML =
-        '<span class="text-error">Notifications blocked - enable in browser settings</span>';
+        '<span class="text-error">Notifications blocked — enable in browser settings</span>';
     } else {
       statusEl.innerHTML =
         '<button id="enableNotifBtn" class="text-primary hover:underline">Enable notifications</button>';
@@ -79,7 +82,7 @@ export class PomodoroModule {
 
     this.stopSound();
 
-    if ("Notification" in window && Notification.permission === "default") {
+    if ("Notification" in window && window.isSecureContext && Notification.permission === "default") {
       Notification.requestPermission().then(() =>
         this.updateNotificationStatus()
       );

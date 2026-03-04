@@ -1914,7 +1914,7 @@
               </svg>
             </button>
           </div>
-          <div class="sidenav-body">
+          <div class="sidenav-content">
 
             <!-- Cloudflare synced block (read-only) -->
             <div id="dnsCfSyncedBlock" class="hidden mb-4 p-3 bg-secondary rounded border border-default">
@@ -13646,12 +13646,11 @@
             </div>
             <div class="form-group">
               <label class="form-label">Type</label>
-              <input
-                type="text"
-                id="c4SidenavType"
-                class="form-input"
-                placeholder="e.g., System"
-              >
+              <select id="c4SidenavType" class="form-input">
+                <option value="System">System</option>
+                <option value="Person">Person</option>
+                <option value="External System">External System</option>
+              </select>
             </div>
             <div class="form-group">
               <label class="form-label">Technology</label>

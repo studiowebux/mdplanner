@@ -253,6 +253,13 @@ export class C4Module {
       }
     });
 
+    if (canDrillDown) {
+      element.querySelector(".c4-component-drilldown")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.drillDown(component);
+      });
+    }
+
     this.makeDraggable(element, component);
 
     container.appendChild(element);

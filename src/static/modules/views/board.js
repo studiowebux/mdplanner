@@ -253,7 +253,15 @@ export class BoardView {
     }
                 </div>
 
-                <div class="text-xs font-mono text-muted">#${task.id}</div>
+                <div class="flex items-center gap-2">
+                  <div class="text-xs font-mono text-muted">#${task.id}</div>
+                  ${config.comments?.length > 0
+                    ? `<button onclick="taskManager.editTask('${task.id}')" class="flex items-center gap-0.5 text-xs text-muted hover:text-secondary" title="${config.comments.length} comment${config.comments.length !== 1 ? "s" : ""}">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+                        ${config.comments.length}
+                      </button>`
+                    : ""}
+                </div>
                 ${
       config.assignee
         ? `<div class="text-xs text-muted flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> ${this.getPersonName(config.assignee)}</div>`
