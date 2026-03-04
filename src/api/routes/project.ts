@@ -77,12 +77,9 @@ projectRouter.post("/config", async (c) => {
 // POST /project/rewrite - rewrite tasks with sections
 projectRouter.post("/rewrite", async (c) => {
   const parser = getParser(c);
-  console.log("Rewrite endpoint called");
   const body = await c.req.json();
   const tasks = await parser.readTasks();
-  console.log("Current tasks count:", tasks.length);
   await parser.writeTasks(tasks, body.sections);
-  console.log("Tasks rewritten with sections:", body.sections);
   await cacheWriteThrough(c, "tasks");
   return jsonResponse({ success: true });
 });

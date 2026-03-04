@@ -65,19 +65,30 @@ export class TasksDirectoryParser {
   }
 
   /**
-   * Get all section directories.
+   * Get all section directories, respecting persisted order from board/.order.
    */
   async listSections(): Promise<string[]> {
-    const sections: string[] = [];
+    // Read persisted order if available
+    let orderedSections: string[] = [];
+    try {
+      const content = await Deno.readTextFile(`${this.boardDir}/.order`);
+      orderedSections = content.split("\n").map((s) => s.trim()).filter(
+        Boolean,
+      );
+    } catch {
+      // No order file — fall back to filesystem enumeration
+    }
+
+    // Get all actual section directories on disk
+    const allDirs = new Set<string>();
     try {
       for await (const entry of Deno.readDir(this.boardDir)) {
         if (entry.isDirectory) {
-          // Convert back to display name (capitalize, replace underscores)
           const displayName = entry.name
             .split("_")
             .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(" ");
-          sections.push(displayName);
+          allDirs.add(displayName);
         }
       }
     } catch (error) {
@@ -85,7 +96,19 @@ export class TasksDirectoryParser {
         throw error;
       }
     }
-    return sections;
+
+    if (orderedSections.length === 0) {
+      return Array.from(allDirs);
+    }
+
+    // Return ordered sections that exist, then any extras not in the order file
+    const result = orderedSections.filter((s) => allDirs.has(s));
+    for (const dir of allDirs) {
+      if (!orderedSections.includes(dir)) {
+        result.push(dir);
+      }
+    }
+    return result;
   }
 
   /**
@@ -829,6 +852,11 @@ export class TasksDirectoryParser {
       for (const section of extraSections) {
         await this.ensureDir(section);
       }
+      // Persist section order so listSections() returns them in the same order
+      await Deno.writeTextFile(
+        `${this.boardDir}/.order`,
+        extraSections.join("\n"),
+      );
     }
 
     // Write all tasks
