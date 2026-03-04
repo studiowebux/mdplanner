@@ -18,9 +18,25 @@ export function registerMilestoneTools(
     "list_milestones",
     {
       description: "List all milestones in the project.",
-      inputSchema: {},
+      inputSchema: {
+        status: z.enum(["open", "completed"]).optional().describe(
+          "Filter by milestone status",
+        ),
+        project: z.string().optional().describe(
+          "Filter by project name (matches milestone.project)",
+        ),
+      },
     },
-    async () => ok(await parser.readMilestones()),
+    async ({ status, project }) => {
+      let milestones = await parser.readMilestones();
+      if (status) milestones = milestones.filter((m) => m.status === status);
+      if (project) {
+        milestones = milestones.filter((m) =>
+          (m.project ?? "").toLowerCase() === project.toLowerCase()
+        );
+      }
+      return ok(milestones);
+    },
   );
 
   server.registerTool(

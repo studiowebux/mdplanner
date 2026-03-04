@@ -27,11 +27,16 @@ export function registerGoalTools(server: McpServer, pm: ProjectManager): void {
         "List all goals in the project. Optionally filter by status.",
       inputSchema: {
         status: z.enum(STATUS).optional().describe("Filter by goal status"),
+        type: z.enum(["enterprise", "project"]).optional().describe(
+          "Filter by goal type",
+        ),
       },
     },
-    async ({ status }) => {
-      const goals = await parser.readGoals();
-      return ok(status ? goals.filter((g) => g.status === status) : goals);
+    async ({ status, type }) => {
+      let goals = await parser.readGoals();
+      if (status) goals = goals.filter((g) => g.status === status);
+      if (type) goals = goals.filter((g) => g.type === type);
+      return ok(goals);
     },
   );
 

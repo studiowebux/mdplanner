@@ -59,9 +59,14 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         completed: z.boolean().optional().describe(
           "Filter by completion state (false = open only, true = completed only)",
         ),
+        tags: z.array(z.string()).optional().describe(
+          "Filter by tags — returns tasks that have ANY of the given tags",
+        ),
       },
     },
-    async ({ section, project, milestone, assignee, priority, completed }) => {
+    async (
+      { section, project, milestone, assignee, priority, completed, tags },
+    ) => {
       const tasks = await parser.readTasks();
       let flat = flattenTasks(tasks);
       if (section) {
@@ -87,6 +92,14 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
       }
       if (completed !== undefined) {
         flat = flat.filter((t) => t.completed === completed);
+      }
+      if (tags?.length) {
+        const lowerTags = tags.map((t) => t.toLowerCase());
+        flat = flat.filter((t) =>
+          (t.config?.tags ?? []).some((tag: string) =>
+            lowerTags.includes(tag.toLowerCase())
+          )
+        );
       }
       return ok(flat);
     },

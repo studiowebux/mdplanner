@@ -25,10 +25,27 @@ export function registerMeetingTools(
     "list_meetings",
     {
       description: "List all meetings sorted by date descending.",
-      inputSchema: {},
+      inputSchema: {
+        date_from: z.string().optional().describe(
+          "Only include meetings on or after this date (YYYY-MM-DD)",
+        ),
+        date_to: z.string().optional().describe(
+          "Only include meetings on or before this date (YYYY-MM-DD)",
+        ),
+        open_actions_only: z.boolean().optional().describe(
+          "Only include meetings that have at least one open action item",
+        ),
+      },
     },
-    async () => {
-      const meetings = await parser.readMeetings();
+    async ({ date_from, date_to, open_actions_only }) => {
+      let meetings = await parser.readMeetings();
+      if (date_from) meetings = meetings.filter((m) => m.date >= date_from);
+      if (date_to) meetings = meetings.filter((m) => m.date <= date_to);
+      if (open_actions_only) {
+        meetings = meetings.filter((m) =>
+          m.actions.some((a) => a.status === "open")
+        );
+      }
       return ok(meetings.map((m) => ({
         id: m.id,
         title: m.title,

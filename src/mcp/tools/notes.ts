@@ -15,10 +15,18 @@ export function registerNoteTools(server: McpServer, pm: ProjectManager): void {
     "list_notes",
     {
       description: "List all notes in the project.",
-      inputSchema: {},
+      inputSchema: {
+        search: z.string().optional().describe(
+          "Filter by title (case-insensitive substring match)",
+        ),
+      },
     },
-    async () => {
-      const notes = await parser.readNotes();
+    async ({ search }) => {
+      let notes = await parser.readNotes();
+      if (search) {
+        const q = search.toLowerCase();
+        notes = notes.filter((n) => n.title.toLowerCase().includes(q));
+      }
       return ok(notes.map((n) => ({
         id: n.id,
         title: n.title,
