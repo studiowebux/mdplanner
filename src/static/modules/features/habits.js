@@ -26,8 +26,9 @@ function todayISO() {
 // The CSS uses grid-auto-flow:column so cells fill column by column.
 // ---------------------------------------------------------------
 
-function buildHeatmapHTML(completions) {
+function buildHeatmapHTML(completions, dayNotes, habitId) {
   const completionSet = new Set(completions);
+  const noteMap = dayNotes || {};
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -51,14 +52,23 @@ function buildHeatmapHTML(completions) {
     const dateStr = toISODate(cellDate);
     const isFuture = cellDate > today;
     const isDone = completionSet.has(dateStr);
+    const note = noteMap[dateStr] || "";
     const dayLabel = DAY_LABELS[i % 7];
-    const title = `${dateStr} (${dayLabel})${isDone ? " — done" : ""}`;
+
+    const noteText = note ? ` — ${note}` : "";
+    const title = `${dateStr} (${dayLabel})${isDone ? " — done" : ""}${noteText}`;
 
     let cls = "habit-heatmap-cell";
     if (isFuture) cls += " future";
     else if (isDone) cls += " done";
+    if (!isFuture && habitId) cls += " clickable";
+    if (note && !isFuture) cls += " has-note";
 
-    cells.push(`<div class="${cls}" title="${escapeHtml(title)}"></div>`);
+    const dataAttrs = (!isFuture && habitId)
+      ? ` data-habit-id="${habitId}" data-date="${dateStr}" data-done="${isDone}" data-note="${escapeHtml(note)}"`
+      : "";
+
+    cells.push(`<div class="${cls}" title="${escapeHtml(title)}"${dataAttrs}></div>`);
   }
 
   return cells.join("");
@@ -198,12 +208,14 @@ export class HabitsModule {
     });
   }
 
-  // Open inline day popup on any non-future cell: toggle done + edit note
-  _openDayPopup(event, habitId, date, isDone, currentNote) {
+  // Open inline day popup on any non-future cell: toggle done + edit note.
+  // cellEl is optional: when called via delegated listener, pass the actual cell
+  // element since event.currentTarget will be the container.
+  _openDayPopup(event, habitId, date, isDone, currentNote, cellEl) {
     event.stopPropagation();
     this._closeNotePopup();
 
-    const cell = event.currentTarget;
+    const cell = cellEl || event.currentTarget;
     const popup = document.createElement("div");
     popup.className = "cal-note-popup";
     popup.innerHTML = `
@@ -250,6 +262,12 @@ export class HabitsModule {
       }
       this.taskManager.habits = await HabitsAPI.fetchAll();
       this.renderView();
+      // Refresh sidenav if the same habit is open in view mode
+      const sidenav = this.taskManager.habitSidenavModule;
+      if (sidenav?.editingId === habitId) {
+        const updated = (this.taskManager.habits || []).find((h) => h.id === habitId);
+        if (updated) sidenav._renderViewContent(updated);
+      }
       showToast("Saved");
       this._closeNotePopup();
     });
@@ -306,7 +324,7 @@ export class HabitsModule {
             <span class="habit-stat-label">Best</span>
           </div>
         </div>
-        <div class="habit-heatmap">${buildHeatmapHTML(habit.completions)}</div>
+        <div class="habit-heatmap">${buildHeatmapHTML(habit.completions, habit.dayNotes, habit.id)}</div>
         ${description}
         <button
           class="${markBtnClass}"
@@ -330,5 +348,15 @@ export class HabitsModule {
       "click",
       () => this.taskManager.habitSidenavModule.openNew(),
     );
+
+    // Delegated heatmap click for card view — opens day popup on past cells.
+    document.getElementById("habitsContainer")?.addEventListener("click", (e) => {
+      if (this.currentView !== "card") return;
+      const cell = e.target.closest(".habit-heatmap-cell.clickable");
+      if (!cell) return;
+      e.stopPropagation();
+      const { habitId, date, done, note } = cell.dataset;
+      this._openDayPopup(e, habitId, date, done === "true", note || "", cell);
+    });
   }
 }

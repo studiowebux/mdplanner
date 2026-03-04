@@ -24,8 +24,9 @@ function todayISO() {
 }
 
 // Heatmap builder — full 12-week view for sidenav
-function buildHeatmapHTML(completions) {
+function buildHeatmapHTML(completions, dayNotes, habitId) {
   const completionSet = new Set(completions);
+  const noteMap = dayNotes || {};
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -47,14 +48,23 @@ function buildHeatmapHTML(completions) {
     const dateStr = toISODate(cellDate);
     const isFuture = cellDate > today;
     const isDone = completionSet.has(dateStr);
+    const note = noteMap[dateStr] || "";
     const dayLabel = DAY_LABELS[i % 7];
-    const title = `${dateStr} (${dayLabel})${isDone ? " — done" : ""}`;
+
+    const noteText = note ? ` — ${note}` : "";
+    const title = `${dateStr} (${dayLabel})${isDone ? " — done" : ""}${noteText}`;
 
     let cls = "habit-heatmap-cell";
     if (isFuture) cls += " future";
     else if (isDone) cls += " done";
+    if (!isFuture && habitId) cls += " clickable";
+    if (note && !isFuture) cls += " has-note";
 
-    cells.push(`<div class="${cls}" title="${escapeHtml(title)}"></div>`);
+    const dataAttrs = (!isFuture && habitId)
+      ? ` data-habit-id="${habitId}" data-date="${dateStr}" data-done="${isDone}" data-note="${escapeHtml(note)}"`
+      : "";
+
+    cells.push(`<div class="${cls}" title="${escapeHtml(title)}"${dataAttrs}></div>`);
   }
 
   return cells.join("");
@@ -241,8 +251,8 @@ export class HabitSidenavModule {
             <span class="habit-stat-label">Total</span>
           </div>
         </div>
-        <div class="habit-view-heatmap-label">Last 12 weeks</div>
-        <div class="habit-heatmap">${buildHeatmapHTML(habit.completions)}</div>
+        <div class="habit-view-heatmap-label">Last 12 weeks — click any past day to mark done or add a note</div>
+        <div class="habit-heatmap">${buildHeatmapHTML(habit.completions, habit.dayNotes, habit.id)}</div>
         ${completeBtn}
         ${notesHtml}
       </div>
@@ -255,6 +265,15 @@ export class HabitSidenavModule {
         if (this.editingId) this.handleComplete(this.editingId);
       },
     );
+
+    // Bind heatmap click for past-day editing
+    viewSection.querySelector(".habit-heatmap")?.addEventListener("click", (e) => {
+      const cell = e.target.closest(".habit-heatmap-cell.clickable");
+      if (!cell) return;
+      e.stopPropagation();
+      const { habitId, date, done, note } = cell.dataset;
+      this.tm.habitsModule._openDayPopup(e, habitId, date, done === "true", note || "", cell);
+    });
   }
 
   // ------------------------------------------------------------------

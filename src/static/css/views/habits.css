@@ -159,6 +159,28 @@
   opacity: 0.2;
 }
 
+.habit-heatmap-cell.clickable {
+  cursor: pointer;
+}
+
+.habit-heatmap-cell.clickable:hover {
+  outline: 1px solid var(--color-text-secondary);
+  outline-offset: 1px;
+  opacity: 1;
+}
+
+/* Tiny dot in the bottom-right corner when a day has a note */
+.habit-heatmap-cell.has-note::after {
+  content: "";
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--color-text-secondary);
+}
+
 /* Tooltip via title attribute renders natively — no extra CSS needed */
 
 /* ------------------------------------------------------------------
