@@ -129,15 +129,11 @@ export class DnsSidenavModule {
   bindEvents() {
     document.getElementById("dnsSidenavCloseBtn")
       ?.addEventListener("click", () => this.close());
+    document.getElementById("dnsSidenavCancelBtn")
+      ?.addEventListener("click", () => this.close());
     document.getElementById("dnsSidenavSaveBtn")
       ?.addEventListener("click", () => this.save());
     document.getElementById("dnsSidenavDeleteBtn")
       ?.addEventListener("click", () => this.deleteDomain());
-
-    // Close on overlay click
-    document.getElementById("dnsSidenav")
-      ?.addEventListener("click", (e) => {
-        if (e.target === e.currentTarget) this.close();
-      });
   }
 }

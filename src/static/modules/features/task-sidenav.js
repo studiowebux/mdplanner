@@ -208,11 +208,13 @@ export class TaskSidenavModule {
     }
 
     // Open sidenav
+    Sidenav.registerModule(this);
     Sidenav.open("taskSidenav");
     this._attachDescUndo();
   }
 
   close() {
+    Sidenav.unregisterModule();
     this._detachDescUndo();
     Sidenav.close("taskSidenav");
     this.editingTask = null;

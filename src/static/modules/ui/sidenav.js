@@ -5,20 +5,40 @@ export class Sidenav {
   static activePanel = null;
   static overlay = null;
   static initialized = false;
+  /** Active BaseSidenavModule instance, if any. Registered on open, cleared on close. */
+  static _activeModule = null;
+
+  /**
+   * Register the currently active BaseSidenavModule so ESC delegates to it.
+   * Called by BaseSidenavModule.openNew() / openEdit().
+   */
+  static registerModule(module) {
+    this._activeModule = module;
+  }
+
+  /**
+   * Unregister the active module. Called by BaseSidenavModule.close().
+   */
+  static unregisterModule() {
+    this._activeModule = null;
+  }
 
   static init() {
     if (this.initialized) return;
 
-    // Create overlay element
+    // Create overlay element — clicking outside does NOT close the sidenav (locked).
     this.overlay = document.createElement("div");
     this.overlay.className = "sidenav-overlay";
-    this.overlay.addEventListener("click", () => this.closeActive());
     document.body.appendChild(this.overlay);
 
-    // Escape key handler
+    // Escape key handler — delegates to active module's dirty-state guard when present.
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && this.activePanel) {
-        this.closeActive();
+        if (this._activeModule) {
+          this._activeModule._confirmAndClose();
+        } else {
+          this.closeActive();
+        }
       }
     });
 

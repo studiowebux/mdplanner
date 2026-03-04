@@ -71,6 +71,7 @@ export class JournalSidenavModule {
     this._showViewMode();
 
     document.getElementById("journalSidenavDelete").classList.remove("hidden");
+    Sidenav.registerModule(this);
     Sidenav.open("journalSidenav");
   }
 
@@ -86,6 +87,7 @@ export class JournalSidenavModule {
     this._showEditMode();
 
     document.getElementById("journalSidenavDelete").classList.remove("hidden");
+    Sidenav.registerModule(this);
     Sidenav.open("journalSidenav");
   }
 
@@ -101,11 +103,13 @@ export class JournalSidenavModule {
       now.toTimeString().slice(0, 5);
     document.getElementById("journalSidenavDelete").classList.add("hidden");
     this._showEditMode();
+    Sidenav.registerModule(this);
     Sidenav.open("journalSidenav");
     document.getElementById("journalSidenavBody")?.focus();
   }
 
   close() {
+    Sidenav.unregisterModule();
     this._detachJournalUndo();
     Sidenav.close("journalSidenav");
     this.editingId = null;

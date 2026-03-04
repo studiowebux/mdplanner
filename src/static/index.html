@@ -1966,8 +1966,10 @@
 
           </div>
           <div class="sidenav-footer">
+            <button id="dnsSidenavDeleteBtn" class="btn-danger-ghost hidden">Delete</button>
+            <div class="flex-1"></div>
+            <button id="dnsSidenavCancelBtn" class="btn-ghost">Cancel</button>
             <button id="dnsSidenavSaveBtn" class="btn-primary">Save</button>
-            <button id="dnsSidenavDeleteBtn" class="btn-secondary hidden" style="color:var(--error)">Delete</button>
           </div>
         </div>
       </div>
@@ -2840,7 +2842,7 @@
                     <button
                       type="button"
                       id="notesInlineSave"
-                      class="btn"
+                      class="btn-primary"
                     >
                       Save
                     </button>
@@ -9577,7 +9579,7 @@
           <button
             type="button"
             id="cancelIdeaLinkPickerBtn"
-            class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+            class="btn-ghost"
           >
             Cancel
           </button>
@@ -10760,13 +10762,13 @@
           <button
             type="button"
             id="sidenavTaskCancel"
-            class="btn-secondary"
+            class="btn-ghost"
           >
             Cancel
           </button>
           <button
             type="submit"
-            class="btn btn-primary"
+            class="btn-primary"
           >
             Save Task
           </button>
@@ -10959,30 +10961,18 @@
         </div>
       </div>
       <div class="sidenav-footer">
-        <button
-          type="button"
-          id="noteSidenavDelete"
-          class="px-4 py-2 text-sm font-medium text-error hover:text-error-text hidden"
-        >
-          Delete
-        </button>
+        <button type="button" id="noteSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
         <button
           type="button"
           id="noteSidenavFullEditor"
-          class="px-3 py-2 text-xs font-medium text-secondary hover:text-primary"
+          class="btn-ghost"
           title="Open in full editor"
         >
           Full Editor
         </button>
         <div class="flex-1"></div>
-        <button type="button" id="noteSidenavSave" class="btn">Save</button>
-        <button
-          type="button"
-          id="noteSidenavCancel"
-          class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
-        >
-          Close
-        </button>
+        <button type="button" id="noteSidenavCancel" class="btn-ghost">Cancel</button>
+        <button type="button" id="noteSidenavSave" class="btn-primary">Save</button>
       </div>
     </div>
 
@@ -11120,11 +11110,11 @@
           <button
             type="button"
             id="goalSidenavCancel"
-            class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+            class="btn-ghost"
           >
             Cancel
           </button>
-          <button type="submit" class="btn btn-primary ml-2">Save</button>
+          <button type="submit" class="btn-primary">Save</button>
         </div>
       </form>
     </div>
@@ -11245,11 +11235,11 @@
           <button
             type="button"
             id="milestoneSidenavCancel"
-            class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+            class="btn-ghost"
           >
             Cancel
           </button>
-          <button type="submit" class="btn btn-primary ml-2">Save</button>
+          <button type="submit" class="btn-primary">Save</button>
         </div>
       </form>
     </div>
@@ -11350,11 +11340,11 @@
           <button
             type="button"
             id="retroSidenavCancel"
-            class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+            class="btn-ghost"
           >
             Cancel
           </button>
-          <button type="submit" class="btn btn-primary ml-2">Save</button>
+          <button type="submit" class="btn-primary">Save</button>
         </div>
       </form>
     </div>
@@ -11495,11 +11485,11 @@
           <button
             type="button"
             id="mindmapSidenavCancel"
-            class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+            class="btn-ghost"
           >
             Cancel
           </button>
-          <button type="submit" id="mindmapSidenavSave" class="btn ml-2">Save</button>
+          <button type="submit" id="mindmapSidenavSave" class="btn-primary">Save</button>
         </div>
       </form>
     </div>
@@ -11601,11 +11591,11 @@
           <button
             type="button"
             id="stickySidenavCancel"
-            class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+            class="btn-ghost"
           >
             Cancel
           </button>
-          <button type="submit" class="btn btn-primary ml-2">Save</button>
+          <button type="submit" class="btn-primary">Save</button>
         </div>
       </form>
     </div>
@@ -11671,8 +11661,8 @@
         <div class="sidenav-footer">
           <button type="button" id="safe-sidenav-delete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
-          <button type="button" id="safe-sidenav-cancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
-          <button type="button" id="safe-sidenav-save" class="btn">Save</button>
+          <button type="button" id="safe-sidenav-cancel" class="btn-ghost">Cancel</button>
+          <button type="button" id="safe-sidenav-save" class="btn-primary">Save</button>
         </div>
       </div>
     </div>
@@ -11751,8 +11741,8 @@
         <div class="sidenav-footer">
           <button type="button" id="pipeline-sidenav-delete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
-          <button type="button" id="pipeline-sidenav-cancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
-          <button type="button" id="pipeline-sidenav-save" class="btn">Save</button>
+          <button type="button" id="pipeline-sidenav-cancel" class="btn-ghost">Cancel</button>
+          <button type="button" id="pipeline-sidenav-save" class="btn-primary">Save</button>
         </div>
       </div>
     </div>
@@ -11819,8 +11809,8 @@
         <div class="sidenav-footer">
           <button type="button" id="kpi-sidenav-delete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
-          <button type="button" id="kpi-sidenav-cancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
-          <button type="button" id="kpi-sidenav-save" class="btn">Save</button>
+          <button type="button" id="kpi-sidenav-cancel" class="btn-ghost">Cancel</button>
+          <button type="button" id="kpi-sidenav-save" class="btn-primary">Save</button>
         </div>
       </div>
     </div>
@@ -11883,10 +11873,10 @@
           <button type="button" id="moscowSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
           <button type="button" id="moscowSidenavCancel"
-            class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">
+            class="btn-ghost">
             Cancel
           </button>
-          <button type="button" id="moscowSidenavSave" class="btn">Save</button>
+          <button type="button" id="moscowSidenavSave" class="btn-primary">Save</button>
         </div>
       </div>
     </div>
@@ -11949,10 +11939,10 @@
           <button type="button" id="eisenhowerSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
           <button type="button" id="eisenhowerSidenavCancel"
-            class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">
+            class="btn-ghost">
             Cancel
           </button>
-          <button type="button" id="eisenhowerSidenavSave" class="btn">Save</button>
+          <button type="button" id="eisenhowerSidenavSave" class="btn-primary">Save</button>
         </div>
       </div>
     </div>
@@ -12067,11 +12057,11 @@
         <button
           type="button"
           id="swotSidenavCancel"
-          class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+          class="btn-ghost"
         >
           Cancel
         </button>
-        <button type="button" id="swotSidenavSave" class="btn">Save</button>
+        <button type="button" id="swotSidenavSave" class="btn-primary">Save</button>
       </div>
     </div>
 
@@ -12189,11 +12179,11 @@
         <button
           type="button"
           id="riskSidenavCancel"
-          class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+          class="btn-ghost"
         >
           Cancel
         </button>
-        <button type="button" id="riskSidenavSave" class="btn">Save</button>
+        <button type="button" id="riskSidenavSave" class="btn-primary">Save</button>
       </div>
     </div>
 
@@ -12407,11 +12397,11 @@
         <button
           type="button"
           id="leanCanvasSidenavCancel"
-          class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+          class="btn-ghost"
         >
           Cancel
         </button>
-        <button type="button" id="leanCanvasSidenavSave" class="btn">Save</button>
+        <button type="button" id="leanCanvasSidenavSave" class="btn-primary">Save</button>
       </div>
     </div>
 
@@ -12588,11 +12578,11 @@
         <button
           type="button"
           id="bmcSidenavCancel"
-          class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+          class="btn-ghost"
         >
           Cancel
         </button>
-        <button type="button" id="bmcSidenavSave" class="btn">Save</button>
+        <button type="button" id="bmcSidenavSave" class="btn-primary">Save</button>
       </div>
     </div>
 
@@ -12708,11 +12698,11 @@
         <button
           type="button"
           id="pvbSidenavCancel"
-          class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+          class="btn-ghost"
         >
           Cancel
         </button>
-        <button type="button" id="pvbSidenavSave" class="btn">Save</button>
+        <button type="button" id="pvbSidenavSave" class="btn-primary">Save</button>
       </div>
     </div>
 
@@ -12911,11 +12901,11 @@
         <button
           type="button"
           id="briefSidenavCancel"
-          class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+          class="btn-ghost"
         >
           Cancel
         </button>
-        <button type="button" id="briefSidenavSave" class="btn">Save</button>
+        <button type="button" id="briefSidenavSave" class="btn-primary">Save</button>
       </div>
     </div>
 
@@ -13039,8 +13029,8 @@
         <div class="sidenav-footer">
           <button type="button" id="meetingSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
-          <button type="button" id="meetingSidenavCancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
-          <button type="button" id="meetingSidenavSave" class="btn">Save</button>
+          <button type="button" id="meetingSidenavCancel" class="btn-ghost">Cancel</button>
+          <button type="button" id="meetingSidenavSave" class="btn-primary">Save</button>
         </div>
       </div>
     </div>
@@ -13104,8 +13094,8 @@
         <div class="sidenav-footer">
           <button type="button" id="journalSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
-          <button type="button" id="journalSidenavCancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
-          <button type="button" id="journalSidenavEditBtn" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active hidden">Edit</button>
+          <button type="button" id="journalSidenavCancel" class="btn-ghost">Cancel</button>
+          <button type="button" id="journalSidenavEditBtn" class="btn-ghost hidden">Edit</button>
           <span id="journalSidenavUnsavedDot" class="journal-unsaved-dot hidden" aria-hidden="true"></span>
           <button type="button" id="journalSidenavSave" class="btn-primary py-2 rounded-lg">Save</button>
         </div>
@@ -13156,8 +13146,8 @@
         <div class="sidenav-footer">
           <button type="button" id="habitSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
-          <button type="button" id="habitSidenavCancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
-          <button type="button" id="habitSidenavEditBtn" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active hidden">Edit</button>
+          <button type="button" id="habitSidenavCancel" class="btn-ghost">Cancel</button>
+          <button type="button" id="habitSidenavEditBtn" class="btn-ghost hidden">Edit</button>
           <button type="button" id="habitSidenavSave" class="btn-primary py-2 rounded-lg">Save</button>
         </div>
       </div>
@@ -13196,8 +13186,8 @@
         <div class="sidenav-footer">
           <button type="button" id="fishboneSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
           <div class="flex-1"></div>
-          <button type="button" id="fishboneSidenavCancel" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active">Cancel</button>
-          <button type="button" id="fishboneSidenavEditBtn" class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active hidden">Edit</button>
+          <button type="button" id="fishboneSidenavCancel" class="btn-ghost">Cancel</button>
+          <button type="button" id="fishboneSidenavEditBtn" class="btn-ghost hidden">Edit</button>
           <button type="button" id="fishboneSidenavSave" class="btn-primary py-2 rounded-lg">Save</button>
         </div>
       </div>
@@ -13559,11 +13549,11 @@
         <button
           type="button"
           id="ideaSidenavCancel"
-          class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+          class="btn-ghost"
         >
           Cancel
         </button>
-        <button type="button" id="ideaSidenavSave" class="btn">Save</button>
+        <button type="button" id="ideaSidenavSave" class="btn-primary">Save</button>
       </div>
     </div>
 
@@ -13699,11 +13689,11 @@
         <button
           type="button"
           id="c4SidenavCancel"
-          class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+          class="btn-ghost"
         >
           Cancel
         </button>
-        <button type="button" id="c4SidenavSave" class="btn">Save</button>
+        <button type="button" id="c4SidenavSave" class="btn-primary">Save</button>
       </div>
     </div>
 
@@ -13753,11 +13743,11 @@
         <button
           type="button"
           id="strategicSidenavCancel"
-          class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+          class="btn-ghost"
         >
           Cancel
         </button>
-        <button type="button" id="strategicSidenavSave" class="btn">Save</button>
+        <button type="button" id="strategicSidenavSave" class="btn-primary">Save</button>
       </div>
     </div>
 
@@ -13805,11 +13795,11 @@
         <button
           type="button"
           id="billingSidenavCancel"
-          class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+          class="btn-ghost"
         >
           Cancel
         </button>
-        <button type="button" id="billingSidenavSave" class="btn">Save</button>
+        <button type="button" id="billingSidenavSave" class="btn-primary">Save</button>
       </div>
     </div>
 
@@ -13857,11 +13847,11 @@
         <button
           type="button"
           id="crmSidenavCancel"
-          class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+          class="btn-ghost"
         >
           Cancel
         </button>
-        <button type="button" id="crmSidenavSave" class="btn">Save</button>
+        <button type="button" id="crmSidenavSave" class="btn-primary">Save</button>
       </div>
     </div>
 
@@ -13961,11 +13951,11 @@
         <button
           type="button"
           id="capacitySidenavCancel"
-          class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+          class="btn-ghost"
         >
           Cancel
         </button>
-        <button type="button" id="capacitySidenavSave" class="btn">Save</button>
+        <button type="button" id="capacitySidenavSave" class="btn-primary">Save</button>
       </div>
     </div>
 
@@ -14101,11 +14091,11 @@
           <button
             type="button"
             id="orgchartSidenavCancel"
-            class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+            class="btn-ghost"
           >
             Cancel
           </button>
-          <button type="submit" class="btn btn-primary ml-2">Save</button>
+          <button type="submit" class="btn-primary">Save</button>
         </div>
       </form>
     </div>
@@ -14272,11 +14262,11 @@
           <button
             type="button"
             id="peopleSidenavCancel"
-            class="px-4 py-2 text-sm font-medium text-secondary bg-tertiary rounded-md hover:bg-active"
+            class="btn-ghost"
           >
             Cancel
           </button>
-          <button type="submit" class="btn btn-primary ml-2">Save</button>
+          <button type="submit" class="btn-primary">Save</button>
         </div>
       </form>
     </div>
@@ -14346,7 +14336,7 @@
       <div class="confirm-modal-box">
         <p id="confirmModalMessage" class="confirm-modal-message"></p>
         <div class="confirm-modal-footer">
-          <button id="confirmModalCancel" class="btn">Cancel</button>
+          <button id="confirmModalCancel" class="btn-ghost">Cancel</button>
           <button id="confirmModalConfirm" class="btn-danger">Delete</button>
         </div>
       </div>

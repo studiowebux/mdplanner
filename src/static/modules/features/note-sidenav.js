@@ -181,6 +181,7 @@ export class NoteSidenavModule {
     document.getElementById("noteSidenavDelete").classList.add("hidden");
 
     // Open sidenav
+    Sidenav.registerModule(this);
     Sidenav.open("noteSidenav");
     this._attachNoteUndoManagers();
   }
@@ -217,11 +218,13 @@ export class NoteSidenavModule {
     document.getElementById("noteSidenavDelete").classList.remove("hidden");
 
     // Open sidenav
+    Sidenav.registerModule(this);
     Sidenav.open("noteSidenav");
     this._attachNoteUndoManagers();
   }
 
   close() {
+    Sidenav.unregisterModule();
     this._detachNoteUndoManagers();
 
     // Reset multi-select state

@@ -44,7 +44,9 @@ export class LeanCanvasSidenavModule {
   }
 
   bindEvents() {
-    // Intercept ESC before sidenav.js closeActive() — capture phase fires first
+    // Intercept ESC before sidenav.js closes without running our state cleanup.
+    // lean-canvas has its own dirty-state check and close() logic, so we handle
+    // ESC here to ensure both are exercised.
     this._escCapture = (e) => {
       if (e.key === "Escape" && Sidenav.isOpen("leanCanvasSidenav")) {
         e.stopImmediatePropagation();
@@ -52,18 +54,6 @@ export class LeanCanvasSidenavModule {
       }
     };
     document.addEventListener("keydown", this._escCapture, true);
-
-    // Intercept overlay click before sidenav.js handler
-    this._overlayCapture = (e) => {
-      if (
-        e.target.classList.contains("sidenav-overlay") &&
-        Sidenav.isOpen("leanCanvasSidenav")
-      ) {
-        e.stopImmediatePropagation();
-        this.close();
-      }
-    };
-    document.addEventListener("click", this._overlayCapture, true);
 
     document.getElementById("leanCanvasSidenavClose")?.addEventListener(
       "click",

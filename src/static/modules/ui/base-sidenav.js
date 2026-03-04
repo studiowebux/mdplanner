@@ -55,8 +55,7 @@ export class BaseSidenavModule {
     this._formDirty = false;
     /** Delegated change listener for dirty tracking — removed on close. */
     this._dirtyListener = () => this._setDirty(true);
-    /** ESC key handler — bound once, removed on close */
-    this._escHandler = (e) => { if (e.key === "Escape") this._confirmAndClose(); };
+    // ESC is now handled globally by Sidenav via registerModule/unregisterModule.
   }
 
   /** @abstract */ get prefix() { throw new Error("override prefix"); }
@@ -99,7 +98,7 @@ export class BaseSidenavModule {
     this.el("Header").textContent = this.newLabel;
     this.clearForm();
     this.el("Delete")?.classList.add("hidden");
-    document.addEventListener("keydown", this._escHandler);
+    Sidenav.registerModule(this);
     Sidenav.open(this.panelId);
     this._ensureFullscreenToggle();
     this._attachUndoManagers();
@@ -116,7 +115,7 @@ export class BaseSidenavModule {
     this.el("Header").textContent = this.editLabel;
     this.fillForm(entity);
     this.el("Delete")?.classList.remove("hidden");
-    document.addEventListener("keydown", this._escHandler);
+    Sidenav.registerModule(this);
     Sidenav.open(this.panelId);
     this._ensureFullscreenToggle();
     this._attachUndoManagers();
@@ -125,7 +124,7 @@ export class BaseSidenavModule {
   }
 
   close() {
-    document.removeEventListener("keydown", this._escHandler);
+    Sidenav.unregisterModule();
     this._detachUndoManagers();
     this._detachDirtyWatcher();
     this._setDirty(false);
