@@ -1,6 +1,7 @@
 // Portfolio View Module - Cross-project dashboard
 import { BillingAPI, GitHubAPI, PeopleAPI, PortfolioAPI } from "../api.js";
 import { PROJECT_STATUS_CLASSES, PROJECT_STATUS_LABELS } from "../constants.js";
+import { FuzzyAutocomplete } from "../ui/fuzzy-autocomplete.js";
 
 /**
  * Portfolio dashboard - displays all projects with status, progress, and filtering.
@@ -21,6 +22,8 @@ export class PortfolioView {
     this.selectedProject = null;
     this.isDetailOpen = false;
     this.isCreating = false;
+    /** @type {FuzzyAutocomplete[]} */
+    this._fuzzyInstances = [];
   }
 
   getPersonName(personId) {
@@ -939,14 +942,9 @@ export class PortfolioView {
             </div>
             <div>
               <label class="form-label">Category</label>
-              <input type="text" id="portfolioDetailCategory" class="form-input" list="portfolioCategoryList" autocomplete="off" value="${
+              <input type="text" id="portfolioDetailCategory" class="form-input" autocomplete="off" value="${
       this.escapeHtml(project.category)
     }">
-              <datalist id="portfolioCategoryList">${
-      [...new Set(this.projects.map((p) => p.category).filter(Boolean))].sort()
-        .map((c) => `<option value="${this.escapeHtml(c)}">`)
-        .join("")
-    }</datalist>
             </div>
             <div>
               <label class="form-label">Status</label>
@@ -993,17 +991,12 @@ export class PortfolioView {
             </div>
             <div>
               <label class="form-label">Billing Customer</label>
-              <input type="text" id="portfolioDetailBillingCustomer" class="form-input" list="portfolioCustomerList" autocomplete="off" value="${
+              <input type="text" id="portfolioDetailBillingCustomer" class="form-input" autocomplete="off" value="${
       this.escapeHtml(
         this.customers.find((c) => c.id === project.billingCustomerId)?.name ||
           project.billingCustomerId || "",
       )
     }" placeholder="Link to a billing customer">
-              <datalist id="portfolioCustomerList">${
-      this.customers.map((c) =>
-        `<option value="${this.escapeHtml(c.name)}" data-id="${c.id}">`
-      ).join("")
-    }</datalist>
             </div>
             <div>
               <label class="form-label">GitHub Repository</label>
@@ -1121,6 +1114,36 @@ export class PortfolioView {
         `}
       </div>
     `;
+
+    // Attach fuzzy autocomplete after DOM is ready
+    requestAnimationFrame(() => this._attachFuzzy());
+  }
+
+  _attachFuzzy() {
+    this._fuzzyInstances.forEach((f) => f.destroy());
+    this._fuzzyInstances = [];
+
+    const categoryInput = document.getElementById("portfolioDetailCategory");
+    if (categoryInput) {
+      this._fuzzyInstances.push(new FuzzyAutocomplete(
+        categoryInput,
+        () => [...new Set(this.projects.map((p) => p.category).filter(Boolean))].sort(),
+      ));
+    }
+
+    const customerInput = document.getElementById("portfolioDetailBillingCustomer");
+    if (customerInput) {
+      this._fuzzyInstances.push(new FuzzyAutocomplete(
+        customerInput,
+        () => this.customers.map((c) => c.name),
+        {
+          onSelect: (name) => {
+            const found = this.customers.find((c) => c.name === name);
+            if (found) customerInput.dataset.selectedId = found.id;
+          },
+        },
+      ));
+    }
   }
 
   _renderStatusUpdates(updates) {

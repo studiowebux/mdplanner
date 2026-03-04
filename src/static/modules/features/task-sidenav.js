@@ -3,6 +3,7 @@
 
 import { Sidenav } from "../ui/sidenav.js";
 import { GitHubAPI, TasksAPI } from "../api.js";
+import { FuzzyAutocomplete } from "../ui/fuzzy-autocomplete.js";
 import { showToast } from "../ui/toast.js";
 import { UndoManager } from "../ui/undo-manager.js";
 import { showConfirm } from "../ui/confirm.js";
@@ -15,6 +16,8 @@ export class TaskSidenavModule {
     this.pendingAttachments = [];
     /** @type {UndoManager | null} */
     this._descUndoManager = null;
+    /** @type {FuzzyAutocomplete | null} */
+    this._projectFuzzy = null;
   }
 
   bindEvents() {
@@ -216,6 +219,8 @@ export class TaskSidenavModule {
   close() {
     Sidenav.unregisterModule();
     this._detachDescUndo();
+    this._projectFuzzy?.destroy();
+    this._projectFuzzy = null;
     Sidenav.close("taskSidenav");
     this.editingTask = null;
     this.parentTaskId = null;
@@ -280,15 +285,18 @@ export class TaskSidenavModule {
       if (currentVal && names.includes(currentVal)) milestoneSelect.value = currentVal;
     }
 
-    // Projects datalist — portfolio item names
-    const projectsDatalist = document.getElementById("projectsList");
-    if (projectsDatalist) {
-      const names = new Set();
-      (this.tm.portfolio || []).forEach((p) => { if (p.name) names.add(p.name); });
-      projectsDatalist.innerHTML = Array.from(names)
-        .sort()
-        .map((n) => `<option value="${n}">`)
-        .join("");
+    // Projects fuzzy autocomplete — portfolio item names
+    const projectInput = document.getElementById("sidenavTaskProject");
+    if (projectInput) {
+      this._projectFuzzy?.destroy();
+      this._projectFuzzy = new FuzzyAutocomplete(
+        projectInput,
+        () => {
+          const names = new Set();
+          (this.tm.portfolio || []).forEach((p) => { if (p.name) names.add(p.name); });
+          return Array.from(names).sort();
+        },
+      );
     }
   }
 

@@ -5,6 +5,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { IdeasAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { escapeHtml } from "../utils.js";
+import { FuzzyAutocomplete } from "../ui/fuzzy-autocomplete.js";
 
 export class IdeaSidenavModule {
   constructor(taskManager) {
@@ -12,6 +13,8 @@ export class IdeaSidenavModule {
     this.editingIdeaId = null;
     this.currentIdea = null;
     this.linkSearchFilter = "";
+    /** @type {FuzzyAutocomplete | null} */
+    this._projectFuzzy = null;
   }
 
   bindEvents() {
@@ -96,6 +99,7 @@ export class IdeaSidenavModule {
     document.getElementById("ideaSidenavLinksSection").classList.add("hidden");
 
     Sidenav.open("ideaSidenav");
+    this._attachProjectFuzzy();
     document.getElementById("ideaSidenavTitle")?.focus();
   }
 
@@ -118,13 +122,30 @@ export class IdeaSidenavModule {
     this.renderLinkOptions();
 
     Sidenav.open("ideaSidenav");
+    this._attachProjectFuzzy();
   }
 
   close() {
+    this._projectFuzzy?.destroy();
+    this._projectFuzzy = null;
     Sidenav.close("ideaSidenav");
     this.editingIdeaId = null;
     this.currentIdea = null;
     this.linkSearchFilter = "";
+  }
+
+  _attachProjectFuzzy() {
+    this._projectFuzzy?.destroy();
+    const input = document.getElementById("ideaSidenavProject");
+    if (!input) return;
+    this._projectFuzzy = new FuzzyAutocomplete(
+      input,
+      () => {
+        const names = new Set();
+        (this.tm.portfolio || []).forEach((p) => { if (p.name) names.add(p.name); });
+        return Array.from(names).sort();
+      },
+    );
   }
 
   clearForm() {
