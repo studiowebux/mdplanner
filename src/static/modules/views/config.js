@@ -320,7 +320,7 @@ export class ConfigView {
     }
   }
 
-  async moveSectionUp(index) {
+  moveSectionUp(index) {
     if (index > 0) {
       const sections = this.tm.sections;
       [sections[index - 1], sections[index]] = [
@@ -328,12 +328,10 @@ export class ConfigView {
         sections[index - 1],
       ];
       this.renderSections();
-      // Rewrite tasks to reorder section headers
-      await this.rewriteTasksWithUpdatedSections();
     }
   }
 
-  async moveSectionDown(index) {
+  moveSectionDown(index) {
     const sections = this.tm.sections;
     if (index < sections.length - 1) {
       [sections[index], sections[index + 1]] = [
@@ -341,9 +339,14 @@ export class ConfigView {
         sections[index],
       ];
       this.renderSections();
-      // Rewrite tasks to reorder section headers
-      await this.rewriteTasksWithUpdatedSections();
     }
+  }
+
+  async saveSectionOrder() {
+    const btn = document.getElementById("saveSectionOrderBtn");
+    if (btn) btn.textContent = "Saving...";
+    await this.rewriteTasksWithUpdatedSections();
+    if (btn) btn.textContent = "Save order";
   }
 
   async moveTasksFromSection(fromSection, toSection) {
@@ -699,6 +702,9 @@ export class ConfigView {
       });
 
     // Section management events
+    document
+      .getElementById("saveSectionOrderBtn")
+      ?.addEventListener("click", () => this.saveSectionOrder());
     document
       .getElementById("addSectionBtn")
       .addEventListener("click", () => this.addSection());
