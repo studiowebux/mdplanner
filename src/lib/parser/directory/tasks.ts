@@ -797,7 +797,7 @@ export class TasksDirectoryParser {
    * Save all tasks (bulk replace).
    * Handles tasks organized by section.
    */
-  async saveAll(tasks: Task[]): Promise<void> {
+  async saveAll(tasks: Task[], extraSections?: string[]): Promise<void> {
     // Group tasks by section
     const tasksBySection = new Map<string, Task[]>();
     for (const task of tasks) {
@@ -821,9 +821,14 @@ export class TasksDirectoryParser {
       }
     }
 
-    // Ensure all required sections exist
+    // Ensure all required sections exist (including empty extra sections)
     for (const section of tasksBySection.keys()) {
       await this.ensureDir(section);
+    }
+    if (extraSections) {
+      for (const section of extraSections) {
+        await this.ensureDir(section);
+      }
     }
 
     // Write all tasks

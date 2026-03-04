@@ -1503,12 +1503,12 @@ export class DirectoryMarkdownParser {
   // Special Methods (API Compatibility)
   // ============================================================
 
-  getSectionsFromBoard(): string[] {
-    return this.tasksParser.listSectionsSync();
+  async getSectionsFromBoard(): Promise<string[]> {
+    return this.tasksParser.listSections();
   }
 
-  async writeTasks(tasks: Task[], _customSections?: string[]): Promise<void> {
-    await this.tasksParser.saveAll(tasks);
+  async writeTasks(tasks: Task[], customSections?: string[]): Promise<void> {
+    await this.tasksParser.saveAll(tasks, customSections);
   }
 
   async getCRMSummary(): Promise<{

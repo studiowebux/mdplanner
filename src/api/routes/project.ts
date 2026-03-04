@@ -30,7 +30,7 @@ projectRouter.get("/config", async (c) => {
 // GET /project/sections - get board sections
 projectRouter.get("/sections", async (c) => {
   const parser = getParser(c);
-  const sections = parser.getSectionsFromBoard();
+  const sections = await parser.getSectionsFromBoard();
   return jsonResponse(sections);
 });
 

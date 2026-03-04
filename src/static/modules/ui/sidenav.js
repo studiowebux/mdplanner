@@ -86,7 +86,8 @@ export class Sidenav {
       }, 100);
     }
 
-    // Prevent body scroll
+    // Prevent body scroll — save scroll position first so close() can restore it
+    this._savedScrollY = window.scrollY;
     document.body.style.overflow = "hidden";
 
     // Callback
@@ -112,8 +113,12 @@ export class Sidenav {
       this.overlay.classList.remove("active");
       this.activePanel = null;
 
-      // Restore body scroll
+      // Restore body scroll and scroll position
       document.body.style.overflow = "";
+      if (this._savedScrollY !== undefined) {
+        window.scrollTo({ top: this._savedScrollY, behavior: "instant" });
+        this._savedScrollY = undefined;
+      }
     }
 
     // Callback

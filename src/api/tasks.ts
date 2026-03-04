@@ -874,7 +874,7 @@ export class TaskAPI {
         method === "GET" && pathParts.length === 3 &&
         pathParts[1] === "project" && pathParts[2] === "sections"
       ) {
-        const sections = this.parser.getSectionsFromBoard();
+        const sections = await this.parser.getSectionsFromBoard();
         return new Response(JSON.stringify(sections), { headers });
       }
 
