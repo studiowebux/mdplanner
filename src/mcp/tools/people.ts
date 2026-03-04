@@ -1,6 +1,8 @@
 /**
  * MCP tools for people registry operations.
- * Tools: list_people, get_person, create_person, update_person, delete_person
+ * Tools: list_people, get_person, create_person, update_person, delete_person,
+ *        get_people_tree, get_people_summary, get_people_departments,
+ *        get_person_reports
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -44,12 +46,53 @@ export function registerPeopleTools(
   );
 
   server.registerTool(
+    "get_people_tree",
+    {
+      description:
+        "Get the org chart as a hierarchical tree. Each node has a person record with a 'children' array of their direct reports.",
+      inputSchema: {},
+    },
+    async () => ok(await parser.getPeopleTree()),
+  );
+
+  server.registerTool(
+    "get_people_summary",
+    {
+      description:
+        "Get people registry summary statistics: total headcount, breakdown by department, managers count.",
+      inputSchema: {},
+    },
+    async () => ok(await parser.getPeopleSummary()),
+  );
+
+  server.registerTool(
+    "get_people_departments",
+    {
+      description: "List all department names used in the people registry.",
+      inputSchema: {},
+    },
+    async () => ok(await parser.getPeopleDepartments()),
+  );
+
+  server.registerTool(
+    "get_person_reports",
+    {
+      description: "Get the direct reports for a given person.",
+      inputSchema: { id: z.string().describe("Person ID") },
+    },
+    async ({ id }) => ok(await parser.getPeopleDirectReports(id)),
+  );
+
+  server.registerTool(
     "create_person",
     {
       description: "Add a new person to the people registry.",
       inputSchema: {
         name: z.string().describe("Full name"),
         title: z.string().optional().describe("Job title"),
+        role: z.string().optional().describe(
+          "Role within the team (e.g. 'developer', 'designer')",
+        ),
         email: z.string().optional(),
         phone: z.string().optional(),
         departments: z.array(z.string()).optional(),
@@ -57,20 +100,41 @@ export function registerPeopleTools(
           "Person ID of direct manager",
         ),
         startDate: z.string().optional().describe("Start date (YYYY-MM-DD)"),
+        hoursPerDay: z.number().optional().describe(
+          "Working hours per day (used by capacity planning)",
+        ),
+        workingDays: z.array(z.string()).optional().describe(
+          "Working days of the week (e.g. ['Mon','Tue','Wed','Thu','Fri'])",
+        ),
         notes: z.string().optional(),
       },
     },
     async (
-      { name, title, email, phone, departments, reportsTo, startDate, notes },
+      {
+        name,
+        title,
+        role,
+        email,
+        phone,
+        departments,
+        reportsTo,
+        startDate,
+        hoursPerDay,
+        workingDays,
+        notes,
+      },
     ) => {
       const person = await parser.addPerson({
         name,
         ...(title && { title }),
+        ...(role && { role }),
         ...(email && { email }),
         ...(phone && { phone }),
         ...(departments?.length && { departments }),
         ...(reportsTo && { reportsTo }),
         ...(startDate && { startDate }),
+        ...(hoursPerDay !== undefined && { hoursPerDay }),
+        ...(workingDays?.length && { workingDays }),
         ...(notes && { notes }),
       });
       return ok({ id: person.id });
@@ -85,11 +149,14 @@ export function registerPeopleTools(
         id: z.string().describe("Person ID"),
         name: z.string().optional(),
         title: z.string().optional(),
+        role: z.string().optional(),
         email: z.string().optional(),
         phone: z.string().optional(),
         departments: z.array(z.string()).optional(),
         reportsTo: z.string().optional(),
         startDate: z.string().optional(),
+        hoursPerDay: z.number().optional(),
+        workingDays: z.array(z.string()).optional(),
         notes: z.string().optional(),
       },
     },

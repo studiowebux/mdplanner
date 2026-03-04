@@ -49,6 +49,7 @@ function bodyToConfig(body: Record<string, any>): TaskConfig {
   if ("planned_start" in body) config.planned_start = body.planned_start;
   if ("planned_end" in body) config.planned_end = body.planned_end;
   if ("project" in body) config.project = body.project;
+  if ("blocked_by" in body) config.blocked_by = body.blocked_by;
   return config;
 }
 

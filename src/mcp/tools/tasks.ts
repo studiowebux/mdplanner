@@ -1,6 +1,7 @@
 /**
  * MCP tools for task operations.
- * Tools: list_tasks, get_task, create_task, update_task, delete_task
+ * Tools: list_tasks, get_task, create_task, update_task, delete_task,
+ *        add_task_comment, add_task_attachments, move_task
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -134,9 +135,21 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         assignee: z.string().optional(),
         due_date: z.string().optional().describe("Due date (YYYY-MM-DD)"),
         priority: z.number().int().min(1).max(5).optional(),
+        effort: z.number().int().optional().describe(
+          "Effort estimate (story points or hours)",
+        ),
         tags: z.array(z.string()).optional(),
         milestone: z.string().optional().describe("Milestone name"),
         project: z.string().optional().describe("Project name"),
+        planned_start: z.string().optional().describe(
+          "Planned start date (YYYY-MM-DD)",
+        ),
+        planned_end: z.string().optional().describe(
+          "Planned end date (YYYY-MM-DD)",
+        ),
+        parentId: z.string().optional().describe(
+          "Parent task ID — creates this task as a subtask",
+        ),
       },
     },
     async (
@@ -147,9 +160,13 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         assignee,
         due_date,
         priority,
+        effort,
         tags,
         milestone,
         project,
+        planned_start,
+        planned_end,
+        parentId,
       },
     ) => {
       const id = await parser.addTask({
@@ -161,10 +178,14 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
           ...(assignee && { assignee }),
           ...(due_date && { due_date }),
           ...(priority != null && { priority }),
+          ...(effort != null && { effort }),
           ...(tags?.length && { tags }),
           ...(milestone && { milestone }),
           ...(project && { project }),
+          ...(planned_start && { planned_start }),
+          ...(planned_end && { planned_end }),
         },
+        ...(parentId && { parentId }),
       });
       return ok({ id });
     },
@@ -269,6 +290,53 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
       );
       if (!result) return err(`Task '${id}' not found`);
       return ok({ success: true, commentId: result.id });
+    },
+  );
+
+  server.registerTool(
+    "add_task_attachments",
+    {
+      description:
+        "Add file attachment paths to a task's attachments frontmatter field.",
+      inputSchema: {
+        id: z.string().describe("Task ID"),
+        paths: z.array(z.string()).describe(
+          "List of file paths relative to the project directory (e.g. ['uploads/2026/03/01/file.pdf'])",
+        ),
+      },
+    },
+    async ({ id, paths }) => {
+      if (!paths.length) return err("paths array must not be empty");
+      const success = await parser.addAttachmentsToTask(id, paths);
+      if (!success) return err(`Task '${id}' not found`);
+      return ok({ success: true });
+    },
+  );
+
+  server.registerTool(
+    "move_task",
+    {
+      description:
+        "Move a task to a different section (column). Optionally specify a position for ordered placement.",
+      inputSchema: {
+        id: z.string().describe("Task ID"),
+        section: z.string().describe(
+          "Target section name (e.g. 'Todo', 'In Progress', 'Done')",
+        ),
+        position: z.number().int().min(0).optional().describe(
+          "Zero-based position within the section (omit to append at end)",
+        ),
+      },
+    },
+    async ({ id, section, position }) => {
+      let success: boolean;
+      if (position !== undefined) {
+        success = await parser.reorderTask(id, section, position);
+      } else {
+        success = await parser.updateTask(id, { section });
+      }
+      if (!success) return err(`Task '${id}' not found`);
+      return ok({ success: true });
     },
   );
 

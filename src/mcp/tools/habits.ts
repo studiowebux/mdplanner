@@ -78,12 +78,16 @@ export function registerHabitTools(
         frequency: z.enum(["daily", "weekly"]).optional(),
         target_days: z.array(z.string()).optional(),
         notes: z.string().optional(),
+        day_notes: z.record(z.string(), z.string()).optional().describe(
+          "Per-day notes keyed by ISO date (YYYY-MM-DD). Merged with existing day notes.",
+        ),
       },
     },
-    async ({ id, target_days, ...rest }) => {
+    async ({ id, target_days, day_notes, ...rest }) => {
       const updated = await parser.updateHabit(id, {
         ...rest,
         ...(target_days !== undefined && { targetDays: target_days }),
+        ...(day_notes !== undefined && { dayNotes: day_notes }),
       });
       if (!updated) return err(`Habit '${id}' not found`);
       return ok({ success: true });

@@ -1,7 +1,8 @@
 /**
  * MCP tools for DNS domain operations.
  * Tools: list_dns_domains, get_dns_domain, create_dns_domain,
- *        update_dns_domain, delete_dns_domain, sync_cloudflare_dns
+ *        update_dns_domain, delete_dns_domain, sync_cloudflare_dns,
+ *        list_dns_records, add_dns_record, update_dns_record, delete_dns_record
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -151,6 +152,129 @@ export function registerDnsTools(
           e instanceof Error ? e.message : "Cloudflare sync failed",
         );
       }
+    },
+  );
+
+  // --- DNS Record management (per-domain) ---
+
+  server.registerTool(
+    "list_dns_records",
+    {
+      description:
+        "List DNS records for a specific domain. Returns records synced from Cloudflare or manually added.",
+      inputSchema: {
+        domain_id: z.string().describe("Domain ID"),
+      },
+    },
+    async ({ domain_id }) => {
+      const domains = await parser.readDnsDomains();
+      const domain = domains.find((d) => d.id === domain_id);
+      if (!domain) return err(`DNS domain '${domain_id}' not found`);
+      return ok(domain.dnsRecords ?? []);
+    },
+  );
+
+  server.registerTool(
+    "add_dns_record",
+    {
+      description: "Add a DNS record to a domain.",
+      inputSchema: {
+        domain_id: z.string().describe("Domain ID"),
+        type: z.string().describe(
+          "Record type (A, AAAA, CNAME, MX, TXT, NS, SRV, etc.)",
+        ),
+        name: z.string().describe(
+          "Record name (e.g. '@', 'www', 'mail')",
+        ),
+        value: z.string().describe("Record value"),
+        ttl: z.number().optional().default(3600).describe("TTL in seconds (default: 3600)"),
+        proxied: z.boolean().optional().describe(
+          "Whether the record is proxied (Cloudflare-specific)",
+        ),
+      },
+    },
+    async ({ domain_id, type, name, value, ttl, proxied }) => {
+      const domains = await parser.readDnsDomains();
+      const domain = domains.find((d) => d.id === domain_id);
+      if (!domain) return err(`DNS domain '${domain_id}' not found`);
+      const records = domain.dnsRecords ?? [];
+      records.push({
+        type,
+        name,
+        value,
+        ttl: ttl ?? 3600,
+        ...(proxied !== undefined && { proxied }),
+      });
+      await parser.updateDnsDomain(domain_id, { dnsRecords: records });
+      return ok({ success: true, count: records.length });
+    },
+  );
+
+  server.registerTool(
+    "update_dns_record",
+    {
+      description:
+        "Update a DNS record on a domain by its index in the records array.",
+      inputSchema: {
+        domain_id: z.string().describe("Domain ID"),
+        record_index: z.number().int().min(0).describe(
+          "Zero-based index of the record in the domain's dnsRecords array",
+        ),
+        type: z.string().optional(),
+        name: z.string().optional(),
+        value: z.string().optional(),
+        ttl: z.number().optional(),
+        proxied: z.boolean().optional(),
+      },
+    },
+    async ({ domain_id, record_index, ...fields }) => {
+      const domains = await parser.readDnsDomains();
+      const domain = domains.find((d) => d.id === domain_id);
+      if (!domain) return err(`DNS domain '${domain_id}' not found`);
+      const records = domain.dnsRecords ?? [];
+      if (record_index >= records.length) {
+        return err(
+          `Record index ${record_index} out of range (domain has ${records.length} records)`,
+        );
+      }
+      const existing = records[record_index];
+      records[record_index] = {
+        type: fields.type ?? existing.type,
+        name: fields.name ?? existing.name,
+        value: fields.value ?? existing.value,
+        ttl: fields.ttl ?? existing.ttl,
+        proxied: fields.proxied ?? existing.proxied,
+      };
+      await parser.updateDnsDomain(domain_id, { dnsRecords: records });
+      return ok({ success: true });
+    },
+  );
+
+  server.registerTool(
+    "delete_dns_record",
+    {
+      description:
+        "Delete a DNS record from a domain by its index in the records array.",
+      inputSchema: {
+        domain_id: z.string().describe("Domain ID"),
+        record_index: z.number().int().min(0).describe(
+          "Zero-based index of the record to delete",
+        ),
+      },
+    },
+    async ({ domain_id, record_index }) => {
+      const domains = await parser.readDnsDomains();
+      const domain = domains.find((d) => d.id === domain_id);
+      if (!domain) return err(`DNS domain '${domain_id}' not found`);
+      const records = domain.dnsRecords ?? [];
+      if (record_index >= records.length) {
+        return err(
+          `Record index ${record_index} out of range (domain has ${records.length} records)`,
+        );
+      }
+      records.splice(record_index, 1);
+      await parser.updateDnsDomain(domain_id, { dnsRecords: records });
+      return ok({ success: true, remaining: records.length });
     },
   );
 }
