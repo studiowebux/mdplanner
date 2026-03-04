@@ -258,6 +258,18 @@ export class C4Module {
         e.stopPropagation();
         this.drillDown(component);
       });
+
+      // Click on the component box itself also drills down (click fires after
+      // mouseup only when no drag occurred — the browser suppresses click after
+      // significant mouse movement, so this is safe alongside makeDraggable)
+      element.addEventListener("click", (e) => {
+        if (
+          e.target.classList.contains("c4-edit-btn") ||
+          e.target.classList.contains("c4-delete-btn") ||
+          e.target.classList.contains("c4-component-drilldown")
+        ) return;
+        this.drillDown(component);
+      });
     }
 
     this.makeDraggable(element, component);
@@ -623,22 +635,16 @@ export class C4Module {
       }
     };
 
-    const handleDragEnd = (shouldDrillDown) => {
+    const handleDragEnd = () => {
       if (!this.tm._c4ActiveDrag) return;
 
       const drag = this.tm._c4ActiveDrag;
       const wasDragging = drag.dragStarted;
-      const component = drag.component;
 
       drag.element.style.cursor = "pointer";
       drag.element.classList.remove("dragging");
       drag.element.style.transition = "";
       this.tm._c4ActiveDrag = null;
-
-      if (!wasDragging && shouldDrillDown && this.canBeDrilledDown(component)) {
-        this.drillDown(component);
-        return;
-      }
 
       if (wasDragging) {
         this.save();
@@ -650,7 +656,7 @@ export class C4Module {
     document.addEventListener("mouseup", (e) => {
       if (this.tm._c4ActiveDrag) {
         e.stopPropagation();
-        handleDragEnd(true);
+        handleDragEnd();
       }
     });
 
@@ -662,7 +668,7 @@ export class C4Module {
         handleDragMove(touch.clientX, touch.clientY);
       }
     }, { passive: false });
-    document.addEventListener("touchend", () => handleDragEnd(true));
+    document.addEventListener("touchend", () => handleDragEnd());
   }
 
   openModal() {
