@@ -153,6 +153,7 @@ export class ListView {
 
   render() {
     const container = document.getElementById("listContainer");
+    const savedScrollY = window.scrollY;
     container.innerHTML = "";
 
     // Populate filter dropdowns
@@ -268,6 +269,9 @@ export class ListView {
 
     // Lazy-load live GitHub issue/PR states after render
     if (this.tm.githubConfigured) this._loadGitHubBadgeStates();
+
+    // Restore scroll position so re-renders after sidenav close/save don't jump to top
+    requestAnimationFrame(() => window.scrollTo({ top: savedScrollY, behavior: "instant" }));
   }
 
   createTaskElement(task, isChild = false) {
