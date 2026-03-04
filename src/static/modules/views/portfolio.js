@@ -39,7 +39,7 @@ export class PortfolioView {
     try {
       const [items, summary, people, customers] = await Promise.all([
         PortfolioAPI.fetchAll(),
-        PortfolioAPI.getSummary(),
+        PortfolioAPI.getSummary().catch(() => null),
         PeopleAPI.fetchAll(),
         BillingAPI.fetchCustomers().catch(() => []),
       ]);
@@ -1312,7 +1312,7 @@ export class PortfolioView {
       }
       this.closeDetailPanel();
       await this.load();
-      this.app.suppressSSE?.("portfolio");
+      this.tm.suppressSSE?.("portfolio");
     } catch (error) {
       console.error("Error saving project:", error);
     }
@@ -1481,7 +1481,7 @@ export class PortfolioView {
       await PortfolioAPI.remove(this.selectedProject.id);
       this.closeDetailPanel();
       await this.load();
-      this.app.suppressSSE?.("portfolio");
+      this.tm.suppressSSE?.("portfolio");
     } catch (err) {
       console.error("Error deleting project:", err);
     }
