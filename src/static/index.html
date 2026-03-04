@@ -2828,26 +2828,6 @@
                         />
                       </svg>
                     </button>
-                    <!-- View in Panel -->
-                    <button
-                      id="editInPanelBtn"
-                      class="p-1.5 rounded hover:bg-tertiary text-secondary hover:text-primary transition-colors"
-                      title="View in Panel"
-                    >
-                      <svg
-                        class="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"
-                        />
-                      </svg>
-                    </button>
                     <!-- Delete -->
                     <button
                       id="deleteNoteBtn"
@@ -12998,8 +12978,15 @@
         <!-- Content rendered by JS -->
       </div>
       <div class="sidenav-footer">
+        <button type="button" id="portfolioDetailDelete" class="btn btn-danger-ghost hidden">
+          Delete
+        </button>
+        <span class="sidenav-footer-spacer"></span>
+        <button type="button" id="portfolioDetailCancel" class="btn btn-ghost">
+          Cancel
+        </button>
         <button type="button" id="portfolioDetailSave" class="btn btn-primary">
-          Save Changes
+          Save
         </button>
       </div>
     </div>

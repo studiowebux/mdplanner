@@ -113,12 +113,13 @@ export class Sidenav {
       this.overlay.classList.remove("active");
       this.activePanel = null;
 
-      // Restore body scroll and scroll position
-      document.body.style.overflow = "";
+      // Restore scroll position BEFORE re-enabling overflow so the browser
+      // never briefly shows the wrong scroll position.
       if (this._savedScrollY !== undefined) {
         window.scrollTo({ top: this._savedScrollY, behavior: "instant" });
         this._savedScrollY = undefined;
       }
+      document.body.style.overflow = "";
     }
 
     // Callback

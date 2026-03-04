@@ -497,15 +497,6 @@ export class NotesModule {
       .getElementById("toggleEditBtn")
       .addEventListener("click", () => this.toggleEditMode());
 
-    // Edit in panel (sidenav)
-    document
-      .getElementById("editInPanelBtn")
-      .addEventListener("click", () => {
-        if (this.tm.activeNote !== null) {
-          this.tm.noteSidenavModule.openEdit(this.tm.activeNote);
-        }
-      });
-
     // Delete note
     document
       .getElementById("deleteNoteBtn")

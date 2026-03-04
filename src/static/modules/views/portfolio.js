@@ -2,6 +2,7 @@
 import { BillingAPI, GitHubAPI, PeopleAPI, PortfolioAPI } from "../api.js";
 import { PROJECT_STATUS_CLASSES, PROJECT_STATUS_LABELS } from "../constants.js";
 import { FuzzyAutocomplete } from "../ui/fuzzy-autocomplete.js";
+import { Sidenav } from "../ui/sidenav.js";
 
 /**
  * Portfolio dashboard - displays all projects with status, progress, and filtering.
@@ -832,7 +833,8 @@ export class PortfolioView {
     const titleEl = document.getElementById("portfolioDetailTitle");
     if (titleEl) titleEl.textContent = "New Project";
 
-    document.getElementById("portfolioDetailPanel")?.classList.add("active");
+    this._updatePanelFooter(false);
+    Sidenav.open("portfolioDetailPanel", { focusFirst: false });
 
     // Focus the name field
     setTimeout(() => {
@@ -851,7 +853,8 @@ export class PortfolioView {
       this.isDetailOpen = true;
       this.isCreating = false;
       this.renderDetailPanel(project);
-      document.getElementById("portfolioDetailPanel")?.classList.add("active");
+      this._updatePanelFooter(true);
+      Sidenav.open("portfolioDetailPanel", { focusFirst: false });
     } catch (error) {
       console.error("Error loading project details:", error);
     }
@@ -864,7 +867,7 @@ export class PortfolioView {
     this.isDetailOpen = false;
     this.isCreating = false;
     this.selectedProject = null;
-    document.getElementById("portfolioDetailPanel")?.classList.remove("active");
+    Sidenav.close("portfolioDetailPanel");
   }
 
   /**
@@ -1382,20 +1385,28 @@ export class PortfolioView {
       }
     });
 
-    // Detail panel close
+    // Detail panel close (X button)
     document.getElementById("portfolioDetailClose")?.addEventListener(
       "click",
-      () => {
-        this.closeDetailPanel();
-      },
+      () => this.closeDetailPanel(),
+    );
+
+    // Detail panel cancel
+    document.getElementById("portfolioDetailCancel")?.addEventListener(
+      "click",
+      () => this.closeDetailPanel(),
+    );
+
+    // Detail panel delete
+    document.getElementById("portfolioDetailDelete")?.addEventListener(
+      "click",
+      () => this._deleteProject(),
     );
 
     // Detail panel save
     document.getElementById("portfolioDetailSave")?.addEventListener(
       "click",
-      () => {
-        this.saveDetailPanel();
-      },
+      () => this.saveDetailPanel(),
     );
 
     // Detail panel content events (delegated)
@@ -1452,6 +1463,28 @@ export class PortfolioView {
         }
       },
     );
+  }
+
+  /** Show/hide Delete button based on whether we're editing an existing project. */
+  _updatePanelFooter(hasProject) {
+    document.getElementById("portfolioDetailDelete")?.classList.toggle(
+      "hidden",
+      !hasProject,
+    );
+  }
+
+  async _deleteProject() {
+    if (!this.selectedProject) return;
+    if (!confirm(`Delete "${this.selectedProject.name}"? This cannot be undone.`)) return;
+
+    try {
+      await PortfolioAPI.remove(this.selectedProject.id);
+      this.closeDetailPanel();
+      await this.load();
+      this.app.suppressSSE?.("portfolio");
+    } catch (err) {
+      console.error("Error deleting project:", err);
+    }
   }
 
   async _postStatusUpdate() {

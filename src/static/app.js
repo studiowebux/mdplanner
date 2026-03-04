@@ -1842,6 +1842,13 @@ class TaskManager {
     }
   }
 
+  async editTaskWithComments(taskId) {
+    const task = this.findTaskById(taskId);
+    if (task) {
+      this.taskSidenavModule.openWithCommentFocus(task);
+    }
+  }
+
   copyTaskLink(taskId) {
     return this.tasksModule.copyLink(taskId);
   }

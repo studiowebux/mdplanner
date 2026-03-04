@@ -217,6 +217,15 @@ export class TaskSidenavModule {
     this._attachDescUndo();
   }
 
+  openWithCommentFocus(task) {
+    this.open(task);
+    // Scroll to comment section after sidenav animation settles
+    setTimeout(() => {
+      const section = document.getElementById("taskCommentsSection");
+      if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 300);
+  }
+
   close() {
     Sidenav.unregisterModule();
     this._detachDescUndo();

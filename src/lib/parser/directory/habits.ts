@@ -206,7 +206,9 @@ export class HabitsDirectoryParser extends DirectoryParser<Habit> {
 
     if (!frontmatter.id) return null;
 
-    const completions = frontmatter.completions ?? [];
+    const completions = (frontmatter.completions ?? []).filter(
+      (c): c is string => typeof c === "string" && c.length > 0,
+    );
     const frequency = frontmatter.frequency ?? "daily";
     const { streakCount, longestStreak } = calculateStreaks(
       frequency,
@@ -287,7 +289,9 @@ export class HabitsDirectoryParser extends DirectoryParser<Habit> {
     const existing = await this.read(id);
     if (!existing) return null;
 
-    const completions = updates.completions ?? existing.completions;
+    const completions = (updates.completions ?? existing.completions).filter(
+      (c): c is string => typeof c === "string" && c.length > 0,
+    );
     const frequency = updates.frequency ?? existing.frequency;
     const { streakCount, longestStreak } = calculateStreaks(
       frequency,
