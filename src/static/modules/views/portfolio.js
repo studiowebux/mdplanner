@@ -1103,8 +1103,41 @@ export class PortfolioView {
             ${kpisHtml}
           </div>
         </section>
+
+        ${this.isCreating ? "" : `
+        <!-- Status Updates -->
+        <section class="sidenav-section">
+          <h3 class="sidenav-section-title">Status Updates</h3>
+          <div class="space-y-2">
+            <div class="flex gap-2">
+              <input type="text" id="portfolioStatusInput" class="form-input flex-1" placeholder="Add a status update..." maxlength="500">
+              <button type="button" id="portfolioAddStatus" class="btn btn-sm">Post</button>
+            </div>
+            <div id="portfolioStatusList" class="space-y-2 mt-2">
+              ${this._renderStatusUpdates(project.statusUpdates || [])}
+            </div>
+          </div>
+        </section>
+        `}
       </div>
     `;
+  }
+
+  _renderStatusUpdates(updates) {
+    if (!updates.length) {
+      return `<p class="text-sm text-muted">No status updates yet.</p>`;
+    }
+    return updates.map((u) => `
+      <div class="portfolio-status-update" data-update-id="${u.id}">
+        <div class="portfolio-status-meta">
+          <span class="text-xs text-muted">${this.escapeHtml(u.date)}</span>
+          <button type="button" class="portfolio-status-delete" data-delete-update="${u.id}" title="Delete">
+            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <p class="text-sm">${this.escapeHtml(u.message)}</p>
+      </div>
+    `).join("");
   }
 
   /**
@@ -1369,8 +1402,98 @@ export class PortfolioView {
         const removeUrlBtn = e.target.closest("[data-remove-url]");
         if (removeUrlBtn) {
           this.removeUrl(removeUrlBtn.dataset.removeUrl);
+          return;
+        }
+
+        // Add status update button
+        if (e.target.closest("#portfolioAddStatus")) {
+          this._postStatusUpdate();
+          return;
+        }
+
+        // Delete status update button
+        const deleteUpdateBtn = e.target.closest("[data-delete-update]");
+        if (deleteUpdateBtn) {
+          this._deleteStatusUpdate(deleteUpdateBtn.dataset.deleteUpdate);
         }
       },
     );
+
+    // Allow Enter key to post status update
+    document.getElementById("portfolioDetailContent")?.addEventListener(
+      "keydown",
+      (e) => {
+        if (e.key === "Enter" && e.target.id === "portfolioStatusInput" && !e.shiftKey) {
+          e.preventDefault();
+          this._postStatusUpdate();
+        }
+      },
+    );
+  }
+
+  async _postStatusUpdate() {
+    const input = document.getElementById("portfolioStatusInput");
+    const message = input?.value?.trim();
+    if (!message || !this.selectedProject) return;
+
+    const res = await fetch(
+      `/api/portfolio/${this.selectedProject.id}/status-updates`,
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message }) },
+    );
+    if (!res.ok) return;
+
+    const { update } = await res.json();
+    input.value = "";
+
+    // Prepend update to list
+    const list = document.getElementById("portfolioStatusList");
+    if (list) {
+      const empty = list.querySelector("p");
+      if (empty) empty.remove();
+      const div = document.createElement("div");
+      div.className = "portfolio-status-update";
+      div.dataset.updateId = update.id;
+      div.innerHTML = `
+        <div class="portfolio-status-meta">
+          <span class="text-xs text-muted">${update.date}</span>
+          <button type="button" class="portfolio-status-delete" data-delete-update="${update.id}" title="Delete">
+            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <p class="text-sm">${this.escapeHtml(update.message)}</p>
+      `;
+      list.prepend(div);
+    }
+
+    // Update in-memory project
+    if (this.selectedProject) {
+      this.selectedProject.statusUpdates = [
+        update,
+        ...(this.selectedProject.statusUpdates || []),
+      ];
+    }
+  }
+
+  async _deleteStatusUpdate(updateId) {
+    if (!this.selectedProject) return;
+    if (!confirm("Delete this status update?")) return;
+
+    const res = await fetch(
+      `/api/portfolio/${this.selectedProject.id}/status-updates/${updateId}`,
+      { method: "DELETE" },
+    );
+    if (!res.ok) return;
+
+    document.querySelector(`[data-update-id="${updateId}"]`)?.remove();
+    if (this.selectedProject) {
+      this.selectedProject.statusUpdates = (
+        this.selectedProject.statusUpdates || []
+      ).filter((u) => u.id !== updateId);
+    }
+
+    const list = document.getElementById("portfolioStatusList");
+    if (list && !list.children.length) {
+      list.innerHTML = `<p class="text-sm text-muted">No status updates yet.</p>`;
+    }
   }
 }

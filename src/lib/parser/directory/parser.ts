@@ -27,6 +27,7 @@ import {
   PortfolioDirectoryParser,
   type PortfolioItem,
   type PortfolioKPI,
+  type PortfolioStatusUpdate,
   type PortfolioSummary,
 } from "./portfolio.ts";
 // OrgChart types re-exported from people parser (orgchart delegates to people)
@@ -1564,6 +1565,20 @@ export class DirectoryMarkdownParser {
 
   async hasPortfolio(): Promise<boolean> {
     return this.portfolioParser.exists();
+  }
+
+  async addPortfolioStatusUpdate(
+    id: string,
+    message: string,
+  ) {
+    return this.portfolioParser.addStatusUpdate(id, message);
+  }
+
+  async deletePortfolioStatusUpdate(
+    id: string,
+    updateId: string,
+  ): Promise<boolean> {
+    return this.portfolioParser.deleteStatusUpdate(id, updateId);
   }
 
   // ============================================================

@@ -17,6 +17,12 @@ export interface PortfolioUrl {
   href: string;
 }
 
+export interface PortfolioStatusUpdate {
+  id: string;
+  date: string; // YYYY-MM-DD
+  message: string;
+}
+
 export interface PortfolioItem {
   id: string;
   name: string;
@@ -37,6 +43,7 @@ export interface PortfolioItem {
   techStack?: string[];
   billingCustomerId?: string;
   githubRepo?: string;
+  statusUpdates?: PortfolioStatusUpdate[];
 }
 
 interface PortfolioFrontmatter {
@@ -57,6 +64,7 @@ interface PortfolioFrontmatter {
   techStack?: string[];
   billingCustomerId?: string;
   githubRepo?: string;
+  statusUpdates?: PortfolioStatusUpdate[];
 }
 
 export class PortfolioDirectoryParser {
@@ -169,6 +177,7 @@ export class PortfolioDirectoryParser {
       techStack: frontmatter.techStack,
       billingCustomerId: frontmatter.billingCustomerId,
       githubRepo: frontmatter.githubRepo,
+      statusUpdates: frontmatter.statusUpdates,
     };
   }
 
@@ -207,6 +216,7 @@ export class PortfolioDirectoryParser {
       techStack: item.techStack,
       billingCustomerId: item.billingCustomerId,
       githubRepo: item.githubRepo,
+      statusUpdates: item.statusUpdates,
     };
 
     for (
@@ -252,6 +262,15 @@ export class PortfolioDirectoryParser {
           for (const url of value as PortfolioUrl[]) {
             yamlLines.push(`  - label: "${url.label}"`);
             yamlLines.push(`    href: "${url.href}"`);
+          }
+        } else if (key === "statusUpdates") {
+          yamlLines.push(`${key}:`);
+          for (const u of value as PortfolioStatusUpdate[]) {
+            yamlLines.push(`  - id: "${u.id}"`);
+            yamlLines.push(`    date: "${u.date}"`);
+            yamlLines.push(
+              `    message: "${u.message.replace(/"/g, '\\"')}"`,
+            );
           }
         } else {
           yamlLines.push(`${key}:`);
@@ -361,6 +380,52 @@ export class PortfolioDirectoryParser {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * Add a status update to a portfolio item.
+   */
+  async addStatusUpdate(
+    id: string,
+    message: string,
+  ): Promise<PortfolioStatusUpdate | null> {
+    const item = await this.read(id);
+    if (!item) return null;
+
+    const update: PortfolioStatusUpdate = {
+      id: `update_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      date: new Date().toISOString().split("T")[0],
+      message,
+    };
+
+    const updated = {
+      ...item,
+      statusUpdates: [update, ...(item.statusUpdates ?? [])],
+    };
+    const filePath = `${this.portfolioDir}/${id}.md`;
+    await Deno.writeTextFile(filePath, this.serialize(updated));
+    eventBus.emit({ entity: "portfolio", action: "updated", id });
+    return update;
+  }
+
+  /**
+   * Delete a status update from a portfolio item.
+   */
+  async deleteStatusUpdate(
+    id: string,
+    updateId: string,
+  ): Promise<boolean> {
+    const item = await this.read(id);
+    if (!item) return false;
+
+    const filtered = (item.statusUpdates ?? []).filter((u) =>
+      u.id !== updateId
+    );
+    const updated = { ...item, statusUpdates: filtered };
+    const filePath = `${this.portfolioDir}/${id}.md`;
+    await Deno.writeTextFile(filePath, this.serialize(updated));
+    eventBus.emit({ entity: "portfolio", action: "updated", id });
+    return true;
   }
 
   /**
