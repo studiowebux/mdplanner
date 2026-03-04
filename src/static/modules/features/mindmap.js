@@ -136,10 +136,10 @@ export class MindmapModule {
 
   renderTreeLayoutFor(rootNodes, content, mindmap) {
     const isVertical = this.currentLayout === "vertical";
-    const levelSpacing = 220;
-    const nodeSpacing = 40;
-    const nodeWidth = 150;
-    const nodeHeight = 40;
+    const levelSpacing = 260;
+    const nodeSpacing = 60;
+    const nodeWidth = 180;
+    const nodeHeight = 50;
 
     // First pass: calculate subtree sizes
     rootNodes.forEach((rootNode) => {

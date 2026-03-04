@@ -296,6 +296,15 @@ export class TaskSidenavModule {
           (this.tm.portfolio || []).forEach((p) => { if (p.name) names.add(p.name); });
           return Array.from(names).sort();
         },
+        {
+          onSelect: (name) => {
+            // Auto-fill GitHub repo from portfolio item if the field is currently empty
+            const repoInput = document.getElementById("sidenavTaskGithubRepo");
+            if (!repoInput || repoInput.value.trim()) return;
+            const item = (this.tm.portfolio || []).find((p) => p.name === name);
+            if (item?.githubRepo) repoInput.value = item.githubRepo;
+          },
+        },
       );
     }
   }
