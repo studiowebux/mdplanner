@@ -74,6 +74,8 @@
 
 .theme-light,
 :root:not(.theme-dark):not(.dark):not(.theme-yellow):not(.theme-minimal) {
+  color-scheme: light;
+
   /* Backgrounds */
   --color-bg-primary: #ffffff;
   --color-bg-secondary: #f9fafb;
@@ -128,6 +130,8 @@
 
 .theme-dark,
 .dark {
+  color-scheme: dark;
+
   /* Backgrounds - true black */
   --color-bg-primary: #000000;
   --color-bg-secondary: #0a0a0a;
@@ -186,6 +190,8 @@
    -------------------------------------------------------------------------- */
 
 .theme-yellow {
+  color-scheme: light;
+
   /* Backgrounds */
   --color-bg-primary: #fffbeb;
   --color-bg-secondary: #fef3c7;
@@ -239,6 +245,8 @@
    -------------------------------------------------------------------------- */
 
 .theme-minimal {
+  color-scheme: light;
+
   /* Backgrounds */
   --color-bg-primary: #fafafa;
   --color-bg-secondary: #f5f5f5;
