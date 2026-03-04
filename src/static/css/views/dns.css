@@ -116,6 +116,16 @@
   color: var(--color-text-muted);
 }
 
+.dns-project-badge {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-top: 0.125rem;
+  padding: 0.1em 0.4em;
+  border: 1px solid var(--color-border-default);
+  border-radius: 999px;
+  display: inline-block;
+}
+
 /* Expiry badges */
 .dns-expiry-badge {
   display: inline-flex;

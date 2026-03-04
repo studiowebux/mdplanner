@@ -182,6 +182,7 @@ export class DnsModule {
           ${domain.dnsRecords && domain.dnsRecords.length > 0
             ? `<div class="dns-records-count">${domain.dnsRecords.length} DNS record${domain.dnsRecords.length !== 1 ? "s" : ""}</div>`
             : ""}
+          ${domain.project ? `<div class="dns-project-badge">${this.escHtml(domain.project)}</div>` : ""}
         </td>
         <td>${expiryBadge(domain)}</td>
         <td class="dns-cost">${cost}</td>

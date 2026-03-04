@@ -46,6 +46,7 @@ dnsRouter.post("/", async (c) => {
     nameservers: body.nameservers,
     notes: body.notes,
     lastFetchedAt: body.lastFetchedAt,
+    project: body.project,
   });
   await cacheWriteThrough(c, "dns_domains");
   return jsonResponse({ success: true, id: domain.id }, 201);
@@ -69,6 +70,7 @@ dnsRouter.put("/:id", async (c) => {
     "nameservers",
     "notes",
     "lastFetchedAt",
+    "project",
   ];
   for (const key of allowed) {
     if (key in body) updates[key] = body[key];

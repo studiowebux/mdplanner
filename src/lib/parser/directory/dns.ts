@@ -24,6 +24,7 @@ interface DnsFrontmatter {
   dns_records?: DnsDnsRecord[];
   status?: string;
   last_fetched_at?: string;
+  project?: string;
   created: string;
   updated: string;
 }
@@ -65,6 +66,7 @@ export class DnsDomainParser extends DirectoryParser<DnsDomain> {
       dnsRecords,
       status: frontmatter.status,
       lastFetchedAt: frontmatter.last_fetched_at,
+      project: frontmatter.project,
       notes: body.trim() || undefined,
       created: frontmatter.created || new Date().toISOString(),
       updated: frontmatter.updated || new Date().toISOString(),
@@ -103,6 +105,7 @@ export class DnsDomainParser extends DirectoryParser<DnsDomain> {
     if (domain.lastFetchedAt) {
       frontmatter.last_fetched_at = domain.lastFetchedAt;
     }
+    if (domain.project) frontmatter.project = domain.project;
 
     return buildFileContent(frontmatter, domain.notes ?? "");
   }

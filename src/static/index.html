@@ -1907,12 +1907,12 @@
           <div class="sidenav-body">
 
             <!-- Cloudflare synced block (read-only) -->
-            <div id="dnsCfSyncedBlock" class="hidden mb-5 p-3 bg-secondary rounded border border-default">
+            <div id="dnsCfSyncedBlock" class="hidden mb-4 p-3 bg-secondary rounded border border-default">
               <p class="text-xs font-medium text-secondary mb-2">Cloudflare (synced)</p>
-              <p class="text-xs text-tertiary">
+              <p class="text-xs text-muted">
                 Last synced: <span id="dnsCfLastFetched">—</span>
               </p>
-              <p class="text-xs text-tertiary mt-1">
+              <p class="text-xs text-muted mt-1">
                 Expiry date and auto-renew are managed by Cloudflare sync and shown as read-only here.
               </p>
             </div>
@@ -1956,6 +1956,13 @@
             <div class="form-group">
               <label class="form-label" for="dnsFieldNameservers">Nameservers (one per line)</label>
               <textarea id="dnsFieldNameservers" class="form-input" rows="3" placeholder="ns1.example.com&#10;ns2.example.com"></textarea>
+            </div>
+
+            <!-- Project -->
+            <div class="form-group">
+              <label class="form-label" for="dnsFieldProject">Portfolio project</label>
+              <input type="text" id="dnsFieldProject" class="form-input" list="dnsProjectsList" placeholder="Link to a portfolio project" autocomplete="off">
+              <datalist id="dnsProjectsList"></datalist>
             </div>
 
             <!-- Notes -->

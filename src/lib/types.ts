@@ -710,6 +710,7 @@ export interface DnsDomain {
   status?: string; // Zone status (e.g. "active") synced from Cloudflare
   notes?: string;
   lastFetchedAt?: string; // ISO timestamp — set by Cloudflare sync
+  project?: string; // linked portfolio project name
   created: string;
   updated: string;
 }

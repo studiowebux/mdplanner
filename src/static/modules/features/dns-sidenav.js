@@ -1,5 +1,6 @@
 // DNS domain create/edit sidenav
 import { DnsAPI } from "../api.js";
+import { showToast } from "../ui/toast.js";
 
 export class DnsSidenavModule {
   constructor(taskManager) {
@@ -9,6 +10,7 @@ export class DnsSidenavModule {
 
   open(domain) {
     this.editingId = domain?.id ?? null;
+    this._populateProjectsDatalist();
     this.populate(domain);
     const overlay = document.getElementById("dnsSidenav");
     if (overlay) {
@@ -42,6 +44,7 @@ export class DnsSidenavModule {
     set("dnsFieldRenewalCost", domain?.renewalCostUsd ?? "");
     set("dnsFieldProvider", domain?.provider ?? "");
     set("dnsFieldNameservers", (domain?.nameservers ?? []).join("\n"));
+    set("dnsFieldProject", domain?.project ?? "");
     set("dnsFieldNotes", domain?.notes ?? "");
 
     // Cloudflare-synced block: show last-fetched, read-only expiry/autoRenew
@@ -74,7 +77,7 @@ export class DnsSidenavModule {
 
     const domain = get("dnsFieldDomain");
     if (!domain) {
-      alert("Domain name is required");
+      showToast("Domain name is required", "error");
       return;
     }
 
@@ -93,6 +96,7 @@ export class DnsSidenavModule {
       renewalCostUsd: !isNaN(renewalCostUsd) ? renewalCostUsd : undefined,
       provider: get("dnsFieldProvider"),
       nameservers,
+      project: get("dnsFieldProject"),
       notes: get("dnsFieldNotes"),
     };
 
@@ -108,7 +112,7 @@ export class DnsSidenavModule {
       this.close();
       await this.tm.dnsModule?.load();
     } catch (err) {
-      alert(`Failed to save: ${err?.message ?? "Unknown error"}`);
+      showToast(`Failed to save: ${err?.message ?? "Unknown error"}`, "error");
     } finally {
       if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = "Save"; }
     }
@@ -116,14 +120,24 @@ export class DnsSidenavModule {
 
   async deleteDomain() {
     if (!this.editingId) return;
-    if (!confirm("Delete this domain? This cannot be undone.")) return;
+    const { showConfirm } = await import("../ui/confirm.js");
+    const confirmed = await showConfirm("Delete this domain? This cannot be undone.");
+    if (!confirmed) return;
     try {
       await DnsAPI.delete(this.editingId);
       this.close();
       await this.tm.dnsModule?.load();
     } catch (err) {
-      alert(`Failed to delete: ${err?.message ?? "Unknown error"}`);
+      showToast(`Failed to delete: ${err?.message ?? "Unknown error"}`, "error");
     }
+  }
+
+  _populateProjectsDatalist() {
+    const dl = document.getElementById("dnsProjectsList");
+    if (!dl) return;
+    const names = new Set();
+    (this.tm.portfolio || []).forEach((p) => { if (p.name) names.add(p.name); });
+    dl.innerHTML = [...names].map((n) => `<option value="${n}"></option>`).join("");
   }
 
   bindEvents() {
