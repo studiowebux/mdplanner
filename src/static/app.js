@@ -2334,6 +2334,10 @@ class TaskManager {
     this.enhancedNotesModule.deleteCustomSection(sectionId);
   }
 
+  moveCustomSection(sectionId, direction) {
+    this.enhancedNotesModule.moveCustomSection(sectionId, direction);
+  }
+
   switchTab(sectionId, tabId) {
     this.enhancedNotesModule.switchTab(sectionId, tabId);
   }

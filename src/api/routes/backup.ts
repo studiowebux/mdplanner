@@ -16,16 +16,17 @@ import { getScheduler } from "../../lib/backup/scheduler.ts";
 
 export const backupRouter = new Hono<{ Variables: AppVariables }>();
 
-/** GET /api/backup/export */
+/** GET /api/backup/export — ?plain=true skips encryption even if public key is configured */
 backupRouter.get("/export", async (c) => {
   const pm = getProjectManager(c);
   const projectDir = pm.getActiveProjectDir();
   const publicKeyHex = pm.getBackupPublicKey();
+  const forcePlain = c.req.query("plain") === "true";
 
   let payload = await packProject({ projectDir });
 
-  const encrypted = !!publicKeyHex;
-  if (publicKeyHex) {
+  const encrypted = !!publicKeyHex && !forcePlain;
+  if (encrypted && publicKeyHex) {
     payload = await encryptPayload(publicKeyHex, payload);
   }
 

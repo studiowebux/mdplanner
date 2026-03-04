@@ -79,9 +79,16 @@ export const BackupAPI = {
     return response.json();
   },
 
-  /** Returns a Blob of the archive. */
+  /** Returns a Blob of the archive (encrypted if server has a public key configured). */
   async exportArchive() {
     const response = await get("/api/backup/export");
+    if (!response.ok) throw new Error("Export failed");
+    return response.blob();
+  },
+
+  /** Returns a plain (unencrypted) Blob of the archive regardless of server key config. */
+  async exportPlainArchive() {
+    const response = await get("/api/backup/export?plain=true");
     if (!response.ok) throw new Error("Export failed");
     return response.blob();
   },

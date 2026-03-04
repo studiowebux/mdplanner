@@ -30,7 +30,7 @@ export class FuzzyAutocomplete {
 
     this._onInput = () => this._open();
     this._onKeydown = (e) => this._handleKey(e);
-    this._onFocus = () => { if (this._input.value) this._open(); };
+    this._onFocus = () => this._open();
     this._onDocClick = (e) => {
       if (!this._dropdown?.contains(e.target) && e.target !== this._input) {
         this._close();

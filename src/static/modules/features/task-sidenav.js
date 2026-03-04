@@ -76,7 +76,7 @@ export class TaskSidenavModule {
     // Project → re-filter milestone select when project changes
     document.getElementById("sidenavTaskProject")?.addEventListener(
       "input",
-      () => this._populateSidenavSelects(),
+      () => this.populateSelects(),
     );
 
     // Milestone → auto-fill project when milestone has a linked project
@@ -196,6 +196,8 @@ export class TaskSidenavModule {
   open(task = null, parentTaskId = null) {
     this.editingTask = task;
     this.parentTaskId = parentTaskId;
+    // Sync to app-level editingTask so TimeTrackingModule can read it
+    this.tm.editingTask = task;
 
     // Update title
     const title = document.getElementById("sidenavTaskTitle");
@@ -209,6 +211,15 @@ export class TaskSidenavModule {
       this.fillForm(task);
     } else {
       this.clearForm();
+    }
+
+    // Show/load time entries section for existing tasks only
+    const timeSection = document.getElementById("timeEntriesSection");
+    if (task && timeSection) {
+      timeSection.classList.remove("hidden");
+      this.tm.loadTaskTimeEntries(task.id);
+    } else if (timeSection) {
+      timeSection.classList.add("hidden");
     }
 
     // Open sidenav
@@ -233,6 +244,7 @@ export class TaskSidenavModule {
     this._projectFuzzy = null;
     Sidenav.close("taskSidenav");
     this.editingTask = null;
+    this.tm.editingTask = null;
     this.parentTaskId = null;
   }
 

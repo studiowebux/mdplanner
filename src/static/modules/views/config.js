@@ -141,6 +141,25 @@ export class ConfigView {
     }
   }
 
+  async exportPlainBackup() {
+    const btn = document.getElementById("backupExportPlainBtn");
+    if (btn) btn.textContent = "Exporting...";
+    try {
+      const blob = await BackupAPI.exportPlainArchive();
+      const filename = `backup-${new Date().toISOString().slice(0, 10)}.tar`;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert(`Export failed: ${err.message}`);
+    } finally {
+      if (btn) btn.textContent = "Export (plain)";
+    }
+  }
+
   async triggerScheduledBackup() {
     const btn = document.getElementById("backupTriggerBtn");
     if (btn) btn.textContent = "Running...";
@@ -739,6 +758,9 @@ export class ConfigView {
     document
       .getElementById("backupExportBtn")
       ?.addEventListener("click", () => this.exportBackup());
+    document
+      .getElementById("backupExportPlainBtn")
+      ?.addEventListener("click", () => this.exportPlainBackup());
     document
       .getElementById("backupTriggerBtn")
       ?.addEventListener("click", () => this.triggerScheduledBackup());

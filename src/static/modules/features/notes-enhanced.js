@@ -760,6 +760,32 @@ export class EnhancedNotesModule {
     this.tm.renderActiveNote();
   }
 
+  moveCustomSection(sectionId, direction) {
+    const currentNote = this.tm.notes[this.tm.activeNote];
+    if (!currentNote || !currentNote.customSections) return;
+
+    const sorted = [...currentNote.customSections].sort((a, b) =>
+      a.order - b.order
+    );
+    const idx = sorted.findIndex((s) => s.id === sectionId);
+    if (idx === -1) return;
+
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= sorted.length) return;
+
+    // Swap order values
+    const tmp = sorted[idx].order;
+    sorted[idx].order = sorted[swapIdx].order;
+    sorted[swapIdx].order = tmp;
+
+    // Re-normalize
+    sorted.sort((a, b) => a.order - b.order);
+    sorted.forEach((s, i) => { s.order = i; });
+
+    this.syncParagraphsToContent();
+    this.tm.renderActiveNote();
+  }
+
   // Rendering
 
   // View mode: renders enhanced note content as beautiful HTML without editing controls
@@ -953,6 +979,10 @@ export class EnhancedNotesModule {
       <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-semibold text-primary">${section.title}</h3>
         <div class="flex space-x-2">
+          <button onclick="taskManager.moveCustomSection('${section.id}', 'up')"
+                  class="px-2 py-1 text-xs border rounded" title="Move up">↑</button>
+          <button onclick="taskManager.moveCustomSection('${section.id}', 'down')"
+                  class="px-2 py-1 text-xs border rounded" title="Move down">↓</button>
           <button onclick="taskManager.deleteCustomSection('${section.id}')"
                   class="px-2 py-1 text-xs bg-error text-white rounded hover:bg-error">Delete</button>
         </div>

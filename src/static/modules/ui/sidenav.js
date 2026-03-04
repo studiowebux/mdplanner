@@ -94,9 +94,10 @@ export class Sidenav {
         localStorage.setItem("sidenavFullscreen", isFullscreen ? "1" : "0");
       });
       // Insert before the close button so the order is: title, spacer, fullscreen, close
+      // Use closeBtn.parentElement (not header) to handle close buttons nested in a flex container
       const closeBtn = header.querySelector(".sidenav-close");
       if (closeBtn) {
-        header.insertBefore(toggle, closeBtn);
+        closeBtn.parentElement.insertBefore(toggle, closeBtn);
       } else {
         header.appendChild(toggle);
       }
