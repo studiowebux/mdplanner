@@ -2191,14 +2191,18 @@
                   <label class="block text-sm font-medium text-secondary mb-1">
                     Task Display
                   </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
+                  <div class="flex items-center gap-2">
+                    <label for="hideCompletedAfterDays" class="text-sm text-secondary">Hide completed tasks after</label>
                     <input
-                      type="checkbox"
-                      id="hideCompletedTasks"
-                      class="rounded border-strong"
+                      type="number"
+                      id="hideCompletedAfterDays"
+                      min="0"
+                      max="365"
+                      placeholder="—"
+                      class="w-16 px-2 py-1 border border-default rounded text-sm text-center"
                     >
-                    <span class="text-sm text-secondary">Hide completed tasks in board and list views</span>
-                  </label>
+                    <span class="text-sm text-secondary">days (leave blank to always show)</span>
+                  </div>
                 </div>
                 <div>
                   <label

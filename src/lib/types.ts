@@ -37,6 +37,7 @@ export interface Task {
   id: string;
   title: string;
   completed: boolean;
+  completedAt?: string; // ISO date set when task is marked complete, cleared when uncompleted
   section: string;
   config: TaskConfig;
   description?: string[];

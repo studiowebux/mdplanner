@@ -61,9 +61,10 @@ export class ConfigView {
   }
 
   renderTaskDisplaySettings() {
-    const checkbox = document.getElementById("hideCompletedTasks");
-    if (checkbox) {
-      checkbox.checked = localStorage.getItem("hideCompletedTasks") === "true";
+    const input = document.getElementById("hideCompletedAfterDays");
+    if (input) {
+      const stored = localStorage.getItem("hideCompletedAfterDays");
+      input.value = stored ?? "";
     }
   }
 
@@ -770,9 +771,14 @@ export class ConfigView {
       });
     // Task display settings
     document
-      .getElementById("hideCompletedTasks")
+      .getElementById("hideCompletedAfterDays")
       ?.addEventListener("change", (e) => {
-        localStorage.setItem("hideCompletedTasks", e.target.checked);
+        const val = e.target.value.trim();
+        if (val === "") {
+          localStorage.removeItem("hideCompletedAfterDays");
+        } else {
+          localStorage.setItem("hideCompletedAfterDays", val);
+        }
         // Re-render whichever task view is active
         if (this.tm.currentView === "board") this.tm.renderBoardView();
         else if (this.tm.currentView === "list") this.tm.renderListView();

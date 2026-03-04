@@ -352,8 +352,15 @@ export class TasksModule {
 
   getToRender() {
     const base = this.tm.searchQuery ? this.tm.filteredTasks : this.tm.tasks;
-    if (localStorage.getItem("hideCompletedTasks") === "true") {
-      return base.filter((t) => !t.completed);
+    const days = parseInt(localStorage.getItem("hideCompletedAfterDays") ?? "", 10);
+    if (!isNaN(days)) {
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - days);
+      return base.filter((t) => {
+        if (!t.completed) return true;
+        if (!t.completedAt) return days === 0 ? false : true; // no date: hide only on "immediately"
+        return new Date(t.completedAt) >= cutoff;
+      });
     }
     return base;
   }

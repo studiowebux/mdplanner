@@ -10,6 +10,7 @@ import type { Task, TaskComment, TaskConfig, TimeEntry } from "../../types.ts";
 interface TaskFrontmatter {
   id: string;
   completed: boolean;
+  completedAt?: string;
   order?: number;
   tags?: string[];
   due_date?: string;
@@ -525,6 +526,7 @@ export class TasksDirectoryParser {
       id: frontmatter.id,
       title,
       completed: frontmatter.completed || false,
+      ...(frontmatter.completedAt && { completedAt: frontmatter.completedAt }),
       section,
       config,
       description: description.length > 0 ? description : undefined,
@@ -539,6 +541,7 @@ export class TasksDirectoryParser {
     const frontmatter: TaskFrontmatter = {
       id: task.id,
       completed: task.completed,
+      ...(task.completedAt && { completedAt: task.completedAt }),
     };
 
     // Add config fields
@@ -746,6 +749,18 @@ export class TasksDirectoryParser {
       config: { ...existing.config, ...(updates.config ?? {}) },
       id: existing.id, // Prevent ID change
     };
+
+    // Auto-manage completedAt when completion state changes
+    if (
+      updates.completed !== undefined &&
+      updates.completed !== existing.completed
+    ) {
+      if (updates.completed) {
+        updated.completedAt = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+      } else {
+        delete updated.completedAt;
+      }
+    }
 
     // If section changed, move file: write to new section dir then remove old file.
     // Do NOT call moveToSection() here — it re-reads the task from disk and would
