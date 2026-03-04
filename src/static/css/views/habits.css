@@ -292,6 +292,10 @@
   text-align: left;
   min-width: 10rem;
   max-width: 16rem;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--color-bg-primary);
 }
 
 .cal-today {
@@ -314,7 +318,12 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 10rem;
   max-width: 16rem;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--color-bg-primary);
 }
 
 .cal-cell {

@@ -179,10 +179,11 @@ export class HabitsModule {
           note ? `Note: ${note}` : "",
         ].filter(Boolean).join(" — ");
 
-        const clickAttr = `onclick="taskManager.habitsModule._openDayPopup(event,'${h.id}','${dateStr}',${isDone},${JSON.stringify(note)})"`;
+        const dataAttrs = `data-habit-id="${escapeHtml(h.id)}" data-date="${dateStr}" data-done="${isDone}" data-note="${escapeHtml(note)}"`;
+        const clickAttr = `onclick="taskManager.habitsModule._openDayPopup(event, this.dataset.habitId, this.dataset.date, this.dataset.done === 'true', this.dataset.note || '', this)"`;
         cls += " cal-clickable";
 
-        cells += `<td class="${cls}" title="${escapeHtml(tooltip)}" ${clickAttr}>${isDone ? (note ? "★" : "•") : ""}</td>`;
+        cells += `<td class="${cls}" title="${escapeHtml(tooltip)}" ${dataAttrs} ${clickAttr}>${isDone ? (note ? "★" : "•") : ""}</td>`;
       }
       return `<tr class="cal-row">${cells}</tr>`;
     }).join("");
