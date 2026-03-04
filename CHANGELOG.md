@@ -8,6 +8,23 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-03-03
+
+### Added
+
+- GitHub: task list view now shows live issue/PR state badges, matching the
+  existing board view behaviour.
+- GitHub: goals view milestone badge now displays open issue count and open PR
+  count inline (e.g. "3 open · 2 PRs"), completing Goal 93.
+- GitHub: task sidenav now shows a Close/Reopen button next to the issue badge
+  after fetching issue status. Sends
+  `PATCH
+  /api/integrations/github/repo/:owner/:repo/issues/:number`.
+- GitHub MCP tools: `github_get_repo`, `github_get_issue`,
+  `github_create_issue`, `github_set_issue_state`, `github_list_repos`,
+  `github_get_pr` — all delegate to the configured GitHub PAT and return a
+  descriptive error when no token is set.
+
 ## [0.9.0] - 2026-03-03
 
 ### Removed
