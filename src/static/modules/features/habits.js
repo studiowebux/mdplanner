@@ -163,11 +163,8 @@ export class HabitsModule {
           note ? `Note: ${note}` : "",
         ].filter(Boolean).join(" — ");
 
-        const canClick = !isFuture;
-        const clickAttr = canClick
-          ? `onclick="taskManager.habitsModule._openDayPopup(event,'${h.id}','${dateStr}',${isDone},${JSON.stringify(note)})"`
-          : "";
-        if (canClick) cls += " cal-clickable";
+        const clickAttr = `onclick="taskManager.habitsModule._openDayPopup(event,'${h.id}','${dateStr}',${isDone},${JSON.stringify(note)})"`;
+        cls += " cal-clickable";
 
         cells += `<td class="${cls}" title="${escapeHtml(tooltip)}" ${clickAttr}>${isDone ? (note ? "★" : "•") : ""}</td>`;
       }
