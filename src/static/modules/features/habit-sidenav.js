@@ -64,7 +64,11 @@ function buildHeatmapHTML(completions, dayNotes, habitId) {
       ? ` data-habit-id="${habitId}" data-date="${dateStr}" data-done="${isDone}" data-note="${escapeHtml(note)}"`
       : "";
 
-    cells.push(`<div class="${cls}" title="${escapeHtml(title)}"${dataAttrs}></div>`);
+    const onclickAttr = (!isFuture && habitId)
+      ? ` onclick="event.stopPropagation(); taskManager.habitsModule._openDayPopup(event, this.dataset.habitId, this.dataset.date, this.dataset.done === 'true', this.dataset.note || '', this)"`
+      : "";
+
+    cells.push(`<div class="${cls}" title="${escapeHtml(title)}"${dataAttrs}${onclickAttr}></div>`);
   }
 
   return cells.join("");
@@ -265,15 +269,6 @@ export class HabitSidenavModule {
         if (this.editingId) this.handleComplete(this.editingId);
       },
     );
-
-    // Bind heatmap click for past-day editing
-    viewSection.querySelector(".habit-heatmap")?.addEventListener("click", (e) => {
-      const cell = e.target.closest(".habit-heatmap-cell.clickable");
-      if (!cell) return;
-      e.stopPropagation();
-      const { habitId, date, done, note } = cell.dataset;
-      this.tm.habitsModule._openDayPopup(e, habitId, date, done === "true", note || "", cell);
-    });
   }
 
   // ------------------------------------------------------------------

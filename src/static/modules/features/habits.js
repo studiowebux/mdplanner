@@ -68,7 +68,13 @@ function buildHeatmapHTML(completions, dayNotes, habitId) {
       ? ` data-habit-id="${habitId}" data-date="${dateStr}" data-done="${isDone}" data-note="${escapeHtml(note)}"`
       : "";
 
-    cells.push(`<div class="${cls}" title="${escapeHtml(title)}"${dataAttrs}></div>`);
+    // Inline onclick stops propagation at the cell level so the enclosing
+    // habit-card onclick (which opens the sidenav) does not fire.
+    const onclickAttr = (!isFuture && habitId)
+      ? ` onclick="event.stopPropagation(); taskManager.habitsModule._openDayPopup(event, this.dataset.habitId, this.dataset.date, this.dataset.done === 'true', this.dataset.note || '', this)"`
+      : "";
+
+    cells.push(`<div class="${cls}" title="${escapeHtml(title)}"${dataAttrs}${onclickAttr}></div>`);
   }
 
   return cells.join("");
@@ -348,15 +354,5 @@ export class HabitsModule {
       "click",
       () => this.taskManager.habitSidenavModule.openNew(),
     );
-
-    // Delegated heatmap click for card view — opens day popup on past cells.
-    document.getElementById("habitsContainer")?.addEventListener("click", (e) => {
-      if (this.currentView !== "card") return;
-      const cell = e.target.closest(".habit-heatmap-cell.clickable");
-      if (!cell) return;
-      e.stopPropagation();
-      const { habitId, date, done, note } = cell.dataset;
-      this._openDayPopup(e, habitId, date, done === "true", note || "", cell);
-    });
   }
 }
