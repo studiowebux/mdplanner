@@ -513,7 +513,7 @@ export class ConfigView {
     });
   }
 
-  async toggleFeature() {
+  toggleFeature() {
     const checkboxes = document.querySelectorAll(".feature-checkbox");
     const allChecked = document.querySelectorAll(".feature-checkbox:checked");
 
@@ -526,7 +526,8 @@ export class ConfigView {
       this.tm.projectConfig.features = features;
     }
 
-    await this.tm.saveProjectConfig();
+    // Apply immediately so nav updates — persist only on explicit Save
+    this.tm.applyFeatureVisibility();
   }
 
   async initIntegrationsPanel() {

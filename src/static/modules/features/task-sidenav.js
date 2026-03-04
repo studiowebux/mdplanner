@@ -7,6 +7,7 @@ import { FuzzyAutocomplete } from "../ui/fuzzy-autocomplete.js";
 import { showToast } from "../ui/toast.js";
 import { UndoManager } from "../ui/undo-manager.js";
 import { showConfirm } from "../ui/confirm.js";
+import { markdownToHtml, escapeHtml } from "../utils.js";
 
 export class TaskSidenavModule {
   constructor(taskManager) {
@@ -703,7 +704,7 @@ export class TaskSidenavModule {
           })
         : "";
       return `
-        <div class="task-comment" data-comment-id="${c.id}">
+        <div class="task-comment" data-comment-id="${c.id}" data-raw-body="${escapeHtml(c.body ?? "")}">
           <div class="task-comment-meta">
             <span class="task-comment-author">${author}</span>
             <span class="task-comment-timestamp">${ts}</span>
@@ -720,10 +721,11 @@ export class TaskSidenavModule {
     const commentEl = document.querySelector(`[data-comment-id="${commentId}"]`);
     if (!commentEl) return;
     const bodyEl = commentEl.querySelector(".task-comment-body");
-    const current = bodyEl?.textContent ?? "";
+    // Use raw markdown stored in data attribute, not rendered textContent
+    const current = commentEl.dataset.rawBody ?? "";
 
     bodyEl.innerHTML = `
-      <textarea class="form-textarea task-comment-edit-textarea" rows="2">${current}</textarea>
+      <textarea class="form-textarea task-comment-edit-textarea" rows="2">${escapeHtml(current)}</textarea>
       <div class="task-comment-edit-actions">
         <button type="button" class="btn-secondary" data-save-comment="${commentId}">Save</button>
         <button type="button" class="btn-ghost" data-cancel-edit-comment="${commentId}">Cancel</button>
@@ -815,12 +817,7 @@ export class TaskSidenavModule {
    * @returns {string} safe HTML
    */
   _formatCommentBody(body) {
-    const escaped = String(body ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-    return escaped.replace(/@([\w.-]+)/g, (_, name) =>
-      `<span class="comment-mention">@${name}</span>`);
+    return markdownToHtml(String(body ?? ""));
   }
 
   /** Attach @mention autocomplete to the comment textarea. */

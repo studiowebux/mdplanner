@@ -173,7 +173,7 @@ export class MeetingsModule {
       const overdue = action.due && action.due < today;
       return `
         <div class="meeting-action-item ${overdue ? "meeting-action-item-overdue" : ""}">
-          <div class="meeting-action-item-desc">${escapeHtml(action.description)}</div>
+          <div class="meeting-action-item-desc">${markdownToHtml(action.description)}</div>
           <div class="meeting-action-item-meta">
             <span class="meeting-action-item-source" onclick="taskManager.meetingSidenavModule.openEdit('${action.meetingId}')">
               ${escapeHtml(action.meetingTitle)}
@@ -253,7 +253,7 @@ export class MeetingsModule {
         return `
                 <div class="meeting-view-action-row ${a.status === "done" ? "meeting-view-action-done" : ""}">
                   <div class="meeting-view-action-status"></div>
-                  <span class="meeting-view-action-desc">${escapeHtml(a.description)}</span>
+                  <div class="meeting-view-action-desc">${markdownToHtml(a.description)}</div>
                   <div class="meeting-view-action-meta">
                     ${a.owner ? `<span>@${escapeHtml(a.owner)}</span>` : ""}
                     ${a.due ? `<span class="${overdue ? "meeting-view-action-overdue" : ""}">${a.due}</span>` : ""}

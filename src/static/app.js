@@ -389,6 +389,8 @@ class TaskManager {
   }
 
   _reloadEntityIfVisible(entity) {
+    // Flag SSE-triggered reloads so load functions can skip the loading spinner
+    this._sseReloading = true;
     const view = this.currentView;
     const taskViews = ["list", "board", "timeline", "summary"];
     switch (entity) {
@@ -1145,7 +1147,11 @@ class TaskManager {
   }
 
   async loadTasks() {
-    document.getElementById("loading").classList.remove("hidden");
+    // SSE-triggered background reloads skip the loading spinner to reduce visual noise
+    const silent = this._sseReloading;
+    this._sseReloading = false;
+    const loadingEl = document.getElementById("loading");
+    if (!silent) loadingEl.classList.remove("hidden");
     try {
       this.tasks = await TasksAPI.fetchAll();
       this.filteredTasks = this.tasks; // Initialize filtered tasks
@@ -1153,7 +1159,7 @@ class TaskManager {
     } catch (error) {
       console.error("Error loading tasks:", error);
     } finally {
-      document.getElementById("loading").classList.add("hidden");
+      if (!silent) loadingEl.classList.add("hidden");
     }
   }
 

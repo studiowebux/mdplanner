@@ -10,6 +10,16 @@
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     >
+    <!-- Apply theme before CSS loads to prevent white flash in dark mode -->
+    <script>
+      (function () {
+        var s = localStorage.getItem("darkMode");
+        var p = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (s === "true" || (s === null && p)) {
+          document.documentElement.classList.add("dark");
+        }
+      }());
+    </script>
     <!-- CSS theme system -->
     <link rel="stylesheet" href="/css/index.css">
   </head>
