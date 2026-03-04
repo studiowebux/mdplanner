@@ -86,9 +86,13 @@ export class Sidenav {
       }, 100);
     }
 
-    // Prevent body scroll — save scroll position first so close() can restore it
+    // Prevent body scroll using position:fixed so browsers reliably restore
+    // scroll position on close. overflow:hidden alone loses scrollY on iOS/Chrome.
     this._savedScrollY = window.scrollY;
-    document.body.style.overflow = "hidden";
+    document.body.style.top = `-${this._savedScrollY}px`;
+    document.body.style.position = "fixed";
+    document.body.style.left = "0";
+    document.body.style.right = "0";
 
     // Callback
     if (options.onOpen) options.onOpen(panel);
@@ -113,13 +117,16 @@ export class Sidenav {
       this.overlay.classList.remove("active");
       this.activePanel = null;
 
-      // Restore scroll position BEFORE re-enabling overflow so the browser
-      // never briefly shows the wrong scroll position.
-      if (this._savedScrollY !== undefined) {
-        window.scrollTo({ top: this._savedScrollY, behavior: "instant" });
-        this._savedScrollY = undefined;
-      }
-      document.body.style.overflow = "";
+      // Restore scroll: remove position:fixed then immediately scrollTo.
+      // Must happen in this order — position:fixed removal triggers reflow,
+      // then scrollTo sets the exact position before the next paint.
+      const scrollY = this._savedScrollY ?? 0;
+      this._savedScrollY = undefined;
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      window.scrollTo(0, scrollY);
     }
 
     // Callback

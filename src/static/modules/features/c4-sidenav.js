@@ -227,7 +227,7 @@ export class C4SidenavModule {
     const addConnection = () => {
       const target = targetInput.value.trim();
       const label = labelInput.value.trim();
-      if (target && label) {
+      if (target) {
         if (!this.currentComponent.connections) {
           this.currentComponent.connections = [];
         }
@@ -335,7 +335,7 @@ export class C4SidenavModule {
     const saveEdit = () => {
       const target = targetInput.value.trim();
       const label = labelInput.value.trim();
-      if (target && label) {
+      if (target) {
         this.currentComponent.connections[index] = { target, label };
         this.renderConnections();
       }

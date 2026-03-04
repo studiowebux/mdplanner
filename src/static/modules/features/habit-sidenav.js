@@ -314,6 +314,21 @@ export class HabitSidenavModule {
   // ------------------------------------------------------------------
 
   async handleComplete(habitId) {
+    // Guard against double-click: check if already done today
+    const habit = (this.tm.habits || []).find((h) => h.id === habitId);
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    if (habit && (habit.completions || []).includes(todayStr)) {
+      return; // Already done today — silently ignore
+    }
+
+    // Disable all mark-done buttons for this habit immediately
+    document.querySelectorAll(`.habit-mark-btn[onclick*="${habitId}"]`).forEach((btn) => {
+      btn.disabled = true;
+      btn.textContent = "Done today";
+      btn.classList.add("done-today");
+    });
+
     let res;
     try {
       res = await HabitsAPI.markComplete(habitId);

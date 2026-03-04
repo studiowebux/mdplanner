@@ -321,26 +321,13 @@ export class HabitsModule {
   }
 
   bindEvents() {
-    // Inject view toggle (Cards / Calendar) into the habits header once
-    const header = document.querySelector(".habits-view-header");
-    if (header && !header.querySelector(".habits-view-toggle")) {
-      const toggle = document.createElement("div");
-      toggle.className = "habits-view-toggle";
-      toggle.innerHTML = `
-        <button class="habits-toggle-btn active" data-habits-view="card">Cards</button>
-        <button class="habits-toggle-btn" data-habits-view="calendar">Calendar</button>
-      `;
-      // Insert before the Add button
-      const addBtn = header.querySelector("#addHabitBtn");
-      header.insertBefore(toggle, addBtn);
-
-      toggle.addEventListener("click", (e) => {
-        const btn = e.target.closest("[data-habits-view]");
-        if (!btn) return;
-        this.currentView = btn.dataset.habitsView;
-        this.renderView();
-      });
-    }
+    // View toggle is now in the HTML — just bind the click handler.
+    document.querySelector(".habits-view-toggle")?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-habits-view]");
+      if (!btn) return;
+      this.currentView = btn.dataset.habitsView;
+      this.renderView();
+    });
 
     document.getElementById("addHabitBtn")?.addEventListener(
       "click",

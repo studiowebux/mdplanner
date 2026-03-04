@@ -8,6 +8,24 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.9.6] - 2026-03-04
+
+### Fixed
+
+- Sidenav: replaced `overflow:hidden` scroll-lock with `position:fixed`
+  technique so closing a sidenav no longer scrolls the page back to the top on
+  all browsers (the previous approach was unreliable on iOS Safari and Chrome).
+- Task list view: project filter dropdown now persists correctly — a missing
+  `change` event listener meant selecting a project filter was never saved to
+  localStorage.
+- C4 diagram: connections with an empty label can now be saved; the save guard
+  previously required a non-empty label which silently dropped the connection.
+- Habits: Cards/Calendar view toggle is now rendered directly in the HTML so it
+  is always visible without relying on JS injection.
+- Habits: "Mark done today" button is disabled immediately on click to prevent
+  double-fire before the API response arrives; a guard also skips the call if
+  the habit is already recorded as done today.
+
 ## [0.9.4] - 2026-03-04
 
 ### Added

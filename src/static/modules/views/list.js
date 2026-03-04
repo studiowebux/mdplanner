@@ -742,6 +742,9 @@ export class ListView {
       .getElementById("sortTasks")
       .addEventListener("change", () => this.applyFilters());
     document
+      .getElementById("filterProject")
+      ?.addEventListener("change", () => this.applyFilters());
+    document
       .getElementById("clearFilters")
       .addEventListener("click", () => this.clearFilters());
 
