@@ -413,7 +413,11 @@ export class EnhancedNotesModule {
     } else {
       this.tm.selectedParagraphs.push(paragraphId);
     }
-    this.tm.renderActiveNote();
+    // Toggle class directly on the existing DOM element — no re-render needed
+    const el = document.querySelector(`[data-paragraph-id="${paragraphId}"]`);
+    if (el) {
+      el.classList.toggle("selected", this.tm.selectedParagraphs.includes(paragraphId));
+    }
   }
 
   // Multi-Select
@@ -548,6 +552,32 @@ export class EnhancedNotesModule {
       this.syncParagraphsToContent();
       this.tm.renderActiveNote();
     }
+  }
+
+  // Flush current DOM textarea/contenteditable values into activeNote.paragraphs,
+  // then rebuild activeNote.content. Call this before save to capture unsaved typing.
+  flushParagraphsFromDOM() {
+    const currentNote = this.tm.notes[this.tm.activeNote];
+    if (!currentNote || !currentNote.paragraphs) return;
+
+    const container = document.getElementById("paragraphsContainer");
+    if (!container) return;
+
+    container.querySelectorAll("[data-paragraph-id]").forEach((el) => {
+      const pid = el.getAttribute("data-paragraph-id");
+      const paragraph = currentNote.paragraphs.find((p) => p.id === pid);
+      if (!paragraph) return;
+
+      const textarea = el.querySelector("textarea");
+      if (textarea) {
+        paragraph.content = textarea.value;
+      } else {
+        const ce = el.querySelector("[contenteditable]");
+        if (ce) paragraph.content = ce.innerText;
+      }
+    });
+
+    this.syncParagraphsToContent();
   }
 
   // Content Sync
@@ -797,9 +827,7 @@ export class EnhancedNotesModule {
     const isCodeBlock = paragraph.type === "code";
 
     div.innerHTML = `
-      <div class="paragraph-handle" style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); cursor: grab; color: #9ca3af; font-size: 14px; padding: 4px; background: #f9fafb; border-radius: 3px;" draggable="true" onmousedown="this.parentElement.draggable=true" onmouseup="this.parentElement.draggable=false">
-        ::
-      </div>
+      <div class="paragraph-handle" draggable="true">⋮⋮</div>
       <div class="paragraph-controls flex flex-wrap items-center gap-2 mb-2">
         ${
       isCodeBlock

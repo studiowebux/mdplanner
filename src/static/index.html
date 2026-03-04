@@ -2798,11 +2798,11 @@
                         />
                       </svg>
                     </button>
-                    <!-- Edit in Panel -->
+                    <!-- View in Panel -->
                     <button
                       id="editInPanelBtn"
                       class="p-1.5 rounded hover:bg-tertiary text-secondary hover:text-primary transition-colors"
-                      title="Edit in Panel"
+                      title="View in Panel"
                     >
                       <svg
                         class="w-5 h-5"
@@ -10806,7 +10806,10 @@
         </div>
       </div>
       <div class="sidenav-content">
-        <div class="sidenav-section">
+        <!-- View-only body (shown when opening existing notes) -->
+        <div id="noteSidenavViewBody" class="sidenav-section hidden"></div>
+
+        <div id="noteSidenavTitleSection" class="sidenav-section">
           <div class="form-group">
             <label class="form-label">Title</label>
             <input
@@ -10818,7 +10821,7 @@
           </div>
         </div>
 
-        <div class="sidenav-section">
+        <div id="noteSidenavModeSection" class="sidenav-section">
           <div class="sidenav-section-title">Mode</div>
           <div class="flex gap-2">
             <button

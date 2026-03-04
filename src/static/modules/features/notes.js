@@ -263,7 +263,11 @@ export class NotesModule {
     const activeNote = this.tm.notes[this.tm.activeNote];
     const title = document.getElementById("activeNoteTitle").value;
 
-    // For enhanced mode, get content from the synced content field
+    // For enhanced mode, flush DOM → paragraphs → content before reading
+    if (this.tm.enhancedMode && activeNote.mode === "enhanced") {
+      this.tm.flushParagraphsFromDOM();
+    }
+
     let content = activeNote.content;
 
     // For simple mode, get content from the editor

@@ -13,6 +13,7 @@ export class NoteSidenavModule {
     this.tm = taskManager;
     this.editingNoteIndex = null;
     this.isNewNote = false;
+    this.isViewMode = false;
     // Enhancement: Multi-select mode
     this.multiSelectMode = false;
     this.selectedParagraphs = new Set();
@@ -165,6 +166,10 @@ export class NoteSidenavModule {
   openNew() {
     this.editingNoteIndex = null;
     this.isNewNote = true;
+    this.isViewMode = false;
+
+    // Ensure edit-mode sections are visible (may have been hidden by openEdit)
+    this._setEditMode();
 
     // Update title
     document.getElementById("noteSidenavHeader").textContent = "New Note";
@@ -196,31 +201,19 @@ export class NoteSidenavModule {
 
     this.editingNoteIndex = noteIndex;
     this.isNewNote = false;
+    this.isViewMode = true;
 
-    // Update title
-    document.getElementById("noteSidenavHeader").textContent = "Edit Note";
+    document.getElementById("noteSidenavHeader").textContent = note.title || "Note";
+    document.getElementById("noteSidenavSaveStatus")?.classList.add("hidden");
 
-    // Fill form
-    document.getElementById("noteSidenavTitle").value = note.title || "";
-
-    const isEnhanced = note.mode === "enhanced";
-    this.updateModeUI(isEnhanced ? "enhanced" : "basic");
-
-    if (isEnhanced) {
-      this.showEnhancedEditor();
-      this.renderEnhancedContent(note);
-    } else {
-      this.showBasicEditor();
-      document.getElementById("noteSidenavEditor").value = note.content || "";
-    }
+    // Show read-only view
+    this._setViewMode(note);
 
     // Show delete button
     document.getElementById("noteSidenavDelete").classList.remove("hidden");
 
-    // Open sidenav
     Sidenav.registerModule(this);
     Sidenav.open("noteSidenav");
-    this._attachNoteUndoManagers();
   }
 
   close() {
@@ -232,13 +225,19 @@ export class NoteSidenavModule {
     this.selectedParagraphs.clear();
     this.updateMultiSelectUI();
 
+    // Restore edit-mode visibility for the next open
+    if (this.isViewMode) {
+      this._setEditMode();
+    }
+    this.isViewMode = false;
+
     Sidenav.close("noteSidenav");
     this.editingNoteIndex = null;
     this.isNewNote = false;
   }
 
   _confirmAndClose() {
-    if (this._hasAnyUnsavedChanges() && !confirm("You have unsaved changes. Close anyway?")) return;
+    if (!this.isViewMode && this._hasNoteUnsavedChanges() && !confirm("You have unsaved changes. Close anyway?")) return;
     this.close();
   }
 
@@ -333,6 +332,77 @@ export class NoteSidenavModule {
     document.getElementById("noteSidenavEnhancedEditor").classList.remove(
       "hidden",
     );
+  }
+
+  _setViewMode(note) {
+    document.getElementById("noteSidenavTitleSection")?.classList.add("hidden");
+    document.getElementById("noteSidenavModeSection")?.classList.add("hidden");
+    document.getElementById("noteSidenavBasicEditor")?.classList.add("hidden");
+    document.getElementById("noteSidenavEnhancedEditor")?.classList.add("hidden");
+    document.getElementById("noteSidenavFullEditor")?.classList.add("hidden");
+    document.getElementById("noteSidenavSave")?.classList.add("hidden");
+    document.getElementById("noteSidenavCancel")?.classList.add("hidden");
+
+    const viewBody = document.getElementById("noteSidenavViewBody");
+    if (viewBody) {
+      viewBody.classList.remove("hidden");
+      this._renderNoteViewBody(note, viewBody);
+    }
+  }
+
+  _setEditMode() {
+    document.getElementById("noteSidenavTitleSection")?.classList.remove("hidden");
+    document.getElementById("noteSidenavModeSection")?.classList.remove("hidden");
+    document.getElementById("noteSidenavViewBody")?.classList.add("hidden");
+    document.getElementById("noteSidenavFullEditor")?.classList.remove("hidden");
+    document.getElementById("noteSidenavSave")?.classList.remove("hidden");
+    document.getElementById("noteSidenavCancel")?.classList.remove("hidden");
+  }
+
+  _renderNoteViewBody(note, container) {
+    let html = "";
+
+    if (note.mode === "enhanced" && note.paragraphs?.length > 0) {
+      const sorted = [...note.paragraphs].sort((a, b) =>
+        (a.order || 0) - (b.order || 0)
+      );
+      sorted.forEach((p) => {
+        if (p.type === "code") {
+          html +=
+            `<pre class="code-block overflow-x-auto mb-4"><code class="text-sm">${
+              escapeHtml(p.content)
+            }</code></pre>`;
+        } else {
+          html += `<div class="markdown-content mb-4">${
+            markdownToHtml(p.content)
+          }</div>`;
+        }
+      });
+    } else {
+      html = `<div class="markdown-content">${
+        markdownToHtml(note.content || "")
+      }</div>`;
+    }
+
+    const meta = [];
+    if (note.createdAt) {
+      meta.push(`Created: ${new Date(note.createdAt).toLocaleDateString()}`);
+    }
+    if (note.updatedAt) {
+      meta.push(`Updated: ${new Date(note.updatedAt).toLocaleDateString()}`);
+    }
+    if (note.revision) meta.push(`Rev: ${note.revision}`);
+
+    container.innerHTML = `
+      ${
+      meta.length > 0
+        ? `<div class="text-xs text-muted mb-4 flex flex-wrap gap-4">${
+          meta.map((m) => `<span>${m}</span>`).join("")
+        }</div>`
+        : ""
+    }
+      ${html || '<p class="text-muted italic">No content</p>'}
+    `;
   }
 
   renderEnhancedContent(note) {

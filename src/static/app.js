@@ -2204,6 +2204,10 @@ class TaskManager {
     this.enhancedNotesModule.syncParagraphsToContent();
   }
 
+  flushParagraphsFromDOM() {
+    this.enhancedNotesModule.flushParagraphsFromDOM();
+  }
+
   renderCustomSectionAsMarkdown(section) {
     return this.enhancedNotesModule.renderCustomSectionAsMarkdown(section);
   }
