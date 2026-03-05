@@ -3,6 +3,7 @@ import { BillingAPI, GitHubAPI, PeopleAPI, PortfolioAPI } from "../api.js";
 import { PROJECT_STATUS_CLASSES, PROJECT_STATUS_LABELS } from "../constants.js";
 import { FuzzyAutocomplete } from "../ui/fuzzy-autocomplete.js";
 import { Sidenav } from "../ui/sidenav.js";
+import { showToast } from "../ui/toast.js";
 
 /**
  * Portfolio dashboard - displays all projects with status, progress, and filtering.
@@ -1259,8 +1260,8 @@ export class PortfolioView {
       client: document.getElementById("portfolioDetailClient")?.value?.trim() ||
         undefined,
       description:
-        document.getElementById("portfolioDetailDescription")?.value?.trim() ||
-        undefined,
+        document.getElementById("portfolioDetailDescription")?.value?.trim() ??
+        "",
       progress:
         parseInt(document.getElementById("portfolioDetailProgress")?.value) ||
         0,
@@ -1303,10 +1304,12 @@ export class PortfolioView {
 
     try {
       if (this.isCreating) {
-        if (!updates.name) {
+        if (!updates.name) return;
+        const result = await PortfolioAPI.create(updates);
+        if (result?.error) {
+          showToast(result.error, "error");
           return;
         }
-        await PortfolioAPI.create(updates);
       } else {
         await PortfolioAPI.update(this.selectedProject.id, updates);
       }

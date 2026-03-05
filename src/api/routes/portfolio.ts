@@ -97,6 +97,14 @@ portfolioRouter.post("/", async (c) => {
     return errorResponse("Name is required", 400);
   }
 
+  const existing = await parser.readPortfolioItems();
+  const duplicate = existing.find(
+    (i) => i.name.toLowerCase() === body.name.trim().toLowerCase(),
+  );
+  if (duplicate) {
+    return errorResponse(`A project named "${body.name}" already exists`, 409);
+  }
+
   const item = await parser.createPortfolioItem({
     name: body.name,
     category: body.category || "Uncategorized",
