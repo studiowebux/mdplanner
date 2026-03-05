@@ -55,6 +55,8 @@ export class BaseSidenavModule {
     this._formDirty = false;
     /** Delegated change listener for dirty tracking — removed on close. */
     this._dirtyListener = () => this._setDirty(true);
+    /** updatedAt captured when an entity is loaded for editing. Sent on PUT for optimistic locking. */
+    this._loadedUpdatedAt = null;
     // ESC is now handled globally by Sidenav via registerModule/unregisterModule.
   }
 
@@ -94,6 +96,7 @@ export class BaseSidenavModule {
 
   openNew() {
     this.editingId = null;
+    this._loadedUpdatedAt = null;
     this._setDirty(false);
     this.el("Header").textContent = this.newLabel;
     this.clearForm();
@@ -111,6 +114,7 @@ export class BaseSidenavModule {
     if (!entity) return;
 
     this.editingId = entityId;
+    this._loadedUpdatedAt = entity.updatedAt ?? entity.updated ?? null;
     this._setDirty(false);
     this.el("Header").textContent = this.editLabel;
     this.fillForm(entity);
@@ -130,6 +134,7 @@ export class BaseSidenavModule {
     this._setDirty(false);
     Sidenav.close(this.panelId);
     this.editingId = null;
+    this._loadedUpdatedAt = null;
   }
 
   /** Close with dirty-state guard — used by ESC, Cancel, Close button. */
@@ -152,7 +157,11 @@ export class BaseSidenavModule {
     this.isSaving = true;
     try {
       if (this.editingId) {
-        await this.api.update(this.editingId, data);
+        const updatePayload = this._loadedUpdatedAt
+          ? { ...data, updatedAt: this._loadedUpdatedAt }
+          : data;
+        await this.api.update(this.editingId, updatePayload);
+        this._loadedUpdatedAt = null; // cleared — server will set a new updatedAt
         this._markAllSaved();
         this._setDirty(false);
         this.showSaveStatus("Saved");
