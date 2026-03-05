@@ -11,6 +11,7 @@ interface NoteFrontmatter {
   updated: string;
   revision: number;
   mode?: "simple" | "enhanced";
+  project?: string;
 }
 
 export class NotesDirectoryParser extends DirectoryParser<Note> {
@@ -61,6 +62,7 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
         updatedAt: frontmatter.updated || new Date().toISOString(),
         revision: frontmatter.revision || 1,
         mode: "enhanced",
+        project: frontmatter.project,
       };
     }
 
@@ -72,6 +74,7 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
       updatedAt: frontmatter.updated || new Date().toISOString(),
       revision: frontmatter.revision || 1,
       mode: "simple",
+      project: frontmatter.project,
     };
   }
 
@@ -82,6 +85,7 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
       updated: note.updatedAt,
       revision: note.revision,
       mode: note.mode,
+      project: note.project || undefined,
     };
 
     let body = `# ${note.title}\n\n`;

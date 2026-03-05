@@ -2809,6 +2809,14 @@
             </div>
           </div>
 
+          <!-- Notes Project Filter -->
+          <div class="px-6 py-2 border-b border-default flex items-center gap-3">
+            <label class="text-sm text-secondary whitespace-nowrap">Project</label>
+            <select id="notesProjectFilter" class="form-input" style="max-width:14rem;">
+              <option value="">All projects</option>
+            </select>
+          </div>
+
           <!-- Notes Tab Navigation -->
           <div class="border-b border-default">
             <div class="flex items-center px-4">
@@ -10917,6 +10925,16 @@
               id="noteSidenavTitle"
               class="form-input"
               placeholder="Note title"
+            >
+          </div>
+          <div class="form-group">
+            <label class="form-label">Project</label>
+            <input
+              type="text"
+              id="noteSidenavProject"
+              class="form-input"
+              placeholder="Link to a portfolio project"
+              autocomplete="off"
             >
           </div>
         </div>

@@ -87,6 +87,7 @@ export interface Note {
   updatedAt: string;
   revision: number;
   mode?: "simple" | "enhanced"; // Simple uses content, enhanced uses paragraphs
+  project?: string;
 }
 
 export interface Goal {

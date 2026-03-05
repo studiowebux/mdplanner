@@ -14,15 +14,23 @@ export function registerNoteTools(server: McpServer, pm: ProjectManager): void {
   server.registerTool(
     "list_notes",
     {
-      description: "List all notes in the project.",
+      description:
+        "List all notes in the project. Filter by title or project to stay focused.",
       inputSchema: {
         search: z.string().optional().describe(
           "Filter by title (case-insensitive substring match)",
         ),
+        project: z.string().optional().describe(
+          "Filter by portfolio project name (exact match, case-insensitive). Use this to scope notes to a specific codebase or project.",
+        ),
       },
     },
-    async ({ search }) => {
+    async ({ search, project }) => {
       let notes = await parser.readNotes();
+      if (project) {
+        const q = project.toLowerCase();
+        notes = notes.filter((n) => (n.project || "").toLowerCase() === q);
+      }
       if (search) {
         const q = search.toLowerCase();
         notes = notes.filter((n) => n.title.toLowerCase().includes(q));
@@ -30,6 +38,7 @@ export function registerNoteTools(server: McpServer, pm: ProjectManager): void {
       return ok(notes.map((n) => ({
         id: n.id,
         title: n.title,
+        project: n.project,
         createdAt: n.createdAt,
         updatedAt: n.updatedAt,
       })));

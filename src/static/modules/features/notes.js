@@ -8,6 +8,7 @@ export class NotesModule {
   /** @param {TaskManager} taskManager */
   constructor(taskManager) {
     this.tm = taskManager;
+    this._projectFilter = "";
   }
 
   async load() {
@@ -27,7 +28,17 @@ export class NotesModule {
     const emptyState = document.getElementById("emptyNotesState");
     const activeContent = document.getElementById("activeNoteContent");
 
-    if (this.tm.notes.length === 0) {
+    // Populate project filter dropdown
+    this._populateProjectFilter();
+
+    // Apply project filter
+    const visibleNotes = this._projectFilter
+      ? this.tm.notes.filter(
+        (n) => (n.project || "").toLowerCase() === this._projectFilter.toLowerCase(),
+      )
+      : this.tm.notes;
+
+    if (visibleNotes.length === 0) {
       tabNav.innerHTML = "";
       emptyState.classList.remove("hidden");
       activeContent.classList.add("hidden");
@@ -40,10 +51,11 @@ export class NotesModule {
     const truncate = (str, max = 20) =>
       str.length > max ? str.slice(0, max) + "..." : str;
 
-    // Render tabs with pill-style design
-    tabNav.innerHTML = this.tm.notes
-      .map((note, index) => {
-        const isActive = (this.tm.activeNote === null && index === 0) ||
+    // Render tabs — index into full tm.notes for selectNote compatibility
+    tabNav.innerHTML = visibleNotes
+      .map((note) => {
+        const index = this.tm.notes.indexOf(note);
+        const isActive = (this.tm.activeNote === null && index === this.tm.notes.indexOf(visibleNotes[0])) ||
           this.tm.activeNote === index;
         const isEnhanced = note.mode === "enhanced";
         return `
@@ -56,7 +68,7 @@ export class NotesModule {
           isEnhanced
             ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-info mr-1.5"></span>'
             : ""
-        }${truncate(note.title)}
+        }${note.project ? `<span class="text-xs text-muted mr-1">[${note.project}]</span>` : ""}${truncate(note.title)}
           </button>
         `;
       })
@@ -459,7 +471,27 @@ export class NotesModule {
     }
   }
 
+  _populateProjectFilter() {
+    const select = document.getElementById("notesProjectFilter");
+    if (!select) return;
+    const projects = [...new Set(
+      this.tm.notes.map((n) => n.project).filter(Boolean),
+    )].sort();
+    const current = select.value;
+    select.innerHTML = '<option value="">All projects</option>' +
+      projects.map((p) => `<option value="${p}">${p}</option>`).join("");
+    if (current && projects.includes(current)) select.value = current;
+  }
+
   bindEvents() {
+    // Project filter
+    document.getElementById("notesProjectFilter")
+      ?.addEventListener("change", (e) => {
+        this._projectFilter = e.target.value;
+        this.tm.activeNote = null;
+        this.renderView();
+      });
+
     // Add note buttons (header and inline tab) - use sidenav
     document
       .getElementById("addNoteBtn")

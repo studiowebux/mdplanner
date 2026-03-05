@@ -7,6 +7,7 @@ import { NotesAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { escapeHtml, markdownToHtml } from "../utils.js";
 import { UndoManager } from "../ui/undo-manager.js";
+import { FuzzyAutocomplete } from "../ui/fuzzy-autocomplete.js";
 
 export class NoteSidenavModule {
   constructor(taskManager) {
@@ -21,6 +22,19 @@ export class NoteSidenavModule {
     this.draggedParagraphId = null;
     /** @type {Map<string, UndoManager>} keyed by element ID */
     this._undoManagers = new Map();
+    /** @type {FuzzyAutocomplete|null} */
+    this._projectFuzzy = null;
+  }
+
+  _attachProjectFuzzy() {
+    const input = document.getElementById("noteSidenavProject");
+    if (!input) return;
+    this._projectFuzzy?.destroy();
+    this._projectFuzzy = new FuzzyAutocomplete(input, () => {
+      const names = new Set();
+      (this.tm.portfolio || []).forEach((p) => { if (p.name) names.add(p.name); });
+      return Array.from(names).sort();
+    });
   }
 
   bindEvents() {
@@ -177,6 +191,7 @@ export class NoteSidenavModule {
     // Reset form
     document.getElementById("noteSidenavTitle").value = "";
     document.getElementById("noteSidenavEditor").value = "";
+    document.getElementById("noteSidenavProject").value = "";
 
     // Show basic mode by default
     this.updateModeUI("basic");
@@ -189,6 +204,7 @@ export class NoteSidenavModule {
     Sidenav.registerModule(this);
     Sidenav.open("noteSidenav");
     this._attachNoteUndoManagers();
+    this._attachProjectFuzzy();
   }
 
   /**
@@ -206,6 +222,10 @@ export class NoteSidenavModule {
     document.getElementById("noteSidenavHeader").textContent = note.title || "Note";
     document.getElementById("noteSidenavSaveStatus")?.classList.add("hidden");
 
+    // Pre-populate edit fields (hidden in view mode, ready when user switches to edit)
+    document.getElementById("noteSidenavTitle").value = note.title || "";
+    document.getElementById("noteSidenavProject").value = note.project || "";
+
     // Show read-only view
     this._setViewMode(note);
 
@@ -214,11 +234,14 @@ export class NoteSidenavModule {
 
     Sidenav.registerModule(this);
     Sidenav.open("noteSidenav");
+    this._attachProjectFuzzy();
   }
 
   close() {
     Sidenav.unregisterModule();
     this._detachNoteUndoManagers();
+    this._projectFuzzy?.destroy();
+    this._projectFuzzy = null;
 
     // Reset multi-select state
     this.multiSelectMode = false;
@@ -669,6 +692,7 @@ export class NoteSidenavModule {
             ? this.buildContentFromParagraphs(tempNote.paragraphs)
             : document.getElementById("noteSidenavEditor").value,
           mode: isEnhanced ? "enhanced" : "basic",
+          project: document.getElementById("noteSidenavProject")?.value?.trim() || undefined,
         };
 
         if (isEnhanced) {
@@ -705,6 +729,7 @@ export class NoteSidenavModule {
 
         note.title = title;
         note.mode = isEnhanced ? "enhanced" : "basic";
+        note.project = document.getElementById("noteSidenavProject")?.value?.trim() || undefined;
 
         if (isEnhanced) {
           note.content = this.buildContentFromParagraphs(note.paragraphs);
@@ -718,6 +743,7 @@ export class NoteSidenavModule {
           mode: note.mode,
           paragraphs: note.paragraphs,
           customSections: note.customSections,
+          project: note.project,
         };
 
         const response = await NotesAPI.update(note.id, saveData);

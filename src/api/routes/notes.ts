@@ -14,11 +14,17 @@ import {
 
 export const notesRouter = new Hono<{ Variables: AppVariables }>();
 
-// GET /notes - list all notes
+// GET /notes - list all notes (optional ?project= filter)
 notesRouter.get("/", async (c) => {
   const parser = getParser(c);
   const projectInfo = await parser.readProjectInfo();
-  return jsonResponse(projectInfo.notes);
+  const projectFilter = c.req.query("project");
+  const notes = projectFilter
+    ? projectInfo.notes.filter((n) =>
+      (n.project || "").toLowerCase() === projectFilter.toLowerCase()
+    )
+    : projectInfo.notes;
+  return jsonResponse(notes);
 });
 
 // GET /notes/:id - get single note
