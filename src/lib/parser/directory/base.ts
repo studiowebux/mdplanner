@@ -252,15 +252,31 @@ export abstract class DirectoryParser<T extends { id: string }> {
   }
 
   /**
-   * Atomic write using temp file + rename.
+   * Atomic write using temp file + rename, with OS-level advisory lock.
+   * Uses a dedicated .lock file and Deno 2.x file.lock() API so external
+   * processes (WebDAV clients, git hooks, sync daemons) that use the same
+   * convention are blocked during the write.
    */
   protected async atomicWriteFile(
     filePath: string,
     content: string,
   ): Promise<void> {
-    const tempPath = filePath + ".tmp";
-    await Deno.writeTextFile(tempPath, content);
-    await Deno.rename(tempPath, filePath);
+    const lockPath = `${filePath}.lock`;
+    const lockFile = await Deno.open(lockPath, { write: true, create: true });
+    await lockFile.lock(true); // exclusive — blocks other cooperative writers
+    try {
+      const tempPath = `${filePath}.tmp`;
+      await Deno.writeTextFile(tempPath, content);
+      await Deno.rename(tempPath, filePath);
+    } finally {
+      await lockFile.unlock();
+      lockFile.close();
+      try {
+        await Deno.remove(lockPath);
+      } catch {
+        // Lock file cleanup is best-effort; stale .lock files are harmless
+      }
+    }
   }
 
   /**

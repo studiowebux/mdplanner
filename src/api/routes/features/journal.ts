@@ -7,6 +7,7 @@ import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
+  checkConflict,
   errorResponse,
   getParser,
   jsonResponse,
@@ -52,6 +53,11 @@ journalRouter.put("/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const body = await c.req.json();
+
+  const existing = await parser.readJournalEntry(id);
+  const conflict = checkConflict(existing?.updated, body.updatedAt);
+  if (conflict) return conflict;
+
   const updated = await parser.updateJournalEntry(id, {
     date: body.date,
     time: body.time,

@@ -7,6 +7,7 @@ import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
+  checkConflict,
   errorResponse,
   getParser,
   jsonResponse,
@@ -52,6 +53,11 @@ habitsRouter.put("/:id", async (c) => {
   const parser = getParser(c);
   const id = c.req.param("id");
   const body = await c.req.json();
+
+  const existing = await parser.readHabit(id);
+  const conflict = checkConflict(existing?.updated, body.updatedAt);
+  if (conflict) return conflict;
+
   const updated = await parser.updateHabit(id, {
     name: body.name,
     description: body.description,

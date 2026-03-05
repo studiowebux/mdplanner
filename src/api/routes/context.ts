@@ -71,3 +71,30 @@ export function errorResponse(message: string, status = 500): Response {
     headers: corsHeaders,
   });
 }
+
+/**
+ * Optimistic locking helper.
+ * Returns a 409 Conflict response when the client's `requestedUpdatedAt` is
+ * older than the server's `storedUpdatedAt`, indicating the entity was modified
+ * after the client last read it. Returns null when there is no conflict.
+ *
+ * Usage in a PUT handler:
+ *   const existing = await parser.readNote(id);
+ *   const conflict = checkConflict(existing?.updatedAt, body.updatedAt);
+ *   if (conflict) return conflict;
+ */
+export function checkConflict(
+  storedUpdatedAt: string | undefined,
+  requestedUpdatedAt: string | undefined,
+): Response | null {
+  if (!storedUpdatedAt || !requestedUpdatedAt) return null;
+  const stored = new Date(storedUpdatedAt).getTime();
+  const requested = new Date(requestedUpdatedAt).getTime();
+  if (stored > requested) {
+    return jsonResponse(
+      { error: "Conflict", serverUpdatedAt: storedUpdatedAt },
+      409,
+    );
+  }
+  return null;
+}

@@ -7,6 +7,7 @@ import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
+  checkConflict,
   errorResponse,
   getParser,
   jsonResponse,
@@ -54,6 +55,11 @@ notesRouter.put("/:id", async (c) => {
   const parser = getParser(c);
   const noteId = c.req.param("id");
   const updates = await c.req.json();
+
+  const existing = await parser.readNote(noteId);
+  const conflict = checkConflict(existing?.updatedAt, updates.updatedAt);
+  if (conflict) return conflict;
+
   const success = await parser.updateNote(noteId, updates);
 
   if (success) {

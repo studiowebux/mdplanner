@@ -338,6 +338,10 @@ export class DirectoryMarkdownParser {
     return this.notesParser.readAll();
   }
 
+  async readNote(id: string): Promise<Note | null> {
+    return this.notesParser.read(id);
+  }
+
   async addNote(
     note: Omit<Note, "id" | "createdAt" | "updatedAt" | "revision">,
   ): Promise<string> {
@@ -364,6 +368,10 @@ export class DirectoryMarkdownParser {
 
   async readGoals(): Promise<Goal[]> {
     return this.goalsParser.readAll();
+  }
+
+  async readGoal(id: string): Promise<Goal | null> {
+    return this.goalsParser.read(id);
   }
 
   async addGoal(goal: Omit<Goal, "id">): Promise<string> {
@@ -542,6 +550,10 @@ export class DirectoryMarkdownParser {
     return this.milestonesParser.readAll();
   }
 
+  async readMilestone(id: string): Promise<Milestone | null> {
+    return this.milestonesParser.read(id);
+  }
+
   async addMilestone(milestone: Omit<Milestone, "id">): Promise<Milestone> {
     return this.milestonesParser.add(milestone);
   }
@@ -564,6 +576,10 @@ export class DirectoryMarkdownParser {
   async readMeetings(): Promise<Meeting[]> {
     const meetings = await this.meetingsParser.readAll();
     return meetings.sort((a, b) => b.date.localeCompare(a.date));
+  }
+
+  async readMeeting(id: string): Promise<Meeting | null> {
+    return this.meetingsParser.read(id);
   }
 
   async addMeeting(
@@ -643,6 +659,10 @@ export class DirectoryMarkdownParser {
     return this.ideasParser.readAll();
   }
 
+  async readIdea(id: string): Promise<Idea | null> {
+    return this.ideasParser.read(id);
+  }
+
   async addIdea(idea: Omit<Idea, "id" | "created">): Promise<Idea> {
     return this.ideasParser.add(idea);
   }
@@ -689,6 +709,10 @@ export class DirectoryMarkdownParser {
 
   async readRetrospectives(): Promise<Retrospective[]> {
     return this.retrospectivesParser.readAll();
+  }
+
+  async readRetrospective(id: string): Promise<Retrospective | null> {
+    return this.retrospectivesParser.read(id);
   }
 
   async addRetrospective(
@@ -1813,6 +1837,10 @@ export class DirectoryMarkdownParser {
     });
   }
 
+  async readJournalEntry(id: string): Promise<JournalEntry | null> {
+    return this.journalParser.read(id);
+  }
+
   async addJournalEntry(
     entry: Omit<JournalEntry, "id" | "created" | "updated">,
   ): Promise<JournalEntry> {
@@ -1863,6 +1891,10 @@ export class DirectoryMarkdownParser {
   async readHabits(): Promise<Habit[]> {
     const habits = await this.habitsParser.readAll();
     return habits.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  async readHabit(id: string): Promise<Habit | null> {
+    return this.habitsParser.read(id);
   }
 
   async addHabit(

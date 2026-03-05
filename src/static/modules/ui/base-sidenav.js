@@ -160,8 +160,22 @@ export class BaseSidenavModule {
         const updatePayload = this._loadedUpdatedAt
           ? { ...data, updatedAt: this._loadedUpdatedAt }
           : data;
-        await this.api.update(this.editingId, updatePayload);
+        const response = await this.api.update(this.editingId, updatePayload);
+
+        if (response.status === 409) {
+          const body = await response.json();
+          this._showConflictBanner(body.serverUpdatedAt);
+          return;
+        }
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          this.showSaveStatus(body.error || "Error");
+          showToast(body.error || `Error saving ${this.entityName}`, "error");
+          return;
+        }
+
         this._loadedUpdatedAt = null; // cleared — server will set a new updatedAt
+        this._hideConflictBanner();
         this._markAllSaved();
         this._setDirty(false);
         this.showSaveStatus("Saved");
@@ -193,6 +207,55 @@ export class BaseSidenavModule {
     } finally {
       this.isSaving = false;
     }
+  }
+
+  _showConflictBanner(serverUpdatedAt) {
+    let banner = this.el("ConflictBanner");
+    if (!banner) {
+      const container = document.getElementById(`${this.prefix}Sidenav`);
+      if (!container) return;
+      banner = document.createElement("div");
+      banner.id = `${this.prefix}ConflictBanner`;
+      banner.className = "sidenav-conflict-banner";
+      const msg = document.createElement("p");
+      msg.textContent = "This item was updated by someone else while you were editing.";
+      const actions = document.createElement("div");
+      actions.className = "sidenav-conflict-actions";
+      const reloadBtn = document.createElement("button");
+      reloadBtn.textContent = "Reload";
+      reloadBtn.className = "btn-conflict-reload";
+      reloadBtn.addEventListener("click", async () => {
+        this._hideConflictBanner();
+        await this.reloadData();
+        if (this.editingId) {
+          const refreshed = this.findEntity(this.editingId);
+          if (refreshed) this.openEdit(refreshed);
+        }
+      });
+      const overwriteBtn = document.createElement("button");
+      overwriteBtn.textContent = "Overwrite";
+      overwriteBtn.className = "btn-conflict-overwrite";
+      overwriteBtn.addEventListener("click", () => {
+        // Force-save: clear loadedUpdatedAt so the conflict check is skipped
+        this._loadedUpdatedAt = null;
+        this._hideConflictBanner();
+        this.save();
+      });
+      actions.append(reloadBtn, overwriteBtn);
+      banner.append(msg, actions);
+      // Insert at top of sidenav body
+      const body = container.querySelector(".sidenav-body") || container;
+      body.prepend(banner);
+    }
+    banner.classList.remove("hidden");
+    if (serverUpdatedAt) {
+      const ts = banner.querySelector("p");
+      if (ts) ts.textContent = `This item was updated at ${new Date(serverUpdatedAt).toLocaleTimeString()} while you were editing.`;
+    }
+  }
+
+  _hideConflictBanner() {
+    this.el("ConflictBanner")?.classList.add("hidden");
   }
 
   async handleDelete() {
