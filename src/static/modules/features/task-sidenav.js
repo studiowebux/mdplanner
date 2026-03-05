@@ -211,6 +211,14 @@ export class TaskSidenavModule {
       this.fillForm(task);
     } else {
       this.clearForm();
+      // Default new tasks to "Todo" — the section select defaults to the first
+      // section in the list (often "Backlog") after form.reset(). Override it.
+      const sectionSelect = document.getElementById("sidenavTaskSection");
+      if (sectionSelect) {
+        const preferred = ["Todo", "todo"];
+        const match = Array.from(sectionSelect.options).find((o) => preferred.includes(o.value));
+        if (match) sectionSelect.value = match.value;
+      }
     }
 
     // Show/load time entries section for existing tasks only

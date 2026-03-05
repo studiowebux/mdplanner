@@ -349,7 +349,7 @@ class TaskManager {
       "summary";
     this.switchView(savedView);
     await this.loadTasks();
-    this.loadPortfolio();
+    await this.loadPortfolio();
     this.milestonesModule.load();
     this.checkTaskHashOnLoad();
     this.checkVersion();
