@@ -8,6 +8,18 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-03-05
+
+### Added
+
+- Notes: replaced horizontal scrolling tab bar with a two-pane layout. Left
+  sidebar shows a searchable, filterable note list; right pane shows the active
+  note. Mobile collapses to single-pane with a Back button.
+- Export: added Markdown bundle format to the Export Data modal.
+  `GET
+  /export/md?entities=...` renders all selected entities as a single
+  readable `.md` document (14 entity types supported).
+
 ## [0.9.9] - 2026-03-04
 
 ### Added
