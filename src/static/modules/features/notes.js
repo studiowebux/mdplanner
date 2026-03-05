@@ -9,6 +9,7 @@ export class NotesModule {
   constructor(taskManager) {
     this.tm = taskManager;
     this._projectFilter = "";
+    this._searchFilter = "";
   }
 
   async load() {
@@ -31,44 +32,43 @@ export class NotesModule {
     // Populate project filter dropdown
     this._populateProjectFilter();
 
-    // Apply project filter
-    const visibleNotes = this._projectFilter
-      ? this.tm.notes.filter(
+    // Apply project + search filters
+    let visibleNotes = this.tm.notes;
+    if (this._projectFilter) {
+      visibleNotes = visibleNotes.filter(
         (n) => (n.project || "").toLowerCase() === this._projectFilter.toLowerCase(),
-      )
-      : this.tm.notes;
+      );
+    }
+    if (this._searchFilter) {
+      const q = this._searchFilter.toLowerCase();
+      visibleNotes = visibleNotes.filter((n) => n.title.toLowerCase().includes(q));
+    }
 
     if (visibleNotes.length === 0) {
       tabNav.innerHTML = "";
       emptyState.classList.remove("hidden");
       activeContent.classList.add("hidden");
+      this._setMobileActive(false);
       return;
     }
 
     emptyState.classList.add("hidden");
 
-    // Truncate long titles
-    const truncate = (str, max = 20) =>
-      str.length > max ? str.slice(0, max) + "..." : str;
-
-    // Render tabs — index into full tm.notes for selectNote compatibility
+    // Render vertical list items
     tabNav.innerHTML = visibleNotes
       .map((note) => {
         const index = this.tm.notes.indexOf(note);
-        const isActive = (this.tm.activeNote === null && index === this.tm.notes.indexOf(visibleNotes[0])) ||
-          this.tm.activeNote === index;
+        const isActive = this.tm.activeNote === index;
         const isEnhanced = note.mode === "enhanced";
+        const meta = [
+          isEnhanced ? "enhanced" : "",
+          note.project ? `[${note.project}]` : "",
+        ].filter(Boolean).join(" · ");
         return `
-          <button class="px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
-          isActive
-            ? "bg-inverse text-inverse"
-            : "text-secondary hover:text-primary hover:bg-tertiary"
-        }" onclick="taskManager.selectNote(${index})" title="${note.title}">
-              ${
-          isEnhanced
-            ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-info mr-1.5"></span>'
-            : ""
-        }${note.project ? `<span class="text-xs text-muted mr-1">[${note.project}]</span>` : ""}${truncate(note.title)}
+          <button class="notes-list-item${isActive ? " active" : ""}"
+            onclick="taskManager.selectNote(${index})" title="${note.title}">
+            <span class="notes-list-item-title">${note.title}</span>
+            ${meta ? `<span class="notes-list-item-meta text-muted" style="font-size:var(--font-size-xs)">${meta}</span>` : ""}
           </button>
         `;
       })
@@ -78,6 +78,9 @@ export class NotesModule {
     if (this.tm.activeNote === null && this.tm.notes.length > 0) {
       this.tm.activeNote = 0;
     }
+
+    // Mobile: toggle note-active class
+    this._setMobileActive(this.tm.activeNote !== null);
 
     this.renderActive();
   }
@@ -336,6 +339,7 @@ export class NotesModule {
     if (note) {
       this.tm.enhancedMode = note.mode === "enhanced";
     }
+    this._setMobileActive(true);
     this.renderView();
   }
 
@@ -471,6 +475,11 @@ export class NotesModule {
     }
   }
 
+  _setMobileActive(active) {
+    const layout = document.getElementById("notesLayout");
+    if (layout) layout.classList.toggle("note-active", active);
+  }
+
   _populateProjectFilter() {
     const select = document.getElementById("notesProjectFilter");
     if (!select) return;
@@ -484,12 +493,31 @@ export class NotesModule {
   }
 
   bindEvents() {
+    // Search filter
+    document.getElementById("notesSearch")
+      ?.addEventListener("input", (e) => {
+        this._searchFilter = e.target.value.trim();
+        this.tm.activeNote = null;
+        this.renderView();
+      });
+
     // Project filter
     document.getElementById("notesProjectFilter")
       ?.addEventListener("change", (e) => {
         this._projectFilter = e.target.value;
         this.tm.activeNote = null;
         this.renderView();
+      });
+
+    // Mobile back button
+    document.getElementById("notesBackBtn")
+      ?.addEventListener("click", () => {
+        this.tm.activeNote = null;
+        this._setMobileActive(false);
+        const activeContent = document.getElementById("activeNoteContent");
+        const emptyState = document.getElementById("emptyNotesState");
+        if (activeContent) activeContent.classList.add("hidden");
+        if (emptyState) emptyState.classList.remove("hidden");
       });
 
     // Add note buttons (header and inline tab) - use sidenav

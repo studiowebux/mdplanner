@@ -2809,48 +2809,41 @@
             </div>
           </div>
 
-          <!-- Notes Project Filter -->
-          <div class="px-6 py-2 border-b border-default flex items-center gap-3">
-            <label class="text-sm text-secondary whitespace-nowrap">Project</label>
-            <select id="notesProjectFilter" class="form-input" style="max-width:14rem;">
-              <option value="">All projects</option>
-            </select>
-          </div>
-
-          <!-- Notes Tab Navigation -->
-          <div class="border-b border-default">
-            <div class="flex items-center px-4">
-              <nav
-                class="-mb-px flex items-center gap-1 overflow-x-auto scrollbar-hide flex-1 py-2"
-                id="notesTabNav"
-              >
-                <!-- Note tabs will be generated dynamically -->
-              </nav>
-              <button
-                id="addNoteTabBtn"
-                class="ml-2 p-1.5 rounded-md text-muted hover:text-secondary hover:bg-tertiary transition-colors flex-shrink-0"
-                title="Add Note"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+          <!-- Notes two-pane layout -->
+          <div class="notes-layout" id="notesLayout">
+            <!-- Sidebar: search + list -->
+            <div class="notes-sidebar">
+              <div class="notes-search-area">
+                <input
+                  id="notesSearch"
+                  type="search"
+                  class="form-input"
+                  placeholder="Search notes..."
+                  autocomplete="off"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-              </button>
+                <select id="notesProjectFilter" class="form-input">
+                  <option value="">All projects</option>
+                </select>
+              </div>
+              <nav id="notesTabNav" class="notes-list">
+                <!-- Note list items rendered dynamically -->
+              </nav>
+              <div class="notes-sidebar-footer">
+                <button id="addNoteTabBtn" class="notes-add-btn" title="Add Note">
+                  + Add Note
+                </button>
+              </div>
             </div>
-          </div>
 
-          <!-- Notes Content -->
-          <div class="p-6">
-            <div id="notesContent" class="min-h-96">
+            <!-- Note content pane -->
+            <div class="notes-content-pane">
+              <button id="notesBackBtn" class="notes-back-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/>
+                </svg>
+                Back to notes
+              </button>
+              <div id="notesContent">
               <div id="emptyNotesState" class="text-center py-12">
                 <svg
                   class="mx-auto h-12 w-12 text-muted"
@@ -3042,8 +3035,10 @@
           </div>
         </div>
       </div>
+    </div>
 
       <!-- Goals View -->
+
       <div id="goalsView" class="hidden pb-16">
         <div class="bg-primary rounded-lg shadow">
           <div
