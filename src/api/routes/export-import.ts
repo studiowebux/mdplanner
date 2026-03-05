@@ -11,7 +11,18 @@ import {
   getParser,
   jsonResponse,
 } from "./context.ts";
-import { Goal, Meeting, Note, Person, Task } from "../../lib/types.ts";
+import {
+  Fishbone,
+  Goal,
+  Habit,
+  Idea,
+  JournalEntry,
+  Meeting,
+  Note,
+  Person,
+  Task,
+} from "../../lib/types.ts";
+import type { Company, Contact, Deal } from "../../lib/types.ts";
 import { PortfolioItem } from "../../lib/parser/directory/portfolio.ts";
 
 export const exportImportRouter = new Hono<{ Variables: AppVariables }>();
@@ -570,6 +581,228 @@ function generateProjectReportHTML(
 </html>`;
 }
 
+// ─── Markdown export helpers ────────────────────────────────────────────────
+
+function mdSection(title: string, body: string): string {
+  return `# ${title}\n\n${body}\n\n---\n\n`;
+}
+
+function convertTasksToMarkdown(tasks: Task[]): string {
+  const flat = flattenTasks(tasks);
+  const sections = [...new Set(flat.map((t) => t.section))];
+  let out = "";
+  for (const section of sections) {
+    const items = flat.filter((t) => t.section === section);
+    out += `## ${section}\n\n`;
+    for (const t of items) {
+      const check = t.completed ? "[x]" : "[ ]";
+      const meta: string[] = [];
+      if (t.config.priority) meta.push(`priority:${t.config.priority}`);
+      if (t.config.assignee) meta.push(`assignee:${t.config.assignee}`);
+      if (t.config.due_date) meta.push(`due:${t.config.due_date}`);
+      if (t.config.milestone) meta.push(`milestone:${t.config.milestone}`);
+      const suffix = meta.length ? `  _(${meta.join(", ")})_` : "";
+      out += `- ${check} **${t.title}**${suffix}\n`;
+      if (t.description?.length) {
+        out += `\n  ${t.description.join(" ").replace(/\n/g, "\n  ")}\n\n`;
+      }
+    }
+    out += "\n";
+  }
+  return out.trim();
+}
+
+function convertNotesToMarkdown(notes: Note[]): string {
+  return notes.map((n) => {
+    const meta: string[] = [];
+    if (n.createdAt) meta.push(`Created: ${n.createdAt}`);
+    if (n.updatedAt) meta.push(`Updated: ${n.updatedAt}`);
+    const tags = (n as unknown as { tags?: string[] }).tags;
+    if (tags?.length) meta.push(`Tags: ${tags.join(", ")}`);
+    let out = `## ${n.title}\n\n`;
+    if (meta.length) out += `_${meta.join(" · ")}_\n\n`;
+    if (n.content) out += `${n.content}\n`;
+    return out;
+  }).join("\n---\n\n");
+}
+
+function convertGoalsToMarkdown(goals: Goal[]): string {
+  return goals.map((g) => {
+    let out =
+      `## ${g.title}\n\n**Status:** ${g.status} | **Type:** ${g.type} | **KPI:** ${g.kpi}\n`;
+    out += `**Timeline:** ${g.startDate} → ${g.endDate}\n\n`;
+    if (g.description) out += `${g.description}\n`;
+    return out;
+  }).join("\n---\n\n");
+}
+
+function convertMeetingsToMarkdown(meetings: Meeting[]): string {
+  return meetings.map((m) => {
+    let out = `## ${m.title}\n\n**Date:** ${m.date}`;
+    if (m.attendees?.length) {
+      out += ` | **Attendees:** ${m.attendees.join(", ")}`;
+    }
+    out += "\n\n";
+    if (m.agenda) out += `### Agenda\n\n${m.agenda}\n\n`;
+    if (m.notes) out += `### Notes\n\n${m.notes}\n\n`;
+    if (m.actions?.length) {
+      out += `### Action Items\n\n`;
+      for (const a of m.actions) {
+        const done = a.status === "done" ? "[x]" : "[ ]";
+        const owner = a.owner ? ` _(${a.owner})_` : "";
+        const due = a.due ? ` — due ${a.due}` : "";
+        out += `- ${done} ${a.description}${owner}${due}\n`;
+      }
+    }
+    return out;
+  }).join("\n---\n\n");
+}
+
+function convertPeopleToMarkdown(people: Person[]): string {
+  let out =
+    "| Name | Title | Role | Email | Phone | Start Date |\n|------|-------|------|-------|-------|------------|\n";
+  for (const p of people) {
+    out += `| ${p.name} | ${p.title ?? ""} | ${p.role ?? ""} | ${
+      p.email ?? ""
+    } | ${p.phone ?? ""} | ${p.startDate ?? ""} |\n`;
+  }
+  return out;
+}
+
+function convertPortfolioToMarkdown(items: PortfolioItem[]): string {
+  return items.map((item) => {
+    let out =
+      `## ${item.name}\n\n**Status:** ${item.status} | **Category:** ${item.category}`;
+    if (item.client) out += ` | **Client:** ${item.client}`;
+    if (item.progress !== undefined) {
+      out += ` | **Progress:** ${item.progress}%`;
+    }
+    out += "\n\n";
+    if (item.techStack?.length) {
+      out += `**Tech:** ${item.techStack.join(", ")}\n\n`;
+    }
+    if (item.startDate || item.endDate) {
+      out += `**Timeline:** ${item.startDate ?? "?"} → ${
+        item.endDate ?? "?"
+      }\n\n`;
+    }
+    if (item.urls?.length) {
+      out += item.urls.map((u) => `[${u.label}](${u.href})`).join(" | ") +
+        "\n\n";
+    }
+    if (item.description) out += `${item.description}\n`;
+    return out;
+  }).join("\n---\n\n");
+}
+
+function convertIdeasToMarkdown(ideas: Idea[]): string {
+  return ideas.map((i) => {
+    let out = `## ${i.title}\n\n**Status:** ${i.status}`;
+    if (i.category) out += ` | **Category:** ${i.category}`;
+    if (i.priority) out += ` | **Priority:** ${i.priority}`;
+    out += "\n\n";
+    if (i.description) out += `${i.description}\n`;
+    return out;
+  }).join("\n---\n\n");
+}
+
+function convertHabitsToMarkdown(habits: Habit[]): string {
+  return habits.map((h) => {
+    let out = `## ${h.name}\n\n**Frequency:** ${h.frequency}`;
+    if (h.targetDays?.length) out += ` | **Days:** ${h.targetDays.join(", ")}`;
+    out += `\n**Streak:** ${h.streakCount} (best: ${h.longestStreak})\n\n`;
+    if (h.description) out += `${h.description}\n\n`;
+    if (h.completions.length) {
+      out += `**Completions (last 10):** ${
+        h.completions.slice(-10).join(", ")
+      }\n`;
+    }
+    return out;
+  }).join("\n---\n\n");
+}
+
+function convertJournalToMarkdown(entries: JournalEntry[]): string {
+  return entries.map((e) => {
+    const title = e.title ? `: ${e.title}` : "";
+    let out = `## ${e.date}${title}\n\n`;
+    if (e.mood) out += `**Mood:** ${e.mood}`;
+    if (e.tags?.length) out += ` | **Tags:** ${e.tags.join(", ")}`;
+    if (e.mood || e.tags?.length) out += "\n\n";
+    if (e.body) out += `${e.body}\n`;
+    return out;
+  }).join("\n---\n\n");
+}
+
+function convertDnsToMarkdown(
+  domains: import("../../lib/types.ts").DnsDomain[],
+): string {
+  return domains.map((d) => {
+    let out = `## ${d.domain}\n\n`;
+    if (d.provider) out += `**Provider:** ${d.provider}  `;
+    if (d.expiryDate) out += `**Expires:** ${d.expiryDate}  `;
+    if (d.autoRenew !== undefined) {
+      out += `**Auto-renew:** ${d.autoRenew ? "yes" : "no"}  `;
+    }
+    out += "\n\n";
+    if (d.dnsRecords?.length) {
+      out += "| Type | Name | Value | TTL |\n|------|------|-------|-----|\n";
+      for (const r of d.dnsRecords) {
+        out += `| ${r.type} | ${r.name} | ${r.value} | ${r.ttl} |\n`;
+      }
+    }
+    return out;
+  }).join("\n---\n\n");
+}
+
+function convertFishbonesToMarkdown(fishbones: Fishbone[]): string {
+  return fishbones.map((f) => {
+    let out = `## ${f.title}\n\n`;
+    if (f.description) out += `${f.description}\n\n`;
+    for (const cause of f.causes) {
+      out += `### ${cause.category}\n\n`;
+      for (const sub of cause.subcauses) out += `- ${sub}\n`;
+      out += "\n";
+    }
+    return out;
+  }).join("\n---\n\n");
+}
+
+function convertContactsToMarkdown(contacts: Contact[]): string {
+  let out =
+    "| Name | Title | Email | Phone | Company |\n|------|-------|-------|-------|---------|\n";
+  for (const c of contacts) {
+    out += `| ${c.firstName} ${c.lastName} | ${c.title ?? ""} | ${
+      c.email ?? ""
+    } | ${c.phone ?? ""} | ${c.companyId} |\n`;
+  }
+  return out;
+}
+
+function convertCompaniesToMarkdown(companies: Company[]): string {
+  return companies.map((c) => {
+    let out = `## ${c.name}\n\n`;
+    if (c.industry) out += `**Industry:** ${c.industry}  `;
+    if (c.website) out += `**Website:** ${c.website}  `;
+    if (c.phone) out += `**Phone:** ${c.phone}  `;
+    out += "\n\n";
+    if (c.notes) out += `${c.notes}\n`;
+    return out;
+  }).join("\n---\n\n");
+}
+
+function convertDealsToMarkdown(deals: Deal[]): string {
+  let out =
+    "| Title | Stage | Value | Probability | Expected Close |\n|-------|-------|-------|-------------|----------------|\n";
+  for (const d of deals) {
+    out += `| ${d.title} | ${d.stage} | ${d.value} | ${d.probability}% | ${
+      d.expectedCloseDate ?? ""
+    } |\n`;
+  }
+  return out;
+}
+
+// ─── End markdown helpers ────────────────────────────────────────────────────
+
 // Routes
 
 // GET /export/csv/:entity - export any supported entity type as CSV
@@ -758,6 +991,122 @@ exportImportRouter.get("/export/json", async (c) => {
     headers: {
       ...corsHeaders,
       "Content-Type": "application/json",
+      "Content-Disposition": `attachment; filename="${filename}"`,
+    },
+  });
+});
+
+// GET /export/md - export one or more entity types as a Markdown document
+// Query params:
+//   entities — comma-separated list (default: all)
+//   Supported: tasks, notes, goals, meetings, people, portfolio, ideas,
+//              habits, journal, dns, fishbone, contacts, companies, deals
+exportImportRouter.get("/export/md", async (c) => {
+  const parser = getParser(c);
+  const projectInfo = await parser.readProjectInfo();
+
+  const SUPPORTED = [
+    "tasks",
+    "notes",
+    "goals",
+    "meetings",
+    "people",
+    "portfolio",
+    "ideas",
+    "habits",
+    "journal",
+    "dns",
+    "fishbone",
+    "contacts",
+    "companies",
+    "deals",
+  ] as const;
+
+  type EntityKey = (typeof SUPPORTED)[number];
+
+  const rawEntities = c.req.query("entities");
+  const requested: EntityKey[] = rawEntities
+    ? (rawEntities.split(",").map((s) => s.trim()).filter((s) =>
+      SUPPORTED.includes(s as EntityKey)
+    ) as EntityKey[])
+    : [...SUPPORTED];
+
+  if (requested.length === 0) {
+    return errorResponse(
+      "No valid entity types specified. Supported: " + SUPPORTED.join(", "),
+      400,
+    );
+  }
+
+  const sections: string[] = [];
+  sections.push(
+    `# ${projectInfo.name ?? "Project"} — Export\n\n_Generated: ${
+      new Date().toISOString()
+    }_\n`,
+  );
+
+  const fetch: Record<EntityKey, () => Promise<string>> = {
+    tasks: async () =>
+      mdSection("Tasks", convertTasksToMarkdown(await parser.readTasks())),
+    notes: async () =>
+      mdSection("Notes", convertNotesToMarkdown(await parser.readNotes())),
+    goals: async () =>
+      mdSection("Goals", convertGoalsToMarkdown(await parser.readGoals())),
+    meetings: async () =>
+      mdSection(
+        "Meetings",
+        convertMeetingsToMarkdown(await parser.readMeetings()),
+      ),
+    people: async () =>
+      mdSection("People", convertPeopleToMarkdown(await parser.readPeople())),
+    portfolio: async () =>
+      mdSection(
+        "Portfolio",
+        convertPortfolioToMarkdown(await parser.readPortfolioItems()),
+      ),
+    ideas: async () =>
+      mdSection("Ideas", convertIdeasToMarkdown(await parser.readIdeas())),
+    habits: async () =>
+      mdSection("Habits", convertHabitsToMarkdown(await parser.readHabits())),
+    journal: async () =>
+      mdSection(
+        "Journal",
+        convertJournalToMarkdown(await parser.readJournalEntries()),
+      ),
+    dns: async () =>
+      mdSection("DNS", convertDnsToMarkdown(await parser.readDnsDomains())),
+    fishbone: async () =>
+      mdSection(
+        "Fishbone Diagrams",
+        convertFishbonesToMarkdown(await parser.readFishbones()),
+      ),
+    contacts: async () =>
+      mdSection(
+        "Contacts",
+        convertContactsToMarkdown(await parser.readContacts()),
+      ),
+    companies: async () =>
+      mdSection(
+        "Companies",
+        convertCompaniesToMarkdown(await parser.readCompanies()),
+      ),
+    deals: async () =>
+      mdSection("Deals", convertDealsToMarkdown(await parser.readDeals())),
+  };
+
+  for (const key of requested) {
+    sections.push(await fetch[key]());
+  }
+
+  const content = sections.join("\n");
+  const filename = `${
+    (projectInfo.name ?? "project").replace(/\s+/g, "-").toLowerCase()
+  }-export-${new Date().toISOString().split("T")[0]}.md`;
+
+  return new Response(content, {
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "text/markdown; charset=utf-8",
       "Content-Disposition": `attachment; filename="${filename}"`,
     },
   });

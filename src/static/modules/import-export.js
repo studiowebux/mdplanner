@@ -62,13 +62,16 @@ export class ImportExportModule {
   }
 
   _onFormatChange() {
-    const isCsv = this._getExportFormat() === "csv";
+    const format = this._getExportFormat();
+    const isCsv = format === "csv";
+    // CSV only supports 6 entity types; hide the rest when CSV is selected
     document.querySelectorAll(".export-json-only").forEach((el) => {
       el.classList.toggle("hidden", isCsv);
       const cb = el.querySelector("input[type=checkbox]");
       if (cb && isCsv) cb.checked = false;
     });
     document.getElementById("exportCsvNote")?.classList.toggle("hidden", !isCsv);
+    document.getElementById("exportMdNote")?.classList.toggle("hidden", format !== "md");
   }
 
   _triggerDownload(url) {
@@ -95,6 +98,8 @@ export class ImportExportModule {
       checked.forEach((entity, i) => {
         setTimeout(() => this._triggerDownload(`/api/export/csv/${entity}`), i * 300);
       });
+    } else if (format === "md") {
+      this._triggerDownload(`/api/export/md?entities=${checked.join(",")}`);
     } else {
       this._triggerDownload(`/api/export/json?entities=${checked.join(",")}`);
     }
