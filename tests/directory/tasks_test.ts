@@ -55,7 +55,7 @@ Deno.test("TasksDirectoryParser - creates task with full config", async () => {
       completed: false,
       section: "In Progress",
       config: {
-        tag: ["bug", "urgent"],
+        tags: ["bug", "urgent"],
         due_date: "2026-03-15",
         assignee: "alice",
         priority: 1,
@@ -68,7 +68,7 @@ Deno.test("TasksDirectoryParser - creates task with full config", async () => {
 
     const retrieved = await parser.read(task.id);
     assertExists(retrieved);
-    assertEquals(retrieved.config.tag, ["bug", "urgent"]);
+    assertEquals(retrieved.config.tags, ["bug", "urgent"]);
     assertEquals(retrieved.config.due_date, "2026-03-15");
     assertEquals(retrieved.config.assignee, "alice");
     assertEquals(retrieved.config.priority, 1);
@@ -295,7 +295,7 @@ Deno.test("TasksDirectoryParser - generates valid markdown file", async () => {
       completed: false,
       section: "Todo",
       config: {
-        tag: ["feature"],
+        tags: ["feature"],
         priority: 2,
       },
       description: ["Task description here"],
@@ -309,7 +309,7 @@ Deno.test("TasksDirectoryParser - generates valid markdown file", async () => {
     assertStringIncludes(fileContent, "---");
     assertStringIncludes(fileContent, `id: ${task.id}`);
     assertStringIncludes(fileContent, "completed: false");
-    assertStringIncludes(fileContent, "tag: [feature]");
+    assertStringIncludes(fileContent, "tags: [feature]");
     assertStringIncludes(fileContent, "priority: 2");
     assertStringIncludes(fileContent, "# Format Test");
     assertStringIncludes(fileContent, "Task description here");
