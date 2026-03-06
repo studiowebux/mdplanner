@@ -353,6 +353,7 @@ export class DirectoryMarkdownParser {
       title: note.title,
       content: note.content || "",
       mode: note.mode || "simple",
+      project: note.project,
     });
     return newNote.id;
   }

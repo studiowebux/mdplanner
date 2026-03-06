@@ -66,10 +66,17 @@ export function registerNoteTools(server: McpServer, pm: ProjectManager): void {
       inputSchema: {
         title: z.string().describe("Note title"),
         content: z.string().optional().describe("Note body (markdown)"),
+        project: z.string().optional().describe(
+          "Portfolio project name to associate with this note",
+        ),
       },
     },
-    async ({ title, content }) => {
-      const id = await parser.addNote({ title, content: content ?? "" });
+    async ({ title, content, project }) => {
+      const id = await parser.addNote({
+        title,
+        content: content ?? "",
+        project,
+      });
       return ok({ id });
     },
   );
@@ -77,19 +84,23 @@ export function registerNoteTools(server: McpServer, pm: ProjectManager): void {
   server.registerTool(
     "update_note",
     {
-      description: "Update an existing note's title or content.",
+      description: "Update an existing note's title, content, or project.",
       inputSchema: {
         id: z.string().describe("Note ID"),
         title: z.string().optional(),
         content: z.string().optional().describe(
           "Full replacement content (markdown)",
         ),
+        project: z.string().optional().describe(
+          "Portfolio project name to associate with this note",
+        ),
       },
     },
-    async ({ id, title, content }) => {
+    async ({ id, title, content, project }) => {
       const success = await parser.updateNote(id, {
         ...(title !== undefined && { title }),
         ...(content !== undefined && { content }),
+        ...(project !== undefined && { project }),
       });
       if (!success) return err(`Note '${id}' not found`);
       return ok({ success: true });

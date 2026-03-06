@@ -209,6 +209,7 @@ export const ENTITIES: EntityDef[] = [
   paragraphs TEXT,       -- JSON array
   custom_sections TEXT,  -- JSON array
   revision INTEGER DEFAULT 1,
+  project TEXT,
   created_at TEXT,
   updated_at TEXT
 )`,
@@ -223,8 +224,8 @@ export const ENTITIES: EntityDef[] = [
       db.execute("DELETE FROM notes");
       for (const n of notes) {
         db.execute(
-          `INSERT INTO notes (id, title, content, mode, paragraphs, custom_sections, revision, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO notes (id, title, content, mode, paragraphs, custom_sections, revision, project, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             val(n.id),
             val(n.title),
@@ -233,6 +234,7 @@ export const ENTITIES: EntityDef[] = [
             json(n.paragraphs),
             json(n.customSections),
             val(n.revision) ?? 1,
+            val(n.project),
             val(n.createdAt),
             val(n.updatedAt),
           ],
