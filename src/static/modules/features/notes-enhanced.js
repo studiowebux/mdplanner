@@ -512,6 +512,30 @@ export class EnhancedNotesModule {
     this.tm.renderActiveNote();
   }
 
+  moveParagraph(paragraphId, direction) {
+    const currentNote = this.tm.notes[this.tm.activeNote];
+    if (!currentNote || !currentNote.paragraphs) return;
+
+    const sorted = [...currentNote.paragraphs].sort((a, b) =>
+      a.order - b.order
+    );
+    const idx = sorted.findIndex((p) => p.id === paragraphId);
+    if (idx === -1) return;
+
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= sorted.length) return;
+
+    const tmp = sorted[idx].order;
+    sorted[idx].order = sorted[swapIdx].order;
+    sorted[swapIdx].order = tmp;
+
+    sorted.sort((a, b) => a.order - b.order);
+    sorted.forEach((p, i) => { p.order = i; });
+
+    this.syncParagraphsToContent();
+    this.tm.renderActiveNote();
+  }
+
   moveSelectedParagraphs(direction) {
     if (this.tm.selectedParagraphs.length === 0) return;
 
@@ -900,6 +924,10 @@ export class EnhancedNotesModule {
         : ""
     }
         <div class="flex gap-2">
+          <button onclick="taskManager.moveParagraph('${paragraph.id}', 'up')"
+                  class="px-2 py-1 text-xs border rounded" title="Move up">&#8593;</button>
+          <button onclick="taskManager.moveParagraph('${paragraph.id}', 'down')"
+                  class="px-2 py-1 text-xs border rounded" title="Move down">&#8595;</button>
           <button onclick="taskManager.duplicateParagraph('${paragraph.id}')"
                   class="px-2 py-1 text-xs bg-inverse text-inverse rounded hover:bg-inverse" title="Duplicate">Copy</button>
           <button onclick="taskManager.toggleParagraphType('${paragraph.id}')"
@@ -1639,7 +1667,8 @@ export class EnhancedNotesModule {
 
   initParagraphDragAndDrop() {
     const container = document.getElementById("paragraphsContainer");
-    if (!container) return;
+    if (!container || container._dragInitialized) return;
+    container._dragInitialized = true;
 
     container.addEventListener("dragover", (e) => {
       e.preventDefault();

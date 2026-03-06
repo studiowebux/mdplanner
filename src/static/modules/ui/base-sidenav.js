@@ -167,6 +167,16 @@ export class BaseSidenavModule {
           this._showConflictBanner(body.serverUpdatedAt);
           return;
         }
+        if (response.status === 404) {
+          showToast(
+            `This ${this.entityName} no longer exists — it was deleted while you were editing.`,
+            "error",
+          );
+          this._setDirty(false);
+          this.close();
+          await this.reloadData();
+          return;
+        }
         if (!response.ok) {
           const body = await response.json().catch(() => ({}));
           this.showSaveStatus(body.error || "Error");
