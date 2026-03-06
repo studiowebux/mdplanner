@@ -660,6 +660,15 @@ export class PortfolioView {
     );
   }
 
+  _scrollToFirstMatch() {
+    if (!this.searchQuery) return;
+    const container = document.getElementById("portfolioGrid");
+    const first = container?.querySelector("[data-portfolio-id]");
+    if (first) {
+      first.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }
+
   /**
    * Filter projects by status.
    * @param {string} status - Status to filter by
@@ -1333,6 +1342,7 @@ export class PortfolioView {
       } else {
         this.renderListView();
       }
+      this._scrollToFirstMatch();
     });
 
     // Add Project button

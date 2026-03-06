@@ -110,6 +110,11 @@ export const TasksAPI = {
     return response.json();
   },
 
+  async fetchOne(id) {
+    const response = await get(`/api/tasks/${id}`);
+    return response.json();
+  },
+
   async create(task) {
     const response = await post("/api/tasks", task);
     return response;

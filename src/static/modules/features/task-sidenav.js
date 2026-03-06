@@ -808,8 +808,7 @@ export class TaskSidenavModule {
       const res = await TasksAPI.updateComment(this.editingTask.id, commentId, body);
       if (!res.ok) throw new Error("Failed to update comment");
 
-      const tasks = await TasksAPI.fetchAll();
-      const updated = tasks.find((t) => t.id === this.editingTask.id);
+      const updated = await TasksAPI.fetchOne(this.editingTask.id);
       if (updated) {
         this.editingTask = updated;
         this._renderCommentThread(updated);
@@ -837,8 +836,7 @@ export class TaskSidenavModule {
 
       input.value = "";
       // Re-fetch the task so the comment thread reflects the saved state
-      const tasks = await TasksAPI.fetchAll();
-      const updated = tasks.find((t) => t.id === this.editingTask.id);
+      const updated = await TasksAPI.fetchOne(this.editingTask.id);
       if (updated) {
         this.editingTask = updated;
         this._renderCommentThread(updated);
@@ -861,8 +859,7 @@ export class TaskSidenavModule {
       const res = await TasksAPI.deleteComment(this.editingTask.id, commentId);
       if (!res.ok) throw new Error("Failed to delete comment");
 
-      const tasks = await TasksAPI.fetchAll();
-      const updated = tasks.find((t) => t.id === this.editingTask.id);
+      const updated = await TasksAPI.fetchOne(this.editingTask.id);
       if (updated) {
         this.editingTask = updated;
         this._renderCommentThread(updated);

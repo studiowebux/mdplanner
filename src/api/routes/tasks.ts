@@ -107,8 +107,12 @@ tasksRouter.post("/", async (c) => {
     ...(body.parentId && { parentId: body.parentId }),
   };
   const taskId = await parser.addTask(task);
+  // Cache sync is fire-and-forget — GET /tasks reads from files, not cache.
+  // Blocking on a full table re-sync delays the response unnecessarily.
+  cacheWriteThrough(c, "tasks").catch((e) =>
+    console.error("[tasks] background cache sync failed:", e)
+  );
   await Promise.all([
-    cacheWriteThrough(c, "tasks"),
     parser.touchLastUpdated(),
     ...(task.config.milestone
       ? [ensureMilestoneExists(parser, task.config.milestone)]
@@ -134,8 +138,10 @@ tasksRouter.put("/:id", async (c) => {
   const success = await parser.updateTask(taskId, updates);
 
   if (success) {
+    cacheWriteThrough(c, "tasks").catch((e) =>
+      console.error("[tasks] background cache sync failed:", e)
+    );
     await Promise.all([
-      cacheWriteThrough(c, "tasks"),
       parser.touchLastUpdated(),
       ...(updates.config?.milestone
         ? [ensureMilestoneExists(parser, updates.config.milestone)]
@@ -221,7 +227,9 @@ tasksRouter.post("/:id/comments", async (c) => {
     return errorResponse("Task not found", 404);
   }
 
-  await cacheWriteThrough(c, "tasks");
+  cacheWriteThrough(c, "tasks").catch((e) =>
+    console.error("[tasks] background cache sync failed:", e)
+  );
   return jsonResponse(comment, 201);
 });
 
@@ -236,7 +244,9 @@ tasksRouter.delete("/:id/comments/:commentId", async (c) => {
     return errorResponse("Task or comment not found", 404);
   }
 
-  await cacheWriteThrough(c, "tasks");
+  cacheWriteThrough(c, "tasks").catch((e) =>
+    console.error("[tasks] background cache sync failed:", e)
+  );
   return jsonResponse({ success: true });
 });
 
@@ -257,7 +267,9 @@ tasksRouter.put("/:id/comments/:commentId", async (c) => {
     return errorResponse("Task or comment not found", 404);
   }
 
-  await cacheWriteThrough(c, "tasks");
+  cacheWriteThrough(c, "tasks").catch((e) =>
+    console.error("[tasks] background cache sync failed:", e)
+  );
   return jsonResponse(comment);
 });
 
