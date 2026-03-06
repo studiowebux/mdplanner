@@ -122,3 +122,41 @@
 .summary-link-remove:hover {
   color: var(--color-text-secondary);
 }
+
+/* Tasks by Person */
+.summary-person-task {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: 0.3rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.summary-person-task:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.summary-person-task-title {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summary-person-task-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.summary-person-task-priority {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
