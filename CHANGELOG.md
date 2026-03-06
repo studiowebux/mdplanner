@@ -8,6 +8,22 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.12.1] - 2026-03-06
+
+### Added
+
+- Portfolio search auto-scroll: typing in the search box scrolls the first
+  matching project row into view.
+- `TasksAPI.fetchOne(id)` for fetching a single task by ID.
+
+### Fixed
+
+- Task create/update and comment operations no longer block on a full cache
+  table re-sync. `cacheWriteThrough` is now fire-and-forget since `GET /tasks`
+  reads from files, not the cache.
+- Comment handlers (add, edit, delete) now fetch only the edited task instead of
+  all tasks, reducing unnecessary API load.
+
 ## [0.12.0] - 2026-03-06
 
 ### Added
