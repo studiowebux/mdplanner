@@ -150,14 +150,16 @@ chmod +x mdplanner-macos-arm
 ### Docker
 
 ```bash
-git clone https://github.com/studiowebux/mdplanner.git
-cd mdplanner
-mkdir -p data
-docker run --rm -v "$(pwd)/data:/data" $(docker build -q .) init /data
+mkdir mdplanner && cd mdplanner
+wget https://raw.githubusercontent.com/studiowebux/mdplanner/main/deploy/quick-start/docker-compose.yml
 docker compose up -d
 ```
 
 Open `http://localhost:8003`. Project files persist in `./data/`.
+
+Image:
+[`ghcr.io/studiowebux/mdplanner`](https://github.com/studiowebux/mdplanner/pkgs/container/mdplanner)
+— multi-platform (amd64, arm64), tagged per release and `latest`.
 
 ### From Source
 

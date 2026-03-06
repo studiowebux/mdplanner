@@ -120,7 +120,7 @@ export function registerMilestoneTools(
         if (existing && !existing.completedAt) {
           updates.completedAt = new Date().toISOString().split("T")[0];
         }
-      } else if (status && status !== "completed") {
+      } else if (status) {
         updates.completedAt = undefined;
       }
 
