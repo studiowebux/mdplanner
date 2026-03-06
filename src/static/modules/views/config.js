@@ -553,6 +553,12 @@ export class ConfigView {
     this.tm.applyFeatureVisibility();
   }
 
+  _setAllFeatures(checked) {
+    const checkboxes = document.querySelectorAll(".feature-checkbox");
+    checkboxes.forEach((cb) => cb.checked = checked);
+    this.toggleFeature();
+  }
+
   async initIntegrationsPanel() {
     try {
       const status = await IntegrationsAPI.getCloudflare();
@@ -712,6 +718,16 @@ export class ConfigView {
     document
       .getElementById("saveProjectConfig")
       .addEventListener("click", () => this.tm.saveProjectConfig());
+
+    // Feature visibility — Select All / Deselect All
+    document.getElementById("featureSelectAll")?.addEventListener(
+      "click",
+      () => this._setAllFeatures(true),
+    );
+    document.getElementById("featureDeselectAll")?.addEventListener(
+      "click",
+      () => this._setAllFeatures(false),
+    );
 
     // Working days dropdown change
     document
