@@ -62,6 +62,8 @@ import { AnalyticsModule } from "./modules/views/analytics.js";
 import { HabitSidenavModule } from "./modules/features/habit-sidenav.js";
 import { FishboneModule } from "./modules/features/fishbone.js";
 import { FishboneSidenavModule } from "./modules/features/fishbone-sidenav.js";
+import { MarketingPlansModule } from "./modules/features/marketing-plans.js";
+import { MarketingPlansSidenavModule } from "./modules/features/marketing-plans-sidenav.js";
 import { DnsModule } from "./modules/views/dns.js";
 import { DnsSidenavModule } from "./modules/features/dns-sidenav.js";
 import { OnboardingModule } from "./modules/features/onboarding.js";
@@ -281,6 +283,8 @@ class TaskManager {
     this.githubView = new GitHubView(this);
     this.fishboneModule = new FishboneModule(this);
     this.fishboneSidenavModule = new FishboneSidenavModule(this);
+    this.marketingPlansModule = new MarketingPlansModule(this);
+    this.marketingPlansSidenavModule = new MarketingPlansSidenavModule(this);
     this.onboardingModule = new OnboardingModule(this);
     this.financesModule = new FinancesModule(this);
     this.retrospectivesModule = new RetrospectivesModule(this);
@@ -433,6 +437,9 @@ class TaskManager {
         break;
       case "fishbone":
         if (view === "fishbone") this.fishboneModule.load();
+        break;
+      case "marketingPlans":
+        if (view === "marketingPlans") this.marketingPlansModule.load();
         break;
       case "retrospectives":
         if (view === "retrospectives") this.loadRetrospectives();
@@ -604,6 +611,7 @@ class TaskManager {
       { id: "journalViewBtn", view: "journal" },
       { id: "habitsViewBtn", view: "habits" },
       { id: "fishboneViewBtn", view: "fishbone" },
+      { id: "marketingPlansViewBtn", view: "marketingPlans" },
       { id: "onboardingViewBtn", view: "onboarding" },
       { id: "financesViewBtn", view: "finances" },
       { id: "analyticsViewBtn", view: "analytics" },
@@ -857,6 +865,12 @@ class TaskManager {
       .getElementById("fishboneViewBtnMobile")
       ?.addEventListener("click", () => {
         this.switchView("fishbone");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("marketingPlansViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("marketingPlans");
         this.closeMobileMenu();
       });
     document
@@ -1136,6 +1150,8 @@ class TaskManager {
     this.habitsModule.bindEvents();
     this.fishboneSidenavModule.bindEvents();
     this.fishboneModule.bindEvents();
+    this.marketingPlansSidenavModule.bindEvents();
+    this.marketingPlansModule.bindEvents();
     this.dnsSidenavModule.bindEvents();
     this.dnsModule.bindEvents();
     this.onboardingSidenavModule.bindEvents();
@@ -1189,6 +1205,7 @@ class TaskManager {
       "journal",
       "habits",
       "fishbone",
+      "marketingPlans",
       "onboarding",
       "finances",
       "ollama",
@@ -1265,6 +1282,7 @@ class TaskManager {
       journal: "Journal",
       habits: "Habits",
       fishbone: "Ishikawa Diagram",
+      marketingPlans: "Marketing Plans",
       onboarding: "Onboarding",
       finances: "Finances",
       ollama: "AI Chat",
@@ -1357,6 +1375,7 @@ class TaskManager {
       "journalViewBtn",
       "habitsViewBtn",
       "fishboneViewBtn",
+      "marketingPlansViewBtn",
       "onboardingViewBtn",
       "fundraisingViewBtn",
       "financesViewBtn",
@@ -1410,6 +1429,7 @@ class TaskManager {
       "journalViewBtnMobile",
       "habitsViewBtnMobile",
       "fishboneViewBtnMobile",
+      "marketingPlansViewBtnMobile",
       "onboardingViewBtnMobile",
       "financesViewBtnMobile",
       "analyticsViewBtnMobile",
@@ -1460,6 +1480,7 @@ class TaskManager {
     document.getElementById("journalView")?.classList.add("hidden");
     document.getElementById("habitsView")?.classList.add("hidden");
     document.getElementById("fishboneView")?.classList.add("hidden");
+    document.getElementById("marketingPlansView")?.classList.add("hidden");
     document.getElementById("onboardingView")?.classList.add("hidden");
     document.getElementById("financesView")?.classList.add("hidden");
     document.getElementById("analyticsView")?.classList.add("hidden");
@@ -1618,6 +1639,10 @@ class TaskManager {
       this.activateViewButton("fishbone");
       document.getElementById("fishboneView").classList.remove("hidden");
       this.fishboneModule.load();
+    } else if (view === "marketingPlans") {
+      this.activateViewButton("marketingPlans");
+      document.getElementById("marketingPlansView").classList.remove("hidden");
+      this.marketingPlansModule.load();
     } else if (view === "github") {
       this.activateViewButton("github");
       document.getElementById("githubView").classList.remove("hidden");

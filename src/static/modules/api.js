@@ -1434,6 +1434,30 @@ export const HabitsAPI = {
   },
 };
 
+export const MarketingPlansAPI = {
+  async fetchAll() {
+    const response = await get("/api/marketing-plans");
+    return response.json();
+  },
+
+  async fetchOne(id) {
+    const response = await get(`/api/marketing-plans/${id}`);
+    return response.json();
+  },
+
+  async create(plan) {
+    return post("/api/marketing-plans", plan);
+  },
+
+  async update(id, plan) {
+    return put(`/api/marketing-plans/${id}`, plan);
+  },
+
+  async delete(id) {
+    return del(`/api/marketing-plans/${id}`);
+  },
+};
+
 export const FishboneAPI = {
   async fetchAll() {
     const response = await get("/api/fishbone");
