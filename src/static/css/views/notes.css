@@ -185,16 +185,32 @@
    Note Editor
    -------------------------------------------------------------------------- */
 
-#activeNoteEditor {
-  font-size: var(--font-size-lg);
+.note-content-display {
+  cursor: text;
+}
+
+.note-content-editor {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
   line-height: 1.6;
-  resize: vertical;
   min-height: 300px;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 6px);
+  background: var(--bg-editor, var(--bg));
+  color: var(--text);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  outline: none;
+}
+
+.note-content-editor:focus {
+  border-color: var(--text-tertiary);
 }
 
 /* Mobile: adjust editor height */
 @media (max-width: 640px) {
-  #activeNoteEditor {
+  .note-content-editor {
     min-height: 200px;
     font-size: 16px; /* Prevents iOS zoom */
   }

@@ -454,6 +454,7 @@ export class ConfigView {
         { id: "businessModel", label: "Business Model" },
         { id: "projectValue", label: "Value Board" },
         { id: "brief", label: "Brief" },
+        { id: "marketingPlans", label: "Marketing Plans" },
       ],
       "Finances": [
         { id: "fundraising", label: "Fundraising" },

@@ -2974,6 +2974,26 @@
                         />
                       </svg>
                     </button>
+                    <!-- Copy link -->
+                    <button
+                      id="copyNoteLinkBtn"
+                      class="p-1.5 rounded hover:bg-tertiary text-secondary hover:text-primary transition-colors"
+                      title="Copy link to note"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                      </svg>
+                    </button>
                     <!-- Delete -->
                     <button
                       id="deleteNoteBtn"
@@ -3086,14 +3106,17 @@
 
                 <!-- Simple Editor Mode (existing) -->
                 <div id="activeNoteBodyContainer" class="relative">
-                  <div id="activeNoteBody" class="max-w-none">
+                  <div id="activeNoteBody" class="max-w-none note-content-display">
                     <!-- Note content will be rendered here -->
                   </div>
-                  <textarea
+                  <div
                     id="activeNoteEditor"
-                    class="w-full min-h-96 p-4 border border-strong rounded-md focus:outline-none focus:ring-2 focus:ring-1 focus:border-transparent hidden resize-none"
-                    placeholder="Write your note content here... (Markdown supported)"
-                  ></textarea>
+                    class="note-content-editor hidden"
+                    contenteditable="true"
+                    role="textbox"
+                    aria-multiline="true"
+                    aria-label="Note content editor"
+                  ></div>
                 </div>
               </div>
             </div>
