@@ -8,6 +8,29 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-03-06
+
+### Added
+
+- Marketing plan builder: standalone entity with structured data for channels,
+  campaigns, audiences, budgets, and KPI targets. Includes parser, cache entity
+  with FTS, REST API (5 endpoints), MCP tools (5 tools), and frontend card grid
+  view with sidenav editor.
+
+### Fixed
+
+- Notes: `project` field was not settable via MCP `create_note` and
+  `update_note` tools. Added `project` parameter to both tool input schemas,
+  added `project` column to cache entity, and fixed `parser.addNote()` to pass
+  project through to the sub-parser.
+- Notes: project filter dropdown was empty because it only populated from
+  existing notes. Now also pulls project names from portfolio items.
+- Task sidenav: typing in the project autocomplete field caused the entire page
+  to hang and reset board/assignee selections. The `input` event listener was
+  calling `populateSelects()` which rebuilt all form selects and
+  destroyed/recreated the FuzzyAutocomplete mid-typing. Now only re-filters the
+  milestone dropdown.
+
 ## [0.10.0] - 2026-03-05
 
 ### Added
