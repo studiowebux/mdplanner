@@ -1,6 +1,6 @@
 services:
   mdplanner:
-    image: studiowebux/mdplanner:latest
+    image: ghcr.io/studiowebux/mdplanner:latest
     container_name: mdplanner
     ports:
       - "8003:8003"

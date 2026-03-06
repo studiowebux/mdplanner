@@ -157,7 +157,8 @@ docker compose up -d
 
 Open `http://localhost:8003`. Project files persist in `./data/`.
 
-Image: [`studiowebux/mdplanner`](https://hub.docker.com/r/studiowebux/mdplanner)
+Image:
+[`ghcr.io/studiowebux/mdplanner`](https://github.com/studiowebux/mdplanner/pkgs/container/mdplanner)
 — multi-platform (amd64, arm64), tagged per release and `latest`.
 
 ### From Source
