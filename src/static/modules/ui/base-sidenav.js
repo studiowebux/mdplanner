@@ -57,6 +57,8 @@ export class BaseSidenavModule {
     this._dirtyListener = () => this._setDirty(true);
     /** updatedAt captured when an entity is loaded for editing. Sent on PUT for optimistic locking. */
     this._loadedUpdatedAt = null;
+    /** Bound SSE listener for stale-edit detection — attached on openEdit, removed on close. */
+    this._sseStaleListener = null;
     // ESC is now handled globally by Sidenav via registerModule/unregisterModule.
   }
 
@@ -124,6 +126,7 @@ export class BaseSidenavModule {
     this._ensureFullscreenToggle();
     this._attachUndoManagers();
     this._attachDirtyWatcher();
+    this._attachStaleEditListener();
     this.onAfterOpen();
   }
 
@@ -131,6 +134,8 @@ export class BaseSidenavModule {
     Sidenav.unregisterModule();
     this._detachUndoManagers();
     this._detachDirtyWatcher();
+    this._detachStaleEditListener();
+    this._hideStaleEditBanner();
     this._setDirty(false);
     Sidenav.close(this.panelId);
     this.editingId = null;
@@ -186,6 +191,7 @@ export class BaseSidenavModule {
 
         this._loadedUpdatedAt = null; // cleared — server will set a new updatedAt
         this._hideConflictBanner();
+        this._hideStaleEditBanner();
         this._markAllSaved();
         this._setDirty(false);
         this.showSaveStatus("Saved");
@@ -266,6 +272,81 @@ export class BaseSidenavModule {
 
   _hideConflictBanner() {
     this.el("ConflictBanner")?.classList.add("hidden");
+  }
+
+  // --- SSE stale-edit detection ---
+
+  /** Listen for remote updates to the entity currently open for editing. */
+  _attachStaleEditListener() {
+    this._detachStaleEditListener();
+    if (!this.editingId) return;
+    this._sseStaleListener = (e) => {
+      const { action, id } = e.detail;
+      if (action === "updated" && id === this.editingId) {
+        this._showStaleEditBanner();
+      }
+      if (action === "deleted" && id === this.editingId) {
+        showToast(
+          `This ${this.entityName} was deleted by another session.`,
+          "error",
+        );
+        this._setDirty(false);
+        this.close();
+        this.reloadData();
+      }
+    };
+    document.addEventListener("mdplanner:change", this._sseStaleListener);
+  }
+
+  /** Remove the SSE stale-edit listener. */
+  _detachStaleEditListener() {
+    if (this._sseStaleListener) {
+      document.removeEventListener("mdplanner:change", this._sseStaleListener);
+      this._sseStaleListener = null;
+    }
+  }
+
+  /** Show inline banner warning the user their local state is stale. */
+  _showStaleEditBanner() {
+    let banner = this.el("StaleBanner");
+    if (!banner) {
+      const container = document.getElementById(this.panelId);
+      if (!container) return;
+      banner = document.createElement("div");
+      banner.id = `${this.prefix}StaleBanner`;
+      banner.className = "sidenav-stale-banner";
+      const msg = document.createElement("p");
+      msg.textContent =
+        "This item was updated in another session while you were editing.";
+      const actions = document.createElement("div");
+      actions.className = "sidenav-stale-actions";
+      const reloadBtn = document.createElement("button");
+      reloadBtn.textContent = "Reload";
+      reloadBtn.className = "btn-stale-reload";
+      reloadBtn.addEventListener("click", async () => {
+        this._hideStaleEditBanner();
+        await this.reloadData();
+        if (this.editingId) {
+          const refreshed = this.findEntity(this.editingId);
+          if (refreshed) this.openEdit(refreshed);
+        }
+      });
+      const keepBtn = document.createElement("button");
+      keepBtn.textContent = "Keep editing";
+      keepBtn.className = "btn-stale-keep";
+      keepBtn.addEventListener("click", () => {
+        this._hideStaleEditBanner();
+      });
+      actions.append(reloadBtn, keepBtn);
+      banner.append(msg, actions);
+      const body = container.querySelector(".sidenav-body") || container;
+      body.prepend(banner);
+    }
+    banner.classList.remove("hidden");
+  }
+
+  _hideStaleEditBanner() {
+    this.el("StaleBanner")?.classList.add("hidden");
   }
 
   async handleDelete() {
