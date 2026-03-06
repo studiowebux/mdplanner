@@ -815,6 +815,13 @@
               >
                 Ishikawa Diagram
               </button>
+              <button
+                id="marketingPlansViewBtn"
+                data-view="marketingPlans"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                Marketing Plans
+              </button>
             </div>
           </div>
 
@@ -1159,6 +1166,12 @@
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
             >
               Ishikawa Diagram
+            </button>
+            <button
+              id="marketingPlansViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              Marketing Plans
             </button>
             <button
               id="portfolioViewBtnMobile"
@@ -1883,6 +1896,20 @@
             <p>No diagrams yet. Create your first fishbone diagram to start analyzing root causes.</p>
           </div>
           <div id="fishboneContainer" class="fishbone-grid"></div>
+        </div>
+      </div>
+
+      <!-- Marketing Plans View -->
+      <div id="marketingPlansView" class="hidden pb-16">
+        <div class="bg-primary rounded-lg shadow">
+          <div class="marketing-plans-view-header">
+            <h2 class="text-lg font-medium text-primary">Marketing Plans</h2>
+            <button id="addMarketingPlanBtn" class="btn-primary py-2 rounded-lg">+ New Plan</button>
+          </div>
+          <div id="emptyMarketingPlansState" class="hidden mktplan-empty">
+            <p>No marketing plans yet. Create your first plan to start building your marketing strategy.</p>
+          </div>
+          <div id="marketingPlansContainer" class="marketing-plans-grid"></div>
         </div>
       </div>
 
@@ -13317,6 +13344,91 @@
           <button type="button" id="fishboneSidenavCancel" class="btn-ghost">Cancel</button>
           <button type="button" id="fishboneSidenavEditBtn" class="btn-ghost hidden">Edit</button>
           <button type="button" id="fishboneSidenavSave" class="btn-primary py-2 rounded-lg">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Marketing Plan Sidenav -->
+    <div id="mktplanSidenav" class="sidenav-panel sidenav-md">
+      <div class="sidenav-header">
+        <h2 id="mktplanSidenavHeader" class="sidenav-title">New Marketing Plan</h2>
+        <button type="button" id="mktplanSidenavClose" class="sidenav-close" aria-label="Close">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="flex flex-col flex-1 overflow-hidden">
+        <!-- View mode -->
+        <div id="mktplanSidenavViewSection" class="sidenav-content hidden"></div>
+        <!-- Edit mode -->
+        <div id="mktplanSidenavFormSection" class="sidenav-content">
+          <div class="sidenav-section">
+            <div class="form-group">
+              <label class="form-label" for="mktplanSidenavName">Plan Name</label>
+              <input id="mktplanSidenavName" type="text" class="form-input" placeholder="e.g. Q2 Product Launch" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mktplanSidenavDesc">Description <span class="text-tertiary">(optional)</span></label>
+              <input id="mktplanSidenavDesc" type="text" class="form-input" placeholder="Brief plan summary" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mktplanSidenavStatus">Status</label>
+              <select id="mktplanSidenavStatus" class="form-input">
+                <option value="draft">Draft</option>
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+                <option value="archived">Archived</option>
+              </select>
+            </div>
+            <div class="form-group" style="display:grid;grid-template-columns:1fr 6rem;gap:0.5rem">
+              <div>
+                <label class="form-label" for="mktplanSidenavBudget">Total Budget</label>
+                <input id="mktplanSidenavBudget" type="number" class="form-input" placeholder="50000" />
+              </div>
+              <div>
+                <label class="form-label" for="mktplanSidenavCurrency">Currency</label>
+                <input id="mktplanSidenavCurrency" type="text" class="form-input" value="USD" />
+              </div>
+            </div>
+            <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+              <div>
+                <label class="form-label" for="mktplanSidenavStart">Start Date</label>
+                <input id="mktplanSidenavStart" type="date" class="form-input" />
+              </div>
+              <div>
+                <label class="form-label" for="mktplanSidenavEnd">End Date</label>
+                <input id="mktplanSidenavEnd" type="date" class="form-input" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Target Audiences</label>
+              <div id="mktplanAudiencesEditor" class="mktplan-array-editor"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Channels</label>
+              <div id="mktplanChannelsEditor" class="mktplan-array-editor"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Campaigns</label>
+              <div id="mktplanCampaignsEditor" class="mktplan-array-editor"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">KPI Targets</label>
+              <div id="mktplanKpisEditor" class="mktplan-array-editor"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mktplanSidenavNotes">Notes <span class="text-tertiary">(optional)</span></label>
+              <textarea id="mktplanSidenavNotes" class="form-input" rows="3" placeholder="Strategy notes, competitive analysis..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="sidenav-footer">
+          <button type="button" id="mktplanSidenavDelete" class="btn-danger-ghost hidden">Delete</button>
+          <div class="flex-1"></div>
+          <button type="button" id="mktplanSidenavCancel" class="btn-ghost">Cancel</button>
+          <button type="button" id="mktplanSidenavEditBtn" class="btn-ghost hidden">Edit</button>
+          <button type="button" id="mktplanSidenavSave" class="btn-primary py-2 rounded-lg">Save</button>
         </div>
       </div>
     </div>

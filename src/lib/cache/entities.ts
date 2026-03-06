@@ -1874,4 +1874,62 @@ export const ENTITIES: EntityDef[] = [
       return diagrams.length;
     },
   },
+
+  // ----------------------------------------------------------
+  // Marketing Plans
+  // ----------------------------------------------------------
+  {
+    table: "marketing_plans",
+    schema: `CREATE TABLE IF NOT EXISTS marketing_plans (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  status TEXT,
+  budget_total REAL,
+  budget_currency TEXT,
+  start_date TEXT,
+  end_date TEXT,
+  target_audiences TEXT,  -- JSON array
+  channels TEXT,          -- JSON array
+  campaigns TEXT,         -- JSON array
+  kpi_targets TEXT,       -- JSON array
+  notes TEXT,
+  created TEXT,
+  updated TEXT
+)`,
+    fts: {
+      type: "marketing_plan",
+      columns: ["id", "name", "description", "notes"],
+      titleCol: "name",
+      contentCol: "notes",
+    },
+    sync: async (parser, db) => {
+      const plans = await parser.readMarketingPlans();
+      db.execute("DELETE FROM marketing_plans");
+      for (const p of plans) {
+        db.execute(
+          `INSERT INTO marketing_plans (id, name, description, status, budget_total, budget_currency, start_date, end_date, target_audiences, channels, campaigns, kpi_targets, notes, created, updated)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            val(p.id),
+            val(p.name),
+            val(p.description),
+            val(p.status),
+            p.budgetTotal ?? null,
+            val(p.budgetCurrency),
+            val(p.startDate),
+            val(p.endDate),
+            json(p.targetAudiences),
+            json(p.channels),
+            json(p.campaigns),
+            json(p.kpiTargets),
+            val(p.notes),
+            val(p.created),
+            val(p.updated),
+          ],
+        );
+      }
+      return plans.length;
+    },
+  },
 ];
