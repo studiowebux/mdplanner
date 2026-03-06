@@ -483,9 +483,11 @@ export class NotesModule {
   _populateProjectFilter() {
     const select = document.getElementById("notesProjectFilter");
     if (!select) return;
-    const projects = [...new Set(
-      this.tm.notes.map((n) => n.project).filter(Boolean),
-    )].sort();
+    const noteProjects = this.tm.notes.map((n) => n.project).filter(Boolean);
+    const portfolioProjects = (this.tm.portfolio || []).map((p) => p.name)
+      .filter(Boolean);
+    const projects = [...new Set([...noteProjects, ...portfolioProjects])]
+      .sort();
     const current = select.value;
     select.innerHTML = '<option value="">All projects</option>' +
       projects.map((p) => `<option value="${p}">${p}</option>`).join("");
