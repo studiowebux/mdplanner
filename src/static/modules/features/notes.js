@@ -167,7 +167,7 @@ export class NotesModule {
       enhancedView.classList.add("hidden");
       enhancedEditor.classList.add("hidden");
       simpleEditor.classList.remove("hidden");
-      document.getElementById("activeNoteEditor").value = activeNote.content;
+      document.getElementById("activeNoteEditor").textContent = activeNote.content;
       this.updateDisplay();
     }
   }
@@ -288,12 +288,11 @@ export class NotesModule {
 
     let content = activeNote.content;
 
-    // For simple mode, get content from the editor
+    // For simple mode, get content from the contentEditable editor
     if (!this.tm.enhancedMode || activeNote.mode !== "enhanced") {
       const editorElement = document.getElementById("activeNoteEditor");
       if (editorElement) {
-        content = editorElement.value;
-        // Update the local content immediately for simple mode
+        content = editorElement.textContent;
         activeNote.content = content;
       }
     }
@@ -513,6 +512,29 @@ export class NotesModule {
   }
 
   bindEvents() {
+    // Click-to-edit: clicking rendered content enters edit mode
+    document.getElementById("activeNoteBody")
+      ?.addEventListener("click", () => {
+        if (!this.tm.noteEditMode && this.tm.activeNote !== null) {
+          const activeNote = this.tm.notes[this.tm.activeNote];
+          const isEnhanced = this.tm.enhancedMode &&
+            activeNote?.mode === "enhanced";
+          if (!isEnhanced) {
+            this.tm.noteEditMode = false;
+            this.toggleEditMode();
+          }
+        }
+      });
+
+    // Cmd+S / Ctrl+S to save note
+    document.getElementById("activeNoteEditor")
+      ?.addEventListener("keydown", (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+          e.preventDefault();
+          this.save();
+        }
+      });
+
     // Search filter
     document.getElementById("notesSearch")
       ?.addEventListener("input", (e) => {

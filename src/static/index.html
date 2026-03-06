@@ -3086,14 +3086,17 @@
 
                 <!-- Simple Editor Mode (existing) -->
                 <div id="activeNoteBodyContainer" class="relative">
-                  <div id="activeNoteBody" class="max-w-none">
+                  <div id="activeNoteBody" class="max-w-none note-content-display">
                     <!-- Note content will be rendered here -->
                   </div>
-                  <textarea
+                  <div
                     id="activeNoteEditor"
-                    class="w-full min-h-96 p-4 border border-strong rounded-md focus:outline-none focus:ring-2 focus:ring-1 focus:border-transparent hidden resize-none"
-                    placeholder="Write your note content here... (Markdown supported)"
-                  ></textarea>
+                    class="note-content-editor hidden"
+                    contenteditable="true"
+                    role="textbox"
+                    aria-multiline="true"
+                    aria-label="Note content editor"
+                  ></div>
                 </div>
               </div>
             </div>
