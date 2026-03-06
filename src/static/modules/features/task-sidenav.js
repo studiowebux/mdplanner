@@ -76,7 +76,7 @@ export class TaskSidenavModule {
     // Project → re-filter milestone select when project changes
     document.getElementById("sidenavTaskProject")?.addEventListener(
       "input",
-      () => this.populateSelects(),
+      () => this._refreshMilestoneSelect(),
     );
 
     // Milestone → auto-fill project when milestone has a linked project
@@ -337,6 +337,24 @@ export class TaskSidenavModule {
         },
       );
     }
+  }
+
+  _refreshMilestoneSelect() {
+    const milestoneSelect = document.getElementById("sidenavTaskMilestone");
+    if (!milestoneSelect) return;
+    const currentVal = milestoneSelect.value;
+    const selectedProject = document.getElementById("sidenavTaskProject")?.value || "";
+    const allMilestones = this.tm.milestones || [];
+    const filtered = selectedProject
+      ? allMilestones.filter((m) => !m.project || m.project === selectedProject)
+      : allMilestones;
+    const names = Array.from(
+      new Set(filtered.map((m) => m.name).filter(Boolean))
+    ).sort();
+    milestoneSelect.innerHTML =
+      '<option value="">— No milestone —</option>' +
+      names.map((n) => `<option value="${n}">${n}</option>`).join("");
+    if (currentVal && names.includes(currentVal)) milestoneSelect.value = currentVal;
   }
 
   fillForm(task) {

@@ -187,7 +187,9 @@ export function registerDnsTools(
           "Record name (e.g. '@', 'www', 'mail')",
         ),
         value: z.string().describe("Record value"),
-        ttl: z.number().optional().default(3600).describe("TTL in seconds (default: 3600)"),
+        ttl: z.number().optional().default(3600).describe(
+          "TTL in seconds (default: 3600)",
+        ),
         proxied: z.boolean().optional().describe(
           "Whether the record is proxied (Cloudflare-specific)",
         ),

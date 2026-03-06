@@ -127,7 +127,9 @@ export function registerBillingTools(
       description: "Create a new quote.",
       inputSchema: {
         customer_id: z.string().describe("Customer ID"),
-        title: z.string().optional().default("Untitled Quote").describe("Quote title"),
+        title: z.string().optional().default("Untitled Quote").describe(
+          "Quote title",
+        ),
         status: z.string().optional().describe(
           "Status (draft, sent, accepted, rejected — default: draft)",
         ),
@@ -156,14 +158,21 @@ export function registerBillingTools(
         rate: li.rate ?? 0,
         amount: li.amount,
       }));
-      const subtotal = lineItems.reduce((sum, item) => sum + (item.amount || 0), 0);
+      const subtotal = lineItems.reduce(
+        (sum, item) => sum + (item.amount || 0),
+        0,
+      );
       const tax = tax_rate ? subtotal * (tax_rate / 100) : 0;
       const newQuote = {
         id,
         number,
         customerId: customer_id,
         title: title ?? "Untitled Quote",
-        status: (status ?? "draft") as "draft" | "sent" | "accepted" | "rejected",
+        status: (status ?? "draft") as
+          | "draft"
+          | "sent"
+          | "accepted"
+          | "rejected",
         ...(valid_until && { validUntil: valid_until }),
         lineItems,
         subtotal,
@@ -238,7 +247,9 @@ export function registerBillingTools(
     async ({ id }) => {
       const quotes = await parser.readQuotes();
       const filtered = quotes.filter((q) => q.id !== id);
-      if (filtered.length === quotes.length) return err(`Quote '${id}' not found`);
+      if (filtered.length === quotes.length) {
+        return err(`Quote '${id}' not found`);
+      }
       await parser.saveQuotes(filtered);
       return ok({ success: true });
     },
@@ -272,7 +283,9 @@ export function registerBillingTools(
       description: "Create a new invoice.",
       inputSchema: {
         customer_id: z.string().describe("Customer ID"),
-        title: z.string().optional().default("Untitled Invoice").describe("Invoice title"),
+        title: z.string().optional().default("Untitled Invoice").describe(
+          "Invoice title",
+        ),
         quote_id: z.string().optional().describe(
           "Quote ID if this invoice is derived from a quote",
         ),
@@ -307,7 +320,10 @@ export function registerBillingTools(
         rate: li.rate ?? 0,
         amount: li.amount,
       }));
-      const subtotal = lineItems.reduce((sum, item) => sum + (item.amount || 0), 0);
+      const subtotal = lineItems.reduce(
+        (sum, item) => sum + (item.amount || 0),
+        0,
+      );
       const tax = tax_rate ? subtotal * (tax_rate / 100) : 0;
       const newInvoice = {
         id,
