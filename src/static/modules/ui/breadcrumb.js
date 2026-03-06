@@ -22,6 +22,7 @@ const VIEW_CATEGORIES = {
   businessModel: { category: "Strategy", label: "Business Model" },
   projectValue: { category: "Strategy", label: "Value Board" },
   brief: { category: "Strategy", label: "Brief" },
+  marketingPlans: { category: "Strategy", label: "Marketing Plans" },
   strategicLevels: { category: "Strategy", label: "Strategic Levels" },
   timeTracking: { category: "Resources", label: "Time Tracking" },
   capacity: { category: "Resources", label: "Capacity" },
