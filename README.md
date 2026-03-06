@@ -117,7 +117,18 @@ with what you need, enable the rest when you grow into it.
 | **SQLite Cache** | Optional FTS5 full-text search acceleration                |
 | **SSE**          | Server-sent events for real-time updates across clients    |
 
+### AI Agent Integration
+
+MD Planner ships with a built-in MCP server. Connect it to Claude Code and your
+entire project becomes accessible — tasks, notes, goals, milestones, decisions,
+all of it. Claude reads context before coding, creates tasks before working, and
+writes decisions back when done. One place to plan, track, and build.
+
 ## Installation
+
+MD Planner is designed to run locally or on a trusted network. There is no
+built-in authentication — access control relies on network isolation or a
+reverse proxy. Do not expose it to the public internet without auth in front.
 
 ### Pre-built Binary
 
@@ -174,10 +185,18 @@ mdplanner --cache ./my-project
 
 # Custom port
 mdplanner --port 8080 ./my-project
+
+# Read-only mode (block all mutations)
+mdplanner --read-only ./my-project
+
+# Enable WebDAV to edit files with external editors (hx, nvim, Obsidian)
+mdplanner --webdav ./my-project
+mdplanner --webdav --webdav-user admin --webdav-pass secret ./my-project
 ```
 
 Open `http://localhost:8003`. The project directory contains one `.md` file per
-entity. Edit files directly or use the web UI — both work.
+entity. Edit files directly, use the web UI, or mount via WebDAV — all three
+work.
 
 ## Contributing
 
