@@ -3008,11 +3008,18 @@
                 <!-- Note metadata -->
                 <div
                   id="noteMetadata"
-                  class="text-xs text-muted mb-4 flex flex-wrap gap-4"
+                  class="text-xs text-muted mb-4 flex flex-wrap gap-4 items-center"
                 >
                   <span id="noteCreatedAt"></span>
                   <span id="noteUpdatedAt"></span>
                   <span id="noteRevision"></span>
+                  <select
+                    id="activeNoteProject"
+                    class="form-select text-xs"
+                    title="Project"
+                  >
+                    <option value="">No project</option>
+                  </select>
                 </div>
 
                 <!-- Enhanced View Mode (rendered content) -->

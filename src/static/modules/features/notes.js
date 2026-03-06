@@ -114,6 +114,9 @@ export class NotesModule {
       ? `Rev: ${activeNote.revision}`
       : "";
 
+    // Populate project select
+    this._populateActiveNoteProject(activeNote.project || "");
+
     // Check if we should use enhanced mode
     const isEnhanced = this.tm.enhancedMode && activeNote.mode === "enhanced";
 
@@ -300,12 +303,14 @@ export class NotesModule {
       this.showSaveStatus("Saving...");
 
       // Prepare the data to save - include all enhanced mode data
+      const project = document.getElementById("activeNoteProject")?.value || undefined;
       const saveData = {
         title: title,
         content: content,
         mode: activeNote.mode,
         paragraphs: activeNote.paragraphs,
         customSections: activeNote.customSections,
+        project: project,
       };
 
       const response = await NotesAPI.update(activeNote.id, saveData);
@@ -478,6 +483,19 @@ export class NotesModule {
   _setMobileActive(active) {
     const layout = document.getElementById("notesLayout");
     if (layout) layout.classList.toggle("note-active", active);
+  }
+
+  _populateActiveNoteProject(current) {
+    const select = document.getElementById("activeNoteProject");
+    if (!select) return;
+    const noteProjects = this.tm.notes.map((n) => n.project).filter(Boolean);
+    const portfolioProjects = (this.tm.portfolio || []).map((p) => p.name)
+      .filter(Boolean);
+    const projects = [...new Set([...noteProjects, ...portfolioProjects])]
+      .sort();
+    select.innerHTML = '<option value="">No project</option>' +
+      projects.map((p) => `<option value="${p}">${p}</option>`).join("");
+    select.value = current && projects.includes(current) ? current : "";
   }
 
   _populateProjectFilter() {

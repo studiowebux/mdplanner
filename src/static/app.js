@@ -2279,6 +2279,10 @@ class TaskManager {
     this.enhancedNotesModule.updateParagraphLanguage(paragraphId, language);
   }
 
+  moveParagraph(paragraphId, direction) {
+    this.enhancedNotesModule.moveParagraph(paragraphId, direction);
+  }
+
   duplicateParagraph(paragraphId) {
     this.enhancedNotesModule.duplicateParagraph(paragraphId);
   }
