@@ -736,6 +736,55 @@ export interface Habit {
   updated: string;
 }
 
+// Marketing Plan
+
+export interface MarketingTargetAudience {
+  name: string;
+  description?: string;
+  size?: string;
+}
+
+export interface MarketingChannel {
+  name: string;
+  budget?: number;
+  goals?: string;
+  status?: "planned" | "active" | "paused" | "completed";
+}
+
+export interface MarketingCampaign {
+  name: string;
+  channel?: string;
+  budget?: number;
+  start_date?: string;
+  end_date?: string;
+  status?: "planned" | "active" | "paused" | "completed";
+  goals?: string;
+}
+
+export interface MarketingKPITarget {
+  metric: string;
+  target: number;
+  current?: number;
+}
+
+export interface MarketingPlan {
+  id: string;
+  name: string;
+  description?: string;
+  status: "draft" | "active" | "completed" | "archived";
+  budgetTotal?: number;
+  budgetCurrency?: string;
+  startDate?: string;
+  endDate?: string;
+  targetAudiences?: MarketingTargetAudience[];
+  channels?: MarketingChannel[];
+  campaigns?: MarketingCampaign[];
+  kpiTargets?: MarketingKPITarget[];
+  notes?: string;
+  created: string;
+  updated: string;
+}
+
 // Fishbone (Ishikawa) Diagram
 
 export interface FishboneCause {

@@ -53,6 +53,7 @@ import { JournalDirectoryParser } from "./journal.ts";
 import { DnsDomainParser } from "./dns.ts";
 import { HabitsDirectoryParser } from "./habits.ts";
 import { FishboneDirectoryParser } from "./fishbone.ts";
+import { MarketingPlansDirectoryParser } from "./marketing-plans.ts";
 import type {
   BillingRate,
   Brief,
@@ -77,6 +78,7 @@ import type {
   JournalEntry,
   KPISnapshot,
   LeanCanvas,
+  MarketingPlan,
   Meeting,
   Milestone,
   Mindmap,
@@ -142,6 +144,7 @@ export class DirectoryMarkdownParser {
   protected dnsParser: DnsDomainParser;
   protected habitsParser: HabitsDirectoryParser;
   protected fishboneParser: FishboneDirectoryParser;
+  protected marketingPlansParser: MarketingPlansDirectoryParser;
 
   constructor(projectDir: string) {
     this.projectDir = projectDir;
@@ -182,6 +185,7 @@ export class DirectoryMarkdownParser {
     this.dnsParser = new DnsDomainParser(projectDir);
     this.habitsParser = new HabitsDirectoryParser(projectDir);
     this.fishboneParser = new FishboneDirectoryParser(projectDir);
+    this.marketingPlansParser = new MarketingPlansDirectoryParser(projectDir);
   }
 
   // ============================================================
@@ -1920,5 +1924,31 @@ export class DirectoryMarkdownParser {
 
   async deleteFishbone(id: string): Promise<boolean> {
     return this.fishboneParser.delete(id);
+  }
+
+  // ============================================================
+  // Marketing Plans
+  // ============================================================
+
+  async readMarketingPlans(): Promise<MarketingPlan[]> {
+    const plans = await this.marketingPlansParser.readAll();
+    return plans.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  async addMarketingPlan(
+    plan: Omit<MarketingPlan, "id" | "created" | "updated">,
+  ): Promise<MarketingPlan> {
+    return this.marketingPlansParser.add(plan);
+  }
+
+  async updateMarketingPlan(
+    id: string,
+    updates: Partial<MarketingPlan>,
+  ): Promise<MarketingPlan | null> {
+    return this.marketingPlansParser.update(id, updates);
+  }
+
+  async deleteMarketingPlan(id: string): Promise<boolean> {
+    return this.marketingPlansParser.delete(id);
   }
 }

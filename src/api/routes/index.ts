@@ -47,6 +47,7 @@ import { journalRouter } from "./features/journal.ts";
 import { dnsRouter } from "./features/dns.ts";
 import { habitsRouter } from "./features/habits.ts";
 import { fishboneRouter } from "./features/fishbone.ts";
+import { marketingPlansRouter } from "./features/marketing-plans.ts";
 import { analyticsRouter } from "./features/analytics.ts";
 import { eisenhowerRouter } from "./features/eisenhower.ts";
 import { safeRouter } from "./features/safe.ts";
@@ -199,6 +200,9 @@ export function createApiRouter(
 
   // Fishbone routes
   api.route("/fishbone", fishboneRouter);
+
+  // Marketing plans routes
+  api.route("/marketing-plans", marketingPlansRouter);
 
   // Analytics routes
   api.route("/analytics", analyticsRouter);
