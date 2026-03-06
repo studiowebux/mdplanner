@@ -87,6 +87,9 @@ export class SummaryView {
 
     // Render task deadlines
     this.renderTaskDeadlines(stats.allTasks);
+
+    // Render tasks by person
+    this.renderTasksByPerson(stats.allTasks);
   }
 
   renderTaskDeadlines(allTasks) {
@@ -457,6 +460,73 @@ export class SummaryView {
             `;
       container.appendChild(div);
     });
+  }
+
+  renderTasksByPerson(allTasks) {
+    const section = document.getElementById("tasksByPersonSection");
+    const container = document.getElementById("tasksByPersonBreakdown");
+    if (!section || !container) return;
+
+    const incompleteTasks = allTasks.filter((t) => !t.completed);
+    if (incompleteTasks.length === 0) {
+      section.classList.add("hidden");
+      return;
+    }
+
+    // Group by assignee
+    const grouped = {};
+    for (const task of incompleteTasks) {
+      const assigneeId = task.config?.assignee || "";
+      if (!grouped[assigneeId]) grouped[assigneeId] = [];
+      grouped[assigneeId].push(task);
+    }
+
+    // Resolve names from people registry
+    const entries = Object.entries(grouped).map(([id, tasks]) => {
+      const person = id ? this.tm.peopleMap?.get(id) : null;
+      const name = person?.name || (id ? id : "Unassigned");
+      return { name, tasks };
+    });
+
+    // Sort: named people first (alphabetical), unassigned last
+    entries.sort((a, b) => {
+      if (a.name === "Unassigned") return 1;
+      if (b.name === "Unassigned") return -1;
+      return a.name.localeCompare(b.name);
+    });
+
+    const priorityLabel = (p) => {
+      if (!p) return "";
+      const labels = { 1: "P1", 2: "P2", 3: "P3", 4: "P4", 5: "P5" };
+      return labels[p] || "";
+    };
+
+    container.innerHTML = entries.map(({ name, tasks }) => `
+      <div>
+        <h4 class="text-sm font-medium text-primary mb-2">${name} (${tasks.length})</h4>
+        <div class="space-y-1">
+          ${
+      tasks.map((t) => {
+        const pLabel = priorityLabel(t.config?.priority);
+        const pBadge = pLabel
+          ? `<span class="summary-person-task-priority">${pLabel}</span>`
+          : "";
+        return `
+              <div class="summary-person-task cursor-pointer"
+                   onclick="taskManager.editTask('${t.id}')">
+                <span class="summary-person-task-title">${t.title}</span>
+                <span class="summary-person-task-meta">
+                  ${pBadge}
+                  <span>${t.section || ""}</span>
+                </span>
+              </div>`;
+      }).join("")
+    }
+        </div>
+      </div>
+    `).join("");
+
+    section.classList.remove("hidden");
   }
 
   bindEvents() {

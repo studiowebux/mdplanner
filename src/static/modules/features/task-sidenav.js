@@ -74,10 +74,10 @@ export class TaskSidenavModule {
     );
 
     // Project → re-filter milestone select when project changes
-    document.getElementById("sidenavTaskProject")?.addEventListener(
-      "input",
-      () => this._refreshMilestoneSelect(),
-    );
+    // Listen for both input (typing) and change (FuzzyAutocomplete selection)
+    const projectInput = document.getElementById("sidenavTaskProject");
+    projectInput?.addEventListener("input", () => this._refreshMilestoneSelect());
+    projectInput?.addEventListener("change", () => this._refreshMilestoneSelect());
 
     // Milestone → auto-fill project when milestone has a linked project
     document.getElementById("sidenavTaskMilestone")?.addEventListener(
