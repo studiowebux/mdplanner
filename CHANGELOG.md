@@ -8,6 +8,25 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-03-06
+
+### Added
+
+- SSE stale-edit warning: when another session updates an entity that is open
+  for editing, an inline banner warns with Reload / Keep editing options. Also
+  handles remote deletes with auto-close and toast notification.
+- Notes contentEditable editor: basic mode notes now use a contentEditable div
+  instead of a textarea. Click rendered content to enter edit mode. Cmd+S /
+  Ctrl+S keyboard shortcut to save.
+- Notes deep links: selecting a note updates the URL hash (`#note=<id>`). F5 or
+  sharing the URL reopens the note. Copy link button in the note toolbar.
+  Browser back/forward navigation supported via hashchange listener.
+
+### Fixed
+
+- Marketing plans missing from feature visibility settings and breadcrumb
+  navigation. The feature was fully implemented but invisible in the UI.
+
 ## [0.11.1] - 2026-03-06
 
 ### Added
@@ -1015,7 +1034,10 @@ and this project adheres to
   Windows
 - GitHub Actions CI/CD pipeline
 
-[Unreleased]: https://github.com/studiowebux/mdplanner/compare/v0.3.3...HEAD
+[Unreleased]: https://github.com/studiowebux/mdplanner/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/studiowebux/mdplanner/compare/v0.11.1...v0.12.0
+[0.11.1]: https://github.com/studiowebux/mdplanner/compare/v0.11.0...v0.11.1
+[0.11.0]: https://github.com/studiowebux/mdplanner/compare/v0.3.3...v0.11.0
 [0.3.3]: https://github.com/studiowebux/mdplanner/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/studiowebux/mdplanner/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/studiowebux/mdplanner/compare/v0.3.0...v0.3.1
