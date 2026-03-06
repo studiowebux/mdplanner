@@ -148,7 +148,8 @@ export function registerCapacityTools(
   server.registerTool(
     "add_capacity_allocation",
     {
-      description: "Add a weekly allocation for a team member in a capacity plan.",
+      description:
+        "Add a weekly allocation for a team member in a capacity plan.",
       inputSchema: {
         plan_id: z.string().describe("Capacity plan ID"),
         member_id: z.string().describe("Member ID within the plan"),
@@ -208,9 +209,7 @@ export function registerCapacityTools(
       const plan = plans.find((p) => p.id === plan_id);
       if (!plan) return err(`Capacity plan '${plan_id}' not found`);
       const before = plan.allocations.length;
-      plan.allocations = plan.allocations.filter((a) =>
-        a.id !== allocation_id
-      );
+      plan.allocations = plan.allocations.filter((a) => a.id !== allocation_id);
       if (plan.allocations.length === before) {
         return err(
           `Allocation '${allocation_id}' not found in plan '${plan_id}'`,
