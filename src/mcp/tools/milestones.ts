@@ -105,13 +105,26 @@ export function registerMilestoneTools(
       },
     },
     async ({ id, name, project, description, target, status }) => {
-      const success = await parser.updateMilestone(id, {
+      const updates: Record<string, unknown> = {
         ...(name !== undefined && { name }),
         ...(project !== undefined && { project }),
         ...(description !== undefined && { description }),
         ...(target !== undefined && { target }),
         ...(status !== undefined && { status }),
-      });
+      };
+
+      // Auto-manage completedAt: set when transitioning to completed, clear otherwise
+      if (status === "completed") {
+        const milestones = await parser.readMilestones();
+        const existing = milestones.find((m) => m.id === id);
+        if (existing && !existing.completedAt) {
+          updates.completedAt = new Date().toISOString().split("T")[0];
+        }
+      } else if (status && status !== "completed") {
+        updates.completedAt = undefined;
+      }
+
+      const success = await parser.updateMilestone(id, updates);
       if (!success) return err(`Milestone '${id}' not found`);
       return ok({ success: true });
     },
