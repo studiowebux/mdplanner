@@ -338,13 +338,30 @@ export class NotesModule {
 
   select(noteIndex) {
     this.tm.activeNote = noteIndex;
-    // Sync enhancedMode with the selected note's mode
     const note = this.tm.notes[noteIndex];
     if (note) {
       this.tm.enhancedMode = note.mode === "enhanced";
+      history.replaceState(null, "", `#note=${note.id}`);
     }
     this._setMobileActive(true);
     this.renderView();
+  }
+
+  /** Open a note by its ID — used by deep links and hashchange. */
+  selectById(noteId) {
+    const index = this.tm.notes.findIndex((n) => n.id === noteId);
+    if (index !== -1) this.select(index);
+  }
+
+  /** Copy current note URL to clipboard. */
+  copyLink() {
+    const note = this.tm.notes[this.tm.activeNote];
+    if (!note) return;
+    const url = `${window.location.origin}${window.location.pathname}#note=${note.id}`;
+    navigator.clipboard.writeText(url).then(() => {
+      this.showSaveStatus("Link copied");
+      setTimeout(() => this.hideSaveStatus(), 2000);
+    });
   }
 
   openModal() {
@@ -598,6 +615,11 @@ export class NotesModule {
     document
       .getElementById("toggleEditBtn")
       .addEventListener("click", () => this.toggleEditMode());
+
+    // Copy link to note
+    document
+      .getElementById("copyNoteLinkBtn")
+      ?.addEventListener("click", () => this.copyLink());
 
     // Delete note
     document

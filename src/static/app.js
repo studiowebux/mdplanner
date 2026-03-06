@@ -355,9 +355,10 @@ class TaskManager {
     await this.loadTasks();
     await this.loadPortfolio();
     this.milestonesModule.load();
-    this.checkTaskHashOnLoad();
+    this.checkHashOnLoad();
     this.checkVersion();
     this._initSSE();
+    window.addEventListener("hashchange", () => this.checkHashOnLoad());
   }
 
   // SSE — auto-reload active view on server-side mutations
@@ -522,15 +523,19 @@ class TaskManager {
     return this.projectsModule.load();
   }
 
-  checkTaskHashOnLoad() {
+  checkHashOnLoad() {
     const hash = window.location.hash;
     if (hash.startsWith("#task=")) {
-      const taskId = hash.substring(6); // Remove "#task="
+      const taskId = hash.substring(6);
       const task = this.findTaskById(taskId);
       if (task) {
         this.switchView("list");
         this.taskSidenavModule.open(task);
       }
+    } else if (hash.startsWith("#note=")) {
+      const noteId = hash.substring(6);
+      this.switchView("notes");
+      this.notesModule.selectById(noteId);
     }
   }
 
@@ -1320,6 +1325,15 @@ class TaskManager {
     // close; clearing here prevents false positives when navigating within the
     // SPA after a sidenav was dismissed non-interactively.
     clearAllDirtyModules();
+
+    // Clear deep-link hashes when navigating away from their view
+    const hash = window.location.hash;
+    if (
+      (hash.startsWith("#note=") && view !== "notes") ||
+      (hash.startsWith("#task=") && !["list", "board", "timeline"].includes(view))
+    ) {
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
 
     this.currentView = view;
     localStorage.setItem("mdplanner_current_view", view);
