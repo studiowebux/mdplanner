@@ -1,7 +1,7 @@
 services:
   mdplanner:
     build: .
-    image: localhost:5000/mdplanner:latest
+    image: studiowebux/mdplanner:latest
     ports:
       - "8003:8003"
     volumes:
