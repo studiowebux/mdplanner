@@ -8,6 +8,20 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-03-07
+
+### Added
+
+- Brain Manager UI: registry CRUD, file browser, JSONL session viewer, sync
+  diff/apply, scaffold/rebuild-rules setup — all behind `--brains-config` CLI
+  flag.
+- Frontend: sidebar + tabbed layout (files, sessions, sync, setup, memory), full
+  API client, feature visibility under Infrastructure group.
+
+### Changed
+
+- Removed unnecessary Deno cache volume from docker-compose.
+
 ## [0.13.0] - 2026-03-06
 
 ### Added
