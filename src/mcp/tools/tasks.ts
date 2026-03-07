@@ -221,6 +221,18 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         planned_end: z.string().optional().describe(
           "Planned end date (YYYY-MM-DD)",
         ),
+        claimed_by: z.string().optional().describe(
+          "Person ID of the agent actively working on this task",
+        ),
+        claimed_at: z.string().optional().describe(
+          "ISO timestamp when the task was claimed",
+        ),
+        expected_revision: z.number().int().optional().describe(
+          "If provided, reject with REVISION_CONFLICT when the task's current revision does not match. Use for optimistic locking in multi-agent scenarios.",
+        ),
+        agent_id: z.string().optional().describe(
+          "Person ID of the calling agent. When provided, In Progress tasks claimed by a different agent are rejected with CLAIM_GUARD error.",
+        ),
       },
     },
     async (
@@ -240,8 +252,36 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         blocked_by,
         planned_start,
         planned_end,
+        claimed_by,
+        claimed_at,
+        expected_revision,
+        agent_id,
       },
     ) => {
+      const current = await parser.readTask(id);
+      if (!current) return err(`Task '${id}' not found`);
+
+      // Optimistic locking: reject stale updates
+      if (
+        expected_revision !== undefined &&
+        current.revision !== expected_revision
+      ) {
+        return err(
+          `REVISION_CONFLICT: expected revision ${expected_revision} but task is at revision ${current.revision}`,
+        );
+      }
+
+      // Claim guard: reject updates from non-owner agents on claimed tasks
+      if (
+        agent_id &&
+        current.section === "In Progress" &&
+        current.config.claimedBy &&
+        current.config.claimedBy !== agent_id
+      ) {
+        return err(
+          `CLAIM_GUARD: task '${id}' is claimed by '${current.config.claimedBy}', caller is '${agent_id}'`,
+        );
+      }
       const success = await parser.updateTask(id, {
         ...(title !== undefined && { title }),
         ...(section !== undefined && { section }),
@@ -260,6 +300,8 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
           ...(blocked_by !== undefined && { blocked_by }),
           ...(planned_start !== undefined && { planned_start }),
           ...(planned_end !== undefined && { planned_end }),
+          ...(claimed_by !== undefined && { claimedBy: claimed_by }),
+          ...(claimed_at !== undefined && { claimedAt: claimed_at }),
         },
       });
       if (!success) return err(`Task '${id}' not found`);
@@ -367,10 +409,22 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         expected_section: z.string().optional().describe(
           "Section the task must be in to claim it (default: 'Todo')",
         ),
+        expected_revision: z.number().int().optional().describe(
+          "If provided, reject with REVISION_CONFLICT when the task's current revision does not match.",
+        ),
       },
     },
-    async ({ id, assignee, expected_section }) => {
+    async ({ id, assignee, expected_section, expected_revision }) => {
       try {
+        if (expected_revision !== undefined) {
+          const current = await parser.readTask(id);
+          if (!current) return err(`Task '${id}' not found`);
+          if (current.revision !== expected_revision) {
+            return err(
+              `REVISION_CONFLICT: expected revision ${expected_revision} but task is at revision ${current.revision}`,
+            );
+          }
+        }
         const task = await parser.claimTask(
           id,
           assignee,

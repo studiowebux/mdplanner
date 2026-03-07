@@ -50,6 +50,8 @@ function bodyToConfig(body: Record<string, any>): TaskConfig {
   if ("planned_end" in body) config.planned_end = body.planned_end;
   if ("project" in body) config.project = body.project;
   if ("blocked_by" in body) config.blocked_by = body.blocked_by;
+  if ("claimed_by" in body) config.claimedBy = body.claimed_by;
+  if ("claimed_at" in body) config.claimedAt = body.claimed_at;
   return config;
 }
 
@@ -97,7 +99,7 @@ tasksRouter.get("/:id", async (c) => {
 tasksRouter.post("/", async (c) => {
   const parser = getParser(c);
   const body = await c.req.json();
-  const task: Omit<Task, "id"> = {
+  const task: Omit<Task, "id" | "revision"> = {
     title: body.title || "Untitled",
     completed: false,
     createdAt: new Date().toISOString(),
@@ -126,6 +128,39 @@ tasksRouter.put("/:id", async (c) => {
   const parser = getParser(c);
   const taskId = c.req.param("id");
   const body = await c.req.json();
+
+  // Read current task for revision/claim checks (only if needed)
+  const needsCurrentTask = body.expected_revision !== undefined ||
+    body.agent_id;
+  const current = needsCurrentTask ? await parser.readTask(taskId) : null;
+  if (needsCurrentTask && !current) {
+    return errorResponse("Task not found", 404);
+  }
+
+  // Optimistic locking: reject stale updates
+  if (
+    body.expected_revision !== undefined && current &&
+    current.revision !== body.expected_revision
+  ) {
+    return errorResponse(
+      `REVISION_CONFLICT: expected revision ${body.expected_revision} but task is at revision ${current.revision}`,
+      409,
+    );
+  }
+
+  // Claim guard: reject updates from non-owner agents on claimed tasks
+  if (
+    body.agent_id && current &&
+    current.section === "In Progress" &&
+    current.config.claimedBy &&
+    current.config.claimedBy !== body.agent_id
+  ) {
+    return errorResponse(
+      `CLAIM_GUARD: task claimed by '${current.config.claimedBy}', caller is '${body.agent_id}'`,
+      409,
+    );
+  }
+
   const updates: Partial<Task> = {
     ...(body.title !== undefined && { title: body.title }),
     ...(body.section !== undefined && { section: body.section }),
@@ -280,9 +315,22 @@ tasksRouter.post("/:id/claim", async (c) => {
   const body = await c.req.json();
   const assignee: string = String(body.assignee ?? "").trim();
   const expectedSection: string | undefined = body.expected_section;
+  const expectedRevision: number | undefined = body.expected_revision;
 
   if (!assignee) {
     return errorResponse("assignee is required", 400);
+  }
+
+  // Optimistic locking: reject stale claims
+  if (expectedRevision !== undefined) {
+    const current = await parser.readTask(taskId);
+    if (!current) return errorResponse("Task not found", 404);
+    if (current.revision !== expectedRevision) {
+      return errorResponse(
+        `REVISION_CONFLICT: expected revision ${expectedRevision} but task is at revision ${current.revision}`,
+        409,
+      );
+    }
   }
 
   try {

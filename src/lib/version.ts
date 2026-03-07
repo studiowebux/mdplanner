@@ -1,4 +1,4 @@
 /** Shared version constants imported by both the HTTP server and MCP server. */
 
-export const VERSION = "0.15.1";
+export const VERSION = "0.16.0";
 export const GITHUB_REPO = "studiowebux/mdplanner";
