@@ -123,6 +123,52 @@ tasksRouter.post("/", async (c) => {
   return jsonResponse({ id: taskId }, 201);
 });
 
+// POST /tasks/sweep-stale-claims - release tasks with expired claims
+tasksRouter.post("/sweep-stale-claims", async (c) => {
+  const parser = getParser(c);
+  const body = await c.req.json().catch(() => ({}));
+  const ttl = ((body.ttl_minutes as number) ?? 30) * 60 * 1000;
+  const now = Date.now();
+  const tasks = await parser.readTasks();
+  const flat: Task[] = [];
+  const flatten = (list: Task[]) => {
+    for (const t of list) {
+      flat.push(t);
+      if (t.children) flatten(t.children);
+    }
+  };
+  flatten(tasks);
+
+  const stale = flat.filter((t) => {
+    if (t.section !== "In Progress") return false;
+    const claimedAt = t.config?.claimedAt;
+    if (!claimedAt) return false;
+    return now - new Date(claimedAt).getTime() > ttl;
+  });
+
+  const released: string[] = [];
+  for (const task of stale) {
+    await parser.updateTask(task.id, {
+      section: "Todo",
+      config: { claimedBy: undefined, claimedAt: undefined },
+    });
+    await parser.addComment(
+      task.id,
+      `[system] Claim expired — agent '${task.config.claimedBy}' unresponsive after ${
+        body.ttl_minutes ?? 30
+      }min TTL`,
+    );
+    released.push(task.id);
+  }
+
+  if (released.length) {
+    cacheWriteThrough(c, "tasks").catch((e) =>
+      console.error("[tasks] background cache sync failed:", e)
+    );
+  }
+  return jsonResponse({ released, count: released.length });
+});
+
 // PUT /tasks/:id - update task
 tasksRouter.put("/:id", async (c) => {
   const parser = getParser(c);
