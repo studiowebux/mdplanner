@@ -4,11 +4,13 @@
     "jsr:@hono/hono@4": "4.9.4",
     "jsr:@std/assert@*": "1.0.16",
     "jsr:@std/assert@1": "1.0.16",
+    "jsr:@std/bytes@^1.0.6": "1.0.6",
     "jsr:@std/fs@1": "1.0.19",
     "jsr:@std/internal@^1.0.12": "1.0.12",
     "jsr:@std/internal@^1.0.9": "1.0.12",
     "jsr:@std/path@1": "1.1.1",
     "jsr:@std/path@^1.1.1": "1.1.1",
+    "jsr:@std/streams@^1.0.17": "1.0.17",
     "npm:@modelcontextprotocol/sdk@1.26.0": "1.26.0_zod@3.25.76_hono@4.12.1_ajv@8.18.0_express@5.2.1",
     "npm:zod@3.25.76": "3.25.76"
   },
@@ -21,6 +23,9 @@
       "dependencies": [
         "jsr:@std/internal@^1.0.12"
       ]
+    },
+    "@std/bytes@1.0.6": {
+      "integrity": "f6ac6adbd8ccd99314045f5703e23af0a68d7f7e58364b47d2c7f408aeb5820a"
     },
     "@std/fs@1.0.19": {
       "integrity": "051968c2b1eae4d2ea9f79a08a3845740ef6af10356aff43d3e2ef11ed09fb06",
@@ -39,6 +44,12 @@
       "integrity": "fe00026bd3a7e6a27f73709b83c607798be40e20c81dde655ce34052fd82ec76",
       "dependencies": [
         "jsr:@std/internal@^1.0.9"
+      ]
+    },
+    "@std/streams@1.0.17": {
+      "integrity": "7859f3d9deed83cf4b41f19223d4a67661b3d3819e9fc117698f493bf5992140",
+      "dependencies": [
+        "jsr:@std/bytes"
       ]
     }
   },
@@ -608,6 +619,7 @@
       "jsr:@std/assert@1",
       "jsr:@std/fs@1",
       "jsr:@std/path@1",
+      "jsr:@std/streams@^1.0.17",
       "npm:@modelcontextprotocol/sdk@1.26.0",
       "npm:zod@3.25.76"
     ]

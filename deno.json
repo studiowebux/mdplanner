@@ -43,6 +43,7 @@
     "compile:mcp:all": "mkdir -p dist && deno task compile:mcp:linux && deno task compile:mcp:macos-intel && deno task compile:mcp:macos-arm && deno task compile:mcp:windows"
   },
   "imports": {
+    "@std/streams": "jsr:@std/streams@^1.0.17",
     "deno/http": "https://deno.land/std@0.224.0/http/server.ts",
     "deno/http/file_server": "https://deno.land/std@0.224.0/http/file_server.ts",
     "@std/path": "jsr:@std/path@^1.0.0",

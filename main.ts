@@ -11,6 +11,7 @@ import { validateProjectPath } from "./src/lib/cli.ts";
 import { generateKeyPair } from "./src/lib/backup/crypto.ts";
 import { generateSecretKey } from "./src/lib/secrets.ts";
 import { initScheduler } from "./src/lib/backup/scheduler.ts";
+import { BrainRegistry } from "./src/lib/brains/registry.ts";
 
 // Get the directory where this script is located (works for both dev and compiled)
 const __dirname = dirname(fromFileUrl(import.meta.url));
@@ -29,6 +30,8 @@ interface CLIArgs {
   backupDir?: string;
   backupIntervalHours: number;
   backupPublicKey?: string;
+  brainsConfig?: string;
+  claudeDir?: string;
 }
 
 function printHelp(): void {
@@ -60,6 +63,8 @@ Options:
       --backup-dir <path>      Directory for automated backups
       --backup-interval <hrs>  Backup frequency in hours (requires --backup-dir)
       --backup-public-key <h>  Hex RSA public key — encrypts all backups
+      --brains-config <path>   Path to brains.json — enables Brain Manager UI
+      --claude-dir <path>      Claude config dir (default: ~/.claude)
   -h, --help                   Show this help message
 
 Examples:
@@ -93,6 +98,9 @@ function parseArgs(args: string[]): CLIArgs {
       ? parseInt(Deno.env.get("MDPLANNER_BACKUP_INTERVAL")!, 10)
       : 0,
     backupPublicKey: Deno.env.get("MDPLANNER_BACKUP_PUBLIC_KEY") ?? undefined,
+    brainsConfig: Deno.env.get("MDPLANNER_BRAINS_CONFIG") ?? undefined,
+    claudeDir: Deno.env.get("MDPLANNER_CLAUDE_DIR") ??
+      join(Deno.env.get("HOME") ?? "", ".claude"),
   };
 
   let i = 0;
@@ -163,6 +171,22 @@ function parseArgs(args: string[]): CLIArgs {
         Deno.exit(1);
       }
       result.backupPublicKey = key;
+      i += 2;
+    } else if (arg === "--brains-config") {
+      const val = args[i + 1];
+      if (!val || val.startsWith("-")) {
+        console.error("Error: --brains-config requires a path");
+        Deno.exit(1);
+      }
+      result.brainsConfig = val;
+      i += 2;
+    } else if (arg === "--claude-dir") {
+      const val = args[i + 1];
+      if (!val || val.startsWith("-")) {
+        console.error("Error: --claude-dir requires a path");
+        Deno.exit(1);
+      }
+      result.claudeDir = val;
       i += 2;
     } else if (arg === "-p" || arg === "--port") {
       const portValue = args[i + 1];
@@ -269,11 +293,21 @@ if (cliArgs.backupDir && cliArgs.backupIntervalHours > 0) {
   );
 }
 
+// Initialize brain registry if --brains-config is provided
+let brainRegistry: BrainRegistry | undefined;
+if (cliArgs.brainsConfig) {
+  brainRegistry = new BrainRegistry(cliArgs.brainsConfig);
+  await brainRegistry.load();
+}
+
 // Create main app
 const app = new Hono();
 
 // API routes
-const apiRouter = createApiRouter(projectManager);
+const apiRouter = createApiRouter(projectManager, {
+  brainRegistry,
+  claudeDir: cliArgs.claudeDir,
+});
 app.route("/api", apiRouter);
 
 // MCP HTTP endpoint (Model Context Protocol — remote AI client access)
@@ -353,6 +387,10 @@ if (cliArgs.readOnly) {
 if (cliArgs.webdav) {
   console.log(`WebDAV http://localhost:${cliArgs.port}/webdav`);
   if (cliArgs.webdavUser) console.log(`WebDAV auth enabled (basic auth)`);
+}
+if (brainRegistry) {
+  const brainCount = brainRegistry.list().length;
+  console.log(`Brains  ${brainCount} registered (${cliArgs.brainsConfig})`);
 }
 
 const projects = await projectManager.scanProjects();

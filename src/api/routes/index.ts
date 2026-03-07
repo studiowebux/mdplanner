@@ -6,6 +6,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { ProjectManager } from "../../lib/project-manager.ts";
 import { AppVariables, isReadOnly } from "./context.ts";
+import type { BrainRegistry } from "../../lib/brains/registry.ts";
 
 // SSE events route
 import { eventsRouter } from "./events.ts";
@@ -57,6 +58,9 @@ import { orgchartRouter } from "./features/orgchart.ts";
 import { peopleRouter } from "./features/people.ts";
 import { portfolioRouter } from "./portfolio.ts";
 
+// Brain management routes
+import { brainsRouter } from "./features/brains.ts";
+
 // Export/Import routes
 import { exportImportRouter } from "./export-import.ts";
 
@@ -78,15 +82,22 @@ import { githubRouter } from "./github.ts";
 
 export function createApiRouter(
   projectManager: ProjectManager,
+  opts?: { brainRegistry?: BrainRegistry; claudeDir?: string },
 ): Hono<{ Variables: AppVariables }> {
   const api = new Hono<{ Variables: AppVariables }>();
 
   // CORS middleware
   api.use("/*", cors());
 
-  // Inject projectManager into context
+  // Inject projectManager and optional brain registry into context
   api.use("/*", async (c, next) => {
     c.set("projectManager", projectManager);
+    if (opts?.brainRegistry) {
+      c.set("brainRegistry", opts.brainRegistry);
+    }
+    if (opts?.claudeDir) {
+      c.set("claudeDir", opts.claudeDir);
+    }
     await next();
   });
 
@@ -206,6 +217,11 @@ export function createApiRouter(
 
   // Analytics routes
   api.route("/analytics", analyticsRouter);
+
+  // Brain management routes (feature-gated via --brains-config)
+  if (opts?.brainRegistry) {
+    api.route("/brains", brainsRouter);
+  }
 
   // 404 handler
   api.notFound((c) => {
