@@ -5,9 +5,12 @@
 import { Context } from "hono";
 import { type CacheLayer, ProjectManager } from "../../lib/project-manager.ts";
 import { DirectoryMarkdownParser } from "../../lib/parser/directory/parser.ts";
+import type { BrainRegistry } from "../../lib/brains/registry.ts";
 
 export interface AppVariables {
   projectManager: ProjectManager;
+  brainRegistry?: BrainRegistry;
+  claudeDir?: string;
 }
 
 export type AppContext = Context<{ Variables: AppVariables }>;
@@ -97,4 +100,12 @@ export function checkConflict(
     );
   }
   return null;
+}
+
+export function getBrainRegistry(c: AppContext): BrainRegistry | undefined {
+  return c.get("brainRegistry");
+}
+
+export function getClaudeDir(c: AppContext): string {
+  return c.get("claudeDir") ?? "";
 }

@@ -101,6 +101,7 @@ import { GlobalSearch } from "./modules/features/search.js";
 import { GitHubView } from "./modules/views/github.js";
 import { OllamaModule } from "./modules/features/ollama.js";
 import { SSEClient } from "./modules/ui/sse-client.js";
+import { BrainsModule } from "./modules/features/brains.js";
 
 class TaskManager {
   constructor() {
@@ -321,6 +322,7 @@ class TaskManager {
     this.projectsModule = new ProjectsModule(this);
     this.uploadsView = new UploadsView(this);
     this.ollamaModule = new OllamaModule(this);
+    this.brainsModule = new BrainsModule(this);
     this.globalSearch = new GlobalSearch(this);
     this.sseClient = new SSEClient();
     /** @type {Map<string, number>} debounce timer per entity */
@@ -622,6 +624,7 @@ class TaskManager {
       { id: "analyticsViewBtn", view: "analytics" },
       { id: "dnsViewBtn", view: "dns" },
       { id: "githubViewBtn", view: "github" },
+      { id: "brainsViewBtn", view: "brains" },
     ];
     additionalViews.forEach(({ id, view }) => {
       document.getElementById(id)?.addEventListener("click", () => {
@@ -920,6 +923,12 @@ class TaskManager {
         this.switchView("github");
         this.closeMobileMenu();
       });
+    document
+      .getElementById("brainsViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("brains");
+        this.closeMobileMenu();
+      });
 
     // Dark mode toggle
     document
@@ -1159,6 +1168,7 @@ class TaskManager {
     this.marketingPlansModule.bindEvents();
     this.dnsSidenavModule.bindEvents();
     this.dnsModule.bindEvents();
+    this.brainsModule.bindEvents();
     this.onboardingSidenavModule.bindEvents();
     this.onboardingTemplateSidenavModule.bindEvents();
     this.onboardingModule.bindEvents();
@@ -1398,6 +1408,7 @@ class TaskManager {
       "uploadsViewBtn",
       "dnsViewBtn",
       "githubViewBtn",
+      "brainsViewBtn",
       "configViewBtn",
     ];
     desktopNavBtns.forEach((id) => {
@@ -1451,6 +1462,7 @@ class TaskManager {
       "uploadsViewBtnMobile",
       "dnsViewBtnMobile",
       "githubViewBtnMobile",
+      "brainsViewBtnMobile",
       "configViewBtnMobile",
     ];
     mobileBtnIds.forEach((id) => {
@@ -1501,6 +1513,7 @@ class TaskManager {
     document.getElementById("ollamaView")?.classList.add("hidden");
     document.getElementById("dnsView")?.classList.add("hidden");
     document.getElementById("githubView")?.classList.add("hidden");
+    document.getElementById("brainsView")?.classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
     document.getElementById("mindmapView").classList.add("hidden");
     document.getElementById("c4View").classList.add("hidden");
@@ -1665,6 +1678,10 @@ class TaskManager {
       this.activateViewButton("dns");
       document.getElementById("dnsView").classList.remove("hidden");
       this.dnsModule.load();
+    } else if (view === "brains") {
+      this.activateViewButton("brains");
+      document.getElementById("brainsView").classList.remove("hidden");
+      this.brainsModule.load();
     } else if (view === "onboarding") {
       this.activateViewButton("onboarding");
       document.getElementById("onboardingView").classList.remove("hidden");
