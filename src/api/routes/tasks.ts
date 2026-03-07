@@ -273,5 +273,32 @@ tasksRouter.put("/:id/comments/:commentId", async (c) => {
   return jsonResponse(comment);
 });
 
+// POST /tasks/:id/claim - atomically claim a task
+tasksRouter.post("/:id/claim", async (c) => {
+  const parser = getParser(c);
+  const taskId = c.req.param("id");
+  const body = await c.req.json();
+  const assignee: string = String(body.assignee ?? "").trim();
+  const expectedSection: string | undefined = body.expected_section;
+
+  if (!assignee) {
+    return errorResponse("assignee is required", 400);
+  }
+
+  try {
+    const task = await parser.claimTask(taskId, assignee, expectedSection);
+    if (!task) {
+      return errorResponse("Task not found", 404);
+    }
+    await cacheWriteThrough(c, "tasks");
+    return jsonResponse(task);
+  } catch (e) {
+    if (e instanceof Error && e.message.startsWith("CLAIM_CONFLICT")) {
+      return errorResponse(e.message, 409);
+    }
+    throw e;
+  }
+});
+
 // Export for use in billing routes
 export { findTaskById };

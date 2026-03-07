@@ -8,6 +8,20 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.15.1] - 2026-03-07
+
+### Added
+
+- `claim_task` MCP tool and `POST /tasks/:id/claim` API endpoint for atomic task
+  claiming — prevents race conditions when multiple agents compete for the same
+  task. Returns 409 CLAIM_CONFLICT if task is not in the expected section.
+
+### Fixed
+
+- TasksDirectoryParser now uses OS-level advisory file locks (`file.lock()`)
+  matching all other parsers — prevents concurrent write corruption from
+  external processes (WebDAV, multiple server instances).
+
 ## [0.15.0] - 2026-03-07
 
 ### Added

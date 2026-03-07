@@ -318,6 +318,14 @@ export class DirectoryMarkdownParser {
     return this.tasksParser.updateComment(taskId, commentId, body);
   }
 
+  async claimTask(
+    id: string,
+    assignee: string,
+    expectedSection?: string,
+  ) {
+    return this.tasksParser.claim(id, assignee, expectedSection);
+  }
+
   async addAttachmentsToTask(
     id: string,
     paths: string[],
