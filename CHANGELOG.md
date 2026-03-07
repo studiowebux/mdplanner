@@ -8,6 +8,25 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-03-07
+
+### Added
+
+- Section jump bar with scroll-spy in the task list view. Horizontal row of
+  clickable section pills below filter dropdowns shows all sections with task
+  counts. IntersectionObserver highlights the active section on scroll. Click to
+  smooth-scroll. Bar auto-hides when a section filter is active.
+- MCP tools for time-tracking (list, get by task, create, delete time entries),
+  C4 architecture (list, get, create, update, delete components; add/remove
+  connections; get by level), and `update_onboarding_template`.
+
+### Fixed
+
+- Task sidenav slow to open: `populateSelects()` now caches dropdown DOM and
+  reuses `FuzzyAutocomplete` instances instead of rebuilding on every open.
+- People parser validates `models` array with shared `AgentModelSchema` Zod
+  schema extracted to `types.ts` as single source of truth.
+
 ## [0.19.0] - 2026-03-07
 
 ### Added
