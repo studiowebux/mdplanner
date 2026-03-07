@@ -631,6 +631,99 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
   );
 
   server.registerTool(
+    "get_next_task",
+    {
+      description:
+        "Find the highest-priority ready task matching an agent's skills. " +
+        "Cross-references task tags with the agent's person.skills array, " +
+        "sorted by priority. Falls back to untagged tasks, then any task. " +
+        "Returns one task or null.",
+      inputSchema: {
+        agent_id: z.string().describe("Person ID of the agent"),
+        project: z.string().optional().describe(
+          "Filter by project name (matches config.project)",
+        ),
+        section: z.string().optional().describe(
+          "Section to search in (default: 'Todo')",
+        ),
+        exclude_tags: z.array(z.string()).optional().describe(
+          "Skip tasks that have ANY of these tags",
+        ),
+      },
+    },
+    async ({ agent_id, project, section, exclude_tags }) => {
+      const person = await parser.readPerson(agent_id);
+      if (!person) return err(`Person '${agent_id}' not found`);
+      const skills = (person.skills ?? []).map((s) => s.toLowerCase());
+
+      const tasks = await parser.readTasks();
+      let candidates = flattenTasks(tasks);
+
+      // Filter by section
+      const targetSection = (section ?? "Todo").toLowerCase();
+      candidates = candidates.filter((t) =>
+        t.section.toLowerCase() === targetSection
+      );
+
+      // Filter by project
+      if (project) {
+        candidates = candidates.filter((t) =>
+          (t.config?.project ?? "").toLowerCase() === project.toLowerCase()
+        );
+      }
+
+      // Filter ready: all blocked_by resolved
+      const allFlat = flattenTasks(tasks);
+      const taskById = new Map(allFlat.map((t) => [t.id, t]));
+      candidates = candidates.filter((t) => {
+        const blockers = t.config?.blocked_by ?? [];
+        if (blockers.length === 0) return true;
+        return blockers.every((bid: string) => {
+          const blocker = taskById.get(bid);
+          return !blocker || blocker.completed ||
+            blocker.section.toLowerCase() === "done";
+        });
+      });
+
+      // Exclude tags
+      if (exclude_tags?.length) {
+        const lowerExclude = exclude_tags.map((t) => t.toLowerCase());
+        candidates = candidates.filter((t) => {
+          const taskTags = (t.config?.tags ?? []).map((tag) =>
+            tag.toLowerCase()
+          );
+          return !taskTags.some((tag) => lowerExclude.includes(tag));
+        });
+      }
+
+      // Sort by priority (1 = highest, undefined defaults to 5)
+      candidates.sort((a, b) =>
+        (a.config?.priority ?? 5) - (b.config?.priority ?? 5)
+      );
+
+      // Skill match: first task whose tags overlap with agent skills
+      if (skills.length > 0) {
+        const skillMatch = candidates.find((t) => {
+          const taskTags = (t.config?.tags ?? []).map((tag) =>
+            tag.toLowerCase()
+          );
+          return taskTags.some((tag) => skills.includes(tag));
+        });
+        if (skillMatch) return ok(skillMatch);
+      }
+
+      // Fallback 1: highest-priority untagged task
+      const untagged = candidates.find((t) => !(t.config?.tags?.length));
+      if (untagged) return ok(untagged);
+
+      // Fallback 2: any remaining task
+      if (candidates.length > 0) return ok(candidates[0]);
+
+      return ok(null);
+    },
+  );
+
+  server.registerTool(
     "sweep_stale_claims",
     {
       description:
