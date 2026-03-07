@@ -63,10 +63,22 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         tags: z.array(z.string()).optional().describe(
           "Filter by tags — returns tasks that have ANY of the given tags",
         ),
+        ready: z.boolean().optional().describe(
+          "Dependency-aware filter. true = tasks whose blocked_by are all Done or completed. false = tasks with open blockers. Evaluated after all other filters.",
+        ),
       },
     },
     async (
-      { section, project, milestone, assignee, priority, completed, tags },
+      {
+        section,
+        project,
+        milestone,
+        assignee,
+        priority,
+        completed,
+        tags,
+        ready,
+      },
     ) => {
       const tasks = await parser.readTasks();
       let flat = flattenTasks(tasks);
@@ -101,6 +113,21 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
             lowerTags.includes(tag.toLowerCase())
           )
         );
+      }
+      if (ready !== undefined) {
+        // Build lookup of all tasks to resolve blocker status
+        const allFlat = flattenTasks(tasks);
+        const taskById = new Map(allFlat.map((t) => [t.id, t]));
+        flat = flat.filter((t) => {
+          const blockers = t.config?.blocked_by ?? [];
+          if (blockers.length === 0) return ready; // no blockers = ready
+          const allResolved = blockers.every((bid: string) => {
+            const blocker = taskById.get(bid);
+            return !blocker || blocker.completed ||
+              blocker.section.toLowerCase() === "done";
+          });
+          return ready ? allResolved : !allResolved;
+        });
       }
       return ok(flat);
     },
