@@ -183,6 +183,21 @@
   word-break: break-word;
 }
 
+.task-comment-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.task-comment-metadata-tag {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 0.0625rem 0.375rem;
+}
+
 .task-comment-edit-textarea {
   width: 100%;
   margin-bottom: 0.375rem;

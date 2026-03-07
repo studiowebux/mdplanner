@@ -140,8 +140,10 @@ export const TasksAPI = {
     return response;
   },
 
-  async addComment(id, body, author) {
-    const response = await post(`/api/tasks/${id}/comments`, { body, author });
+  async addComment(id, body, author, metadata) {
+    const payload = { body, author };
+    if (metadata) payload.metadata = metadata;
+    const response = await post(`/api/tasks/${id}/comments`, payload);
     return response;
   },
 
@@ -150,8 +152,10 @@ export const TasksAPI = {
     return response;
   },
 
-  async updateComment(id, commentId, body) {
-    const response = await put(`/api/tasks/${id}/comments/${commentId}`, { body });
+  async updateComment(id, commentId, body, metadata) {
+    const payload = { body };
+    if (metadata !== undefined) payload.metadata = metadata;
+    const response = await put(`/api/tasks/${id}/comments/${commentId}`, payload);
     return response;
   },
 };

@@ -766,6 +766,7 @@ export class TaskSidenavModule {
             hour: "2-digit", minute: "2-digit",
           })
         : "";
+      const metaHtml = c.metadata ? this._renderCommentMetadata(c.metadata) : "";
       return `
         <div class="task-comment" data-comment-id="${c.id}" data-raw-body="${escapeHtml(c.body ?? "")}">
           <div class="task-comment-meta">
@@ -775,6 +776,7 @@ export class TaskSidenavModule {
             <button type="button" class="task-comment-delete" data-delete-comment="${c.id}" title="Delete comment">&times;</button>
           </div>
           <div class="task-comment-body">${this._formatCommentBody(c.body)}</div>
+          ${metaHtml}
         </div>
       `;
     }).join("");
@@ -878,6 +880,15 @@ export class TaskSidenavModule {
    */
   _formatCommentBody(body) {
     return markdownToHtml(String(body ?? ""));
+  }
+
+  _renderCommentMetadata(metadata) {
+    const keys = Object.entries(metadata).filter(([, v]) => v != null);
+    if (keys.length === 0) return "";
+    const items = keys.map(([k, v]) =>
+      `<span class="task-comment-metadata-tag"><strong>${escapeHtml(k)}</strong>: ${escapeHtml(String(v))}</span>`
+    ).join(" ");
+    return `<div class="task-comment-metadata">${items}</div>`;
   }
 
   /** Attach @mention autocomplete to the comment textarea. */
