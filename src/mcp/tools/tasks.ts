@@ -349,13 +349,19 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         author: z.string().optional().describe(
           "Author name (defaults to 'Claude' when called from MCP)",
         ),
+        metadata: z.record(z.unknown()).optional().describe(
+          "Structured metadata for machine-readable progress. " +
+            "Predefined keys: action (started|progress|completed|blocked|deferred), " +
+            "commit, branch, files_changed, next_step",
+        ),
       },
     },
-    async ({ id, comment, author }) => {
+    async ({ id, comment, author, metadata }) => {
       const result = await parser.addComment(
         id,
         comment,
         author ?? "Claude",
+        metadata,
       );
       if (!result) return err(`Task '${id}' not found`);
       return ok({ success: true, commentId: result.id });
@@ -510,6 +516,9 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
             comment_author: z.string().optional().describe(
               "Author for the comment (default: 'Claude')",
             ),
+            comment_metadata: z.record(z.unknown()).optional().describe(
+              "Structured metadata for the inline comment",
+            ),
           }),
         ).min(1).max(50).describe(
           "Array of task updates (1-50). Each entry needs at least an id.",
@@ -609,6 +618,7 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
             entry.id,
             entry.comment,
             entry.comment_author ?? "Claude",
+            entry.comment_metadata,
           );
         }
 

@@ -270,6 +270,7 @@ tasksRouter.post("/batch", async (c) => {
         entry.id,
         String(entry.comment),
         entry.comment_author ? String(entry.comment_author) : undefined,
+        entry.comment_metadata as Record<string, unknown> | undefined,
       );
     }
 
@@ -422,7 +423,14 @@ tasksRouter.post("/:id/comments", async (c) => {
     return errorResponse("comment body is required", 400);
   }
 
-  const comment = await parser.addComment(taskId, commentBody, author);
+  // deno-lint-ignore no-explicit-any
+  const metadata: Record<string, unknown> | undefined = body.metadata as any;
+  const comment = await parser.addComment(
+    taskId,
+    commentBody,
+    author,
+    metadata,
+  );
   if (!comment) {
     return errorResponse("Task not found", 404);
   }

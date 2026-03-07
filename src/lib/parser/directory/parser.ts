@@ -310,8 +310,9 @@ export class DirectoryMarkdownParser {
     taskId: string,
     body: string,
     author?: string,
+    metadata?: Record<string, unknown>,
   ) {
-    return this.tasksParser.addComment(taskId, body, author);
+    return this.tasksParser.addComment(taskId, body, author, metadata);
   }
 
   async deleteComment(taskId: string, commentId: string): Promise<boolean> {
