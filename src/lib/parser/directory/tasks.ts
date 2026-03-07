@@ -654,15 +654,31 @@ export class TasksDirectoryParser {
   }
 
   /**
-   * Atomic write using temp file + rename.
+   * Atomic write using temp file + rename, with OS-level advisory lock.
+   * Uses a dedicated .lock file and Deno 2.x file.lock() API so external
+   * processes (WebDAV clients, git hooks, sync daemons) that use the same
+   * convention are blocked during the write.
    */
   private async atomicWriteFile(
     filePath: string,
     content: string,
   ): Promise<void> {
-    const tempPath = filePath + ".tmp";
-    await Deno.writeTextFile(tempPath, content);
-    await Deno.rename(tempPath, filePath);
+    const lockPath = `${filePath}.lock`;
+    const lockFile = await Deno.open(lockPath, { write: true, create: true });
+    await lockFile.lock(true);
+    try {
+      const tempPath = `${filePath}.tmp`;
+      await Deno.writeTextFile(tempPath, content);
+      await Deno.rename(tempPath, filePath);
+    } finally {
+      await lockFile.unlock();
+      lockFile.close();
+      try {
+        await Deno.remove(lockPath);
+      } catch {
+        // Lock file cleanup is best-effort; stale .lock files are harmless
+      }
+    }
   }
 
   /**
@@ -807,6 +823,46 @@ export class TasksDirectoryParser {
     }
 
     return updated;
+  }
+
+  /**
+   * Atomically claim a task: move to "In Progress" and assign to claimant.
+   * Fails if task is not in the expected section (default: "Todo").
+   * Prevents race conditions in multi-agent scenarios.
+   */
+  async claim(
+    id: string,
+    assignee: string,
+    expectedSection = "Todo",
+  ): Promise<Task | null> {
+    return await this.withWriteLock(id, async () => {
+      const task = await this.read(id);
+      if (!task) return null;
+
+      if (task.section !== expectedSection) {
+        throw new Error(
+          `CLAIM_CONFLICT: task '${id}' is in '${task.section}', expected '${expectedSection}'`,
+        );
+      }
+
+      const oldFilePath = await this.findTaskFilePath(id, task.section);
+      const claimed: Task = {
+        ...task,
+        section: "In Progress",
+        config: { ...task.config, assignee },
+      };
+      await this.write(claimed);
+
+      if (oldFilePath) {
+        try {
+          await Deno.remove(oldFilePath);
+        } catch {
+          // Ignore — file may already be removed
+        }
+      }
+
+      return claimed;
+    });
   }
 
   /**

@@ -1,7 +1,7 @@
 /**
  * MCP tools for task operations.
  * Tools: list_tasks, get_task, create_task, update_task, delete_task,
- *        add_task_comment, add_task_attachments, move_task
+ *        add_task_comment, add_task_attachments, move_task, claim_task
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -350,6 +350,40 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
       const success = await parser.deleteTask(id);
       if (!success) return err(`Task '${id}' not found`);
       return ok({ success: true });
+    },
+  );
+
+  server.registerTool(
+    "claim_task",
+    {
+      description:
+        "Atomically claim a task: move it to 'In Progress' and assign it. " +
+        "Fails with CLAIM_CONFLICT if the task is not in the expected section " +
+        "(default: 'Todo'). Use this instead of update_task when multiple " +
+        "agents may compete for the same task.",
+      inputSchema: {
+        id: z.string().describe("Task ID"),
+        assignee: z.string().describe("Person ID of the claimant"),
+        expected_section: z.string().optional().describe(
+          "Section the task must be in to claim it (default: 'Todo')",
+        ),
+      },
+    },
+    async ({ id, assignee, expected_section }) => {
+      try {
+        const task = await parser.claimTask(
+          id,
+          assignee,
+          expected_section,
+        );
+        if (!task) return err(`Task '${id}' not found`);
+        return ok({ success: true, task });
+      } catch (e) {
+        if (e instanceof Error && e.message.startsWith("CLAIM_CONFLICT")) {
+          return err(e.message);
+        }
+        throw e;
+      }
     },
   );
 }
