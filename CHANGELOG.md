@@ -8,6 +8,22 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-03-07
+
+### Added
+
+- `batch_update_tasks` MCP tool and `POST /tasks/batch` API endpoint for
+  updating 1-50 tasks in a single call. Each entry supports all `update_task`
+  fields plus optional inline `comment`/`comment_author`. Returns per-task
+  success/error results with optimistic locking and claim guard support.
+- `ready` boolean filter on `list_tasks` MCP tool for dependency-aware task
+  picking — `true` returns only tasks whose `blocked_by` are all resolved.
+- `sweep_stale_claims` MCP tool and `POST /tasks/sweep-stale-claims` endpoint
+  for releasing tasks with expired claims (configurable TTL, default 30min).
+- `agent_heartbeat` MCP tool and `POST /people/:id/heartbeat` endpoint for agent
+  liveness signaling — updates `lastSeen`, optionally sets `status` and
+  `currentTaskId`.
+
 ## [0.16.0] - 2026-03-07
 
 ### Added
