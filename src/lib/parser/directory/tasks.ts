@@ -766,6 +766,7 @@ export class TasksDirectoryParser {
     id: string,
     commentId: string,
     body: string,
+    metadata?: Record<string, unknown>,
   ): Promise<TaskComment | null> {
     const task = await this.read(id);
     if (!task) return null;
@@ -777,6 +778,9 @@ export class TasksDirectoryParser {
     const updated_comment: TaskComment = {
       ...existing[idx],
       body: body.replace(/\n/g, " ").trim(),
+      ...(metadata !== undefined && {
+        metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
+      }),
     };
     const updatedComments = [
       ...existing.slice(0, idx),

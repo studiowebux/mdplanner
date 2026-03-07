@@ -470,7 +470,14 @@ tasksRouter.put("/:id/comments/:commentId", async (c) => {
     return errorResponse("comment body is required", 400);
   }
 
-  const comment = await parser.updateComment(taskId, commentId, commentBody);
+  // deno-lint-ignore no-explicit-any
+  const metadata: Record<string, unknown> | undefined = body.metadata as any;
+  const comment = await parser.updateComment(
+    taskId,
+    commentId,
+    commentBody,
+    metadata,
+  );
   if (!comment) {
     return errorResponse("Task or comment not found", 404);
   }
