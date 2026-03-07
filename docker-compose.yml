@@ -7,7 +7,6 @@ services:
     volumes:
       - ./data:/data
       - ./backups:/backups
-      - deno_cache:/root/.cache/deno
     environment:
       - MDPLANNER_CACHE=${MDPLANNER_CACHE:-}
       - MDPLANNER_WEBDAV=${MDPLANNER_WEBDAV:-1}
@@ -35,6 +34,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 15s
-
-volumes:
-  deno_cache:
