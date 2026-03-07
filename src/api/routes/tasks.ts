@@ -82,6 +82,96 @@ tasksRouter.get("/", async (c) => {
   return jsonResponse(tasks);
 });
 
+// GET /tasks/next - find highest-priority ready task matching agent skills
+tasksRouter.get("/next", async (c) => {
+  const parser = getParser(c);
+  const agentId = c.req.query("agent_id");
+  const project = c.req.query("project");
+  const section = c.req.query("section") ?? "Todo";
+  const excludeTagsRaw = c.req.query("exclude_tags");
+  const excludeTags = excludeTagsRaw
+    ? excludeTagsRaw.split(",").map((t) => t.trim())
+    : [];
+
+  if (!agentId) {
+    return errorResponse("agent_id query parameter is required", 400);
+  }
+
+  const person = await parser.readPerson(agentId);
+  if (!person) return errorResponse("Person not found", 404);
+  const skills = (person.skills ?? []).map((s) => s.toLowerCase());
+
+  const tasks = await parser.readTasks();
+  const flat: Task[] = [];
+  const flatten = (list: Task[]) => {
+    for (const t of list) {
+      flat.push(t);
+      if (t.children) flatten(t.children);
+    }
+  };
+  flatten(tasks);
+
+  // Filter by section
+  let candidates = flat.filter((t) =>
+    t.section.toLowerCase() === section.toLowerCase()
+  );
+
+  // Filter by project
+  if (project) {
+    candidates = candidates.filter((t) =>
+      (t.config?.project ?? "").toLowerCase() === project.toLowerCase()
+    );
+  }
+
+  // Filter ready: all blocked_by resolved
+  const taskById = new Map(flat.map((t) => [t.id, t]));
+  candidates = candidates.filter((t) => {
+    const blockers = t.config?.blocked_by ?? [];
+    if (blockers.length === 0) return true;
+    return blockers.every((bid: string) => {
+      const blocker = taskById.get(bid);
+      return !blocker || blocker.completed ||
+        blocker.section.toLowerCase() === "done";
+    });
+  });
+
+  // Exclude tags
+  if (excludeTags.length) {
+    const lowerExclude = excludeTags.map((t) => t.toLowerCase());
+    candidates = candidates.filter((t) => {
+      const taskTags = (t.config?.tags ?? []).map((tag: string) =>
+        tag.toLowerCase()
+      );
+      return !taskTags.some((tag) => lowerExclude.includes(tag));
+    });
+  }
+
+  // Sort by priority (1 = highest, undefined defaults to 5)
+  candidates.sort((a, b) =>
+    (a.config?.priority ?? 5) - (b.config?.priority ?? 5)
+  );
+
+  // Skill match
+  if (skills.length > 0) {
+    const skillMatch = candidates.find((t) => {
+      const taskTags = (t.config?.tags ?? []).map((tag: string) =>
+        tag.toLowerCase()
+      );
+      return taskTags.some((tag) => skills.includes(tag));
+    });
+    if (skillMatch) return jsonResponse(skillMatch);
+  }
+
+  // Fallback 1: untagged task
+  const untagged = candidates.find((t) => !(t.config?.tags?.length));
+  if (untagged) return jsonResponse(untagged);
+
+  // Fallback 2: any remaining
+  if (candidates.length > 0) return jsonResponse(candidates[0]);
+
+  return jsonResponse(null);
+});
+
 // GET /tasks/:id - get single task
 tasksRouter.get("/:id", async (c) => {
   const parser = getParser(c);
