@@ -1,7 +1,8 @@
 /**
  * MCP tools for onboarding record and template operations.
  * Tools: list_onboarding, get_onboarding, create_onboarding, update_onboarding, delete_onboarding,
- *        list_onboarding_templates, get_onboarding_template, create_onboarding_template, delete_onboarding_template
+ *        list_onboarding_templates, get_onboarding_template, create_onboarding_template,
+ *        update_onboarding_template, delete_onboarding_template
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -152,6 +153,31 @@ export function registerOnboardingTools(
         steps: steps ?? [],
       });
       return ok({ id: item.id });
+    },
+  );
+
+  server.registerTool(
+    "update_onboarding_template",
+    {
+      description: "Update an existing onboarding template.",
+      inputSchema: {
+        id: z.string().describe("Template ID"),
+        name: z.string().optional(),
+        description: z.string().optional(),
+        steps: z.array(z.object({
+          title: z.string().describe("Step title"),
+          category: z.enum(STEP_CATEGORY).describe("Step category"),
+        })).optional().describe("Full replacement step list"),
+      },
+    },
+    async ({ id, name, description, steps }) => {
+      const updated = await parser.updateOnboardingTemplate(id, {
+        ...(name !== undefined && { name }),
+        ...(description !== undefined && { description }),
+        ...(steps !== undefined && { steps }),
+      });
+      if (!updated) return err(`Onboarding template '${id}' not found`);
+      return ok({ success: true });
     },
   );
 
