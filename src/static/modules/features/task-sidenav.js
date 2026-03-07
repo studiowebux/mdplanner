@@ -19,6 +19,8 @@ export class TaskSidenavModule {
     this._descUndoManager = null;
     /** @type {FuzzyAutocomplete | null} */
     this._projectFuzzy = null;
+    /** Cache keys to skip DOM rebuilds when data hasn't changed */
+    this._cache = { sections: null, assignees: null, tags: null, milestones: null };
   }
 
   bindEvents() {
@@ -248,8 +250,6 @@ export class TaskSidenavModule {
   close() {
     Sidenav.unregisterModule();
     this._detachDescUndo();
-    this._projectFuzzy?.destroy();
-    this._projectFuzzy = null;
     Sidenav.close("taskSidenav");
     this.editingTask = null;
     this.tm.editingTask = null;
@@ -265,60 +265,55 @@ export class TaskSidenavModule {
   }
 
   populateSelects() {
-    // Sections
+    // Sections — skip if unchanged
     const sectionSelect = document.getElementById("sidenavTaskSection");
     if (sectionSelect && this.tm.sections) {
-      sectionSelect.innerHTML = this.tm.sections.map((s) =>
-        `<option value="${s}">${s}</option>`
-      ).join("");
+      const key = this.tm.sections.join(",");
+      if (this._cache.sections !== key) {
+        sectionSelect.innerHTML = this.tm.sections.map((s) =>
+          `<option value="${s}">${s}</option>`
+        ).join("");
+        this._cache.sections = key;
+      }
     }
 
-    // Assignees from people/ registry
+    // Assignees from people/ registry — skip if unchanged
     const assigneeSelect = document.getElementById("sidenavTaskAssignee");
     if (assigneeSelect) {
       const people = Array.from(this.tm.peopleMap.values());
-      assigneeSelect.innerHTML = `<option value="">Unassigned</option>` +
-        people.map((p) => {
-          const role = p.role || p.title || "";
-          const label = role ? `${p.name} (${role})` : p.name;
-          return `<option value="${p.id}">${label}</option>`;
-        }).join("");
+      const key = people.map((p) => p.id).join(",");
+      if (this._cache.assignees !== key) {
+        assigneeSelect.innerHTML = `<option value="">Unassigned</option>` +
+          people.map((p) => {
+            const role = p.role || p.title || "";
+            const label = role ? `${p.name} (${role})` : p.name;
+            return `<option value="${p.id}">${label}</option>`;
+          }).join("");
+        this._cache.assignees = key;
+      }
     }
 
-    // Tags — render as checkboxes (mobile-safe, avoids <select multiple> issues on iOS)
+    // Tags — skip if unchanged
     const tagsContainer = document.getElementById("sidenavTaskTags");
     if (tagsContainer && this.tm.projectConfig?.tags) {
-      tagsContainer.innerHTML = this.tm.projectConfig.tags.map((t) =>
-        `<label class="tag-checkbox-item">
+      const key = this.tm.projectConfig.tags.join(",");
+      if (this._cache.tags !== key) {
+        tagsContainer.innerHTML = this.tm.projectConfig.tags.map((t) =>
+          `<label class="tag-checkbox-item">
           <input type="checkbox" value="${t}" name="sidenavTag">
           <span>${t}</span>
         </label>`
-      ).join("");
+        ).join("");
+        this._cache.tags = key;
+      }
     }
 
-    // Milestones select — filtered by selected project if one is set
-    const milestoneSelect = document.getElementById("sidenavTaskMilestone");
-    if (milestoneSelect) {
-      const currentVal = milestoneSelect.value;
-      const selectedProject = document.getElementById("sidenavTaskProject")?.value || "";
-      const allMilestones = this.tm.milestones || [];
-      const filtered = selectedProject
-        ? allMilestones.filter((m) => !m.project || m.project === selectedProject)
-        : allMilestones;
-      const names = Array.from(
-        new Set(filtered.map((m) => m.name).filter(Boolean))
-      ).sort();
-      milestoneSelect.innerHTML =
-        '<option value="">— No milestone —</option>' +
-        names.map((n) => `<option value="${n}">${n}</option>`).join("");
-      // Restore selection if still valid
-      if (currentVal && names.includes(currentVal)) milestoneSelect.value = currentVal;
-    }
+    // Milestones select — filtered by selected project
+    this._refreshMilestoneSelect();
 
-    // Projects fuzzy autocomplete — portfolio item names
+    // Projects fuzzy autocomplete — initialize once, reuse on subsequent opens
     const projectInput = document.getElementById("sidenavTaskProject");
-    if (projectInput) {
-      this._projectFuzzy?.destroy();
+    if (projectInput && !this._projectFuzzy) {
       this._projectFuzzy = new FuzzyAutocomplete(
         projectInput,
         () => {
@@ -328,7 +323,6 @@ export class TaskSidenavModule {
         },
         {
           onSelect: (name) => {
-            // Auto-fill GitHub repo from portfolio item if the field is currently empty
             const repoInput = document.getElementById("sidenavTaskGithubRepo");
             if (!repoInput || repoInput.value.trim()) return;
             const item = (this.tm.portfolio || []).find((p) => p.name === name);
@@ -351,9 +345,13 @@ export class TaskSidenavModule {
     const names = Array.from(
       new Set(filtered.map((m) => m.name).filter(Boolean))
     ).sort();
-    milestoneSelect.innerHTML =
-      '<option value="">— No milestone —</option>' +
-      names.map((n) => `<option value="${n}">${n}</option>`).join("");
+    const key = selectedProject + ":" + names.join(",");
+    if (this._cache.milestones !== key) {
+      milestoneSelect.innerHTML =
+        '<option value="">— No milestone —</option>' +
+        names.map((n) => `<option value="${n}">${n}</option>`).join("");
+      this._cache.milestones = key;
+    }
     if (currentVal && names.includes(currentVal)) milestoneSelect.value = currentVal;
   }
 
