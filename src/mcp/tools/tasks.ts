@@ -469,6 +469,158 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
   );
 
   server.registerTool(
+    "batch_update_tasks",
+    {
+      description:
+        "Update multiple tasks in a single call. Each entry follows the " +
+        "same fields as update_task. Returns per-task success/error results. " +
+        "Use this to move a batch to In Progress, add comments to several " +
+        "tasks, or move a batch to Done in one round-trip.",
+      inputSchema: {
+        updates: z.array(
+          z.object({
+            id: z.string().describe("Task ID"),
+            title: z.string().optional(),
+            section: z.string().optional(),
+            completed: z.boolean().optional(),
+            description: z.string().optional().describe(
+              "Full replacement description (markdown)",
+            ),
+            assignee: z.string().optional(),
+            due_date: z.string().optional(),
+            priority: z.number().int().min(1).max(5).optional(),
+            effort: z.number().int().optional(),
+            tags: z.array(z.string()).optional(),
+            milestone: z.string().optional(),
+            project: z.string().optional(),
+            blocked_by: z.array(z.string()).optional(),
+            planned_start: z.string().optional(),
+            planned_end: z.string().optional(),
+            claimed_by: z.string().optional(),
+            claimed_at: z.string().optional(),
+            expected_revision: z.number().int().optional().describe(
+              "Optimistic locking — reject if revision mismatch",
+            ),
+            agent_id: z.string().optional().describe(
+              "Claim guard — reject if task claimed by different agent",
+            ),
+            comment: z.string().optional().describe(
+              "If provided, add this comment to the task after updating",
+            ),
+            comment_author: z.string().optional().describe(
+              "Author for the comment (default: 'Claude')",
+            ),
+          }),
+        ).min(1).max(50).describe(
+          "Array of task updates (1-50). Each entry needs at least an id.",
+        ),
+      },
+    },
+    async ({ updates }) => {
+      const results: { id: string; success: boolean; error?: string }[] = [];
+
+      for (const entry of updates) {
+        const current = await parser.readTask(entry.id);
+        if (!current) {
+          results.push({
+            id: entry.id,
+            success: false,
+            error: `Task '${entry.id}' not found`,
+          });
+          continue;
+        }
+
+        // Optimistic locking
+        if (
+          entry.expected_revision !== undefined &&
+          current.revision !== entry.expected_revision
+        ) {
+          results.push({
+            id: entry.id,
+            success: false,
+            error:
+              `REVISION_CONFLICT: expected ${entry.expected_revision}, actual ${current.revision}`,
+          });
+          continue;
+        }
+
+        // Claim guard
+        if (
+          entry.agent_id &&
+          current.section === "In Progress" &&
+          current.config.claimedBy &&
+          current.config.claimedBy !== entry.agent_id
+        ) {
+          results.push({
+            id: entry.id,
+            success: false,
+            error:
+              `CLAIM_GUARD: task claimed by '${current.config.claimedBy}', caller is '${entry.agent_id}'`,
+          });
+          continue;
+        }
+
+        const success = await parser.updateTask(entry.id, {
+          ...(entry.title !== undefined && { title: entry.title }),
+          ...(entry.section !== undefined && { section: entry.section }),
+          ...(entry.completed !== undefined && { completed: entry.completed }),
+          ...(entry.description !== undefined && {
+            description: entry.description.split("\n"),
+          }),
+          config: {
+            ...(entry.assignee !== undefined && { assignee: entry.assignee }),
+            ...(entry.due_date !== undefined && { due_date: entry.due_date }),
+            ...(entry.priority !== undefined && { priority: entry.priority }),
+            ...(entry.effort !== undefined && { effort: entry.effort }),
+            ...(entry.tags !== undefined && { tags: entry.tags }),
+            ...(entry.milestone !== undefined && {
+              milestone: entry.milestone,
+            }),
+            ...(entry.project !== undefined && { project: entry.project }),
+            ...(entry.blocked_by !== undefined && {
+              blocked_by: entry.blocked_by,
+            }),
+            ...(entry.planned_start !== undefined && {
+              planned_start: entry.planned_start,
+            }),
+            ...(entry.planned_end !== undefined && {
+              planned_end: entry.planned_end,
+            }),
+            ...(entry.claimed_by !== undefined && {
+              claimedBy: entry.claimed_by,
+            }),
+            ...(entry.claimed_at !== undefined && {
+              claimedAt: entry.claimed_at,
+            }),
+          },
+        });
+
+        if (!success) {
+          results.push({
+            id: entry.id,
+            success: false,
+            error: `Failed to update task '${entry.id}'`,
+          });
+          continue;
+        }
+
+        if (entry.comment) {
+          await parser.addComment(
+            entry.id,
+            entry.comment,
+            entry.comment_author ?? "Claude",
+          );
+        }
+
+        results.push({ id: entry.id, success: true });
+      }
+
+      const updated = results.filter((r) => r.success).length;
+      return ok({ updated, total: updates.length, results });
+    },
+  );
+
+  server.registerTool(
     "sweep_stale_claims",
     {
       description:

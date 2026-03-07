@@ -169,6 +169,125 @@ tasksRouter.post("/sweep-stale-claims", async (c) => {
   return jsonResponse({ released, count: released.length });
 });
 
+// POST /tasks/batch - batch update multiple tasks
+tasksRouter.post("/batch", async (c) => {
+  const parser = getParser(c);
+  const body = await c.req.json();
+  const updates = body.updates;
+
+  if (!Array.isArray(updates) || updates.length === 0) {
+    return errorResponse(
+      "updates array is required and must not be empty",
+      400,
+    );
+  }
+  if (updates.length > 50) {
+    return errorResponse("updates array must not exceed 50 entries", 400);
+  }
+
+  const results: { id: string; success: boolean; error?: string }[] = [];
+
+  for (const entry of updates) {
+    if (!entry.id) {
+      results.push({ id: "", success: false, error: "missing task id" });
+      continue;
+    }
+
+    // Read current task for revision/claim checks
+    const needsCurrentTask = entry.expected_revision !== undefined ||
+      entry.agent_id;
+    const current = needsCurrentTask ? await parser.readTask(entry.id) : null;
+
+    if (needsCurrentTask && !current) {
+      results.push({
+        id: entry.id,
+        success: false,
+        error: "Task not found",
+      });
+      continue;
+    }
+
+    // Optimistic locking
+    if (
+      entry.expected_revision !== undefined && current &&
+      current.revision !== entry.expected_revision
+    ) {
+      results.push({
+        id: entry.id,
+        success: false,
+        error:
+          `REVISION_CONFLICT: expected ${entry.expected_revision}, actual ${current.revision}`,
+      });
+      continue;
+    }
+
+    // Claim guard
+    if (
+      entry.agent_id && current &&
+      current.section === "In Progress" &&
+      current.config.claimedBy &&
+      current.config.claimedBy !== entry.agent_id
+    ) {
+      results.push({
+        id: entry.id,
+        success: false,
+        error:
+          `CLAIM_GUARD: task claimed by '${current.config.claimedBy}', caller is '${entry.agent_id}'`,
+      });
+      continue;
+    }
+
+    const taskUpdates: Partial<Task> = {
+      ...(entry.title !== undefined && { title: entry.title }),
+      ...(entry.section !== undefined && { section: entry.section }),
+      ...(entry.completed !== undefined && { completed: entry.completed }),
+      ...(entry.description !== undefined && {
+        description: bodyToDescription(entry),
+      }),
+      config: bodyToConfig(entry),
+    };
+
+    const success = await parser.updateTask(entry.id, taskUpdates);
+    if (!success) {
+      results.push({
+        id: entry.id,
+        success: false,
+        error: "Task not found",
+      });
+      continue;
+    }
+
+    // Auto-create milestone if referenced
+    if (taskUpdates.config?.milestone) {
+      await ensureMilestoneExists(parser, taskUpdates.config.milestone).catch(
+        () => {},
+      );
+    }
+
+    // Optional inline comment
+    if (entry.comment) {
+      await parser.addComment(
+        entry.id,
+        String(entry.comment),
+        entry.comment_author ? String(entry.comment_author) : undefined,
+      );
+    }
+
+    results.push({ id: entry.id, success: true });
+  }
+
+  const updated = results.filter((r) => r.success).length;
+  if (updated > 0) {
+    cacheWriteThrough(c, "tasks").catch((e) =>
+      console.error("[tasks] background cache sync failed:", e)
+    );
+    parser.touchLastUpdated().catch((e) =>
+      console.error("[lastUpdated] touch failed:", e)
+    );
+  }
+  return jsonResponse({ updated, total: updates.length, results });
+});
+
 // PUT /tasks/:id - update task
 tasksRouter.put("/:id", async (c) => {
   const parser = getParser(c);
