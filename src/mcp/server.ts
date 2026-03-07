@@ -39,6 +39,8 @@ import { registerDnsTools } from "./tools/dns.ts";
 import { registerGitHubTools } from "./tools/github.ts";
 import { registerMindmapTools } from "./tools/mindmaps.ts";
 import { registerMarketingPlanTools } from "./tools/marketing-plans.ts";
+import { registerTimeTrackingTools } from "./tools/time-tracking.ts";
+import { registerC4Tools } from "./tools/c4.ts";
 import { registerResources } from "./resources.ts";
 
 /**
@@ -83,6 +85,8 @@ export function createMcpServer(pm: ProjectManager): McpServer {
   registerGitHubTools(server, pm);
   registerMindmapTools(server, pm);
   registerMarketingPlanTools(server, pm);
+  registerTimeTrackingTools(server, pm);
+  registerC4Tools(server, pm);
   registerResources(server, pm);
 
   return server;
