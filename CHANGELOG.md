@@ -8,6 +8,20 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-03-06
+
+### Added
+
+- GitHub Container Registry workflow: multi-platform Docker image (linux/amd64,
+  linux/arm64) published to ghcr.io on version tags.
+- Quick-start docker-compose for 3-line setup.
+
+### Fixed
+
+- CI type error in milestones.ts (TS2367).
+- Test type errors: `tag` renamed to `tags` in tasks_test.ts to match
+  TaskConfig.
+
 ## [0.12.1] - 2026-03-06
 
 ### Added
