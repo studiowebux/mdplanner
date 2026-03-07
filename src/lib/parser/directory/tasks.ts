@@ -718,6 +718,7 @@ export class TasksDirectoryParser {
     id: string,
     body: string,
     author?: string,
+    metadata?: Record<string, unknown>,
   ): Promise<TaskComment | null> {
     const task = await this.read(id);
     if (!task) return null;
@@ -727,6 +728,7 @@ export class TasksDirectoryParser {
       timestamp: new Date().toISOString(),
       body: body.replace(/\n/g, " ").trim(),
       ...(author && { author }),
+      ...(metadata && Object.keys(metadata).length > 0 && { metadata }),
     };
 
     const existing = task.config.comments ?? [];

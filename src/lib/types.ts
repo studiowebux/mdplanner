@@ -11,6 +11,7 @@ export interface TaskComment {
   author?: string;
   timestamp: string; // ISO date string
   body: string; // single-line text
+  metadata?: Record<string, unknown>;
 }
 
 export interface TaskConfig {
