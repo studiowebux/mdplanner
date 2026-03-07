@@ -309,11 +309,17 @@ export class ListView {
       }
     });
 
+    // Build section jump bar
+    this.renderSectionJumpBar(sections, allTasks);
+
     // Lazy-load live GitHub issue/PR states after render
     if (this.tm.githubConfigured) this._loadGitHubBadgeStates();
 
     // Restore scroll position so re-renders after sidenav close/save don't jump to top
-    requestAnimationFrame(() => window.scrollTo({ top: savedScrollY, behavior: "instant" }));
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: savedScrollY, behavior: "instant" });
+      this.setupScrollSpy();
+    });
   }
 
   createTaskElement(task, isChild = false) {
@@ -498,6 +504,64 @@ export class ListView {
         `;
 
     return div;
+  }
+
+  /** Build clickable section pills in the jump bar. */
+  renderSectionJumpBar(sections, allTasks) {
+    const bar = document.getElementById("sectionJumpBar");
+    if (!bar) return;
+    bar.innerHTML = "";
+
+    // Hide when section filter narrows to one section
+    if (this.tm.listFilters.section) return;
+
+    sections.forEach((section) => {
+      const count = allTasks.filter(
+        (t) => t.section === section && !t.parentId,
+      ).length;
+      const pill = document.createElement("button");
+      pill.type = "button";
+      pill.className = "section-jump-pill";
+      pill.dataset.section = section;
+      pill.textContent = `${section} (${count})`;
+      pill.addEventListener("click", () => {
+        const header = document.querySelector(
+          `.list-section-header[data-section="${section}"]`,
+        );
+        if (header) {
+          header.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+      bar.appendChild(pill);
+    });
+  }
+
+  /** IntersectionObserver scroll-spy — highlights the pill for the visible section. */
+  setupScrollSpy() {
+    if (this._scrollSpyObserver) this._scrollSpyObserver.disconnect();
+
+    const headers = document.querySelectorAll(
+      "#listContainer .list-section-header",
+    );
+    if (headers.length === 0) return;
+
+    this._scrollSpyObserver = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+        if (visible.length === 0) return;
+
+        const topSection = visible[0].target.dataset.section;
+        document.querySelectorAll(".section-jump-pill").forEach((pill) => {
+          pill.classList.toggle("active", pill.dataset.section === topSection);
+        });
+      },
+      { threshold: 0, rootMargin: "-20% 0px -70% 0px" },
+    );
+
+    headers.forEach((h) => this._scrollSpyObserver.observe(h));
   }
 
   /**
