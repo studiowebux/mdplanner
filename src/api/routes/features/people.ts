@@ -107,6 +107,31 @@ peopleRouter.put("/:id", async (c) => {
   return jsonResponse(updated);
 });
 
+// POST /people/:id/heartbeat - update agent lastSeen timestamp
+peopleRouter.post("/:id/heartbeat", async (c) => {
+  const parser = getParser(c);
+  const id = c.req.param("id");
+  const body = await c.req.json().catch(() => ({}));
+
+  const updates: Record<string, unknown> = {
+    lastSeen: new Date().toISOString(),
+  };
+  if (body.status) updates.status = body.status;
+  if (body.currentTaskId !== undefined) {
+    updates.currentTaskId = body.currentTaskId || undefined;
+  }
+
+  const updated = await parser.updatePerson(id, updates);
+  if (!updated) {
+    return errorResponse("Person not found", 404);
+  }
+
+  cacheWriteThrough(c, "people").catch((e) =>
+    console.error("[people] background cache sync failed:", e)
+  );
+  return jsonResponse({ success: true });
+});
+
 // DELETE /people/:id - delete person
 peopleRouter.delete("/:id", async (c) => {
   const parser = getParser(c);

@@ -228,4 +228,34 @@ export function registerPeopleTools(
       return ok({ success: true });
     },
   );
+
+  server.registerTool(
+    "agent_heartbeat",
+    {
+      description:
+        "Update an agent's lastSeen timestamp and optionally set status " +
+        "and currentTaskId. Call periodically to signal the agent is alive.",
+      inputSchema: {
+        id: z.string().describe("Person ID of the agent"),
+        status: z.enum(["idle", "working", "offline"]).optional().describe(
+          "Agent status (default: keeps current value)",
+        ),
+        currentTaskId: z.string().optional().describe(
+          "Task ID the agent is currently working on (empty string to clear)",
+        ),
+      },
+    },
+    async ({ id, status, currentTaskId }) => {
+      const updates: Record<string, unknown> = {
+        lastSeen: new Date().toISOString(),
+      };
+      if (status !== undefined) updates.status = status;
+      if (currentTaskId !== undefined) {
+        updates.currentTaskId = currentTaskId || undefined;
+      }
+      const success = await parser.updatePerson(id, updates);
+      if (!success) return err(`Person '${id}' not found`);
+      return ok({ success: true });
+    },
+  );
 }

@@ -467,6 +467,53 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
       }
     },
   );
+
+  server.registerTool(
+    "sweep_stale_claims",
+    {
+      description:
+        "Release tasks whose claim has expired. Scans In Progress tasks " +
+        "where claimedAt + TTL has passed, moves them back to Todo, clears " +
+        "claimedBy/claimedAt, and adds a system comment. Returns the list " +
+        "of released task IDs.",
+      inputSchema: {
+        ttl_minutes: z.number().int().min(1).optional().describe(
+          "Claim TTL in minutes (default: 30). Tasks claimed longer ago are released.",
+        ),
+      },
+    },
+    async ({ ttl_minutes }) => {
+      const ttl = (ttl_minutes ?? 30) * 60 * 1000;
+      const now = Date.now();
+      const tasks = await parser.readTasks();
+      const flat = flattenTasks(tasks);
+      const stale = flat.filter((t) => {
+        if (t.section !== "In Progress") return false;
+        const claimedAt = t.config?.claimedAt;
+        if (!claimedAt) return false;
+        return now - new Date(claimedAt).getTime() > ttl;
+      });
+
+      const released: string[] = [];
+      for (const task of stale) {
+        await parser.updateTask(task.id, {
+          section: "Todo",
+          config: {
+            claimedBy: undefined,
+            claimedAt: undefined,
+          },
+        });
+        await parser.addComment(
+          task.id,
+          `[system] Claim expired — agent '${task.config.claimedBy}' unresponsive after ${
+            ttl_minutes ?? 30
+          }min TTL`,
+        );
+        released.push(task.id);
+      }
+      return ok({ released, count: released.length });
+    },
+  );
 }
 
 /** Flattens a task tree into a single-level array. */
