@@ -2,7 +2,6 @@
 import { GitHubAPI, PortfolioAPI } from "../api.js";
 
 export class GitHubView {
-  /** @param {import("../app.js").TaskManager} taskManager */
   constructor(taskManager) {
     this.tm = taskManager;
     this._loading = false;
