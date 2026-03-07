@@ -203,6 +203,48 @@
   color: var(--color-text-muted);
 }
 
+/* Agent Type Badge */
+.people-agent-badge {
+  display: inline-block;
+  margin-left: 0.375rem;
+  padding: 0.0625rem 0.375rem;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-muted);
+  background: transparent;
+  vertical-align: middle;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.people-agent-badge--ai {
+  border-color: var(--color-text-muted);
+}
+
+.people-agent-badge--hybrid {
+  border-style: dashed;
+}
+
+/* Skill Tags */
+.people-card-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.375rem;
+}
+
+.people-skill-tag {
+  display: inline-block;
+  padding: 0.0625rem 0.375rem;
+  font-size: var(--font-size-xs);
+  border: 1px solid var(--color-border-default);
+  border-radius: 0.25rem;
+  color: var(--color-text-muted);
+  background: transparent;
+}
+
 /* Dark Mode */
 .dark .people-card {
   background-color: var(--color-bg-secondary);

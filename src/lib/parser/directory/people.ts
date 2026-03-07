@@ -5,7 +5,7 @@
  * Unifies OrgChartMember + TeamMember into a single Person entity.
  */
 import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
-import type { Person } from "../../types.ts";
+import type { AgentModel, Person } from "../../types.ts";
 
 interface PersonFrontmatter {
   id: string;
@@ -18,6 +18,10 @@ interface PersonFrontmatter {
   startDate?: string;
   hoursPerDay?: number;
   workingDays?: string[];
+  agentType?: "human" | "ai" | "hybrid";
+  skills?: string[];
+  models?: AgentModel[];
+  systemPrompt?: string;
 }
 
 export interface PersonWithChildren extends Person {
@@ -72,6 +76,14 @@ export class PeopleDirectoryParser extends DirectoryParser<Person> {
       workingDays = [frontmatter.workingDays];
     }
 
+    // Handle skills as array or scalar
+    let skills: string[] | undefined;
+    if (Array.isArray(frontmatter.skills)) {
+      skills = frontmatter.skills;
+    } else if (typeof frontmatter.skills === "string") {
+      skills = [frontmatter.skills];
+    }
+
     return {
       id: frontmatter.id,
       name,
@@ -85,6 +97,10 @@ export class PeopleDirectoryParser extends DirectoryParser<Person> {
       hoursPerDay: frontmatter.hoursPerDay,
       workingDays,
       notes: notes || undefined,
+      agentType: frontmatter.agentType,
+      skills: skills?.length ? skills : undefined,
+      models: frontmatter.models?.length ? frontmatter.models : undefined,
+      systemPrompt: frontmatter.systemPrompt,
     };
   }
 
@@ -108,6 +124,10 @@ export class PeopleDirectoryParser extends DirectoryParser<Person> {
     if (person.workingDays?.length) {
       frontmatter.workingDays = person.workingDays;
     }
+    if (person.agentType) frontmatter.agentType = person.agentType;
+    if (person.skills?.length) frontmatter.skills = person.skills;
+    if (person.models?.length) frontmatter.models = person.models;
+    if (person.systemPrompt) frontmatter.systemPrompt = person.systemPrompt;
 
     const body = `# ${person.name}\n\n${person.notes || ""}`;
     return buildFileContent(frontmatter, body);

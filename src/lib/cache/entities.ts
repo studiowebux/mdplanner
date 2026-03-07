@@ -1160,7 +1160,11 @@ export const ENTITIES: EntityDef[] = [
   start_date TEXT,
   hours_per_day REAL,
   working_days TEXT,  -- JSON array
-  notes TEXT
+  notes TEXT,
+  agent_type TEXT,
+  skills TEXT,  -- JSON array
+  models TEXT,  -- JSON array of objects
+  system_prompt TEXT
 )`,
     fts: {
       type: "person",
@@ -1173,8 +1177,8 @@ export const ENTITIES: EntityDef[] = [
       db.execute("DELETE FROM people");
       for (const p of people) {
         db.execute(
-          `INSERT INTO people (id, name, title, role, departments, reports_to, email, phone, start_date, hours_per_day, working_days, notes)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO people (id, name, title, role, departments, reports_to, email, phone, start_date, hours_per_day, working_days, notes, agent_type, skills, models, system_prompt)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             val(p.id),
             val(p.name),
@@ -1188,6 +1192,10 @@ export const ENTITIES: EntityDef[] = [
             val(p.hoursPerDay),
             json(p.workingDays),
             val(p.notes),
+            val(p.agentType),
+            json(p.skills),
+            json(p.models),
+            val(p.systemPrompt),
           ],
         );
       }

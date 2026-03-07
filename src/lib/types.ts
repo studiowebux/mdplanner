@@ -506,6 +506,12 @@ export interface Interaction {
 
 // People Registry Types
 
+export interface AgentModel {
+  name: string;
+  provider: string;
+  endpoint?: string;
+}
+
 export interface Person {
   id: string;
   name: string;
@@ -519,6 +525,10 @@ export interface Person {
   hoursPerDay?: number;
   workingDays?: string[];
   notes?: string;
+  agentType?: "human" | "ai" | "hybrid";
+  skills?: string[];
+  models?: AgentModel[];
+  systemPrompt?: string;
 }
 
 // MoSCoW Analysis Types

@@ -14571,6 +14571,51 @@
             </div>
           </div>
           <div class="sidenav-section">
+            <div class="sidenav-section-title">Agent Configuration</div>
+            <div class="form-group">
+              <label class="form-label">Agent Type</label>
+              <select id="peopleSidenavAgentType" class="form-select">
+                <option value="">Not set</option>
+                <option value="human">Human</option>
+                <option value="ai">AI</option>
+                <option value="hybrid">Hybrid</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Skills</label>
+              <input
+                type="text"
+                id="peopleSidenavSkills"
+                class="form-input"
+                placeholder="e.g., go, typescript, code-review"
+              >
+              <p class="text-xs text-muted mt-1">
+                Comma-separated capabilities
+              </p>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Models</label>
+              <textarea
+                id="peopleSidenavModels"
+                rows="3"
+                class="form-textarea"
+                placeholder='[{"name":"claude-sonnet-4-6","provider":"anthropic"}]'
+              ></textarea>
+              <p class="text-xs text-muted mt-1">
+                JSON array of {name, provider, endpoint?}
+              </p>
+            </div>
+            <div class="form-group">
+              <label class="form-label">System Prompt</label>
+              <textarea
+                id="peopleSidenavSystemPrompt"
+                rows="3"
+                class="form-textarea"
+                placeholder="Default persona or instructions for this agent"
+              ></textarea>
+            </div>
+          </div>
+          <div class="sidenav-section">
             <div class="sidenav-section-title">Notes</div>
             <div class="form-group">
               <textarea
