@@ -8,6 +8,16 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-03-07
+
+### Added
+
+- `get_next_task` MCP tool and `GET /tasks/next` API endpoint for skill-based
+  task matching. Accepts `agent_id`, reads `person.skills`, cross-references
+  with task `tags` on ready tasks sorted by priority. Falls back to untagged
+  tasks, then any available task. Supports `project`, `section`, and
+  `exclude_tags` filters.
+
 ## [0.18.0] - 2026-03-07
 
 ### Added
