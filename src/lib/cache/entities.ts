@@ -143,6 +143,7 @@ export const ENTITIES: EntityDef[] = [
   parent_id TEXT,
   project TEXT,
   config TEXT,         -- Full config as JSON
+  revision INTEGER DEFAULT 1,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 )`,
@@ -160,8 +161,8 @@ export const ENTITIES: EntityDef[] = [
       const insertTask = (task: any, parentId?: string) => {
         const config = task.config ?? {};
         db.execute(
-          `INSERT INTO tasks (id, title, completed, section, description, tags, due_date, assignee, priority, effort, milestone, blocked_by, planned_start, planned_end, parent_id, project, config)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO tasks (id, title, completed, section, description, tags, due_date, assignee, priority, effort, milestone, blocked_by, planned_start, planned_end, parent_id, project, config, revision)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             val(task.id),
             val(task.title),
@@ -182,6 +183,7 @@ export const ENTITIES: EntityDef[] = [
             val(parentId),
             val(config.project),
             JSON.stringify(config),
+            val(task.revision ?? 1),
           ],
         );
         count++;

@@ -22,6 +22,9 @@ interface PersonFrontmatter {
   skills?: string[];
   models?: AgentModel[];
   systemPrompt?: string;
+  status?: "idle" | "working" | "offline";
+  lastSeen?: string;
+  currentTaskId?: string;
 }
 
 export interface PersonWithChildren extends Person {
@@ -101,6 +104,9 @@ export class PeopleDirectoryParser extends DirectoryParser<Person> {
       skills: skills?.length ? skills : undefined,
       models: frontmatter.models?.length ? frontmatter.models : undefined,
       systemPrompt: frontmatter.systemPrompt,
+      status: frontmatter.status,
+      lastSeen: frontmatter.lastSeen,
+      currentTaskId: frontmatter.currentTaskId,
     };
   }
 
@@ -128,6 +134,9 @@ export class PeopleDirectoryParser extends DirectoryParser<Person> {
     if (person.skills?.length) frontmatter.skills = person.skills;
     if (person.models?.length) frontmatter.models = person.models;
     if (person.systemPrompt) frontmatter.systemPrompt = person.systemPrompt;
+    if (person.status) frontmatter.status = person.status;
+    if (person.lastSeen) frontmatter.lastSeen = person.lastSeen;
+    if (person.currentTaskId) frontmatter.currentTaskId = person.currentTaskId;
 
     const body = `# ${person.name}\n\n${person.notes || ""}`;
     return buildFileContent(frontmatter, body);

@@ -323,6 +323,7 @@ function parseTasksCSV(csvContent: string): ParseResult {
       title,
       section: values[2]?.trim() || "Backlog",
       completed: values[3]?.toUpperCase() === "TRUE",
+      revision: 1,
       config: {
         priority: values[4]?.trim() ? parseInt(values[4]) : undefined,
         assignee: values[5]?.trim() || undefined,

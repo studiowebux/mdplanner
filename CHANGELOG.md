@@ -8,6 +8,26 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-03-07
+
+### Added
+
+- Task revision field and `updatedAt` timestamp for optimistic locking. Every
+  write increments revision; `expected_revision` param on `update_task`,
+  `claim_task` MCP tools and API routes rejects stale updates with
+  REVISION_CONFLICT (409).
+- `readTask(id)` delegate method on DirectoryMarkdownParser for single-task
+  lookups without reading all tasks.
+- Task claim tracking: `claimedBy` (person ID) and `claimedAt` (ISO timestamp)
+  fields on TaskConfig, set automatically by `claim_task` and exposed on
+  `update_task` MCP tool and API route.
+- Person agent status fields: `status` (idle/working/offline), `lastSeen` (ISO
+  timestamp), `currentTaskId` for orchestrator tracking. Exposed on
+  `update_person` MCP tool.
+- Claim guard on `update_task`: when `agent_id` is provided, In Progress tasks
+  claimed by a different agent are rejected with CLAIM_GUARD (409). Owner
+  (human) can always override by omitting `agent_id`.
+
 ## [0.15.1] - 2026-03-07
 
 ### Added

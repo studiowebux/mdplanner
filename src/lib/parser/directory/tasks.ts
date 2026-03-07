@@ -12,6 +12,8 @@ interface TaskFrontmatter {
   completed: boolean;
   completedAt?: string;
   createdAt?: string;
+  updatedAt?: string;
+  revision?: number;
   order?: number;
   tags?: string[];
   due_date?: string;
@@ -29,6 +31,8 @@ interface TaskFrontmatter {
   githubRepo?: string;
   githubPR?: number;
   comments?: TaskComment[];
+  claimedBy?: string;
+  claimedAt?: string;
 }
 
 export class TasksDirectoryParser {
@@ -505,6 +509,7 @@ export class TasksDirectoryParser {
             completed: completed === "x",
             section,
             config: {},
+            revision: 1,
             parentId: frontmatter.id,
           });
         }
@@ -545,6 +550,8 @@ export class TasksDirectoryParser {
     if (frontmatter.comments?.length) {
       config.comments = frontmatter.comments;
     }
+    if (frontmatter.claimedBy) config.claimedBy = frontmatter.claimedBy;
+    if (frontmatter.claimedAt) config.claimedAt = frontmatter.claimedAt;
 
     return {
       id: frontmatter.id,
@@ -552,6 +559,8 @@ export class TasksDirectoryParser {
       completed: frontmatter.completed || false,
       ...(frontmatter.completedAt && { completedAt: frontmatter.completedAt }),
       ...(frontmatter.createdAt && { createdAt: frontmatter.createdAt }),
+      ...(frontmatter.updatedAt && { updatedAt: frontmatter.updatedAt }),
+      revision: frontmatter.revision || 1,
       section,
       config,
       description: description.length > 0 ? description : undefined,
@@ -568,6 +577,8 @@ export class TasksDirectoryParser {
       completed: task.completed,
       ...(task.completedAt && { completedAt: task.completedAt }),
       ...(task.createdAt && { createdAt: task.createdAt }),
+      ...(task.updatedAt && { updatedAt: task.updatedAt }),
+      revision: task.revision,
     };
 
     // Add config fields
@@ -608,6 +619,8 @@ export class TasksDirectoryParser {
     if (task.config.comments?.length) {
       frontmatter.comments = task.config.comments;
     }
+    if (task.config.claimedBy) frontmatter.claimedBy = task.config.claimedBy;
+    if (task.config.claimedAt) frontmatter.claimedAt = task.config.claimedAt;
 
     let body = `# ${task.title}\n\n`;
 
@@ -684,11 +697,15 @@ export class TasksDirectoryParser {
   /**
    * Add a new task.
    */
-  async add(task: Omit<Task, "id">): Promise<Task> {
+  async add(task: Omit<Task, "id" | "revision">): Promise<Task> {
+    const now = new Date().toISOString();
     const newTask: Task = {
       ...task,
       config: task.config ?? {}, // ensure config always exists
       id: this.generateId(),
+      createdAt: task.createdAt ?? now,
+      updatedAt: now,
+      revision: 1,
     };
     await this.write(newTask);
     return newTask;
@@ -790,6 +807,8 @@ export class TasksDirectoryParser {
       // clobbering time_entries, blocked_by, order, attachments, etc.
       config: { ...existing.config, ...(updates.config ?? {}) },
       id: existing.id, // Prevent ID change
+      updatedAt: new Date().toISOString(),
+      revision: existing.revision + 1,
     };
 
     // Auto-manage completedAt when completion state changes
@@ -846,10 +865,18 @@ export class TasksDirectoryParser {
       }
 
       const oldFilePath = await this.findTaskFilePath(id, task.section);
+      const now = new Date().toISOString();
       const claimed: Task = {
         ...task,
         section: "In Progress",
-        config: { ...task.config, assignee },
+        config: {
+          ...task.config,
+          assignee,
+          claimedBy: assignee,
+          claimedAt: now,
+        },
+        updatedAt: now,
+        revision: task.revision + 1,
       };
       await this.write(claimed);
 

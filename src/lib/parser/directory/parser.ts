@@ -263,11 +263,15 @@ export class DirectoryMarkdownParser {
     return this.tasksParser.readAll();
   }
 
+  async readTask(id: string): Promise<Task | null> {
+    return this.tasksParser.read(id);
+  }
+
   async readTasksBySection(section: string): Promise<Task[]> {
     return this.tasksParser.readBySection(section);
   }
 
-  async addTask(task: Omit<Task, "id">): Promise<string> {
+  async addTask(task: Omit<Task, "id" | "revision">): Promise<string> {
     const newTask = await this.tasksParser.add(task);
     return newTask.id;
   }

@@ -198,6 +198,15 @@ export function registerPeopleTools(
         systemPrompt: z.string().optional().describe(
           "Default system prompt / persona for AI agents",
         ),
+        status: z.enum(["idle", "working", "offline"]).optional().describe(
+          "Agent availability status",
+        ),
+        lastSeen: z.string().optional().describe(
+          "ISO timestamp of last agent interaction (auto-set or manual)",
+        ),
+        currentTaskId: z.string().optional().describe(
+          "Task ID the agent is currently working on",
+        ),
       },
     },
     async ({ id, ...updates }) => {

@@ -31,6 +31,8 @@ export interface TaskConfig {
   githubRepo?: string;
   githubPR?: number;
   comments?: TaskComment[];
+  claimedBy?: string; // Person ID of the agent actively working on this task
+  claimedAt?: string; // ISO timestamp when claimed
 }
 
 export interface Task {
@@ -39,6 +41,8 @@ export interface Task {
   completed: boolean;
   completedAt?: string; // ISO date set when task is marked complete, cleared when uncompleted
   createdAt?: string; // ISO date set once at task creation
+  updatedAt?: string; // ISO date updated on every write
+  revision: number; // Monotonic counter for optimistic locking
   section: string;
   config: TaskConfig;
   description?: string[];
@@ -529,6 +533,9 @@ export interface Person {
   skills?: string[];
   models?: AgentModel[];
   systemPrompt?: string;
+  status?: "idle" | "working" | "offline";
+  lastSeen?: string; // ISO timestamp updated on agent interactions
+  currentTaskId?: string; // Task ID the agent is actively working on
 }
 
 // MoSCoW Analysis Types
