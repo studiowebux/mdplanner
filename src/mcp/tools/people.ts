@@ -8,6 +8,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { ProjectManager } from "../../lib/project-manager.ts";
+import { AgentModelSchema } from "../../lib/types.ts";
 import { err, ok } from "./utils.ts";
 
 export function registerPeopleTools(
@@ -113,15 +114,9 @@ export function registerPeopleTools(
         skills: z.array(z.string()).optional().describe(
           "Capabilities (e.g. ['go', 'typescript', 'code-review'])",
         ),
-        models: z.array(z.object({
-          name: z.string().describe("Model identifier"),
-          provider: z.string().describe(
-            "Provider name (e.g. anthropic, ollama)",
-          ),
-          endpoint: z.string().optional().describe(
-            "Inference server URL for self-hosted models",
-          ),
-        })).optional().describe("AI models this agent can use"),
+        models: z.array(AgentModelSchema).optional().describe(
+          "AI models this agent can use",
+        ),
         systemPrompt: z.string().optional().describe(
           "Default system prompt / persona for AI agents",
         ),
@@ -190,11 +185,9 @@ export function registerPeopleTools(
         skills: z.array(z.string()).optional().describe(
           "Capabilities (e.g. ['go', 'typescript', 'code-review'])",
         ),
-        models: z.array(z.object({
-          name: z.string(),
-          provider: z.string(),
-          endpoint: z.string().optional(),
-        })).optional().describe("AI models this agent can use"),
+        models: z.array(AgentModelSchema).optional().describe(
+          "AI models this agent can use",
+        ),
         systemPrompt: z.string().optional().describe(
           "Default system prompt / persona for AI agents",
         ),

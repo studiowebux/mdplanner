@@ -5,6 +5,7 @@
  * Unifies OrgChartMember + TeamMember into a single Person entity.
  */
 import { buildFileContent, DirectoryParser, parseFrontmatter } from "./base.ts";
+import { AgentModelSchema } from "../../types.ts";
 import type { AgentModel, Person } from "../../types.ts";
 
 interface PersonFrontmatter {
@@ -102,7 +103,20 @@ export class PeopleDirectoryParser extends DirectoryParser<Person> {
       notes: notes || undefined,
       agentType: frontmatter.agentType,
       skills: skills?.length ? skills : undefined,
-      models: frontmatter.models?.length ? frontmatter.models : undefined,
+      models: frontmatter.models?.length
+        ? (() => {
+          const result = AgentModelSchema.array().safeParse(
+            frontmatter.models,
+          );
+          if (!result.success) {
+            console.warn(
+              `[people] Invalid models in ${_filePath}: ${result.error.message}`,
+            );
+            return undefined;
+          }
+          return result.data;
+        })()
+        : undefined,
       systemPrompt: frontmatter.systemPrompt,
       status: frontmatter.status,
       lastSeen: frontmatter.lastSeen,
@@ -132,7 +146,9 @@ export class PeopleDirectoryParser extends DirectoryParser<Person> {
     }
     if (person.agentType) frontmatter.agentType = person.agentType;
     if (person.skills?.length) frontmatter.skills = person.skills;
-    if (person.models?.length) frontmatter.models = person.models;
+    if (person.models?.length) {
+      frontmatter.models = AgentModelSchema.array().parse(person.models);
+    }
     if (person.systemPrompt) frontmatter.systemPrompt = person.systemPrompt;
     if (person.status) frontmatter.status = person.status;
     if (person.lastSeen) frontmatter.lastSeen = person.lastSeen;

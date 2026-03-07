@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 export interface TimeEntry {
   id: string;
   date: string;
@@ -511,11 +513,13 @@ export interface Interaction {
 
 // People Registry Types
 
-export interface AgentModel {
-  name: string;
-  provider: string;
-  endpoint?: string;
-}
+export const AgentModelSchema = z.object({
+  name: z.string().min(1),
+  provider: z.string().min(1),
+  endpoint: z.string().optional(),
+});
+
+export type AgentModel = z.infer<typeof AgentModelSchema>;
 
 export interface Person {
   id: string;
