@@ -81,6 +81,10 @@ peopleRouter.post("/", async (c) => {
     hoursPerDay: body.hoursPerDay,
     workingDays: body.workingDays,
     notes: body.notes,
+    agentType: body.agentType,
+    skills: body.skills,
+    models: body.models,
+    systemPrompt: body.systemPrompt,
   });
 
   await cacheWriteThrough(c, "people");

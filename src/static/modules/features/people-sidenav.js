@@ -22,6 +22,8 @@ export class PeopleSidenavModule extends BaseSidenavModule {
       "peopleSidenavDepartments", "peopleSidenavReportsTo",
       "peopleSidenavEmail", "peopleSidenavPhone", "peopleSidenavStartDate",
       "peopleSidenavHoursPerDay", "peopleSidenavWorkingDays",
+      "peopleSidenavAgentType", "peopleSidenavSkills",
+      "peopleSidenavModels", "peopleSidenavSystemPrompt",
       "peopleSidenavNotes",
     ];
   }
@@ -80,6 +82,10 @@ export class PeopleSidenavModule extends BaseSidenavModule {
     document.getElementById("peopleSidenavStartDate").value = "";
     document.getElementById("peopleSidenavHoursPerDay").value = "8";
     document.getElementById("peopleSidenavWorkingDays").value = "Mon, Tue, Wed, Thu, Fri";
+    document.getElementById("peopleSidenavAgentType").value = "";
+    document.getElementById("peopleSidenavSkills").value = "";
+    document.getElementById("peopleSidenavModels").value = "";
+    document.getElementById("peopleSidenavSystemPrompt").value = "";
     document.getElementById("peopleSidenavNotes").value = "";
   }
 
@@ -99,6 +105,14 @@ export class PeopleSidenavModule extends BaseSidenavModule {
       person.hoursPerDay ?? 8;
     document.getElementById("peopleSidenavWorkingDays").value =
       person.workingDays?.join(", ") || "Mon, Tue, Wed, Thu, Fri";
+    document.getElementById("peopleSidenavAgentType").value =
+      person.agentType || "";
+    document.getElementById("peopleSidenavSkills").value =
+      person.skills?.join(", ") || "";
+    document.getElementById("peopleSidenavModels").value =
+      person.models?.length ? JSON.stringify(person.models, null, 2) : "";
+    document.getElementById("peopleSidenavSystemPrompt").value =
+      person.systemPrompt || "";
     document.getElementById("peopleSidenavNotes").value = person.notes || "";
   }
 
@@ -118,6 +132,23 @@ export class PeopleSidenavModule extends BaseSidenavModule {
     const hoursRaw = document.getElementById("peopleSidenavHoursPerDay").value;
     const hoursPerDay = hoursRaw ? parseFloat(hoursRaw) : undefined;
 
+    const skillsInput = document.getElementById("peopleSidenavSkills")
+      .value.trim();
+    const skills = skillsInput
+      ? skillsInput.split(",").map((s) => s.trim()).filter((s) => s)
+      : [];
+
+    let models;
+    const modelsInput = document.getElementById("peopleSidenavModels")
+      .value.trim();
+    if (modelsInput) {
+      try {
+        models = JSON.parse(modelsInput);
+      } catch {
+        // invalid JSON — ignore
+      }
+    }
+
     return {
       name: document.getElementById("peopleSidenavName").value.trim(),
       title: document.getElementById("peopleSidenavTitle").value.trim() || undefined,
@@ -129,6 +160,10 @@ export class PeopleSidenavModule extends BaseSidenavModule {
       startDate: document.getElementById("peopleSidenavStartDate").value || undefined,
       hoursPerDay: hoursPerDay || undefined,
       workingDays: workingDays.length > 0 ? workingDays : undefined,
+      agentType: document.getElementById("peopleSidenavAgentType").value || undefined,
+      skills: skills.length > 0 ? skills : undefined,
+      models: models?.length ? models : undefined,
+      systemPrompt: document.getElementById("peopleSidenavSystemPrompt").value.trim() || undefined,
       notes: document.getElementById("peopleSidenavNotes").value.trim() || undefined,
     };
   }

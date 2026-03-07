@@ -80,7 +80,9 @@ export class PeopleModule {
         p.name.toLowerCase().includes(q) ||
         (p.title && p.title.toLowerCase().includes(q)) ||
         (p.role && p.role.toLowerCase().includes(q)) ||
-        (p.email && p.email.toLowerCase().includes(q))
+        (p.email && p.email.toLowerCase().includes(q)) ||
+        (p.agentType && p.agentType.toLowerCase().includes(q)) ||
+        (p.skills && p.skills.some((s) => s.toLowerCase().includes(q)))
       );
     }
 
@@ -112,14 +114,23 @@ export class PeopleModule {
           ? this.people.find((p) => p.id === person.reportsTo)
           : null;
 
+        const agentBadge = person.agentType
+          ? `<span class="people-agent-badge people-agent-badge--${person.agentType}">${escapeHtml(person.agentType)}</span>`
+          : "";
+
+        const skillTags = person.skills?.length
+          ? `<div class="people-card-skills">${person.skills.map((s) => `<span class="people-skill-tag">${escapeHtml(s)}</span>`).join("")}</div>`
+          : "";
+
         html += `
         <div class="people-card" data-person-id="${person.id}">
           <div class="people-card-avatar">${this.getInitials(person.name)}</div>
           <div class="people-card-info">
-            <div class="people-card-name">${escapeHtml(person.name)}</div>
+            <div class="people-card-name">${escapeHtml(person.name)}${agentBadge}</div>
             <div class="people-card-role">${escapeHtml(roleText)}</div>
             ${deptText ? `<div class="people-card-dept">${escapeHtml(deptText)}</div>` : ""}
             ${person.email ? `<div class="people-card-email">${escapeHtml(person.email)}</div>` : ""}
+            ${skillTags}
             ${manager ? `<div class="people-card-reports">Reports to ${escapeHtml(manager.name)}</div>` : ""}
           </div>
         </div>

@@ -8,6 +8,16 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-03-07
+
+### Added
+
+- Person model: `agentType` (human/ai/hybrid), `skills`, `models`, and
+  `systemPrompt` fields for multi-agent orchestration.
+- MCP tools: `create_person` and `update_person` accept agent fields.
+- UI: "Agent Configuration" section in people sidenav, agent type badge and
+  skill tags on people cards, search by agent type and skills.
+
 ## [0.14.0] - 2026-03-07
 
 ### Added
