@@ -8,6 +8,22 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-03-07
+
+### Added
+
+- Structured `metadata` field on task comments (`Record<string, unknown>`) for
+  machine-readable progress tracking. Supported on `add_task_comment` MCP tool,
+  `batch_update_tasks` inline comments, and REST API endpoints. Predefined keys:
+  `action`, `commit`, `branch`, `files_changed`, `next_step`.
+- Frontend renders comment metadata as tags below comment body in task sidenav.
+
+### Fixed
+
+- `updateComment` parser method and `PUT /tasks/:id/comments/:commentId` now
+  accept and persist metadata updates.
+- Frontend API client `addComment` and `updateComment` forward metadata.
+
 ## [0.17.0] - 2026-03-07
 
 ### Added
