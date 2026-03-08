@@ -33,6 +33,7 @@ interface CLIArgs {
   brainsConfig?: string;
   claudeDir?: string;
   corsOrigin?: string;
+  apiToken?: string;
 }
 
 function printHelp(): void {
@@ -65,6 +66,7 @@ Options:
       --backup-interval <hrs>  Backup frequency in hours (requires --backup-dir)
       --backup-public-key <h>  Hex RSA public key — encrypts all backups
       --brains-config <path>   Path to brains.json — enables Brain Manager UI
+      --api-token <tok>        Protect the REST API with a session token
       --cors-origin <origin>   Restrict CORS to this origin (default: allow all)
       --claude-dir <path>      Claude config dir (default: ~/.claude)
   -h, --help                   Show this help message
@@ -104,6 +106,7 @@ function parseArgs(args: string[]): CLIArgs {
     claudeDir: Deno.env.get("MDPLANNER_CLAUDE_DIR") ??
       join(Deno.env.get("HOME") ?? "", ".claude"),
     corsOrigin: Deno.env.get("MDPLANNER_CORS_ORIGIN") ?? undefined,
+    apiToken: Deno.env.get("MDPLANNER_API_TOKEN") ?? undefined,
   };
 
   let i = 0;
@@ -190,6 +193,14 @@ function parseArgs(args: string[]): CLIArgs {
         Deno.exit(1);
       }
       result.corsOrigin = val;
+      i += 2;
+    } else if (arg === "--api-token") {
+      const tok = args[i + 1];
+      if (!tok || tok.startsWith("-")) {
+        console.error("Error: --api-token requires a value");
+        Deno.exit(1);
+      }
+      result.apiToken = tok;
       i += 2;
     } else if (arg === "--claude-dir") {
       const val = args[i + 1];
@@ -319,6 +330,7 @@ const apiRouter = createApiRouter(projectManager, {
   brainRegistry,
   claudeDir: cliArgs.claudeDir,
   corsOrigin: cliArgs.corsOrigin,
+  apiToken: cliArgs.apiToken,
 });
 app.route("/api", apiRouter);
 
@@ -402,6 +414,9 @@ if (cliArgs.cache) {
 }
 if (cliArgs.mcpToken) {
   console.log(`MCP auth enabled (bearer token)`);
+}
+if (cliArgs.apiToken) {
+  console.log(`API auth enabled (session cookie + bearer token)`);
 }
 if (cliArgs.readOnly) {
   console.log(`Mode    read-only (mutations blocked)`);

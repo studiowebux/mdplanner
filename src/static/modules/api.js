@@ -9,11 +9,16 @@ async function request(url, options = {}) {
   const { headers: optionHeaders, ...restOptions } = options;
   const response = await fetch(url, {
     ...restOptions,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...optionHeaders,
     },
   });
+  // 401 interception — notify the app that re-authentication is needed
+  if (response.status === 401 && !url.includes("/api/auth")) {
+    window.dispatchEvent(new CustomEvent("mdplanner:auth-required"));
+  }
   return response;
 }
 
@@ -98,7 +103,7 @@ export const BackupAPI = {
     const headers = { "Content-Type": "application/octet-stream" };
     if (privateKeyHex) headers["X-Backup-Private-Key"] = privateKeyHex;
     const url = `/api/backup/import${overwrite ? "?overwrite=true" : ""}`;
-    const response = await fetch(url, { method: "POST", headers, body: data });
+    const response = await fetch(url, { method: "POST", headers, body: data, credentials: "include" });
     return response.json();
   },
 };
@@ -1634,5 +1639,25 @@ export const BrainsAPI = {
     } catch {
       return false;
     }
+  },
+};
+
+/** Authentication API — uses raw fetch for check() to avoid 401 interception loop. */
+export const AuthAPI = {
+  async check() {
+    const response = await fetch("/api/auth/check", {
+      credentials: "include",
+    });
+    return response;
+  },
+
+  async login(token) {
+    const response = await post("/api/auth", { token });
+    return response;
+  },
+
+  async logout() {
+    const response = await post("/api/auth/logout", {});
+    return response;
   },
 };

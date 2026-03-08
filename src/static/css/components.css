@@ -1043,6 +1043,14 @@ select.input {
   border-top: 1px solid var(--color-border-default);
 }
 
+/* Auth modal */
+
+.auth-error {
+  font-size: var(--font-size-sm);
+  color: var(--error);
+  margin: 0 0 0.5rem;
+}
+
 /* Export data modal */
 
 .export-entity-grid {
