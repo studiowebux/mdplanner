@@ -59,6 +59,14 @@ import { orgchartRouter } from "./features/orgchart.ts";
 import { peopleRouter } from "./features/people.ts";
 import { portfolioRouter } from "./portfolio.ts";
 
+// Auth routes
+import { createAuthRouter } from "./auth.ts";
+import {
+  parseSessionCookie,
+  validateSession,
+  validateToken,
+} from "../../lib/auth.ts";
+
 // Brain management routes
 import { brainsRouter } from "./features/brains.ts";
 
@@ -87,15 +95,56 @@ export function createApiRouter(
     brainRegistry?: BrainRegistry;
     claudeDir?: string;
     corsOrigin?: string;
+    apiToken?: string;
   },
 ): Hono<{ Variables: AppVariables }> {
   const api = new Hono<{ Variables: AppVariables }>();
 
   // CORS middleware — restrict to configured origin when set
-  api.use(
-    "/*",
-    cors(opts?.corsOrigin ? { origin: opts.corsOrigin } : undefined),
-  );
+  const corsOpts = opts?.corsOrigin
+    ? { origin: opts.corsOrigin, credentials: !!opts?.apiToken }
+    : undefined;
+  api.use("/*", cors(corsOpts));
+
+  // Auth routes + middleware — only when --api-token is configured
+  if (opts?.apiToken) {
+    const apiToken = opts.apiToken;
+    api.route("/auth", createAuthRouter(apiToken));
+
+    api.use("/*", async (c, next) => {
+      const path = c.req.path;
+      // Allow-listed paths that skip auth
+      if (
+        c.req.method === "OPTIONS" ||
+        path === "/api/health" ||
+        path === "/api/version" ||
+        path.startsWith("/api/auth")
+      ) {
+        return next();
+      }
+
+      // Bearer token header
+      const authHeader = c.req.header("Authorization") ?? "";
+      if (authHeader.startsWith("Bearer ")) {
+        const token = authHeader.slice(7);
+        if (validateToken(token, apiToken)) {
+          return next();
+        }
+      }
+
+      // Session cookie
+      const cookie = c.req.header("Cookie") ?? "";
+      const sessionId = parseSessionCookie(cookie);
+      if (sessionId && validateSession(sessionId)) {
+        return next();
+      }
+
+      return c.json(
+        { error: "NOT_AUTHENTICATED", message: "Authentication required" },
+        401,
+      );
+    });
+  }
 
   // Inject projectManager and optional brain registry into context
   api.use("/*", async (c, next) => {

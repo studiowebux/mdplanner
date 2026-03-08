@@ -14708,6 +14708,23 @@
       </div>
     </div>
 
+    <!-- Auth Modal -->
+    <div id="authModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Authentication">
+      <div class="modal-box" style="max-width:24rem;">
+        <div class="modal-header">
+          <h2 class="modal-title">Authentication Required</h2>
+        </div>
+        <div class="modal-body">
+          <p id="authError" class="auth-error hidden"></p>
+          <label for="authTokenInput">API Token</label>
+          <input type="password" id="authTokenInput" autocomplete="off" placeholder="Enter your API token" />
+        </div>
+        <div class="modal-footer">
+          <button id="authSubmitBtn" class="btn-ghost">Sign In</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Confirm Modal -->
     <div id="confirmModalOverlay" class="confirm-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="confirmModalMessage">
       <div class="confirm-modal-box">

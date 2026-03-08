@@ -101,6 +101,7 @@ import { GlobalSearch } from "./modules/features/search.js";
 import { GitHubView } from "./modules/views/github.js";
 import { OllamaModule } from "./modules/features/ollama.js";
 import { SSEClient } from "./modules/ui/sse-client.js";
+import { AuthModal, checkAuthOnBoot } from "./modules/ui/auth-modal.js";
 import { BrainsModule } from "./modules/features/brains.js";
 
 class TaskManager {
@@ -344,6 +345,13 @@ class TaskManager {
     Sidenav.init();
     Help.init();
     initConfirmModal();
+
+    // Auth gate — show login modal if server requires a token
+    this.authModal = new AuthModal();
+    this.authModal.bindEvents();
+    const authenticated = await checkAuthOnBoot(this.authModal);
+    if (!authenticated) return;
+
     await this.globalSearch.init();
     this.bindEvents();
     await this.loadProjects(); // Load projects first
