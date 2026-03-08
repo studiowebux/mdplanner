@@ -41,6 +41,10 @@ import { registerMindmapTools } from "./tools/mindmaps.ts";
 import { registerMarketingPlanTools } from "./tools/marketing-plans.ts";
 import { registerTimeTrackingTools } from "./tools/time-tracking.ts";
 import { registerC4Tools } from "./tools/c4.ts";
+import { registerStrategicLevelsTools } from "./tools/strategic-levels.ts";
+import { registerBusinessModelTools } from "./tools/business-model.ts";
+import { registerLeanCanvasTools } from "./tools/lean-canvas.ts";
+import { registerProjectValueTools } from "./tools/project-value.ts";
 import { registerResources } from "./resources.ts";
 
 /**
@@ -87,6 +91,10 @@ export function createMcpServer(pm: ProjectManager): McpServer {
   registerMarketingPlanTools(server, pm);
   registerTimeTrackingTools(server, pm);
   registerC4Tools(server, pm);
+  registerStrategicLevelsTools(server, pm);
+  registerBusinessModelTools(server, pm);
+  registerLeanCanvasTools(server, pm);
+  registerProjectValueTools(server, pm);
   registerResources(server, pm);
 
   return server;
