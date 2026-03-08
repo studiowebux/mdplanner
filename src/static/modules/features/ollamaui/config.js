@@ -1,5 +1,8 @@
 /* config.js — Config panel logic, sliders, model loading, connection status */
 
+import { App } from "./state.js";
+import { TtsAPI } from "../../api.js";
+
 App.toggleConfig = function () {
   App.el.configPanel.style.display =
     App.el.configPanel.style.display === "flex" ? "none" : "flex";
@@ -16,20 +19,29 @@ App.populateConfigUI = function () {
   document.getElementById("topPValue").textContent = App.config.topP;
   document.getElementById("configNumCtx").value = App.config.numCtx;
   document.getElementById("numCtxValue").textContent = App.config.numCtx;
-  document.getElementById("configSearchUrl").value = App.config.searchUrl || "";
-  document.getElementById("configChatterboxUrl").value = App.config.chatterboxUrl || "";
-  document.getElementById("configChatterboxAutoUnload").checked = App.config.chatterboxAutoUnload || false;
-  document.getElementById("configChatterboxSplit").checked = App.config.chatterboxSplit || false;
-  document.getElementById("configChatterboxSplitChars").value = App.config.chatterboxSplitChars || 400;
-  document.getElementById("configChatterboxExageration").value = App.config.chatterboxExageration ?? 0.5;
-  document.getElementById("ttsExagerationValue").textContent = App.config.chatterboxExageration ?? 0.5;
-  document.getElementById("configChatterboxCfgWeight").value = App.config.chatterboxCfgWeight ?? 0.5;
-  document.getElementById("ttsCfgWeightValue").textContent = App.config.chatterboxCfgWeight ?? 0.5;
+  document.getElementById("configSearchUrl").value =
+    App.config.searchUrl || "";
+  document.getElementById("configChatterboxUrl").value =
+    App.config.chatterboxUrl || "";
+  document.getElementById("configChatterboxAutoUnload").checked =
+    App.config.chatterboxAutoUnload || false;
+  document.getElementById("configChatterboxSplit").checked =
+    App.config.chatterboxSplit || false;
+  document.getElementById("configChatterboxSplitChars").value =
+    App.config.chatterboxSplitChars || 400;
+  document.getElementById("configChatterboxExageration").value =
+    App.config.chatterboxExageration ?? 0.5;
+  document.getElementById("ttsExagerationValue").textContent =
+    App.config.chatterboxExageration ?? 0.5;
+  document.getElementById("configChatterboxCfgWeight").value =
+    App.config.chatterboxCfgWeight ?? 0.5;
+  document.getElementById("ttsCfgWeightValue").textContent =
+    App.config.chatterboxCfgWeight ?? 0.5;
   App.loadChatterboxVoices();
 };
 
 App.saveConfig = function () {
-  var prevStorageKey = App.config.storageKey;
+  const prevStorageKey = App.config.storageKey;
 
   App.config.baseUrl = document.getElementById("configBaseUrl").value.trim();
   App.config.model = document.getElementById("configModelSelect").value;
@@ -48,13 +60,29 @@ App.saveConfig = function () {
   App.config.searchUrl = document
     .getElementById("configSearchUrl")
     .value.trim();
-  App.config.chatterboxUrl = document.getElementById("configChatterboxUrl").value.trim();
-  App.config.chatterboxVoice = document.getElementById("configChatterboxVoice").value;
-  App.config.chatterboxAutoUnload = document.getElementById("configChatterboxAutoUnload").checked;
-  App.config.chatterboxSplit = document.getElementById("configChatterboxSplit").checked;
-  App.config.chatterboxSplitChars = parseInt(document.getElementById("configChatterboxSplitChars").value, 10) || 400;
-  App.config.chatterboxExageration = parseFloat(document.getElementById("configChatterboxExageration").value);
-  App.config.chatterboxCfgWeight = parseFloat(document.getElementById("configChatterboxCfgWeight").value);
+  App.config.chatterboxUrl = document
+    .getElementById("configChatterboxUrl")
+    .value.trim();
+  App.config.chatterboxVoice = document.getElementById(
+    "configChatterboxVoice",
+  ).value;
+  App.config.chatterboxAutoUnload = document.getElementById(
+    "configChatterboxAutoUnload",
+  ).checked;
+  App.config.chatterboxSplit = document.getElementById(
+    "configChatterboxSplit",
+  ).checked;
+  App.config.chatterboxSplitChars =
+    parseInt(
+      document.getElementById("configChatterboxSplitChars").value,
+      10,
+    ) || 400;
+  App.config.chatterboxExageration = parseFloat(
+    document.getElementById("configChatterboxExageration").value,
+  );
+  App.config.chatterboxCfgWeight = parseFloat(
+    document.getElementById("configChatterboxCfgWeight").value,
+  );
 
   localStorage.setItem("ollama-ui-config", JSON.stringify(App.config));
 
@@ -69,55 +97,19 @@ App.saveConfig = function () {
   App.toggleConfig();
 };
 
-/* Slider live values */
-
-document
-  .getElementById("configTemperature")
-  .addEventListener("input", function (e) {
-    document.getElementById("tempValue").textContent = e.target.value;
-  });
-
-document
-  .getElementById("configTopP")
-  .addEventListener("input", function (e) {
-    document.getElementById("topPValue").textContent = e.target.value;
-  });
-
-document
-  .getElementById("configNumCtx")
-  .addEventListener("input", function (e) {
-    document.getElementById("numCtxValue").textContent = e.target.value;
-  });
-
-/* Auto-refresh models on URL change */
-
-document.getElementById("configBaseUrl").addEventListener(
-  "input",
-  App.debounce(function () {
-    var url = document.getElementById("configBaseUrl").value.trim();
-    if (url) {
-      var prevUrl = App.config.baseUrl;
-      App.config.baseUrl = url;
-      App.loadModels().finally(function () {
-        App.config.baseUrl = prevUrl;
-      });
-    }
-  }, 800),
-);
-
 /* Model loading */
 
 App.loadModels = async function () {
-  var select = document.getElementById("configModelSelect");
+  const select = document.getElementById("configModelSelect");
   select.innerHTML = '<option value="">Loading...</option>';
 
   try {
-    var res = await fetch(App.apiUrl("/api/tags"));
-    var data = await res.json();
+    const res = await fetch(App.apiUrl("/api/tags"));
+    const data = await res.json();
 
     select.innerHTML = "";
     data.models.forEach(function (m) {
-      var option = document.createElement("option");
+      const option = document.createElement("option");
       option.value = m.name;
       option.textContent = m.name;
       select.appendChild(option);
@@ -133,7 +125,7 @@ App.loadModels = async function () {
 
     App.updateHeaderModel();
     App.updateConnectionStatus(true);
-  } catch (err) {
+  } catch (_) {
     select.innerHTML = '<option value="">Error loading models</option>';
     App.updateConnectionStatus(false);
   }
@@ -143,18 +135,18 @@ App.loadModels = async function () {
 
 App.fetchModelInfo = async function (modelName) {
   try {
-    var res = await fetch(App.apiUrl("/api/show"), {
+    const res = await fetch(App.apiUrl("/api/show"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: modelName }),
     });
-    var data = await res.json();
+    const data = await res.json();
 
-    var info = data.model_info || {};
-    var keys = Object.keys(info);
-    for (var i = 0; i < keys.length; i++) {
+    const info = data.model_info || {};
+    const keys = Object.keys(info);
+    for (let i = 0; i < keys.length; i++) {
       if (keys[i].endsWith(".context_length")) {
-        var ctx = info[keys[i]];
+        const ctx = info[keys[i]];
         if (ctx >= 1000) {
           App.el.headerCtx.textContent = Math.round(ctx / 1024) + "K ctx";
         } else {
@@ -170,60 +162,44 @@ App.fetchModelInfo = async function (modelName) {
       }
     }
     App.el.headerCtx.style.display = "none";
-  } catch (e) {
+  } catch (_) {
     App.el.headerCtx.style.display = "none";
   }
 };
 
-/* Chatterbox voice loader */
+/* Chatterbox voice loader — uses centralized TtsAPI */
 
 App.loadChatterboxVoices = async function () {
-  var select = document.getElementById("configChatterboxVoice");
-  var base = (document.getElementById("configChatterboxUrl").value.trim() || App.config.chatterboxUrl || "").replace(/\/$/, "");
-  /* Both Caddy and Chatterbox set Access-Control-Allow-Origin: * causing
-   * duplicate CORS headers. Route through the mdplanner proxy instead. */
+  const select = document.getElementById("configChatterboxVoice");
+  const base = (document.getElementById("configChatterboxUrl").value.trim() ||
+    App.config.chatterboxUrl || "").replace(/\/$/, "");
   try {
-    var res = await fetch("/api/tts/voices", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ttsUrl: base }),
-    });
-    var data = await res.json();
+    const data = await TtsAPI.voices(base);
     select.innerHTML = "";
     (data.voices || []).forEach(function (v) {
-      var opt = document.createElement("option");
+      const opt = document.createElement("option");
       opt.value = v;
       opt.textContent = v;
       select.appendChild(opt);
     });
     if (App.config.chatterboxVoice) select.value = App.config.chatterboxVoice;
-  } catch (e) {
+  } catch (_) {
     select.innerHTML = '<option value="">No voices found</option>';
   }
 };
-
-document.getElementById("configChatterboxExageration").addEventListener("input", function (e) {
-  document.getElementById("ttsExagerationValue").textContent = e.target.value;
-});
-
-document.getElementById("configChatterboxCfgWeight").addEventListener("input", function (e) {
-  document.getElementById("ttsCfgWeightValue").textContent = e.target.value;
-});
-
-document.getElementById("configChatterboxUrl").addEventListener(
-  "input",
-  App.debounce(function () { App.loadChatterboxVoices(); }, 800),
-);
 
 /* Unload model from VRAM */
 
 /* silent=true: skip status messages (used when caller owns the typing indicator) */
 App.unloadModel = async function (silent) {
-  var model = App.config.model || document.getElementById("configModelSelect").value;
+  const model = App.config.model ||
+    document.getElementById("configModelSelect").value;
   if (!model) {
     if (!silent) {
       App.el.typingEl.textContent = "No model selected.";
-      setTimeout(function () { App.el.typingEl.textContent = ""; }, 2000);
+      setTimeout(function () {
+        App.el.typingEl.textContent = "";
+      }, 2000);
     }
     return;
   }
@@ -231,7 +207,7 @@ App.unloadModel = async function (silent) {
   if (!silent) App.el.typingEl.textContent = "Unloading " + model + "...";
 
   try {
-    var res = await fetch(App.apiUrl("/api/generate"), {
+    const res = await fetch(App.apiUrl("/api/generate"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ model: model, keep_alive: 0 }),
@@ -243,14 +219,20 @@ App.unloadModel = async function (silent) {
         : "Failed to unload: HTTP " + res.status;
     }
   } catch (e) {
-    if (!silent) App.el.typingEl.textContent = "Failed to unload: " + e.message;
+    if (!silent) {
+      App.el.typingEl.textContent = "Failed to unload: " + e.message;
+    }
   }
 
-  if (!silent) setTimeout(function () { App.el.typingEl.textContent = ""; }, 3000);
+  if (!silent) {
+    setTimeout(function () {
+      App.el.typingEl.textContent = "";
+    }, 3000);
+  }
 };
 
 App.updateHeaderModel = function () {
-  var model = document.getElementById("configModelSelect").value;
+  const model = document.getElementById("configModelSelect").value;
   if (model) {
     App.el.headerModel.textContent = model;
     App.el.headerModel.style.display = "";
@@ -262,23 +244,21 @@ App.updateHeaderModel = function () {
   }
 };
 
-document
-  .getElementById("configModelSelect")
-  .addEventListener("change", App.updateHeaderModel);
-
 /* Connection status */
 
 App.updateConnectionStatus = function (ok) {
   App.el.connectionDot.className =
     "connection-dot " + (ok ? "connected" : "disconnected");
-  App.el.connectionDot.title = ok ? "Connected to Ollama" : "Disconnected from Ollama";
+  App.el.connectionDot.title = ok
+    ? "Connected to Ollama"
+    : "Disconnected from Ollama";
 };
 
 App.checkConnection = async function () {
   try {
-    var res = await fetch(App.apiUrl("/api/tags"));
+    const res = await fetch(App.apiUrl("/api/tags"));
     App.updateConnectionStatus(res.ok);
-  } catch (e) {
+  } catch (_) {
     App.updateConnectionStatus(false);
     if (
       location.protocol === "https:" &&
@@ -290,6 +270,69 @@ App.checkConnection = async function () {
   }
 };
 
-document.addEventListener("visibilitychange", function () {
-  if (!document.hidden) App.checkConnection();
-});
+/* -------- Event listeners (deferred to init) -------- */
+
+export function initConfigListeners() {
+  document
+    .getElementById("configTemperature")
+    .addEventListener("input", function (e) {
+      document.getElementById("tempValue").textContent = e.target.value;
+    });
+
+  document
+    .getElementById("configTopP")
+    .addEventListener("input", function (e) {
+      document.getElementById("topPValue").textContent = e.target.value;
+    });
+
+  document
+    .getElementById("configNumCtx")
+    .addEventListener("input", function (e) {
+      document.getElementById("numCtxValue").textContent = e.target.value;
+    });
+
+  document.getElementById("configBaseUrl").addEventListener(
+    "input",
+    App.debounce(function () {
+      const url = document.getElementById("configBaseUrl").value.trim();
+      if (url) {
+        const prevUrl = App.config.baseUrl;
+        App.config.baseUrl = url;
+        App.loadModels().finally(function () {
+          App.config.baseUrl = prevUrl;
+        });
+      }
+    }, 800),
+  );
+
+  document.getElementById("configChatterboxExageration").addEventListener(
+    "input",
+    function (e) {
+      document.getElementById("ttsExagerationValue").textContent =
+        e.target.value;
+    },
+  );
+
+  document.getElementById("configChatterboxCfgWeight").addEventListener(
+    "input",
+    function (e) {
+      document.getElementById("ttsCfgWeightValue").textContent =
+        e.target.value;
+    },
+  );
+
+  document.getElementById("configChatterboxUrl").addEventListener(
+    "input",
+    App.debounce(function () {
+      App.loadChatterboxVoices();
+    }, 800),
+  );
+
+  document
+    .getElementById("configModelSelect")
+    .addEventListener("change", App.updateHeaderModel);
+
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) App.checkConnection();
+  });
+}

@@ -1,6 +1,6 @@
 /* state.js — App namespace, config, state, DOM refs, utilities */
 
-var DEFAULT_CONFIG = {
+const DEFAULT_CONFIG = {
   baseUrl: "http://localhost:11434",
   model: "",
   storageKey: "ollama-chat-history",
@@ -18,7 +18,7 @@ var DEFAULT_CONFIG = {
   chatterboxCfgWeight: 0.5,
 };
 
-window.App = {
+export const App = {
   config: Object.assign(
     {},
     DEFAULT_CONFIG,
@@ -48,15 +48,15 @@ window.App = {
     searchToggleBtn: document.getElementById("searchToggleBtn"),
   },
 
-  apiUrl: function (path) {
+  apiUrl(path) {
     return App.config.baseUrl.replace(/\/$/, "") + path;
   },
 
-  debounce: function (fn, ms) {
-    var timer;
+  debounce(fn, ms) {
+    let timer;
     return function () {
-      var args = arguments;
-      var ctx = this;
+      const args = arguments;
+      const ctx = this;
       clearTimeout(timer);
       timer = setTimeout(function () {
         fn.apply(ctx, args);
@@ -64,28 +64,30 @@ window.App = {
     };
   },
 
-  escapeHtml: function (text) {
-    var div = document.createElement("div");
+  escapeHtml(text) {
+    const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
   },
 
-  loadHistory: function () {
-    var branchKey = App.config.storageKey + "-branches";
-    var savedBranches = localStorage.getItem(branchKey);
+  loadHistory() {
+    const branchKey = App.config.storageKey + "-branches";
+    const savedBranches = localStorage.getItem(branchKey);
     if (savedBranches) {
       App.branches = JSON.parse(savedBranches);
       App.chatHistory = App.branches.forks[App.branches.current].history.slice();
     } else {
       App.branches = null;
-      App.chatHistory = JSON.parse(localStorage.getItem(App.config.storageKey)) || [];
+      App.chatHistory =
+        JSON.parse(localStorage.getItem(App.config.storageKey)) || [];
     }
   },
 
-  saveHistory: function () {
+  saveHistory() {
     if (App.branches) {
       /* Sync active fork before persisting the whole branches object */
-      App.branches.forks[App.branches.current].history = App.chatHistory.slice();
+      App.branches.forks[App.branches.current].history =
+        App.chatHistory.slice();
       localStorage.setItem(
         App.config.storageKey + "-branches",
         JSON.stringify(App.branches),
@@ -93,20 +95,24 @@ window.App = {
     } else {
       localStorage.removeItem(App.config.storageKey + "-branches");
     }
-    localStorage.setItem(App.config.storageKey, JSON.stringify(App.chatHistory));
+    localStorage.setItem(
+      App.config.storageKey,
+      JSON.stringify(App.chatHistory),
+    );
   },
 
-  toggleTheme: function () {
-    var current = document.documentElement.getAttribute("data-theme") || "dark";
-    var next = current === "dark" ? "light" : "dark";
+  toggleTheme() {
+    const current =
+      document.documentElement.getAttribute("data-theme") || "dark";
+    const next = current === "dark" ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", next);
     localStorage.setItem("ollama-ui-theme", next);
     App.el.themeToggleBtn.textContent = next === "dark" ? "Light" : "Dark";
   },
 };
 
-/* Set initial toggle button label */
-(function () {
-  var theme = document.documentElement.getAttribute("data-theme") || "dark";
+export function initThemeLabel() {
+  const theme =
+    document.documentElement.getAttribute("data-theme") || "dark";
   App.el.themeToggleBtn.textContent = theme === "dark" ? "Light" : "Dark";
-})();
+}
