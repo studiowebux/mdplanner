@@ -32,6 +32,9 @@ searchRouter.get("/", async (c) => {
   if (!query || query.trim().length === 0) {
     return errorResponse("Query parameter 'q' is required", 400);
   }
+  if (query.length > 1000) {
+    return errorResponse("Query too long (max 1000 characters)", 400);
+  }
 
   const limitParam = c.req.query("limit");
   const offsetParam = c.req.query("offset");

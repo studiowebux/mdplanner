@@ -123,7 +123,7 @@ export class FundraisingPipelineSidenavModule {
   }
 
   _showStatus(msg) {
-    const el = document.getElementById("pipeline-sidenav-status");
+    const el = document.getElementById("pipeline-sidenav-save-status");
     if (el) {
       el.textContent = msg;
       el.classList.remove("hidden");

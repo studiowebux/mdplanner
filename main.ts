@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { serveStatic } from "hono/deno";
-import { dirname, extname, fromFileUrl, join } from "@std/path";
+import { dirname, extname, fromFileUrl, join, resolve } from "@std/path";
 import { ProjectManager } from "./src/lib/project-manager.ts";
 import { createApiRouter } from "./src/api/routes/index.ts";
 import { createMcpHonoRouter } from "./src/mcp/http.ts";
@@ -32,6 +32,7 @@ interface CLIArgs {
   backupPublicKey?: string;
   brainsConfig?: string;
   claudeDir?: string;
+  corsOrigin?: string;
 }
 
 function printHelp(): void {
@@ -64,6 +65,7 @@ Options:
       --backup-interval <hrs>  Backup frequency in hours (requires --backup-dir)
       --backup-public-key <h>  Hex RSA public key — encrypts all backups
       --brains-config <path>   Path to brains.json — enables Brain Manager UI
+      --cors-origin <origin>   Restrict CORS to this origin (default: allow all)
       --claude-dir <path>      Claude config dir (default: ~/.claude)
   -h, --help                   Show this help message
 
@@ -101,6 +103,7 @@ function parseArgs(args: string[]): CLIArgs {
     brainsConfig: Deno.env.get("MDPLANNER_BRAINS_CONFIG") ?? undefined,
     claudeDir: Deno.env.get("MDPLANNER_CLAUDE_DIR") ??
       join(Deno.env.get("HOME") ?? "", ".claude"),
+    corsOrigin: Deno.env.get("MDPLANNER_CORS_ORIGIN") ?? undefined,
   };
 
   let i = 0;
@@ -179,6 +182,14 @@ function parseArgs(args: string[]): CLIArgs {
         Deno.exit(1);
       }
       result.brainsConfig = val;
+      i += 2;
+    } else if (arg === "--cors-origin") {
+      const val = args[i + 1];
+      if (!val || val.startsWith("-")) {
+        console.error("Error: --cors-origin requires a value");
+        Deno.exit(1);
+      }
+      result.corsOrigin = val;
       i += 2;
     } else if (arg === "--claude-dir") {
       const val = args[i + 1];
@@ -307,6 +318,7 @@ const app = new Hono();
 const apiRouter = createApiRouter(projectManager, {
   brainRegistry,
   claudeDir: cliArgs.claudeDir,
+  corsOrigin: cliArgs.corsOrigin,
 });
 app.route("/api", apiRouter);
 
@@ -316,6 +328,12 @@ app.route("/mcp", mcpRouter);
 
 // WebDAV — mount project directory as a WebDAV volume (e.g. for Obsidian)
 if (cliArgs.webdav) {
+  if (!cliArgs.webdavUser || !cliArgs.webdavPass) {
+    console.error(
+      "Error: WebDAV requires both --webdav-user and --webdav-pass",
+    );
+    Deno.exit(1);
+  }
   const webdavHandler = await createWebDavHandler({
     rootDir: cliArgs.projectPath,
     authUser: cliArgs.webdavUser ?? null,
@@ -346,7 +364,11 @@ const UPLOAD_MIME: Record<string, string> = {
 };
 
 app.get("/uploads/*", async (c) => {
-  const filePath = join(cliArgs.projectPath, c.req.path);
+  const filePath = resolve(join(cliArgs.projectPath, c.req.path));
+  const projectRoot = resolve(cliArgs.projectPath);
+  if (!filePath.startsWith(projectRoot + "/") && filePath !== projectRoot) {
+    return c.text("Forbidden", 403);
+  }
   try {
     const data = await Deno.readFile(filePath);
     const mime = UPLOAD_MIME[extname(filePath).toLowerCase()] ??
@@ -399,4 +421,13 @@ projects.forEach((p) =>
   console.log(`  - ${p.filename} (${p.name}, ${p.taskCount} tasks)`)
 );
 
-Deno.serve({ port: cliArgs.port }, app.fetch);
+const server = Deno.serve({ port: cliArgs.port }, app.fetch);
+
+// Graceful shutdown — drain connections on SIGTERM/SIGINT
+const shutdown = async () => {
+  console.log("\nShutting down...");
+  await server.shutdown();
+  Deno.exit(0);
+};
+Deno.addSignalListener("SIGTERM", shutdown);
+Deno.addSignalListener("SIGINT", shutdown);
