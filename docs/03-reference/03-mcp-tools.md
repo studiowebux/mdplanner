@@ -164,6 +164,46 @@ No dedicated MCP tools. Use the REST API for C4 diagrams.
 
 ## Lean Canvas
 
+| Tool                 | Description        |
+| -------------------- | ------------------ |
+| `list_lean_canvas`   | List canvases      |
+| `get_lean_canvas`    | Get canvas         |
+| `create_lean_canvas` | Create canvas      |
+| `update_lean_canvas` | Update canvas      |
+| `delete_lean_canvas` | Delete canvas      |
+
+## Business Model
+
+| Tool                    | Description      |
+| ----------------------- | ---------------- |
+| `list_business_model`   | List models      |
+| `get_business_model`    | Get model        |
+| `create_business_model` | Create model     |
+| `update_business_model` | Update model     |
+| `delete_business_model` | Delete model     |
+
+## Project Value
+
+| Tool                     | Description    |
+| ------------------------ | -------------- |
+| `list_project_value`     | List boards    |
+| `get_project_value`      | Get board      |
+| `create_project_value`   | Create board   |
+| `update_project_value`   | Update board   |
+| `delete_project_value`   | Delete board   |
+
+## Strategic Levels
+
+| Tool                       | Description      |
+| -------------------------- | ---------------- |
+| `list_strategic_levels`    | List levels      |
+| `get_strategic_levels`     | Get level        |
+| `create_strategic_levels`  | Create level     |
+| `update_strategic_levels`  | Update level     |
+| `delete_strategic_levels`  | Delete level     |
+
+## SAFEs (Fundraising)
+
 | Tool           | Description   |
 | -------------- | ------------- |
 | `list_safe`    | List SAFEs    |

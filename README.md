@@ -10,6 +10,8 @@ Bug Tracker:
 [GitHub Issues](https://github.com/studiowebux/mdplanner/issues)<br> Discord:
 [discord.gg/BG5Erm9fNv](https://discord.gg/BG5Erm9fNv)
 
+## Funding
+
 [Buy Me a Coffee](https://buymeacoffee.com/studiowebux)<br>
 [GitHub Sponsors](https://github.com/sponsors/studiowebux)<br>
 [Patreon](https://patreon.com/studiowebux)

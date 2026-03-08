@@ -32,7 +32,8 @@ mdplanner --mcp-token mytoken ./my-project
 
 ## Claude Desktop configuration
 
-Add to `~/.claude_desktop_config.json`:
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
+or the equivalent path on your platform:
 
 ```json
 {
