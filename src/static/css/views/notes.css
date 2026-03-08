@@ -212,7 +212,7 @@
 @media (max-width: 640px) {
   .note-content-editor {
     min-height: 200px;
-    font-size: 16px; /* Prevents iOS zoom */
+    font-size: var(--font-size-lg); /* Prevents iOS zoom */
   }
 }
 
@@ -233,7 +233,7 @@
 @media (max-width: 640px) {
   #noteMetadata {
     flex-direction: column;
-    gap: 0.25rem !important;
+    gap: 0.25rem;
   }
 }
 

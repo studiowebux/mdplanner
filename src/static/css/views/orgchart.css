@@ -218,8 +218,8 @@
   opacity: 0.6;
 }
 
-.orgchart-drag-handle:hover {
-  opacity: 1 !important;
+.orgchart-node .orgchart-drag-handle:hover {
+  opacity: 1;
 }
 
 /* Drag States */

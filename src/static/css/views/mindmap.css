@@ -35,7 +35,7 @@
   max-width: 180px;
   text-align: center;
   font-weight: 500;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -51,7 +51,7 @@
 .mindmap-node.root {
   background: var(--color-bg-inverse);
   color: var(--color-text-inverse);
-  font-size: 16px;
+  font-size: var(--font-size-lg);
   font-weight: bold;
   border-color: var(--color-bg-inverse);
 }
@@ -122,11 +122,11 @@
   .mindmap-node {
     min-width: 80px;
     max-width: 140px;
-    font-size: 11px;
+    font-size: var(--font-size-xs);
     padding: 6px 10px;
   }
 
   .mindmap-node.root {
-    font-size: 14px;
+    font-size: var(--font-size-base);
   }
 }
