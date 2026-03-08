@@ -1,6 +1,7 @@
 import { MilestonesAPI } from "../api.js";
 import { markdownToHtml } from "../utils.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 /**
  * MilestonesModule - Handles milestone CRUD operations
@@ -12,11 +13,14 @@ export class MilestonesModule {
   }
 
   async load() {
+    showLoading("milestonesView");
     try {
       this.taskManager.milestones = await MilestonesAPI.fetchAll();
       this.renderView();
     } catch (error) {
       console.error("Error loading milestones:", error);
+    } finally {
+      hideLoading("milestonesView");
     }
   }
 

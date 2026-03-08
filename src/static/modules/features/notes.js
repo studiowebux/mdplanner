@@ -1,6 +1,7 @@
 // Notes Feature Module - Basic CRUD functionality
 import { NotesAPI, ProjectAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 /**
  * Notes management - CRUD, selection, save
@@ -14,6 +15,7 @@ export class NotesModule {
   }
 
   async load() {
+    showLoading("notesView");
     try {
       const projectInfo = await ProjectAPI.getInfo();
       this.tm.notes = projectInfo.notes || [];
@@ -22,6 +24,8 @@ export class NotesModule {
       console.error("Error loading notes:", error);
       this.tm.notes = [];
       this.renderView();
+    } finally {
+      hideLoading("notesView");
     }
   }
 

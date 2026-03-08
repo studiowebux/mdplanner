@@ -3,6 +3,7 @@ import { BillingAPI, GitHubAPI, PeopleAPI, PortfolioAPI } from "../api.js";
 import { PROJECT_STATUS_CLASSES, PROJECT_STATUS_LABELS } from "../constants.js";
 import { showConfirm } from "../ui/confirm.js";
 import { FuzzyAutocomplete } from "../ui/fuzzy-autocomplete.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 import { Sidenav } from "../ui/sidenav.js";
 import { showToast } from "../ui/toast.js";
 
@@ -38,6 +39,7 @@ export class PortfolioView {
    * Load projects and summary data from API.
    */
   async load() {
+    showLoading("portfolioView");
     try {
       const [items, summary, people, customers] = await Promise.all([
         PortfolioAPI.fetchAll(),
@@ -56,6 +58,8 @@ export class PortfolioView {
       this.render();
     } catch (error) {
       console.error("Error loading portfolio data:", error);
+    } finally {
+      hideLoading("portfolioView");
     }
   }
 

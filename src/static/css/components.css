@@ -1211,3 +1211,29 @@ select.input {
   color: var(--color-text-primary);
   font-weight: 600;
 }
+
+/* --------------------------------------------------------------------------
+   Loading Spinner
+   -------------------------------------------------------------------------- */
+
+.view-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl) 0;
+}
+
+.view-loading-spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-text-secondary);
+  border-radius: 50%;
+  animation: view-spin 0.6s linear infinite;
+}
+
+@keyframes view-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
