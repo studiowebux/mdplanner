@@ -48,7 +48,13 @@ services:
       - ./data:/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8003/"]
+      test: [
+        "CMD",
+        "wget",
+        "-qO",
+        "/dev/null",
+        "http://127.0.0.1:8003/api/health",
+      ]
       interval: 30s
       timeout: 10s
       retries: 3
