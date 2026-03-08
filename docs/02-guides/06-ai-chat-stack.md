@@ -1,3 +1,7 @@
+---
+title: AI Chat Stack
+---
+
 # AI Chat Stack
 
 Run MD Planner alongside Ollama (LLM), Chatterbox (TTS), SearXNG (search), and

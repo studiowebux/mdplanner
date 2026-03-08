@@ -1,6 +1,10 @@
+---
+title: MCP Tools
+---
+
 # MCP Tools
 
-MD Planner exposes 198 tools via the Model Context Protocol. Connect via stdio
+MD Planner exposes 239 tools via the Model Context Protocol. Connect via stdio
 (compiled binary) or HTTP (`/mcp` endpoint with `--mcp-token`).
 
 Tools follow a consistent pattern per entity: `list_*`, `get_*`, `create_*`,

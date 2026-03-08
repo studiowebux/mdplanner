@@ -1,3 +1,7 @@
+---
+title: GitHub Integration
+---
+
 # GitHub Integration
 
 MD Planner integrates with GitHub for repository summaries and issue management.

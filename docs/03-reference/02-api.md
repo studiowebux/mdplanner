@@ -1,3 +1,7 @@
+---
+title: REST API
+---
+
 # REST API
 
 Base URL: `http://localhost:8003/api`

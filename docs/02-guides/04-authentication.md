@@ -1,3 +1,7 @@
+---
+title: Authentication
+---
+
 # Authentication
 
 MD Planner supports two independent authentication mechanisms.

@@ -1,6 +1,10 @@
+---
+title: MCP Integration
+---
+
 # MCP Integration
 
-MD Planner ships a built-in MCP server with 198 tools. Two transport modes are
+MD Planner ships a built-in MCP server with 239 tools. Two transport modes are
 available.
 
 ## stdio (local binary)
@@ -88,5 +92,5 @@ Add to `.claude/settings.json` or `~/.claude/settings.json`:
 
 ## Tool reference
 
-See [MCP Tools](../03-reference/03-mcp-tools.md) for the complete list of 198
+See [MCP Tools](../03-reference/03-mcp-tools.md) for the complete list of 239
 tools grouped by entity.
