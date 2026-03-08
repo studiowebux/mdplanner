@@ -43,6 +43,7 @@ export interface PortfolioItem {
   techStack?: string[];
   billingCustomerId?: string;
   githubRepo?: string;
+  brainManaged?: boolean;
   statusUpdates?: PortfolioStatusUpdate[];
 }
 
@@ -64,6 +65,7 @@ interface PortfolioFrontmatter {
   techStack?: string[];
   billingCustomerId?: string;
   githubRepo?: string;
+  brainManaged?: boolean;
   statusUpdates?: PortfolioStatusUpdate[];
 }
 
@@ -177,6 +179,7 @@ export class PortfolioDirectoryParser {
       techStack: frontmatter.techStack,
       billingCustomerId: frontmatter.billingCustomerId,
       githubRepo: frontmatter.githubRepo,
+      brainManaged: frontmatter.brainManaged,
       statusUpdates: frontmatter.statusUpdates,
     };
   }
@@ -216,6 +219,7 @@ export class PortfolioDirectoryParser {
       techStack: item.techStack,
       billingCustomerId: item.billingCustomerId,
       githubRepo: item.githubRepo,
+      brainManaged: item.brainManaged,
       statusUpdates: item.statusUpdates,
     };
 
@@ -359,6 +363,7 @@ export class PortfolioDirectoryParser {
       urls: data.urls,
       logo: data.logo,
       license: data.license,
+      brainManaged: data.brainManaged,
     };
 
     // Write the file directly (update() reads the existing file first,

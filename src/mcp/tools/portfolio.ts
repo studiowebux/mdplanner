@@ -97,6 +97,9 @@ export function registerPortfolioTools(
         github_repo: z.string().optional().describe(
           "GitHub repository in owner/repo format",
         ),
+        brain_managed: z.boolean().optional().describe(
+          "Whether this project is managed by a brain protocol",
+        ),
       },
     },
     async (
@@ -119,6 +122,7 @@ export function registerPortfolioTools(
         logo,
         billing_customer_id,
         github_repo,
+        brain_managed,
       },
     ) => {
       const item = await parser.createPortfolioItem({
@@ -140,6 +144,7 @@ export function registerPortfolioTools(
         ...(logo && { logo }),
         ...(billing_customer_id && { billingCustomerId: billing_customer_id }),
         ...(github_repo && { githubRepo: github_repo }),
+        ...(brain_managed !== undefined && { brainManaged: brain_managed }),
       });
       return ok({ id: item.id });
     },
@@ -176,6 +181,9 @@ export function registerPortfolioTools(
         logo: z.string().optional(),
         billing_customer_id: z.string().optional(),
         github_repo: z.string().optional(),
+        brain_managed: z.boolean().optional().describe(
+          "Whether this project is managed by a brain protocol",
+        ),
       },
     },
     async (
@@ -186,6 +194,7 @@ export function registerPortfolioTools(
         end_date,
         billing_customer_id,
         github_repo,
+        brain_managed,
         ...rest
       },
     ) => {
@@ -198,6 +207,7 @@ export function registerPortfolioTools(
           billingCustomerId: billing_customer_id,
         }),
         ...(github_repo !== undefined && { githubRepo: github_repo }),
+        ...(brain_managed !== undefined && { brainManaged: brain_managed }),
       });
       if (!result) return err(`Portfolio item '${id}' not found`);
       return ok({ success: true });
