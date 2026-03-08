@@ -4,6 +4,8 @@
 
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { bodyLimit } from "hono/body-limit";
+import { RateLimiter } from "../../lib/rate-limit.ts";
 import { ProjectManager } from "../../lib/project-manager.ts";
 import { AppVariables, isCacheEnabled, isReadOnly } from "./context.ts";
 import { VERSION } from "../../lib/version.ts";
@@ -96,6 +98,8 @@ export function createApiRouter(
     claudeDir?: string;
     corsOrigin?: string;
     apiToken?: string;
+    maxBodySize?: number;
+    rateLimitPerMinute?: number;
   },
 ): Hono<{ Variables: AppVariables }> {
   const api = new Hono<{ Variables: AppVariables }>();
@@ -145,6 +149,55 @@ export function createApiRouter(
       );
     });
   }
+
+  // Body size limit — default 10MB
+  const maxBody = opts?.maxBodySize ?? 10 * 1024 * 1024;
+  api.use(
+    "/*",
+    bodyLimit({
+      maxSize: maxBody,
+      onError: (c) =>
+        c.json(
+          {
+            error: "PAYLOAD_TOO_LARGE",
+            message: `Request body exceeds ${Math.floor(maxBody / 1024 / 1024)}MB limit`,
+          },
+          413,
+        ),
+    }),
+  );
+
+  // Rate limiting — per-IP sliding window, default 200 req/min
+  const rateLimit = opts?.rateLimitPerMinute ?? 200;
+  const limiter = new RateLimiter({
+    maxRequests: rateLimit,
+    windowMs: 60_000,
+  });
+
+  api.use("/*", async (c, next) => {
+    // Skip rate limiting for SSE (long-lived connection) and OPTIONS
+    if (c.req.method === "OPTIONS" || c.req.path === "/api/events") {
+      return next();
+    }
+
+    const ip = c.req.header("X-Forwarded-For")?.split(",")[0]?.trim() ??
+      c.req.header("X-Real-IP") ?? "unknown";
+    const result = limiter.check(ip);
+
+    c.header("X-RateLimit-Limit", String(rateLimit));
+    c.header("X-RateLimit-Remaining", String(result.remaining));
+
+    if (!result.allowed) {
+      const retryAfter = Math.ceil((result.resetAt - Date.now()) / 1000);
+      c.header("Retry-After", String(retryAfter));
+      return c.json(
+        { error: "RATE_LIMITED", message: "Too many requests" },
+        429,
+      );
+    }
+
+    return next();
+  });
 
   // Inject projectManager and optional brain registry into context
   api.use("/*", async (c, next) => {
