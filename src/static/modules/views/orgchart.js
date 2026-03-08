@@ -452,6 +452,8 @@ export class OrgChartModule {
     const viewport = document.getElementById("orgchartViewport");
     const container = document.getElementById("orgchartContainer");
     if (!viewport || !container) return;
+    if (container.dataset.panningSetup) return;
+    container.dataset.panningSetup = "true";
 
     let isDragging = false;
     let startX, startY;
