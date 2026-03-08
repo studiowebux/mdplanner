@@ -1,0 +1,124 @@
+title: MD Planner
+description: Markdown-based project management with directory storage.
+base_url: https://mdplanner.dev
+author: Studio Webux
+theme: default
+dark_mode: true
+enable_search: true
+enable_llms: true
+
+changelog:
+  enabled: true
+  title: "Changelog"
+  path: "changelog"
+  rss_enabled: true
+  repository: "https://github.com/studiowebux/mdplanner"
+
+stale_warning:
+  enabled: true
+  threshold_days: 365
+  show_update_date: true
+
+social_links:
+  - name: GitHub
+    url: https://github.com/studiowebux/mdplanner
+    icon: github
+  - name: Discord
+    url: https://discord.gg/BG5Erm9fNv
+    icon: discord
+
+footer:
+  copyright: "2026 Studio Webux. GPL-3.0."
+  links:
+    - title: "Project"
+      items:
+        - text: "GitHub"
+          url: "https://github.com/studiowebux/mdplanner"
+        - text: "Issues"
+          url: "https://github.com/studiowebux/mdplanner/issues"
+        - text: "Releases"
+          url: "https://github.com/studiowebux/mdplanner/releases"
+    - title: "Community"
+      items:
+        - text: "Discord"
+          url: "https://discord.gg/BG5Erm9fNv"
+        - text: "Buy Me a Coffee"
+          url: "https://buymeacoffee.com/studiowebux"
+
+landing:
+  enabled: true
+  nav:
+    - text: "Docs"
+      url: "/getting-started/quick-start.html"
+    - text: "GitHub"
+      url: "https://github.com/studiowebux/mdplanner"
+    - text: "Discord"
+      url: "https://discord.gg/BG5Erm9fNv"
+  hero:
+    title: "Project management with plain markdown files"
+    subtitle: "50+ views, 198 MCP tools, zero database. Plan, track, and build with .md files you own."
+    buttons:
+      - text: "Get Started"
+        url: "/getting-started/quick-start.html"
+        primary: true
+      - text: "View on GitHub"
+        url: "https://github.com/studiowebux/mdplanner"
+        primary: false
+  features:
+    title: "Features"
+    items:
+      - emoji: "~"
+        title: "Directory Storage"
+        description: "One .md file per entity. Human-readable, git-trackable, portable."
+      - emoji: "~"
+        title: "Kanban Board"
+        description: "Drag-and-drop task board organized by section columns."
+      - emoji: "~"
+        title: "Gantt Timeline"
+        description: "Task schedules, dependencies, and critical path visualization."
+      - emoji: "~"
+        title: "Goal Tracking"
+        description: "Enterprise and project goals with KPI targets and status."
+      - emoji: "~"
+        title: "MCP Server"
+        description: "198 tools for Claude Code, Claude Desktop, and any MCP client."
+      - emoji: "~"
+        title: "AI Chat"
+        description: "Built-in Ollama integration for local LLM conversations."
+      - emoji: "~"
+        title: "Encrypted Backup"
+        description: "TAR + AES-256-GCM export/import with RSA key pair."
+      - emoji: "~"
+        title: "WebDAV"
+        description: "Mount your project directory in any WebDAV-compatible editor."
+      - emoji: "~"
+        title: "Real-time SSE"
+        description: "Server-sent events push changes to all connected clients."
+      - emoji: "~"
+        title: "GitHub Integration"
+        description: "Repository summary and issue management from the UI."
+      - emoji: "~"
+        title: "SQLite FTS"
+        description: "Optional FTS5 full-text search across all entities."
+      - emoji: "~"
+        title: "Single Binary"
+        description: "One executable, no runtime dependencies. Linux, macOS, Windows."
+  links:
+    title: "Resources"
+    items:
+      - icon: "github"
+        title: "GitHub"
+        description: "Source code and issues"
+        url: "https://github.com/studiowebux/mdplanner"
+      - icon: "discord"
+        title: "Community"
+        description: "Join the discussion"
+        url: "https://discord.gg/BG5Erm9fNv"
+  opensource:
+    title: "Open Source"
+    description: "GPL-3.0. Self-host with full control. Built by Studio Webux."
+    links:
+      - text: "GitHub Repository"
+        url: "https://github.com/studiowebux/mdplanner"
+      - text: "Releases"
+        url: "https://github.com/studiowebux/mdplanner/releases"
