@@ -3,6 +3,7 @@
 
 import { Sidenav } from "../ui/sidenav.js";
 import { MilestonesAPI, StrategicLevelsAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 import { showToast } from "../ui/toast.js";
 import { escapeHtml } from "../utils.js";
 
@@ -507,7 +508,7 @@ export class StrategicLevelsSidenavModule {
   async handleDelete() {
     try {
       if (this.mode === "builder" && this.editingBuilderId) {
-        if (!confirm("Delete this strategy? This will remove all levels.")) {
+        if (!(await showConfirm("Delete this strategy? This will remove all levels."))) {
           return;
         }
         await StrategicLevelsAPI.delete(this.editingBuilderId);
@@ -524,12 +525,12 @@ export class StrategicLevelsSidenavModule {
 
         if (children.length > 0) {
           if (
-            !confirm(
+            !(await showConfirm(
               `This level has ${children.length} child level(s). Deleting will also remove all children. Continue?`,
-            )
+            ))
           ) return;
         } else {
-          if (!confirm("Delete this level?")) return;
+          if (!(await showConfirm("Delete this level?"))) return;
         }
 
         await StrategicLevelsAPI.deleteLevel(

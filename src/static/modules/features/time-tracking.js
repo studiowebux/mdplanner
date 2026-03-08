@@ -1,4 +1,5 @@
 import { TimeTrackingAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 
 /**
  * TimeTrackingModule - Handles time entry tracking for tasks
@@ -178,7 +179,7 @@ export class TimeTrackingModule {
   }
 
   async deleteFromView(taskId, entryId) {
-    if (!confirm("Delete this time entry?")) return;
+    if (!(await showConfirm("Delete this time entry?"))) return;
     try {
       await TimeTrackingAPI.delete(taskId, entryId);
       await this.load();

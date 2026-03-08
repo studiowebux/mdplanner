@@ -3,6 +3,7 @@
 
 import { Sidenav } from "../ui/sidenav.js";
 import { C4API } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 import { showToast } from "../ui/toast.js";
 import { escapeHtml } from "../utils.js";
 
@@ -502,9 +503,9 @@ export class C4SidenavModule {
     if (!component) return;
 
     if (
-      !confirm(
+      !(await showConfirm(
         `Delete "${component.name}"? This will also remove any children and connections.`,
-      )
+      ))
     ) return;
 
     try {

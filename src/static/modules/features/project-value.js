@@ -1,4 +1,5 @@
 import { ProjectValueAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 
 /**
  * ProjectValueModule - Handles Project Value Board (4-block canvas)
@@ -167,7 +168,7 @@ export class ProjectValueModule {
 
   async deleteSelected() {
     if (!this.taskManager.selectedProjectValueId) return;
-    if (!confirm("Delete this Project Value Board?")) return;
+    if (!(await showConfirm("Delete this Project Value Board?"))) return;
     try {
       await ProjectValueAPI.delete(this.taskManager.selectedProjectValueId);
       this.taskManager.selectedProjectValueId = null;

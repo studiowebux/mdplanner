@@ -5,6 +5,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { MindmapsAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { escapeHtml } from "../utils.js";
+import { showConfirm } from "../ui/confirm.js";
 
 export class MindmapSidenavModule {
   constructor(taskManager) {
@@ -257,7 +258,7 @@ export class MindmapSidenavModule {
     );
     if (!mindmap) return;
 
-    if (!confirm(`Delete "${mindmap.title}"? This cannot be undone.`)) return;
+    if (!(await showConfirm(`Delete "${mindmap.title}"? This cannot be undone.`))) return;
 
     try {
       await MindmapsAPI.delete(this.editingMindmapId);

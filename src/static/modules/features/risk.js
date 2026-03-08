@@ -1,4 +1,5 @@
 import { RiskAnalysisAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 
 /**
  * RiskModule - Handles Risk Analysis (Impact/Probability matrix)
@@ -163,7 +164,7 @@ export class RiskModule {
 
   async deleteSelected() {
     if (!this.taskManager.selectedRiskId) return;
-    if (!confirm("Delete this risk analysis?")) return;
+    if (!(await showConfirm("Delete this risk analysis?"))) return;
     try {
       await RiskAnalysisAPI.delete(this.taskManager.selectedRiskId);
       this.taskManager.selectedRiskId = null;

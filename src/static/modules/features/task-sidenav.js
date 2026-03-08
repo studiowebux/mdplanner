@@ -256,10 +256,10 @@ export class TaskSidenavModule {
     this.parentTaskId = null;
   }
 
-  _confirmAndClose() {
+  async _confirmAndClose() {
     if (
       this._descUndoManager?.hasUnsavedChanges() &&
-      !confirm("You have unsaved changes. Close anyway?")
+      !(await showConfirm("You have unsaved changes. Close anyway?", "Close"))
     ) return;
     this.close();
   }

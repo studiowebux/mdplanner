@@ -1,5 +1,6 @@
 import { MoscowAPI } from "../api.js";
 import { escapeHtml } from "../utils.js";
+import { showConfirm } from "../ui/confirm.js";
 
 /**
  * MoscowModule - Handles MoSCoW Prioritization (Must, Should, Could, Won't)
@@ -117,7 +118,7 @@ export class MoscowModule {
 
   async deleteSelected() {
     if (!this.taskManager.selectedMoscowId) return;
-    if (!confirm("Delete this MoSCoW analysis?")) return;
+    if (!(await showConfirm("Delete this MoSCoW analysis?"))) return;
     try {
       await MoscowAPI.delete(this.taskManager.selectedMoscowId);
       this.taskManager.selectedMoscowId = null;

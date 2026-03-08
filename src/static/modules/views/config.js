@@ -1,6 +1,7 @@
 // Config View Module
 import { BackupAPI, GitHubAPI, IntegrationsAPI, ProjectAPI } from "../api.js";
 import { AccessibilityManager } from "../ui/accessibility.js";
+import { showConfirm } from "../ui/confirm.js";
 
 function formatBytes(bytes) {
   if (!bytes || bytes === 0) return "0 B";
@@ -326,8 +327,9 @@ export class ConfigView {
       : "Backlog";
 
     if (
-      confirm(
+      await showConfirm(
         `Are you sure you want to remove this section? Tasks in this section will be moved to "${targetSection}".`,
+        "Remove",
       )
     ) {
       const removedSection = this.tm.sections[index];
@@ -613,7 +615,7 @@ export class ConfigView {
   }
 
   async deleteCloudflareToken() {
-    if (!confirm("Remove Cloudflare credentials?")) return;
+    if (!(await showConfirm("Remove Cloudflare credentials?", "Remove"))) return;
     try {
       await IntegrationsAPI.deleteCloudflare();
       await this.initIntegrationsPanel();
@@ -676,7 +678,7 @@ export class ConfigView {
   }
 
   async deleteGitHubToken() {
-    if (!confirm("Remove GitHub credentials?")) return;
+    if (!(await showConfirm("Remove GitHub credentials?", "Remove"))) return;
     try {
       await GitHubAPI.deleteToken();
       await this.initGitHubPanel();

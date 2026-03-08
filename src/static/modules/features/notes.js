@@ -1,5 +1,6 @@
 // Notes Feature Module - Basic CRUD functionality
 import { NotesAPI, ProjectAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 
 /**
  * Notes management - CRUD, selection, save
@@ -484,7 +485,7 @@ export class NotesModule {
   async deleteCurrent() {
     if (this.tm.activeNote === null) return;
 
-    if (!confirm("Are you sure you want to delete this note?")) return;
+    if (!(await showConfirm("Are you sure you want to delete this note?"))) return;
 
     try {
       const note = this.tm.notes[this.tm.activeNote];

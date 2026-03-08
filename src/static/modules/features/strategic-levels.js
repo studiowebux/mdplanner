@@ -1,4 +1,5 @@
 import { MilestonesAPI, StrategicLevelsAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 import { escapeHtml } from "../utils.js";
 
 /**
@@ -469,7 +470,7 @@ export class StrategicLevelsModule {
 
   async deleteBuilder() {
     if (!this.taskManager.selectedStrategicBuilderId) return;
-    if (!confirm("Are you sure you want to delete this strategy?")) return;
+    if (!(await showConfirm("Are you sure you want to delete this strategy?"))) return;
 
     try {
       await StrategicLevelsAPI.delete(
@@ -506,14 +507,14 @@ export class StrategicLevelsModule {
     if (children.length > 0) {
       const childNames = children.map((c) => c.title).join(", ");
       if (
-        !confirm(
+        !(await showConfirm(
           `This level has ${children.length} child level(s): ${childNames}.\n\nDeleting will also remove all children. Continue?`,
-        )
+        ))
       ) {
         return;
       }
     } else {
-      if (!confirm("Are you sure you want to delete this level?")) return;
+      if (!(await showConfirm("Are you sure you want to delete this level?"))) return;
     }
 
     try {

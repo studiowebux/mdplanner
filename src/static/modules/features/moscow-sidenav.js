@@ -5,6 +5,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { MoscowAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { escapeHtml } from "../utils.js";
+import { showConfirm } from "../ui/confirm.js";
 
 const CATEGORIES = ["must", "should", "could", "wont"];
 const CATEGORY_LABELS = {
@@ -207,9 +208,9 @@ export class MoscowSidenavModule {
   async handleDelete() {
     if (!this.editingMoscowId) return;
     if (
-      !confirm(
+      !(await showConfirm(
         `Delete "${this.currentAnalysis.title}"? This cannot be undone.`,
-      )
+      ))
     ) return;
 
     try {

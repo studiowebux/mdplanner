@@ -3,6 +3,7 @@
 
 import { OnboardingTemplatesAPI } from "../api.js";
 import { Sidenav } from "../ui/sidenav.js";
+import { showConfirm } from "../ui/confirm.js";
 
 export class OnboardingTemplateSidenavModule {
   constructor(taskManager) {
@@ -121,7 +122,7 @@ export class OnboardingTemplateSidenavModule {
 
   async _delete() {
     if (!this.editingId) return;
-    if (!confirm("Delete this template?")) return;
+    if (!(await showConfirm("Delete this template?"))) return;
     try {
       await OnboardingTemplatesAPI.delete(this.editingId);
       await this.taskManager.onboardingModule.load();

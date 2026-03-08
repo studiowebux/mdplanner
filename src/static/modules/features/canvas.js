@@ -1,4 +1,5 @@
 import { CanvasAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 
 export class CanvasModule {
   constructor(taskManager) {
@@ -313,7 +314,7 @@ export class CanvasModule {
   }
 
   async delete(id) {
-    if (confirm("Delete this sticky note?")) {
+    if (await showConfirm("Delete this sticky note?")) {
       try {
         await CanvasAPI.delete(id);
         this.load();

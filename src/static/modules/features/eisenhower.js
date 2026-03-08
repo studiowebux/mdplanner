@@ -1,5 +1,6 @@
 import { EisenhowerAPI } from "../api.js";
 import { escapeHtml } from "../utils.js";
+import { showConfirm } from "../ui/confirm.js";
 
 const QUADRANT_LABELS = {
   urgentImportant: "Do First",
@@ -116,7 +117,7 @@ export class EisenhowerModule {
 
   async deleteSelected() {
     if (!this.taskManager.selectedEisenhowerId) return;
-    if (!confirm("Delete this Eisenhower matrix?")) return;
+    if (!(await showConfirm("Delete this Eisenhower matrix?"))) return;
     try {
       await EisenhowerAPI.delete(this.taskManager.selectedEisenhowerId);
       this.taskManager.selectedEisenhowerId = null;

@@ -1,5 +1,6 @@
 // DNS Tracker view module
 import { DnsAPI, IntegrationsAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 
 const SHIELD_SVG = `<svg class="dns-shield" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-label="Auto-renew on">
   <path d="M8 1.5 L13.5 3.5 L13.5 8 C13.5 11 11 13.5 8 14.5 C5 13.5 2.5 11 2.5 8 L2.5 3.5 Z"/>
@@ -424,7 +425,7 @@ export class DnsModule {
 
   async batchDelete() {
     const n = this.selected.size;
-    if (!confirm(`Delete ${n} domain${n !== 1 ? "s" : ""}? This cannot be undone.`)) return;
+    if (!(await showConfirm(`Delete ${n} domain${n !== 1 ? "s" : ""}? This cannot be undone.`))) return;
     for (const id of [...this.selected]) {
       await DnsAPI.delete(id);
     }

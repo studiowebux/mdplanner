@@ -1,7 +1,8 @@
 // Tasks Feature Module
 import { TasksAPI } from "../api.js";
-import { formatDateForInput, markdownToHtml } from "../utils.js";
+import { showConfirm } from "../ui/confirm.js";
 import { showToast } from "../ui/toast.js";
+import { formatDateForInput, markdownToHtml } from "../utils.js";
 
 /**
  * Handles task CRUD operations, search, and modal management
@@ -228,7 +229,7 @@ export class TasksModule {
   }
 
   async delete(taskId) {
-    if (confirm("Are you sure you want to delete this task?")) {
+    if (await showConfirm("Are you sure you want to delete this task?")) {
       try {
         const response = await TasksAPI.delete(taskId);
         if (response.ok) {

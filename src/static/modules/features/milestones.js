@@ -1,5 +1,6 @@
 import { MilestonesAPI } from "../api.js";
 import { markdownToHtml } from "../utils.js";
+import { showConfirm } from "../ui/confirm.js";
 
 /**
  * MilestonesModule - Handles milestone CRUD operations
@@ -219,7 +220,7 @@ export class MilestonesModule {
   }
 
   async delete(id) {
-    if (!confirm("Delete this milestone?")) return;
+    if (!(await showConfirm("Delete this milestone?"))) return;
     try {
       await MilestonesAPI.delete(id);
       await this.load();

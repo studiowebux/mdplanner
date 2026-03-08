@@ -1836,6 +1836,7 @@
             <!-- Actions list -->
             <div id="meetingsActionsList" class="hidden">
               <div class="meetings-actions-filter">
+                <label for="meetingsOwnerFilter" class="sr-only">Filter by owner</label>
                 <input id="meetingsOwnerFilter" type="text" placeholder="Filter by owner..." />
               </div>
               <div id="emptyMeetingsActionsState" class="hidden">
@@ -2153,12 +2154,12 @@
               </div>
               <div class="config-panel-body">
                 <div>
-                  <label>Ollama Base URL</label>
+                  <label for="configBaseUrl">Ollama Base URL</label>
                   <input id="configBaseUrl" placeholder="http://localhost:11434" />
                 </div>
                 <div class="config-row">
                   <div>
-                    <label>Model</label>
+                    <label for="configModelSelect">Model</label>
                     <select id="configModelSelect"></select>
                   </div>
                   <div class="config-btn-row">
@@ -2167,20 +2168,20 @@
                   </div>
                 </div>
                 <div>
-                  <label>System Prompt</label>
+                  <label for="configSystemPrompt">System Prompt</label>
                   <textarea id="configSystemPrompt" rows="3" placeholder="Optional: set a system prompt..."></textarea>
                 </div>
                 <div class="slider-group">
                   <div>
                     <div class="slider-label">
-                      <label>Temperature</label>
+                      <label for="configTemperature">Temperature</label>
                       <span id="tempValue">0.7</span>
                     </div>
                     <input type="range" id="configTemperature" min="0" max="2" step="0.1" value="0.7" />
                   </div>
                   <div>
                     <div class="slider-label">
-                      <label>Top P</label>
+                      <label for="configTopP">Top P</label>
                       <span id="topPValue">0.9</span>
                     </div>
                     <input type="range" id="configTopP" min="0" max="1" step="0.05" value="0.9" />
@@ -2188,22 +2189,22 @@
                 </div>
                 <div>
                   <div class="slider-label">
-                    <label>Context Size (num_ctx)</label>
+                    <label for="configNumCtx">Context Size (num_ctx)</label>
                     <span id="numCtxValue">8192</span>
                   </div>
                   <input type="range" id="configNumCtx" min="2048" max="131072" step="1024" value="8192" />
                 </div>
                 <div>
-                  <label>Search URL (SearXNG — optional)</label>
+                  <label for="configSearchUrl">Search URL (SearXNG — optional)</label>
                   <input id="configSearchUrl" placeholder="http://localhost:8888" />
                 </div>
                 <div>
-                  <label>Chatterbox TTS URL (optional)</label>
+                  <label for="configChatterboxUrl">Chatterbox TTS URL (optional)</label>
                   <input id="configChatterboxUrl" placeholder="http://localhost:8001" />
                 </div>
                 <div class="config-row">
                   <div>
-                    <label>TTS Voice</label>
+                    <label for="configChatterboxVoice">TTS Voice</label>
                     <select id="configChatterboxVoice"><option value="">-- select voice --</option></select>
                   </div>
                   <div class="config-tts-voice-refresh">
@@ -2225,21 +2226,21 @@
                 <div class="slider-group">
                   <div>
                     <div class="slider-label">
-                      <label>TTS Exaggeration</label>
+                      <label for="configChatterboxExageration">TTS Exaggeration</label>
                       <span id="ttsExagerationValue">0.5</span>
                     </div>
                     <input type="range" id="configChatterboxExageration" min="0" max="2" step="0.05" value="0.5" />
                   </div>
                   <div>
                     <div class="slider-label">
-                      <label>TTS CFG Weight</label>
+                      <label for="configChatterboxCfgWeight">TTS CFG Weight</label>
                       <span id="ttsCfgWeightValue">0.5</span>
                     </div>
                     <input type="range" id="configChatterboxCfgWeight" min="0" max="1" step="0.05" value="0.5" />
                   </div>
                 </div>
                 <div>
-                  <label>Storage Key</label>
+                  <label for="configStorageKey">Storage Key</label>
                   <input id="configStorageKey" placeholder="ollama-chat-history" />
                 </div>
                 <button class="btn-primary" onclick="App.saveConfig()">Save Config</button>
@@ -2255,8 +2256,8 @@
               <div class="config-panel-body">
                 <div class="prompt-list" id="promptList"></div>
                 <div class="prompt-add">
-                  <input id="newPromptTitle" placeholder="Title" />
-                  <textarea id="newPromptContent" rows="2" placeholder="Prompt content..."></textarea>
+                  <input id="newPromptTitle" placeholder="Title" aria-label="Prompt title" />
+                  <textarea id="newPromptContent" rows="2" placeholder="Prompt content..." aria-label="Prompt content"></textarea>
                   <div class="prompt-actions">
                     <button class="btn-ghost" onclick="App.addPrompt()">Add</button>
                     <button class="btn-ghost" onclick="App.exportPrompts()">Export JSON</button>

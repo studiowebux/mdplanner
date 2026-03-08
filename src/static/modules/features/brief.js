@@ -1,4 +1,5 @@
 import { BriefAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 import { escapeHtml } from "../utils.js";
 
 /**
@@ -177,7 +178,7 @@ export class BriefModule {
 
   async delete() {
     if (!this.taskManager.selectedBriefId) return;
-    if (!confirm("Are you sure you want to delete this brief?")) return;
+    if (!(await showConfirm("Are you sure you want to delete this brief?"))) return;
     try {
       await BriefAPI.delete(this.taskManager.selectedBriefId);
       this.taskManager.selectedBriefId = null;

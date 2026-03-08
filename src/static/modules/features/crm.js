@@ -1,4 +1,5 @@
 import { CRMAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 
 export class CRMModule {
   constructor(taskManager) {
@@ -134,9 +135,9 @@ export class CRMModule {
 
   async deleteCompany(id) {
     if (
-      !confirm(
+      !(await showConfirm(
         "Delete this company? This will also remove related contacts, deals, and interactions.",
-      )
+      ))
     ) return;
     try {
       await CRMAPI.deleteCompany(id);
@@ -240,7 +241,7 @@ export class CRMModule {
   }
 
   async deleteContact(id) {
-    if (!confirm("Delete this contact?")) return;
+    if (!(await showConfirm("Delete this contact?"))) return;
     try {
       await CRMAPI.deleteContact(id);
       await this.load();
@@ -342,7 +343,7 @@ export class CRMModule {
   }
 
   async deleteDeal(id) {
-    if (!confirm("Delete this deal?")) return;
+    if (!(await showConfirm("Delete this deal?"))) return;
     try {
       await CRMAPI.deleteDeal(id);
       await this.load();
@@ -457,7 +458,7 @@ export class CRMModule {
   }
 
   async deleteInteraction(id) {
-    if (!confirm("Delete this interaction?")) return;
+    if (!(await showConfirm("Delete this interaction?"))) return;
     try {
       await CRMAPI.deleteInteraction(id);
       await this.load();

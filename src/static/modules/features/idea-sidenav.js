@@ -6,6 +6,7 @@ import { IdeasAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { escapeHtml } from "../utils.js";
 import { FuzzyAutocomplete } from "../ui/fuzzy-autocomplete.js";
+import { showConfirm } from "../ui/confirm.js";
 
 export class IdeaSidenavModule {
   constructor(taskManager) {
@@ -426,7 +427,7 @@ export class IdeaSidenavModule {
     if (!this.editingIdeaId) return;
 
     if (
-      !confirm(`Delete "${this.currentIdea.title}"? This cannot be undone.`)
+      !(await showConfirm(`Delete "${this.currentIdea.title}"? This cannot be undone.`))
     ) return;
 
     try {
