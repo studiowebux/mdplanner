@@ -1246,6 +1246,11 @@ class TaskManager {
     document.getElementById("globalSearchBtn")?.classList.toggle("hidden", !searchEnabled);
     document.getElementById("globalSearchBtnMobile")?.classList.toggle("hidden", !searchEnabled);
 
+    // Pomodoro header button (not a nav view — handled separately)
+    const pomodoroEnabled = showAll || (features && features.includes("pomodoro"));
+    document.getElementById("pomodoroBtn")?.classList.toggle("hidden", !pomodoroEnabled);
+    document.getElementById("pomodoroBtnMobile")?.classList.toggle("hidden", !pomodoroEnabled);
+
     // Hide empty dropdown categories (desktop)
     document.querySelectorAll(".nav-dropdown").forEach((dropdown) => {
       const menu = dropdown.querySelector(".nav-dropdown-menu");

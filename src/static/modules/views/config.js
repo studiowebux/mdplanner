@@ -487,6 +487,7 @@ export class ConfigView {
       ],
       "Tools": [
         { id: "quick-search", label: "Quick Search (⌘K)" },
+        { id: "pomodoro", label: "Pomodoro Timer" },
         { id: "ollama", label: "AI Chat" },
         { id: "analytics", label: "Analytics" },
         { id: "uploads", label: "Uploads" },
