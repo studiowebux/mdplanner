@@ -1,3 +1,7 @@
+---
+title: WebDAV
+---
+
 # WebDAV
 
 MD Planner exposes the project directory over WebDAV at `/webdav`. This allows

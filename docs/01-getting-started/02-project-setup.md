@@ -1,3 +1,7 @@
+---
+title: Project Setup
+---
+
 # Project Setup
 
 ## Initialize a project

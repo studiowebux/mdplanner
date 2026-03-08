@@ -44,6 +44,10 @@ footer:
           url: "https://discord.gg/BG5Erm9fNv"
         - text: "Buy Me a Coffee"
           url: "https://buymeacoffee.com/studiowebux"
+        - text: "GitHub Sponsors"
+          url: "https://github.com/sponsors/studiowebux"
+        - text: "Patreon"
+          url: "https://patreon.com/studiowebux"
 
 landing:
   enabled: true
@@ -56,7 +60,7 @@ landing:
       url: "https://discord.gg/BG5Erm9fNv"
   hero:
     title: "Project management with plain markdown files"
-    subtitle: "50+ views, 198 MCP tools, zero database. Plan, track, and build with .md files you own."
+    subtitle: "46 views, 239 MCP tools, zero database. Plan, track, and build with .md files you own."
     buttons:
       - text: "Get Started"
         url: "/getting-started/quick-start.html"
@@ -81,7 +85,7 @@ landing:
         description: "Enterprise and project goals with KPI targets and status."
       - emoji: "~"
         title: "MCP Server"
-        description: "198 tools for Claude Code, Claude Desktop, and any MCP client."
+        description: "239 tools for Claude Code, Claude Desktop, and any MCP client."
       - emoji: "~"
         title: "AI Chat"
         description: "Built-in Ollama integration for local LLM conversations."

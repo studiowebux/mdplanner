@@ -1,3 +1,7 @@
+---
+title: Environment Variables
+---
+
 # Environment Variables
 
 All environment variables use the `MDPLANNER_` prefix. CLI flags take precedence

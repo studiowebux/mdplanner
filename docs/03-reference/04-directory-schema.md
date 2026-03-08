@@ -1,3 +1,7 @@
+---
+title: Directory Schema
+---
+
 # Directory Schema
 
 Every entity is a markdown file with YAML frontmatter. The directory name

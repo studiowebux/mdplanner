@@ -1,3 +1,7 @@
+---
+title: Features
+---
+
 # Features
 
 Every feature can be hidden or shown from Settings > Feature Visibility. Start

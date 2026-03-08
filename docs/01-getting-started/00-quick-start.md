@@ -1,3 +1,7 @@
+---
+title: Quick Start
+---
+
 # Quick Start
 
 Three ways to get MD Planner running.
