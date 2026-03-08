@@ -1,5 +1,6 @@
 import { IdeasAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 const ARCHIVED_STATUSES = ["implemented", "cancelled"];
 
@@ -17,11 +18,14 @@ export class IdeasModule {
   }
 
   async load() {
+    showLoading("ideasView");
     try {
       this.taskManager.ideas = await IdeasAPI.fetchAll();
       this.renderView();
     } catch (error) {
       console.error("Error loading ideas:", error);
+    } finally {
+      hideLoading("ideasView");
     }
   }
 

@@ -2,6 +2,7 @@
 // List view with Records and Templates tabs
 
 import { OnboardingAPI, OnboardingTemplatesAPI } from "../api.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 const CATEGORIES = ["equipment", "accounts", "docs", "training", "intro", "other"];
 
@@ -12,6 +13,7 @@ export class OnboardingModule {
   }
 
   async load() {
+    showLoading("onboardingView");
     try {
       const [records, templates] = await Promise.all([
         OnboardingAPI.fetchAll(),
@@ -23,6 +25,8 @@ export class OnboardingModule {
       this._populateTemplateSelect();
     } catch (error) {
       console.error("Error loading onboarding data:", error);
+    } finally {
+      hideLoading("onboardingView");
     }
   }
 

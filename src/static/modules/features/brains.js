@@ -1,6 +1,7 @@
 // Brain Manager Module — main view with sidebar + tabbed content
 import { BrainsAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 import { BrainFilesPanel } from "./brains-files.js";
 import { BrainSessionsPanel } from "./brains-sessions.js";
 import { BrainSyncPanel } from "./brains-sync.js";
@@ -19,12 +20,14 @@ export class BrainsModule {
   }
 
   async load() {
+    showLoading("brainsView");
     try {
       this.brains = await BrainsAPI.fetchAll();
     } catch {
       this.brains = [];
     }
     this.renderView();
+    hideLoading("brainsView");
   }
 
   renderView() {

@@ -1,4 +1,5 @@
 import { AnalyticsAPI } from "../api.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 // Analytics View Module
 //
@@ -322,8 +323,7 @@ export class AnalyticsModule {
     const ts = document.getElementById("analyticsTimestamp");
     if (!grid) return;
 
-    grid.innerHTML =
-      '<p class="analytics-loading">Loading analytics\u2026</p>';
+    showLoading("analyticsView");
 
     try {
       const data = await AnalyticsAPI.fetch();
@@ -338,6 +338,8 @@ export class AnalyticsModule {
       console.error("[analytics] load error:", err);
       grid.innerHTML =
         '<p class="analytics-error">Failed to load analytics. Check the server logs.</p>';
+    } finally {
+      hideLoading("analyticsView");
     }
   }
 

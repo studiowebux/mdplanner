@@ -1,5 +1,6 @@
 import { LeanCanvasAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 /**
  * LeanCanvasModule - Handles Lean Canvas (startup-focused business model)
@@ -10,6 +11,7 @@ export class LeanCanvasModule {
   }
 
   async load() {
+    showLoading("leanCanvasView");
     try {
       this.taskManager.leanCanvases = await LeanCanvasAPI.fetchAll();
       this.renderSelector();
@@ -25,6 +27,8 @@ export class LeanCanvasModule {
       }
     } catch (error) {
       console.error("Error loading lean canvases:", error);
+    } finally {
+      hideLoading("leanCanvasView");
     }
   }
 

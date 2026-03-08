@@ -1,5 +1,6 @@
 import { C4API } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 export class C4Module {
   constructor(taskManager) {
@@ -7,6 +8,7 @@ export class C4Module {
   }
 
   async load() {
+    showLoading("c4View");
     try {
       const data = await C4API.fetchAll();
       this.tm.c4Components = data.components || [];
@@ -24,6 +26,7 @@ export class C4Module {
     }
 
     this.render();
+    hideLoading("c4View");
 
     setTimeout(() => {
       const resetBtn = document.getElementById("c4ResetViewBtn");

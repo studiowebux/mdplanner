@@ -1,5 +1,6 @@
 import { RiskAnalysisAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 /**
  * RiskModule - Handles Risk Analysis (Impact/Probability matrix)
@@ -10,6 +11,7 @@ export class RiskModule {
   }
 
   async load() {
+    showLoading("riskAnalysisView");
     try {
       this.taskManager.riskAnalyses = await RiskAnalysisAPI.fetchAll();
       this.renderSelector();
@@ -25,6 +27,8 @@ export class RiskModule {
       }
     } catch (error) {
       console.error("Error loading risk analyses:", error);
+    } finally {
+      hideLoading("riskAnalysisView");
     }
   }
 

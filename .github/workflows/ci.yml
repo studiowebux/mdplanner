@@ -33,6 +33,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-deno-
 
+      - name: Scan for secrets
+        run: |
+          PATTERNS='(sk-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{36,}|AKIA[0-9A-Z]{16}|password\s*=\s*["\x27][^"\x27]+["\x27])'
+          MATCHES=$(grep -rEn "$PATTERNS" --include='*.ts' --include='*.js' --include='*.json' --include='*.yml' --include='*.yaml' --include='*.env' --exclude-dir=node_modules --exclude-dir=.git . || true)
+          if [ -n "$MATCHES" ]; then
+            echo "::error::Potential secrets detected in source files:"
+            echo "$MATCHES"
+            exit 1
+          fi
+          echo "No secrets detected."
+
       - name: Format check
         run: deno fmt --check
 

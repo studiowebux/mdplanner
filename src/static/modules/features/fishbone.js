@@ -3,6 +3,7 @@
 
 import { FishboneAPI } from "../api.js";
 import { escapeHtml } from "../utils.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 export class FishboneModule {
   constructor(taskManager) {
@@ -10,11 +11,14 @@ export class FishboneModule {
   }
 
   async load() {
+    showLoading("fishboneView");
     try {
       this.taskManager.fishbones = await FishboneAPI.fetchAll();
       this.renderView();
     } catch (error) {
       console.error("Error loading fishbone diagrams:", error);
+    } finally {
+      hideLoading("fishboneView");
     }
   }
 

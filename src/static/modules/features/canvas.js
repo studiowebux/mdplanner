@@ -1,5 +1,6 @@
 import { CanvasAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 export class CanvasModule {
   constructor(taskManager) {
@@ -12,11 +13,14 @@ export class CanvasModule {
   }
 
   async load() {
+    showLoading("canvasView");
     try {
       this.stickyNotes = await CanvasAPI.fetchAll();
       this.render();
     } catch (error) {
       console.error("Error loading canvas:", error);
+    } finally {
+      hideLoading("canvasView");
     }
   }
 

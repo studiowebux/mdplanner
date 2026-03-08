@@ -3,6 +3,7 @@
 
 import { HabitsAPI } from "../api.js";
 import { escapeHtml } from "../utils.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 import { showToast } from "../ui/toast.js";
 
 // ---------------------------------------------------------------
@@ -95,11 +96,14 @@ export class HabitsModule {
   }
 
   async load() {
+    showLoading("habitsView");
     try {
       this.taskManager.habits = await HabitsAPI.fetchAll();
       this.renderView();
     } catch (error) {
       console.error("Error loading habits:", error);
+    } finally {
+      hideLoading("habitsView");
     }
   }
 

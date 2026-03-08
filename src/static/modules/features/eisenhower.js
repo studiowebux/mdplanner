@@ -1,6 +1,7 @@
 import { EisenhowerAPI } from "../api.js";
 import { escapeHtml } from "../utils.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 const QUADRANT_LABELS = {
   urgentImportant: "Do First",
@@ -18,6 +19,7 @@ export class EisenhowerModule {
   }
 
   async load() {
+    showLoading("eisenhowerView");
     try {
       this.taskManager.eisenhowerMatrices = await EisenhowerAPI.fetchAll();
       this.renderSelector();
@@ -33,6 +35,8 @@ export class EisenhowerModule {
       }
     } catch (error) {
       console.error("Error loading Eisenhower matrices:", error);
+    } finally {
+      hideLoading("eisenhowerView");
     }
   }
 

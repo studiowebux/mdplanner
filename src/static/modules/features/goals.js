@@ -1,5 +1,6 @@
 import { GitHubAPI, GoalsAPI, ProjectAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 /**
  * GoalsModule - Handles goal CRUD and filtering
@@ -10,6 +11,7 @@ export class GoalsModule {
   }
 
   async load() {
+    showLoading("goalsView");
     try {
       const projectInfo = await ProjectAPI.getInfo();
       this.taskManager.goals = projectInfo.goals || [];
@@ -18,6 +20,8 @@ export class GoalsModule {
       console.error("Error loading goals:", error);
       this.taskManager.goals = [];
       this.renderView();
+    } finally {
+      hideLoading("goalsView");
     }
   }
 

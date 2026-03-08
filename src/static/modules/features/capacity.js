@@ -1,5 +1,6 @@
 import { CapacityAPI, MilestonesAPI, PeopleAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 import { escapeHtml } from "../utils.js";
 
 /**
@@ -12,6 +13,7 @@ export class CapacityModule {
   }
 
   async load() {
+    showLoading("capacityView");
     try {
       const [plans, people] = await Promise.all([
         CapacityAPI.fetchAll(),
@@ -33,6 +35,8 @@ export class CapacityModule {
       }
     } catch (error) {
       console.error("Error loading capacity plans:", error);
+    } finally {
+      hideLoading("capacityView");
     }
   }
 

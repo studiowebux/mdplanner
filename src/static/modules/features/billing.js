@@ -1,5 +1,6 @@
 import { BillingAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 export class BillingModule {
   constructor(taskManager) {
@@ -19,6 +20,7 @@ export class BillingModule {
   }
 
   async load() {
+    showLoading("billingView");
     try {
       const [customers, rates, quotes, invoices, summary] = await Promise.all([
         fetch("/api/customers").then((r) => r.json()),
@@ -41,6 +43,8 @@ export class BillingModule {
       this.renderInvoicesView();
     } catch (error) {
       console.error("Error loading billing data:", error);
+    } finally {
+      hideLoading("billingView");
     }
   }
 

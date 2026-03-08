@@ -3,6 +3,7 @@
 
 import { UploadsAPI } from "../api.js";
 import { escapeHtml } from "../utils.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 import { showToast } from "../ui/toast.js";
 
 function formatBytes(bytes) {
@@ -21,7 +22,7 @@ export class UploadsView {
   async load() {
     const container = document.getElementById("uploadsContent");
     if (!container) return;
-    container.innerHTML = "<p>Loading...</p>";
+    showLoading("uploadsView");
 
     try {
       const [listData, orphanData] = await Promise.all([
@@ -33,6 +34,8 @@ export class UploadsView {
       container.innerHTML =
         '<p class="uploads-empty">Failed to load uploads.</p>';
       console.error("UploadsView load error:", err);
+    } finally {
+      hideLoading("uploadsView");
     }
   }
 

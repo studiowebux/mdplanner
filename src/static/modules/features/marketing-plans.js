@@ -3,6 +3,7 @@
 
 import { MarketingPlansAPI } from "../api.js";
 import { escapeHtml } from "../utils.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 export class MarketingPlansModule {
   constructor(taskManager) {
@@ -10,11 +11,14 @@ export class MarketingPlansModule {
   }
 
   async load() {
+    showLoading("marketingPlansView");
     try {
       this.taskManager.marketingPlans = await MarketingPlansAPI.fetchAll();
       this.renderView();
     } catch (error) {
       console.error("Error loading marketing plans:", error);
+    } finally {
+      hideLoading("marketingPlansView");
     }
   }
 

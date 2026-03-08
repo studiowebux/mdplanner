@@ -1,5 +1,6 @@
 // GitHub view — overview of linked repos with live stats.
 import { GitHubAPI, PortfolioAPI } from "../api.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 export class GitHubView {
   constructor(taskManager) {
@@ -15,7 +16,7 @@ export class GitHubView {
     if (this._loading) return;
     this._loading = true;
 
-    container.innerHTML = `<p class="text-secondary" style="padding:1rem;">Loading…</p>`;
+    showLoading("githubView");
 
     // Check token
     let connected = false;
@@ -70,6 +71,7 @@ export class GitHubView {
       `;
       this._bindRefresh();
       this._loading = false;
+      hideLoading("githubView");
       return;
     }
 
@@ -95,6 +97,7 @@ export class GitHubView {
     this._bindFilters();
     this._renderTable();
     this._loading = false;
+    hideLoading("githubView");
   }
 
   _renderTable() {

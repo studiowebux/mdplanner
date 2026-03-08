@@ -4,6 +4,8 @@
  * Pattern: View Module (tab controller)
  */
 
+import { showLoading, hideLoading } from "../ui/loading.js";
+
 export class FundraisingModule {
   constructor(taskManager) {
     this.tm = taskManager;
@@ -11,14 +13,19 @@ export class FundraisingModule {
   }
 
   async load() {
-    await Promise.all([
-      this.tm.fundraisingSafeModule.load(),
-      this.tm.fundraisingPipelineModule.load(),
-      this.tm.fundraisingKpiModule.load(),
-    ]);
-    this.tm.fundraisingRunwayModule.load();
-    this.tm.fundraisingTargetsModule.load();
-    this.switchTab(this.activeTab);
+    showLoading("fundraisingView");
+    try {
+      await Promise.all([
+        this.tm.fundraisingSafeModule.load(),
+        this.tm.fundraisingPipelineModule.load(),
+        this.tm.fundraisingKpiModule.load(),
+      ]);
+      this.tm.fundraisingRunwayModule.load();
+      this.tm.fundraisingTargetsModule.load();
+      this.switchTab(this.activeTab);
+    } finally {
+      hideLoading("fundraisingView");
+    }
   }
 
   switchTab(tab) {

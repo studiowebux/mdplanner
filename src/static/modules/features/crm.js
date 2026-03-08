@@ -1,5 +1,6 @@
 import { CRMAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 export class CRMModule {
   constructor(taskManager) {
@@ -17,6 +18,7 @@ export class CRMModule {
   }
 
   async load() {
+    showLoading("crmView");
     try {
       const [companies, contacts, deals, interactions, summary] = await Promise
         .all([
@@ -40,6 +42,8 @@ export class CRMModule {
       this.renderInteractionsView();
     } catch (error) {
       console.error("Error loading CRM data:", error);
+    } finally {
+      hideLoading("crmView");
     }
   }
 

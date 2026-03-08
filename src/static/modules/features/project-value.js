@@ -1,5 +1,6 @@
 import { ProjectValueAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 /**
  * ProjectValueModule - Handles Project Value Board (4-block canvas)
@@ -10,6 +11,7 @@ export class ProjectValueModule {
   }
 
   async load() {
+    showLoading("projectValueView");
     try {
       this.taskManager.projectValueBoards = await ProjectValueAPI.fetchAll();
       this.renderSelector();
@@ -25,6 +27,8 @@ export class ProjectValueModule {
       }
     } catch (error) {
       console.error("Error loading project value boards:", error);
+    } finally {
+      hideLoading("projectValueView");
     }
   }
 

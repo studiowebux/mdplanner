@@ -1,6 +1,7 @@
 // DNS Tracker view module
 import { DnsAPI, IntegrationsAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 const SHIELD_SVG = `<svg class="dns-shield" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-label="Auto-renew on">
   <path d="M8 1.5 L13.5 3.5 L13.5 8 C13.5 11 11 13.5 8 14.5 C5 13.5 2.5 11 2.5 8 L2.5 3.5 Z"/>
@@ -102,6 +103,7 @@ export class DnsModule {
   }
 
   async load() {
+    showLoading("dnsView");
     try {
       this.domains = await DnsAPI.fetchAll();
     } catch {
@@ -115,6 +117,7 @@ export class DnsModule {
     }
     this.selected.clear();
     this.render();
+    hideLoading("dnsView");
   }
 
   render() {

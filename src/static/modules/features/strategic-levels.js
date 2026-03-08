@@ -1,5 +1,6 @@
 import { MilestonesAPI, StrategicLevelsAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 import { escapeHtml } from "../utils.js";
 
 /**
@@ -12,6 +13,7 @@ export class StrategicLevelsModule {
   }
 
   async load() {
+    showLoading("strategicLevelsView");
     try {
       this.taskManager.strategicLevelsBuilders = await StrategicLevelsAPI
         .fetchAll();
@@ -28,6 +30,8 @@ export class StrategicLevelsModule {
       }
     } catch (error) {
       console.error("Error loading strategic levels builders:", error);
+    } finally {
+      hideLoading("strategicLevelsView");
     }
   }
 

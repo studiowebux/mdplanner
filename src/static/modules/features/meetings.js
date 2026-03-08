@@ -3,6 +3,7 @@
 
 import { MeetingsAPI, TasksAPI } from "../api.js";
 import { escapeHtml, markdownToHtml } from "../utils.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 export class MeetingsModule {
   constructor(taskManager) {
@@ -13,11 +14,14 @@ export class MeetingsModule {
   }
 
   async load() {
+    showLoading("meetingsView");
     try {
       this.taskManager.meetings = await MeetingsAPI.fetchAll();
       this.renderView();
     } catch (error) {
       console.error("Error loading meetings:", error);
+    } finally {
+      hideLoading("meetingsView");
     }
   }
 
