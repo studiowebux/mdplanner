@@ -110,6 +110,35 @@ export function createApiRouter(
     : undefined;
   api.use("/*", cors(corsOpts));
 
+  // Request logging — structured JSON, one line per request
+  api.use("/*", async (c, next) => {
+    // Skip SSE keepalives and OPTIONS preflight
+    if (c.req.method === "OPTIONS" || c.req.path === "/api/events") {
+      return next();
+    }
+
+    const requestId = c.req.header("X-Request-ID") ?? crypto.randomUUID();
+    c.header("X-Request-ID", requestId);
+    const start = performance.now();
+
+    await next();
+
+    const duration = Math.round(performance.now() - start);
+    const status = c.res.status;
+    const level = status >= 500 ? "error" : status >= 400 ? "warn" : "info";
+    console.info(
+      JSON.stringify({
+        level,
+        ts: new Date().toISOString(),
+        method: c.req.method,
+        path: c.req.path,
+        status,
+        duration_ms: duration,
+        request_id: requestId,
+      }),
+    );
+  });
+
   // Auth routes + middleware — only when --api-token is configured
   if (opts?.apiToken) {
     const apiToken = opts.apiToken;
