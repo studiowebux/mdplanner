@@ -34,6 +34,8 @@ interface CLIArgs {
   claudeDir?: string;
   corsOrigin?: string;
   apiToken?: string;
+  maxBodySize?: number;
+  rateLimitPerMinute?: number;
 }
 
 function printHelp(): void {
@@ -67,6 +69,8 @@ Options:
       --backup-public-key <h>  Hex RSA public key — encrypts all backups
       --brains-config <path>   Path to brains.json — enables Brain Manager UI
       --api-token <tok>        Protect the REST API with a session token
+      --max-body-size <MB>     Max request body in MB (default: 10)
+      --rate-limit <n>         Max requests per minute per IP (default: 200)
       --cors-origin <origin>   Restrict CORS to this origin (default: allow all)
       --claude-dir <path>      Claude config dir (default: ~/.claude)
   -h, --help                   Show this help message
@@ -107,6 +111,12 @@ function parseArgs(args: string[]): CLIArgs {
       join(Deno.env.get("HOME") ?? "", ".claude"),
     corsOrigin: Deno.env.get("MDPLANNER_CORS_ORIGIN") ?? undefined,
     apiToken: Deno.env.get("MDPLANNER_API_TOKEN") ?? undefined,
+    maxBodySize: Deno.env.get("MDPLANNER_MAX_BODY_SIZE")
+      ? parseInt(Deno.env.get("MDPLANNER_MAX_BODY_SIZE")!, 10) * 1024 * 1024
+      : undefined,
+    rateLimitPerMinute: Deno.env.get("MDPLANNER_RATE_LIMIT")
+      ? parseInt(Deno.env.get("MDPLANNER_RATE_LIMIT")!, 10)
+      : undefined,
   };
 
   let i = 0;
@@ -201,6 +211,32 @@ function parseArgs(args: string[]): CLIArgs {
         Deno.exit(1);
       }
       result.apiToken = tok;
+      i += 2;
+    } else if (arg === "--max-body-size") {
+      const val = args[i + 1];
+      if (!val || val.startsWith("-")) {
+        console.error("Error: --max-body-size requires a number (MB)");
+        Deno.exit(1);
+      }
+      const mb = parseInt(val, 10);
+      if (isNaN(mb) || mb < 1) {
+        console.error("Error: --max-body-size must be a positive integer");
+        Deno.exit(1);
+      }
+      result.maxBodySize = mb * 1024 * 1024;
+      i += 2;
+    } else if (arg === "--rate-limit") {
+      const val = args[i + 1];
+      if (!val || val.startsWith("-")) {
+        console.error("Error: --rate-limit requires a number");
+        Deno.exit(1);
+      }
+      const n = parseInt(val, 10);
+      if (isNaN(n) || n < 1) {
+        console.error("Error: --rate-limit must be a positive integer");
+        Deno.exit(1);
+      }
+      result.rateLimitPerMinute = n;
       i += 2;
     } else if (arg === "--claude-dir") {
       const val = args[i + 1];
@@ -331,6 +367,8 @@ const apiRouter = createApiRouter(projectManager, {
   claudeDir: cliArgs.claudeDir,
   corsOrigin: cliArgs.corsOrigin,
   apiToken: cliArgs.apiToken,
+  maxBodySize: cliArgs.maxBodySize,
+  rateLimitPerMinute: cliArgs.rateLimitPerMinute,
 });
 app.route("/api", apiRouter);
 
