@@ -5,7 +5,8 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { ProjectManager } from "../../lib/project-manager.ts";
-import { AppVariables, isReadOnly } from "./context.ts";
+import { AppVariables, isCacheEnabled, isReadOnly } from "./context.ts";
+import { VERSION } from "../../lib/version.ts";
 import type { BrainRegistry } from "../../lib/brains/registry.ts";
 
 // SSE events route
@@ -82,12 +83,19 @@ import { githubRouter } from "./github.ts";
 
 export function createApiRouter(
   projectManager: ProjectManager,
-  opts?: { brainRegistry?: BrainRegistry; claudeDir?: string },
+  opts?: {
+    brainRegistry?: BrainRegistry;
+    claudeDir?: string;
+    corsOrigin?: string;
+  },
 ): Hono<{ Variables: AppVariables }> {
   const api = new Hono<{ Variables: AppVariables }>();
 
-  // CORS middleware
-  api.use("/*", cors());
+  // CORS middleware — restrict to configured origin when set
+  api.use(
+    "/*",
+    cors(opts?.corsOrigin ? { origin: opts.corsOrigin } : undefined),
+  );
 
   // Inject projectManager and optional brain registry into context
   api.use("/*", async (c, next) => {
@@ -99,6 +107,17 @@ export function createApiRouter(
       c.set("claudeDir", opts.claudeDir);
     }
     await next();
+  });
+
+  // Health check — no auth required
+  const startedAt = Date.now();
+  api.get("/health", (c) => {
+    return c.json({
+      status: "ok",
+      version: VERSION,
+      uptime: Math.floor((Date.now() - startedAt) / 1000),
+      cache: isCacheEnabled(c),
+    });
   });
 
   // Read-only guard: block all mutations when --read-only is active

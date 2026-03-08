@@ -8,7 +8,7 @@
  * Excluded from pack: .git/, .mdplanner.db
  */
 
-import { join, relative } from "@std/path";
+import { join, relative, resolve } from "@std/path";
 import { walk } from "@std/fs";
 
 // ---- TAR constants ------------------------------------------------------
@@ -241,6 +241,15 @@ export async function unpackToDir(
     }
 
     const destPath = join(targetDir, name);
+    const resolvedDest = resolve(destPath);
+    const resolvedTarget = resolve(targetDir);
+    if (
+      !resolvedDest.startsWith(resolvedTarget + "/") &&
+      resolvedDest !== resolvedTarget
+    ) {
+      skipped.push(name);
+      continue;
+    }
 
     // Ensure parent directory exists
     const parentDir = destPath.slice(0, destPath.lastIndexOf("/"));

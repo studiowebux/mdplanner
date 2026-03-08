@@ -121,7 +121,7 @@ export class FundraisingSafeSidenavModule {
   }
 
   _showStatus(msg) {
-    const el = document.getElementById("safe-sidenav-status");
+    const el = document.getElementById("safe-sidenav-save-status");
     if (el) {
       el.textContent = msg;
       el.classList.remove("hidden");
