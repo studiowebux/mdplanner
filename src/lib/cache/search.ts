@@ -60,6 +60,9 @@ export interface SearchStats {
 /** FTS-enabled entities, derived from the registry. */
 const FTS_ENTITIES = ENTITIES.filter((e) => e.fts !== undefined);
 
+/** Pattern matching entity IDs: prefix_timestamp_random */
+const ENTITY_ID_PATTERN = /^[a-z][a-z0-9]*_\d{10,}_[a-z0-9]+$/i;
+
 /**
  * Full-text search engine using FTS5.
  */
@@ -68,27 +71,80 @@ export class SearchEngine {
 
   /**
    * Search across all indexed content.
+   * Detects entity ID queries and does a direct lookup before FTS.
    */
   search(query: string, options?: SearchOptions): SearchResult[] {
-    if (!query.trim()) return [];
+    const trimmed = query.trim();
+    if (!trimmed) return [];
 
     const limit = options?.limit ?? 50;
     const activeTypes = options?.types ??
       FTS_ENTITIES.map((e) => e.fts!.type as SearchResultType);
 
-    const safeQuery = this.escapeQuery(query);
     const results: SearchResult[] = [];
+
+    // Direct ID lookup when query looks like an entity ID
+    if (ENTITY_ID_PATTERN.test(trimmed)) {
+      const idResult = this.searchById(trimmed, activeTypes);
+      if (idResult) {
+        results.push(idResult);
+      }
+    }
+
+    const safeQuery = this.escapeQuery(trimmed);
 
     for (const entity of FTS_ENTITIES) {
       if (!activeTypes.includes(entity.fts!.type as SearchResultType)) continue;
       results.push(...this.searchEntity(entity, safeQuery, limit));
     }
 
-    // Sort by score (lower is better in bm25)
+    // Sort by score (lower is better in bm25; ID match uses -Infinity)
     results.sort((a, b) => a.score - b.score);
 
+    // Deduplicate: ID match may also appear in FTS results
+    const seen = new Set<string>();
+    const deduped = results.filter((r) => {
+      if (seen.has(r.id)) return false;
+      seen.add(r.id);
+      return true;
+    });
+
     // Apply global limit with offset
-    return results.slice(options?.offset ?? 0, (options?.offset ?? 0) + limit);
+    const offset = options?.offset ?? 0;
+    return deduped.slice(offset, offset + limit);
+  }
+
+  /**
+   * Direct lookup by entity ID across all cached tables.
+   * Returns the first match as a top-ranked result.
+   */
+  private searchById(
+    id: string,
+    activeTypes: SearchResultType[],
+  ): SearchResult | null {
+    for (const entity of FTS_ENTITIES) {
+      const { fts, table } = entity;
+      if (!fts) continue;
+      if (!activeTypes.includes(fts.type as SearchResultType)) continue;
+      try {
+        const row = this.db.queryOne<{ [key: string]: unknown }>(
+          `SELECT id, ${fts.titleCol} FROM ${table} WHERE id = ?`,
+          [id],
+        );
+        if (row) {
+          return {
+            id: row.id as string,
+            title: (row[fts.titleCol] as string) ?? id,
+            snippet: "Exact match by ID",
+            score: -Infinity,
+            type: fts.type as SearchResultType,
+          };
+        }
+      } catch {
+        continue;
+      }
+    }
+    return null;
   }
 
   /**
