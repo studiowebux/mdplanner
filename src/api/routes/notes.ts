@@ -12,6 +12,7 @@ import {
   getParser,
   jsonResponse,
 } from "./context.ts";
+import { CreateNoteSchema, parseBody, UpdateNoteSchema } from "../schemas.ts";
 
 export const notesRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -44,8 +45,12 @@ notesRouter.get("/:id", async (c) => {
 // POST /notes - create note
 notesRouter.post("/", async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
-  const noteId = await parser.addNote(body);
+  const raw = await c.req.json();
+  const parsed = parseBody(CreateNoteSchema, raw);
+  if (!parsed.success) return errorResponse(parsed.error, 400);
+  const noteId = await parser.addNote(
+    parsed.data as Parameters<typeof parser.addNote>[0],
+  );
   await cacheWriteThrough(c, "notes");
   return jsonResponse({ id: noteId }, 201);
 });
@@ -54,7 +59,10 @@ notesRouter.post("/", async (c) => {
 notesRouter.put("/:id", async (c) => {
   const parser = getParser(c);
   const noteId = c.req.param("id");
-  const updates = await c.req.json();
+  const raw = await c.req.json();
+  const parsed = parseBody(UpdateNoteSchema, raw);
+  if (!parsed.success) return errorResponse(parsed.error, 400);
+  const updates = parsed.data;
 
   const existing = await parser.readNote(noteId);
   const conflict = checkConflict(existing?.updatedAt, updates.updatedAt);

@@ -13,6 +13,18 @@ import {
 } from "./context.ts";
 import { Task, TaskConfig } from "../../lib/types.ts";
 import type { DirectoryMarkdownParser } from "../../lib/parser/directory/parser.ts";
+import {
+  BatchUpdateSchema,
+  CreateTaskSchema,
+  parseBody,
+  SweepStaleClaimsSchema,
+  TaskAttachmentsSchema,
+  TaskClaimSchema,
+  TaskCommentSchema,
+  TaskCommentUpdateSchema,
+  TaskMoveSchema,
+  UpdateTaskSchema,
+} from "../schemas.ts";
 
 export const tasksRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -188,7 +200,10 @@ tasksRouter.get("/:id", async (c) => {
 // POST /tasks - create task
 tasksRouter.post("/", async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
+  const raw = await c.req.json();
+  const parsed = parseBody(CreateTaskSchema, raw);
+  if (!parsed.success) return errorResponse(parsed.error, 400);
+  const body = parsed.data;
   const task: Omit<Task, "id" | "revision"> = {
     title: body.title || "Untitled",
     completed: false,
@@ -216,8 +231,11 @@ tasksRouter.post("/", async (c) => {
 // POST /tasks/sweep-stale-claims - release tasks with expired claims
 tasksRouter.post("/sweep-stale-claims", async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json().catch(() => ({}));
-  const ttl = ((body.ttl_minutes as number) ?? 30) * 60 * 1000;
+  const raw = await c.req.json().catch(() => ({}));
+  const parsed = parseBody(SweepStaleClaimsSchema, raw);
+  if (!parsed.success) return errorResponse(parsed.error, 400);
+  const body = parsed.data;
+  const ttl = (body.ttl_minutes ?? 30) * 60 * 1000;
   const now = Date.now();
   const tasks = await parser.readTasks();
   const flat: Task[] = [];
@@ -262,18 +280,10 @@ tasksRouter.post("/sweep-stale-claims", async (c) => {
 // POST /tasks/batch - batch update multiple tasks
 tasksRouter.post("/batch", async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
-  const updates = body.updates;
-
-  if (!Array.isArray(updates) || updates.length === 0) {
-    return errorResponse(
-      "updates array is required and must not be empty",
-      400,
-    );
-  }
-  if (updates.length > 50) {
-    return errorResponse("updates array must not exceed 50 entries", 400);
-  }
+  const raw = await c.req.json();
+  const parsed = parseBody(BatchUpdateSchema, raw);
+  if (!parsed.success) return errorResponse(parsed.error, 400);
+  const updates = parsed.data.updates;
 
   const results: { id: string; success: boolean; error?: string }[] = [];
 
@@ -383,7 +393,10 @@ tasksRouter.post("/batch", async (c) => {
 tasksRouter.put("/:id", async (c) => {
   const parser = getParser(c);
   const taskId = c.req.param("id");
-  const body = await c.req.json();
+  const raw = await c.req.json();
+  const parsed = parseBody(UpdateTaskSchema, raw);
+  if (!parsed.success) return errorResponse(parsed.error, 400);
+  const body = parsed.data;
 
   // Read current task for revision/claim checks (only if needed)
   const needsCurrentTask = body.expected_revision !== undefined ||
@@ -463,11 +476,10 @@ tasksRouter.delete("/:id", async (c) => {
 tasksRouter.patch("/:id/attachments", async (c) => {
   const parser = getParser(c);
   const taskId = c.req.param("id");
-  const body = await c.req.json();
-  const paths: string[] = Array.isArray(body.paths) ? body.paths : [];
-  if (!paths.length) {
-    return errorResponse("paths array is required", 400);
-  }
+  const raw = await c.req.json();
+  const parsed = parseBody(TaskAttachmentsSchema, raw);
+  if (!parsed.success) return errorResponse(parsed.error, 400);
+  const paths = parsed.data.paths;
   const success = await parser.addAttachmentsToTask(taskId, paths);
   if (success) {
     await cacheWriteThrough(c, "tasks");
@@ -480,7 +492,10 @@ tasksRouter.patch("/:id/attachments", async (c) => {
 tasksRouter.patch("/:id/move", async (c) => {
   const parser = getParser(c);
   const taskId = c.req.param("id");
-  const { section, position } = await c.req.json();
+  const raw = await c.req.json();
+  const parsed = parseBody(TaskMoveSchema, raw);
+  if (!parsed.success) return errorResponse(parsed.error, 400);
+  const { section, position } = parsed.data;
 
   // If position is provided, use reorder; otherwise just move section
   if (position !== undefined && position !== null) {
@@ -503,18 +518,14 @@ tasksRouter.patch("/:id/move", async (c) => {
 tasksRouter.post("/:id/comments", async (c) => {
   const parser = getParser(c);
   const taskId = c.req.param("id");
-  const body = await c.req.json();
-  const commentBody: string = String(body.body ?? "").trim();
-  const author: string | undefined = body.author
-    ? String(body.author)
-    : undefined;
-
-  if (!commentBody) {
-    return errorResponse("comment body is required", 400);
-  }
-
-  // deno-lint-ignore no-explicit-any
-  const metadata: Record<string, unknown> | undefined = body.metadata as any;
+  const raw = await c.req.json();
+  const parsed = parseBody(TaskCommentSchema, raw);
+  if (!parsed.success) return errorResponse(parsed.error, 400);
+  const commentBody = parsed.data.body;
+  const author = parsed.data.author;
+  const metadata = parsed.data.metadata as
+    | Record<string, unknown>
+    | undefined;
   const comment = await parser.addComment(
     taskId,
     commentBody,
@@ -553,15 +564,13 @@ tasksRouter.put("/:id/comments/:commentId", async (c) => {
   const parser = getParser(c);
   const taskId = c.req.param("id");
   const commentId = c.req.param("commentId");
-  const body = await c.req.json();
-  const commentBody: string = String(body.body ?? "").trim();
-
-  if (!commentBody) {
-    return errorResponse("comment body is required", 400);
-  }
-
-  // deno-lint-ignore no-explicit-any
-  const metadata: Record<string, unknown> | undefined = body.metadata as any;
+  const raw = await c.req.json();
+  const parsed = parseBody(TaskCommentUpdateSchema, raw);
+  if (!parsed.success) return errorResponse(parsed.error, 400);
+  const commentBody = parsed.data.body;
+  const metadata = parsed.data.metadata as
+    | Record<string, unknown>
+    | undefined;
   const comment = await parser.updateComment(
     taskId,
     commentId,
@@ -582,14 +591,12 @@ tasksRouter.put("/:id/comments/:commentId", async (c) => {
 tasksRouter.post("/:id/claim", async (c) => {
   const parser = getParser(c);
   const taskId = c.req.param("id");
-  const body = await c.req.json();
-  const assignee: string = String(body.assignee ?? "").trim();
-  const expectedSection: string | undefined = body.expected_section;
-  const expectedRevision: number | undefined = body.expected_revision;
-
-  if (!assignee) {
-    return errorResponse("assignee is required", 400);
-  }
+  const raw = await c.req.json();
+  const parsed = parseBody(TaskClaimSchema, raw);
+  if (!parsed.success) return errorResponse(parsed.error, 400);
+  const assignee = parsed.data.assignee;
+  const expectedSection = parsed.data.expected_section;
+  const expectedRevision = parsed.data.expected_revision;
 
   // Optimistic locking: reject stale claims
   if (expectedRevision !== undefined) {
