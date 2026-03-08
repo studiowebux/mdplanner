@@ -8,6 +8,31 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.24.0] - 2026-03-08
+
+### Added
+
+- Cookie-based API token authentication via `--api-token` CLI flag with login
+  modal UI and session cookies for SSE compatibility.
+- Request body size limits and per-IP rate limiting middleware.
+- Request logging middleware with `X-Request-ID` header propagation.
+- Zod validation on tasks, notes, and goals API routes.
+- Global search now supports searching by entity ID.
+- Loading spinner for all 38 async view modules during data fetch.
+- CI secrets scan workflow step (detects `sk-`, `ghp_`, `AKIA`, `password=`
+  patterns in staged files).
+
+### Fixed
+
+- SSE connection limit per IP (max 10, evicts oldest) to prevent resource
+  exhaustion.
+- Event listener accumulation in orgchart and config views on repeated
+  navigation.
+- Missing `<label>` elements on form inputs across all sidenav modules.
+- Native `confirm()` dialogs replaced with styled confirmation modal.
+- Removed unnecessary `!important` declarations and replaced hardcoded `px` font
+  sizes with CSS variables.
+
 ## [0.23.0] - 2026-03-08
 
 ### Added
@@ -1227,7 +1252,8 @@ and this project adheres to
   Windows
 - GitHub Actions CI/CD pipeline
 
-[Unreleased]: https://github.com/studiowebux/mdplanner/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/studiowebux/mdplanner/compare/v0.24.0...HEAD
+[0.24.0]: https://github.com/studiowebux/mdplanner/compare/v0.23.0...v0.24.0
 [0.12.0]: https://github.com/studiowebux/mdplanner/compare/v0.11.1...v0.12.0
 [0.11.1]: https://github.com/studiowebux/mdplanner/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/studiowebux/mdplanner/compare/v0.3.3...v0.11.0
