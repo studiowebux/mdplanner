@@ -23,16 +23,11 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.24"
 
       - name: Checkout MinimalDoc
         uses: actions/checkout@v4
@@ -40,11 +35,18 @@ jobs:
           repository: studiowebux/minimaldoc
           path: minimaldoc-src
 
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache: true
+          cache-dependency-path: minimaldoc-src/go.sum
+
       - name: Build MinimalDoc
         run: cd minimaldoc-src && go build -o ../minimaldoc ./cmd/minimaldoc/
 
       - name: Build docs
-        run: ./minimaldoc build --source docs --output _site
+        run: ./minimaldoc build docs -o _site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -55,7 +57,7 @@ jobs:
     name: Deploy
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
