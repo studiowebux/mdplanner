@@ -8,6 +8,15 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-03-08
+
+### Added
+
+- Full-text search (FTS5) indexing for all 44 cached entities. Previously only
+  22 entities were searchable. Now milestones, C4 components, customers, deals,
+  investors, interactions, quotes, invoices, and 14 more are all discoverable
+  via the `search` MCP tool.
+
 ## [0.21.0] - 2026-03-07
 
 ### Added
