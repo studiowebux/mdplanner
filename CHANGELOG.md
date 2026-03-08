@@ -8,6 +8,33 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-03-08
+
+### Added
+
+- GET /api/health endpoint returning status, version, uptime, and cache info.
+- Graceful shutdown on SIGTERM/SIGINT with `server.shutdown()`.
+- CORS origin restriction via `--cors-origin` flag and `MDPLANNER_CORS_ORIGIN`
+  environment variable.
+- Search query length validation (max 1000 characters).
+
+### Fixed
+
+- Path traversal vulnerability in `/uploads/*` endpoint — resolved path is now
+  boundary-checked against the uploads directory.
+- Path traversal vulnerability in TAR archive extraction — post-join resolve
+  validation prevents writes outside the target directory.
+- WebDAV startup now fails if credentials are missing when WebDAV is enabled
+  (`--webdav-user` and `--webdav-pass` required).
+- Duplicate HTML element IDs in sidenav save-status spans renamed to
+  `safe-sidenav-status` and `pipeline-sidenav-status`.
+
+### Security
+
+- Path traversal fixes in uploads and backup extraction (critical).
+- CORS no longer defaults to wildcard `*` — must be explicitly configured.
+- WebDAV authentication enforced at startup.
+
 ## [0.22.0] - 2026-03-08
 
 ### Added
