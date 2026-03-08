@@ -533,12 +533,15 @@ export class ConfigView {
       container.appendChild(groupDiv);
     }
 
-    // Bind change events via delegation
-    container.addEventListener("change", (e) => {
-      if (e.target.classList.contains("feature-checkbox")) {
-        this.toggleFeature();
-      }
-    });
+    // Bind change events via delegation (guard prevents duplicate listeners)
+    if (!container.dataset.featuresBound) {
+      container.dataset.featuresBound = "true";
+      container.addEventListener("change", (e) => {
+        if (e.target.classList.contains("feature-checkbox")) {
+          this.toggleFeature();
+        }
+      });
+    }
   }
 
   toggleFeature() {
