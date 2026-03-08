@@ -11,6 +11,7 @@ import {
   getParser,
   jsonResponse,
 } from "./context.ts";
+import { CreateGoalSchema, parseBody, UpdateGoalSchema } from "../schemas.ts";
 
 export const goalsRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -37,8 +38,12 @@ goalsRouter.get("/:id", async (c) => {
 // POST /goals - create goal
 goalsRouter.post("/", async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
-  const goalId = await parser.addGoal(body);
+  const raw = await c.req.json();
+  const parsed = parseBody(CreateGoalSchema, raw);
+  if (!parsed.success) return errorResponse(parsed.error, 400);
+  const goalId = await parser.addGoal(
+    parsed.data as Parameters<typeof parser.addGoal>[0],
+  );
   await cacheWriteThrough(c, "goals");
   return jsonResponse({ id: goalId }, 201);
 });
@@ -47,8 +52,10 @@ goalsRouter.post("/", async (c) => {
 goalsRouter.put("/:id", async (c) => {
   const parser = getParser(c);
   const goalId = c.req.param("id");
-  const updates = await c.req.json();
-  const success = await parser.updateGoal(goalId, updates);
+  const raw = await c.req.json();
+  const parsed = parseBody(UpdateGoalSchema, raw);
+  if (!parsed.success) return errorResponse(parsed.error, 400);
+  const success = await parser.updateGoal(goalId, parsed.data);
 
   if (success) {
     await cacheWriteThrough(c, "goals");
