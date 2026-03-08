@@ -8,6 +8,14 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-03-07
+
+### Added
+
+- 23 MCP tools for strategy entities: Strategic Levels Builder (8 tools
+  including sub-entity level operations), Business Model Canvas (5 tools), Lean
+  Canvas (5 tools), Project Value Board (5 tools).
+
 ## [0.20.0] - 2026-03-07
 
 ### Added
