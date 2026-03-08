@@ -302,6 +302,12 @@ export const ENTITIES: EntityDef[] = [
   status TEXT,
   description TEXT
 )`,
+    fts: {
+      type: "milestone",
+      columns: ["id", "name", "description"],
+      titleCol: "name",
+      contentCol: "description",
+    },
     sync: async (parser, db) => {
       const milestones = await parser.readMilestones();
       db.execute("DELETE FROM milestones");
@@ -419,6 +425,12 @@ export const ENTITIES: EntityDef[] = [
   width REAL,
   height REAL
 )`,
+    fts: {
+      type: "sticky_note",
+      columns: ["id", "content"],
+      titleCol: "content",
+      contentCol: "content",
+    },
     sync: async (parser, db) => {
       const notes = await parser.readStickyNotes();
       db.execute("DELETE FROM sticky_notes");
@@ -451,6 +463,12 @@ export const ENTITIES: EntityDef[] = [
   title TEXT NOT NULL,
   nodes TEXT            -- JSON tree structure
 )`,
+    fts: {
+      type: "mindmap",
+      columns: ["id", "title"],
+      titleCol: "title",
+      contentCol: "title",
+    },
     sync: async (parser, db) => {
       const mindmaps = await parser.readMindmaps();
       db.execute("DELETE FROM mindmaps");
@@ -482,6 +500,12 @@ export const ENTITIES: EntityDef[] = [
   children TEXT,        -- JSON array of IDs
   parent TEXT
 )`,
+    fts: {
+      type: "c4_component",
+      columns: ["id", "name", "description"],
+      titleCol: "name",
+      contentCol: "description",
+    },
     sync: async (parser, db) => {
       const components = await parser.readC4Components();
       db.execute("DELETE FROM c4_components");
@@ -564,6 +588,12 @@ export const ENTITIES: EntityDef[] = [
   low_impact_high_prob TEXT,   -- JSON array
   low_impact_low_prob TEXT     -- JSON array
 )`,
+    fts: {
+      type: "risk",
+      columns: ["id", "title"],
+      titleCol: "title",
+      contentCol: "title",
+    },
     sync: async (parser, db) => {
       const analyses = await parser.readRiskAnalyses();
       db.execute("DELETE FROM risk");
@@ -597,6 +627,12 @@ export const ENTITIES: EntityDef[] = [
   date TEXT,
   data TEXT             -- Full canvas as JSON
 )`,
+    fts: {
+      type: "lean_canvas",
+      columns: ["id", "title"],
+      titleCol: "title",
+      contentCol: "title",
+    },
     sync: async (parser, db) => {
       const canvases = await parser.readLeanCanvases();
       db.execute("DELETE FROM lean_canvas");
@@ -621,6 +657,12 @@ export const ENTITIES: EntityDef[] = [
   date TEXT,
   data TEXT             -- Full canvas as JSON
 )`,
+    fts: {
+      type: "business_model",
+      columns: ["id", "title"],
+      titleCol: "title",
+      contentCol: "title",
+    },
     sync: async (parser, db) => {
       const canvases = await parser.readBusinessModelCanvases();
       db.execute("DELETE FROM business_model");
@@ -645,6 +687,12 @@ export const ENTITIES: EntityDef[] = [
   date TEXT,
   data TEXT             -- Full board as JSON
 )`,
+    fts: {
+      type: "project_value",
+      columns: ["id", "title"],
+      titleCol: "title",
+      contentCol: "title",
+    },
     sync: async (parser, db) => {
       const boards = await parser.readProjectValueBoards();
       db.execute("DELETE FROM project_value");
@@ -701,6 +749,12 @@ export const ENTITIES: EntityDef[] = [
   team_members TEXT,    -- JSON array
   allocations TEXT      -- JSON array
 )`,
+    fts: {
+      type: "capacity_plan",
+      columns: ["id", "title"],
+      titleCol: "title",
+      contentCol: "title",
+    },
     sync: async (parser, db) => {
       const plans = await parser.readCapacityPlans();
       db.execute("DELETE FROM capacity_plans");
@@ -733,6 +787,12 @@ export const ENTITIES: EntityDef[] = [
   date TEXT,
   levels TEXT           -- JSON array
 )`,
+    fts: {
+      type: "strategic_builder",
+      columns: ["id", "title"],
+      titleCol: "title",
+      contentCol: "title",
+    },
     sync: async (parser, db) => {
       const builders = await parser.readStrategicLevelsBuilders();
       db.execute("DELETE FROM strategic_builders");
@@ -759,6 +819,12 @@ export const ENTITIES: EntityDef[] = [
   address TEXT,
   notes TEXT
 )`,
+    fts: {
+      type: "customer",
+      columns: ["id", "name", "notes"],
+      titleCol: "name",
+      contentCol: "notes",
+    },
     sync: async (parser, db) => {
       const customers = await parser.readCustomers();
       db.execute("DELETE FROM customers");
@@ -793,6 +859,12 @@ export const ENTITIES: EntityDef[] = [
   assignee TEXT,
   is_default INTEGER DEFAULT 0
 )`,
+    fts: {
+      type: "rate",
+      columns: ["id", "name"],
+      titleCol: "name",
+      contentCol: "name",
+    },
     sync: async (parser, db) => {
       try {
         const rates = await parser.readBillingRates();
@@ -833,6 +905,12 @@ export const ENTITIES: EntityDef[] = [
   total REAL,
   FOREIGN KEY (customer_id) REFERENCES customers(id)
 )`,
+    fts: {
+      type: "quote",
+      columns: ["id", "number", "notes"],
+      titleCol: "number",
+      contentCol: "notes",
+    },
     sync: async (parser, db) => {
       const quotes = await parser.readQuotes();
       db.execute("DELETE FROM quotes");
@@ -878,6 +956,12 @@ export const ENTITIES: EntityDef[] = [
   FOREIGN KEY (customer_id) REFERENCES customers(id),
   FOREIGN KEY (quote_id) REFERENCES quotes(id)
 )`,
+    fts: {
+      type: "invoice",
+      columns: ["id", "number", "notes"],
+      titleCol: "number",
+      contentCol: "notes",
+    },
     sync: async (parser, db) => {
       const invoices = await parser.readInvoices();
       db.execute("DELETE FROM invoices");
@@ -1018,6 +1102,12 @@ export const ENTITIES: EntityDef[] = [
   FOREIGN KEY (company_id) REFERENCES companies(id),
   FOREIGN KEY (contact_id) REFERENCES contacts(id)
 )`,
+    fts: {
+      type: "deal",
+      columns: ["id", "title", "notes"],
+      titleCol: "title",
+      contentCol: "notes",
+    },
     sync: async (parser, db) => {
       const deals = await parser.readDeals();
       db.execute("DELETE FROM deals");
@@ -1064,6 +1154,12 @@ export const ENTITIES: EntityDef[] = [
   FOREIGN KEY (contact_id) REFERENCES contacts(id),
   FOREIGN KEY (deal_id) REFERENCES deals(id)
 )`,
+    fts: {
+      type: "interaction",
+      columns: ["id", "summary", "notes"],
+      titleCol: "summary",
+      contentCol: "notes",
+    },
     sync: async (parser, db) => {
       const interactions = await parser.readInteractions();
       db.execute("DELETE FROM interactions");
@@ -1221,6 +1317,12 @@ export const ENTITIES: EntityDef[] = [
   start_date TEXT,
   notes TEXT
 )`,
+    fts: {
+      type: "org_member",
+      columns: ["id", "name", "notes"],
+      titleCol: "name",
+      contentCol: "notes",
+    },
     sync: async (parser, db) => {
       const members = await parser.readOrgChartMembers();
       db.execute("DELETE FROM org_members");
@@ -1389,6 +1491,12 @@ export const ENTITIES: EntityDef[] = [
   status TEXT,
   notes TEXT
 )`,
+    fts: {
+      type: "safe_agreement",
+      columns: ["id", "investor", "notes"],
+      titleCol: "investor",
+      contentCol: "notes",
+    },
     sync: async (parser, db) => {
       const agreements = await parser.readSafeAgreements();
       db.execute("DELETE FROM safe_agreements");
@@ -1430,6 +1538,12 @@ export const ENTITIES: EntityDef[] = [
   last_contact TEXT,
   notes TEXT
 )`,
+    fts: {
+      type: "investor",
+      columns: ["id", "name", "notes"],
+      titleCol: "name",
+      contentCol: "notes",
+    },
     sync: async (parser, db) => {
       const investors = await parser.readInvestors();
       db.execute("DELETE FROM investors");
@@ -1474,6 +1588,12 @@ export const ENTITIES: EntityDef[] = [
   gross_margin REAL,
   notes TEXT
 )`,
+    fts: {
+      type: "kpi_snapshot",
+      columns: ["id", "period", "notes"],
+      titleCol: "period",
+      contentCol: "notes",
+    },
     sync: async (parser, db) => {
       const snapshots = await parser.readKpiSnapshots();
       db.execute("DELETE FROM kpi_snapshots");
@@ -1640,6 +1760,12 @@ export const ENTITIES: EntityDef[] = [
   notes TEXT,
   FOREIGN KEY (invoice_id) REFERENCES invoices(id)
 )`,
+    fts: {
+      type: "payment",
+      columns: ["id", "reference", "notes"],
+      titleCol: "reference",
+      contentCol: "notes",
+    },
     sync: async (parser, db) => {
       const payments = await parser.readPayments();
       db.execute("DELETE FROM payments");
@@ -1676,6 +1802,12 @@ export const ENTITIES: EntityDef[] = [
   description TEXT,
   FOREIGN KEY (task_id) REFERENCES tasks(id)
 )`,
+    fts: {
+      type: "time_entry",
+      columns: ["id", "description"],
+      titleCol: "description",
+      contentCol: "description",
+    },
     sync: async (parser, db) => {
       const entriesMap = await parser.readTimeEntries();
       db.execute("DELETE FROM time_entries");
