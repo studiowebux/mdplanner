@@ -1,3 +1,5 @@
+import { AnalyticsAPI } from "../api.js";
+
 // Analytics View Module
 //
 // Extension pattern — widget registry:
@@ -324,9 +326,7 @@ export class AnalyticsModule {
       '<p class="analytics-loading">Loading analytics\u2026</p>';
 
     try {
-      const res = await fetch("/api/analytics");
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const data = await AnalyticsAPI.fetch();
 
       if (ts) {
         const d = new Date(data.generatedAt);

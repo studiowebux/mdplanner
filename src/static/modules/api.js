@@ -1491,6 +1491,40 @@ export const FishboneAPI = {
   },
 };
 
+/** Analytics dashboard data */
+export const AnalyticsAPI = {
+  async fetch() {
+    const response = await get("/api/analytics");
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return response.json();
+  },
+};
+
+/** TTS proxy (Chatterbox via server-side proxy) */
+export const TtsAPI = {
+  async synthesize({ ttsUrl, text, voice, exageration, cfg_weight }) {
+    const response = await post("/api/tts/synthesize", {
+      ttsUrl,
+      text,
+      voice,
+      exageration,
+      cfg_weight,
+    });
+    if (!response.ok) {
+      const errBody = await response.text();
+      let msg = errBody;
+      try { msg = JSON.parse(errBody).error || errBody; } catch { /* raw */ }
+      throw new Error(`HTTP ${response.status} — ${msg}`);
+    }
+    return response.blob();
+  },
+
+  async voices(ttsUrl) {
+    const response = await post("/api/tts/voices", { ttsUrl });
+    return response.json();
+  },
+};
+
 export const BrainsAPI = {
   async fetchAll() {
     const response = await get("/api/brains");
