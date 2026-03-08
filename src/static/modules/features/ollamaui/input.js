@@ -1,36 +1,15 @@
 /* input.js — Textarea handling, keyboard shortcuts, init */
 
-App.el.inputEl.addEventListener("input", function () {
-  App.el.inputEl.style.height = "auto";
-  App.el.inputEl.style.height =
-    Math.min(App.el.inputEl.scrollHeight, 150) + "px";
-  var len = App.el.inputEl.value.length;
-  document.getElementById("charCount").textContent = len > 0 ? len : "";
-});
-
-App.el.inputEl.addEventListener("keydown", function (e) {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    handleSend();
-  }
-});
-
-App.el.sendBtn.addEventListener("click", function () {
-  if (App.isGenerating) {
-    App.stopGeneration();
-  } else {
-    handleSend();
-  }
-});
+import { App } from "./state.js";
 
 async function handleSend() {
-  var value = App.el.inputEl.value.trim();
+  const value = App.el.inputEl.value.trim();
   if (!value && !App.pendingImages.length) return;
   if (App.isGenerating) return;
 
-  var content = value || "(image)";
-  var images = App.pendingImages.length ? App.pendingImages.slice() : null;
-  var searchData = null;
+  const content = value || "(image)";
+  const images = App.pendingImages.length ? App.pendingImages.slice() : null;
+  let searchData = null;
 
   App.el.inputEl.value = "";
   App.el.inputEl.style.height = "auto";
@@ -49,42 +28,60 @@ async function handleSend() {
   });
 }
 
-/* -------- Keyboard shortcuts -------- */
+export function initInputListeners() {
+  App.el.inputEl.addEventListener("input", function () {
+    App.el.inputEl.style.height = "auto";
+    App.el.inputEl.style.height =
+      Math.min(App.el.inputEl.scrollHeight, 150) + "px";
+    const len = App.el.inputEl.value.length;
+    document.getElementById("charCount").textContent = len > 0 ? len : "";
+  });
 
-document.addEventListener("keydown", function (e) {
-  /* Only handle shortcuts when the Ollama view is active */
-  if (document.getElementById("ollamaView")?.classList.contains("hidden")) return;
+  App.el.inputEl.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  });
 
-  /* Escape: stop generation or clear input */
-  if (e.key === "Escape") {
+  App.el.sendBtn.addEventListener("click", function () {
     if (App.isGenerating) {
       App.stopGeneration();
-    } else if (document.activeElement === App.el.inputEl) {
-      App.el.inputEl.value = "";
-      App.el.inputEl.style.height = "auto";
+    } else {
+      handleSend();
     }
-  }
+  });
+}
 
-  /* / to focus input (when not typing somewhere) */
-  if (
-    e.key === "/" &&
-    document.activeElement !== App.el.inputEl &&
-    !document.activeElement.closest(".config-panel") &&
-    document.activeElement.tagName !== "TEXTAREA" &&
-    document.activeElement.tagName !== "INPUT"
-  ) {
-    e.preventDefault();
-    App.el.inputEl.focus();
-  }
-});
+export function initKeyboardShortcuts() {
+  document.addEventListener("keydown", function (e) {
+    /* Only handle shortcuts when the Ollama view is active */
+    if (
+      document.getElementById("ollamaView")?.classList.contains("hidden")
+    ) {
+      return;
+    }
 
-/* -------- Init (deferred — called by OllamaModule.load() on first activation) -------- */
+    /* Escape: stop generation or clear input */
+    if (e.key === "Escape") {
+      if (App.isGenerating) {
+        App.stopGeneration();
+      } else if (document.activeElement === App.el.inputEl) {
+        App.el.inputEl.value = "";
+        App.el.inputEl.style.height = "auto";
+      }
+    }
 
-App.init = function () {
-  App.populateConfigUI();
-  App.loadHistory();
-  App.renderHistory();
-  App.renderBranchNav();
-  App.loadModels();
-  App.checkConnection();
-};
+    /* / to focus input (when not typing somewhere) */
+    if (
+      e.key === "/" &&
+      document.activeElement !== App.el.inputEl &&
+      !document.activeElement.closest(".config-panel") &&
+      document.activeElement.tagName !== "TEXTAREA" &&
+      document.activeElement.tagName !== "INPUT"
+    ) {
+      e.preventDefault();
+      App.el.inputEl.focus();
+    }
+  });
+}
