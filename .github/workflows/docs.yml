@@ -34,11 +34,17 @@ jobs:
         with:
           go-version: "1.24"
 
-      - name: Install MinimalDoc
-        run: go install github.com/studiowebux/minimaldoc@latest
+      - name: Checkout MinimalDoc
+        uses: actions/checkout@v4
+        with:
+          repository: studiowebux/minimaldoc
+          path: minimaldoc-src
+
+      - name: Build MinimalDoc
+        run: cd minimaldoc-src && go build -o ../minimaldoc ./cmd/minimaldoc/
 
       - name: Build docs
-        run: minimaldoc build --source docs --output _site
+        run: ./minimaldoc build --source docs --output _site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
