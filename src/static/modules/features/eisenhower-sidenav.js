@@ -5,6 +5,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { EisenhowerAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { escapeHtml } from "../utils.js";
+import { showConfirm } from "../ui/confirm.js";
 
 const QUADRANTS = [
   "urgentImportant",
@@ -214,9 +215,9 @@ export class EisenhowerSidenavModule {
   async handleDelete() {
     if (!this.editingEisenhowerId) return;
     if (
-      !confirm(
+      !(await showConfirm(
         `Delete "${this.currentMatrix.title}"? This cannot be undone.`,
-      )
+      ))
     ) return;
 
     try {

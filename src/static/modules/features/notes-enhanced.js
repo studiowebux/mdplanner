@@ -1,5 +1,6 @@
 // Enhanced Notes Module - Paragraphs, Custom Sections, Tabs, Timeline, Split View
 import { NotesAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 import { escapeHtml, markdownToHtml } from "../utils.js";
 
 export class EnhancedNotesModule {
@@ -308,11 +309,11 @@ export class EnhancedNotesModule {
     this.tm.renderActiveNote();
   }
 
-  deleteParagraph(paragraphId) {
+  async deleteParagraph(paragraphId) {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.paragraphs) return;
 
-    if (!confirm("Delete this paragraph?")) return;
+    if (!(await showConfirm("Delete this paragraph?"))) return;
 
     currentNote.paragraphs = currentNote.paragraphs.filter((p) =>
       p.id !== paragraphId
@@ -467,12 +468,12 @@ export class EnhancedNotesModule {
     }
   }
 
-  deleteSelectedParagraphs() {
+  async deleteSelectedParagraphs() {
     if (this.tm.selectedParagraphs.length === 0) return;
     if (
-      !confirm(
+      !(await showConfirm(
         `Delete ${this.tm.selectedParagraphs.length} selected paragraph(s)?`,
-      )
+      ))
     ) return;
 
     const currentNote = this.tm.notes[this.tm.activeNote];
@@ -767,8 +768,8 @@ export class EnhancedNotesModule {
     }
   }
 
-  deleteCustomSection(sectionId) {
-    if (!confirm("Delete this custom section?")) return;
+  async deleteCustomSection(sectionId) {
+    if (!(await showConfirm("Delete this custom section?"))) return;
 
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
@@ -1311,8 +1312,8 @@ export class EnhancedNotesModule {
     }
   }
 
-  deleteTab(sectionId, tabId) {
-    if (!confirm("Delete this entire tab and all its content?")) return;
+  async deleteTab(sectionId, tabId) {
+    if (!(await showConfirm("Delete this entire tab and all its content?"))) return;
 
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
@@ -1417,8 +1418,8 @@ export class EnhancedNotesModule {
     }
   }
 
-  deleteTimelineItem(sectionId, itemId) {
-    if (!confirm("Delete this timeline item?")) return;
+  async deleteTimelineItem(sectionId, itemId) {
+    if (!(await showConfirm("Delete this timeline item?"))) return;
 
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
@@ -1470,8 +1471,8 @@ export class EnhancedNotesModule {
     this.tm.renderActiveNote();
   }
 
-  removeColumnFromSplitView(sectionId, columnIndex) {
-    if (!confirm("Remove this column and all its content?")) return;
+  async removeColumnFromSplitView(sectionId, columnIndex) {
+    if (!(await showConfirm("Remove this column and all its content?", "Remove"))) return;
 
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;
@@ -1561,8 +1562,8 @@ export class EnhancedNotesModule {
     }
   }
 
-  deleteTabContent(contentId) {
-    if (!confirm("Delete this content?")) return;
+  async deleteTabContent(contentId) {
+    if (!(await showConfirm("Delete this content?"))) return;
 
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.customSections) return;

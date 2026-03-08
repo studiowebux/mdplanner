@@ -4,6 +4,7 @@
 import { Sidenav } from "../ui/sidenav.js";
 import { CapacityAPI, PeopleAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
+import { showConfirm } from "../ui/confirm.js";
 import { escapeHtml } from "../utils.js";
 
 export class CapacitySidenavModule {
@@ -301,9 +302,9 @@ export class CapacitySidenavModule {
 
   async removeMember(memberId) {
     if (
-      !confirm(
+      !(await showConfirm(
         "Delete this team member? Their allocations will also be removed.",
-      )
+      ))
     ) return;
 
     try {
@@ -485,7 +486,7 @@ export class CapacitySidenavModule {
   async handleDelete() {
     if (!this.editingPlanId) return;
     if (
-      !confirm(`Delete "${this.currentPlan.title}"? This cannot be undone.`)
+      !(await showConfirm(`Delete "${this.currentPlan.title}"? This cannot be undone.`))
     ) return;
 
     try {

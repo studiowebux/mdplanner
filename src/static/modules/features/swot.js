@@ -1,4 +1,5 @@
 import { SwotAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 import { escapeHtml } from "../utils.js";
 
 /**
@@ -170,7 +171,7 @@ export class SwotModule {
 
   async deleteSelected() {
     if (!this.taskManager.selectedSwotId) return;
-    if (!confirm("Delete this SWOT analysis?")) return;
+    if (!(await showConfirm("Delete this SWOT analysis?"))) return;
     try {
       await SwotAPI.delete(this.taskManager.selectedSwotId);
       this.taskManager.selectedSwotId = null;

@@ -115,10 +115,10 @@ export class JournalSidenavModule {
     this.editingId = null;
   }
 
-  _confirmAndClose() {
+  async _confirmAndClose() {
     if (
       this._undoManager?.hasUnsavedChanges() &&
-      !confirm("You have unsaved changes. Close anyway?")
+      !(await showConfirm("You have unsaved changes. Close anyway?", "Close"))
     ) return;
     this.close();
   }

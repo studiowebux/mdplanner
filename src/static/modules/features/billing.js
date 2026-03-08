@@ -1,4 +1,5 @@
 import { BillingAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 
 export class BillingModule {
   constructor(taskManager) {
@@ -123,7 +124,7 @@ export class BillingModule {
   }
 
   async deleteCustomer(id) {
-    if (!confirm("Delete this customer?")) return;
+    if (!(await showConfirm("Delete this customer?"))) return;
     try {
       await BillingAPI.deleteCustomer(id);
       await this.load();
@@ -180,7 +181,7 @@ export class BillingModule {
   }
 
   async deleteRate(id) {
-    if (!confirm("Delete this billing rate?")) return;
+    if (!(await showConfirm("Delete this billing rate?"))) return;
     try {
       await BillingAPI.deleteRate(id);
       await this.load();
@@ -316,7 +317,7 @@ export class BillingModule {
   }
 
   async deleteQuote(id) {
-    if (!confirm("Delete this quote?")) return;
+    if (!(await showConfirm("Delete this quote?"))) return;
     try {
       await BillingAPI.deleteQuote(id);
       await this.load();
@@ -439,7 +440,7 @@ export class BillingModule {
   }
 
   async deleteInvoice(id) {
-    if (!confirm("Delete this invoice?")) return;
+    if (!(await showConfirm("Delete this invoice?"))) return;
     try {
       await BillingAPI.deleteInvoice(id);
       await this.load();

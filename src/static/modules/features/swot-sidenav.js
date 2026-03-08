@@ -3,6 +3,7 @@
 
 import { Sidenav } from "../ui/sidenav.js";
 import { SwotAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 import { showToast } from "../ui/toast.js";
 import { escapeHtml } from "../utils.js";
 
@@ -198,7 +199,7 @@ export class SwotSidenavModule {
   async handleDelete() {
     if (!this.editingSwotId) return;
     if (
-      !confirm(`Delete "${this.currentSwot.title}"? This cannot be undone.`)
+      !(await showConfirm(`Delete "${this.currentSwot.title}"? This cannot be undone.`))
     ) return;
 
     try {

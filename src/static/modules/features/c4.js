@@ -1,4 +1,5 @@
 import { C4API } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 
 export class C4Module {
   constructor(taskManager) {
@@ -242,10 +243,10 @@ export class C4Module {
       this.openEditModal(component);
     });
 
-    element.querySelector(".c4-delete-btn").addEventListener("click", (e) => {
+    element.querySelector(".c4-delete-btn").addEventListener("click", async (e) => {
       e.stopPropagation();
       if (
-        confirm(
+        await showConfirm(
           `Delete "${component.name}"? This will also remove any children and connections.`,
         )
       ) {
@@ -1119,13 +1120,13 @@ export class C4Module {
     });
 
     container.querySelectorAll(".c4-list-delete").forEach((btn) => {
-      btn.addEventListener("click", (e) => {
+      btn.addEventListener("click", async (e) => {
         e.stopPropagation();
         const componentId = btn.dataset.componentId;
         const component = this.tm.c4Components.find((c) =>
           c.id === componentId
         );
-        if (component && confirm(`Delete "${component.name}"?`)) {
+        if (component && await showConfirm(`Delete "${component.name}"?`)) {
           this.delete(componentId);
           this.renderListView();
         }

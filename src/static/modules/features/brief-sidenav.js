@@ -4,6 +4,7 @@
 import { Sidenav } from "../ui/sidenav.js";
 import { BriefAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
+import { showConfirm } from "../ui/confirm.js";
 import { escapeHtml } from "../utils.js";
 
 export class BriefSidenavModule {
@@ -212,7 +213,7 @@ export class BriefSidenavModule {
   async handleDelete() {
     if (!this.editingBriefId) return;
     if (
-      !confirm(`Delete "${this.currentBrief.title}"? This cannot be undone.`)
+      !(await showConfirm(`Delete "${this.currentBrief.title}"? This cannot be undone.`))
     ) return;
 
     try {

@@ -4,6 +4,7 @@
 import { Sidenav } from "../ui/sidenav.js";
 import { BusinessModelAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
+import { showConfirm } from "../ui/confirm.js";
 import { escapeHtml } from "../utils.js";
 
 export class BusinessModelSidenavModule {
@@ -208,7 +209,7 @@ export class BusinessModelSidenavModule {
   async handleDelete() {
     if (!this.editingCanvasId) return;
     if (
-      !confirm(`Delete "${this.currentCanvas.title}"? This cannot be undone.`)
+      !(await showConfirm(`Delete "${this.currentCanvas.title}"? This cannot be undone.`))
     ) return;
 
     try {

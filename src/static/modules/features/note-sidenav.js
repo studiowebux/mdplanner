@@ -5,6 +5,7 @@
 import { Sidenav } from "../ui/sidenav.js";
 import { NotesAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
+import { showConfirm } from "../ui/confirm.js";
 import { escapeHtml, markdownToHtml } from "../utils.js";
 import { UndoManager } from "../ui/undo-manager.js";
 import { FuzzyAutocomplete } from "../ui/fuzzy-autocomplete.js";
@@ -259,8 +260,8 @@ export class NoteSidenavModule {
     this.isNewNote = false;
   }
 
-  _confirmAndClose() {
-    if (!this.isViewMode && this._hasNoteUnsavedChanges() && !confirm("You have unsaved changes. Close anyway?")) return;
+  async _confirmAndClose() {
+    if (!this.isViewMode && this._hasNoteUnsavedChanges() && !(await showConfirm("You have unsaved changes. Close anyway?", "Close"))) return;
     this.close();
   }
 
@@ -630,8 +631,8 @@ export class NoteSidenavModule {
     }
   }
 
-  deleteParagraph(paragraphId) {
-    if (!confirm("Delete this paragraph?")) return;
+  async deleteParagraph(paragraphId) {
+    if (!(await showConfirm("Delete this paragraph?"))) return;
 
     const note = this.isNewNote
       ? this._getTempNote()
@@ -857,7 +858,7 @@ export class NoteSidenavModule {
     const note = this.tm.notes[this.editingNoteIndex];
     if (!note) return;
 
-    if (!confirm(`Delete "${note.title}"? This cannot be undone.`)) return;
+    if (!(await showConfirm(`Delete "${note.title}"? This cannot be undone.`))) return;
 
     try {
       await NotesAPI.delete(note.id);
@@ -929,14 +930,14 @@ export class NoteSidenavModule {
     }
   }
 
-  bulkDeleteParagraphs() {
+  async bulkDeleteParagraphs() {
     if (this.selectedParagraphs.size === 0) {
       showToast("No paragraphs selected", "error");
       return;
     }
 
     if (
-      !confirm(`Delete ${this.selectedParagraphs.size} selected paragraph(s)?`)
+      !(await showConfirm(`Delete ${this.selectedParagraphs.size} selected paragraph(s)?`))
     ) return;
 
     const note = this.isNewNote
@@ -1391,8 +1392,8 @@ export class NoteSidenavModule {
     }
   }
 
-  deleteSection(sectionId) {
-    if (!confirm("Delete this section?")) return;
+  async deleteSection(sectionId) {
+    if (!(await showConfirm("Delete this section?"))) return;
 
     const note = this.isNewNote
       ? this._getTempNote()

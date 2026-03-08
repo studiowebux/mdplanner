@@ -4,6 +4,7 @@
 import { Sidenav } from "../ui/sidenav.js";
 import { BillingAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
+import { showConfirm } from "../ui/confirm.js";
 import { escapeHtml } from "../utils.js";
 
 export class BillingSidenavModule {
@@ -716,7 +717,7 @@ export class BillingSidenavModule {
 
   async handleDelete() {
     if (!this.editingId) return;
-    if (!confirm(`Delete this ${this.entityType}?`)) return;
+    if (!(await showConfirm(`Delete this ${this.entityType}?`))) return;
 
     try {
       switch (this.entityType) {

@@ -1,4 +1,5 @@
 import { CapacityAPI, MilestonesAPI, PeopleAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 import { escapeHtml } from "../utils.js";
 
 /**
@@ -356,7 +357,7 @@ export class CapacityModule {
 
   async deletePlan() {
     if (!this.taskManager.selectedCapacityPlanId) return;
-    if (!confirm("Are you sure you want to delete this capacity plan?")) return;
+    if (!(await showConfirm("Are you sure you want to delete this capacity plan?"))) return;
     try {
       await CapacityAPI.delete(this.taskManager.selectedCapacityPlanId);
       this.taskManager.selectedCapacityPlanId = null;
@@ -476,9 +477,9 @@ export class CapacityModule {
 
   async deleteTeamMember(id) {
     if (
-      !confirm(
+      !(await showConfirm(
         "Delete this team member? Their allocations will also be removed.",
-      )
+      ))
     ) {
       return;
     }

@@ -1,4 +1,5 @@
 import { BusinessModelAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 
 /**
  * BusinessModelModule - Handles Business Model Canvas (9-block canvas)
@@ -173,7 +174,7 @@ export class BusinessModelModule {
 
   async deleteSelected() {
     if (!this.taskManager.selectedBusinessModelId) return;
-    if (!confirm("Delete this Business Model Canvas?")) return;
+    if (!(await showConfirm("Delete this Business Model Canvas?"))) return;
     try {
       await BusinessModelAPI.delete(this.taskManager.selectedBusinessModelId);
       this.taskManager.selectedBusinessModelId = null;

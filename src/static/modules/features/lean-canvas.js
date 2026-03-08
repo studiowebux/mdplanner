@@ -1,4 +1,5 @@
 import { LeanCanvasAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 
 /**
  * LeanCanvasModule - Handles Lean Canvas (startup-focused business model)
@@ -171,7 +172,7 @@ export class LeanCanvasModule {
 
   async deleteSelected() {
     if (!this.taskManager.selectedLeanCanvasId) return;
-    if (!confirm("Delete this Lean Canvas?")) return;
+    if (!(await showConfirm("Delete this Lean Canvas?"))) return;
     try {
       await LeanCanvasAPI.delete(this.taskManager.selectedLeanCanvasId);
       this.taskManager.selectedLeanCanvasId = null;

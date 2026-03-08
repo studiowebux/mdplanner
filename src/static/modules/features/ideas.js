@@ -1,4 +1,5 @@
 import { IdeasAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 
 const ARCHIVED_STATUSES = ["implemented", "cancelled"];
 
@@ -261,7 +262,7 @@ export class IdeasModule {
   }
 
   async delete(id) {
-    if (!confirm("Delete this idea?")) return;
+    if (!(await showConfirm("Delete this idea?"))) return;
     try {
       await IdeasAPI.delete(id);
       await this.load();

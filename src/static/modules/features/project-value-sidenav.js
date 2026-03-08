@@ -4,6 +4,7 @@
 import { Sidenav } from "../ui/sidenav.js";
 import { ProjectValueAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
+import { showConfirm } from "../ui/confirm.js";
 import { escapeHtml } from "../utils.js";
 
 export class ProjectValueSidenavModule {
@@ -193,7 +194,7 @@ export class ProjectValueSidenavModule {
   async handleDelete() {
     if (!this.editingBoardId) return;
     if (
-      !confirm(`Delete "${this.currentBoard.title}"? This cannot be undone.`)
+      !(await showConfirm(`Delete "${this.currentBoard.title}"? This cannot be undone.`))
     ) return;
 
     try {

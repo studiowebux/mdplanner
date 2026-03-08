@@ -1,6 +1,7 @@
 // Portfolio View Module - Cross-project dashboard
 import { BillingAPI, GitHubAPI, PeopleAPI, PortfolioAPI } from "../api.js";
 import { PROJECT_STATUS_CLASSES, PROJECT_STATUS_LABELS } from "../constants.js";
+import { showConfirm } from "../ui/confirm.js";
 import { FuzzyAutocomplete } from "../ui/fuzzy-autocomplete.js";
 import { Sidenav } from "../ui/sidenav.js";
 import { showToast } from "../ui/toast.js";
@@ -1488,7 +1489,7 @@ export class PortfolioView {
 
   async _deleteProject() {
     if (!this.selectedProject) return;
-    if (!confirm(`Delete "${this.selectedProject.name}"? This cannot be undone.`)) return;
+    if (!(await showConfirm(`Delete "${this.selectedProject.name}"? This cannot be undone.`))) return;
 
     try {
       await PortfolioAPI.remove(this.selectedProject.id);
@@ -1545,7 +1546,7 @@ export class PortfolioView {
 
   async _deleteStatusUpdate(updateId) {
     if (!this.selectedProject) return;
-    if (!confirm("Delete this status update?")) return;
+    if (!(await showConfirm("Delete this status update?"))) return;
 
     const res = await fetch(
       `/api/portfolio/${this.selectedProject.id}/status-updates/${updateId}`,

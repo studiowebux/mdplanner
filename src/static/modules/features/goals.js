@@ -1,4 +1,5 @@
 import { GitHubAPI, GoalsAPI, ProjectAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 
 /**
  * GoalsModule - Handles goal CRUD and filtering
@@ -261,7 +262,7 @@ export class GoalsModule {
   }
 
   async delete(goalIndex) {
-    if (!confirm("Are you sure you want to delete this goal?")) return;
+    if (!(await showConfirm("Are you sure you want to delete this goal?"))) return;
 
     try {
       const goal = this.taskManager.goals[goalIndex];

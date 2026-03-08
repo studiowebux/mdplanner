@@ -1,4 +1,5 @@
 import { RetrospectivesAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 
 /**
  * RetrospectivesModule - Handles retrospective CRUD (Continue/Stop/Start format)
@@ -230,7 +231,7 @@ export class RetrospectivesModule {
   }
 
   async delete(id) {
-    if (!confirm("Delete this retrospective?")) return;
+    if (!(await showConfirm("Delete this retrospective?"))) return;
     try {
       await RetrospectivesAPI.delete(id);
       await this.load();

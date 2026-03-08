@@ -1,5 +1,6 @@
 import { MindmapsAPI } from "../api.js";
 import { escapeHtml } from "../utils.js";
+import { showConfirm } from "../ui/confirm.js";
 
 export class MindmapModule {
   constructor(taskManager) {
@@ -487,7 +488,7 @@ export class MindmapModule {
   async deleteSelected() {
     if (!this.selectedMindmap) return;
 
-    if (confirm(`Delete mindmap "${this.selectedMindmap.title}"?`)) {
+    if (await showConfirm(`Delete mindmap "${this.selectedMindmap.title}"?`)) {
       try {
         await MindmapsAPI.delete(this.selectedMindmap.id);
         this.selectedMindmap = null;

@@ -4,6 +4,7 @@
 import { Sidenav } from "../ui/sidenav.js";
 import { RiskAnalysisAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
+import { showConfirm } from "../ui/confirm.js";
 import { escapeHtml } from "../utils.js";
 
 export class RiskSidenavModule {
@@ -203,7 +204,7 @@ export class RiskSidenavModule {
   async handleDelete() {
     if (!this.editingRiskId) return;
     if (
-      !confirm(`Delete "${this.currentRisk.title}"? This cannot be undone.`)
+      !(await showConfirm(`Delete "${this.currentRisk.title}"? This cannot be undone.`))
     ) return;
 
     try {

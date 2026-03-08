@@ -5,6 +5,7 @@
 
 import { OnboardingAPI } from "../api.js";
 import { Sidenav } from "../ui/sidenav.js";
+import { showConfirm } from "../ui/confirm.js";
 import { bindAutocomplete } from "../ui/autocomplete.js";
 
 const CATEGORY_ORDER = ["equipment", "accounts", "docs", "training", "intro", "other"];
@@ -113,7 +114,7 @@ export class OnboardingSidenavModule {
 
   async _deleteMeta() {
     if (!this.editingId) return;
-    if (!confirm("Delete this onboarding record?")) return;
+    if (!(await showConfirm("Delete this onboarding record?"))) return;
     try {
       await OnboardingAPI.delete(this.editingId);
       await this.taskManager.onboardingModule.load();

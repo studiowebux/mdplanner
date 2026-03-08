@@ -3,6 +3,7 @@
 
 import { FinancesAPI } from "../api.js";
 import { Sidenav } from "../ui/sidenav.js";
+import { showConfirm } from "../ui/confirm.js";
 
 export class FinancesSidenavModule {
   constructor(taskManager) {
@@ -162,7 +163,7 @@ export class FinancesSidenavModule {
 
   async _delete() {
     if (!this.editingId) return;
-    if (!confirm("Delete this period?")) return;
+    if (!(await showConfirm("Delete this period?"))) return;
     try {
       await FinancesAPI.delete(this.editingId);
       await this.taskManager.financesModule.load();

@@ -1,5 +1,6 @@
 // Brain Manager Module — main view with sidebar + tabbed content
 import { BrainsAPI } from "../api.js";
+import { showConfirm } from "../ui/confirm.js";
 import { BrainFilesPanel } from "./brains-files.js";
 import { BrainSessionsPanel } from "./brains-sessions.js";
 import { BrainSyncPanel } from "./brains-sync.js";
@@ -194,7 +195,7 @@ export class BrainsModule {
   }
 
   async removeBrain(name) {
-    if (!confirm(`Remove brain "${name}" from registry?`)) return;
+    if (!(await showConfirm(`Remove brain "${name}" from registry?`, "Remove"))) return;
     try {
       await BrainsAPI.remove(name);
       if (this.selectedBrain === name) this.selectedBrain = null;

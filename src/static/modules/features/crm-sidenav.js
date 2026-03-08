@@ -4,6 +4,7 @@
 import { Sidenav } from "../ui/sidenav.js";
 import { CRMAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
+import { showConfirm } from "../ui/confirm.js";
 import { escapeHtml } from "../utils.js";
 
 export class CRMSidenavModule {
@@ -776,7 +777,7 @@ export class CRMSidenavModule {
       ? "Delete this company? This will also remove related contacts, deals, and interactions."
       : `Delete this ${this.entityType}?`;
 
-    if (!confirm(confirmMsg)) return;
+    if (!(await showConfirm(confirmMsg))) return;
 
     try {
       switch (this.entityType) {

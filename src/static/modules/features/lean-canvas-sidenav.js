@@ -5,6 +5,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { LeanCanvasAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { escapeHtml } from "../utils.js";
+import { showConfirm } from "../ui/confirm.js";
 
 export class LeanCanvasSidenavModule {
   constructor(taskManager) {
@@ -129,8 +130,8 @@ export class LeanCanvasSidenavModule {
     return false;
   }
 
-  close() {
-    if (this._isDirty() && !confirm("You have unsaved changes. Close anyway?")) {
+  async close() {
+    if (this._isDirty() && !(await showConfirm("You have unsaved changes. Close anyway?", "Close"))) {
       return;
     }
     Sidenav.close("leanCanvasSidenav");
@@ -291,7 +292,7 @@ export class LeanCanvasSidenavModule {
   async handleDelete() {
     if (!this.editingCanvasId) return;
     if (
-      !confirm(`Delete "${this.currentCanvas.title}"? This cannot be undone.`)
+      !(await showConfirm(`Delete "${this.currentCanvas.title}"? This cannot be undone.`))
     ) return;
 
     try {

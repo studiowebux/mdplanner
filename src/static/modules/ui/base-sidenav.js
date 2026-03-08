@@ -4,6 +4,7 @@
 
 import { Sidenav } from "./sidenav.js";
 import { showToast } from "./toast.js";
+import { showConfirm } from "./confirm.js";
 import { UndoManager } from "./undo-manager.js";
 
 /** Global set of BaseSidenavModule instances that have unsaved changes. */
@@ -143,8 +144,8 @@ export class BaseSidenavModule {
   }
 
   /** Close with dirty-state guard — used by ESC, Cancel, Close button. */
-  _confirmAndClose() {
-    if (this._formDirty && !confirm("You have unsaved changes. Close anyway?")) return;
+  async _confirmAndClose() {
+    if (this._formDirty && !(await showConfirm("You have unsaved changes. Close anyway?", "Close"))) return;
     this.close();
   }
 
@@ -356,7 +357,7 @@ export class BaseSidenavModule {
     if (!entity) return;
 
     const label = entity[this.titleField] || entity.name || entity.title || this.editingId;
-    if (!confirm(`Delete "${label}"? This cannot be undone.`)) return;
+    if (!(await showConfirm(`Delete "${label}"? This cannot be undone.`))) return;
 
     try {
       await this.api.delete(this.editingId);
