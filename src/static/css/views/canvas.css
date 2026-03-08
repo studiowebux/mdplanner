@@ -71,7 +71,7 @@
   cursor: move;
   user-select: none;
   font-family: "Comic Sans MS", cursive, sans-serif;
-  font-size: 14px;
+  font-size: var(--font-size-base);
   line-height: 1.4;
   transition:
     transform var(--transition-base),
@@ -185,7 +185,7 @@
   padding: 2px 4px;
   cursor: pointer;
   border-radius: 2px;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
 }
 
 .sticky-note-controls button:hover {
@@ -206,7 +206,7 @@
     width: 160px;
     min-width: 120px;
     min-height: 80px;
-    font-size: 12px;
+    font-size: var(--font-size-sm);
     padding: 8px;
   }
 
