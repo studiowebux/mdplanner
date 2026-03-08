@@ -1,5 +1,6 @@
 import { BriefAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 import { escapeHtml } from "../utils.js";
 
 /**
@@ -11,6 +12,7 @@ export class BriefModule {
   }
 
   async load() {
+    showLoading("briefView");
     try {
       this.taskManager.briefs = await BriefAPI.fetchAll();
       this.renderSelector();
@@ -24,6 +26,8 @@ export class BriefModule {
       }
     } catch (error) {
       console.error("Error loading briefs:", error);
+    } finally {
+      hideLoading("briefView");
     }
   }
 

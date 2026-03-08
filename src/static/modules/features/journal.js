@@ -3,6 +3,7 @@
 
 import { JournalAPI } from "../api.js";
 import { escapeHtml } from "../utils.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 const MOOD_LABELS = {
   great: "Great",
@@ -18,11 +19,14 @@ export class JournalModule {
   }
 
   async load() {
+    showLoading("journalView");
     try {
       this.taskManager.journal = await JournalAPI.fetchAll();
       this.renderView();
     } catch (error) {
       console.error("Error loading journal:", error);
+    } finally {
+      hideLoading("journalView");
     }
   }
 

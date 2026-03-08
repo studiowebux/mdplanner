@@ -2,6 +2,7 @@
 // Three tabs: Overview (period table), Burn Rate (runway + bar chart), P&L (category breakdown)
 
 import { FinancesAPI } from "../api.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 // ----------------------------------------------------------------
 // Derived value helpers
@@ -51,12 +52,15 @@ export class FinancesModule {
   }
 
   async load() {
+    showLoading("financesView");
     try {
       const periods = await FinancesAPI.fetchAll();
       this.taskManager.financialPeriods = periods;
       this.renderView();
     } catch (err) {
       console.error("Error loading finances:", err);
+    } finally {
+      hideLoading("financesView");
     }
   }
 

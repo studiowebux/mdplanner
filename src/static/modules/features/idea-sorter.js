@@ -1,5 +1,6 @@
 import { IdeasAPI } from "../api.js";
 import { escapeHtml } from "../utils.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2, "": 3 };
 
@@ -17,11 +18,14 @@ export class IdeaSorterModule {
   }
 
   async load() {
+    showLoading("ideaSorterView");
     try {
       this.tm.ideas = await IdeasAPI.fetchAll();
       this.renderView();
     } catch (error) {
       console.error("Error loading idea sorter:", error);
+    } finally {
+      hideLoading("ideaSorterView");
     }
   }
 

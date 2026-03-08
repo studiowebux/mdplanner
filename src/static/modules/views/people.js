@@ -5,6 +5,7 @@
  */
 import { PeopleAPI } from "../api.js";
 import { escapeHtml } from "../utils.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 export class PeopleModule {
   constructor(taskManager) {
@@ -16,6 +17,7 @@ export class PeopleModule {
   }
 
   async load() {
+    showLoading("peopleView");
     try {
       const [people, departments] = await Promise.all([
         PeopleAPI.fetchAll(),
@@ -28,6 +30,8 @@ export class PeopleModule {
       this.render();
     } catch (error) {
       console.error("Error loading people:", error);
+    } finally {
+      hideLoading("peopleView");
     }
   }
 

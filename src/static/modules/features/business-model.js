@@ -1,5 +1,6 @@
 import { BusinessModelAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 /**
  * BusinessModelModule - Handles Business Model Canvas (9-block canvas)
@@ -10,6 +11,7 @@ export class BusinessModelModule {
   }
 
   async load() {
+    showLoading("businessModelView");
     try {
       this.taskManager.businessModelCanvases = await BusinessModelAPI
         .fetchAll();
@@ -26,6 +28,8 @@ export class BusinessModelModule {
       }
     } catch (error) {
       console.error("Error loading business model canvases:", error);
+    } finally {
+      hideLoading("businessModelView");
     }
   }
 

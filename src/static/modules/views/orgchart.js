@@ -6,6 +6,7 @@
  */
 import { OrgChartAPI } from "../api.js";
 import { escapeHtml } from "../utils.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 export class OrgChartModule {
   constructor(taskManager) {
@@ -23,6 +24,7 @@ export class OrgChartModule {
   }
 
   async load() {
+    showLoading("orgchartView");
     try {
       const [members, tree, departments] = await Promise.all([
         OrgChartAPI.fetchAll(),
@@ -37,6 +39,8 @@ export class OrgChartModule {
       this.renderSummary();
     } catch (error) {
       console.error("Error loading org chart:", error);
+    } finally {
+      hideLoading("orgchartView");
     }
   }
 

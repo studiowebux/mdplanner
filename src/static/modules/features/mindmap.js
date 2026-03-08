@@ -1,6 +1,7 @@
 import { MindmapsAPI } from "../api.js";
 import { escapeHtml } from "../utils.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 export class MindmapModule {
   constructor(taskManager) {
@@ -18,6 +19,7 @@ export class MindmapModule {
   }
 
   async load(autoSelect = true) {
+    showLoading("mindmapView");
     try {
       this.mindmaps = await MindmapsAPI.fetchAll();
       this.renderSelector();
@@ -37,6 +39,8 @@ export class MindmapModule {
       }
     } catch (error) {
       console.error("Error loading mindmaps:", error);
+    } finally {
+      hideLoading("mindmapView");
     }
   }
 

@@ -1,5 +1,6 @@
 import { RetrospectivesAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 /**
  * RetrospectivesModule - Handles retrospective CRUD (Continue/Stop/Start format)
@@ -11,11 +12,14 @@ export class RetrospectivesModule {
   }
 
   async load() {
+    showLoading("retrospectivesView");
     try {
       this.taskManager.retrospectives = await RetrospectivesAPI.fetchAll();
       this.renderView();
     } catch (error) {
       console.error("Error loading retrospectives:", error);
+    } finally {
+      hideLoading("retrospectivesView");
     }
   }
 

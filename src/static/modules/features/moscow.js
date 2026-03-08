@@ -1,6 +1,7 @@
 import { MoscowAPI } from "../api.js";
 import { escapeHtml } from "../utils.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 /**
  * MoscowModule - Handles MoSCoW Prioritization (Must, Should, Could, Won't)
@@ -11,6 +12,7 @@ export class MoscowModule {
   }
 
   async load() {
+    showLoading("moscowView");
     try {
       this.taskManager.moscowAnalyses = await MoscowAPI.fetchAll();
       this.renderSelector();
@@ -26,6 +28,8 @@ export class MoscowModule {
       }
     } catch (error) {
       console.error("Error loading MoSCoW analyses:", error);
+    } finally {
+      hideLoading("moscowView");
     }
   }
 

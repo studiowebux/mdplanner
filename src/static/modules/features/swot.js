@@ -1,5 +1,6 @@
 import { SwotAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 import { escapeHtml } from "../utils.js";
 
 /**
@@ -11,6 +12,7 @@ export class SwotModule {
   }
 
   async load() {
+    showLoading("swotView");
     try {
       this.taskManager.swotAnalyses = await SwotAPI.fetchAll();
       this.renderSelector();
@@ -26,6 +28,8 @@ export class SwotModule {
       }
     } catch (error) {
       console.error("Error loading SWOT analyses:", error);
+    } finally {
+      hideLoading("swotView");
     }
   }
 

@@ -1,5 +1,6 @@
 import { TimeTrackingAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showLoading, hideLoading } from "../ui/loading.js";
 
 /**
  * TimeTrackingModule - Handles time entry tracking for tasks
@@ -31,11 +32,14 @@ export class TimeTrackingModule {
   }
 
   async load() {
+    showLoading("timeTrackingView");
     try {
       this.taskManager.timeEntries = await TimeTrackingAPI.fetchAll();
       this.renderView();
     } catch (error) {
       console.error("Error loading time entries:", error);
+    } finally {
+      hideLoading("timeTrackingView");
     }
   }
 
