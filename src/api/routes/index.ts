@@ -160,7 +160,9 @@ export function createApiRouter(
         c.json(
           {
             error: "PAYLOAD_TOO_LARGE",
-            message: `Request body exceeds ${Math.floor(maxBody / 1024 / 1024)}MB limit`,
+            message: `Request body exceeds ${
+              Math.floor(maxBody / 1024 / 1024)
+            }MB limit`,
           },
           413,
         ),
