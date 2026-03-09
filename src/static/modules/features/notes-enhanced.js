@@ -534,7 +534,8 @@ export class EnhancedNotesModule {
     sorted.forEach((p, i) => { p.order = i; });
 
     this.syncParagraphsToContent();
-    this.tm.renderActiveNote();
+    this.tm.renderParagraphs();
+    this.tm.saveNote();
   }
 
   moveSelectedParagraphs(direction) {

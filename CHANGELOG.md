@@ -8,6 +8,33 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.25.2] - 2026-03-09
+
+### Added
+
+- Backup "Create backup" button always visible in Settings (shows guidance when
+  `--backup-dir` is not configured).
+- Section jump bar in task list view is now sticky at the top with a border
+  separator for better visibility.
+
+### Fixed
+
+- Time tracking section in task sidenav crashed silently on null DOM elements,
+  preventing time entries from ever rendering.
+- C4 diagram component boxes were not clickable for drilldown because
+  `mousedown` handler's `preventDefault` blocked the `click` event. Changed to
+  `mouseup`-based drilldown detection.
+- Enhanced note paragraph reorder buttons now call `renderParagraphs()` directly
+  (stays in edit mode) and auto-save after reordering.
+- Portfolio search auto-scroll now wraps `scrollIntoView` in
+  `requestAnimationFrame` so the DOM has time to update before scrolling.
+- Task sidenav defers time entry loading until after the sidenav animation
+  settles, reducing perceived first-open latency.
+- Search by entity ID now searches all cached entities, not just FTS-enabled
+  ones, so IDs for milestones, deals, and other non-FTS types resolve correctly.
+- GitHub Actions workflow runs view fixed: API now returns `{ runs: [...] }`
+  wrapper matching frontend expectations.
+
 ## [0.25.1] - 2026-03-09
 
 ### Fixed

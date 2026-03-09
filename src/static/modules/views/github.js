@@ -224,8 +224,8 @@ export class GitHubView {
     const results = await Promise.allSettled(
       linkedProjects.map(async (p) => {
         const [owner, repo] = p.githubRepo.split("/");
-        const runs = await GitHubAPI.listWorkflowRuns(owner, repo);
-        return { project: p, runs };
+        const data = await GitHubAPI.listWorkflowRuns(owner, repo);
+        return { project: p, runs: data.runs ?? data };
       }),
     );
 

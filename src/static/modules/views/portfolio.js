@@ -673,11 +673,13 @@ export class PortfolioView {
 
   _scrollToFirstMatch() {
     if (!this.searchQuery) return;
-    const container = document.getElementById("portfolioGrid");
-    const first = container?.querySelector("[data-portfolio-id]");
-    if (first) {
-      first.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }
+    requestAnimationFrame(() => {
+      const container = document.getElementById("portfolioGrid");
+      const first = container?.querySelector("[data-portfolio-id]");
+      if (first) {
+        first.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    });
   }
 
   /**

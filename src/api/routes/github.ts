@@ -161,7 +161,7 @@ githubRouter.get("/repo/:owner/:repo/actions/runs", async (c) => {
   try {
     const provider = new GitHubApiProvider(token);
     const runs = await provider.listWorkflowRuns(owner, repo);
-    return jsonResponse(runs);
+    return jsonResponse({ runs });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "GitHub API error";
     const status = msg.includes("404") ? 404 : msg.includes("401") ? 401 : 502;
