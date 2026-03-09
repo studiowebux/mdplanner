@@ -96,6 +96,7 @@ export class GitHubView {
     this._bindRefresh();
     this._bindFilters();
     this._renderTable();
+    this._renderWorkflowRuns(linked);
     this._loading = false;
     hideLoading("githubView");
   }
@@ -213,6 +214,99 @@ export class GitHubView {
 
     document.getElementById("githubSearch")?.addEventListener("input", () => this._renderTable());
     document.getElementById("githubSort")?.addEventListener("change", () => this._renderTable());
+  }
+
+  async _renderWorkflowRuns(linkedProjects) {
+    const container = document.getElementById("githubViewContainer");
+    if (!container) return;
+
+    // Fetch workflow runs for all linked repos in parallel
+    const results = await Promise.allSettled(
+      linkedProjects.map(async (p) => {
+        const [owner, repo] = p.githubRepo.split("/");
+        const runs = await GitHubAPI.listWorkflowRuns(owner, repo);
+        return { project: p, runs };
+      }),
+    );
+
+    // Flatten all runs with project context, take most recent 20
+    const allRuns = [];
+    for (const result of results) {
+      if (result.status !== "fulfilled") continue;
+      for (const run of result.value.runs) {
+        allRuns.push({ project: result.value.project, run });
+      }
+    }
+    allRuns.sort((a, b) => new Date(b.run.createdAt) - new Date(a.run.createdAt));
+    const recent = allRuns.slice(0, 20);
+
+    if (recent.length === 0) return;
+
+    let html = `
+      <h3 class="github-runs-title">Recent Workflow Runs</h3>
+      <table class="github-view-table">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Workflow</th>
+            <th>Repository</th>
+            <th>Branch</th>
+            <th>Event</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>`;
+
+    for (const { project, run } of recent) {
+      const statusClass = this._runStatusClass(run);
+      const statusLabel = this._runStatusLabel(run);
+      const timeAgo = this._timeAgo(run.createdAt);
+
+      html += `<tr>
+        <td><span class="github-run-status ${statusClass}">${statusLabel}</span></td>
+        <td><a href="${this._esc(run.htmlUrl)}" target="_blank" rel="noopener noreferrer" class="github-view-repolink">${this._esc(run.name)}</a></td>
+        <td>${this._esc(project.githubRepo)}</td>
+        <td class="text-muted">${this._esc(run.headBranch)}</td>
+        <td class="text-muted">${this._esc(run.event)}</td>
+        <td class="text-muted">${timeAgo}</td>
+      </tr>`;
+    }
+
+    html += `</tbody></table>`;
+    container.insertAdjacentHTML("beforeend", html);
+  }
+
+  _runStatusClass(run) {
+    if (run.status !== "completed") return "github-run-pending";
+    if (run.conclusion === "success") return "github-run-success";
+    if (run.conclusion === "failure") return "github-run-failure";
+    if (run.conclusion === "cancelled") return "github-run-cancelled";
+    return "github-run-neutral";
+  }
+
+  _runStatusLabel(run) {
+    if (run.status === "queued") return "Queued";
+    if (run.status === "in_progress") return "Running";
+    if (run.status === "waiting") return "Waiting";
+    if (run.conclusion === "success") return "Success";
+    if (run.conclusion === "failure") return "Failed";
+    if (run.conclusion === "cancelled") return "Cancelled";
+    if (run.conclusion === "skipped") return "Skipped";
+    if (run.conclusion === "timed_out") return "Timed out";
+    return run.conclusion || run.status;
+  }
+
+  _timeAgo(dateStr) {
+    const now = Date.now();
+    const then = new Date(dateStr).getTime();
+    const seconds = Math.floor((now - then) / 1000);
+    if (seconds < 60) return "just now";
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
   }
 
   _esc(str) {

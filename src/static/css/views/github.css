@@ -224,3 +224,61 @@
 [data-theme="dark"] .github-milestone-fill {
   background: #2ea043;
 }
+
+/* Workflow runs section title */
+.github-runs-title {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 1.5rem 0 0.75rem;
+}
+
+/* Workflow run status badges */
+.github-run-status {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.github-run-success {
+  background: #1a7f37;
+  color: #ffffff;
+}
+
+.github-run-failure {
+  background: #cf222e;
+  color: #ffffff;
+}
+
+.github-run-pending {
+  background: #bf8700;
+  color: #ffffff;
+}
+
+.github-run-cancelled {
+  color: var(--color-text-tertiary);
+  border: 1px solid var(--color-border-default);
+}
+
+.github-run-neutral {
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-default);
+}
+
+[data-theme="dark"] .github-run-success {
+  background: #2ea043;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .github-run-failure {
+  background: #f85149;
+  color: #000000;
+}
+
+[data-theme="dark"] .github-run-pending {
+  background: #d29922;
+  color: #000000;
+}

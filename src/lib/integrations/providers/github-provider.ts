@@ -52,6 +52,26 @@ export interface GitHubPR {
   htmlUrl: string;
 }
 
+export interface GitHubWorkflowRun {
+  id: number;
+  name: string;
+  status: "queued" | "in_progress" | "completed" | "waiting";
+  conclusion:
+    | "success"
+    | "failure"
+    | "neutral"
+    | "skipped"
+    | "cancelled"
+    | "timed_out"
+    | "action_required"
+    | null;
+  headBranch: string;
+  event: string;
+  createdAt: string;
+  updatedAt: string;
+  htmlUrl: string;
+}
+
 export interface GitHubProvider {
   /** Verify the PAT and return the authenticated user. */
   getAuthenticatedUser(): Promise<GitHubUser>;
@@ -85,6 +105,12 @@ export interface GitHubProvider {
     repo: string,
     number: number,
   ): Promise<GitHubPR>;
+
+  /** List recent workflow runs for a repository. */
+  listWorkflowRuns(
+    owner: string,
+    repo: string,
+  ): Promise<GitHubWorkflowRun[]>;
 
   /** Set an issue's state to "open" or "closed". */
   setIssueState(

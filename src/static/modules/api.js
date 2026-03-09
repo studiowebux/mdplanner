@@ -1361,6 +1361,14 @@ export const GitHubAPI = {
     return response.json();
   },
 
+  /** List recent workflow runs for a repository. */
+  async listWorkflowRuns(owner, repo) {
+    const response = await get(
+      `/api/integrations/github/repo/${owner}/${repo}/actions/runs`,
+    );
+    return response.json();
+  },
+
   /** Fetch a single PR by number. */
   async getPR(owner, repo, number) {
     const response = await get(
