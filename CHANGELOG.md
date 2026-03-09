@@ -8,6 +8,27 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.25.0] - 2026-03-08
+
+### Added
+
+- GitHub Actions workflow runs display in the GitHub integration view with
+  status badges, workflow name links, branch, event trigger, and relative time.
+- `brainManaged` boolean field on portfolio items to track brain protocol
+  managed projects (parser, cache, API, MCP tools, frontend checkbox and badge).
+- MinimalDoc documentation site with 18 pages (getting started, guides,
+  reference), landing page, and changelog migration (60 release files).
+- GitHub Pages deployment workflow for docs site.
+
+### Fixed
+
+- Docs pages rendered as "UNTITLED" in MinimalDoc due to missing YAML
+  frontmatter — added `title:` frontmatter to all 18 documentation pages.
+- MCP tool count corrected from 198 to 239 across all documentation.
+- View count corrected from "50+" to 46 in landing page hero subtitle.
+- Added missing GitHub Sponsors and Patreon funding links to docs footer.
+- MinimalDoc CI workflow to clone and build MinimalDoc from source.
+
 ## [0.24.0] - 2026-03-08
 
 ### Added
