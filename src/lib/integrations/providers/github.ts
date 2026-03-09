@@ -19,6 +19,7 @@ import type {
   GitHubRepo,
   GitHubRepoSummary,
   GitHubUser,
+  GitHubWorkflowRun,
 } from "./github-provider.ts";
 
 const GITHUB_API = "https://api.github.com";
@@ -223,5 +224,39 @@ export class GitHubApiProvider implements GitHubProvider {
       merged: data.merged === true,
       htmlUrl: data.html_url,
     };
+  }
+
+  async listWorkflowRuns(
+    owner: string,
+    repo: string,
+  ): Promise<GitHubWorkflowRun[]> {
+    // deno-lint-ignore no-explicit-any
+    const data = await this.ghGet(
+      `/repos/${owner}/${repo}/actions/runs?per_page=20`,
+    ) as any;
+
+    const runs: {
+      id: number;
+      name: string;
+      status: string;
+      conclusion: string | null;
+      head_branch: string;
+      event: string;
+      created_at: string;
+      updated_at: string;
+      html_url: string;
+    }[] = data?.workflow_runs ?? [];
+
+    return runs.map((r) => ({
+      id: r.id,
+      name: r.name,
+      status: r.status as GitHubWorkflowRun["status"],
+      conclusion: r.conclusion as GitHubWorkflowRun["conclusion"],
+      headBranch: r.head_branch,
+      event: r.event,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+      htmlUrl: r.html_url,
+    }));
   }
 }

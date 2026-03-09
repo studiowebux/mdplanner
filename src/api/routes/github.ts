@@ -151,6 +151,24 @@ githubRouter.patch("/repo/:owner/:repo/issues/:number", async (c) => {
   }
 });
 
+// GET /integrations/github/repo/:owner/:repo/actions/runs — recent workflow runs
+githubRouter.get("/repo/:owner/:repo/actions/runs", async (c) => {
+  const token = await resolveToken(c);
+  if (!token) return errorResponse("GitHub token not configured", 400);
+
+  const { owner, repo } = c.req.param();
+
+  try {
+    const provider = new GitHubApiProvider(token);
+    const runs = await provider.listWorkflowRuns(owner, repo);
+    return jsonResponse(runs);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "GitHub API error";
+    const status = msg.includes("404") ? 404 : msg.includes("401") ? 401 : 502;
+    return errorResponse(msg, status);
+  }
+});
+
 // GET /integrations/github/repo/:owner/:repo/pulls/:number — single PR status
 githubRouter.get("/repo/:owner/:repo/pulls/:number", async (c) => {
   const token = await resolveToken(c);
