@@ -198,8 +198,8 @@ export function createApiRouter(
     }),
   );
 
-  // Rate limiting — per-IP sliding window, default 200 req/min
-  const rateLimit = opts?.rateLimitPerMinute ?? 200;
+  // Rate limiting — per-IP sliding window, default 1000 req/min
+  const rateLimit = opts?.rateLimitPerMinute ?? 1000;
   const limiter = new RateLimiter({
     maxRequests: rateLimit,
     windowMs: 60_000,
