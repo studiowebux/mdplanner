@@ -263,17 +263,16 @@ export class C4Module {
         this.drillDown(component);
       });
 
-      // Drilldown on mouseup when no drag occurred (click events are blocked
-      // by mousedown's preventDefault in makeDraggable, so use mouseup instead)
-      element.addEventListener("mouseup", (e) => {
+      // Drilldown on click when no drag occurred. The _c4WasDragging flag is
+      // set by handleDragEnd before _c4ActiveDrag is cleared, so we can check
+      // it here reliably.
+      element.addEventListener("click", (e) => {
         if (
           e.target.classList.contains("c4-edit-btn") ||
           e.target.classList.contains("c4-delete-btn") ||
           e.target.classList.contains("c4-component-drilldown")
         ) return;
-        // Only drill down if no drag movement occurred
-        const drag = this.tm._c4ActiveDrag;
-        if (drag && !drag.dragStarted) {
+        if (!this.tm._c4WasDragging) {
           this.drillDown(component);
         }
       });
@@ -572,10 +571,10 @@ export class C4Module {
         initialY: component.position.y,
         dragStarted: false,
       };
+      this.tm._c4WasDragging = false;
 
       this.stopForceLayout();
 
-      e.preventDefault();
       e.stopPropagation();
     };
 
@@ -651,6 +650,7 @@ export class C4Module {
       drag.element.style.cursor = "pointer";
       drag.element.classList.remove("dragging");
       drag.element.style.transition = "";
+      this.tm._c4WasDragging = wasDragging;
       this.tm._c4ActiveDrag = null;
 
       if (wasDragging) {
