@@ -36,8 +36,8 @@ export const UpdateTaskSchema = z.object({
   description: z.string().optional(),
   expected_revision: z.number().int().optional(),
   agent_id: z.string().optional(),
-  priority: z.number().int().min(1).max(5).optional(),
-  effort: z.number().int().min(0).optional(),
+  priority: z.number().int().min(1).max(5).nullable().optional(),
+  effort: z.number().int().min(0).nullable().optional(),
   due_date: z.string().nullable().optional(),
   assignee: z.string().nullable().optional(),
   milestone: z.string().nullable().optional(),
@@ -48,6 +48,9 @@ export const UpdateTaskSchema = z.object({
   claimed_by: z.string().nullable().optional(),
   claimed_at: z.string().nullable().optional(),
   tags: z.array(z.string()).optional(),
+  githubRepo: z.string().nullable().optional(),
+  githubIssue: z.number().int().nullable().optional(),
+  githubPR: z.number().int().nullable().optional(),
 }).strict();
 
 export const BatchUpdateSchema = z.object({

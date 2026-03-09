@@ -64,6 +64,9 @@ function bodyToConfig(body: Record<string, any>): TaskConfig {
   if ("blocked_by" in body) config.blocked_by = body.blocked_by;
   if ("claimed_by" in body) config.claimedBy = body.claimed_by;
   if ("claimed_at" in body) config.claimedAt = body.claimed_at;
+  if ("githubRepo" in body) config.githubRepo = body.githubRepo;
+  if ("githubIssue" in body) config.githubIssue = body.githubIssue;
+  if ("githubPR" in body) config.githubPR = body.githubPR;
   return config;
 }
 
