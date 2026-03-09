@@ -263,16 +263,19 @@ export class C4Module {
         this.drillDown(component);
       });
 
-      // Click on the component box itself also drills down (click fires after
-      // mouseup only when no drag occurred — the browser suppresses click after
-      // significant mouse movement, so this is safe alongside makeDraggable)
-      element.addEventListener("click", (e) => {
+      // Drilldown on mouseup when no drag occurred (click events are blocked
+      // by mousedown's preventDefault in makeDraggable, so use mouseup instead)
+      element.addEventListener("mouseup", (e) => {
         if (
           e.target.classList.contains("c4-edit-btn") ||
           e.target.classList.contains("c4-delete-btn") ||
           e.target.classList.contains("c4-component-drilldown")
         ) return;
-        this.drillDown(component);
+        // Only drill down if no drag movement occurred
+        const drag = this.tm._c4ActiveDrag;
+        if (drag && !drag.dragStarted) {
+          this.drillDown(component);
+        }
       });
     }
 

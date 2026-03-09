@@ -114,7 +114,11 @@ export class ConfigView {
         lastError.textContent = `Last error: ${status.lastError}`;
         lastError.classList.remove("hidden");
       }
-      if (triggerBtn && status.enabled) triggerBtn.classList.remove("hidden");
+      if (triggerBtn && status.enabled) {
+        triggerBtn.textContent = "Create backup";
+      } else if (triggerBtn) {
+        triggerBtn.textContent = "Create backup (requires --backup-dir)";
+      }
     } catch {
       // Status endpoint unavailable — panel still works for export/import
     }

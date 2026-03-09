@@ -249,6 +249,8 @@ export class TimeTrackingModule {
     const container = document.getElementById("timeEntriesList");
     const totalDisplay = document.getElementById("totalHoursValue");
 
+    if (!container || !totalDisplay) return;
+
     if (!entries || entries.length === 0) {
       container.innerHTML =
         '<div class="text-sm text-muted">No time entries yet</div>';

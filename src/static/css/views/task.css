@@ -232,7 +232,12 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.375rem;
-  margin-top: 0.5rem;
+  padding: 0.5rem 1.5rem;
+  border-bottom: 1px solid var(--color-border-default);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-bg-primary);
 }
 
 .section-jump-bar:empty {

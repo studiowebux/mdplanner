@@ -225,16 +225,22 @@ export class TaskSidenavModule {
 
     // Show/load time entries section for existing tasks only
     const timeSection = document.getElementById("timeEntriesSection");
-    if (task && timeSection) {
-      timeSection.classList.remove("hidden");
-      this.tm.loadTaskTimeEntries(task.id);
-    } else if (timeSection) {
-      timeSection.classList.add("hidden");
+    if (timeSection) {
+      if (task) {
+        timeSection.classList.remove("hidden");
+      } else {
+        timeSection.classList.add("hidden");
+      }
     }
 
     // Open sidenav
     Sidenav.registerModule(this);
     Sidenav.open("taskSidenav");
+
+    // Defer time entries load until after sidenav animation settles
+    if (task && timeSection) {
+      setTimeout(() => this.tm.loadTaskTimeEntries(task.id), 200);
+    }
     this._attachDescUndo();
   }
 

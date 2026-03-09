@@ -120,25 +120,41 @@ export class SearchEngine {
    */
   private searchById(
     id: string,
-    activeTypes: SearchResultType[],
+    _activeTypes: SearchResultType[],
   ): SearchResult | null {
-    for (const entity of FTS_ENTITIES) {
+    for (const entity of ENTITIES) {
       const { fts, table } = entity;
-      if (!fts) continue;
-      if (!activeTypes.includes(fts.type as SearchResultType)) continue;
       try {
-        const row = this.db.queryOne<{ [key: string]: unknown }>(
-          `SELECT id, ${fts.titleCol} FROM ${table} WHERE id = ?`,
-          [id],
-        );
-        if (row) {
-          return {
-            id: row.id as string,
-            title: (row[fts.titleCol] as string) ?? id,
-            snippet: "Exact match by ID",
-            score: -Infinity,
-            type: fts.type as SearchResultType,
-          };
+        if (fts) {
+          const row = this.db.queryOne<{ [key: string]: unknown }>(
+            `SELECT id, ${fts.titleCol} FROM ${table} WHERE id = ?`,
+            [id],
+          );
+          if (row) {
+            return {
+              id: row.id as string,
+              title: (row[fts.titleCol] as string) ?? id,
+              snippet: "Exact match by ID",
+              score: -Infinity,
+              type: fts.type as SearchResultType,
+            };
+          }
+        } else {
+          const row = this.db.queryOne<
+            { id: string; title?: string; name?: string }
+          >(
+            `SELECT * FROM ${table} WHERE id = ?`,
+            [id],
+          );
+          if (row) {
+            return {
+              id: row.id,
+              title: (row.title ?? row.name ?? id) as string,
+              snippet: "Exact match by ID",
+              score: -Infinity,
+              type: table as SearchResultType,
+            };
+          }
         }
       } catch {
         continue;
