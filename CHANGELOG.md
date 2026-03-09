@@ -8,6 +8,16 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.25.1] - 2026-03-09
+
+### Fixed
+
+- Task update API rejected null `priority` and `effort` values, preventing moves
+  from Done to Todo on tasks without those fields set.
+- Task update API rejected `githubRepo`, `githubIssue`, and `githubPR` fields
+  due to `.strict()` validation — added them to `UpdateTaskSchema` and
+  `bodyToConfig()`.
+
 ## [0.25.0] - 2026-03-08
 
 ### Added
