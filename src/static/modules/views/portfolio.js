@@ -521,6 +521,11 @@ export class PortfolioView {
       ? `<span class="portfolio-license">${this.escapeHtml(project.license)}</span>`
       : "";
 
+    // Brain managed badge
+    const brainBadgeHtml = project.brainManaged
+      ? '<span class="portfolio-brain-badge" title="Brain Protocol Managed">Brain</span>'
+      : "";
+
     return `
       <div class="${containerClass}" data-portfolio-id="${project.id}">
         <div class="flex items-center justify-between gap-4">
@@ -538,6 +543,7 @@ export class PortfolioView {
         : ""
     }
               ${licenseHtml}
+              ${brainBadgeHtml}
               ${
       hasKpis
         ? '<span class="w-2 h-2 bg-info rounded-full" title="Has KPIs"></span>'
@@ -1022,6 +1028,12 @@ export class PortfolioView {
       this.escapeHtml(project.githubRepo || "")
     }" placeholder="owner/repo (e.g. studiowebux/mdplanner)">
             </div>
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="portfolioDetailBrainManaged" ${
+      project.brainManaged ? "checked" : ""
+    }>
+              <label for="portfolioDetailBrainManaged" class="form-label" style="margin:0">Brain Protocol Managed</label>
+            </div>
             <div>
               <label class="form-label flex items-center justify-between">
                 <span>URLs</span>
@@ -1314,6 +1326,8 @@ export class PortfolioView {
       githubRepo:
         document.getElementById("portfolioDetailGithubRepo")?.value?.trim() ||
         "",
+      brainManaged:
+        document.getElementById("portfolioDetailBrainManaged")?.checked || false,
     };
 
     try {

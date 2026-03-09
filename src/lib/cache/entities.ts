@@ -1204,7 +1204,8 @@ export const ENTITIES: EntityDef[] = [
   team TEXT,            -- JSON array
   kpis TEXT,            -- JSON array
   tech_stack TEXT,      -- JSON array
-  billing_customer_id TEXT
+  billing_customer_id TEXT,
+  brain_managed INTEGER DEFAULT 0
 )`,
     fts: {
       type: "portfolio",
@@ -1217,8 +1218,8 @@ export const ENTITIES: EntityDef[] = [
       db.execute("DELETE FROM portfolio");
       for (const p of items) {
         db.execute(
-          `INSERT INTO portfolio (id, name, category, status, client, revenue, expenses, progress, start_date, end_date, team, kpis, tech_stack, billing_customer_id)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO portfolio (id, name, category, status, client, revenue, expenses, progress, start_date, end_date, team, kpis, tech_stack, billing_customer_id, brain_managed)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             val(p.id),
             val(p.name),
@@ -1234,6 +1235,7 @@ export const ENTITIES: EntityDef[] = [
             json(p.kpis),
             json(p.techStack),
             val(p.billingCustomerId),
+            val(p.brainManaged ? 1 : 0),
           ],
         );
       }
