@@ -3,29 +3,118 @@
  * Pattern: Feature Router with CRUD operations.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
-  errorResponse,
   getParser,
-  jsonResponse,
 } from "../context.ts";
 
-export const safeRouter = new Hono<{ Variables: AppVariables }>();
+export const safeRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-// GET /safe - list all SAFE agreements
-safeRouter.get("/", async (c) => {
-  const parser = getParser(c);
-  const agreements = await parser.readSafeAgreements();
-  return jsonResponse(agreements);
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+const idParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+});
+const SuccessSchema = z.object({ success: z.boolean() });
+
+const listSafeRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["Safe"],
+  summary: "List all SAFE agreements",
+  operationId: "listSafeAgreements",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "List of SAFE agreements",
+    },
+  },
 });
 
-// POST /safe - create agreement
-safeRouter.post("/", async (c) => {
+const createSafeRoute = createRoute({
+  method: "post",
+  path: "/",
+  tags: ["Safe"],
+  summary: "Create SAFE agreement",
+  operationId: "createSafeAgreement",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: { "application/json": { schema: z.any() } },
+      description: "SAFE agreement created",
+    },
+  },
+});
+
+const updateSafeRoute = createRoute({
+  method: "put",
+  path: "/{id}",
+  tags: ["Safe"],
+  summary: "Update SAFE agreement",
+  operationId: "updateSafeAgreement",
+  request: {
+    params: idParam,
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "SAFE agreement updated",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const deleteSafeRoute = createRoute({
+  method: "delete",
+  path: "/{id}",
+  tags: ["Safe"],
+  summary: "Delete SAFE agreement",
+  operationId: "deleteSafeAgreement",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "SAFE agreement deleted",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+// --- Handlers ---
+
+safeRouter.openapi(listSafeRoute, async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
+  const agreements = await parser.readSafeAgreements();
+  return c.json(agreements, 200);
+});
+
+safeRouter.openapi(createSafeRoute, async (c) => {
+  const parser = getParser(c);
+  const body = c.req.valid("json");
   const agreement = await parser.addSafeAgreement({
     investor: body.investor || "",
     amount: Number(body.amount) || 0,
@@ -37,26 +126,24 @@ safeRouter.post("/", async (c) => {
     notes: body.notes || "",
   });
   await cacheWriteThrough(c, "safe_agreements");
-  return jsonResponse(agreement, 201);
+  return c.json(agreement, 201);
 });
 
-// PUT /safe/:id - update agreement
-safeRouter.put("/:id", async (c) => {
+safeRouter.openapi(updateSafeRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-  const body = await c.req.json();
+  const { id } = c.req.valid("param");
+  const body = c.req.valid("json");
   const updated = await parser.updateSafeAgreement(id, body);
-  if (!updated) return errorResponse("Not found", 404);
+  if (!updated) return c.json({ error: "Not found" }, 404);
   await cacheWriteThrough(c, "safe_agreements");
-  return jsonResponse(updated);
+  return c.json(updated, 200);
 });
 
-// DELETE /safe/:id - delete agreement
-safeRouter.delete("/:id", async (c) => {
+safeRouter.openapi(deleteSafeRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const { id } = c.req.valid("param");
   const success = await parser.deleteSafeAgreement(id);
-  if (!success) return errorResponse("Not found", 404);
+  if (!success) return c.json({ error: "Not found" }, 404);
   cachePurge(c, "safe_agreements", id);
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });

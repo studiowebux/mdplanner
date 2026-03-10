@@ -4,13 +4,16 @@
  * Each event: data: {"entity":"tasks","action":"updated","id":"..."}\n\n
  * Keepalive comments are sent every 30 s to prevent proxy timeouts.
  * Per-IP connection limit prevents resource exhaustion (max 10 concurrent).
+ *
+ * NOTE: SSE does not fit the OpenAPI request/response model — this route
+ * uses a regular .get() handler. It will not appear in the generated spec.
  */
 
-import { Hono } from "hono";
+import { OpenAPIHono } from "@hono/zod-openapi";
 import { AppVariables } from "./context.ts";
 import { eventBus, SSEEvent } from "../../lib/event-bus.ts";
 
-export const eventsRouter = new Hono<{ Variables: AppVariables }>();
+export const eventsRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
 /** Maximum concurrent SSE connections per IP address. */
 const MAX_SSE_PER_IP = 10;

@@ -2,29 +2,120 @@
  * Project Value Board CRUD routes.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
-  errorResponse,
   getParser,
-  jsonResponse,
 } from "../context.ts";
 
-export const projectValueRouter = new Hono<{ Variables: AppVariables }>();
+export const projectValueRouter = new OpenAPIHono<{
+  Variables: AppVariables;
+}>();
 
-// GET /project-value-board - list all project value boards
-projectValueRouter.get("/", async (c) => {
-  const parser = getParser(c);
-  const boards = await parser.readProjectValueBoards();
-  return jsonResponse(boards);
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+const idParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+});
+const SuccessSchema = z.object({ success: z.boolean() });
+
+const listProjectValueRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["Project Value"],
+  summary: "List all project value boards",
+  operationId: "listProjectValueBoards",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "List of project value boards",
+    },
+  },
 });
 
-// POST /project-value-board - create project value board
-projectValueRouter.post("/", async (c) => {
+const createProjectValueRoute = createRoute({
+  method: "post",
+  path: "/",
+  tags: ["Project Value"],
+  summary: "Create project value board",
+  operationId: "createProjectValueBoard",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Project value board created",
+    },
+  },
+});
+
+const updateProjectValueRoute = createRoute({
+  method: "put",
+  path: "/{id}",
+  tags: ["Project Value"],
+  summary: "Update project value board",
+  operationId: "updateProjectValueBoard",
+  request: {
+    params: idParam,
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Updated project value board",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const deleteProjectValueRoute = createRoute({
+  method: "delete",
+  path: "/{id}",
+  tags: ["Project Value"],
+  summary: "Delete project value board",
+  operationId: "deleteProjectValueBoard",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Project value board deleted",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+// --- Handlers ---
+
+projectValueRouter.openapi(listProjectValueRoute, async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
+  const boards = await parser.readProjectValueBoards();
+  return c.json(boards, 200);
+});
+
+projectValueRouter.openapi(createProjectValueRoute, async (c) => {
+  const parser = getParser(c);
+  const body = c.req.valid("json");
   const boards = await parser.readProjectValueBoards();
   const newBoard = {
     id: crypto.randomUUID(),
@@ -38,31 +129,31 @@ projectValueRouter.post("/", async (c) => {
   boards.push(newBoard);
   await parser.saveProjectValueBoards(boards);
   await cacheWriteThrough(c, "project_value");
-  return jsonResponse(newBoard, 201);
+  return c.json(newBoard, 201);
 });
 
-// PUT /project-value-board/:id - update project value board
-projectValueRouter.put("/:id", async (c) => {
+projectValueRouter.openapi(updateProjectValueRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-  const body = await c.req.json();
+  const { id } = c.req.valid("param");
+  const body = c.req.valid("json");
   const boards = await parser.readProjectValueBoards();
   const index = boards.findIndex((b) => b.id === id);
-  if (index === -1) return errorResponse("Not found", 404);
+  if (index === -1) return c.json({ error: "Not found" }, 404);
   boards[index] = { ...boards[index], ...body };
   await parser.saveProjectValueBoards(boards);
   await cacheWriteThrough(c, "project_value");
-  return jsonResponse(boards[index]);
+  return c.json(boards[index], 200);
 });
 
-// DELETE /project-value-board/:id - delete project value board
-projectValueRouter.delete("/:id", async (c) => {
+projectValueRouter.openapi(deleteProjectValueRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const { id } = c.req.valid("param");
   const boards = await parser.readProjectValueBoards();
   const filtered = boards.filter((b) => b.id !== id);
-  if (filtered.length === boards.length) return errorResponse("Not found", 404);
+  if (filtered.length === boards.length) {
+    return c.json({ error: "Not found" }, 404);
+  }
   await parser.saveProjectValueBoards(filtered);
   cachePurge(c, "project_value", id);
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });

@@ -4,7 +4,7 @@
  * Registered only when --api-token is configured.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   clearSessionCookie,
   createSession,
@@ -15,16 +15,97 @@ import {
   validateToken,
 } from "../../lib/auth.ts";
 
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string(),
+}).openapi("AuthError");
+
+const loginRoute = createRoute({
+  method: "post",
+  path: "/",
+  tags: ["Core"],
+  summary: "Exchange API token for session cookie",
+  operationId: "login",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            token: z.string().min(1).openapi({
+              description: "API token configured via --api-token",
+            }),
+          }),
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({ ok: z.boolean() }),
+        },
+      },
+      description: "Session created, cookie set",
+    },
+    401: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid API token",
+    },
+  },
+});
+
+const logoutRoute = createRoute({
+  method: "post",
+  path: "/logout",
+  tags: ["Core"],
+  summary: "Destroy current session",
+  operationId: "logout",
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({ ok: z.boolean() }),
+        },
+      },
+      description: "Session destroyed, cookie cleared",
+    },
+  },
+});
+
+const checkRoute = createRoute({
+  method: "get",
+  path: "/check",
+  tags: ["Core"],
+  summary: "Verify authentication status",
+  operationId: "authCheck",
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({ authenticated: z.boolean() }).openapi(
+            "AuthCheckResponse",
+          ),
+        },
+      },
+      description: "Authenticated",
+    },
+    401: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not authenticated",
+    },
+  },
+});
+
 export function createAuthRouter(
   apiToken: string,
-): Hono {
-  const router = new Hono();
+): OpenAPIHono {
+  const router = new OpenAPIHono();
 
-  /** Exchange the API token for a session cookie. */
-  router.post("/", async (c) => {
-    const body = await c.req.json().catch(() => null);
-    const provided = body?.token;
-    if (!provided || !validateToken(provided, apiToken)) {
+  router.openapi(loginRoute, async (c) => {
+    const { token } = c.req.valid("json");
+    if (!validateToken(token, apiToken)) {
       return c.json(
         { error: "INVALID_TOKEN", message: "Invalid API token" },
         401,
@@ -32,34 +113,30 @@ export function createAuthRouter(
     }
     const sessionId = createSession();
     c.header("Set-Cookie", setSessionCookie(sessionId));
-    return c.json({ ok: true });
+    return c.json({ ok: true }, 200);
   });
 
-  /** Destroy the current session. */
-  router.post("/logout", (c) => {
+  router.openapi(logoutRoute, (c) => {
     const cookie = c.req.header("Cookie") ?? "";
     const sessionId = parseSessionCookie(cookie);
     if (sessionId) destroySession(sessionId);
     c.header("Set-Cookie", clearSessionCookie());
-    return c.json({ ok: true });
+    return c.json({ ok: true }, 200);
   });
 
-  /** Check whether the caller has a valid session or bearer token. */
-  router.get("/check", (c) => {
-    // Bearer token check
+  router.openapi(checkRoute, (c) => {
     const authHeader = c.req.header("Authorization") ?? "";
     if (authHeader.startsWith("Bearer ")) {
       const token = authHeader.slice(7);
       if (validateToken(token, apiToken)) {
-        return c.json({ authenticated: true });
+        return c.json({ authenticated: true }, 200);
       }
     }
 
-    // Session cookie check
     const cookie = c.req.header("Cookie") ?? "";
     const sessionId = parseSessionCookie(cookie);
     if (sessionId && validateSession(sessionId)) {
-      return c.json({ authenticated: true });
+      return c.json({ authenticated: true }, 200);
     }
 
     return c.json(

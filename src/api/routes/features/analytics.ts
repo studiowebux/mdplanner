@@ -4,26 +4,47 @@
  * returns a single JSON payload. Read-only; no mutations.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
-  errorResponse,
   getParser,
   getProjectManager,
-  jsonResponse,
 } from "../context.ts";
 import { collectAnalytics } from "../../../lib/analytics/index.ts";
 
-export const analyticsRouter = new Hono<{ Variables: AppVariables }>();
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
 
-analyticsRouter.get("/", async (c) => {
+export const analyticsRouter = new OpenAPIHono<{ Variables: AppVariables }>();
+
+const getAnalyticsRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["Analytics"],
+  summary: "Collect all analytics",
+  operationId: "getAnalytics",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Analytics payload",
+    },
+    500: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Collection failed",
+    },
+  },
+});
+
+analyticsRouter.openapi(getAnalyticsRoute, async (c) => {
   try {
     const parser = getParser(c);
     const projectDir = getProjectManager(c).getActiveProjectDir();
     const payload = await collectAnalytics(parser, projectDir);
-    return jsonResponse(payload);
+    return c.json(payload, 200);
   } catch (err) {
     console.error("[analytics] collection failed:", err);
-    return errorResponse("Failed to collect analytics", 500);
+    return c.json({ error: "Failed to collect analytics" }, 500);
   }
 });

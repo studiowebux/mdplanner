@@ -3,29 +3,118 @@
  * Pattern: Feature Router with CRUD operations.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
-  errorResponse,
   getParser,
-  jsonResponse,
 } from "../context.ts";
 
-export const investorsRouter = new Hono<{ Variables: AppVariables }>();
+export const investorsRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-// GET /investors - list all investors
-investorsRouter.get("/", async (c) => {
-  const parser = getParser(c);
-  const investors = await parser.readInvestors();
-  return jsonResponse(investors);
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+const idParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+});
+const SuccessSchema = z.object({ success: z.boolean() });
+
+const listInvestorsRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["Investors"],
+  summary: "List all investors",
+  operationId: "listInvestors",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "List of investors",
+    },
+  },
 });
 
-// POST /investors - create investor
-investorsRouter.post("/", async (c) => {
+const createInvestorRoute = createRoute({
+  method: "post",
+  path: "/",
+  tags: ["Investors"],
+  summary: "Create investor",
+  operationId: "createInvestor",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Investor created",
+    },
+  },
+});
+
+const updateInvestorRoute = createRoute({
+  method: "put",
+  path: "/{id}",
+  tags: ["Investors"],
+  summary: "Update investor",
+  operationId: "updateInvestor",
+  request: {
+    params: idParam,
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Investor updated",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const deleteInvestorRoute = createRoute({
+  method: "delete",
+  path: "/{id}",
+  tags: ["Investors"],
+  summary: "Delete investor",
+  operationId: "deleteInvestor",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Investor deleted",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+// --- Handlers ---
+
+investorsRouter.openapi(listInvestorsRoute, async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
+  const investors = await parser.readInvestors();
+  return c.json(investors, 200);
+});
+
+investorsRouter.openapi(createInvestorRoute, async (c) => {
+  const parser = getParser(c);
+  const body = c.req.valid("json");
   const investor = await parser.addInvestor({
     name: body.name || "",
     type: body.type || "vc",
@@ -38,26 +127,24 @@ investorsRouter.post("/", async (c) => {
     notes: body.notes || "",
   });
   await cacheWriteThrough(c, "investors");
-  return jsonResponse(investor, 201);
+  return c.json(investor, 201);
 });
 
-// PUT /investors/:id - update investor
-investorsRouter.put("/:id", async (c) => {
+investorsRouter.openapi(updateInvestorRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-  const body = await c.req.json();
+  const { id } = c.req.valid("param");
+  const body = c.req.valid("json");
   const updated = await parser.updateInvestor(id, body);
-  if (!updated) return errorResponse("Not found", 404);
+  if (!updated) return c.json({ error: "Not found" }, 404);
   await cacheWriteThrough(c, "investors");
-  return jsonResponse(updated);
+  return c.json(updated, 200);
 });
 
-// DELETE /investors/:id - delete investor
-investorsRouter.delete("/:id", async (c) => {
+investorsRouter.openapi(deleteInvestorRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const { id } = c.req.valid("param");
   const success = await parser.deleteInvestor(id);
-  if (!success) return errorResponse("Not found", 404);
+  if (!success) return c.json({ error: "Not found" }, 404);
   cachePurge(c, "investors", id);
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });

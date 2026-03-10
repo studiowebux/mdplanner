@@ -6,63 +6,176 @@
  * Requires cache to be enabled (--cache flag).
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   type AppVariables,
-  errorResponse,
   getCache,
   getProjectManager,
   isCacheEnabled,
-  jsonResponse,
 } from "./context.ts";
 
-const searchRouter = new Hono<{ Variables: AppVariables }>();
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+const SuccessSchema = z.object({ success: z.boolean() });
+
+const searchRouter = new OpenAPIHono<{ Variables: AppVariables }>();
+
+// --- Route definitions ---
+
+const searchRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["Search"],
+  summary: "Full-text search across entities",
+  operationId: "search",
+  request: {
+    query: z.object({
+      q: z.string().optional().openapi({
+        description: "Search query",
+      }),
+      limit: z.string().optional().openapi({
+        description: "Max results (1-100, default 50)",
+      }),
+      offset: z.string().optional().openapi({
+        description: "Results offset",
+      }),
+      types: z.string().optional().openapi({
+        description: "Comma-separated entity types to search",
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Search results",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Bad request",
+    },
+  },
+});
+
+const searchStatsRoute = createRoute({
+  method: "get",
+  path: "/stats",
+  tags: ["Search"],
+  summary: "Cache statistics and counts",
+  operationId: "getSearchStats",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Cache statistics",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Cache not enabled",
+    },
+  },
+});
+
+const searchStatusRoute = createRoute({
+  method: "get",
+  path: "/status",
+  tags: ["Search"],
+  summary: "Cache status",
+  operationId: "getSearchStatus",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Cache status",
+    },
+  },
+});
+
+const rebuildCacheRoute = createRoute({
+  method: "post",
+  path: "/rebuild",
+  tags: ["Search"],
+  summary: "Rebuild cache from markdown",
+  operationId: "rebuildSearchCache",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Rebuild result",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Cache not enabled",
+    },
+    500: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Rebuild failed",
+    },
+  },
+});
+
+const syncCacheRoute = createRoute({
+  method: "post",
+  path: "/sync",
+  tags: ["Search"],
+  summary: "Sync cache (full sync)",
+  operationId: "syncSearchCache",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Sync result",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Cache not enabled",
+    },
+  },
+});
+
+// --- Handlers ---
 
 // GET /search - Full-text search across entities
-searchRouter.get("/", async (c) => {
+searchRouter.openapi(searchRoute, async (c) => {
   const cache = getCache(c);
   if (!cache) {
-    return errorResponse(
-      "Cache is not enabled. Start server with --cache flag.",
+    return c.json(
+      { error: "Cache is not enabled. Start server with --cache flag." },
       400,
     );
   }
 
-  const query = c.req.query("q");
+  const { q: query, limit: limitParam, offset: offsetParam, types: typesParam } =
+    c.req.valid("query");
   if (!query || query.trim().length === 0) {
-    return errorResponse("Query parameter 'q' is required", 400);
+    return c.json({ error: "Query parameter 'q' is required" }, 400);
   }
   if (query.length > 1000) {
-    return errorResponse("Query too long (max 1000 characters)", 400);
+    return c.json({ error: "Query too long (max 1000 characters)" }, 400);
   }
-
-  const limitParam = c.req.query("limit");
-  const offsetParam = c.req.query("offset");
-  const typesParam = c.req.query("types");
 
   const limit = limitParam
     ? Math.min(100, Math.max(1, parseInt(limitParam, 10) || 50))
     : 50;
-  const offset = offsetParam ? Math.max(0, parseInt(offsetParam, 10) || 0) : 0;
+  const offset = offsetParam
+    ? Math.max(0, parseInt(offsetParam, 10) || 0)
+    : 0;
   const types = typesParam?.split(",").filter(Boolean) as
     | ("task" | "note" | "goal" | "idea" | "meeting" | "person")[]
     | undefined;
 
   const results = cache.search.search(query, { limit, offset, types });
 
-  return jsonResponse({
+  return c.json({
     query,
     count: results.length,
     results,
-  });
+  }, 200);
 });
 
 // GET /search/stats - Cache statistics and counts
-searchRouter.get("/stats", async (c) => {
+searchRouter.openapi(searchStatsRoute, async (c) => {
   const cache = getCache(c);
   if (!cache) {
-    return errorResponse(
-      "Cache is not enabled. Start server with --cache flag.",
+    return c.json(
+      { error: "Cache is not enabled. Start server with --cache flag." },
       400,
     );
   }
@@ -70,43 +183,43 @@ searchRouter.get("/stats", async (c) => {
   const stats = cache.search.getStats();
   const lastSync = cache.sync.getLastSyncTime();
 
-  return jsonResponse({
+  return c.json({
     ...stats,
     lastSync: lastSync?.toISOString() ?? null,
     cacheEnabled: true,
-  });
+  }, 200);
 });
 
 // GET /search/status - Cache status
-searchRouter.get("/status", async (c) => {
+searchRouter.openapi(searchStatusRoute, async (c) => {
   const enabled = isCacheEnabled(c);
 
   if (!enabled) {
-    return jsonResponse({
+    return c.json({
       enabled: false,
       message: "Cache is not enabled. Start server with --cache flag.",
-    });
+    }, 200);
   }
 
   const cache = getCache(c);
   const lastSync = cache?.sync.getLastSyncTime();
   const needsSync = cache?.sync.needsSync() ?? true;
 
-  return jsonResponse({
+  return c.json({
     enabled: true,
     needsSync,
     lastSync: lastSync?.toISOString() ?? null,
     dbPath: cache?.db.getPath() ?? null,
-  });
+  }, 200);
 });
 
 // POST /search/rebuild - Rebuild cache from markdown
-searchRouter.post("/rebuild", async (c) => {
+searchRouter.openapi(rebuildCacheRoute, async (c) => {
   const pm = getProjectManager(c);
 
   if (!pm.isCacheEnabled()) {
-    return errorResponse(
-      "Cache is not enabled. Start server with --cache flag.",
+    return c.json(
+      { error: "Cache is not enabled. Start server with --cache flag." },
       400,
     );
   }
@@ -114,37 +227,37 @@ searchRouter.post("/rebuild", async (c) => {
   const result = await pm.rebuildCache();
 
   if (!result) {
-    return errorResponse("Failed to rebuild cache.", 500);
+    return c.json({ error: "Failed to rebuild cache." }, 500);
   }
 
-  return jsonResponse({
+  return c.json({
     success: true,
     tables: result.tables,
     items: result.items,
     duration: result.duration,
     errors: result.errors.length > 0 ? result.errors : undefined,
-  });
+  }, 200);
 });
 
 // POST /search/sync - Sync cache (full sync)
-searchRouter.post("/sync", async (c) => {
+searchRouter.openapi(syncCacheRoute, async (c) => {
   const cache = getCache(c);
   if (!cache) {
-    return errorResponse(
-      "Cache is not enabled. Start server with --cache flag.",
+    return c.json(
+      { error: "Cache is not enabled. Start server with --cache flag." },
       400,
     );
   }
 
   const result = await cache.sync.fullSync();
 
-  return jsonResponse({
+  return c.json({
     success: true,
     tables: result.tables,
     items: result.items,
     duration: result.duration,
     errors: result.errors.length > 0 ? result.errors : undefined,
-  });
+  }, 200);
 });
 
 export { searchRouter };

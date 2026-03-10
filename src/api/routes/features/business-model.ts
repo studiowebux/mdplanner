@@ -2,29 +2,120 @@
  * Business Model Canvas CRUD routes.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
-  errorResponse,
   getParser,
-  jsonResponse,
 } from "../context.ts";
 
-export const businessModelRouter = new Hono<{ Variables: AppVariables }>();
+export const businessModelRouter = new OpenAPIHono<{
+  Variables: AppVariables;
+}>();
 
-// GET /business-model - list all business model canvases
-businessModelRouter.get("/", async (c) => {
-  const parser = getParser(c);
-  const canvases = await parser.readBusinessModelCanvases();
-  return jsonResponse(canvases);
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+const idParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+});
+const SuccessSchema = z.object({ success: z.boolean() });
+
+const listBusinessModelRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["Business Model"],
+  summary: "List all business model canvases",
+  operationId: "listBusinessModelCanvases",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "List of business model canvases",
+    },
+  },
 });
 
-// POST /business-model - create business model canvas
-businessModelRouter.post("/", async (c) => {
+const createBusinessModelRoute = createRoute({
+  method: "post",
+  path: "/",
+  tags: ["Business Model"],
+  summary: "Create business model canvas",
+  operationId: "createBusinessModelCanvas",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Business model canvas created",
+    },
+  },
+});
+
+const updateBusinessModelRoute = createRoute({
+  method: "put",
+  path: "/{id}",
+  tags: ["Business Model"],
+  summary: "Update business model canvas",
+  operationId: "updateBusinessModelCanvas",
+  request: {
+    params: idParam,
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Business model canvas updated",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const deleteBusinessModelRoute = createRoute({
+  method: "delete",
+  path: "/{id}",
+  tags: ["Business Model"],
+  summary: "Delete business model canvas",
+  operationId: "deleteBusinessModelCanvas",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Business model canvas deleted",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+// --- Handlers ---
+
+businessModelRouter.openapi(listBusinessModelRoute, async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
+  const canvases = await parser.readBusinessModelCanvases();
+  return c.json(canvases, 200);
+});
+
+businessModelRouter.openapi(createBusinessModelRoute, async (c) => {
+  const parser = getParser(c);
+  const body = c.req.valid("json");
   const canvases = await parser.readBusinessModelCanvases();
   const newCanvas = {
     id: crypto.randomUUID().substring(0, 8),
@@ -43,33 +134,31 @@ businessModelRouter.post("/", async (c) => {
   canvases.push(newCanvas);
   await parser.saveBusinessModelCanvases(canvases);
   await cacheWriteThrough(c, "business_model");
-  return jsonResponse(newCanvas, 201);
+  return c.json(newCanvas, 201);
 });
 
-// PUT /business-model/:id - update business model canvas
-businessModelRouter.put("/:id", async (c) => {
+businessModelRouter.openapi(updateBusinessModelRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-  const body = await c.req.json();
+  const { id } = c.req.valid("param");
+  const body = c.req.valid("json");
   const canvases = await parser.readBusinessModelCanvases();
-  const index = canvases.findIndex((c) => c.id === id);
-  if (index === -1) return errorResponse("Not found", 404);
+  const index = canvases.findIndex((bm) => bm.id === id);
+  if (index === -1) return c.json({ error: "Not found" }, 404);
   canvases[index] = { ...canvases[index], ...body };
   await parser.saveBusinessModelCanvases(canvases);
   await cacheWriteThrough(c, "business_model");
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });
 
-// DELETE /business-model/:id - delete business model canvas
-businessModelRouter.delete("/:id", async (c) => {
+businessModelRouter.openapi(deleteBusinessModelRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const { id } = c.req.valid("param");
   const canvases = await parser.readBusinessModelCanvases();
-  const filtered = canvases.filter((c) => c.id !== id);
+  const filtered = canvases.filter((bm) => bm.id !== id);
   if (filtered.length === canvases.length) {
-    return errorResponse("Not found", 404);
+    return c.json({ error: "Not found" }, 404);
   }
   await parser.saveBusinessModelCanvases(filtered);
   cachePurge(c, "business_model", id);
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });

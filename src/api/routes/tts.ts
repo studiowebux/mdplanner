@@ -4,21 +4,57 @@
  * runs on a different port. These routes forward requests server-side,
  * bypassing the browser's CORS restriction.
  */
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 
-const ttsRouter = new Hono();
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+const SuccessSchema = z.object({ success: z.boolean() });
+
+const ttsRouter = new OpenAPIHono();
 
 // POST /api/tts/synthesize — forward synthesis request to Chatterbox
-ttsRouter.post("/synthesize", async (c) => {
-  const body = await c.req.json<{
-    ttsUrl: string;
-    text: string;
-    voice?: string;
-    exageration?: number;
-    cfg_weight?: number;
-  }>();
+const synthesizeRoute = createRoute({
+  method: "post",
+  path: "/synthesize",
+  tags: ["TTS"],
+  summary: "Synthesize speech via Chatterbox TTS proxy",
+  operationId: "ttsSynthesize",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            ttsUrl: z.string(),
+            text: z.string(),
+            voice: z.string().optional(),
+            exageration: z.number().optional(),
+            cfg_weight: z.number().optional(),
+          }),
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "audio/wav": { schema: z.any() } },
+      description: "Audio data from Chatterbox",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Missing ttsUrl",
+    },
+    502: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Upstream TTS error",
+    },
+  },
+});
 
-  const { ttsUrl, text, voice, exageration, cfg_weight } = body;
+ttsRouter.openapi(synthesizeRoute, async (c) => {
+  const { ttsUrl, text, voice, exageration, cfg_weight } = c.req.valid("json");
 
   if (!ttsUrl) {
     return c.json(
@@ -63,9 +99,42 @@ ttsRouter.post("/synthesize", async (c) => {
 });
 
 // POST /api/tts/voices — forward voices list request to Chatterbox
-ttsRouter.post("/voices", async (c) => {
-  const body = await c.req.json<{ ttsUrl: string }>();
-  const { ttsUrl } = body;
+const voicesRoute = createRoute({
+  method: "post",
+  path: "/voices",
+  tags: ["TTS"],
+  summary: "List available TTS voices from Chatterbox",
+  operationId: "ttsListVoices",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            ttsUrl: z.string(),
+          }),
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "List of available voices",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Missing ttsUrl",
+    },
+    502: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Upstream TTS error",
+    },
+  },
+});
+
+ttsRouter.openapi(voicesRoute, async (c) => {
+  const { ttsUrl } = c.req.valid("json");
 
   if (!ttsUrl) {
     return c.json(
@@ -84,7 +153,7 @@ ttsRouter.post("/voices", async (c) => {
     }
 
     const data = await res.json();
-    return c.json(data);
+    return c.json(data, 200);
   } catch (err) {
     return c.json(
       {

@@ -1,31 +1,119 @@
 /**
  * MoSCoW Analysis CRUD routes.
- * Pattern: Feature Router with CRUD operations.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
-  errorResponse,
   getParser,
-  jsonResponse,
 } from "../context.ts";
 
-export const moscowRouter = new Hono<{ Variables: AppVariables }>();
+export const moscowRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-// GET /moscow - list all analyses
-moscowRouter.get("/", async (c) => {
-  const parser = getParser(c);
-  const analyses = await parser.readMoscowAnalyses();
-  return jsonResponse(analyses);
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+const idParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+});
+const SuccessSchema = z.object({ success: z.boolean() });
+
+const listMoscowRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["MoSCoW"],
+  summary: "List all MoSCoW analyses",
+  operationId: "listMoscowAnalyses",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "List of MoSCoW analyses",
+    },
+  },
 });
 
-// POST /moscow - create analysis
-moscowRouter.post("/", async (c) => {
+const createMoscowRoute = createRoute({
+  method: "post",
+  path: "/",
+  tags: ["MoSCoW"],
+  summary: "Create MoSCoW analysis",
+  operationId: "createMoscowAnalysis",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: { "application/json": { schema: z.any() } },
+      description: "MoSCoW analysis created",
+    },
+  },
+});
+
+const updateMoscowRoute = createRoute({
+  method: "put",
+  path: "/{id}",
+  tags: ["MoSCoW"],
+  summary: "Update MoSCoW analysis",
+  operationId: "updateMoscowAnalysis",
+  request: {
+    params: idParam,
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Updated MoSCoW analysis",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const deleteMoscowRoute = createRoute({
+  method: "delete",
+  path: "/{id}",
+  tags: ["MoSCoW"],
+  summary: "Delete MoSCoW analysis",
+  operationId: "deleteMoscowAnalysis",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "MoSCoW analysis deleted",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+// --- Handlers ---
+
+moscowRouter.openapi(listMoscowRoute, async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
+  const analyses = await parser.readMoscowAnalyses();
+  return c.json(analyses, 200);
+});
+
+moscowRouter.openapi(createMoscowRoute, async (c) => {
+  const parser = getParser(c);
+  const body = c.req.valid("json");
   const analysis = await parser.addMoscowAnalysis({
     title: body.title || "Untitled Analysis",
     date: body.date || new Date().toISOString().split("T")[0],
@@ -35,26 +123,24 @@ moscowRouter.post("/", async (c) => {
     wont: body.wont || [],
   });
   await cacheWriteThrough(c, "moscow");
-  return jsonResponse(analysis, 201);
+  return c.json(analysis, 201);
 });
 
-// PUT /moscow/:id - update analysis
-moscowRouter.put("/:id", async (c) => {
+moscowRouter.openapi(updateMoscowRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-  const body = await c.req.json();
+  const { id } = c.req.valid("param");
+  const body = c.req.valid("json");
   const updated = await parser.updateMoscowAnalysis(id, body);
-  if (!updated) return errorResponse("Not found", 404);
+  if (!updated) return c.json({ error: "Not found" }, 404);
   await cacheWriteThrough(c, "moscow");
-  return jsonResponse(updated);
+  return c.json(updated, 200);
 });
 
-// DELETE /moscow/:id - delete analysis
-moscowRouter.delete("/:id", async (c) => {
+moscowRouter.openapi(deleteMoscowRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const { id } = c.req.valid("param");
   const success = await parser.deleteMoscowAnalysis(id);
-  if (!success) return errorResponse("Not found", 404);
+  if (!success) return c.json({ error: "Not found" }, 404);
   cachePurge(c, "moscow", id);
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });

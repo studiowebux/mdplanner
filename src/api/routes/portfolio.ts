@@ -2,109 +2,301 @@
  * Portfolio management routes.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
-  errorResponse,
   getParser,
-  jsonResponse,
 } from "./context.ts";
 import { DirectoryMarkdownParser } from "../../lib/parser/directory/parser.ts";
 import { eventBus } from "../../lib/event-bus.ts";
 
-export const portfolioRouter = new Hono<{ Variables: AppVariables }>();
+export const portfolioRouter = new OpenAPIHono<{
+  Variables: AppVariables;
+}>();
 
-// GET /portfolio - list all portfolio items
-portfolioRouter.get("/", async (c) => {
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+const idParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+});
+const SuccessSchema = z.object({ success: z.boolean() });
+
+const statusUpdateParams = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+  updateId: z.string().openapi({ param: { name: "updateId", in: "path" } }),
+});
+
+// --- Route definitions ---
+
+const listPortfolioRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["Portfolio"],
+  summary: "List all portfolio items",
+  operationId: "listPortfolioItems",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "List of portfolio items",
+    },
+  },
+});
+
+const getPortfolioSummaryRoute = createRoute({
+  method: "get",
+  path: "/summary",
+  tags: ["Portfolio"],
+  summary: "Get portfolio summary with totals by status and category",
+  operationId: "getPortfolioSummary",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Portfolio summary",
+    },
+  },
+});
+
+const getPortfolioItemRoute = createRoute({
+  method: "get",
+  path: "/{id}",
+  tags: ["Portfolio"],
+  summary: "Get single portfolio item",
+  operationId: "getPortfolioItem",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Portfolio item details",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Requires directory-based project",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const createPortfolioItemRoute = createRoute({
+  method: "post",
+  path: "/",
+  tags: ["Portfolio"],
+  summary: "Create portfolio item",
+  operationId: "createPortfolioItem",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Portfolio item created",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
+    },
+    409: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Duplicate name",
+    },
+  },
+});
+
+const updatePortfolioItemRoute = createRoute({
+  method: "put",
+  path: "/{id}",
+  tags: ["Portfolio"],
+  summary: "Update portfolio item",
+  operationId: "updatePortfolioItem",
+  request: {
+    params: idParam,
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Updated portfolio item",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Requires directory-based project",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const addStatusUpdateRoute = createRoute({
+  method: "post",
+  path: "/{id}/status-updates",
+  tags: ["Portfolio"],
+  summary: "Add a status update to a portfolio item",
+  operationId: "addPortfolioStatusUpdate",
+  request: {
+    params: idParam,
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({ message: z.string() }),
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Status update added",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Portfolio item not found",
+    },
+  },
+});
+
+const deleteStatusUpdateRoute = createRoute({
+  method: "delete",
+  path: "/{id}/status-updates/{updateId}",
+  tags: ["Portfolio"],
+  summary: "Delete a status update from a portfolio item",
+  operationId: "deletePortfolioStatusUpdate",
+  request: { params: statusUpdateParams },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Status update deleted",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Requires directory-based project",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const deletePortfolioItemRoute = createRoute({
+  method: "delete",
+  path: "/{id}",
+  tags: ["Portfolio"],
+  summary: "Delete portfolio item",
+  operationId: "deletePortfolioItem",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Portfolio item deleted",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Requires directory-based project",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+// --- Handlers ---
+
+portfolioRouter.openapi(listPortfolioRoute, async (c) => {
   const parser = getParser(c);
-
-  // Portfolio only works with directory-based projects
   if (!(parser instanceof DirectoryMarkdownParser)) {
-    return jsonResponse([]);
+    return c.json([], 200);
   }
-
   const hasPortfolio = await parser.hasPortfolio();
   if (!hasPortfolio) {
-    return jsonResponse([]);
+    return c.json([], 200);
   }
-
   const items = await parser.readPortfolioItems();
-  return jsonResponse(items);
+  return c.json(items, 200);
 });
 
-// GET /portfolio/summary - get portfolio summary
-portfolioRouter.get("/summary", async (c) => {
+portfolioRouter.openapi(getPortfolioSummaryRoute, async (c) => {
   const parser = getParser(c);
-
-  // Portfolio only works with directory-based projects
+  const empty = {
+    total: 0,
+    byStatus: {},
+    byCategory: {},
+    avgProgress: 0,
+    totalRevenue: 0,
+    totalExpenses: 0,
+  };
   if (!(parser instanceof DirectoryMarkdownParser)) {
-    return jsonResponse({
-      total: 0,
-      byStatus: {},
-      byCategory: {},
-      avgProgress: 0,
-      totalRevenue: 0,
-      totalExpenses: 0,
-    });
+    return c.json(empty, 200);
   }
-
   const hasPortfolio = await parser.hasPortfolio();
   if (!hasPortfolio) {
-    return jsonResponse({
-      total: 0,
-      byStatus: {},
-      byCategory: {},
-      avgProgress: 0,
-      totalRevenue: 0,
-      totalExpenses: 0,
-    });
+    return c.json(empty, 200);
   }
-
   const summary = await parser.getPortfolioSummary();
-  return jsonResponse(summary);
+  return c.json(summary, 200);
 });
 
-// GET /portfolio/:id - get single portfolio item
-portfolioRouter.get("/:id", async (c) => {
+portfolioRouter.openapi(getPortfolioItemRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-
+  const { id } = c.req.valid("param");
   if (!(parser instanceof DirectoryMarkdownParser)) {
-    return errorResponse("Portfolio requires directory-based project", 400);
+    return c.json(
+      { error: "Portfolio requires directory-based project" },
+      400,
+    );
   }
-
   const item = await parser.readPortfolioItem(id);
   if (!item) {
-    return errorResponse(`Portfolio item ${id} not found`, 404);
+    return c.json({ error: `Portfolio item ${id} not found` }, 404);
   }
-
-  return jsonResponse(item);
+  return c.json(item, 200);
 });
 
-// POST /portfolio - create portfolio item
-portfolioRouter.post("/", async (c) => {
+portfolioRouter.openapi(createPortfolioItemRoute, async (c) => {
   const parser = getParser(c);
-
   if (!(parser instanceof DirectoryMarkdownParser)) {
-    return errorResponse("Portfolio requires directory-based project", 400);
+    return c.json(
+      { error: "Portfolio requires directory-based project" },
+      400,
+    );
   }
-
-  const body = await c.req.json();
-
+  const body = c.req.valid("json");
   if (!body.name) {
-    return errorResponse("Name is required", 400);
+    return c.json({ error: "Name is required" }, 400);
   }
-
   const existing = await parser.readPortfolioItems();
   const duplicate = existing.find(
     (i) => i.name.toLowerCase() === body.name.trim().toLowerCase(),
   );
   if (duplicate) {
-    return errorResponse(`A project named "${body.name}" already exists`, 409);
+    return c.json(
+      { error: `A project named "${body.name}" already exists` },
+      409,
+    );
   }
-
   const item = await parser.createPortfolioItem({
     name: body.name,
     category: body.category || "Uncategorized",
@@ -126,91 +318,82 @@ portfolioRouter.post("/", async (c) => {
     githubRepo: body.githubRepo,
     brainManaged: body.brainManaged,
   });
-
   await cacheWriteThrough(c, "portfolio");
   eventBus.emit({ entity: "portfolio", action: "created", id: item.id });
-  return jsonResponse(item, 201);
+  return c.json(item, 201);
 });
 
-// PUT /portfolio/:id - update portfolio item
-portfolioRouter.put("/:id", async (c) => {
+portfolioRouter.openapi(updatePortfolioItemRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-
+  const { id } = c.req.valid("param");
   if (!(parser instanceof DirectoryMarkdownParser)) {
-    return errorResponse("Portfolio requires directory-based project", 400);
+    return c.json(
+      { error: "Portfolio requires directory-based project" },
+      400,
+    );
   }
-
-  const updates = await c.req.json();
+  const updates = c.req.valid("json");
   const updated = await parser.updatePortfolioItem(id, updates);
-
   if (!updated) {
-    return errorResponse(`Portfolio item ${id} not found`, 404);
+    return c.json({ error: `Portfolio item ${id} not found` }, 404);
   }
-
   await cacheWriteThrough(c, "portfolio");
   eventBus.emit({ entity: "portfolio", action: "updated", id });
-  return jsonResponse(updated);
+  return c.json(updated, 200);
 });
 
-// POST /portfolio/:id/status-updates - add a status update
-portfolioRouter.post("/:id/status-updates", async (c) => {
+portfolioRouter.openapi(addStatusUpdateRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-
+  const { id } = c.req.valid("param");
   if (!(parser instanceof DirectoryMarkdownParser)) {
-    return errorResponse("Portfolio requires directory-based project", 400);
+    return c.json(
+      { error: "Portfolio requires directory-based project" },
+      400,
+    );
   }
-
-  const body = await c.req.json();
+  const body = c.req.valid("json");
   if (!body.message?.trim()) {
-    return errorResponse("message is required", 400);
+    return c.json({ error: "message is required" }, 400);
   }
-
   const update = await parser.addPortfolioStatusUpdate(id, body.message.trim());
   if (!update) {
-    return errorResponse(`Portfolio item ${id} not found`, 404);
+    return c.json({ error: `Portfolio item ${id} not found` }, 404);
   }
-
   cacheWriteThrough(c, "portfolio");
-  return jsonResponse({ success: true, update });
+  return c.json({ success: true, update }, 200);
 });
 
-// DELETE /portfolio/:id/status-updates/:updateId - delete a status update
-portfolioRouter.delete("/:id/status-updates/:updateId", async (c) => {
+portfolioRouter.openapi(deleteStatusUpdateRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-  const updateId = c.req.param("updateId");
-
+  const { id, updateId } = c.req.valid("param");
   if (!(parser instanceof DirectoryMarkdownParser)) {
-    return errorResponse("Portfolio requires directory-based project", 400);
+    return c.json(
+      { error: "Portfolio requires directory-based project" },
+      400,
+    );
   }
-
   const ok = await parser.deletePortfolioStatusUpdate(id, updateId);
   if (!ok) {
-    return errorResponse(`Portfolio item or update not found`, 404);
+    return c.json({ error: "Portfolio item or update not found" }, 404);
   }
-
   cacheWriteThrough(c, "portfolio");
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });
 
-// DELETE /portfolio/:id - delete portfolio item
-portfolioRouter.delete("/:id", async (c) => {
+portfolioRouter.openapi(deletePortfolioItemRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-
+  const { id } = c.req.valid("param");
   if (!(parser instanceof DirectoryMarkdownParser)) {
-    return errorResponse("Portfolio requires directory-based project", 400);
+    return c.json(
+      { error: "Portfolio requires directory-based project" },
+      400,
+    );
   }
-
   const deleted = await parser.deletePortfolioItem(id);
-
   if (!deleted) {
-    return errorResponse(`Portfolio item ${id} not found`, 404);
+    return c.json({ error: `Portfolio item ${id} not found` }, 404);
   }
-
   cachePurge(c, "portfolio", id);
   eventBus.emit({ entity: "portfolio", action: "deleted", id });
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });

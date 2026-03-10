@@ -4,117 +4,267 @@
  * Delegates to people registry — orgchart is a view of people data.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
-  errorResponse,
   getParser,
-  jsonResponse,
 } from "../context.ts";
 
-export const orgchartRouter = new Hono<{ Variables: AppVariables }>();
+export const orgchartRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-// GET /orgchart - list all members
-orgchartRouter.get("/", async (c) => {
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+
+const idParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+});
+
+const listRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["People"],
+  summary: "List all org chart members",
+  operationId: "listOrgChartMembers",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.object({})) } },
+      description: "List of org chart members",
+    },
+  },
+});
+
+const treeRoute = createRoute({
+  method: "get",
+  path: "/tree",
+  tags: ["People"],
+  summary: "Get org chart tree",
+  operationId: "getOrgChartTree",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.object({}) } },
+      description: "Hierarchical tree structure",
+    },
+  },
+});
+
+const summaryRoute = createRoute({
+  method: "get",
+  path: "/summary",
+  tags: ["People"],
+  summary: "Get org chart summary",
+  operationId: "getOrgChartSummary",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.object({}) } },
+      description: "Summary statistics",
+    },
+  },
+});
+
+const departmentsRoute = createRoute({
+  method: "get",
+  path: "/departments",
+  tags: ["People"],
+  summary: "List org chart departments",
+  operationId: "getOrgChartDepartments",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.string()) } },
+      description: "Department list",
+    },
+  },
+});
+
+const getRoute = createRoute({
+  method: "get",
+  path: "/{id}",
+  tags: ["People"],
+  summary: "Get single org chart member",
+  operationId: "getOrgChartMember",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.object({}) } },
+      description: "Member details",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Member not found",
+    },
+  },
+});
+
+const reportsRoute = createRoute({
+  method: "get",
+  path: "/{id}/reports",
+  tags: ["People"],
+  summary: "Get direct reports for member",
+  operationId: "getOrgChartReports",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.object({})) } },
+      description: "Direct reports",
+    },
+  },
+});
+
+const createMemberRoute = createRoute({
+  method: "post",
+  path: "/",
+  tags: ["People"],
+  summary: "Create org chart member",
+  operationId: "createOrgChartMember",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            name: z.string().min(1),
+            title: z.string().optional(),
+            role: z.string().optional(),
+            departments: z.array(z.string()).optional(),
+            reportsTo: z.string().optional(),
+            email: z.string().optional(),
+            phone: z.string().optional(),
+            startDate: z.string().optional(),
+            hoursPerDay: z.number().optional(),
+            workingDays: z.array(z.string()).optional(),
+            notes: z.string().optional(),
+          }),
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: { "application/json": { schema: z.object({}) } },
+      description: "Member created",
+    },
+  },
+});
+
+const updateMemberRoute = createRoute({
+  method: "put",
+  path: "/{id}",
+  tags: ["People"],
+  summary: "Update org chart member",
+  operationId: "updateOrgChartMember",
+  request: {
+    params: idParam,
+    body: {
+      content: { "application/json": { schema: z.any() } },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.object({}) } },
+      description: "Updated member",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Member not found",
+    },
+  },
+});
+
+const deleteMemberRoute = createRoute({
+  method: "delete",
+  path: "/{id}",
+  tags: ["People"],
+  summary: "Delete org chart member",
+  operationId: "deleteOrgChartMember",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({ success: z.boolean() }),
+        },
+      },
+      description: "Member deleted",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Member not found",
+    },
+  },
+});
+
+orgchartRouter.openapi(listRoute, async (c) => {
   const parser = getParser(c);
   const members = await parser.readOrgChartMembers();
-  return jsonResponse(members);
+  return c.json(members, 200);
 });
 
-// GET /orgchart/tree - get hierarchical tree structure
-orgchartRouter.get("/tree", async (c) => {
+orgchartRouter.openapi(treeRoute, async (c) => {
   const parser = getParser(c);
   const tree = await parser.getOrgChartTree();
-  return jsonResponse(tree);
+  return c.json(tree, 200);
 });
 
-// GET /orgchart/summary - get summary statistics
-orgchartRouter.get("/summary", async (c) => {
+orgchartRouter.openapi(summaryRoute, async (c) => {
   const parser = getParser(c);
   const summary = await parser.getOrgChartSummary();
-  return jsonResponse(summary);
+  return c.json(summary, 200);
 });
 
-// GET /orgchart/departments - list all departments
-orgchartRouter.get("/departments", async (c) => {
+orgchartRouter.openapi(departmentsRoute, async (c) => {
   const parser = getParser(c);
   const departments = await parser.getOrgChartDepartments();
-  return jsonResponse(departments);
+  return c.json(departments, 200);
 });
 
-// GET /orgchart/:id - get single member
-orgchartRouter.get("/:id", async (c) => {
+orgchartRouter.openapi(getRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const { id } = c.req.valid("param");
   const member = await parser.readOrgChartMember(id);
-
   if (!member) {
-    return errorResponse("Member not found", 404);
+    return c.json({ error: "Member not found" }, 404);
   }
-
-  return jsonResponse(member);
+  return c.json(member, 200);
 });
 
-// GET /orgchart/:id/reports - get direct reports
-orgchartRouter.get("/:id/reports", async (c) => {
+orgchartRouter.openapi(reportsRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const { id } = c.req.valid("param");
   const reports = await parser.getOrgChartDirectReports(id);
-  return jsonResponse(reports);
+  return c.json(reports, 200);
 });
 
-// POST /orgchart - create member
-orgchartRouter.post("/", async (c) => {
+orgchartRouter.openapi(createMemberRoute, async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
-
-  const member = await parser.addOrgChartMember({
-    name: body.name,
-    title: body.title,
-    role: body.role,
-    departments: body.departments,
-    reportsTo: body.reportsTo,
-    email: body.email,
-    phone: body.phone,
-    startDate: body.startDate,
-    hoursPerDay: body.hoursPerDay,
-    workingDays: body.workingDays,
-    notes: body.notes,
-  });
-
+  const body = c.req.valid("json");
+  const member = await parser.addOrgChartMember(body);
   await cacheWriteThrough(c, "org_members");
-  return jsonResponse(member, 201);
+  return c.json(member, 201);
 });
 
-// PUT /orgchart/:id - update member
-orgchartRouter.put("/:id", async (c) => {
+orgchartRouter.openapi(updateMemberRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-  const body = await c.req.json();
-
+  const { id } = c.req.valid("param");
+  const body = c.req.valid("json");
   const updated = await parser.updateOrgChartMember(id, body);
-
   if (!updated) {
-    return errorResponse("Member not found", 404);
+    return c.json({ error: "Member not found" }, 404);
   }
-
   await cacheWriteThrough(c, "org_members");
-  return jsonResponse(updated);
+  return c.json(updated, 200);
 });
 
-// DELETE /orgchart/:id - delete member
-orgchartRouter.delete("/:id", async (c) => {
+orgchartRouter.openapi(deleteMemberRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-
+  const { id } = c.req.valid("param");
   const success = await parser.deleteOrgChartMember(id);
-
   if (!success) {
-    return errorResponse("Member not found", 404);
+    return c.json({ error: "Member not found" }, 404);
   }
-
   cachePurge(c, "org_members", id);
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });

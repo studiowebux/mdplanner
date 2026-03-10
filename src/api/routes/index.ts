@@ -3,6 +3,7 @@
  */
 
 import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
 import { bodyLimit } from "hono/body-limit";
 import { RateLimiter } from "../../lib/rate-limit.ts";
@@ -102,7 +103,23 @@ export function createApiRouter(
     rateLimitPerMinute?: number;
   },
 ): Hono<{ Variables: AppVariables }> {
-  const api = new Hono<{ Variables: AppVariables }>();
+  const api = new OpenAPIHono<{ Variables: AppVariables }>({
+    defaultHook: (result, c) => {
+      if (!result.success) {
+        return c.json(
+          {
+            error: "VALIDATION_ERROR",
+            message: result.error.issues
+              .map((i: { path: (string | number)[]; message: string }) =>
+                `${i.path.join(".")}: ${i.message}`
+              )
+              .join("; "),
+          },
+          400,
+        );
+      }
+    },
+  });
 
   // CORS middleware — restrict to configured origin when set
   const corsOpts = opts?.corsOrigin
@@ -151,6 +168,7 @@ export function createApiRouter(
         c.req.method === "OPTIONS" ||
         path === "/api/health" ||
         path === "/api/version" ||
+        path === "/api/doc" ||
         path.startsWith("/api/auth")
       ) {
         return next();
@@ -244,13 +262,39 @@ export function createApiRouter(
 
   // Health check — no auth required
   const startedAt = Date.now();
-  api.get("/health", (c) => {
+  const healthRoute = createRoute({
+    method: "get",
+    path: "/health",
+    tags: ["Core"],
+    summary: "Health check",
+    operationId: "healthCheck",
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: z.object({
+              status: z.string().openapi({ example: "ok" }),
+              version: z.string().openapi({ example: "0.25.2" }),
+              uptime: z.number().openapi({
+                description: "Server uptime in seconds",
+              }),
+              cache: z.boolean().openapi({
+                description: "Whether SQLite cache is enabled",
+              }),
+            }).openapi("HealthResponse"),
+          },
+        },
+        description: "Server is healthy",
+      },
+    },
+  });
+  api.openapi(healthRoute, (c) => {
     return c.json({
       status: "ok",
       version: VERSION,
       uptime: Math.floor((Date.now() - startedAt) / 1000),
       cache: isCacheEnabled(c),
-    });
+    }, 200);
   });
 
   // Read-only guard: block all mutations when --read-only is active
@@ -374,6 +418,18 @@ export function createApiRouter(
   if (opts?.brainRegistry) {
     api.route("/brains", brainsRouter);
   }
+
+  // OpenAPI spec endpoint — auto-generated from Zod schemas
+  api.doc31("/doc", {
+    openapi: "3.1.0",
+    info: {
+      title: "MDPlanner API",
+      version: VERSION,
+      description:
+        "Markdown-based project management API. All data stored as markdown files with YAML frontmatter.",
+      license: { name: "MIT", url: "https://opensource.org/licenses/MIT" },
+    },
+  });
 
   // 404 handler
   api.notFound((c) => {
