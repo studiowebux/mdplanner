@@ -2,18 +2,187 @@
  * Milestones CRUD routes.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
-  errorResponse,
   getParser,
-  jsonResponse,
 } from "../context.ts";
 import { Task } from "../../../lib/types.ts";
 
-export const milestonesRouter = new Hono<{ Variables: AppVariables }>();
+export const milestonesRouter = new OpenAPIHono<{ Variables: AppVariables }>();
+
+// ---------------------------------------------------------------------------
+// Shared schemas
+// ---------------------------------------------------------------------------
+
+const ErrorSchema = z
+  .object({
+    error: z.string(),
+  })
+  .openapi("MilestoneError");
+
+const SuccessSchema = z
+  .object({
+    success: z.boolean(),
+  })
+  .openapi("MilestoneSuccess");
+
+const SuccessWithIdSchema = z
+  .object({
+    success: z.boolean(),
+    id: z.string(),
+  })
+  .openapi("MilestoneSuccessWithId");
+
+const idParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+});
+
+const MilestoneSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    status: z.enum(["open", "completed"]),
+    target: z.string().optional(),
+    description: z.string().optional(),
+    project: z.string().optional(),
+    completedAt: z.string().optional(),
+    taskCount: z.number(),
+    completedCount: z.number(),
+    progress: z.number().min(0).max(100),
+  })
+  .openapi("Milestone");
+
+const CreateMilestoneSchema = z
+  .object({
+    name: z.string().min(1).openapi({ description: "Milestone name" }),
+    target: z.string().optional().openapi({
+      description: "Target date (YYYY-MM-DD)",
+    }),
+    status: z.enum(["open", "completed"]).default("open").openapi({
+      description: "Milestone status",
+    }),
+    description: z.string().optional().openapi({
+      description: "Optional description",
+    }),
+    project: z.string().optional().openapi({
+      description: "Project filter scope",
+    }),
+  })
+  .openapi("CreateMilestone");
+
+const UpdateMilestoneSchema = z
+  .object({
+    name: z.string().min(1).optional().openapi({ description: "Milestone name" }),
+    target: z.string().optional().openapi({
+      description: "Target date (YYYY-MM-DD)",
+    }),
+    status: z.enum(["open", "completed"]).optional().openapi({
+      description: "Milestone status",
+    }),
+    description: z.string().optional().openapi({
+      description: "Optional description",
+    }),
+    project: z.string().optional().openapi({
+      description: "Project filter scope",
+    }),
+  })
+  .openapi("UpdateMilestone");
+
+// ---------------------------------------------------------------------------
+// Route definitions
+// ---------------------------------------------------------------------------
+
+const listRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["Milestones"],
+  summary: "List milestones with progress",
+  operationId: "listMilestones",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(MilestoneSchema) } },
+      description:
+        "List of milestones including virtual entries inferred from task references",
+    },
+  },
+});
+
+const createRoute_ = createRoute({
+  method: "post",
+  path: "/",
+  tags: ["Milestones"],
+  summary: "Create a milestone",
+  operationId: "createMilestone",
+  request: {
+    body: {
+      content: { "application/json": { schema: CreateMilestoneSchema } },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: { "application/json": { schema: SuccessWithIdSchema } },
+      description: "Milestone created",
+    },
+    409: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Duplicate milestone name",
+    },
+  },
+});
+
+const updateRoute = createRoute({
+  method: "put",
+  path: "/{id}",
+  tags: ["Milestones"],
+  summary: "Update a milestone",
+  operationId: "updateMilestone",
+  request: {
+    params: idParam,
+    body: {
+      content: { "application/json": { schema: UpdateMilestoneSchema } },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Milestone updated",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Milestone not found",
+    },
+  },
+});
+
+const deleteRoute = createRoute({
+  method: "delete",
+  path: "/{id}",
+  tags: ["Milestones"],
+  summary: "Delete a milestone",
+  operationId: "deleteMilestone",
+  request: {
+    params: idParam,
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Milestone deleted",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Milestone not found",
+    },
+  },
+});
+
+// ---------------------------------------------------------------------------
+// Helper
+// ---------------------------------------------------------------------------
 
 function getTasksByMilestone(tasks: Task[], milestone: string): Task[] {
   const result: Task[] = [];
@@ -27,8 +196,12 @@ function getTasksByMilestone(tasks: Task[], milestone: string): Task[] {
   return result;
 }
 
+// ---------------------------------------------------------------------------
+// Handlers
+// ---------------------------------------------------------------------------
+
 // GET /milestones - list all milestones with progress, including names inferred from tasks
-milestonesRouter.get("/", async (c) => {
+milestonesRouter.openapi(listRoute, async (c) => {
   const parser = getParser(c);
   const [milestones, tasks] = await Promise.all([
     parser.readMilestones(),
@@ -78,13 +251,13 @@ milestonesRouter.get("/", async (c) => {
   };
   collectNames(tasks);
 
-  return jsonResponse(result);
+  return c.json(result, 200);
 });
 
 // POST /milestones - create milestone
-milestonesRouter.post("/", async (c) => {
+milestonesRouter.openapi(createRoute_, async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
+  const body = c.req.valid("json");
   const milestones = await parser.readMilestones();
 
   // Prevent duplicate name (optionally scoped to project)
@@ -94,10 +267,12 @@ milestonesRouter.post("/", async (c) => {
     )
     : milestones.find((m) => m.name === body.name);
   if (duplicate) {
-    return errorResponse(
-      body.project
-        ? `Milestone '${body.name}' already exists for project '${body.project}'`
-        : `Milestone '${body.name}' already exists`,
+    return c.json(
+      {
+        error: body.project
+          ? `Milestone '${body.name}' already exists for project '${body.project}'`
+          : `Milestone '${body.name}' already exists`,
+      },
       409,
     );
   }
@@ -110,17 +285,17 @@ milestonesRouter.post("/", async (c) => {
     project: body.project,
   });
   await cacheWriteThrough(c, "milestones");
-  return jsonResponse({ success: true, id: created.id }, 201);
+  return c.json({ success: true, id: created.id }, 201);
 });
 
 // PUT /milestones/:id - update milestone
-milestonesRouter.put("/:id", async (c) => {
+milestonesRouter.openapi(updateRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-  const body = await c.req.json();
+  const { id } = c.req.valid("param");
+  const body = c.req.valid("json");
   const milestones = await parser.readMilestones();
   const index = milestones.findIndex((m) => m.id === id);
-  if (index === -1) return errorResponse("Not found", 404);
+  if (index === -1) return c.json({ error: "Not found" }, 404);
 
   const existing = milestones[index];
   const merged = { ...existing, ...body };
@@ -135,15 +310,15 @@ milestonesRouter.put("/:id", async (c) => {
   milestones[index] = merged;
   await parser.saveMilestones(milestones);
   await cacheWriteThrough(c, "milestones");
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });
 
 // DELETE /milestones/:id - delete milestone
-milestonesRouter.delete("/:id", async (c) => {
+milestonesRouter.openapi(deleteRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const { id } = c.req.valid("param");
   const deleted = await parser.deleteMilestone(id);
-  if (!deleted) return errorResponse("Not found", 404);
+  if (!deleted) return c.json({ error: "Not found" }, 404);
   cachePurge(c, "milestones", id);
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });

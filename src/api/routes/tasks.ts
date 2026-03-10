@@ -2,21 +2,18 @@
  * Task CRUD routes.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
-  errorResponse,
   getParser,
-  jsonResponse,
 } from "./context.ts";
 import { Task, TaskConfig } from "../../lib/types.ts";
 import type { DirectoryMarkdownParser } from "../../lib/parser/directory/parser.ts";
 import {
   BatchUpdateSchema,
   CreateTaskSchema,
-  parseBody,
   SweepStaleClaimsSchema,
   TaskAttachmentsSchema,
   TaskClaimSchema,
@@ -26,11 +23,28 @@ import {
   UpdateTaskSchema,
 } from "../schemas.ts";
 
-export const tasksRouter = new Hono<{ Variables: AppVariables }>();
+export const tasksRouter = new OpenAPIHono<{ Variables: AppVariables }>();
+
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+
+const idParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+});
+
+const commentParams = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+  commentId: z.string().openapi({
+    param: { name: "commentId", in: "path" },
+  }),
+});
+
+const SuccessSchema = z.object({ success: z.boolean() });
 
 /**
  * Auto-create a milestone file if the given name is not already tracked.
- * Called after task create/update so every milestone reference has a backing file.
  */
 async function ensureMilestoneExists(
   parser: DirectoryMarkdownParser,
@@ -42,19 +56,12 @@ async function ensureMilestoneExists(
   }
 }
 
-/**
- * Map flat request body fields into a TaskConfig object.
- * Undefined/null/empty values produce undefined so callers can distinguish
- * "not provided" from "explicitly cleared" via deep merge in the parser.
- */
 // deno-lint-ignore no-explicit-any
 function bodyToConfig(body: Record<string, any>): TaskConfig {
   const config: TaskConfig = {};
   if (Array.isArray(body.tags) && body.tags.length) config.tags = body.tags;
   if (body.priority != null) config.priority = Number(body.priority);
   if (body.effort != null) config.effort = Number(body.effort);
-  // Clearable string fields: include empty string so the merge layer can
-  // overwrite (and the serializer's truthiness check drops them from file).
   if ("due_date" in body) config.due_date = body.due_date;
   if ("assignee" in body) config.assignee = body.assignee;
   if ("milestone" in body) config.milestone = body.milestone;
@@ -79,9 +86,7 @@ function bodyToDescription(body: Record<string, any>): string[] | undefined {
 
 function findTaskById(tasks: Task[], id: string): Task | null {
   for (const task of tasks) {
-    if (task.id === id) {
-      return task;
-    }
+    if (task.id === id) return task;
     if (task.children) {
       const found = findTaskById(task.children, id);
       if (found) return found;
@@ -90,30 +95,395 @@ function findTaskById(tasks: Task[], id: string): Task | null {
   return null;
 }
 
-// GET /tasks - list all tasks
-tasksRouter.get("/", async (c) => {
-  const parser = getParser(c);
-  const tasks = await parser.readTasks();
-  return jsonResponse(tasks);
+// --- Route definitions ---
+
+const listTasksRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["Tasks"],
+  summary: "List all tasks (hierarchical)",
+  operationId: "listTasks",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.object({})) } },
+      description: "Hierarchical task list",
+    },
+  },
 });
 
-// GET /tasks/next - find highest-priority ready task matching agent skills
-tasksRouter.get("/next", async (c) => {
+const getNextTaskRoute = createRoute({
+  method: "get",
+  path: "/next",
+  tags: ["Tasks"],
+  summary: "Find highest-priority ready task matching agent skills",
+  operationId: "getNextTask",
+  request: {
+    query: z.object({
+      agent_id: z.string().openapi({
+        description: "Person ID of the requesting agent (required)",
+      }),
+      project: z.string().optional().openapi({
+        description: "Filter by project name",
+      }),
+      section: z.string().optional().openapi({
+        description: "Section to search (default: Todo)",
+      }),
+      exclude_tags: z.string().optional().openapi({
+        description: "Comma-separated tags to exclude",
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any().openapi({ description: "Best matching task, or null if none found" }) } },
+      description: "Best matching task, or null if none found",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Missing agent_id",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Person not found",
+    },
+  },
+});
+
+const getTaskRoute = createRoute({
+  method: "get",
+  path: "/{id}",
+  tags: ["Tasks"],
+  summary: "Get single task by ID",
+  operationId: "getTask",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.object({}) } },
+      description: "Task details",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Task not found",
+    },
+  },
+});
+
+const createTaskRoute = createRoute({
+  method: "post",
+  path: "/",
+  tags: ["Tasks"],
+  summary: "Create task",
+  operationId: "createTask",
+  request: {
+    body: {
+      content: { "application/json": { schema: CreateTaskSchema } },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: {
+        "application/json": {
+          schema: z.object({ id: z.string() }),
+        },
+      },
+      description: "Task created",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
+    },
+  },
+});
+
+const sweepStaleClaimsRoute = createRoute({
+  method: "post",
+  path: "/sweep-stale-claims",
+  tags: ["Tasks"],
+  summary: "Release tasks with expired claims",
+  operationId: "sweepStaleClaims",
+  request: {
+    body: {
+      content: { "application/json": { schema: SweepStaleClaimsSchema } },
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            released: z.array(z.string()),
+            count: z.number(),
+          }),
+        },
+      },
+      description: "Released task IDs",
+    },
+  },
+});
+
+const batchUpdateRoute = createRoute({
+  method: "post",
+  path: "/batch",
+  tags: ["Tasks"],
+  summary: "Batch update multiple tasks",
+  operationId: "batchUpdateTasks",
+  request: {
+    body: {
+      content: { "application/json": { schema: BatchUpdateSchema } },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            updated: z.number(),
+            total: z.number(),
+            results: z.array(z.object({
+              id: z.string(),
+              success: z.boolean(),
+              error: z.string().optional(),
+            })),
+          }),
+        },
+      },
+      description: "Batch results",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
+    },
+  },
+});
+
+const updateTaskRoute = createRoute({
+  method: "put",
+  path: "/{id}",
+  tags: ["Tasks"],
+  summary: "Update task",
+  operationId: "updateTask",
+  request: {
+    params: idParam,
+    body: {
+      content: { "application/json": { schema: UpdateTaskSchema } },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Task updated",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Task not found",
+    },
+    409: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Revision conflict or claim guard violation",
+    },
+  },
+});
+
+const deleteTaskRoute = createRoute({
+  method: "delete",
+  path: "/{id}",
+  tags: ["Tasks"],
+  summary: "Delete task",
+  operationId: "deleteTask",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Task deleted",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Task not found",
+    },
+  },
+});
+
+const addAttachmentsRoute = createRoute({
+  method: "patch",
+  path: "/{id}/attachments",
+  tags: ["Tasks"],
+  summary: "Add file paths to task attachments",
+  operationId: "addTaskAttachments",
+  request: {
+    params: idParam,
+    body: {
+      content: { "application/json": { schema: TaskAttachmentsSchema } },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Attachments added",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Task not found",
+    },
+  },
+});
+
+const moveTaskRoute = createRoute({
+  method: "patch",
+  path: "/{id}/move",
+  tags: ["Tasks"],
+  summary: "Move task to section with optional position",
+  operationId: "moveTask",
+  request: {
+    params: idParam,
+    body: {
+      content: { "application/json": { schema: TaskMoveSchema } },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Task moved",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Task not found",
+    },
+  },
+});
+
+const addCommentRoute = createRoute({
+  method: "post",
+  path: "/{id}/comments",
+  tags: ["Tasks"],
+  summary: "Add comment to task",
+  operationId: "addTaskComment",
+  request: {
+    params: idParam,
+    body: {
+      content: { "application/json": { schema: TaskCommentSchema } },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: { "application/json": { schema: z.object({}) } },
+      description: "Comment added",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Task not found",
+    },
+  },
+});
+
+const deleteCommentRoute = createRoute({
+  method: "delete",
+  path: "/{id}/comments/{commentId}",
+  tags: ["Tasks"],
+  summary: "Delete comment from task",
+  operationId: "deleteTaskComment",
+  request: { params: commentParams },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Comment deleted",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Task or comment not found",
+    },
+  },
+});
+
+const updateCommentRoute = createRoute({
+  method: "put",
+  path: "/{id}/comments/{commentId}",
+  tags: ["Tasks"],
+  summary: "Update comment body",
+  operationId: "updateTaskComment",
+  request: {
+    params: commentParams,
+    body: {
+      content: { "application/json": { schema: TaskCommentUpdateSchema } },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.object({}) } },
+      description: "Updated comment",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Task or comment not found",
+    },
+  },
+});
+
+const claimTaskRoute = createRoute({
+  method: "post",
+  path: "/{id}/claim",
+  tags: ["Tasks"],
+  summary: "Atomically claim a task",
+  operationId: "claimTask",
+  request: {
+    params: idParam,
+    body: {
+      content: { "application/json": { schema: TaskClaimSchema } },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.object({}) } },
+      description: "Claimed task",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Task not found",
+    },
+    409: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Claim conflict or revision mismatch",
+    },
+  },
+});
+
+// --- Handlers ---
+
+tasksRouter.openapi(listTasksRoute, async (c) => {
   const parser = getParser(c);
-  const agentId = c.req.query("agent_id");
-  const project = c.req.query("project");
-  const section = c.req.query("section") ?? "Todo";
-  const excludeTagsRaw = c.req.query("exclude_tags");
-  const excludeTags = excludeTagsRaw
-    ? excludeTagsRaw.split(",").map((t) => t.trim())
+  const tasks = await parser.readTasks();
+  return c.json(tasks, 200);
+});
+
+tasksRouter.openapi(getNextTaskRoute, async (c) => {
+  const parser = getParser(c);
+  const { agent_id: agentId, project, section: sectionRaw, exclude_tags } = c
+    .req.valid("query");
+  const section = sectionRaw ?? "Todo";
+  const excludeTags = exclude_tags
+    ? exclude_tags.split(",").map((t) => t.trim())
     : [];
 
   if (!agentId) {
-    return errorResponse("agent_id query parameter is required", 400);
+    return c.json(
+      { error: "agent_id query parameter is required" },
+      400,
+    );
   }
 
   const person = await parser.readPerson(agentId);
-  if (!person) return errorResponse("Person not found", 404);
+  if (!person) return c.json({ error: "Person not found" }, 404);
   const skills = (person.skills ?? []).map((s) => s.toLowerCase());
 
   const tasks = await parser.readTasks();
@@ -126,19 +496,16 @@ tasksRouter.get("/next", async (c) => {
   };
   flatten(tasks);
 
-  // Filter by section
   let candidates = flat.filter((t) =>
     t.section.toLowerCase() === section.toLowerCase()
   );
 
-  // Filter by project
   if (project) {
     candidates = candidates.filter((t) =>
       (t.config?.project ?? "").toLowerCase() === project.toLowerCase()
     );
   }
 
-  // Filter ready: all blocked_by resolved
   const taskById = new Map(flat.map((t) => [t.id, t]));
   candidates = candidates.filter((t) => {
     const blockers = t.config?.blocked_by ?? [];
@@ -150,7 +517,6 @@ tasksRouter.get("/next", async (c) => {
     });
   });
 
-  // Exclude tags
   if (excludeTags.length) {
     const lowerExclude = excludeTags.map((t) => t.toLowerCase());
     candidates = candidates.filter((t) => {
@@ -161,12 +527,10 @@ tasksRouter.get("/next", async (c) => {
     });
   }
 
-  // Sort by priority (1 = highest, undefined defaults to 5)
   candidates.sort((a, b) =>
     (a.config?.priority ?? 5) - (b.config?.priority ?? 5)
   );
 
-  // Skill match
   if (skills.length > 0) {
     const skillMatch = candidates.find((t) => {
       const taskTags = (t.config?.tags ?? []).map((tag: string) =>
@@ -174,39 +538,29 @@ tasksRouter.get("/next", async (c) => {
       );
       return taskTags.some((tag) => skills.includes(tag));
     });
-    if (skillMatch) return jsonResponse(skillMatch);
+    if (skillMatch) return c.json(skillMatch, 200);
   }
 
-  // Fallback 1: untagged task
   const untagged = candidates.find((t) => !(t.config?.tags?.length));
-  if (untagged) return jsonResponse(untagged);
+  if (untagged) return c.json(untagged, 200);
 
-  // Fallback 2: any remaining
-  if (candidates.length > 0) return jsonResponse(candidates[0]);
+  if (candidates.length > 0) return c.json(candidates[0], 200);
 
-  return jsonResponse(null);
+  return c.json(null, 200);
 });
 
-// GET /tasks/:id - get single task
-tasksRouter.get("/:id", async (c) => {
+tasksRouter.openapi(getTaskRoute, async (c) => {
   const parser = getParser(c);
-  const taskId = c.req.param("id");
+  const { id: taskId } = c.req.valid("param");
   const tasks = await parser.readTasks();
   const task = findTaskById(tasks, taskId);
-
-  if (task) {
-    return jsonResponse(task);
-  }
-  return errorResponse("Task not found", 404);
+  if (task) return c.json(task, 200);
+  return c.json({ error: "Task not found" }, 404);
 });
 
-// POST /tasks - create task
-tasksRouter.post("/", async (c) => {
+tasksRouter.openapi(createTaskRoute, async (c) => {
   const parser = getParser(c);
-  const raw = await c.req.json();
-  const parsed = parseBody(CreateTaskSchema, raw);
-  if (!parsed.success) return errorResponse(parsed.error, 400);
-  const body = parsed.data;
+  const body = c.req.valid("json");
   const task: Omit<Task, "id" | "revision"> = {
     title: body.title || "Untitled",
     completed: false,
@@ -217,8 +571,6 @@ tasksRouter.post("/", async (c) => {
     ...(body.parentId && { parentId: body.parentId }),
   };
   const taskId = await parser.addTask(task);
-  // Cache sync is fire-and-forget — GET /tasks reads from files, not cache.
-  // Blocking on a full table re-sync delays the response unnecessarily.
   cacheWriteThrough(c, "tasks").catch((e) =>
     console.error("[tasks] background cache sync failed:", e)
   );
@@ -228,16 +580,12 @@ tasksRouter.post("/", async (c) => {
       ? [ensureMilestoneExists(parser, task.config.milestone)]
       : []),
   ]);
-  return jsonResponse({ id: taskId }, 201);
+  return c.json({ id: taskId }, 201);
 });
 
-// POST /tasks/sweep-stale-claims - release tasks with expired claims
-tasksRouter.post("/sweep-stale-claims", async (c) => {
+tasksRouter.openapi(sweepStaleClaimsRoute, async (c) => {
   const parser = getParser(c);
-  const raw = await c.req.json().catch(() => ({}));
-  const parsed = parseBody(SweepStaleClaimsSchema, raw);
-  if (!parsed.success) return errorResponse(parsed.error, 400);
-  const body = parsed.data;
+  const body = c.req.valid("json");
   const ttl = (body.ttl_minutes ?? 30) * 60 * 1000;
   const now = Date.now();
   const tasks = await parser.readTasks();
@@ -277,16 +625,12 @@ tasksRouter.post("/sweep-stale-claims", async (c) => {
       console.error("[tasks] background cache sync failed:", e)
     );
   }
-  return jsonResponse({ released, count: released.length });
+  return c.json({ released, count: released.length }, 200);
 });
 
-// POST /tasks/batch - batch update multiple tasks
-tasksRouter.post("/batch", async (c) => {
+tasksRouter.openapi(batchUpdateRoute, async (c) => {
   const parser = getParser(c);
-  const raw = await c.req.json();
-  const parsed = parseBody(BatchUpdateSchema, raw);
-  if (!parsed.success) return errorResponse(parsed.error, 400);
-  const updates = parsed.data.updates;
+  const { updates } = c.req.valid("json");
 
   const results: { id: string; success: boolean; error?: string }[] = [];
 
@@ -296,21 +640,15 @@ tasksRouter.post("/batch", async (c) => {
       continue;
     }
 
-    // Read current task for revision/claim checks
     const needsCurrentTask = entry.expected_revision !== undefined ||
       entry.agent_id;
     const current = needsCurrentTask ? await parser.readTask(entry.id) : null;
 
     if (needsCurrentTask && !current) {
-      results.push({
-        id: entry.id,
-        success: false,
-        error: "Task not found",
-      });
+      results.push({ id: entry.id, success: false, error: "Task not found" });
       continue;
     }
 
-    // Optimistic locking
     if (
       entry.expected_revision !== undefined && current &&
       current.revision !== entry.expected_revision
@@ -324,7 +662,6 @@ tasksRouter.post("/batch", async (c) => {
       continue;
     }
 
-    // Claim guard
     if (
       entry.agent_id && current &&
       current.section === "In Progress" &&
@@ -352,22 +689,16 @@ tasksRouter.post("/batch", async (c) => {
 
     const success = await parser.updateTask(entry.id, taskUpdates);
     if (!success) {
-      results.push({
-        id: entry.id,
-        success: false,
-        error: "Task not found",
-      });
+      results.push({ id: entry.id, success: false, error: "Task not found" });
       continue;
     }
 
-    // Auto-create milestone if referenced
     if (taskUpdates.config?.milestone) {
       await ensureMilestoneExists(parser, taskUpdates.config.milestone).catch(
         () => {},
       );
     }
 
-    // Optional inline comment
     if (entry.comment) {
       await parser.addComment(
         entry.id,
@@ -389,48 +720,41 @@ tasksRouter.post("/batch", async (c) => {
       console.error("[lastUpdated] touch failed:", e)
     );
   }
-  return jsonResponse({ updated, total: updates.length, results });
+  return c.json({ updated, total: updates.length, results }, 200);
 });
 
-// PUT /tasks/:id - update task
-tasksRouter.put("/:id", async (c) => {
+tasksRouter.openapi(updateTaskRoute, async (c) => {
   const parser = getParser(c);
-  const taskId = c.req.param("id");
-  const raw = await c.req.json();
-  const parsed = parseBody(UpdateTaskSchema, raw);
-  if (!parsed.success) return errorResponse(parsed.error, 400);
-  const body = parsed.data;
+  const { id: taskId } = c.req.valid("param");
+  const body = c.req.valid("json");
 
-  // Read current task for revision/claim checks (only if needed)
   const needsCurrentTask = body.expected_revision !== undefined ||
     body.agent_id;
   const current = needsCurrentTask ? await parser.readTask(taskId) : null;
   if (needsCurrentTask && !current) {
-    return errorResponse("Task not found", 404);
+    return c.json({ error: "Task not found" }, 404);
   }
 
-  // Optimistic locking: reject stale updates
   if (
     body.expected_revision !== undefined && current &&
     current.revision !== body.expected_revision
   ) {
-    return errorResponse(
-      `REVISION_CONFLICT: expected revision ${body.expected_revision} but task is at revision ${current.revision}`,
-      409,
-    );
+    return c.json({
+      error:
+        `REVISION_CONFLICT: expected revision ${body.expected_revision} but task is at revision ${current.revision}`,
+    }, 409);
   }
 
-  // Claim guard: reject updates from non-owner agents on claimed tasks
   if (
     body.agent_id && current &&
     current.section === "In Progress" &&
     current.config.claimedBy &&
     current.config.claimedBy !== body.agent_id
   ) {
-    return errorResponse(
-      `CLAIM_GUARD: task claimed by '${current.config.claimedBy}', caller is '${body.agent_id}'`,
-      409,
-    );
+    return c.json({
+      error:
+        `CLAIM_GUARD: task claimed by '${current.config.claimedBy}', caller is '${body.agent_id}'`,
+    }, 409);
   }
 
   const updates: Partial<Task> = {
@@ -454,15 +778,14 @@ tasksRouter.put("/:id", async (c) => {
         ? [ensureMilestoneExists(parser, updates.config.milestone)]
         : []),
     ]);
-    return jsonResponse({ success: true });
+    return c.json({ success: true }, 200);
   }
-  return errorResponse("Task not found", 404);
+  return c.json({ error: "Task not found" }, 404);
 });
 
-// DELETE /tasks/:id - delete task
-tasksRouter.delete("/:id", async (c) => {
+tasksRouter.openapi(deleteTaskRoute, async (c) => {
   const parser = getParser(c);
-  const taskId = c.req.param("id");
+  const { id: taskId } = c.req.valid("param");
   const success = await parser.deleteTask(taskId);
 
   if (success) {
@@ -470,163 +793,124 @@ tasksRouter.delete("/:id", async (c) => {
     parser.touchLastUpdated().catch((e) =>
       console.error("[lastUpdated] touch failed:", e)
     );
-    return jsonResponse({ success: true });
+    return c.json({ success: true }, 200);
   }
-  return errorResponse("Task not found", 404);
+  return c.json({ error: "Task not found" }, 404);
 });
 
-// PATCH /tasks/:id/attachments - add file paths to task attachments frontmatter
-tasksRouter.patch("/:id/attachments", async (c) => {
+tasksRouter.openapi(addAttachmentsRoute, async (c) => {
   const parser = getParser(c);
-  const taskId = c.req.param("id");
-  const raw = await c.req.json();
-  const parsed = parseBody(TaskAttachmentsSchema, raw);
-  if (!parsed.success) return errorResponse(parsed.error, 400);
-  const paths = parsed.data.paths;
+  const { id: taskId } = c.req.valid("param");
+  const { paths } = c.req.valid("json");
   const success = await parser.addAttachmentsToTask(taskId, paths);
   if (success) {
     await cacheWriteThrough(c, "tasks");
-    return jsonResponse({ success: true });
+    return c.json({ success: true }, 200);
   }
-  return errorResponse("Task not found", 404);
+  return c.json({ error: "Task not found" }, 404);
 });
 
-// PATCH /tasks/:id/move - move task to section with optional position
-tasksRouter.patch("/:id/move", async (c) => {
+tasksRouter.openapi(moveTaskRoute, async (c) => {
   const parser = getParser(c);
-  const taskId = c.req.param("id");
-  const raw = await c.req.json();
-  const parsed = parseBody(TaskMoveSchema, raw);
-  if (!parsed.success) return errorResponse(parsed.error, 400);
-  const { section, position } = parsed.data;
+  const { id: taskId } = c.req.valid("param");
+  const { section, position } = c.req.valid("json");
 
-  // If position is provided, use reorder; otherwise just move section
   if (position !== undefined && position !== null) {
     const success = await parser.reorderTask(taskId, section, position);
     if (success) {
       await cacheWriteThrough(c, "tasks");
-      return jsonResponse({ success: true });
+      return c.json({ success: true }, 200);
     }
   } else {
     const success = await parser.updateTask(taskId, { section });
     if (success) {
       await cacheWriteThrough(c, "tasks");
-      return jsonResponse({ success: true });
+      return c.json({ success: true }, 200);
     }
   }
-  return errorResponse("Task not found", 404);
+  return c.json({ error: "Task not found" }, 404);
 });
 
-// POST /tasks/:id/comments - add a comment to a task
-tasksRouter.post("/:id/comments", async (c) => {
+tasksRouter.openapi(addCommentRoute, async (c) => {
   const parser = getParser(c);
-  const taskId = c.req.param("id");
-  const raw = await c.req.json();
-  const parsed = parseBody(TaskCommentSchema, raw);
-  if (!parsed.success) return errorResponse(parsed.error, 400);
-  const commentBody = parsed.data.body;
-  const author = parsed.data.author;
-  const metadata = parsed.data.metadata as
-    | Record<string, unknown>
-    | undefined;
+  const { id: taskId } = c.req.valid("param");
+  const { body: commentBody, author, metadata } = c.req.valid("json");
   const comment = await parser.addComment(
     taskId,
     commentBody,
     author,
-    metadata,
+    metadata as Record<string, unknown> | undefined,
   );
   if (!comment) {
-    return errorResponse("Task not found", 404);
+    return c.json({ error: "Task not found" }, 404);
   }
-
   cacheWriteThrough(c, "tasks").catch((e) =>
     console.error("[tasks] background cache sync failed:", e)
   );
-  return jsonResponse(comment, 201);
+  return c.json(comment, 201);
 });
 
-// DELETE /tasks/:id/comments/:commentId - delete a comment from a task
-tasksRouter.delete("/:id/comments/:commentId", async (c) => {
+tasksRouter.openapi(deleteCommentRoute, async (c) => {
   const parser = getParser(c);
-  const taskId = c.req.param("id");
-  const commentId = c.req.param("commentId");
-
+  const { id: taskId, commentId } = c.req.valid("param");
   const success = await parser.deleteComment(taskId, commentId);
   if (!success) {
-    return errorResponse("Task or comment not found", 404);
+    return c.json({ error: "Task or comment not found" }, 404);
   }
-
   cacheWriteThrough(c, "tasks").catch((e) =>
     console.error("[tasks] background cache sync failed:", e)
   );
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });
 
-// PUT /tasks/:id/comments/:commentId - update a comment body
-tasksRouter.put("/:id/comments/:commentId", async (c) => {
+tasksRouter.openapi(updateCommentRoute, async (c) => {
   const parser = getParser(c);
-  const taskId = c.req.param("id");
-  const commentId = c.req.param("commentId");
-  const raw = await c.req.json();
-  const parsed = parseBody(TaskCommentUpdateSchema, raw);
-  if (!parsed.success) return errorResponse(parsed.error, 400);
-  const commentBody = parsed.data.body;
-  const metadata = parsed.data.metadata as
-    | Record<string, unknown>
-    | undefined;
+  const { id: taskId, commentId } = c.req.valid("param");
+  const { body: commentBody, metadata } = c.req.valid("json");
   const comment = await parser.updateComment(
     taskId,
     commentId,
     commentBody,
-    metadata,
+    metadata as Record<string, unknown> | undefined,
   );
   if (!comment) {
-    return errorResponse("Task or comment not found", 404);
+    return c.json({ error: "Task or comment not found" }, 404);
   }
-
   cacheWriteThrough(c, "tasks").catch((e) =>
     console.error("[tasks] background cache sync failed:", e)
   );
-  return jsonResponse(comment);
+  return c.json(comment, 200);
 });
 
-// POST /tasks/:id/claim - atomically claim a task
-tasksRouter.post("/:id/claim", async (c) => {
+tasksRouter.openapi(claimTaskRoute, async (c) => {
   const parser = getParser(c);
-  const taskId = c.req.param("id");
-  const raw = await c.req.json();
-  const parsed = parseBody(TaskClaimSchema, raw);
-  if (!parsed.success) return errorResponse(parsed.error, 400);
-  const assignee = parsed.data.assignee;
-  const expectedSection = parsed.data.expected_section;
-  const expectedRevision = parsed.data.expected_revision;
+  const { id: taskId } = c.req.valid("param");
+  const { assignee, expected_section, expected_revision } = c.req.valid("json");
 
-  // Optimistic locking: reject stale claims
-  if (expectedRevision !== undefined) {
+  if (expected_revision !== undefined) {
     const current = await parser.readTask(taskId);
-    if (!current) return errorResponse("Task not found", 404);
-    if (current.revision !== expectedRevision) {
-      return errorResponse(
-        `REVISION_CONFLICT: expected revision ${expectedRevision} but task is at revision ${current.revision}`,
-        409,
-      );
+    if (!current) return c.json({ error: "Task not found" }, 404);
+    if (current.revision !== expected_revision) {
+      return c.json({
+        error:
+          `REVISION_CONFLICT: expected revision ${expected_revision} but task is at revision ${current.revision}`,
+      }, 409);
     }
   }
 
   try {
-    const task = await parser.claimTask(taskId, assignee, expectedSection);
+    const task = await parser.claimTask(taskId, assignee, expected_section);
     if (!task) {
-      return errorResponse("Task not found", 404);
+      return c.json({ error: "Task not found" }, 404);
     }
     await cacheWriteThrough(c, "tasks");
-    return jsonResponse(task);
+    return c.json(task, 200);
   } catch (e) {
     if (e instanceof Error && e.message.startsWith("CLAIM_CONFLICT")) {
-      return errorResponse(e.message, 409);
+      return c.json({ error: e.message }, 409);
     }
     throw e;
   }
 });
 
-// Export for use in billing routes
 export { findTaskById };

@@ -2,42 +2,135 @@
  * Project info, config, and sections routes.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
   cacheWriteThrough,
-  errorResponse,
   getParser,
-  jsonResponse,
 } from "./context.ts";
 
-export const projectRouter = new Hono<{ Variables: AppVariables }>();
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+
+const SuccessSchema = z.object({ success: z.boolean() });
+
+export const projectRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
 // GET /project - get project info
-projectRouter.get("/", async (c) => {
+const getProjectInfoRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["Projects"],
+  summary: "Get project info (name, description)",
+  operationId: "getProjectInfo",
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            name: z.string(),
+            description: z.array(z.string()).optional(),
+          }),
+        },
+      },
+      description: "Project info",
+    },
+  },
+});
+
+projectRouter.openapi(getProjectInfoRoute, async (c) => {
   const parser = getParser(c);
   const projectInfo = await parser.readProjectInfo();
-  return jsonResponse(projectInfo);
+  return c.json(projectInfo, 200);
 });
 
 // GET /project/config - get project config
-projectRouter.get("/config", async (c) => {
+const getProjectConfigRoute = createRoute({
+  method: "get",
+  path: "/config",
+  tags: ["Projects"],
+  summary: "Get project configuration",
+  operationId: "getProjectConfig",
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.any().openapi({ description: "Project configuration object" }),
+        },
+      },
+      description: "Project configuration object",
+    },
+  },
+});
+
+projectRouter.openapi(getProjectConfigRoute, async (c) => {
   const parser = getParser(c);
   const config = await parser.readProjectConfig();
-  return jsonResponse(config);
+  return c.json(config, 200);
 });
 
 // GET /project/sections - get board sections
-projectRouter.get("/sections", async (c) => {
+const getProjectSectionsRoute = createRoute({
+  method: "get",
+  path: "/sections",
+  tags: ["Projects"],
+  summary: "Get board sections",
+  operationId: "getProjectSections",
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.array(z.string()),
+        },
+      },
+      description: "List of board section names",
+    },
+  },
+});
+
+projectRouter.openapi(getProjectSectionsRoute, async (c) => {
   const parser = getParser(c);
   const sections = await parser.getSectionsFromBoard();
-  return jsonResponse(sections);
+  return c.json(sections, 200);
 });
 
 // PUT /project/info - update project name and/or description
-projectRouter.put("/info", async (c) => {
+const updateProjectInfoRoute = createRoute({
+  method: "put",
+  path: "/info",
+  tags: ["Projects"],
+  summary: "Update project name and/or description",
+  operationId: "updateProjectInfo",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            name: z.string().optional(),
+            description: z.array(z.string()).optional(),
+          }),
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Project info updated",
+    },
+    500: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Failed to save project info",
+    },
+  },
+});
+
+projectRouter.openapi(updateProjectInfoRoute, async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
+  const body = c.req.valid("json");
   try {
     if (typeof body.name === "string" && body.name.trim()) {
       await parser.saveProjectName(body.name.trim());
@@ -45,17 +138,45 @@ projectRouter.put("/info", async (c) => {
     if (Array.isArray(body.description)) {
       await parser.saveProjectDescription(body.description);
     }
-    return jsonResponse({ success: true });
+    return c.json({ success: true }, 200);
   } catch (error) {
     console.error("Failed to save project info:", error);
-    return errorResponse("Failed to save project info", 500);
+    return c.json({ error: "Failed to save project info" }, 500);
   }
 });
 
 // POST /project/config - save project config
-projectRouter.post("/config", async (c) => {
+const saveProjectConfigRoute = createRoute({
+  method: "post",
+  path: "/config",
+  tags: ["Projects"],
+  summary: "Save project configuration",
+  operationId: "saveProjectConfig",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.record(z.string(), z.unknown()),
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Config saved",
+    },
+    500: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Failed to save config",
+    },
+  },
+});
+
+projectRouter.openapi(saveProjectConfigRoute, async (c) => {
   const parser = getParser(c);
-  const config = await c.req.json();
+  const config = c.req.valid("json");
   try {
     // Strip null/malformed link entries before saving
     if (Array.isArray(config.links)) {
@@ -67,19 +188,45 @@ projectRouter.post("/config", async (c) => {
       );
     }
     await parser.saveProjectConfig(config);
-    return jsonResponse({ success: true });
+    return c.json({ success: true }, 200);
   } catch (error) {
     console.error("Failed to save config:", error);
-    return errorResponse("Failed to save config", 500);
+    return c.json({ error: "Failed to save config" }, 500);
   }
 });
 
 // POST /project/rewrite - rewrite tasks with sections
-projectRouter.post("/rewrite", async (c) => {
+const rewriteTasksRoute = createRoute({
+  method: "post",
+  path: "/rewrite",
+  tags: ["Projects"],
+  summary: "Rewrite tasks with updated section ordering",
+  operationId: "rewriteProjectTasks",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            sections: z.array(z.string()),
+          }),
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Tasks rewritten with new sections",
+    },
+  },
+});
+
+projectRouter.openapi(rewriteTasksRoute, async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
+  const body = c.req.valid("json");
   const tasks = await parser.readTasks();
   await parser.writeTasks(tasks, body.sections);
   await cacheWriteThrough(c, "tasks");
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });
