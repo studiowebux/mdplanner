@@ -3,29 +3,118 @@
  * Pattern: Feature Router with CRUD operations.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
-  errorResponse,
   getParser,
-  jsonResponse,
 } from "../context.ts";
 
-export const kpisRouter = new Hono<{ Variables: AppVariables }>();
+export const kpisRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-// GET /kpis - list all KPI snapshots
-kpisRouter.get("/", async (c) => {
-  const parser = getParser(c);
-  const snapshots = await parser.readKpiSnapshots();
-  return jsonResponse(snapshots);
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+const idParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+});
+const SuccessSchema = z.object({ success: z.boolean() });
+
+const listKpisRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["KPIs"],
+  summary: "List all KPI snapshots",
+  operationId: "listKpis",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "List of KPI snapshots",
+    },
+  },
 });
 
-// POST /kpis - create snapshot
-kpisRouter.post("/", async (c) => {
+const createKpiRoute = createRoute({
+  method: "post",
+  path: "/",
+  tags: ["KPIs"],
+  summary: "Create KPI snapshot",
+  operationId: "createKpi",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: { "application/json": { schema: z.any() } },
+      description: "KPI snapshot created",
+    },
+  },
+});
+
+const updateKpiRoute = createRoute({
+  method: "put",
+  path: "/{id}",
+  tags: ["KPIs"],
+  summary: "Update KPI snapshot",
+  operationId: "updateKpi",
+  request: {
+    params: idParam,
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "KPI snapshot updated",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const deleteKpiRoute = createRoute({
+  method: "delete",
+  path: "/{id}",
+  tags: ["KPIs"],
+  summary: "Delete KPI snapshot",
+  operationId: "deleteKpi",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "KPI snapshot deleted",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+// --- Handlers ---
+
+kpisRouter.openapi(listKpisRoute, async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
+  const snapshots = await parser.readKpiSnapshots();
+  return c.json(snapshots, 200);
+});
+
+kpisRouter.openapi(createKpiRoute, async (c) => {
+  const parser = getParser(c);
+  const body = c.req.valid("json");
   const mrr = Number(body.mrr) || 0;
   const snapshot = await parser.addKpiSnapshot({
     period: body.period || "",
@@ -41,26 +130,24 @@ kpisRouter.post("/", async (c) => {
     notes: body.notes || "",
   });
   await cacheWriteThrough(c, "kpi_snapshots");
-  return jsonResponse(snapshot, 201);
+  return c.json(snapshot, 201);
 });
 
-// PUT /kpis/:id - update snapshot
-kpisRouter.put("/:id", async (c) => {
+kpisRouter.openapi(updateKpiRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-  const body = await c.req.json();
+  const { id } = c.req.valid("param");
+  const body = c.req.valid("json");
   const updated = await parser.updateKpiSnapshot(id, body);
-  if (!updated) return errorResponse("Not found", 404);
+  if (!updated) return c.json({ error: "Not found" }, 404);
   await cacheWriteThrough(c, "kpi_snapshots");
-  return jsonResponse(updated);
+  return c.json(updated, 200);
 });
 
-// DELETE /kpis/:id - delete snapshot
-kpisRouter.delete("/:id", async (c) => {
+kpisRouter.openapi(deleteKpiRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const { id } = c.req.valid("param");
   const success = await parser.deleteKpiSnapshot(id);
-  if (!success) return errorResponse("Not found", 404);
+  if (!success) return c.json({ error: "Not found" }, 404);
   cachePurge(c, "kpi_snapshots", id);
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });

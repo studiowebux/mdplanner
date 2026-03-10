@@ -4,9 +4,8 @@
  * Bypasses DirectoryMarkdownParser — reads/writes filesystem directly.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import type { AppVariables } from "../context.ts";
-import { errorResponse, jsonResponse } from "../context.ts";
 import {
   RegisterBrainSchema,
   SetupRequestSchema,
@@ -21,13 +20,19 @@ import { rebuildRules, scaffoldBrain } from "../../../lib/brains/setup.ts";
 import { pathToSlug } from "../../../lib/brains/registry.ts";
 import { join } from "@std/path";
 
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+const SuccessSchema = z.object({ success: z.boolean() });
+
 /** Extended variables for brain routes. */
 interface BrainVariables extends AppVariables {
   brainRegistry: BrainRegistry;
   claudeDir: string;
 }
 
-export const brainsRouter = new Hono<{ Variables: BrainVariables }>();
+export const brainsRouter = new OpenAPIHono<{ Variables: BrainVariables }>();
 
 // --- Helper to extract registry from context ---
 
@@ -41,159 +46,622 @@ function getClaudeDir(c: { get: (key: "claudeDir") => string }): string {
   return c.get("claudeDir");
 }
 
+// --- Param schemas ---
+
+const nameParam = z.object({
+  name: z.string().openapi({ param: { name: "name", in: "path" } }),
+});
+
+const nameAndIdParam = z.object({
+  name: z.string().openapi({ param: { name: "name", in: "path" } }),
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+});
+
+// --- Route definitions ---
+
+const listBrainsRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["Brains"],
+  summary: "List all brains",
+  operationId: "listBrains",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "List of brains with info",
+    },
+  },
+});
+
+const registerBrainRoute = createRoute({
+  method: "post",
+  path: "/",
+  tags: ["Brains"],
+  summary: "Register a new brain",
+  operationId: "registerBrain",
+  request: {
+    body: {
+      content: { "application/json": { schema: z.any() } },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Registered brain",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid input",
+    },
+    409: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Conflict",
+    },
+  },
+});
+
+const deleteBrainRoute = createRoute({
+  method: "delete",
+  path: "/{name}",
+  tags: ["Brains"],
+  summary: "Delete a brain",
+  operationId: "deleteBrain",
+  request: { params: nameParam },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({ deleted: z.string() }),
+        },
+      },
+      description: "Brain deleted",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const updateBrainRoute = createRoute({
+  method: "patch",
+  path: "/{name}",
+  tags: ["Brains"],
+  summary: "Update a brain",
+  operationId: "updateBrain",
+  request: {
+    params: nameParam,
+    body: {
+      content: { "application/json": { schema: z.any() } },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Updated brain",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid input",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const listFilesRoute = createRoute({
+  method: "get",
+  path: "/{name}/files",
+  tags: ["Brains"],
+  summary: "List files in a brain directory",
+  operationId: "listBrainFiles",
+  request: {
+    params: nameParam,
+    query: z.object({
+      path: z.string().optional().openapi({
+        description: "Relative path within brain",
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "File listing",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Bad request",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Brain not found",
+    },
+  },
+});
+
+const readFileRoute = createRoute({
+  method: "get",
+  path: "/{name}/file",
+  tags: ["Brains"],
+  summary: "Read a file from a brain",
+  operationId: "readBrainFile",
+  request: {
+    params: nameParam,
+    query: z.object({
+      path: z.string().optional().openapi({
+        description: "Relative path to file",
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      description: "File content as plain text",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Bad request",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const listSessionsRoute = createRoute({
+  method: "get",
+  path: "/{name}/sessions",
+  tags: ["Brains"],
+  summary: "List sessions for a brain",
+  operationId: "listBrainSessions",
+  request: { params: nameParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "Session listing",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Brain not found",
+    },
+  },
+});
+
+const getSessionRoute = createRoute({
+  method: "get",
+  path: "/{name}/sessions/{id}",
+  tags: ["Brains"],
+  summary: "Get a session by ID",
+  operationId: "getBrainSession",
+  request: { params: nameAndIdParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Session detail",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+    500: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Server error",
+    },
+  },
+});
+
+const getMemoryRoute = createRoute({
+  method: "get",
+  path: "/{name}/memory",
+  tags: ["Brains"],
+  summary: "Get memory file for a brain",
+  operationId: "getBrainMemory",
+  request: { params: nameParam },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({ content: z.string(), exists: z.boolean() }),
+        },
+      },
+      description: "Memory content",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Brain not found",
+    },
+    500: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Server error",
+    },
+  },
+});
+
+const updateMemoryRoute = createRoute({
+  method: "put",
+  path: "/{name}/memory",
+  tags: ["Brains"],
+  summary: "Update memory file for a brain",
+  operationId: "updateBrainMemory",
+  request: {
+    params: nameParam,
+    body: {
+      content: { "application/json": { schema: z.any() } },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({ saved: z.string() }),
+        },
+      },
+      description: "Memory saved",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid input",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Brain not found",
+    },
+    500: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Server error",
+    },
+  },
+});
+
+const setupBrainRoute = createRoute({
+  method: "post",
+  path: "/{name}/setup",
+  tags: ["Brains"],
+  summary: "Scaffold a brain",
+  operationId: "setupBrain",
+  request: {
+    params: nameParam,
+    body: {
+      content: { "application/json": { schema: z.any() } },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Brain scaffolded",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid input",
+    },
+    409: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Already exists",
+    },
+    500: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Server error",
+    },
+  },
+});
+
+const rebuildRulesRoute = createRoute({
+  method: "post",
+  path: "/{name}/rebuild-rules",
+  tags: ["Brains"],
+  summary: "Rebuild rules for a brain",
+  operationId: "rebuildBrainRules",
+  request: { params: nameParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Rules rebuilt",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Brain not found",
+    },
+    500: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Protocol rules not found",
+    },
+  },
+});
+
+const listStacksRoute = createRoute({
+  method: "get",
+  path: "/stacks",
+  tags: ["Brains"],
+  summary: "List available stack rule names",
+  operationId: "listBrainStacks",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.string()) } },
+      description: "Stack rule names",
+    },
+  },
+});
+
+const listPracticesRoute = createRoute({
+  method: "get",
+  path: "/practices",
+  tags: ["Brains"],
+  summary: "List available practice rule names",
+  operationId: "listBrainPractices",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.string()) } },
+      description: "Practice rule names",
+    },
+  },
+});
+
+const listWorkflowsRoute = createRoute({
+  method: "get",
+  path: "/workflows",
+  tags: ["Brains"],
+  summary: "List available workflow rule names",
+  operationId: "listBrainWorkflows",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.string()) } },
+      description: "Workflow rule names",
+    },
+  },
+});
+
+const syncDiffRoute = createRoute({
+  method: "get",
+  path: "/sync/diff",
+  tags: ["Brains"],
+  summary: "Compute diff between two brains",
+  operationId: "getBrainSyncDiff",
+  request: {
+    query: z.object({
+      from: z.string().optional().openapi({
+        description: "Source brain name",
+      }),
+      to: z.string().optional().openapi({
+        description: "Target brain name",
+      }),
+      dirs: z.string().optional().openapi({
+        description: "Comma-separated directories to compare",
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "Diff entries",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Missing parameters",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Brain not found",
+    },
+  },
+});
+
+const syncApplyRoute = createRoute({
+  method: "post",
+  path: "/sync/apply",
+  tags: ["Brains"],
+  summary: "Apply sync changes between brains",
+  operationId: "applyBrainSync",
+  request: {
+    body: {
+      content: { "application/json": { schema: z.any() } },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Sync result",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid input",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Brain not found",
+    },
+  },
+});
+
+const listDirsRoute = createRoute({
+  method: "get",
+  path: "/dirs",
+  tags: ["Brains"],
+  summary: "List directories for directory picker",
+  operationId: "listBrainDirs",
+  request: {
+    query: z.object({
+      parent: z.string().optional().openapi({
+        description: "Parent directory path",
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "Directory listing",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Missing parent",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Cannot read directory",
+    },
+  },
+});
+
+// --- Handlers ---
+
 // --- Brain CRUD ---
 
-brainsRouter.get("/", async (c) => {
+brainsRouter.openapi(listBrainsRoute, async (c) => {
   const reg = getRegistry(c);
   const claudeDir = getClaudeDir(c);
   const brains = await reg.listWithInfo(claudeDir);
-  return jsonResponse(brains);
+  return c.json(brains, 200);
 });
 
-brainsRouter.post("/", async (c) => {
+brainsRouter.openapi(registerBrainRoute, async (c) => {
   const reg = getRegistry(c);
-  const body = await c.req.json();
+  const body = await c.req.valid("json");
   const parsed = RegisterBrainSchema.safeParse(body);
   if (!parsed.success) {
-    return errorResponse("Invalid input: " + parsed.error.message, 400);
+    return c.json({ error: "Invalid input: " + parsed.error.message }, 400);
   }
   try {
     await reg.register(parsed.data);
-    return jsonResponse(parsed.data, 201);
+    return c.json(parsed.data, 201);
   } catch (e) {
-    return errorResponse(e instanceof Error ? e.message : String(e), 409);
+    return c.json({ error: e instanceof Error ? e.message : String(e) }, 409);
   }
 });
 
-brainsRouter.delete("/:name", async (c) => {
+brainsRouter.openapi(deleteBrainRoute, async (c) => {
   const reg = getRegistry(c);
-  const name = c.req.param("name");
+  const { name } = c.req.valid("param");
   try {
     await reg.remove(name);
-    return jsonResponse({ deleted: name });
+    return c.json({ deleted: name }, 200);
   } catch (e) {
-    return errorResponse(e instanceof Error ? e.message : String(e), 404);
+    return c.json({ error: e instanceof Error ? e.message : String(e) }, 404);
   }
 });
 
-brainsRouter.patch("/:name", async (c) => {
+brainsRouter.openapi(updateBrainRoute, async (c) => {
   const reg = getRegistry(c);
-  const name = c.req.param("name");
-  const body = await c.req.json();
+  const { name } = c.req.valid("param");
+  const body = await c.req.valid("json");
   const parsed = UpdateBrainSchema.safeParse(body);
   if (!parsed.success) {
-    return errorResponse("Invalid input: " + parsed.error.message, 400);
+    return c.json({ error: "Invalid input: " + parsed.error.message }, 400);
   }
   try {
     const updated = await reg.update(name, parsed.data);
-    return jsonResponse(updated);
+    return c.json(updated, 200);
   } catch (e) {
-    return errorResponse(e instanceof Error ? e.message : String(e), 404);
+    return c.json({ error: e instanceof Error ? e.message : String(e) }, 404);
   }
 });
 
 // --- File browser ---
 
-brainsRouter.get("/:name/files", async (c) => {
+brainsRouter.openapi(listFilesRoute, async (c) => {
   const reg = getRegistry(c);
-  const name = c.req.param("name");
+  const { name } = c.req.valid("param");
   const brain = reg.get(name);
-  if (!brain) return errorResponse("brain not found", 404);
+  if (!brain) return c.json({ error: "brain not found" }, 404);
 
-  const rel = c.req.query("path") ?? "";
+  const { path: rel } = c.req.valid("query");
   try {
-    const files = await listFiles(brain.path, rel);
-    return jsonResponse(files);
+    const files = await listFiles(brain.path, rel ?? "");
+    return c.json(files, 200);
   } catch (e) {
-    return errorResponse(e instanceof Error ? e.message : String(e), 400);
+    return c.json({ error: e instanceof Error ? e.message : String(e) }, 400);
   }
 });
 
-brainsRouter.get("/:name/file", async (c) => {
+brainsRouter.openapi(readFileRoute, async (c) => {
   const reg = getRegistry(c);
-  const name = c.req.param("name");
+  const { name } = c.req.valid("param");
   const brain = reg.get(name);
-  if (!brain) return errorResponse("brain not found", 404);
+  if (!brain) return c.json({ error: "brain not found" }, 404);
 
-  const rel = c.req.query("path") ?? "";
+  const { path: rel } = c.req.valid("query");
   try {
-    const content = await readFile(brain.path, rel);
+    const content = await readFile(brain.path, rel ?? "");
     return new Response(content, {
       headers: { "Content-Type": "text/plain; charset=utf-8" },
     });
   } catch (e) {
     if (e instanceof Deno.errors.NotFound) {
-      return errorResponse("file not found", 404);
+      return c.json({ error: "file not found" }, 404);
     }
-    return errorResponse(e instanceof Error ? e.message : String(e), 400);
+    return c.json({ error: e instanceof Error ? e.message : String(e) }, 400);
   }
 });
 
 // --- Sessions ---
 
-brainsRouter.get("/:name/sessions", async (c) => {
+brainsRouter.openapi(listSessionsRoute, async (c) => {
   const reg = getRegistry(c);
   const claudeDir = getClaudeDir(c);
-  const name = c.req.param("name");
+  const { name } = c.req.valid("param");
   const brain = reg.get(name);
-  if (!brain) return errorResponse("brain not found", 404);
+  if (!brain) return c.json({ error: "brain not found" }, 404);
 
   const sessions = await listSessions(claudeDir, brain.path);
-  return jsonResponse(sessions);
+  return c.json(sessions, 200);
 });
 
-brainsRouter.get("/:name/sessions/:id", async (c) => {
+brainsRouter.openapi(getSessionRoute, async (c) => {
   const reg = getRegistry(c);
   const claudeDir = getClaudeDir(c);
-  const name = c.req.param("name");
-  const id = c.req.param("id");
+  const { name, id } = c.req.valid("param");
   const brain = reg.get(name);
-  if (!brain) return errorResponse("brain not found", 404);
+  if (!brain) return c.json({ error: "brain not found" }, 404);
 
   try {
     const detail = await getSession(claudeDir, brain.path, id);
-    return jsonResponse(detail);
+    return c.json(detail, 200);
   } catch (e) {
     if (e instanceof Deno.errors.NotFound) {
-      return errorResponse("session not found", 404);
+      return c.json({ error: "session not found" }, 404);
     }
-    return errorResponse(e instanceof Error ? e.message : String(e), 500);
+    return c.json({ error: e instanceof Error ? e.message : String(e) }, 500);
   }
 });
 
 // --- Memory ---
 
-brainsRouter.get("/:name/memory", async (c) => {
+brainsRouter.openapi(getMemoryRoute, async (c) => {
   const reg = getRegistry(c);
   const claudeDir = getClaudeDir(c);
-  const name = c.req.param("name");
+  const { name } = c.req.valid("param");
   const brain = reg.get(name);
-  if (!brain) return errorResponse("brain not found", 404);
+  if (!brain) return c.json({ error: "brain not found" }, 404);
 
   const slug = pathToSlug(brain.path);
   const path = join(claudeDir, "projects", slug, "memory", "MEMORY.md");
 
   try {
     const content = await Deno.readTextFile(path);
-    return jsonResponse({ content, exists: true });
+    return c.json({ content, exists: true }, 200);
   } catch (e) {
     if (e instanceof Deno.errors.NotFound) {
-      return jsonResponse({ content: "", exists: false });
+      return c.json({ content: "", exists: false }, 200);
     }
-    return errorResponse("cannot read memory file", 500);
+    return c.json({ error: "cannot read memory file" }, 500);
   }
 });
 
-brainsRouter.put("/:name/memory", async (c) => {
+brainsRouter.openapi(updateMemoryRoute, async (c) => {
   const reg = getRegistry(c);
   const claudeDir = getClaudeDir(c);
-  const name = c.req.param("name");
+  const { name } = c.req.valid("param");
   const brain = reg.get(name);
-  if (!brain) return errorResponse("brain not found", 404);
+  if (!brain) return c.json({ error: "brain not found" }, 404);
 
-  const body = await c.req.json();
+  const body = await c.req.valid("json");
   if (typeof body.content !== "string") {
-    return errorResponse("content is required", 400);
+    return c.json({ error: "content is required" }, 400);
   }
 
   const slug = pathToSlug(brain.path);
@@ -203,21 +671,21 @@ brainsRouter.put("/:name/memory", async (c) => {
   try {
     await Deno.mkdir(dir, { recursive: true });
     await Deno.writeTextFile(path, body.content);
-    return jsonResponse({ saved: path });
+    return c.json({ saved: path }, 200);
   } catch {
-    return errorResponse("cannot write memory file", 500);
+    return c.json({ error: "cannot write memory file" }, 500);
   }
 });
 
 // --- Setup ---
 
-brainsRouter.post("/:name/setup", async (c) => {
+brainsRouter.openapi(setupBrainRoute, async (c) => {
   const reg = getRegistry(c);
-  const name = c.req.param("name");
-  const body = await c.req.json();
+  const { name } = c.req.valid("param");
+  const body = await c.req.valid("json");
   const parsed = SetupRequestSchema.safeParse(body);
   if (!parsed.success) {
-    return errorResponse("Invalid input: " + parsed.error.message, 400);
+    return c.json({ error: "Invalid input: " + parsed.error.message }, 400);
   }
 
   try {
@@ -225,7 +693,7 @@ brainsRouter.post("/:name/setup", async (c) => {
       name,
       ...parsed.data,
     });
-    return jsonResponse(
+    return c.json(
       { brainDir, message: "brain scaffolded successfully" },
       201,
     );
@@ -233,21 +701,21 @@ brainsRouter.post("/:name/setup", async (c) => {
     const status = e instanceof Error && e.message.includes("already exists")
       ? 409
       : 500;
-    return errorResponse(e instanceof Error ? e.message : String(e), status);
+    return c.json({ error: e instanceof Error ? e.message : String(e) }, status);
   }
 });
 
-brainsRouter.post("/:name/rebuild-rules", async (c) => {
+brainsRouter.openapi(rebuildRulesRoute, async (c) => {
   const reg = getRegistry(c);
-  const name = c.req.param("name");
+  const { name } = c.req.valid("param");
   const brain = reg.get(name);
-  if (!brain) return errorResponse("brain not found", 404);
+  if (!brain) return c.json({ error: "brain not found" }, 404);
 
   const protocolRules = reg.protocolRulesDir();
   try {
     await Deno.stat(protocolRules);
   } catch {
-    return errorResponse("protocol rules not found", 500);
+    return c.json({ error: "protocol rules not found" }, 500);
   }
 
   const result = await rebuildRules(
@@ -258,50 +726,48 @@ brainsRouter.post("/:name/rebuild-rules", async (c) => {
     brain.workflows,
   );
 
-  return jsonResponse({
+  return c.json({
     brain: name,
     ...result,
     stacks: brain.stacks,
     message: "rules rebuilt successfully",
-  });
+  }, 200);
 });
 
 // --- Rule names (available stacks/practices/workflows) ---
 
-brainsRouter.get("/stacks", async (c) => {
+brainsRouter.openapi(listStacksRoute, async (c) => {
   const reg = getRegistry(c);
   const names = await reg.listRuleNames("stack");
-  return jsonResponse(names);
+  return c.json(names, 200);
 });
 
-brainsRouter.get("/practices", async (c) => {
+brainsRouter.openapi(listPracticesRoute, async (c) => {
   const reg = getRegistry(c);
   const names = await reg.listRuleNames("practices");
-  return jsonResponse(names);
+  return c.json(names, 200);
 });
 
-brainsRouter.get("/workflows", async (c) => {
+brainsRouter.openapi(listWorkflowsRoute, async (c) => {
   const reg = getRegistry(c);
   const names = await reg.listRuleNames("workflow");
-  return jsonResponse(names);
+  return c.json(names, 200);
 });
 
 // --- Sync ---
 
-brainsRouter.get("/sync/diff", async (c) => {
+brainsRouter.openapi(syncDiffRoute, async (c) => {
   const reg = getRegistry(c);
-  const fromName = c.req.query("from") ?? "";
-  const toName = c.req.query("to") ?? "";
-  const dirsParam = c.req.query("dirs") ?? "";
+  const { from: fromName, to: toName, dirs: dirsParam } = c.req.valid("query");
 
   if (!fromName || !toName) {
-    return errorResponse("from and to are required", 400);
+    return c.json({ error: "from and to are required" }, 400);
   }
 
   const fromBrain = reg.get(fromName);
-  if (!fromBrain) return errorResponse("from brain not found", 404);
+  if (!fromBrain) return c.json({ error: "from brain not found" }, 404);
   const toBrain = reg.get(toName);
-  if (!toBrain) return errorResponse("to brain not found", 404);
+  if (!toBrain) return c.json({ error: "to brain not found" }, 404);
 
   const dirs = dirsParam ? dirsParam.split(",") : undefined;
   const entries = await computeDiff(fromBrain.path, toBrain.path, dirs, {
@@ -310,40 +776,40 @@ brainsRouter.get("/sync/diff", async (c) => {
     workflows: toBrain.workflows,
   });
 
-  return jsonResponse(entries);
+  return c.json(entries, 200);
 });
 
-brainsRouter.post("/sync/apply", async (c) => {
+brainsRouter.openapi(syncApplyRoute, async (c) => {
   const reg = getRegistry(c);
-  const body = await c.req.json();
+  const body = await c.req.valid("json");
   const parsed = SyncApplySchema.safeParse(body);
   if (!parsed.success) {
-    return errorResponse("Invalid input: " + parsed.error.message, 400);
+    return c.json({ error: "Invalid input: " + parsed.error.message }, 400);
   }
 
   const fromBrain = reg.get(parsed.data.from);
-  if (!fromBrain) return errorResponse("from brain not found", 404);
+  if (!fromBrain) return c.json({ error: "from brain not found" }, 404);
   const toBrain = reg.get(parsed.data.to);
-  if (!toBrain) return errorResponse("to brain not found", 404);
+  if (!toBrain) return c.json({ error: "to brain not found" }, 404);
 
   const result = await applySync(
     fromBrain.path,
     toBrain.path,
     parsed.data.files,
   );
-  return jsonResponse(result);
+  return c.json(result, 200);
 });
 
 // --- Directory picker ---
 
-brainsRouter.get("/dirs", async (c) => {
-  const parent = c.req.query("parent") ?? "";
-  if (!parent) return errorResponse("parent is required", 400);
+brainsRouter.openapi(listDirsRoute, async (c) => {
+  const { parent } = c.req.valid("query");
+  if (!parent) return c.json({ error: "parent is required" }, 400);
 
   try {
     const dirs = await listDirs(parent);
-    return jsonResponse(dirs);
+    return c.json(dirs, 200);
   } catch {
-    return errorResponse("cannot read directory", 404);
+    return c.json({ error: "cannot read directory" }, 404);
   }
 });

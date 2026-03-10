@@ -2,40 +2,155 @@
  * Journal CRUD routes.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
   checkConflict,
-  errorResponse,
   getParser,
-  jsonResponse,
 } from "../context.ts";
 
-export const journalRouter = new Hono<{ Variables: AppVariables }>();
+export const journalRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-// GET /journal - list all entries sorted by date desc
-journalRouter.get("/", async (c) => {
-  const parser = getParser(c);
-  const entries = await parser.readJournalEntries();
-  return jsonResponse(entries);
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+const idParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+});
+const SuccessSchema = z.object({ success: z.boolean() });
+
+const listJournalRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["Journal"],
+  summary: "List all journal entries",
+  operationId: "listJournalEntries",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "List of journal entries",
+    },
+  },
 });
 
-// GET /journal/:id - single entry
-journalRouter.get("/:id", async (c) => {
+const getJournalRoute = createRoute({
+  method: "get",
+  path: "/{id}",
+  tags: ["Journal"],
+  summary: "Get a single journal entry",
+  operationId: "getJournalEntry",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Journal entry",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const createJournalRoute = createRoute({
+  method: "post",
+  path: "/",
+  tags: ["Journal"],
+  summary: "Create journal entry",
+  operationId: "createJournalEntry",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: {
+        "application/json": {
+          schema: z.object({ success: z.boolean(), id: z.string() }),
+        },
+      },
+      description: "Journal entry created",
+    },
+  },
+});
+
+const updateJournalRoute = createRoute({
+  method: "put",
+  path: "/{id}",
+  tags: ["Journal"],
+  summary: "Update journal entry",
+  operationId: "updateJournalEntry",
+  request: {
+    params: idParam,
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Journal entry updated",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+    409: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Conflict — stale edit",
+    },
+  },
+});
+
+const deleteJournalRoute = createRoute({
+  method: "delete",
+  path: "/{id}",
+  tags: ["Journal"],
+  summary: "Delete journal entry",
+  operationId: "deleteJournalEntry",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Journal entry deleted",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+// --- Handlers ---
+
+journalRouter.openapi(listJournalRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const entries = await parser.readJournalEntries();
+  return c.json(entries, 200);
+});
+
+journalRouter.openapi(getJournalRoute, async (c) => {
+  const parser = getParser(c);
+  const { id } = c.req.valid("param");
   const entries = await parser.readJournalEntries();
   const entry = entries.find((e) => e.id === id);
-  if (!entry) return errorResponse("Not found", 404);
-  return jsonResponse(entry);
+  if (!entry) return c.json({ error: "Not found" }, 404);
+  return c.json(entry, 200);
 });
 
-// POST /journal - create entry
-journalRouter.post("/", async (c) => {
+journalRouter.openapi(createJournalRoute, async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
+  const body = c.req.valid("json");
   const entry = await parser.addJournalEntry({
     date: body.date || new Date().toISOString().split("T")[0],
     time: body.time,
@@ -45,18 +160,18 @@ journalRouter.post("/", async (c) => {
     body: body.body || "",
   });
   await cacheWriteThrough(c, "journal");
-  return jsonResponse({ success: true, id: entry.id }, 201);
+  return c.json({ success: true, id: entry.id }, 201);
 });
 
-// PUT /journal/:id - update entry
-journalRouter.put("/:id", async (c) => {
+journalRouter.openapi(updateJournalRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-  const body = await c.req.json();
+  const { id } = c.req.valid("param");
+  const body = c.req.valid("json");
 
   const existing = await parser.readJournalEntry(id);
   const conflict = checkConflict(existing?.updated, body.updatedAt);
-  if (conflict) return conflict;
+  // deno-lint-ignore no-explicit-any
+  if (conflict) return conflict as any;
 
   const updated = await parser.updateJournalEntry(id, {
     date: body.date,
@@ -66,17 +181,16 @@ journalRouter.put("/:id", async (c) => {
     tags: body.tags,
     body: body.body,
   });
-  if (!updated) return errorResponse("Not found", 404);
+  if (!updated) return c.json({ error: "Not found" }, 404);
   await cacheWriteThrough(c, "journal");
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });
 
-// DELETE /journal/:id - delete entry
-journalRouter.delete("/:id", async (c) => {
+journalRouter.openapi(deleteJournalRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const { id } = c.req.valid("param");
   const deleted = await parser.deleteJournalEntry(id);
-  if (!deleted) return errorResponse("Not found", 404);
+  if (!deleted) return c.json({ error: "Not found" }, 404);
   cachePurge(c, "journal", id);
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });

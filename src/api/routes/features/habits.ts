@@ -2,40 +2,204 @@
  * Habit tracker CRUD routes.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
   checkConflict,
-  errorResponse,
   getParser,
-  jsonResponse,
 } from "../context.ts";
 
-export const habitsRouter = new Hono<{ Variables: AppVariables }>();
+export const habitsRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-// GET /habits - list all habits
-habitsRouter.get("/", async (c) => {
-  const parser = getParser(c);
-  const habits = await parser.readHabits();
-  return jsonResponse(habits);
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+const idParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+});
+const idDateParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+  date: z.string().openapi({ param: { name: "date", in: "path" } }),
+});
+const SuccessSchema = z.object({ success: z.boolean() });
+
+const listHabitsRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["Habits"],
+  summary: "List all habits",
+  operationId: "listHabits",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "List of habits",
+    },
+  },
 });
 
-// GET /habits/:id - single habit
-habitsRouter.get("/:id", async (c) => {
+const getHabitRoute = createRoute({
+  method: "get",
+  path: "/{id}",
+  tags: ["Habits"],
+  summary: "Get a single habit",
+  operationId: "getHabit",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Habit",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const createHabitRoute = createRoute({
+  method: "post",
+  path: "/",
+  tags: ["Habits"],
+  summary: "Create habit",
+  operationId: "createHabit",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: {
+        "application/json": {
+          schema: z.object({ success: z.boolean(), id: z.string() }),
+        },
+      },
+      description: "Habit created",
+    },
+  },
+});
+
+const updateHabitRoute = createRoute({
+  method: "put",
+  path: "/{id}",
+  tags: ["Habits"],
+  summary: "Update habit metadata",
+  operationId: "updateHabit",
+  request: {
+    params: idParam,
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Habit updated",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+    409: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Conflict — stale edit",
+    },
+  },
+});
+
+const markHabitCompleteRoute = createRoute({
+  method: "post",
+  path: "/{id}/complete",
+  tags: ["Habits"],
+  summary: "Mark habit complete for today or a specific date",
+  operationId: "markHabitComplete",
+  request: {
+    params: idParam,
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Habit marked complete",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const unmarkHabitCompleteRoute = createRoute({
+  method: "delete",
+  path: "/{id}/complete/{date}",
+  tags: ["Habits"],
+  summary: "Unmark a specific date as complete",
+  operationId: "unmarkHabitComplete",
+  request: { params: idDateParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Habit completion unmarked",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const deleteHabitRoute = createRoute({
+  method: "delete",
+  path: "/{id}",
+  tags: ["Habits"],
+  summary: "Delete habit",
+  operationId: "deleteHabit",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Habit deleted",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+// --- Handlers ---
+
+habitsRouter.openapi(listHabitsRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const habits = await parser.readHabits();
+  return c.json(habits, 200);
+});
+
+habitsRouter.openapi(getHabitRoute, async (c) => {
+  const parser = getParser(c);
+  const { id } = c.req.valid("param");
   const habits = await parser.readHabits();
   const habit = habits.find((h) => h.id === id);
-  if (!habit) return errorResponse("Not found", 404);
-  return jsonResponse(habit);
+  if (!habit) return c.json({ error: "Not found" }, 404);
+  return c.json(habit, 200);
 });
 
-// POST /habits - create habit
-habitsRouter.post("/", async (c) => {
+habitsRouter.openapi(createHabitRoute, async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
+  const body = c.req.valid("json");
   const habit = await parser.addHabit({
     name: body.name || "",
     description: body.description,
@@ -45,18 +209,18 @@ habitsRouter.post("/", async (c) => {
     notes: body.notes,
   });
   await cacheWriteThrough(c, "habits");
-  return jsonResponse({ success: true, id: habit.id }, 201);
+  return c.json({ success: true, id: habit.id }, 201);
 });
 
-// PUT /habits/:id - update habit metadata
-habitsRouter.put("/:id", async (c) => {
+habitsRouter.openapi(updateHabitRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-  const body = await c.req.json();
+  const { id } = c.req.valid("param");
+  const body = c.req.valid("json");
 
   const existing = await parser.readHabit(id);
   const conflict = checkConflict(existing?.updated, body.updatedAt);
-  if (conflict) return conflict;
+  // deno-lint-ignore no-explicit-any
+  if (conflict) return conflict as any;
 
   const updated = await parser.updateHabit(id, {
     name: body.name,
@@ -66,45 +230,41 @@ habitsRouter.put("/:id", async (c) => {
     dayNotes: body.dayNotes,
     notes: body.notes,
   });
-  if (!updated) return errorResponse("Not found", 404);
+  if (!updated) return c.json({ error: "Not found" }, 404);
   await cacheWriteThrough(c, "habits");
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });
 
-// POST /habits/:id/complete - mark today (or a specific date) as done
-habitsRouter.post("/:id/complete", async (c) => {
+habitsRouter.openapi(markHabitCompleteRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const { id } = c.req.valid("param");
   let date: string | undefined;
   try {
-    const body = await c.req.json();
+    const body = c.req.valid("json");
     date = body.date;
   } catch {
     // No body — mark today
   }
   const updated = await parser.markHabitComplete(id, date);
-  if (!updated) return errorResponse("Not found", 404);
+  if (!updated) return c.json({ error: "Not found" }, 404);
   await cacheWriteThrough(c, "habits");
-  return jsonResponse(updated);
+  return c.json(updated, 200);
 });
 
-// DELETE /habits/:id/complete/:date - unmark a specific date
-habitsRouter.delete("/:id/complete/:date", async (c) => {
+habitsRouter.openapi(unmarkHabitCompleteRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-  const date = c.req.param("date");
+  const { id, date } = c.req.valid("param");
   const updated = await parser.unmarkHabitComplete(id, date);
-  if (!updated) return errorResponse("Not found", 404);
+  if (!updated) return c.json({ error: "Not found" }, 404);
   await cacheWriteThrough(c, "habits");
-  return jsonResponse(updated);
+  return c.json(updated, 200);
 });
 
-// DELETE /habits/:id - delete habit
-habitsRouter.delete("/:id", async (c) => {
+habitsRouter.openapi(deleteHabitRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const { id } = c.req.valid("param");
   const deleted = await parser.deleteHabit(id);
-  if (!deleted) return errorResponse("Not found", 404);
+  if (!deleted) return c.json({ error: "Not found" }, 404);
   cachePurge(c, "habits", id);
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });

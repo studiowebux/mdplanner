@@ -2,7 +2,7 @@
  * Export/Import routes (CSV, PDF).
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
   cacheWriteThrough,
@@ -25,7 +25,15 @@ import {
 import type { Company, Contact, Deal } from "../../lib/types.ts";
 import { PortfolioItem } from "../../lib/parser/directory/portfolio.ts";
 
-export const exportImportRouter = new Hono<{ Variables: AppVariables }>();
+export const exportImportRouter = new OpenAPIHono<{
+  Variables: AppVariables;
+}>();
+
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+const SuccessSchema = z.object({ success: z.boolean() });
 
 // Helper functions
 
@@ -807,6 +815,7 @@ function convertDealsToMarkdown(deals: Deal[]): string {
 // Routes
 
 // GET /export/csv/:entity - export any supported entity type as CSV
+// Kept as plain .get() — returns text/csv with Content-Disposition, not JSON
 const CSV_SUPPORTED = [
   "tasks",
   "notes",
@@ -879,7 +888,45 @@ exportImportRouter.get("/export/csv/:entity", async (c) => {
 });
 
 // POST /import/csv/tasks - import tasks from CSV
-exportImportRouter.post("/import/csv/tasks", async (c) => {
+const importCsvTasksRoute = createRoute({
+  method: "post",
+  path: "/import/csv/tasks",
+  tags: ["ExportImport"],
+  summary: "Import tasks from CSV",
+  operationId: "importCsvTasks",
+  request: {
+    body: {
+      content: {
+        "text/csv": {
+          schema: z.any(),
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            success: z.boolean(),
+            imported: z.number(),
+            skipped: z.number(),
+            errors: z.array(
+              z.object({
+                row: z.number(),
+                message: z.string(),
+              }),
+            ),
+          }),
+        },
+      },
+      description: "Import results",
+    },
+  },
+});
+
+exportImportRouter.openapi(importCsvTasksRoute, async (c) => {
   const parser = getParser(c);
   const body = await c.req.text();
   const { tasks: parsedTasks, errors } = parseTasksCSV(body);
@@ -897,11 +944,42 @@ exportImportRouter.post("/import/csv/tasks", async (c) => {
 
   if (imported > 0) await cacheWriteThrough(c, "tasks");
 
-  return jsonResponse({ success: true, imported, skipped, errors });
+  return c.json({ success: true, imported, skipped, errors }, 200);
 });
 
 // POST /import/csv/canvas - import canvas sticky notes from CSV
-exportImportRouter.post("/import/csv/canvas", async (c) => {
+const importCsvCanvasRoute = createRoute({
+  method: "post",
+  path: "/import/csv/canvas",
+  tags: ["ExportImport"],
+  summary: "Import canvas sticky notes from CSV",
+  operationId: "importCsvCanvas",
+  request: {
+    body: {
+      content: {
+        "text/csv": {
+          schema: z.any(),
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            success: z.boolean(),
+            imported: z.number(),
+          }),
+        },
+      },
+      description: "Import results",
+    },
+  },
+});
+
+exportImportRouter.openapi(importCsvCanvasRoute, async (c) => {
   const parser = getParser(c);
   const body = await c.req.text();
   const stickyNotes = parseCanvasCSV(body);
@@ -909,14 +987,11 @@ exportImportRouter.post("/import/csv/canvas", async (c) => {
   projectInfo.stickyNotes = stickyNotes;
   await parser.saveProjectInfo(projectInfo);
   await cacheWriteThrough(c, "sticky_notes");
-  return jsonResponse({ success: true, imported: stickyNotes.length });
+  return c.json({ success: true, imported: stickyNotes.length }, 200);
 });
 
 // GET /export/json - export one or more entity types as a JSON bundle
-// Query params:
-//   entities — comma-separated list (default: all)
-//   Supported: tasks, notes, goals, meetings, people, portfolio, ideas,
-//              habits, journal, dns, fishbone, contacts, companies, deals
+// Kept as plain .get() — returns JSON with Content-Disposition attachment header
 exportImportRouter.get("/export/json", async (c) => {
   const parser = getParser(c);
   const projectInfo = await parser.readProjectInfo();
@@ -998,10 +1073,7 @@ exportImportRouter.get("/export/json", async (c) => {
 });
 
 // GET /export/md - export one or more entity types as a Markdown document
-// Query params:
-//   entities — comma-separated list (default: all)
-//   Supported: tasks, notes, goals, meetings, people, portfolio, ideas,
-//              habits, journal, dns, fishbone, contacts, companies, deals
+// Kept as plain .get() — returns text/markdown with Content-Disposition
 exportImportRouter.get("/export/md", async (c) => {
   const parser = getParser(c);
   const projectInfo = await parser.readProjectInfo();
@@ -1114,6 +1186,7 @@ exportImportRouter.get("/export/md", async (c) => {
 });
 
 // GET /export/pdf/report - export project report as HTML (for PDF printing)
+// Kept as plain .get() — returns text/html
 exportImportRouter.get("/export/pdf/report", async (c) => {
   const parser = getParser(c);
   const projectInfo = await parser.readProjectInfo();

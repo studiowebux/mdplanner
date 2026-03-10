@@ -2,39 +2,150 @@
  * Financial Period CRUD routes.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
-  errorResponse,
   getParser,
-  jsonResponse,
 } from "../context.ts";
 
-export const financesRouter = new Hono<{ Variables: AppVariables }>();
+export const financesRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-// GET /finances - list all periods sorted by date desc
-financesRouter.get("/", async (c) => {
-  const parser = getParser(c);
-  const periods = await parser.readFinancialPeriods();
-  return jsonResponse(periods);
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+const idParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+});
+const SuccessSchema = z.object({ success: z.boolean() });
+
+const listFinancesRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["Finances"],
+  summary: "List all financial periods",
+  operationId: "listFinances",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "List of financial periods",
+    },
+  },
 });
 
-// GET /finances/:id - single period
-financesRouter.get("/:id", async (c) => {
+const getFinanceRoute = createRoute({
+  method: "get",
+  path: "/{id}",
+  tags: ["Finances"],
+  summary: "Get a single financial period",
+  operationId: "getFinance",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Financial period",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const createFinanceRoute = createRoute({
+  method: "post",
+  path: "/",
+  tags: ["Finances"],
+  summary: "Create financial period",
+  operationId: "createFinance",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: {
+        "application/json": {
+          schema: z.object({ success: z.boolean(), id: z.string() }),
+        },
+      },
+      description: "Financial period created",
+    },
+  },
+});
+
+const updateFinanceRoute = createRoute({
+  method: "put",
+  path: "/{id}",
+  tags: ["Finances"],
+  summary: "Update financial period",
+  operationId: "updateFinance",
+  request: {
+    params: idParam,
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Financial period updated",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const deleteFinanceRoute = createRoute({
+  method: "delete",
+  path: "/{id}",
+  tags: ["Finances"],
+  summary: "Delete financial period",
+  operationId: "deleteFinance",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Financial period deleted",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+// --- Handlers ---
+
+financesRouter.openapi(listFinancesRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const periods = await parser.readFinancialPeriods();
+  return c.json(periods, 200);
+});
+
+financesRouter.openapi(getFinanceRoute, async (c) => {
+  const parser = getParser(c);
+  const { id } = c.req.valid("param");
   const periods = await parser.readFinancialPeriods();
   const period = periods.find((p) => p.id === id);
-  if (!period) return errorResponse("Not found", 404);
-  return jsonResponse(period);
+  if (!period) return c.json({ error: "Not found" }, 404);
+  return c.json(period, 200);
 });
 
-// POST /finances - create period
-financesRouter.post("/", async (c) => {
+financesRouter.openapi(createFinanceRoute, async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
+  const body = c.req.valid("json");
   const record = await parser.addFinancialPeriod({
     period: body.period || "",
     cash_on_hand: Number(body.cash_on_hand) || 0,
@@ -43,14 +154,13 @@ financesRouter.post("/", async (c) => {
     notes: body.notes,
   });
   await cacheWriteThrough(c, "financial_periods");
-  return jsonResponse({ success: true, id: record.id }, 201);
+  return c.json({ success: true, id: record.id }, 201);
 });
 
-// PUT /finances/:id - update period
-financesRouter.put("/:id", async (c) => {
+financesRouter.openapi(updateFinanceRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-  const body = await c.req.json();
+  const { id } = c.req.valid("param");
+  const body = c.req.valid("json");
   // Only merge fields explicitly provided to avoid clobbering existing values.
   const updates: Record<string, unknown> = {};
   if (body.period !== undefined) updates.period = body.period;
@@ -61,17 +171,16 @@ financesRouter.put("/:id", async (c) => {
   if (body.expenses !== undefined) updates.expenses = body.expenses;
   if (body.notes !== undefined) updates.notes = body.notes;
   const updated = await parser.updateFinancialPeriod(id, updates);
-  if (!updated) return errorResponse("Not found", 404);
+  if (!updated) return c.json({ error: "Not found" }, 404);
   await cacheWriteThrough(c, "financial_periods");
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });
 
-// DELETE /finances/:id - delete period
-financesRouter.delete("/:id", async (c) => {
+financesRouter.openapi(deleteFinanceRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const { id } = c.req.valid("param");
   const deleted = await parser.deleteFinancialPeriod(id);
-  if (!deleted) return errorResponse("Not found", 404);
+  if (!deleted) return c.json({ error: "Not found" }, 404);
   cachePurge(c, "financial_periods", id);
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });

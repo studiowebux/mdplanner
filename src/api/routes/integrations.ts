@@ -14,7 +14,7 @@
  * GET    /api/integrations/github/test         — verify token (calls GET /user)
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { isEncryptionEnabled } from "../../lib/secrets.ts";
 import { CloudflareDnsProvider } from "../../lib/integrations/providers/cloudflare-dns.ts";
 import { GitHubApiProvider } from "../../lib/integrations/providers/github.ts";
@@ -22,61 +22,167 @@ import { ProjectManager } from "../../lib/project-manager.ts";
 import { DirectoryMarkdownParser } from "../../lib/parser/directory/parser.ts";
 import {
   AppVariables,
-  errorResponse,
   getParser,
   getProjectManager,
-  jsonResponse,
 } from "./context.ts";
 
-export const integrationsRouter = new Hono<{ Variables: AppVariables }>();
+export const integrationsRouter = new OpenAPIHono<{
+  Variables: AppVariables;
+}>();
+
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+const SuccessSchema = z.object({ success: z.boolean() });
 
 // POST /integrations/cloudflare — save token (account ID is auto-fetched later)
-integrationsRouter.post("/cloudflare", async (c) => {
+const saveCfTokenRoute = createRoute({
+  method: "post",
+  path: "/cloudflare",
+  tags: ["Integrations"],
+  summary: "Save Cloudflare API token",
+  operationId: "saveCloudflareToken",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            token: z.string(),
+          }),
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            success: z.boolean(),
+            encrypted: z.boolean(),
+          }),
+        },
+      },
+      description: "Token saved",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Missing token",
+    },
+  },
+});
+
+integrationsRouter.openapi(saveCfTokenRoute, async (c) => {
   const pm = getProjectManager(c);
-  const body = await c.req.json();
+  const body = c.req.valid("json");
   const token = body.token?.trim();
 
-  if (!token) return errorResponse("token is required", 400);
+  if (!token) return c.json({ error: "token is required" }, 400);
 
   await pm.setIntegrationSecret("cloudflare", "token", token);
 
-  return jsonResponse({
-    success: true,
-    encrypted: isEncryptionEnabled(),
-  });
+  return c.json(
+    {
+      success: true,
+      encrypted: isEncryptionEnabled(),
+    },
+    200,
+  );
 });
 
 // GET /integrations/cloudflare — return presence + encryption status (never the token)
-integrationsRouter.get("/cloudflare", async (c) => {
+const getCfStatusRoute = createRoute({
+  method: "get",
+  path: "/cloudflare",
+  tags: ["Integrations"],
+  summary: "Check Cloudflare token configuration status",
+  operationId: "getCloudflareStatus",
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            configured: z.boolean(),
+            encrypted: z.boolean(),
+          }),
+        },
+      },
+      description: "Cloudflare integration status",
+    },
+  },
+});
+
+integrationsRouter.openapi(getCfStatusRoute, async (c) => {
   const pm = getProjectManager(c);
   const token = await pm.getIntegrationSecret("cloudflare", "token");
 
-  return jsonResponse({
-    configured: token !== null,
-    encrypted: isEncryptionEnabled(),
-  });
+  return c.json(
+    {
+      configured: token !== null,
+      encrypted: isEncryptionEnabled(),
+    },
+    200,
+  );
 });
 
 // DELETE /integrations/cloudflare — remove all Cloudflare credentials
-integrationsRouter.delete("/cloudflare", async (c) => {
+const deleteCfRoute = createRoute({
+  method: "delete",
+  path: "/cloudflare",
+  tags: ["Integrations"],
+  summary: "Remove Cloudflare credentials",
+  operationId: "deleteCloudflareCredentials",
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Credentials removed",
+    },
+  },
+});
+
+integrationsRouter.openapi(deleteCfRoute, async (c) => {
   const pm = getProjectManager(c);
   await pm.deleteIntegrationSecrets("cloudflare");
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });
 
 // GET /integrations/cloudflare/zones — preview domains from Cloudflare (no writes)
-integrationsRouter.get("/cloudflare/zones", async (c) => {
+const listCfZonesRoute = createRoute({
+  method: "get",
+  path: "/cloudflare/zones",
+  tags: ["Integrations"],
+  summary: "Preview domains from Cloudflare API",
+  operationId: "listCloudflareZones",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "List of Cloudflare domains",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Token not configured",
+    },
+    502: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Cloudflare API error",
+    },
+  },
+});
+
+integrationsRouter.openapi(listCfZonesRoute, async (c) => {
   const pm = getProjectManager(c);
   const token = await pm.getIntegrationSecret("cloudflare", "token");
-  if (!token) return errorResponse("Cloudflare token not configured", 400);
+  if (!token) return c.json({ error: "Cloudflare token not configured" }, 400);
 
   try {
     const provider = new CloudflareDnsProvider(token);
     const domains = await provider.fetchDomains();
-    return jsonResponse({ domains });
+    return c.json({ domains }, 200);
   } catch (err) {
-    return errorResponse(
-      err instanceof Error ? err.message : "Cloudflare API error",
+    return c.json(
+      { error: err instanceof Error ? err.message : "Cloudflare API error" },
       502,
     );
   }
@@ -85,54 +191,158 @@ integrationsRouter.get("/cloudflare/zones", async (c) => {
 // --- GitHub integration ---
 
 // POST /integrations/github — save PAT
-integrationsRouter.post("/github", async (c) => {
+const saveGhTokenRoute = createRoute({
+  method: "post",
+  path: "/github",
+  tags: ["Integrations"],
+  summary: "Save GitHub personal access token",
+  operationId: "saveGitHubToken",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            token: z.string(),
+          }),
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            success: z.boolean(),
+            encrypted: z.boolean(),
+          }),
+        },
+      },
+      description: "Token saved",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Missing token",
+    },
+  },
+});
+
+integrationsRouter.openapi(saveGhTokenRoute, async (c) => {
   const pm = getProjectManager(c);
-  const body = await c.req.json();
+  const body = c.req.valid("json");
   const token = body.token?.trim();
 
   if (!token) {
-    return errorResponse("token is required", 400);
+    return c.json({ error: "token is required" }, 400);
   }
 
   await pm.setIntegrationSecret("github", "token", token);
 
-  return jsonResponse({
-    success: true,
-    encrypted: isEncryptionEnabled(),
-  });
+  return c.json(
+    {
+      success: true,
+      encrypted: isEncryptionEnabled(),
+    },
+    200,
+  );
 });
 
 // GET /integrations/github — presence + encryption status (never the token)
-integrationsRouter.get("/github", async (c) => {
+const getGhStatusRoute = createRoute({
+  method: "get",
+  path: "/github",
+  tags: ["Integrations"],
+  summary: "Check GitHub token configuration status",
+  operationId: "getGitHubStatus",
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            configured: z.boolean(),
+            encrypted: z.boolean(),
+          }),
+        },
+      },
+      description: "GitHub integration status",
+    },
+  },
+});
+
+integrationsRouter.openapi(getGhStatusRoute, async (c) => {
   const pm = getProjectManager(c);
   const token = await pm.getIntegrationSecret("github", "token");
 
-  return jsonResponse({
-    configured: token !== null,
-    encrypted: isEncryptionEnabled(),
-  });
+  return c.json(
+    {
+      configured: token !== null,
+      encrypted: isEncryptionEnabled(),
+    },
+    200,
+  );
 });
 
 // DELETE /integrations/github — remove GitHub credentials
-integrationsRouter.delete("/github", async (c) => {
+const deleteGhRoute = createRoute({
+  method: "delete",
+  path: "/github",
+  tags: ["Integrations"],
+  summary: "Remove GitHub credentials",
+  operationId: "deleteGitHubCredentials",
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Credentials removed",
+    },
+  },
+});
+
+integrationsRouter.openapi(deleteGhRoute, async (c) => {
   const pm = getProjectManager(c);
   await pm.deleteIntegrationSecrets("github");
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });
 
 // GET /integrations/github/test — verify PAT by calling GET /user
-integrationsRouter.get("/github/test", async (c) => {
+const testGhTokenRoute = createRoute({
+  method: "get",
+  path: "/github/test",
+  tags: ["Integrations"],
+  summary: "Verify GitHub token by calling GET /user",
+  operationId: "testGitHubToken",
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({ login: z.string() }),
+        },
+      },
+      description: "Authenticated GitHub user",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Token not configured",
+    },
+    502: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "GitHub API error",
+    },
+  },
+});
+
+integrationsRouter.openapi(testGhTokenRoute, async (c) => {
   const pm = getProjectManager(c);
   const token = await pm.getIntegrationSecret("github", "token");
-  if (!token) return errorResponse("GitHub token not configured", 400);
+  if (!token) return c.json({ error: "GitHub token not configured" }, 400);
 
   try {
     const provider = new GitHubApiProvider(token);
     const user = await provider.getAuthenticatedUser();
-    return jsonResponse({ login: user.login });
+    return c.json({ login: user.login }, 200);
   } catch (err) {
-    return errorResponse(
-      err instanceof Error ? err.message : "GitHub API error",
+    return c.json(
+      { error: err instanceof Error ? err.message : "GitHub API error" },
       502,
     );
   }
