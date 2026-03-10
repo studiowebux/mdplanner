@@ -158,7 +158,7 @@ const updateMemberRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: { "application/json": { schema: z.object({}).passthrough() } },
+      content: { "application/json": { schema: z.any() } },
       required: true,
     },
   },

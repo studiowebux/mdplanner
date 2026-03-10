@@ -1,31 +1,119 @@
 /**
  * Eisenhower Matrix CRUD routes.
- * Pattern: Feature Router with CRUD operations.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
-  errorResponse,
   getParser,
-  jsonResponse,
 } from "../context.ts";
 
-export const eisenhowerRouter = new Hono<{ Variables: AppVariables }>();
+export const eisenhowerRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-// GET /eisenhower - list all matrices
-eisenhowerRouter.get("/", async (c) => {
-  const parser = getParser(c);
-  const matrices = await parser.readEisenhowerMatrices();
-  return jsonResponse(matrices);
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+const idParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+});
+const SuccessSchema = z.object({ success: z.boolean() });
+
+const listEisenhowerRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["Eisenhower"],
+  summary: "List all Eisenhower matrices",
+  operationId: "listEisenhowerMatrices",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "List of Eisenhower matrices",
+    },
+  },
 });
 
-// POST /eisenhower - create matrix
-eisenhowerRouter.post("/", async (c) => {
+const createEisenhowerRoute = createRoute({
+  method: "post",
+  path: "/",
+  tags: ["Eisenhower"],
+  summary: "Create Eisenhower matrix",
+  operationId: "createEisenhowerMatrix",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Eisenhower matrix created",
+    },
+  },
+});
+
+const updateEisenhowerRoute = createRoute({
+  method: "put",
+  path: "/{id}",
+  tags: ["Eisenhower"],
+  summary: "Update Eisenhower matrix",
+  operationId: "updateEisenhowerMatrix",
+  request: {
+    params: idParam,
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Updated Eisenhower matrix",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const deleteEisenhowerRoute = createRoute({
+  method: "delete",
+  path: "/{id}",
+  tags: ["Eisenhower"],
+  summary: "Delete Eisenhower matrix",
+  operationId: "deleteEisenhowerMatrix",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Eisenhower matrix deleted",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+// --- Handlers ---
+
+eisenhowerRouter.openapi(listEisenhowerRoute, async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
+  const matrices = await parser.readEisenhowerMatrices();
+  return c.json(matrices, 200);
+});
+
+eisenhowerRouter.openapi(createEisenhowerRoute, async (c) => {
+  const parser = getParser(c);
+  const body = c.req.valid("json");
   const matrix = await parser.addEisenhowerMatrix({
     title: body.title || "Untitled Matrix",
     date: body.date || new Date().toISOString().split("T")[0],
@@ -35,26 +123,24 @@ eisenhowerRouter.post("/", async (c) => {
     notUrgentNotImportant: body.notUrgentNotImportant || [],
   });
   await cacheWriteThrough(c, "eisenhower");
-  return jsonResponse(matrix, 201);
+  return c.json(matrix, 201);
 });
 
-// PUT /eisenhower/:id - update matrix
-eisenhowerRouter.put("/:id", async (c) => {
+eisenhowerRouter.openapi(updateEisenhowerRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-  const body = await c.req.json();
+  const { id } = c.req.valid("param");
+  const body = c.req.valid("json");
   const updated = await parser.updateEisenhowerMatrix(id, body);
-  if (!updated) return errorResponse("Not found", 404);
+  if (!updated) return c.json({ error: "Not found" }, 404);
   await cacheWriteThrough(c, "eisenhower");
-  return jsonResponse(updated);
+  return c.json(updated, 200);
 });
 
-// DELETE /eisenhower/:id - delete matrix
-eisenhowerRouter.delete("/:id", async (c) => {
+eisenhowerRouter.openapi(deleteEisenhowerRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const { id } = c.req.valid("param");
   const success = await parser.deleteEisenhowerMatrix(id);
-  if (!success) return errorResponse("Not found", 404);
+  if (!success) return c.json({ error: "Not found" }, 404);
   cachePurge(c, "eisenhower", id);
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });

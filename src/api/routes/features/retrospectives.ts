@@ -2,29 +2,124 @@
  * Retrospectives CRUD routes.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
-  errorResponse,
   getParser,
-  jsonResponse,
 } from "../context.ts";
 
-export const retrospectivesRouter = new Hono<{ Variables: AppVariables }>();
+export const retrospectivesRouter = new OpenAPIHono<{
+  Variables: AppVariables;
+}>();
 
-// GET /retrospectives - list all retrospectives
-retrospectivesRouter.get("/", async (c) => {
-  const parser = getParser(c);
-  const retrospectives = await parser.readRetrospectives();
-  return jsonResponse(retrospectives);
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+const idParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+});
+const SuccessSchema = z.object({ success: z.boolean() });
+
+const listRetrospectivesRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["Retrospectives"],
+  summary: "List all retrospectives",
+  operationId: "listRetrospectives",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "List of retrospectives",
+    },
+  },
 });
 
-// POST /retrospectives - create retrospective
-retrospectivesRouter.post("/", async (c) => {
+const createRetrospectiveRoute = createRoute({
+  method: "post",
+  path: "/",
+  tags: ["Retrospectives"],
+  summary: "Create retrospective",
+  operationId: "createRetrospective",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: {
+        "application/json": {
+          schema: z.object({ success: z.boolean(), id: z.string() }),
+        },
+      },
+      description: "Retrospective created",
+    },
+  },
+});
+
+const updateRetrospectiveRoute = createRoute({
+  method: "put",
+  path: "/{id}",
+  tags: ["Retrospectives"],
+  summary: "Update retrospective",
+  operationId: "updateRetrospective",
+  request: {
+    params: idParam,
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Retrospective updated",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const deleteRetrospectiveRoute = createRoute({
+  method: "delete",
+  path: "/{id}",
+  tags: ["Retrospectives"],
+  summary: "Delete retrospective",
+  operationId: "deleteRetrospective",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Retrospective deleted",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+// --- Handlers ---
+
+retrospectivesRouter.openapi(listRetrospectivesRoute, async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
+  const retrospectives = await parser.readRetrospectives();
+  return c.json(retrospectives, 200);
+});
+
+retrospectivesRouter.openapi(createRetrospectiveRoute, async (c) => {
+  const parser = getParser(c);
+  const body = c.req.valid("json");
   const retrospectives = await parser.readRetrospectives();
   const id = crypto.randomUUID().substring(0, 8);
   retrospectives.push({
@@ -38,33 +133,31 @@ retrospectivesRouter.post("/", async (c) => {
   });
   await parser.saveRetrospectives(retrospectives);
   await cacheWriteThrough(c, "retrospectives");
-  return jsonResponse({ success: true, id }, 201);
+  return c.json({ success: true, id }, 201);
 });
 
-// PUT /retrospectives/:id - update retrospective
-retrospectivesRouter.put("/:id", async (c) => {
+retrospectivesRouter.openapi(updateRetrospectiveRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-  const body = await c.req.json();
+  const { id } = c.req.valid("param");
+  const body = c.req.valid("json");
   const retrospectives = await parser.readRetrospectives();
   const index = retrospectives.findIndex((r) => r.id === id);
-  if (index === -1) return errorResponse("Not found", 404);
+  if (index === -1) return c.json({ error: "Not found" }, 404);
   retrospectives[index] = { ...retrospectives[index], ...body };
   await parser.saveRetrospectives(retrospectives);
   await cacheWriteThrough(c, "retrospectives");
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });
 
-// DELETE /retrospectives/:id - delete retrospective
-retrospectivesRouter.delete("/:id", async (c) => {
+retrospectivesRouter.openapi(deleteRetrospectiveRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const { id } = c.req.valid("param");
   const retrospectives = await parser.readRetrospectives();
   const filtered = retrospectives.filter((r) => r.id !== id);
   if (filtered.length === retrospectives.length) {
-    return errorResponse("Not found", 404);
+    return c.json({ error: "Not found" }, 404);
   }
   await parser.saveRetrospectives(filtered);
   cachePurge(c, "retrospectives", id);
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });

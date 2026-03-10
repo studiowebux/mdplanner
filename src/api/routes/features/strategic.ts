@@ -2,29 +2,216 @@
  * Strategic Levels routes.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
-  errorResponse,
   getParser,
-  jsonResponse,
 } from "../context.ts";
 
-export const strategicRouter = new Hono<{ Variables: AppVariables }>();
+export const strategicRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-// GET /strategic-levels - list all strategic levels builders
-strategicRouter.get("/", async (c) => {
-  const parser = getParser(c);
-  const builders = await parser.readStrategicLevelsBuilders();
-  return jsonResponse(builders);
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+const idParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+});
+const SuccessSchema = z.object({ success: z.boolean() });
+const levelParams = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+  levelId: z.string().openapi({ param: { name: "levelId", in: "path" } }),
 });
 
-// POST /strategic-levels - create strategic levels builder
-strategicRouter.post("/", async (c) => {
+// --- Route definitions ---
+
+const listStrategicRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["Strategic Levels"],
+  summary: "List all strategic levels builders",
+  operationId: "listStrategicLevels",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "List of strategic levels builders",
+    },
+  },
+});
+
+const createStrategicRoute = createRoute({
+  method: "post",
+  path: "/",
+  tags: ["Strategic Levels"],
+  summary: "Create strategic levels builder",
+  operationId: "createStrategicLevels",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Strategic levels builder created",
+    },
+  },
+});
+
+const getStrategicRoute = createRoute({
+  method: "get",
+  path: "/{id}",
+  tags: ["Strategic Levels"],
+  summary: "Get single strategic levels builder",
+  operationId: "getStrategicLevels",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Strategic levels builder details",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const updateStrategicRoute = createRoute({
+  method: "put",
+  path: "/{id}",
+  tags: ["Strategic Levels"],
+  summary: "Update strategic levels builder",
+  operationId: "updateStrategicLevels",
+  request: {
+    params: idParam,
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Updated strategic levels builder",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const deleteStrategicRoute = createRoute({
+  method: "delete",
+  path: "/{id}",
+  tags: ["Strategic Levels"],
+  summary: "Delete strategic levels builder",
+  operationId: "deleteStrategicLevels",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Strategic levels builder deleted",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const addLevelRoute = createRoute({
+  method: "post",
+  path: "/{id}/levels",
+  tags: ["Strategic Levels"],
+  summary: "Add level to strategic levels builder",
+  operationId: "addStrategicLevel",
+  request: {
+    params: idParam,
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Level added",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Builder not found",
+    },
+  },
+});
+
+const updateLevelRoute = createRoute({
+  method: "put",
+  path: "/{id}/levels/{levelId}",
+  tags: ["Strategic Levels"],
+  summary: "Update level in strategic levels builder",
+  operationId: "updateStrategicLevel",
+  request: {
+    params: levelParams,
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Level updated",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const deleteLevelRoute = createRoute({
+  method: "delete",
+  path: "/{id}/levels/{levelId}",
+  tags: ["Strategic Levels"],
+  summary: "Delete level from strategic levels builder",
+  operationId: "deleteStrategicLevel",
+  request: { params: levelParams },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Level deleted",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+// --- Handlers ---
+
+strategicRouter.openapi(listStrategicRoute, async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
+  const builders = await parser.readStrategicLevelsBuilders();
+  return c.json(builders, 200);
+});
+
+strategicRouter.openapi(createStrategicRoute, async (c) => {
+  const parser = getParser(c);
+  const body = c.req.valid("json");
   const builders = await parser.readStrategicLevelsBuilders();
   const newBuilder = {
     id: crypto.randomUUID().substring(0, 8),
@@ -35,56 +222,51 @@ strategicRouter.post("/", async (c) => {
   builders.push(newBuilder);
   await parser.saveStrategicLevelsBuilders(builders);
   await cacheWriteThrough(c, "strategic_builders");
-  return jsonResponse(newBuilder, 201);
+  return c.json(newBuilder, 201);
 });
 
-// GET /strategic-levels/:id - get single strategic levels builder
-strategicRouter.get("/:id", async (c) => {
+strategicRouter.openapi(getStrategicRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const { id } = c.req.valid("param");
   const builders = await parser.readStrategicLevelsBuilders();
   const builder = builders.find((b) => b.id === id);
-  if (!builder) return errorResponse("Not found", 404);
-  return jsonResponse(builder);
+  if (!builder) return c.json({ error: "Not found" }, 404);
+  return c.json(builder, 200);
 });
 
-// PUT /strategic-levels/:id - update strategic levels builder
-strategicRouter.put("/:id", async (c) => {
+strategicRouter.openapi(updateStrategicRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
-  const body = await c.req.json();
+  const { id } = c.req.valid("param");
+  const body = c.req.valid("json");
   const builders = await parser.readStrategicLevelsBuilders();
   const index = builders.findIndex((b) => b.id === id);
-  if (index === -1) return errorResponse("Not found", 404);
+  if (index === -1) return c.json({ error: "Not found" }, 404);
   builders[index] = { ...builders[index], ...body };
   await parser.saveStrategicLevelsBuilders(builders);
   await cacheWriteThrough(c, "strategic_builders");
-  return jsonResponse(builders[index]);
+  return c.json(builders[index], 200);
 });
 
-// DELETE /strategic-levels/:id - delete strategic levels builder
-strategicRouter.delete("/:id", async (c) => {
+strategicRouter.openapi(deleteStrategicRoute, async (c) => {
   const parser = getParser(c);
-  const id = c.req.param("id");
+  const { id } = c.req.valid("param");
   const builders = await parser.readStrategicLevelsBuilders();
   const filtered = builders.filter((b) => b.id !== id);
   if (filtered.length === builders.length) {
-    return errorResponse("Not found", 404);
+    return c.json({ error: "Not found" }, 404);
   }
   await parser.saveStrategicLevelsBuilders(filtered);
   cachePurge(c, "strategic_builders", id);
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });
 
-// POST /strategic-levels/:id/levels - add level
-strategicRouter.post("/:id/levels", async (c) => {
+strategicRouter.openapi(addLevelRoute, async (c) => {
   const parser = getParser(c);
-  const builderId = c.req.param("id");
-  const body = await c.req.json();
+  const { id: builderId } = c.req.valid("param");
+  const body = c.req.valid("json");
   const builders = await parser.readStrategicLevelsBuilders();
   const builder = builders.find((b) => b.id === builderId);
-  if (!builder) return errorResponse("Builder not found", 404);
-
+  if (!builder) return c.json({ error: "Builder not found" }, 404);
   const newLevel = {
     id: crypto.randomUUID().substring(0, 8),
     title: body.title,
@@ -98,42 +280,34 @@ strategicRouter.post("/:id/levels", async (c) => {
   builder.levels.push(newLevel);
   await parser.saveStrategicLevelsBuilders(builders);
   await cacheWriteThrough(c, "strategic_builders");
-  return jsonResponse(newLevel, 201);
+  return c.json(newLevel, 201);
 });
 
-// PUT /strategic-levels/:id/levels/:levelId - update level
-strategicRouter.put("/:id/levels/:levelId", async (c) => {
+strategicRouter.openapi(updateLevelRoute, async (c) => {
   const parser = getParser(c);
-  const builderId = c.req.param("id");
-  const levelId = c.req.param("levelId");
-  const body = await c.req.json();
+  const { id: builderId, levelId } = c.req.valid("param");
+  const body = c.req.valid("json");
   const builders = await parser.readStrategicLevelsBuilders();
   const builder = builders.find((b) => b.id === builderId);
-  if (!builder) return errorResponse("Builder not found", 404);
-
+  if (!builder) return c.json({ error: "Builder not found" }, 404);
   const levelIndex = builder.levels.findIndex((l) => l.id === levelId);
-  if (levelIndex === -1) return errorResponse("Level not found", 404);
-
+  if (levelIndex === -1) return c.json({ error: "Level not found" }, 404);
   builder.levels[levelIndex] = { ...builder.levels[levelIndex], ...body };
   await parser.saveStrategicLevelsBuilders(builders);
   await cacheWriteThrough(c, "strategic_builders");
-  return jsonResponse(builder.levels[levelIndex]);
+  return c.json(builder.levels[levelIndex], 200);
 });
 
-// DELETE /strategic-levels/:id/levels/:levelId - delete level
-strategicRouter.delete("/:id/levels/:levelId", async (c) => {
+strategicRouter.openapi(deleteLevelRoute, async (c) => {
   const parser = getParser(c);
-  const builderId = c.req.param("id");
-  const levelId = c.req.param("levelId");
+  const { id: builderId, levelId } = c.req.valid("param");
   const builders = await parser.readStrategicLevelsBuilders();
   const builder = builders.find((b) => b.id === builderId);
-  if (!builder) return errorResponse("Builder not found", 404);
-
+  if (!builder) return c.json({ error: "Builder not found" }, 404);
   const filtered = builder.levels.filter((l) => l.id !== levelId);
   if (filtered.length === builder.levels.length) {
-    return errorResponse("Level not found", 404);
+    return c.json({ error: "Level not found" }, 404);
   }
-
   builder.levels = filtered.map((l) => {
     if (l.parentId === levelId) {
       return { ...l, parentId: undefined };
@@ -142,5 +316,5 @@ strategicRouter.delete("/:id/levels/:levelId", async (c) => {
   });
   await parser.saveStrategicLevelsBuilders(builders);
   await cacheWriteThrough(c, "strategic_builders");
-  return jsonResponse({ success: true });
+  return c.json({ success: true }, 200);
 });

@@ -2,70 +2,176 @@
  * Mindmap CRUD routes.
  */
 
-import { Hono } from "hono";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AppVariables,
   cachePurge,
   cacheWriteThrough,
-  errorResponse,
   getParser,
-  jsonResponse,
 } from "./context.ts";
 
-export const mindmapsRouter = new Hono<{ Variables: AppVariables }>();
+export const mindmapsRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-// GET /mindmaps - list all mindmaps
-mindmapsRouter.get("/", async (c) => {
-  const parser = getParser(c);
-  const projectInfo = await parser.readProjectInfo();
-  return jsonResponse(projectInfo.mindmaps);
+const ErrorSchema = z.object({
+  error: z.string(),
+  message: z.string().optional(),
+});
+const idParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+});
+const SuccessSchema = z.object({ success: z.boolean() });
+
+// --- Route definitions ---
+
+const listMindmapsRoute = createRoute({
+  method: "get",
+  path: "/",
+  tags: ["Mindmaps"],
+  summary: "List all mindmaps",
+  operationId: "listMindmaps",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "List of mindmaps",
+    },
+  },
 });
 
-// GET /mindmaps/:id - get single mindmap
-mindmapsRouter.get("/:id", async (c) => {
+const getMindmapRoute = createRoute({
+  method: "get",
+  path: "/{id}",
+  tags: ["Mindmaps"],
+  summary: "Get single mindmap",
+  operationId: "getMindmap",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Mindmap details",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const createMindmapRoute = createRoute({
+  method: "post",
+  path: "/",
+  tags: ["Mindmaps"],
+  summary: "Create mindmap",
+  operationId: "createMindmap",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    201: {
+      content: {
+        "application/json": { schema: z.object({ id: z.string() }) },
+      },
+      description: "Mindmap created",
+    },
+  },
+});
+
+const updateMindmapRoute = createRoute({
+  method: "put",
+  path: "/{id}",
+  tags: ["Mindmaps"],
+  summary: "Update mindmap",
+  operationId: "updateMindmap",
+  request: {
+    params: idParam,
+    body: {
+      content: {
+        "application/json": { schema: z.any() },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Mindmap updated",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+const deleteMindmapRoute = createRoute({
+  method: "delete",
+  path: "/{id}",
+  tags: ["Mindmaps"],
+  summary: "Delete mindmap",
+  operationId: "deleteMindmap",
+  request: { params: idParam },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Mindmap deleted",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+// --- Handlers ---
+
+mindmapsRouter.openapi(listMindmapsRoute, async (c) => {
   const parser = getParser(c);
-  const mindmapId = c.req.param("id");
+  const projectInfo = await parser.readProjectInfo();
+  return c.json(projectInfo.mindmaps, 200);
+});
+
+mindmapsRouter.openapi(getMindmapRoute, async (c) => {
+  const parser = getParser(c);
+  const { id: mindmapId } = c.req.valid("param");
   const projectInfo = await parser.readProjectInfo();
   const mindmap = projectInfo.mindmaps.find((m) => m.id === mindmapId);
-
   if (mindmap) {
-    return jsonResponse(mindmap);
+    return c.json(mindmap, 200);
   }
-  return errorResponse("Mindmap not found", 404);
+  return c.json({ error: "Mindmap not found" }, 404);
 });
 
-// POST /mindmaps - create mindmap
-mindmapsRouter.post("/", async (c) => {
+mindmapsRouter.openapi(createMindmapRoute, async (c) => {
   const parser = getParser(c);
-  const body = await c.req.json();
+  const body = c.req.valid("json");
   const mindmapId = await parser.addMindmap(body);
   await cacheWriteThrough(c, "mindmaps");
-  return jsonResponse({ id: mindmapId }, 201);
+  return c.json({ id: mindmapId }, 201);
 });
 
-// PUT /mindmaps/:id - update mindmap
-mindmapsRouter.put("/:id", async (c) => {
+mindmapsRouter.openapi(updateMindmapRoute, async (c) => {
   const parser = getParser(c);
-  const mindmapId = c.req.param("id");
-  const updates = await c.req.json();
+  const { id: mindmapId } = c.req.valid("param");
+  const updates = c.req.valid("json");
   const success = await parser.updateMindmap(mindmapId, updates);
-
   if (success) {
     await cacheWriteThrough(c, "mindmaps");
-    return jsonResponse({ success: true });
+    return c.json({ success: true }, 200);
   }
-  return errorResponse("Mindmap not found", 404);
+  return c.json({ error: "Mindmap not found" }, 404);
 });
 
-// DELETE /mindmaps/:id - delete mindmap
-mindmapsRouter.delete("/:id", async (c) => {
+mindmapsRouter.openapi(deleteMindmapRoute, async (c) => {
   const parser = getParser(c);
-  const mindmapId = c.req.param("id");
+  const { id: mindmapId } = c.req.valid("param");
   const success = await parser.deleteMindmap(mindmapId);
-
   if (success) {
     cachePurge(c, "mindmaps", mindmapId);
-    return jsonResponse({ success: true });
+    return c.json({ success: true }, 200);
   }
-  return errorResponse("Mindmap not found", 404);
+  return c.json({ error: "Mindmap not found" }, 404);
 });
