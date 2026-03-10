@@ -8,6 +8,17 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.26.0] - 2026-03-10
+
+### Added
+
+- Auto-generated OpenAPI 3.1 specification served at `GET /api/doc` — always in
+  sync with code, no manual maintenance required.
+- All 289 API operations across 169 paths documented with request/response
+  schemas, tags, summaries, and operationIds.
+- Consistent 400 validation error responses via `defaultHook` on the root
+  router.
+
 ## [0.25.2] - 2026-03-09
 
 ### Added
