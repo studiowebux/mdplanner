@@ -13,10 +13,15 @@ import {
 
 export const habitsRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("HabitError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("HabitSuccess");
+const SuccessWithIdSchema = z
+  .object({ success: z.boolean(), id: z.string() })
+  .openapi("HabitSuccessWithId");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
@@ -24,7 +29,56 @@ const idDateParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
   date: z.string().openapi({ param: { name: "date", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const HabitSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string().optional(),
+    frequency: z.enum(["daily", "weekly"]),
+    targetDays: z.array(z.string()).optional(),
+    completions: z.array(z.string()),
+    streakCount: z.number(),
+    longestStreak: z.number(),
+    dayNotes: z.record(z.string()).optional(),
+    notes: z.string().optional(),
+    created: z.string(),
+    updated: z.string(),
+  })
+  .openapi("Habit");
+
+const CreateHabitSchema = z
+  .object({
+    name: z.string().openapi({ description: "Habit name" }),
+    description: z.string().optional(),
+    frequency: z.enum(["daily", "weekly"]).optional(),
+    targetDays: z.array(z.string()).optional(),
+    completions: z.array(z.string()).optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("CreateHabit");
+
+const UpdateHabitSchema = z
+  .object({
+    name: z.string().optional(),
+    description: z.string().optional(),
+    frequency: z.enum(["daily", "weekly"]).optional(),
+    targetDays: z.array(z.string()).optional(),
+    dayNotes: z.record(z.string()).optional(),
+    notes: z.string().optional(),
+    updatedAt: z.string().optional().openapi({
+      description: "Last known updatedAt for conflict detection",
+    }),
+  })
+  .openapi("UpdateHabit");
+
+const MarkHabitCompleteSchema = z
+  .object({
+    date: z.string().optional().openapi({
+      description: "Date to mark complete (YYYY-MM-DD). Defaults to today.",
+    }),
+  })
+  .openapi("MarkHabitComplete");
 
 const listHabitsRoute = createRoute({
   method: "get",
@@ -34,7 +88,7 @@ const listHabitsRoute = createRoute({
   operationId: "listHabits",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(HabitSchema) } },
       description: "List of habits",
     },
   },
@@ -49,7 +103,7 @@ const getHabitRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: HabitSchema } },
       description: "Habit",
     },
     404: {
@@ -67,19 +121,13 @@ const createHabitRoute = createRoute({
   operationId: "createHabit",
   request: {
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateHabitSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: {
-        "application/json": {
-          schema: z.object({ success: z.boolean(), id: z.string() }),
-        },
-      },
+      content: { "application/json": { schema: SuccessWithIdSchema } },
       description: "Habit created",
     },
   },
@@ -94,9 +142,7 @@ const updateHabitRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: UpdateHabitSchema } },
       required: true,
     },
   },
@@ -125,14 +171,12 @@ const markHabitCompleteRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: MarkHabitCompleteSchema } },
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: HabitSchema } },
       description: "Habit marked complete",
     },
     404: {
@@ -151,7 +195,7 @@ const unmarkHabitCompleteRoute = createRoute({
   request: { params: idDateParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: HabitSchema } },
       description: "Habit completion unmarked",
     },
     404: {

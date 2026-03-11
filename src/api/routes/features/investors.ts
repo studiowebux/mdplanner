@@ -13,14 +13,62 @@ import {
 
 export const investorsRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("InvestorError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("InvestorSuccess");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const investorType = z.enum([
+  "vc",
+  "angel",
+  "family_office",
+  "corporate",
+  "accelerator",
+]);
+const investorStage = z.enum(["lead", "associate", "partner", "passed"]);
+const investorStatus = z.enum([
+  "not_started",
+  "in_progress",
+  "term_sheet",
+  "passed",
+  "invested",
+]);
+
+const InvestorSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    type: investorType,
+    stage: investorStage,
+    status: investorStatus,
+    amount_target: z.number(),
+    contact: z.string(),
+    intro_date: z.string(),
+    last_contact: z.string(),
+    notes: z.string(),
+  })
+  .openapi("Investor");
+
+const CreateInvestorSchema = z
+  .object({
+    name: z.string().optional().openapi({ description: "Investor name" }),
+    type: investorType.optional(),
+    stage: investorStage.optional(),
+    status: investorStatus.optional(),
+    amount_target: z.number().optional(),
+    contact: z.string().optional(),
+    intro_date: z.string().optional(),
+    last_contact: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("CreateInvestor");
+
+const UpdateInvestorSchema = CreateInvestorSchema.openapi("UpdateInvestor");
 
 const listInvestorsRoute = createRoute({
   method: "get",
@@ -30,7 +78,7 @@ const listInvestorsRoute = createRoute({
   operationId: "listInvestors",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(InvestorSchema) } },
       description: "List of investors",
     },
   },
@@ -44,15 +92,13 @@ const createInvestorRoute = createRoute({
   operationId: "createInvestor",
   request: {
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateInvestorSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: InvestorSchema } },
       description: "Investor created",
     },
   },
@@ -67,15 +113,13 @@ const updateInvestorRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: UpdateInvestorSchema } },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: InvestorSchema } },
       description: "Investor updated",
     },
     404: {

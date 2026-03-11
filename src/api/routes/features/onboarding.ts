@@ -12,14 +12,70 @@ import {
 
 export const onboardingRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("OnboardingError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("OnboardingSuccess");
+const SuccessWithIdSchema = z
+  .object({ success: z.boolean(), id: z.string() })
+  .openapi("OnboardingSuccessWithId");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const stepCategory = z.enum([
+  "equipment",
+  "accounts",
+  "docs",
+  "training",
+  "intro",
+  "other",
+]);
+
+const OnboardingStepSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    category: stepCategory,
+    status: z.enum(["not_started", "in_progress", "complete"]),
+    dueDate: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("OnboardingStep");
+
+const OnboardingSchema = z
+  .object({
+    id: z.string(),
+    employeeName: z.string(),
+    role: z.string(),
+    startDate: z.string(),
+    personId: z.string().optional(),
+    steps: z.array(OnboardingStepSchema),
+    notes: z.string().optional(),
+    created: z.string(),
+  })
+  .openapi("Onboarding");
+
+const CreateOnboardingSchema = z
+  .object({
+    employeeName: z.string().optional().openapi({
+      description: "Employee name",
+    }),
+    role: z.string().optional(),
+    startDate: z.string().optional().openapi({
+      description: "Start date (YYYY-MM-DD)",
+    }),
+    personId: z.string().optional(),
+    steps: z.array(OnboardingStepSchema).optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("CreateOnboarding");
+
+const UpdateOnboardingSchema = CreateOnboardingSchema.openapi(
+  "UpdateOnboarding",
+);
 
 // --- Route definitions ---
 
@@ -31,7 +87,7 @@ const listOnboardingRoute = createRoute({
   operationId: "listOnboardingRecords",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(OnboardingSchema) } },
       description: "List of onboarding records",
     },
   },
@@ -46,7 +102,7 @@ const getOnboardingRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: OnboardingSchema } },
       description: "Onboarding record details",
     },
     404: {
@@ -64,19 +120,13 @@ const createOnboardingRoute = createRoute({
   operationId: "createOnboardingRecord",
   request: {
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateOnboardingSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: {
-        "application/json": {
-          schema: z.object({ success: z.boolean(), id: z.string() }),
-        },
-      },
+      content: { "application/json": { schema: SuccessWithIdSchema } },
       description: "Onboarding record created",
     },
   },
@@ -91,9 +141,7 @@ const updateOnboardingRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: UpdateOnboardingSchema } },
       required: true,
     },
   },

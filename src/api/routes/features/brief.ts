@@ -12,14 +12,56 @@ import {
 
 export const briefRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("BriefError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("BriefSuccess");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const stringArray = z.array(z.string());
+
+const BriefSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    date: z.string(),
+    summary: stringArray,
+    mission: stringArray,
+    responsible: stringArray,
+    accountable: stringArray,
+    consulted: stringArray,
+    informed: stringArray,
+    highLevelBudget: stringArray,
+    highLevelTimeline: stringArray,
+    culture: stringArray,
+    changeCapacity: stringArray,
+    guidingPrinciples: stringArray,
+  })
+  .openapi("Brief");
+
+const CreateBriefSchema = z
+  .object({
+    title: z.string().optional().openapi({ description: "Brief title" }),
+    date: z.string().optional().openapi({ description: "Date (YYYY-MM-DD)" }),
+    summary: stringArray.optional(),
+    mission: stringArray.optional(),
+    responsible: stringArray.optional(),
+    accountable: stringArray.optional(),
+    consulted: stringArray.optional(),
+    informed: stringArray.optional(),
+    highLevelBudget: stringArray.optional(),
+    highLevelTimeline: stringArray.optional(),
+    culture: stringArray.optional(),
+    changeCapacity: stringArray.optional(),
+    guidingPrinciples: stringArray.optional(),
+  })
+  .openapi("CreateBrief");
+
+const UpdateBriefSchema = CreateBriefSchema.openapi("UpdateBrief");
 
 const listBriefsRoute = createRoute({
   method: "get",
@@ -29,7 +71,7 @@ const listBriefsRoute = createRoute({
   operationId: "listBriefs",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(BriefSchema) } },
       description: "List of briefs",
     },
   },
@@ -43,15 +85,13 @@ const createBriefRoute = createRoute({
   operationId: "createBrief",
   request: {
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateBriefSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: BriefSchema } },
       description: "Brief created",
     },
   },
@@ -66,15 +106,13 @@ const updateBriefRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: UpdateBriefSchema } },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: BriefSchema } },
       description: "Updated brief",
     },
     404: {

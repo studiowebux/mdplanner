@@ -14,14 +14,90 @@ export const marketingPlansRouter = new OpenAPIHono<
   { Variables: AppVariables }
 >();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("MarketingPlanError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("MarketingPlanSuccess");
+const SuccessWithIdSchema = z
+  .object({ success: z.boolean(), id: z.string() })
+  .openapi("MarketingPlanSuccessWithId");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const channelStatus = z.enum(["planned", "active", "paused", "completed"]);
+
+const MarketingTargetAudienceSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  size: z.string().optional(),
+});
+
+const MarketingChannelSchema = z.object({
+  name: z.string(),
+  budget: z.number().optional(),
+  goals: z.string().optional(),
+  status: channelStatus.optional(),
+});
+
+const MarketingCampaignSchema = z.object({
+  name: z.string(),
+  channel: z.string().optional(),
+  budget: z.number().optional(),
+  start_date: z.string().optional(),
+  end_date: z.string().optional(),
+  status: channelStatus.optional(),
+  goals: z.string().optional(),
+});
+
+const MarketingKPITargetSchema = z.object({
+  metric: z.string(),
+  target: z.number(),
+  current: z.number().optional(),
+});
+
+const MarketingPlanSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string().optional(),
+    status: z.enum(["draft", "active", "completed", "archived"]),
+    budgetTotal: z.number().optional(),
+    budgetCurrency: z.string().optional(),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
+    targetAudiences: z.array(MarketingTargetAudienceSchema).optional(),
+    channels: z.array(MarketingChannelSchema).optional(),
+    campaigns: z.array(MarketingCampaignSchema).optional(),
+    kpiTargets: z.array(MarketingKPITargetSchema).optional(),
+    notes: z.string().optional(),
+    created: z.string(),
+    updated: z.string(),
+  })
+  .openapi("MarketingPlan");
+
+const CreateMarketingPlanSchema = z
+  .object({
+    name: z.string().optional().openapi({ description: "Plan name" }),
+    description: z.string().optional(),
+    status: z.enum(["draft", "active", "completed", "archived"]).optional(),
+    budgetTotal: z.number().optional(),
+    budgetCurrency: z.string().optional(),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
+    targetAudiences: z.array(MarketingTargetAudienceSchema).optional(),
+    channels: z.array(MarketingChannelSchema).optional(),
+    campaigns: z.array(MarketingCampaignSchema).optional(),
+    kpiTargets: z.array(MarketingKPITargetSchema).optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("CreateMarketingPlan");
+
+const UpdateMarketingPlanSchema = CreateMarketingPlanSchema.openapi(
+  "UpdateMarketingPlan",
+);
 
 // --- Route definitions ---
 
@@ -33,7 +109,9 @@ const listMarketingPlansRoute = createRoute({
   operationId: "listMarketingPlans",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: {
+        "application/json": { schema: z.array(MarketingPlanSchema) },
+      },
       description: "List of marketing plans",
     },
   },
@@ -48,7 +126,7 @@ const getMarketingPlanRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: MarketingPlanSchema } },
       description: "Marketing plan details",
     },
     404: {
@@ -66,19 +144,13 @@ const createMarketingPlanRoute = createRoute({
   operationId: "createMarketingPlan",
   request: {
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateMarketingPlanSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: {
-        "application/json": {
-          schema: z.object({ success: z.boolean(), id: z.string() }),
-        },
-      },
+      content: { "application/json": { schema: SuccessWithIdSchema } },
       description: "Marketing plan created",
     },
   },
@@ -93,9 +165,7 @@ const updateMarketingPlanRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: UpdateMarketingPlanSchema } },
       required: true,
     },
   },

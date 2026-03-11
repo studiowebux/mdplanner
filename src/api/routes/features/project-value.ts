@@ -14,14 +14,44 @@ export const projectValueRouter = new OpenAPIHono<{
   Variables: AppVariables;
 }>();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("ProjectValueError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("ProjectValueSuccess");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const stringArray = z.array(z.string());
+
+const ProjectValueSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    date: z.string(),
+    customerSegments: stringArray,
+    problem: stringArray,
+    solution: stringArray,
+    benefit: stringArray,
+  })
+  .openapi("ProjectValue");
+
+const CreateProjectValueSchema = z
+  .object({
+    title: z.string().optional().openapi({ description: "Board title" }),
+    date: z.string().optional().openapi({ description: "Date (YYYY-MM-DD)" }),
+    customerSegments: stringArray.optional(),
+    problem: stringArray.optional(),
+    solution: stringArray.optional(),
+    benefit: stringArray.optional(),
+  })
+  .openapi("CreateProjectValue");
+
+const UpdateProjectValueSchema = CreateProjectValueSchema.openapi(
+  "UpdateProjectValue",
+);
 
 const listProjectValueRoute = createRoute({
   method: "get",
@@ -31,7 +61,7 @@ const listProjectValueRoute = createRoute({
   operationId: "listProjectValueBoards",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(ProjectValueSchema) } },
       description: "List of project value boards",
     },
   },
@@ -45,15 +75,13 @@ const createProjectValueRoute = createRoute({
   operationId: "createProjectValueBoard",
   request: {
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateProjectValueSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: ProjectValueSchema } },
       description: "Project value board created",
     },
   },
@@ -68,15 +96,13 @@ const updateProjectValueRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: UpdateProjectValueSchema } },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: ProjectValueSchema } },
       description: "Updated project value board",
     },
     404: {

@@ -14,10 +14,15 @@ export const timeTrackingRouter = new OpenAPIHono<
   { Variables: AppVariables }
 >();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("TimeEntryError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("TimeEntrySuccess");
+const SuccessWithIdSchema = z
+  .object({ success: z.boolean(), id: z.string() })
+  .openapi("TimeEntrySuccessWithId");
 const taskIdParam = z.object({
   taskId: z.string().openapi({ param: { name: "taskId", in: "path" } }),
 });
@@ -25,7 +30,25 @@ const taskIdEntryIdParams = z.object({
   taskId: z.string().openapi({ param: { name: "taskId", in: "path" } }),
   entryId: z.string().openapi({ param: { name: "entryId", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const TimeEntrySchema = z
+  .object({
+    id: z.string(),
+    date: z.string(),
+    hours: z.number(),
+    person: z.string().optional(),
+    description: z.string().optional(),
+  })
+  .openapi("TimeEntry");
+
+const CreateTimeEntrySchema = z
+  .object({
+    date: z.string().optional().openapi({ description: "Date (YYYY-MM-DD)" }),
+    hours: z.number().optional().openapi({ description: "Hours logged" }),
+    person: z.string().optional(),
+    description: z.string().optional(),
+  })
+  .openapi("CreateTimeEntry");
 
 // --- Route definitions ---
 
@@ -37,7 +60,11 @@ const listTimeEntriesRoute = createRoute({
   operationId: "listTimeEntries",
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: {
+        "application/json": {
+          schema: z.record(z.string(), z.array(TimeEntrySchema)),
+        },
+      },
       description: "Map of task IDs to time entry arrays",
     },
   },
@@ -52,7 +79,9 @@ const getTimeEntriesForTaskRoute = createRoute({
   request: { params: taskIdParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: {
+        "application/json": { schema: z.array(TimeEntrySchema) },
+      },
       description: "Time entries for the task",
     },
   },
@@ -67,19 +96,13 @@ const createTimeEntryRoute = createRoute({
   request: {
     params: taskIdParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateTimeEntrySchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: {
-        "application/json": {
-          schema: z.object({ success: z.boolean(), id: z.string() }),
-        },
-      },
+      content: { "application/json": { schema: SuccessWithIdSchema } },
       description: "Time entry created",
     },
   },
@@ -109,7 +132,16 @@ const deleteTimeEntryRoute = createRoute({
 timeTrackingRouter.openapi(listTimeEntriesRoute, async (c) => {
   const parser = getParser(c);
   const timeEntries = await parser.readTimeEntries();
-  const result: Record<string, unknown[]> = {};
+  const result: Record<
+    string,
+    {
+      id: string;
+      date: string;
+      hours: number;
+      person?: string;
+      description?: string;
+    }[]
+  > = {};
   for (const [taskId, entries] of timeEntries) {
     result[taskId] = entries;
   }

@@ -12,14 +12,45 @@ import {
 
 export const swotRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("SwotError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("SwotSuccess");
+const SuccessWithIdSchema = z
+  .object({ success: z.boolean(), id: z.string() })
+  .openapi("SwotSuccessWithId");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const stringArray = z.array(z.string());
+
+const SwotSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    date: z.string(),
+    strengths: stringArray,
+    weaknesses: stringArray,
+    opportunities: stringArray,
+    threats: stringArray,
+  })
+  .openapi("Swot");
+
+const CreateSwotSchema = z
+  .object({
+    title: z.string().optional().openapi({ description: "Analysis title" }),
+    date: z.string().optional().openapi({ description: "Date (YYYY-MM-DD)" }),
+    strengths: stringArray.optional(),
+    weaknesses: stringArray.optional(),
+    opportunities: stringArray.optional(),
+    threats: stringArray.optional(),
+  })
+  .openapi("CreateSwot");
+
+const UpdateSwotSchema = CreateSwotSchema.openapi("UpdateSwot");
 
 const listSwotRoute = createRoute({
   method: "get",
@@ -29,7 +60,7 @@ const listSwotRoute = createRoute({
   operationId: "listSwotAnalyses",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(SwotSchema) } },
       description: "List of SWOT analyses",
     },
   },
@@ -43,19 +74,13 @@ const createSwotRoute = createRoute({
   operationId: "createSwotAnalysis",
   request: {
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateSwotSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: {
-        "application/json": {
-          schema: z.object({ success: z.boolean(), id: z.string() }),
-        },
-      },
+      content: { "application/json": { schema: SuccessWithIdSchema } },
       description: "SWOT analysis created",
     },
   },
@@ -70,9 +95,7 @@ const updateSwotRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: UpdateSwotSchema } },
       required: true,
     },
   },
@@ -122,7 +145,7 @@ swotRouter.openapi(createSwotRoute, async (c) => {
   const id = crypto.randomUUID().substring(0, 8);
   swotAnalyses.push({
     id,
-    title: body.title,
+    title: body.title || "",
     date: body.date || new Date().toISOString().split("T")[0],
     strengths: body.strengths || [],
     weaknesses: body.weaknesses || [],

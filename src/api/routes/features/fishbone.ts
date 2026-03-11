@@ -12,14 +12,46 @@ import {
 
 export const fishboneRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("FishboneError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("FishboneSuccess");
+const SuccessWithIdSchema = z
+  .object({ success: z.boolean(), id: z.string() })
+  .openapi("FishboneSuccessWithId");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const FishboneCauseSchema = z
+  .object({
+    category: z.string(),
+    subcauses: z.array(z.string()),
+  })
+  .openapi("FishboneCause");
+
+const FishboneSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    description: z.string().optional(),
+    causes: z.array(FishboneCauseSchema),
+    created: z.string(),
+    updated: z.string(),
+  })
+  .openapi("Fishbone");
+
+const CreateFishboneSchema = z
+  .object({
+    title: z.string().optional().openapi({ description: "Problem statement" }),
+    description: z.string().optional(),
+    causes: z.array(FishboneCauseSchema).optional(),
+  })
+  .openapi("CreateFishbone");
+
+const UpdateFishboneSchema = CreateFishboneSchema.openapi("UpdateFishbone");
 
 // --- Route definitions ---
 
@@ -31,7 +63,7 @@ const listFishbonesRoute = createRoute({
   operationId: "listFishbones",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(FishboneSchema) } },
       description: "List of fishbone diagrams",
     },
   },
@@ -46,7 +78,7 @@ const getFishboneRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: FishboneSchema } },
       description: "Fishbone diagram details",
     },
     404: {
@@ -64,19 +96,13 @@ const createFishboneRoute = createRoute({
   operationId: "createFishbone",
   request: {
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateFishboneSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: {
-        "application/json": {
-          schema: z.object({ success: z.boolean(), id: z.string() }),
-        },
-      },
+      content: { "application/json": { schema: SuccessWithIdSchema } },
       description: "Fishbone diagram created",
     },
   },
@@ -91,9 +117,7 @@ const updateFishboneRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: UpdateFishboneSchema } },
       required: true,
     },
   },

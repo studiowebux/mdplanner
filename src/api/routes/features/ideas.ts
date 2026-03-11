@@ -12,14 +12,68 @@ import {
 
 export const ideasRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("IdeaError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("IdeaSuccess");
+const SuccessWithIdSchema = z
+  .object({ success: z.boolean(), id: z.string() })
+  .openapi("IdeaSuccessWithId");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const ideaStatus = z.enum([
+  "new",
+  "considering",
+  "planned",
+  "approved",
+  "rejected",
+  "implemented",
+  "cancelled",
+]);
+
+const IdeaSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    status: ideaStatus,
+    category: z.string().optional(),
+    priority: z.enum(["high", "medium", "low"]).optional(),
+    project: z.string().optional(),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
+    resources: z.string().optional(),
+    subtasks: z.array(z.string()).optional(),
+    created: z.string(),
+    description: z.string().optional(),
+    links: z.array(z.string()).optional(),
+    implementedAt: z.string().optional(),
+    cancelledAt: z.string().optional(),
+  })
+  .openapi("Idea");
+
+const CreateIdeaSchema = z
+  .object({
+    title: z.string().openapi({ description: "Idea title" }),
+    status: ideaStatus.optional(),
+    category: z.string().optional(),
+    priority: z.enum(["high", "medium", "low"]).optional(),
+    project: z.string().optional(),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
+    resources: z.string().optional(),
+    subtasks: z.array(z.string()).optional(),
+    description: z.string().optional(),
+    links: z.array(z.string()).optional(),
+    implementedAt: z.string().optional(),
+    cancelledAt: z.string().optional(),
+  })
+  .openapi("CreateIdea");
+
+const UpdateIdeaSchema = CreateIdeaSchema.partial().openapi("UpdateIdea");
 
 // --- Route definitions ---
 
@@ -31,7 +85,7 @@ const listIdeasRoute = createRoute({
   operationId: "listIdeas",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(IdeaSchema) } },
       description: "List of ideas",
     },
   },
@@ -45,19 +99,13 @@ const createIdeaRoute = createRoute({
   operationId: "createIdea",
   request: {
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateIdeaSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: {
-        "application/json": {
-          schema: z.object({ success: z.boolean(), id: z.string() }),
-        },
-      },
+      content: { "application/json": { schema: SuccessWithIdSchema } },
       description: "Idea created",
     },
   },
@@ -72,9 +120,7 @@ const updateIdeaRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: UpdateIdeaSchema } },
       required: true,
     },
   },

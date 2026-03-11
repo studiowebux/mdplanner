@@ -13,14 +13,53 @@ import {
 
 export const kpisRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("KpiError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("KpiSuccess");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const KpiSnapshotSchema = z
+  .object({
+    id: z.string(),
+    period: z.string(),
+    mrr: z.number(),
+    arr: z.number(),
+    churn_rate: z.number(),
+    ltv: z.number(),
+    cac: z.number(),
+    growth_rate: z.number(),
+    active_users: z.number(),
+    nrr: z.number(),
+    gross_margin: z.number(),
+    notes: z.string(),
+  })
+  .openapi("KpiSnapshot");
+
+const CreateKpiSnapshotSchema = z
+  .object({
+    period: z.string().optional().openapi({ description: "Reporting period" }),
+    mrr: z.number().optional().openapi({
+      description: "Monthly recurring revenue",
+    }),
+    churn_rate: z.number().optional(),
+    ltv: z.number().optional(),
+    cac: z.number().optional(),
+    growth_rate: z.number().optional(),
+    active_users: z.number().optional(),
+    nrr: z.number().optional(),
+    gross_margin: z.number().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("CreateKpiSnapshot");
+
+const UpdateKpiSnapshotSchema = CreateKpiSnapshotSchema.openapi(
+  "UpdateKpiSnapshot",
+);
 
 const listKpisRoute = createRoute({
   method: "get",
@@ -30,7 +69,7 @@ const listKpisRoute = createRoute({
   operationId: "listKpis",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(KpiSnapshotSchema) } },
       description: "List of KPI snapshots",
     },
   },
@@ -44,15 +83,13 @@ const createKpiRoute = createRoute({
   operationId: "createKpi",
   request: {
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateKpiSnapshotSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: KpiSnapshotSchema } },
       description: "KPI snapshot created",
     },
   },
@@ -67,15 +104,13 @@ const updateKpiRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: UpdateKpiSnapshotSchema } },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: KpiSnapshotSchema } },
       description: "KPI snapshot updated",
     },
     404: {

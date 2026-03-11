@@ -12,14 +12,42 @@ import {
 
 export const moscowRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("MoscowError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("MoscowSuccess");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const stringArray = z.array(z.string());
+
+const MoscowSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    date: z.string(),
+    must: stringArray,
+    should: stringArray,
+    could: stringArray,
+    wont: stringArray,
+  })
+  .openapi("Moscow");
+
+const CreateMoscowSchema = z
+  .object({
+    title: z.string().optional().openapi({ description: "Analysis title" }),
+    date: z.string().optional().openapi({ description: "Date (YYYY-MM-DD)" }),
+    must: stringArray.optional(),
+    should: stringArray.optional(),
+    could: stringArray.optional(),
+    wont: stringArray.optional(),
+  })
+  .openapi("CreateMoscow");
+
+const UpdateMoscowSchema = CreateMoscowSchema.openapi("UpdateMoscow");
 
 const listMoscowRoute = createRoute({
   method: "get",
@@ -29,7 +57,7 @@ const listMoscowRoute = createRoute({
   operationId: "listMoscowAnalyses",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(MoscowSchema) } },
       description: "List of MoSCoW analyses",
     },
   },
@@ -43,15 +71,13 @@ const createMoscowRoute = createRoute({
   operationId: "createMoscowAnalysis",
   request: {
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateMoscowSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: MoscowSchema } },
       description: "MoSCoW analysis created",
     },
   },
@@ -66,15 +92,13 @@ const updateMoscowRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: UpdateMoscowSchema } },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: MoscowSchema } },
       description: "Updated MoSCoW analysis",
     },
     404: {
