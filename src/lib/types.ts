@@ -16,6 +16,30 @@ export interface TaskComment {
   metadata?: Record<string, unknown>;
 }
 
+export type RejectionType =
+  | "wrong-approach"
+  | "incomplete"
+  | "out-of-scope"
+  | "needs-discussion";
+
+export interface ApprovalVerdict {
+  decidedAt: string;
+  decidedBy: string; // human person ID
+  decision: "approved" | "rejected";
+  feedback?: string;
+  rejectionType?: RejectionType;
+}
+
+export interface ApprovalRequest {
+  id: string;
+  requestedAt: string;
+  requestedBy: string; // agent person ID
+  summary: string; // markdown — what was done
+  commitHash?: string;
+  artifactUrls?: string[];
+  verdict?: ApprovalVerdict;
+}
+
 export interface TaskConfig {
   tags?: string[];
   due_date?: string;
@@ -36,6 +60,7 @@ export interface TaskConfig {
   comments?: TaskComment[];
   claimedBy?: string; // Person ID of the agent actively working on this task
   claimedAt?: string; // ISO timestamp when claimed
+  approvalRequest?: ApprovalRequest;
 }
 
 export interface Task {

@@ -142,8 +142,12 @@ searchRouter.openapi(searchRoute, async (c) => {
     );
   }
 
-  const { q: query, limit: limitParam, offset: offsetParam, types: typesParam } =
-    c.req.valid("query");
+  const {
+    q: query,
+    limit: limitParam,
+    offset: offsetParam,
+    types: typesParam,
+  } = c.req.valid("query");
   if (!query || query.trim().length === 0) {
     return c.json({ error: "Query parameter 'q' is required" }, 400);
   }
@@ -154,9 +158,7 @@ searchRouter.openapi(searchRoute, async (c) => {
   const limit = limitParam
     ? Math.min(100, Math.max(1, parseInt(limitParam, 10) || 50))
     : 50;
-  const offset = offsetParam
-    ? Math.max(0, parseInt(offsetParam, 10) || 0)
-    : 0;
+  const offset = offsetParam ? Math.max(0, parseInt(offsetParam, 10) || 0) : 0;
   const types = typesParam?.split(",").filter(Boolean) as
     | ("task" | "note" | "goal" | "idea" | "meeting" | "person")[]
     | undefined;

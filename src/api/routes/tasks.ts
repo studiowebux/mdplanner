@@ -12,8 +12,12 @@ import {
 import { Task, TaskConfig } from "../../lib/types.ts";
 import type { DirectoryMarkdownParser } from "../../lib/parser/directory/parser.ts";
 import {
+  ApproveTaskSchema,
   BatchUpdateSchema,
   CreateTaskSchema,
+  RejectionTypeEnum,
+  RejectTaskSchema,
+  RequestApprovalSchema,
   SweepStaleClaimsSchema,
   TaskAttachmentsSchema,
   TaskClaimSchema,
@@ -135,7 +139,13 @@ const getNextTaskRoute = createRoute({
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any().openapi({ description: "Best matching task, or null if none found" }) } },
+      content: {
+        "application/json": {
+          schema: z.any().openapi({
+            description: "Best matching task, or null if none found",
+          }),
+        },
+      },
       description: "Best matching task, or null if none found",
     },
     400: {
@@ -911,6 +921,185 @@ tasksRouter.openapi(claimTaskRoute, async (c) => {
     }
     throw e;
   }
+});
+
+// ---------------------------------------------------------------------------
+// Approval gates
+// ---------------------------------------------------------------------------
+
+const requestApprovalRoute = createRoute({
+  method: "post",
+  path: "/{id}/request-approval",
+  tags: ["Tasks"],
+  summary: "Submit task for human review",
+  operationId: "requestTaskApproval",
+  description:
+    "Agent calls this instead of moving the task to Done. Attaches a structured " +
+    "summary (with optional commit hash) and moves the task to 'Pending Review'.",
+  request: {
+    params: idParam,
+    body: {
+      content: { "application/json": { schema: RequestApprovalSchema } },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Task submitted for review",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Task not found",
+    },
+  },
+});
+
+const approveTaskRoute = createRoute({
+  method: "post",
+  path: "/{id}/approve",
+  tags: ["Tasks"],
+  summary: "Approve a pending review task",
+  operationId: "approveTask",
+  description: "Human approves the task. Moves it to Done.",
+  request: {
+    params: idParam,
+    body: {
+      content: { "application/json": { schema: ApproveTaskSchema } },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Task approved",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Task not found",
+    },
+  },
+});
+
+const rejectTaskRoute = createRoute({
+  method: "post",
+  path: "/{id}/reject",
+  tags: ["Tasks"],
+  summary: "Reject a pending review task",
+  operationId: "rejectTask",
+  description:
+    "Human rejects the task with structured feedback. Moves it back to In Progress " +
+    "and reassigns to the original requesting agent.",
+  request: {
+    params: idParam,
+    body: {
+      content: { "application/json": { schema: RejectTaskSchema } },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: SuccessSchema } },
+      description: "Task rejected",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Task not found",
+    },
+  },
+});
+
+tasksRouter.openapi(requestApprovalRoute, async (c) => {
+  const parser = getParser(c);
+  const { id: taskId } = c.req.valid("param");
+  const body = c.req.valid("json");
+
+  const tasks = await parser.readTasks();
+  const task = findTaskById(tasks, taskId);
+  if (!task) return c.json({ error: "Task not found" }, 404);
+
+  const approvalRequest = {
+    id: crypto.randomUUID(),
+    requestedAt: new Date().toISOString(),
+    requestedBy: body.requested_by ?? task.config.assignee ?? "",
+    summary: body.summary,
+    ...(body.commit_hash && { commitHash: body.commit_hash }),
+    ...(body.artifact_urls?.length && { artifactUrls: body.artifact_urls }),
+  };
+
+  await parser.updateTask(taskId, {
+    section: "Pending Review",
+    config: { ...task.config, approvalRequest },
+  });
+  cacheWriteThrough(c, "tasks").catch((e) =>
+    console.error("[tasks] background cache sync failed:", e)
+  );
+  return c.json({ success: true }, 200);
+});
+
+tasksRouter.openapi(approveTaskRoute, async (c) => {
+  const parser = getParser(c);
+  const { id: taskId } = c.req.valid("param");
+  const body = c.req.valid("json");
+
+  const tasks = await parser.readTasks();
+  const task = findTaskById(tasks, taskId);
+  if (!task) return c.json({ error: "Task not found" }, 404);
+
+  const verdict = {
+    decidedAt: new Date().toISOString(),
+    decidedBy: body.decided_by ?? "",
+    decision: "approved" as const,
+    ...(body.feedback && { feedback: body.feedback }),
+  };
+
+  const existing = task.config.approvalRequest;
+  await parser.updateTask(taskId, {
+    section: "Done",
+    config: {
+      ...task.config,
+      approvalRequest: existing ? { ...existing, verdict } : undefined,
+    },
+  });
+  cacheWriteThrough(c, "tasks").catch((e) =>
+    console.error("[tasks] background cache sync failed:", e)
+  );
+  return c.json({ success: true }, 200);
+});
+
+tasksRouter.openapi(rejectTaskRoute, async (c) => {
+  const parser = getParser(c);
+  const { id: taskId } = c.req.valid("param");
+  const body = c.req.valid("json");
+
+  const tasks = await parser.readTasks();
+  const task = findTaskById(tasks, taskId);
+  if (!task) return c.json({ error: "Task not found" }, 404);
+
+  const verdict = {
+    decidedAt: new Date().toISOString(),
+    decidedBy: body.decided_by ?? "",
+    decision: "rejected" as const,
+    feedback: body.feedback,
+    rejectionType: body.rejection_type,
+  };
+
+  const existing = task.config.approvalRequest;
+  // Reassign to the original requesting agent
+  const agentId = existing?.requestedBy || task.config.assignee;
+
+  await parser.updateTask(taskId, {
+    section: "In Progress",
+    config: {
+      ...task.config,
+      assignee: agentId,
+      approvalRequest: existing ? { ...existing, verdict } : undefined,
+    },
+  });
+  cacheWriteThrough(c, "tasks").catch((e) =>
+    console.error("[tasks] background cache sync failed:", e)
+  );
+  return c.json({ success: true }, 200);
 });
 
 export { findTaskById };

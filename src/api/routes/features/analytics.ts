@@ -5,11 +5,7 @@
  */
 
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import {
-  AppVariables,
-  getParser,
-  getProjectManager,
-} from "../context.ts";
+import { AppVariables, getParser, getProjectManager } from "../context.ts";
 import { collectAnalytics } from "../../../lib/analytics/index.ts";
 
 const ErrorSchema = z.object({

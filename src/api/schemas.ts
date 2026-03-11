@@ -94,6 +94,31 @@ export const SweepStaleClaimsSchema = z.object({
   ttl_minutes: z.number().int().min(1).default(30),
 }).strict();
 
+export const RequestApprovalSchema = z.object({
+  summary: z.string().min(1),
+  requested_by: z.string().optional(),
+  commit_hash: z.string().optional(),
+  artifact_urls: z.array(z.string()).optional(),
+}).strict();
+
+export const ApproveTaskSchema = z.object({
+  decided_by: z.string().optional(),
+  feedback: z.string().optional(),
+}).strict();
+
+export const RejectionTypeEnum = z.enum([
+  "wrong-approach",
+  "incomplete",
+  "out-of-scope",
+  "needs-discussion",
+]);
+
+export const RejectTaskSchema = z.object({
+  decided_by: z.string().optional(),
+  feedback: z.string().min(1),
+  rejection_type: RejectionTypeEnum,
+}).strict();
+
 // -- Notes --
 
 export const CreateNoteSchema = z.object({

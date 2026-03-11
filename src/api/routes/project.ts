@@ -3,11 +3,7 @@
  */
 
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import {
-  AppVariables,
-  cacheWriteThrough,
-  getParser,
-} from "./context.ts";
+import { AppVariables, cacheWriteThrough, getParser } from "./context.ts";
 
 const ErrorSchema = z.object({
   error: z.string(),
@@ -57,7 +53,9 @@ const getProjectConfigRoute = createRoute({
     200: {
       content: {
         "application/json": {
-          schema: z.any().openapi({ description: "Project configuration object" }),
+          schema: z.any().openapi({
+            description: "Project configuration object",
+          }),
         },
       },
       description: "Project configuration object",

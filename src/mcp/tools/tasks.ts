@@ -769,6 +769,184 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
       return ok({ released, count: released.length });
     },
   );
+
+  // ---------------------------------------------------------------------------
+  // Approval gates
+  // ---------------------------------------------------------------------------
+
+  server.registerTool(
+    "request_approval",
+    {
+      description:
+        "Submit a task for human review. Call this instead of moving the task to Done. " +
+        "Attaches a structured summary (with optional commit hash) and moves the task to " +
+        "'Pending Review'. At the next boot session the verdict will appear in inProgress " +
+        "tasks (if rejected) or the task will be in Done (if approved).",
+      inputSchema: {
+        id: z.string().describe("Task ID"),
+        summary: z.string().describe(
+          "What was done — markdown. Include what changed, why, and how to verify.",
+        ),
+        requested_by: z.string().optional().describe(
+          "Person ID of the requesting agent (defaults to current task assignee)",
+        ),
+        commit_hash: z.string().optional().describe("Short git commit hash"),
+        artifact_urls: z.array(z.string()).optional().describe(
+          "Links to PRs, releases, or previews",
+        ),
+      },
+    },
+    async ({ id, summary, requested_by, commit_hash, artifact_urls }) => {
+      const tasks = await parser.readTasks();
+      const task = flattenTasks(tasks).find((t) => t.id === id);
+      if (!task) return err(`Task '${id}' not found`);
+
+      const approvalRequest = {
+        id: crypto.randomUUID(),
+        requestedAt: new Date().toISOString(),
+        requestedBy: requested_by ?? task.config.assignee ?? "",
+        summary,
+        ...(commit_hash && { commitHash: commit_hash }),
+        ...(artifact_urls?.length && { artifactUrls: artifact_urls }),
+      };
+
+      await parser.updateTask(id, {
+        section: "Pending Review",
+        config: { ...task.config, approvalRequest },
+      });
+      return ok({ success: true, taskId: id, section: "Pending Review" });
+    },
+  );
+
+  server.registerTool(
+    "approve_task",
+    {
+      description: "Approve a task in 'Pending Review'. Moves it to Done. " +
+        "Typically called by the human owner or a delegated reviewer.",
+      inputSchema: {
+        id: z.string().describe("Task ID"),
+        decided_by: z.string().optional().describe("Person ID of the approver"),
+        feedback: z.string().optional().describe("Optional approval note"),
+      },
+    },
+    async ({ id, decided_by, feedback }) => {
+      const tasks = await parser.readTasks();
+      const task = flattenTasks(tasks).find((t) => t.id === id);
+      if (!task) return err(`Task '${id}' not found`);
+
+      const verdict = {
+        decidedAt: new Date().toISOString(),
+        decidedBy: decided_by ?? "",
+        decision: "approved" as const,
+        ...(feedback && { feedback }),
+      };
+
+      const existing = task.config.approvalRequest;
+      await parser.updateTask(id, {
+        section: "Done",
+        config: {
+          ...task.config,
+          approvalRequest: existing ? { ...existing, verdict } : undefined,
+        },
+      });
+      return ok({ success: true, taskId: id, section: "Done" });
+    },
+  );
+
+  server.registerTool(
+    "reject_task",
+    {
+      description:
+        "Reject a task in 'Pending Review'. Moves it back to In Progress and " +
+        "reassigns to the original requesting agent. Structured rejection type " +
+        "allows the agent to route without parsing prose feedback.",
+      inputSchema: {
+        id: z.string().describe("Task ID"),
+        feedback: z.string().describe(
+          "Explanation of what needs to change (required on rejection)",
+        ),
+        rejection_type: z.enum([
+          "wrong-approach",
+          "incomplete",
+          "out-of-scope",
+          "needs-discussion",
+        ]).describe("Structured rejection category"),
+        decided_by: z.string().optional().describe("Person ID of the reviewer"),
+      },
+    },
+    async ({ id, feedback, rejection_type, decided_by }) => {
+      const tasks = await parser.readTasks();
+      const task = flattenTasks(tasks).find((t) => t.id === id);
+      if (!task) return err(`Task '${id}' not found`);
+
+      const verdict = {
+        decidedAt: new Date().toISOString(),
+        decidedBy: decided_by ?? "",
+        decision: "rejected" as const,
+        feedback,
+        rejectionType: rejection_type,
+      };
+
+      const existing = task.config.approvalRequest;
+      const agentId = existing?.requestedBy || task.config.assignee;
+
+      await parser.updateTask(id, {
+        section: "In Progress",
+        config: {
+          ...task.config,
+          assignee: agentId,
+          approvalRequest: existing ? { ...existing, verdict } : undefined,
+        },
+      });
+      return ok({
+        success: true,
+        taskId: id,
+        section: "In Progress",
+        reassignedTo: agentId,
+      });
+    },
+  );
+
+  server.registerTool(
+    "list_pending_approvals",
+    {
+      description:
+        "List all tasks in 'Pending Review' — the human owner's review queue. " +
+        "Returns stubs: id, title, requestedBy, requestedAt, summary excerpt, commit hash.",
+      inputSchema: {
+        project: z.string().optional().describe(
+          "Filter by project name (case-insensitive)",
+        ),
+      },
+    },
+    async ({ project }) => {
+      const tasks = await parser.readTasks();
+      const flat = flattenTasks(tasks);
+      const projectLower = project?.toLowerCase();
+
+      let pending = flat.filter((t) => t.section === "Pending Review");
+      if (projectLower) {
+        pending = pending.filter(
+          (t) => (t.config.project || "").toLowerCase() === projectLower,
+        );
+      }
+
+      const stubs = pending.map((t) => {
+        const ar = t.config.approvalRequest;
+        return {
+          id: t.id,
+          title: t.title,
+          project: t.config.project,
+          requestedBy: ar?.requestedBy,
+          requestedAt: ar?.requestedAt,
+          commitHash: ar?.commitHash,
+          summaryExcerpt: ar?.summary.slice(0, 200),
+        };
+      });
+
+      return ok(stubs);
+    },
+  );
 }
 
 /** Flattens a task tree into a single-level array. */

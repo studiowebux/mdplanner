@@ -8,6 +8,28 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.28.0] - 2026-03-11
+
+### Added
+
+- Approval gates — structured human-in-the-loop workflow for task sign-off.
+  Agents call `POST /tasks/:id/request-approval` instead of moving tasks to
+  Done. Tasks enter a new "Pending Review" section. Humans approve or reject
+  with structured feedback (`rejection_type` enum so agents can route without
+  parsing prose).
+- `POST /tasks/:id/approve` and `POST /tasks/:id/reject` — human review
+  endpoints. Approve moves to Done; reject returns to In Progress reassigned to
+  the original agent.
+- 4 new MCP tools: `request_approval`, `approve_task`, `reject_task`,
+  `list_pending_approvals`. Total MCP tool count: 244.
+- Approval panel in task sidenav — renders agent summary, commit hash, artifact
+  links, and verdict badge (approved/rejected). Approve/Reject buttons for
+  humans when task is in Pending Review.
+- "Pending Review" board column inserts automatically between In Progress and
+  Done when the first task enters it — no manual setup required.
+- Scalar API reference UI at `GET /api/reference` — interactive docs backed by
+  the auto-generated OpenAPI 3.1 spec. No authentication required.
+
 ## [0.27.0] - 2026-03-11
 
 ### Added

@@ -3,11 +3,7 @@
  */
 
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import {
-  AppVariables,
-  cacheWriteThrough,
-  getParser,
-} from "./context.ts";
+import { AppVariables, cacheWriteThrough, getParser } from "./context.ts";
 
 export const c4Router = new OpenAPIHono<{ Variables: AppVariables }>();
 

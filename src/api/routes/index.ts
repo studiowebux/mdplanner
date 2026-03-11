@@ -4,6 +4,7 @@
 
 import { Hono } from "hono";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import { apiReference } from "@scalar/hono-api-reference";
 import { cors } from "hono/cors";
 import { bodyLimit } from "hono/body-limit";
 import { RateLimiter } from "../../lib/rate-limit.ts";
@@ -172,6 +173,7 @@ export function createApiRouter(
         path === "/api/health" ||
         path === "/api/version" ||
         path === "/api/doc" ||
+        path === "/api/reference" ||
         path.startsWith("/api/auth")
       ) {
         return next();
@@ -436,6 +438,12 @@ export function createApiRouter(
       license: { name: "MIT", url: "https://opensource.org/licenses/MIT" },
     },
   });
+
+  // Scalar API reference UI — interactive docs at /api/reference
+  api.get(
+    "/reference",
+    apiReference({ url: "/api/doc", theme: "default" }),
+  );
 
   // 404 handler
   api.notFound((c) => {

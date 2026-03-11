@@ -11,10 +11,7 @@
 
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { GitHubApiProvider } from "../../lib/integrations/providers/github.ts";
-import {
-  AppVariables,
-  getProjectManager,
-} from "./context.ts";
+import { AppVariables, getProjectManager } from "./context.ts";
 
 export const githubRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
@@ -84,11 +81,7 @@ githubRouter.openapi(getRepoRoute, async (c) => {
     return c.json(data, 200);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "GitHub API error";
-    const status = msg.includes("404")
-      ? 404
-      : msg.includes("401")
-        ? 401
-        : 502;
+    const status = msg.includes("404") ? 404 : msg.includes("401") ? 401 : 502;
     return c.json({ error: msg }, status);
   }
 });
@@ -151,11 +144,7 @@ githubRouter.openapi(getIssueRoute, async (c) => {
     return c.json(data, 200);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "GitHub API error";
-    const status = msg.includes("404")
-      ? 404
-      : msg.includes("401")
-        ? 401
-        : 502;
+    const status = msg.includes("404") ? 404 : msg.includes("401") ? 401 : 502;
     return c.json({ error: msg }, status);
   }
 });
@@ -229,11 +218,7 @@ githubRouter.openapi(createIssueRoute, async (c) => {
     return c.json(created, 201);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "GitHub API error";
-    const status = msg.includes("404")
-      ? 404
-      : msg.includes("401")
-        ? 401
-        : 502;
+    const status = msg.includes("404") ? 404 : msg.includes("401") ? 401 : 502;
     return c.json({ error: msg }, status);
   }
 });
@@ -342,11 +327,7 @@ githubRouter.openapi(listMilestonesRoute, async (c) => {
     return c.json(milestones, 200);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "GitHub API error";
-    const status = msg.includes("404")
-      ? 404
-      : msg.includes("401")
-        ? 401
-        : 502;
+    const status = msg.includes("404") ? 404 : msg.includes("401") ? 401 : 502;
     return c.json({ error: msg }, status);
   }
 });
@@ -425,11 +406,7 @@ githubRouter.openapi(patchIssueRoute, async (c) => {
     return c.json(issue, 200);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "GitHub API error";
-    const status = msg.includes("404")
-      ? 404
-      : msg.includes("401")
-        ? 401
-        : 502;
+    const status = msg.includes("404") ? 404 : msg.includes("401") ? 401 : 502;
     return c.json({ error: msg }, status);
   }
 });
@@ -487,11 +464,7 @@ githubRouter.openapi(listRunsRoute, async (c) => {
     return c.json({ runs }, 200);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "GitHub API error";
-    const status = msg.includes("404")
-      ? 404
-      : msg.includes("401")
-        ? 401
-        : 502;
+    const status = msg.includes("404") ? 404 : msg.includes("401") ? 401 : 502;
     return c.json({ error: msg }, status);
   }
 });
@@ -554,11 +527,7 @@ githubRouter.openapi(getPrRoute, async (c) => {
     return c.json(pr, 200);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "GitHub API error";
-    const status = msg.includes("404")
-      ? 404
-      : msg.includes("401")
-        ? 401
-        : 502;
+    const status = msg.includes("404") ? 404 : msg.includes("401") ? 401 : 502;
     return c.json({ error: msg }, status);
   }
 });

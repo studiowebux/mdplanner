@@ -421,7 +421,9 @@ capacityRouter.openapi(deletePlanRoute, async (c) => {
   const { id } = c.req.valid("param");
   const plans = await parser.readCapacityPlans();
   const filtered = plans.filter((p) => p.id !== id);
-  if (filtered.length === plans.length) return c.json({ error: "Not found" }, 404);
+  if (filtered.length === plans.length) {
+    return c.json({ error: "Not found" }, 404);
+  }
   await parser.saveCapacityPlans(filtered);
   cachePurge(c, "capacity_plans", id);
   return c.json({ success: true }, 200);

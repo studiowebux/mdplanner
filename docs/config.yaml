@@ -60,7 +60,7 @@ landing:
       url: "https://discord.gg/BG5Erm9fNv"
   hero:
     title: "Project management with plain markdown files"
-    subtitle: "46 views, 239 MCP tools, zero database. Plan, track, and build with .md files you own."
+    subtitle: "46 views, 244 MCP tools, zero database. Plan, track, and build with .md files you own."
     buttons:
       - text: "Get Started"
         url: "/getting-started/quick-start.html"
@@ -85,7 +85,7 @@ landing:
         description: "Enterprise and project goals with KPI targets and status."
       - emoji: "~"
         title: "MCP Server"
-        description: "239 tools for Claude Code, Claude Desktop, and any MCP client."
+        description: "244 tools for Claude Code, Claude Desktop, and any MCP client."
       - emoji: "~"
         title: "AI Chat"
         description: "Built-in Ollama integration for local LLM conversations."
