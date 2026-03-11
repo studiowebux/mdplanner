@@ -428,9 +428,30 @@ export class SummaryView {
     const openMilestones = milestones
       .filter((m) => milestoneData[m].incomplete > 0)
       .sort();
-    const doneMilestones = milestones
+    let doneMilestones = milestones
       .filter((m) => milestoneData[m].incomplete === 0)
       .sort();
+
+    // Apply hideCompletedMilestonesAfterDays filter using tm.milestones
+    // as a completedAt lookup (populated when the milestones view is visited)
+    const days = parseInt(
+      localStorage.getItem("hideCompletedMilestonesAfterDays") ?? "",
+      10,
+    );
+    if (!isNaN(days) && this.tm.milestones) {
+      const completedAtByName = new Map(
+        this.tm.milestones
+          .filter((m) => m.completedAt)
+          .map((m) => [m.name, m.completedAt]),
+      );
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - days);
+      doneMilestones = doneMilestones.filter((name) => {
+        const completedAt = completedAtByName.get(name);
+        if (!completedAt) return days === 0 ? false : true;
+        return new Date(completedAt) >= cutoff;
+      });
+    }
 
     const makeCard = (milestone, index) => {
       const data = milestoneData[milestone];
