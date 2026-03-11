@@ -103,14 +103,24 @@ export class TasksDirectoryParser {
     }
 
     if (orderedSections.length === 0) {
-      return Array.from(allDirs);
+      return insertPendingReview(Array.from(allDirs));
     }
 
     // Return ordered sections that exist, then any extras not in the order file
     const result = orderedSections.filter((s) => allDirs.has(s));
     for (const dir of allDirs) {
       if (!orderedSections.includes(dir)) {
-        result.push(dir);
+        // "Pending Review" belongs between "In Progress" and "Done"
+        if (dir === "Pending Review") {
+          const doneIdx = result.indexOf("Done");
+          if (doneIdx !== -1) {
+            result.splice(doneIdx, 0, dir);
+          } else {
+            result.push(dir);
+          }
+        } else {
+          result.push(dir);
+        }
       }
     }
     return result;
@@ -905,7 +915,7 @@ export class TasksDirectoryParser {
   listSectionsSync(): string[] {
     // Default sections - the actual sections are determined by directory structure
     // This is a fallback for sync access
-    return ["Backlog", "Todo", "In Progress", "Done"];
+    return ["Backlog", "Todo", "In Progress", "Pending Review", "Done"];
   }
 
   /**
@@ -956,4 +966,20 @@ export class TasksDirectoryParser {
       await this.write(task);
     }
   }
+}
+
+/**
+ * Insert "Pending Review" between "In Progress" and "Done" in a section list.
+ * Used when the section appears on disk but is not yet in the .order file.
+ */
+function insertPendingReview(sections: string[]): string[] {
+  if (!sections.includes("Pending Review")) return sections;
+  const result = sections.filter((s) => s !== "Pending Review");
+  const doneIdx = result.indexOf("Done");
+  if (doneIdx !== -1) {
+    result.splice(doneIdx, 0, "Pending Review");
+  } else {
+    result.push("Pending Review");
+  }
+  return result;
 }
