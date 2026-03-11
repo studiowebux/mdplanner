@@ -10,8 +10,13 @@ import {
   cacheWriteThrough,
   getParser,
 } from "../context.ts";
+import { AgentModelSchema } from "../../../lib/types.ts";
 
 export const peopleRouter = new OpenAPIHono<{ Variables: AppVariables }>();
+
+// ---------------------------------------------------------------------------
+// Shared schemas
+// ---------------------------------------------------------------------------
 
 const ErrorSchema = z.object({
   error: z.string(),
@@ -22,6 +27,81 @@ const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
 
+const PersonSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    title: z.string().optional(),
+    role: z.string().optional(),
+    departments: z.array(z.string()).optional(),
+    reportsTo: z.string().optional(),
+    email: z.string().optional(),
+    phone: z.string().optional(),
+    startDate: z.string().optional(),
+    hoursPerDay: z.number().optional(),
+    workingDays: z.array(z.string()).optional(),
+    notes: z.string().optional(),
+    agentType: z.enum(["human", "ai", "hybrid"]).optional(),
+    skills: z.array(z.string()).optional(),
+    models: z.array(AgentModelSchema).optional(),
+    systemPrompt: z.string().optional(),
+    status: z.enum(["idle", "working", "offline"]).optional(),
+    lastSeen: z.string().optional(),
+    currentTaskId: z.string().optional(),
+  })
+  .openapi("Person");
+
+const CreatePersonSchema = z
+  .object({
+    name: z.string().min(1).openapi({ description: "Person name" }),
+    title: z.string().optional(),
+    role: z.string().optional(),
+    departments: z.array(z.string()).optional(),
+    reportsTo: z.string().optional(),
+    email: z.string().optional(),
+    phone: z.string().optional(),
+    startDate: z.string().optional(),
+    hoursPerDay: z.number().optional(),
+    workingDays: z.array(z.string()).optional(),
+    notes: z.string().optional(),
+    agentType: z.enum(["human", "ai"]).optional(),
+    skills: z.array(z.string()).optional(),
+    models: z.array(AgentModelSchema).optional(),
+    systemPrompt: z.string().optional(),
+  })
+  .openapi("CreatePerson");
+
+const UpdatePersonSchema = z
+  .object({
+    name: z.string().optional(),
+    title: z.string().optional(),
+    role: z.string().optional(),
+    departments: z.array(z.string()).optional(),
+    reportsTo: z.string().optional(),
+    email: z.string().optional(),
+    phone: z.string().optional(),
+    startDate: z.string().optional(),
+    hoursPerDay: z.number().optional(),
+    workingDays: z.array(z.string()).optional(),
+    notes: z.string().optional(),
+    agentType: z.enum(["human", "ai", "hybrid"]).optional(),
+    skills: z.array(z.string()).optional(),
+    models: z.array(AgentModelSchema).optional(),
+    systemPrompt: z.string().optional(),
+    status: z.enum(["idle", "working", "offline"]).optional(),
+    lastSeen: z.string().optional(),
+    currentTaskId: z.string().optional(),
+  })
+  .openapi("UpdatePerson");
+
+// Tree and summary are computed aggregates with dynamic shape.
+const PeopleTreeSchema = z.unknown();
+const PeopleSummarySchema = z.unknown();
+
+// ---------------------------------------------------------------------------
+// Route definitions
+// ---------------------------------------------------------------------------
+
 const listPeopleRoute = createRoute({
   method: "get",
   path: "/",
@@ -30,7 +110,7 @@ const listPeopleRoute = createRoute({
   operationId: "listPeople",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.object({})) } },
+      content: { "application/json": { schema: z.array(PersonSchema) } },
       description: "List of people",
     },
   },
@@ -44,7 +124,7 @@ const getTreeRoute = createRoute({
   operationId: "getPeopleTree",
   responses: {
     200: {
-      content: { "application/json": { schema: z.object({}) } },
+      content: { "application/json": { schema: PeopleTreeSchema } },
       description: "Hierarchical tree structure",
     },
   },
@@ -58,7 +138,7 @@ const getSummaryRoute = createRoute({
   operationId: "getPeopleSummary",
   responses: {
     200: {
-      content: { "application/json": { schema: z.object({}) } },
+      content: { "application/json": { schema: PeopleSummarySchema } },
       description: "People summary stats",
     },
   },
@@ -87,7 +167,7 @@ const getPersonRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.object({}) } },
+      content: { "application/json": { schema: PersonSchema } },
       description: "Person details",
     },
     404: {
@@ -106,7 +186,7 @@ const getReportsRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.object({})) } },
+      content: { "application/json": { schema: z.array(PersonSchema) } },
       description: "Direct reports",
     },
   },
@@ -121,37 +201,19 @@ const createPersonRoute = createRoute({
   request: {
     body: {
       content: {
-        "application/json": {
-          schema: z.object({
-            name: z.string().min(1),
-            title: z.string().optional(),
-            role: z.string().optional(),
-            departments: z.array(z.string()).optional(),
-            reportsTo: z.string().optional(),
-            email: z.string().optional(),
-            phone: z.string().optional(),
-            startDate: z.string().optional(),
-            hoursPerDay: z.number().optional(),
-            workingDays: z.array(z.string()).optional(),
-            notes: z.string().optional(),
-            agentType: z.enum(["human", "ai"]).optional(),
-            skills: z.array(z.string()).optional(),
-            models: z.array(z.object({
-              name: z.string(),
-              provider: z.string().default(""),
-              endpoint: z.string().optional(),
-            })).optional(),
-            systemPrompt: z.string().optional(),
-          }),
-        },
+        "application/json": { schema: CreatePersonSchema },
       },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.object({}) } },
+      content: { "application/json": { schema: PersonSchema } },
       description: "Person created",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid input",
     },
   },
 });
@@ -165,14 +227,18 @@ const updatePersonRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: UpdatePersonSchema } },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.object({}) } },
+      content: { "application/json": { schema: PersonSchema } },
       description: "Updated person",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid input",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },

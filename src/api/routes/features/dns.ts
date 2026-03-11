@@ -23,6 +23,67 @@ const idParam = z.object({
 });
 const SuccessSchema = z.object({ success: z.boolean() });
 
+// ---------------------------------------------------------------------------
+// Shared schemas
+// ---------------------------------------------------------------------------
+
+const DnsRecordSchema = z
+  .object({
+    type: z.string(),
+    name: z.string(),
+    value: z.string(),
+    ttl: z.number(),
+    proxied: z.boolean().optional(),
+  })
+  .openapi("DnsRecord");
+
+const DnsDomainSchema = z
+  .object({
+    id: z.string(),
+    domain: z.string(),
+    expiryDate: z.string().optional(),
+    autoRenew: z.boolean().optional(),
+    renewalCostUsd: z.number().optional(),
+    provider: z.string().optional(),
+    nameservers: z.array(z.string()).optional(),
+    dnsRecords: z.array(DnsRecordSchema).optional(),
+    status: z.string().optional(),
+    notes: z.string().optional(),
+    lastFetchedAt: z.string().optional(),
+    project: z.string().optional(),
+    created: z.string(),
+    updated: z.string(),
+  })
+  .openapi("DnsDomain");
+
+const CreateDnsDomainSchema = z
+  .object({
+    domain: z.string().min(1).openapi({ description: "Domain name" }),
+    expiryDate: z.string().optional(),
+    autoRenew: z.boolean().optional(),
+    renewalCostUsd: z.number().optional(),
+    provider: z.string().optional(),
+    nameservers: z.array(z.string()).optional(),
+    notes: z.string().optional(),
+    lastFetchedAt: z.string().optional(),
+    project: z.string().optional(),
+  })
+  .openapi("CreateDnsDomain");
+
+const UpdateDnsDomainSchema = z
+  .object({
+    domain: z.string().optional(),
+    expiryDate: z.string().optional(),
+    autoRenew: z.boolean().optional(),
+    renewalCostUsd: z.number().optional(),
+    provider: z.string().optional(),
+    nameservers: z.array(z.string()).optional(),
+    notes: z.string().optional(),
+    lastFetchedAt: z.string().optional(),
+    project: z.string().optional(),
+  })
+  .openapi("UpdateDnsDomain");
+
 // --- Route definitions ---
 
 const listDnsRoute = createRoute({
@@ -33,7 +94,7 @@ const listDnsRoute = createRoute({
   operationId: "listDnsDomains",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(DnsDomainSchema) } },
       description: "List of DNS domains",
     },
   },
@@ -48,7 +109,7 @@ const getDnsRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: DnsDomainSchema } },
       description: "DNS domain details",
     },
     404: {
@@ -67,7 +128,7 @@ const createDnsRoute = createRoute({
   request: {
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: CreateDnsDomainSchema },
       },
       required: true,
     },
@@ -80,6 +141,10 @@ const createDnsRoute = createRoute({
         },
       },
       description: "DNS domain created",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
   },
 });
@@ -94,7 +159,7 @@ const updateDnsRoute = createRoute({
     params: idParam,
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: UpdateDnsDomainSchema },
       },
       required: true,
     },
@@ -103,6 +168,10 @@ const updateDnsRoute = createRoute({
     200: {
       content: { "application/json": { schema: SuccessSchema } },
       description: "DNS domain updated",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -206,8 +275,9 @@ dnsRouter.openapi(updateDnsRoute, async (c) => {
     "lastFetchedAt",
     "project",
   ];
+  const bodyRecord = body as Record<string, unknown>;
   for (const key of allowed) {
-    if (key in body) updates[key] = body[key];
+    if (key in bodyRecord) updates[key] = bodyRecord[key];
   }
 
   const updated = await parser.updateDnsDomain(id, updates);

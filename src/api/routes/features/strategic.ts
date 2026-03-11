@@ -12,6 +12,10 @@ import {
 
 export const strategicRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
+// ---------------------------------------------------------------------------
+// Shared schemas
+// ---------------------------------------------------------------------------
+
 const ErrorSchema = z.object({
   error: z.string(),
   message: z.string().optional(),
@@ -25,7 +29,95 @@ const levelParams = z.object({
   levelId: z.string().openapi({ param: { name: "levelId", in: "path" } }),
 });
 
-// --- Route definitions ---
+const StrategicLevelSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    description: z.string().optional(),
+    level: z.enum([
+      "vision",
+      "mission",
+      "goals",
+      "objectives",
+      "strategies",
+      "tactics",
+    ]),
+    parentId: z.string().optional(),
+    order: z.number(),
+    linkedTasks: z.array(z.string()).optional(),
+    linkedMilestones: z.array(z.string()).optional(),
+  })
+  .openapi("StrategicLevel");
+
+const StrategicLevelsBuilderSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    date: z.string(),
+    levels: z.array(StrategicLevelSchema),
+  })
+  .openapi("StrategicLevelsBuilder");
+
+const CreateStrategicLevelsBuilderSchema = z
+  .object({
+    title: z.string().optional().openapi({ description: "Builder title" }),
+    date: z.string().optional().openapi({ description: "Date (YYYY-MM-DD)" }),
+    levels: z.array(StrategicLevelSchema).optional().openapi({
+      description: "Initial levels",
+    }),
+  })
+  .openapi("CreateStrategicLevelsBuilder");
+
+const UpdateStrategicLevelsBuilderSchema = z
+  .object({
+    title: z.string().optional(),
+    date: z.string().optional(),
+    levels: z.array(StrategicLevelSchema).optional(),
+  })
+  .openapi("UpdateStrategicLevelsBuilder");
+
+const CreateStrategicLevelSchema = z
+  .object({
+    title: z.string().openapi({ description: "Level title" }),
+    description: z.string().optional(),
+    level: z.enum([
+      "vision",
+      "mission",
+      "goals",
+      "objectives",
+      "strategies",
+      "tactics",
+    ]),
+    parentId: z.string().optional(),
+    linkedTasks: z.array(z.string()).optional(),
+    linkedMilestones: z.array(z.string()).optional(),
+  })
+  .openapi("CreateStrategicLevel");
+
+const UpdateStrategicLevelSchema = z
+  .object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    level: z
+      .enum([
+        "vision",
+        "mission",
+        "goals",
+        "objectives",
+        "strategies",
+        "tactics",
+      ])
+      .optional(),
+    parentId: z.string().optional(),
+    order: z.number().optional(),
+    linkedTasks: z.array(z.string()).optional(),
+    linkedMilestones: z.array(z.string()).optional(),
+  })
+  .openapi("UpdateStrategicLevel");
+
+// ---------------------------------------------------------------------------
+// Route definitions
+// ---------------------------------------------------------------------------
 
 const listStrategicRoute = createRoute({
   method: "get",
@@ -35,7 +127,9 @@ const listStrategicRoute = createRoute({
   operationId: "listStrategicLevels",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: {
+        "application/json": { schema: z.array(StrategicLevelsBuilderSchema) },
+      },
       description: "List of strategic levels builders",
     },
   },
@@ -50,15 +144,21 @@ const createStrategicRoute = createRoute({
   request: {
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: CreateStrategicLevelsBuilderSchema },
       },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: {
+        "application/json": { schema: StrategicLevelsBuilderSchema },
+      },
       description: "Strategic levels builder created",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid input",
     },
   },
 });
@@ -72,7 +172,9 @@ const getStrategicRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: {
+        "application/json": { schema: StrategicLevelsBuilderSchema },
+      },
       description: "Strategic levels builder details",
     },
     404: {
@@ -92,15 +194,21 @@ const updateStrategicRoute = createRoute({
     params: idParam,
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: UpdateStrategicLevelsBuilderSchema },
       },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: {
+        "application/json": { schema: StrategicLevelsBuilderSchema },
+      },
       description: "Updated strategic levels builder",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid input",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -138,15 +246,19 @@ const addLevelRoute = createRoute({
     params: idParam,
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: CreateStrategicLevelSchema },
       },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: StrategicLevelSchema } },
       description: "Level added",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid input",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -165,15 +277,19 @@ const updateLevelRoute = createRoute({
     params: levelParams,
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: UpdateStrategicLevelSchema },
       },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: StrategicLevelSchema } },
       description: "Level updated",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid input",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },

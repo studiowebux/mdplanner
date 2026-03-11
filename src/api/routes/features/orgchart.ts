@@ -14,6 +14,10 @@ import {
 
 export const orgchartRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
+// ---------------------------------------------------------------------------
+// Shared schemas
+// ---------------------------------------------------------------------------
+
 const ErrorSchema = z.object({
   error: z.string(),
   message: z.string().optional(),
@@ -23,6 +27,60 @@ const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
 
+const OrgChartMemberSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    title: z.string().optional(),
+    departments: z.array(z.string()).optional(),
+    reportsTo: z.string().optional(),
+    email: z.string().optional(),
+    phone: z.string().optional(),
+    startDate: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("OrgChartMember");
+
+const CreateOrgChartMemberSchema = z
+  .object({
+    name: z.string().min(1).openapi({ description: "Member name" }),
+    title: z.string().optional(),
+    role: z.string().optional(),
+    departments: z.array(z.string()).optional(),
+    reportsTo: z.string().optional(),
+    email: z.string().optional(),
+    phone: z.string().optional(),
+    startDate: z.string().optional(),
+    hoursPerDay: z.number().optional(),
+    workingDays: z.array(z.string()).optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("CreateOrgChartMember");
+
+const UpdateOrgChartMemberSchema = z
+  .object({
+    name: z.string().optional(),
+    title: z.string().optional(),
+    role: z.string().optional(),
+    departments: z.array(z.string()).optional(),
+    reportsTo: z.string().optional(),
+    email: z.string().optional(),
+    phone: z.string().optional(),
+    startDate: z.string().optional(),
+    hoursPerDay: z.number().optional(),
+    workingDays: z.array(z.string()).optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("UpdateOrgChartMember");
+
+// Tree and summary are computed aggregates with dynamic shape.
+const OrgChartTreeSchema = z.unknown();
+const OrgChartSummarySchema = z.unknown();
+
+// ---------------------------------------------------------------------------
+// Route definitions
+// ---------------------------------------------------------------------------
+
 const listRoute = createRoute({
   method: "get",
   path: "/",
@@ -31,7 +89,9 @@ const listRoute = createRoute({
   operationId: "listOrgChartMembers",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.object({})) } },
+      content: {
+        "application/json": { schema: z.array(OrgChartMemberSchema) },
+      },
       description: "List of org chart members",
     },
   },
@@ -45,7 +105,7 @@ const treeRoute = createRoute({
   operationId: "getOrgChartTree",
   responses: {
     200: {
-      content: { "application/json": { schema: z.object({}) } },
+      content: { "application/json": { schema: OrgChartTreeSchema } },
       description: "Hierarchical tree structure",
     },
   },
@@ -59,7 +119,7 @@ const summaryRoute = createRoute({
   operationId: "getOrgChartSummary",
   responses: {
     200: {
-      content: { "application/json": { schema: z.object({}) } },
+      content: { "application/json": { schema: OrgChartSummarySchema } },
       description: "Summary statistics",
     },
   },
@@ -88,7 +148,7 @@ const getRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.object({}) } },
+      content: { "application/json": { schema: OrgChartMemberSchema } },
       description: "Member details",
     },
     404: {
@@ -107,7 +167,9 @@ const reportsRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.object({})) } },
+      content: {
+        "application/json": { schema: z.array(OrgChartMemberSchema) },
+      },
       description: "Direct reports",
     },
   },
@@ -122,29 +184,19 @@ const createMemberRoute = createRoute({
   request: {
     body: {
       content: {
-        "application/json": {
-          schema: z.object({
-            name: z.string().min(1),
-            title: z.string().optional(),
-            role: z.string().optional(),
-            departments: z.array(z.string()).optional(),
-            reportsTo: z.string().optional(),
-            email: z.string().optional(),
-            phone: z.string().optional(),
-            startDate: z.string().optional(),
-            hoursPerDay: z.number().optional(),
-            workingDays: z.array(z.string()).optional(),
-            notes: z.string().optional(),
-          }),
-        },
+        "application/json": { schema: CreateOrgChartMemberSchema },
       },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.object({}) } },
+      content: { "application/json": { schema: OrgChartMemberSchema } },
       description: "Member created",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid input",
     },
   },
 });
@@ -158,14 +210,18 @@ const updateMemberRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: UpdateOrgChartMemberSchema } },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.object({}) } },
+      content: { "application/json": { schema: OrgChartMemberSchema } },
       description: "Updated member",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid input",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
