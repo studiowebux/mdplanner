@@ -273,6 +273,30 @@
 }
 
 /* --------------------------------------------------------------------------
+   Toggle button — show/hide collapsed list sections in widgets
+   -------------------------------------------------------------------------- */
+
+.widget-toggle-btn {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem 0;
+  transition: color var(--transition-fast);
+}
+
+.widget-toggle-btn:hover {
+  color: var(--color-text-secondary);
+}
+
+.widget-toggle-list {
+  margin-top: 0.25rem;
+}
+
+/* --------------------------------------------------------------------------
    Loading / error states
    -------------------------------------------------------------------------- */
 
