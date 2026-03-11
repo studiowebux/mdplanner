@@ -15,6 +15,9 @@ import type { BrainRegistry } from "../../lib/brains/registry.ts";
 // SSE events route
 import { eventsRouter } from "./events.ts";
 
+// Context-pack route
+import { contextPackRouter } from "./context-pack.ts";
+
 // Core routes
 import { versionRouter } from "./version.ts";
 import { projectsRouter } from "./projects.ts";
@@ -311,6 +314,9 @@ export function createApiRouter(
 
   // SSE events
   api.route("/events", eventsRouter);
+
+  // Context-pack route
+  api.route("/context-pack", contextPackRouter);
 
   // Core routes
   api.route("/version", versionRouter);
