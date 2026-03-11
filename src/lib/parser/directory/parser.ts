@@ -1589,6 +1589,10 @@ export class DirectoryMarkdownParser {
     return this.portfolioParser.read(id);
   }
 
+  async readPortfolioItemByName(name: string): Promise<PortfolioItem | null> {
+    return this.portfolioParser.readByName(name);
+  }
+
   async createPortfolioItem(
     data: Omit<PortfolioItem, "id">,
   ): Promise<PortfolioItem> {
