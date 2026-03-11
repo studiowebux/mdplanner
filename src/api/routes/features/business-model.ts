@@ -14,14 +14,54 @@ export const businessModelRouter = new OpenAPIHono<{
   Variables: AppVariables;
 }>();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("BusinessModelError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("BusinessModelSuccess");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const stringArray = z.array(z.string());
+
+const BusinessModelSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    date: z.string(),
+    keyPartners: stringArray,
+    keyActivities: stringArray,
+    keyResources: stringArray,
+    valueProposition: stringArray,
+    customerRelationships: stringArray,
+    channels: stringArray,
+    customerSegments: stringArray,
+    costStructure: stringArray,
+    revenueStreams: stringArray,
+  })
+  .openapi("BusinessModel");
+
+const CreateBusinessModelSchema = z
+  .object({
+    title: z.string().optional().openapi({ description: "Canvas title" }),
+    date: z.string().optional().openapi({ description: "Date (YYYY-MM-DD)" }),
+    keyPartners: stringArray.optional(),
+    keyActivities: stringArray.optional(),
+    keyResources: stringArray.optional(),
+    valueProposition: stringArray.optional(),
+    customerRelationships: stringArray.optional(),
+    channels: stringArray.optional(),
+    customerSegments: stringArray.optional(),
+    costStructure: stringArray.optional(),
+    revenueStreams: stringArray.optional(),
+  })
+  .openapi("CreateBusinessModel");
+
+const UpdateBusinessModelSchema = CreateBusinessModelSchema.openapi(
+  "UpdateBusinessModel",
+);
 
 const listBusinessModelRoute = createRoute({
   method: "get",
@@ -31,7 +71,9 @@ const listBusinessModelRoute = createRoute({
   operationId: "listBusinessModelCanvases",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: {
+        "application/json": { schema: z.array(BusinessModelSchema) },
+      },
       description: "List of business model canvases",
     },
   },
@@ -45,15 +87,13 @@ const createBusinessModelRoute = createRoute({
   operationId: "createBusinessModelCanvas",
   request: {
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateBusinessModelSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: BusinessModelSchema } },
       description: "Business model canvas created",
     },
   },
@@ -68,9 +108,7 @@ const updateBusinessModelRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: UpdateBusinessModelSchema } },
       required: true,
     },
   },
@@ -119,7 +157,7 @@ businessModelRouter.openapi(createBusinessModelRoute, async (c) => {
   const canvases = await parser.readBusinessModelCanvases();
   const newCanvas = {
     id: crypto.randomUUID().substring(0, 8),
-    title: body.title,
+    title: body.title || "",
     date: body.date || new Date().toISOString().split("T")[0],
     keyPartners: body.keyPartners || [],
     keyActivities: body.keyActivities || [],

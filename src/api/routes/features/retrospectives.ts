@@ -14,14 +14,49 @@ export const retrospectivesRouter = new OpenAPIHono<{
   Variables: AppVariables;
 }>();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("RetrospectiveError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("RetrospectiveSuccess");
+const SuccessWithIdSchema = z
+  .object({ success: z.boolean(), id: z.string() })
+  .openapi("RetrospectiveSuccessWithId");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const stringArray = z.array(z.string());
+
+const RetrospectiveSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    date: z.string(),
+    status: z.enum(["open", "closed"]),
+    continue: stringArray,
+    stop: stringArray,
+    start: stringArray,
+  })
+  .openapi("Retrospective");
+
+const CreateRetrospectiveSchema = z
+  .object({
+    title: z.string().optional().openapi({
+      description: "Retrospective title",
+    }),
+    date: z.string().optional().openapi({ description: "Date (YYYY-MM-DD)" }),
+    status: z.enum(["open", "closed"]).optional(),
+    continue: stringArray.optional(),
+    stop: stringArray.optional(),
+    start: stringArray.optional(),
+  })
+  .openapi("CreateRetrospective");
+
+const UpdateRetrospectiveSchema = CreateRetrospectiveSchema.openapi(
+  "UpdateRetrospective",
+);
 
 const listRetrospectivesRoute = createRoute({
   method: "get",
@@ -31,7 +66,9 @@ const listRetrospectivesRoute = createRoute({
   operationId: "listRetrospectives",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: {
+        "application/json": { schema: z.array(RetrospectiveSchema) },
+      },
       description: "List of retrospectives",
     },
   },
@@ -45,19 +82,13 @@ const createRetrospectiveRoute = createRoute({
   operationId: "createRetrospective",
   request: {
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateRetrospectiveSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: {
-        "application/json": {
-          schema: z.object({ success: z.boolean(), id: z.string() }),
-        },
-      },
+      content: { "application/json": { schema: SuccessWithIdSchema } },
       description: "Retrospective created",
     },
   },
@@ -72,9 +103,7 @@ const updateRetrospectiveRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: UpdateRetrospectiveSchema } },
       required: true,
     },
   },
@@ -124,7 +153,7 @@ retrospectivesRouter.openapi(createRetrospectiveRoute, async (c) => {
   const id = crypto.randomUUID().substring(0, 8);
   retrospectives.push({
     id,
-    title: body.title,
+    title: body.title || "",
     date: body.date || new Date().toISOString().split("T")[0],
     status: body.status || "open",
     continue: body.continue || [],

@@ -12,14 +12,53 @@ import {
 
 export const financesRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("FinanceError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("FinanceSuccess");
+const SuccessWithIdSchema = z
+  .object({ success: z.boolean(), id: z.string() })
+  .openapi("FinanceSuccessWithId");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const FinancePeriodItemSchema = z
+  .object({
+    category: z.string(),
+    amount: z.number(),
+  })
+  .openapi("FinancePeriodItem");
+
+const FinancialPeriodSchema = z
+  .object({
+    id: z.string(),
+    period: z.string().openapi({ description: "Reporting period (YYYY-MM)" }),
+    cash_on_hand: z.number(),
+    revenue: z.array(FinancePeriodItemSchema),
+    expenses: z.array(FinancePeriodItemSchema),
+    notes: z.string().optional(),
+    created: z.string(),
+  })
+  .openapi("FinancialPeriod");
+
+const CreateFinancialPeriodSchema = z
+  .object({
+    period: z.string().optional().openapi({
+      description: "Reporting period (YYYY-MM)",
+    }),
+    cash_on_hand: z.number().optional(),
+    revenue: z.array(FinancePeriodItemSchema).optional(),
+    expenses: z.array(FinancePeriodItemSchema).optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("CreateFinancialPeriod");
+
+const UpdateFinancialPeriodSchema = CreateFinancialPeriodSchema.openapi(
+  "UpdateFinancialPeriod",
+);
 
 const listFinancesRoute = createRoute({
   method: "get",
@@ -29,7 +68,9 @@ const listFinancesRoute = createRoute({
   operationId: "listFinances",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: {
+        "application/json": { schema: z.array(FinancialPeriodSchema) },
+      },
       description: "List of financial periods",
     },
   },
@@ -44,7 +85,7 @@ const getFinanceRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: FinancialPeriodSchema } },
       description: "Financial period",
     },
     404: {
@@ -62,19 +103,13 @@ const createFinanceRoute = createRoute({
   operationId: "createFinance",
   request: {
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateFinancialPeriodSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: {
-        "application/json": {
-          schema: z.object({ success: z.boolean(), id: z.string() }),
-        },
-      },
+      content: { "application/json": { schema: SuccessWithIdSchema } },
       description: "Financial period created",
     },
   },
@@ -89,9 +124,7 @@ const updateFinanceRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: UpdateFinancialPeriodSchema } },
       required: true,
     },
   },

@@ -23,6 +23,135 @@ const SuccessSchema = z.object({ success: z.boolean() });
 
 export const capacityRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
+// ---------------------------------------------------------------------------
+// Shared schemas
+// ---------------------------------------------------------------------------
+
+const TeamMemberRefSchema = z
+  .object({
+    id: z.string(),
+    personId: z.string(),
+    hoursPerDay: z.number().optional(),
+    workingDays: z.array(z.string()).optional(),
+  })
+  .openapi("TeamMemberRef");
+
+const WeeklyAllocationSchema = z
+  .object({
+    id: z.string(),
+    memberId: z.string(),
+    weekStart: z.string(),
+    allocatedHours: z.number(),
+    targetType: z.enum(["project", "task", "milestone"]),
+    targetId: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("WeeklyAllocation");
+
+const CapacityPlanSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    date: z.string(),
+    budgetHours: z.number().optional(),
+    teamMembers: z.array(TeamMemberRefSchema),
+    allocations: z.array(WeeklyAllocationSchema),
+  })
+  .openapi("CapacityPlan");
+
+const CreateCapacityPlanSchema = z
+  .object({
+    title: z.string().optional().openapi({ description: "Plan title" }),
+    date: z.string().optional().openapi({
+      description: "Plan date (YYYY-MM-DD)",
+    }),
+    budgetHours: z.number().optional(),
+    teamMembers: z.array(TeamMemberRefSchema).optional(),
+    allocations: z.array(WeeklyAllocationSchema).optional(),
+  })
+  .openapi("CreateCapacityPlan");
+
+const UpdateCapacityPlanSchema = z
+  .object({
+    title: z.string().optional(),
+    date: z.string().optional(),
+    budgetHours: z.number().optional(),
+    teamMembers: z.array(TeamMemberRefSchema).optional(),
+    allocations: z.array(WeeklyAllocationSchema).optional(),
+  })
+  .openapi("UpdateCapacityPlan");
+
+const AddTeamMemberSchema = z
+  .object({
+    personId: z.string().min(1).openapi({ description: "Person ID" }),
+    hoursPerDay: z.number().optional(),
+    workingDays: z.array(z.string()).optional(),
+  })
+  .openapi("AddTeamMember");
+
+const UpdateTeamMemberSchema = z
+  .object({
+    personId: z.string().optional(),
+    hoursPerDay: z.number().optional(),
+    workingDays: z.array(z.string()).optional(),
+  })
+  .openapi("UpdateTeamMember");
+
+const AddAllocationSchema = z
+  .object({
+    memberId: z.string().min(1).openapi({ description: "Team member ID" }),
+    weekStart: z.string().openapi({
+      description: "Week start date (YYYY-MM-DD)",
+    }),
+    allocatedHours: z.number().optional(),
+    targetType: z.enum(["project", "task", "milestone"]).optional(),
+    targetId: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("AddAllocation");
+
+const UpdateAllocationSchema = z
+  .object({
+    memberId: z.string().optional(),
+    weekStart: z.string().optional(),
+    allocatedHours: z.number().optional(),
+    targetType: z.enum(["project", "task", "milestone"]).optional(),
+    targetId: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("UpdateAllocation");
+
+const UtilizationEntrySchema = z
+  .object({
+    memberId: z.string(),
+    personId: z.string(),
+    memberName: z.string(),
+    weeklyCapacity: z.number(),
+    allocatedByWeek: z.record(z.string(), z.number()),
+    totalAllocated: z.number(),
+    actualHours: z.number(),
+    utilizationPercent: z.number(),
+  })
+  .openapi("UtilizationEntry");
+
+const AssignmentSuggestionSchema = z
+  .object({
+    taskId: z.string(),
+    taskTitle: z.string(),
+    memberId: z.string(),
+    personId: z.string(),
+    memberName: z.string(),
+    hours: z.number(),
+    weekStart: z.string(),
+  })
+  .openapi("AssignmentSuggestion");
+
+const ApplyAssignmentsSchema = z
+  .object({
+    suggestions: z.array(AssignmentSuggestionSchema),
+  })
+  .openapi("ApplyAssignments");
+
 function getUnassignedTasks(tasks: Task[]): Task[] {
   const result: Task[] = [];
   const collect = (taskList: Task[]) => {
@@ -59,7 +188,7 @@ const listPlansRoute = createRoute({
   operationId: "listCapacityPlans",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(CapacityPlanSchema) } },
       description: "List of capacity plans",
     },
   },
@@ -73,14 +202,18 @@ const createPlanRoute = createRoute({
   operationId: "createCapacityPlan",
   request: {
     body: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: CreateCapacityPlanSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: CapacityPlanSchema } },
       description: "Created capacity plan",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
   },
 });
@@ -94,7 +227,7 @@ const getPlanRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: CapacityPlanSchema } },
       description: "Capacity plan",
     },
     404: {
@@ -113,14 +246,18 @@ const updatePlanRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: UpdateCapacityPlanSchema } },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: CapacityPlanSchema } },
       description: "Updated capacity plan",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -157,14 +294,18 @@ const addMemberRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: AddTeamMemberSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: TeamMemberRefSchema } },
       description: "Created team member",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -187,14 +328,18 @@ const updateMemberRoute = createRoute({
   request: {
     params: memberParams,
     body: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: UpdateTeamMemberSchema } },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: TeamMemberRefSchema } },
       description: "Updated team member",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -231,14 +376,18 @@ const addAllocationRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: AddAllocationSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: WeeklyAllocationSchema } },
       description: "Created allocation",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -261,14 +410,18 @@ const updateAllocationRoute = createRoute({
   request: {
     params: allocationParams,
     body: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: UpdateAllocationSchema } },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: WeeklyAllocationSchema } },
       description: "Updated allocation",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -305,7 +458,9 @@ const utilizationRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: {
+        "application/json": { schema: z.array(UtilizationEntrySchema) },
+      },
       description: "Utilization report",
     },
     404: {
@@ -324,7 +479,9 @@ const suggestAssignmentsRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: {
+        "application/json": { schema: z.array(AssignmentSuggestionSchema) },
+      },
       description: "Assignment suggestions",
     },
     404: {
@@ -343,7 +500,7 @@ const applyAssignmentsRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: ApplyAssignmentsSchema } },
       required: true,
     },
   },
@@ -355,6 +512,10 @@ const applyAssignmentsRoute = createRoute({
         },
       },
       description: "Assignments applied",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },

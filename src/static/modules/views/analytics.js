@@ -195,21 +195,57 @@ registerWidget({
       ${kpiCard(`${m.completionRate}%`, "Complete")}
     </div>`;
 
-    if (m.list.length > 0) {
-      html += sectionTitle("Status");
-      for (const ms of m.list) {
-        const badge =
-          ms.status === "completed"
-            ? statusBadge("done", "success")
-            : statusBadge("open");
+    const openList = m.list.filter((ms) => ms.status !== "completed");
+    let doneList = m.list.filter((ms) => ms.status === "completed");
+
+    // Apply the same hide-after-days filter as the milestones view
+    const days = parseInt(
+      localStorage.getItem("hideCompletedMilestonesAfterDays") ?? "",
+      10,
+    );
+    if (!isNaN(days)) {
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - days);
+      doneList = doneList.filter((ms) => {
+        if (!ms.completedAt) return days === 0 ? false : true;
+        return new Date(ms.completedAt) >= cutoff;
+      });
+    }
+
+    if (openList.length > 0) {
+      html += sectionTitle("Open");
+      for (const ms of openList) {
         html += `<div class="data-row">
           <span class="data-row-label">${ms.name}</span>
-          <span class="data-row-value">${badge}</span>
+          <span class="data-row-value">${statusBadge("open")}</span>
         </div>`;
       }
     }
 
+    if (doneList.length > 0) {
+      html += `<button class="widget-toggle-btn" data-count="${doneList.length}">Show ${doneList.length} completed</button>`;
+      html += `<div class="widget-toggle-list hidden">`;
+      html += sectionTitle("Completed");
+      for (const ms of doneList) {
+        html += `<div class="data-row">
+          <span class="data-row-label">${ms.name}</span>
+          <span class="data-row-value">${statusBadge("done", "success")}</span>
+        </div>`;
+      }
+      html += `</div>`;
+    }
+
     container.innerHTML = html;
+
+    const btn = container.querySelector(".widget-toggle-btn");
+    if (btn) {
+      btn.addEventListener("click", () => {
+        const list = container.querySelector(".widget-toggle-list");
+        const count = btn.dataset.count;
+        const hidden = list.classList.toggle("hidden");
+        btn.textContent = hidden ? `Show ${count} completed` : "Hide completed";
+      });
+    }
   },
 });
 

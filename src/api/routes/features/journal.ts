@@ -13,14 +13,59 @@ import {
 
 export const journalRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("JournalError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("JournalSuccess");
+const SuccessWithIdSchema = z
+  .object({ success: z.boolean(), id: z.string() })
+  .openapi("JournalSuccessWithId");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const journalMood = z.enum(["great", "good", "neutral", "bad", "terrible"]);
+
+const JournalEntrySchema = z
+  .object({
+    id: z.string(),
+    date: z.string(),
+    time: z.string().optional(),
+    title: z.string().optional(),
+    mood: journalMood.optional(),
+    tags: z.array(z.string()).optional(),
+    body: z.string(),
+    created: z.string(),
+    updated: z.string(),
+  })
+  .openapi("JournalEntry");
+
+const CreateJournalEntrySchema = z
+  .object({
+    date: z.string().optional().openapi({ description: "Date (YYYY-MM-DD)" }),
+    time: z.string().optional().openapi({ description: "Time (HH:MM)" }),
+    title: z.string().optional(),
+    mood: journalMood.optional(),
+    tags: z.array(z.string()).optional(),
+    body: z.string().optional(),
+  })
+  .openapi("CreateJournalEntry");
+
+const UpdateJournalEntrySchema = z
+  .object({
+    date: z.string().optional(),
+    time: z.string().optional(),
+    title: z.string().optional(),
+    mood: journalMood.optional(),
+    tags: z.array(z.string()).optional(),
+    body: z.string().optional(),
+    updatedAt: z.string().optional().openapi({
+      description: "Last known updatedAt for conflict detection",
+    }),
+  })
+  .openapi("UpdateJournalEntry");
 
 const listJournalRoute = createRoute({
   method: "get",
@@ -30,7 +75,9 @@ const listJournalRoute = createRoute({
   operationId: "listJournalEntries",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: {
+        "application/json": { schema: z.array(JournalEntrySchema) },
+      },
       description: "List of journal entries",
     },
   },
@@ -45,7 +92,7 @@ const getJournalRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: JournalEntrySchema } },
       description: "Journal entry",
     },
     404: {
@@ -63,19 +110,13 @@ const createJournalRoute = createRoute({
   operationId: "createJournalEntry",
   request: {
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateJournalEntrySchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: {
-        "application/json": {
-          schema: z.object({ success: z.boolean(), id: z.string() }),
-        },
-      },
+      content: { "application/json": { schema: SuccessWithIdSchema } },
       description: "Journal entry created",
     },
   },
@@ -90,9 +131,7 @@ const updateJournalRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: UpdateJournalEntrySchema } },
       required: true,
     },
   },

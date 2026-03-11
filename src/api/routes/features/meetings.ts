@@ -12,14 +12,54 @@ import {
 
 export const meetingsRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("MeetingError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("MeetingSuccess");
+const SuccessWithIdSchema = z
+  .object({ success: z.boolean(), id: z.string() })
+  .openapi("MeetingSuccessWithId");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const MeetingActionSchema = z
+  .object({
+    id: z.string(),
+    description: z.string(),
+    owner: z.string().optional(),
+    due: z.string().optional(),
+    status: z.enum(["open", "done"]),
+  })
+  .openapi("MeetingAction");
+
+const MeetingSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    date: z.string(),
+    attendees: z.array(z.string()).optional(),
+    agenda: z.string().optional(),
+    notes: z.string().optional(),
+    actions: z.array(MeetingActionSchema),
+    created: z.string(),
+  })
+  .openapi("Meeting");
+
+const CreateMeetingSchema = z
+  .object({
+    title: z.string().optional().openapi({ description: "Meeting title" }),
+    date: z.string().optional().openapi({ description: "Date (YYYY-MM-DD)" }),
+    attendees: z.array(z.string()).optional(),
+    agenda: z.string().optional(),
+    notes: z.string().optional(),
+    actions: z.array(MeetingActionSchema).optional(),
+  })
+  .openapi("CreateMeeting");
+
+const UpdateMeetingSchema = CreateMeetingSchema.openapi("UpdateMeeting");
 
 // --- Route definitions ---
 
@@ -31,7 +71,7 @@ const listMeetingsRoute = createRoute({
   operationId: "listMeetings",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(MeetingSchema) } },
       description: "List of meetings",
     },
   },
@@ -46,7 +86,7 @@ const getMeetingRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: MeetingSchema } },
       description: "Meeting details",
     },
     404: {
@@ -64,19 +104,13 @@ const createMeetingRoute = createRoute({
   operationId: "createMeeting",
   request: {
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateMeetingSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: {
-        "application/json": {
-          schema: z.object({ success: z.boolean(), id: z.string() }),
-        },
-      },
+      content: { "application/json": { schema: SuccessWithIdSchema } },
       description: "Meeting created",
     },
   },
@@ -91,9 +125,7 @@ const updateMeetingRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: UpdateMeetingSchema } },
       required: true,
     },
   },
@@ -165,7 +197,7 @@ meetingsRouter.openapi(updateMeetingRoute, async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
   const updated = await parser.updateMeeting(id, {
-    title: body.title,
+    title: body.title || "",
     date: body.date,
     attendees: body.attendees,
     agenda: body.agenda,

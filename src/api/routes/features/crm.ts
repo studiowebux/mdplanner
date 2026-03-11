@@ -22,6 +22,223 @@ const idParam = z.object({
 });
 const SuccessSchema = z.object({ success: z.boolean() });
 
+// ---------------------------------------------------------------------------
+// Shared sub-schemas
+// ---------------------------------------------------------------------------
+
+const CrmAddressSchema = z
+  .object({
+    street: z.string().optional(),
+    city: z.string().optional(),
+    state: z.string().optional(),
+    postalCode: z.string().optional(),
+    country: z.string().optional(),
+  })
+  .openapi("CrmAddress");
+
+// ---------------------------------------------------------------------------
+// Company schemas
+// ---------------------------------------------------------------------------
+
+const CompanySchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    industry: z.string().optional(),
+    website: z.string().optional(),
+    phone: z.string().optional(),
+    address: CrmAddressSchema.optional(),
+    notes: z.string().optional(),
+    created: z.string(),
+  })
+  .openapi("Company");
+
+const CreateCompanySchema = z
+  .object({
+    name: z.string().min(1).openapi({ description: "Company name" }),
+    industry: z.string().optional(),
+    website: z.string().optional(),
+    phone: z.string().optional(),
+    address: CrmAddressSchema.optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("CreateCompany");
+
+const UpdateCompanySchema = z
+  .object({
+    name: z.string().min(1).optional(),
+    industry: z.string().optional(),
+    website: z.string().optional(),
+    phone: z.string().optional(),
+    address: CrmAddressSchema.optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("UpdateCompany");
+
+// ---------------------------------------------------------------------------
+// Contact schemas
+// ---------------------------------------------------------------------------
+
+const ContactSchema = z
+  .object({
+    id: z.string(),
+    companyId: z.string(),
+    firstName: z.string(),
+    lastName: z.string(),
+    email: z.string().optional(),
+    phone: z.string().optional(),
+    title: z.string().optional(),
+    isPrimary: z.boolean(),
+    notes: z.string().optional(),
+    created: z.string(),
+  })
+  .openapi("Contact");
+
+const CreateContactSchema = z
+  .object({
+    companyId: z.string().min(1).openapi({ description: "Company ID" }),
+    firstName: z.string().min(1),
+    lastName: z.string().min(1),
+    email: z.string().optional(),
+    phone: z.string().optional(),
+    title: z.string().optional(),
+    isPrimary: z.boolean().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("CreateContact");
+
+const UpdateContactSchema = z
+  .object({
+    companyId: z.string().optional(),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    email: z.string().optional(),
+    phone: z.string().optional(),
+    title: z.string().optional(),
+    isPrimary: z.boolean().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("UpdateContact");
+
+// ---------------------------------------------------------------------------
+// Deal schemas
+// ---------------------------------------------------------------------------
+
+const DealSchema = z
+  .object({
+    id: z.string(),
+    companyId: z.string(),
+    contactId: z.string().optional(),
+    title: z.string(),
+    value: z.number(),
+    stage: z.enum([
+      "lead",
+      "qualified",
+      "proposal",
+      "negotiation",
+      "won",
+      "lost",
+    ]),
+    probability: z.number(),
+    expectedCloseDate: z.string().optional(),
+    notes: z.string().optional(),
+    created: z.string(),
+    closedAt: z.string().optional(),
+  })
+  .openapi("Deal");
+
+const CreateDealSchema = z
+  .object({
+    companyId: z.string().min(1).openapi({ description: "Company ID" }),
+    contactId: z.string().optional(),
+    title: z.string().min(1),
+    value: z.number().optional(),
+    stage: z
+      .enum(["lead", "qualified", "proposal", "negotiation", "won", "lost"])
+      .optional(),
+    probability: z.number().min(0).max(100).optional(),
+    expectedCloseDate: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("CreateDeal");
+
+const UpdateDealSchema = z
+  .object({
+    companyId: z.string().optional(),
+    contactId: z.string().optional(),
+    title: z.string().optional(),
+    value: z.number().optional(),
+    stage: z
+      .enum(["lead", "qualified", "proposal", "negotiation", "won", "lost"])
+      .optional(),
+    probability: z.number().min(0).max(100).optional(),
+    expectedCloseDate: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("UpdateDeal");
+
+// ---------------------------------------------------------------------------
+// Interaction schemas
+// ---------------------------------------------------------------------------
+
+const InteractionSchema = z
+  .object({
+    id: z.string(),
+    companyId: z.string(),
+    contactId: z.string().optional(),
+    dealId: z.string().optional(),
+    type: z.enum(["email", "call", "meeting", "note"]),
+    summary: z.string(),
+    date: z.string(),
+    duration: z.number().optional(),
+    nextFollowUp: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("Interaction");
+
+const CreateInteractionSchema = z
+  .object({
+    companyId: z.string().min(1).openapi({ description: "Company ID" }),
+    contactId: z.string().optional(),
+    dealId: z.string().optional(),
+    type: z.enum(["email", "call", "meeting", "note"]).optional(),
+    summary: z.string().min(1),
+    date: z.string().optional(),
+    duration: z.number().optional(),
+    nextFollowUp: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("CreateInteraction");
+
+const UpdateInteractionSchema = z
+  .object({
+    companyId: z.string().optional(),
+    contactId: z.string().optional(),
+    dealId: z.string().optional(),
+    type: z.enum(["email", "call", "meeting", "note"]).optional(),
+    summary: z.string().optional(),
+    date: z.string().optional(),
+    duration: z.number().optional(),
+    nextFollowUp: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("UpdateInteraction");
+
+// ---------------------------------------------------------------------------
+// CRM summary schema
+// ---------------------------------------------------------------------------
+
+const CrmSummarySchema = z
+  .object({
+    totalCompanies: z.number(),
+    totalContacts: z.number(),
+    totalDeals: z.number(),
+    totalInteractions: z.number(),
+    pipelineValue: z.number(),
+    wonDeals: z.number(),
+  })
+  .openapi("CrmSummary");
+
 // ================== COMPANIES ==================
 
 const listCompaniesRoute = createRoute({
@@ -32,7 +249,7 @@ const listCompaniesRoute = createRoute({
   operationId: "listCompanies",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(CompanySchema) } },
       description: "List of companies",
     },
   },
@@ -47,7 +264,7 @@ const getCompanyRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: CompanySchema } },
       description: "Company details",
     },
     404: {
@@ -66,15 +283,19 @@ const createCompanyRoute = createRoute({
   request: {
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: CreateCompanySchema },
       },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: CompanySchema } },
       description: "Company created",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
   },
 });
@@ -89,15 +310,19 @@ const updateCompanyRoute = createRoute({
     params: idParam,
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: UpdateCompanySchema },
       },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: CompanySchema } },
       description: "Updated company",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -134,7 +359,7 @@ const getCompanyContactsRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(ContactSchema) } },
       description: "Company contacts",
     },
   },
@@ -149,7 +374,7 @@ const getCompanyDealsRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(DealSchema) } },
       description: "Company deals",
     },
   },
@@ -164,7 +389,7 @@ const getCompanyInteractionsRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(InteractionSchema) } },
       description: "Company interactions",
     },
   },
@@ -180,7 +405,7 @@ const listContactsRoute = createRoute({
   operationId: "listContacts",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(ContactSchema) } },
       description: "List of contacts",
     },
   },
@@ -195,7 +420,7 @@ const getContactRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: ContactSchema } },
       description: "Contact details",
     },
     404: {
@@ -214,15 +439,19 @@ const createContactRoute = createRoute({
   request: {
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: CreateContactSchema },
       },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: ContactSchema } },
       description: "Contact created",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
   },
 });
@@ -237,15 +466,19 @@ const updateContactRoute = createRoute({
     params: idParam,
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: UpdateContactSchema },
       },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: ContactSchema } },
       description: "Updated contact",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -283,7 +516,7 @@ const listDealsRoute = createRoute({
   operationId: "listDeals",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(DealSchema) } },
       description: "List of deals",
     },
   },
@@ -298,7 +531,7 @@ const getDealRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: DealSchema } },
       description: "Deal details",
     },
     404: {
@@ -317,15 +550,19 @@ const createDealRoute = createRoute({
   request: {
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: CreateDealSchema },
       },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: DealSchema } },
       description: "Deal created",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
   },
 });
@@ -340,15 +577,19 @@ const updateDealRoute = createRoute({
     params: idParam,
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: UpdateDealSchema },
       },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: DealSchema } },
       description: "Updated deal",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -387,7 +628,16 @@ const updateDealStageRoute = createRoute({
     body: {
       content: {
         "application/json": {
-          schema: z.object({ stage: z.string() }),
+          schema: z.object({
+            stage: z.enum([
+              "lead",
+              "qualified",
+              "proposal",
+              "negotiation",
+              "won",
+              "lost",
+            ]),
+          }),
         },
       },
       required: true,
@@ -395,7 +645,7 @@ const updateDealStageRoute = createRoute({
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: DealSchema } },
       description: "Deal stage updated",
     },
     400: {
@@ -418,7 +668,7 @@ const getDealInteractionsRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(InteractionSchema) } },
       description: "Deal interactions",
     },
   },
@@ -434,7 +684,7 @@ const listInteractionsRoute = createRoute({
   operationId: "listInteractions",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(InteractionSchema) } },
       description: "List of interactions",
     },
   },
@@ -449,7 +699,7 @@ const getInteractionRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: InteractionSchema } },
       description: "Interaction details",
     },
     404: {
@@ -468,15 +718,19 @@ const createInteractionRoute = createRoute({
   request: {
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: CreateInteractionSchema },
       },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: InteractionSchema } },
       description: "Interaction created",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
   },
 });
@@ -491,15 +745,19 @@ const updateInteractionRoute = createRoute({
     params: idParam,
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: UpdateInteractionSchema },
       },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: InteractionSchema } },
       description: "Updated interaction",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -537,7 +795,7 @@ const getCrmSummaryRoute = createRoute({
   operationId: "getCrmSummary",
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: CrmSummarySchema } },
       description: "CRM summary",
     },
   },

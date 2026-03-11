@@ -406,10 +406,7 @@ export class SummaryView {
       if (task.config.milestone) {
         const milestone = task.config.milestone;
         if (!milestoneData[milestone]) {
-          milestoneData[milestone] = {
-            total: 0,
-            incomplete: 0,
-          };
+          milestoneData[milestone] = { total: 0, incomplete: 0 };
         }
         milestoneData[milestone].total++;
         if (!task.completed) {
@@ -420,7 +417,6 @@ export class SummaryView {
 
     const milestones = Object.keys(milestoneData);
 
-    // Show/hide milestones section based on whether we have milestones
     if (milestones.length === 0) {
       milestonesSection.classList.add("hidden");
       return;
@@ -429,37 +425,87 @@ export class SummaryView {
     milestonesSection.classList.remove("hidden");
     container.innerHTML = "";
 
-    milestones.sort().forEach((milestone, index) => {
+    const openMilestones = milestones
+      .filter((m) => milestoneData[m].incomplete > 0)
+      .sort();
+    let doneMilestones = milestones
+      .filter((m) => milestoneData[m].incomplete === 0)
+      .sort();
+
+    // Apply hideCompletedMilestonesAfterDays filter using tm.milestones
+    // as a completedAt lookup (populated when the milestones view is visited)
+    const days = parseInt(
+      localStorage.getItem("hideCompletedMilestonesAfterDays") ?? "",
+      10,
+    );
+    if (!isNaN(days) && this.tm.milestones) {
+      const completedAtByName = new Map(
+        this.tm.milestones
+          .filter((m) => m.completedAt)
+          .map((m) => [m.name, m.completedAt]),
+      );
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - days);
+      doneMilestones = doneMilestones.filter((name) => {
+        const completedAt = completedAtByName.get(name);
+        if (!completedAt) return days === 0 ? false : true;
+        return new Date(completedAt) >= cutoff;
+      });
+    }
+
+    const makeCard = (milestone, index) => {
       const data = milestoneData[milestone];
       const completedCount = data.total - data.incomplete;
       const progressPercent = data.total > 0
         ? Math.round((completedCount / data.total) * 100)
         : 0;
-      // Alternate between different grey shades for visual distinction
-      const dotShade = index % 2 === 0
-        ? "bg-inverse"
-        : "bg-active";
-
+      const dotShade = index % 2 === 0 ? "bg-inverse" : "bg-active";
       const div = document.createElement("div");
       div.className = "space-y-2";
       div.innerHTML = `
-                <div class="flex items-center justify-between gap-2">
-                    <div class="flex items-center space-x-2 min-w-0">
-                        <div class="w-3 h-3 ${dotShade} rounded-full flex-shrink-0"></div>
-                        <span class="text-sm font-medium text-primary flex items-center gap-1 min-w-0"><svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg><span class="truncate">${milestone}</span></span>
-                    </div>
-                    <span class="text-sm font-medium text-primary flex-shrink-0">${data.incomplete} remaining</span>
-                </div>
-                <div class="flex items-center space-x-2 text-xs text-muted">
-                    <span class="flex-shrink-0">${completedCount}/${data.total} completed</span>
-                    <div class="flex-1 bg-active rounded-full h-1.5">
-                        <div class="bg-inverse h-1.5 rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
-                    </div>
-                    <span class="flex-shrink-0">${progressPercent}%</span>
-                </div>
-            `;
-      container.appendChild(div);
-    });
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center space-x-2 min-w-0">
+            <div class="w-3 h-3 ${dotShade} rounded-full flex-shrink-0"></div>
+            <span class="text-sm font-medium text-primary flex items-center gap-1 min-w-0">
+              <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg>
+              <span class="truncate">${milestone}</span>
+            </span>
+          </div>
+          <span class="text-sm font-medium text-primary flex-shrink-0">${data.incomplete} remaining</span>
+        </div>
+        <div class="flex items-center space-x-2 text-xs text-muted">
+          <span class="flex-shrink-0">${completedCount}/${data.total} completed</span>
+          <div class="flex-1 bg-active rounded-full h-1.5">
+            <div class="bg-inverse h-1.5 rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
+          </div>
+          <span class="flex-shrink-0">${progressPercent}%</span>
+        </div>
+      `;
+      return div;
+    };
+
+    openMilestones.forEach((m, i) => container.appendChild(makeCard(m, i)));
+
+    if (doneMilestones.length > 0) {
+      const toggleBtn = document.createElement("button");
+      toggleBtn.className = "summary-milestone-toggle";
+      toggleBtn.textContent = `Show ${doneMilestones.length} completed`;
+      container.appendChild(toggleBtn);
+
+      const doneWrap = document.createElement("div");
+      doneWrap.classList.add("hidden");
+      doneMilestones.forEach((m, i) =>
+        doneWrap.appendChild(makeCard(m, openMilestones.length + i))
+      );
+      container.appendChild(doneWrap);
+
+      toggleBtn.addEventListener("click", () => {
+        const hidden = doneWrap.classList.toggle("hidden");
+        toggleBtn.textContent = hidden
+          ? `Show ${doneMilestones.length} completed`
+          : "Hide completed";
+      });
+    }
   }
 
   renderTasksByPerson(allTasks) {

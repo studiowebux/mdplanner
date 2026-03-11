@@ -14,14 +14,54 @@ export const onboardingTemplatesRouter = new OpenAPIHono<
   { Variables: AppVariables }
 >();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("OnboardingTemplateError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("OnboardingTemplateSuccess");
+const SuccessWithIdSchema = z
+  .object({ success: z.boolean(), id: z.string() })
+  .openapi("OnboardingTemplateSuccessWithId");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const stepCategory = z.enum([
+  "equipment",
+  "accounts",
+  "docs",
+  "training",
+  "intro",
+  "other",
+]);
+
+const OnboardingStepDefinitionSchema = z.object({
+  title: z.string(),
+  category: stepCategory,
+});
+
+const OnboardingTemplateSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string().optional(),
+    steps: z.array(OnboardingStepDefinitionSchema),
+    created: z.string(),
+  })
+  .openapi("OnboardingTemplate");
+
+const CreateOnboardingTemplateSchema = z
+  .object({
+    name: z.string().optional().openapi({ description: "Template name" }),
+    description: z.string().optional(),
+    steps: z.array(OnboardingStepDefinitionSchema).optional(),
+  })
+  .openapi("CreateOnboardingTemplate");
+
+const UpdateOnboardingTemplateSchema = CreateOnboardingTemplateSchema.openapi(
+  "UpdateOnboardingTemplate",
+);
 
 // --- Route definitions ---
 
@@ -33,7 +73,9 @@ const listOnboardingTemplatesRoute = createRoute({
   operationId: "listOnboardingTemplates",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: {
+        "application/json": { schema: z.array(OnboardingTemplateSchema) },
+      },
       description: "List of onboarding templates",
     },
   },
@@ -48,7 +90,7 @@ const getOnboardingTemplateRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: OnboardingTemplateSchema } },
       description: "Onboarding template details",
     },
     404: {
@@ -67,18 +109,14 @@ const createOnboardingTemplateRoute = createRoute({
   request: {
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: CreateOnboardingTemplateSchema },
       },
       required: true,
     },
   },
   responses: {
     201: {
-      content: {
-        "application/json": {
-          schema: z.object({ success: z.boolean(), id: z.string() }),
-        },
-      },
+      content: { "application/json": { schema: SuccessWithIdSchema } },
       description: "Onboarding template created",
     },
   },
@@ -94,7 +132,7 @@ const updateOnboardingTemplateRoute = createRoute({
     params: idParam,
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: UpdateOnboardingTemplateSchema },
       },
       required: true,
     },

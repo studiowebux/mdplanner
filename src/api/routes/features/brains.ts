@@ -7,6 +7,7 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import type { AppVariables } from "../context.ts";
 import {
+  BrainInfoSchema,
   RegisterBrainSchema,
   SetupRequestSchema,
   SyncApplySchema,
@@ -25,6 +26,104 @@ const ErrorSchema = z.object({
   message: z.string().optional(),
 });
 const SuccessSchema = z.object({ success: z.boolean() });
+
+// File entry returned by the brain file browser.
+const FileEntrySchema = z
+  .object({
+    name: z.string(),
+    path: z.string(),
+    isDir: z.boolean(),
+    size: z.number().optional(),
+  })
+  .openapi("BrainFileEntry");
+
+// Directory item returned by the directory picker.
+const DirItemSchema = z
+  .object({
+    name: z.string(),
+    path: z.string(),
+  })
+  .openapi("BrainDirItem");
+
+// Session metadata returned by listSessions.
+const SessionMetaSchema = z
+  .object({
+    id: z.string(),
+    slug: z.string(),
+    lastModified: z.string(),
+    messageCount: z.number(),
+    preview: z.string(),
+  })
+  .openapi("BrainSessionMeta");
+
+// Tool use block within a session message.
+const ToolUseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  input: z.string(),
+});
+
+// Tool result block within a session message.
+const ToolResultSchema = z.object({
+  toolUseId: z.string(),
+  content: z.string(),
+});
+
+// Individual message within a session transcript.
+const SessionMessageSchema = z.object({
+  role: z.string(),
+  text: z.string(),
+  thinking: z.string(),
+  toolUses: z.array(ToolUseSchema),
+  toolResults: z.array(ToolResultSchema),
+  timestamp: z.string(),
+});
+
+// Subagent session within a parent session.
+const SubagentSessionSchema = z.object({
+  id: z.string(),
+  messages: z.array(SessionMessageSchema),
+});
+
+// Full session detail returned by getSession.
+const SessionDetailSchema = z
+  .object({
+    messages: z.array(SessionMessageSchema),
+    subagents: z.array(SubagentSessionSchema),
+  })
+  .openapi("BrainSessionDetail");
+
+// Rebuild result — wraps rebuildRules() output with brain name and message.
+// Uses z.unknown() because the exact shape evolves with brain config.
+const RebuildResultSchema = z.unknown().openapi({});
+
+// Sync diff entry — typed from DiffEntry in sync.ts.
+const SyncDiffEntrySchema = z
+  .object({
+    relPath: z.string(),
+    dir: z.string(),
+    status: z.enum(["added", "modified", "identical", "removed", "skipped"]),
+    sourceMod: z.string().optional(),
+    targetMod: z.string().optional(),
+    newer: z.string(),
+  })
+  .openapi("BrainSyncDiffEntry");
+
+// Sync apply result — { applied: string[], failed: string[] }.
+const SyncApplyResultSchema = z
+  .object({
+    applied: z.array(z.string()),
+    failed: z.array(z.string()),
+  })
+  .openapi("BrainSyncApplyResult");
+
+// Setup result — returns brainDir + message; keep open for future fields.
+const SetupResultSchema = z
+  .object({
+    brainDir: z.string(),
+    message: z.string(),
+  })
+  .openapi("BrainSetupResult");
 
 /** Extended variables for brain routes. */
 interface BrainVariables extends AppVariables {
@@ -67,7 +166,7 @@ const listBrainsRoute = createRoute({
   operationId: "listBrains",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(BrainInfoSchema) } },
       description: "List of brains with info",
     },
   },
@@ -81,13 +180,13 @@ const registerBrainRoute = createRoute({
   operationId: "registerBrain",
   request: {
     body: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: RegisterBrainSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: BrainInfoSchema } },
       description: "Registered brain",
     },
     400: {
@@ -133,13 +232,13 @@ const updateBrainRoute = createRoute({
   request: {
     params: nameParam,
     body: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: UpdateBrainSchema } },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: BrainInfoSchema } },
       description: "Updated brain",
     },
     400: {
@@ -169,7 +268,7 @@ const listFilesRoute = createRoute({
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(FileEntrySchema) } },
       description: "File listing",
     },
     400: {
@@ -221,7 +320,9 @@ const listSessionsRoute = createRoute({
   request: { params: nameParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: {
+        "application/json": { schema: z.array(SessionMetaSchema) },
+      },
       description: "Session listing",
     },
     404: {
@@ -240,7 +341,7 @@ const getSessionRoute = createRoute({
   request: { params: nameAndIdParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: SessionDetailSchema } },
       description: "Session detail",
     },
     404: {
@@ -290,7 +391,13 @@ const updateMemoryRoute = createRoute({
   request: {
     params: nameParam,
     body: {
-      content: { "application/json": { schema: z.any() } },
+      content: {
+        "application/json": {
+          schema: z.object({
+            content: z.string().openapi({ description: "Memory file content" }),
+          }),
+        },
+      },
       required: true,
     },
   },
@@ -327,13 +434,13 @@ const setupBrainRoute = createRoute({
   request: {
     params: nameParam,
     body: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: SetupRequestSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: SetupResultSchema } },
       description: "Brain scaffolded",
     },
     400: {
@@ -360,7 +467,8 @@ const rebuildRulesRoute = createRoute({
   request: { params: nameParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      // Shape evolves with brain config — z.unknown() avoids handler mismatch.
+      content: { "application/json": { schema: z.unknown() } },
       description: "Rules rebuilt",
     },
     404: {
@@ -437,7 +545,9 @@ const syncDiffRoute = createRoute({
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: {
+        "application/json": { schema: z.array(SyncDiffEntrySchema) },
+      },
       description: "Diff entries",
     },
     400: {
@@ -459,13 +569,13 @@ const syncApplyRoute = createRoute({
   operationId: "applyBrainSync",
   request: {
     body: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: SyncApplySchema } },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: SyncApplyResultSchema } },
       description: "Sync result",
     },
     400: {
@@ -494,7 +604,7 @@ const listDirsRoute = createRoute({
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(DirItemSchema) } },
       description: "Directory listing",
     },
     400: {

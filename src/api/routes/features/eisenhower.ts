@@ -12,14 +12,44 @@ import {
 
 export const eisenhowerRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("EisenhowerError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("EisenhowerSuccess");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const stringArray = z.array(z.string());
+
+const EisenhowerSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    date: z.string(),
+    urgentImportant: stringArray,
+    notUrgentImportant: stringArray,
+    urgentNotImportant: stringArray,
+    notUrgentNotImportant: stringArray,
+  })
+  .openapi("Eisenhower");
+
+const CreateEisenhowerSchema = z
+  .object({
+    title: z.string().optional().openapi({ description: "Matrix title" }),
+    date: z.string().optional().openapi({ description: "Date (YYYY-MM-DD)" }),
+    urgentImportant: stringArray.optional(),
+    notUrgentImportant: stringArray.optional(),
+    urgentNotImportant: stringArray.optional(),
+    notUrgentNotImportant: stringArray.optional(),
+  })
+  .openapi("CreateEisenhower");
+
+const UpdateEisenhowerSchema = CreateEisenhowerSchema.openapi(
+  "UpdateEisenhower",
+);
 
 const listEisenhowerRoute = createRoute({
   method: "get",
@@ -29,7 +59,7 @@ const listEisenhowerRoute = createRoute({
   operationId: "listEisenhowerMatrices",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(EisenhowerSchema) } },
       description: "List of Eisenhower matrices",
     },
   },
@@ -43,15 +73,13 @@ const createEisenhowerRoute = createRoute({
   operationId: "createEisenhowerMatrix",
   request: {
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateEisenhowerSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: EisenhowerSchema } },
       description: "Eisenhower matrix created",
     },
   },
@@ -66,15 +94,13 @@ const updateEisenhowerRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: UpdateEisenhowerSchema } },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: EisenhowerSchema } },
       description: "Updated Eisenhower matrix",
     },
     404: {

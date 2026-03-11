@@ -33,6 +33,22 @@
   margin-bottom: var(--space-xs);
 }
 
+.summary-milestone-toggle {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem 0;
+  transition: color var(--transition-fast);
+}
+
+.summary-milestone-toggle:hover {
+  color: var(--color-text-secondary);
+}
+
 .summary-edit-btn {
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);

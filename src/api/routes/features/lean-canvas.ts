@@ -14,14 +14,60 @@ export const leanCanvasRouter = new OpenAPIHono<{
   Variables: AppVariables;
 }>();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("LeanCanvasError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("LeanCanvasSuccess");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const stringArray = z.array(z.string());
+
+const LeanCanvasSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    date: z.string(),
+    problem: stringArray,
+    solution: stringArray,
+    uniqueValueProp: stringArray,
+    unfairAdvantage: stringArray,
+    customerSegments: stringArray,
+    existingAlternatives: stringArray,
+    keyMetrics: stringArray,
+    highLevelConcept: stringArray,
+    channels: stringArray,
+    earlyAdopters: stringArray,
+    costStructure: stringArray,
+    revenueStreams: stringArray,
+  })
+  .openapi("LeanCanvas");
+
+const CreateLeanCanvasSchema = z
+  .object({
+    title: z.string().optional().openapi({ description: "Canvas title" }),
+    date: z.string().optional().openapi({ description: "Date (YYYY-MM-DD)" }),
+    problem: stringArray.optional(),
+    solution: stringArray.optional(),
+    uniqueValueProp: stringArray.optional(),
+    unfairAdvantage: stringArray.optional(),
+    customerSegments: stringArray.optional(),
+    existingAlternatives: stringArray.optional(),
+    keyMetrics: stringArray.optional(),
+    highLevelConcept: stringArray.optional(),
+    channels: stringArray.optional(),
+    earlyAdopters: stringArray.optional(),
+    costStructure: stringArray.optional(),
+    revenueStreams: stringArray.optional(),
+  })
+  .openapi("CreateLeanCanvas");
+
+const UpdateLeanCanvasSchema = CreateLeanCanvasSchema.openapi(
+  "UpdateLeanCanvas",
+);
 
 const listLeanCanvasRoute = createRoute({
   method: "get",
@@ -31,7 +77,7 @@ const listLeanCanvasRoute = createRoute({
   operationId: "listLeanCanvases",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(LeanCanvasSchema) } },
       description: "List of lean canvases",
     },
   },
@@ -45,15 +91,13 @@ const createLeanCanvasRoute = createRoute({
   operationId: "createLeanCanvas",
   request: {
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateLeanCanvasSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: LeanCanvasSchema } },
       description: "Lean canvas created",
     },
   },
@@ -68,9 +112,7 @@ const updateLeanCanvasRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: UpdateLeanCanvasSchema } },
       required: true,
     },
   },
@@ -119,7 +161,7 @@ leanCanvasRouter.openapi(createLeanCanvasRoute, async (c) => {
   const leanCanvases = await parser.readLeanCanvases();
   const newCanvas = {
     id: crypto.randomUUID().substring(0, 8),
-    title: body.title,
+    title: body.title || "",
     date: body.date || new Date().toISOString().split("T")[0],
     problem: body.problem || [],
     solution: body.solution || [],

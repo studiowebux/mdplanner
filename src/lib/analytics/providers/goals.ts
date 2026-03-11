@@ -15,6 +15,7 @@ export interface MilestoneStat {
   id: string;
   name: string;
   status: "open" | "completed";
+  completedAt?: string;
 }
 
 export interface GoalStats {
@@ -89,6 +90,7 @@ export async function collectGoalStats(
     id: m.id,
     name: m.name,
     status: m.status,
+    ...(m.completedAt && { completedAt: m.completedAt }),
   }));
 
   return {

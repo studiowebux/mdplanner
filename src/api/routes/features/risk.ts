@@ -12,14 +12,42 @@ import {
 
 export const riskRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
-const ErrorSchema = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
+const ErrorSchema = z
+  .object({ error: z.string(), message: z.string().optional() })
+  .openapi("RiskError");
+const SuccessSchema = z
+  .object({ success: z.boolean() })
+  .openapi("RiskSuccess");
 const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
-const SuccessSchema = z.object({ success: z.boolean() });
+
+const stringArray = z.array(z.string());
+
+const RiskSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    date: z.string(),
+    highImpactHighProb: stringArray,
+    highImpactLowProb: stringArray,
+    lowImpactHighProb: stringArray,
+    lowImpactLowProb: stringArray,
+  })
+  .openapi("Risk");
+
+const CreateRiskSchema = z
+  .object({
+    title: z.string().optional().openapi({ description: "Analysis title" }),
+    date: z.string().optional().openapi({ description: "Date (YYYY-MM-DD)" }),
+    highImpactHighProb: stringArray.optional(),
+    highImpactLowProb: stringArray.optional(),
+    lowImpactHighProb: stringArray.optional(),
+    lowImpactLowProb: stringArray.optional(),
+  })
+  .openapi("CreateRisk");
+
+const UpdateRiskSchema = CreateRiskSchema.openapi("UpdateRisk");
 
 const listRiskRoute = createRoute({
   method: "get",
@@ -29,7 +57,7 @@ const listRiskRoute = createRoute({
   operationId: "listRiskAnalyses",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(RiskSchema) } },
       description: "List of risk analyses",
     },
   },
@@ -43,15 +71,13 @@ const createRiskRoute = createRoute({
   operationId: "createRiskAnalysis",
   request: {
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: CreateRiskSchema } },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: RiskSchema } },
       description: "Risk analysis created",
     },
   },
@@ -66,9 +92,7 @@ const updateRiskRoute = createRoute({
   request: {
     params: idParam,
     body: {
-      content: {
-        "application/json": { schema: z.any() },
-      },
+      content: { "application/json": { schema: UpdateRiskSchema } },
       required: true,
     },
   },
@@ -117,7 +141,7 @@ riskRouter.openapi(createRiskRoute, async (c) => {
   const riskAnalyses = await parser.readRiskAnalyses();
   const newRisk = {
     id: crypto.randomUUID().substring(0, 8),
-    title: body.title,
+    title: body.title || "",
     date: body.date || new Date().toISOString().split("T")[0],
     highImpactHighProb: body.highImpactHighProb || [],
     highImpactLowProb: body.highImpactLowProb || [],

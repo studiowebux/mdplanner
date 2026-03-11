@@ -14,6 +14,10 @@ import { eventBus } from "../../../lib/event-bus.ts";
 
 export const billingRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
+// ---------------------------------------------------------------------------
+// Shared schemas
+// ---------------------------------------------------------------------------
+
 const ErrorSchema = z.object({
   error: z.string(),
   message: z.string().optional(),
@@ -22,6 +26,299 @@ const idParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
 });
 const SuccessSchema = z.object({ success: z.boolean() });
+
+const BillingAddressSchema = z
+  .object({
+    street: z.string().optional(),
+    city: z.string().optional(),
+    state: z.string().optional(),
+    postalCode: z.string().optional(),
+    country: z.string().optional(),
+  })
+  .openapi("BillingAddress");
+
+// ---------------------------------------------------------------------------
+// Customer schemas
+// ---------------------------------------------------------------------------
+
+const CustomerSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    email: z.string().optional(),
+    phone: z.string().optional(),
+    company: z.string().optional(),
+    billingAddress: BillingAddressSchema.optional(),
+    notes: z.string().optional(),
+    created: z.string(),
+  })
+  .openapi("Customer");
+
+const CreateCustomerSchema = z
+  .object({
+    name: z.string().min(1).openapi({ description: "Customer name" }),
+    email: z.string().optional(),
+    phone: z.string().optional(),
+    company: z.string().optional(),
+    billingAddress: BillingAddressSchema.optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("CreateCustomer");
+
+const UpdateCustomerSchema = z
+  .object({
+    name: z.string().min(1).optional(),
+    email: z.string().optional(),
+    phone: z.string().optional(),
+    company: z.string().optional(),
+    billingAddress: BillingAddressSchema.optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("UpdateCustomer");
+
+// ---------------------------------------------------------------------------
+// Billing rate schemas
+// ---------------------------------------------------------------------------
+
+const BillingRateSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    hourlyRate: z.number(),
+    assignee: z.string().optional(),
+    isDefault: z.boolean().optional(),
+  })
+  .openapi("BillingRate");
+
+const CreateBillingRateSchema = z
+  .object({
+    name: z.string().min(1).openapi({ description: "Rate name" }),
+    hourlyRate: z.number().openapi({ description: "Hourly rate amount" }),
+    assignee: z.string().optional(),
+    isDefault: z.boolean().optional(),
+  })
+  .openapi("CreateBillingRate");
+
+const UpdateBillingRateSchema = z
+  .object({
+    name: z.string().min(1).optional(),
+    hourlyRate: z.number().optional(),
+    assignee: z.string().optional(),
+    isDefault: z.boolean().optional(),
+  })
+  .openapi("UpdateBillingRate");
+
+// ---------------------------------------------------------------------------
+// Quote schemas
+// ---------------------------------------------------------------------------
+
+const QuoteLineItemSchema = z
+  .object({
+    id: z.string(),
+    description: z.string(),
+    quantity: z.number(),
+    rate: z.number(),
+    amount: z.number(),
+  })
+  .openapi("QuoteLineItem");
+
+const QuoteLineItemInputSchema = z.object({
+  id: z.string(),
+  description: z.string(),
+  quantity: z.number(),
+  rate: z.number(),
+  amount: z.number(),
+});
+
+const QuoteSchema = z
+  .object({
+    id: z.string(),
+    number: z.string(),
+    customerId: z.string(),
+    title: z.string(),
+    status: z.enum(["draft", "sent", "accepted", "rejected"]),
+    validUntil: z.string().optional(),
+    lineItems: z.array(QuoteLineItemSchema),
+    subtotal: z.number(),
+    tax: z.number().optional(),
+    taxRate: z.number().optional(),
+    total: z.number(),
+    notes: z.string().optional(),
+    created: z.string(),
+    sentAt: z.string().optional(),
+    acceptedAt: z.string().optional(),
+  })
+  .openapi("Quote");
+
+const CreateQuoteSchema = z
+  .object({
+    customerId: z.string().min(1).openapi({ description: "Customer ID" }),
+    title: z.string().min(1).openapi({ description: "Quote title" }),
+    status: z.enum(["draft", "sent", "accepted", "rejected"]).optional(),
+    validUntil: z.string().optional(),
+    lineItems: z.array(QuoteLineItemInputSchema).optional(),
+    taxRate: z.number().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("CreateQuote");
+
+const UpdateQuoteSchema = z
+  .object({
+    customerId: z.string().optional(),
+    title: z.string().optional(),
+    status: z.enum(["draft", "sent", "accepted", "rejected"]).optional(),
+    validUntil: z.string().optional(),
+    lineItems: z.array(QuoteLineItemInputSchema).optional(),
+    taxRate: z.number().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("UpdateQuote");
+
+// ---------------------------------------------------------------------------
+// Invoice schemas
+// ---------------------------------------------------------------------------
+
+const InvoiceLineItemSchema = z
+  .object({
+    id: z.string(),
+    description: z.string(),
+    quantity: z.number(),
+    rate: z.number(),
+    amount: z.number(),
+    taskId: z.string().optional(),
+    timeEntryIds: z.array(z.string()).optional(),
+  })
+  .openapi("InvoiceLineItem");
+
+const InvoiceLineItemInputSchema = z.object({
+  id: z.string(),
+  description: z.string(),
+  quantity: z.number(),
+  rate: z.number(),
+  amount: z.number(),
+  taskId: z.string().optional(),
+  timeEntryIds: z.array(z.string()).optional(),
+});
+
+const InvoiceSchema = z
+  .object({
+    id: z.string(),
+    number: z.string(),
+    customerId: z.string(),
+    quoteId: z.string().optional(),
+    title: z.string(),
+    status: z.enum(["draft", "sent", "paid", "overdue", "cancelled"]),
+    dueDate: z.string().optional(),
+    lineItems: z.array(InvoiceLineItemSchema),
+    subtotal: z.number(),
+    tax: z.number().optional(),
+    taxRate: z.number().optional(),
+    total: z.number(),
+    paidAmount: z.number(),
+    notes: z.string().optional(),
+    created: z.string(),
+    sentAt: z.string().optional(),
+    paidAt: z.string().optional(),
+  })
+  .openapi("Invoice");
+
+const CreateInvoiceSchema = z
+  .object({
+    customerId: z.string().min(1).openapi({ description: "Customer ID" }),
+    quoteId: z.string().optional(),
+    title: z.string().min(1).openapi({ description: "Invoice title" }),
+    status: z.enum(["draft", "sent", "paid", "overdue", "cancelled"])
+      .optional(),
+    dueDate: z.string().optional(),
+    lineItems: z.array(InvoiceLineItemInputSchema).optional(),
+    taxRate: z.number().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("CreateInvoice");
+
+const UpdateInvoiceSchema = z
+  .object({
+    customerId: z.string().optional(),
+    quoteId: z.string().optional(),
+    title: z.string().optional(),
+    status: z.enum(["draft", "sent", "paid", "overdue", "cancelled"])
+      .optional(),
+    dueDate: z.string().optional(),
+    lineItems: z.array(InvoiceLineItemInputSchema).optional(),
+    taxRate: z.number().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("UpdateInvoice");
+
+// ---------------------------------------------------------------------------
+// Payment schemas
+// ---------------------------------------------------------------------------
+
+const PaymentSchema = z
+  .object({
+    id: z.string(),
+    invoiceId: z.string(),
+    amount: z.number(),
+    date: z.string(),
+    method: z.enum(["bank", "card", "cash", "other"]).optional(),
+    reference: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("Payment");
+
+const CreatePaymentSchema = z
+  .object({
+    amount: z.number().openapi({ description: "Payment amount" }),
+    date: z.string().optional().openapi({
+      description: "Payment date (YYYY-MM-DD)",
+    }),
+    method: z.enum(["bank", "card", "cash", "other"]).optional(),
+    reference: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .openapi("CreatePayment");
+
+// ---------------------------------------------------------------------------
+// Generate invoice schema
+// ---------------------------------------------------------------------------
+
+const GenerateInvoiceSchema = z
+  .object({
+    customerId: z.string().min(1).openapi({ description: "Customer ID" }),
+    taskIds: z.array(z.string()).openapi({
+      description: "Task IDs to include in the invoice",
+    }),
+    startDate: z.string().optional().openapi({
+      description: "Filter time entries from this date (YYYY-MM-DD)",
+    }),
+    endDate: z.string().optional().openapi({
+      description: "Filter time entries up to this date (YYYY-MM-DD)",
+    }),
+    hourlyRate: z.number().optional().openapi({
+      description: "Hourly rate to apply",
+    }),
+    title: z.string().optional().openapi({ description: "Invoice title" }),
+  })
+  .openapi("GenerateInvoice");
+
+// ---------------------------------------------------------------------------
+// Billing summary schema
+// ---------------------------------------------------------------------------
+
+const BillingSummarySchema = z
+  .object({
+    totalOutstanding: z.number(),
+    totalOverdue: z.number(),
+    totalPaid: z.number(),
+    totalInvoiced: z.number(),
+    pendingQuotes: z.number(),
+    acceptedQuotes: z.number(),
+    draftInvoices: z.number(),
+    sentInvoices: z.number(),
+    paidInvoices: z.number(),
+    overdueInvoices: z.number(),
+  })
+  .openapi("BillingSummary");
 
 function findTaskById(tasks: Task[], id: string): Task | null {
   for (const task of tasks) {
@@ -44,7 +341,7 @@ const listCustomersRoute = createRoute({
   operationId: "listCustomers",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(CustomerSchema) } },
       description: "List of customers",
     },
   },
@@ -59,7 +356,7 @@ const getCustomerRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: CustomerSchema } },
       description: "Customer details",
     },
     404: {
@@ -78,15 +375,19 @@ const createCustomerRoute = createRoute({
   request: {
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: CreateCustomerSchema },
       },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: CustomerSchema } },
       description: "Customer created",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
   },
 });
@@ -101,15 +402,19 @@ const updateCustomerRoute = createRoute({
     params: idParam,
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: UpdateCustomerSchema },
       },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: CustomerSchema } },
       description: "Updated customer",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -147,7 +452,7 @@ const listBillingRatesRoute = createRoute({
   operationId: "listBillingRates",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(BillingRateSchema) } },
       description: "List of billing rates",
     },
   },
@@ -162,15 +467,19 @@ const createBillingRateRoute = createRoute({
   request: {
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: CreateBillingRateSchema },
       },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: BillingRateSchema } },
       description: "Billing rate created",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
   },
 });
@@ -185,15 +494,19 @@ const updateBillingRateRoute = createRoute({
     params: idParam,
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: UpdateBillingRateSchema },
       },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: BillingRateSchema } },
       description: "Updated billing rate",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -231,7 +544,7 @@ const listQuotesRoute = createRoute({
   operationId: "listQuotes",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(QuoteSchema) } },
       description: "List of quotes",
     },
   },
@@ -246,7 +559,7 @@ const getQuoteRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: QuoteSchema } },
       description: "Quote details",
     },
     404: {
@@ -265,15 +578,19 @@ const createQuoteRoute = createRoute({
   request: {
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: CreateQuoteSchema },
       },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: QuoteSchema } },
       description: "Quote created",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
   },
 });
@@ -288,15 +605,19 @@ const updateQuoteRoute = createRoute({
     params: idParam,
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: UpdateQuoteSchema },
       },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: QuoteSchema } },
       description: "Updated quote",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -333,7 +654,7 @@ const sendQuoteRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: QuoteSchema } },
       description: "Quote marked as sent",
     },
     404: {
@@ -352,7 +673,7 @@ const acceptQuoteRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: QuoteSchema } },
       description: "Quote marked as accepted",
     },
     404: {
@@ -371,7 +692,7 @@ const quoteToInvoiceRoute = createRoute({
   request: { params: idParam },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: InvoiceSchema } },
       description: "Invoice created from quote",
     },
     404: {
@@ -391,7 +712,7 @@ const listInvoicesRoute = createRoute({
   operationId: "listInvoices",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(InvoiceSchema) } },
       description: "List of invoices",
     },
   },
@@ -406,7 +727,7 @@ const getInvoiceRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: InvoiceSchema } },
       description: "Invoice details",
     },
     404: {
@@ -425,15 +746,19 @@ const createInvoiceRoute = createRoute({
   request: {
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: CreateInvoiceSchema },
       },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: InvoiceSchema } },
       description: "Invoice created",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
   },
 });
@@ -448,15 +773,19 @@ const updateInvoiceRoute = createRoute({
     params: idParam,
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: UpdateInvoiceSchema },
       },
       required: true,
     },
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: InvoiceSchema } },
       description: "Updated invoice",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -493,7 +822,7 @@ const sendInvoiceRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: InvoiceSchema } },
       description: "Invoice marked as sent",
     },
     404: {
@@ -512,7 +841,7 @@ const getInvoicePaymentsRoute = createRoute({
   request: { params: idParam },
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.any()) } },
+      content: { "application/json": { schema: z.array(PaymentSchema) } },
       description: "Invoice payments",
     },
   },
@@ -528,15 +857,19 @@ const addInvoicePaymentRoute = createRoute({
     params: idParam,
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: CreatePaymentSchema },
       },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: PaymentSchema } },
       description: "Payment added",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Validation error",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -554,14 +887,14 @@ const generateInvoiceRoute = createRoute({
   request: {
     body: {
       content: {
-        "application/json": { schema: z.any() },
+        "application/json": { schema: GenerateInvoiceSchema },
       },
       required: true,
     },
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: InvoiceSchema } },
       description: "Invoice generated",
     },
     400: {
@@ -581,7 +914,7 @@ const getBillingSummaryRoute = createRoute({
   operationId: "getBillingSummary",
   responses: {
     200: {
-      content: { "application/json": { schema: z.any() } },
+      content: { "application/json": { schema: BillingSummarySchema } },
       description: "Billing summary",
     },
   },
