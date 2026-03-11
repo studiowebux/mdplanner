@@ -234,8 +234,9 @@ dnsRouter.openapi(syncCloudflareDnsRoute, async (c) => {
     return c.json({ success: true, ...result }, 200);
   } catch (err) {
     const status =
-      err instanceof Error && err.message.includes("not configured") ? 400
-      : 502;
+      err instanceof Error && err.message.includes("not configured")
+        ? 400
+        : 502;
     return c.json(
       {
         error: err instanceof Error ? err.message : "Sync failed",

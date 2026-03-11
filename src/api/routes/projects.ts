@@ -48,7 +48,9 @@ const activeProjectRoute = createRoute({
     200: {
       content: {
         "application/json": {
-          schema: z.any().openapi({ description: "Active project with filename and metadata" }),
+          schema: z.any().openapi({
+            description: "Active project with filename and metadata",
+          }),
         },
       },
       description: "Active project info",

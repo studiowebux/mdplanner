@@ -163,6 +163,29 @@ export const TasksAPI = {
     const response = await put(`/api/tasks/${id}/comments/${commentId}`, payload);
     return response;
   },
+
+  async requestApproval(id, body) {
+    const response = await post(`/api/tasks/${id}/request-approval`, body);
+    return response;
+  },
+
+  async approveTask(id, body) {
+    const response = await post(`/api/tasks/${id}/approve`, body ?? {});
+    return response;
+  },
+
+  async rejectTask(id, body) {
+    const response = await post(`/api/tasks/${id}/reject`, body);
+    return response;
+  },
+
+  async listPendingApprovals(project) {
+    const url = project
+      ? `/api/tasks?section=Pending%20Review&project=${encodeURIComponent(project)}`
+      : `/api/tasks?section=Pending%20Review`;
+    const response = await get(url);
+    return response.json();
+  },
 };
 
 /** Project config and info operations */

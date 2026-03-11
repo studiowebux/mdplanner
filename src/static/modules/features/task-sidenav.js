@@ -111,6 +111,20 @@ export class TaskSidenavModule {
       (e) => localStorage.setItem("commentAuthorName", e.target.value),
     );
 
+    // Approval panel — delegate approve/reject clicks
+    document.getElementById("taskApprovalPanel")?.addEventListener(
+      "click",
+      (e) => {
+        const approveBtn = e.target.closest("[data-approve-task]");
+        if (approveBtn) {
+          this._handleApprove(approveBtn.dataset.approveTask);
+          return;
+        }
+        const rejectBtn = e.target.closest("[data-reject-task]");
+        if (rejectBtn) this._handleReject(rejectBtn.dataset.rejectTask);
+      },
+    );
+
     // Comment thread — delegate delete and edit clicks
     document.getElementById("taskCommentThread")?.addEventListener(
       "click",
@@ -432,6 +446,9 @@ export class TaskSidenavModule {
     const commentsSection = document.getElementById("taskCommentsSection");
     if (commentsSection) commentsSection.classList.remove("hidden");
     this._renderCommentThread(task);
+
+    // Approval — show section only when task has an approval request
+    this._renderApprovalPanel(task);
   }
 
   clearForm() {
@@ -449,6 +466,12 @@ export class TaskSidenavModule {
     if (thread) thread.innerHTML = "";
     const commentInput = document.getElementById("taskCommentInput");
     if (commentInput) commentInput.value = "";
+
+    // Hide approval section
+    const approvalSection = document.getElementById("taskApprovalSection");
+    if (approvalSection) approvalSection.classList.add("hidden");
+    const approvalPanel = document.getElementById("taskApprovalPanel");
+    if (approvalPanel) approvalPanel.innerHTML = "";
 
     this._resetGitHubBadge();
     this._resetGitHubPRBadge();
@@ -1003,6 +1026,109 @@ export class TaskSidenavModule {
     if (!dot) return;
     const show = this._descUndoManager?.hasUnsavedChanges() ?? false;
     dot.classList.toggle("hidden", !show);
+  }
+
+  // --- Approval panel ---
+
+  _renderApprovalPanel(task) {
+    const section = document.getElementById("taskApprovalSection");
+    const panel = document.getElementById("taskApprovalPanel");
+    if (!section || !panel) return;
+
+    const ar = task?.config?.approvalRequest;
+    if (!ar) {
+      section.classList.add("hidden");
+      panel.innerHTML = "";
+      return;
+    }
+
+    section.classList.remove("hidden");
+    const isPending = task.section === "Pending Review";
+    const verdict = ar.verdict;
+    const ts = (iso) =>
+      new Date(iso).toLocaleString(undefined, {
+        year: "numeric", month: "short", day: "numeric",
+        hour: "2-digit", minute: "2-digit",
+      });
+
+    let verdictHtml = "";
+    if (verdict) {
+      const isApproved = verdict.decision === "approved";
+      verdictHtml = `
+        <div class="task-approval-verdict task-approval-verdict--${verdict.decision}">
+          <span class="task-approval-verdict-label">${isApproved ? "Approved" : "Rejected"}</span>
+          <span class="task-approval-verdict-ts">${ts(verdict.decidedAt)}</span>
+          ${verdict.rejectionType ? `<span class="task-approval-rejection-type">${verdict.rejectionType}</span>` : ""}
+          ${verdict.feedback ? `<div class="task-approval-feedback">${escapeHtml(verdict.feedback)}</div>` : ""}
+        </div>`;
+    }
+
+    const actionsHtml = isPending
+      ? `<div class="task-approval-actions">
+          <button type="button" class="btn-primary" data-approve-task="${task.id}">Approve</button>
+          <button type="button" class="btn-secondary" data-reject-task="${task.id}">Reject</button>
+        </div>`
+      : "";
+
+    panel.innerHTML = `
+      <div class="task-approval-summary">
+        ${markdownToHtml(ar.summary)}
+      </div>
+      ${ar.commitHash ? `<div class="task-approval-meta"><span class="task-approval-commit">${escapeHtml(ar.commitHash)}</span></div>` : ""}
+      ${ar.artifactUrls?.length
+        ? `<div class="task-approval-artifacts">${ar.artifactUrls.map((u) => `<a href="${escapeHtml(u)}" target="_blank" rel="noopener">${escapeHtml(u)}</a>`).join("")}</div>`
+        : ""}
+      ${verdictHtml}
+      ${actionsHtml}`;
+  }
+
+  async _handleApprove(taskId) {
+    if (!await showConfirm("Approve this task?")) return;
+    try {
+      const res = await TasksAPI.approveTask(taskId, {});
+      if (!res.ok) throw new Error(await res.text());
+      showToast("Task approved", "success");
+      const updated = await TasksAPI.fetchOne(taskId);
+      this.editingTask = updated;
+      this._renderApprovalPanel(updated);
+      this.tm?.loadTasks?.();
+    } catch (e) {
+      showToast(`Approve failed: ${e.message}`, "error");
+    }
+  }
+
+  async _handleReject(taskId) {
+    const feedback = prompt("Rejection feedback (required):");
+    if (!feedback?.trim()) return;
+    const rejectionType = prompt(
+      "Rejection type:\n1. wrong-approach\n2. incomplete\n3. out-of-scope\n4. needs-discussion\n\nEnter number or type:",
+    );
+    const typeMap = {
+      "1": "wrong-approach",
+      "2": "incomplete",
+      "3": "out-of-scope",
+      "4": "needs-discussion",
+    };
+    const resolvedType = typeMap[rejectionType?.trim()] ?? rejectionType?.trim();
+    const validTypes = ["wrong-approach", "incomplete", "out-of-scope", "needs-discussion"];
+    if (!validTypes.includes(resolvedType)) {
+      showToast("Invalid rejection type", "error");
+      return;
+    }
+    try {
+      const res = await TasksAPI.rejectTask(taskId, {
+        feedback: feedback.trim(),
+        rejection_type: resolvedType,
+      });
+      if (!res.ok) throw new Error(await res.text());
+      showToast("Task rejected", "success");
+      const updated = await TasksAPI.fetchOne(taskId);
+      this.editingTask = updated;
+      this._renderApprovalPanel(updated);
+      this.tm?.loadTasks?.();
+    } catch (e) {
+      showToast(`Reject failed: ${e.message}`, "error");
+    }
   }
 }
 

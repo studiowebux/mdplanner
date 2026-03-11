@@ -20,11 +20,7 @@ import { CloudflareDnsProvider } from "../../lib/integrations/providers/cloudfla
 import { GitHubApiProvider } from "../../lib/integrations/providers/github.ts";
 import { ProjectManager } from "../../lib/project-manager.ts";
 import { DirectoryMarkdownParser } from "../../lib/parser/directory/parser.ts";
-import {
-  AppVariables,
-  getParser,
-  getProjectManager,
-} from "./context.ts";
+import { AppVariables, getParser, getProjectManager } from "./context.ts";
 
 export const integrationsRouter = new OpenAPIHono<{
   Variables: AppVariables;

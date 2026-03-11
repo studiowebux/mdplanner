@@ -701,7 +701,10 @@ brainsRouter.openapi(setupBrainRoute, async (c) => {
     const status = e instanceof Error && e.message.includes("already exists")
       ? 409
       : 500;
-    return c.json({ error: e instanceof Error ? e.message : String(e) }, status);
+    return c.json(
+      { error: e instanceof Error ? e.message : String(e) },
+      status,
+    );
   }
 });
 

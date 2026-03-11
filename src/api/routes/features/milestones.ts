@@ -75,7 +75,9 @@ const CreateMilestoneSchema = z
 
 const UpdateMilestoneSchema = z
   .object({
-    name: z.string().min(1).optional().openapi({ description: "Milestone name" }),
+    name: z.string().min(1).optional().openapi({
+      description: "Milestone name",
+    }),
     target: z.string().optional().openapi({
       description: "Target date (YYYY-MM-DD)",
     }),

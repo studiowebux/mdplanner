@@ -22,7 +22,8 @@ const getVersionRoute = createRoute({
             current: z.string().openapi({ example: "0.25.2" }),
             latest: z.string().nullable().openapi({
               example: "0.25.2",
-              description: "Latest release version from GitHub, or null if check failed",
+              description:
+                "Latest release version from GitHub, or null if check failed",
             }),
             updateAvailable: z.boolean(),
             repo: z.string().openapi({ example: "studiowebux/mdplanner" }),
