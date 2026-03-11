@@ -8,6 +8,17 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.27.0] - 2026-03-11
+
+### Added
+
+- `GET /context-pack` — single-call agent boot endpoint. Returns people, active
+  milestone, in-progress tasks, top-10 todo, most recent progress note excerpt,
+  and decision/architecture/constraint note titles in one parallel read.
+  Replaces 8+ sequential MCP calls from Phase 1 Boot.
+- `get_context_pack` MCP tool — same data as the HTTP endpoint, accessible from
+  any MCP client. Accepts optional `project` and `milestone` parameters.
+
 ## [0.26.0] - 2026-03-10
 
 ### Added
