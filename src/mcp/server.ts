@@ -45,6 +45,7 @@ import { registerStrategicLevelsTools } from "./tools/strategic-levels.ts";
 import { registerBusinessModelTools } from "./tools/business-model.ts";
 import { registerLeanCanvasTools } from "./tools/lean-canvas.ts";
 import { registerProjectValueTools } from "./tools/project-value.ts";
+import { registerContextPackTools } from "./tools/context-pack.ts";
 import { registerResources } from "./resources.ts";
 
 /**
@@ -95,6 +96,7 @@ export function createMcpServer(pm: ProjectManager): McpServer {
   registerBusinessModelTools(server, pm);
   registerLeanCanvasTools(server, pm);
   registerProjectValueTools(server, pm);
+  registerContextPackTools(server, pm);
   registerResources(server, pm);
 
   return server;
