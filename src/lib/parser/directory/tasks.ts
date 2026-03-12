@@ -686,22 +686,13 @@ export class TasksDirectoryParser {
     filePath: string,
     content: string,
   ): Promise<void> {
-    const lockPath = `${filePath}.lock`;
-    const lockFile = await Deno.open(lockPath, { write: true, create: true });
-    await lockFile.lock(true);
-    try {
-      const tempPath = `${filePath}.tmp`;
-      await Deno.writeTextFile(tempPath, content);
-      await Deno.rename(tempPath, filePath);
-    } finally {
-      await lockFile.unlock();
-      lockFile.close();
-      try {
-        await Deno.remove(lockPath);
-      } catch {
-        // Lock file cleanup is best-effort; stale .lock files are harmless
-      }
-    }
+    // Temp-file + rename is inherently atomic on same-filesystem writes.
+    // In-process serialization is handled by withWriteLock.
+    // OS-level flock was removed: it blocked indefinitely when a stale
+    // .lock file existed, causing all write operations to hang.
+    const tempPath = `${filePath}.tmp`;
+    await Deno.writeTextFile(tempPath, content);
+    await Deno.rename(tempPath, filePath);
   }
 
   /**
