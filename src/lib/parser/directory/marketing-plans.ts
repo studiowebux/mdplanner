@@ -97,6 +97,15 @@ export class MarketingPlansDirectoryParser
     return buildFileContent(frontmatter, plan.notes ?? "");
   }
 
+  /**
+   * Read a marketing plan by name (case-insensitive).
+   * Falls back to a full scan since plan IDs are timestamp-based.
+   */
+  async readByName(name: string): Promise<MarketingPlan | null> {
+    const all = await this.readAll();
+    return all.find((p) => p.name.toLowerCase() === name.toLowerCase()) ?? null;
+  }
+
   async add(
     plan: Omit<MarketingPlan, "id" | "created" | "updated">,
   ): Promise<MarketingPlan> {

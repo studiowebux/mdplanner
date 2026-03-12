@@ -42,6 +42,20 @@ export function registerIdeaTools(server: McpServer, pm: ProjectManager): void {
   );
 
   server.registerTool(
+    "get_idea_by_name",
+    {
+      description:
+        "Get an idea by its title (case-insensitive). Prefer this over list_ideas when the title is known.",
+      inputSchema: { name: z.string().describe("Idea title") },
+    },
+    async ({ name }) => {
+      const idea = await parser.readIdeaByName(name);
+      if (!idea) return err(`Idea '${name}' not found`);
+      return ok(idea);
+    },
+  );
+
+  server.registerTool(
     "create_idea",
     {
       description: "Create a new idea.",

@@ -185,6 +185,11 @@ export class CRMDirectoryParser {
     }
   }
 
+  async readCompanyByName(name: string): Promise<Company | null> {
+    const all = await this.readAllCompanies();
+    return all.find((c) => c.name.toLowerCase() === name.toLowerCase()) ?? null;
+  }
+
   // ============================================================
   // Contacts
   // ============================================================
@@ -291,6 +296,16 @@ export class CRMDirectoryParser {
     } catch {
       return false;
     }
+  }
+
+  async readContactByName(name: string): Promise<Contact | null> {
+    const lower = name.toLowerCase();
+    const all = await this.readAllContacts();
+    return all.find((c) =>
+      `${c.firstName} ${c.lastName}`.toLowerCase() === lower ||
+      c.firstName.toLowerCase() === lower ||
+      c.lastName.toLowerCase() === lower
+    ) ?? null;
   }
 
   async getContactsByCompany(companyId: string): Promise<Contact[]> {
@@ -414,6 +429,11 @@ export class CRMDirectoryParser {
     } catch {
       return false;
     }
+  }
+
+  async readDealByName(name: string): Promise<Deal | null> {
+    const all = await this.readAllDeals();
+    return all.find((d) => d.title.toLowerCase() === name.toLowerCase()) ?? null;
   }
 
   async getDealsByCompany(companyId: string): Promise<Deal[]> {

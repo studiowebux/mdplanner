@@ -73,6 +73,20 @@ export function registerMeetingTools(
   );
 
   server.registerTool(
+    "get_meeting_by_name",
+    {
+      description:
+        "Get a meeting by its title (case-insensitive). Prefer this over list_meetings when the title is known.",
+      inputSchema: { name: z.string().describe("Meeting title") },
+    },
+    async ({ name }) => {
+      const meeting = await parser.readMeetingByName(name);
+      if (!meeting) return err(`Meeting '${name}' not found`);
+      return ok(meeting);
+    },
+  );
+
+  server.registerTool(
     "create_meeting",
     {
       description: "Create a new meeting record.",

@@ -81,6 +81,15 @@ export class GoalsDirectoryParser extends DirectoryParser<Goal> {
   }
 
   /**
+   * Read a goal by title (case-insensitive).
+   * Falls back to a full scan since goal IDs are timestamp-based.
+   */
+  async readByName(name: string): Promise<Goal | null> {
+    const all = await this.readAll();
+    return all.find((g) => g.title.toLowerCase() === name.toLowerCase()) ?? null;
+  }
+
+  /**
    * Add a new goal.
    */
   async add(goal: Omit<Goal, "id">): Promise<Goal> {

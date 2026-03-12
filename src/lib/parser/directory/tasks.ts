@@ -696,6 +696,14 @@ export class TasksDirectoryParser {
   }
 
   /**
+   * Read a task by title (case-insensitive). Scans all sections.
+   */
+  async readByName(name: string): Promise<Task | null> {
+    const all = await this.readAll();
+    return all.find((t) => t.title.toLowerCase() === name.toLowerCase()) ?? null;
+  }
+
+  /**
    * Add a new task.
    */
   async add(task: Omit<Task, "id" | "revision">): Promise<Task> {

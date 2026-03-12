@@ -33,6 +33,20 @@ export function registerCrmTools(server: McpServer, pm: ProjectManager): void {
   );
 
   server.registerTool(
+    "get_company_by_name",
+    {
+      description:
+        "Get a company by its name (case-insensitive). Prefer this over list_companies when the name is known.",
+      inputSchema: { name: z.string().describe("Company name") },
+    },
+    async ({ name }) => {
+      const item = await parser.readCompanyByName(name);
+      if (!item) return err(`Company '${name}' not found`);
+      return ok(item);
+    },
+  );
+
+  server.registerTool(
     "create_company",
     {
       description: "Create a new company in the CRM.",
@@ -123,6 +137,20 @@ export function registerCrmTools(server: McpServer, pm: ProjectManager): void {
       const items = await parser.readContacts();
       const item = items.find((i) => i.id === id);
       if (!item) return err(`Contact '${id}' not found`);
+      return ok(item);
+    },
+  );
+
+  server.registerTool(
+    "get_contact_by_name",
+    {
+      description:
+        "Get a contact by name (case-insensitive). Accepts full name, first name, or last name. Prefer this over list_contacts when the name is known.",
+      inputSchema: { name: z.string().describe("Contact name (full, first, or last)") },
+    },
+    async ({ name }) => {
+      const item = await parser.readContactByName(name);
+      if (!item) return err(`Contact '${name}' not found`);
       return ok(item);
     },
   );
@@ -264,6 +292,20 @@ export function registerCrmTools(server: McpServer, pm: ProjectManager): void {
       const items = await parser.readDeals();
       const item = items.find((i) => i.id === id);
       if (!item) return err(`Deal '${id}' not found`);
+      return ok(item);
+    },
+  );
+
+  server.registerTool(
+    "get_deal_by_name",
+    {
+      description:
+        "Get a deal by its title (case-insensitive). Prefer this over list_deals when the title is known.",
+      inputSchema: { name: z.string().describe("Deal title") },
+    },
+    async ({ name }) => {
+      const item = await parser.readDealByName(name);
+      if (!item) return err(`Deal '${name}' not found`);
       return ok(item);
     },
   );

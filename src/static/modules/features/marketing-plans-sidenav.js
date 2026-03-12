@@ -5,7 +5,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { MarketingPlansAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { showConfirm } from "../ui/confirm.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, markdownToHtml } from "../utils.js";
 
 const STATUS_OPTIONS = ["draft", "active", "completed", "archived"];
 const CHANNEL_STATUS_OPTIONS = ["planned", "active", "paused", "completed"];
@@ -203,7 +203,7 @@ export class MarketingPlansSidenavModule {
 
     view.innerHTML = `
       <div class="sidenav-section">
-        ${plan.description ? `<p class="text-sm text-secondary" style="margin-bottom:0.75rem">${escapeHtml(plan.description)}</p>` : ""}
+        ${plan.description ? `<div class="text-sm text-secondary prose-sm" style="margin-bottom:0.75rem">${markdownToHtml(plan.description)}</div>` : ""}
         <div class="mktplan-view-field">
           <div class="mktplan-view-label">Status</div>
           <div class="mktplan-view-value">${escapeHtml(plan.status)}</div>
@@ -229,7 +229,7 @@ export class MarketingPlansSidenavModule {
         <div class="mktplan-section-title">KPI Targets (${kpis.length})</div>
         ${kpiHtml}
 
-        ${plan.notes ? `<div class="mktplan-section-title">Notes</div><p class="text-sm text-secondary">${escapeHtml(plan.notes)}</p>` : ""}
+        ${plan.notes ? `<div class="mktplan-section-title">Notes</div><div class="text-sm text-secondary prose-sm">${markdownToHtml(plan.notes)}</div>` : ""}
       </div>
     `;
   }

@@ -39,6 +39,20 @@ export function registerHabitTools(
   );
 
   server.registerTool(
+    "get_habit_by_name",
+    {
+      description:
+        "Get a habit by its name (case-insensitive). Prefer this over list_habits when the name is known.",
+      inputSchema: { name: z.string().describe("Habit name") },
+    },
+    async ({ name }) => {
+      const habit = await parser.readHabitByName(name);
+      if (!habit) return err(`Habit '${name}' not found`);
+      return ok(habit);
+    },
+  );
+
+  server.registerTool(
     "create_habit",
     {
       description: "Create a new habit to track.",

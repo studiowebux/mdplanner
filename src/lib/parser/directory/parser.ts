@@ -267,6 +267,10 @@ export class DirectoryMarkdownParser {
     return this.tasksParser.read(id);
   }
 
+  async readTaskByName(name: string): Promise<Task | null> {
+    return this.tasksParser.readByName(name);
+  }
+
   async readTasksBySection(section: string): Promise<Task[]> {
     return this.tasksParser.readBySection(section);
   }
@@ -364,6 +368,10 @@ export class DirectoryMarkdownParser {
     return this.notesParser.read(id);
   }
 
+  async readNoteByName(name: string): Promise<Note | null> {
+    return this.notesParser.readByName(name);
+  }
+
   async addNote(
     note: Omit<Note, "id" | "createdAt" | "updatedAt" | "revision">,
   ): Promise<string> {
@@ -395,6 +403,10 @@ export class DirectoryMarkdownParser {
 
   async readGoal(id: string): Promise<Goal | null> {
     return this.goalsParser.read(id);
+  }
+
+  async readGoalByName(name: string): Promise<Goal | null> {
+    return this.goalsParser.readByName(name);
   }
 
   async addGoal(goal: Omit<Goal, "id">): Promise<string> {
@@ -577,6 +589,10 @@ export class DirectoryMarkdownParser {
     return this.milestonesParser.read(id);
   }
 
+  async readMilestoneByName(name: string): Promise<Milestone | null> {
+    return this.milestonesParser.readByName(name);
+  }
+
   async addMilestone(milestone: Omit<Milestone, "id">): Promise<Milestone> {
     return this.milestonesParser.add(milestone);
   }
@@ -603,6 +619,10 @@ export class DirectoryMarkdownParser {
 
   async readMeeting(id: string): Promise<Meeting | null> {
     return this.meetingsParser.read(id);
+  }
+
+  async readMeetingByName(name: string): Promise<Meeting | null> {
+    return this.meetingsParser.readByName(name);
   }
 
   async addMeeting(
@@ -684,6 +704,10 @@ export class DirectoryMarkdownParser {
 
   async readIdea(id: string): Promise<Idea | null> {
     return this.ideasParser.read(id);
+  }
+
+  async readIdeaByName(name: string): Promise<Idea | null> {
+    return this.ideasParser.readByName(name);
   }
 
   async addIdea(idea: Omit<Idea, "id" | "created">): Promise<Idea> {
@@ -1361,6 +1385,10 @@ export class DirectoryMarkdownParser {
     return this.crmParser.deleteCompany(id);
   }
 
+  async readCompanyByName(name: string): Promise<Company | null> {
+    return this.crmParser.readCompanyByName(name);
+  }
+
   // ============================================================
   // CRM - Contacts
   // ============================================================
@@ -1382,6 +1410,10 @@ export class DirectoryMarkdownParser {
 
   async deleteContact(id: string): Promise<boolean> {
     return this.crmParser.deleteContact(id);
+  }
+
+  async readContactByName(name: string): Promise<Contact | null> {
+    return this.crmParser.readContactByName(name);
   }
 
   async getContactsByCompany(companyId: string): Promise<Contact[]> {
@@ -1406,6 +1438,10 @@ export class DirectoryMarkdownParser {
 
   async deleteDeal(id: string): Promise<boolean> {
     return this.crmParser.deleteDeal(id);
+  }
+
+  async readDealByName(name: string): Promise<Deal | null> {
+    return this.crmParser.readDealByName(name);
   }
 
   async getDealsByCompany(companyId: string): Promise<Deal[]> {
@@ -1924,6 +1960,10 @@ export class DirectoryMarkdownParser {
     return this.habitsParser.read(id);
   }
 
+  async readHabitByName(name: string): Promise<Habit | null> {
+    return this.habitsParser.readByName(name);
+  }
+
   async addHabit(
     habit: Omit<
       Habit,
@@ -1988,6 +2028,10 @@ export class DirectoryMarkdownParser {
   async readMarketingPlans(): Promise<MarketingPlan[]> {
     const plans = await this.marketingPlansParser.readAll();
     return plans.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  async readMarketingPlanByName(name: string): Promise<MarketingPlan | null> {
+    return this.marketingPlansParser.readByName(name);
   }
 
   async addMarketingPlan(

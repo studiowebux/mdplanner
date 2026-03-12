@@ -75,6 +75,15 @@ export class MeetingsDirectoryParser extends DirectoryParser<Meeting> {
     return buildFileContent(frontmatter, body);
   }
 
+  /**
+   * Read a meeting by title (case-insensitive).
+   * Falls back to a full scan since meeting IDs are timestamp-based.
+   */
+  async readByName(name: string): Promise<Meeting | null> {
+    const all = await this.readAll();
+    return all.find((m) => m.title.toLowerCase() === name.toLowerCase()) ?? null;
+  }
+
   async add(meeting: Omit<Meeting, "id" | "created">): Promise<Meeting> {
     const newMeeting: Meeting = {
       ...meeting,

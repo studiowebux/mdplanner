@@ -148,6 +148,20 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
   );
 
   server.registerTool(
+    "get_task_by_name",
+    {
+      description:
+        "Get a task by its title (case-insensitive). Prefer this over list_tasks when the exact title is known.",
+      inputSchema: { name: z.string().describe("Task title") },
+    },
+    async ({ name }) => {
+      const task = await parser.readTaskByName(name);
+      if (!task) return err(`Task '${name}' not found`);
+      return ok(task);
+    },
+  );
+
+  server.registerTool(
     "create_task",
     {
       description: "Create a new task in the project.",

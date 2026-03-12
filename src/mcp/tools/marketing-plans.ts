@@ -68,6 +68,20 @@ export function registerMarketingPlanTools(
   );
 
   server.registerTool(
+    "get_marketing_plan_by_name",
+    {
+      description:
+        "Get a marketing plan by its name (case-insensitive). Prefer this over list_marketing_plans when the name is known.",
+      inputSchema: { name: z.string().describe("Marketing plan name") },
+    },
+    async ({ name }) => {
+      const plan = await parser.readMarketingPlanByName(name);
+      if (!plan) return err(`Marketing plan '${name}' not found`);
+      return ok(plan);
+    },
+  );
+
+  server.registerTool(
     "create_marketing_plan",
     {
       description:

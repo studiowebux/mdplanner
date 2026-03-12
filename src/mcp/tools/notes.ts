@@ -60,6 +60,20 @@ export function registerNoteTools(server: McpServer, pm: ProjectManager): void {
   );
 
   server.registerTool(
+    "get_note_by_name",
+    {
+      description:
+        "Get a note by its title (case-insensitive). Prefer this over list_notes when the exact title is known.",
+      inputSchema: { name: z.string().describe("Note title") },
+    },
+    async ({ name }) => {
+      const note = await parser.readNoteByName(name);
+      if (!note) return err(`Note '${name}' not found`);
+      return ok(note);
+    },
+  );
+
+  server.registerTool(
     "create_note",
     {
       description: "Create a new note.",

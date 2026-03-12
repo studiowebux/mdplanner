@@ -7,7 +7,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { FishboneAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { showConfirm } from "../ui/confirm.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, markdownToHtml } from "../utils.js";
 
 const DEFAULT_CATEGORIES = [
   "People",
@@ -175,7 +175,7 @@ export class FishboneSidenavModule {
       <div class="sidenav-section">
         ${
       diagram.description
-        ? `<p class="fishbone-sidenav-desc">${escapeHtml(diagram.description)}</p>`
+        ? `<p class="fishbone-sidenav-desc">${markdownToHtml(diagram.description)}</p>`
         : ""
     }
         <div class="fb-view-problem">${escapeHtml(diagram.title)}</div>
