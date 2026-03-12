@@ -152,9 +152,10 @@ function parseYamlSimple<T = Record<string, unknown>>(yaml: string): T {
         pendingObjIndent = indent;
       } else if (valueStr.startsWith("[") && valueStr.endsWith("]")) {
         // Inline array: [item1, item2]
-        const items = valueStr.slice(1, -1).split(",").map((s) =>
-          parseValue(s.trim())
-        );
+        const inner = valueStr.slice(1, -1).trim();
+        const items = inner === ""
+          ? []
+          : inner.split(",").map((s) => parseValue(s.trim()));
         writeTarget[key] = items;
       } else if (valueStr.startsWith("{") && valueStr.endsWith("}")) {
         // Inline object: {x: 1, y: 2}

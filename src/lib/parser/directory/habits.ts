@@ -257,6 +257,15 @@ export class HabitsDirectoryParser extends DirectoryParser<Habit> {
     return buildFileContent(frontmatter, habit.notes ?? "");
   }
 
+  /**
+   * Read a habit by name (case-insensitive).
+   * Falls back to a full scan since habit IDs are timestamp-based.
+   */
+  async readByName(name: string): Promise<Habit | null> {
+    const all = await this.readAll();
+    return all.find((h) => h.name.toLowerCase() === name.toLowerCase()) ?? null;
+  }
+
   async add(
     habit: Omit<
       Habit,

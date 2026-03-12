@@ -55,6 +55,20 @@ export function registerGoalTools(server: McpServer, pm: ProjectManager): void {
   );
 
   server.registerTool(
+    "get_goal_by_name",
+    {
+      description:
+        "Get a goal by its title (case-insensitive). Prefer this over list_goals when the title is known.",
+      inputSchema: { name: z.string().describe("Goal title") },
+    },
+    async ({ name }) => {
+      const goal = await parser.readGoalByName(name);
+      if (!goal) return err(`Goal '${name}' not found`);
+      return ok(goal);
+    },
+  );
+
+  server.registerTool(
     "create_goal",
     {
       description: "Create a new goal in the project.",

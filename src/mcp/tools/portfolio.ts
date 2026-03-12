@@ -46,6 +46,22 @@ export function registerPortfolioTools(
   );
 
   server.registerTool(
+    "get_portfolio_by_name",
+    {
+      description:
+        "Get a portfolio project by its name (case-insensitive). Prefer this over list_portfolio when the project name is known.",
+      inputSchema: {
+        name: z.string().describe("Portfolio project name"),
+      },
+    },
+    async ({ name }) => {
+      const item = await parser.readPortfolioItemByName(name);
+      if (!item) return err(`Portfolio item '${name}' not found`);
+      return ok(item);
+    },
+  );
+
+  server.registerTool(
     "get_portfolio_summary",
     {
       description:

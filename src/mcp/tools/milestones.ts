@@ -54,6 +54,20 @@ export function registerMilestoneTools(
   );
 
   server.registerTool(
+    "get_milestone_by_name",
+    {
+      description:
+        "Get a milestone by its name (case-insensitive). Prefer this over list_milestones when the name is known.",
+      inputSchema: { name: z.string().describe("Milestone name") },
+    },
+    async ({ name }) => {
+      const m = await parser.readMilestoneByName(name);
+      if (!m) return err(`Milestone '${name}' not found`);
+      return ok(m);
+    },
+  );
+
+  server.registerTool(
     "create_milestone",
     {
       description:

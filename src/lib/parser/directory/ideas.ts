@@ -103,6 +103,16 @@ export class IdeasDirectoryParser extends DirectoryParser<Idea> {
   }
 
   /**
+   * Read an idea by title (case-insensitive).
+   * Falls back to a full scan since idea IDs are timestamp-based.
+   */
+  async readByName(name: string): Promise<Idea | null> {
+    const all = await this.readAll();
+    return all.find((i) => i.title.toLowerCase() === name.toLowerCase()) ??
+      null;
+  }
+
+  /**
    * Add a new idea.
    */
   async add(idea: Omit<Idea, "id" | "created">): Promise<Idea> {

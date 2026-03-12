@@ -439,7 +439,7 @@ export class TimelineView {
         isOverdue ? " animate-pulse" : ""
       }" style="left: ${leftPercent}%; width: ${widthPercent}%; top: 50%; transform: translateY(-50%); z-index: 20; background-color: ${barColors.bg}; border: 1px solid ${barColors.border};">`;
       html +=
-        `<div class="px-2 py-1 text-xs text-white font-medium truncate">${task.startDate.toLocaleDateString()} - ${task.endDate.toLocaleDateString()}</div>`;
+        `<div class="px-2 py-1 text-xs font-medium truncate" style="color: ${barColors.text};">${task.startDate.toLocaleDateString()} - ${task.endDate.toLocaleDateString()}</div>`;
       html += `</div>`;
 
       // Add per-task due date marker

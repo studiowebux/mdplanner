@@ -614,6 +614,16 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
   }
 
   /**
+   * Read a note by title (case-insensitive).
+   * Falls back to a full scan since note IDs are timestamp-based.
+   */
+  async readByName(name: string): Promise<Note | null> {
+    const all = await this.readAll();
+    return all.find((n) => n.title.toLowerCase() === name.toLowerCase()) ??
+      null;
+  }
+
+  /**
    * Add a new note.
    */
   async add(

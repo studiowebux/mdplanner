@@ -220,8 +220,8 @@ export class C4Module {
 
     element.innerHTML = `
       <div class="c4-component-controls" style="position: absolute; top: 4px; right: 4px; display: none; gap: 2px; z-index: 10;">
-        <button class="c4-edit-btn" title="Edit" style="background: rgba(0,0,0,0.6); border: none; color: white; width: 20px; height: 20px; border-radius: 3px; cursor: pointer; font-size: 10px;">E</button>
-        <button class="c4-delete-btn" title="Delete" style="background: rgba(0,0,0,0.6); border: none; color: white; width: 20px; height: 20px; border-radius: 3px; cursor: pointer; font-size: 10px;">X</button>
+        <button class="c4-edit-btn" title="Edit">E</button>
+        <button class="c4-delete-btn" title="Delete">X</button>
       </div>
       <div class="c4-component-type">${component.type}</div>
       <div class="c4-component-title">${component.name}</div>
@@ -808,7 +808,7 @@ export class C4Module {
 
       if (matches.length > 0 && value.length > 0) {
         dropdown.innerHTML = matches.map((comp) =>
-          `<div class="c4-target-dropdown-item" data-id="${comp.id}" data-name="${comp.name}">${comp.name} <span style="opacity:0.6;font-size:10px">(${comp.level})</span></div>`
+          `<div class="c4-target-dropdown-item" data-id="${comp.id}" data-name="${comp.name}">${comp.name} <span style="opacity:0.6;font-size:var(--font-size-xs)">(${comp.level})</span></div>`
         ).join("");
         dropdown.classList.remove("hidden");
       } else {
@@ -1153,7 +1153,7 @@ export class C4Module {
     const levelBadgeColors = {
       context: "bg-inverse text-inverse",
       container: "bg-inverse text-inverse",
-      component: "bg-active text-white",
+      component: "bg-active text-primary",
       code: "bg-active text-primary",
     };
 
@@ -1244,7 +1244,7 @@ export class C4Module {
     const levelBadgeColors = {
       context: "bg-inverse text-inverse",
       container: "bg-inverse text-inverse",
-      component: "bg-active text-white",
+      component: "bg-active text-primary",
       code: "bg-active text-primary",
     };
 

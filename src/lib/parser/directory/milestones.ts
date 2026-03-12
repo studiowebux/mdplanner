@@ -78,6 +78,15 @@ export class MilestonesDirectoryParser extends DirectoryParser<Milestone> {
   }
 
   /**
+   * Read a milestone by name (case-insensitive).
+   * Falls back to a full scan since milestone IDs are timestamp-based.
+   */
+  async readByName(name: string): Promise<Milestone | null> {
+    const all = await this.readAll();
+    return all.find((m) => m.name.toLowerCase() === name.toLowerCase()) ?? null;
+  }
+
+  /**
    * Add a new milestone.
    */
   async add(milestone: Omit<Milestone, "id">): Promise<Milestone> {

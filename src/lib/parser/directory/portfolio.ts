@@ -198,6 +198,23 @@ export class PortfolioDirectoryParser {
   }
 
   /**
+   * Read a portfolio item by name (case-insensitive).
+   * Fast path: derive slug from name using the same logic as create().
+   * Fallback: scan all items and match by name.
+   */
+  async readByName(name: string): Promise<PortfolioItem | null> {
+    const slug = name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+    const fast = await this.read(slug);
+    if (fast) return fast;
+
+    const all = await this.readAll();
+    return all.find((i) => i.name.toLowerCase() === name.toLowerCase()) ?? null;
+  }
+
+  /**
    * Serialize a portfolio item to markdown file content.
    */
   private serialize(item: PortfolioItem): string {
