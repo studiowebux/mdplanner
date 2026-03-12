@@ -8,19 +8,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { ProjectManager } from "../../lib/project-manager.ts";
 import { Task } from "../../lib/types.ts";
-
-function ok(data: unknown) {
-  return {
-    content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }],
-  };
-}
-
-function err(message: string) {
-  return {
-    content: [{ type: "text" as const, text: `Error: ${message}` }],
-    isError: true as const,
-  };
-}
+import { err, ok } from "./utils.ts";
 
 function findTaskById(tasks: Task[], id: string): Task | null {
   for (const task of tasks) {

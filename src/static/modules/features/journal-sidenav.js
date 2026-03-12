@@ -6,7 +6,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { JournalAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { showConfirm } from "../ui/confirm.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, markdownToHtml } from "../utils.js";
 import { UndoManager } from "../ui/undo-manager.js";
 
 const MOOD_LABELS = {
@@ -196,7 +196,7 @@ export class JournalSidenavModule {
 
     if (entry.body && entry.body.trim()) {
       // marked is globally available via vendor/marked/marked.min.js
-      body.innerHTML = marked.parse(entry.body);
+      body.innerHTML = markdownToHtml(entry.body);
     } else {
       body.innerHTML = `<p style="color: var(--text-tertiary); font-style: italic;">No content.</p>`;
     }
