@@ -81,7 +81,8 @@ export class MeetingsDirectoryParser extends DirectoryParser<Meeting> {
    */
   async readByName(name: string): Promise<Meeting | null> {
     const all = await this.readAll();
-    return all.find((m) => m.title.toLowerCase() === name.toLowerCase()) ?? null;
+    return all.find((m) => m.title.toLowerCase() === name.toLowerCase()) ??
+      null;
   }
 
   async add(meeting: Omit<Meeting, "id" | "created">): Promise<Meeting> {

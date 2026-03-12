@@ -86,7 +86,8 @@ export class GoalsDirectoryParser extends DirectoryParser<Goal> {
    */
   async readByName(name: string): Promise<Goal | null> {
     const all = await this.readAll();
-    return all.find((g) => g.title.toLowerCase() === name.toLowerCase()) ?? null;
+    return all.find((g) => g.title.toLowerCase() === name.toLowerCase()) ??
+      null;
   }
 
   /**

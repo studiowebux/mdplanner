@@ -433,7 +433,8 @@ export class CRMDirectoryParser {
 
   async readDealByName(name: string): Promise<Deal | null> {
     const all = await this.readAllDeals();
-    return all.find((d) => d.title.toLowerCase() === name.toLowerCase()) ?? null;
+    return all.find((d) => d.title.toLowerCase() === name.toLowerCase()) ??
+      null;
   }
 
   async getDealsByCompany(companyId: string): Promise<Deal[]> {

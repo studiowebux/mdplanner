@@ -619,7 +619,8 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
    */
   async readByName(name: string): Promise<Note | null> {
     const all = await this.readAll();
-    return all.find((n) => n.title.toLowerCase() === name.toLowerCase()) ?? null;
+    return all.find((n) => n.title.toLowerCase() === name.toLowerCase()) ??
+      null;
   }
 
   /**

@@ -146,7 +146,9 @@ export function registerCrmTools(server: McpServer, pm: ProjectManager): void {
     {
       description:
         "Get a contact by name (case-insensitive). Accepts full name, first name, or last name. Prefer this over list_contacts when the name is known.",
-      inputSchema: { name: z.string().describe("Contact name (full, first, or last)") },
+      inputSchema: {
+        name: z.string().describe("Contact name (full, first, or last)"),
+      },
     },
     async ({ name }) => {
       const item = await parser.readContactByName(name);

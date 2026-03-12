@@ -700,7 +700,8 @@ export class TasksDirectoryParser {
    */
   async readByName(name: string): Promise<Task | null> {
     const all = await this.readAll();
-    return all.find((t) => t.title.toLowerCase() === name.toLowerCase()) ?? null;
+    return all.find((t) => t.title.toLowerCase() === name.toLowerCase()) ??
+      null;
   }
 
   /**

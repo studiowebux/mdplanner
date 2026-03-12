@@ -108,7 +108,8 @@ export class IdeasDirectoryParser extends DirectoryParser<Idea> {
    */
   async readByName(name: string): Promise<Idea | null> {
     const all = await this.readAll();
-    return all.find((i) => i.title.toLowerCase() === name.toLowerCase()) ?? null;
+    return all.find((i) => i.title.toLowerCase() === name.toLowerCase()) ??
+      null;
   }
 
   /**
