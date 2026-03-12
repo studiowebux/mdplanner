@@ -1153,7 +1153,7 @@ export class C4Module {
     const levelBadgeColors = {
       context: "bg-inverse text-inverse",
       container: "bg-inverse text-inverse",
-      component: "bg-active text-white",
+      component: "bg-active text-primary",
       code: "bg-active text-primary",
     };
 
@@ -1244,7 +1244,7 @@ export class C4Module {
     const levelBadgeColors = {
       context: "bg-inverse text-inverse",
       container: "bg-inverse text-inverse",
-      component: "bg-active text-white",
+      component: "bg-active text-primary",
       code: "bg-active text-primary",
     };
 
