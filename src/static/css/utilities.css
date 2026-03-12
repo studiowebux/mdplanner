@@ -248,7 +248,7 @@
 .text-base { font-size: var(--font-size-lg); line-height: 1.5rem; }
 .text-lg { font-size: var(--font-size-lg-plus); line-height: 1.75rem; }
 .text-xl { font-size: var(--font-size-xl); line-height: 1.75rem; }
-.text-2xl { font-size: var(--font-size-xxl); line-height: 2rem; }
+.text-2xl { font-size: var(--font-size-xxl); line-height: 2.5rem; }
 .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
 
 /* --------------------------------------------------------------------------

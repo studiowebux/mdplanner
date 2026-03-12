@@ -225,7 +225,7 @@
   border: none;
   cursor: pointer;
   color: var(--color-text-muted);
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   padding: 0 0.25rem;
   line-height: 1;
   flex-shrink: 0;
