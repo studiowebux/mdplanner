@@ -104,7 +104,7 @@ export function registerMeetingTools(
       },
     },
     async ({ title, date, attendees, agenda, notes, actions }) => {
-      const id = await parser.addMeeting({
+      const meeting = await parser.addMeeting({
         title,
         date,
         attendees: attendees ?? [],
@@ -118,7 +118,7 @@ export function registerMeetingTools(
           status: a.status ?? "open",
         })),
       });
-      return ok({ id });
+      return ok({ id: meeting.id });
     },
   );
 

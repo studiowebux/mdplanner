@@ -6,7 +6,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { HabitsAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { showConfirm } from "../ui/confirm.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, markdownToHtml } from "../utils.js";
 
 // ---------------------------------------------------------------
 // Date helpers
@@ -232,7 +232,7 @@ export class HabitSidenavModule {
 
     const notesHtml =
       habit.notes && habit.notes.trim()
-        ? `<div class="habit-view-body">${typeof marked !== "undefined" ? marked.parse(habit.notes) : escapeHtml(habit.notes)}</div>`
+        ? `<div class="habit-view-body">${markdownToHtml(habit.notes)}</div>`
         : "";
 
     viewSection.innerHTML = `

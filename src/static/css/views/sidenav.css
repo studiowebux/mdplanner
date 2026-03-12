@@ -439,15 +439,15 @@
 .sidenav-stale-banner {
   margin: 0.75rem 1rem;
   padding: 0.75rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md, 6px);
-  background: var(--surface);
+  background: var(--color-bg-secondary);
 }
 
 .sidenav-stale-banner p {
   margin: 0 0 0.5rem;
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .sidenav-stale-actions {
@@ -461,9 +461,9 @@
   font-size: var(--font-size-sm);
   border-radius: var(--radius-md, 6px);
   cursor: pointer;
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-border-default);
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .btn-stale-keep {
