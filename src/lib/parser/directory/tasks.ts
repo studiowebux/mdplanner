@@ -864,13 +864,16 @@ export class TasksDirectoryParser {
    * Atomically claim a task: move to "In Progress" and assign to claimant.
    * Fails if task is not in the expected section (default: "Todo").
    * Prevents race conditions in multi-agent scenarios.
+   *
+   * NOTE: Uses atomicWriteFile directly instead of write() to avoid a
+   * re-entrant deadlock — write() also acquires withWriteLock for the same id.
    */
   async claim(
     id: string,
     assignee: string,
     expectedSection = "Todo",
   ): Promise<Task | null> {
-    return await this.withWriteLock(id, async () => {
+    const claimed = await this.withWriteLock(id, async () => {
       const task = await this.read(id);
       if (!task) return null;
 
@@ -882,7 +885,7 @@ export class TasksDirectoryParser {
 
       const oldFilePath = await this.findTaskFilePath(id, task.section);
       const now = new Date().toISOString();
-      const claimed: Task = {
+      const claimedTask: Task = {
         ...task,
         section: "In Progress",
         config: {
@@ -894,7 +897,12 @@ export class TasksDirectoryParser {
         updatedAt: now,
         revision: task.revision + 1,
       };
-      await this.write(claimed);
+
+      // Write directly — do not call write() here as it would re-enter
+      // withWriteLock for the same id and deadlock.
+      await this.ensureDir(claimedTask.section);
+      const newPath = this.getFilePath(claimedTask.id, claimedTask.section);
+      await this.atomicWriteFile(newPath, this.serializeTask(claimedTask));
 
       if (oldFilePath) {
         try {
@@ -904,8 +912,13 @@ export class TasksDirectoryParser {
         }
       }
 
-      return claimed;
+      return claimedTask;
     });
+
+    if (claimed) {
+      eventBus.emit({ entity: "tasks", action: "updated", id: claimed.id });
+    }
+    return claimed;
   }
 
   /**
