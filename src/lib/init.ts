@@ -3,8 +3,10 @@ import { join } from "@std/path";
 
 // Starter directories — essential set for a new project
 const STARTER_DIRECTORIES = [
+  "board/backlog",
   "board/todo",
   "board/in_progress",
+  "board/pending_review",
   "board/done",
   "notes",
   "goals",
@@ -22,7 +24,7 @@ status: active
 working_days_per_week: 5
 working_days: [Mon, Tue, Wed, Thu, Fri]
 assignees: []
-tags: []
+tags: [Feature, Bug, QOL, Design, Refactor, Chore, Documentation]
 links: []
 ---
 
