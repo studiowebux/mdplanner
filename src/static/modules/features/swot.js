@@ -66,15 +66,18 @@ export class SwotModule {
   renderView(swot) {
     const emptyState = document.getElementById("emptySwotState");
     const grid = document.getElementById("swotGrid");
+    const selector = document.getElementById("swotSelector");
 
     if (!swot) {
       emptyState.classList.remove("hidden");
       grid.classList.add("hidden");
+      selector.classList.add("hidden");
       return;
     }
 
     emptyState.classList.add("hidden");
     grid.classList.remove("hidden");
+    selector.classList.remove("hidden");
 
     const renderItems = (items, quadrant) => {
       if (!items || items.length === 0) {

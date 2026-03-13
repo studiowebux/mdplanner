@@ -65,15 +65,18 @@ export class RiskModule {
   renderView(risk) {
     const emptyState = document.getElementById("emptyRiskAnalysisState");
     const grid = document.getElementById("riskAnalysisGrid");
+    const selector = document.getElementById("riskAnalysisSelector");
 
     if (!risk) {
       emptyState.classList.remove("hidden");
       grid.classList.add("hidden");
+      selector.classList.add("hidden");
       return;
     }
 
     emptyState.classList.add("hidden");
     grid.classList.remove("hidden");
+    selector.classList.remove("hidden");
 
     const quadrants = [
       { id: "highImpactHighProb", el: "riskHighImpactHighProb" },
