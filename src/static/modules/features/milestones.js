@@ -10,6 +10,7 @@ export class MilestonesModule {
   constructor(taskManager) {
     this.taskManager = taskManager;
     this.currentView = localStorage.getItem("milestonesView") || "table";
+    this.showCompleted = localStorage.getItem("milestonesShowCompleted") === "true";
   }
 
   async load() {
@@ -28,8 +29,10 @@ export class MilestonesModule {
     const container = document.getElementById("milestonesContainer");
     const emptyState = document.getElementById("emptyMilestonesState");
     const toggle = document.getElementById("milestoneViewToggle");
+    const showCompletedCb = document.getElementById("milestonesShowCompleted");
 
     if (toggle) toggle.textContent = this.currentView === "table" ? "Card view" : "Table view";
+    if (showCompletedCb) showCompletedCb.checked = this.showCompleted;
 
     const allMilestones = this.taskManager.milestones || [];
     const visible = this._applyHideFilter(allMilestones);
@@ -54,15 +57,29 @@ export class MilestonesModule {
   }
 
   _applyHideFilter(milestones) {
-    const days = parseInt(localStorage.getItem("hideCompletedMilestonesAfterDays") ?? "", 10);
-    if (isNaN(days)) return milestones;
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - days);
-    return milestones.filter((m) => {
-      if (m.status !== "completed") return true;
-      if (!m.completedAt) return days === 0 ? false : true;
-      return new Date(m.completedAt) >= cutoff;
-    });
+    let result = milestones;
+
+    // Primary toggle: hide completed milestones unless "Show completed" is on.
+    if (!this.showCompleted) {
+      result = result.filter((m) => m.status !== "completed");
+    }
+
+    // Secondary filter: time-based cutoff from settings (hideCompletedMilestonesAfterDays).
+    const days = parseInt(
+      localStorage.getItem("hideCompletedMilestonesAfterDays") ?? "",
+      10,
+    );
+    if (!isNaN(days)) {
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - days);
+      result = result.filter((m) => {
+        if (m.status !== "completed") return true;
+        if (!m.completedAt) return days === 0 ? false : true;
+        return new Date(m.completedAt) >= cutoff;
+      });
+    }
+
+    return result;
   }
 
   _renderTable(container) {
@@ -253,6 +270,15 @@ export class MilestonesModule {
       () => {
         this.currentView = this.currentView === "table" ? "card" : "table";
         localStorage.setItem("milestonesView", this.currentView);
+        this.renderView();
+      },
+    );
+
+    document.getElementById("milestonesShowCompleted")?.addEventListener(
+      "change",
+      (e) => {
+        this.showCompleted = e.target.checked;
+        localStorage.setItem("milestonesShowCompleted", this.showCompleted);
         this.renderView();
       },
     );

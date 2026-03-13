@@ -15,6 +15,9 @@ and this project adheres to
   fields, timestamps, revision, assignee, effort, and files. Use instead of
   `get_task` to reduce token usage. `last_comments` param (default 5, max 20).
   Total MCP tool count: 245.
+- Milestone view hides completed milestones by default. A "Show completed"
+  checkbox (same pattern as the archived ideas toggle) restores them. Preference
+  persisted in localStorage under `milestonesShowCompleted`.
 - Enhanced note block reordering now interleaves paragraphs and custom sections.
   Added `globalOrder` field to `NoteParagraph` and `CustomSection`. The parser
   assigns it during parse (file order = global order); the serializer writes
