@@ -199,6 +199,9 @@ export class ListView {
   render() {
     const container = document.getElementById("listContainer");
     const savedScrollY = window.scrollY;
+    // Pin minHeight to current height before clearing — prevents layout collapse
+    // that causes scroll jumps and offset click events during re-render.
+    container.style.minHeight = container.offsetHeight + "px";
     container.innerHTML = "";
 
     // Populate filter dropdowns
@@ -318,8 +321,11 @@ export class ListView {
     // Lazy-load live GitHub issue/PR states after render
     if (this.tm.githubConfigured) this._loadGitHubBadgeStates();
 
-    // Restore scroll position so re-renders after sidenav close/save don't jump to top
+    // Restore scroll position so re-renders after sidenav close/save don't jump to top.
+    // Release the minHeight lock and scroll atomically in the same rAF so the browser
+    // never sees a collapsed container.
     requestAnimationFrame(() => {
+      container.style.minHeight = "";
       window.scrollTo({ top: savedScrollY, behavior: "instant" });
       this.setupScrollSpy();
     });

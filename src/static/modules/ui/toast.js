@@ -1,6 +1,8 @@
 // Toast notification utility
 
 export function showToast(message, isError = false) {
+  // Accept both boolean (true/false) and string ("error"/"success") for isError
+  isError = isError === true || isError === "error";
   // Remove existing toast if any
   const existing = document.getElementById("toast-notification");
   if (existing) existing.remove();

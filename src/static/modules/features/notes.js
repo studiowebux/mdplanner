@@ -534,9 +534,9 @@ export class NotesModule {
   }
 
   bindEvents() {
-    // Click-to-edit: clicking rendered content enters edit mode
+    // Double-click-to-edit: single click only reads, double-click enters edit mode
     document.getElementById("activeNoteBody")
-      ?.addEventListener("click", () => {
+      ?.addEventListener("dblclick", () => {
         if (!this.tm.noteEditMode && this.tm.activeNote !== null) {
           const activeNote = this.tm.notes[this.tm.activeNote];
           const isEnhanced = this.tm.enhancedMode &&

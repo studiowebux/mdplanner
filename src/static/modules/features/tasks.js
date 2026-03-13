@@ -445,6 +445,20 @@ export class TasksModule {
           titleSpan.classList.add("text-primary");
         }
       }
+
+      // If "incomplete" filter is active and task just became completed, remove the row
+      if (task.completed && this.tm.listFilters?.status === "incomplete") {
+        card.remove();
+        return;
+      }
+      // If "hide completed immediately" (days=0) setting is active, remove the row
+      const hideDays = parseInt(
+        localStorage.getItem("hideCompletedAfterDays") ?? "",
+        10,
+      );
+      if (task.completed && hideDays === 0) {
+        card.remove();
+      }
     }
   }
 
