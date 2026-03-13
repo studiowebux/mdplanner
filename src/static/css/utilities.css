@@ -9,7 +9,7 @@
    Display
    -------------------------------------------------------------------------- */
 
-.hidden { display: none !important; }
+.hidden { display: none; }
 .block { display: block; }
 .inline { display: inline; }
 .inline-block { display: inline-block; }

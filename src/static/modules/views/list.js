@@ -908,10 +908,14 @@ export class ListView {
     document.getElementById("batchTags").value = "";
 
     panel.classList.remove("hidden");
+    panel.classList.add("flex");
   }
 
   closeBatchPanel() {
-    document.getElementById("batchEditPanel")?.classList.add("hidden");
+    const panel = document.getElementById("batchEditPanel");
+    if (!panel) return;
+    panel.classList.add("hidden");
+    panel.classList.remove("flex");
   }
 
   async applyBatchUpdate() {
