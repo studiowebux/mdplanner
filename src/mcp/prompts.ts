@@ -92,7 +92,9 @@ Steps:
       description:
         "Daily standup summary: tasks done, in-progress, and blocked for the project.",
       argsSchema: {
-        project: z.string().optional().describe("Project name to scope the summary"),
+        project: z.string().optional().describe(
+          "Project name to scope the summary",
+        ),
       },
     },
     async ({ project }) => {
@@ -115,8 +117,7 @@ Steps:
       );
       const inProgress = scoped.filter((t) => t.section === "In Progress");
       const blocked = scoped.filter(
-        (t) =>
-          t.section === "Todo" && (t.config?.blocked_by ?? []).length > 0,
+        (t) => t.section === "Todo" && (t.config?.blocked_by ?? []).length > 0,
       );
 
       const fmt = (tasks: typeof flat) =>
@@ -171,7 +172,9 @@ Summarise this for a standup. Flag anything that needs attention.`,
             type: "text",
             text: `Approve task \`${task_id}\`.
 
-Call \`approve_task\` with id="${task_id}"${feedback ? ` and feedback="${feedback}"` : ""}. ${feedbackClause}
+Call \`approve_task\` with id="${task_id}"${
+              feedback ? ` and feedback="${feedback}"` : ""
+            }. ${feedbackClause}
 Then confirm the task is now in Done and report its title.`,
           },
         }],
@@ -189,7 +192,9 @@ Then confirm the task is now in Done and report its title.`,
       description:
         "Return the highest-priority ready task for the project — what to work on right now.",
       argsSchema: {
-        project: z.string().optional().describe("Project name to scope the search"),
+        project: z.string().optional().describe(
+          "Project name to scope the search",
+        ),
       },
     },
     async ({ project }) => {

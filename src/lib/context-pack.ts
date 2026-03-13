@@ -129,7 +129,9 @@ function extractRelevantFiles(task: Task): string[] {
   };
   add(task.config.files);
   for (const comment of task.config.comments ?? []) {
-    add((comment.metadata as Record<string, unknown> | undefined)?.files_changed);
+    add(
+      (comment.metadata as Record<string, unknown> | undefined)?.files_changed,
+    );
   }
   return [...seen];
 }
