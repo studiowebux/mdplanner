@@ -10564,83 +10564,6 @@
               </div>
             </div>
 
-            <div
-              id="timeEntriesSection"
-              class="hidden border-t border-default pt-4 mt-4"
-            >
-              <div class="flex justify-between items-center mb-3">
-                <label
-                  class="block text-sm font-medium text-secondary"
-                >Time Entries</label>
-                <button
-                  type="button"
-                  id="addTimeEntryBtn"
-                  class="text-sm text-primary hover:text-secondary underline"
-                >
-                  + Add Entry
-                </button>
-              </div>
-              <div
-                id="timeEntriesList"
-                class="space-y-2 max-h-40 overflow-y-auto"
-              >
-              </div>
-              <div
-                id="addTimeEntryForm"
-                class="hidden mt-3 p-3 bg-secondary rounded-md"
-              >
-                <div class="grid grid-cols-4 gap-2 mb-2">
-                  <input
-                    type="date"
-                    id="timeEntryDate"
-                    class="border border-strong rounded px-2 py-1 text-sm"
-                  >
-                  <input
-                    type="number"
-                    id="timeEntryHours"
-                    step="0.5"
-                    min="0"
-                    placeholder="Hours"
-                    class="border border-strong rounded px-2 py-1 text-sm"
-                  >
-                  <select
-                    id="timeEntryPerson"
-                    class="border border-strong rounded px-2 py-1 text-sm"
-                  >
-                    <option value="">-- Person --</option>
-                  </select>
-                  <input
-                    type="text"
-                    id="timeEntryDescription"
-                    placeholder="Description"
-                    class="border border-strong rounded px-2 py-1 text-sm"
-                  >
-                </div>
-                <div class="flex justify-end gap-2">
-                  <button
-                    type="button"
-                    id="cancelTimeEntryBtn"
-                    class="text-xs text-muted hover:text-secondary"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    id="saveTimeEntryBtn"
-                    class="text-xs text-primary hover:text-secondary underline"
-                  >
-                    Save
-                  </button>
-                </div>
-              </div>
-              <div
-                id="totalHoursDisplay"
-                class="mt-2 text-sm text-secondary"
-              >
-                Total: <span id="totalHoursValue">0</span>h logged
-              </div>
-            </div>
-
             <div>
               <label
                 class="block text-sm font-medium text-secondary mb-1"
@@ -10941,6 +10864,60 @@
                 class="flex flex-wrap gap-2 mt-2"
               >
               </div>
+            </div>
+          </div>
+
+          <!-- Time entries — only visible when editing an existing task -->
+          <div id="timeEntriesSection" class="sidenav-section hidden">
+            <div class="sidenav-section-title flex justify-between items-center">
+              <span>Time Entries</span>
+              <button
+                type="button"
+                id="addTimeEntryBtn"
+                class="text-sm text-primary hover:text-secondary underline"
+              >+ Add Entry</button>
+            </div>
+            <div id="timeEntriesList" class="space-y-2 max-h-40 overflow-y-auto"></div>
+            <div id="addTimeEntryForm" class="hidden mt-3 p-3 bg-secondary rounded-md">
+              <div class="grid grid-cols-2 gap-2 mb-2">
+                <input
+                  type="date"
+                  id="timeEntryDate"
+                  class="form-input text-sm"
+                >
+                <input
+                  type="number"
+                  id="timeEntryHours"
+                  step="0.5"
+                  min="0"
+                  placeholder="Hours"
+                  class="form-input text-sm"
+                >
+                <select id="timeEntryPerson" class="form-select text-sm">
+                  <option value="">-- Person --</option>
+                </select>
+                <input
+                  type="text"
+                  id="timeEntryDescription"
+                  placeholder="Description"
+                  class="form-input text-sm"
+                >
+              </div>
+              <div class="flex justify-end gap-2">
+                <button
+                  type="button"
+                  id="cancelTimeEntryBtn"
+                  class="text-xs text-muted hover:text-secondary"
+                >Cancel</button>
+                <button
+                  type="button"
+                  id="saveTimeEntryBtn"
+                  class="text-xs text-primary hover:text-secondary underline"
+                >Save</button>
+              </div>
+            </div>
+            <div id="totalHoursDisplay" class="mt-2 text-sm text-secondary">
+              Total: <span id="totalHoursValue">0</span>h logged
             </div>
           </div>
 
