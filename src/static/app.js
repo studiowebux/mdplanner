@@ -2267,6 +2267,10 @@ class TaskManager {
     return this.enhancedNotesModule.generateTimelineId();
   }
 
+  renderBlocks() {
+    this.enhancedNotesModule.renderBlocks();
+  }
+
   renderParagraphs() {
     this.enhancedNotesModule.renderParagraphs();
   }

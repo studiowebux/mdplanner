@@ -246,6 +246,47 @@ export class EnhancedNotesModule {
       Math.random().toString(36).substr(2, 9);
   }
 
+  // Returns the highest globalOrder value across all paragraphs and custom
+  // sections in the note, or -1 when the note has no blocks yet.
+  _maxGlobalOrder(note) {
+    let max = -1;
+    for (const p of note.paragraphs ?? []) {
+      if ((p.globalOrder ?? -1) > max) max = p.globalOrder;
+    }
+    for (const s of note.customSections ?? []) {
+      if ((s.globalOrder ?? -1) > max) max = s.globalOrder;
+    }
+    return max;
+  }
+
+  // Returns all blocks (paragraphs + custom sections) as a single array sorted
+  // by globalOrder, with a `kind` discriminator on each entry.
+  _allBlocksSorted(note) {
+    const paragraphs = note.paragraphs ?? [];
+    const sections = note.customSections ?? [];
+    const nParagraphs = paragraphs.length;
+    return [
+      ...paragraphs.map((p, i) => ({
+        kind: "paragraph",
+        item: p,
+        _order: p.globalOrder ?? i,
+      })),
+      ...sections.map((s, i) => ({
+        kind: "section",
+        item: s,
+        _order: s.globalOrder ?? nParagraphs + i,
+      })),
+    ].sort((a, b) => a._order - b._order);
+  }
+
+  // Re-assigns integer globalOrder values 0, 1, 2, ... to all blocks sorted by
+  // their current (possibly fractional) globalOrder. Call after any swap or
+  // insertion that may have introduced non-integer values.
+  _renormalizeGlobalOrders(note) {
+    const sorted = this._allBlocksSorted(note);
+    sorted.forEach((block, i) => { block.item.globalOrder = i; });
+  }
+
   generateTabId() {
     return "tab_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
   }
@@ -270,6 +311,7 @@ export class EnhancedNotesModule {
       content: "",
       language: type === "code" ? "javascript" : undefined,
       order: currentNote.paragraphs.length,
+      globalOrder: this._maxGlobalOrder(currentNote) + 1,
     };
 
     currentNote.paragraphs.push(newParagraph);
@@ -299,11 +341,13 @@ export class EnhancedNotesModule {
       ...originalParagraph,
       id: this.generateParagraphId(),
       order: originalParagraph.order + 0.5,
+      globalOrder: (originalParagraph.globalOrder ?? 0) + 0.5,
     };
 
     currentNote.paragraphs.push(newParagraph);
     currentNote.paragraphs.sort((a, b) => a.order - b.order);
     currentNote.paragraphs.forEach((p, index) => p.order = index);
+    this._renormalizeGlobalOrders(currentNote);
 
     this.syncParagraphsToContent();
     this.tm.renderActiveNote();
@@ -442,7 +486,7 @@ export class EnhancedNotesModule {
   }
 
   showMultiSelectActions() {
-    const container = document.getElementById("paragraphsContainer");
+    const container = document.getElementById("blocksContainer");
     let actionBar = document.getElementById("multiSelectActions");
 
     if (!actionBar) {
@@ -515,26 +559,24 @@ export class EnhancedNotesModule {
 
   moveParagraph(paragraphId, direction) {
     const currentNote = this.tm.notes[this.tm.activeNote];
-    if (!currentNote || !currentNote.paragraphs) return;
+    if (!currentNote) return;
 
-    const sorted = [...currentNote.paragraphs].sort((a, b) =>
-      a.order - b.order
+    const sorted = this._allBlocksSorted(currentNote);
+    const idx = sorted.findIndex(
+      (b) => b.kind === "paragraph" && b.item.id === paragraphId,
     );
-    const idx = sorted.findIndex((p) => p.id === paragraphId);
     if (idx === -1) return;
 
     const swapIdx = direction === "up" ? idx - 1 : idx + 1;
     if (swapIdx < 0 || swapIdx >= sorted.length) return;
 
-    const tmp = sorted[idx].order;
-    sorted[idx].order = sorted[swapIdx].order;
-    sorted[swapIdx].order = tmp;
+    const tmp = sorted[idx].item.globalOrder;
+    sorted[idx].item.globalOrder = sorted[swapIdx].item.globalOrder;
+    sorted[swapIdx].item.globalOrder = tmp;
 
-    sorted.sort((a, b) => a.order - b.order);
-    sorted.forEach((p, i) => { p.order = i; });
-
+    this._renormalizeGlobalOrders(currentNote);
     this.syncParagraphsToContent();
-    this.tm.renderParagraphs();
+    this.tm.renderBlocks();
     this.tm.saveNote();
   }
 
@@ -544,37 +586,43 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.paragraphs) return;
 
-    const sortedParagraphs = [...currentNote.paragraphs].sort((a, b) =>
-      a.order - b.order
-    );
-    const selectedIndices = this.tm.selectedParagraphs.map((id) =>
-      sortedParagraphs.findIndex((p) => p.id === id)
-    ).sort((a, b) => a - b);
+    // Work on the combined block list so selected paragraphs can move past
+    // custom sections as well as other paragraphs.
+    const allBlocks = this._allBlocksSorted(currentNote);
+    const selectedIds = new Set(this.tm.selectedParagraphs);
+    const selectedIndices = allBlocks
+      .map((b, i) =>
+        b.kind === "paragraph" && selectedIds.has(b.item.id) ? i : -1
+      )
+      .filter((i) => i !== -1)
+      .sort((a, b) => a - b);
+
+    if (selectedIndices.length === 0) return;
 
     let moved = false;
     if (direction === "up" && selectedIndices[0] > 0) {
       selectedIndices.forEach((index) => {
-        [sortedParagraphs[index], sortedParagraphs[index - 1]] = [
-          sortedParagraphs[index - 1],
-          sortedParagraphs[index],
+        [allBlocks[index], allBlocks[index - 1]] = [
+          allBlocks[index - 1],
+          allBlocks[index],
         ];
       });
       moved = true;
     } else if (
       direction === "down" &&
-      selectedIndices[selectedIndices.length - 1] < sortedParagraphs.length - 1
+      selectedIndices[selectedIndices.length - 1] < allBlocks.length - 1
     ) {
       selectedIndices.reverse().forEach((index) => {
-        [sortedParagraphs[index], sortedParagraphs[index + 1]] = [
-          sortedParagraphs[index + 1],
-          sortedParagraphs[index],
+        [allBlocks[index], allBlocks[index + 1]] = [
+          allBlocks[index + 1],
+          allBlocks[index],
         ];
       });
       moved = true;
     }
 
     if (moved) {
-      sortedParagraphs.forEach((p, index) => p.order = index);
+      allBlocks.forEach((b, i) => { b.item.globalOrder = i; });
       this.syncParagraphsToContent();
       this.tm.renderActiveNote();
     }
@@ -586,7 +634,7 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote || !currentNote.paragraphs) return;
 
-    const container = document.getElementById("paragraphsContainer");
+    const container = document.getElementById("blocksContainer");
     if (!container) return;
 
     container.querySelectorAll("[data-paragraph-id]").forEach((el) => {
@@ -611,30 +659,37 @@ export class EnhancedNotesModule {
     const currentNote = this.tm.notes[this.tm.activeNote];
     if (!currentNote) return;
 
+    // Merge paragraphs and custom sections into a single interleaved sequence
+    // sorted by globalOrder so the file preserves the visual order.
+    const paragraphs = currentNote.paragraphs ?? [];
+    const sections = currentNote.customSections ?? [];
+    const nParagraphs = paragraphs.length;
+
+    const blocks = [
+      ...paragraphs.map((p, i) => ({
+        kind: "paragraph",
+        item: p,
+        _order: p.globalOrder ?? i,
+      })),
+      ...sections.map((s, i) => ({
+        kind: "section",
+        item: s,
+        _order: s.globalOrder ?? nParagraphs + i,
+      })),
+    ].sort((a, b) => a._order - b._order);
+
     let content = "";
-
-    if (currentNote.paragraphs && currentNote.paragraphs.length > 0) {
-      const sortedParagraphs = [...currentNote.paragraphs].sort((a, b) =>
-        a.order - b.order
-      );
-      sortedParagraphs.forEach((paragraph) => {
-        if (paragraph.type === "code") {
-          content += `\`\`\`${
-            paragraph.language || "text"
-          }\n${paragraph.content}\n\`\`\`\n\n`;
+    for (const block of blocks) {
+      if (block.kind === "paragraph") {
+        const p = block.item;
+        if (p.type === "code") {
+          content += `\`\`\`${p.language || "text"}\n${p.content}\n\`\`\`\n\n`;
         } else {
-          content += `${paragraph.content}\n\n`;
+          content += `${p.content}\n\n`;
         }
-      });
-    }
-
-    if (currentNote.customSections && currentNote.customSections.length > 0) {
-      const sortedSections = [...currentNote.customSections].sort((a, b) =>
-        a.order - b.order
-      );
-      sortedSections.forEach((section) => {
-        content += this.renderCustomSectionAsMarkdown(section);
-      });
+      } else {
+        content += this.renderCustomSectionAsMarkdown(block.item);
+      }
     }
 
     currentNote.content = content.trim();
@@ -733,6 +788,7 @@ export class EnhancedNotesModule {
       type: type,
       title: title,
       order: currentNote.customSections.length,
+      globalOrder: this._maxGlobalOrder(currentNote) + 1,
       config: this.getInitialSectionConfig(type),
     };
 
@@ -788,28 +844,25 @@ export class EnhancedNotesModule {
 
   moveCustomSection(sectionId, direction) {
     const currentNote = this.tm.notes[this.tm.activeNote];
-    if (!currentNote || !currentNote.customSections) return;
+    if (!currentNote) return;
 
-    const sorted = [...currentNote.customSections].sort((a, b) =>
-      a.order - b.order
+    const sorted = this._allBlocksSorted(currentNote);
+    const idx = sorted.findIndex(
+      (b) => b.kind === "section" && b.item.id === sectionId,
     );
-    const idx = sorted.findIndex((s) => s.id === sectionId);
     if (idx === -1) return;
 
     const swapIdx = direction === "up" ? idx - 1 : idx + 1;
     if (swapIdx < 0 || swapIdx >= sorted.length) return;
 
-    // Swap order values
-    const tmp = sorted[idx].order;
-    sorted[idx].order = sorted[swapIdx].order;
-    sorted[swapIdx].order = tmp;
+    const tmp = sorted[idx].item.globalOrder;
+    sorted[idx].item.globalOrder = sorted[swapIdx].item.globalOrder;
+    sorted[swapIdx].item.globalOrder = tmp;
 
-    // Re-normalize
-    sorted.sort((a, b) => a.order - b.order);
-    sorted.forEach((s, i) => { s.order = i; });
-
+    this._renormalizeGlobalOrders(currentNote);
     this.syncParagraphsToContent();
-    this.tm.renderActiveNote();
+    this.tm.renderBlocks();
+    this.tm.saveNote();
   }
 
   // Rendering
@@ -822,51 +875,87 @@ export class EnhancedNotesModule {
     let html =
       '<div class="enhanced-note-view prose max-w-none">';
 
-    // Render paragraphs as formatted content
-    const sortedParagraphs = [...(currentNote.paragraphs || [])].sort((a, b) =>
-      a.order - b.order
-    );
-    sortedParagraphs.forEach((paragraph) => {
-      if (paragraph.type === "code") {
-        const lang = paragraph.language || "text";
-        html +=
-          `<pre class="bg-tertiary rounded-lg p-4 overflow-x-auto my-4"><code class="language-${lang} text-sm">${
-            escapeHtml(paragraph.content)
-          }</code></pre>`;
-      } else {
-        html += `<div class="my-4">${markdownToHtml(paragraph.content)}</div>`;
-      }
-    });
+    // Render all blocks interleaved by globalOrder
+    const paragraphs = currentNote.paragraphs ?? [];
+    const sections = currentNote.customSections ?? [];
+    const nParagraphs = paragraphs.length;
+    const viewBlocks = [
+      ...paragraphs.map((p, i) => ({
+        kind: "paragraph",
+        item: p,
+        _order: p.globalOrder ?? i,
+      })),
+      ...sections.map((s, i) => ({
+        kind: "section",
+        item: s,
+        _order: s.globalOrder ?? nParagraphs + i,
+      })),
+    ].sort((a, b) => a._order - b._order);
 
-    // Render custom sections
-    const sortedSections = [...(currentNote.customSections || [])].sort((
-      a,
-      b,
-    ) => a.order - b.order);
-    sortedSections.forEach((section) => {
-      html += this.renderCustomSectionPreview(section);
+    viewBlocks.forEach((block) => {
+      if (block.kind === "paragraph") {
+        const paragraph = block.item;
+        if (paragraph.type === "code") {
+          const lang = paragraph.language || "text";
+          html +=
+            `<pre class="bg-tertiary rounded-lg p-4 overflow-x-auto my-4"><code class="language-${lang} text-sm">${
+              escapeHtml(paragraph.content)
+            }</code></pre>`;
+        } else {
+          html +=
+            `<div class="my-4">${markdownToHtml(paragraph.content)}</div>`;
+        }
+      } else {
+        html += this.renderCustomSectionPreview(block.item);
+      }
     });
 
     html += "</div>";
     return html;
   }
 
-  renderParagraphs() {
+  renderBlocks() {
     const currentNote = this.tm.notes[this.tm.activeNote];
-    if (!currentNote || !currentNote.paragraphs) return;
+    if (!currentNote) return;
 
-    const container = document.getElementById("paragraphsContainer");
+    const container = document.getElementById("blocksContainer");
+    if (!container) return;
     container.innerHTML = "";
 
-    const sortedParagraphs = [...currentNote.paragraphs].sort((a, b) =>
-      a.order - b.order
-    );
-    sortedParagraphs.forEach((paragraph) => {
-      const paragraphElement = this.createParagraphElement(paragraph);
-      container.appendChild(paragraphElement);
-    });
+    // Reset drag init flag so the new container gets listeners attached.
+    container._dragInitialized = false;
+
+    const paragraphs = currentNote.paragraphs ?? [];
+    const sections = currentNote.customSections ?? [];
+    const nParagraphs = paragraphs.length;
+
+    const blocks = [
+      ...paragraphs.map((p, i) => ({
+        kind: "paragraph",
+        item: p,
+        _order: p.globalOrder ?? i,
+      })),
+      ...sections.map((s, i) => ({
+        kind: "section",
+        item: s,
+        _order: s.globalOrder ?? nParagraphs + i,
+      })),
+    ].sort((a, b) => a._order - b._order);
+
+    for (const block of blocks) {
+      if (block.kind === "paragraph") {
+        container.appendChild(this.createParagraphElement(block.item));
+      } else {
+        container.appendChild(this.createCustomSectionElement(block.item));
+      }
+    }
 
     this.initDragAndDrop();
+  }
+
+  // Keep renderParagraphs as an alias so existing callers continue to work.
+  renderParagraphs() {
+    this.renderBlocks();
   }
 
   createParagraphElement(paragraph) {
@@ -985,19 +1074,7 @@ export class EnhancedNotesModule {
   }
 
   renderCustomSections() {
-    const currentNote = this.tm.notes[this.tm.activeNote];
-    if (!currentNote || !currentNote.customSections) return;
-
-    const container = document.getElementById("customSectionsContainer");
-    container.innerHTML = "";
-
-    const sortedSections = [...currentNote.customSections].sort((a, b) =>
-      a.order - b.order
-    );
-    sortedSections.forEach((section) => {
-      const sectionElement = this.createCustomSectionElement(section);
-      container.appendChild(sectionElement);
-    });
+    this.renderBlocks();
   }
 
   createCustomSectionElement(section) {
@@ -1668,7 +1745,7 @@ export class EnhancedNotesModule {
   }
 
   initParagraphDragAndDrop() {
-    const container = document.getElementById("paragraphsContainer");
+    const container = document.getElementById("blocksContainer");
     if (!container || container._dragInitialized) return;
     container._dragInitialized = true;
 
@@ -1698,7 +1775,9 @@ export class EnhancedNotesModule {
 
   getDragAfterElement(container, y) {
     const draggableElements = [
-      ...container.querySelectorAll(".paragraph-section:not(.dragging)"),
+      ...container.querySelectorAll(
+        ".paragraph-section:not(.dragging), .custom-section:not(.dragging)",
+      ),
     ];
 
     return draggableElements.reduce((closest, child) => {
@@ -1714,21 +1793,37 @@ export class EnhancedNotesModule {
   }
 
   updateParagraphOrder() {
-    const container = document.getElementById("paragraphsContainer");
-    const paragraphElements = container.querySelectorAll(".paragraph-section");
+    const container = document.getElementById("blocksContainer");
+    if (!container) return;
     const currentNote = this.tm.notes[this.tm.activeNote];
+    if (!currentNote) return;
 
-    if (!currentNote || !currentNote.paragraphs) return;
-
+    // Read DOM order and assign sequential globalOrder to each block.
+    const blockElements = container.querySelectorAll(
+      ".paragraph-section, .custom-section",
+    );
     let orderChanged = false;
-    paragraphElements.forEach((element, index) => {
+
+    blockElements.forEach((element, index) => {
       const paragraphId = element.getAttribute("data-paragraph-id");
-      const paragraph = currentNote.paragraphs.find((p) =>
-        p.id === paragraphId
-      );
-      if (paragraph && paragraph.order !== index) {
-        paragraph.order = index;
-        orderChanged = true;
+      const sectionId = element.getAttribute("data-section-id");
+
+      if (paragraphId) {
+        const p = (currentNote.paragraphs ?? []).find((x) =>
+          x.id === paragraphId
+        );
+        if (p && p.globalOrder !== index) {
+          p.globalOrder = index;
+          orderChanged = true;
+        }
+      } else if (sectionId) {
+        const s = (currentNote.customSections ?? []).find((x) =>
+          x.id === sectionId
+        );
+        if (s && s.globalOrder !== index) {
+          s.globalOrder = index;
+          orderChanged = true;
+        }
       }
     });
 

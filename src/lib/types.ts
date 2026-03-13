@@ -85,6 +85,8 @@ export interface NoteParagraph {
   content: string;
   language?: string; // For code blocks
   order: number;
+  /** Position in the combined paragraph+section render order. Set by the parser; used by the frontend to interleave blocks. */
+  globalOrder?: number;
   metadata?: {
     collapsed?: boolean;
     readonly?: boolean;
@@ -97,6 +99,8 @@ export interface CustomSection {
   type: "tabs" | "timeline" | "split-view";
   title: string;
   order: number;
+  /** Position in the combined paragraph+section render order. Set by the parser; used by the frontend to interleave blocks. */
+  globalOrder?: number;
   config: {
     tabs?: { id: string; title: string; content: NoteParagraph[] }[];
     timeline?: {

@@ -15,6 +15,12 @@ and this project adheres to
   fields, timestamps, revision, assignee, effort, and files. Use instead of
   `get_task` to reduce token usage. `last_comments` param (default 5, max 20).
   Total MCP tool count: 245.
+- Enhanced note block reordering now interleaves paragraphs and custom sections.
+  Added `globalOrder` field to `NoteParagraph` and `CustomSection`. The parser
+  assigns it during parse (file order = global order); the serializer writes
+  blocks interleaved by `globalOrder`. The UI merges both types into a single
+  `#blocksContainer` so up/down arrows and drag-and-drop can move any block past
+  any other block regardless of type.
 - `suggestedAction.nextMilestoneSuggestion` — when `suggestedAction.type` is
   `wait-review`, `get_context_pack` now includes a `nextMilestoneSuggestion`
   object with `suggestedName`, `rationale`, and `candidateTaskIds`. Clusters
