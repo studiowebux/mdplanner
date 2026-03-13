@@ -73,7 +73,7 @@ export class OnboardingSidenavModule {
         const existing = (this.taskManager.onboardingRecords || []).find(
           (r) => r.id === this.editingId,
         );
-        await OnboardingAPI.update(this.editingId, {
+        const res = await OnboardingAPI.update(this.editingId, {
           employeeName: name,
           role,
           startDate,
@@ -81,6 +81,11 @@ export class OnboardingSidenavModule {
           notes,
           steps: existing?.steps ?? [],
         });
+        if (!res.ok) {
+          statusEl.textContent = "Error";
+          statusEl.classList.remove("hidden");
+          return;
+        }
       } else {
         // Load steps from selected template if any
         const templateId = document.getElementById("onboardingTemplateSelect")?.value;
@@ -98,7 +103,12 @@ export class OnboardingSidenavModule {
             }));
           }
         }
-        await OnboardingAPI.create({ employeeName: name, role, startDate, personId, notes, steps });
+        const res = await OnboardingAPI.create({ employeeName: name, role, startDate, personId, notes, steps });
+        if (!res.ok) {
+          statusEl.textContent = "Error";
+          statusEl.classList.remove("hidden");
+          return;
+        }
       }
       statusEl.textContent = "Saved";
       statusEl.classList.remove("hidden");
@@ -116,7 +126,11 @@ export class OnboardingSidenavModule {
     if (!this.editingId) return;
     if (!(await showConfirm("Delete this onboarding record?"))) return;
     try {
-      await OnboardingAPI.delete(this.editingId);
+      const res = await OnboardingAPI.delete(this.editingId);
+      if (!res.ok) {
+        console.error("Error deleting onboarding record");
+        return;
+      }
       await this.taskManager.onboardingModule.load();
       Sidenav.close("onboardingSidenav");
     } catch (err) {
@@ -200,7 +214,11 @@ export class OnboardingSidenavModule {
   async _saveSteps() {
     // Always send the full record so no fields get wiped by the API spread
     try {
-      await OnboardingAPI.update(this.detailRecord.id, this.detailRecord);
+      const res = await OnboardingAPI.update(this.detailRecord.id, this.detailRecord);
+      if (!res.ok) {
+        console.error("Error saving onboarding steps");
+        return;
+      }
       this.taskManager.onboardingRecords = await OnboardingAPI.fetchAll();
       this.taskManager.onboardingModule.renderView();
     } catch (err) {

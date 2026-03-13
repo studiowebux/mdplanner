@@ -86,10 +86,18 @@ export class FundraisingSafeSidenavModule {
 
     try {
       if (this.editingId) {
-        await SafeAPI.update(this.editingId, data);
+        const res = await SafeAPI.update(this.editingId, data);
+        if (!res.ok) {
+          showToast("Failed to save SAFE agreement", "error");
+          return;
+        }
         this._showStatus("Saved");
       } else {
         const res = await SafeAPI.create(data);
+        if (!res.ok) {
+          showToast("Failed to create SAFE agreement", "error");
+          return;
+        }
         const created = await res.json();
         this.editingId = created.id;
         this._setHeader("Edit SAFE Agreement");
@@ -109,7 +117,11 @@ export class FundraisingSafeSidenavModule {
   async handleDelete() {
     if (!this.editingId) return;
     try {
-      await SafeAPI.delete(this.editingId);
+      const res = await SafeAPI.delete(this.editingId);
+      if (!res.ok) {
+        showToast("Failed to delete SAFE agreement", "error");
+        return;
+      }
       Sidenav.close("safe-sidenav");
       this.editingId = null;
       await this.tm.fundraisingSafeModule.load();

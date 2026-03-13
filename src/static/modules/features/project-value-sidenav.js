@@ -171,10 +171,18 @@ export class ProjectValueSidenavModule {
 
     try {
       if (this.editingBoardId) {
-        await ProjectValueAPI.update(this.editingBoardId, this.currentBoard);
+        const res = await ProjectValueAPI.update(this.editingBoardId, this.currentBoard);
+        if (!res.ok) {
+          showToast("Failed to save Project Value Board", "error");
+          return;
+        }
         this.showSaveStatus("Saved");
       } else {
         const response = await ProjectValueAPI.create(this.currentBoard);
+        if (!response.ok) {
+          showToast("Failed to create Project Value Board", "error");
+          return;
+        }
         const result = await response.json();
         this.editingBoardId = result.id;
         this.currentBoard.id = result.id;
@@ -198,7 +206,11 @@ export class ProjectValueSidenavModule {
     ) return;
 
     try {
-      await ProjectValueAPI.delete(this.editingBoardId);
+      const res = await ProjectValueAPI.delete(this.editingBoardId);
+      if (!res.ok) {
+        showToast("Failed to delete Project Value Board", "error");
+        return;
+      }
       showToast("Project Value Board deleted", "success");
       await this.tm.projectValueModule.load();
       this.close();

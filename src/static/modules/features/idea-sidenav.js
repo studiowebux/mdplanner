@@ -453,7 +453,11 @@ export class IdeaSidenavModule {
     ) return;
 
     try {
-      await IdeasAPI.delete(this.editingIdeaId);
+      const res = await IdeasAPI.delete(this.editingIdeaId);
+      if (!res.ok) {
+        showToast("Failed to delete idea", "error");
+        return;
+      }
       showToast("Idea deleted", "success");
       await this.tm.ideasModule.load();
       this.close();

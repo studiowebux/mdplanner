@@ -73,7 +73,11 @@ export class StickyNoteSidenavModule extends BaseSidenavModule {
 
     try {
       if (this.editingId) {
-        await CanvasAPI.update(this.editingId, data);
+        const res = await CanvasAPI.update(this.editingId, data);
+        if (!res.ok) {
+          showToast("Failed to save sticky note", "error");
+          return;
+        }
         this.showSaveStatus("Saved");
       } else {
         data.position = {
@@ -81,6 +85,10 @@ export class StickyNoteSidenavModule extends BaseSidenavModule {
           y: 100 + Math.random() * 200,
         };
         const response = await CanvasAPI.create(data);
+        if (!response.ok) {
+          showToast("Failed to create sticky note", "error");
+          return;
+        }
         const result = await response.json();
         this.editingId = result.id;
         this.showSaveStatus("Created");

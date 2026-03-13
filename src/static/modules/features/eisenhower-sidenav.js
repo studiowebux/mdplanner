@@ -187,13 +187,21 @@ export class EisenhowerSidenavModule {
 
     try {
       if (this.editingEisenhowerId) {
-        await EisenhowerAPI.update(
+        const res = await EisenhowerAPI.update(
           this.editingEisenhowerId,
           this.currentMatrix,
         );
+        if (!res.ok) {
+          showToast("Failed to save Eisenhower matrix", "error");
+          return;
+        }
         this.showSaveStatus("Saved");
       } else {
         const response = await EisenhowerAPI.create(this.currentMatrix);
+        if (!response.ok) {
+          showToast("Failed to create Eisenhower matrix", "error");
+          return;
+        }
         const result = await response.json();
         this.editingEisenhowerId = result.id;
         this.currentMatrix.id = result.id;
@@ -221,7 +229,11 @@ export class EisenhowerSidenavModule {
     ) return;
 
     try {
-      await EisenhowerAPI.delete(this.editingEisenhowerId);
+      const res = await EisenhowerAPI.delete(this.editingEisenhowerId);
+      if (!res.ok) {
+        showToast("Failed to delete Eisenhower matrix", "error");
+        return;
+      }
       showToast("Eisenhower matrix deleted", "success");
       await this.tm.eisenhowerModule.load();
       this.close();

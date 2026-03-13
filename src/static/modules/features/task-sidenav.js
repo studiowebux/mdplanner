@@ -529,7 +529,11 @@ export class TaskSidenavModule {
 
     try {
       if (this.editingTask) {
-        await TasksAPI.update(this.editingTask.id, taskData);
+        const res = await TasksAPI.update(this.editingTask.id, taskData);
+        if (!res.ok) {
+          showToast("Failed to save task", "error");
+          return;
+        }
         showToast("Task updated", "success");
       } else {
         if (this.parentTaskId) {
@@ -729,11 +733,15 @@ export class TaskSidenavModule {
 
       // If editing an existing task, persist immediately
       if (this.editingTask) {
-        await TasksAPI.update(this.editingTask.id, {
+        const updateRes = await TasksAPI.update(this.editingTask.id, {
           githubIssue: created.number,
           githubRepo: repo,
         });
-        showToast(`Issue #${created.number} created`, "success");
+        if (!updateRes.ok) {
+          showToast(`Issue #${created.number} created but failed to link to task`, "error");
+        } else {
+          showToast(`Issue #${created.number} created`, "success");
+        }
       } else {
         showToast(`Issue #${created.number} created — save task to link it`, "success");
       }

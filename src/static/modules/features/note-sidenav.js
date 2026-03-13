@@ -861,7 +861,11 @@ export class NoteSidenavModule {
     if (!(await showConfirm(`Delete "${note.title}"? This cannot be undone.`))) return;
 
     try {
-      await NotesAPI.delete(note.id);
+      const res = await NotesAPI.delete(note.id);
+      if (!res.ok) {
+        showToast("Failed to delete note", "error");
+        return;
+      }
       showToast("Note deleted", "success");
       this.tm.activeNote = null;
       await this.tm.loadNotes();

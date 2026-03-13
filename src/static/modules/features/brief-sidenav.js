@@ -188,10 +188,18 @@ export class BriefSidenavModule {
 
     try {
       if (this.editingBriefId) {
-        await BriefAPI.update(this.editingBriefId, this.currentBrief);
+        const res = await BriefAPI.update(this.editingBriefId, this.currentBrief);
+        if (!res.ok) {
+          showToast("Failed to save brief", "error");
+          return;
+        }
         this.showSaveStatus("Saved");
       } else {
         const response = await BriefAPI.create(this.currentBrief);
+        if (!response.ok) {
+          showToast("Failed to create brief", "error");
+          return;
+        }
         const result = await response.json();
         this.editingBriefId = result.id;
         this.currentBrief.id = result.id;
@@ -217,7 +225,11 @@ export class BriefSidenavModule {
     ) return;
 
     try {
-      await BriefAPI.delete(this.editingBriefId);
+      const res = await BriefAPI.delete(this.editingBriefId);
+      if (!res.ok) {
+        showToast("Failed to delete brief", "error");
+        return;
+      }
       showToast("Brief deleted", "success");
       await this.tm.briefModule.load();
       this.close();

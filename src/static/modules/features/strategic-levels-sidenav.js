@@ -431,10 +431,18 @@ export class StrategicLevelsSidenavModule {
     try {
       if (this.mode === "builder") {
         if (this.editingBuilderId) {
-          await StrategicLevelsAPI.update(this.editingBuilderId, data);
+          const res = await StrategicLevelsAPI.update(this.editingBuilderId, data);
+          if (!res.ok) {
+            showToast("Failed to save strategy", "error");
+            return;
+          }
           this.showSaveStatus("Saved");
         } else {
           const response = await StrategicLevelsAPI.create(data);
+          if (!response.ok) {
+            showToast("Failed to create strategy", "error");
+            return;
+          }
           const result = await response.json();
           this.editingBuilderId = result.id;
           this.tm.selectedStrategicBuilderId = result.id;
@@ -450,17 +458,25 @@ export class StrategicLevelsSidenavModule {
         }
 
         if (this.editingLevelId) {
-          await StrategicLevelsAPI.updateLevel(
+          const res = await StrategicLevelsAPI.updateLevel(
             this.tm.selectedStrategicBuilderId,
             this.editingLevelId,
             data,
           );
+          if (!res.ok) {
+            showToast("Failed to save level", "error");
+            return;
+          }
           this.showSaveStatus("Saved");
         } else {
-          await StrategicLevelsAPI.createLevel(
+          const res = await StrategicLevelsAPI.createLevel(
             this.tm.selectedStrategicBuilderId,
             data,
           );
+          if (!res.ok) {
+            showToast("Failed to create level", "error");
+            return;
+          }
           this.editingLevelId = true; // Mark as created
           this.showSaveStatus("Created");
           document.getElementById("strategicSidenavDelete").classList.remove(
@@ -511,7 +527,11 @@ export class StrategicLevelsSidenavModule {
         if (!(await showConfirm("Delete this strategy? This will remove all levels."))) {
           return;
         }
-        await StrategicLevelsAPI.delete(this.editingBuilderId);
+        const delRes = await StrategicLevelsAPI.delete(this.editingBuilderId);
+        if (!delRes.ok) {
+          showToast("Failed to delete strategy", "error");
+          return;
+        }
         this.tm.selectedStrategicBuilderId = null;
         showToast("Strategy deleted", "success");
       } else if (this.mode === "level" && this.editingLevelId) {
@@ -533,10 +553,14 @@ export class StrategicLevelsSidenavModule {
           if (!(await showConfirm("Delete this level?"))) return;
         }
 
-        await StrategicLevelsAPI.deleteLevel(
+        const delRes = await StrategicLevelsAPI.deleteLevel(
           this.tm.selectedStrategicBuilderId,
           this.editingLevelId,
         );
+        if (!delRes.ok) {
+          showToast("Failed to delete level", "error");
+          return;
+        }
         showToast("Level deleted", "success");
       }
 

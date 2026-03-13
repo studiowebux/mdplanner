@@ -123,10 +123,18 @@ export class FundraisingKpiSidenavModule {
 
     try {
       if (this.editingId) {
-        await KpiAPI.update(this.editingId, data);
+        const res = await KpiAPI.update(this.editingId, data);
+        if (!res.ok) {
+          showToast("Failed to save KPI snapshot", "error");
+          return;
+        }
         this._showStatus("Saved");
       } else {
         const res = await KpiAPI.create(data);
+        if (!res.ok) {
+          showToast("Failed to create KPI snapshot", "error");
+          return;
+        }
         const created = await res.json();
         this.editingId = created.id;
         this.tm.selectedKpiId = created.id;
@@ -147,7 +155,11 @@ export class FundraisingKpiSidenavModule {
   async handleDelete() {
     if (!this.editingId) return;
     try {
-      await KpiAPI.delete(this.editingId);
+      const res = await KpiAPI.delete(this.editingId);
+      if (!res.ok) {
+        showToast("Failed to delete KPI snapshot", "error");
+        return;
+      }
       Sidenav.close("kpi-sidenav");
       this.editingId = null;
       this.tm.selectedKpiId = null;

@@ -179,10 +179,18 @@ export class PeopleSidenavModule extends BaseSidenavModule {
 
     try {
       if (this.editingId) {
-        await PeopleAPI.update(this.editingId, data);
+        const res = await PeopleAPI.update(this.editingId, data);
+        if (!res.ok) {
+          showToast("Failed to save person", "error");
+          return;
+        }
         this.showSaveStatus("Saved");
       } else {
-        await PeopleAPI.create(data);
+        const res = await PeopleAPI.create(data);
+        if (!res.ok) {
+          showToast("Failed to create person", "error");
+          return;
+        }
         showToast("Person created", "success");
         await this.reloadData();
         this.close();

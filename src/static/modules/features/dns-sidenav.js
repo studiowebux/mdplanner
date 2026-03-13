@@ -105,9 +105,17 @@ export class DnsSidenavModule {
 
     try {
       if (this.editingId) {
-        await DnsAPI.update(this.editingId, payload);
+        const res = await DnsAPI.update(this.editingId, payload);
+        if (!res.ok) {
+          showToast("Failed to save domain", "error");
+          return;
+        }
       } else {
-        await DnsAPI.create(payload);
+        const res = await DnsAPI.create(payload);
+        if (!res.ok) {
+          showToast("Failed to create domain", "error");
+          return;
+        }
       }
       this.close();
       await this.tm.dnsModule?.load();
@@ -124,7 +132,11 @@ export class DnsSidenavModule {
     const confirmed = await showConfirm("Delete this domain? This cannot be undone.");
     if (!confirmed) return;
     try {
-      await DnsAPI.delete(this.editingId);
+      const res = await DnsAPI.delete(this.editingId);
+      if (!res.ok) {
+        showToast("Failed to delete domain", "error");
+        return;
+      }
       this.close();
       await this.tm.dnsModule?.load();
     } catch (err) {

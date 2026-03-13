@@ -222,10 +222,18 @@ export class MindmapSidenavModule {
 
     try {
       if (this.editingMindmapId) {
-        await MindmapsAPI.update(this.editingMindmapId, data);
+        const res = await MindmapsAPI.update(this.editingMindmapId, data);
+        if (!res.ok) {
+          showToast("Failed to save mindmap", "error");
+          return;
+        }
         this.showSaveStatus("Saved");
       } else {
         const response = await MindmapsAPI.create(data);
+        if (!response.ok) {
+          showToast("Failed to create mindmap", "error");
+          return;
+        }
         const result = await response.json();
         this.editingMindmapId = result.id;
         this.showSaveStatus("Created");
@@ -261,7 +269,11 @@ export class MindmapSidenavModule {
     if (!(await showConfirm(`Delete "${mindmap.title}"? This cannot be undone.`))) return;
 
     try {
-      await MindmapsAPI.delete(this.editingMindmapId);
+      const res = await MindmapsAPI.delete(this.editingMindmapId);
+      if (!res.ok) {
+        showToast("Failed to delete mindmap", "error");
+        return;
+      }
       showToast("Mindmap deleted", "success");
       await this.tm.mindmapModule.load(false);
       this.close();
