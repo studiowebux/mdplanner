@@ -7,6 +7,7 @@
 
 import type { DirectoryMarkdownParser } from "./parser/directory/parser.ts";
 import type { Task } from "./types.ts";
+import { VERSION } from "./version.ts";
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -109,6 +110,7 @@ export interface SuggestedAction {
 export interface ContextPack {
   generatedAt: string;
   project: string;
+  serverVersion: string;
   people: {
     agents: ContextPackAgent[];
     owner: ContextPackOwner | null;
@@ -466,6 +468,7 @@ export async function assembleContextPack(
   return {
     generatedAt: new Date().toISOString(),
     project: project ?? "",
+    serverVersion: VERSION,
     people: {
       agents,
       owner: ownerPerson
