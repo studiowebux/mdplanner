@@ -370,27 +370,39 @@ export class TasksModule {
   async toggle(taskId) {
     const task = this.findById(taskId);
     if (task) {
-      // Optimistic update - update local state immediately
       const newCompleted = !task.completed;
-      task.completed = newCompleted;
+      const prevSection = task.section;
 
-      // Update UI immediately without full re-render
+      // Optimistic update — move to Done when completing.
+      task.completed = newCompleted;
+      if (newCompleted && task.section !== "Done") {
+        task.section = "Done";
+      }
+
       this.updateInView(taskId, task);
+      this.tm.renderTasks();
+
+      const payload = { completed: newCompleted };
+      if (newCompleted && prevSection !== "Done") {
+        payload.section = "Done";
+      }
 
       try {
-        const response = await TasksAPI.update(taskId, {
-          completed: newCompleted,
-        });
+        const response = await TasksAPI.update(taskId, payload);
         if (!response.ok) {
           // Revert on failure
           task.completed = !newCompleted;
+          task.section = prevSection;
           this.updateInView(taskId, task);
+          this.tm.renderTasks();
           console.error("Failed to toggle task");
         }
       } catch (error) {
         // Revert on error
         task.completed = !newCompleted;
+        task.section = prevSection;
         this.updateInView(taskId, task);
+        this.tm.renderTasks();
         console.error("Error toggling task:", error);
       }
     }
