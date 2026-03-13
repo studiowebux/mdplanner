@@ -73,6 +73,25 @@ export interface ContextPackSummary {
   staleTasks: number;
 }
 
+export type SuggestedActionType =
+  | "resume"
+  | "pick-next"
+  | "wait-review"
+  | "unblock"
+  | "idle";
+
+export interface SuggestedAction {
+  /** What the agent should do next. */
+  type: SuggestedActionType;
+  /** Task to act on (when applicable). */
+  taskId?: string;
+  taskTitle?: string;
+  /** One sentence explaining why this action was chosen. */
+  reason: string;
+  /** One sentence: exactly what to do right now. */
+  nextStep: string;
+}
+
 export interface ContextPack {
   generatedAt: string;
   project: string;
@@ -88,6 +107,7 @@ export interface ContextPack {
   architecture: ContextPackNote[];
   constraints: ContextPackNote[];
   summary: ContextPackSummary;
+  suggestedAction: SuggestedAction;
 }
 
 // ---------------------------------------------------------------------------
@@ -144,6 +164,88 @@ function isTaskStale(task: Task, cutoffMs: number): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// Suggested action
+// ---------------------------------------------------------------------------
+
+function computeSuggestedAction(
+  inProgressTasks: Task[],
+  todoTasks: Task[],
+  pendingReviewTasks: Task[],
+  taskById: Map<string, Task>,
+  isReady: (t: Task) => boolean,
+): SuggestedAction {
+  // 1. Resume an in-progress task
+  if (inProgressTasks.length > 0) {
+    const task = inProgressTasks[0];
+    const comments = task.config.comments ?? [];
+    const lastComment = comments[comments.length - 1];
+    const state = lastComment
+      ? lastComment.body.split("\n")[0].slice(0, 120)
+      : descriptionExcerpt(task.description, 120);
+    return {
+      type: "resume",
+      taskId: task.id,
+      taskTitle: task.title,
+      reason: `Task "${task.title}" is already in progress.`,
+      nextStep: state
+        ? `Continue from last checkpoint: ${state}`
+        : `Continue implementing "${task.title}".`,
+    };
+  }
+
+  // 2. Blocked tasks whose blocker is now done — unblock first
+  const unblockable = todoTasks.find((t) => {
+    const blockers = t.config.blocked_by ?? [];
+    return blockers.length > 0 && blockers.every((id) => {
+      const blocker = taskById.get(id);
+      return !blocker || blocker.completed || blocker.section === "Done";
+    });
+  });
+  if (unblockable) {
+    return {
+      type: "unblock",
+      taskId: unblockable.id,
+      taskTitle: unblockable.title,
+      reason:
+        `"${unblockable.title}" was blocked but all its blockers are now done.`,
+      nextStep: `Pick up "${unblockable.title}" — blockers resolved.`,
+    };
+  }
+
+  // 3. Pick the highest-priority ready todo task
+  const readyTasks = todoTasks
+    .filter(isReady)
+    .sort((a, b) => (a.config.priority ?? 99) - (b.config.priority ?? 99));
+  if (readyTasks.length > 0) {
+    const task = readyTasks[0];
+    return {
+      type: "pick-next",
+      taskId: task.id,
+      taskTitle: task.title,
+      reason: `"${task.title}" is the highest-priority ready task.`,
+      nextStep: `Claim and start "${task.title}".`,
+    };
+  }
+
+  // 4. Everything is in review — wait for owner
+  if (pendingReviewTasks.length > 0) {
+    return {
+      type: "wait-review",
+      reason:
+        `${pendingReviewTasks.length} task(s) are awaiting owner review and no Todo tasks remain.`,
+      nextStep: "Wait for the owner to approve or reject the pending tasks.",
+    };
+  }
+
+  // 5. No actionable work — owner needs to queue tasks
+  return {
+    type: "idle",
+    reason: "No tasks are in Todo, In Progress, or Pending Review.",
+    nextStep: "Ask the owner to move Backlog items to Todo.",
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Assembler
 // ---------------------------------------------------------------------------
 
@@ -176,6 +278,9 @@ export async function assembleContextPack(
     (t) => t.section === "In Progress",
   );
   const todoTasks = projectTasks.filter((t) => t.section === "Todo");
+  const pendingReviewTasks = projectTasks.filter(
+    (t) => t.section === "Pending Review",
+  );
 
   // Ready: all blockers are Done or completed
   const isReady = (task: Task): boolean =>
@@ -317,5 +422,12 @@ export async function assembleContextPack(
       totalTodo: todoTasks.length,
       staleTasks,
     },
+    suggestedAction: computeSuggestedAction(
+      inProgressTasks,
+      todoTasks,
+      pendingReviewTasks,
+      taskById,
+      isReady,
+    ),
   };
 }
