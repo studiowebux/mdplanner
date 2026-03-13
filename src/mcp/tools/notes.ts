@@ -60,6 +60,23 @@ export function registerNoteTools(server: McpServer, pm: ProjectManager): void {
   );
 
   server.registerTool(
+    "get_notes_batch",
+    {
+      description:
+        "Fetch multiple notes by ID in one call. Returns full content for each found note and lists IDs that were not found. Use this after get_context_pack returns note stubs to avoid N sequential get_note round-trips.",
+      inputSchema: {
+        ids: z.array(z.string()).min(1).describe("Array of note IDs to fetch"),
+      },
+    },
+    async ({ ids }) => {
+      const results = await Promise.all(ids.map((id) => parser.readNote(id)));
+      const notes = results.filter((n) => n !== null);
+      const notFound = ids.filter((_, i) => results[i] === null);
+      return ok({ notes, notFound });
+    },
+  );
+
+  server.registerTool(
     "get_note_by_name",
     {
       description:
