@@ -399,7 +399,12 @@ export class IdeaSidenavModule {
 
     try {
       if (this.editingIdeaId) {
-        await IdeasAPI.update(this.editingIdeaId, data);
+        const res = await IdeasAPI.update(this.editingIdeaId, data);
+        if (!res.ok) {
+          this.showSaveStatus("Error");
+          showToast("Failed to save idea", "error");
+          return;
+        }
         this.showSaveStatus("Saved");
         if (
           ARCHIVED_STATUSES.includes(data.status) &&
@@ -413,6 +418,11 @@ export class IdeaSidenavModule {
         }
       } else {
         const response = await IdeasAPI.create(data);
+        if (!response.ok) {
+          this.showSaveStatus("Error");
+          showToast("Failed to create idea", "error");
+          return;
+        }
         const result = await response.json();
         this.editingIdeaId = result.id;
         this.currentIdea.id = result.id;
