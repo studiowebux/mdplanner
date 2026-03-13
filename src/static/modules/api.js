@@ -186,6 +186,10 @@ export const TasksAPI = {
     const response = await get(url);
     return response.json();
   },
+
+  async batchUpdate(updates) {
+    return post("/api/tasks/batch", { updates });
+  },
 };
 
 /** Project config and info operations */

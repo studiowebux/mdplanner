@@ -267,6 +267,65 @@
 }
 
 /* --------------------------------------------------------------------------
+   Batch Select Mode (List View)
+   -------------------------------------------------------------------------- */
+
+/* Batch select checkbox — hidden in normal mode, shown in batch mode */
+.batch-checkbox {
+  display: none;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-strong);
+  cursor: pointer;
+  accent-color: var(--color-accent);
+}
+
+#listContainer.batch-mode .batch-checkbox {
+  display: block;
+}
+
+#listContainer.batch-mode .task-list-item {
+  cursor: pointer;
+  user-select: none;
+}
+
+#listContainer.batch-mode .task-list-item:hover {
+  background: var(--color-bg-secondary);
+}
+
+.task-list-item.batch-selected {
+  background: var(--color-bg-tertiary) !important;
+  border-left: 3px solid var(--color-accent);
+}
+
+/* Active state for the Select toggle button */
+#batchSelectBtn.active {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+}
+
+/* Batch action bar — fixed above the bottom nav */
+.batch-action-bar {
+  position: fixed;
+  bottom: 4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1.25rem;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
    Task Complete Button (List View)
    -------------------------------------------------------------------------- */
 

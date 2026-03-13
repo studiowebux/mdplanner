@@ -6,6 +6,7 @@ import {
   getPriorityBadgeClasses,
   getPriorityText,
 } from "../utils.js";
+import { showToast } from "../ui/toast.js";
 
 /**
  * List view with filtering, sorting, and drag-drop
@@ -14,6 +15,8 @@ export class ListView {
   /** @param {TaskManager} taskManager */
   constructor(taskManager) {
     this.tm = taskManager;
+    this._batchMode = false;
+    this._selectedIds = new Set();
   }
 
   getPersonName(personId) {
@@ -338,6 +341,8 @@ export class ListView {
     div.innerHTML = `
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
+                    <input type="checkbox" class="batch-checkbox"
+                           onchange="taskManager.listView.toggleTaskSelection('${task.id}')" />
                     <div>
                         <div class="flex items-center space-x-2 flex-wrap gap-1">
                             <span class="task-title ${
@@ -817,6 +822,142 @@ export class ListView {
     });
   }
 
+  // ── Batch Select ──────────────────────────────────────────────────────────
+
+  toggleBatchMode() {
+    if (this._batchMode) {
+      this.exitBatchMode();
+    } else {
+      this.enterBatchMode();
+    }
+  }
+
+  enterBatchMode() {
+    this._batchMode = true;
+    this._selectedIds = new Set();
+    document.getElementById("listContainer")?.classList.add("batch-mode");
+    document.getElementById("batchSelectBtn")?.classList.add("active");
+    this._updateBatchBar();
+  }
+
+  exitBatchMode() {
+    this._batchMode = false;
+    this._selectedIds = new Set();
+    document.getElementById("listContainer")?.classList.remove("batch-mode");
+    document.querySelectorAll(".batch-selected").forEach((el) =>
+      el.classList.remove("batch-selected")
+    );
+    document.querySelectorAll(".batch-checkbox").forEach((cb) => {
+      cb.checked = false;
+    });
+    document.getElementById("batchSelectBtn")?.classList.remove("active");
+    this._updateBatchBar();
+    this.closeBatchPanel();
+  }
+
+  toggleTaskSelection(taskId) {
+    if (!this._batchMode) return;
+    if (this._selectedIds.has(taskId)) {
+      this._selectedIds.delete(taskId);
+    } else {
+      this._selectedIds.add(taskId);
+    }
+    const row = document.querySelector(`[data-task-id="${taskId}"]`);
+    const selected = this._selectedIds.has(taskId);
+    row?.classList.toggle("batch-selected", selected);
+    const cb = row?.querySelector(".batch-checkbox");
+    if (cb) cb.checked = selected;
+    this._updateBatchBar();
+  }
+
+  _updateBatchBar() {
+    const bar = document.getElementById("batchActionBar");
+    if (!bar) return;
+    const count = this._selectedIds.size;
+    if (!this._batchMode || count === 0) {
+      bar.classList.add("hidden");
+      return;
+    }
+    bar.classList.remove("hidden");
+    const countEl = document.getElementById("batchSelectedCount");
+    if (countEl) {
+      countEl.textContent = `${count} task${count !== 1 ? "s" : ""} selected`;
+    }
+  }
+
+  openBatchPanel() {
+    const panel = document.getElementById("batchEditPanel");
+    if (!panel) return;
+
+    const sections = this.tm.sections || [];
+    const sectionSel = document.getElementById("batchSection");
+    sectionSel.innerHTML = '<option value="">Leave unchanged</option>' +
+      sections.map((s) => `<option value="${s}">${s}</option>`).join("");
+
+    const people = Array.from(this.tm.peopleMap.values());
+    const assigneeSel = document.getElementById("batchAssignee");
+    assigneeSel.innerHTML = '<option value="">Leave unchanged</option>' +
+      people.map((p) => `<option value="${p.id}">${p.name}</option>`).join("");
+
+    const milestones = this.tm.projectConfig?.milestones || [];
+    const milestoneSel = document.getElementById("batchMilestone");
+    milestoneSel.innerHTML = '<option value="">Leave unchanged</option>' +
+      milestones.map((m) => `<option value="${m}">${m}</option>`).join("");
+
+    document.getElementById("batchPriority").value = "";
+    document.getElementById("batchTags").value = "";
+
+    panel.classList.remove("hidden");
+  }
+
+  closeBatchPanel() {
+    document.getElementById("batchEditPanel")?.classList.add("hidden");
+  }
+
+  async applyBatchUpdate() {
+    const section = document.getElementById("batchSection")?.value || "";
+    const assignee = document.getElementById("batchAssignee")?.value || "";
+    const milestone = document.getElementById("batchMilestone")?.value || "";
+    const priorityRaw = document.getElementById("batchPriority")?.value || "";
+    const priority = priorityRaw ? parseInt(priorityRaw, 10) : null;
+    const tagsRaw = (document.getElementById("batchTags")?.value || "").trim();
+    const tags = tagsRaw
+      ? tagsRaw.split(",").map((t) => t.trim()).filter(Boolean)
+      : null;
+
+    const update = {};
+    if (section) update.section = section;
+    if (assignee) update.assignee = assignee;
+    if (milestone) update.milestone = milestone;
+    if (priority) update.priority = priority;
+    if (tags && tags.length > 0) update.tags = tags;
+
+    if (Object.keys(update).length === 0) {
+      this.closeBatchPanel();
+      return;
+    }
+
+    const updates = Array.from(this._selectedIds).map((id) => ({
+      id,
+      ...update,
+    }));
+
+    try {
+      const response = await TasksAPI.batchUpdate(updates);
+      const result = await response.json();
+      const failed = result.results?.filter((r) => !r.success).length || 0;
+      const msg = failed > 0
+        ? `${result.updated} updated, ${failed} failed`
+        : `${result.updated} task${result.updated !== 1 ? "s" : ""} updated`;
+      showToast(msg, failed > 0);
+      this.closeBatchPanel();
+      this.exitBatchMode();
+      await this.tm.loadTasks();
+    } catch {
+      showToast("Batch update failed", true);
+    }
+  }
+
   bindEvents() {
     // Filter change events
     document
@@ -840,6 +981,40 @@ export class ListView {
     document
       .getElementById("clearFilters")
       .addEventListener("click", () => this.clearFilters());
+
+    document.getElementById("batchSelectBtn")?.addEventListener(
+      "click",
+      () => this.toggleBatchMode(),
+    );
+    document.getElementById("batchCancelBtn")?.addEventListener(
+      "click",
+      () => this.exitBatchMode(),
+    );
+    document.getElementById("batchEditBtn")?.addEventListener(
+      "click",
+      () => this.openBatchPanel(),
+    );
+    document.getElementById("batchPanelCancelBtn")?.addEventListener(
+      "click",
+      () => this.closeBatchPanel(),
+    );
+    document.getElementById("batchApplyBtn")?.addEventListener(
+      "click",
+      () => this.applyBatchUpdate(),
+    );
+    document.getElementById("batchEditPanel")?.addEventListener("click", (e) => {
+      if (e.target.id === "batchEditPanel") this.closeBatchPanel();
+    });
+
+    // Row-click delegation: clicking non-interactive area in batch mode selects the row
+    document.getElementById("listContainer")?.addEventListener("click", (e) => {
+      if (!this._batchMode) return;
+      const row = e.target.closest(".task-list-item");
+      if (!row || !row.dataset.taskId) return;
+      if (e.target.classList.contains("batch-checkbox")) return;
+      if (e.target.closest("button, select, a")) return;
+      this.toggleTaskSelection(row.dataset.taskId);
+    });
 
     this.bindDrag();
     this.bindTouchDrag();
