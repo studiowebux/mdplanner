@@ -523,11 +523,15 @@ export class ListView {
   /** Build clickable section pills in the jump bar. */
   renderSectionJumpBar(sections, allTasks) {
     const bar = document.getElementById("sectionJumpBar");
+    const listView = document.getElementById("listView");
     if (!bar) return;
     bar.innerHTML = "";
 
     // Hide when section filter narrows to one section
-    if (this.tm.listFilters.section) return;
+    if (this.tm.listFilters.section) {
+      listView?.classList.remove("jump-bar-active");
+      return;
+    }
 
     sections.forEach((section) => {
       const count = allTasks.filter(
@@ -548,6 +552,8 @@ export class ListView {
       });
       bar.appendChild(pill);
     });
+
+    listView?.classList.toggle("jump-bar-active", bar.children.length > 0);
   }
 
   /** IntersectionObserver scroll-spy — highlights the pill for the visible section. */

@@ -76,6 +76,17 @@
   border-style: solid;
 }
 
+.list-section-header {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+}
+
+/* When the section jump bar is visible, offset headers below it */
+#listView.jump-bar-active .list-section-header {
+  top: 2.5rem;
+}
+
 .list-section-header.drag-over {
   background-color: var(--color-bg-active);
 }
