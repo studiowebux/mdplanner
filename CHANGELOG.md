@@ -15,6 +15,8 @@ and this project adheres to
   fields, timestamps, revision, assignee, effort, and files. Use instead of
   `get_task` to reduce token usage. `last_comments` param (default 5, max 20).
   Total MCP tool count: 245.
+- GitHub view: open issue and PR counts are now clickable links that open the
+  corresponding GitHub issues/pulls page in a new tab.
 - Milestone view hides completed milestones by default. A "Show completed"
   checkbox (same pattern as the archived ideas toggle) restores them. Preference
   persisted in localStorage under `milestonesShowCompleted`.
