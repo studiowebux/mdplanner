@@ -1415,14 +1415,59 @@
       </div>
 
       <!-- Summary View -->
-      <div id="summaryView" class="hidden pb-16">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
-          <!-- Project Info -->
+      <div id="summaryView" class="hidden pb-16 space-y-4">
+
+        <!-- Milestone health strip -->
+        <div id="summaryMilestoneStrip" class="summary-milestone-strip hidden">
+          <div class="summary-milestone-info">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/>
+            </svg>
+            <span id="summaryMilestoneName" class="font-medium text-primary"></span>
+            <span id="summaryMilestoneProgress" class="summary-milestone-badge"></span>
+          </div>
+          <div class="summary-milestone-bar-wrap">
+            <div class="summary-milestone-track">
+              <div id="summaryMilestoneBar" class="summary-milestone-fill" style="width:0%"></div>
+            </div>
+            <span id="summaryMilestoneDate" class="text-xs text-muted"></span>
+          </div>
+        </div>
+
+        <!-- Three status cards -->
+        <div class="summary-status-row">
+          <button
+            class="summary-status-card"
+            onclick="taskManager.listView.tm.listFilters.section='In Progress'; taskManager.switchView('list')"
+            title="View In Progress tasks"
+          >
+            <div class="summary-status-card-label">In Progress</div>
+            <div id="summaryCountInProgress" class="summary-status-card-count">0</div>
+            <div id="summaryAssigneesInProgress" class="summary-status-card-meta"></div>
+          </button>
+          <button
+            class="summary-status-card"
+            onclick="taskManager.listView.tm.listFilters.section='Pending Review'; taskManager.switchView('list')"
+            title="View Pending Review tasks"
+          >
+            <div class="summary-status-card-label">Pending Review</div>
+            <div id="summaryCountPendingReview" class="summary-status-card-count">0</div>
+            <div id="summaryOldestPendingReview" class="summary-status-card-meta"></div>
+          </button>
+          <button class="summary-status-card summary-status-card--blocked" title="Blocked tasks">
+            <div class="summary-status-card-label">Blocked</div>
+            <div id="summaryCountBlocked" class="summary-status-card-count">0</div>
+            <div id="summaryBlockedMeta" class="summary-status-card-meta"></div>
+          </button>
+        </div>
+
+        <!-- Two-column layout: project info (left) + collapsibles (right) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+          <!-- Left: project info -->
           <div class="lg:col-span-2 space-y-4">
             <div class="bg-primary rounded-lg shadow p-4 sm:p-6">
-              <div
-                class="flex flex-wrap items-start justify-between gap-3 mb-4"
-              >
+              <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
                 <h2
                   id="summaryProjectName"
                   class="text-xl sm:text-2xl font-bold text-primary"
@@ -1441,10 +1486,7 @@
                     <option value="on-hold">On Hold</option>
                     <option value="completed">Completed</option>
                   </select>
-                  <span
-                    class="help-tip"
-                    data-tip="Track your project health. On Track = progressing well, At Risk = potential issues, Late = behind schedule."
-                  >?</span>
+                  <span class="help-tip" data-tip="Track your project health. On Track = progressing well, At Risk = potential issues, Late = behind schedule.">?</span>
                 </div>
               </div>
               <div id="projectStatusComment" class="hidden mb-4">
@@ -1456,222 +1498,108 @@
                 ></textarea>
               </div>
               <div class="summary-description-header">
-                <button
-                  id="editDescriptionBtn"
-                  type="button"
-                  class="summary-edit-btn"
-                  title="Edit description"
-                >Edit</button>
+                <button id="editDescriptionBtn" type="button" class="summary-edit-btn" title="Edit description">Edit</button>
               </div>
-              <div
-                id="projectDescription"
-                class="prose prose-gray max-w-none"
-              >
-                <p class="text-secondary">
-                  Loading project description...
-                </p>
+              <div id="projectDescription" class="prose prose-gray max-w-none">
+                <p class="text-secondary">Loading project description...</p>
               </div>
               <div id="projectDescriptionEditor" class="hidden">
-                <textarea
-                  rows="5"
-                  class="summary-description-textarea"
-                  placeholder="Project description (markdown supported)"
-                ></textarea>
+                <textarea rows="5" class="summary-description-textarea" placeholder="Project description (markdown supported)"></textarea>
                 <div class="summary-description-actions">
-                  <button
-                    id="cancelDescriptionBtn"
-                    type="button"
-                    class="btn-ghost"
-                  >Cancel</button>
-                  <button
-                    id="saveDescriptionBtn"
-                    type="button"
-                    class="btn-secondary"
-                  >Save</button>
+                  <button id="cancelDescriptionBtn" type="button" class="btn-ghost">Cancel</button>
+                  <button id="saveDescriptionBtn" type="button" class="btn-secondary">Save</button>
                 </div>
               </div>
-
-              <!-- Project Dates -->
-              <div
-                class="mt-4 pt-4 border-t border-default flex flex-wrap gap-4 text-sm text-secondary"
-              >
-                <div>
-                  <span class="font-medium">Started:</span>
-                  <span id="summaryStartDate">-</span>
-                </div>
-                <div>
-                  <span class="font-medium">Last Updated:</span>
-                  <span id="summaryLastUpdated">-</span>
-                </div>
+              <div class="mt-4 pt-4 border-t border-default flex flex-wrap gap-4 text-sm text-secondary">
+                <div><span class="font-medium">Started:</span> <span id="summaryStartDate">-</span></div>
+                <div><span class="font-medium">Last Updated:</span> <span id="summaryLastUpdated">-</span></div>
               </div>
             </div>
 
             <!-- Useful Links -->
             <div class="bg-primary rounded-lg shadow p-4 sm:p-6">
               <div class="flex justify-between items-center mb-4">
-                <h3
-                  class="text-lg font-semibold text-primary"
-                >
-                  Useful Links
-                </h3>
-                <button
-                  id="addLinkBtn"
-                  class="text-sm text-primary hover:text-secondary underline"
-                >
-                  + Add Link
-                </button>
+                <h3 class="text-base font-semibold text-primary">Useful Links</h3>
+                <button id="addLinkBtn" class="text-sm text-primary hover:text-secondary underline">+ Add Link</button>
               </div>
               <div id="projectLinks" class="space-y-2">
-                <p class="text-sm text-muted italic">
-                  No links added yet.
-                </p>
+                <p class="text-sm text-muted italic">No links added yet.</p>
               </div>
-
-              <!-- Add Link Form (hidden by default) -->
-              <div
-                id="addLinkForm"
-                class="hidden mt-4 pt-4 border-t border-default"
-              >
+              <div id="addLinkForm" class="hidden mt-4 pt-4 border-t border-default">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <input
-                    type="text"
-                    id="linkTitle"
-                    placeholder="Title"
-                    class="w-full border border-strong rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-1 focus:border-transparent"
-                  >
-                  <input
-                    type="url"
-                    id="linkUrl"
-                    placeholder="https://..."
-                    class="w-full border border-strong rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-1 focus:border-transparent"
-                  >
+                  <input type="text" id="linkTitle" placeholder="Title" class="w-full border border-strong rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-1 focus:border-transparent">
+                  <input type="url" id="linkUrl" placeholder="https://..." class="w-full border border-strong rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-1 focus:border-transparent">
                 </div>
                 <div class="flex justify-end gap-2 mt-3">
-                  <button
-                    id="cancelLinkBtn"
-                    type="button"
-                    class="px-3 py-1.5 text-sm text-secondary hover:text-primary"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    id="saveLinkBtn"
-                    type="button"
-                    class="px-3 py-1.5 text-sm bg-inverse text-inverse rounded-md hover:bg-active"
-                  >
-                    Save
-                  </button>
+                  <button id="cancelLinkBtn" type="button" class="px-3 py-1.5 text-sm text-secondary hover:text-primary">Cancel</button>
+                  <button id="saveLinkBtn" type="button" class="px-3 py-1.5 text-sm bg-inverse text-inverse rounded-md hover:bg-active">Save</button>
                 </div>
-              </div>
-            </div>
-
-            <!-- Task Deadlines -->
-            <div class="bg-primary rounded-lg shadow p-4 sm:p-6">
-              <h3
-                class="text-lg font-semibold text-primary mb-4"
-              >
-                Task Deadlines
-              </h3>
-              <div id="taskDeadlines" class="space-y-4">
-                <p class="text-sm text-muted italic">
-                  No upcoming deadlines.
-                </p>
               </div>
             </div>
           </div>
 
-          <!-- Project Stats -->
-          <div class="space-y-4 sm:space-y-6">
-            <div class="bg-primary rounded-lg shadow p-4 sm:p-6">
-              <h3
-                class="text-lg font-semibold text-primary mb-4"
-              >
-                Task Overview
-              </h3>
-              <div class="space-y-4">
-                <div class="flex justify-between items-center">
-                  <span class="text-sm text-secondary"
-                  >Total Tasks</span>
-                  <span
-                    id="totalTasks"
-                    class="text-lg font-semibold text-primary"
-                  >0</span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-sm text-secondary"
-                  >Completed</span>
-                  <span
-                    id="completedTasks"
-                    class="text-lg font-semibold text-success"
-                  >0</span>
-                </div>
-                <div id="dynamicSectionCounts">
-                  <!-- Dynamic section counts will be populated here -->
-                </div>
-              </div>
+          <!-- Right: collapsible sections -->
+          <div class="space-y-2">
 
-              <!-- Progress Bar -->
-              <div class="mt-6">
-                <div
-                  class="flex justify-between text-sm text-secondary mb-2"
-                >
-                  <span>Progress</span>
-                  <span id="progressPercent">0%</span>
+            <!-- Stats (progress) -->
+            <details class="summary-collapsible">
+              <summary class="summary-collapsible-header">Stats</summary>
+              <div class="summary-collapsible-body space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-secondary">Total</span>
+                  <span id="totalTasks" class="text-sm font-semibold text-primary">0</span>
                 </div>
-                <div
-                  class="w-full bg-active rounded-full h-2"
-                >
-                  <div
-                    id="progressBar"
-                    class="bg-success h-2 rounded-full transition-all duration-300"
-                    style="width: 0%"
-                  >
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-secondary">Completed</span>
+                  <span id="completedTasks" class="text-sm font-semibold text-success">0</span>
+                </div>
+                <div id="dynamicSectionCounts" class="space-y-1 pt-1 border-t border-default"></div>
+                <div class="pt-1">
+                  <div class="flex justify-between text-xs text-muted mb-1">
+                    <span>Progress</span>
+                    <span id="progressPercent">0%</span>
+                  </div>
+                  <div class="w-full bg-active rounded-full h-1.5">
+                    <div id="progressBar" class="bg-success h-1.5 rounded-full transition-all duration-300" style="width:0%"></div>
                   </div>
                 </div>
               </div>
-            </div>
+            </details>
 
-            <!-- Section Breakdown -->
-            <div class="bg-primary rounded-lg shadow p-6">
-              <h3
-                class="text-lg font-semibold text-primary mb-4"
-              >
-                Section Breakdown
-              </h3>
-              <div id="sectionBreakdown" class="space-y-3">
-                <!-- Section counts will be populated dynamically -->
+            <!-- Deadlines -->
+            <details class="summary-collapsible">
+              <summary class="summary-collapsible-header">Deadlines</summary>
+              <div id="taskDeadlines" class="summary-collapsible-body space-y-3">
+                <p class="text-sm text-muted italic">No upcoming deadlines.</p>
               </div>
-            </div>
+            </details>
+
+            <!-- Todo queue -->
+            <details class="summary-collapsible">
+              <summary class="summary-collapsible-header">Todo Queue</summary>
+              <div id="summaryTodoQueue" class="summary-collapsible-body space-y-1">
+                <p class="text-sm text-muted">No tasks in queue.</p>
+              </div>
+            </details>
+
+            <!-- Section breakdown -->
+            <details class="summary-collapsible">
+              <summary class="summary-collapsible-header">Sections</summary>
+              <div id="sectionBreakdown" class="summary-collapsible-body space-y-2"></div>
+            </details>
 
             <!-- Milestones -->
-            <div
-              id="milestonesSection"
-              class="bg-primary rounded-lg shadow p-6 hidden"
-            >
-              <h3
-                class="text-lg font-semibold text-primary mb-4"
-              >
-                Milestones
-              </h3>
-              <div id="milestoneBreakdown" class="space-y-3">
-                <!-- Milestone counts will be populated dynamically -->
-              </div>
-            </div>
+            <details id="milestonesSection" class="summary-collapsible hidden">
+              <summary class="summary-collapsible-header">Milestones</summary>
+              <div id="milestoneBreakdown" class="summary-collapsible-body space-y-3"></div>
+            </details>
 
             <!-- Tasks by Person -->
-            <div
-              id="tasksByPersonSection"
-              class="bg-primary rounded-lg shadow p-6 hidden"
-            >
-              <h3
-                class="text-lg font-semibold text-primary mb-4"
-              >
-                Tasks by Person
-              </h3>
-              <div id="tasksByPersonBreakdown" class="space-y-4">
-                <!-- Per-person task lists will be populated dynamically -->
-              </div>
-            </div>
+            <details id="tasksByPersonSection" class="summary-collapsible hidden">
+              <summary class="summary-collapsible-header">Tasks by Person</summary>
+              <div id="tasksByPersonBreakdown" class="summary-collapsible-body space-y-4"></div>
+            </details>
+
           </div>
         </div>
       </div>
@@ -1679,7 +1607,7 @@
       <!-- List View -->
       <div id="listView" class="hidden pb-16">
         <div
-          class="bg-primary rounded-lg shadow overflow-hidden"
+          class="bg-primary rounded-lg shadow"
         >
           <div class="px-6 py-4 border-b border-default">
             <div class="flex flex-wrap items-center justify-between gap-3">
@@ -1734,12 +1662,71 @@
                 >
                   Clear
                 </button>
+                <button
+                  id="batchSelectBtn"
+                  class="text-sm border border-default rounded-md px-2 py-1 text-muted hover:text-primary hover:border-strong transition-colors"
+                  title="Enter multi-select mode"
+                >
+                  Select
+                </button>
               </div>
             </div>
             <div id="sectionJumpBar" class="section-jump-bar"></div>
           </div>
           <div class="divide-y divide-y border-default">
             <div id="listContainer"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Batch action bar — shown when tasks are selected in batch mode -->
+      <div id="batchActionBar" class="hidden batch-action-bar">
+        <span id="batchSelectedCount" class="text-sm font-medium text-primary"></span>
+        <div class="flex items-center gap-2">
+          <button id="batchCancelBtn" class="btn-ghost text-sm">Cancel</button>
+          <button id="batchEditBtn" class="btn-primary text-sm">Edit selected</button>
+        </div>
+      </div>
+
+      <!-- Batch edit panel modal -->
+      <div id="batchEditPanel" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div class="bg-primary rounded-lg shadow-xl border border-default w-full max-w-md mx-4">
+          <div class="px-6 py-4 border-b border-default">
+            <h3 class="text-base font-semibold text-primary">Edit selected tasks</h3>
+            <p class="text-xs text-muted mt-0.5">Empty fields are left unchanged.</p>
+          </div>
+          <div class="px-6 py-4 space-y-3">
+            <div>
+              <label class="block text-xs font-medium text-secondary mb-1">Section</label>
+              <select id="batchSection" class="form-input text-sm w-full"></select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-secondary mb-1">Assignee</label>
+              <select id="batchAssignee" class="form-input text-sm w-full"></select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-secondary mb-1">Milestone</label>
+              <select id="batchMilestone" class="form-input text-sm w-full"></select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-secondary mb-1">Priority</label>
+              <select id="batchPriority" class="form-input text-sm w-full">
+                <option value="">Leave unchanged</option>
+                <option value="1">Critical</option>
+                <option value="2">High</option>
+                <option value="3">Medium</option>
+                <option value="4">Low</option>
+                <option value="5">Minimal</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-secondary mb-1">Tags (comma-separated, replaces existing)</label>
+              <input id="batchTags" type="text" placeholder="e.g. bug, ui, v2" class="form-input text-sm w-full" />
+            </div>
+          </div>
+          <div class="px-6 py-4 border-t border-default flex items-center justify-end gap-2">
+            <button id="batchPanelCancelBtn" class="btn-ghost">Cancel</button>
+            <button id="batchApplyBtn" class="btn-primary">Apply</button>
           </div>
         </div>
       </div>

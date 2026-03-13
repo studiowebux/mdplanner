@@ -2,12 +2,19 @@
 import { GitHubAPI, PortfolioAPI } from "../api.js";
 import { showLoading, hideLoading } from "../ui/loading.js";
 
+const RUNS_PER_PAGE = 25;
+
 export class GitHubView {
   constructor(taskManager) {
     this.tm = taskManager;
     this._loading = false;
     this._repos = []; // cached results for re-filtering
     this._filtersBound = false;
+    this._allRuns = []; // all fetched workflow runs
+    this._runsPage = 1;
+    this._runsTypeFilter = "";
+    this._runsSortDir = "desc"; // "desc" = newest first
+    this._runsBound = false;
   }
 
   async load() {
@@ -203,7 +210,12 @@ export class GitHubView {
     document.getElementById("githubRefreshBtn")?.addEventListener("click", () => {
       this._loading = false;
       this._repos = [];
+      this._allRuns = [];
+      this._runsPage = 1;
+      this._runsTypeFilter = "";
+      this._runsSortDir = "desc";
       this._filtersBound = false;
+      this._runsBound = false;
       this.load();
     });
   }
@@ -229,51 +241,131 @@ export class GitHubView {
       }),
     );
 
-    // Flatten all runs with project context, take most recent 20
-    const allRuns = [];
+    // Flatten all runs with project context into module state
+    this._allRuns = [];
     for (const result of results) {
       if (result.status !== "fulfilled") continue;
       for (const run of result.value.runs) {
-        allRuns.push({ project: result.value.project, run });
+        this._allRuns.push({ project: result.value.project, run });
       }
     }
-    allRuns.sort((a, b) => new Date(b.run.createdAt) - new Date(a.run.createdAt));
-    const recent = allRuns.slice(0, 20);
 
-    if (recent.length === 0) return;
+    if (this._allRuns.length === 0) return;
 
-    let html = `
-      <h3 class="github-runs-title">Recent Workflow Runs</h3>
-      <table class="github-view-table">
-        <thead>
-          <tr>
-            <th>Status</th>
-            <th>Workflow</th>
-            <th>Repository</th>
-            <th>Branch</th>
-            <th>Event</th>
-            <th>Time</th>
-          </tr>
-        </thead>
-        <tbody>`;
+    // Inject the runs section shell (controls + table target)
+    container.insertAdjacentHTML(
+      "beforeend",
+      `<div id="githubRunsSection">
+        <div class="github-runs-header">
+          <h3 class="github-runs-title">Workflow Runs</h3>
+          <div class="github-runs-controls">
+            <select id="githubRunsType" class="text-sm border border-strong rounded-md px-2 py-1">
+              <option value="">All event types</option>
+            </select>
+            <select id="githubRunsSort" class="text-sm border border-strong rounded-md px-2 py-1">
+              <option value="desc">Newest first</option>
+              <option value="asc">Oldest first</option>
+            </select>
+          </div>
+        </div>
+        <div id="githubRunsTable"></div>
+        <div id="githubRunsPager" class="github-runs-pager"></div>
+      </div>`,
+    );
 
-    for (const { project, run } of recent) {
-      const statusClass = this._runStatusClass(run);
-      const statusLabel = this._runStatusLabel(run);
-      const timeAgo = this._timeAgo(run.createdAt);
-
-      html += `<tr>
-        <td><span class="github-run-status ${statusClass}">${statusLabel}</span></td>
-        <td><a href="${this._esc(run.htmlUrl)}" target="_blank" rel="noopener noreferrer" class="github-view-repolink">${this._esc(run.name)}</a></td>
-        <td>${this._esc(project.githubRepo)}</td>
-        <td class="text-muted">${this._esc(run.headBranch)}</td>
-        <td class="text-muted">${this._esc(run.event)}</td>
-        <td class="text-muted">${timeAgo}</td>
-      </tr>`;
+    // Populate event type filter with distinct values from fetched runs
+    const types = [...new Set(this._allRuns.map((r) => r.run.event))].sort();
+    const typeSelect = document.getElementById("githubRunsType");
+    for (const t of types) {
+      const opt = document.createElement("option");
+      opt.value = t;
+      opt.textContent = t;
+      typeSelect.appendChild(opt);
     }
 
-    html += `</tbody></table>`;
-    container.insertAdjacentHTML("beforeend", html);
+    this._renderRunsView();
+    this._bindRunsControls();
+  }
+
+  _renderRunsView() {
+    let runs = [...this._allRuns];
+
+    // Filter by event type
+    if (this._runsTypeFilter) {
+      runs = runs.filter((r) => r.run.event === this._runsTypeFilter);
+    }
+
+    // Sort
+    runs.sort((a, b) => {
+      const diff = new Date(a.run.createdAt) - new Date(b.run.createdAt);
+      return this._runsSortDir === "asc" ? diff : -diff;
+    });
+
+    const total = runs.length;
+    const totalPages = Math.max(1, Math.ceil(total / RUNS_PER_PAGE));
+    if (this._runsPage > totalPages) this._runsPage = totalPages;
+
+    const start = (this._runsPage - 1) * RUNS_PER_PAGE;
+    const page = runs.slice(start, start + RUNS_PER_PAGE);
+
+    // Render table
+    const tableEl = document.getElementById("githubRunsTable");
+    if (!tableEl) return;
+
+    if (page.length === 0) {
+      tableEl.innerHTML =
+        `<p class="text-muted" style="padding:1rem">No workflow runs match the filter.</p>`;
+    } else {
+      let html =
+        `<table class="github-view-table"><thead><tr><th>Status</th><th>Workflow</th><th>Repository</th><th>Branch</th><th>Event</th><th>Time</th></tr></thead><tbody>`;
+      for (const { project, run } of page) {
+        const statusClass = this._runStatusClass(run);
+        const statusLabel = this._runStatusLabel(run);
+        const timeAgo = this._timeAgo(run.createdAt);
+        html +=
+          `<tr><td><span class="github-run-status ${statusClass}">${statusLabel}</span></td><td><a href="${this._esc(run.htmlUrl)}" target="_blank" rel="noopener noreferrer" class="github-view-repolink">${this._esc(run.name)}</a></td><td>${this._esc(project.githubRepo)}</td><td class="text-muted">${this._esc(run.headBranch)}</td><td class="text-muted">${this._esc(run.event)}</td><td class="text-muted">${timeAgo}</td></tr>`;
+      }
+      html += `</tbody></table>`;
+      tableEl.innerHTML = html;
+    }
+
+    // Render pager
+    const pagerEl = document.getElementById("githubRunsPager");
+    if (!pagerEl) return;
+    const from = total === 0 ? 0 : start + 1;
+    const to = Math.min(start + RUNS_PER_PAGE, total);
+    pagerEl.innerHTML = `
+      <span class="github-runs-count">Showing ${from}–${to} of ${total}</span>
+      <div class="github-runs-nav">
+        <button id="githubRunsPrev" class="btn-secondary" ${this._runsPage <= 1 ? "disabled" : ""}>Previous</button>
+        <span class="github-runs-page">Page ${this._runsPage} of ${totalPages}</span>
+        <button id="githubRunsNext" class="btn-secondary" ${this._runsPage >= totalPages ? "disabled" : ""}>Next</button>
+      </div>
+    `;
+
+    document.getElementById("githubRunsPrev")?.addEventListener("click", () => {
+      if (this._runsPage > 1) { this._runsPage--; this._renderRunsView(); }
+    });
+    document.getElementById("githubRunsNext")?.addEventListener("click", () => {
+      if (this._runsPage < totalPages) { this._runsPage++; this._renderRunsView(); }
+    });
+  }
+
+  _bindRunsControls() {
+    if (this._runsBound) return;
+    this._runsBound = true;
+
+    document.getElementById("githubRunsType")?.addEventListener("change", (e) => {
+      this._runsTypeFilter = e.target.value;
+      this._runsPage = 1;
+      this._renderRunsView();
+    });
+
+    document.getElementById("githubRunsSort")?.addEventListener("change", (e) => {
+      this._runsSortDir = e.target.value;
+      this._runsPage = 1;
+      this._renderRunsView();
+    });
   }
 
   _runStatusClass(run) {

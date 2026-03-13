@@ -1213,6 +1213,46 @@ select.input {
 }
 
 /* --------------------------------------------------------------------------
+   Toast Notifications
+   -------------------------------------------------------------------------- */
+
+.toast {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  max-width: 22rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-default);
+  border-left-width: 4px;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  box-shadow: var(--shadow-lg);
+  z-index: 9999;
+  cursor: pointer;
+  transform: translateX(calc(100% + 1.5rem));
+  opacity: 0;
+  transition:
+    transform 0.25s ease,
+    opacity 0.25s ease;
+}
+
+.toast.toast-visible {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.toast.toast-success {
+  border-left-color: var(--color-success);
+}
+
+.toast.toast-error {
+  border-left-color: var(--color-error);
+}
+
+/* --------------------------------------------------------------------------
    Loading Spinner
    -------------------------------------------------------------------------- */
 

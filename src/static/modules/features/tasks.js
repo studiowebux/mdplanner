@@ -397,7 +397,21 @@ export class TasksModule {
   }
 
   updateInView(taskId, task) {
-    // Update checkbox state
+    // Update complete button state (list view)
+    const completeBtn = document.querySelector(
+      `[data-complete-btn="${taskId}"]`,
+    );
+    if (completeBtn) {
+      completeBtn.textContent = task.completed ? "Reopen" : "Complete";
+      completeBtn.title = task.completed ? "Reopen task" : "Mark complete";
+      if (task.completed) {
+        completeBtn.classList.add("task-complete-btn--done");
+      } else {
+        completeBtn.classList.remove("task-complete-btn--done");
+      }
+    }
+
+    // Update checkbox state (board view)
     const checkboxes = document.querySelectorAll(
       `input[onchange*="toggleTask('${taskId}')"]`,
     );

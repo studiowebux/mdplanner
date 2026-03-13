@@ -41,8 +41,7 @@ function timestamp(): string {
 
 export class BackupScheduler {
   private readonly options: SchedulerOptions;
-  private timer: ReturnType<typeof setInterval> | null = null;
-  private startTime: number = Date.now();
+  private timer: ReturnType<typeof setTimeout> | null = null;
   private status: BackupStatus;
 
   constructor(options: SchedulerOptions) {
@@ -56,25 +55,81 @@ export class BackupScheduler {
       lastBackupSize: null,
       lastBackupFile: null,
       lastError: null,
-      nextBackupTime: new Date(
-        Date.now() + options.intervalHours * 60 * 60 * 1000,
-      ).toISOString(),
+      nextBackupTime: null,
     };
   }
 
+  /**
+   * Returns the age (ms) of the most recent backup file in backupDir.
+   * Returns Infinity when no backups exist or the directory is unreadable.
+   */
+  private async lastBackupAgeMs(): Promise<number> {
+    try {
+      let latestMtime = 0;
+      await ensureDir(this.options.backupDir);
+      for await (const entry of Deno.readDir(this.options.backupDir)) {
+        if (
+          entry.isFile &&
+          (entry.name.endsWith(".tar") || entry.name.endsWith(".tar.enc"))
+        ) {
+          const stat = await Deno.stat(
+            join(this.options.backupDir, entry.name),
+          );
+          if (stat.mtime && stat.mtime.getTime() > latestMtime) {
+            latestMtime = stat.mtime.getTime();
+          }
+        }
+      }
+      return latestMtime > 0 ? Date.now() - latestMtime : Infinity;
+    } catch {
+      return Infinity;
+    }
+  }
+
+  /**
+   * Schedule the first backup based on real wall-clock elapsed time.
+   * If overdue (age >= interval) → run immediately.
+   * Otherwise → wait only the remaining time, then switch to regular interval.
+   */
   start(): void {
-    const ms = this.options.intervalHours * 60 * 60 * 1000;
+    const intervalMs = this.options.intervalHours * 60 * 60 * 1000;
     console.log(
       `[backup] scheduler started — every ${this.options.intervalHours}h → ${this.options.backupDir}`,
     );
-    this.timer = setInterval(() => {
-      this.runBackup().catch(() => {});
-    }, ms);
+
+    this.lastBackupAgeMs().then((ageMs) => {
+      const delayMs = ageMs >= intervalMs ? 0 : intervalMs - ageMs;
+
+      if (delayMs === 0) {
+        console.log(
+          `[backup] overdue (last backup ${
+            Math.round(ageMs / 3_600_000)
+          }h ago) — running immediately`,
+        );
+      } else {
+        const nextTime = new Date(Date.now() + delayMs).toISOString();
+        this.status.nextBackupTime = nextTime;
+        console.log(
+          `[backup] next backup in ${
+            Math.round(delayMs / 60_000)
+          }min (${nextTime})`,
+        );
+      }
+
+      this.timer = setTimeout(() => {
+        this.runBackup().catch(() => {}).finally(() => {
+          // Switch to regular interval after first fire
+          this.timer = setInterval(() => {
+            this.runBackup().catch(() => {});
+          }, intervalMs) as unknown as ReturnType<typeof setTimeout>;
+        });
+      }, delayMs);
+    });
   }
 
   stop(): void {
     if (this.timer !== null) {
-      clearInterval(this.timer);
+      clearTimeout(this.timer);
       this.timer = null;
     }
   }
