@@ -216,7 +216,8 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         },
         ...(parentId && { parentId }),
       });
-      return ok({ id });
+      const created = await parser.readTask(id);
+      return ok(created ?? { id });
     },
   );
 
@@ -334,7 +335,8 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         },
       });
       if (!success) return err(`Task '${id}' not found`);
-      return ok({ success: true });
+      const updated = await parser.readTask(id);
+      return ok(updated ?? { success: true });
     },
   );
 
