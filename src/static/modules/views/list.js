@@ -28,7 +28,9 @@ export class ListView {
     this._restoreFilters();
 
     const sections = this.tm.sections || [];
-    const milestones = this.tm.projectConfig?.milestones || [];
+    const milestoneNames = Array.from(
+      new Set((this.tm.milestones || []).map((m) => m.name).filter(Boolean)),
+    ).sort();
     const f = this.tm.listFilters;
 
     const sectionSelect = document.getElementById("filterSection");
@@ -45,7 +47,7 @@ export class ListView {
 
     const milestoneSelect = document.getElementById("filterMilestone");
     milestoneSelect.innerHTML = '<option value="">All Milestones</option>' +
-      milestones.map((m) => `<option value="${m}">${m}</option>`).join("");
+      milestoneNames.map((n) => `<option value="${n}">${n}</option>`).join("");
     milestoneSelect.value = f.milestone || "";
 
     const statusSelect = document.getElementById("filterStatus");
@@ -849,6 +851,13 @@ export class ListView {
     this._selectedIds = new Set();
     document.getElementById("listContainer")?.classList.add("batch-mode");
     document.getElementById("batchSelectBtn")?.classList.add("active");
+    // Disable dragging so clicks register as selection, not drag-start
+    document.querySelectorAll('.task-list-item[draggable="true"]').forEach(
+      (el) => {
+        el.dataset.wasDraggable = "true";
+        el.draggable = false;
+      },
+    );
     this._updateBatchBar();
   }
 
@@ -862,6 +871,13 @@ export class ListView {
     document.querySelectorAll(".batch-checkbox").forEach((cb) => {
       cb.checked = false;
     });
+    // Restore dragging on items that were draggable before batch mode
+    document.querySelectorAll(".task-list-item[data-was-draggable]").forEach(
+      (el) => {
+        el.draggable = true;
+        delete el.dataset.wasDraggable;
+      },
+    );
     document.getElementById("batchSelectBtn")?.classList.remove("active");
     this._updateBatchBar();
     this.closeBatchPanel();
@@ -911,10 +927,12 @@ export class ListView {
     assigneeSel.innerHTML = '<option value="">Leave unchanged</option>' +
       people.map((p) => `<option value="${p.id}">${p.name}</option>`).join("");
 
-    const milestones = this.tm.projectConfig?.milestones || [];
+    const milestoneNames = Array.from(
+      new Set((this.tm.milestones || []).map((m) => m.name).filter(Boolean)),
+    ).sort();
     const milestoneSel = document.getElementById("batchMilestone");
     milestoneSel.innerHTML = '<option value="">Leave unchanged</option>' +
-      milestones.map((m) => `<option value="${m}">${m}</option>`).join("");
+      milestoneNames.map((n) => `<option value="${n}">${n}</option>`).join("");
 
     document.getElementById("batchPriority").value = "";
     document.getElementById("batchTags").value = "";
