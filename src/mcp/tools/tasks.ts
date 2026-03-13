@@ -216,7 +216,8 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         },
         ...(parentId && { parentId }),
       });
-      return ok({ id });
+      const created = await parser.readTask(id);
+      return ok(created ?? { id });
     },
   );
 
@@ -250,6 +251,9 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         planned_end: z.string().optional().describe(
           "Planned end date (YYYY-MM-DD)",
         ),
+        files: z.array(z.string()).optional().describe(
+          "Relevant source file paths (relative to codebase root). Surfaced in get_context_pack as relevantFiles.",
+        ),
         claimed_by: z.string().optional().describe(
           "Person ID of the agent actively working on this task",
         ),
@@ -281,6 +285,7 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         blocked_by,
         planned_start,
         planned_end,
+        files,
         claimed_by,
         claimed_at,
         expected_revision,
@@ -329,12 +334,14 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
           ...(blocked_by !== undefined && { blocked_by }),
           ...(planned_start !== undefined && { planned_start }),
           ...(planned_end !== undefined && { planned_end }),
+          ...(files !== undefined && { files }),
           ...(claimed_by !== undefined && { claimedBy: claimed_by }),
           ...(claimed_at !== undefined && { claimedAt: claimed_at }),
         },
       });
       if (!success) return err(`Task '${id}' not found`);
-      return ok({ success: true });
+      const updated = await parser.readTask(id);
+      return ok(updated ?? { success: true });
     },
   );
 
@@ -504,6 +511,7 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
             blocked_by: z.array(z.string()).optional(),
             planned_start: z.string().optional(),
             planned_end: z.string().optional(),
+            files: z.array(z.string()).optional(),
             claimed_by: z.string().optional(),
             claimed_at: z.string().optional(),
             expected_revision: z.number().int().optional().describe(
@@ -597,6 +605,7 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
             ...(entry.planned_end !== undefined && {
               planned_end: entry.planned_end,
             }),
+            ...(entry.files !== undefined && { files: entry.files }),
             ...(entry.claimed_by !== undefined && {
               claimedBy: entry.claimed_by,
             }),

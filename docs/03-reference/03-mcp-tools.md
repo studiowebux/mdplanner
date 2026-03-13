@@ -16,8 +16,8 @@ Tools follow a consistent pattern per entity: `list_*`, `get_*`, `create_*`,
 | --------------------- | -------------------------------------------------------- |
 | `list_tasks`          | List tasks with filters (section, project, milestone, assignee, priority, tags, ready, completed) |
 | `get_task`            | Get task by ID with full description and comments        |
-| `create_task`         | Create task with title, description, section, assignee, milestone, priority, tags, effort, dates |
-| `update_task`         | Update any task field including section, assignee, milestone |
+| `create_task`         | Create task — returns full task object (not just `{id}`)                 |
+| `update_task`         | Update any task field including section, assignee, milestone, files — returns full task object |
 | `delete_task`         | Delete task by ID                                        |
 | `add_task_comment`    | Add comment to task (with optional metadata)             |
 | `add_task_attachments`| Add file attachments to task                             |
@@ -25,17 +25,23 @@ Tools follow a consistent pattern per entity: `list_*`, `get_*`, `create_*`,
 | `claim_task`          | Claim task for an agent (concurrency-safe)               |
 | `batch_update_tasks`  | Update up to 50 tasks in one call                        |
 | `get_next_task`       | Get next available task by priority (skill-aware)        |
-| `sweep_stale_claims`  | Release tasks claimed longer than timeout                |
+| `sweep_stale_claims`  | Release tasks claimed longer than timeout                        |
+| `request_approval`    | Submit task for human review — moves to Pending Review           |
+| `approve_task`        | Approve a Pending Review task — moves to Done                    |
+| `reject_task`         | Reject a Pending Review task — returns to In Progress            |
+| `list_pending_approvals` | List all tasks in Pending Review with approval request stubs  |
 
 ## Notes
 
-| Tool           | Description                           |
-| -------------- | ------------------------------------- |
-| `list_notes`   | List notes (filter by search, project) |
-| `get_note`     | Get note with full content            |
-| `create_note`  | Create note                           |
-| `update_note`  | Update note title or content          |
-| `delete_note`  | Delete note                           |
+| Tool                | Description                                                                 |
+| ------------------- | --------------------------------------------------------------------------- |
+| `list_notes`        | List notes (filter by search, project)                                      |
+| `get_note`          | Get note by ID with full content                                            |
+| `get_note_by_name`  | Get note by title (case-insensitive)                                        |
+| `get_notes_batch`   | Fetch multiple notes by ID in one call — returns `{ notes, notFound }`      |
+| `create_note`       | Create note                                                                 |
+| `update_note`       | Update note title or content                                                |
+| `delete_note`       | Delete note                                                                 |
 
 ## Goals
 
@@ -428,3 +434,31 @@ Requires `--cache`.
 | Tool             | Description                            |
 | ---------------- | -------------------------------------- |
 | `get_analytics`  | Dashboard data (tasks, goals, trends)  |
+
+## Context Pack
+
+| Tool                | Description                                                                              |
+| ------------------- | ---------------------------------------------------------------------------------------- |
+| `get_context_pack`  | Single-call agent boot — returns people, active milestone, in-progress tasks (with `relevantFiles`), top-10 todo, recent progress excerpt, and decision/architecture/constraint note stubs |
+
+## Time Tracking
+
+| Tool                       | Description                        |
+| -------------------------- | ---------------------------------- |
+| `list_time_entries`        | List all time entries              |
+| `get_time_entries_for_task`| Get time entries for a task        |
+| `create_time_entry`        | Log time against a task            |
+| `delete_time_entry`        | Delete a time entry                |
+
+## MCP Prompts
+
+Registered prompts surface as `/slash-commands` in Claude Code. Dynamic
+prompts (`/daily`, `/next`) fetch live task data at render time.
+
+| Prompt            | Arguments              | Description                                                    |
+| ----------------- | ---------------------- | -------------------------------------------------------------- |
+| `/session-start`  | `project?`             | Full Phase 1 boot — reads local-dev.md, calls get_context_pack, checks git state |
+| `/end-session`    | —                      | Write progress note + HANDOFF.md + move completed tasks to Pending Review |
+| `/daily`          | `project?`             | Live standup: tasks done/in-progress/blocked in last 24 h      |
+| `/approve`        | `task_id`, `feedback?` | Approve a Pending Review task and move to Done                 |
+| `/next`           | `project?`             | Highest-priority ready task — what to work on right now        |
