@@ -395,10 +395,22 @@ export class IdeaSidenavModule {
     // Update currentIdea with form data
     Object.assign(this.currentIdea, data);
 
+    const ARCHIVED_STATUSES = ["implemented", "cancelled"];
+
     try {
       if (this.editingIdeaId) {
         await IdeasAPI.update(this.editingIdeaId, data);
         this.showSaveStatus("Saved");
+        if (
+          ARCHIVED_STATUSES.includes(data.status) &&
+          !this.tm.ideasModule.showArchived
+        ) {
+          showToast(
+            `Idea archived (${data.status}) — enable "Show archived" to see it`,
+            "info",
+          );
+          this.close();
+        }
       } else {
         const response = await IdeasAPI.create(data);
         const result = await response.json();
