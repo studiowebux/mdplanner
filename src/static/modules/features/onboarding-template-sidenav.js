@@ -104,9 +104,19 @@ export class OnboardingTemplateSidenavModule {
 
     try {
       if (this.editingId) {
-        await OnboardingTemplatesAPI.update(this.editingId, payload);
+        const res = await OnboardingTemplatesAPI.update(this.editingId, payload);
+        if (!res.ok) {
+          statusEl.textContent = "Error saving";
+          statusEl.classList.remove("hidden");
+          return;
+        }
       } else {
-        await OnboardingTemplatesAPI.create(payload);
+        const res = await OnboardingTemplatesAPI.create(payload);
+        if (!res.ok) {
+          statusEl.textContent = "Error saving";
+          statusEl.classList.remove("hidden");
+          return;
+        }
       }
       statusEl.textContent = "Saved";
       statusEl.classList.remove("hidden");
@@ -124,7 +134,11 @@ export class OnboardingTemplateSidenavModule {
     if (!this.editingId) return;
     if (!(await showConfirm("Delete this template?"))) return;
     try {
-      await OnboardingTemplatesAPI.delete(this.editingId);
+      const res = await OnboardingTemplatesAPI.delete(this.editingId);
+      if (!res.ok) {
+        console.error("Error deleting onboarding template");
+        return;
+      }
       await this.taskManager.onboardingModule.load();
       this._closePanel();
     } catch (err) {

@@ -139,15 +139,25 @@ export class FinancesSidenavModule {
 
     try {
       if (this.editingId) {
-        await FinancesAPI.update(this.editingId, {
+        const res = await FinancesAPI.update(this.editingId, {
           period,
           cash_on_hand,
           revenue,
           expenses,
           notes,
         });
+        if (!res.ok) {
+          statusEl.textContent = "Error saving";
+          statusEl.classList.remove("hidden");
+          return;
+        }
       } else {
-        await FinancesAPI.create({ period, cash_on_hand, revenue, expenses, notes });
+        const res = await FinancesAPI.create({ period, cash_on_hand, revenue, expenses, notes });
+        if (!res.ok) {
+          statusEl.textContent = "Error saving";
+          statusEl.classList.remove("hidden");
+          return;
+        }
       }
       statusEl.textContent = "Saved";
       statusEl.classList.remove("hidden");
@@ -165,7 +175,11 @@ export class FinancesSidenavModule {
     if (!this.editingId) return;
     if (!(await showConfirm("Delete this period?"))) return;
     try {
-      await FinancesAPI.delete(this.editingId);
+      const res = await FinancesAPI.delete(this.editingId);
+      if (!res.ok) {
+        console.error("Error deleting finances period");
+        return;
+      }
       await this.taskManager.financesModule.load();
       Sidenav.close("financesSidenav");
     } catch (err) {

@@ -7,6 +7,7 @@
 
 import type { DirectoryMarkdownParser } from "./parser/directory/parser.ts";
 import type { Task } from "./types.ts";
+import { VERSION } from "./version.ts";
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -73,9 +74,43 @@ export interface ContextPackSummary {
   staleTasks: number;
 }
 
+export type SuggestedActionType =
+  | "resume"
+  | "pick-next"
+  | "wait-review"
+  | "unblock"
+  | "idle";
+
+export interface NextMilestoneSuggestion {
+  /** Human-readable milestone name for the next sprint. */
+  suggestedName: string;
+  /** One sentence explaining the clustering rationale. */
+  rationale: string;
+  /** Top Backlog task IDs (sorted by priority) for the suggested milestone. */
+  candidateTaskIds: string[];
+}
+
+export interface SuggestedAction {
+  /** What the agent should do next. */
+  type: SuggestedActionType;
+  /** Task to act on (when applicable). */
+  taskId?: string;
+  taskTitle?: string;
+  /** One sentence explaining why this action was chosen. */
+  reason: string;
+  /** One sentence: exactly what to do right now. */
+  nextStep: string;
+  /**
+   * Present only when type is "wait-review". Suggests a name and candidate
+   * tasks for the next milestone based on Backlog clustering.
+   */
+  nextMilestoneSuggestion?: NextMilestoneSuggestion;
+}
+
 export interface ContextPack {
   generatedAt: string;
   project: string;
+  serverVersion: string;
   people: {
     agents: ContextPackAgent[];
     owner: ContextPackOwner | null;
@@ -87,7 +122,10 @@ export interface ContextPack {
   decisions: ContextPackNote[];
   architecture: ContextPackNote[];
   constraints: ContextPackNote[];
+  features: ContextPackNote[];
+  investigations: ContextPackNote[];
   summary: ContextPackSummary;
+  suggestedAction: SuggestedAction;
 }
 
 // ---------------------------------------------------------------------------
@@ -143,6 +181,142 @@ function isTaskStale(task: Task, cutoffMs: number): boolean {
   return new Date(last.timestamp).getTime() < cutoffMs;
 }
 
+/**
+ * Cluster Backlog tasks by their first tag and return a milestone suggestion.
+ * Picks the largest tag cluster (by task count). Falls back to untagged tasks.
+ * Returns undefined when the Backlog is empty.
+ */
+function computeNextMilestoneSuggestion(
+  backlogTasks: Task[],
+): NextMilestoneSuggestion | undefined {
+  if (backlogTasks.length === 0) return undefined;
+
+  const tagGroups = new Map<string, Task[]>();
+  const untagged: Task[] = [];
+
+  for (const task of backlogTasks) {
+    const tags = task.config.tags ?? [];
+    if (tags.length === 0) {
+      untagged.push(task);
+    } else {
+      const key = tags[0].toLowerCase();
+      const group = tagGroups.get(key) ?? [];
+      group.push(task);
+      tagGroups.set(key, group);
+    }
+  }
+
+  // Find the tag group with the most tasks; fall back to untagged
+  let bestTag: string | null = null;
+  let bestGroup: Task[] = untagged;
+  for (const [tag, tasks] of tagGroups) {
+    if (tasks.length > bestGroup.length) {
+      bestTag = tag;
+      bestGroup = tasks;
+    }
+  }
+
+  if (bestGroup.length === 0) return undefined;
+
+  const sorted = [...bestGroup].sort(
+    (a, b) => (a.config.priority ?? 99) - (b.config.priority ?? 99),
+  );
+  const candidateTaskIds = sorted.slice(0, 10).map((t) => t.id);
+  const label = bestTag
+    ? bestTag.charAt(0).toUpperCase() + bestTag.slice(1)
+    : "General";
+  const suggestedName = `Next: ${label}`;
+  const rationale = bestTag
+    ? `${bestGroup.length} Backlog task(s) share the "${bestTag}" tag — largest cluster by count.`
+    : `${bestGroup.length} untagged Backlog task(s) form the largest group.`;
+
+  return { suggestedName, rationale, candidateTaskIds };
+}
+
+// ---------------------------------------------------------------------------
+// Suggested action
+// ---------------------------------------------------------------------------
+
+function computeSuggestedAction(
+  inProgressTasks: Task[],
+  todoTasks: Task[],
+  pendingReviewTasks: Task[],
+  backlogTasks: Task[],
+  taskById: Map<string, Task>,
+  isReady: (t: Task) => boolean,
+): SuggestedAction {
+  // 1. Resume an in-progress task
+  if (inProgressTasks.length > 0) {
+    const task = inProgressTasks[0];
+    const comments = task.config.comments ?? [];
+    const lastComment = comments[comments.length - 1];
+    const state = lastComment
+      ? lastComment.body.split("\n")[0].slice(0, 120)
+      : descriptionExcerpt(task.description, 120);
+    return {
+      type: "resume",
+      taskId: task.id,
+      taskTitle: task.title,
+      reason: `Task "${task.title}" is already in progress.`,
+      nextStep: state
+        ? `Continue from last checkpoint: ${state}`
+        : `Continue implementing "${task.title}".`,
+    };
+  }
+
+  // 2. Blocked tasks whose blocker is now done — unblock first
+  const unblockable = todoTasks.find((t) => {
+    const blockers = t.config.blocked_by ?? [];
+    return blockers.length > 0 && blockers.every((id) => {
+      const blocker = taskById.get(id);
+      return !blocker || blocker.completed || blocker.section === "Done";
+    });
+  });
+  if (unblockable) {
+    return {
+      type: "unblock",
+      taskId: unblockable.id,
+      taskTitle: unblockable.title,
+      reason:
+        `"${unblockable.title}" was blocked but all its blockers are now done.`,
+      nextStep: `Pick up "${unblockable.title}" — blockers resolved.`,
+    };
+  }
+
+  // 3. Pick the highest-priority ready todo task
+  const readyTasks = todoTasks
+    .filter(isReady)
+    .sort((a, b) => (a.config.priority ?? 99) - (b.config.priority ?? 99));
+  if (readyTasks.length > 0) {
+    const task = readyTasks[0];
+    return {
+      type: "pick-next",
+      taskId: task.id,
+      taskTitle: task.title,
+      reason: `"${task.title}" is the highest-priority ready task.`,
+      nextStep: `Claim and start "${task.title}".`,
+    };
+  }
+
+  // 4. Everything is in review — wait for owner
+  if (pendingReviewTasks.length > 0) {
+    return {
+      type: "wait-review",
+      reason:
+        `${pendingReviewTasks.length} task(s) are awaiting owner review and no Todo tasks remain.`,
+      nextStep: "Wait for the owner to approve or reject the pending tasks.",
+      nextMilestoneSuggestion: computeNextMilestoneSuggestion(backlogTasks),
+    };
+  }
+
+  // 5. No actionable work — owner needs to queue tasks
+  return {
+    type: "idle",
+    reason: "No tasks are in Todo, In Progress, or Pending Review.",
+    nextStep: "Ask the owner to move Backlog items to Todo.",
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Assembler
 // ---------------------------------------------------------------------------
@@ -176,6 +350,10 @@ export async function assembleContextPack(
     (t) => t.section === "In Progress",
   );
   const todoTasks = projectTasks.filter((t) => t.section === "Todo");
+  const pendingReviewTasks = projectTasks.filter(
+    (t) => t.section === "Pending Review",
+  );
+  const backlogTasks = projectTasks.filter((t) => t.section === "Backlog");
 
   // Ready: all blockers are Done or completed
   const isReady = (task: Task): boolean =>
@@ -267,6 +445,14 @@ export async function assembleContextPack(
     .filter((n) => n.title.toLowerCase().startsWith("[constraint]"))
     .map(toNoteRef);
 
+  const features = scopedNotes
+    .filter((n) => n.title.toLowerCase().startsWith("[feature]"))
+    .map(toNoteRef);
+
+  const investigations = scopedNotes
+    .filter((n) => n.title.toLowerCase().startsWith("[investigation]"))
+    .map(toNoteRef);
+
   // People
   const agents = allPeople
     .filter((p) => p.agentType && p.agentType !== "human")
@@ -282,6 +468,7 @@ export async function assembleContextPack(
   return {
     generatedAt: new Date().toISOString(),
     project: project ?? "",
+    serverVersion: VERSION,
     people: {
       agents,
       owner: ownerPerson
@@ -311,11 +498,21 @@ export async function assembleContextPack(
     decisions,
     architecture,
     constraints,
+    features,
+    investigations,
     summary: {
       openMilestones: openMilestones.length,
       totalInProgress: inProgressTasks.length,
       totalTodo: todoTasks.length,
       staleTasks,
     },
+    suggestedAction: computeSuggestedAction(
+      inProgressTasks,
+      todoTasks,
+      pendingReviewTasks,
+      backlogTasks,
+      taskById,
+      isReady,
+    ),
   };
 }

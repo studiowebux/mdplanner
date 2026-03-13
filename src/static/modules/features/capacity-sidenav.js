@@ -443,11 +443,15 @@ export class CapacitySidenavModule {
 
     try {
       if (this.editingPlanId) {
-        await CapacityAPI.update(this.editingPlanId, {
+        const res = await CapacityAPI.update(this.editingPlanId, {
           title: this.currentPlan.title,
           date: this.currentPlan.date,
           budgetHours: this.currentPlan.budgetHours,
         });
+        if (!res.ok) {
+          showToast("Failed to save capacity plan", "error");
+          return;
+        }
         this.showSaveStatus("Saved");
       } else {
         const response = await CapacityAPI.create({
@@ -455,6 +459,10 @@ export class CapacitySidenavModule {
           date: this.currentPlan.date,
           budgetHours: this.currentPlan.budgetHours,
         });
+        if (!response.ok) {
+          showToast("Failed to create capacity plan", "error");
+          return;
+        }
         const result = await response.json();
         this.editingPlanId = result.id;
         this.currentPlan.id = result.id;
@@ -490,7 +498,11 @@ export class CapacitySidenavModule {
     ) return;
 
     try {
-      await CapacityAPI.delete(this.editingPlanId);
+      const res = await CapacityAPI.delete(this.editingPlanId);
+      if (!res.ok) {
+        showToast("Failed to delete capacity plan", "error");
+        return;
+      }
       showToast("Capacity plan deleted", "success");
       this.tm.selectedCapacityPlanId = null;
       await this.tm.capacityModule?.load();

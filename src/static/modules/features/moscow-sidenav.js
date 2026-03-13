@@ -183,10 +183,18 @@ export class MoscowSidenavModule {
 
     try {
       if (this.editingMoscowId) {
-        await MoscowAPI.update(this.editingMoscowId, this.currentAnalysis);
+        const res = await MoscowAPI.update(this.editingMoscowId, this.currentAnalysis);
+        if (!res.ok) {
+          showToast("Failed to save MoSCoW analysis", "error");
+          return;
+        }
         this.showSaveStatus("Saved");
       } else {
         const response = await MoscowAPI.create(this.currentAnalysis);
+        if (!response.ok) {
+          showToast("Failed to create MoSCoW analysis", "error");
+          return;
+        }
         const result = await response.json();
         this.editingMoscowId = result.id;
         this.currentAnalysis.id = result.id;
@@ -214,7 +222,11 @@ export class MoscowSidenavModule {
     ) return;
 
     try {
-      await MoscowAPI.delete(this.editingMoscowId);
+      const res = await MoscowAPI.delete(this.editingMoscowId);
+      if (!res.ok) {
+        showToast("Failed to delete MoSCoW analysis", "error");
+        return;
+      }
       showToast("MoSCoW analysis deleted", "success");
       await this.tm.moscowModule.load();
       this.close();

@@ -181,10 +181,18 @@ export class RiskSidenavModule {
 
     try {
       if (this.editingRiskId) {
-        await RiskAnalysisAPI.update(this.editingRiskId, this.currentRisk);
+        const res = await RiskAnalysisAPI.update(this.editingRiskId, this.currentRisk);
+        if (!res.ok) {
+          showToast("Failed to save risk analysis", "error");
+          return;
+        }
         this.showSaveStatus("Saved");
       } else {
         const response = await RiskAnalysisAPI.create(this.currentRisk);
+        if (!response.ok) {
+          showToast("Failed to create risk analysis", "error");
+          return;
+        }
         const result = await response.json();
         this.editingRiskId = result.id;
         this.currentRisk.id = result.id;
@@ -208,7 +216,11 @@ export class RiskSidenavModule {
     ) return;
 
     try {
-      await RiskAnalysisAPI.delete(this.editingRiskId);
+      const res = await RiskAnalysisAPI.delete(this.editingRiskId);
+      if (!res.ok) {
+        showToast("Failed to delete risk analysis", "error");
+        return;
+      }
       showToast("Risk analysis deleted", "success");
       await this.tm.riskModule.load();
       this.close();

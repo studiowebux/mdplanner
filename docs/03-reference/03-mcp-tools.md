@@ -4,7 +4,7 @@ title: MCP Tools
 
 # MCP Tools
 
-MD Planner exposes 244 tools via the Model Context Protocol. Connect via stdio
+MD Planner exposes 245 tools via the Model Context Protocol. Connect via stdio
 (compiled binary) or HTTP (`/mcp` endpoint with `--mcp-token`).
 
 Tools follow a consistent pattern per entity: `list_*`, `get_*`, `create_*`,
@@ -16,6 +16,7 @@ Tools follow a consistent pattern per entity: `list_*`, `get_*`, `create_*`,
 | --------------------- | -------------------------------------------------------- |
 | `list_tasks`          | List tasks with filters (section, project, milestone, assignee, priority, tags, ready, completed) |
 | `get_task`            | Get task by ID with full description and comments        |
+| `get_task_slim`       | Get minimal task view — id, title, description, section, milestone, blockedBy, last N comments (token-efficient) |
 | `create_task`         | Create task — returns full task object (not just `{id}`)                 |
 | `update_task`         | Update any task field including section, assignee, milestone, files — returns full task object |
 | `delete_task`         | Delete task by ID                                        |
@@ -439,7 +440,7 @@ Requires `--cache`.
 
 | Tool                | Description                                                                              |
 | ------------------- | ---------------------------------------------------------------------------------------- |
-| `get_context_pack`  | Single-call agent boot — returns people, active milestone, in-progress tasks (with `relevantFiles`), top-10 todo, recent progress excerpt, and decision/architecture/constraint note stubs |
+| `get_context_pack`  | Single-call agent boot — returns people, active milestone, in-progress tasks (with `relevantFiles`), top-10 todo, recent progress excerpt, decision/architecture/constraint note stubs, and `suggestedAction` (includes `nextMilestoneSuggestion` when type is `wait-review`) |
 
 ## Time Tracking
 

@@ -395,12 +395,34 @@ export class IdeaSidenavModule {
     // Update currentIdea with form data
     Object.assign(this.currentIdea, data);
 
+    const ARCHIVED_STATUSES = ["implemented", "cancelled"];
+
     try {
       if (this.editingIdeaId) {
-        await IdeasAPI.update(this.editingIdeaId, data);
+        const res = await IdeasAPI.update(this.editingIdeaId, data);
+        if (!res.ok) {
+          this.showSaveStatus("Error");
+          showToast("Failed to save idea", "error");
+          return;
+        }
         this.showSaveStatus("Saved");
+        if (
+          ARCHIVED_STATUSES.includes(data.status) &&
+          !this.tm.ideasModule.showArchived
+        ) {
+          showToast(
+            `Idea archived (${data.status}) — enable "Show archived" to see it`,
+            "info",
+          );
+          this.close();
+        }
       } else {
         const response = await IdeasAPI.create(data);
+        if (!response.ok) {
+          this.showSaveStatus("Error");
+          showToast("Failed to create idea", "error");
+          return;
+        }
         const result = await response.json();
         this.editingIdeaId = result.id;
         this.currentIdea.id = result.id;
@@ -431,7 +453,11 @@ export class IdeaSidenavModule {
     ) return;
 
     try {
-      await IdeasAPI.delete(this.editingIdeaId);
+      const res = await IdeasAPI.delete(this.editingIdeaId);
+      if (!res.ok) {
+        showToast("Failed to delete idea", "error");
+        return;
+      }
       showToast("Idea deleted", "success");
       await this.tm.ideasModule.load();
       this.close();

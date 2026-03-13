@@ -28,7 +28,9 @@ export class ListView {
     this._restoreFilters();
 
     const sections = this.tm.sections || [];
-    const milestones = this.tm.projectConfig?.milestones || [];
+    const milestoneNames = Array.from(
+      new Set((this.tm.milestones || []).map((m) => m.name).filter(Boolean)),
+    ).sort();
     const f = this.tm.listFilters;
 
     const sectionSelect = document.getElementById("filterSection");
@@ -45,7 +47,7 @@ export class ListView {
 
     const milestoneSelect = document.getElementById("filterMilestone");
     milestoneSelect.innerHTML = '<option value="">All Milestones</option>' +
-      milestones.map((m) => `<option value="${m}">${m}</option>`).join("");
+      milestoneNames.map((n) => `<option value="${n}">${n}</option>`).join("");
     milestoneSelect.value = f.milestone || "";
 
     const statusSelect = document.getElementById("filterStatus");
@@ -199,6 +201,9 @@ export class ListView {
   render() {
     const container = document.getElementById("listContainer");
     const savedScrollY = window.scrollY;
+    // Pin minHeight to current height before clearing — prevents layout collapse
+    // that causes scroll jumps and offset click events during re-render.
+    container.style.minHeight = container.offsetHeight + "px";
     container.innerHTML = "";
 
     // Populate filter dropdowns
@@ -318,8 +323,11 @@ export class ListView {
     // Lazy-load live GitHub issue/PR states after render
     if (this.tm.githubConfigured) this._loadGitHubBadgeStates();
 
-    // Restore scroll position so re-renders after sidenav close/save don't jump to top
+    // Restore scroll position so re-renders after sidenav close/save don't jump to top.
+    // Release the minHeight lock and scroll atomically in the same rAF so the browser
+    // never sees a collapsed container.
     requestAnimationFrame(() => {
+      container.style.minHeight = "";
       window.scrollTo({ top: savedScrollY, behavior: "instant" });
       this.setupScrollSpy();
     });
@@ -517,11 +525,15 @@ export class ListView {
   /** Build clickable section pills in the jump bar. */
   renderSectionJumpBar(sections, allTasks) {
     const bar = document.getElementById("sectionJumpBar");
+    const listView = document.getElementById("listView");
     if (!bar) return;
     bar.innerHTML = "";
 
     // Hide when section filter narrows to one section
-    if (this.tm.listFilters.section) return;
+    if (this.tm.listFilters.section) {
+      listView?.classList.remove("jump-bar-active");
+      return;
+    }
 
     sections.forEach((section) => {
       const count = allTasks.filter(
@@ -542,6 +554,8 @@ export class ListView {
       });
       bar.appendChild(pill);
     });
+
+    listView?.classList.toggle("jump-bar-active", bar.children.length > 0);
   }
 
   /** IntersectionObserver scroll-spy — highlights the pill for the visible section. */
@@ -837,6 +851,13 @@ export class ListView {
     this._selectedIds = new Set();
     document.getElementById("listContainer")?.classList.add("batch-mode");
     document.getElementById("batchSelectBtn")?.classList.add("active");
+    // Disable dragging so clicks register as selection, not drag-start
+    document.querySelectorAll('.task-list-item[draggable="true"]').forEach(
+      (el) => {
+        el.dataset.wasDraggable = "true";
+        el.draggable = false;
+      },
+    );
     this._updateBatchBar();
   }
 
@@ -850,6 +871,13 @@ export class ListView {
     document.querySelectorAll(".batch-checkbox").forEach((cb) => {
       cb.checked = false;
     });
+    // Restore dragging on items that were draggable before batch mode
+    document.querySelectorAll(".task-list-item[data-was-draggable]").forEach(
+      (el) => {
+        el.draggable = true;
+        delete el.dataset.wasDraggable;
+      },
+    );
     document.getElementById("batchSelectBtn")?.classList.remove("active");
     this._updateBatchBar();
     this.closeBatchPanel();
@@ -899,10 +927,12 @@ export class ListView {
     assigneeSel.innerHTML = '<option value="">Leave unchanged</option>' +
       people.map((p) => `<option value="${p.id}">${p.name}</option>`).join("");
 
-    const milestones = this.tm.projectConfig?.milestones || [];
+    const milestoneNames = Array.from(
+      new Set((this.tm.milestones || []).map((m) => m.name).filter(Boolean)),
+    ).sort();
     const milestoneSel = document.getElementById("batchMilestone");
     milestoneSel.innerHTML = '<option value="">Leave unchanged</option>' +
-      milestones.map((m) => `<option value="${m}">${m}</option>`).join("");
+      milestoneNames.map((n) => `<option value="${n}">${n}</option>`).join("");
 
     document.getElementById("batchPriority").value = "";
     document.getElementById("batchTags").value = "";

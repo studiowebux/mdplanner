@@ -88,10 +88,18 @@ export class FundraisingPipelineSidenavModule {
 
     try {
       if (this.editingId) {
-        await InvestorAPI.update(this.editingId, data);
+        const res = await InvestorAPI.update(this.editingId, data);
+        if (!res.ok) {
+          showToast("Failed to save investor", "error");
+          return;
+        }
         this._showStatus("Saved");
       } else {
         const res = await InvestorAPI.create(data);
+        if (!res.ok) {
+          showToast("Failed to create investor", "error");
+          return;
+        }
         const created = await res.json();
         this.editingId = created.id;
         this._setHeader("Edit Investor");
@@ -111,7 +119,11 @@ export class FundraisingPipelineSidenavModule {
   async handleDelete() {
     if (!this.editingId) return;
     try {
-      await InvestorAPI.delete(this.editingId);
+      const res = await InvestorAPI.delete(this.editingId);
+      if (!res.ok) {
+        showToast("Failed to delete investor", "error");
+        return;
+      }
       Sidenav.close("pipeline-sidenav");
       this.editingId = null;
       await this.tm.fundraisingPipelineModule.load();

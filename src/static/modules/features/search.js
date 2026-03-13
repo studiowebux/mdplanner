@@ -100,15 +100,41 @@ export class GlobalSearch {
   }
 
   async search(query) {
-    if (!this.cacheEnabled || !query.trim()) {
+    const trimmed = query.trim();
+    if (!trimmed) {
       this._renderEmpty();
       return;
     }
+
+    // Client-side task ID lookup — works without cache and handles stale cache.
+    // Pattern: task_<13+digits>_<alphanumeric>
+    const taskIdMatch = /^task_\d{10,}_[a-z0-9]+$/i.test(trimmed)
+      ? this.taskManager.findTaskById(trimmed)
+      : null;
+
+    if (!this.cacheEnabled) {
+      if (taskIdMatch) {
+        this.results = [_taskToResult(taskIdMatch)];
+        this.activeIndex = -1;
+        this._renderResults(trimmed);
+      } else {
+        this._renderEmpty();
+      }
+      return;
+    }
+
     try {
-      const data = await SearchAPI.search(query, { limit: 25 });
-      this.results = data.results ?? [];
+      const data = await SearchAPI.search(trimmed, { limit: 25 });
+      let results = data.results ?? [];
+
+      // Prepend in-memory task match if cache didn't return it (stale cache)
+      if (taskIdMatch && !results.some((r) => r.id === trimmed)) {
+        results = [_taskToResult(taskIdMatch), ...results];
+      }
+
+      this.results = results;
       this.activeIndex = -1;
-      this._renderResults(query);
+      this._renderResults(trimmed);
     } catch {
       this._renderError();
     }
@@ -116,6 +142,12 @@ export class GlobalSearch {
 
   _navigate(result) {
     const view = VIEW_BY_TYPE[result.type] ?? "list";
+
+    // Portfolio: set scroll target before load() so render() picks it up
+    if (result.type === "portfolio" && this.taskManager.portfolioView) {
+      this.taskManager.portfolioView._pendingScrollId = result.id;
+    }
+
     this.taskManager.switchView(view);
     this.close();
 
@@ -257,6 +289,16 @@ export class GlobalSearch {
       }
     });
   }
+}
+
+function _taskToResult(task) {
+  return {
+    type: "task",
+    id: task.id,
+    title: task.title,
+    snippet: `${task.section} — ID match`,
+    score: -Infinity,
+  };
 }
 
 function escapeHtml(str) {

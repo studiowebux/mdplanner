@@ -352,10 +352,18 @@ export class MeetingSidenavModule {
 
     try {
       if (this.editingMeetingId) {
-        await MeetingsAPI.update(this.editingMeetingId, data);
+        const res = await MeetingsAPI.update(this.editingMeetingId, data);
+        if (!res.ok) {
+          showToast("Failed to save meeting", "error");
+          return;
+        }
         this.showSaveStatus("Saved");
       } else {
         const res = await MeetingsAPI.create(data);
+        if (!res.ok) {
+          showToast("Failed to create meeting", "error");
+          return;
+        }
         const result = await res.json();
         this.editingMeetingId = result.id;
         this.currentMeeting.id = result.id;
@@ -383,7 +391,11 @@ export class MeetingSidenavModule {
     if (!ok) return;
 
     try {
-      await MeetingsAPI.delete(this.editingMeetingId);
+      const res = await MeetingsAPI.delete(this.editingMeetingId);
+      if (!res.ok) {
+        showToast("Failed to delete meeting", "error");
+        return;
+      }
       showToast("Meeting deleted", "success");
       await this.tm.meetingsModule.load();
       this.close();

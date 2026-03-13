@@ -75,6 +75,15 @@ export class PortfolioView {
     } else {
       this.renderListView();
     }
+
+    if (this._pendingScrollId) {
+      const id = this._pendingScrollId;
+      this._pendingScrollId = null;
+      requestAnimationFrame(() => {
+        const el = document.querySelector(`[data-portfolio-id="${id}"]`);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    }
   }
 
   /**

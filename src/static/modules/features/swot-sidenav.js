@@ -176,10 +176,18 @@ export class SwotSidenavModule {
 
     try {
       if (this.editingSwotId) {
-        await SwotAPI.update(this.editingSwotId, this.currentSwot);
+        const res = await SwotAPI.update(this.editingSwotId, this.currentSwot);
+        if (!res.ok) {
+          showToast("Failed to save SWOT analysis", "error");
+          return;
+        }
         this.showSaveStatus("Saved");
       } else {
         const response = await SwotAPI.create(this.currentSwot);
+        if (!response.ok) {
+          showToast("Failed to create SWOT analysis", "error");
+          return;
+        }
         const result = await response.json();
         this.editingSwotId = result.id;
         this.currentSwot.id = result.id;
@@ -203,7 +211,11 @@ export class SwotSidenavModule {
     ) return;
 
     try {
-      await SwotAPI.delete(this.editingSwotId);
+      const res = await SwotAPI.delete(this.editingSwotId);
+      if (!res.ok) {
+        showToast("Failed to delete SWOT analysis", "error");
+        return;
+      }
       showToast("SWOT analysis deleted", "success");
       await this.tm.swotModule.load();
       this.close();

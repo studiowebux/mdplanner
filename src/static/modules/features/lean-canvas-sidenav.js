@@ -267,10 +267,18 @@ export class LeanCanvasSidenavModule {
 
     try {
       if (this.editingCanvasId) {
-        await LeanCanvasAPI.update(this.editingCanvasId, this.currentCanvas);
+        const res = await LeanCanvasAPI.update(this.editingCanvasId, this.currentCanvas);
+        if (!res.ok) {
+          showToast("Failed to save Lean Canvas", "error");
+          return;
+        }
         this.showSaveStatus("Saved");
       } else {
         const response = await LeanCanvasAPI.create(this.currentCanvas);
+        if (!response.ok) {
+          showToast("Failed to create Lean Canvas", "error");
+          return;
+        }
         const result = await response.json();
         this.editingCanvasId = result.id;
         this.currentCanvas.id = result.id;
@@ -296,7 +304,11 @@ export class LeanCanvasSidenavModule {
     ) return;
 
     try {
-      await LeanCanvasAPI.delete(this.editingCanvasId);
+      const res = await LeanCanvasAPI.delete(this.editingCanvasId);
+      if (!res.ok) {
+        showToast("Failed to delete Lean Canvas", "error");
+        return;
+      }
       showToast("Lean Canvas deleted", "success");
       await this.tm.leanCanvasModule.load();
       this.close();

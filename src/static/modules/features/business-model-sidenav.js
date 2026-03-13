@@ -186,10 +186,18 @@ export class BusinessModelSidenavModule {
 
     try {
       if (this.editingCanvasId) {
-        await BusinessModelAPI.update(this.editingCanvasId, this.currentCanvas);
+        const res = await BusinessModelAPI.update(this.editingCanvasId, this.currentCanvas);
+        if (!res.ok) {
+          showToast("Failed to save Business Model Canvas", "error");
+          return;
+        }
         this.showSaveStatus("Saved");
       } else {
         const response = await BusinessModelAPI.create(this.currentCanvas);
+        if (!response.ok) {
+          showToast("Failed to create Business Model Canvas", "error");
+          return;
+        }
         const result = await response.json();
         this.editingCanvasId = result.id;
         this.currentCanvas.id = result.id;
@@ -213,7 +221,11 @@ export class BusinessModelSidenavModule {
     ) return;
 
     try {
-      await BusinessModelAPI.delete(this.editingCanvasId);
+      const res = await BusinessModelAPI.delete(this.editingCanvasId);
+      if (!res.ok) {
+        showToast("Failed to delete Business Model Canvas", "error");
+        return;
+      }
       showToast("Business Model Canvas deleted", "success");
       await this.tm.businessModelModule.load();
       this.close();

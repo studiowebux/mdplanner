@@ -181,10 +181,18 @@ export class OrgChartSidenavModule extends BaseSidenavModule {
 
     try {
       if (this.editingId) {
-        await OrgChartAPI.update(this.editingId, data);
+        const res = await OrgChartAPI.update(this.editingId, data);
+        if (!res.ok) {
+          showToast("Failed to save team member", "error");
+          return;
+        }
         this.showSaveStatus("Saved");
       } else {
-        await OrgChartAPI.create(data);
+        const res = await OrgChartAPI.create(data);
+        if (!res.ok) {
+          showToast("Failed to create team member", "error");
+          return;
+        }
         showToast("Team member created", "success");
         await this.reloadData();
         this.close();

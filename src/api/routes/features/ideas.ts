@@ -73,7 +73,24 @@ const CreateIdeaSchema = z
   })
   .openapi("CreateIdea");
 
-const UpdateIdeaSchema = CreateIdeaSchema.partial().openapi("UpdateIdea");
+// Update schema accepts null to clear optional fields (frontend sends null for empty values).
+const UpdateIdeaSchema = z
+  .object({
+    title: z.string().optional(),
+    status: ideaStatus.optional(),
+    category: z.string().nullish(),
+    priority: z.enum(["high", "medium", "low"]).nullish(),
+    project: z.string().nullish(),
+    startDate: z.string().nullish(),
+    endDate: z.string().nullish(),
+    resources: z.string().nullish(),
+    subtasks: z.array(z.string()).nullish(),
+    description: z.string().nullish(),
+    links: z.array(z.string()).nullish(),
+    implementedAt: z.string().nullish(),
+    cancelledAt: z.string().nullish(),
+  })
+  .openapi("UpdateIdea");
 
 // --- Route definitions ---
 
@@ -187,11 +204,19 @@ ideasRouter.openapi(updateIdeaRoute, async (c) => {
   const parser = getParser(c);
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
-  const ideas = await parser.readIdeas();
-  const index = ideas.findIndex((i) => i.id === id);
-  if (index === -1) return c.json({ error: "Not found" }, 404);
-  ideas[index] = { ...ideas[index], ...body };
-  await parser.saveIdeas(ideas);
+  // null means "clear this field" — convert to undefined so the spread removes it
+  const updates = Object.fromEntries(
+    Object.entries(body)
+      .filter(([_, v]) => v !== undefined)
+      .map(([k, v]) => [k, v === null ? undefined : v]),
+  ) as Parameters<typeof parser.updateIdea>[1];
+  const updated = await parser.updateIdea(id, updates);
+  if (!updated) {
+    return c.json(
+      { error: "Not found", message: `Idea '${id}' not found` },
+      404,
+    );
+  }
   await cacheWriteThrough(c, "ideas");
   return c.json({ success: true }, 200);
 });

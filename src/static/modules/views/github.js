@@ -186,6 +186,7 @@ export class GitHubView {
       const lastPush = data.lastCommitAt
         ? new Date(data.lastCommitAt).toLocaleDateString()
         : "—";
+      const repoBase = `https://github.com/${this._esc(project.githubRepo)}`;
       html += `<tr>
         <td>${this._esc(project.name)}</td>
         <td>
@@ -195,8 +196,8 @@ export class GitHubView {
           </a>
         </td>
         <td>${data.stars}</td>
-        <td>${data.openIssues}</td>
-        <td>${data.openPRs ?? 0}</td>
+        <td><a href="${repoBase}/issues" target="_blank" rel="noopener noreferrer" class="github-view-repolink">${data.openIssues}</a></td>
+        <td><a href="${repoBase}/pulls" target="_blank" rel="noopener noreferrer" class="github-view-repolink">${data.openPRs ?? 0}</a></td>
         <td class="text-muted">${lastPush}</td>
         <td>${data.license ? `<span class="github-license-badge">${this._esc(data.license)}</span>` : "—"}</td>
       </tr>`;

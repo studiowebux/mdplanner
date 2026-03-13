@@ -125,6 +125,7 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
     let customSectionType: "tabs" | "timeline" | "split-view" = "tabs";
     let paragraphOrder = 0;
     let sectionOrder = 0;
+    let globalOrder = 0;
 
     const flushParagraph = () => {
       if (currentParagraph.length > 0) {
@@ -135,6 +136,7 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
             type: "text",
             content: text,
             order: paragraphOrder++,
+            globalOrder: globalOrder++,
           });
         }
         currentParagraph = [];
@@ -158,6 +160,7 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
             content: codeContent,
             language: codeLanguage || undefined,
             order: paragraphOrder++,
+            globalOrder: globalOrder++,
           });
           currentParagraph = [];
           inCodeBlock = false;
@@ -206,6 +209,7 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
               customSectionType,
               customSectionLines.join("\n"),
               sectionOrder++,
+              globalOrder++,
             ),
           );
           inCustomSection = false;
@@ -237,12 +241,14 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
     type: "tabs" | "timeline" | "split-view",
     content: string,
     order: number,
+    globalOrder?: number,
   ): CustomSection {
     const section: CustomSection = {
       id,
       type,
       title,
       order,
+      globalOrder,
       config: {},
     };
 
@@ -534,26 +540,43 @@ export class NotesDirectoryParser extends DirectoryParser<Note> {
   ): string {
     const lines: string[] = [];
 
-    // Sort by order
-    const sortedParagraphs = [...paragraphs].sort((a, b) => a.order - b.order);
-    const sortedSections = [...customSections].sort((a, b) =>
-      a.order - b.order
-    );
+    // Merge paragraphs and custom sections into a single interleaved sequence
+    // sorted by globalOrder. Fall back to type-group ordering for items that
+    // predate the globalOrder field (paragraphs first, then sections).
+    type Block =
+      | { kind: "paragraph"; item: NoteParagraph }
+      | { kind: "section"; item: CustomSection };
 
-    // Serialize paragraphs
-    for (const p of sortedParagraphs) {
-      if (p.type === "code") {
-        lines.push(`\`\`\`${p.language || ""}`);
-        lines.push(p.content);
-        lines.push("```");
-      } else {
-        lines.push(p.content);
+    const blocks: (Block & { _order: number })[] = [
+      ...paragraphs.map((p, i) => ({
+        kind: "paragraph" as const,
+        item: p,
+        _order: p.globalOrder ?? i,
+      })),
+      ...customSections.map((s, i) => ({
+        kind: "section" as const,
+        item: s,
+        _order: s.globalOrder ?? paragraphs.length + i,
+      })),
+    ].sort((a, b) => a._order - b._order);
+
+    for (const block of blocks) {
+      if (block.kind === "paragraph") {
+        const p = block.item;
+        if (p.type === "code") {
+          lines.push(`\`\`\`${p.language || ""}`);
+          lines.push(p.content);
+          lines.push("```");
+        } else {
+          lines.push(p.content);
+        }
+        lines.push("");
+        continue;
       }
-      lines.push("");
-    }
 
-    // Serialize custom sections
-    for (const section of sortedSections) {
+      // Custom section
+      const section = block.item;
+      // (serialization continues below)
       lines.push(`<!-- Custom Section: ${section.title} -->`);
       lines.push(`<!-- section-id: ${section.id}, type: ${section.type} -->`);
       lines.push("");
