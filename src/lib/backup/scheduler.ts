@@ -102,13 +102,17 @@ export class BackupScheduler {
 
       if (delayMs === 0) {
         console.log(
-          `[backup] overdue (last backup ${Math.round(ageMs / 3_600_000)}h ago) — running immediately`,
+          `[backup] overdue (last backup ${
+            Math.round(ageMs / 3_600_000)
+          }h ago) — running immediately`,
         );
       } else {
         const nextTime = new Date(Date.now() + delayMs).toISOString();
         this.status.nextBackupTime = nextTime;
         console.log(
-          `[backup] next backup in ${Math.round(delayMs / 60_000)}min (${nextTime})`,
+          `[backup] next backup in ${
+            Math.round(delayMs / 60_000)
+          }min (${nextTime})`,
         );
       }
 

@@ -266,6 +266,42 @@
   font-weight: 600;
 }
 
+/* --------------------------------------------------------------------------
+   Task Complete Button (List View)
+   -------------------------------------------------------------------------- */
+
+.task-complete-btn {
+  font-size: var(--font-size-xs);
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.task-complete-btn:hover {
+  color: var(--color-success);
+  border-color: var(--color-success);
+  background: transparent;
+}
+
+.task-complete-btn--done {
+  color: var(--color-text-muted);
+  border-color: var(--color-border-default);
+}
+
+.task-complete-btn--done:hover {
+  color: var(--color-text-secondary);
+  border-color: var(--color-border-strong);
+  background: transparent;
+}
+
 /* @mention autocomplete dropdown */
 .mention-dropdown {
   position: absolute;

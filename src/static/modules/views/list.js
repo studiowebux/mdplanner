@@ -338,9 +338,6 @@ export class ListView {
     div.innerHTML = `
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                    <input type="checkbox" ${task.completed ? "checked" : ""}
-                           onchange="taskManager.toggleTask('${task.id}')"
-                           class="rounded border-strong text-primary focus:ring-1">
                     <div>
                         <div class="flex items-center space-x-2 flex-wrap gap-1">
                             <span class="task-title ${
@@ -462,6 +459,12 @@ export class ListView {
                 </select>`;
       })()
     }
+                    <button onclick="taskManager.toggleTask('${task.id}')"
+                            data-complete-btn="${task.id}"
+                            class="task-complete-btn ${task.completed ? "task-complete-btn--done" : ""}"
+                            title="${task.completed ? "Reopen task" : "Mark complete"}">
+                        ${task.completed ? "Reopen" : "Complete"}
+                    </button>
                     <button onclick="taskManager.enterFocusMode('${task.id}')"
                             class="focus-task-btn text-muted hover:text-secondary transition-colors" title="Focus Mode">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
