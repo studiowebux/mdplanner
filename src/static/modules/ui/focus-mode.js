@@ -151,6 +151,27 @@ export class FocusMode {
     }
 
             ${
+      config.comments && config.comments.length > 0
+        ? `
+              <div class="focus-mode-comments">
+                <h4 class="focus-mode-subtasks-header">Comments (${config.comments.length})</h4>
+                ${
+          config.comments.map((c) => `
+                  <div class="focus-mode-comment">
+                    <div class="focus-mode-comment-meta">
+                      <span class="focus-mode-comment-author">${this.escapeHtml(c.author || "Unknown")}</span>
+                      <span class="focus-mode-comment-date">${this.formatDate(c.timestamp)}</span>
+                    </div>
+                    <div class="focus-mode-comment-body">${this.escapeHtml(c.body || "")}</div>
+                  </div>
+                `).join("")
+        }
+              </div>
+            `
+        : ""
+    }
+
+            ${
       subtasks.length > 0
         ? `
               <div class="focus-mode-subtasks">
