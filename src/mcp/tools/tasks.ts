@@ -150,6 +150,39 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
   );
 
   server.registerTool(
+    "get_task_slim",
+    {
+      description:
+        "Get a minimal view of a task by ID. Returns only id, title, description, section, milestone, blockedBy, and the last N comments. " +
+        "Omits config fields, timestamps, revision, assignee, effort, dates, and files. " +
+        "Use instead of get_task to reduce token usage when full task details are not needed.",
+      inputSchema: {
+        id: z.string().describe("Task ID"),
+        last_comments: z.number().int().min(0).max(20).optional().describe(
+          "Number of most-recent comments to include (default: 5, max: 20)",
+        ),
+      },
+    },
+    async ({ id, last_comments }) => {
+      const tasks = await parser.readTasks();
+      const task = findTaskById(tasks, id);
+      if (!task) return err(`Task '${id}' not found`);
+      const n = last_comments ?? 5;
+      const comments = task.config.comments ?? [];
+      const slim = {
+        id: task.id,
+        title: task.title,
+        description: task.description?.join("\n"),
+        section: task.section,
+        milestone: task.config.milestone,
+        blockedBy: task.config.blocked_by,
+        comments: comments.slice(-n),
+      };
+      return ok(slim);
+    },
+  );
+
+  server.registerTool(
     "create_task",
     {
       description: "Create a new task in the project.",

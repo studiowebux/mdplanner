@@ -8,6 +8,14 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- `get_task_slim` MCP tool — returns a minimal task view (id, title,
+  description, section, milestone, blockedBy, last N comments). Omits config
+  fields, timestamps, revision, assignee, effort, and files. Use instead of
+  `get_task` to reduce token usage. `last_comments` param (default 5, max 20).
+  Total MCP tool count: 245.
+
 ## [0.28.0] - 2026-03-11
 
 ### Added
