@@ -90,6 +90,141 @@ export class SummaryView {
 
     // Render tasks by person
     this.renderTasksByPerson(stats.allTasks);
+
+    // Render new at-a-glance sections
+    this.renderMilestoneStrip(stats.allTasks);
+    this.renderStatusCards(stats.allTasks);
+    this.renderTodoQueue(stats.allTasks);
+  }
+
+  renderMilestoneStrip(allTasks) {
+    const strip = document.getElementById("summaryMilestoneStrip");
+    if (!strip) return;
+
+    // Count per milestone
+    const counts = {};
+    for (const t of allTasks) {
+      const m = t.config?.milestone;
+      if (!m) continue;
+      if (!counts[m]) counts[m] = { total: 0, done: 0, inProgress: 0 };
+      counts[m].total++;
+      if (t.completed) counts[m].done++;
+      if (t.section === "In Progress") counts[m].inProgress++;
+    }
+
+    // Active = highest inProgress count among milestones with remaining tasks
+    let active = null;
+    let max = -1;
+    for (const [name, c] of Object.entries(counts)) {
+      if (c.inProgress > max && c.total - c.done > 0) {
+        max = c.inProgress;
+        active = name;
+      }
+    }
+
+    if (!active) {
+      strip.classList.add("hidden");
+      return;
+    }
+
+    const c = counts[active];
+    const pct = c.total > 0 ? Math.round((c.done / c.total) * 100) : 0;
+
+    document.getElementById("summaryMilestoneName").textContent = active;
+    document.getElementById("summaryMilestoneProgress").textContent =
+      `${c.done} / ${c.total} done`;
+    document.getElementById("summaryMilestoneBar").style.width = `${pct}%`;
+
+    strip.classList.remove("hidden");
+  }
+
+  renderStatusCards(allTasks) {
+    // In Progress
+    const inProgress = allTasks.filter((t) =>
+      t.section === "In Progress" && !t.completed
+    );
+    document.getElementById("summaryCountInProgress").textContent =
+      inProgress.length;
+    const assigneeIds = [
+      ...new Set(
+        inProgress.map((t) => t.config?.assignee).filter(Boolean),
+      ),
+    ];
+    const assigneeNames = assigneeIds.slice(0, 3).map((id) =>
+      this.tm.getPersonName(id)
+    );
+    const assigneeEl = document.getElementById("summaryAssigneesInProgress");
+    if (assigneeEl) {
+      assigneeEl.textContent = assigneeNames.length > 0
+        ? assigneeNames.join(", ") +
+          (assigneeIds.length > 3 ? ` +${assigneeIds.length - 3}` : "")
+        : "";
+    }
+
+    // Pending Review
+    const pendingReview = allTasks.filter((t) =>
+      t.section === "Pending Review" && !t.completed
+    );
+    document.getElementById("summaryCountPendingReview").textContent =
+      pendingReview.length;
+    const oldestEl = document.getElementById("summaryOldestPendingReview");
+    if (oldestEl && pendingReview.length > 0) {
+      const oldest = [...pendingReview].sort((a, b) =>
+        new Date(a.updatedAt) - new Date(b.updatedAt)
+      )[0];
+      const days = oldest.updatedAt
+        ? Math.floor((Date.now() - new Date(oldest.updatedAt)) / 86_400_000)
+        : null;
+      oldestEl.textContent = days !== null ? `Oldest: ${days}d waiting` : "";
+    } else if (oldestEl) {
+      oldestEl.textContent = "";
+    }
+
+    // Blocked — tasks with unresolved blocked_by
+    const incompleteIds = new Set(
+      allTasks.filter((t) => !t.completed).map((t) => t.id),
+    );
+    const blocked = allTasks.filter((t) =>
+      !t.completed &&
+      t.config?.blocked_by?.length > 0 &&
+      t.config.blocked_by.some((id) => incompleteIds.has(id))
+    );
+    document.getElementById("summaryCountBlocked").textContent = blocked.length;
+    const blockedMetaEl = document.getElementById("summaryBlockedMeta");
+    if (blockedMetaEl) {
+      blockedMetaEl.textContent = blocked.length > 0
+        ? blocked[0].title.substring(0, 40) +
+          (blocked[0].title.length > 40 ? "…" : "")
+        : "";
+    }
+  }
+
+  renderTodoQueue(allTasks) {
+    const container = document.getElementById("summaryTodoQueue");
+    if (!container) return;
+
+    const todo = allTasks
+      .filter((t) => t.section === "Todo" && !t.completed)
+      .sort((a, b) => (a.config?.priority ?? 99) - (b.config?.priority ?? 99))
+      .slice(0, 5);
+
+    if (todo.length === 0) {
+      container.innerHTML =
+        '<p class="text-sm text-muted">No tasks in queue.</p>';
+      return;
+    }
+
+    container.innerHTML = todo.map((t) => {
+      const p = t.config?.priority;
+      const badge = p
+        ? `<span class="text-xs text-muted w-6 flex-shrink-0">P${p}</span>`
+        : `<span class="w-6 flex-shrink-0"></span>`;
+      return `<div class="flex items-center gap-2 px-1 py-1 rounded cursor-pointer hover:bg-secondary"
+                   onclick="taskManager.editTask('${t.id}')">
+        ${badge}
+        <span class="text-sm text-primary truncate">${t.title}</span>
+      </div>`;
+    }).join("");
   }
 
   renderTaskDeadlines(allTasks) {
