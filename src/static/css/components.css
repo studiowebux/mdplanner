@@ -1221,7 +1221,7 @@ select.input {
   top: 1rem;
   right: 1rem;
   max-width: 22rem;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1rem 0.75rem 0.875rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border-default);
   border-left-width: 4px;
@@ -1232,11 +1232,20 @@ select.input {
   box-shadow: var(--shadow-lg);
   z-index: 9999;
   cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
   transform: translateX(calc(100% + 1.5rem));
   opacity: 0;
   transition:
-    transform 0.25s ease,
-    opacity 0.25s ease;
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.3s ease;
+}
+
+.toast::before {
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
 }
 
 .toast.toast-visible {
@@ -1248,8 +1257,18 @@ select.input {
   border-left-color: var(--color-success);
 }
 
+.toast.toast-success::before {
+  content: "✓";
+  color: var(--color-success);
+}
+
 .toast.toast-error {
-  border-left-color: var(--color-error);
+  border-left-color: var(--color-warning);
+}
+
+.toast.toast-error::before {
+  content: "⚠";
+  color: var(--color-warning);
 }
 
 /* --------------------------------------------------------------------------
