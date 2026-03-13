@@ -164,6 +164,17 @@ export function createApiRouter(
   if (opts?.apiToken) {
     const apiToken = opts.apiToken;
     api.route("/auth", createAuthRouter(apiToken));
+  } else {
+    // No auth configured — register a permanent stub so the browser check
+    // returns 200 instead of 404, eliminating the console error.
+    api.get(
+      "/auth/check",
+      (c) => c.json({ required: false, authenticated: true }, 200),
+    );
+  }
+
+  if (opts?.apiToken) {
+    const apiToken = opts.apiToken;
 
     api.use("/*", async (c, next) => {
       const path = c.req.path;
