@@ -41,6 +41,7 @@ export interface ContextPackInProgress {
   milestone?: string;
   description: string;
   blockedBy: string[];
+  relevantFiles: string[];
 }
 
 export interface ContextPackTodo {
@@ -111,6 +112,26 @@ function descriptionExcerpt(
 ): string {
   if (!lines || lines.length === 0) return "";
   return lines.join("\n").slice(0, maxChars);
+}
+
+/** Collect relevant file paths for a task from two sources (deduped):
+ *  1. Explicit `config.files` set by the agent or owner via update_task.
+ *  2. `metadata.files_changed` arrays on task comments (written by git hooks).
+ */
+function extractRelevantFiles(task: Task): string[] {
+  const seen = new Set<string>();
+  const add = (paths: unknown) => {
+    if (Array.isArray(paths)) {
+      for (const p of paths) {
+        if (typeof p === "string" && p) seen.add(p);
+      }
+    }
+  };
+  add(task.config.files);
+  for (const comment of task.config.comments ?? []) {
+    add((comment.metadata as Record<string, unknown> | undefined)?.files_changed);
+  }
+  return [...seen];
 }
 
 function isTaskStale(task: Task, cutoffMs: number): boolean {
@@ -274,6 +295,7 @@ export async function assembleContextPack(
       milestone: t.config.milestone,
       description: descriptionExcerpt(t.description, 300),
       blockedBy: t.config.blocked_by ?? [],
+      relevantFiles: extractRelevantFiles(t),
     })),
     todo: sortedTodo.map((t) => ({
       id: t.id,

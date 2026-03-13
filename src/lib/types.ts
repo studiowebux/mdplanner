@@ -61,6 +61,7 @@ export interface TaskConfig {
   claimedBy?: string; // Person ID of the agent actively working on this task
   claimedAt?: string; // ISO timestamp when claimed
   approvalRequest?: ApprovalRequest;
+  files?: string[]; // Relevant source file paths (relative to codebase root)
 }
 
 export interface Task {
