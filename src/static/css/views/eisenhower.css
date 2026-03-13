@@ -1,9 +1,12 @@
 /* Eisenhower Matrix View — 2x2 grid with axis labels */
 
 .eisenhower-grid {
-  display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.eisenhower-grid:not(.hidden) {
+  display: flex;
 }
 
 .eisenhower-axis-top {
