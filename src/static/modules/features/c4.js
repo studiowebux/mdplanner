@@ -284,18 +284,8 @@ export class C4Module {
   }
 
   canBeDrilledDown(component) {
-    // Check if component has explicit children array
-    if (component.children && component.children.length > 0) {
-      return true;
-    }
-
-    // Check if any components have this as their parent
-    if (this.tm.c4Components.some((c) => c.parent === component.id)) {
-      return true;
-    }
-
-    // No explicit children - cannot drill down
-    return false;
+    // Code is the leaf level in the C4 hierarchy — cannot have children
+    return component.level !== "code";
   }
 
   drillDown(component) {
