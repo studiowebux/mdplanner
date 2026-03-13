@@ -536,105 +536,112 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
       },
     },
     async ({ updates }) => {
-      const results: { id: string; success: boolean; error?: string }[] = [];
+      // Pattern: parallel fan-out — all task updates are independent, run concurrently
+      const results = await Promise.all(
+        updates.map(async (entry): Promise<
+          { id: string; success: boolean; error?: string }
+        > => {
+          const current = await parser.readTask(entry.id);
+          if (!current) {
+            return {
+              id: entry.id,
+              success: false,
+              error: `Task '${entry.id}' not found`,
+            };
+          }
 
-      for (const entry of updates) {
-        const current = await parser.readTask(entry.id);
-        if (!current) {
-          results.push({
-            id: entry.id,
-            success: false,
-            error: `Task '${entry.id}' not found`,
+          // Optimistic locking
+          if (
+            entry.expected_revision !== undefined &&
+            current.revision !== entry.expected_revision
+          ) {
+            return {
+              id: entry.id,
+              success: false,
+              error:
+                `REVISION_CONFLICT: expected ${entry.expected_revision}, actual ${current.revision}`,
+            };
+          }
+
+          // Claim guard
+          if (
+            entry.agent_id &&
+            current.section === "In Progress" &&
+            current.config.claimedBy &&
+            current.config.claimedBy !== entry.agent_id
+          ) {
+            return {
+              id: entry.id,
+              success: false,
+              error:
+                `CLAIM_GUARD: task claimed by '${current.config.claimedBy}', caller is '${entry.agent_id}'`,
+            };
+          }
+
+          const success = await parser.updateTask(entry.id, {
+            ...(entry.title !== undefined && { title: entry.title }),
+            ...(entry.section !== undefined && { section: entry.section }),
+            ...(entry.completed !== undefined && {
+              completed: entry.completed,
+            }),
+            ...(entry.description !== undefined && {
+              description: entry.description.split("\n"),
+            }),
+            config: {
+              ...(entry.assignee !== undefined && {
+                assignee: entry.assignee,
+              }),
+              ...(entry.due_date !== undefined && {
+                due_date: entry.due_date,
+              }),
+              ...(entry.priority !== undefined && {
+                priority: entry.priority,
+              }),
+              ...(entry.effort !== undefined && { effort: entry.effort }),
+              ...(entry.tags !== undefined && { tags: entry.tags }),
+              ...(entry.milestone !== undefined && {
+                milestone: entry.milestone,
+              }),
+              ...(entry.project !== undefined && { project: entry.project }),
+              ...(entry.blocked_by !== undefined && {
+                blocked_by: entry.blocked_by,
+              }),
+              ...(entry.planned_start !== undefined && {
+                planned_start: entry.planned_start,
+              }),
+              ...(entry.planned_end !== undefined && {
+                planned_end: entry.planned_end,
+              }),
+              ...(entry.files !== undefined && { files: entry.files }),
+              ...(entry.claimed_by !== undefined && {
+                claimedBy: entry.claimed_by,
+              }),
+              ...(entry.claimed_at !== undefined && {
+                claimedAt: entry.claimed_at,
+              }),
+            },
           });
-          continue;
-        }
 
-        // Optimistic locking
-        if (
-          entry.expected_revision !== undefined &&
-          current.revision !== entry.expected_revision
-        ) {
-          results.push({
-            id: entry.id,
-            success: false,
-            error:
-              `REVISION_CONFLICT: expected ${entry.expected_revision}, actual ${current.revision}`,
-          });
-          continue;
-        }
+          if (!success) {
+            return {
+              id: entry.id,
+              success: false,
+              error: `Failed to update task '${entry.id}'`,
+            };
+          }
 
-        // Claim guard
-        if (
-          entry.agent_id &&
-          current.section === "In Progress" &&
-          current.config.claimedBy &&
-          current.config.claimedBy !== entry.agent_id
-        ) {
-          results.push({
-            id: entry.id,
-            success: false,
-            error:
-              `CLAIM_GUARD: task claimed by '${current.config.claimedBy}', caller is '${entry.agent_id}'`,
-          });
-          continue;
-        }
+          if (entry.comment) {
+            await parser.addComment(
+              entry.id,
+              entry.comment,
+              entry.comment_author ?? "Claude",
+              entry.comment_metadata,
+            );
+          }
 
-        const success = await parser.updateTask(entry.id, {
-          ...(entry.title !== undefined && { title: entry.title }),
-          ...(entry.section !== undefined && { section: entry.section }),
-          ...(entry.completed !== undefined && { completed: entry.completed }),
-          ...(entry.description !== undefined && {
-            description: entry.description.split("\n"),
-          }),
-          config: {
-            ...(entry.assignee !== undefined && { assignee: entry.assignee }),
-            ...(entry.due_date !== undefined && { due_date: entry.due_date }),
-            ...(entry.priority !== undefined && { priority: entry.priority }),
-            ...(entry.effort !== undefined && { effort: entry.effort }),
-            ...(entry.tags !== undefined && { tags: entry.tags }),
-            ...(entry.milestone !== undefined && {
-              milestone: entry.milestone,
-            }),
-            ...(entry.project !== undefined && { project: entry.project }),
-            ...(entry.blocked_by !== undefined && {
-              blocked_by: entry.blocked_by,
-            }),
-            ...(entry.planned_start !== undefined && {
-              planned_start: entry.planned_start,
-            }),
-            ...(entry.planned_end !== undefined && {
-              planned_end: entry.planned_end,
-            }),
-            ...(entry.files !== undefined && { files: entry.files }),
-            ...(entry.claimed_by !== undefined && {
-              claimedBy: entry.claimed_by,
-            }),
-            ...(entry.claimed_at !== undefined && {
-              claimedAt: entry.claimed_at,
-            }),
-          },
-        });
-
-        if (!success) {
-          results.push({
-            id: entry.id,
-            success: false,
-            error: `Failed to update task '${entry.id}'`,
-          });
-          continue;
-        }
-
-        if (entry.comment) {
-          await parser.addComment(
-            entry.id,
-            entry.comment,
-            entry.comment_author ?? "Claude",
-            entry.comment_metadata,
-          );
-        }
-
-        results.push({ id: entry.id, success: true });
-      }
+          return { id: entry.id, success: true };
+        }),
+      );
 
       const updated = results.filter((r) => r.success).length;
       return ok({ updated, total: updates.length, results });
