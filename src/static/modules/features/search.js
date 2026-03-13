@@ -142,6 +142,12 @@ export class GlobalSearch {
 
   _navigate(result) {
     const view = VIEW_BY_TYPE[result.type] ?? "list";
+
+    // Portfolio: set scroll target before load() so render() picks it up
+    if (result.type === "portfolio" && this.taskManager.portfolioView) {
+      this.taskManager.portfolioView._pendingScrollId = result.id;
+    }
+
     this.taskManager.switchView(view);
     this.close();
 
