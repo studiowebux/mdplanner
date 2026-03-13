@@ -440,7 +440,7 @@ Requires `--cache`.
 
 | Tool                | Description                                                                              |
 | ------------------- | ---------------------------------------------------------------------------------------- |
-| `get_context_pack`  | Single-call agent boot — returns people, active milestone, in-progress tasks (with `relevantFiles`), top-10 todo, recent progress excerpt, and decision/architecture/constraint note stubs |
+| `get_context_pack`  | Single-call agent boot — returns people, active milestone, in-progress tasks (with `relevantFiles`), top-10 todo, recent progress excerpt, decision/architecture/constraint note stubs, and `suggestedAction` (includes `nextMilestoneSuggestion` when type is `wait-review`) |
 
 ## Time Tracking
 

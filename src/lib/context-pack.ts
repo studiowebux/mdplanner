@@ -80,6 +80,15 @@ export type SuggestedActionType =
   | "unblock"
   | "idle";
 
+export interface NextMilestoneSuggestion {
+  /** Human-readable milestone name for the next sprint. */
+  suggestedName: string;
+  /** One sentence explaining the clustering rationale. */
+  rationale: string;
+  /** Top Backlog task IDs (sorted by priority) for the suggested milestone. */
+  candidateTaskIds: string[];
+}
+
 export interface SuggestedAction {
   /** What the agent should do next. */
   type: SuggestedActionType;
@@ -90,6 +99,11 @@ export interface SuggestedAction {
   reason: string;
   /** One sentence: exactly what to do right now. */
   nextStep: string;
+  /**
+   * Present only when type is "wait-review". Suggests a name and candidate
+   * tasks for the next milestone based on Backlog clustering.
+   */
+  nextMilestoneSuggestion?: NextMilestoneSuggestion;
 }
 
 export interface ContextPack {
@@ -165,6 +179,58 @@ function isTaskStale(task: Task, cutoffMs: number): boolean {
   return new Date(last.timestamp).getTime() < cutoffMs;
 }
 
+/**
+ * Cluster Backlog tasks by their first tag and return a milestone suggestion.
+ * Picks the largest tag cluster (by task count). Falls back to untagged tasks.
+ * Returns undefined when the Backlog is empty.
+ */
+function computeNextMilestoneSuggestion(
+  backlogTasks: Task[],
+): NextMilestoneSuggestion | undefined {
+  if (backlogTasks.length === 0) return undefined;
+
+  const tagGroups = new Map<string, Task[]>();
+  const untagged: Task[] = [];
+
+  for (const task of backlogTasks) {
+    const tags = task.config.tags ?? [];
+    if (tags.length === 0) {
+      untagged.push(task);
+    } else {
+      const key = tags[0].toLowerCase();
+      const group = tagGroups.get(key) ?? [];
+      group.push(task);
+      tagGroups.set(key, group);
+    }
+  }
+
+  // Find the tag group with the most tasks; fall back to untagged
+  let bestTag: string | null = null;
+  let bestGroup: Task[] = untagged;
+  for (const [tag, tasks] of tagGroups) {
+    if (tasks.length > bestGroup.length) {
+      bestTag = tag;
+      bestGroup = tasks;
+    }
+  }
+
+  if (bestGroup.length === 0) return undefined;
+
+  const sorted = [...bestGroup].sort(
+    (a, b) => (a.config.priority ?? 99) - (b.config.priority ?? 99),
+  );
+  const candidateTaskIds = sorted.slice(0, 10).map((t) => t.id);
+  const label = bestTag
+    ? bestTag.charAt(0).toUpperCase() + bestTag.slice(1)
+    : "General";
+  const suggestedName = `Next: ${label}`;
+  const rationale = bestTag
+    ? `${bestGroup.length} Backlog task(s) share the "${bestTag}" tag — largest cluster by count.`
+    : `${bestGroup.length} untagged Backlog task(s) form the largest group.`;
+
+  return { suggestedName, rationale, candidateTaskIds };
+}
+
 // ---------------------------------------------------------------------------
 // Suggested action
 // ---------------------------------------------------------------------------
@@ -173,6 +239,7 @@ function computeSuggestedAction(
   inProgressTasks: Task[],
   todoTasks: Task[],
   pendingReviewTasks: Task[],
+  backlogTasks: Task[],
   taskById: Map<string, Task>,
   isReady: (t: Task) => boolean,
 ): SuggestedAction {
@@ -236,6 +303,7 @@ function computeSuggestedAction(
       reason:
         `${pendingReviewTasks.length} task(s) are awaiting owner review and no Todo tasks remain.`,
       nextStep: "Wait for the owner to approve or reject the pending tasks.",
+      nextMilestoneSuggestion: computeNextMilestoneSuggestion(backlogTasks),
     };
   }
 
@@ -283,6 +351,7 @@ export async function assembleContextPack(
   const pendingReviewTasks = projectTasks.filter(
     (t) => t.section === "Pending Review",
   );
+  const backlogTasks = projectTasks.filter((t) => t.section === "Backlog");
 
   // Ready: all blockers are Done or completed
   const isReady = (task: Task): boolean =>
@@ -438,6 +507,7 @@ export async function assembleContextPack(
       inProgressTasks,
       todoTasks,
       pendingReviewTasks,
+      backlogTasks,
       taskById,
       isReady,
     ),

@@ -15,6 +15,11 @@ and this project adheres to
   fields, timestamps, revision, assignee, effort, and files. Use instead of
   `get_task` to reduce token usage. `last_comments` param (default 5, max 20).
   Total MCP tool count: 245.
+- `suggestedAction.nextMilestoneSuggestion` — when `suggestedAction.type` is
+  `wait-review`, `get_context_pack` now includes a `nextMilestoneSuggestion`
+  object with `suggestedName`, `rationale`, and `candidateTaskIds`. Clusters
+  Backlog tasks by their primary tag (largest group wins) so agents can propose
+  the next milestone scope without manual Backlog analysis.
 
 ## [0.28.0] - 2026-03-11
 
