@@ -106,6 +106,8 @@ export interface ContextPack {
   decisions: ContextPackNote[];
   architecture: ContextPackNote[];
   constraints: ContextPackNote[];
+  features: ContextPackNote[];
+  investigations: ContextPackNote[];
   summary: ContextPackSummary;
   suggestedAction: SuggestedAction;
 }
@@ -372,6 +374,14 @@ export async function assembleContextPack(
     .filter((n) => n.title.toLowerCase().startsWith("[constraint]"))
     .map(toNoteRef);
 
+  const features = scopedNotes
+    .filter((n) => n.title.toLowerCase().startsWith("[feature]"))
+    .map(toNoteRef);
+
+  const investigations = scopedNotes
+    .filter((n) => n.title.toLowerCase().startsWith("[investigation]"))
+    .map(toNoteRef);
+
   // People
   const agents = allPeople
     .filter((p) => p.agentType && p.agentType !== "human")
@@ -416,6 +426,8 @@ export async function assembleContextPack(
     decisions,
     architecture,
     constraints,
+    features,
+    investigations,
     summary: {
       openMilestones: openMilestones.length,
       totalInProgress: inProgressTasks.length,
