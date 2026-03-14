@@ -261,6 +261,12 @@ export class ListView {
         (task) => task.section === section && !task.parentId,
       );
 
+      // Non-sticky scroll anchor for hash navigation
+      const anchor = document.createElement("div");
+      anchor.className = "section-scroll-anchor";
+      anchor.id = `section-${section.toLowerCase().replace(/\s+/g, "-")}`;
+      container.appendChild(anchor);
+
       // Add section separator (always show, even if empty)
       const sectionHeader = document.createElement("div");
       sectionHeader.className =
@@ -539,19 +545,12 @@ export class ListView {
       const count = allTasks.filter(
         (t) => t.section === section && !t.parentId,
       ).length;
-      const pill = document.createElement("button");
-      pill.type = "button";
+      const anchorId = `section-${section.toLowerCase().replace(/\s+/g, "-")}`;
+      const pill = document.createElement("a");
+      pill.href = `#${anchorId}`;
       pill.className = "section-jump-pill";
       pill.dataset.section = section;
       pill.textContent = `${section} (${count})`;
-      pill.addEventListener("click", () => {
-        const header = document.querySelector(
-          `.list-section-header[data-section="${section}"]`,
-        );
-        if (header) {
-          header.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      });
       bar.appendChild(pill);
     });
 

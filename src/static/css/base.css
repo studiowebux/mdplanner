@@ -20,7 +20,10 @@ html {
   line-height: 1.5;
   -webkit-text-size-adjust: 100%;
   tab-size: 4;
-  overflow-x: hidden; /* Prevent off-screen sidenav from causing horizontal scroll on mobile */
+  scroll-behavior: smooth;
+  overflow-x: clip; /* Prevent off-screen sidenav from causing horizontal scroll on mobile.
+     Uses 'clip' instead of 'hidden' — clips the same way but does not create
+     a scrolling ancestor, which would break position: sticky on descendants. */
 }
 
 body {
@@ -135,7 +138,7 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow-x: clip;
   /* iOS safe area support */
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
