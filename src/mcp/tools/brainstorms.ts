@@ -86,7 +86,9 @@ export function registerBrainstormTools(
           .describe("Questions with optional answers"),
       },
     },
-    async ({ title, tags, linked_projects, linked_tasks, linked_goals, questions }) => {
+    async (
+      { title, tags, linked_projects, linked_tasks, linked_goals, questions },
+    ) => {
       const brainstorm = await parser.addBrainstorm({
         title,
         ...(tags && { tags }),

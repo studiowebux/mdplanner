@@ -57,6 +57,7 @@ import { MarketingPlansDirectoryParser } from "./marketing-plans.ts";
 import { BrainstormsDirectoryParser } from "./brainstorms.ts";
 import type {
   BillingRate,
+  Brainstorm,
   Brief,
   BusinessModelCanvas,
   C4Component,
@@ -73,7 +74,6 @@ import type {
   Goal,
   Habit,
   Idea,
-  Brainstorm,
   Interaction,
   InvestorEntry,
   Invoice,
