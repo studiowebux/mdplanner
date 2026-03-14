@@ -21,6 +21,7 @@ when both are set.
 | `MDPLANNER_BACKUP_INTERVAL`     | `--backup-interval`         | —           | Backup frequency in hours (requires `MDPLANNER_BACKUP_DIR`) |
 | `MDPLANNER_BACKUP_PUBLIC_KEY`   | `--backup-public-key`       | —           | RSA-OAEP-4096 public key hex for encrypted backups         |
 | `MDPLANNER_SECRET_KEY`          | _(env only)_                | —           | 32-byte hex key for AES-256-GCM integration secret encryption |
+| `MDPLANNER_CERVEAU_DIR`         | `--cerveau-dir`             | `~/.cerveau` | Path to cerveau directory for brain viewer                |
 | `MDPLANNER_CORS_ORIGIN`         | `--cors-origin`             | allow all   | Restrict CORS to a specific origin                         |
 | `MDPLANNER_MAX_BODY_SIZE`       | `--max-body-size`           | `10`        | Max request body size in MB                                |
 | `MDPLANNER_RATE_LIMIT`          | `--rate-limit`              | `200`       | Max requests per minute per IP                             |
