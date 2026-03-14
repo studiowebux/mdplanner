@@ -443,10 +443,7 @@ export class DnsModule {
     }
     // Fallback
     const t = document.createElement("div");
-    t.style.cssText =
-      "position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);padding:0.5rem 1rem;" +
-      "background:var(--bg-editor);border:1px solid var(--border);border-radius:var(--radius);" +
-      "font-size:var(--font-size-sm);z-index:200;";
+    t.className = "dns-toast-fallback";
     t.textContent = msg;
     document.body.appendChild(t);
     setTimeout(() => t.remove(), 3000);

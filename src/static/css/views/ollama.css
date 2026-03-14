@@ -848,6 +848,14 @@ body[data-current-view="ollama"] #breadcrumb {
   padding: 2px 0;
 }
 
+.ollama-view-root .tts-error-msg {
+  color: var(--color-text-primary);
+}
+
+.ollama-view-root .tts-dismiss-btn {
+  margin-left: var(--space-sm);
+}
+
 .ollama-view-root .tts-btn {
   background: transparent;
   border: 1px solid var(--color-border-default);

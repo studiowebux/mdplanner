@@ -223,12 +223,11 @@ App.navigateBranch = function (delta) {
 function ttsShowError(msg) {
   App.el.typingEl.innerHTML = "";
   const errDiv = document.createElement("span");
-  errDiv.style.color = "var(--text)";
+  errDiv.className = "tts-error-msg";
   errDiv.textContent = "TTS error: " + msg;
   const dismissBtn = document.createElement("button");
-  dismissBtn.className = "tts-btn";
+  dismissBtn.className = "tts-btn tts-dismiss-btn";
   dismissBtn.textContent = "\u2715";
-  dismissBtn.style.marginLeft = "8px";
   dismissBtn.addEventListener("click", function () {
     App.el.typingEl.innerHTML = "";
   });

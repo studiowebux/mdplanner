@@ -152,7 +152,6 @@ export class GitHubView {
       if (!existing) {
         const empty = document.createElement("p");
         empty.className = "github-view-empty text-muted";
-        empty.style.padding = "1rem";
         empty.textContent = "No repositories match the search.";
         container.appendChild(empty);
       }
