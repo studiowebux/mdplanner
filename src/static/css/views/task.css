@@ -96,8 +96,8 @@
    -------------------------------------------------------------------------- */
 
 .drop-zone-active {
-  border-color: var(--color-border-strong) !important;
-  background-color: var(--color-bg-tertiary) !important;
+  border-color: var(--color-border-strong);
+  background-color: var(--color-bg-tertiary);
 }
 
 /* --------------------------------------------------------------------------
@@ -306,8 +306,8 @@
   background: var(--color-bg-secondary);
 }
 
-.task-list-item.batch-selected {
-  background: var(--color-bg-tertiary) !important;
+#listContainer .task-list-item.batch-selected {
+  background: var(--color-bg-tertiary);
   border-left: 3px solid var(--color-accent);
 }
 

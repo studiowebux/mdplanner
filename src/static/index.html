@@ -179,7 +179,7 @@
                 <div
                   class="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-default"
                 >
-                  <label
+                  <label for="pomodoroSoundToggle"
                     class="flex items-center gap-1.5 text-xs text-muted cursor-pointer"
                   >
                     <input
@@ -1697,19 +1697,19 @@
           </div>
           <div class="px-6 py-4 space-y-3">
             <div>
-              <label class="block text-xs font-medium text-secondary mb-1">Section</label>
+              <label for="batchSection" class="block text-xs font-medium text-secondary mb-1">Section</label>
               <select id="batchSection" class="form-input text-sm w-full"></select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-secondary mb-1">Assignee</label>
+              <label for="batchAssignee" class="block text-xs font-medium text-secondary mb-1">Assignee</label>
               <select id="batchAssignee" class="form-input text-sm w-full"></select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-secondary mb-1">Milestone</label>
+              <label for="batchMilestone" class="block text-xs font-medium text-secondary mb-1">Milestone</label>
               <select id="batchMilestone" class="form-input text-sm w-full"></select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-secondary mb-1">Priority</label>
+              <label for="batchPriority" class="block text-xs font-medium text-secondary mb-1">Priority</label>
               <select id="batchPriority" class="form-input text-sm w-full">
                 <option value="">Leave unchanged</option>
                 <option value="1">Critical</option>
@@ -1720,7 +1720,7 @@
               </select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-secondary mb-1">Tags (comma-separated, replaces existing)</label>
+              <label for="batchTags" class="block text-xs font-medium text-secondary mb-1">Tags (comma-separated, replaces existing)</label>
               <input id="batchTags" type="text" placeholder="e.g. bug, ui, v2" class="form-input text-sm w-full" />
             </div>
           </div>
@@ -2076,7 +2076,7 @@
 
             <!-- Auto-renew -->
             <div class="form-group">
-              <label class="flex items-center gap-2 cursor-pointer">
+              <label for="dnsFieldAutoRenew" class="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" id="dnsFieldAutoRenew">
                 <span class="form-label mb-0">Auto-renew</span>
               </label>
@@ -2199,13 +2199,13 @@
                   </div>
                 </div>
                 <div>
-                  <label class="ollama-tts-label">
+                  <label for="configChatterboxAutoUnload" class="ollama-tts-label">
                     <input type="checkbox" id="configChatterboxAutoUnload" class="ollama-checkbox" />
                     Auto-unload Ollama
                   </label>
                 </div>
                 <div>
-                  <label class="ollama-tts-label">
+                  <label for="configChatterboxSplit" class="ollama-tts-label">
                     <input type="checkbox" id="configChatterboxSplit" class="ollama-checkbox" />
                     Split text <input type="number" id="configChatterboxSplitChars" min="100" max="2000" step="50" value="400" class="ollama-split-chars" /> chars
                   </label>
@@ -2323,7 +2323,7 @@
               </h3>
               <div class="space-y-4">
                 <div>
-                  <label
+                  <label for="projectStartDate"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Project Start Date</label>
                   <input
@@ -2362,7 +2362,7 @@
                   </div>
                 </div>
                 <div>
-                  <label
+                  <label for="workingDays"
                     class="flex items-center text-sm font-medium text-secondary mb-1"
                   >
                     Working Days per Week
@@ -2635,7 +2635,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Reduced Motion -->
               <div>
-                <label
+                <label for="accessibilityReducedMotion"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Reduced Motion</label>
                 <select
@@ -2653,7 +2653,7 @@
 
               <!-- High Contrast -->
               <div>
-                <label class="flex items-center space-x-3 cursor-pointer">
+                <label for="accessibilityHighContrast" class="flex items-center space-x-3 cursor-pointer">
                   <input
                     type="checkbox"
                     id="accessibilityHighContrast"
@@ -2671,7 +2671,7 @@
 
               <!-- Large Touch Targets -->
               <div>
-                <label class="flex items-center space-x-3 cursor-pointer">
+                <label for="accessibilityLargeTargets" class="flex items-center space-x-3 cursor-pointer">
                   <input
                     type="checkbox"
                     id="accessibilityLargeTargets"
@@ -2689,7 +2689,7 @@
 
               <!-- Show Breadcrumbs -->
               <div>
-                <label class="flex items-center space-x-3 cursor-pointer">
+                <label for="accessibilityShowBreadcrumbs" class="flex items-center space-x-3 cursor-pointer">
                   <input
                     type="checkbox"
                     id="accessibilityShowBreadcrumbs"
@@ -2768,7 +2768,7 @@
                   >
                 </div>
                 <div class="flex items-center gap-3">
-                  <label class="flex items-center gap-2 text-sm text-secondary cursor-pointer">
+                  <label for="backupImportOverwrite" class="flex items-center gap-2 text-sm text-secondary cursor-pointer">
                     <input type="checkbox" id="backupImportOverwrite">
                     Overwrite existing files
                   </label>
@@ -3220,7 +3220,7 @@
               Milestones
             </h2>
             <div class="flex gap-2 items-center">
-              <label class="ideas-filter-archive-label">
+              <label for="milestonesShowCompleted" class="ideas-filter-archive-label">
                 <input type="checkbox" id="milestonesShowCompleted">
                 Show completed
               </label>
@@ -3296,7 +3296,7 @@
             <select id="ideasFilterCategory">
               <option value="">All categories</option>
             </select>
-            <label class="ideas-filter-archive-label">
+            <label for="ideasShowArchived" class="ideas-filter-archive-label">
               <input type="checkbox" id="ideasShowArchived">
               Show archived
             </label>
@@ -4102,7 +4102,7 @@
           <form id="swotForm">
             <div class="p-6 space-y-4">
               <div>
-                <label
+                <label for="swotTitle"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Title</label>
                 <input
@@ -4114,7 +4114,7 @@
                 >
               </div>
               <div>
-                <label
+                <label for="swotDate"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Date</label>
                 <input
@@ -4161,7 +4161,7 @@
           <form id="swotItemForm">
             <div class="p-6">
               <div>
-                <label
+                <label for="swotItemText"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Item</label>
                 <input
@@ -4380,7 +4380,7 @@
           <form id="riskAnalysisForm">
             <div class="p-6 space-y-4">
               <div>
-                <label
+                <label for="riskAnalysisTitle"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Title</label>
                 <input
@@ -4392,7 +4392,7 @@
                 >
               </div>
               <div>
-                <label
+                <label for="riskAnalysisDate"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Date</label>
                 <input
@@ -4439,7 +4439,7 @@
           <form id="riskAnalysisItemForm">
             <div class="p-6">
               <div>
-                <label
+                <label for="riskAnalysisItemText"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Risk Description</label>
                 <input
@@ -4826,7 +4826,7 @@
           <form id="leanCanvasForm">
             <div class="p-6 space-y-4">
               <div>
-                <label
+                <label for="leanCanvasTitle"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Title</label>
                 <input
@@ -4838,7 +4838,7 @@
                 >
               </div>
               <div>
-                <label
+                <label for="leanCanvasDate"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Date</label>
                 <input
@@ -4885,7 +4885,7 @@
           <form id="leanCanvasItemForm">
             <div class="p-6">
               <div>
-                <label
+                <label for="leanCanvasItemText"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Item</label>
                 <input
@@ -5213,7 +5213,7 @@
           <form id="businessModelForm">
             <div class="p-6 space-y-4">
               <div>
-                <label
+                <label for="businessModelTitle"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Title</label>
                 <input
@@ -5225,7 +5225,7 @@
                 >
               </div>
               <div>
-                <label
+                <label for="businessModelDate"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Date</label>
                 <input
@@ -5272,7 +5272,7 @@
           <form id="businessModelItemForm">
             <div class="p-6">
               <div>
-                <label
+                <label for="businessModelItemText"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Item</label>
                 <input
@@ -5479,7 +5479,7 @@
           <form id="projectValueForm">
             <div class="p-6 space-y-4">
               <div>
-                <label
+                <label for="projectValueTitle"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Title</label>
                 <input
@@ -5491,7 +5491,7 @@
                 >
               </div>
               <div>
-                <label
+                <label for="projectValueDate"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Date</label>
                 <input
@@ -5538,7 +5538,7 @@
           <form id="projectValueItemForm">
             <div class="p-6">
               <div>
-                <label
+                <label for="projectValueItemText"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Item</label>
                 <input
@@ -5911,7 +5911,7 @@
           <form id="briefForm">
             <div class="p-6 space-y-4">
               <div>
-                <label
+                <label for="briefTitle"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Title</label>
                 <input
@@ -5923,7 +5923,7 @@
                 >
               </div>
               <div>
-                <label
+                <label for="briefDate"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Date</label>
                 <input
@@ -5967,7 +5967,7 @@
           <form id="briefItemForm">
             <div class="p-6">
               <div>
-                <label
+                <label for="briefItemText"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Item</label>
                 <input
@@ -6016,7 +6016,7 @@
           <form id="capacityPlanForm">
             <div class="p-6 space-y-4">
               <div>
-                <label
+                <label for="capacityPlanTitle"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Title</label>
                 <input
@@ -6028,7 +6028,7 @@
                 >
               </div>
               <div>
-                <label
+                <label for="capacityPlanDate"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Date</label>
                 <input
@@ -6038,7 +6038,7 @@
                 >
               </div>
               <div>
-                <label
+                <label for="capacityPlanBudget"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Budget Hours (optional)</label>
                 <input
@@ -6086,7 +6086,7 @@
           <form id="teamMemberForm">
             <div class="p-6 space-y-4">
               <div>
-                <label
+                <label for="teamMemberPersonId"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Person</label>
                 <select
@@ -6098,7 +6098,7 @@
                 </select>
               </div>
               <div>
-                <label
+                <label for="teamMemberHours"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Hours Per Day (override)</label>
                 <input
@@ -6115,42 +6115,42 @@
                   class="block text-sm font-medium text-secondary mb-1"
                 >Working Days</label>
                 <div class="flex flex-wrap gap-2">
-                  <label
+                  <label for="workMon"
                     class="flex items-center gap-1 text-sm text-secondary"
                   >
                     <input type="checkbox" id="workMon" checked class="rounded">
                     Mon
                   </label>
-                  <label
+                  <label for="workTue"
                     class="flex items-center gap-1 text-sm text-secondary"
                   >
                     <input type="checkbox" id="workTue" checked class="rounded">
                     Tue
                   </label>
-                  <label
+                  <label for="workWed"
                     class="flex items-center gap-1 text-sm text-secondary"
                   >
                     <input type="checkbox" id="workWed" checked class="rounded">
                     Wed
                   </label>
-                  <label
+                  <label for="workThu"
                     class="flex items-center gap-1 text-sm text-secondary"
                   >
                     <input type="checkbox" id="workThu" checked class="rounded">
                     Thu
                   </label>
-                  <label
+                  <label for="workFri"
                     class="flex items-center gap-1 text-sm text-secondary"
                   >
                     <input type="checkbox" id="workFri" checked class="rounded">
                     Fri
                   </label>
-                  <label
+                  <label for="workSat"
                     class="flex items-center gap-1 text-sm text-secondary"
                   >
                     <input type="checkbox" id="workSat" class="rounded"> Sat
                   </label>
-                  <label
+                  <label for="workSun"
                     class="flex items-center gap-1 text-sm text-secondary"
                   >
                     <input type="checkbox" id="workSun" class="rounded"> Sun
@@ -6195,7 +6195,7 @@
           <form id="allocationForm">
             <div class="p-6 space-y-4">
               <div>
-                <label
+                <label for="allocationHours"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Hours this week</label>
                 <input
@@ -6211,7 +6211,7 @@
                 </p>
               </div>
               <div>
-                <label
+                <label for="allocationTargetType"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Target Type</label>
                 <select
@@ -6224,7 +6224,7 @@
                 </select>
               </div>
               <div id="allocationTargetContainer">
-                <label
+                <label for="allocationTargetId"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Target (optional)</label>
                 <select
@@ -6241,7 +6241,7 @@
                 </p>
               </div>
               <div>
-                <label
+                <label for="allocationNotes"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Notes (optional)</label>
                 <input
@@ -7244,7 +7244,7 @@
             <!-- Controls -->
             <div class="flex items-center gap-4 flex-wrap">
               <div class="flex items-center gap-2">
-                <label class="text-sm text-secondary"
+                <label for="orgchartViewToggle" class="text-sm text-secondary"
                 >View:</label>
                 <select
                   id="orgchartViewToggle"
@@ -7255,7 +7255,7 @@
                 </select>
               </div>
               <div class="flex items-center gap-2">
-                <label class="text-sm text-secondary"
+                <label for="orgchartDepartmentFilter" class="text-sm text-secondary"
                 >Department:</label>
                 <select
                   id="orgchartDepartmentFilter"
@@ -7265,7 +7265,7 @@
                 </select>
               </div>
               <div class="flex items-center gap-2">
-                <label class="text-sm text-secondary"
+                <label for="orgchartZoom" class="text-sm text-secondary"
                 >Zoom:</label>
                 <input
                   type="range"
@@ -7443,7 +7443,7 @@
           <form id="crmCompanyForm">
             <div class="p-6 space-y-4">
               <div>
-                <label
+                <label for="crmCompanyName"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Company Name *</label>
                 <input
@@ -7455,7 +7455,7 @@
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label
+                  <label for="crmCompanyIndustry"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Industry</label>
                   <input
@@ -7465,7 +7465,7 @@
                   >
                 </div>
                 <div>
-                  <label
+                  <label for="crmCompanyPhone"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Phone</label>
                   <input
@@ -7476,7 +7476,7 @@
                 </div>
               </div>
               <div>
-                <label
+                <label for="crmCompanyWebsite"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Website</label>
                 <input
@@ -7532,7 +7532,7 @@
                 </div>
               </fieldset>
               <div>
-                <label
+                <label for="crmCompanyNotes"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Notes</label>
                 <textarea
@@ -7579,7 +7579,7 @@
           <form id="crmContactForm">
             <div class="p-6 space-y-4">
               <div>
-                <label
+                <label for="crmContactCompany"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Company *</label>
                 <select
@@ -7592,7 +7592,7 @@
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label
+                  <label for="crmContactFirstName"
                     class="block text-sm font-medium text-secondary mb-1"
                   >First Name *</label>
                   <input
@@ -7603,7 +7603,7 @@
                   >
                 </div>
                 <div>
-                  <label
+                  <label for="crmContactLastName"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Last Name</label>
                   <input
@@ -7615,7 +7615,7 @@
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label
+                  <label for="crmContactEmail"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Email</label>
                   <input
@@ -7625,7 +7625,7 @@
                   >
                 </div>
                 <div>
-                  <label
+                  <label for="crmContactPhone"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Phone</label>
                   <input
@@ -7636,7 +7636,7 @@
                 </div>
               </div>
               <div>
-                <label
+                <label for="crmContactTitle"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Job Title</label>
                 <input
@@ -7651,13 +7651,12 @@
                   id="crmContactPrimary"
                   class="w-4 h-4 text-info border-strong rounded focus:ring-1"
                 >
-                <label
-                  for="crmContactPrimary"
+                <label for="crmContactPrimary"
                   class="ml-2 text-sm text-secondary"
                 >Primary contact for company</label>
               </div>
               <div>
-                <label
+                <label for="crmContactNotes"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Notes</label>
                 <textarea
@@ -7704,7 +7703,7 @@
           <form id="crmDealForm">
             <div class="p-6 space-y-4">
               <div>
-                <label
+                <label for="crmDealTitle"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Deal Title *</label>
                 <input
@@ -7716,7 +7715,7 @@
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label
+                  <label for="crmDealCompany"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Company *</label>
                   <select
@@ -7728,7 +7727,7 @@
                   </select>
                 </div>
                 <div>
-                  <label
+                  <label for="crmDealContact"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Contact</label>
                   <select
@@ -7741,7 +7740,7 @@
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label
+                  <label for="crmDealValue"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Value ($)</label>
                   <input
@@ -7753,7 +7752,7 @@
                   >
                 </div>
                 <div>
-                  <label
+                  <label for="crmDealProbability"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Probability (%)</label>
                   <input
@@ -7767,7 +7766,7 @@
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label
+                  <label for="crmDealStage"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Stage</label>
                   <select
@@ -7783,7 +7782,7 @@
                   </select>
                 </div>
                 <div>
-                  <label
+                  <label for="crmDealExpectedClose"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Expected Close</label>
                   <input
@@ -7794,7 +7793,7 @@
                 </div>
               </div>
               <div>
-                <label
+                <label for="crmDealNotes"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Notes</label>
                 <textarea
@@ -7841,7 +7840,7 @@
           <form id="crmInteractionForm">
             <div class="p-6 space-y-4">
               <div>
-                <label
+                <label for="crmInteractionType"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Type *</label>
                 <select
@@ -7856,7 +7855,7 @@
                 </select>
               </div>
               <div>
-                <label
+                <label for="crmInteractionSummary"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Summary *</label>
                 <input
@@ -7869,7 +7868,7 @@
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label
+                  <label for="crmInteractionCompany"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Company</label>
                   <select
@@ -7880,7 +7879,7 @@
                   </select>
                 </div>
                 <div>
-                  <label
+                  <label for="crmInteractionContact"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Contact</label>
                   <select
@@ -7892,7 +7891,7 @@
                 </div>
               </div>
               <div>
-                <label
+                <label for="crmInteractionDeal"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Related Deal</label>
                 <select
@@ -7904,7 +7903,7 @@
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label
+                  <label for="crmInteractionDate"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Date *</label>
                   <input
@@ -7915,7 +7914,7 @@
                   >
                 </div>
                 <div>
-                  <label
+                  <label for="crmInteractionDuration"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Duration (min)</label>
                   <input
@@ -7927,7 +7926,7 @@
                 </div>
               </div>
               <div>
-                <label
+                <label for="crmInteractionFollowUp"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Next Follow-up</label>
                 <input
@@ -7937,7 +7936,7 @@
                 >
               </div>
               <div>
-                <label
+                <label for="crmInteractionNotes"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Notes</label>
                 <textarea
@@ -7984,7 +7983,7 @@
           <form id="customerForm">
             <div class="p-6 space-y-4">
               <div>
-                <label
+                <label for="customerName"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Name *</label>
                 <input
@@ -7996,7 +7995,7 @@
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label
+                  <label for="customerEmail"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Email</label>
                   <input
@@ -8006,7 +8005,7 @@
                   >
                 </div>
                 <div>
-                  <label
+                  <label for="customerPhone"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Phone</label>
                   <input
@@ -8017,7 +8016,7 @@
                 </div>
               </div>
               <div>
-                <label
+                <label for="customerCompany"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Company</label>
                 <input
@@ -8072,7 +8071,7 @@
                 </div>
               </fieldset>
               <div>
-                <label
+                <label for="customerNotes"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Notes</label>
                 <textarea
@@ -8119,7 +8118,7 @@
           <form id="billingRateForm">
             <div class="p-6 space-y-4">
               <div>
-                <label
+                <label for="billingRateName"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Name *</label>
                 <input
@@ -8131,7 +8130,7 @@
                 >
               </div>
               <div>
-                <label
+                <label for="billingRateHourly"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Hourly Rate *</label>
                 <input
@@ -8144,7 +8143,7 @@
                 >
               </div>
               <div>
-                <label
+                <label for="billingRateAssignee"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Assignee</label>
                 <input
@@ -8204,7 +8203,7 @@
             <div class="p-6 space-y-4">
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label
+                  <label for="quoteTitle"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Title *</label>
                   <input
@@ -8215,7 +8214,7 @@
                   >
                 </div>
                 <div>
-                  <label
+                  <label for="quoteCustomer"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Customer *</label>
                   <select
@@ -8229,7 +8228,7 @@
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label
+                  <label for="quoteValidUntil"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Valid Until</label>
                   <input
@@ -8239,7 +8238,7 @@
                   >
                 </div>
                 <div>
-                  <label
+                  <label for="quoteTaxRate"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Tax Rate (%)</label>
                   <input
@@ -8287,7 +8286,7 @@
                 </div>
               </div>
               <div>
-                <label
+                <label for="quoteNotes"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Notes</label>
                 <textarea
@@ -8335,7 +8334,7 @@
             <div class="p-6 space-y-4">
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label
+                  <label for="invoiceTitle"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Title *</label>
                   <input
@@ -8346,7 +8345,7 @@
                   >
                 </div>
                 <div>
-                  <label
+                  <label for="invoiceCustomer"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Customer *</label>
                   <select
@@ -8360,7 +8359,7 @@
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label
+                  <label for="invoiceDueDate"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Due Date</label>
                   <input
@@ -8370,7 +8369,7 @@
                   >
                 </div>
                 <div>
-                  <label
+                  <label for="invoiceTaxRate"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Tax Rate (%)</label>
                   <input
@@ -8418,7 +8417,7 @@
                 </div>
               </div>
               <div>
-                <label
+                <label for="invoiceNotes"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Notes</label>
                 <textarea
@@ -8462,7 +8461,7 @@
           <form id="generateInvoiceForm">
             <div class="p-6 space-y-4">
               <div>
-                <label
+                <label for="generateInvoiceCustomer"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Customer *</label>
                 <select
@@ -8474,7 +8473,7 @@
                 </select>
               </div>
               <div>
-                <label
+                <label for="generateInvoiceTitle"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Title</label>
                 <input
@@ -8486,7 +8485,7 @@
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label
+                  <label for="generateInvoiceStartDate"
                     class="block text-sm font-medium text-secondary mb-1"
                   >Start Date</label>
                   <input
@@ -8496,7 +8495,7 @@
                   >
                 </div>
                 <div>
-                  <label
+                  <label for="generateInvoiceEndDate"
                     class="block text-sm font-medium text-secondary mb-1"
                   >End Date</label>
                   <input
@@ -8507,7 +8506,7 @@
                 </div>
               </div>
               <div>
-                <label
+                <label for="generateInvoiceRate"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Hourly Rate *</label>
                 <input
@@ -8564,7 +8563,7 @@
           <form id="paymentForm">
             <div class="p-6 space-y-4">
               <div>
-                <label
+                <label for="paymentAmount"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Amount *</label>
                 <input
@@ -8577,7 +8576,7 @@
                 >
               </div>
               <div>
-                <label
+                <label for="paymentDate"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Date *</label>
                 <input
@@ -8588,7 +8587,7 @@
                 >
               </div>
               <div>
-                <label
+                <label for="paymentMethod"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Method</label>
                 <select
@@ -8603,7 +8602,7 @@
                 </select>
               </div>
               <div>
-                <label
+                <label for="paymentReference"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Reference</label>
                 <input
@@ -8614,7 +8613,7 @@
                 >
               </div>
               <div>
-                <label
+                <label for="paymentNotes"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Notes</label>
                 <textarea
@@ -8661,7 +8660,7 @@
           <form id="strategicLevelsForm">
             <div class="p-6 space-y-4">
               <div>
-                <label
+                <label for="strategicLevelsTitle"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Title</label>
                 <input
@@ -8673,7 +8672,7 @@
                 >
               </div>
               <div>
-                <label
+                <label for="strategicLevelsDate"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Date</label>
                 <input
@@ -8720,7 +8719,7 @@
           <form id="strategicLevelForm">
             <div class="p-6 space-y-4">
               <div>
-                <label
+                <label for="strategicLevelTitle"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Title</label>
                 <input
@@ -8732,7 +8731,7 @@
                 >
               </div>
               <div>
-                <label
+                <label for="strategicLevelDescription"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Description (optional)</label>
                 <textarea
@@ -8743,7 +8742,7 @@
                 ></textarea>
               </div>
               <div>
-                <label
+                <label for="strategicLevelType"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Level Type</label>
                 <select
@@ -8760,7 +8759,7 @@
                 </select>
               </div>
               <div id="strategicLevelParentGroup">
-                <label
+                <label for="strategicLevelParent"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Parent</label>
                 <select
@@ -8880,7 +8879,7 @@
           >
             <div class="flex items-center space-x-4">
               <div class="flex items-center space-x-2">
-                <label class="text-sm text-secondary"
+                <label for="canvasZoom" class="text-sm text-secondary"
                 >Zoom:</label>
                 <input
                   type="range"
@@ -8962,7 +8961,7 @@
           >
             <div class="flex items-center space-x-4">
               <div class="flex items-center space-x-2">
-                <label class="text-sm text-secondary"
+                <label for="mindmapZoom" class="text-sm text-secondary"
                 >Zoom:</label>
                 <input
                   type="range"
@@ -8979,7 +8978,7 @@
                 >100%</span>
               </div>
               <div class="flex items-center space-x-2">
-                <label class="text-sm text-secondary"
+                <label for="mindmapLayout" class="text-sm text-secondary"
                 >Layout:</label>
                 <select
                   id="mindmapLayout"
@@ -9083,7 +9082,7 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-4">
                 <div class="flex items-center space-x-2">
-                  <label class="text-sm text-secondary"
+                  <label for="c4ViewMode" class="text-sm text-secondary"
                   >View:</label>
                   <select
                     id="c4ViewMode"
@@ -9094,7 +9093,7 @@
                   </select>
                 </div>
                 <div id="c4DiagramControls" class="flex items-center space-x-2">
-                  <label class="text-sm text-secondary"
+                  <label for="c4Zoom" class="text-sm text-secondary"
                   >Zoom:</label>
                   <input
                     type="range"
@@ -9112,7 +9111,7 @@
                 </div>
               </div>
               <div id="c4DiagramOptions" class="flex items-center space-x-4">
-                <label
+                <label for="c4PhysicsToggle"
                   class="flex items-center space-x-2 text-sm text-secondary"
                 >
                   <input type="checkbox" id="c4PhysicsToggle" class="rounded">
@@ -9225,7 +9224,7 @@
           </h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label
+              <label for="timelineStartDate"
                 class="block text-sm font-medium text-secondary mb-1"
               >Project Start Date</label>
               <input
@@ -9239,7 +9238,7 @@
               </p>
             </div>
             <div>
-              <label
+              <label for="timelineWorkingDays"
                 class="block text-sm font-medium text-secondary mb-1"
               >Working Days per Week</label>
               <select
@@ -9307,7 +9306,7 @@
         </div>
         <div class="p-6">
           <div class="mb-4">
-            <label
+            <label for="customSectionType"
               class="block text-sm font-medium text-secondary mb-2"
             >Section Type</label>
             <select
@@ -9324,7 +9323,7 @@
             </select>
           </div>
           <div class="mb-4">
-            <label
+            <label for="customSectionTitle"
               class="block text-sm font-medium text-secondary mb-2"
             >Section Title</label>
             <input
@@ -9373,7 +9372,7 @@
         <form id="noteForm">
           <div class="p-6 space-y-4">
             <div>
-              <label
+              <label for="noteTitle"
                 class="block text-sm font-medium text-secondary mb-1"
               >Title</label>
               <input
@@ -9457,7 +9456,7 @@
         <form id="goalForm" class="flex flex-col flex-1 overflow-hidden">
           <div class="p-6 space-y-4 overflow-y-auto flex-1">
             <div>
-              <label
+              <label for="goalTitle"
                 class="block text-sm font-medium text-secondary mb-1"
               >Title</label>
               <input
@@ -9470,7 +9469,7 @@
 
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label
+                <label for="goalType"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Type</label>
                 <select
@@ -9482,7 +9481,7 @@
                 </select>
               </div>
               <div>
-                <label
+                <label for="goalStatus"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Status</label>
                 <select
@@ -9500,7 +9499,7 @@
             </div>
 
             <div>
-              <label
+              <label for="goalKpi"
                 class="block text-sm font-medium text-secondary mb-1"
               >KPI (Key Performance Indicator)</label>
               <input
@@ -9514,7 +9513,7 @@
 
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label
+                <label for="goalStartDate"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Start Date</label>
                 <input
@@ -9525,7 +9524,7 @@
                 >
               </div>
               <div>
-                <label
+                <label for="goalEndDate"
                   class="block text-sm font-medium text-secondary mb-1"
                 >End Date</label>
                 <input
@@ -9538,7 +9537,7 @@
             </div>
 
             <div>
-              <label
+              <label for="goalDescription"
                 class="block text-sm font-medium text-secondary mb-1"
               >Description</label>
               <textarea
@@ -9590,7 +9589,7 @@
         <form id="milestoneForm">
           <div class="p-6 space-y-4">
             <div>
-              <label
+              <label for="milestoneName"
                 class="block text-sm font-medium text-secondary mb-1"
               >Name</label>
               <input
@@ -9601,7 +9600,7 @@
               >
             </div>
             <div>
-              <label
+              <label for="milestoneTarget"
                 class="block text-sm font-medium text-secondary mb-1"
               >Target Date</label>
               <input
@@ -9611,7 +9610,7 @@
               >
             </div>
             <div>
-              <label
+              <label for="milestoneStatus"
                 class="block text-sm font-medium text-secondary mb-1"
               >Status</label>
               <select
@@ -9623,7 +9622,7 @@
               </select>
             </div>
             <div>
-              <label
+              <label for="milestoneDescription"
                 class="block text-sm font-medium text-secondary mb-1"
               >Description</label>
               <textarea
@@ -9673,7 +9672,7 @@
         <form id="ideaForm">
           <div class="p-6 space-y-4">
             <div>
-              <label
+              <label for="ideaTitle"
                 class="block text-sm font-medium text-secondary mb-1"
               >Title</label>
               <input
@@ -9685,7 +9684,7 @@
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label
+                <label for="ideaStatus"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Status</label>
                 <select
@@ -9700,7 +9699,7 @@
                 </select>
               </div>
               <div>
-                <label
+                <label for="ideaCategory"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Category</label>
                 <input
@@ -9712,7 +9711,7 @@
               </div>
             </div>
             <div>
-              <label
+              <label for="ideaDescription"
                 class="block text-sm font-medium text-secondary mb-1"
               >Description</label>
               <textarea
@@ -9825,7 +9824,7 @@
           <div class="p-6 space-y-4 overflow-y-auto flex-1">
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label
+                <label for="retrospectiveTitle"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Title</label>
                 <input
@@ -9837,7 +9836,7 @@
                 >
               </div>
               <div>
-                <label
+                <label for="retrospectiveDate"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Date</label>
                 <input
@@ -9848,7 +9847,7 @@
               </div>
             </div>
             <div>
-              <label
+              <label for="retrospectiveStatus"
                 class="block text-sm font-medium text-secondary mb-1"
               >Status</label>
               <select
@@ -9860,7 +9859,7 @@
               </select>
             </div>
             <div>
-              <label
+              <label for="retrospectiveContinue"
                 class="block text-sm font-medium text-success mb-1"
               >Continue (what went well)</label>
               <textarea
@@ -9871,7 +9870,7 @@
               ></textarea>
             </div>
             <div>
-              <label
+              <label for="retrospectiveStop"
                 class="block text-sm font-medium text-error-text mb-1"
               >Stop (what should stop)</label>
               <textarea
@@ -9882,7 +9881,7 @@
               ></textarea>
             </div>
             <div>
-              <label
+              <label for="retrospectiveStart"
                 class="block text-sm font-medium text-secondary mb-1"
               >Start (what to start doing)</label>
               <textarea
@@ -9935,7 +9934,7 @@
         <form id="mindmapForm" class="flex flex-col flex-1 overflow-hidden">
           <div class="p-6 space-y-4 overflow-y-auto flex-1">
             <div>
-              <label
+              <label for="mindmapTitle"
                 class="block text-sm font-medium text-secondary mb-1"
               >Title</label>
               <input
@@ -10174,7 +10173,7 @@
         <form id="stickyNoteForm" class="flex flex-col flex-1 overflow-hidden">
           <div class="p-6 space-y-4 overflow-y-auto flex-1">
             <div>
-              <label
+              <label for="stickyNoteContent"
                 class="block text-sm font-medium text-secondary mb-1"
               >Content</label>
               <textarea
@@ -10282,7 +10281,7 @@
         </div>
         <form id="c4ComponentForm" class="p-6 space-y-4">
           <div>
-            <label
+            <label for="c4ComponentName"
               class="block text-sm font-medium text-secondary mb-1"
             >Component Name</label>
             <input
@@ -10296,7 +10295,7 @@
 
           <div class="grid grid-cols-3 gap-4">
             <div>
-              <label
+              <label for="c4ComponentLevel"
                 class="block text-sm font-medium text-secondary mb-1"
               >Level</label>
               <select
@@ -10310,7 +10309,7 @@
               </select>
             </div>
             <div>
-              <label
+              <label for="c4ComponentType"
                 class="block text-sm font-medium text-secondary mb-1"
               >Type</label>
               <input
@@ -10321,7 +10320,7 @@
               >
             </div>
             <div>
-              <label
+              <label for="c4ComponentTechnology"
                 class="block text-sm font-medium text-secondary mb-1"
               >Technology</label>
               <input
@@ -10334,7 +10333,7 @@
           </div>
 
           <div>
-            <label
+            <label for="c4ComponentDescription"
               class="block text-sm font-medium text-secondary mb-1"
             >Description</label>
             <textarea
@@ -10347,7 +10346,7 @@
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label
+              <label for="c4ComponentX"
                 class="block text-sm font-medium text-secondary mb-1"
               >X Position</label>
               <input
@@ -10358,7 +10357,7 @@
               >
             </div>
             <div>
-              <label
+              <label for="c4ComponentY"
                 class="block text-sm font-medium text-secondary mb-1"
               >Y Position</label>
               <input
@@ -10450,7 +10449,7 @@
         <form id="taskForm" class="flex flex-col flex-1 overflow-hidden">
           <div class="p-6 space-y-4 overflow-y-auto flex-1">
             <div>
-              <label
+              <label for="taskTitle"
                 class="block text-sm font-medium text-secondary mb-1"
               >Title</label>
               <input
@@ -10463,7 +10462,7 @@
 
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label
+                <label for="taskSection"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Section</label>
                 <select
@@ -10474,7 +10473,7 @@
                 </select>
               </div>
               <div>
-                <label
+                <label for="taskPriority"
                   class="flex items-center text-sm font-medium text-secondary mb-1"
                 >
                   Priority
@@ -10499,7 +10498,7 @@
 
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label
+                <label for="taskAssignee"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Assignee</label>
                 <select
@@ -10511,7 +10510,7 @@
                 </select>
               </div>
               <div>
-                <label
+                <label for="taskEffort"
                   class="flex items-center text-sm font-medium text-secondary mb-1"
                 >
                   Effort (days)
@@ -10530,7 +10529,7 @@
             </div>
 
             <div>
-              <label
+              <label for="taskDueDate"
                 class="block text-sm font-medium text-secondary mb-1"
               >Due Date</label>
               <input
@@ -10542,7 +10541,7 @@
 
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label
+                <label for="taskPlannedStart"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Planned Start</label>
                 <input
@@ -10552,7 +10551,7 @@
                 >
               </div>
               <div>
-                <label
+                <label for="taskPlannedEnd"
                   class="block text-sm font-medium text-secondary mb-1"
                 >Planned End</label>
                 <input
@@ -10564,7 +10563,7 @@
             </div>
 
             <div>
-              <label
+              <label for="taskMilestone"
                 class="block text-sm font-medium text-secondary mb-1"
               >Milestone</label>
               <input
@@ -10576,7 +10575,7 @@
             </div>
 
             <div>
-              <label
+              <label for="taskTags"
                 class="block text-sm font-medium text-secondary mb-1"
               >Tags</label>
               <select
@@ -10590,7 +10589,7 @@
             </div>
 
             <div>
-              <label
+              <label for="taskBlockedBy"
                 class="flex items-center text-sm font-medium text-secondary mb-1"
               >
                 Blocked By
@@ -10622,7 +10621,7 @@
             </div>
 
             <div>
-              <label
+              <label for="taskDescription"
                 class="block text-sm font-medium text-secondary mb-1"
               >Description</label>
               <textarea
@@ -10684,7 +10683,7 @@
         <div class="sidenav-content">
           <div class="sidenav-section">
             <div class="form-group">
-              <label class="form-label">Title</label>
+              <label for="sidenavTaskTitleInput" class="form-label">Title</label>
               <input
                 type="text"
                 id="sidenavTaskTitleInput"
@@ -10693,7 +10692,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Description <span id="taskDescUnsavedDot" class="journal-unsaved-dot hidden" aria-hidden="true"></span></label>
+              <label for="sidenavTaskDescription" class="form-label">Description <span id="taskDescUnsavedDot" class="journal-unsaved-dot hidden" aria-hidden="true"></span></label>
               <textarea
                 id="sidenavTaskDescription"
                 rows="3"
@@ -10723,11 +10722,11 @@
             <div class="sidenav-section-title">Details</div>
             <div class="sidenav-grid">
               <div class="form-group">
-                <label class="form-label">Section</label>
+                <label for="sidenavTaskSection" class="form-label">Section</label>
                 <select id="sidenavTaskSection" class="form-select"></select>
               </div>
               <div class="form-group">
-                <label class="form-label">Priority</label>
+                <label for="sidenavTaskPriority" class="form-label">Priority</label>
                 <select id="sidenavTaskPriority" class="form-select">
                   <option value="">None</option>
                   <option value="1">P1 - Critical</option>
@@ -10740,11 +10739,11 @@
             </div>
             <div class="sidenav-grid">
               <div class="form-group">
-                <label class="form-label">Assignee</label>
+                <label for="sidenavTaskAssignee" class="form-label">Assignee</label>
                 <select id="sidenavTaskAssignee" class="form-select"></select>
               </div>
               <div class="form-group">
-                <label class="form-label">Effort (days)</label>
+                <label for="sidenavTaskEffort" class="form-label">Effort (days)</label>
                 <input
                   type="number"
                   id="sidenavTaskEffort"
@@ -10758,7 +10757,7 @@
           <div class="sidenav-section">
             <div class="sidenav-section-title">Schedule</div>
             <div class="form-group">
-              <label class="form-label">Due Date</label>
+              <label for="sidenavTaskDueDate" class="form-label">Due Date</label>
               <input
                 type="datetime-local"
                 id="sidenavTaskDueDate"
@@ -10767,7 +10766,7 @@
             </div>
             <div class="sidenav-grid">
               <div class="form-group">
-                <label class="form-label">Planned Start</label>
+                <label for="sidenavTaskPlannedStart" class="form-label">Planned Start</label>
                 <input
                   type="date"
                   id="sidenavTaskPlannedStart"
@@ -10775,7 +10774,7 @@
                 >
               </div>
               <div class="form-group">
-                <label class="form-label">Planned End</label>
+                <label for="sidenavTaskPlannedEnd" class="form-label">Planned End</label>
                 <input
                   type="date"
                   id="sidenavTaskPlannedEnd"
@@ -10788,13 +10787,13 @@
           <div class="sidenav-section">
             <div class="sidenav-section-title">Organization</div>
             <div class="form-group">
-              <label class="form-label">Milestone</label>
+              <label for="sidenavTaskMilestone" class="form-label">Milestone</label>
               <select id="sidenavTaskMilestone" class="form-input">
                 <option value="">— No milestone —</option>
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Project</label>
+              <label for="sidenavTaskProject" class="form-label">Project</label>
               <input
                 type="text"
                 id="sidenavTaskProject"
@@ -10804,7 +10803,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">GitHub</label>
+              <label for="sidenavTaskGithubRepo" class="form-label">GitHub</label>
               <div class="space-y-2">
                 <input
                   type="text"
@@ -10845,7 +10844,7 @@
               <div id="sidenavTaskTags" class="tag-checkbox-list"></div>
             </div>
             <div class="form-group">
-              <label class="form-label">Blocked By</label>
+              <label for="sidenavTaskBlockedBy" class="form-label">Blocked By</label>
               <input
                 type="text"
                 id="sidenavTaskBlockedBy"
@@ -11005,7 +11004,7 @@
 
         <div id="noteSidenavTitleSection" class="sidenav-section">
           <div class="form-group">
-            <label class="form-label">Title</label>
+            <label for="noteSidenavTitle" class="form-label">Title</label>
             <input
               type="text"
               id="noteSidenavTitle"
@@ -11014,7 +11013,7 @@
             >
           </div>
           <div class="form-group">
-            <label class="form-label">Project</label>
+            <label for="noteSidenavProject" class="form-label">Project</label>
             <input
               type="text"
               id="noteSidenavProject"
@@ -11048,7 +11047,7 @@
         <!-- Basic Editor -->
         <div id="noteSidenavBasicEditor" class="sidenav-section">
           <div class="form-group">
-            <label class="form-label">Content</label>
+            <label for="noteSidenavEditor" class="form-label">Content</label>
             <textarea
               id="noteSidenavEditor"
               rows="15"
@@ -11216,7 +11215,7 @@
         <div class="sidenav-content">
           <div class="sidenav-section">
             <div class="form-group">
-              <label class="form-label">Title</label>
+              <label for="goalSidenavTitle" class="form-label">Title</label>
               <input
                 type="text"
                 id="goalSidenavTitle"
@@ -11225,7 +11224,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Description</label>
+              <label for="goalSidenavDescription" class="form-label">Description</label>
               <textarea
                 id="goalSidenavDescription"
                 rows="3"
@@ -11237,14 +11236,14 @@
             <div class="sidenav-section-title">Details</div>
             <div class="sidenav-grid">
               <div class="form-group">
-                <label class="form-label">Type</label>
+                <label for="goalSidenavType" class="form-label">Type</label>
                 <select id="goalSidenavType" class="form-select">
                   <option value="project">Project</option>
                   <option value="enterprise">Enterprise</option>
                 </select>
               </div>
               <div class="form-group">
-                <label class="form-label">Status</label>
+                <label for="goalSidenavStatus" class="form-label">Status</label>
                 <select id="goalSidenavStatus" class="form-select">
                   <option value="planning">Planning</option>
                   <option value="on-track">On Track</option>
@@ -11256,7 +11255,7 @@
               </div>
             </div>
             <div class="form-group">
-              <label class="form-label">KPI</label>
+              <label for="goalSidenavKpi" class="form-label">KPI</label>
               <input
                 type="text"
                 id="goalSidenavKpi"
@@ -11266,18 +11265,18 @@
             </div>
             <div class="sidenav-grid">
               <div class="form-group">
-                <label class="form-label">Start Date</label>
+                <label for="goalSidenavStartDate" class="form-label">Start Date</label>
                 <input type="date" id="goalSidenavStartDate" class="form-input">
               </div>
               <div class="form-group">
-                <label class="form-label">End Date</label>
+                <label for="goalSidenavEndDate" class="form-label">End Date</label>
                 <input type="date" id="goalSidenavEndDate" class="form-input">
               </div>
             </div>
           </div>
           <div class="sidenav-section">
             <div class="form-group">
-              <label class="form-label">GitHub Repo</label>
+              <label for="goalSidenavGithubRepo" class="form-label">GitHub Repo</label>
               <input
                 type="text"
                 id="goalSidenavGithubRepo"
@@ -11287,7 +11286,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">GitHub Milestone</label>
+              <label for="goalSidenavGithubMilestone" class="form-label">GitHub Milestone</label>
               <div class="flex items-center gap-2">
                 <input
                   type="number"
@@ -11362,7 +11361,7 @@
         <div class="sidenav-content">
           <div class="sidenav-section">
             <div class="form-group">
-              <label class="form-label">Name</label>
+              <label for="milestoneSidenavName" class="form-label">Name</label>
               <input
                 type="text"
                 id="milestoneSidenavName"
@@ -11371,7 +11370,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Description</label>
+              <label for="milestoneSidenavDescription" class="form-label">Description</label>
               <textarea
                 id="milestoneSidenavDescription"
                 rows="3"
@@ -11382,7 +11381,7 @@
           <div class="sidenav-section">
             <div class="sidenav-section-title">Details</div>
             <div class="form-group">
-              <label class="form-label">Project</label>
+              <label for="milestoneSidenavProject" class="form-label">Project</label>
               <input
                 type="text"
                 id="milestoneSidenavProject"
@@ -11395,7 +11394,7 @@
             </div>
             <div class="sidenav-grid">
               <div class="form-group">
-                <label class="form-label">Target Date</label>
+                <label for="milestoneSidenavTarget" class="form-label">Target Date</label>
                 <input
                   type="date"
                   id="milestoneSidenavTarget"
@@ -11403,7 +11402,7 @@
                 >
               </div>
               <div class="form-group">
-                <label class="form-label">Status</label>
+                <label for="milestoneSidenavStatus" class="form-label">Status</label>
                 <select id="milestoneSidenavStatus" class="form-select">
                   <option value="pending">Pending</option>
                   <option value="in-progress">In Progress</option>
@@ -11489,7 +11488,7 @@
         <div class="sidenav-content">
           <div class="sidenav-section">
             <div class="form-group">
-              <label class="form-label">Title</label>
+              <label for="retroSidenavTitle" class="form-label">Title</label>
               <input
                 type="text"
                 id="retroSidenavTitle"
@@ -11500,11 +11499,11 @@
             </div>
             <div class="sidenav-grid">
               <div class="form-group">
-                <label class="form-label">Date</label>
+                <label for="retroSidenavDate" class="form-label">Date</label>
                 <input type="date" id="retroSidenavDate" class="form-input">
               </div>
               <div class="form-group">
-                <label class="form-label">Status</label>
+                <label for="retroSidenavStatus" class="form-label">Status</label>
                 <select id="retroSidenavStatus" class="form-select">
                   <option value="open">Open</option>
                   <option value="closed">Closed</option>
@@ -11597,7 +11596,7 @@
         <div class="sidenav-content">
           <div class="sidenav-section">
             <div class="form-group">
-              <label class="form-label">Title</label>
+              <label for="mindmapSidenavTitle" class="form-label">Title</label>
               <input
                 type="text"
                 id="mindmapSidenavTitle"
@@ -11739,7 +11738,7 @@
         <div class="sidenav-content">
           <div class="sidenav-section">
             <div class="form-group">
-              <label class="form-label">Content</label>
+              <label for="stickySidenavContent" class="form-label">Content</label>
               <textarea
                 id="stickySidenavContent"
                 rows="6"
@@ -11829,23 +11828,23 @@
         <div class="sidenav-content">
           <div class="sidenav-section">
             <div class="form-group">
-              <label class="form-label">Investor Name</label>
+              <label for="safe-sidenav-investor" class="form-label">Investor Name</label>
               <input type="text" id="safe-sidenav-investor" class="form-input" placeholder="e.g. Jane Smith">
             </div>
             <div class="form-group">
-              <label class="form-label">Amount ($)</label>
+              <label for="safe-sidenav-amount" class="form-label">Amount ($)</label>
               <input type="number" id="safe-sidenav-amount" class="form-input" placeholder="e.g. 500000" min="0">
             </div>
             <div class="form-group">
-              <label class="form-label">Valuation Cap ($)</label>
+              <label for="safe-sidenav-valuation_cap" class="form-label">Valuation Cap ($)</label>
               <input type="number" id="safe-sidenav-valuation_cap" class="form-input" placeholder="e.g. 5000000" min="0">
             </div>
             <div class="form-group">
-              <label class="form-label">Discount (%)</label>
+              <label for="safe-sidenav-discount" class="form-label">Discount (%)</label>
               <input type="number" id="safe-sidenav-discount" class="form-input" placeholder="e.g. 20" min="0" max="100">
             </div>
             <div class="form-group">
-              <label class="form-label">Type</label>
+              <label for="safe-sidenav-type" class="form-label">Type</label>
               <select id="safe-sidenav-type" class="form-input">
                 <option value="post-money">Post-Money</option>
                 <option value="pre-money">Pre-Money</option>
@@ -11853,11 +11852,11 @@
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Date</label>
+              <label for="safe-sidenav-date" class="form-label">Date</label>
               <input type="date" id="safe-sidenav-date" class="form-input">
             </div>
             <div class="form-group">
-              <label class="form-label">Status</label>
+              <label for="safe-sidenav-status" class="form-label">Status</label>
               <select id="safe-sidenav-status" class="form-input">
                 <option value="draft">Draft</option>
                 <option value="signed">Signed</option>
@@ -11865,7 +11864,7 @@
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Notes</label>
+              <label for="safe-sidenav-notes" class="form-label">Notes</label>
               <textarea id="safe-sidenav-notes" class="form-input" rows="3"></textarea>
             </div>
           </div>
@@ -11896,11 +11895,11 @@
         <div class="sidenav-content">
           <div class="sidenav-section">
             <div class="form-group">
-              <label class="form-label">Name</label>
+              <label for="pipeline-sidenav-name" class="form-label">Name</label>
               <input type="text" id="pipeline-sidenav-name" class="form-input" placeholder="e.g. Sequoia Capital">
             </div>
             <div class="form-group">
-              <label class="form-label">Type</label>
+              <label for="pipeline-sidenav-type" class="form-label">Type</label>
               <select id="pipeline-sidenav-type" class="form-input">
                 <option value="vc">VC</option>
                 <option value="angel">Angel</option>
@@ -11910,7 +11909,7 @@
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Stage</label>
+              <label for="pipeline-sidenav-stage" class="form-label">Stage</label>
               <select id="pipeline-sidenav-stage" class="form-input">
                 <option value="lead">Lead</option>
                 <option value="associate">Associate</option>
@@ -11919,7 +11918,7 @@
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Status</label>
+              <label for="pipeline-sidenav-status" class="form-label">Status</label>
               <select id="pipeline-sidenav-status" class="form-input">
                 <option value="not_started">Not Started</option>
                 <option value="in_progress">In Progress</option>
@@ -11929,23 +11928,23 @@
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Target Amount ($)</label>
+              <label for="pipeline-sidenav-amount_target" class="form-label">Target Amount ($)</label>
               <input type="number" id="pipeline-sidenav-amount_target" class="form-input" placeholder="e.g. 1000000" min="0">
             </div>
             <div class="form-group">
-              <label class="form-label">Contact Email</label>
+              <label for="pipeline-sidenav-contact" class="form-label">Contact Email</label>
               <input type="email" id="pipeline-sidenav-contact" class="form-input" placeholder="e.g. partner@firm.com">
             </div>
             <div class="form-group">
-              <label class="form-label">Intro Date</label>
+              <label for="pipeline-sidenav-intro_date" class="form-label">Intro Date</label>
               <input type="date" id="pipeline-sidenav-intro_date" class="form-input">
             </div>
             <div class="form-group">
-              <label class="form-label">Last Contact</label>
+              <label for="pipeline-sidenav-last_contact" class="form-label">Last Contact</label>
               <input type="date" id="pipeline-sidenav-last_contact" class="form-input">
             </div>
             <div class="form-group">
-              <label class="form-label">Notes</label>
+              <label for="pipeline-sidenav-notes" class="form-label">Notes</label>
               <textarea id="pipeline-sidenav-notes" class="form-input" rows="3"></textarea>
             </div>
           </div>
@@ -11976,44 +11975,44 @@
         <div class="sidenav-content">
           <div class="sidenav-section">
             <div class="form-group">
-              <label class="form-label">Period (YYYY-MM)</label>
+              <label for="kpi-sidenav-period" class="form-label">Period (YYYY-MM)</label>
               <input type="text" id="kpi-sidenav-period" class="form-input" placeholder="e.g. 2026-02" pattern="\d{4}-\d{2}">
             </div>
             <div class="form-group">
-              <label class="form-label">MRR ($)</label>
+              <label for="kpi-sidenav-mrr" class="form-label">MRR ($)</label>
               <input type="number" id="kpi-sidenav-mrr" class="form-input" placeholder="Monthly Recurring Revenue" min="0">
               <p id="kpi-sidenav-arr-preview" class="kpi-arr-preview">ARR: —</p>
             </div>
             <div class="form-group">
-              <label class="form-label">Churn Rate (%)</label>
+              <label for="kpi-sidenav-churn_rate" class="form-label">Churn Rate (%)</label>
               <input type="number" id="kpi-sidenav-churn_rate" class="form-input" placeholder="e.g. 2.5" min="0" step="0.1">
             </div>
             <div class="form-group">
-              <label class="form-label">LTV ($)</label>
+              <label for="kpi-sidenav-ltv" class="form-label">LTV ($)</label>
               <input type="number" id="kpi-sidenav-ltv" class="form-input" placeholder="Customer Lifetime Value" min="0">
             </div>
             <div class="form-group">
-              <label class="form-label">CAC ($)</label>
+              <label for="kpi-sidenav-cac" class="form-label">CAC ($)</label>
               <input type="number" id="kpi-sidenav-cac" class="form-input" placeholder="Customer Acquisition Cost" min="0">
             </div>
             <div class="form-group">
-              <label class="form-label">MoM Growth Rate (%)</label>
+              <label for="kpi-sidenav-growth_rate" class="form-label">MoM Growth Rate (%)</label>
               <input type="number" id="kpi-sidenav-growth_rate" class="form-input" placeholder="e.g. 15" step="0.1">
             </div>
             <div class="form-group">
-              <label class="form-label">Active Users</label>
+              <label for="kpi-sidenav-active_users" class="form-label">Active Users</label>
               <input type="number" id="kpi-sidenav-active_users" class="form-input" placeholder="e.g. 1200" min="0">
             </div>
             <div class="form-group">
-              <label class="form-label">NRR — Net Revenue Retention (%)</label>
+              <label for="kpi-sidenav-nrr" class="form-label">NRR — Net Revenue Retention (%)</label>
               <input type="number" id="kpi-sidenav-nrr" class="form-input" placeholder="e.g. 110" min="0" step="0.1">
             </div>
             <div class="form-group">
-              <label class="form-label">Gross Margin (%)</label>
+              <label for="kpi-sidenav-gross_margin" class="form-label">Gross Margin (%)</label>
               <input type="number" id="kpi-sidenav-gross_margin" class="form-input" placeholder="e.g. 72" min="0" max="100" step="0.1">
             </div>
             <div class="form-group">
-              <label class="form-label">Notes</label>
+              <label for="kpi-sidenav-notes" class="form-label">Notes</label>
               <textarea id="kpi-sidenav-notes" class="form-input" rows="3"></textarea>
             </div>
           </div>
@@ -12044,11 +12043,11 @@
         <div class="sidenav-content">
           <div class="sidenav-section">
             <div class="form-group">
-              <label class="form-label">Title</label>
+              <label for="moscowSidenavTitle" class="form-label">Title</label>
               <input type="text" id="moscowSidenavTitle" required class="form-input">
             </div>
             <div class="form-group">
-              <label class="form-label">Date</label>
+              <label for="moscowSidenavDate" class="form-label">Date</label>
               <input type="date" id="moscowSidenavDate" class="form-input">
             </div>
           </div>
@@ -12110,11 +12109,11 @@
         <div class="sidenav-content">
           <div class="sidenav-section">
             <div class="form-group">
-              <label class="form-label">Title</label>
+              <label for="eisenhowerSidenavTitle" class="form-label">Title</label>
               <input type="text" id="eisenhowerSidenavTitle" required class="form-input">
             </div>
             <div class="form-group">
-              <label class="form-label">Date</label>
+              <label for="eisenhowerSidenavDate" class="form-label">Date</label>
               <input type="date" id="eisenhowerSidenavDate" class="form-input">
             </div>
           </div>
@@ -12192,7 +12191,7 @@
         <div class="sidenav-section">
           <div class="sidenav-grid">
             <div class="form-group">
-              <label class="form-label">Title</label><input
+              <label class="form-label" for="swotSidenavTitle">Title</label><input
                 type="text"
                 id="swotSidenavTitle"
                 class="form-input"
@@ -12200,7 +12199,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Date</label><input
+              <label class="form-label" for="swotSidenavDate">Date</label><input
                 type="date"
                 id="swotSidenavDate"
                 class="form-input"
@@ -12310,7 +12309,7 @@
         <div class="sidenav-section">
           <div class="sidenav-grid">
             <div class="form-group">
-              <label class="form-label">Title</label><input
+              <label class="form-label" for="riskSidenavTitle">Title</label><input
                 type="text"
                 id="riskSidenavTitle"
                 class="form-input"
@@ -12318,7 +12317,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Date</label><input
+              <label class="form-label" for="riskSidenavDate">Date</label><input
                 type="date"
                 id="riskSidenavDate"
                 class="form-input"
@@ -12434,7 +12433,7 @@
         <div class="sidenav-section">
           <div class="sidenav-grid">
             <div class="form-group">
-              <label class="form-label">Title</label><input
+              <label class="form-label" for="leanCanvasSidenavTitle">Title</label><input
                 type="text"
                 id="leanCanvasSidenavTitle"
                 class="form-input"
@@ -12442,7 +12441,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Date</label><input
+              <label class="form-label" for="leanCanvasSidenavDate">Date</label><input
                 type="date"
                 id="leanCanvasSidenavDate"
                 class="form-input"
@@ -12652,7 +12651,7 @@
         <div class="sidenav-section">
           <div class="sidenav-grid">
             <div class="form-group">
-              <label class="form-label">Title</label><input
+              <label class="form-label" for="bmcSidenavTitle">Title</label><input
                 type="text"
                 id="bmcSidenavTitle"
                 class="form-input"
@@ -12660,7 +12659,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Date</label><input
+              <label class="form-label" for="bmcSidenavDate">Date</label><input
                 type="date"
                 id="bmcSidenavDate"
                 class="form-input"
@@ -12833,7 +12832,7 @@
         <div class="sidenav-section">
           <div class="sidenav-grid">
             <div class="form-group">
-              <label class="form-label">Title</label><input
+              <label class="form-label" for="pvbSidenavTitle">Title</label><input
                 type="text"
                 id="pvbSidenavTitle"
                 class="form-input"
@@ -12841,7 +12840,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Date</label><input
+              <label class="form-label" for="pvbSidenavDate">Date</label><input
                 type="date"
                 id="pvbSidenavDate"
                 class="form-input"
@@ -12951,7 +12950,7 @@
         <div class="sidenav-section">
           <div class="sidenav-grid">
             <div class="form-group">
-              <label class="form-label">Title</label><input
+              <label class="form-label" for="briefSidenavTitle">Title</label><input
                 type="text"
                 id="briefSidenavTitle"
                 class="form-input"
@@ -12959,7 +12958,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Date</label><input
+              <label class="form-label" for="briefSidenavDate">Date</label><input
                 type="date"
                 id="briefSidenavDate"
                 class="form-input"
@@ -13677,7 +13676,7 @@
       <div class="sidenav-content">
         <div class="sidenav-section">
           <div class="form-group">
-            <label class="form-label">Title</label>
+            <label for="ideaSidenavTitle" class="form-label">Title</label>
             <input
               type="text"
               id="ideaSidenavTitle"
@@ -13688,7 +13687,7 @@
           </div>
           <div class="sidenav-grid">
             <div class="form-group">
-              <label class="form-label">Status</label>
+              <label for="ideaSidenavStatus" class="form-label">Status</label>
               <select id="ideaSidenavStatus" class="form-input">
                 <option value="new">New</option>
                 <option value="considering">Considering</option>
@@ -13700,7 +13699,7 @@
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Priority</label>
+              <label for="ideaSidenavPriority" class="form-label">Priority</label>
               <select id="ideaSidenavPriority" class="form-input">
                 <option value="">None</option>
                 <option value="high">High</option>
@@ -13710,7 +13709,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Project</label>
+            <label for="ideaSidenavProject" class="form-label">Project</label>
             <input
               type="text"
               id="ideaSidenavProject"
@@ -13721,7 +13720,7 @@
           </div>
           <div class="sidenav-grid">
             <div class="form-group">
-              <label class="form-label">Category</label>
+              <label for="ideaSidenavCategory" class="form-label">Category</label>
               <input
                 type="text"
                 id="ideaSidenavCategory"
@@ -13730,7 +13729,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Resources</label>
+              <label for="ideaSidenavResources" class="form-label">Resources</label>
               <input
                 type="text"
                 id="ideaSidenavResources"
@@ -13741,7 +13740,7 @@
           </div>
           <div class="sidenav-grid">
             <div class="form-group">
-              <label class="form-label">Start Date</label>
+              <label for="ideaSidenavStartDate" class="form-label">Start Date</label>
               <input
                 type="date"
                 id="ideaSidenavStartDate"
@@ -13749,7 +13748,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">End Date</label>
+              <label for="ideaSidenavEndDate" class="form-label">End Date</label>
               <input
                 type="date"
                 id="ideaSidenavEndDate"
@@ -13758,7 +13757,7 @@
             </div>
           </div>
           <div id="ideaSidenavArchiveDateRow" class="form-group hidden">
-            <label class="form-label" id="ideaSidenavArchiveDateLabel">Archive Date</label>
+            <label for="ideaSidenavArchiveDate" class="form-label" id="ideaSidenavArchiveDateLabel">Archive Date</label>
             <input
               type="date"
               id="ideaSidenavArchiveDate"
@@ -13766,7 +13765,7 @@
             >
           </div>
           <div class="form-group">
-            <label class="form-label">Subtasks</label>
+            <label for="ideaSidenavSubtaskInput" class="form-label">Subtasks</label>
             <div class="flex gap-2 mb-2">
               <input
                 type="text"
@@ -13779,7 +13778,7 @@
             <div id="ideaSidenavSubtaskList"></div>
           </div>
           <div class="form-group">
-            <label class="form-label">Description</label>
+            <label for="ideaSidenavDescription" class="form-label">Description</label>
             <textarea
               id="ideaSidenavDescription"
               class="form-input"
@@ -13823,7 +13822,7 @@
               </div>
             </div>
             <div>
-              <label class="text-xs text-muted mb-1 block"
+              <label for="ideaSidenavLinkSearch" class="text-xs text-muted mb-1 block"
               >Add Link</label>
               <input
                 type="text"
@@ -13898,7 +13897,7 @@
             ID: <span id="c4SidenavIdValue"></span>
           </div>
           <div class="form-group">
-            <label class="form-label">Component Name</label>
+            <label for="c4SidenavName" class="form-label">Component Name</label>
             <input
               type="text"
               id="c4SidenavName"
@@ -13909,7 +13908,7 @@
           </div>
           <div class="sidenav-grid grid-cols-3">
             <div class="form-group">
-              <label class="form-label">Level</label>
+              <label for="c4SidenavLevel" class="form-label">Level</label>
               <select id="c4SidenavLevel" class="form-input">
                 <option value="context">Context</option>
                 <option value="container">Container</option>
@@ -13918,7 +13917,7 @@
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Type</label>
+              <label for="c4SidenavType" class="form-label">Type</label>
               <select id="c4SidenavType" class="form-input">
                 <option value="System">System</option>
                 <option value="Person">Person</option>
@@ -13926,7 +13925,7 @@
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Technology</label>
+              <label for="c4SidenavTechnology" class="form-label">Technology</label>
               <input
                 type="text"
                 id="c4SidenavTechnology"
@@ -13936,7 +13935,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Description</label>
+            <label for="c4SidenavDescription" class="form-label">Description</label>
             <textarea
               id="c4SidenavDescription"
               class="form-input"
@@ -13946,7 +13945,7 @@
           </div>
           <div class="sidenav-grid">
             <div class="form-group">
-              <label class="form-label">X Position</label>
+              <label for="c4SidenavX" class="form-label">X Position</label>
               <input
                 type="number"
                 id="c4SidenavX"
@@ -13955,7 +13954,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Y Position</label>
+              <label for="c4SidenavY" class="form-label">Y Position</label>
               <input
                 type="number"
                 id="c4SidenavY"
@@ -14191,7 +14190,7 @@
       <div class="sidenav-content">
         <div class="sidenav-section">
           <div class="form-group">
-            <label class="form-label">Plan Title</label>
+            <label for="capacitySidenavTitle" class="form-label">Plan Title</label>
             <input
               type="text"
               id="capacitySidenavTitle"
@@ -14202,11 +14201,11 @@
           </div>
           <div class="sidenav-grid">
             <div class="form-group">
-              <label class="form-label">Date</label>
+              <label for="capacitySidenavDate" class="form-label">Date</label>
               <input type="date" id="capacitySidenavDate" class="form-input">
             </div>
             <div class="form-group">
-              <label class="form-label">Budget (hours)</label>
+              <label for="capacitySidenavBudget" class="form-label">Budget (hours)</label>
               <input
                 type="number"
                 id="capacitySidenavBudget"
@@ -14299,7 +14298,7 @@
         <div class="sidenav-content">
           <div class="sidenav-section">
             <div class="form-group">
-              <label class="form-label">Name *</label>
+              <label for="orgchartSidenavName" class="form-label">Name *</label>
               <input
                 type="text"
                 id="orgchartSidenavName"
@@ -14308,7 +14307,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Title *</label>
+              <label for="orgchartSidenavTitle" class="form-label">Title *</label>
               <input
                 type="text"
                 id="orgchartSidenavTitle"
@@ -14318,7 +14317,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Departments *</label>
+              <label for="orgchartSidenavDeptInput" class="form-label">Departments *</label>
               <div id="orgchartDeptChips" class="flex flex-wrap gap-1 mb-1"></div>
               <div class="flex gap-1">
                 <input
@@ -14334,7 +14333,7 @@
               <input type="hidden" id="orgchartSidenavDepartments">
             </div>
             <div class="form-group">
-              <label class="form-label">Reports To</label>
+              <label for="orgchartSidenavReportsTo" class="form-label">Reports To</label>
               <select id="orgchartSidenavReportsTo" class="form-select">
                 <option value="">None (Top Level)</option>
               </select>
@@ -14343,7 +14342,7 @@
           <div class="sidenav-section">
             <div class="sidenav-section-title">Contact Info</div>
             <div class="form-group">
-              <label class="form-label">Email</label>
+              <label for="orgchartSidenavEmail" class="form-label">Email</label>
               <input
                 type="email"
                 id="orgchartSidenavEmail"
@@ -14352,7 +14351,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Phone</label>
+              <label for="orgchartSidenavPhone" class="form-label">Phone</label>
               <input
                 type="tel"
                 id="orgchartSidenavPhone"
@@ -14364,7 +14363,7 @@
           <div class="sidenav-section">
             <div class="sidenav-section-title">Additional Info</div>
             <div class="form-group">
-              <label class="form-label">Start Date</label>
+              <label for="orgchartSidenavStartDate" class="form-label">Start Date</label>
               <input
                 type="date"
                 id="orgchartSidenavStartDate"
@@ -14372,7 +14371,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Notes</label>
+              <label for="orgchartSidenavNotes" class="form-label">Notes</label>
               <textarea
                 id="orgchartSidenavNotes"
                 rows="3"
@@ -14440,7 +14439,7 @@
         <div class="sidenav-content">
           <div class="sidenav-section">
             <div class="form-group">
-              <label class="form-label">Name *</label>
+              <label for="peopleSidenavName" class="form-label">Name *</label>
               <input
                 type="text"
                 id="peopleSidenavName"
@@ -14449,7 +14448,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Title</label>
+              <label for="peopleSidenavTitle" class="form-label">Title</label>
               <input
                 type="text"
                 id="peopleSidenavTitle"
@@ -14458,7 +14457,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Role</label>
+              <label for="peopleSidenavRole" class="form-label">Role</label>
               <input
                 type="text"
                 id="peopleSidenavRole"
@@ -14467,7 +14466,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Departments</label>
+              <label for="peopleSidenavDepartments" class="form-label">Departments</label>
               <input
                 type="text"
                 id="peopleSidenavDepartments"
@@ -14479,7 +14478,7 @@
               </p>
             </div>
             <div class="form-group">
-              <label class="form-label">Reports To</label>
+              <label for="peopleSidenavReportsTo" class="form-label">Reports To</label>
               <select id="peopleSidenavReportsTo" class="form-select">
                 <option value="">None</option>
               </select>
@@ -14488,7 +14487,7 @@
           <div class="sidenav-section">
             <div class="sidenav-section-title">Contact Info</div>
             <div class="form-group">
-              <label class="form-label">Email</label>
+              <label for="peopleSidenavEmail" class="form-label">Email</label>
               <input
                 type="email"
                 id="peopleSidenavEmail"
@@ -14497,7 +14496,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Phone</label>
+              <label for="peopleSidenavPhone" class="form-label">Phone</label>
               <input
                 type="tel"
                 id="peopleSidenavPhone"
@@ -14509,7 +14508,7 @@
           <div class="sidenav-section">
             <div class="sidenav-section-title">Work Schedule</div>
             <div class="form-group">
-              <label class="form-label">Hours Per Day</label>
+              <label for="peopleSidenavHoursPerDay" class="form-label">Hours Per Day</label>
               <input
                 type="number"
                 id="peopleSidenavHoursPerDay"
@@ -14521,7 +14520,7 @@
               >
             </div>
             <div class="form-group">
-              <label class="form-label">Working Days</label>
+              <label for="peopleSidenavWorkingDays" class="form-label">Working Days</label>
               <input
                 type="text"
                 id="peopleSidenavWorkingDays"
@@ -14533,7 +14532,7 @@
               </p>
             </div>
             <div class="form-group">
-              <label class="form-label">Start Date</label>
+              <label for="peopleSidenavStartDate" class="form-label">Start Date</label>
               <input
                 type="date"
                 id="peopleSidenavStartDate"
@@ -14544,7 +14543,7 @@
           <div class="sidenav-section">
             <div class="sidenav-section-title">Agent Configuration</div>
             <div class="form-group">
-              <label class="form-label">Agent Type</label>
+              <label for="peopleSidenavAgentType" class="form-label">Agent Type</label>
               <select id="peopleSidenavAgentType" class="form-select">
                 <option value="">Not set</option>
                 <option value="human">Human</option>
@@ -14553,7 +14552,7 @@
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Skills</label>
+              <label for="peopleSidenavSkills" class="form-label">Skills</label>
               <input
                 type="text"
                 id="peopleSidenavSkills"
@@ -14565,7 +14564,7 @@
               </p>
             </div>
             <div class="form-group">
-              <label class="form-label">Models</label>
+              <label for="peopleSidenavModels" class="form-label">Models</label>
               <textarea
                 id="peopleSidenavModels"
                 rows="3"
@@ -14577,7 +14576,7 @@
               </p>
             </div>
             <div class="form-group">
-              <label class="form-label">System Prompt</label>
+              <label for="peopleSidenavSystemPrompt" class="form-label">System Prompt</label>
               <textarea
                 id="peopleSidenavSystemPrompt"
                 rows="3"
