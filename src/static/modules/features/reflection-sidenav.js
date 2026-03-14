@@ -313,7 +313,19 @@ export class ReflectionSidenavModule {
           showToast("Failed to create reflection", "error");
           return;
         }
-        const result = await response.json();
+        let result;
+        try {
+          result = await response.json();
+        } catch {
+          this._showSaveStatus("Error");
+          showToast("Unexpected server response", "error");
+          return;
+        }
+        if (!result?.id) {
+          this._showSaveStatus("Error");
+          showToast("Invalid response from server", "error");
+          return;
+        }
         this.editingId = result.id;
         this._showSaveStatus("Created");
         document.getElementById("reflectionSidenavHeader").textContent =
@@ -572,7 +584,19 @@ export class ReflectionSidenavModule {
           showToast("Failed to create template", "error");
           return;
         }
-        const result = await response.json();
+        let result;
+        try {
+          result = await response.json();
+        } catch {
+          this._showTemplateSaveStatus("Error");
+          showToast("Unexpected server response", "error");
+          return;
+        }
+        if (!result?.id) {
+          this._showTemplateSaveStatus("Error");
+          showToast("Invalid response from server", "error");
+          return;
+        }
         this.editingTemplateId = result.id;
         this._showTemplateSaveStatus("Created");
         document.getElementById(

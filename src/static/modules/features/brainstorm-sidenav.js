@@ -237,7 +237,19 @@ export class BrainstormSidenavModule {
           showToast("Failed to create brainstorm", "error");
           return;
         }
-        const result = await response.json();
+        let result;
+        try {
+          result = await response.json();
+        } catch {
+          this.showSaveStatus("Error");
+          showToast("Unexpected server response", "error");
+          return;
+        }
+        if (!result?.id) {
+          this.showSaveStatus("Error");
+          showToast("Invalid response from server", "error");
+          return;
+        }
         this.editingId = result.id;
         this.showSaveStatus("Created");
 

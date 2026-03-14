@@ -75,10 +75,14 @@ export class ReflectionModule {
 
     if (this.activeTab === "reflections") {
       tabReflections.classList.add("active");
+      tabReflections.setAttribute("aria-selected", "true");
       tabTemplates.classList.remove("active");
+      tabTemplates.setAttribute("aria-selected", "false");
     } else {
       tabTemplates.classList.add("active");
+      tabTemplates.setAttribute("aria-selected", "true");
       tabReflections.classList.remove("active");
+      tabReflections.setAttribute("aria-selected", "false");
     }
   }
 
