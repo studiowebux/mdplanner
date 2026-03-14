@@ -236,8 +236,8 @@ cerveauRouter.openapi(registryRoute, async (c) => {
 
 cerveauRouter.openapi(protocolRoute, async (c) => {
   const reader = getReader(c);
-  const [stacks, practices, workflows, hooks, skills, agents] =
-    await Promise.all([
+  const [stacks, practices, workflows, hooks, skills, agents] = await Promise
+    .all([
       reader.protocolRuleNames("stack"),
       reader.protocolRuleNames("practices"),
       reader.protocolRuleNames("workflow"),

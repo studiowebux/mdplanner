@@ -453,7 +453,11 @@ if (cliArgs.readOnly) {
 }
 if (cerveauReader) {
   const brains = await cerveauReader.brains();
-  console.log(`Cerveau ${cliArgs.cerveauDir} (${brains.length} brain${brains.length !== 1 ? "s" : ""})`);
+  console.log(
+    `Cerveau ${cliArgs.cerveauDir} (${brains.length} brain${
+      brains.length !== 1 ? "s" : ""
+    })`,
+  );
 }
 if (cliArgs.webdav) {
   console.log(`WebDAV http://localhost:${cliArgs.port}/webdav`);
