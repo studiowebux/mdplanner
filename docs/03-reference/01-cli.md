@@ -35,11 +35,9 @@ mdplanner keygen-secret
 | `--backup-dir <path>`         | `MDPLANNER_BACKUP_DIR`        | —        | Directory for automated backups                      |
 | `--backup-interval <hrs>`     | `MDPLANNER_BACKUP_INTERVAL`   | —        | Backup frequency in hours (requires `--backup-dir`)  |
 | `--backup-public-key <hex>`   | `MDPLANNER_BACKUP_PUBLIC_KEY` | —        | RSA public key hex for encrypted backups             |
-| `--brains-config <path>`      | `MDPLANNER_BRAINS_CONFIG`     | —        | Path to `brains.json` for Brain Manager UI           |
 | `--cors-origin <origin>`      | `MDPLANNER_CORS_ORIGIN`       | allow all | Restrict CORS to this origin                        |
 | `--max-body-size <MB>`        | `MDPLANNER_MAX_BODY_SIZE`     | `10`     | Max request body in MB                               |
 | `--rate-limit <n>`            | `MDPLANNER_RATE_LIMIT`        | `200`    | Max requests per minute per IP                       |
-| `--claude-dir <path>`         | `MDPLANNER_CLAUDE_DIR`        | `~/.claude` | Claude config directory                           |
 | `-h, --help`                  | —                             | —        | Show help message                                    |
 
 Environment variables are fallbacks. CLI flags take precedence.
