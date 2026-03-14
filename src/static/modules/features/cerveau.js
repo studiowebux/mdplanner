@@ -290,25 +290,14 @@ export class CerveauModule {
     `;
 
     this.expandedDirs.clear();
-    this.fileCache.clear();
-    await this._loadDir(brain.path);
-  }
-
-  async _loadDir(path) {
-    if (!this.fileCache.has(path)) {
-      const files = await CerveauAPI.fetchFiles(path);
-      this.fileCache.set(path, files);
-    }
+    this.treeData = await CerveauAPI.fetchTree(brain.path);
     this._renderTree();
   }
 
   _renderTree() {
     const tree = document.getElementById("cerveauFileTree");
-    if (!tree) return;
-    const brain = this.brains.find((b) => b.name === this.selectedBrain);
-    if (!brain) return;
-    const rootFiles = this.fileCache.get(brain.path) || [];
-    tree.innerHTML = this._renderEntries(rootFiles, 0);
+    if (!tree || !this.treeData) return;
+    tree.innerHTML = this._renderEntries(this.treeData, 0);
   }
 
   _renderEntries(entries, depth) {
@@ -317,9 +306,7 @@ export class CerveauModule {
         const indent = depth * 1.25;
         if (entry.isDir) {
           const expanded = this.expandedDirs.has(entry.path);
-          const children = expanded
-            ? this.fileCache.get(entry.path) || []
-            : [];
+          const children = entry.children || [];
           return `
             <div class="cerveau-file-entry cerveau-file-dir ${expanded ? "expanded" : ""}"
               style="padding-left: ${indent}rem" data-path="${entry.path}">
@@ -350,14 +337,13 @@ export class CerveauModule {
       .join("");
   }
 
-  async _toggleDir(path) {
+  _toggleDir(path) {
     if (this.expandedDirs.has(path)) {
       this.expandedDirs.delete(path);
-      this._renderTree();
     } else {
       this.expandedDirs.add(path);
-      await this._loadDir(path);
     }
+    this._renderTree();
   }
 
   async _showFile(path) {

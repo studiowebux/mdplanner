@@ -212,6 +212,31 @@ const brainMemoryRoute = createRoute({
   },
 });
 
+const treeRoute = createRoute({
+  method: "get",
+  path: "/tree",
+  tags: ["Cerveau"],
+  summary: "Get full recursive directory tree",
+  operationId: "getCerveauTree",
+  request: {
+    query: z.object({
+      path: z.string().openapi({
+        description: "Relative path to root of tree",
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(FileEntrySchema) } },
+      description: "Recursive file tree",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid path",
+    },
+  },
+});
+
 // --- Handlers ---
 
 cerveauRouter.openapi(manifestRoute, async (c) => {
@@ -275,6 +300,21 @@ cerveauRouter.openapi(readFileRoute, async (c) => {
     if (e instanceof Deno.errors.NotFound) {
       return c.json({ error: "file not found" }, 404);
     }
+    return c.json(
+      { error: e instanceof Error ? e.message : String(e) },
+      400,
+    );
+  }
+});
+
+cerveauRouter.openapi(treeRoute, async (c) => {
+  const reader = getReader(c);
+  const { path: relPath } = c.req.valid("query");
+  if (!relPath) return c.json({ error: "path is required" }, 400);
+  try {
+    const tree = await reader.listTree(relPath);
+    return c.json(tree, 200);
+  } catch (e) {
     return c.json(
       { error: e instanceof Error ? e.message : String(e) },
       400,

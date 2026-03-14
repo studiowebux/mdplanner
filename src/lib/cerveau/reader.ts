@@ -43,6 +43,7 @@ export interface FileEntry {
   isDir: boolean;
   isSymlink: boolean;
   size?: number;
+  children?: FileEntry[];
 }
 
 // --- Reader ---
@@ -119,6 +120,17 @@ export class CerveauReader {
       if (a.isDir !== b.isDir) return a.isDir ? -1 : 1;
       return a.name.localeCompare(b.name);
     });
+  }
+
+  /** Recursively list the full directory tree. */
+  async listTree(relPath: string): Promise<FileEntry[]> {
+    const entries = await this.listFiles(relPath);
+    for (const entry of entries) {
+      if (entry.isDir) {
+        entry.children = await this.listTree(entry.path);
+      }
+    }
+    return entries;
   }
 
   /** Read a file's content within the cerveau tree. */
