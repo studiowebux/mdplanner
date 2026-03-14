@@ -2235,7 +2235,7 @@
             </div>
 
             <!-- Prompt panel — overlay from the right, inside the chat container -->
-            <div class="prompt-panel" id="promptPanel" style="display:none">
+            <div class="prompt-panel hidden" id="promptPanel">
               <div class="config-panel-header">
                 <span>Saved Prompts</span>
                 <button class="btn-ghost" onclick="App.togglePromptPanel()">Close</button>
@@ -2250,7 +2250,7 @@
                     <button class="btn-ghost" onclick="App.exportPrompts()">Export JSON</button>
                     <label class="prompt-import-label">
                       Import
-                      <input type="file" accept=".json" style="display:none" onchange="App.importPrompts(this)" />
+                      <input type="file" accept=".json" class="hidden" onchange="App.importPrompts(this)" />
                     </label>
                   </div>
                 </div>
@@ -2260,9 +2260,9 @@
               <div class="left">
                 <span class="connection-dot" id="connectionDot" title="Connection status"></span>
                 <span>Ollama Chat</span>
-                <span class="badge" id="headerModel" style="display: none"></span>
-                <span class="badge" id="headerCtx" style="display: none"></span>
-                <span class="ctx-usage" id="ctxUsageWrap" style="display: none">
+                <span class="badge hidden" id="headerModel"></span>
+                <span class="badge hidden" id="headerCtx"></span>
+                <span class="ctx-usage hidden" id="ctxUsageWrap">
                   <span class="ctx-usage-text" id="ctxUsage"></span>
                   <span class="ctx-usage-track"><span class="ctx-usage-bar" id="ctxBar"></span></span>
                 </span>
@@ -2276,7 +2276,7 @@
               </div>
             </header>
 
-            <div class="branch-nav" id="branchNav" style="display:none">
+            <div class="branch-nav hidden" id="branchNav">
               <button id="branchPrev" onclick="App.navigateBranch(-1)">&lt;</button>
               <span id="branchLabel"></span>
               <button id="branchNext" onclick="App.navigateBranch(1)">&gt;</button>
@@ -8940,15 +8940,13 @@
               </button>
               <button
                 id="editMindmapBtn"
-                class="bg-success text-white px-3 py-2 rounded-lg hover:bg-success transition-colors"
-                style="display: none"
+                class="bg-success text-white px-3 py-2 rounded-lg hover:bg-success transition-colors hidden"
               >
                 Edit
               </button>
               <button
                 id="deleteMindmapBtn"
-                class="btn-danger py-2 rounded-lg"
-                style="display: none"
+                class="btn-danger py-2 rounded-lg hidden"
               >
                 Delete
               </button>
@@ -9281,14 +9279,14 @@
     </main>
 
     <!-- Hidden File Input for CSV Import -->
-    <input type="file" id="csvFileInput" accept=".csv" style="display: none">
+    <input type="file" id="csvFileInput" accept=".csv" class="hidden">
 
     <!-- Hidden File Input for Markdown Import -->
     <input
       type="file"
       id="markdownFileInput"
       accept=".md,.markdown"
-      style="display: none"
+      class="hidden"
     >
 
     <!-- Custom Section Modal -->
