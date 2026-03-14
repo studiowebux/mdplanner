@@ -214,8 +214,6 @@ export class BoardView {
         const existingZone = tasksContainer.querySelector(".drop-zone");
         if (existingZone) {
           existingZone.classList.add("drop-zone-expand");
-          existingZone.style.flex = "1";
-          existingZone.style.minHeight = "48px";
         }
       }
 

@@ -128,7 +128,7 @@ body[data-current-view="ollama"] #breadcrumb {
   font-weight: normal;
 }
 
-.ollama-view-root .ctx-usage {
+.ollama-view-root .ctx-usage:not(.hidden) {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
