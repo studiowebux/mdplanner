@@ -49,6 +49,7 @@
     "@std/path": "jsr:@std/path@^1.0.0",
     "@std/fs": "jsr:@std/fs@^1.0.0",
     "@std/assert": "jsr:@std/assert@^1.0.0",
+    "@studiowebux/deno-minilog": "jsr:@studiowebux/deno-minilog@0.4.1",
     "hono": "npm:hono@4.12.5",
     "hono/cors": "npm:hono@4.12.5/cors",
     "hono/deno": "npm:hono@4.12.5/deno",

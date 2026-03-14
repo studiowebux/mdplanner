@@ -8,6 +8,7 @@ import { createMcpHonoRouter } from "./src/mcp/http.ts";
 import { initProject, printInitSuccess } from "./src/lib/init.ts";
 import { createWebDavHandler } from "./src/lib/webdav/handler.ts";
 import { GITHUB_REPO, VERSION } from "./src/lib/version.ts";
+import { log } from "./src/lib/logger.ts";
 import { validateProjectPath } from "./src/lib/cli.ts";
 import { generateKeyPair } from "./src/lib/backup/crypto.ts";
 import { generateSecretKey } from "./src/lib/secrets.ts";
@@ -336,7 +337,7 @@ if (cliArgs.backupDir && cliArgs.backupIntervalHours > 0) {
     publicKeyHex: cliArgs.backupPublicKey,
   });
 } else if (cliArgs.backupDir && cliArgs.backupIntervalHours === 0) {
-  console.warn(
+  log.warn(
     "[backup] --backup-dir set but --backup-interval not provided — automated backups disabled. Use POST /api/backup/trigger for manual backups.",
   );
 }
@@ -356,7 +357,7 @@ if (cliArgs.cerveauDir) {
 const app = new Hono();
 
 // HTTP request logging — logs method, path, status, and duration
-app.use("*", logger());
+app.use("*", logger((message: string) => log.info(message)));
 
 // API routes
 const apiRouter = createApiRouter(projectManager, {
@@ -439,45 +440,45 @@ app.use(
   }),
 );
 
-console.log(`mdplanner v${VERSION}`);
-console.log(`Server  http://localhost:${cliArgs.port}`);
-console.log(`MCP     http://localhost:${cliArgs.port}/mcp`);
-console.log(`Project ${cliArgs.projectPath}`);
+log.info(`mdplanner v${VERSION}`);
+log.info(`Server  http://localhost:${cliArgs.port}`);
+log.info(`MCP     http://localhost:${cliArgs.port}/mcp`);
+log.info(`Project ${cliArgs.projectPath}`);
 if (cliArgs.cache) {
-  console.log(`Cache   ${cliArgs.projectPath}/.mdplanner.db`);
+  log.info(`Cache   ${cliArgs.projectPath}/.mdplanner.db`);
 }
 if (cliArgs.mcpToken) {
-  console.log(`MCP auth enabled (bearer token)`);
+  log.info(`MCP auth enabled (bearer token)`);
 }
 if (cliArgs.apiToken) {
-  console.log(`API auth enabled (session cookie + bearer token)`);
+  log.info(`API auth enabled (session cookie + bearer token)`);
 }
 if (cliArgs.readOnly) {
-  console.log(`Mode    read-only (mutations blocked)`);
+  log.info(`Mode    read-only (mutations blocked)`);
 }
 if (cerveauReader) {
   const brains = await cerveauReader.brains();
-  console.log(
+  log.info(
     `Cerveau ${cliArgs.cerveauDir} (${brains.length} brain${
       brains.length !== 1 ? "s" : ""
     })`,
   );
 }
 if (cliArgs.webdav) {
-  console.log(`WebDAV http://localhost:${cliArgs.port}/webdav`);
-  if (cliArgs.webdavUser) console.log(`WebDAV auth enabled (basic auth)`);
+  log.info(`WebDAV http://localhost:${cliArgs.port}/webdav`);
+  if (cliArgs.webdavUser) log.info(`WebDAV auth enabled (basic auth)`);
 }
 const projects = await projectManager.scanProjects();
-console.log(`Found ${projects.length} project(s):`);
+log.info(`Found ${projects.length} project(s):`);
 projects.forEach((p) =>
-  console.log(`  - ${p.filename} (${p.name}, ${p.taskCount} tasks)`)
+  log.info(`  - ${p.filename} (${p.name}, ${p.taskCount} tasks)`)
 );
 
 const server = Deno.serve({ port: cliArgs.port }, app.fetch);
 
 // Graceful shutdown — drain connections on SIGTERM/SIGINT
 const shutdown = async () => {
-  console.log("\nShutting down...");
+  log.info("Shutting down...");
   await server.shutdown();
   Deno.exit(0);
 };

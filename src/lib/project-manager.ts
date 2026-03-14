@@ -1,5 +1,6 @@
 import { DirectoryMarkdownParser } from "./parser/directory/parser.ts";
 import { CacheDatabase, CacheSync, SearchEngine } from "./cache/index.ts";
+import { log } from "./logger.ts";
 
 /**
  * ProjectManager - Manages a single directory-based project
@@ -124,7 +125,7 @@ export class ProjectManager {
     try {
       await this.cache.sync.syncOneTable(table);
     } catch (e) {
-      console.error(`[cache] write-through failed for table "${table}":`, e);
+      log.error(`[cache] write-through failed for table "${table}": ${e}`);
     }
   }
 
@@ -137,10 +138,7 @@ export class ProjectManager {
     try {
       this.cache.sync.remove(table, id);
     } catch (e) {
-      console.error(
-        `[cache] purge failed for table "${table}", id "${id}":`,
-        e,
-      );
+      log.error(`[cache] purge failed for table "${table}", id "${id}": ${e}`);
     }
   }
 
@@ -259,7 +257,7 @@ export class ProjectManager {
         isDirectory: true,
       }];
     } catch (e) {
-      console.error("Failed to read project:", e);
+      log.error(`Failed to read project: ${e}`);
       return [];
     }
   }
