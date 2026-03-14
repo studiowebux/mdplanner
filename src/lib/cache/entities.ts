@@ -412,6 +412,89 @@ export const ENTITIES: EntityDef[] = [
   },
 
   // ----------------------------------------------------------
+  // Reflection Templates
+  // ----------------------------------------------------------
+  {
+    table: "reflection_templates",
+    schema: `CREATE TABLE IF NOT EXISTS reflection_templates (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  tags TEXT,
+  questions TEXT,
+  created TEXT
+)`,
+    fts: {
+      type: "reflection_template",
+      columns: ["id", "title", "questions"],
+      titleCol: "title",
+      contentCol: "questions",
+    },
+    sync: async (parser, db) => {
+      const templates = await parser.readReflectionTemplates();
+      db.execute("DELETE FROM reflection_templates");
+      for (const t of templates) {
+        db.execute(
+          `INSERT INTO reflection_templates (id, title, description, tags, questions, created)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+          [
+            val(t.id),
+            val(t.title),
+            val(t.description),
+            json(t.tags),
+            val((t.questions || []).join("\n")),
+            val(t.created),
+          ],
+        );
+      }
+      return templates.length;
+    },
+  },
+
+  // ----------------------------------------------------------
+  // Reflections
+  // ----------------------------------------------------------
+  {
+    table: "reflections",
+    schema: `CREATE TABLE IF NOT EXISTS reflections (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  tags TEXT,
+  template_id TEXT,
+  questions TEXT,
+  created TEXT
+)`,
+    fts: {
+      type: "reflection",
+      columns: ["id", "title", "questions"],
+      titleCol: "title",
+      contentCol: "questions",
+    },
+    sync: async (parser, db) => {
+      const reflections = await parser.readReflections();
+      db.execute("DELETE FROM reflections");
+      for (const r of reflections) {
+        const questionsText = (r.questions || [])
+          .map((q) => `${q.question}: ${q.answer || ""}`)
+          .join("\n");
+        db.execute(
+          `INSERT INTO reflections (id, title, tags, template_id, questions, created)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+          [
+            val(r.id),
+            val(r.title),
+            json(r.tags),
+            val(r.templateId),
+            val(questionsText),
+            val(r.created),
+          ],
+        );
+      }
+      return reflections.length;
+    },
+  },
+
+  // ----------------------------------------------------------
   // Retrospectives
   // ----------------------------------------------------------
   {
