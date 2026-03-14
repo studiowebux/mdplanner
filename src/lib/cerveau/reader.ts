@@ -121,6 +121,10 @@ export class CerveauReader {
   async readFile(relPath: string): Promise<string> {
     const absPath = this.resolve(relPath);
     this.guardPath(absPath);
+    const info = await Deno.stat(absPath);
+    if (info.isDirectory) {
+      throw new Error("Is a directory");
+    }
     return await Deno.readTextFile(absPath);
   }
 
