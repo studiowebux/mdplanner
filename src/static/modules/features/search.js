@@ -107,14 +107,22 @@ export class GlobalSearch {
     }
 
     // Client-side task ID lookup — works without cache and handles stale cache.
-    // Pattern: task_<13+digits>_<alphanumeric>
+    // Full ID: task_<13+digits>_<alphanumeric>
+    // Partial suffix: short alphanumeric string matching the end of an ID
     const taskIdMatch = /^task_\d{10,}_[a-z0-9]+$/i.test(trimmed)
       ? this.taskManager.findTaskById(trimmed)
       : null;
+    const suffixMatches = !taskIdMatch && /^[a-z0-9]{3,8}$/i.test(trimmed)
+      ? _findBySuffix(this.taskManager.tasks, trimmed)
+      : [];
+
+    const idResults = taskIdMatch
+      ? [_taskToResult(taskIdMatch)]
+      : suffixMatches.map(_taskToResult);
 
     if (!this.cacheEnabled) {
-      if (taskIdMatch) {
-        this.results = [_taskToResult(taskIdMatch)];
+      if (idResults.length > 0) {
+        this.results = idResults;
         this.activeIndex = -1;
         this._renderResults(trimmed);
       } else {
@@ -127,9 +135,11 @@ export class GlobalSearch {
       const data = await SearchAPI.search(trimmed, { limit: 25 });
       let results = data.results ?? [];
 
-      // Prepend in-memory task match if cache didn't return it (stale cache)
-      if (taskIdMatch && !results.some((r) => r.id === trimmed)) {
-        results = [_taskToResult(taskIdMatch), ...results];
+      // Prepend in-memory ID matches not already in cache results
+      const cacheIds = new Set(results.map((r) => r.id));
+      const extra = idResults.filter((r) => !cacheIds.has(r.id));
+      if (extra.length > 0) {
+        results = [...extra, ...results];
       }
 
       this.results = results;
@@ -289,6 +299,25 @@ export class GlobalSearch {
       }
     });
   }
+}
+
+/** Find tasks whose ID ends with the given suffix (case-insensitive). */
+function _findBySuffix(tasks, suffix) {
+  const lower = suffix.toLowerCase();
+  const matches = [];
+  for (const task of tasks) {
+    if (task.id.toLowerCase().endsWith(lower)) {
+      matches.push(task);
+    }
+    if (task.children) {
+      for (const child of task.children) {
+        if (child.id.toLowerCase().endsWith(lower)) {
+          matches.push(child);
+        }
+      }
+    }
+  }
+  return matches;
 }
 
 function _taskToResult(task) {

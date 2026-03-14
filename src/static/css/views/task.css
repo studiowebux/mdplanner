@@ -118,6 +118,18 @@
   top: 2.5rem;
 }
 
+/* Non-sticky scroll anchor placed before each section header.
+   scrollIntoView targets this instead of the sticky header so
+   scroll position is always correct in both directions. */
+.section-scroll-anchor {
+  height: 0;
+  overflow: hidden;
+}
+
+#listView.jump-bar-active .section-scroll-anchor {
+  scroll-margin-top: 2.5rem;
+}
+
 .list-section-header.drag-over {
   background-color: var(--color-bg-active);
 }

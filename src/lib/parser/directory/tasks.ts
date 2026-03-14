@@ -103,7 +103,7 @@ export class TasksDirectoryParser {
     }
 
     if (orderedSections.length === 0) {
-      return insertPendingReview(Array.from(allDirs));
+      return sortByDefaultOrder(Array.from(allDirs));
     }
 
     // Return ordered sections that exist, then any extras not in the order file
@@ -981,18 +981,33 @@ export class TasksDirectoryParser {
   }
 }
 
+/** Default workflow order when no .order file exists. */
+const DEFAULT_SECTION_ORDER = [
+  "Backlog",
+  "Todo",
+  "In Progress",
+  "Pending Review",
+  "Done",
+];
+
 /**
- * Insert "Pending Review" between "In Progress" and "Done" in a section list.
- * Used when the section appears on disk but is not yet in the .order file.
+ * Sort sections by the default workflow order when no .order file exists.
+ * Known sections appear in workflow order; unknown sections are appended
+ * alphabetically at the end.
  */
-function insertPendingReview(sections: string[]): string[] {
-  if (!sections.includes("Pending Review")) return sections;
-  const result = sections.filter((s) => s !== "Pending Review");
-  const doneIdx = result.indexOf("Done");
-  if (doneIdx !== -1) {
-    result.splice(doneIdx, 0, "Pending Review");
-  } else {
-    result.push("Pending Review");
+function sortByDefaultOrder(sections: string[]): string[] {
+  const known: string[] = [];
+  const unknown: string[] = [];
+  for (const s of sections) {
+    if (DEFAULT_SECTION_ORDER.includes(s)) {
+      known.push(s);
+    } else {
+      unknown.push(s);
+    }
   }
-  return result;
+  known.sort(
+    (a, b) => DEFAULT_SECTION_ORDER.indexOf(a) - DEFAULT_SECTION_ORDER.indexOf(b),
+  );
+  unknown.sort();
+  return [...known, ...unknown];
 }
