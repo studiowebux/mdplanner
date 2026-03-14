@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { logger } from "hono/logger";
 import { serveStatic } from "hono/deno";
 import { dirname, extname, fromFileUrl, join, resolve } from "@std/path";
 import { ProjectManager } from "./src/lib/project-manager.ts";
@@ -353,6 +354,9 @@ if (cliArgs.cerveauDir) {
 
 // Create main app
 const app = new Hono();
+
+// HTTP request logging — logs method, path, status, and duration
+app.use("*", logger());
 
 // API routes
 const apiRouter = createApiRouter(projectManager, {

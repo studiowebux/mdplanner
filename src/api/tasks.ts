@@ -27,8 +27,6 @@ export class TaskAPI {
       "Access-Control-Allow-Headers": "Content-Type",
     };
 
-    console.log(method, url.href);
-
     if (method === "OPTIONS") {
       return new Response(null, { status: 200, headers });
     }
@@ -903,12 +901,9 @@ export class TaskAPI {
         method === "POST" && pathParts.length === 3 &&
         pathParts[1] === "project" && pathParts[2] === "rewrite"
       ) {
-        console.log("Rewrite endpoint called");
         const body = await req.json();
         const tasks = await this.parser.readTasks();
-        console.log("Current tasks count:", tasks.length);
         await this.parser.writeTasks(tasks, body.sections);
-        console.log("Tasks rewritten with sections:", body.sections);
         return new Response(JSON.stringify({ success: true }), { headers });
       }
 
