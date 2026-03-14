@@ -1006,7 +1006,8 @@ function sortByDefaultOrder(sections: string[]): string[] {
     }
   }
   known.sort(
-    (a, b) => DEFAULT_SECTION_ORDER.indexOf(a) - DEFAULT_SECTION_ORDER.indexOf(b),
+    (a, b) =>
+      DEFAULT_SECTION_ORDER.indexOf(a) - DEFAULT_SECTION_ORDER.indexOf(b),
   );
   unknown.sort();
   return [...known, ...unknown];

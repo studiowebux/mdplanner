@@ -17,6 +17,7 @@ import { registerProjectTools } from "./tools/project.ts";
 import { registerSearchTools } from "./tools/search.ts";
 import { registerMilestoneTools } from "./tools/milestones.ts";
 import { registerIdeaTools } from "./tools/ideas.ts";
+import { registerBrainstormTools } from "./tools/brainstorms.ts";
 import { registerPortfolioTools } from "./tools/portfolio.ts";
 import { registerMoscowTools } from "./tools/moscow.ts";
 import { registerEisenhowerTools } from "./tools/eisenhower.ts";
@@ -69,6 +70,7 @@ export function createMcpServer(pm: ProjectManager): McpServer {
   registerSearchTools(server, pm);
   registerMilestoneTools(server, pm);
   registerIdeaTools(server, pm);
+  registerBrainstormTools(server, pm);
   registerPortfolioTools(server, pm);
   registerMoscowTools(server, pm);
   registerEisenhowerTools(server, pm);

@@ -494,6 +494,13 @@
                 Ideas
               </button>
               <button
+                id="brainstormViewBtn"
+                data-view="brainstorm"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                Brainstorm
+              </button>
+              <button
                 id="retrospectivesViewBtn"
                 data-view="retrospectives"
                 class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
@@ -1002,6 +1009,12 @@
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
             >
               Ideas
+            </button>
+            <button
+              id="brainstormViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              Brainstorm
             </button>
             <button
               id="retrospectivesViewBtnMobile"
@@ -3362,6 +3375,59 @@
             </div>
             <div
               id="ideasContainer"
+              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Brainstorm View -->
+      <div id="brainstormView" class="hidden pb-16">
+        <div class="bg-primary rounded-lg shadow">
+          <div
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
+          >
+            <h2 class="text-lg font-medium text-primary">
+              Brainstorm
+            </h2>
+            <div class="flex gap-2">
+              <button id="addBrainstormBtn" class="btn-primary py-2 rounded-lg">
+                + New Brainstorm
+              </button>
+            </div>
+          </div>
+          <div class="brainstorm-filter-bar">
+            <input
+              type="text"
+              id="brainstormFilterSearch"
+              placeholder="Search brainstorms..."
+            >
+          </div>
+          <div class="p-6">
+            <div id="emptyBrainstormState" class="text-center py-12 hidden">
+              <svg
+                class="mx-auto h-12 w-12 text-muted"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                />
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-primary">
+                No brainstorms yet
+              </h3>
+              <p class="mt-1 text-sm text-muted">
+                Start a brainstorm to explore an idea before committing.
+              </p>
+            </div>
+            <div
+              id="brainstormContainer"
               class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
             >
             </div>
@@ -13885,6 +13951,74 @@
           Cancel
         </button>
         <button type="button" id="ideaSidenavSave" class="btn-primary">Save</button>
+      </div>
+    </div>
+
+    <!-- Brainstorm Sidenav -->
+    <div id="brainstormSidenav" class="sidenav-panel sidenav-md">
+      <div class="sidenav-header">
+        <h2 id="brainstormSidenavHeader" class="sidenav-title">
+          New Brainstorm
+        </h2>
+        <div class="flex items-center gap-2">
+          <span id="brainstormSidenavSaveStatus" class="text-xs hidden"></span>
+          <button
+            type="button"
+            id="brainstormSidenavClose"
+            class="sidenav-close"
+            aria-label="Close"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="sidenav-body">
+        <div class="sidenav-field">
+          <label for="brainstormSidenavTitle">Title</label>
+          <input type="text" id="brainstormSidenavTitle" placeholder="What do you want to explore?">
+        </div>
+        <div class="sidenav-field">
+          <label for="brainstormSidenavTags">Tags</label>
+          <input type="text" id="brainstormSidenavTags" placeholder="Comma-separated tags">
+        </div>
+        <div class="sidenav-field">
+          <label>Questions</label>
+          <div id="brainstormSidenavQuestionsContainer"></div>
+          <button type="button" id="brainstormSidenavAddQuestion" class="btn-secondary mt-2">
+            + Add Question
+          </button>
+        </div>
+      </div>
+      <div class="sidenav-footer">
+        <button
+          type="button"
+          id="brainstormSidenavDelete"
+          class="btn-danger-ghost hidden"
+        >
+          Delete
+        </button>
+        <button
+          type="button"
+          id="brainstormSidenavCancel"
+          class="btn-secondary"
+        >
+          Cancel
+        </button>
+        <button type="button" id="brainstormSidenavSave" class="btn-primary">
+          Save
+        </button>
       </div>
     </div>
 
