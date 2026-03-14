@@ -1565,6 +1565,61 @@ export const TtsAPI = {
   },
 };
 
+export const CerveauAPI = {
+  async fetchManifest() {
+    const response = await get("/api/cerveau/manifest");
+    if (!response.ok) return null;
+    return response.json();
+  },
+
+  async fetchBrains() {
+    const response = await get("/api/cerveau/brains");
+    if (!response.ok) return null;
+    return response.json();
+  },
+
+  async fetchRegistry() {
+    const response = await get("/api/cerveau/registry");
+    if (!response.ok) return null;
+    return response.json();
+  },
+
+  async fetchProtocol() {
+    const response = await get("/api/cerveau/protocol");
+    if (!response.ok) return null;
+    return response.json();
+  },
+
+  async fetchFiles(path = "") {
+    const q = path ? `?path=${encodeURIComponent(path)}` : "";
+    const response = await get(`/api/cerveau/files${q}`);
+    return response.json();
+  },
+
+  async fetchFile(path) {
+    const response = await get(
+      `/api/cerveau/file?path=${encodeURIComponent(path)}`,
+    );
+    return response.text();
+  },
+
+  async fetchBrainMemory(name) {
+    const response = await get(
+      `/api/cerveau/brains/${encodeURIComponent(name)}/memory`,
+    );
+    return response.json();
+  },
+
+  async isAvailable() {
+    try {
+      const response = await get("/api/cerveau/brains");
+      return response.ok;
+    } catch {
+      return false;
+    }
+  },
+};
+
 /** Authentication API — uses raw fetch for check() to avoid 401 interception loop. */
 export const AuthAPI = {
   async check() {

@@ -892,6 +892,13 @@
               >
                 GitHub
               </button>
+              <button
+                id="cerveauViewBtn"
+                data-view="cerveau"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                Brains
+              </button>
             </div>
           </div>
           <button
@@ -1234,6 +1241,12 @@
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
             >
               GitHub
+            </button>
+            <button
+              id="cerveauViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              Brains
             </button>
             <button
               id="ollamaViewBtnMobile"
@@ -2040,6 +2053,25 @@
           </div>
           <div class="p-6">
             <div id="githubViewContainer"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cerveau Viewer -->
+      <div id="cerveauView" class="hidden pb-16">
+        <div class="px-6 py-4 border-b border-default flex justify-between items-center view-header">
+          <h2 class="text-lg font-medium text-primary">Brains</h2>
+        </div>
+        <div id="emptyCerveauState" class="empty-state hidden p-8 text-center text-secondary">
+          Cerveau directory not found. Set --cerveau-dir or MDPLANNER_CERVEAU_DIR to enable.
+        </div>
+        <div id="cerveauContainer" class="hidden">
+          <div class="cerveau-layout">
+            <div id="cerveauSidebar"></div>
+            <div class="cerveau-main">
+              <div id="cerveauTabs"></div>
+              <div id="cerveauContent"></div>
+            </div>
           </div>
         </div>
       </div>

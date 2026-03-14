@@ -100,6 +100,7 @@ import { UploadsView } from "./modules/views/uploads.js";
 import { GlobalSearch } from "./modules/features/search.js";
 import { GitHubView } from "./modules/views/github.js";
 import { OllamaModule } from "./modules/features/ollama.js";
+import { CerveauModule } from "./modules/features/cerveau.js";
 import { SSEClient } from "./modules/ui/sse-client.js";
 import { AuthModal, checkAuthOnBoot } from "./modules/ui/auth-modal.js";
 
@@ -322,6 +323,7 @@ class TaskManager {
     this.projectsModule = new ProjectsModule(this);
     this.uploadsView = new UploadsView(this);
     this.ollamaModule = new OllamaModule(this);
+    this.cerveauModule = new CerveauModule(this);
     this.globalSearch = new GlobalSearch(this);
     this.sseClient = new SSEClient();
     /** @type {Map<string, number>} debounce timer per entity */
@@ -615,6 +617,7 @@ class TaskManager {
       { id: "analyticsViewBtn", view: "analytics" },
       { id: "dnsViewBtn", view: "dns" },
       { id: "githubViewBtn", view: "github" },
+      { id: "cerveauViewBtn", view: "cerveau" },
     ];
     additionalViews.forEach(({ id, view }) => {
       document.getElementById(id)?.addEventListener("click", () => this.switchView(view));
@@ -900,6 +903,12 @@ class TaskManager {
         this.closeMobileMenu();
       });
     document
+      .getElementById("cerveauViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("cerveau");
+        this.closeMobileMenu();
+      });
+    document
       .getElementById("uploadsViewBtnMobile")
       ?.addEventListener("click", () => {
         this.switchView("uploads");
@@ -1157,6 +1166,7 @@ class TaskManager {
     this.marketingPlansModule.bindEvents();
     this.dnsSidenavModule.bindEvents();
     this.dnsModule.bindEvents();
+    this.cerveauModule.bindEvents();
     this.onboardingSidenavModule.bindEvents();
     this.onboardingTemplateSidenavModule.bindEvents();
     this.onboardingModule.bindEvents();
@@ -1215,6 +1225,7 @@ class TaskManager {
       "dns",
       "analytics",
       "github",
+      "cerveau",
     ];
 
     // If no features configured, show everything
@@ -1404,6 +1415,7 @@ class TaskManager {
       "uploadsViewBtn",
       "dnsViewBtn",
       "githubViewBtn",
+      "cerveauViewBtn",
       "configViewBtn",
     ];
     desktopNavBtns.forEach((id) => {
@@ -1457,6 +1469,7 @@ class TaskManager {
       "uploadsViewBtnMobile",
       "dnsViewBtnMobile",
       "githubViewBtnMobile",
+      "cerveauViewBtnMobile",
       "configViewBtnMobile",
     ];
     mobileBtnIds.forEach((id) => {
@@ -1507,6 +1520,7 @@ class TaskManager {
     document.getElementById("ollamaView")?.classList.add("hidden");
     document.getElementById("dnsView")?.classList.add("hidden");
     document.getElementById("githubView")?.classList.add("hidden");
+    document.getElementById("cerveauView")?.classList.add("hidden");
     document.getElementById("canvasView").classList.add("hidden");
     document.getElementById("mindmapView").classList.add("hidden");
     document.getElementById("c4View").classList.add("hidden");
@@ -1687,6 +1701,10 @@ class TaskManager {
       this.activateViewButton("ollama");
       document.getElementById("ollamaView").classList.remove("hidden");
       this.ollamaModule.load();
+    } else if (view === "cerveau") {
+      this.activateViewButton("cerveau");
+      document.getElementById("cerveauView").classList.remove("hidden");
+      this.cerveauModule.load();
     } else if (view === "config") {
       this.activateViewButton("config");
       document.getElementById("configView").classList.remove("hidden");

@@ -502,6 +502,7 @@ export class ConfigView {
       "Infrastructure": [
         { id: "dns", label: "DNS Tracker" },
         { id: "github", label: "GitHub Integration" },
+        { id: "cerveau", label: "Brains" },
       ],
     };
 

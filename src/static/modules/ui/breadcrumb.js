@@ -27,6 +27,7 @@ const VIEW_CATEGORIES = {
   timeTracking: { category: "Resources", label: "Time Tracking" },
   capacity: { category: "Resources", label: "Capacity" },
   billing: { category: "Resources", label: "Billing" },
+  cerveau: { category: "Infrastructure", label: "Brains" },
   config: { category: "Settings", label: "Configuration" },
 
 };

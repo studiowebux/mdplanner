@@ -5,9 +5,11 @@
 import { Context } from "hono";
 import { type CacheLayer, ProjectManager } from "../../lib/project-manager.ts";
 import { DirectoryMarkdownParser } from "../../lib/parser/directory/parser.ts";
+import type { CerveauReader } from "../../lib/cerveau/reader.ts";
 
 export interface AppVariables {
   projectManager: ProjectManager;
+  cerveauReader?: CerveauReader;
 }
 
 export type AppContext = Context<{ Variables: AppVariables }>;
@@ -98,5 +100,3 @@ export function checkConflict(
   }
   return null;
 }
-
-
