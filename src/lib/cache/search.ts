@@ -304,6 +304,6 @@ export class SearchEngine {
       .split(/\s+/)
       .filter((term) => term.length > 0)
       .map((term) => `"${term}"*`)
-      .join(" OR ");
+      .join(" AND ");
   }
 }
