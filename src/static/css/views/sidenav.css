@@ -285,6 +285,7 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-text-muted, #9ca3af);
+  margin-top: 0;
   margin-bottom: 1rem;
 }
 

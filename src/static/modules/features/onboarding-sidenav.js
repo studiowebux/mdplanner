@@ -159,7 +159,9 @@ export class OnboardingSidenavModule {
     const steps = record.steps || [];
     const done = steps.filter((s) => s.status === "complete").length;
     const pct = steps.length > 0 ? Math.round((done / steps.length) * 100) : 0;
-    document.getElementById("onboardingDetailProgressFill").style.width = `${pct}%`;
+    const progressFill = document.getElementById("onboardingDetailProgressFill");
+    progressFill.style.width = `${pct}%`;
+    progressFill.closest("[role='progressbar']")?.setAttribute("aria-valuenow", String(pct));
     document.getElementById("onboardingDetailProgressLabel").textContent =
       `${done} / ${steps.length} complete`;
 

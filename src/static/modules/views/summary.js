@@ -768,6 +768,16 @@ export class SummaryView {
         () => this.cancelDescriptionEdit(),
       );
     }
+
+    // Summary status cards — navigate to filtered list view
+    document.getElementById("summaryCardInProgress")?.addEventListener("click", () => {
+      this.tm.listView.tm.listFilters.section = "In Progress";
+      this.tm.switchView("list");
+    });
+    document.getElementById("summaryCardPendingReview")?.addEventListener("click", () => {
+      this.tm.listView.tm.listFilters.section = "Pending Review";
+      this.tm.switchView("list");
+    });
   }
 
   async saveName(nameEl) {

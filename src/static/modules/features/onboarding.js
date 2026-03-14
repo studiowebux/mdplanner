@@ -74,7 +74,7 @@ export class OnboardingModule {
         <span class="onboarding-row-role">${escapeHtml(record.role || "—")}</span>
         <span class="onboarding-row-date">${record.startDate}</span>
         <div class="onboarding-row-progress">
-          <div class="onboarding-progress-bar">
+          <div class="onboarding-progress-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Onboarding progress">
             <div class="onboarding-progress-fill" style="width:${pct}%"></div>
           </div>
           <span class="onboarding-progress-label">${done}/${total}</span>

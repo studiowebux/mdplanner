@@ -268,13 +268,13 @@ export class StrategicLevelsSidenavModule {
   renderLinkForm() {
     return `
       <div class="sidenav-section">
-        <div class="sidenav-section-title">Linked Tasks</div>
+        <h3 class="sidenav-section-title">Linked Tasks</h3>
         <div id="strategicSidenavTasks" class="max-h-48 overflow-y-auto border border-default rounded p-2 bg-secondary">
           <div class="text-muted text-sm">Loading...</div>
         </div>
       </div>
       <div class="sidenav-section">
-        <div class="sidenav-section-title">Linked Milestones</div>
+        <h3 class="sidenav-section-title">Linked Milestones</h3>
         <div id="strategicSidenavMilestones" class="max-h-48 overflow-y-auto border border-default rounded p-2 bg-secondary">
           <div class="text-muted text-sm">Loading...</div>
         </div>

@@ -228,7 +228,7 @@ export class CRMSidenavModule {
         </div>
       </div>
       <div class="sidenav-section">
-        <div class="sidenav-section-title">Address</div>
+        <h3 class="sidenav-section-title">Address</h3>
         <div class="form-group">
           <input type="text" id="crmSidenavCompanyStreet" class="form-input" placeholder="Street" value="${
       escapeHtml(c.address?.street || "")

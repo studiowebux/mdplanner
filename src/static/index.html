@@ -1475,8 +1475,8 @@
         <!-- Three status cards -->
         <div class="summary-status-row">
           <button
+            id="summaryCardInProgress"
             class="summary-status-card"
-            onclick="taskManager.listView.tm.listFilters.section='In Progress'; taskManager.switchView('list')"
             title="View In Progress tasks"
           >
             <div class="summary-status-card-label">In Progress</div>
@@ -1484,8 +1484,8 @@
             <div id="summaryAssigneesInProgress" class="summary-status-card-meta"></div>
           </button>
           <button
+            id="summaryCardPendingReview"
             class="summary-status-card"
-            onclick="taskManager.listView.tm.listFilters.section='Pending Review'; taskManager.switchView('list')"
             title="View Pending Review tasks"
           >
             <div class="summary-status-card-label">Pending Review</div>
@@ -2942,9 +2942,9 @@
                   <option value="">All projects</option>
                 </select>
               </div>
-              <nav id="notesTabNav" class="notes-list">
+              <ul id="notesTabNav" class="notes-list">
                 <!-- Note list items rendered dynamically -->
-              </nav>
+              </ul>
               <div class="notes-sidebar-footer">
                 <button id="addNoteTabBtn" class="notes-add-btn" title="Add Note">
                   + Add Note
@@ -10755,7 +10755,7 @@
           </div>
 
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Details</div>
+            <h3 class="sidenav-section-title">Details</h3>
             <div class="sidenav-grid">
               <div class="form-group">
                 <label for="sidenavTaskSection" class="form-label">Section</label>
@@ -10791,7 +10791,7 @@
           </div>
 
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Schedule</div>
+            <h3 class="sidenav-section-title">Schedule</h3>
             <div class="form-group">
               <label for="sidenavTaskDueDate" class="form-label">Due Date</label>
               <input
@@ -10821,7 +10821,7 @@
           </div>
 
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Organization</div>
+            <h3 class="sidenav-section-title">Organization</h3>
             <div class="form-group">
               <label for="sidenavTaskMilestone" class="form-label">Milestone</label>
               <select id="sidenavTaskMilestone" class="form-input">
@@ -10962,7 +10962,7 @@
 
           <!-- Comments section — only visible when editing an existing task -->
           <div id="taskCommentsSection" class="sidenav-section hidden">
-            <div class="sidenav-section-title">Comments</div>
+            <h3 class="sidenav-section-title">Comments</h3>
             <div id="taskCommentThread" class="task-comment-thread"></div>
             <div class="task-comment-form">
               <select id="taskCommentAuthorInput" class="form-select"></select>
@@ -10982,7 +10982,7 @@
 
           <!-- Approval section — only visible when task has an approval request -->
           <div id="taskApprovalSection" class="sidenav-section hidden">
-            <div class="sidenav-section-title">Approval</div>
+            <h3 class="sidenav-section-title">Approval</h3>
             <div id="taskApprovalPanel"></div>
           </div>
         </div>
@@ -11061,7 +11061,7 @@
         </div>
 
         <div id="noteSidenavModeSection" class="sidenav-section">
-          <div class="sidenav-section-title">Mode</div>
+          <h3 class="sidenav-section-title">Mode</h3>
           <div class="flex gap-2">
             <button
               type="button"
@@ -11269,7 +11269,7 @@
             </div>
           </div>
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Details</div>
+            <h3 class="sidenav-section-title">Details</h3>
             <div class="sidenav-grid">
               <div class="form-group">
                 <label for="goalSidenavType" class="form-label">Type</label>
@@ -11415,7 +11415,7 @@
             </div>
           </div>
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Details</div>
+            <h3 class="sidenav-section-title">Details</h3>
             <div class="form-group">
               <label for="milestoneSidenavProject" class="form-label">Project</label>
               <input
@@ -11453,7 +11453,7 @@
           </div>
 
           <div id="milestoneSidenavProgress" class="sidenav-section hidden">
-            <div class="sidenav-section-title">Progress</div>
+            <h3 class="sidenav-section-title">Progress</h3>
             <div
               class="text-sm text-secondary mb-2"
               id="milestoneSidenavProgressText"
@@ -11548,7 +11548,7 @@
             </div>
           </div>
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Continue (What went well)</div>
+            <h3 class="sidenav-section-title">Continue (What went well)</h3>
             <textarea
               id="retroSidenavContinue"
               rows="4"
@@ -11557,7 +11557,7 @@
             ></textarea>
           </div>
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Stop (What to improve)</div>
+            <h3 class="sidenav-section-title">Stop (What to improve)</h3>
             <textarea
               id="retroSidenavStop"
               rows="4"
@@ -11566,7 +11566,7 @@
             ></textarea>
           </div>
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Start (New ideas)</div>
+            <h3 class="sidenav-section-title">Start (New ideas)</h3>
             <textarea
               id="retroSidenavStart"
               rows="4"
@@ -11642,7 +11642,7 @@
             </div>
           </div>
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Structure</div>
+            <h3 class="sidenav-section-title">Structure</h3>
             <div class="flex flex-wrap gap-1 mb-2">
               <button
                 type="button"
@@ -11709,7 +11709,7 @@
             ></textarea>
           </div>
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Preview</div>
+            <h3 class="sidenav-section-title">Preview</h3>
             <div
               id="mindmapSidenavPreview"
               class="p-3 bg-secondary rounded-lg border border-default max-h-48 overflow-auto text-sm"
@@ -11785,7 +11785,7 @@
             </div>
           </div>
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Color</div>
+            <h3 class="sidenav-section-title">Color</h3>
             <div class="flex gap-2 flex-wrap">
               <button
                 type="button"
@@ -13163,11 +13163,13 @@
     >
       <div class="flex items-center gap-2">
         <span id="versionDisplay">MD Planner v0.1.0</span>
-        <span
+        <a
           id="updateBadge"
+          href="https://github.com/studiowebux/mdplanner/releases"
+          target="_blank"
+          rel="noopener noreferrer"
           class="hidden px-1.5 py-0.5 bg-success-bg text-success-text rounded text-xs cursor-pointer hover:bg-success-bg"
-          onclick="window.open('https://github.com/studiowebux/mdplanner/releases', '_blank')"
-        >Update available</span>
+        >Update available</a>
         <span
           id="readOnlyBadge"
           class="hidden px-1.5 py-0.5 bg-warning-bg text-warning-text rounded text-xs"
@@ -13268,7 +13270,7 @@
             </div>
           </div>
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Action Items</div>
+            <h3 class="sidenav-section-title">Action Items</h3>
             <div class="meeting-action-input-row">
               <input id="meetingSidenavActionInput" type="text" class="form-input" placeholder="Action description" />
               <div class="meeting-action-meta-inputs">
@@ -13558,7 +13560,7 @@
             </div>
           </div>
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Steps</div>
+            <h3 class="sidenav-section-title">Steps</h3>
             <div id="onboardingTemplateStepsList" class="onboarding-steps-list"></div>
             <div class="onboarding-add-step">
               <input id="onboardingTemplateNewStepTitle" type="text" class="form-input" placeholder="Step title..." />
@@ -13620,7 +13622,7 @@
             </div>
           </div>
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Load from Template</div>
+            <h3 class="sidenav-section-title">Load from Template</h3>
             <div class="onboarding-template-load-row">
               <select id="onboardingTemplateSelect" class="form-input">
                 <option value="">— pick a template —</option>
@@ -13656,14 +13658,14 @@
       <div class="flex flex-col flex-1 overflow-hidden">
         <div class="sidenav-content">
           <div class="onboarding-detail-progress">
-            <div class="onboarding-progress-bar">
+            <div class="onboarding-progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Onboarding progress">
               <div id="onboardingDetailProgressFill" class="onboarding-progress-fill"></div>
             </div>
             <span id="onboardingDetailProgressLabel" class="onboarding-progress-label"></span>
           </div>
           <div id="onboardingDetailChecklist" class="onboarding-checklist"></div>
           <div class="sidenav-section" style="margin-top:1rem">
-            <div class="sidenav-section-title">Add Step</div>
+            <h3 class="sidenav-section-title">Add Step</h3>
             <div class="onboarding-add-step">
               <input id="onboardingDetailNewStep" type="text" class="form-input" placeholder="Step title..." />
               <select id="onboardingDetailNewCategory" class="form-input" style="max-width:8rem">
@@ -14376,7 +14378,7 @@
             </div>
           </div>
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Contact Info</div>
+            <h3 class="sidenav-section-title">Contact Info</h3>
             <div class="form-group">
               <label for="orgchartSidenavEmail" class="form-label">Email</label>
               <input
@@ -14397,7 +14399,7 @@
             </div>
           </div>
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Additional Info</div>
+            <h3 class="sidenav-section-title">Additional Info</h3>
             <div class="form-group">
               <label for="orgchartSidenavStartDate" class="form-label">Start Date</label>
               <input
@@ -14521,7 +14523,7 @@
             </div>
           </div>
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Contact Info</div>
+            <h3 class="sidenav-section-title">Contact Info</h3>
             <div class="form-group">
               <label for="peopleSidenavEmail" class="form-label">Email</label>
               <input
@@ -14542,7 +14544,7 @@
             </div>
           </div>
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Work Schedule</div>
+            <h3 class="sidenav-section-title">Work Schedule</h3>
             <div class="form-group">
               <label for="peopleSidenavHoursPerDay" class="form-label">Hours Per Day</label>
               <input
@@ -14577,7 +14579,7 @@
             </div>
           </div>
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Agent Configuration</div>
+            <h3 class="sidenav-section-title">Agent Configuration</h3>
             <div class="form-group">
               <label for="peopleSidenavAgentType" class="form-label">Agent Type</label>
               <select id="peopleSidenavAgentType" class="form-select">
@@ -14622,7 +14624,7 @@
             </div>
           </div>
           <div class="sidenav-section">
-            <div class="sidenav-section-title">Notes</div>
+            <h3 class="sidenav-section-title">Notes</h3>
             <div class="form-group">
               <textarea
                 id="peopleSidenavNotes"
