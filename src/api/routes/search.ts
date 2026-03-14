@@ -44,6 +44,10 @@ const searchRoute = createRoute({
       types: z.string().optional().openapi({
         description: "Comma-separated entity types to search",
       }),
+      project: z.string().optional().openapi({
+        description:
+          "Filter results to entities belonging to this project (case-insensitive)",
+      }),
     }),
   },
   responses: {
@@ -147,6 +151,7 @@ searchRouter.openapi(searchRoute, async (c) => {
     limit: limitParam,
     offset: offsetParam,
     types: typesParam,
+    project: projectParam,
   } = c.req.valid("query");
   if (!query || query.trim().length === 0) {
     return c.json({ error: "Query parameter 'q' is required" }, 400);
@@ -163,7 +168,12 @@ searchRouter.openapi(searchRoute, async (c) => {
     | ("task" | "note" | "goal" | "idea" | "meeting" | "person")[]
     | undefined;
 
-  const results = cache.search.search(query, { limit, offset, types });
+  const results = cache.search.search(query, {
+    limit,
+    offset,
+    types,
+    ...(projectParam && { project: projectParam }),
+  });
 
   return c.json({
     query,
