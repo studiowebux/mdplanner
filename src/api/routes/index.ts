@@ -11,7 +11,7 @@ import { RateLimiter } from "../../lib/rate-limit.ts";
 import { ProjectManager } from "../../lib/project-manager.ts";
 import { AppVariables, isCacheEnabled, isReadOnly } from "./context.ts";
 import { VERSION } from "../../lib/version.ts";
-import type { BrainRegistry } from "../../lib/brains/registry.ts";
+
 
 // SSE events route
 import { eventsRouter } from "./events.ts";
@@ -74,9 +74,6 @@ import {
   validateToken,
 } from "../../lib/auth.ts";
 
-// Brain management routes
-import { brainsRouter } from "./features/brains.ts";
-
 // Export/Import routes
 import { exportImportRouter } from "./export-import.ts";
 
@@ -99,8 +96,6 @@ import { githubRouter } from "./github.ts";
 export function createApiRouter(
   projectManager: ProjectManager,
   opts?: {
-    brainRegistry?: BrainRegistry;
-    claudeDir?: string;
     corsOrigin?: string;
     apiToken?: string;
     maxBodySize?: number;
@@ -264,15 +259,9 @@ export function createApiRouter(
     return next();
   });
 
-  // Inject projectManager and optional brain registry into context
+  // Inject projectManager into context
   api.use("/*", async (c, next) => {
     c.set("projectManager", projectManager);
-    if (opts?.brainRegistry) {
-      c.set("brainRegistry", opts.brainRegistry);
-    }
-    if (opts?.claudeDir) {
-      c.set("claudeDir", opts.claudeDir);
-    }
     await next();
   });
 
@@ -432,11 +421,6 @@ export function createApiRouter(
 
   // Analytics routes
   api.route("/analytics", analyticsRouter);
-
-  // Brain management routes (feature-gated via --brains-config)
-  if (opts?.brainRegistry) {
-    api.route("/brains", brainsRouter);
-  }
 
   // OpenAPI spec endpoint — auto-generated from Zod schemas
   api.doc31("/doc", {

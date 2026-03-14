@@ -28,7 +28,7 @@ const VIEW_CATEGORIES = {
   capacity: { category: "Resources", label: "Capacity" },
   billing: { category: "Resources", label: "Billing" },
   config: { category: "Settings", label: "Configuration" },
-  brains: { category: "Infrastructure", label: "Brain Manager" },
+
 };
 
 /**
