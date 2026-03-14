@@ -102,9 +102,7 @@ export class CerveauReader {
         const entryPath = join(absPath, entry.name);
         const linfo = await Deno.lstat(entryPath);
         // Follow symlinks to determine if target is a directory
-        const resolved = linfo.isSymlink
-          ? await Deno.stat(entryPath)
-          : linfo;
+        const resolved = linfo.isSymlink ? await Deno.stat(entryPath) : linfo;
         entries.push({
           name: entry.name,
           path: join(relPath, entry.name),

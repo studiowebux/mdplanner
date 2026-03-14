@@ -402,9 +402,17 @@
 }
 
 .cerveau-file-viewer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: var(--space-sm) var(--space-md);
   border-bottom: 1px solid var(--color-border-default);
   background: var(--color-bg-secondary);
+}
+
+.cerveau-preview-toggle {
+  font-size: var(--font-size-xs);
+  cursor: pointer;
 }
 
 .cerveau-file-viewer-path {
@@ -448,4 +456,96 @@
   text-align: center;
   color: var(--color-text-tertiary);
   font-size: var(--font-size-sm);
+}
+
+/* Markdown preview */
+.cerveau-md-preview {
+  padding: var(--space-md);
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
+  color: var(--color-text-primary);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.cerveau-md-preview h1,
+.cerveau-md-preview h2,
+.cerveau-md-preview h3,
+.cerveau-md-preview h4 {
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-sm);
+  color: var(--color-text-primary);
+}
+
+.cerveau-md-preview h1 { font-size: var(--font-size-xl); }
+.cerveau-md-preview h2 { font-size: var(--font-size-lg); border-bottom: 1px solid var(--color-border-default); padding-bottom: var(--space-xs); }
+.cerveau-md-preview h3 { font-size: var(--font-size-base); }
+.cerveau-md-preview h4 { font-size: var(--font-size-sm); }
+
+.cerveau-md-preview p {
+  margin-bottom: var(--space-sm);
+}
+
+.cerveau-md-preview ul,
+.cerveau-md-preview ol {
+  margin-bottom: var(--space-sm);
+  padding-left: var(--space-lg);
+}
+
+.cerveau-md-preview li {
+  margin-bottom: var(--space-xs);
+}
+
+.cerveau-md-preview code {
+  background: var(--color-bg-tertiary);
+  padding: 0.125rem var(--space-xs);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+}
+
+.cerveau-md-preview pre {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  overflow-x: auto;
+  margin-bottom: var(--space-sm);
+}
+
+.cerveau-md-preview pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+.cerveau-md-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--space-sm);
+  font-size: var(--font-size-xs);
+}
+
+.cerveau-md-preview th,
+.cerveau-md-preview td {
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--color-border-default);
+  text-align: left;
+}
+
+.cerveau-md-preview th {
+  background: var(--color-bg-secondary);
+  font-weight: 600;
+}
+
+.cerveau-md-preview blockquote {
+  border-left: 3px solid var(--color-border-default);
+  padding-left: var(--space-md);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.cerveau-md-preview hr {
+  border: none;
+  border-top: 1px solid var(--color-border-default);
+  margin: var(--space-md) 0;
 }

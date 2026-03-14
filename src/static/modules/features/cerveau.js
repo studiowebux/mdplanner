@@ -2,6 +2,8 @@
 import { CerveauAPI } from "../api.js";
 import { showLoading, hideLoading } from "../ui/loading.js";
 
+/* global marked */
+
 export class CerveauModule {
   constructor(taskManager) {
     this.tm = taskManager;
@@ -93,6 +95,7 @@ export class CerveauModule {
     const tabList = [
       { id: "overview", label: "Overview" },
       { id: "rules", label: "Rules" },
+      { id: "localdev", label: "Local Dev" },
       { id: "memory", label: "Memory" },
       { id: "files", label: "Files" },
       { id: "protocol", label: "Protocol" },
@@ -135,6 +138,9 @@ export class CerveauModule {
         break;
       case "rules":
         this._renderRules();
+        break;
+      case "localdev":
+        this._renderLocalDev();
         break;
       case "memory":
         this._renderMemory();
@@ -245,6 +251,37 @@ export class CerveauModule {
         </div>
       </div>
     `;
+  }
+
+  async _renderLocalDev() {
+    const panel = document.getElementById("cerveauContent");
+    if (!panel) return;
+    const brain = this.brains.find((b) => b.name === this.selectedBrain);
+    if (!brain) return;
+
+    panel.innerHTML = '<div class="cerveau-loading">Loading local-dev.md...</div>';
+
+    const filePath = `${brain.path}/.claude/rules/workflow/local-dev.md`;
+    try {
+      const content = await CerveauAPI.fetchFile(filePath);
+      const rendered = typeof marked !== "undefined" ? marked.parse(content) : "";
+      const escaped = content
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+      panel.innerHTML = `
+        <div class="cerveau-panel">
+          <div class="cerveau-file-viewer-header" style="margin-bottom: var(--space-md)">
+            <span class="cerveau-file-viewer-path">${filePath}</span>
+            ${typeof marked !== "undefined" ? `<button class="btn-sm cerveau-preview-toggle" data-mode="preview">Raw</button>` : ""}
+          </div>
+          <div id="cerveauLocalDevPreview" class="cerveau-md-preview">${rendered}</div>
+          <pre id="cerveauLocalDevRaw" class="cerveau-memory-content hidden"><code>${escaped}</code></pre>
+        </div>
+      `;
+    } catch {
+      panel.innerHTML = '<div class="cerveau-panel"><span class="cerveau-tag-none">local-dev.md not found</span></div>';
+    }
   }
 
   async _renderMemory() {
@@ -359,12 +396,16 @@ export class CerveauModule {
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
+      const isMd = path.endsWith(".md");
+      const rendered = isMd && typeof marked !== "undefined" ? marked.parse(content) : "";
       contentEl.innerHTML = `
         <div class="cerveau-file-viewer">
           <div class="cerveau-file-viewer-header">
             <span class="cerveau-file-viewer-path">${path}</span>
+            ${isMd && rendered ? `<button class="btn-sm cerveau-preview-toggle" data-mode="raw">Preview</button>` : ""}
           </div>
-          <pre class="cerveau-file-viewer-code"><code>${escaped}</code></pre>
+          <pre id="cerveauFileRaw" class="cerveau-file-viewer-code"><code>${escaped}</code></pre>
+          ${rendered ? `<div id="cerveauFilePreview" class="cerveau-md-preview hidden">${rendered}</div>` : ""}
         </div>
       `;
     } catch {
@@ -460,10 +501,34 @@ export class CerveauModule {
         if (tab) this.switchTab(tab.dataset.tab);
       });
 
-    // File tree + file content (event delegation on cerveauContent)
+    // File tree, file content, and preview toggle (event delegation on cerveauContent)
     document
       .getElementById("cerveauContent")
       ?.addEventListener("click", (e) => {
+        // Markdown preview toggle
+        const toggle = e.target.closest(".cerveau-preview-toggle");
+        if (toggle) {
+          const mode = toggle.dataset.mode;
+          if (mode === "raw") {
+            // Currently showing raw, switch to preview
+            const raw = document.getElementById("cerveauFileRaw") || document.getElementById("cerveauLocalDevRaw");
+            const preview = document.getElementById("cerveauFilePreview") || document.getElementById("cerveauLocalDevPreview");
+            if (raw) raw.classList.add("hidden");
+            if (preview) preview.classList.remove("hidden");
+            toggle.dataset.mode = "preview";
+            toggle.textContent = "Raw";
+          } else {
+            // Currently showing preview, switch to raw
+            const raw = document.getElementById("cerveauFileRaw") || document.getElementById("cerveauLocalDevRaw");
+            const preview = document.getElementById("cerveauFilePreview") || document.getElementById("cerveauLocalDevPreview");
+            if (raw) raw.classList.remove("hidden");
+            if (preview) preview.classList.add("hidden");
+            toggle.dataset.mode = "raw";
+            toggle.textContent = "Preview";
+          }
+          return;
+        }
+
         const dir = e.target.closest(".cerveau-file-dir");
         if (dir) {
           this._toggleDir(dir.dataset.path);
