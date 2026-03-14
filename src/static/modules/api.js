@@ -1596,6 +1596,13 @@ export const CerveauAPI = {
     return response.json();
   },
 
+  async fetchTree(path) {
+    const response = await get(
+      `/api/cerveau/tree?path=${encodeURIComponent(path)}`,
+    );
+    return response.json();
+  },
+
   async fetchFile(path) {
     const response = await get(
       `/api/cerveau/file?path=${encodeURIComponent(path)}`,

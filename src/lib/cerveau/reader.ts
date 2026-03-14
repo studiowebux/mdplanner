@@ -43,6 +43,7 @@ export interface FileEntry {
   isDir: boolean;
   isSymlink: boolean;
   size?: number;
+  children?: FileEntry[];
 }
 
 // --- Reader ---
@@ -99,13 +100,15 @@ export class CerveauReader {
     try {
       for await (const entry of Deno.readDir(absPath)) {
         const entryPath = join(absPath, entry.name);
-        const info = await Deno.lstat(entryPath);
+        const linfo = await Deno.lstat(entryPath);
+        // Follow symlinks to determine if target is a directory
+        const resolved = linfo.isSymlink ? await Deno.stat(entryPath) : linfo;
         entries.push({
           name: entry.name,
           path: join(relPath, entry.name),
-          isDir: entry.isDirectory,
-          isSymlink: info.isSymlink,
-          size: entry.isFile ? info.size : undefined,
+          isDir: resolved.isDirectory,
+          isSymlink: linfo.isSymlink,
+          size: resolved.isFile ? resolved.size : undefined,
         });
       }
     } catch {
@@ -117,10 +120,25 @@ export class CerveauReader {
     });
   }
 
+  /** Recursively list the full directory tree. */
+  async listTree(relPath: string): Promise<FileEntry[]> {
+    const entries = await this.listFiles(relPath);
+    for (const entry of entries) {
+      if (entry.isDir) {
+        entry.children = await this.listTree(entry.path);
+      }
+    }
+    return entries;
+  }
+
   /** Read a file's content within the cerveau tree. */
   async readFile(relPath: string): Promise<string> {
     const absPath = this.resolve(relPath);
     this.guardPath(absPath);
+    const info = await Deno.stat(absPath);
+    if (info.isDirectory) {
+      throw new Error("Is a directory");
+    }
     return await Deno.readTextFile(absPath);
   }
 

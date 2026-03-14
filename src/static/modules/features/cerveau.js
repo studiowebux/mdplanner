@@ -2,6 +2,8 @@
 import { CerveauAPI } from "../api.js";
 import { showLoading, hideLoading } from "../ui/loading.js";
 
+/* global marked */
+
 export class CerveauModule {
   constructor(taskManager) {
     this.tm = taskManager;
@@ -74,7 +76,7 @@ export class CerveauModule {
     const version = this.manifest ? `v${this.manifest.version}` : "";
 
     sidebar.innerHTML = `
-      ${version ? `<div class="cerveau-version">${version}</div>` : ""}
+      ${version ? `<div class="cerveau-version">Cerveau ${version}</div>` : ""}
       <div class="cerveau-sidebar-section">Brains</div>
       ${this.brains.map((b) => `
         <button class="cerveau-sidebar-item ${this.selectedBrain === b.name ? "active" : ""}"
@@ -93,6 +95,7 @@ export class CerveauModule {
     const tabList = [
       { id: "overview", label: "Overview" },
       { id: "rules", label: "Rules" },
+      { id: "localdev", label: "Local Dev" },
       { id: "memory", label: "Memory" },
       { id: "files", label: "Files" },
       { id: "protocol", label: "Protocol" },
@@ -122,7 +125,12 @@ export class CerveauModule {
   }
 
   _renderActivePanel() {
-    if (!this.selectedBrain && this.activeTab !== "protocol" && this.activeTab !== "packages") return;
+    if (
+      !this.selectedBrain &&
+      this.activeTab !== "protocol" &&
+      this.activeTab !== "packages"
+    )
+      return;
 
     switch (this.activeTab) {
       case "overview":
@@ -130,6 +138,9 @@ export class CerveauModule {
         break;
       case "rules":
         this._renderRules();
+        break;
+      case "localdev":
+        this._renderLocalDev();
         break;
       case "memory":
         this._renderMemory();
@@ -152,29 +163,50 @@ export class CerveauModule {
     const brain = this.brains.find((b) => b.name === this.selectedBrain);
     if (!brain) return;
 
+    const renderTags = (items) => {
+      if (!items.length)
+        return '<span class="cerveau-tag-none">All (no filter)</span>';
+      return `<div class="cerveau-tags">${items.map((s) => `<span class="cerveau-tag">${s}</span>`).join("")}</div>`;
+    };
+
     panel.innerHTML = `
-      <div class="cerveau-detail">
-        <h3>${brain.name}</h3>
-        <table class="cerveau-props">
-          <tr><td class="cerveau-prop-label">Path</td><td>${brain.path}</td></tr>
-          <tr><td class="cerveau-prop-label">Codebase</td><td>${brain.codebase}</td></tr>
-          <tr><td class="cerveau-prop-label">Core</td><td>${brain.isCore ? "Yes" : "No"}</td></tr>
-        </table>
-        <div class="cerveau-config-section">
-          <h4>Stacks</h4>
-          ${brain.stacks.length ? brain.stacks.map((s) => `<span class="cerveau-tag">${s}</span>`).join("") : '<span class="text-tertiary">All (no filter)</span>'}
-        </div>
-        <div class="cerveau-config-section">
-          <h4>Practices</h4>
-          ${brain.practices.length ? brain.practices.map((p) => `<span class="cerveau-tag">${p}</span>`).join("") : '<span class="text-tertiary">All (no filter)</span>'}
-        </div>
-        <div class="cerveau-config-section">
-          <h4>Workflows</h4>
-          ${brain.workflows.length ? brain.workflows.map((w) => `<span class="cerveau-tag">${w}</span>`).join("") : '<span class="text-tertiary">All (no filter)</span>'}
-        </div>
-        <div class="cerveau-config-section">
-          <h4>Agents</h4>
-          ${brain.agents.length ? brain.agents.map((a) => `<span class="cerveau-tag">${a}</span>`).join("") : '<span class="text-tertiary">All (no filter)</span>'}
+      <div class="cerveau-panel">
+        <div class="cerveau-cards">
+          <div class="cerveau-card">
+            <div class="cerveau-card-header">Configuration</div>
+            <div class="cerveau-card-body">
+              <div class="cerveau-props">
+                <div class="cerveau-prop">
+                  <span class="cerveau-prop-label">Path</span>
+                  <span class="cerveau-prop-value">${brain.path}</span>
+                </div>
+                <div class="cerveau-prop">
+                  <span class="cerveau-prop-label">Codebase</span>
+                  <span class="cerveau-prop-value">${brain.codebase}</span>
+                </div>
+                <div class="cerveau-prop">
+                  <span class="cerveau-prop-label">Core</span>
+                  <span class="cerveau-prop-value">${brain.isCore ? "Yes" : "No"}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="cerveau-card">
+            <div class="cerveau-card-header">Stacks</div>
+            <div class="cerveau-card-body">${renderTags(brain.stacks)}</div>
+          </div>
+          <div class="cerveau-card">
+            <div class="cerveau-card-header">Practices</div>
+            <div class="cerveau-card-body">${renderTags(brain.practices)}</div>
+          </div>
+          <div class="cerveau-card">
+            <div class="cerveau-card-header">Workflows</div>
+            <div class="cerveau-card-body">${renderTags(brain.workflows)}</div>
+          </div>
+          <div class="cerveau-card">
+            <div class="cerveau-card-header">Agents</div>
+            <div class="cerveau-card-body">${renderTags(brain.agents)}</div>
+          </div>
         </div>
       </div>
     `;
@@ -187,30 +219,69 @@ export class CerveauModule {
     if (!brain) return;
 
     const renderSection = (title, available, selected) => {
+      if (!available.length)
+        return `
+        <div class="cerveau-card">
+          <div class="cerveau-card-header">${title}</div>
+          <div class="cerveau-card-body"><span class="cerveau-tag-none">None available</span></div>
+        </div>`;
       const showAll = selected.length === 0;
       return `
-        <div class="cerveau-rules-section">
-          <h4>${title}</h4>
-          <div class="cerveau-rules-list">
-            ${available.map((name) => {
-              const active = showAll || selected.includes(name);
-              return `<span class="cerveau-rule ${active ? "active" : "inactive"}">${name}</span>`;
-            }).join("")}
-            ${available.length === 0 ? '<span class="text-tertiary">None available</span>' : ""}
+        <div class="cerveau-card">
+          <div class="cerveau-card-header">${title}</div>
+          <div class="cerveau-card-body">
+            <div class="cerveau-tags">
+              ${available.map((name) => {
+                const active = showAll || selected.includes(name);
+                return `<span class="cerveau-rule ${active ? "active" : "inactive"}">${name}</span>`;
+              }).join("")}
+            </div>
           </div>
         </div>
       `;
     };
 
     panel.innerHTML = `
-      <div class="cerveau-detail">
-        <h3>Rules for ${brain.name}</h3>
-        ${renderSection("Stacks", this.protocol.stacks, brain.stacks)}
-        ${renderSection("Practices", this.protocol.practices, brain.practices)}
-        ${renderSection("Workflows", this.protocol.workflows, brain.workflows)}
-        ${renderSection("Agents", this.protocol.agents, brain.agents)}
+      <div class="cerveau-panel">
+        <div class="cerveau-rules-grid">
+          ${renderSection("Stacks", this.protocol.stacks, brain.stacks)}
+          ${renderSection("Practices", this.protocol.practices, brain.practices)}
+          ${renderSection("Workflows", this.protocol.workflows, brain.workflows)}
+          ${renderSection("Agents", this.protocol.agents, brain.agents)}
+        </div>
       </div>
     `;
+  }
+
+  async _renderLocalDev() {
+    const panel = document.getElementById("cerveauContent");
+    if (!panel) return;
+    const brain = this.brains.find((b) => b.name === this.selectedBrain);
+    if (!brain) return;
+
+    panel.innerHTML = '<div class="cerveau-loading">Loading local-dev.md...</div>';
+
+    const filePath = `${brain.path}/.claude/rules/workflow/local-dev.md`;
+    try {
+      const content = await CerveauAPI.fetchFile(filePath);
+      const rendered = typeof marked !== "undefined" ? marked.parse(content) : "";
+      const escaped = content
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+      panel.innerHTML = `
+        <div class="cerveau-panel">
+          <div class="cerveau-file-viewer-header" style="margin-bottom: var(--space-md)">
+            <span class="cerveau-file-viewer-path">${filePath}</span>
+            ${typeof marked !== "undefined" ? `<button class="btn-sm cerveau-preview-toggle" data-mode="preview">Raw</button>` : ""}
+          </div>
+          <div id="cerveauLocalDevPreview" class="cerveau-md-preview">${rendered}</div>
+          <pre id="cerveauLocalDevRaw" class="cerveau-memory-content hidden"><code>${escaped}</code></pre>
+        </div>
+      `;
+    } catch {
+      panel.innerHTML = '<div class="cerveau-panel"><span class="cerveau-tag-none">local-dev.md not found</span></div>';
+    }
   }
 
   async _renderMemory() {
@@ -226,15 +297,15 @@ export class CerveauModule {
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
       panel.innerHTML = `
-        <div class="cerveau-detail">
-          <h3>Brain Memory</h3>
+        <div class="cerveau-panel">
           ${data.content
             ? `<pre class="cerveau-memory-content"><code>${escaped}</code></pre>`
-            : '<p class="text-tertiary">No brain memory section found in local-dev.md</p>'}
+            : '<span class="cerveau-tag-none">No brain memory section found in local-dev.md</span>'}
         </div>
       `;
     } catch {
-      panel.innerHTML = '<div class="cerveau-error">Failed to load memory</div>';
+      panel.innerHTML =
+        '<div class="cerveau-error">Failed to load memory</div>';
     }
   }
 
@@ -246,35 +317,24 @@ export class CerveauModule {
 
     panel.innerHTML = `
       <div class="cerveau-files-layout">
-        <div class="cerveau-files-tree" id="cerveauFileTree">
+        <div class="cerveau-file-tree" id="cerveauFileTree">
           <div class="cerveau-loading">Loading files...</div>
         </div>
-        <div class="cerveau-files-content" id="cerveauFileContent">
+        <div class="cerveau-file-content" id="cerveauFileContent">
           <div class="cerveau-files-placeholder">Select a file to view its content</div>
         </div>
       </div>
     `;
 
     this.expandedDirs.clear();
-    this.fileCache.clear();
-    await this._loadDir(brain.path);
-  }
-
-  async _loadDir(path) {
-    if (!this.fileCache.has(path)) {
-      const files = await CerveauAPI.fetchFiles(path);
-      this.fileCache.set(path, files);
-    }
+    this.treeData = await CerveauAPI.fetchTree(brain.path);
     this._renderTree();
   }
 
   _renderTree() {
     const tree = document.getElementById("cerveauFileTree");
-    if (!tree) return;
-    const brain = this.brains.find((b) => b.name === this.selectedBrain);
-    if (!brain) return;
-    const rootFiles = this.fileCache.get(brain.path) || [];
-    tree.innerHTML = this._renderEntries(rootFiles, 0);
+    if (!tree || !this.treeData) return;
+    tree.innerHTML = this._renderEntries(this.treeData, 0);
   }
 
   _renderEntries(entries, depth) {
@@ -283,7 +343,7 @@ export class CerveauModule {
         const indent = depth * 1.25;
         if (entry.isDir) {
           const expanded = this.expandedDirs.has(entry.path);
-          const children = expanded ? this.fileCache.get(entry.path) || [] : [];
+          const children = entry.children || [];
           return `
             <div class="cerveau-file-entry cerveau-file-dir ${expanded ? "expanded" : ""}"
               style="padding-left: ${indent}rem" data-path="${entry.path}">
@@ -291,12 +351,13 @@ export class CerveauModule {
                 <path d="${expanded ? "M6 9l6 6 6-6" : "M9 18l6-6-6-6"}"/>
               </svg>
               <span class="cerveau-file-name">${entry.name}</span>
-              ${entry.isSymlink ? '<span class="cerveau-symlink-badge">link</span>' : ""}
+              ${entry.isSymlink ? '<span class="cerveau-symlink-badge">sym</span>' : ""}
             </div>
             ${expanded ? this._renderEntries(children, depth + 1) : ""}
           `;
         }
-        const sizeStr = entry.size != null ? this._formatSize(entry.size) : "";
+        const sizeStr =
+          entry.size != null ? this._formatSize(entry.size) : "";
         return `
           <div class="cerveau-file-entry cerveau-file-item"
             style="padding-left: ${indent + 1.25}rem" data-path="${entry.path}">
@@ -305,7 +366,7 @@ export class CerveauModule {
               <polyline points="14 2 14 8 20 8"/>
             </svg>
             <span class="cerveau-file-name">${entry.name}</span>
-            ${entry.isSymlink ? '<span class="cerveau-symlink-badge">link</span>' : ""}
+            ${entry.isSymlink ? '<span class="cerveau-symlink-badge">sym</span>' : ""}
             <span class="cerveau-file-size">${sizeStr}</span>
           </div>
         `;
@@ -313,21 +374,21 @@ export class CerveauModule {
       .join("");
   }
 
-  async _toggleDir(path) {
+  _toggleDir(path) {
     if (this.expandedDirs.has(path)) {
       this.expandedDirs.delete(path);
-      this._renderTree();
     } else {
       this.expandedDirs.add(path);
-      await this._loadDir(path);
     }
+    this._renderTree();
   }
 
   async _showFile(path) {
     const contentEl = document.getElementById("cerveauFileContent");
     if (!contentEl) return;
 
-    contentEl.innerHTML = '<div class="cerveau-loading">Loading file...</div>';
+    contentEl.innerHTML =
+      '<div class="cerveau-loading">Loading file...</div>';
 
     try {
       const content = await CerveauAPI.fetchFile(path);
@@ -335,16 +396,21 @@ export class CerveauModule {
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
+      const isMd = path.endsWith(".md");
+      const rendered = isMd && typeof marked !== "undefined" ? marked.parse(content) : "";
       contentEl.innerHTML = `
         <div class="cerveau-file-viewer">
           <div class="cerveau-file-viewer-header">
             <span class="cerveau-file-viewer-path">${path}</span>
+            ${isMd && rendered ? `<button class="btn-sm cerveau-preview-toggle" data-mode="raw">Preview</button>` : ""}
           </div>
-          <pre class="cerveau-file-viewer-code"><code>${escaped}</code></pre>
+          <pre id="cerveauFileRaw" class="cerveau-file-viewer-code"><code>${escaped}</code></pre>
+          ${rendered ? `<div id="cerveauFilePreview" class="cerveau-md-preview hidden">${rendered}</div>` : ""}
         </div>
       `;
     } catch {
-      contentEl.innerHTML = '<div class="cerveau-error">Failed to load file</div>';
+      contentEl.innerHTML =
+        '<div class="cerveau-error">Failed to load file</div>';
     }
   }
 
@@ -352,24 +418,27 @@ export class CerveauModule {
     const panel = document.getElementById("cerveauContent");
     if (!panel || !this.protocol) return;
 
-    const renderList = (title, items) => `
-      <div class="cerveau-protocol-section">
-        <h4>${title}</h4>
-        <div class="cerveau-protocol-list">
-          ${items.length ? items.map((i) => `<span class="cerveau-tag">${i}</span>`).join("") : '<span class="text-tertiary">None</span>'}
+    const renderCard = (title, items) => `
+      <div class="cerveau-card">
+        <div class="cerveau-card-header">${title}</div>
+        <div class="cerveau-card-body">
+          ${items.length
+            ? `<div class="cerveau-tags">${items.map((i) => `<span class="cerveau-tag">${i}</span>`).join("")}</div>`
+            : '<span class="cerveau-tag-none">None</span>'}
         </div>
       </div>
     `;
 
     panel.innerHTML = `
-      <div class="cerveau-detail">
-        <h3>Protocol</h3>
-        ${renderList("Stacks", this.protocol.stacks)}
-        ${renderList("Practices", this.protocol.practices)}
-        ${renderList("Workflows", this.protocol.workflows)}
-        ${renderList("Hooks", this.protocol.hooks)}
-        ${renderList("Skills", this.protocol.skills)}
-        ${renderList("Agents", this.protocol.agents)}
+      <div class="cerveau-panel">
+        <div class="cerveau-rules-grid">
+          ${renderCard("Stacks", this.protocol.stacks)}
+          ${renderCard("Practices", this.protocol.practices)}
+          ${renderCard("Workflows", this.protocol.workflows)}
+          ${renderCard("Hooks", this.protocol.hooks)}
+          ${renderCard("Skills", this.protocol.skills)}
+          ${renderCard("Agents", this.protocol.agents)}
+        </div>
       </div>
     `;
   }
@@ -379,29 +448,86 @@ export class CerveauModule {
     if (!panel) return;
 
     if (!this.registry || !this.registry.packages.length) {
-      panel.innerHTML = '<div class="cerveau-detail"><p class="text-tertiary">No packages in registry</p></div>';
+      panel.innerHTML =
+        '<div class="cerveau-panel"><span class="cerveau-tag-none">No packages in registry</span></div>';
       return;
     }
 
+    // Collect unique types for filter
+    const types = [...new Set(this.registry.packages.map((p) => p.type))].sort();
+
     panel.innerHTML = `
-      <div class="cerveau-detail">
-        <h3>Package Registry (${this.registry.version})</h3>
-        <div class="cerveau-packages">
-          ${this.registry.packages.map((pkg) => `
-            <div class="cerveau-package">
-              <div class="cerveau-package-header">
-                <span class="cerveau-package-name">${pkg.name}</span>
-                <span class="cerveau-package-type">${pkg.type}</span>
-              </div>
-              <p class="cerveau-package-desc">${pkg.description}</p>
-              <div class="cerveau-package-tags">
-                ${pkg.tags.map((t) => `<span class="cerveau-tag-sm">${t}</span>`).join("")}
-              </div>
-              <div class="cerveau-package-files">
-                ${pkg.files.map((f) => `<code class="cerveau-package-file">${f}</code>`).join("")}
-              </div>
-            </div>
-          `).join("")}
+      <div class="cerveau-panel">
+        <div class="cerveau-marketplace-controls">
+          <input type="text" id="cerveauPkgSearch" class="cerveau-search-input"
+            placeholder="Search packages...">
+          <select id="cerveauPkgFilter" class="cerveau-filter-select">
+            <option value="">All types</option>
+            ${types.map((t) => `<option value="${t}">${t}</option>`).join("")}
+          </select>
+          <span id="cerveauPkgCount" class="cerveau-pkg-count"></span>
+        </div>
+        <div id="cerveauPkgGrid" class="cerveau-packages"></div>
+      </div>
+    `;
+
+    this._filterPackages();
+  }
+
+  _filterPackages() {
+    const grid = document.getElementById("cerveauPkgGrid");
+    const countEl = document.getElementById("cerveauPkgCount");
+    if (!grid || !this.registry) return;
+
+    const search = (document.getElementById("cerveauPkgSearch")?.value || "").toLowerCase();
+    const typeFilter = document.getElementById("cerveauPkgFilter")?.value || "";
+
+    const filtered = this.registry.packages.filter((pkg) => {
+      if (typeFilter && pkg.type !== typeFilter) return false;
+      if (search) {
+        const haystack = `${pkg.name} ${pkg.description} ${pkg.tags.join(" ")}`.toLowerCase();
+        return haystack.includes(search);
+      }
+      return true;
+    });
+
+    if (countEl) {
+      countEl.textContent = `${filtered.length} of ${this.registry.packages.length} packages`;
+    }
+
+    grid.innerHTML = filtered.length
+      ? filtered.map((pkg) => this._renderPackageCard(pkg)).join("")
+      : '<span class="cerveau-tag-none">No packages match</span>';
+  }
+
+  _renderPackageCard(pkg) {
+    // Determine which brains have this package active
+    const typeKey = { workflow: "workflows", practice: "practices", stack: "stacks", agent: "agents" }[pkg.type];
+    const ruleNames = pkg.files
+      .map((f) => f.replace(/^.*\//, "").replace(/\.md$/, ""));
+
+    const brainStatuses = this.brains.map((brain) => {
+      const brainList = brain[typeKey] || [];
+      const allActive = brainList.length === 0;
+      const installed = allActive || ruleNames.some((r) => brainList.includes(r));
+      return { name: brain.name, installed };
+    });
+
+    return `
+      <div class="cerveau-package">
+        <div class="cerveau-package-header">
+          <span class="cerveau-package-name">${pkg.name}</span>
+          <span class="cerveau-package-type">${pkg.type}</span>
+        </div>
+        <div class="cerveau-package-body">
+          <p class="cerveau-package-desc">${pkg.description}</p>
+          ${pkg.tags.length ? `<div class="cerveau-tags mb-1">${pkg.tags.map((t) => `<span class="cerveau-tag-sm">${t}</span>`).join("")}</div>` : ""}
+          <div class="cerveau-package-files mb-2">
+            ${pkg.files.map((f) => `<code class="cerveau-package-file">${f}</code>`).join("")}
+          </div>
+          <div class="cerveau-package-brains">
+            ${brainStatuses.map((b) => `<span class="cerveau-brain-status ${b.installed ? "installed" : "not-installed"}">${b.name}</span>`).join("")}
+          </div>
         </div>
       </div>
     `;
@@ -417,32 +543,74 @@ export class CerveauModule {
 
   bindEvents() {
     // Sidebar brain selection
-    document.getElementById("cerveauSidebar")?.addEventListener("click", (e) => {
-      const item = e.target.closest("[data-brain]");
-      if (item) this.selectBrain(item.dataset.brain);
-    });
+    document
+      .getElementById("cerveauSidebar")
+      ?.addEventListener("click", (e) => {
+        const item = e.target.closest("[data-brain]");
+        if (item) this.selectBrain(item.dataset.brain);
+      });
 
     // Tab switching
-    document.getElementById("cerveauTabs")?.addEventListener("click", (e) => {
-      const tab = e.target.closest("[data-tab]");
-      if (tab) this.switchTab(tab.dataset.tab);
-    });
+    document
+      .getElementById("cerveauTabs")
+      ?.addEventListener("click", (e) => {
+        const tab = e.target.closest("[data-tab]");
+        if (tab) this.switchTab(tab.dataset.tab);
+      });
 
-    // File tree + file content (event delegation on cerveauContent)
-    document.getElementById("cerveauContent")?.addEventListener("click", (e) => {
-      const dir = e.target.closest(".cerveau-file-dir");
-      if (dir) {
-        this._toggleDir(dir.dataset.path);
-        return;
-      }
-      const file = e.target.closest(".cerveau-file-item");
-      if (file) {
-        document
-          .querySelectorAll(".cerveau-file-item.active")
-          .forEach((el) => el.classList.remove("active"));
-        file.classList.add("active");
-        this._showFile(file.dataset.path);
-      }
-    });
+    // Marketplace search and filter (event delegation)
+    document
+      .getElementById("cerveauContent")
+      ?.addEventListener("input", (e) => {
+        if (e.target.id === "cerveauPkgSearch") this._filterPackages();
+      });
+    document
+      .getElementById("cerveauContent")
+      ?.addEventListener("change", (e) => {
+        if (e.target.id === "cerveauPkgFilter") this._filterPackages();
+      });
+
+    // File tree, file content, and preview toggle (event delegation on cerveauContent)
+    document
+      .getElementById("cerveauContent")
+      ?.addEventListener("click", (e) => {
+        // Markdown preview toggle
+        const toggle = e.target.closest(".cerveau-preview-toggle");
+        if (toggle) {
+          const mode = toggle.dataset.mode;
+          if (mode === "raw") {
+            // Currently showing raw, switch to preview
+            const raw = document.getElementById("cerveauFileRaw") || document.getElementById("cerveauLocalDevRaw");
+            const preview = document.getElementById("cerveauFilePreview") || document.getElementById("cerveauLocalDevPreview");
+            if (raw) raw.classList.add("hidden");
+            if (preview) preview.classList.remove("hidden");
+            toggle.dataset.mode = "preview";
+            toggle.textContent = "Raw";
+          } else {
+            // Currently showing preview, switch to raw
+            const raw = document.getElementById("cerveauFileRaw") || document.getElementById("cerveauLocalDevRaw");
+            const preview = document.getElementById("cerveauFilePreview") || document.getElementById("cerveauLocalDevPreview");
+            if (raw) raw.classList.remove("hidden");
+            if (preview) preview.classList.add("hidden");
+            toggle.dataset.mode = "raw";
+            toggle.textContent = "Preview";
+          }
+          return;
+        }
+
+        const dir = e.target.closest(".cerveau-file-dir");
+        if (dir) {
+          this._toggleDir(dir.dataset.path);
+          return;
+        }
+        const file = e.target.closest(".cerveau-file-item");
+        if (file) {
+          document
+            .querySelectorAll(".cerveau-file-item.active")
+            .forEach((el) => el.classList.remove("active"));
+          file.classList.add("active");
+          this._showFile(file.dataset.path);
+        }
+      });
   }
 }
