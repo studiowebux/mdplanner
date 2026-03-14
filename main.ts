@@ -11,6 +11,7 @@ import { validateProjectPath } from "./src/lib/cli.ts";
 import { generateKeyPair } from "./src/lib/backup/crypto.ts";
 import { generateSecretKey } from "./src/lib/secrets.ts";
 import { initScheduler } from "./src/lib/backup/scheduler.ts";
+import { CerveauReader } from "./src/lib/cerveau/reader.ts";
 
 // Get the directory where this script is located (works for both dev and compiled)
 const __dirname = dirname(fromFileUrl(import.meta.url));
@@ -29,6 +30,7 @@ interface CLIArgs {
   backupDir?: string;
   backupIntervalHours: number;
   backupPublicKey?: string;
+  cerveauDir?: string;
   corsOrigin?: string;
   apiToken?: string;
   maxBodySize?: number;
@@ -68,6 +70,7 @@ Options:
       --max-body-size <MB>     Max request body in MB (default: 10)
       --rate-limit <n>         Max requests per minute per IP (default: 200)
       --cors-origin <origin>   Restrict CORS to this origin (default: allow all)
+      --cerveau-dir <path>     Path to cerveau directory (default: ~/.cerveau)
   -h, --help                   Show this help message
 
 Examples:
@@ -101,6 +104,8 @@ function parseArgs(args: string[]): CLIArgs {
       ? parseInt(Deno.env.get("MDPLANNER_BACKUP_INTERVAL")!, 10)
       : 0,
     backupPublicKey: Deno.env.get("MDPLANNER_BACKUP_PUBLIC_KEY") ?? undefined,
+    cerveauDir: Deno.env.get("MDPLANNER_CERVEAU_DIR") ??
+      join(Deno.env.get("HOME") ?? "", ".cerveau"),
     corsOrigin: Deno.env.get("MDPLANNER_CORS_ORIGIN") ?? undefined,
     apiToken: Deno.env.get("MDPLANNER_API_TOKEN") ?? undefined,
     maxBodySize: Deno.env.get("MDPLANNER_MAX_BODY_SIZE")
@@ -222,6 +227,14 @@ function parseArgs(args: string[]): CLIArgs {
       }
       result.rateLimitPerMinute = n;
       i += 2;
+    } else if (arg === "--cerveau-dir") {
+      const val = args[i + 1];
+      if (!val || val.startsWith("-")) {
+        console.error("Error: --cerveau-dir requires a path");
+        Deno.exit(1);
+      }
+      result.cerveauDir = val;
+      i += 2;
     } else if (arg === "-p" || arg === "--port") {
       const portValue = args[i + 1];
       if (!portValue || portValue.startsWith("-")) {
@@ -327,11 +340,23 @@ if (cliArgs.backupDir && cliArgs.backupIntervalHours > 0) {
   );
 }
 
+// Initialize cerveau reader if directory exists
+let cerveauReader: CerveauReader | undefined;
+if (cliArgs.cerveauDir) {
+  try {
+    await Deno.stat(cliArgs.cerveauDir);
+    cerveauReader = new CerveauReader(cliArgs.cerveauDir);
+  } catch {
+    // Cerveau directory not found — viewer disabled
+  }
+}
+
 // Create main app
 const app = new Hono();
 
 // API routes
 const apiRouter = createApiRouter(projectManager, {
+  cerveauReader,
   corsOrigin: cliArgs.corsOrigin,
   apiToken: cliArgs.apiToken,
   maxBodySize: cliArgs.maxBodySize,
@@ -425,6 +450,10 @@ if (cliArgs.apiToken) {
 }
 if (cliArgs.readOnly) {
   console.log(`Mode    read-only (mutations blocked)`);
+}
+if (cerveauReader) {
+  const brains = await cerveauReader.brains();
+  console.log(`Cerveau ${cliArgs.cerveauDir} (${brains.length} brain${brains.length !== 1 ? "s" : ""})`);
 }
 if (cliArgs.webdav) {
   console.log(`WebDAV http://localhost:${cliArgs.port}/webdav`);
