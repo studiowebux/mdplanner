@@ -217,7 +217,7 @@ export class ReflectionModule {
         </div>
         <div class="flex justify-end gap-1 mt-3">
           <button type="button" onclick="taskManager.reflectionSidenavModule.openNewFromTemplate('${t.id}')" class="btn-ghost">Use</button>
-          <button type="button" onclick="taskManager.reflectionSidenavModule.openEditTemplate('${t.id}')" class="btn-ghost">Edit</button>
+          <button type="button" onclick="taskManager.reflectionTemplateSidenavModule.openEdit('${t.id}')" class="btn-ghost">Edit</button>
           <button type="button" onclick="taskManager.deleteReflectionTemplate('${t.id}')" class="btn-danger-ghost">Delete</button>
         </div>
       </div>`;
@@ -287,7 +287,7 @@ export class ReflectionModule {
     document
       .getElementById("addReflectionTemplateBtn")
       ?.addEventListener("click", () =>
-        this.taskManager.reflectionSidenavModule.openNewTemplate(),
+        this.taskManager.reflectionTemplateSidenavModule.openNew(),
       );
 
     document
