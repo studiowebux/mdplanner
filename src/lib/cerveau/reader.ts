@@ -99,13 +99,17 @@ export class CerveauReader {
     try {
       for await (const entry of Deno.readDir(absPath)) {
         const entryPath = join(absPath, entry.name);
-        const info = await Deno.lstat(entryPath);
+        const linfo = await Deno.lstat(entryPath);
+        // Follow symlinks to determine if target is a directory
+        const resolved = linfo.isSymlink
+          ? await Deno.stat(entryPath)
+          : linfo;
         entries.push({
           name: entry.name,
           path: join(relPath, entry.name),
-          isDir: entry.isDirectory,
-          isSymlink: info.isSymlink,
-          size: entry.isFile ? info.size : undefined,
+          isDir: resolved.isDirectory,
+          isSymlink: linfo.isSymlink,
+          size: resolved.isFile ? resolved.size : undefined,
         });
       }
     } catch {
