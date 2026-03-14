@@ -76,6 +76,37 @@
   border-style: solid;
 }
 
+/* Board drop zones */
+.drop-zone {
+  min-height: 8px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+}
+
+.drop-zone.drop-zone-expand {
+  flex: 1;
+  min-height: 48px;
+}
+
+.drop-zone--visible {
+  background: var(--color-info-bg, rgba(59, 130, 246, 0.1));
+  border: 2px dashed var(--color-info-text, #3b82f6);
+  min-height: 32px;
+  margin: 4px 0;
+}
+
+.drop-zone--visible.drop-zone-expand {
+  min-height: 48px;
+}
+
+.drop-zone--highlight {
+  background: var(--color-info-text, #3b82f6);
+  border: 2px solid var(--color-info-text, #3b82f6);
+}
+
 .list-section-header {
   position: sticky;
   top: 0;
