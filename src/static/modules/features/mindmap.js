@@ -33,9 +33,9 @@ export class MindmapModule {
         const deleteBtn = document.getElementById("deleteMindmapBtn");
 
         if (content) content.innerHTML = "";
-        if (emptyState) emptyState.style.display = "flex";
-        if (editBtn) editBtn.style.display = "none";
-        if (deleteBtn) deleteBtn.style.display = "none";
+        if (emptyState) emptyState.classList.remove("hidden");
+        if (editBtn) editBtn.classList.add("hidden");
+        if (deleteBtn) deleteBtn.classList.add("hidden");
       }
     } catch (error) {
       console.error("Error loading mindmaps:", error);
@@ -71,9 +71,9 @@ export class MindmapModule {
       const deleteBtn = document.getElementById("deleteMindmapBtn");
 
       if (content) content.innerHTML = "";
-      if (emptyState) emptyState.style.display = "flex";
-      if (editBtn) editBtn.style.display = "none";
-      if (deleteBtn) deleteBtn.style.display = "none";
+      if (emptyState) emptyState.classList.remove("hidden");
+      if (editBtn) editBtn.classList.add("hidden");
+      if (deleteBtn) deleteBtn.classList.add("hidden");
       return;
     }
 
@@ -84,8 +84,8 @@ export class MindmapModule {
       const editBtn = document.getElementById("editMindmapBtn");
       const deleteBtn = document.getElementById("deleteMindmapBtn");
       if (editBtn && deleteBtn) {
-        editBtn.style.display = "block";
-        deleteBtn.style.display = "block";
+        editBtn.classList.remove("hidden");
+        deleteBtn.classList.remove("hidden");
       }
     } else {
       const content = document.getElementById("mindmapContent");
@@ -94,9 +94,9 @@ export class MindmapModule {
       const deleteBtn = document.getElementById("deleteMindmapBtn");
 
       if (content) content.innerHTML = "";
-      if (emptyState) emptyState.style.display = "flex";
-      if (editBtn) editBtn.style.display = "none";
-      if (deleteBtn) deleteBtn.style.display = "none";
+      if (emptyState) emptyState.classList.remove("hidden");
+      if (editBtn) editBtn.classList.add("hidden");
+      if (deleteBtn) deleteBtn.classList.add("hidden");
     }
   }
 
@@ -117,11 +117,11 @@ export class MindmapModule {
     }
 
     if (!mindmap || mindmap.nodes.length === 0) {
-      if (emptyState) emptyState.style.display = "flex";
+      if (emptyState) emptyState.classList.remove("hidden");
       return;
     }
 
-    if (emptyState) emptyState.style.display = "none";
+    if (emptyState) emptyState.classList.add("hidden");
     content.innerHTML = "";
 
     this.setupPanningFor(viewportId, containerId);
@@ -129,7 +129,7 @@ export class MindmapModule {
     const rootNodes = mindmap.nodes.filter((node) => node.level === 0);
 
     if (rootNodes.length === 0) {
-      if (emptyState) emptyState.style.display = "flex";
+      if (emptyState) emptyState.classList.remove("hidden");
       return;
     }
 
@@ -498,8 +498,8 @@ export class MindmapModule {
         this.selectedMindmap = null;
         this.load(false);
         document.getElementById("mindmapSelector").value = "";
-        document.getElementById("editMindmapBtn").style.display = "none";
-        document.getElementById("deleteMindmapBtn").style.display = "none";
+        document.getElementById("editMindmapBtn").classList.add("hidden");
+        document.getElementById("deleteMindmapBtn").classList.add("hidden");
       } catch (error) {
         console.error("Error deleting mindmap:", error);
       }

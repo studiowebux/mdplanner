@@ -102,11 +102,11 @@ export class PeopleModule {
 
     if (filtered.length === 0) {
       container.innerHTML = "";
-      if (emptyState) emptyState.style.display = "flex";
+      if (emptyState) emptyState.classList.remove("hidden");
       return;
     }
 
-    if (emptyState) emptyState.style.display = "none";
+    if (emptyState) emptyState.classList.add("hidden");
 
     let html = "";
     filtered

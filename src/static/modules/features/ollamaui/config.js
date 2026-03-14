@@ -4,8 +4,7 @@ import { App } from "./state.js";
 import { TtsAPI } from "../../api.js";
 
 App.toggleConfig = function () {
-  App.el.configPanel.style.display =
-    App.el.configPanel.style.display === "flex" ? "none" : "flex";
+  App.el.configPanel.classList.toggle("hidden");
 };
 
 App.populateConfigUI = function () {
@@ -152,7 +151,7 @@ App.fetchModelInfo = async function (modelName) {
         } else {
           App.el.headerCtx.textContent = ctx + " ctx";
         }
-        App.el.headerCtx.style.display = "";
+        App.el.headerCtx.classList.remove("hidden");
 
         /* Auto-update num_ctx slider to match model's native context */
         App.config.numCtx = ctx;
@@ -161,9 +160,9 @@ App.fetchModelInfo = async function (modelName) {
         return;
       }
     }
-    App.el.headerCtx.style.display = "none";
+    App.el.headerCtx.classList.add("hidden");
   } catch (_) {
-    App.el.headerCtx.style.display = "none";
+    App.el.headerCtx.classList.add("hidden");
   }
 };
 
@@ -235,12 +234,12 @@ App.updateHeaderModel = function () {
   const model = document.getElementById("configModelSelect").value;
   if (model) {
     App.el.headerModel.textContent = model;
-    App.el.headerModel.style.display = "";
+    App.el.headerModel.classList.remove("hidden");
     App.config.model = model;
     App.fetchModelInfo(model);
   } else {
-    App.el.headerModel.style.display = "none";
-    App.el.headerCtx.style.display = "none";
+    App.el.headerModel.classList.add("hidden");
+    App.el.headerCtx.classList.add("hidden");
   }
 };
 

@@ -241,9 +241,7 @@ export class StrategicLevelsSidenavModule {
     }
             </select>
           </div>
-          <div class="form-group" id="strategicSidenavParentGroup" ${
-      l.level === "vision" ? 'style="display:none"' : ""
-    }>
+          <div class="form-group${l.level === "vision" ? " hidden" : ""}" id="strategicSidenavParentGroup">
             <label class="form-label">Parent</label>
             <select id="strategicSidenavParent" class="form-input">
               <option value="">None (Root)</option>
@@ -371,10 +369,10 @@ export class StrategicLevelsSidenavModule {
     const parentSelect = document.getElementById("strategicSidenavParent");
 
     if (newType === "vision") {
-      parentGroup.style.display = "none";
+      parentGroup.classList.add("hidden");
       parentSelect.value = "";
     } else {
-      parentGroup.style.display = "";
+      parentGroup.classList.remove("hidden");
       // Update parent options
       const builder = this.tm.strategicLevelsBuilders.find((b) =>
         b.id === this.tm.selectedStrategicBuilderId

@@ -250,8 +250,11 @@
 }
 
 /* Inline price popover */
-.dns-price-popover {
+.dns-price-popover:not(.hidden) {
   display: flex;
+}
+
+.dns-price-popover {
   align-items: center;
   gap: 0.5rem;
 }

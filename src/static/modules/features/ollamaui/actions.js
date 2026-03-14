@@ -450,9 +450,9 @@ App.savePrompts = function () {
 
 App.togglePromptPanel = function () {
   const panel = document.getElementById("promptPanel");
-  const isOpen = panel.style.display === "flex";
-  panel.style.display = isOpen ? "none" : "flex";
-  if (!isOpen) App.renderPromptList();
+  const wasHidden = panel.classList.contains("hidden");
+  panel.classList.toggle("hidden");
+  if (wasHidden) App.renderPromptList();
 };
 
 App.renderPromptList = function () {
@@ -476,7 +476,7 @@ App.renderPromptList = function () {
     useBtn.addEventListener("click", function () {
       document.getElementById("configSystemPrompt").value = p.content;
       App.togglePromptPanel();
-      if (App.el.configPanel.style.display !== "flex") App.toggleConfig();
+      if (App.el.configPanel.classList.contains("hidden")) App.toggleConfig();
     });
 
     const delBtn = document.createElement("button");

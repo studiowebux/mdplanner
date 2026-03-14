@@ -142,7 +142,7 @@ App.clearChat = function () {
   App.chatHistory = [];
   App.saveHistory();
   App.el.messagesEl.innerHTML = "";
-  App.el.ctxUsageEl.parentElement.style.display = "none";
+  App.el.ctxUsageEl.parentElement.classList.add("hidden");
 };
 
 /* -------- Scroll helpers -------- */
@@ -175,12 +175,12 @@ App.scrollToBottom = function (force) {
 App.renderBranchNav = function () {
   const nav = document.getElementById("branchNav");
   if (!App.branches || App.branches.forks.length <= 1) {
-    nav.style.display = "none";
+    nav.classList.add("hidden");
     return;
   }
   const curr = App.branches.current;
   const total = App.branches.forks.length;
-  nav.style.display = "flex";
+  nav.classList.remove("hidden");
   document.getElementById("branchLabel").textContent =
     App.branches.forks[curr].label + " (" + (curr + 1) + "/" + total + ")";
   document.getElementById("branchPrev").disabled = curr === 0;
@@ -193,7 +193,7 @@ App.updateCtxUsage = function (used, total) {
   const pct = Math.min((used / total) * 100, 100);
   App.el.ctxUsageEl.textContent = used + " / " + total;
   App.el.ctxBarEl.style.width = pct + "%";
-  App.el.ctxUsageEl.parentElement.style.display = "";
+  App.el.ctxUsageEl.parentElement.classList.remove("hidden");
 };
 
 /* -------- Event listeners (deferred to init) -------- */
@@ -201,7 +201,7 @@ App.updateCtxUsage = function (used, total) {
 export function initMessageListeners() {
   App.el.messagesEl.addEventListener("scroll", function () {
     const nearBottom = App.isNearBottom();
-    App.el.scrollBottomBtn.style.display = nearBottom ? "none" : "block";
+    App.el.scrollBottomBtn.classList.toggle("hidden", nearBottom);
     /* Track when user manually scrolls up during generation */
     if (!nearBottom && App.isGenerating) {
       App.userScrolledUp = true;
@@ -217,6 +217,6 @@ export function initMessageListeners() {
       top: App.el.messagesEl.scrollHeight,
       behavior: "smooth",
     });
-    App.el.scrollBottomBtn.style.display = "none";
+    App.el.scrollBottomBtn.classList.add("hidden");
   });
 }

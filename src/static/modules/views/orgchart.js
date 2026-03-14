@@ -91,11 +91,11 @@ export class OrgChartModule {
 
     if (filteredTree.length === 0) {
       container.innerHTML = "";
-      if (emptyState) emptyState.style.display = "flex";
+      if (emptyState) emptyState.classList.remove("hidden");
       return;
     }
 
-    if (emptyState) emptyState.style.display = "none";
+    if (emptyState) emptyState.classList.add("hidden");
 
     container.innerHTML = "";
     const treeContainer = document.createElement("div");
@@ -360,11 +360,11 @@ export class OrgChartModule {
 
     if (filteredMembers.length === 0) {
       container.innerHTML = "";
-      if (emptyState) emptyState.style.display = "flex";
+      if (emptyState) emptyState.classList.remove("hidden");
       return;
     }
 
-    if (emptyState) emptyState.style.display = "none";
+    if (emptyState) emptyState.classList.add("hidden");
 
     // Group by department (members can appear in multiple departments)
     const byDepartment = {};
