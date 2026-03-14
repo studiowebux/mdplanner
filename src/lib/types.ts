@@ -244,6 +244,23 @@ export interface Idea {
   cancelledAt?: string;
 }
 
+export interface BrainstormQuestion {
+  question: string;
+  answer?: string;
+}
+
+export interface Brainstorm {
+  id: string;
+  title: string;
+  created: string;
+  updated?: string;
+  tags?: string[];
+  linkedProjects?: string[];
+  linkedTasks?: string[];
+  linkedGoals?: string[];
+  questions: BrainstormQuestion[];
+}
+
 export interface Retrospective {
   id: string;
   title: string;

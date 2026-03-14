@@ -420,6 +420,34 @@ export const IdeasAPI = {
   },
 };
 
+// Brainstorms API
+export const BrainstormsAPI = {
+  async fetchAll() {
+    const response = await get("/api/brainstorms");
+    return response.json();
+  },
+
+  async fetchOne(id) {
+    const response = await get(`/api/brainstorms/${id}`);
+    return response.json();
+  },
+
+  async create(brainstorm) {
+    const response = await post("/api/brainstorms", brainstorm);
+    return response;
+  },
+
+  async update(id, brainstorm) {
+    const response = await put(`/api/brainstorms/${id}`, brainstorm);
+    return response;
+  },
+
+  async delete(id) {
+    const response = await del(`/api/brainstorms/${id}`);
+    return response;
+  },
+};
+
 // Retrospectives API
 export const RetrospectivesAPI = {
   async fetchAll() {

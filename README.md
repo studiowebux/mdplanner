@@ -43,6 +43,7 @@ with what you need, enable the rest when you grow into it.
 | **Goals**          | Track goals with status, timeline, and KPI targets             |
 | **Milestones**     | Version-based milestones with target dates and progress        |
 | **Ideas**          | Idea repository with categories, priority, and task conversion |
+| **Brainstorm**     | Guided question-and-answer sessions for exploring ideas        |
 | **Retrospectives** | Start/stop/continue retrospective format                       |
 | **MoSCoW**         | Must/Should/Could/Won't prioritization matrix                  |
 | **Eisenhower**     | Importance/Urgency decision matrix                             |

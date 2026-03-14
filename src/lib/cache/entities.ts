@@ -370,6 +370,48 @@ export const ENTITIES: EntityDef[] = [
   },
 
   // ----------------------------------------------------------
+  // Brainstorms
+  // ----------------------------------------------------------
+  {
+    table: "brainstorms",
+    schema: `CREATE TABLE IF NOT EXISTS brainstorms (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  tags TEXT,
+  questions TEXT,
+  created TEXT
+)`,
+    fts: {
+      type: "brainstorm",
+      columns: ["id", "title", "questions"],
+      titleCol: "title",
+      contentCol: "questions",
+    },
+    sync: async (parser, db) => {
+      const brainstorms = await parser.readBrainstorms();
+      db.execute("DELETE FROM brainstorms");
+      for (const b of brainstorms) {
+        // Flatten questions into searchable text
+        const questionsText = (b.questions || [])
+          .map((q) => `${q.question}: ${q.answer || ""}`)
+          .join("\n");
+        db.execute(
+          `INSERT INTO brainstorms (id, title, tags, questions, created)
+           VALUES (?, ?, ?, ?, ?)`,
+          [
+            val(b.id),
+            val(b.title),
+            json(b.tags),
+            val(questionsText),
+            val(b.created),
+          ],
+        );
+      }
+      return brainstorms.length;
+    },
+  },
+
+  // ----------------------------------------------------------
   // Retrospectives
   // ----------------------------------------------------------
   {

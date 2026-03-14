@@ -54,6 +54,7 @@ import { DnsDomainParser } from "./dns.ts";
 import { HabitsDirectoryParser } from "./habits.ts";
 import { FishboneDirectoryParser } from "./fishbone.ts";
 import { MarketingPlansDirectoryParser } from "./marketing-plans.ts";
+import { BrainstormsDirectoryParser } from "./brainstorms.ts";
 import type {
   BillingRate,
   Brief,
@@ -72,6 +73,7 @@ import type {
   Goal,
   Habit,
   Idea,
+  Brainstorm,
   Interaction,
   InvestorEntry,
   Invoice,
@@ -145,6 +147,7 @@ export class DirectoryMarkdownParser {
   protected habitsParser: HabitsDirectoryParser;
   protected fishboneParser: FishboneDirectoryParser;
   protected marketingPlansParser: MarketingPlansDirectoryParser;
+  protected brainstormsParser: BrainstormsDirectoryParser;
 
   constructor(projectDir: string) {
     this.projectDir = projectDir;
@@ -186,6 +189,7 @@ export class DirectoryMarkdownParser {
     this.habitsParser = new HabitsDirectoryParser(projectDir);
     this.fishboneParser = new FishboneDirectoryParser(projectDir);
     this.marketingPlansParser = new MarketingPlansDirectoryParser(projectDir);
+    this.brainstormsParser = new BrainstormsDirectoryParser(projectDir);
   }
 
   // ============================================================
@@ -748,6 +752,39 @@ export class DirectoryMarkdownParser {
       ...idea,
       backlinks: backlinks.get(idea.id) || [],
     }));
+  }
+
+  // ============================================================
+  // Brainstorms
+  // ============================================================
+
+  async readBrainstorms(): Promise<Brainstorm[]> {
+    return this.brainstormsParser.readAll();
+  }
+
+  async readBrainstorm(id: string): Promise<Brainstorm | null> {
+    return this.brainstormsParser.read(id);
+  }
+
+  async readBrainstormByName(name: string): Promise<Brainstorm | null> {
+    return this.brainstormsParser.readByName(name);
+  }
+
+  async addBrainstorm(
+    brainstorm: Omit<Brainstorm, "id" | "created">,
+  ): Promise<Brainstorm> {
+    return this.brainstormsParser.add(brainstorm);
+  }
+
+  async updateBrainstorm(
+    id: string,
+    updates: Partial<Brainstorm>,
+  ): Promise<Brainstorm | null> {
+    return this.brainstormsParser.update(id, updates);
+  }
+
+  async deleteBrainstorm(id: string): Promise<boolean> {
+    return this.brainstormsParser.delete(id);
   }
 
   // ============================================================
@@ -1510,6 +1547,10 @@ export class DirectoryMarkdownParser {
     await this.ideasParser.saveAll(ideas);
   }
 
+  async saveBrainstorms(brainstorms: Brainstorm[]): Promise<void> {
+    await this.brainstormsParser.saveAll(brainstorms);
+  }
+
   async saveRetrospectives(retrospectives: Retrospective[]): Promise<void> {
     await this.retrospectivesParser.saveAll(retrospectives);
   }
@@ -1822,6 +1863,7 @@ export class DirectoryMarkdownParser {
     await Deno.mkdir(`${this.projectDir}/board/done`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/milestones`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/ideas`, { recursive: true });
+    await Deno.mkdir(`${this.projectDir}/brainstorms`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/retrospectives`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/swot`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/risk`, { recursive: true });

@@ -38,6 +38,7 @@ import { c4Router } from "./c4.ts";
 // Feature routes
 import { milestonesRouter } from "./features/milestones.ts";
 import { ideasRouter } from "./features/ideas.ts";
+import { brainstormsRouter } from "./features/brainstorms.ts";
 import { retrospectivesRouter } from "./features/retrospectives.ts";
 import { swotRouter } from "./features/swot.ts";
 import { riskRouter } from "./features/risk.ts";
@@ -343,6 +344,7 @@ export function createApiRouter(
   // Feature routes
   api.route("/milestones", milestonesRouter);
   api.route("/ideas", ideasRouter);
+  api.route("/brainstorms", brainstormsRouter);
   api.route("/retrospectives", retrospectivesRouter);
   api.route("/swot", swotRouter);
   api.route("/risk-analysis", riskRouter);
