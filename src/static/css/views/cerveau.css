@@ -306,6 +306,71 @@
   letter-spacing: 0.03em;
 }
 
+/* Marketplace controls */
+.cerveau-marketplace-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.cerveau-search-input {
+  flex: 1;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.cerveau-search-input:focus {
+  outline: none;
+  border-color: var(--color-text-primary);
+}
+
+.cerveau-filter-select {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.cerveau-pkg-count {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+/* Brain status badges */
+.cerveau-package-brains {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-top: var(--space-sm);
+}
+
+.cerveau-brain-status {
+  font-size: 10px;
+  padding: 0.125rem var(--space-sm);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border-default);
+}
+
+.cerveau-brain-status.installed {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.cerveau-brain-status.not-installed {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-tertiary);
+  opacity: 0.5;
+}
+
 .cerveau-package-body {
   padding: var(--space-md);
 }

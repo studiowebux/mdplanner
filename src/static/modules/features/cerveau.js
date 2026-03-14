@@ -453,24 +453,81 @@ export class CerveauModule {
       return;
     }
 
+    // Collect unique types for filter
+    const types = [...new Set(this.registry.packages.map((p) => p.type))].sort();
+
     panel.innerHTML = `
       <div class="cerveau-panel">
-        <div class="cerveau-packages">
-          ${this.registry.packages.map((pkg) => `
-            <div class="cerveau-package">
-              <div class="cerveau-package-header">
-                <span class="cerveau-package-name">${pkg.name}</span>
-                <span class="cerveau-package-type">${pkg.type}</span>
-              </div>
-              <div class="cerveau-package-body">
-                <p class="cerveau-package-desc">${pkg.description}</p>
-                ${pkg.tags.length ? `<div class="cerveau-tags mb-2">${pkg.tags.map((t) => `<span class="cerveau-tag-sm">${t}</span>`).join("")}</div>` : ""}
-                <div class="cerveau-package-files">
-                  ${pkg.files.map((f) => `<code class="cerveau-package-file">${f}</code>`).join("")}
-                </div>
-              </div>
-            </div>
-          `).join("")}
+        <div class="cerveau-marketplace-controls">
+          <input type="text" id="cerveauPkgSearch" class="cerveau-search-input"
+            placeholder="Search packages...">
+          <select id="cerveauPkgFilter" class="cerveau-filter-select">
+            <option value="">All types</option>
+            ${types.map((t) => `<option value="${t}">${t}</option>`).join("")}
+          </select>
+          <span id="cerveauPkgCount" class="cerveau-pkg-count"></span>
+        </div>
+        <div id="cerveauPkgGrid" class="cerveau-packages"></div>
+      </div>
+    `;
+
+    this._filterPackages();
+  }
+
+  _filterPackages() {
+    const grid = document.getElementById("cerveauPkgGrid");
+    const countEl = document.getElementById("cerveauPkgCount");
+    if (!grid || !this.registry) return;
+
+    const search = (document.getElementById("cerveauPkgSearch")?.value || "").toLowerCase();
+    const typeFilter = document.getElementById("cerveauPkgFilter")?.value || "";
+
+    const filtered = this.registry.packages.filter((pkg) => {
+      if (typeFilter && pkg.type !== typeFilter) return false;
+      if (search) {
+        const haystack = `${pkg.name} ${pkg.description} ${pkg.tags.join(" ")}`.toLowerCase();
+        return haystack.includes(search);
+      }
+      return true;
+    });
+
+    if (countEl) {
+      countEl.textContent = `${filtered.length} of ${this.registry.packages.length} packages`;
+    }
+
+    grid.innerHTML = filtered.length
+      ? filtered.map((pkg) => this._renderPackageCard(pkg)).join("")
+      : '<span class="cerveau-tag-none">No packages match</span>';
+  }
+
+  _renderPackageCard(pkg) {
+    // Determine which brains have this package active
+    const typeKey = { workflow: "workflows", practice: "practices", stack: "stacks", agent: "agents" }[pkg.type];
+    const ruleNames = pkg.files
+      .map((f) => f.replace(/^.*\//, "").replace(/\.md$/, ""));
+
+    const brainStatuses = this.brains.map((brain) => {
+      const brainList = brain[typeKey] || [];
+      const allActive = brainList.length === 0;
+      const installed = allActive || ruleNames.some((r) => brainList.includes(r));
+      return { name: brain.name, installed };
+    });
+
+    return `
+      <div class="cerveau-package">
+        <div class="cerveau-package-header">
+          <span class="cerveau-package-name">${pkg.name}</span>
+          <span class="cerveau-package-type">${pkg.type}</span>
+        </div>
+        <div class="cerveau-package-body">
+          <p class="cerveau-package-desc">${pkg.description}</p>
+          ${pkg.tags.length ? `<div class="cerveau-tags mb-1">${pkg.tags.map((t) => `<span class="cerveau-tag-sm">${t}</span>`).join("")}</div>` : ""}
+          <div class="cerveau-package-files mb-2">
+            ${pkg.files.map((f) => `<code class="cerveau-package-file">${f}</code>`).join("")}
+          </div>
+          <div class="cerveau-package-brains">
+            ${brainStatuses.map((b) => `<span class="cerveau-brain-status ${b.installed ? "installed" : "not-installed"}">${b.name}</span>`).join("")}
+          </div>
         </div>
       </div>
     `;
@@ -499,6 +556,18 @@ export class CerveauModule {
       ?.addEventListener("click", (e) => {
         const tab = e.target.closest("[data-tab]");
         if (tab) this.switchTab(tab.dataset.tab);
+      });
+
+    // Marketplace search and filter (event delegation)
+    document
+      .getElementById("cerveauContent")
+      ?.addEventListener("input", (e) => {
+        if (e.target.id === "cerveauPkgSearch") this._filterPackages();
+      });
+    document
+      .getElementById("cerveauContent")
+      ?.addEventListener("change", (e) => {
+        if (e.target.id === "cerveauPkgFilter") this._filterPackages();
       });
 
     // File tree, file content, and preview toggle (event delegation on cerveauContent)
