@@ -55,6 +55,8 @@ import { MilestonesModule } from "./modules/features/milestones.js";
 import { IdeasModule } from "./modules/features/ideas.js";
 import { BrainstormModule } from "./modules/features/brainstorm.js";
 import { BrainstormSidenavModule } from "./modules/features/brainstorm-sidenav.js";
+import { ReflectionModule } from "./modules/features/reflection.js";
+import { ReflectionSidenavModule } from "./modules/features/reflection-sidenav.js";
 import { MeetingsModule } from "./modules/features/meetings.js";
 import { MeetingSidenavModule } from "./modules/features/meeting-sidenav.js";
 import { JournalModule } from "./modules/features/journal.js";
@@ -281,6 +283,8 @@ class TaskManager {
     this.ideasModule = new IdeasModule(this);
     this.brainstormModule = new BrainstormModule(this);
     this.brainstormSidenavModule = new BrainstormSidenavModule(this);
+    this.reflectionModule = new ReflectionModule(this);
+    this.reflectionSidenavModule = new ReflectionSidenavModule(this);
     this.meetingsModule = new MeetingsModule(this);
     this.journalModule = new JournalModule(this);
     this.dnsModule = new DnsModule(this);
@@ -447,6 +451,9 @@ class TaskManager {
       case "brainstorm":
         if (view === "brainstorm") this.brainstormModule.load();
         break;
+      case "reflection":
+        if (view === "reflection") this.reflectionModule.load();
+        break;
       case "journal":
         if (view === "journal") this.journalModule.load();
         break;
@@ -594,6 +601,7 @@ class TaskManager {
       { id: "milestonesViewBtn", view: "milestones" },
       { id: "ideasViewBtn", view: "ideas" },
       { id: "brainstormViewBtn", view: "brainstorm" },
+      { id: "reflectionViewBtn", view: "reflection" },
       { id: "retrospectivesViewBtn", view: "retrospectives" },
       { id: "moscowViewBtn", view: "moscow" },
       { id: "eisenhowerViewBtn", view: "eisenhower" },
@@ -746,6 +754,12 @@ class TaskManager {
       .getElementById("brainstormViewBtnMobile")
       ?.addEventListener("click", () => {
         this.switchView("brainstorm");
+        this.closeMobileMenu();
+      });
+    document
+      .getElementById("reflectionViewBtnMobile")
+      ?.addEventListener("click", () => {
+        this.switchView("reflection");
         this.closeMobileMenu();
       });
     document
@@ -1002,9 +1016,10 @@ class TaskManager {
     this.projectValueSidenavModule.bindEvents();
     this.briefSidenavModule.bindEvents();
 
-    // Batch 3 sidenav bindings (Ideas, Brainstorm & Diagrams)
+    // Batch 3 sidenav bindings (Ideas, Brainstorm, Reflection & Diagrams)
     this.ideaSidenavModule.bindEvents();
     this.brainstormSidenavModule.bindEvents();
+    this.reflectionSidenavModule.bindEvents();
     this.c4SidenavModule.bindEvents();
 
     // Batch 4 sidenav bindings (Complex modules)
@@ -1058,6 +1073,9 @@ class TaskManager {
 
     // Brainstorm events - delegated to BrainstormModule
     this.brainstormModule.bindEvents();
+
+    // Reflection events - delegated to ReflectionModule
+    this.reflectionModule.bindEvents();
 
     // Billing events - delegated to BillingModule
     this.billingModule.bindEvents();
@@ -1226,7 +1244,7 @@ class TaskManager {
     const features = this.projectConfig?.features;
     const allViews = [
       "summary", "list", "board", "timeline",
-      "notes", "goals", "milestones", "ideas", "brainstorm",
+      "notes", "goals", "milestones", "ideas", "brainstorm", "reflection",
       "canvas", "mindmap", "c4", "retrospectives",
       "moscow", "eisenhower", "ideaSorter", "fundraising", "swot", "riskAnalysis", "leanCanvas", "businessModel",
       "projectValue", "brief", "timeTracking", "capacity",
@@ -1295,6 +1313,7 @@ class TaskManager {
       milestones: "Milestones",
       ideas: "Ideas",
       brainstorm: "Brainstorm",
+      reflection: "Reflection",
       canvas: "Canvas",
       mindmap: "Mindmap",
       c4: "C4 Architecture",
@@ -1401,6 +1420,7 @@ class TaskManager {
       "milestonesViewBtn",
       "ideasViewBtn",
       "brainstormViewBtn",
+      "reflectionViewBtn",
       "canvasViewBtn",
       "mindmapViewBtn",
       "c4ViewBtn",
@@ -1460,6 +1480,7 @@ class TaskManager {
       "c4ViewBtnMobile",
       "ideasViewBtnMobile",
       "brainstormViewBtnMobile",
+      "reflectionViewBtnMobile",
       "retrospectivesViewBtnMobile",
       "moscowViewBtnMobile",
       "eisenhowerViewBtnMobile",
@@ -1511,6 +1532,7 @@ class TaskManager {
     document.getElementById("milestonesView").classList.add("hidden");
     document.getElementById("ideasView").classList.add("hidden");
     document.getElementById("brainstormView").classList.add("hidden");
+    document.getElementById("reflectionView").classList.add("hidden");
     document.getElementById("retrospectivesView").classList.add("hidden");
     document.getElementById("moscowView")?.classList.add("hidden");
     document.getElementById("eisenhowerView")?.classList.add("hidden");
@@ -1590,6 +1612,10 @@ class TaskManager {
       this.activateViewButton("brainstorm");
       document.getElementById("brainstormView").classList.remove("hidden");
       this.brainstormModule.load();
+    } else if (view === "reflection") {
+      this.activateViewButton("reflection");
+      document.getElementById("reflectionView").classList.remove("hidden");
+      this.reflectionModule.load();
     } else if (view === "retrospectives") {
       this.activateViewButton("retrospectives");
       document.getElementById("retrospectivesView").classList.remove("hidden");
@@ -2622,6 +2648,14 @@ class TaskManager {
 
   async deleteBrainstorm(id) {
     return this.brainstormModule.delete(id);
+  }
+
+  async deleteReflection(id) {
+    return this.reflectionModule.delete(id);
+  }
+
+  async deleteReflectionTemplate(id) {
+    return this.reflectionModule.deleteTemplate(id);
   }
 
   // Retrospectives functionality - delegated to RetrospectivesModule

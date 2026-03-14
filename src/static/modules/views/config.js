@@ -449,6 +449,7 @@ export class ConfigView {
         { id: "milestones", label: "Milestones" },
         { id: "ideas", label: "Ideas" },
         { id: "brainstorm", label: "Brainstorm" },
+        { id: "reflection", label: "Reflection" },
         { id: "retrospectives", label: "Retrospectives" },
         { id: "moscow", label: "MoSCoW" },
         { id: "eisenhower", label: "Eisenhower Matrix" },

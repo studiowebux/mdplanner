@@ -13,6 +13,7 @@ const VIEW_CATEGORIES = {
   milestones: { category: "Planning", label: "Milestones" },
   ideas: { category: "Planning", label: "Ideas" },
   brainstorm: { category: "Planning", label: "Brainstorm" },
+  reflection: { category: "Planning", label: "Reflection" },
   canvas: { category: "Diagrams", label: "Canvas" },
   mindmap: { category: "Diagrams", label: "Mindmap" },
   c4: { category: "Diagrams", label: "C4 Architecture" },

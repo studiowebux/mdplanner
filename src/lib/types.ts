@@ -261,6 +261,34 @@ export interface Brainstorm {
   questions: BrainstormQuestion[];
 }
 
+export interface ReflectionQuestion {
+  question: string;
+  answer?: string;
+}
+
+export interface ReflectionTemplate {
+  id: string;
+  title: string;
+  description?: string;
+  tags?: string[];
+  questions: string[];
+  created: string;
+  updated?: string;
+}
+
+export interface Reflection {
+  id: string;
+  title: string;
+  created: string;
+  updated?: string;
+  tags?: string[];
+  templateId?: string;
+  linkedProjects?: string[];
+  linkedTasks?: string[];
+  linkedGoals?: string[];
+  questions: ReflectionQuestion[];
+}
+
 export interface Retrospective {
   id: string;
   title: string;

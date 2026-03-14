@@ -448,6 +448,62 @@ export const BrainstormsAPI = {
   },
 };
 
+// Reflection Templates API
+export const ReflectionTemplatesAPI = {
+  async fetchAll() {
+    const response = await get("/api/reflection-templates");
+    return response.json();
+  },
+
+  async fetchOne(id) {
+    const response = await get(`/api/reflection-templates/${id}`);
+    return response.json();
+  },
+
+  async create(template) {
+    const response = await post("/api/reflection-templates", template);
+    return response;
+  },
+
+  async update(id, template) {
+    const response = await put(`/api/reflection-templates/${id}`, template);
+    return response;
+  },
+
+  async delete(id) {
+    const response = await del(`/api/reflection-templates/${id}`);
+    return response;
+  },
+};
+
+// Reflections API
+export const ReflectionsAPI = {
+  async fetchAll() {
+    const response = await get("/api/reflections");
+    return response.json();
+  },
+
+  async fetchOne(id) {
+    const response = await get(`/api/reflections/${id}`);
+    return response.json();
+  },
+
+  async create(reflection) {
+    const response = await post("/api/reflections", reflection);
+    return response;
+  },
+
+  async update(id, reflection) {
+    const response = await put(`/api/reflections/${id}`, reflection);
+    return response;
+  },
+
+  async delete(id) {
+    const response = await del(`/api/reflections/${id}`);
+    return response;
+  },
+};
+
 // Retrospectives API
 export const RetrospectivesAPI = {
   async fetchAll() {

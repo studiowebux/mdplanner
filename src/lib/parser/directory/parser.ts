@@ -55,6 +55,8 @@ import { HabitsDirectoryParser } from "./habits.ts";
 import { FishboneDirectoryParser } from "./fishbone.ts";
 import { MarketingPlansDirectoryParser } from "./marketing-plans.ts";
 import { BrainstormsDirectoryParser } from "./brainstorms.ts";
+import { ReflectionTemplatesDirectoryParser } from "./reflection-templates.ts";
+import { ReflectionsDirectoryParser } from "./reflections.ts";
 import type {
   BillingRate,
   Brainstorm,
@@ -94,6 +96,8 @@ import type {
   ProjectInfo,
   ProjectValueBoard,
   Quote,
+  Reflection,
+  ReflectionTemplate,
   Retrospective,
   RiskAnalysis,
   SAFEAgreement,
@@ -148,6 +152,8 @@ export class DirectoryMarkdownParser {
   protected fishboneParser: FishboneDirectoryParser;
   protected marketingPlansParser: MarketingPlansDirectoryParser;
   protected brainstormsParser: BrainstormsDirectoryParser;
+  protected reflectionTemplatesParser: ReflectionTemplatesDirectoryParser;
+  protected reflectionsParser: ReflectionsDirectoryParser;
 
   constructor(projectDir: string) {
     this.projectDir = projectDir;
@@ -190,6 +196,10 @@ export class DirectoryMarkdownParser {
     this.fishboneParser = new FishboneDirectoryParser(projectDir);
     this.marketingPlansParser = new MarketingPlansDirectoryParser(projectDir);
     this.brainstormsParser = new BrainstormsDirectoryParser(projectDir);
+    this.reflectionTemplatesParser = new ReflectionTemplatesDirectoryParser(
+      projectDir,
+    );
+    this.reflectionsParser = new ReflectionsDirectoryParser(projectDir);
   }
 
   // ============================================================
@@ -1551,6 +1561,86 @@ export class DirectoryMarkdownParser {
     await this.brainstormsParser.saveAll(brainstorms);
   }
 
+  // ============================================================
+  // Reflection Templates
+  // ============================================================
+
+  async readReflectionTemplates(): Promise<ReflectionTemplate[]> {
+    return this.reflectionTemplatesParser.readAll();
+  }
+
+  async readReflectionTemplate(
+    id: string,
+  ): Promise<ReflectionTemplate | null> {
+    return this.reflectionTemplatesParser.read(id);
+  }
+
+  async readReflectionTemplateByName(
+    name: string,
+  ): Promise<ReflectionTemplate | null> {
+    return this.reflectionTemplatesParser.readByName(name);
+  }
+
+  async addReflectionTemplate(
+    template: Omit<ReflectionTemplate, "id" | "created">,
+  ): Promise<ReflectionTemplate> {
+    return this.reflectionTemplatesParser.add(template);
+  }
+
+  async updateReflectionTemplate(
+    id: string,
+    updates: Partial<ReflectionTemplate>,
+  ): Promise<ReflectionTemplate | null> {
+    return this.reflectionTemplatesParser.update(id, updates);
+  }
+
+  async deleteReflectionTemplate(id: string): Promise<boolean> {
+    return this.reflectionTemplatesParser.delete(id);
+  }
+
+  async saveReflectionTemplates(
+    templates: ReflectionTemplate[],
+  ): Promise<void> {
+    await this.reflectionTemplatesParser.saveAll(templates);
+  }
+
+  // ============================================================
+  // Reflections
+  // ============================================================
+
+  async readReflections(): Promise<Reflection[]> {
+    return this.reflectionsParser.readAll();
+  }
+
+  async readReflection(id: string): Promise<Reflection | null> {
+    return this.reflectionsParser.read(id);
+  }
+
+  async readReflectionByName(name: string): Promise<Reflection | null> {
+    return this.reflectionsParser.readByName(name);
+  }
+
+  async addReflection(
+    reflection: Omit<Reflection, "id" | "created">,
+  ): Promise<Reflection> {
+    return this.reflectionsParser.add(reflection);
+  }
+
+  async updateReflection(
+    id: string,
+    updates: Partial<Reflection>,
+  ): Promise<Reflection | null> {
+    return this.reflectionsParser.update(id, updates);
+  }
+
+  async deleteReflection(id: string): Promise<boolean> {
+    return this.reflectionsParser.delete(id);
+  }
+
+  async saveReflections(reflections: Reflection[]): Promise<void> {
+    await this.reflectionsParser.saveAll(reflections);
+  }
+
   async saveRetrospectives(retrospectives: Retrospective[]): Promise<void> {
     await this.retrospectivesParser.saveAll(retrospectives);
   }
@@ -1864,6 +1954,10 @@ export class DirectoryMarkdownParser {
     await Deno.mkdir(`${this.projectDir}/milestones`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/ideas`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/brainstorms`, { recursive: true });
+    await Deno.mkdir(`${this.projectDir}/reflection-templates`, {
+      recursive: true,
+    });
+    await Deno.mkdir(`${this.projectDir}/reflections`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/retrospectives`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/swot`, { recursive: true });
     await Deno.mkdir(`${this.projectDir}/risk`, { recursive: true });

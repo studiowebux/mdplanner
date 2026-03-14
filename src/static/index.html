@@ -501,6 +501,13 @@
                 Brainstorm
               </button>
               <button
+                id="reflectionViewBtn"
+                data-view="reflection"
+                class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
+              >
+                Reflection
+              </button>
+              <button
                 id="retrospectivesViewBtn"
                 data-view="retrospectives"
                 class="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary"
@@ -1015,6 +1022,12 @@
               class="w-full text-left px-4 py-2.5 text-sm text-secondary"
             >
               Brainstorm
+            </button>
+            <button
+              id="reflectionViewBtnMobile"
+              class="w-full text-left px-4 py-2.5 text-sm text-secondary"
+            >
+              Reflection
             </button>
             <button
               id="retrospectivesViewBtnMobile"
@@ -3428,8 +3441,94 @@
             </div>
             <div
               id="brainstormContainer"
-              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+              class="hidden"
             >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reflection View -->
+      <div id="reflectionView" class="hidden pb-16">
+        <div class="bg-primary rounded-lg shadow">
+          <div
+            class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
+          >
+            <h2 class="text-lg font-medium text-primary">Reflection</h2>
+            <div class="flex gap-2">
+              <button
+                id="addReflectionTemplateBtn"
+                class="btn-secondary py-2 rounded-lg"
+              >
+                + New Template
+              </button>
+              <button
+                id="addReflectionBtn"
+                class="btn-primary py-2 rounded-lg"
+              >
+                + New Reflection
+              </button>
+            </div>
+          </div>
+          <div class="reflection-filter-bar">
+            <nav class="flex gap-2 mr-4" role="tablist" aria-label="Reflection">
+              <button
+                id="reflectionTabReflections"
+                class="btn-ghost active"
+                role="tab"
+                aria-selected="true"
+                aria-controls="reflectionContainer"
+              >
+                Reflections
+              </button>
+              <button
+                id="reflectionTabTemplates"
+                class="btn-ghost"
+                role="tab"
+                aria-selected="false"
+                aria-controls="reflectionTemplatesContainer"
+              >
+                Templates
+              </button>
+            </nav>
+            <input
+              type="text"
+              id="reflectionFilterSearch"
+              placeholder="Search reflections..."
+            >
+          </div>
+          <div class="p-6">
+            <div
+              id="emptyReflectionState"
+              class="text-center py-12 hidden"
+            >
+              <svg
+                class="mx-auto h-12 w-12 text-muted"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                />
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-primary">
+                No reflections yet
+              </h3>
+              <p class="mt-1 text-sm text-muted">
+                Create a template or start a reflection to look back and grow.
+              </p>
+            </div>
+            <div
+              id="reflectionContainer"
+              class="hidden"
+              role="tabpanel"
+            >
+            </div>
+            <div id="reflectionTemplatesContainer" class="hidden" role="tabpanel">
             </div>
           </div>
         </div>
@@ -13955,7 +14054,7 @@
     </div>
 
     <!-- Brainstorm Sidenav -->
-    <div id="brainstormSidenav" class="sidenav-panel sidenav-md">
+    <div id="brainstormSidenav" class="sidenav-panel sidenav-md" role="dialog" aria-modal="true" aria-labelledby="brainstormSidenavHeader">
       <div class="sidenav-header">
         <h2 id="brainstormSidenavHeader" class="sidenav-title">
           New Brainstorm
@@ -13994,7 +14093,7 @@
           <input type="text" id="brainstormSidenavTags" placeholder="Comma-separated tags">
         </div>
         <div class="sidenav-field">
-          <label>Questions</label>
+          <h3 class="sidenav-section-title">Questions</h3>
           <div id="brainstormSidenavQuestionsContainer"></div>
           <button type="button" id="brainstormSidenavAddQuestion" class="btn-secondary mt-2">
             + Add Question
@@ -14017,6 +14116,167 @@
           Cancel
         </button>
         <button type="button" id="brainstormSidenavSave" class="btn-primary">
+          Save
+        </button>
+      </div>
+    </div>
+
+    <!-- Reflection Sidenav -->
+    <div id="reflectionSidenav" class="sidenav-panel sidenav-md" role="dialog" aria-modal="true" aria-labelledby="reflectionSidenavHeader">
+      <div class="sidenav-header">
+        <h2 id="reflectionSidenavHeader" class="sidenav-title">
+          New Reflection
+        </h2>
+        <div class="flex items-center gap-2">
+          <span id="reflectionSidenavSaveStatus" class="text-xs hidden"></span>
+          <button
+            type="button"
+            id="reflectionSidenavClose"
+            class="sidenav-close"
+            aria-label="Close"
+          >
+            &times;
+          </button>
+        </div>
+      </div>
+      <div class="sidenav-body">
+        <div class="sidenav-field">
+          <label for="reflectionSidenavTitle">Title</label>
+          <input
+            type="text"
+            id="reflectionSidenavTitle"
+            placeholder="What are you reflecting on?"
+          >
+        </div>
+        <div class="sidenav-field">
+          <label for="reflectionSidenavTags">Tags</label>
+          <input
+            type="text"
+            id="reflectionSidenavTags"
+            placeholder="Comma-separated tags"
+          >
+        </div>
+        <div class="sidenav-field">
+          <h3 class="sidenav-section-title">Load from template</h3>
+          <div
+            id="reflectionSidenavTemplatePicker"
+            class="flex flex-wrap gap-2"
+          ></div>
+        </div>
+        <div class="sidenav-field">
+          <h3 class="sidenav-section-title">Questions</h3>
+          <div id="reflectionSidenavQuestionsContainer"></div>
+          <button
+            type="button"
+            id="reflectionSidenavAddQuestion"
+            class="btn-secondary mt-2"
+          >
+            + Add Question
+          </button>
+        </div>
+      </div>
+      <div class="sidenav-footer">
+        <button
+          type="button"
+          id="reflectionSidenavDelete"
+          class="btn-danger-ghost hidden"
+        >
+          Delete
+        </button>
+        <button
+          type="button"
+          id="reflectionSidenavCancel"
+          class="btn-secondary"
+        >
+          Cancel
+        </button>
+        <button type="button" id="reflectionSidenavSave" class="btn-primary">
+          Save
+        </button>
+      </div>
+    </div>
+
+    <!-- Reflection Template Sidenav -->
+    <div id="reflectionTemplateSidenav" class="sidenav-panel sidenav-md" role="dialog" aria-modal="true" aria-labelledby="reflectionTemplateSidenavHeader">
+      <div class="sidenav-header">
+        <h2
+          id="reflectionTemplateSidenavHeader"
+          class="sidenav-title"
+        >
+          New Template
+        </h2>
+        <div class="flex items-center gap-2">
+          <span
+            id="reflectionTemplateSidenavSaveStatus"
+            class="text-xs hidden"
+          ></span>
+          <button
+            type="button"
+            id="reflectionTemplateSidenavClose"
+            class="sidenav-close"
+            aria-label="Close"
+          >
+            &times;
+          </button>
+        </div>
+      </div>
+      <div class="sidenav-body">
+        <div class="sidenav-field">
+          <label for="reflectionTemplateSidenavTitle">Title</label>
+          <input
+            type="text"
+            id="reflectionTemplateSidenavTitle"
+            placeholder="Template name"
+          >
+        </div>
+        <div class="sidenav-field">
+          <label for="reflectionTemplateSidenavDescription">Description</label>
+          <input
+            type="text"
+            id="reflectionTemplateSidenavDescription"
+            placeholder="What is this template for?"
+          >
+        </div>
+        <div class="sidenav-field">
+          <label for="reflectionTemplateSidenavTags">Tags</label>
+          <input
+            type="text"
+            id="reflectionTemplateSidenavTags"
+            placeholder="Comma-separated tags"
+          >
+        </div>
+        <div class="sidenav-field">
+          <h3 class="sidenav-section-title">Questions</h3>
+          <div id="reflectionTemplateSidenavQuestionsContainer"></div>
+          <button
+            type="button"
+            id="reflectionTemplateSidenavAddQuestion"
+            class="btn-secondary mt-2"
+          >
+            + Add Question
+          </button>
+        </div>
+      </div>
+      <div class="sidenav-footer">
+        <button
+          type="button"
+          id="reflectionTemplateSidenavDelete"
+          class="btn-danger-ghost hidden"
+        >
+          Delete
+        </button>
+        <button
+          type="button"
+          id="reflectionTemplateSidenavCancel"
+          class="btn-secondary"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          id="reflectionTemplateSidenavSave"
+          class="btn-primary"
+        >
           Save
         </button>
       </div>
