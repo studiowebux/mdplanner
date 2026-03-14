@@ -38,6 +38,7 @@ mdplanner keygen-secret
 | `--cors-origin <origin>`      | `MDPLANNER_CORS_ORIGIN`       | allow all | Restrict CORS to this origin                        |
 | `--max-body-size <MB>`        | `MDPLANNER_MAX_BODY_SIZE`     | `10`     | Max request body in MB                               |
 | `--rate-limit <n>`            | `MDPLANNER_RATE_LIMIT`        | `200`    | Max requests per minute per IP                       |
+| `--cerveau-dir <path>`        | `MDPLANNER_CERVEAU_DIR`       | `~/.cerveau` | Path to cerveau directory for brain viewer        |
 | `-h, --help`                  | —                             | —        | Show help message                                    |
 
 Environment variables are fallbacks. CLI flags take precedence.
