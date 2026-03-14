@@ -88,9 +88,9 @@ export class ReflectionModule {
     const templateContainer = document.getElementById(
       "reflectionTemplatesContainer",
     );
+    if (!container || !emptyState) return;
 
     if (templateContainer) templateContainer.classList.add("hidden");
-    container.classList.remove("hidden");
 
     const visible = this._getVisibleReflections();
 
@@ -100,20 +100,20 @@ export class ReflectionModule {
     ) {
       emptyState.classList.remove("hidden");
       container.innerHTML = "";
-      container.className = "hidden";
+      container.classList.add("hidden");
       return;
     }
 
     emptyState.classList.add("hidden");
 
     if (visible.length === 0) {
-      container.className = "";
+      container.classList.remove("hidden");
       container.innerHTML =
         '<p class="text-sm text-muted col-span-full text-center py-8">No reflections match the current filters.</p>';
       return;
     }
 
-    container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4";
+    container.classList.remove("hidden");
     container.innerHTML = visible
       .map((r) => {
         const answeredCount = (r.questions || []).filter(
@@ -165,10 +165,11 @@ export class ReflectionModule {
     const templateContainer = document.getElementById(
       "reflectionTemplatesContainer",
     );
+    if (!container || !templateContainer) return;
 
     container.classList.add("hidden");
     emptyState.classList.add("hidden");
-    if (templateContainer) templateContainer.classList.remove("hidden");
+    templateContainer.classList.remove("hidden");
 
     const visible = this._getVisibleTemplates();
 

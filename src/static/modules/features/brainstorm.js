@@ -41,6 +41,7 @@ export class BrainstormModule {
   renderView() {
     const container = document.getElementById("brainstormContainer");
     const emptyState = document.getElementById("emptyBrainstormState");
+    if (!container || !emptyState) return;
 
     const visible = this._getVisible();
 
@@ -50,26 +51,24 @@ export class BrainstormModule {
     ) {
       emptyState.classList.remove("hidden");
       container.innerHTML = "";
-      container.className = "";
+      container.classList.add("hidden");
       return;
     }
 
     emptyState.classList.add("hidden");
 
     if (visible.length === 0) {
-      container.className = "";
+      container.classList.remove("hidden");
       container.innerHTML =
         '<p class="text-sm text-muted col-span-full text-center py-8">No brainstorms match the current filters.</p>';
       return;
     }
 
+    container.classList.remove("hidden");
     this._renderCards(container, visible);
   }
 
   _renderCards(container, visible) {
-    container.className =
-      "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4";
-
     container.innerHTML = visible
       .map((b) => {
         const answeredCount = (b.questions || []).filter(
