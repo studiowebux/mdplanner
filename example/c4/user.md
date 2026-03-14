@@ -2,12 +2,12 @@
 id: user
 level: context
 type: Person
-position:
-  x: 100
-  y: 300
+position: {x: 100, y: 300}
 connections:
-  - target: taskflow
+  -
+    target: taskflow
     label: Uses
+tags: [mdplanner/c4]
 ---
 
 # User

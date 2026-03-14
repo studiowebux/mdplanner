@@ -2,14 +2,14 @@
 id: database
 level: container
 type: Database
+position: {x: 680, y: 296}
 technology: PostgreSQL
-position:
-  x: 400
-  y: 300
-parent: taskflow
 connections:
-  - target: api
+  -
+    target: api
     label: Reads/writes
+parent: taskflow
+tags: [mdplanner/c4]
 ---
 
 # Database
