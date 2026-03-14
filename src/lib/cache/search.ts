@@ -63,6 +63,9 @@ const FTS_ENTITIES = ENTITIES.filter((e) => e.fts !== undefined);
 /** Pattern matching entity IDs: prefix_timestamp_random */
 const ENTITY_ID_PATTERN = /^[a-z][a-z0-9]*_\d{10,}_[a-z0-9]+$/i;
 
+/** Short alphanumeric suffix that could match the tail of an entity ID. */
+const ID_SUFFIX_PATTERN = /^[a-z0-9]{3,8}$/i;
+
 /**
  * Full-text search engine using FTS5.
  */
@@ -89,6 +92,9 @@ export class SearchEngine {
       if (idResult) {
         results.push(idResult);
       }
+    } else if (ID_SUFFIX_PATTERN.test(trimmed)) {
+      // Partial suffix search: short alphanumeric like "pn5a"
+      results.push(...this.searchBySuffix(trimmed, activeTypes));
     }
 
     const safeQuery = this.escapeQuery(trimmed);
@@ -161,6 +167,56 @@ export class SearchEngine {
       }
     }
     return null;
+  }
+
+  /**
+   * Find entities whose ID ends with the given suffix.
+   */
+  private searchBySuffix(
+    suffix: string,
+    _activeTypes: SearchResultType[],
+  ): SearchResult[] {
+    const results: SearchResult[] = [];
+    const pattern = `%_${suffix}`;
+    for (const entity of ENTITIES) {
+      const { fts, table } = entity;
+      try {
+        if (fts) {
+          const rows = this.db.query<{ [key: string]: unknown }>(
+            `SELECT id, ${fts.titleCol} FROM ${table} WHERE id LIKE ? LIMIT 5`,
+            [pattern],
+          );
+          for (const row of rows) {
+            results.push({
+              id: row.id as string,
+              title: (row[fts.titleCol] as string) ?? (row.id as string),
+              snippet: "ID suffix match",
+              score: -Infinity,
+              type: fts.type as SearchResultType,
+            });
+          }
+        } else {
+          const rows = this.db.query<
+            { id: string; title?: string; name?: string }
+          >(
+            `SELECT * FROM ${table} WHERE id LIKE ? LIMIT 5`,
+            [pattern],
+          );
+          for (const row of rows) {
+            results.push({
+              id: row.id,
+              title: (row.title ?? row.name ?? row.id) as string,
+              snippet: "ID suffix match",
+              score: -Infinity,
+              type: table as SearchResultType,
+            });
+          }
+        }
+      } catch {
+        continue;
+      }
+    }
+    return results;
   }
 
   /**
