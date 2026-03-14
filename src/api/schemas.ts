@@ -121,10 +121,51 @@ export const RejectTaskSchema = z.object({
 
 // -- Notes --
 
+const NoteParagraphSchema = z.object({
+  id: z.string(),
+  type: z.enum(["text", "code"]),
+  content: z.string(),
+  language: z.string().optional(),
+  order: z.number(),
+  globalOrder: z.number().optional(),
+  metadata: z.object({
+    collapsed: z.boolean().optional(),
+    readonly: z.boolean().optional(),
+    tags: z.array(z.string()).optional(),
+  }).optional(),
+});
+
+const CustomSectionSchema = z.object({
+  id: z.string(),
+  type: z.enum(["tabs", "timeline", "split-view"]),
+  title: z.string(),
+  order: z.number(),
+  globalOrder: z.number().optional(),
+  config: z.object({
+    tabs: z.array(z.object({
+      id: z.string(),
+      title: z.string(),
+      content: z.array(NoteParagraphSchema),
+    })).optional(),
+    timeline: z.array(z.object({
+      id: z.string(),
+      title: z.string(),
+      status: z.enum(["success", "failed", "pending"]),
+      date: z.string().optional(),
+      content: z.array(NoteParagraphSchema),
+    })).optional(),
+    splitView: z.object({
+      columns: z.array(z.array(NoteParagraphSchema)),
+    }).optional(),
+  }),
+});
+
 export const CreateNoteSchema = z.object({
   title: z.string().min(1),
   content: z.string().default(""),
   mode: z.enum(["simple", "enhanced"]).default("simple"),
+  paragraphs: z.array(NoteParagraphSchema).optional(),
+  customSections: z.array(CustomSectionSchema).optional(),
   project: z.string().optional(),
 }).strict();
 
@@ -132,6 +173,8 @@ export const UpdateNoteSchema = z.object({
   title: z.string().min(1).optional(),
   content: z.string().optional(),
   mode: z.enum(["simple", "enhanced"]).optional(),
+  paragraphs: z.array(NoteParagraphSchema).optional(),
+  customSections: z.array(CustomSectionSchema).optional(),
   project: z.string().optional(),
   updatedAt: z.string().optional(),
 }).strict();
