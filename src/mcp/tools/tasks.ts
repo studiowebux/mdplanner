@@ -10,17 +10,6 @@ import { ProjectManager } from "../../lib/project-manager.ts";
 import { Task } from "../../lib/types.ts";
 import { err, ok } from "./utils.ts";
 
-function findTaskById(tasks: Task[], id: string): Task | null {
-  for (const task of tasks) {
-    if (task.id === id) return task;
-    if (task.children) {
-      const found = findTaskById(task.children, id);
-      if (found) return found;
-    }
-  }
-  return null;
-}
-
 export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
   const parser = pm.getActiveParser();
 
@@ -128,8 +117,7 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
       inputSchema: { id: z.string().describe("Task ID") },
     },
     async ({ id }) => {
-      const tasks = await parser.readTasks();
-      const task = findTaskById(tasks, id);
+      const task = await parser.readTask(id);
       if (!task) return err(`Task '${id}' not found`);
       return ok(task);
     },
@@ -164,8 +152,7 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
       },
     },
     async ({ id, last_comments }) => {
-      const tasks = await parser.readTasks();
-      const task = findTaskById(tasks, id);
+      const task = await parser.readTask(id);
       if (!task) return err(`Task '${id}' not found`);
       const n = last_comments ?? 5;
       const comments = task.config.comments ?? [];

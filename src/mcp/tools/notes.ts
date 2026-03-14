@@ -52,8 +52,7 @@ export function registerNoteTools(server: McpServer, pm: ProjectManager): void {
       inputSchema: { id: z.string().describe("Note ID") },
     },
     async ({ id }) => {
-      const notes = await parser.readNotes();
-      const note = notes.find((n) => n.id === id);
+      const note = await parser.readNote(id);
       if (!note) return err(`Note '${id}' not found`);
       return ok(note);
     },
