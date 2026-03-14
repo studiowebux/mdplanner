@@ -199,6 +199,9 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         parentId: z.string().optional().describe(
           "Parent task ID — creates this task as a subtask",
         ),
+        withResult: z.boolean().optional().describe(
+          "Return the full created task (default: false — returns only { id })",
+        ),
       },
     },
     async (
@@ -216,6 +219,7 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         planned_start,
         planned_end,
         parentId,
+        withResult,
       },
     ) => {
       const id = await parser.addTask({
@@ -236,8 +240,11 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         },
         ...(parentId && { parentId }),
       });
-      const created = await parser.readTask(id);
-      return ok(created ?? { id });
+      if (withResult) {
+        const created = await parser.readTask(id);
+        return ok(created ?? { id });
+      }
+      return ok({ id });
     },
   );
 
@@ -286,6 +293,9 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         agent_id: z.string().optional().describe(
           "Person ID of the calling agent. When provided, In Progress tasks claimed by a different agent are rejected with CLAIM_GUARD error.",
         ),
+        withResult: z.boolean().optional().describe(
+          "Return the full updated task (default: false — returns only { id, success })",
+        ),
       },
     },
     async (
@@ -310,6 +320,7 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         claimed_at,
         expected_revision,
         agent_id,
+        withResult,
       },
     ) => {
       const current = await parser.readTask(id);
@@ -360,8 +371,11 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         },
       });
       if (!success) return err(`Task '${id}' not found`);
-      const updated = await parser.readTask(id);
-      return ok(updated ?? { success: true });
+      if (withResult) {
+        const updated = await parser.readTask(id);
+        return ok(updated ?? { id, success: true });
+      }
+      return ok({ id, success: true });
     },
   );
 
@@ -474,9 +488,12 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         expected_revision: z.number().int().optional().describe(
           "If provided, reject with REVISION_CONFLICT when the task's current revision does not match.",
         ),
+        withResult: z.boolean().optional().describe(
+          "Return the full claimed task (default: false — returns only { id, success })",
+        ),
       },
     },
-    async ({ id, assignee, expected_section, expected_revision }) => {
+    async ({ id, assignee, expected_section, expected_revision, withResult }) => {
       try {
         if (expected_revision !== undefined) {
           const current = await parser.readTask(id);
@@ -493,7 +510,7 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
           expected_section,
         );
         if (!task) return err(`Task '${id}' not found`);
-        return ok({ success: true, task });
+        return ok(withResult ? { success: true, task } : { id, success: true });
       } catch (e) {
         if (e instanceof Error && e.message.startsWith("CLAIM_CONFLICT")) {
           return err(e.message);
