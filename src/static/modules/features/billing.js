@@ -69,7 +69,9 @@ export class BillingModule {
 
   switchTab(tab) {
     document.querySelectorAll("[data-billing-tab]").forEach((t) => {
-      t.classList.toggle("active", t.dataset.billingTab === tab);
+      const isActive = t.dataset.billingTab === tab;
+      t.classList.toggle("active", isActive);
+      t.setAttribute("aria-selected", String(isActive));
     });
 
     document.querySelectorAll(".billing-tab-content").forEach((c) =>

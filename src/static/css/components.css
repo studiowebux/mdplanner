@@ -1013,6 +1013,18 @@ select.input {
   overflow: hidden;
 }
 
+.modal-box--sm {
+  max-width: 24rem;
+}
+
+.modal-box--md {
+  max-width: 28rem;
+}
+
+.modal-box--lg {
+  max-width: 36rem;
+}
+
 .modal-header {
   display: flex;
   align-items: center;

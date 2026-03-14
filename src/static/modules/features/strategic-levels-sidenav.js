@@ -241,9 +241,7 @@ export class StrategicLevelsSidenavModule {
     }
             </select>
           </div>
-          <div class="form-group" id="strategicSidenavParentGroup" ${
-      l.level === "vision" ? 'style="display:none"' : ""
-    }>
+          <div class="form-group${l.level === "vision" ? " hidden" : ""}" id="strategicSidenavParentGroup">
             <label class="form-label">Parent</label>
             <select id="strategicSidenavParent" class="form-input">
               <option value="">None (Root)</option>
@@ -270,13 +268,13 @@ export class StrategicLevelsSidenavModule {
   renderLinkForm() {
     return `
       <div class="sidenav-section">
-        <div class="sidenav-section-title">Linked Tasks</div>
+        <h3 class="sidenav-section-title">Linked Tasks</h3>
         <div id="strategicSidenavTasks" class="max-h-48 overflow-y-auto border border-default rounded p-2 bg-secondary">
           <div class="text-muted text-sm">Loading...</div>
         </div>
       </div>
       <div class="sidenav-section">
-        <div class="sidenav-section-title">Linked Milestones</div>
+        <h3 class="sidenav-section-title">Linked Milestones</h3>
         <div id="strategicSidenavMilestones" class="max-h-48 overflow-y-auto border border-default rounded p-2 bg-secondary">
           <div class="text-muted text-sm">Loading...</div>
         </div>
@@ -371,10 +369,10 @@ export class StrategicLevelsSidenavModule {
     const parentSelect = document.getElementById("strategicSidenavParent");
 
     if (newType === "vision") {
-      parentGroup.style.display = "none";
+      parentGroup.classList.add("hidden");
       parentSelect.value = "";
     } else {
-      parentGroup.style.display = "";
+      parentGroup.classList.remove("hidden");
       // Update parent options
       const builder = this.tm.strategicLevelsBuilders.find((b) =>
         b.id === this.tm.selectedStrategicBuilderId

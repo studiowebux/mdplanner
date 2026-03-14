@@ -223,7 +223,7 @@ export class BillingSidenavModule {
         </div>
       </div>
       <div class="sidenav-section">
-        <div class="sidenav-section-title">Billing Address</div>
+        <h3 class="sidenav-section-title">Billing Address</h3>
         <div class="form-group">
           <input type="text" id="billingSidenavCustomerStreet" class="form-input" placeholder="Street" value="${
       escapeHtml(c.billingAddress?.street || "")

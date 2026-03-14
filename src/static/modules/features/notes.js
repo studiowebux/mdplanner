@@ -70,11 +70,11 @@ export class NotesModule {
           note.project ? `[${note.project}]` : "",
         ].filter(Boolean).join(" · ");
         return `
-          <button class="notes-list-item${isActive ? " active" : ""}"
+          <li><button class="notes-list-item${isActive ? " active" : ""}"
             onclick="taskManager.selectNote(${index})" title="${note.title}">
             <span class="notes-list-item-title">${note.title}</span>
             ${meta ? `<span class="notes-list-item-meta text-muted" style="font-size:var(--font-size-xs)">${meta}</span>` : ""}
-          </button>
+          </button></li>
         `;
       })
       .join("");

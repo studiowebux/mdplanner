@@ -112,7 +112,9 @@ export class CapacityModule {
     const panelIds = { team: "capacityTeamContent", alloc: "capacityAllocContent", util: "capacityUtilContent" };
 
     tabs.forEach((t) => {
-      document.getElementById(btnIds[t])?.classList.toggle("active", t === tab);
+      const btn = document.getElementById(btnIds[t]);
+      btn?.classList.toggle("active", t === tab);
+      btn?.setAttribute("aria-selected", String(t === tab));
       document.getElementById(panelIds[t])?.classList.toggle("hidden", t !== tab);
     });
 

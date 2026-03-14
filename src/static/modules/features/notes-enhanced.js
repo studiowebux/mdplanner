@@ -502,13 +502,13 @@ export class EnhancedNotesModule {
       `;
       document.body.appendChild(actionBar);
     }
-    actionBar.style.display = "flex";
+    actionBar.classList.remove("hidden");
   }
 
   hideMultiSelectActions() {
     const actionBar = document.getElementById("multiSelectActions");
     if (actionBar) {
-      actionBar.style.display = "none";
+      actionBar.classList.add("hidden");
     }
   }
 

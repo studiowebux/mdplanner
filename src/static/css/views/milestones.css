@@ -196,6 +196,32 @@
   background: transparent;
 }
 
+/* ---------------------------------------------------------------
+   Milestones card view
+   --------------------------------------------------------------- */
+
+.milestones-cards {
+  padding: 1.5rem;
+}
+
+.milestones-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.milestones-card-title {
+  font-size: var(--font-size-base);
+}
+
+.milestones-card-meta {
+  font-size: var(--font-size-sm);
+}
+
+.milestones-card-actions {
+  margin-top: auto;
+  padding-top: 0.75rem;
+}
+
 @media (max-width: 36rem) {
   .milestones-table-wrap,
   .retro-table-wrap {

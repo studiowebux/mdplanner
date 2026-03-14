@@ -574,28 +574,13 @@ class TaskManager {
       .addEventListener("click", () => this.switchView("config"));
     document
       .getElementById("canvasViewBtn")
-      .addEventListener("click", () => {
-        this.switchView("canvas");
-        document.querySelectorAll(".nav-dropdown-menu").forEach((m) =>
-          m.classList.add("hidden")
-        );
-      });
+      .addEventListener("click", () => this.switchView("canvas"));
     document
       .getElementById("mindmapViewBtn")
-      .addEventListener("click", () => {
-        this.switchView("mindmap");
-        document.querySelectorAll(".nav-dropdown-menu").forEach((m) =>
-          m.classList.add("hidden")
-        );
-      });
+      .addEventListener("click", () => this.switchView("mindmap"));
     document
       .getElementById("c4ViewBtn")
-      .addEventListener("click", () => {
-        this.switchView("c4");
-        document.querySelectorAll(".nav-dropdown-menu").forEach((m) =>
-          m.classList.add("hidden")
-        );
-      });
+      .addEventListener("click", () => this.switchView("c4"));
 
     // Additional desktop view buttons
     const additionalViews = [
@@ -635,12 +620,7 @@ class TaskManager {
       { id: "brainsViewBtn", view: "brains" },
     ];
     additionalViews.forEach(({ id, view }) => {
-      document.getElementById(id)?.addEventListener("click", () => {
-        this.switchView(view);
-        document.querySelectorAll(".nav-dropdown-menu").forEach((m) =>
-          m.classList.add("hidden")
-        );
-      });
+      document.getElementById(id)?.addEventListener("click", () => this.switchView(view));
     });
 
     // Navigation dropdowns (multiple category dropdowns)
@@ -651,18 +631,27 @@ class TaskManager {
         btn.addEventListener("click", (e) => {
           e.stopPropagation();
           // Close all other dropdowns first
-          document.querySelectorAll(".nav-dropdown-menu").forEach((m) => {
-            if (m !== menu) m.classList.add("hidden");
+          document.querySelectorAll(".nav-dropdown").forEach((d) => {
+            const otherMenu = d.querySelector(".nav-dropdown-menu");
+            const otherBtn = d.querySelector(".nav-dropdown-btn");
+            if (otherMenu && otherMenu !== menu) {
+              otherMenu.classList.add("hidden");
+              otherBtn?.setAttribute("aria-expanded", "false");
+            }
           });
-          menu.classList.toggle("hidden");
+          const isOpen = menu.classList.toggle("hidden");
+          btn.setAttribute("aria-expanded", String(!isOpen));
         });
       }
     });
     // Close dropdowns when clicking outside
     document.addEventListener("click", (e) => {
       if (!e.target.closest(".nav-dropdown")) {
-        document.querySelectorAll(".nav-dropdown-menu").forEach((menu) => {
-          menu.classList.add("hidden");
+        document.querySelectorAll(".nav-dropdown").forEach((dropdown) => {
+          const menu = dropdown.querySelector(".nav-dropdown-menu");
+          const btn = dropdown.querySelector(".nav-dropdown-btn");
+          menu?.classList.add("hidden");
+          btn?.setAttribute("aria-expanded", "false");
         });
       }
     });
@@ -1321,10 +1310,13 @@ class TaskManager {
     const label = document.getElementById("currentViewLabel");
     if (label) label.textContent = viewLabels[view] || view;
 
-    // Close dropdown
-    document.querySelectorAll(".nav-dropdown-menu").forEach((m) =>
-      m.classList.add("hidden")
-    );
+    // Close dropdown and reset aria-expanded
+    document.querySelectorAll(".nav-dropdown").forEach((dropdown) => {
+      const menu = dropdown.querySelector(".nav-dropdown-menu");
+      const btn = dropdown.querySelector(".nav-dropdown-btn");
+      menu?.classList.add("hidden");
+      btn?.setAttribute("aria-expanded", "false");
+    });
 
     // Activate desktop button in dropdown
     const desktopBtn = document.getElementById(`${view}ViewBtn`);

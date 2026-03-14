@@ -140,24 +140,23 @@ export class MilestonesModule {
   }
 
   _renderCards(container) {
-    container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4";
-    container.style.padding = "1.5rem";
+    container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 milestones-cards";
     container.innerHTML = this.taskManager.milestones
       .map(
         (m) => `
-      <div class="bg-secondary rounded-lg p-4 border border-default" style="display:flex;flex-direction:column">
+      <div class="bg-secondary rounded-lg p-4 border border-default milestones-card">
         <div class="flex justify-between items-start mb-2">
-          <h3 class="font-medium text-primary" style="font-size:var(--font-size-base)">${m.name}</h3>
+          <h3 class="font-medium text-primary milestones-card-title">${m.name}</h3>
           <span class="px-2 py-1 text-xs rounded border border-default bg-tertiary text-secondary">${m.status}</span>
         </div>
         ${
           m.project
-            ? `<span class="text-xs text-muted mb-1" style="font-size:var(--font-size-sm)">${m.project}</span>`
+            ? `<span class="text-xs text-muted mb-1 milestones-card-meta">${m.project}</span>`
             : ""
         }
         ${
           m.target
-            ? `<p class="text-sm text-muted mb-2" style="font-size:var(--font-size-sm)">Target: ${
+            ? `<p class="text-sm text-muted mb-2 milestones-card-meta">Target: ${
               new Date(m.target).toLocaleDateString()
             }</p>`
             : ""
@@ -173,10 +172,10 @@ export class MilestonesModule {
         </div>
         ${
           m.description
-            ? `<div class="mt-2" style="font-size:var(--font-size-sm)">${markdownToHtml(m.description)}</div>`
+            ? `<div class="mt-2 milestones-card-meta">${markdownToHtml(m.description)}</div>`
             : ""
         }
-        <div class="flex justify-end gap-1" style="margin-top:auto;padding-top:0.75rem">
+        <div class="flex justify-end gap-1 milestones-card-actions">
           <button type="button" onclick="taskManager.milestoneSidenavModule.openEdit('${m.id}')" class="btn-ghost">Edit</button>
           <button type="button" onclick="taskManager.deleteMilestone('${m.id}')" class="btn-danger-ghost">Delete</button>
         </div>

@@ -67,7 +67,9 @@ export class CRMModule {
 
   switchTab(tab) {
     document.querySelectorAll("[data-crm-tab]").forEach((t) => {
-      t.classList.toggle("active", t.dataset.crmTab === tab);
+      const isActive = t.dataset.crmTab === tab;
+      t.classList.toggle("active", isActive);
+      t.setAttribute("aria-selected", String(isActive));
     });
 
     document.querySelectorAll(".crm-tab-content").forEach((c) =>

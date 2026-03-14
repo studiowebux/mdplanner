@@ -181,7 +181,7 @@ export class DnsModule {
       <div class="dns-batch-bar hidden" id="dnsBatchBar">
         <span class="dns-batch-count" id="dnsBatchCount">0 selected</span>
         <div class="dns-batch-sep"></div>
-        <div class="dns-price-popover" id="dnsPricePopover" style="display:none">
+        <div class="dns-price-popover hidden" id="dnsPricePopover">
           <span class="text-sm text-secondary">USD</span>
           <input type="number" class="dns-price-input" id="dnsBatchPriceInput" min="0" step="0.01" placeholder="0.00">
           <button class="btn-secondary" id="dnsBatchPriceApply">Apply</button>
@@ -363,7 +363,7 @@ export class DnsModule {
 
     document.getElementById("dnsBatchCostBtn")?.addEventListener("click", () => {
       const pop = document.getElementById("dnsPricePopover");
-      if (pop) pop.style.display = pop.style.display === "none" ? "flex" : "none";
+      if (pop) pop.classList.toggle("hidden");
     });
 
     document.getElementById("dnsBatchPriceApply")?.addEventListener("click", () => {
@@ -372,7 +372,7 @@ export class DnsModule {
 
     document.getElementById("dnsBatchPriceCancel")?.addEventListener("click", () => {
       const pop = document.getElementById("dnsPricePopover");
-      if (pop) pop.style.display = "none";
+      if (pop) pop.classList.add("hidden");
     });
 
     document.getElementById("dnsBatchDeleteBtn")?.addEventListener("click", () => {
@@ -443,10 +443,7 @@ export class DnsModule {
     }
     // Fallback
     const t = document.createElement("div");
-    t.style.cssText =
-      "position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);padding:0.5rem 1rem;" +
-      "background:var(--bg-editor);border:1px solid var(--border);border-radius:var(--radius);" +
-      "font-size:var(--font-size-sm);z-index:200;";
+    t.className = "dns-toast-fallback";
     t.textContent = msg;
     document.body.appendChild(t);
     setTimeout(() => t.remove(), 3000);

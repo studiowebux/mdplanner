@@ -74,7 +74,7 @@ export class OnboardingModule {
         <span class="onboarding-row-role">${escapeHtml(record.role || "—")}</span>
         <span class="onboarding-row-date">${record.startDate}</span>
         <div class="onboarding-row-progress">
-          <div class="onboarding-progress-bar">
+          <div class="onboarding-progress-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Onboarding progress">
             <div class="onboarding-progress-fill" style="width:${pct}%"></div>
           </div>
           <span class="onboarding-progress-label">${done}/${total}</span>
@@ -138,14 +138,18 @@ export class OnboardingModule {
       recordsEl?.classList.remove("hidden");
       templatesEl?.classList.add("hidden");
       tabRecords?.classList.add("active");
+      tabRecords?.setAttribute("aria-selected", "true");
       tabTemplates?.classList.remove("active");
+      tabTemplates?.setAttribute("aria-selected", "false");
       addBtn?.classList.remove("hidden");
       addTmplBtn?.classList.add("hidden");
     } else {
       recordsEl?.classList.add("hidden");
       templatesEl?.classList.remove("hidden");
       tabRecords?.classList.remove("active");
+      tabRecords?.setAttribute("aria-selected", "false");
       tabTemplates?.classList.add("active");
+      tabTemplates?.setAttribute("aria-selected", "true");
       addBtn?.classList.add("hidden");
       addTmplBtn?.classList.remove("hidden");
     }

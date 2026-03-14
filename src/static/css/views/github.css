@@ -225,6 +225,11 @@
   background: #2ea043;
 }
 
+/* Empty state */
+.github-view-empty {
+  padding: 1rem;
+}
+
 /* Workflow runs section header + controls */
 .github-runs-header {
   display: flex;

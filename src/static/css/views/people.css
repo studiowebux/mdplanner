@@ -178,8 +178,11 @@
 }
 
 /* Empty State */
+.people-empty-state:not(.hidden) {
+  display: flex;
+}
+
 .people-empty-state {
-  display: none;
   flex-direction: column;
   align-items: center;
   justify-content: center;

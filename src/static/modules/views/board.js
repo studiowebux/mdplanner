@@ -214,8 +214,6 @@ export class BoardView {
         const existingZone = tasksContainer.querySelector(".drop-zone");
         if (existingZone) {
           existingZone.classList.add("drop-zone-expand");
-          existingZone.style.flex = "1";
-          existingZone.style.minHeight = "48px";
         }
       }
 
@@ -279,15 +277,9 @@ export class BoardView {
     zone.dataset.position = position;
     // Hidden by default, shown when dragging
     // Last zone in each column expands to fill remaining space
-    zone.style.cssText = `
-      min-height: 8px;
-      border-radius: 4px;
-      transition: all 0.15s ease;
-      flex-shrink: 0;
-    `;
+    zone.classList.add("drop-zone");
     if (expandable) {
-      zone.style.flex = "1";
-      zone.style.minHeight = "48px";
+      zone.classList.add("drop-zone-expand");
     }
     return zone;
   }
@@ -512,34 +504,25 @@ export class BoardView {
 
   showDropZones() {
     document.querySelectorAll(".drop-zone").forEach((zone) => {
-      const isExpandable = zone.classList.contains("drop-zone-expand");
-      zone.style.background = "rgba(59, 130, 246, 0.1)";
-      zone.style.border = "2px dashed #3b82f6";
-      zone.style.minHeight = isExpandable ? "48px" : "32px";
-      zone.style.margin = "4px 0";
+      zone.classList.add("drop-zone--visible");
+      zone.classList.remove("drop-zone--highlight");
     });
   }
 
   hideDropZones() {
     document.querySelectorAll(".drop-zone").forEach((zone) => {
-      const isExpandable = zone.classList.contains("drop-zone-expand");
-      zone.style.background = "transparent";
-      zone.style.border = "none";
-      zone.style.minHeight = isExpandable ? "48px" : "8px";
-      zone.style.margin = "0";
+      zone.classList.remove("drop-zone--visible", "drop-zone--highlight");
     });
   }
 
   highlightDropZone(zone) {
     // Reset all zones to default drag state
     document.querySelectorAll(".drop-zone").forEach((z) => {
-      z.style.background = "rgba(59, 130, 246, 0.1)";
-      z.style.border = "2px dashed #3b82f6";
+      z.classList.remove("drop-zone--highlight");
     });
     // Highlight active zone
     if (zone) {
-      zone.style.background = "#3b82f6";
-      zone.style.border = "2px solid #3b82f6";
+      zone.classList.add("drop-zone--highlight");
     }
   }
 
@@ -572,7 +555,6 @@ export class BoardView {
         e.target.classList.contains("task-list-item")
       ) {
         e.target.classList.add("dragging");
-        e.target.style.opacity = "0.5";
         e.dataTransfer.setData("text/plain", e.target.dataset.taskId);
         e.dataTransfer.effectAllowed = "move";
 
@@ -598,7 +580,6 @@ export class BoardView {
         e.target.classList.contains("task-list-item")
       ) {
         e.target.classList.remove("dragging");
-        e.target.style.opacity = "1";
         this.hideDropZones();
         this.draggedTaskId = null;
         this.draggedFromSection = null;
@@ -620,8 +601,7 @@ export class BoardView {
     document.addEventListener("dragleave", (e) => {
       const dropZone = e.target.closest(".drop-zone");
       if (dropZone && !dropZone.contains(e.relatedTarget)) {
-        dropZone.style.background = "rgba(59, 130, 246, 0.1)";
-        dropZone.style.border = "2px dashed #3b82f6";
+        dropZone.classList.remove("drop-zone--highlight");
       }
     });
 
@@ -750,8 +730,7 @@ export class BoardView {
         if (dz === dropZone) {
           this.highlightDropZone(dz);
         } else {
-          dz.style.background = "rgba(59, 130, 246, 0.1)";
-          dz.style.border = "2px dashed #3b82f6";
+          dz.classList.remove("drop-zone--highlight");
         }
       });
     }, { passive: false });
