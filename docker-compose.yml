@@ -27,10 +27,9 @@ services:
       # Generate keypair with: mdplanner keygen
       # Store only the PUBLIC key here. Private key stays with you — never in this file.
       # - MDPLANNER_BACKUP_PUBLIC_KEY=${MDPLANNER_BACKUP_PUBLIC_KEY:-}
-      # Brain Manager: path to brains.json inside the container.
-      # Mount the config file and brains directory as volumes below.
-      - MDPLANNER_BRAINS_CONFIG=${MDPLANNER_BRAINS_CONFIG:-}
-      - MDPLANNER_CLAUDE_DIR=${MDPLANNER_CLAUDE_DIR:-}
+      # Cerveau viewer: path to cerveau directory inside the container.
+      # Mount the cerveau directory as a volume below.
+      - MDPLANNER_CERVEAU_DIR=${MDPLANNER_CERVEAU_DIR:-}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8003/"]
