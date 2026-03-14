@@ -115,21 +115,21 @@ export class BrainstormSidenavModule {
     container.innerHTML = questions
       .map(
         (q, i) => `
-      <div class="brainstorm-question-item" data-index="${i}">
-        <div class="brainstorm-question-header">
+      <div class="sidenav-question-item" data-index="${i}">
+        <div class="sidenav-question-header">
           <input type="text"
-                 class="brainstorm-question-input"
+                 class="sidenav-question-input"
                  value="${escapeHtml(q.question)}"
                  placeholder="Question..."
                  data-field="question"
                  data-index="${i}">
-          <div class="brainstorm-question-actions">
-            ${i > 0 ? `<button type="button" class="brainstorm-question-move btn-ghost" data-dir="up" data-index="${i}" title="Move up">&#9650;</button>` : ""}
-            ${i < questions.length - 1 ? `<button type="button" class="brainstorm-question-move btn-ghost" data-dir="down" data-index="${i}" title="Move down">&#9660;</button>` : ""}
-            <button type="button" class="brainstorm-question-remove btn-danger-ghost" data-index="${i}" title="Remove">&#10005;</button>
+          <div class="sidenav-question-actions">
+            ${i > 0 ? `<button type="button" class="sidenav-question-move btn-ghost" data-dir="up" data-index="${i}" title="Move up">&#9650;</button>` : ""}
+            ${i < questions.length - 1 ? `<button type="button" class="sidenav-question-move btn-ghost" data-dir="down" data-index="${i}" title="Move down">&#9660;</button>` : ""}
+            <button type="button" class="sidenav-question-remove btn-danger-ghost" data-index="${i}" title="Remove">&#10005;</button>
           </div>
         </div>
-        <textarea class="brainstorm-answer-input"
+        <textarea class="sidenav-answer-input"
                   placeholder="Your thoughts..."
                   data-field="answer"
                   data-index="${i}"
@@ -139,7 +139,7 @@ export class BrainstormSidenavModule {
       .join("");
 
     // Bind question input changes
-    container.querySelectorAll(".brainstorm-question-input").forEach((input) => {
+    container.querySelectorAll(".sidenav-question-input").forEach((input) => {
       input.addEventListener("input", (e) => {
         const idx = parseInt(e.target.dataset.index, 10);
         this.current.questions[idx].question = e.target.value;
@@ -147,7 +147,7 @@ export class BrainstormSidenavModule {
     });
 
     // Bind answer textarea changes
-    container.querySelectorAll(".brainstorm-answer-input").forEach((textarea) => {
+    container.querySelectorAll(".sidenav-answer-input").forEach((textarea) => {
       textarea.addEventListener("input", (e) => {
         const idx = parseInt(e.target.dataset.index, 10);
         this.current.questions[idx].answer = e.target.value;
@@ -155,7 +155,7 @@ export class BrainstormSidenavModule {
     });
 
     // Bind move buttons
-    container.querySelectorAll(".brainstorm-question-move").forEach((btn) => {
+    container.querySelectorAll(".sidenav-question-move").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         const idx = parseInt(e.currentTarget.dataset.index, 10);
         const dir = e.currentTarget.dataset.dir;
@@ -164,7 +164,7 @@ export class BrainstormSidenavModule {
     });
 
     // Bind remove buttons
-    container.querySelectorAll(".brainstorm-question-remove").forEach((btn) => {
+    container.querySelectorAll(".sidenav-question-remove").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         const idx = parseInt(e.currentTarget.dataset.index, 10);
         this.removeQuestion(idx);
@@ -177,7 +177,7 @@ export class BrainstormSidenavModule {
     this.current.questions.push({ question: "", answer: "" });
     this.renderQuestions();
     // Focus the new question input
-    const inputs = document.querySelectorAll(".brainstorm-question-input");
+    const inputs = document.querySelectorAll(".sidenav-question-input");
     if (inputs.length > 0) inputs[inputs.length - 1].focus();
   }
 

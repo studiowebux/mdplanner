@@ -112,17 +112,17 @@ export class ReflectionTemplateSidenavModule {
     container.innerHTML = questions
       .map(
         (q, i) => `
-      <div class="reflection-question-item" data-index="${i}">
-        <div class="reflection-question-header">
+      <div class="sidenav-question-item" data-index="${i}">
+        <div class="sidenav-question-header">
           <input type="text"
-                 class="reflection-template-question-input"
+                 class="sidenav-question-input"
                  value="${escapeHtml(q)}"
                  placeholder="Question..."
                  data-index="${i}">
-          <div class="reflection-question-actions">
-            ${i > 0 ? `<button type="button" class="reflection-template-question-move btn-ghost" data-dir="up" data-index="${i}" title="Move up">&#9650;</button>` : ""}
-            ${i < questions.length - 1 ? `<button type="button" class="reflection-template-question-move btn-ghost" data-dir="down" data-index="${i}" title="Move down">&#9660;</button>` : ""}
-            <button type="button" class="reflection-template-question-remove btn-danger-ghost" data-index="${i}" title="Remove">&#10005;</button>
+          <div class="sidenav-question-actions">
+            ${i > 0 ? `<button type="button" class="sidenav-question-move btn-ghost" data-dir="up" data-index="${i}" title="Move up">&#9650;</button>` : ""}
+            ${i < questions.length - 1 ? `<button type="button" class="sidenav-question-move btn-ghost" data-dir="down" data-index="${i}" title="Move down">&#9660;</button>` : ""}
+            <button type="button" class="sidenav-question-remove btn-danger-ghost" data-index="${i}" title="Remove">&#10005;</button>
           </div>
         </div>
       </div>`,
@@ -130,7 +130,7 @@ export class ReflectionTemplateSidenavModule {
       .join("");
 
     container
-      .querySelectorAll(".reflection-template-question-input")
+      .querySelectorAll(".sidenav-question-input")
       .forEach((input) => {
         input.addEventListener("input", (e) => {
           const idx = parseInt(e.target.dataset.index, 10);
@@ -139,7 +139,7 @@ export class ReflectionTemplateSidenavModule {
       });
 
     container
-      .querySelectorAll(".reflection-template-question-move")
+      .querySelectorAll(".sidenav-question-move")
       .forEach((btn) => {
         btn.addEventListener("click", (e) => {
           const idx = parseInt(e.currentTarget.dataset.index, 10);
@@ -149,7 +149,7 @@ export class ReflectionTemplateSidenavModule {
       });
 
     container
-      .querySelectorAll(".reflection-template-question-remove")
+      .querySelectorAll(".sidenav-question-remove")
       .forEach((btn) => {
         btn.addEventListener("click", (e) => {
           const idx = parseInt(e.currentTarget.dataset.index, 10);
@@ -164,7 +164,7 @@ export class ReflectionTemplateSidenavModule {
     this.currentTemplate.questions.push("");
     this._renderQuestions();
     const inputs = document.querySelectorAll(
-      ".reflection-template-question-input",
+      ".sidenav-question-input",
     );
     if (inputs.length > 0) inputs[inputs.length - 1].focus();
   }
