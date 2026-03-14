@@ -58,7 +58,7 @@ jobs:
       - name: Generate MCP spec
         run: |
           mkdir -p docs/mcp
-          npx -y @modelcontextprotocol/inspector@0.11.0 --cli deno run --allow-read --allow-write --allow-env mcp.ts ./example --method tools/list > docs/mcp/mdplanner.mcp.json
+          npx -y @modelcontextprotocol/inspector@0.21.1 --cli deno run --allow-read --allow-write --allow-env mcp.ts ./example --method tools/list > docs/mcp/mdplanner.mcp.json
 
       - name: Build docs
         run: ./minimaldoc build docs -o _site
