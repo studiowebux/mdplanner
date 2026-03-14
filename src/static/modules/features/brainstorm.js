@@ -1,5 +1,6 @@
 import { BrainstormsAPI } from "../api.js";
 import { showLoading, hideLoading } from "../ui/loading.js";
+import { filterBySearchQuery } from "../utils.js";
 
 /**
  * BrainstormModule - Handles brainstorm list display and filtering
@@ -23,19 +24,14 @@ export class BrainstormModule {
   }
 
   _getVisible() {
-    return (this.taskManager.brainstorms || []).filter((b) => {
-      if (this.searchQuery) {
-        const q = this.searchQuery.toLowerCase();
-        const inTitle = (b.title || "").toLowerCase().includes(q);
-        const inQuestions = (b.questions || []).some(
-          (qn) =>
-            qn.question.toLowerCase().includes(q) ||
-            (qn.answer || "").toLowerCase().includes(q),
-        );
-        if (!inTitle && !inQuestions) return false;
-      }
-      return true;
-    });
+    return filterBySearchQuery(
+      this.taskManager.brainstorms || [],
+      this.searchQuery,
+      (b) => [
+        b.title || "",
+        ...(b.questions || []).flatMap((qn) => [qn.question, qn.answer || ""]),
+      ],
+    );
   }
 
   renderView() {

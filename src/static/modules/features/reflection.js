@@ -1,5 +1,6 @@
 import { ReflectionsAPI, ReflectionTemplatesAPI } from "../api.js";
 import { showLoading, hideLoading } from "../ui/loading.js";
+import { filterBySearchQuery } from "../utils.js";
 
 /**
  * ReflectionModule - Handles reflection list display with tabs for
@@ -30,30 +31,22 @@ export class ReflectionModule {
   }
 
   _getVisibleReflections() {
-    return (this.taskManager.reflections || []).filter((r) => {
-      if (this.searchQuery) {
-        const q = this.searchQuery.toLowerCase();
-        const inTitle = (r.title || "").toLowerCase().includes(q);
-        const inQuestions = (r.questions || []).some(
-          (qn) =>
-            qn.question.toLowerCase().includes(q) ||
-            (qn.answer || "").toLowerCase().includes(q),
-        );
-        if (!inTitle && !inQuestions) return false;
-      }
-      return true;
-    });
+    return filterBySearchQuery(
+      this.taskManager.reflections || [],
+      this.searchQuery,
+      (r) => [
+        r.title || "",
+        ...(r.questions || []).flatMap((qn) => [qn.question, qn.answer || ""]),
+      ],
+    );
   }
 
   _getVisibleTemplates() {
-    return (this.taskManager.reflectionTemplates || []).filter((t) => {
-      if (this.searchQuery) {
-        const q = this.searchQuery.toLowerCase();
-        return (t.title || "").toLowerCase().includes(q) ||
-          (t.description || "").toLowerCase().includes(q);
-      }
-      return true;
-    });
+    return filterBySearchQuery(
+      this.taskManager.reflectionTemplates || [],
+      this.searchQuery,
+      (t) => [t.title || "", t.description || ""],
+    );
   }
 
   renderView() {
