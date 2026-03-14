@@ -29,24 +29,47 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Checkout MinimalDoc
-        uses: actions/checkout@v4
-        with:
-          repository: studiowebux/minimaldoc
-          path: minimaldoc-src
-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.24"
-          cache: true
-          cache-dependency-path: minimaldoc-src/go.sum
+          go-version: "1.26"
 
-      - name: Build MinimalDoc
-        run: cd minimaldoc-src && go build -o ../minimaldoc ./cmd/minimaldoc/
+      - name: Install MinimalDoc
+        run: go install github.com/studiowebux/minimaldoc/cmd/minimaldoc@v1.5.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Generate MCP spec
+        run: |
+          mkdir -p docs/mcp
+          MCP_CMD="deno run --allow-read --allow-write --allow-env mcp.ts ./example"
+          npx -y @modelcontextprotocol/inspector@0.21.1 --cli $MCP_CMD --method tools/list > /tmp/mcp-tools.json
+          npx -y @modelcontextprotocol/inspector@0.21.1 --cli $MCP_CMD --method resources/list > /tmp/mcp-resources.json
+          npx -y @modelcontextprotocol/inspector@0.21.1 --cli $MCP_CMD --method prompts/list > /tmp/mcp-prompts.json
+          deno eval '
+            const t = JSON.parse(Deno.readTextFileSync("/tmp/mcp-tools.json"));
+            const r = JSON.parse(Deno.readTextFileSync("/tmp/mcp-resources.json"));
+            const p = JSON.parse(Deno.readTextFileSync("/tmp/mcp-prompts.json"));
+            const spec = {
+              name: "MD Planner MCP Server",
+              description: "Markdown-based project management MCP server with directory storage.",
+              tools: t.tools,
+              resources: r.resources,
+              prompts: p.prompts
+            };
+            Deno.writeTextFileSync("docs/mcp/mdplanner.mcp.json", JSON.stringify(spec, null, 2));
+          '
 
       - name: Build docs
-        run: ./minimaldoc build docs -o _site
+        run: minimaldoc build docs -o _site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

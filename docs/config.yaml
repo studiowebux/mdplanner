@@ -14,6 +14,12 @@ changelog:
   rss_enabled: true
   repository: "https://github.com/studiowebux/mdplanner"
 
+mcp:
+  enabled: true
+  spec_files:
+    - "mcp/*.mcp.json"
+  path: "mcp"
+
 stale_warning:
   enabled: true
   threshold_days: 365
