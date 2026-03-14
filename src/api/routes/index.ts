@@ -11,7 +11,10 @@ import { RateLimiter } from "../../lib/rate-limit.ts";
 import { ProjectManager } from "../../lib/project-manager.ts";
 import { AppVariables, isCacheEnabled, isReadOnly } from "./context.ts";
 import { VERSION } from "../../lib/version.ts";
+import type { CerveauReader } from "../../lib/cerveau/reader.ts";
 
+// Cerveau viewer routes
+import { cerveauRouter } from "./features/cerveau.ts";
 
 // SSE events route
 import { eventsRouter } from "./events.ts";
@@ -96,6 +99,7 @@ import { githubRouter } from "./github.ts";
 export function createApiRouter(
   projectManager: ProjectManager,
   opts?: {
+    cerveauReader?: CerveauReader;
     corsOrigin?: string;
     apiToken?: string;
     maxBodySize?: number;
@@ -259,9 +263,12 @@ export function createApiRouter(
     return next();
   });
 
-  // Inject projectManager into context
+  // Inject projectManager and optional cerveau reader into context
   api.use("/*", async (c, next) => {
     c.set("projectManager", projectManager);
+    if (opts?.cerveauReader) {
+      c.set("cerveauReader", opts.cerveauReader);
+    }
     await next();
   });
 
@@ -421,6 +428,11 @@ export function createApiRouter(
 
   // Analytics routes
   api.route("/analytics", analyticsRouter);
+
+  // Cerveau viewer routes (feature-gated via --cerveau-dir)
+  if (opts?.cerveauReader) {
+    api.route("/cerveau", cerveauRouter);
+  }
 
   // OpenAPI spec endpoint — auto-generated from Zod schemas
   api.doc31("/doc", {
