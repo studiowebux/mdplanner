@@ -138,14 +138,18 @@ export class OnboardingModule {
       recordsEl?.classList.remove("hidden");
       templatesEl?.classList.add("hidden");
       tabRecords?.classList.add("active");
+      tabRecords?.setAttribute("aria-selected", "true");
       tabTemplates?.classList.remove("active");
+      tabTemplates?.setAttribute("aria-selected", "false");
       addBtn?.classList.remove("hidden");
       addTmplBtn?.classList.add("hidden");
     } else {
       recordsEl?.classList.add("hidden");
       templatesEl?.classList.remove("hidden");
       tabRecords?.classList.remove("active");
+      tabRecords?.setAttribute("aria-selected", "false");
       tabTemplates?.classList.add("active");
+      tabTemplates?.setAttribute("aria-selected", "true");
       addBtn?.classList.add("hidden");
       addTmplBtn?.classList.remove("hidden");
     }

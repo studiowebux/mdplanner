@@ -40,7 +40,9 @@ export class FundraisingModule {
     const targetPanel = document.getElementById(`fundraising-panel-${tab}`);
     if (targetPanel) {
       targetPanel.querySelectorAll(".view-tab").forEach((btn) => {
-        btn.classList.toggle("active", btn.dataset.tab === tab);
+        const isActive = btn.dataset.tab === tab;
+        btn.classList.toggle("active", isActive);
+        btn.setAttribute("aria-selected", String(isActive));
       });
     }
   }

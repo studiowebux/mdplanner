@@ -1808,13 +1808,13 @@
             </div>
           </div>
           <!-- Tab bar -->
-          <nav class="view-tabs">
-            <button id="meetingsTabMeetings" class="view-tab active">Meetings</button>
-            <button id="meetingsTabActions" class="view-tab">Open Actions</button>
+          <nav class="view-tabs" role="tablist" aria-label="Meetings">
+            <button id="meetingsTabMeetings" class="view-tab active" role="tab" aria-selected="true" aria-controls="meetingsList">Meetings</button>
+            <button id="meetingsTabActions" class="view-tab" role="tab" aria-selected="false" aria-controls="meetingsActionsContainer">Open Actions</button>
           </nav>
           <div class="p-6">
             <!-- Meetings list -->
-            <div id="meetingsList">
+            <div id="meetingsList" role="tabpanel">
               <div id="emptyMeetingsState" class="hidden">
                 <p class="text-secondary text-sm">No meetings yet. Create your first meeting.</p>
               </div>
@@ -1829,7 +1829,7 @@
               <div id="emptyMeetingsActionsState" class="hidden">
                 <p class="text-secondary text-sm">No open action items.</p>
               </div>
-              <div id="meetingsActionsContainer"></div>
+              <div id="meetingsActionsContainer" role="tabpanel"></div>
             </div>
           </div>
         </div>
@@ -1845,20 +1845,20 @@
               <button id="addOnboardingBtn" class="btn-primary py-2 rounded-lg">+ New Onboarding</button>
             </div>
           </div>
-          <nav class="view-tabs">
-            <button id="onboardingTabRecords" class="view-tab active">Onboarding</button>
-            <button id="onboardingTabTemplates" class="view-tab">Templates</button>
+          <nav class="view-tabs" role="tablist" aria-label="Onboarding">
+            <button id="onboardingTabRecords" class="view-tab active" role="tab" aria-selected="true" aria-controls="onboardingRecordsList">Onboarding</button>
+            <button id="onboardingTabTemplates" class="view-tab" role="tab" aria-selected="false" aria-controls="onboardingTemplatesList">Templates</button>
           </nav>
           <div class="p-6">
             <!-- Records -->
-            <div id="onboardingRecordsList">
+            <div id="onboardingRecordsList" role="tabpanel">
               <div id="emptyOnboardingState" class="hidden">
                 <p class="text-secondary text-sm">No onboarding records yet. Create one to get started.</p>
               </div>
               <div id="onboardingContainer" class="onboarding-list"></div>
             </div>
             <!-- Templates -->
-            <div id="onboardingTemplatesList" class="hidden">
+            <div id="onboardingTemplatesList" class="hidden" role="tabpanel">
               <div id="emptyOnboardingTemplatesState" class="hidden">
                 <p class="text-secondary text-sm">No templates yet. Create a template to reuse onboarding steps.</p>
               </div>
@@ -1949,24 +1949,24 @@
             <h2 class="text-lg font-medium text-primary">Finances</h2>
             <button id="addFinancesBtn" class="btn-primary py-2 rounded-lg">+ Add Period</button>
           </div>
-          <nav class="view-tabs">
-            <button id="financesTab-overview" class="view-tab active">Overview</button>
-            <button id="financesTab-burnrate" class="view-tab">Burn Rate</button>
-            <button id="financesTab-pl" class="view-tab">P&amp;L</button>
+          <nav class="view-tabs" role="tablist" aria-label="Finances">
+            <button id="financesTab-overview" class="view-tab active" role="tab" aria-selected="true" aria-controls="financesPanel-overview">Overview</button>
+            <button id="financesTab-burnrate" class="view-tab" role="tab" aria-selected="false" aria-controls="financesPanel-burnrate">Burn Rate</button>
+            <button id="financesTab-pl" class="view-tab" role="tab" aria-selected="false" aria-controls="financesPanel-pl">P&amp;L</button>
           </nav>
           <!-- Overview tab -->
-          <div id="financesPanel-overview">
+          <div id="financesPanel-overview" role="tabpanel">
             <div id="emptyFinancesState" class="hidden">
               <p class="finances-empty-msg">No periods yet. Add your first monthly record to get started.</p>
             </div>
             <div id="financesOverviewContainer"></div>
           </div>
           <!-- Burn Rate tab -->
-          <div id="financesPanel-burnrate" class="hidden">
+          <div id="financesPanel-burnrate" class="hidden" role="tabpanel">
             <div id="financesBurnRateContainer"></div>
           </div>
           <!-- P&L tab -->
-          <div id="financesPanel-pl" class="hidden">
+          <div id="financesPanel-pl" class="hidden" role="tabpanel">
             <div id="financesPLContainer"></div>
           </div>
         </div>
@@ -3744,7 +3744,7 @@
           </div>
 
           <!-- SAFE Rounds tab -->
-          <div id="fundraising-panel-safe" class="fundraising-tab-panel">
+          <div id="fundraising-panel-safe" class="fundraising-tab-panel" role="tabpanel">
             <div class="px-6 py-4 border-b border-default flex justify-between items-center view-header">
               <h2 class="text-lg font-medium text-primary">Fundraising</h2>
               <div class="flex items-center gap-2">
@@ -3752,12 +3752,12 @@
                 <button id="safe-add-btn" class="btn-primary py-2 rounded-lg">+ Add SAFE</button>
               </div>
             </div>
-            <nav class="view-tabs">
-              <button class="view-tab active" data-tab="safe">SAFE Rounds</button>
-              <button class="view-tab" data-tab="pipeline">Pipeline</button>
-              <button class="view-tab" data-tab="kpi">KPI Tracker</button>
-              <button class="view-tab" data-tab="runway">Runway</button>
-              <button class="view-tab" data-tab="targets">Targets</button>
+            <nav class="view-tabs" role="tablist" aria-label="Fundraising">
+              <button class="view-tab active" data-tab="safe" role="tab" aria-selected="true" aria-controls="fundraising-panel-safe">SAFE Rounds</button>
+              <button class="view-tab" data-tab="pipeline" role="tab" aria-selected="false" aria-controls="fundraising-panel-pipeline">Pipeline</button>
+              <button class="view-tab" data-tab="kpi" role="tab" aria-selected="false" aria-controls="fundraising-panel-kpi">KPI Tracker</button>
+              <button class="view-tab" data-tab="runway" role="tab" aria-selected="false" aria-controls="fundraising-panel-runway">Runway</button>
+              <button class="view-tab" data-tab="targets" role="tab" aria-selected="false" aria-controls="fundraising-panel-targets">Targets</button>
             </nav>
             <div class="p-6">
               <div id="safe-summary-card" class="safe-summary-card"></div>
@@ -3783,7 +3783,7 @@
           </div>
 
           <!-- Pipeline tab -->
-          <div id="fundraising-panel-pipeline" class="fundraising-tab-panel hidden">
+          <div id="fundraising-panel-pipeline" class="fundraising-tab-panel hidden" role="tabpanel">
             <div class="px-6 py-4 border-b border-default flex justify-between items-center view-header">
               <h2 class="text-lg font-medium text-primary">Fundraising</h2>
               <div class="flex items-center gap-2">
@@ -3791,12 +3791,12 @@
                 <button id="pipeline-add-btn" class="btn-primary py-2 rounded-lg">+ Add Investor</button>
               </div>
             </div>
-            <nav class="view-tabs">
-              <button class="view-tab" data-tab="safe">SAFE Rounds</button>
-              <button class="view-tab active" data-tab="pipeline">Pipeline</button>
-              <button class="view-tab" data-tab="kpi">KPI Tracker</button>
-              <button class="view-tab" data-tab="runway">Runway</button>
-              <button class="view-tab" data-tab="targets">Targets</button>
+            <nav class="view-tabs" role="tablist" aria-label="Fundraising">
+              <button class="view-tab" data-tab="safe" role="tab" aria-selected="false" aria-controls="fundraising-panel-safe">SAFE Rounds</button>
+              <button class="view-tab active" data-tab="pipeline" role="tab" aria-selected="true" aria-controls="fundraising-panel-pipeline">Pipeline</button>
+              <button class="view-tab" data-tab="kpi" role="tab" aria-selected="false" aria-controls="fundraising-panel-kpi">KPI Tracker</button>
+              <button class="view-tab" data-tab="runway" role="tab" aria-selected="false" aria-controls="fundraising-panel-runway">Runway</button>
+              <button class="view-tab" data-tab="targets" role="tab" aria-selected="false" aria-controls="fundraising-panel-targets">Targets</button>
             </nav>
             <div class="p-6">
               <div class="pipeline-filters">
@@ -3827,7 +3827,7 @@
           </div>
 
           <!-- KPI Tracker tab -->
-          <div id="fundraising-panel-kpi" class="fundraising-tab-panel hidden">
+          <div id="fundraising-panel-kpi" class="fundraising-tab-panel hidden" role="tabpanel">
             <div class="px-6 py-4 border-b border-default flex justify-between items-center view-header">
               <h2 class="text-lg font-medium text-primary">Fundraising</h2>
               <div class="flex items-center gap-2">
@@ -3837,12 +3837,12 @@
                 <button id="kpi-add-btn" class="btn-primary py-2 rounded-lg">+ Add Period</button>
               </div>
             </div>
-            <nav class="view-tabs">
-              <button class="view-tab" data-tab="safe">SAFE Rounds</button>
-              <button class="view-tab" data-tab="pipeline">Pipeline</button>
-              <button class="view-tab active" data-tab="kpi">KPI Tracker</button>
-              <button class="view-tab" data-tab="runway">Runway</button>
-              <button class="view-tab" data-tab="targets">Targets</button>
+            <nav class="view-tabs" role="tablist" aria-label="Fundraising">
+              <button class="view-tab" data-tab="safe" role="tab" aria-selected="false" aria-controls="fundraising-panel-safe">SAFE Rounds</button>
+              <button class="view-tab" data-tab="pipeline" role="tab" aria-selected="false" aria-controls="fundraising-panel-pipeline">Pipeline</button>
+              <button class="view-tab active" data-tab="kpi" role="tab" aria-selected="true" aria-controls="fundraising-panel-kpi">KPI Tracker</button>
+              <button class="view-tab" data-tab="runway" role="tab" aria-selected="false" aria-controls="fundraising-panel-runway">Runway</button>
+              <button class="view-tab" data-tab="targets" role="tab" aria-selected="false" aria-controls="fundraising-panel-targets">Targets</button>
             </nav>
             <div class="p-6">
               <div class="kpi-controls">
@@ -3860,17 +3860,17 @@
           </div>
 
           <!-- Runway tab -->
-          <div id="fundraising-panel-runway" class="fundraising-tab-panel hidden">
+          <div id="fundraising-panel-runway" class="fundraising-tab-panel hidden" role="tabpanel">
             <div class="px-6 py-4 border-b border-default flex justify-between items-center view-header">
               <h2 class="text-lg font-medium text-primary">Fundraising</h2>
               <button class="fundraising-info-btn" data-action="fundraising-info" aria-label="Glossary">?</button>
             </div>
-            <nav class="view-tabs">
-              <button class="view-tab" data-tab="safe">SAFE Rounds</button>
-              <button class="view-tab" data-tab="pipeline">Pipeline</button>
-              <button class="view-tab" data-tab="kpi">KPI Tracker</button>
-              <button class="view-tab active" data-tab="runway">Runway</button>
-              <button class="view-tab" data-tab="targets">Targets</button>
+            <nav class="view-tabs" role="tablist" aria-label="Fundraising">
+              <button class="view-tab" data-tab="safe" role="tab" aria-selected="false" aria-controls="fundraising-panel-safe">SAFE Rounds</button>
+              <button class="view-tab" data-tab="pipeline" role="tab" aria-selected="false" aria-controls="fundraising-panel-pipeline">Pipeline</button>
+              <button class="view-tab" data-tab="kpi" role="tab" aria-selected="false" aria-controls="fundraising-panel-kpi">KPI Tracker</button>
+              <button class="view-tab active" data-tab="runway" role="tab" aria-selected="true" aria-controls="fundraising-panel-runway">Runway</button>
+              <button class="view-tab" data-tab="targets" role="tab" aria-selected="false" aria-controls="fundraising-panel-targets">Targets</button>
             </nav>
             <div class="p-6">
               <div class="runway-calculator">
@@ -3900,17 +3900,17 @@
           </div>
 
           <!-- Targets tab -->
-          <div id="fundraising-panel-targets" class="fundraising-tab-panel hidden">
+          <div id="fundraising-panel-targets" class="fundraising-tab-panel hidden" role="tabpanel">
             <div class="px-6 py-4 border-b border-default flex justify-between items-center view-header">
               <h2 class="text-lg font-medium text-primary">Fundraising</h2>
               <button class="fundraising-info-btn" data-action="fundraising-info" aria-label="Glossary">?</button>
             </div>
-            <nav class="view-tabs">
-              <button class="view-tab" data-tab="safe">SAFE Rounds</button>
-              <button class="view-tab" data-tab="pipeline">Pipeline</button>
-              <button class="view-tab" data-tab="kpi">KPI Tracker</button>
-              <button class="view-tab" data-tab="runway">Runway</button>
-              <button class="view-tab active" data-tab="targets">Targets</button>
+            <nav class="view-tabs" role="tablist" aria-label="Fundraising">
+              <button class="view-tab" data-tab="safe" role="tab" aria-selected="false" aria-controls="fundraising-panel-safe">SAFE Rounds</button>
+              <button class="view-tab" data-tab="pipeline" role="tab" aria-selected="false" aria-controls="fundraising-panel-pipeline">Pipeline</button>
+              <button class="view-tab" data-tab="kpi" role="tab" aria-selected="false" aria-controls="fundraising-panel-kpi">KPI Tracker</button>
+              <button class="view-tab" data-tab="runway" role="tab" aria-selected="false" aria-controls="fundraising-panel-runway">Runway</button>
+              <button class="view-tab active" data-tab="targets" role="tab" aria-selected="true" aria-controls="fundraising-panel-targets">Targets</button>
             </nav>
             <div class="p-6">
               <p class="text-sm text-muted mb-4">Set targets for key metrics. Current values pull from the latest KPI period. Click a target cell to edit.</p>
@@ -6498,10 +6498,10 @@
           </div>
 
           <!-- Tabs -->
-          <nav class="view-tabs" aria-label="Tabs">
-            <button id="capacityTeamTab" class="view-tab active">Team Members</button>
-            <button id="capacityAllocTab" class="view-tab">Allocations</button>
-            <button id="capacityUtilTab" class="view-tab">Utilization</button>
+          <nav class="view-tabs" role="tablist" aria-label="Capacity Planning">
+            <button id="capacityTeamTab" class="view-tab active" role="tab" aria-selected="true" aria-controls="capacityTeamContent">Team Members</button>
+            <button id="capacityAllocTab" class="view-tab" role="tab" aria-selected="false" aria-controls="capacityAllocContent">Allocations</button>
+            <button id="capacityUtilTab" class="view-tab" role="tab" aria-selected="false" aria-controls="capacityUtilContent">Utilization</button>
           </nav>
 
           <div class="p-6">
@@ -6530,7 +6530,7 @@
             </div>
 
             <!-- Team Members Tab Content -->
-            <div id="capacityTeamContent" class="hidden">
+            <div id="capacityTeamContent" class="hidden" role="tabpanel">
               <div class="flex justify-between items-center mb-4 capacity-section-header">
                 <div>
                   <h3
@@ -6566,7 +6566,7 @@
             </div>
 
             <!-- Allocations Tab Content -->
-            <div id="capacityAllocContent" class="hidden">
+            <div id="capacityAllocContent" class="hidden" role="tabpanel">
               <div class="flex justify-between items-center mb-4 capacity-section-header">
                 <div>
                   <div class="flex items-center gap-4">
@@ -6643,7 +6643,7 @@
             </div>
 
             <!-- Utilization Tab Content -->
-            <div id="capacityUtilContent" class="hidden">
+            <div id="capacityUtilContent" class="hidden" role="tabpanel">
               <div class="mb-4">
                 <h3
                   class="text-sm font-medium text-secondary"
@@ -6824,16 +6824,16 @@
               </div>
             </div>
             <!-- Billing Tabs -->
-            <nav class="view-tabs">
-              <button data-billing-tab="customers" class="view-tab active">Customers</button>
-              <button data-billing-tab="rates" class="view-tab">Rates</button>
-              <button data-billing-tab="quotes" class="view-tab">Quotes</button>
-              <button data-billing-tab="invoices" class="view-tab">Invoices</button>
+            <nav class="view-tabs" role="tablist" aria-label="Billing">
+              <button data-billing-tab="customers" class="view-tab active" role="tab" aria-selected="true" aria-controls="customersTab">Customers</button>
+              <button data-billing-tab="rates" class="view-tab" role="tab" aria-selected="false" aria-controls="ratesTab">Rates</button>
+              <button data-billing-tab="quotes" class="view-tab" role="tab" aria-selected="false" aria-controls="quotesTab">Quotes</button>
+              <button data-billing-tab="invoices" class="view-tab" role="tab" aria-selected="false" aria-controls="invoicesTab">Invoices</button>
             </nav>
           </div>
           <div class="p-6">
             <!-- Customers Tab -->
-            <div id="customersTab" class="billing-tab-content">
+            <div id="customersTab" class="billing-tab-content" role="tabpanel">
               <div class="flex justify-end mb-4">
                 <button id="addCustomerBtn" class="btn-primary py-2 rounded-lg">
                   + Add Customer
@@ -6869,7 +6869,7 @@
               </div>
             </div>
             <!-- Rates Tab -->
-            <div id="ratesTab" class="billing-tab-content hidden">
+            <div id="ratesTab" class="billing-tab-content hidden" role="tabpanel">
               <div class="flex justify-end mb-4">
                 <button
                   id="addBillingRateBtn"
@@ -6908,7 +6908,7 @@
               </div>
             </div>
             <!-- Quotes Tab -->
-            <div id="quotesTab" class="billing-tab-content hidden">
+            <div id="quotesTab" class="billing-tab-content hidden" role="tabpanel">
               <div class="flex justify-end mb-4">
                 <button id="addQuoteBtn" class="btn-primary py-2 rounded-lg">
                   + New Quote
@@ -6940,7 +6940,7 @@
               <div id="quotesContainer" class="space-y-4"></div>
             </div>
             <!-- Invoices Tab -->
-            <div id="invoicesTab" class="billing-tab-content hidden">
+            <div id="invoicesTab" class="billing-tab-content hidden" role="tabpanel">
               <div class="flex justify-end gap-2 mb-4">
                 <button
                   id="generateInvoiceBtn"
@@ -7036,16 +7036,16 @@
               </div>
             </div>
             <!-- CRM Tabs -->
-            <nav class="view-tabs">
-              <button data-crm-tab="companies" class="view-tab active">Companies</button>
-              <button data-crm-tab="contacts" class="view-tab">Contacts</button>
-              <button data-crm-tab="deals" class="view-tab">Deals</button>
-              <button data-crm-tab="interactions" class="view-tab">Interactions</button>
+            <nav class="view-tabs" role="tablist" aria-label="CRM">
+              <button data-crm-tab="companies" class="view-tab active" role="tab" aria-selected="true" aria-controls="companiesTab">Companies</button>
+              <button data-crm-tab="contacts" class="view-tab" role="tab" aria-selected="false" aria-controls="contactsTab">Contacts</button>
+              <button data-crm-tab="deals" class="view-tab" role="tab" aria-selected="false" aria-controls="dealsTab">Deals</button>
+              <button data-crm-tab="interactions" class="view-tab" role="tab" aria-selected="false" aria-controls="interactionsTab">Interactions</button>
             </nav>
           </div>
           <div class="p-6">
             <!-- Companies Tab -->
-            <div id="companiesTab" class="crm-tab-content">
+            <div id="companiesTab" class="crm-tab-content" role="tabpanel">
               <div class="flex justify-end mb-4">
                 <button
                   id="addCRMCompanyBtn"
@@ -7084,7 +7084,7 @@
               </div>
             </div>
             <!-- Contacts Tab -->
-            <div id="contactsTab" class="crm-tab-content hidden">
+            <div id="contactsTab" class="crm-tab-content hidden" role="tabpanel">
               <div class="flex justify-end mb-4">
                 <button
                   id="addCRMContactBtn"
@@ -7123,7 +7123,7 @@
               </div>
             </div>
             <!-- Deals Tab -->
-            <div id="dealsTab" class="crm-tab-content hidden">
+            <div id="dealsTab" class="crm-tab-content hidden" role="tabpanel">
               <div class="flex justify-end mb-4">
                 <button id="addCRMDealBtn" class="btn-primary py-2 rounded-lg">
                   + Add Deal
@@ -7159,7 +7159,7 @@
               </div>
             </div>
             <!-- Interactions Tab -->
-            <div id="interactionsTab" class="crm-tab-content hidden">
+            <div id="interactionsTab" class="crm-tab-content hidden" role="tabpanel">
               <div class="flex justify-end mb-4">
                 <button
                   id="addCRMInteractionBtn"

@@ -311,14 +311,12 @@ export class MeetingsModule {
   switchTab(tab) {
     this.activeTab = tab;
 
-    document.getElementById("meetingsTabMeetings")?.classList.toggle(
-      "active",
-      tab === "meetings",
-    );
-    document.getElementById("meetingsTabActions")?.classList.toggle(
-      "active",
-      tab === "actions",
-    );
+    const meetingsBtn = document.getElementById("meetingsTabMeetings");
+    const actionsBtn = document.getElementById("meetingsTabActions");
+    meetingsBtn?.classList.toggle("active", tab === "meetings");
+    meetingsBtn?.setAttribute("aria-selected", String(tab === "meetings"));
+    actionsBtn?.classList.toggle("active", tab === "actions");
+    actionsBtn?.setAttribute("aria-selected", String(tab === "actions"));
 
     document.getElementById("meetingsList")?.classList.toggle(
       "hidden",
