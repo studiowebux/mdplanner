@@ -16,7 +16,7 @@ export class BrainstormModule {
       this.taskManager.brainstorms = await BrainstormsAPI.fetchAll();
       this.renderView();
     } catch (error) {
-      console.error("Error loading brainstorms:", error);
+      console.error("BrainstormModule.load failed", { error: error.message });
     } finally {
       hideLoading("brainstormView");
     }
@@ -123,7 +123,7 @@ export class BrainstormModule {
       ).filter((b) => b.id !== id);
       this.renderView();
     } catch (error) {
-      console.error("Error deleting brainstorm:", error);
+      console.error("BrainstormModule.delete failed", { id, error: error.message });
     }
   }
 

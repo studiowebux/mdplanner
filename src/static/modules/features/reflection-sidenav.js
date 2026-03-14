@@ -337,7 +337,7 @@ export class ReflectionSidenavModule {
 
       await this.tm.reflectionModule.load();
     } catch (error) {
-      console.error("Error saving reflection:", error);
+      console.error("ReflectionSidenavModule.save failed", { id: this.editingId, error: error.message });
       this._showSaveStatus("Error");
       showToast("Error saving reflection", "error");
     }
@@ -364,7 +364,7 @@ export class ReflectionSidenavModule {
       await this.tm.reflectionModule.load();
       this.close();
     } catch (error) {
-      console.error("Error deleting reflection:", error);
+      console.error("ReflectionSidenavModule.handleDelete failed", { id: this.editingId, error: error.message });
       showToast("Error deleting reflection", "error");
     }
   }
@@ -609,7 +609,7 @@ export class ReflectionSidenavModule {
 
       await this.tm.reflectionModule.load();
     } catch (error) {
-      console.error("Error saving template:", error);
+      console.error("ReflectionSidenavModule.saveTemplate failed", { id: this.editingTemplateId, error: error.message });
       this._showTemplateSaveStatus("Error");
       showToast("Error saving template", "error");
     }
@@ -636,7 +636,7 @@ export class ReflectionSidenavModule {
       await this.tm.reflectionModule.load();
       this.closeTemplate();
     } catch (error) {
-      console.error("Error deleting template:", error);
+      console.error("ReflectionSidenavModule.handleDeleteTemplate failed", { id: this.editingTemplateId, error: error.message });
       showToast("Error deleting template", "error");
     }
   }

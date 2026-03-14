@@ -262,7 +262,7 @@ export class BrainstormSidenavModule {
 
       await this.tm.brainstormModule.load();
     } catch (error) {
-      console.error("Error saving brainstorm:", error);
+      console.error("BrainstormSidenavModule.save failed", { id: this.editingId, error: error.message });
       this.showSaveStatus("Error");
       showToast("Error saving brainstorm", "error");
     }
@@ -289,7 +289,7 @@ export class BrainstormSidenavModule {
       await this.tm.brainstormModule.load();
       this.close();
     } catch (error) {
-      console.error("Error deleting brainstorm:", error);
+      console.error("BrainstormSidenavModule.handleDelete failed", { id: this.editingId, error: error.message });
       showToast("Error deleting brainstorm", "error");
     }
   }

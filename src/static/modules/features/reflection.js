@@ -23,7 +23,7 @@ export class ReflectionModule {
       this.taskManager.reflectionTemplates = templates;
       this.renderView();
     } catch (error) {
-      console.error("Error loading reflections:", error);
+      console.error("ReflectionModule.load failed", { error: error.message });
     } finally {
       hideLoading("reflectionView");
     }
@@ -246,7 +246,7 @@ export class ReflectionModule {
       ).filter((r) => r.id !== id);
       this.renderView();
     } catch (error) {
-      console.error("Error deleting reflection:", error);
+      console.error("ReflectionModule.delete failed", { id, error: error.message });
     }
   }
 
@@ -264,7 +264,7 @@ export class ReflectionModule {
       ).filter((t) => t.id !== id);
       this.renderView();
     } catch (error) {
-      console.error("Error deleting reflection template:", error);
+      console.error("ReflectionModule.deleteTemplate failed", { id, error: error.message });
     }
   }
 
