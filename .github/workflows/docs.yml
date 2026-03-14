@@ -58,7 +58,23 @@ jobs:
       - name: Generate MCP spec
         run: |
           mkdir -p docs/mcp
-          npx -y @modelcontextprotocol/inspector@0.21.1 --cli deno run --allow-read --allow-write --allow-env mcp.ts ./example --method tools/list > docs/mcp/mdplanner.mcp.json
+          MCP_CMD="deno run --allow-read --allow-write --allow-env mcp.ts ./example"
+          npx -y @modelcontextprotocol/inspector@0.21.1 --cli $MCP_CMD --method tools/list > /tmp/mcp-tools.json
+          npx -y @modelcontextprotocol/inspector@0.21.1 --cli $MCP_CMD --method resources/list > /tmp/mcp-resources.json
+          npx -y @modelcontextprotocol/inspector@0.21.1 --cli $MCP_CMD --method prompts/list > /tmp/mcp-prompts.json
+          deno eval '
+            const t = JSON.parse(Deno.readTextFileSync("/tmp/mcp-tools.json"));
+            const r = JSON.parse(Deno.readTextFileSync("/tmp/mcp-resources.json"));
+            const p = JSON.parse(Deno.readTextFileSync("/tmp/mcp-prompts.json"));
+            const spec = {
+              name: "MD Planner MCP Server",
+              description: "Markdown-based project management MCP server with directory storage.",
+              tools: t.tools,
+              resources: r.resources,
+              prompts: p.prompts
+            };
+            Deno.writeTextFileSync("docs/mcp/mdplanner.mcp.json", JSON.stringify(spec, null, 2));
+          '
 
       - name: Build docs
         run: ./minimaldoc build docs -o _site
