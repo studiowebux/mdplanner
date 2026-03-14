@@ -35,7 +35,7 @@ jobs:
           go-version: "1.26"
 
       - name: Install MinimalDoc
-        run: go install github.com/studiowebux/minimaldoc/cmd/minimaldoc@v1.5.0
+        run: go install github.com/studiowebux/minimaldoc/cmd/minimaldoc@v1.5.1
 
       - name: Setup Node
         uses: actions/setup-node@v4
