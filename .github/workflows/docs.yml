@@ -45,6 +45,21 @@ jobs:
       - name: Build MinimalDoc
         run: cd minimaldoc-src && go build -o ../minimaldoc ./cmd/minimaldoc/
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Generate MCP spec
+        run: |
+          mkdir -p docs/mcp
+          npx -y @modelcontextprotocol/inspector@0.11.0 --cli deno run --allow-read --allow-write --allow-env mcp.ts ./example --method tools/list > docs/mcp/mdplanner.mcp.json
+
       - name: Build docs
         run: ./minimaldoc build docs -o _site
 
