@@ -969,7 +969,10 @@ export class ListView {
     if (milestone) update.milestone = milestone;
     if (priority) update.priority = priority;
     if (tags && tags.length > 0) update.tags = tags;
-    if (markCompleted) update.completed = true;
+    if (markCompleted) {
+      update.completed = true;
+      if (!update.section) update.section = "Done";
+    }
 
     if (Object.keys(update).length === 0) {
       this.closeBatchPanel();

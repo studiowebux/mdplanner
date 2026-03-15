@@ -1384,14 +1384,19 @@ export class PortfolioView {
           showToast(result.error, "error");
           return;
         }
+        showToast("Project created", "success");
       } else {
         await PortfolioAPI.update(this.selectedProject.id, updates);
+        showToast("Project saved", "success");
       }
+      const scrollY = window.scrollY;
       this.closeDetailPanel();
       await this.load();
       this.tm.suppressSSE?.("portfolio");
+      requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: "instant" }));
     } catch (error) {
       console.error("Error saving project:", error);
+      showToast("Error saving project", "error");
     }
   }
 
