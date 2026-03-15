@@ -1488,7 +1488,6 @@ export const GitHubAPI = {
     const response = await get(
       `/api/integrations/github/repo/${owner}/${repo}/releases/latest`,
     );
-    if (!response.ok) return null;
     return ensureOk(response);
   },
 
@@ -1672,7 +1671,6 @@ export const FishboneAPI = {
 export const AnalyticsAPI = {
   async fetch() {
     const response = await get("/api/analytics");
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return ensureOk(response);
   },
 };
@@ -1705,25 +1703,21 @@ export const TtsAPI = {
 export const CerveauAPI = {
   async fetchManifest() {
     const response = await get("/api/cerveau/manifest");
-    if (!response.ok) return null;
     return ensureOk(response);
   },
 
   async fetchBrains() {
     const response = await get("/api/cerveau/brains");
-    if (!response.ok) return null;
     return ensureOk(response);
   },
 
   async fetchRegistry() {
     const response = await get("/api/cerveau/registry");
-    if (!response.ok) return null;
     return ensureOk(response);
   },
 
   async fetchProtocol() {
     const response = await get("/api/cerveau/protocol");
-    if (!response.ok) return null;
     return ensureOk(response);
   },
 

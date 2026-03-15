@@ -8,6 +8,7 @@ import { showConfirm } from "./confirm.js";
 import { UndoManager } from "./undo-manager.js";
 import {
   clearAllFieldErrors,
+  extractErrorMessage,
   showServerFieldErrors,
   validateRequired,
 } from "../utils.js";
@@ -221,7 +222,7 @@ export class BaseSidenavModule {
         }
         if (!response.ok) {
           const body = await response.json().catch(() => ({}));
-          const errMsg = this._extractErrorMessage(body);
+          const errMsg = extractErrorMessage(body);
           this.showSaveStatus(errMsg);
           showToast(errMsg || `Error saving ${this.entityName}`, "error");
           showServerFieldErrors(errMsg, this.getFieldMap());
@@ -239,7 +240,7 @@ export class BaseSidenavModule {
         const response = await this.api.create(data);
         const result = await response.json();
         if (!response.ok) {
-          const errMsg = this._extractErrorMessage(result);
+          const errMsg = extractErrorMessage(result);
           this.showSaveStatus(errMsg);
           showToast(errMsg || `Error creating ${this.entityName}`, "error");
           showServerFieldErrors(errMsg, this.getFieldMap());
@@ -418,23 +419,7 @@ export class BaseSidenavModule {
     }
   }
 
-  /** Extract a human-readable error message from API error responses. */
-  _extractErrorMessage(body) {
-    if (!body) return "Error";
-    // String error field
-    if (typeof body.error === "string") return body.error;
-    // Zod validation error — flatten issues into readable text
-    if (body.error?.issues && Array.isArray(body.error.issues)) {
-      return body.error.issues
-        .map((i) => `${i.path?.join(".") || "field"}: ${i.message}`)
-        .join("; ");
-    }
-    // message field (defaultHook format)
-    if (typeof body.message === "string") return body.message;
-    return "Error";
-  }
-
-  // --- Status display (replaces hardcoded Tailwind colors) ---
+  // --- Status display ---
 
   showSaveStatus(text) {
     const statusEl = this.el("SaveStatus");
