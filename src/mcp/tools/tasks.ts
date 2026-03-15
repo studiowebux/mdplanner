@@ -202,6 +202,10 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         withResult: z.boolean().optional().describe(
           "Return the full created task (default: false — returns only { id })",
         ),
+        claim: z.boolean().optional().describe(
+          "Atomic create-and-claim. Sets section to 'In Progress', " +
+            "records claimedBy/claimedAt. Requires assignee.",
+        ),
       },
     },
     async (
@@ -220,12 +224,19 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         planned_end,
         parentId,
         withResult,
+        claim,
       },
     ) => {
+      if (claim && !assignee) {
+        return err("claim requires assignee to be set");
+      }
+
+      const effectiveSection = claim ? "In Progress" : (section ?? "Todo");
+
       const id = await parser.addTask({
         title,
         completed: false,
-        section: section ?? "Todo",
+        section: effectiveSection,
         description: description ? description.split("\n") : undefined,
         config: {
           ...(assignee && { assignee }),
@@ -237,6 +248,10 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
           ...(project && { project }),
           ...(planned_start && { planned_start }),
           ...(planned_end && { planned_end }),
+          ...(claim && {
+            claimedBy: assignee,
+            claimedAt: new Date().toISOString(),
+          }),
         },
         ...(parentId && { parentId }),
       });
