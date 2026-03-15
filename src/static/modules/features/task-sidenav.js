@@ -553,15 +553,24 @@ export class TaskSidenavModule {
           taskData.parentId = this.parentTaskId;
         }
         const res = await TasksAPI.create(taskData);
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          showToast(extractErrorMessage(errBody), "error");
+          return;
+        }
         // res.json() can fail on an empty or non-JSON body (proxy error,
-        // truncated response). Falling back to {} means newId is undefined,
-        // the attachment upload is skipped, but the task was still created —
-        // a partial success is better than crashing the entire save flow.
+        // truncated response). If it does, newId is undefined and we warn
+        // the user that attachments could not be uploaded.
         const { id: newId } = await res.json().catch(() => ({}));
         if (newId && this.pendingAttachments.length) {
           await TasksAPI.addAttachments(newId, this.pendingAttachments);
+          this.pendingAttachments = [];
+        } else if (!newId && this.pendingAttachments.length) {
+          showToast("Task created but attachments could not be uploaded — please re-attach them", "error");
+          // leave pendingAttachments intact so the user can retry
+        } else {
+          this.pendingAttachments = [];
         }
-        this.pendingAttachments = [];
         showToast(`"${taskData.title}" created`, "success", newId ? () => {
           const task = this.tm.findTaskById(newId);
           if (task) this.tm.taskSidenavModule.open(task);
