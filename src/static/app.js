@@ -1,6 +1,6 @@
 import { showToast } from "./modules/ui/toast.js";
 import { clearAllDirtyModules, hasDirtyBaseSidenav } from "./modules/ui/base-sidenav.js";
-import { initConfirmModal } from "./modules/ui/confirm.js";
+import { initConfirmModal, showConfirm } from "./modules/ui/confirm.js";
 import { ThemeManager } from "./modules/ui/theme.js";
 import { closeMobileMenu, toggleMobileMenu } from "./modules/ui/mobile.js";
 import { AccessibilityManager } from "./modules/ui/accessibility.js";
@@ -117,6 +117,7 @@ class TaskManager {
     this.projectInfo = null;
     this.projectConfig = null;
     this.githubConfigured = false;
+    this._configDirty = false;
     this.peopleMap = new Map();
     this.sections = [];
     this.currentView = "summary";
@@ -1391,6 +1392,16 @@ class TaskManager {
   }
 
   async switchView(view) {
+    // Guard: unsaved settings changes when leaving config view
+    if (this.currentView === "config" && this._configDirty && view !== "config") {
+      const confirmed = await showConfirm(
+        "You have unsaved settings. Leave anyway?",
+        "Leave",
+      );
+      if (!confirmed) return;
+      this._setConfigDirty(false);
+    }
+
     // Clear any sidenav dirty-state that leaked via overlay-click close or
     // view-switching without an explicit BaseSidenavModule.close() call.
     // The beforeunload handler guards against genuine unsaved changes on page
@@ -1411,6 +1422,12 @@ class TaskManager {
     localStorage.setItem("mdplanner_current_view", view);
     // Set data attribute on body for CSS targeting
     document.body.setAttribute("data-current-view", view);
+
+    // Show sticky save footer only in config view
+    document.getElementById("configStickyFooter")?.classList.toggle(
+      "hidden",
+      view !== "config",
+    );
 
     // Update breadcrumb
     Breadcrumb.render(view);
@@ -2098,6 +2115,14 @@ class TaskManager {
     }
   }
 
+  _setConfigDirty(dirty) {
+    this._configDirty = dirty;
+    document.getElementById("configDirtyNotice")?.classList.toggle(
+      "hidden",
+      !dirty,
+    );
+  }
+
   applyGitHubVisibility() {
     const show = this.githubConfigured;
     document.getElementById("sidenavGithubSection")?.classList.toggle(
@@ -2159,6 +2184,7 @@ class TaskManager {
 
       if (response.ok) {
         this.projectConfig = config;
+        this._setConfigDirty(false);
         this.applyFeatureVisibility();
         if (this.currentView === "timeline") {
           this.timelineView.generate();
