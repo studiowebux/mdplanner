@@ -185,12 +185,14 @@ export class BaseSidenavModule {
         }
         if (!response.ok) {
           const body = await response.json().catch(() => ({}));
-          this.showSaveStatus(body.error || "Error");
-          showToast(body.error || `Error saving ${this.entityName}`, "error");
+          const errMsg = this._extractErrorMessage(body);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg || `Error saving ${this.entityName}`, "error");
           return;
         }
 
         this._loadedUpdatedAt = null; // cleared — server will set a new updatedAt
+        this._ownSavePending = true;
         this._hideConflictBanner();
         this._hideStaleEditBanner();
         this._markAllSaved();
@@ -200,11 +202,13 @@ export class BaseSidenavModule {
         const response = await this.api.create(data);
         const result = await response.json();
         if (!response.ok) {
-          this.showSaveStatus(result.error || "Error");
-          showToast(result.error || `Error creating ${this.entityName}`, "error");
+          const errMsg = this._extractErrorMessage(result);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg || `Error creating ${this.entityName}`, "error");
           return;
         }
         this.editingId = result.id;
+        this._ownSavePending = true;
         this._markAllSaved();
         this._setDirty(false);
         this.showSaveStatus("Created");
@@ -283,6 +287,11 @@ export class BaseSidenavModule {
     if (!this.editingId) return;
     this._sseStaleListener = (e) => {
       const { action, id } = e.detail;
+      // Skip the SSE event triggered by our own save
+      if (action === "updated" && id === this.editingId && this._ownSavePending) {
+        this._ownSavePending = false;
+        return;
+      }
       if (action === "updated" && id === this.editingId) {
         this._showStaleEditBanner();
       }
@@ -371,13 +380,30 @@ export class BaseSidenavModule {
     }
   }
 
+  /** Extract a human-readable error message from API error responses. */
+  _extractErrorMessage(body) {
+    if (!body) return "Error";
+    // String error field
+    if (typeof body.error === "string") return body.error;
+    // Zod validation error — flatten issues into readable text
+    if (body.error?.issues && Array.isArray(body.error.issues)) {
+      return body.error.issues
+        .map((i) => `${i.path?.join(".") || "field"}: ${i.message}`)
+        .join("; ");
+    }
+    // message field (defaultHook format)
+    if (typeof body.message === "string") return body.message;
+    return "Error";
+  }
+
   // --- Status display (replaces hardcoded Tailwind colors) ---
 
   showSaveStatus(text) {
     const statusEl = this.el("SaveStatus");
     if (!statusEl) return;
 
-    statusEl.textContent = text;
+    const textStr = typeof text === "string" ? text : "Error";
+    statusEl.textContent = textStr;
     statusEl.classList.remove(
       "hidden",
       "sidenav-status-saved",
@@ -385,15 +411,15 @@ export class BaseSidenavModule {
       "sidenav-status-error",
     );
 
-    if (text === "Saved" || text === "Created") {
+    if (textStr === "Saved" || textStr === "Created") {
       statusEl.classList.add("sidenav-status-saved");
-    } else if (text === "Error" || text.includes("required")) {
+    } else if (textStr === "Error" || textStr.includes("required")) {
       statusEl.classList.add("sidenav-status-error");
     } else {
       statusEl.classList.add("sidenav-status-saving");
     }
 
-    if (text === "Saved" || text === "Created" || text === "Error") {
+    if (textStr === "Saved" || textStr === "Created" || textStr === "Error") {
       setTimeout(() => {
         if (this._hasAnyUnsavedChanges()) {
           statusEl.textContent = "Modified";
