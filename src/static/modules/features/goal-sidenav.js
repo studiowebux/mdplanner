@@ -2,7 +2,7 @@
 // Pattern: Template Method (extends BaseSidenavModule)
 
 import { BaseSidenavModule } from "../ui/base-sidenav.js";
-import { GitHubAPI, GoalsAPI } from "../api.js";
+import { GitHubAPI, GoalsAPI, PortfolioAPI } from "../api.js";
 import { bindAutocomplete } from "../ui/autocomplete.js";
 import { showToast } from "../ui/toast.js";
 
@@ -13,7 +13,9 @@ export class GoalSidenavModule extends BaseSidenavModule {
   get inputIds() {
     return [
       "goalSidenavTitle", "goalSidenavType", "goalSidenavStatus",
-      "goalSidenavKpi", "goalSidenavStartDate", "goalSidenavEndDate",
+      "goalSidenavKpi", "goalSidenavKpiMetric", "goalSidenavKpiTarget",
+      "goalSidenavLinkedPortfolio",
+      "goalSidenavStartDate", "goalSidenavEndDate",
       "goalSidenavDescription", "goalSidenavGithubRepo", "goalSidenavGithubMilestone",
     ];
   }
@@ -23,11 +25,14 @@ export class GoalSidenavModule extends BaseSidenavModule {
     document.getElementById("goalSidenavType").value = "project";
     document.getElementById("goalSidenavStatus").value = "planning";
     document.getElementById("goalSidenavKpi").value = "";
+    document.getElementById("goalSidenavKpiMetric").value = "";
+    document.getElementById("goalSidenavKpiTarget").value = "";
     document.getElementById("goalSidenavStartDate").value = "";
     document.getElementById("goalSidenavEndDate").value = "";
     document.getElementById("goalSidenavDescription").value = "";
     document.getElementById("goalSidenavGithubRepo").value = "";
     document.getElementById("goalSidenavGithubMilestone").value = "";
+    this._clearLinkedPortfolio();
     this._resetMilestonePanel();
   }
 
@@ -36,11 +41,15 @@ export class GoalSidenavModule extends BaseSidenavModule {
     document.getElementById("goalSidenavType").value = goal.type || "project";
     document.getElementById("goalSidenavStatus").value = goal.status || "planning";
     document.getElementById("goalSidenavKpi").value = goal.kpi || "";
+    document.getElementById("goalSidenavKpiMetric").value = goal.kpiMetric || "";
+    document.getElementById("goalSidenavKpiTarget").value = goal.kpiTarget ?? "";
     document.getElementById("goalSidenavStartDate").value = goal.startDate || "";
     document.getElementById("goalSidenavEndDate").value = goal.endDate || "";
     document.getElementById("goalSidenavDescription").value = goal.description || "";
     document.getElementById("goalSidenavGithubRepo").value = goal.githubRepo || "";
     document.getElementById("goalSidenavGithubMilestone").value = goal.githubMilestone ?? "";
+
+    this._populateLinkedPortfolio(goal.linkedPortfolioItems || []);
 
     if (goal.githubMilestone) {
       this._setMilestoneSummary(goal.githubMilestone, null, null, null);
@@ -52,17 +61,41 @@ export class GoalSidenavModule extends BaseSidenavModule {
   getFormData() {
     const repoVal = document.getElementById("goalSidenavGithubRepo").value.trim();
     const milestoneVal = document.getElementById("goalSidenavGithubMilestone").value;
+    const kpiMetric = document.getElementById("goalSidenavKpiMetric").value;
+    const kpiTargetRaw = document.getElementById("goalSidenavKpiTarget").value;
+    const linkedPortfolioSel = document.getElementById("goalSidenavLinkedPortfolio");
+    const linkedPortfolioItems = linkedPortfolioSel
+      ? Array.from(linkedPortfolioSel.selectedOptions).map((o) => o.value)
+      : [];
     return {
       title: document.getElementById("goalSidenavTitle").value.trim(),
       type: document.getElementById("goalSidenavType").value,
       status: document.getElementById("goalSidenavStatus").value,
       kpi: document.getElementById("goalSidenavKpi").value.trim(),
+      kpiMetric: kpiMetric || null,
+      kpiTarget: kpiTargetRaw ? parseFloat(kpiTargetRaw) : null,
       startDate: document.getElementById("goalSidenavStartDate").value,
       endDate: document.getElementById("goalSidenavEndDate").value,
       description: document.getElementById("goalSidenavDescription").value.trim(),
       githubRepo: repoVal || null,
       githubMilestone: milestoneVal ? parseInt(milestoneVal, 10) : null,
+      linkedPortfolioItems,
     };
+  }
+
+  _clearLinkedPortfolio() {
+    const sel = document.getElementById("goalSidenavLinkedPortfolio");
+    if (sel) sel.innerHTML = "";
+  }
+
+  _populateLinkedPortfolio(selectedIds) {
+    const sel = document.getElementById("goalSidenavLinkedPortfolio");
+    if (!sel) return;
+    const portfolioItems = this._portfolioItems || [];
+    sel.innerHTML = portfolioItems.map((p) => {
+      const selected = selectedIds.includes(p.id) ? "selected" : "";
+      return `<option value="${p.id}" ${selected}>${p.name}</option>`;
+    }).join("");
   }
 
   findEntity(id) {
@@ -149,7 +182,17 @@ export class GoalSidenavModule extends BaseSidenavModule {
     }
   }
 
-  onOpen() {
+  async onOpen() {
+    // Populate linked portfolio options from API
+    const editing = this._editingId ? this.findEntity(this._editingId) : null;
+    try {
+      const items = await PortfolioAPI.fetchAll();
+      this._portfolioItems = items;
+    } catch {
+      this._portfolioItems = [];
+    }
+    this._populateLinkedPortfolio(editing?.linkedPortfolioItems || []);
+
     // Bind repo autocomplete
     const repoInput = document.getElementById("goalSidenavGithubRepo");
     if (repoInput && !repoInput._ghAutocomplete) {

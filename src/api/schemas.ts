@@ -197,11 +197,14 @@ export const CreateGoalSchema = z.object({
   description: z.string().default(""),
   type: GoalTypeEnum.default("project"),
   kpi: z.string().default(""),
+  kpiMetric: z.string().optional(),
+  kpiTarget: z.number().optional(),
   status: GoalStatusEnum.default("planning"),
   startDate: z.string().default(""),
   endDate: z.string().default(""),
   githubRepo: z.string().optional(),
   githubMilestone: z.number().int().optional(),
+  linkedPortfolioItems: z.array(z.string()).optional(),
 }).strict();
 
 export const UpdateGoalSchema = z.object({
@@ -209,11 +212,14 @@ export const UpdateGoalSchema = z.object({
   description: z.string().optional(),
   type: GoalTypeEnum.optional(),
   kpi: z.string().optional(),
+  kpiMetric: z.string().nullable().optional(),
+  kpiTarget: z.number().nullable().optional(),
   status: GoalStatusEnum.optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   githubRepo: z.string().optional(),
   githubMilestone: z.number().int().optional(),
+  linkedPortfolioItems: z.array(z.string()).optional(),
 }).strict();
 
 /**

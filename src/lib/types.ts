@@ -133,11 +133,14 @@ export interface Goal {
   description: string;
   type: "enterprise" | "project";
   kpi: string;
+  kpiMetric?: string;
+  kpiTarget?: number;
   startDate: string;
   endDate: string;
   status: "planning" | "on-track" | "at-risk" | "late" | "success" | "failed";
   githubRepo?: string;
   githubMilestone?: number;
+  linkedPortfolioItems?: string[];
 }
 
 export interface StickyNote {

@@ -11461,6 +11461,31 @@
             </div>
             <div class="sidenav-grid">
               <div class="form-group">
+                <label for="goalSidenavKpiMetric" class="form-label">KPI Metric</label>
+                <select id="goalSidenavKpiMetric" class="form-input">
+                  <option value="">None</option>
+                  <option value="mrr">MRR</option>
+                  <option value="arr">ARR</option>
+                  <option value="churn_rate">Churn Rate</option>
+                  <option value="ltv">LTV</option>
+                  <option value="cac">CAC</option>
+                  <option value="growth_rate">Growth Rate</option>
+                  <option value="active_users">Active Users</option>
+                  <option value="nrr">NRR</option>
+                  <option value="gross_margin">Gross Margin</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="goalSidenavKpiTarget" class="form-label">KPI Target</label>
+                <input type="number" id="goalSidenavKpiTarget" class="form-input" placeholder="Target value">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="goalSidenavLinkedPortfolio" class="form-label">Linked Portfolio Items</label>
+              <select id="goalSidenavLinkedPortfolio" class="form-input" multiple></select>
+            </div>
+            <div class="sidenav-grid">
+              <div class="form-group">
                 <label for="goalSidenavStartDate" class="form-label">Start Date</label>
                 <input type="date" id="goalSidenavStartDate" class="form-input">
               </div>

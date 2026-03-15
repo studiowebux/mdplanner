@@ -9,11 +9,14 @@ interface GoalFrontmatter {
   id: string;
   type: "enterprise" | "project";
   kpi: string;
+  kpi_metric?: string;
+  kpi_target?: number;
   start: string;
   end: string;
   status: "planning" | "on-track" | "at-risk" | "late" | "success" | "failed";
   github_repo?: string;
   github_milestone?: number;
+  linked_portfolio_items?: string[];
 }
 
 export class GoalsDirectoryParser extends DirectoryParser<Goal> {
@@ -52,11 +55,14 @@ export class GoalsDirectoryParser extends DirectoryParser<Goal> {
       description,
       type: frontmatter.type || "project",
       kpi: frontmatter.kpi || "",
+      kpiMetric: frontmatter.kpi_metric,
+      kpiTarget: frontmatter.kpi_target,
       startDate: frontmatter.start || "",
       endDate: frontmatter.end || "",
       status: frontmatter.status || "planning",
       githubRepo: frontmatter.github_repo,
       githubMilestone: frontmatter.github_milestone,
+      linkedPortfolioItems: frontmatter.linked_portfolio_items,
     };
   }
 
@@ -70,9 +76,14 @@ export class GoalsDirectoryParser extends DirectoryParser<Goal> {
       status: goal.status,
     };
 
+    if (goal.kpiMetric) frontmatter.kpi_metric = goal.kpiMetric;
+    if (goal.kpiTarget !== undefined) frontmatter.kpi_target = goal.kpiTarget;
     if (goal.githubRepo) frontmatter.github_repo = goal.githubRepo;
     if (goal.githubMilestone !== undefined) {
       frontmatter.github_milestone = goal.githubMilestone;
+    }
+    if (goal.linkedPortfolioItems?.length) {
+      frontmatter.linked_portfolio_items = goal.linkedPortfolioItems;
     }
 
     const body = `# ${goal.title}\n\n${goal.description || ""}`;
