@@ -183,8 +183,70 @@ const deleteRoute = createRoute({
 });
 
 // ---------------------------------------------------------------------------
+// Summary schemas + route
+// ---------------------------------------------------------------------------
+
+const TaskStubSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  tags: z.array(z.string()),
+}).openapi("MilestoneTaskStub");
+
+const MilestoneSummarySchema = z.object({
+  milestone: z.string(),
+  id: z.string(),
+  status: z.enum(["open", "completed"]),
+  description: z.string().optional(),
+  target: z.string().optional(),
+  totalOpen: z.number(),
+  totalDone: z.number(),
+  sections: z.record(z.string(), z.array(TaskStubSchema)),
+}).openapi("MilestoneSummary");
+
+const nameParam = z.object({
+  name: z.string().openapi({ param: { name: "name", in: "path" } }),
+});
+
+const summaryRoute = createRoute({
+  method: "get",
+  path: "/{name}/summary",
+  tags: ["Milestones"],
+  summary: "Get milestone summary with tasks grouped by section",
+  operationId: "getMilestoneSummary",
+  request: {
+    params: nameParam,
+    query: z.object({
+      project: z.string().optional().openapi({
+        description: "Filter tasks by project name",
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: MilestoneSummarySchema } },
+      description: "Milestone summary with tasks grouped by section",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Milestone not found",
+    },
+  },
+});
+
+// ---------------------------------------------------------------------------
 // Helper
 // ---------------------------------------------------------------------------
+
+function flattenTasks(tasks: Task[]): Task[] {
+  const result: Task[] = [];
+  for (const task of tasks) {
+    result.push(task);
+    if (task.children?.length) {
+      result.push(...flattenTasks(task.children));
+    }
+  }
+  return result;
+}
 
 function getTasksByMilestone(tasks: Task[], milestone: string): Task[] {
   const result: Task[] = [];
@@ -254,6 +316,66 @@ milestonesRouter.openapi(listRoute, async (c) => {
   collectNames(tasks);
 
   return c.json(result, 200);
+});
+
+// GET /milestones/:name/summary - milestone summary with tasks grouped by section
+milestonesRouter.openapi(summaryRoute, async (c) => {
+  const parser = getParser(c);
+  const { name } = c.req.valid("param");
+  const { project } = c.req.valid("query");
+
+  const milestones = await parser.readMilestones();
+  const m = milestones.find(
+    (ms) => ms.name.toLowerCase() === name.toLowerCase(),
+  );
+  if (!m) return c.json({ error: `Milestone '${name}' not found` }, 404);
+
+  const tasks = await parser.readTasks();
+  let flat = flattenTasks(tasks);
+
+  flat = flat.filter(
+    (t) => (t.config?.milestone ?? "").toLowerCase() === name.toLowerCase(),
+  );
+  if (project) {
+    flat = flat.filter(
+      (t) => (t.config?.project ?? "").toLowerCase() === project.toLowerCase(),
+    );
+  }
+
+  const sectionOrder = ["In Progress", "Pending Review", "Todo", "Done"];
+  const sections: Record<
+    string,
+    { id: string; title: string; tags: string[] }[]
+  > = {};
+  for (const sec of sectionOrder) {
+    sections[sec] = [];
+  }
+  for (const t of flat) {
+    const sec = t.section;
+    if (!sections[sec]) sections[sec] = [];
+    sections[sec].push({
+      id: t.id,
+      title: t.title,
+      tags: t.config?.tags ?? [],
+    });
+  }
+
+  const totalDone = sections["Done"].length;
+  const totalOpen = flat.length - totalDone;
+
+  return c.json(
+    {
+      milestone: m.name,
+      id: m.id,
+      status: m.status,
+      description: m.description,
+      target: m.target,
+      totalOpen,
+      totalDone,
+      sections,
+    },
+    200,
+  );
 });
 
 // POST /milestones - create milestone
