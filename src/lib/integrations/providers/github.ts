@@ -13,6 +13,7 @@
 import type {
   GitHubCreatedIssue,
   GitHubIssue,
+  GitHubMergeResult,
   GitHubMilestone,
   GitHubPR,
   GitHubProvider,
@@ -125,6 +126,13 @@ export class GitHubApiProvider implements GitHubProvider {
       number: data.number,
       title: data.title,
       state: data.state === "closed" ? "closed" : "open",
+      labels: Array.isArray(data.labels)
+        ? data.labels.map((l: { name?: string }) =>
+          typeof l === "string" ? l : l.name ?? ""
+        )
+        : [],
+      assignee: data.assignee?.login ?? null,
+      createdAt: data.created_at,
       htmlUrl: data.html_url,
     };
   }
@@ -229,6 +237,13 @@ export class GitHubApiProvider implements GitHubProvider {
       number: data.number,
       title: data.title,
       state: data.state === "closed" ? "closed" : "open",
+      labels: Array.isArray(data.labels)
+        ? data.labels.map((l: { name?: string }) =>
+          typeof l === "string" ? l : l.name ?? ""
+        )
+        : [],
+      assignee: data.assignee?.login ?? null,
+      createdAt: data.created_at,
       htmlUrl: data.html_url,
     };
   }
@@ -244,6 +259,10 @@ export class GitHubApiProvider implements GitHubProvider {
       title: data.title,
       state: data.state === "closed" ? "closed" : "open",
       merged: data.merged === true,
+      assignee: data.assignee?.login ?? null,
+      headBranch: data.head?.ref ?? "",
+      createdAt: data.created_at,
+      reviewDecision: null,
       htmlUrl: data.html_url,
     };
   }
@@ -280,5 +299,90 @@ export class GitHubApiProvider implements GitHubProvider {
       updatedAt: r.updated_at,
       htmlUrl: r.html_url,
     }));
+  }
+
+  async listIssues(
+    owner: string,
+    repo: string,
+    state: "open" | "closed" | "all" = "open",
+    assignee?: string,
+  ): Promise<GitHubIssue[]> {
+    let path =
+      `/repos/${owner}/${repo}/issues?state=${state}&per_page=100&sort=created&direction=desc`;
+    if (assignee) path += `&assignee=${encodeURIComponent(assignee)}`;
+    // deno-lint-ignore no-explicit-any
+    const data = await this.ghGet(path) as any[];
+    // GitHub issues endpoint includes PRs — filter them out
+    return (data ?? [])
+      .filter((d) => !d.pull_request)
+      .map((d) => ({
+        number: d.number,
+        title: d.title,
+        state: d.state === "closed" ? "closed" as const : "open" as const,
+        labels: Array.isArray(d.labels)
+          ? d.labels.map((l: { name?: string }) =>
+            typeof l === "string" ? l : l.name ?? ""
+          )
+          : [],
+        assignee: d.assignee?.login ?? null,
+        createdAt: d.created_at,
+        htmlUrl: d.html_url,
+      }));
+  }
+
+  async listPRs(
+    owner: string,
+    repo: string,
+    state: "open" | "closed" | "all" = "open",
+  ): Promise<GitHubPR[]> {
+    // deno-lint-ignore no-explicit-any
+    const data = await this.ghGet(
+      `/repos/${owner}/${repo}/pulls?state=${state}&per_page=100&sort=created&direction=desc`,
+    ) as any[];
+
+    return (data ?? []).map((d) => ({
+      number: d.number,
+      title: d.title,
+      state: d.state === "closed" ? "closed" as const : "open" as const,
+      merged: d.merged_at !== null,
+      assignee: d.assignee?.login ?? null,
+      headBranch: d.head?.ref ?? "",
+      createdAt: d.created_at,
+      reviewDecision: null,
+      htmlUrl: d.html_url,
+    }));
+  }
+
+  async mergePR(
+    owner: string,
+    repo: string,
+    number: number,
+    mergeMethod: "merge" | "squash" | "rebase" = "squash",
+  ): Promise<GitHubMergeResult> {
+    // deno-lint-ignore no-explicit-any
+    const res = await fetch(
+      `${GITHUB_API}/repos/${owner}/${repo}/pulls/${number}/merge`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+          Accept: "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ merge_method: mergeMethod }),
+      },
+    );
+    if (!res.ok) {
+      const text = await res.text().catch(() => res.statusText);
+      throw new Error(`GitHub API error ${res.status}: ${text}`);
+    }
+    // deno-lint-ignore no-explicit-any
+    const data = await res.json() as any;
+    return {
+      sha: data.sha ?? "",
+      merged: data.merged === true,
+      message: data.message ?? "",
+    };
   }
 }

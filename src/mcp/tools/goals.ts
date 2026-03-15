@@ -84,11 +84,23 @@ export function registerGoalTools(server: McpServer, pm: ProjectManager): void {
           "Goal type (default: project)",
         ),
         kpi: z.string().optional().describe("Key performance indicator"),
+        kpiMetric: z.string().optional().describe(
+          "KPI snapshot metric to track (e.g. mrr, active_users, growth_rate)",
+        ),
+        kpiTarget: z.number().optional().describe(
+          "Target value for the KPI metric",
+        ),
         startDate: z.string().optional().describe("Start date (YYYY-MM-DD)"),
         endDate: z.string().optional().describe("End date (YYYY-MM-DD)"),
+        linkedPortfolioItems: z.array(z.string()).optional().describe(
+          "Portfolio item IDs this goal is linked to",
+        ),
       },
     },
-    async ({ title, description, status, type, kpi, startDate, endDate }) => {
+    async ({
+      title, description, status, type, kpi, kpiMetric, kpiTarget,
+      startDate, endDate, linkedPortfolioItems,
+    }) => {
       const id = await parser.addGoal({
         title,
         description: description ?? "",
@@ -97,6 +109,9 @@ export function registerGoalTools(server: McpServer, pm: ProjectManager): void {
         kpi: kpi ?? "",
         startDate: startDate ?? "",
         endDate: endDate ?? "",
+        ...(kpiMetric && { kpiMetric }),
+        ...(kpiTarget !== undefined && { kpiTarget }),
+        ...(linkedPortfolioItems?.length && { linkedPortfolioItems }),
       });
       return ok({ id });
     },
@@ -113,12 +128,24 @@ export function registerGoalTools(server: McpServer, pm: ProjectManager): void {
         status: z.enum(STATUS).optional(),
         type: z.enum(["enterprise", "project"]).optional(),
         kpi: z.string().optional(),
+        kpiMetric: z.string().nullable().optional().describe(
+          "KPI snapshot metric to track (null to clear)",
+        ),
+        kpiTarget: z.number().nullable().optional().describe(
+          "Target value for the KPI metric (null to clear)",
+        ),
         startDate: z.string().optional(),
         endDate: z.string().optional(),
+        linkedPortfolioItems: z.array(z.string()).optional().describe(
+          "Portfolio item IDs this goal is linked to",
+        ),
       },
     },
     async (
-      { id, title, description, status, type, kpi, startDate, endDate },
+      {
+        id, title, description, status, type, kpi, kpiMetric, kpiTarget,
+        startDate, endDate, linkedPortfolioItems,
+      },
     ) => {
       const success = await parser.updateGoal(id, {
         ...(title !== undefined && { title }),
@@ -126,8 +153,15 @@ export function registerGoalTools(server: McpServer, pm: ProjectManager): void {
         ...(status !== undefined && { status }),
         ...(type !== undefined && { type }),
         ...(kpi !== undefined && { kpi }),
+        ...(kpiMetric !== undefined && {
+          kpiMetric: kpiMetric ?? undefined,
+        }),
+        ...(kpiTarget !== undefined && {
+          kpiTarget: kpiTarget ?? undefined,
+        }),
         ...(startDate !== undefined && { startDate }),
         ...(endDate !== undefined && { endDate }),
+        ...(linkedPortfolioItems !== undefined && { linkedPortfolioItems }),
       });
       if (!success) return err(`Goal '${id}' not found`);
       return ok({ success: true });

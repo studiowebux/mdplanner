@@ -18,6 +18,9 @@ export interface GitHubIssue {
   number: number;
   title: string;
   state: "open" | "closed";
+  labels: string[];
+  assignee: string | null;
+  createdAt: string;
   htmlUrl: string;
 }
 
@@ -49,7 +52,17 @@ export interface GitHubPR {
   /** "open" | "closed" — use merged to distinguish closed+merged */
   state: "open" | "closed";
   merged: boolean;
+  assignee: string | null;
+  headBranch: string;
+  createdAt: string;
+  reviewDecision: string | null;
   htmlUrl: string;
+}
+
+export interface GitHubMergeResult {
+  sha: string;
+  merged: boolean;
+  message: string;
 }
 
 export interface GitHubWorkflowRun {
@@ -132,4 +145,27 @@ export interface GitHubProvider {
     number: number,
     state: "open" | "closed",
   ): Promise<GitHubIssue>;
+
+  /** List issues for a repository, optionally filtered by state and assignee. */
+  listIssues(
+    owner: string,
+    repo: string,
+    state?: "open" | "closed" | "all",
+    assignee?: string,
+  ): Promise<GitHubIssue[]>;
+
+  /** List pull requests for a repository, optionally filtered by state. */
+  listPRs(
+    owner: string,
+    repo: string,
+    state?: "open" | "closed" | "all",
+  ): Promise<GitHubPR[]>;
+
+  /** Merge a pull request. */
+  mergePR(
+    owner: string,
+    repo: string,
+    number: number,
+    mergeMethod?: "merge" | "squash" | "rebase",
+  ): Promise<GitHubMergeResult>;
 }

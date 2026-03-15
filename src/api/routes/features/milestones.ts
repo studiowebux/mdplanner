@@ -78,16 +78,16 @@ const UpdateMilestoneSchema = z
     name: z.string().min(1).optional().openapi({
       description: "Milestone name",
     }),
-    target: z.string().optional().openapi({
+    target: z.string().nullable().optional().openapi({
       description: "Target date (YYYY-MM-DD)",
     }),
     status: z.enum(["open", "completed"]).optional().openapi({
       description: "Milestone status",
     }),
-    description: z.string().optional().openapi({
+    description: z.string().nullable().optional().openapi({
       description: "Optional description",
     }),
-    project: z.string().optional().openapi({
+    project: z.string().nullable().optional().openapi({
       description: "Project filter scope",
     }),
   })
@@ -422,7 +422,12 @@ milestonesRouter.openapi(updateRoute, async (c) => {
   if (index === -1) return c.json({ error: "Not found" }, 404);
 
   const existing = milestones[index];
-  const merged = { ...existing, ...body };
+  // Coerce null values to undefined so they clear the field without violating the type
+  const cleaned: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(body)) {
+    if (v !== undefined) cleaned[k] = v === null ? undefined : v;
+  }
+  const merged = { ...existing, ...cleaned };
 
   // Auto-manage completedAt: set when transitioning to completed, clear otherwise
   if (body.status === "completed" && !existing.completedAt) {
