@@ -43,9 +43,13 @@ export function registerSearchTools(
         limit: z.number().int().min(1).max(100).optional().describe(
           "Maximum number of results (default: 20)",
         ),
+        project: z.string().optional().describe(
+          "Filter results to entities belonging to this project name (case-insensitive). " +
+            "Entities without a project field are excluded when this is set.",
+        ),
       },
     },
-    ({ query, types, limit }) => {
+    ({ query, types, limit, project }) => {
       const cache = pm.getCache();
       if (!cache) {
         return err(
@@ -55,6 +59,7 @@ export function registerSearchTools(
       const results = cache.search.search(query, {
         limit: limit ?? 20,
         ...(types?.length && { types: types as SearchResultType[] }),
+        ...(project && { project }),
       });
       return ok(results);
     },

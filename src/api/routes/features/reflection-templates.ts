@@ -43,7 +43,7 @@ const CreateReflectionTemplateSchema = z
   .object({
     title: z.string().openapi({ description: "Template title" }),
     description: z.string().optional(),
-    tags: z.array(z.string()).optional(),
+    tags: z.array(z.string()).nullish(),
     questions: z.array(z.string()).optional(),
   })
   .openapi("CreateReflectionTemplate");
@@ -192,7 +192,7 @@ reflectionTemplatesRouter.openapi(createReflectionTemplateRoute, async (c) => {
   const template = await parser.addReflectionTemplate({
     title: body.title,
     description: body.description,
-    tags: body.tags,
+    tags: body.tags ?? undefined,
     questions: body.questions || [],
   });
   await cacheWriteThrough(c, "reflection_templates");

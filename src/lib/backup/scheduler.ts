@@ -11,6 +11,7 @@ import { join } from "@std/path";
 import { ensureDir } from "@std/fs";
 import { packProject } from "./archive.ts";
 import { encryptPayload } from "./crypto.ts";
+import { log } from "../logger.ts";
 
 export interface SchedulerOptions {
   /** Absolute path to the project being backed up. */
@@ -93,7 +94,7 @@ export class BackupScheduler {
    */
   start(): void {
     const intervalMs = this.options.intervalHours * 60 * 60 * 1000;
-    console.log(
+    log.info(
       `[backup] scheduler started — every ${this.options.intervalHours}h → ${this.options.backupDir}`,
     );
 
@@ -101,7 +102,7 @@ export class BackupScheduler {
       const delayMs = ageMs >= intervalMs ? 0 : intervalMs - ageMs;
 
       if (delayMs === 0) {
-        console.log(
+        log.info(
           `[backup] overdue (last backup ${
             Math.round(ageMs / 3_600_000)
           }h ago) — running immediately`,
@@ -109,7 +110,7 @@ export class BackupScheduler {
       } else {
         const nextTime = new Date(Date.now() + delayMs).toISOString();
         this.status.nextBackupTime = nextTime;
-        console.log(
+        log.info(
           `[backup] next backup in ${
             Math.round(delayMs / 60_000)
           }min (${nextTime})`,
@@ -163,12 +164,12 @@ export class BackupScheduler {
       this.status.nextBackupTime = new Date(
         now.getTime() + this.options.intervalHours * 60 * 60 * 1000,
       ).toISOString();
-      console.log(`[backup] wrote ${filename} (${payload.length} bytes)`);
+      log.info(`[backup] wrote ${filename} (${payload.length} bytes)`);
       return { file: filename, size: payload.length };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       this.status.lastError = msg;
-      console.error(`[backup] failed to write ${filename}: ${msg}`);
+      log.error(`[backup] failed to write ${filename}: ${msg}`);
       throw err;
     }
   }

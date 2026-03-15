@@ -1,5 +1,5 @@
 // Brainstorm Sidenav Module
-// Slide-in panel for brainstorm creation and editing with question management
+// Slide-in panel for brainstorm viewing, creation, and editing with question management
 
 import { Sidenav } from "../ui/sidenav.js";
 import { BrainstormsAPI } from "../api.js";
@@ -22,6 +22,7 @@ export class BrainstormSidenavModule {
     this.tm = taskManager;
     this.editingId = null;
     this.current = null;
+    this.isViewMode = false;
   }
 
   bindEvents() {
@@ -45,6 +46,10 @@ export class BrainstormSidenavModule {
       "click",
       () => this.addQuestion(),
     );
+    document.getElementById("brainstormSidenavEdit")?.addEventListener(
+      "click",
+      () => this._setEditMode(),
+    );
   }
 
   openNew() {
@@ -61,10 +66,28 @@ export class BrainstormSidenavModule {
     document.getElementById("brainstormSidenavHeader").textContent =
       "New Brainstorm";
     document.getElementById("brainstormSidenavDelete").classList.add("hidden");
+    this._setEditMode();
     this.fillForm();
 
     Sidenav.open("brainstormSidenav");
     document.getElementById("brainstormSidenavTitle")?.focus();
+  }
+
+  openView(id) {
+    const brainstorm = (this.tm.brainstorms || []).find((b) => b.id === id);
+    if (!brainstorm) return;
+
+    this.editingId = id;
+    this.current = JSON.parse(JSON.stringify(brainstorm));
+
+    document.getElementById("brainstormSidenavHeader").textContent =
+      brainstorm.title;
+    document.getElementById("brainstormSidenavDelete").classList.remove(
+      "hidden",
+    );
+    this._setViewMode();
+
+    Sidenav.open("brainstormSidenav");
   }
 
   openEdit(id) {
@@ -79,15 +102,85 @@ export class BrainstormSidenavModule {
     document.getElementById("brainstormSidenavDelete").classList.remove(
       "hidden",
     );
+    this._setEditMode();
     this.fillForm();
 
     Sidenav.open("brainstormSidenav");
+  }
+
+  _setViewMode() {
+    this.isViewMode = true;
+    document.getElementById("brainstormSidenavViewBody")?.classList.remove(
+      "hidden",
+    );
+    document.getElementById("brainstormSidenavEditBody")?.classList.add(
+      "hidden",
+    );
+    document.getElementById("brainstormSidenavEdit")?.classList.remove(
+      "hidden",
+    );
+    document.getElementById("brainstormSidenavSave")?.classList.add("hidden");
+    document.getElementById("brainstormSidenavCancel")?.classList.add("hidden");
+    this._renderViewBody();
+  }
+
+  _setEditMode() {
+    this.isViewMode = false;
+    document.getElementById("brainstormSidenavViewBody")?.classList.add(
+      "hidden",
+    );
+    document.getElementById("brainstormSidenavEditBody")?.classList.remove(
+      "hidden",
+    );
+    document.getElementById("brainstormSidenavEdit")?.classList.add("hidden");
+    document.getElementById("brainstormSidenavSave")?.classList.remove(
+      "hidden",
+    );
+    document.getElementById("brainstormSidenavCancel")?.classList.remove(
+      "hidden",
+    );
+    if (this.editingId) {
+      document.getElementById("brainstormSidenavHeader").textContent =
+        "Edit Brainstorm";
+      this.fillForm();
+    }
+  }
+
+  _renderViewBody() {
+    const viewBody = document.getElementById("brainstormSidenavViewBody");
+    if (!viewBody || !this.current) return;
+
+    const tags = (this.current.tags || [])
+      .map(
+        (t) =>
+          `<span class="inline-block px-2 py-0.5 text-xs bg-active text-secondary rounded">${escapeHtml(t)}</span>`,
+      )
+      .join("");
+
+    const questions = (this.current.questions || [])
+      .map(
+        (q) => `
+      <div class="sidenav-section">
+        <h4 class="font-medium text-primary text-sm mb-1">${escapeHtml(q.question)}</h4>
+        <p class="text-sm text-secondary whitespace-pre-wrap">${q.answer ? escapeHtml(q.answer) : '<span class="text-muted">No answer yet</span>'}</p>
+      </div>`,
+      )
+      .join("");
+
+    viewBody.innerHTML = `
+      ${tags ? `<div class="sidenav-section"><div class="flex flex-wrap gap-1">${tags}</div></div>` : ""}
+      <div class="sidenav-section">
+        <p class="text-xs text-muted">Created: ${this.current.created ? this.current.created.slice(0, 10) : "Unknown"}</p>
+      </div>
+      ${questions || '<div class="sidenav-section"><p class="text-sm text-muted">No questions yet.</p></div>'}
+    `;
   }
 
   close() {
     Sidenav.close("brainstormSidenav");
     this.editingId = null;
     this.current = null;
+    this.isViewMode = false;
   }
 
   fillForm() {
@@ -115,21 +208,21 @@ export class BrainstormSidenavModule {
     container.innerHTML = questions
       .map(
         (q, i) => `
-      <div class="brainstorm-question-item" data-index="${i}">
-        <div class="brainstorm-question-header">
+      <div class="sidenav-question-item" data-index="${i}">
+        <div class="sidenav-question-header">
           <input type="text"
-                 class="brainstorm-question-input"
+                 class="sidenav-question-input"
                  value="${escapeHtml(q.question)}"
                  placeholder="Question..."
                  data-field="question"
                  data-index="${i}">
-          <div class="brainstorm-question-actions">
-            ${i > 0 ? `<button type="button" class="brainstorm-question-move btn-ghost" data-dir="up" data-index="${i}" title="Move up">&#9650;</button>` : ""}
-            ${i < questions.length - 1 ? `<button type="button" class="brainstorm-question-move btn-ghost" data-dir="down" data-index="${i}" title="Move down">&#9660;</button>` : ""}
-            <button type="button" class="brainstorm-question-remove btn-danger-ghost" data-index="${i}" title="Remove">&#10005;</button>
+          <div class="sidenav-question-actions">
+            ${i > 0 ? `<button type="button" class="sidenav-question-move btn-ghost" data-dir="up" data-index="${i}" title="Move up">&#9650;</button>` : ""}
+            ${i < questions.length - 1 ? `<button type="button" class="sidenav-question-move btn-ghost" data-dir="down" data-index="${i}" title="Move down">&#9660;</button>` : ""}
+            <button type="button" class="sidenav-question-remove btn-danger-ghost" data-index="${i}" title="Remove">&#10005;</button>
           </div>
         </div>
-        <textarea class="brainstorm-answer-input"
+        <textarea class="sidenav-answer-input"
                   placeholder="Your thoughts..."
                   data-field="answer"
                   data-index="${i}"
@@ -139,7 +232,7 @@ export class BrainstormSidenavModule {
       .join("");
 
     // Bind question input changes
-    container.querySelectorAll(".brainstorm-question-input").forEach((input) => {
+    container.querySelectorAll(".sidenav-question-input").forEach((input) => {
       input.addEventListener("input", (e) => {
         const idx = parseInt(e.target.dataset.index, 10);
         this.current.questions[idx].question = e.target.value;
@@ -147,7 +240,7 @@ export class BrainstormSidenavModule {
     });
 
     // Bind answer textarea changes
-    container.querySelectorAll(".brainstorm-answer-input").forEach((textarea) => {
+    container.querySelectorAll(".sidenav-answer-input").forEach((textarea) => {
       textarea.addEventListener("input", (e) => {
         const idx = parseInt(e.target.dataset.index, 10);
         this.current.questions[idx].answer = e.target.value;
@@ -155,7 +248,7 @@ export class BrainstormSidenavModule {
     });
 
     // Bind move buttons
-    container.querySelectorAll(".brainstorm-question-move").forEach((btn) => {
+    container.querySelectorAll(".sidenav-question-move").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         const idx = parseInt(e.currentTarget.dataset.index, 10);
         const dir = e.currentTarget.dataset.dir;
@@ -164,7 +257,7 @@ export class BrainstormSidenavModule {
     });
 
     // Bind remove buttons
-    container.querySelectorAll(".brainstorm-question-remove").forEach((btn) => {
+    container.querySelectorAll(".sidenav-question-remove").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         const idx = parseInt(e.currentTarget.dataset.index, 10);
         this.removeQuestion(idx);
@@ -177,7 +270,7 @@ export class BrainstormSidenavModule {
     this.current.questions.push({ question: "", answer: "" });
     this.renderQuestions();
     // Focus the new question input
-    const inputs = document.querySelectorAll(".brainstorm-question-input");
+    const inputs = document.querySelectorAll(".sidenav-question-input");
     if (inputs.length > 0) inputs[inputs.length - 1].focus();
   }
 
@@ -262,7 +355,7 @@ export class BrainstormSidenavModule {
 
       await this.tm.brainstormModule.load();
     } catch (error) {
-      console.error("Error saving brainstorm:", error);
+      console.error("BrainstormSidenavModule.save failed", { id: this.editingId, error: error.message });
       this.showSaveStatus("Error");
       showToast("Error saving brainstorm", "error");
     }
@@ -289,7 +382,7 @@ export class BrainstormSidenavModule {
       await this.tm.brainstormModule.load();
       this.close();
     } catch (error) {
-      console.error("Error deleting brainstorm:", error);
+      console.error("BrainstormSidenavModule.handleDelete failed", { id: this.editingId, error: error.message });
       showToast("Error deleting brainstorm", "error");
     }
   }

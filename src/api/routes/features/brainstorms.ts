@@ -47,7 +47,7 @@ const BrainstormSchema = z
 const CreateBrainstormSchema = z
   .object({
     title: z.string().openapi({ description: "Brainstorm title" }),
-    tags: z.array(z.string()).optional(),
+    tags: z.array(z.string()).nullish(),
     linkedProjects: z.array(z.string()).optional(),
     linkedTasks: z.array(z.string()).optional(),
     linkedGoals: z.array(z.string()).optional(),
@@ -193,7 +193,7 @@ brainstormsRouter.openapi(createBrainstormRoute, async (c) => {
   const body = c.req.valid("json");
   const brainstorm = await parser.addBrainstorm({
     title: body.title,
-    tags: body.tags,
+    tags: body.tags ?? undefined,
     linkedProjects: body.linkedProjects,
     linkedTasks: body.linkedTasks,
     linkedGoals: body.linkedGoals,

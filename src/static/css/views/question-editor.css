@@ -1,0 +1,88 @@
+/* Shared sidenav question editor — used by brainstorm + reflection modules */
+
+.sidenav-question-item {
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  background: var(--color-bg-primary);
+}
+
+.sidenav-question-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.sidenav-question-input {
+  flex: 1;
+  font-weight: 500;
+  font-size: 0.875rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-border-default);
+  padding: 4px 0;
+  color: var(--color-text-primary);
+  outline: none;
+}
+
+.sidenav-question-input:focus {
+  outline: none;
+  border-bottom-color: var(--color-border-focus);
+}
+
+.sidenav-question-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.sidenav-question-actions button {
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.sidenav-answer-input {
+  width: 100%;
+  font-size: 0.875rem;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: 6px;
+  padding: 8px;
+  color: var(--color-text-secondary);
+  resize: vertical;
+  min-height: 60px;
+  outline: none;
+}
+
+.sidenav-answer-input:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.2);
+}
+
+.sidenav-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.sidenav-filter-bar input[type="text"] {
+  flex: 1;
+  max-width: 320px;
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: 6px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.sidenav-filter-bar input[type="text"]:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+}

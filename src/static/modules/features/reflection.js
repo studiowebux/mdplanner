@@ -1,5 +1,6 @@
 import { ReflectionsAPI, ReflectionTemplatesAPI } from "../api.js";
 import { showLoading, hideLoading } from "../ui/loading.js";
+import { filterBySearchQuery } from "../utils.js";
 
 /**
  * ReflectionModule - Handles reflection list display with tabs for
@@ -23,37 +24,29 @@ export class ReflectionModule {
       this.taskManager.reflectionTemplates = templates;
       this.renderView();
     } catch (error) {
-      console.error("Error loading reflections:", error);
+      console.error("ReflectionModule.load failed", { error: error.message });
     } finally {
       hideLoading("reflectionView");
     }
   }
 
   _getVisibleReflections() {
-    return (this.taskManager.reflections || []).filter((r) => {
-      if (this.searchQuery) {
-        const q = this.searchQuery.toLowerCase();
-        const inTitle = (r.title || "").toLowerCase().includes(q);
-        const inQuestions = (r.questions || []).some(
-          (qn) =>
-            qn.question.toLowerCase().includes(q) ||
-            (qn.answer || "").toLowerCase().includes(q),
-        );
-        if (!inTitle && !inQuestions) return false;
-      }
-      return true;
-    });
+    return filterBySearchQuery(
+      this.taskManager.reflections || [],
+      this.searchQuery,
+      (r) => [
+        r.title || "",
+        ...(r.questions || []).flatMap((qn) => [qn.question, qn.answer || ""]),
+      ],
+    );
   }
 
   _getVisibleTemplates() {
-    return (this.taskManager.reflectionTemplates || []).filter((t) => {
-      if (this.searchQuery) {
-        const q = this.searchQuery.toLowerCase();
-        return (t.title || "").toLowerCase().includes(q) ||
-          (t.description || "").toLowerCase().includes(q);
-      }
-      return true;
-    });
+    return filterBySearchQuery(
+      this.taskManager.reflectionTemplates || [],
+      this.searchQuery,
+      (t) => [t.title || "", t.description || ""],
+    );
   }
 
   renderView() {
@@ -136,7 +129,7 @@ export class ReflectionModule {
           : null;
 
         return `
-      <div class="bg-secondary rounded-lg p-4 border border-default reflection-card">
+      <div class="bg-secondary rounded-lg p-4 border border-default reflection-card cursor-pointer" onclick="taskManager.reflectionSidenavModule.openView('${r.id}')">
         <div class="flex justify-between items-start mb-2">
           <h3 class="font-medium text-primary">${r.title}</h3>
           <span class="px-2 py-1 text-xs rounded bg-info-bg text-info-text">${answeredCount}/${totalCount}</span>
@@ -155,8 +148,8 @@ export class ReflectionModule {
           ${totalCount > 3 ? `<p class="text-xs text-muted">+${totalCount - 3} more</p>` : ""}
         </div>
         <div class="flex justify-end gap-1 mt-3">
-          <button type="button" onclick="taskManager.reflectionSidenavModule.openEdit('${r.id}')" class="btn-ghost">Edit</button>
-          <button type="button" onclick="taskManager.deleteReflection('${r.id}')" class="btn-danger-ghost">Delete</button>
+          <button type="button" onclick="event.stopPropagation(); taskManager.reflectionSidenavModule.openEdit('${r.id}')" class="btn-ghost">Edit</button>
+          <button type="button" onclick="event.stopPropagation(); taskManager.deleteReflection('${r.id}')" class="btn-danger-ghost">Delete</button>
         </div>
       </div>`;
       })
@@ -217,7 +210,7 @@ export class ReflectionModule {
         </div>
         <div class="flex justify-end gap-1 mt-3">
           <button type="button" onclick="taskManager.reflectionSidenavModule.openNewFromTemplate('${t.id}')" class="btn-ghost">Use</button>
-          <button type="button" onclick="taskManager.reflectionSidenavModule.openEditTemplate('${t.id}')" class="btn-ghost">Edit</button>
+          <button type="button" onclick="taskManager.reflectionTemplateSidenavModule.openEdit('${t.id}')" class="btn-ghost">Edit</button>
           <button type="button" onclick="taskManager.deleteReflectionTemplate('${t.id}')" class="btn-danger-ghost">Delete</button>
         </div>
       </div>`;
@@ -246,7 +239,7 @@ export class ReflectionModule {
       ).filter((r) => r.id !== id);
       this.renderView();
     } catch (error) {
-      console.error("Error deleting reflection:", error);
+      console.error("ReflectionModule.delete failed", { id, error: error.message });
     }
   }
 
@@ -264,7 +257,7 @@ export class ReflectionModule {
       ).filter((t) => t.id !== id);
       this.renderView();
     } catch (error) {
-      console.error("Error deleting reflection template:", error);
+      console.error("ReflectionModule.deleteTemplate failed", { id, error: error.message });
     }
   }
 
@@ -287,7 +280,7 @@ export class ReflectionModule {
     document
       .getElementById("addReflectionTemplateBtn")
       ?.addEventListener("click", () =>
-        this.taskManager.reflectionSidenavModule.openNewTemplate(),
+        this.taskManager.reflectionTemplateSidenavModule.openNew(),
       );
 
     document

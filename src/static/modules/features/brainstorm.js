@@ -1,5 +1,6 @@
 import { BrainstormsAPI } from "../api.js";
 import { showLoading, hideLoading } from "../ui/loading.js";
+import { filterBySearchQuery } from "../utils.js";
 
 /**
  * BrainstormModule - Handles brainstorm list display and filtering
@@ -16,26 +17,21 @@ export class BrainstormModule {
       this.taskManager.brainstorms = await BrainstormsAPI.fetchAll();
       this.renderView();
     } catch (error) {
-      console.error("Error loading brainstorms:", error);
+      console.error("BrainstormModule.load failed", { error: error.message });
     } finally {
       hideLoading("brainstormView");
     }
   }
 
   _getVisible() {
-    return (this.taskManager.brainstorms || []).filter((b) => {
-      if (this.searchQuery) {
-        const q = this.searchQuery.toLowerCase();
-        const inTitle = (b.title || "").toLowerCase().includes(q);
-        const inQuestions = (b.questions || []).some(
-          (qn) =>
-            qn.question.toLowerCase().includes(q) ||
-            (qn.answer || "").toLowerCase().includes(q),
-        );
-        if (!inTitle && !inQuestions) return false;
-      }
-      return true;
-    });
+    return filterBySearchQuery(
+      this.taskManager.brainstorms || [],
+      this.searchQuery,
+      (b) => [
+        b.title || "",
+        ...(b.questions || []).flatMap((qn) => [qn.question, qn.answer || ""]),
+      ],
+    );
   }
 
   renderView() {
@@ -83,7 +79,7 @@ export class BrainstormModule {
           .join("");
 
         return `
-      <div class="bg-secondary rounded-lg p-4 border border-default brainstorm-card">
+      <div class="bg-secondary rounded-lg p-4 border border-default brainstorm-card cursor-pointer" onclick="taskManager.brainstormSidenavModule.openView('${b.id}')">
         <div class="flex justify-between items-start mb-2">
           <h3 class="font-medium text-primary">${b.title}</h3>
           <span class="px-2 py-1 text-xs rounded bg-info-bg text-info-text">${answeredCount}/${totalCount}</span>
@@ -101,8 +97,8 @@ export class BrainstormModule {
           ${totalCount > 3 ? `<p class="text-xs text-muted">+${totalCount - 3} more</p>` : ""}
         </div>
         <div class="flex justify-end gap-1 mt-3">
-          <button type="button" onclick="taskManager.brainstormSidenavModule.openEdit('${b.id}')" class="btn-ghost">Edit</button>
-          <button type="button" onclick="taskManager.deleteBrainstorm('${b.id}')" class="btn-danger-ghost">Delete</button>
+          <button type="button" onclick="event.stopPropagation(); taskManager.brainstormSidenavModule.openEdit('${b.id}')" class="btn-ghost">Edit</button>
+          <button type="button" onclick="event.stopPropagation(); taskManager.deleteBrainstorm('${b.id}')" class="btn-danger-ghost">Delete</button>
         </div>
       </div>`;
       })
@@ -123,7 +119,7 @@ export class BrainstormModule {
       ).filter((b) => b.id !== id);
       this.renderView();
     } catch (error) {
-      console.error("Error deleting brainstorm:", error);
+      console.error("BrainstormModule.delete failed", { id, error: error.message });
     }
   }
 

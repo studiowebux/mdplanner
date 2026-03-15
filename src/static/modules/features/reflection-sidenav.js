@@ -1,8 +1,8 @@
 // Reflection Sidenav Module
-// Slide-in panel for reflection and template creation/editing
+// Slide-in panel for reflection viewing, creation, and editing
 
 import { Sidenav } from "../ui/sidenav.js";
-import { ReflectionsAPI, ReflectionTemplatesAPI } from "../api.js";
+import { ReflectionsAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { escapeHtml } from "../utils.js";
 import { showConfirm } from "../ui/confirm.js";
@@ -18,16 +18,12 @@ const DEFAULT_QUESTIONS = [
 export class ReflectionSidenavModule {
   constructor(taskManager) {
     this.tm = taskManager;
-    // Reflection sidenav state
     this.editingId = null;
     this.current = null;
-    // Template sidenav state
-    this.editingTemplateId = null;
-    this.currentTemplate = null;
+    this.isViewMode = false;
   }
 
   bindEvents() {
-    // Reflection sidenav
     document.getElementById("reflectionSidenavClose")?.addEventListener(
       "click",
       () => this.close(),
@@ -48,30 +44,11 @@ export class ReflectionSidenavModule {
       "click",
       () => this.addQuestion(),
     );
-
-    // Template sidenav
-    document.getElementById("reflectionTemplateSidenavClose")?.addEventListener(
+    document.getElementById("reflectionSidenavEdit")?.addEventListener(
       "click",
-      () => this.closeTemplate(),
+      () => this._setEditMode(),
     );
-    document.getElementById(
-      "reflectionTemplateSidenavCancel",
-    )?.addEventListener("click", () => this.closeTemplate());
-    document.getElementById(
-      "reflectionTemplateSidenavDelete",
-    )?.addEventListener("click", () => this.handleDeleteTemplate());
-    document.getElementById("reflectionTemplateSidenavSave")?.addEventListener(
-      "click",
-      () => this.saveTemplate(),
-    );
-    document.getElementById(
-      "reflectionTemplateSidenavAddQuestion",
-    )?.addEventListener("click", () => this.addTemplateQuestion());
   }
-
-  // ============================================================
-  // Reflection sidenav
-  // ============================================================
 
   openNew() {
     this.editingId = null;
@@ -86,6 +63,7 @@ export class ReflectionSidenavModule {
     document.getElementById("reflectionSidenavHeader").textContent =
       "New Reflection";
     document.getElementById("reflectionSidenavDelete").classList.add("hidden");
+    this._setEditMode();
     this._fillForm();
     Sidenav.open("reflectionSidenav");
     document.getElementById("reflectionSidenavTitle")?.focus();
@@ -109,9 +87,27 @@ export class ReflectionSidenavModule {
     document.getElementById("reflectionSidenavHeader").textContent =
       "New Reflection";
     document.getElementById("reflectionSidenavDelete").classList.add("hidden");
+    this._setEditMode();
     this._fillForm();
     Sidenav.open("reflectionSidenav");
     document.getElementById("reflectionSidenavTitle")?.focus();
+  }
+
+  openView(id) {
+    const reflection = (this.tm.reflections || []).find((r) => r.id === id);
+    if (!reflection) return;
+
+    this.editingId = id;
+    this.current = JSON.parse(JSON.stringify(reflection));
+
+    document.getElementById("reflectionSidenavHeader").textContent =
+      reflection.title;
+    document
+      .getElementById("reflectionSidenavDelete")
+      .classList.remove("hidden");
+    this._setViewMode();
+
+    Sidenav.open("reflectionSidenav");
   }
 
   openEdit(id) {
@@ -127,14 +123,97 @@ export class ReflectionSidenavModule {
     document
       .getElementById("reflectionSidenavDelete")
       .classList.remove("hidden");
+    this._setEditMode();
     this._fillForm();
     Sidenav.open("reflectionSidenav");
+  }
+
+  _setViewMode() {
+    this.isViewMode = true;
+    document.getElementById("reflectionSidenavViewBody")?.classList.remove(
+      "hidden",
+    );
+    document.getElementById("reflectionSidenavEditBody")?.classList.add(
+      "hidden",
+    );
+    document.getElementById("reflectionSidenavEdit")?.classList.remove(
+      "hidden",
+    );
+    document.getElementById("reflectionSidenavSave")?.classList.add("hidden");
+    document.getElementById("reflectionSidenavCancel")?.classList.add("hidden");
+    this._renderViewBody();
+  }
+
+  _setEditMode() {
+    this.isViewMode = false;
+    document.getElementById("reflectionSidenavViewBody")?.classList.add(
+      "hidden",
+    );
+    document.getElementById("reflectionSidenavEditBody")?.classList.remove(
+      "hidden",
+    );
+    document.getElementById("reflectionSidenavEdit")?.classList.add("hidden");
+    document.getElementById("reflectionSidenavSave")?.classList.remove(
+      "hidden",
+    );
+    document.getElementById("reflectionSidenavCancel")?.classList.remove(
+      "hidden",
+    );
+    if (this.editingId) {
+      document.getElementById("reflectionSidenavHeader").textContent =
+        "Edit Reflection";
+      this._renderTemplatePicker();
+      this._fillForm();
+    }
+  }
+
+  _renderViewBody() {
+    const viewBody = document.getElementById("reflectionSidenavViewBody");
+    if (!viewBody || !this.current) return;
+
+    const tags = (this.current.tags || [])
+      .map(
+        (t) =>
+          `<span class="inline-block px-2 py-0.5 text-xs bg-active text-secondary rounded">${escapeHtml(t)}</span>`,
+      )
+      .join("");
+
+    const templateName = this.current.templateId
+      ? this._templateName(this.current.templateId)
+      : null;
+
+    const questions = (this.current.questions || [])
+      .map(
+        (q) => `
+      <div class="sidenav-section">
+        <h4 class="font-medium text-primary text-sm mb-1">${escapeHtml(q.question)}</h4>
+        <p class="text-sm text-secondary whitespace-pre-wrap">${q.answer ? escapeHtml(q.answer) : '<span class="text-muted">No answer yet</span>'}</p>
+      </div>`,
+      )
+      .join("");
+
+    viewBody.innerHTML = `
+      ${tags ? `<div class="sidenav-section"><div class="flex flex-wrap gap-1">${tags}</div></div>` : ""}
+      <div class="sidenav-section">
+        ${templateName ? `<p class="text-xs text-muted mb-1">Template: ${escapeHtml(templateName)}</p>` : ""}
+        <p class="text-xs text-muted">Created: ${this.current.created ? this.current.created.slice(0, 10) : "Unknown"}</p>
+      </div>
+      ${questions || '<div class="sidenav-section"><p class="text-sm text-muted">No questions yet.</p></div>'}
+    `;
+  }
+
+  _templateName(templateId) {
+    const template = (this.tm.reflectionTemplates || []).find(
+      (t) => t.id === templateId,
+    );
+    return template ? template.title : null;
   }
 
   close() {
     Sidenav.close("reflectionSidenav");
     this.editingId = null;
     this.current = null;
+    this.isViewMode = false;
   }
 
   _fillForm() {
@@ -196,21 +275,21 @@ export class ReflectionSidenavModule {
     container.innerHTML = questions
       .map(
         (q, i) => `
-      <div class="reflection-question-item" data-index="${i}">
-        <div class="reflection-question-header">
+      <div class="sidenav-question-item" data-index="${i}">
+        <div class="sidenav-question-header">
           <input type="text"
-                 class="reflection-question-input"
+                 class="sidenav-question-input"
                  value="${escapeHtml(q.question)}"
                  placeholder="Question..."
                  data-field="question"
                  data-index="${i}">
-          <div class="reflection-question-actions">
-            ${i > 0 ? `<button type="button" class="reflection-question-move btn-ghost" data-dir="up" data-index="${i}" title="Move up">&#9650;</button>` : ""}
-            ${i < questions.length - 1 ? `<button type="button" class="reflection-question-move btn-ghost" data-dir="down" data-index="${i}" title="Move down">&#9660;</button>` : ""}
-            <button type="button" class="reflection-question-remove btn-danger-ghost" data-index="${i}" title="Remove">&#10005;</button>
+          <div class="sidenav-question-actions">
+            ${i > 0 ? `<button type="button" class="sidenav-question-move btn-ghost" data-dir="up" data-index="${i}" title="Move up">&#9650;</button>` : ""}
+            ${i < questions.length - 1 ? `<button type="button" class="sidenav-question-move btn-ghost" data-dir="down" data-index="${i}" title="Move down">&#9660;</button>` : ""}
+            <button type="button" class="sidenav-question-remove btn-danger-ghost" data-index="${i}" title="Remove">&#10005;</button>
           </div>
         </div>
-        <textarea class="reflection-answer-input"
+        <textarea class="sidenav-answer-input"
                   placeholder="Your answer..."
                   data-field="answer"
                   data-index="${i}"
@@ -219,21 +298,21 @@ export class ReflectionSidenavModule {
       )
       .join("");
 
-    container.querySelectorAll(".reflection-question-input").forEach((input) => {
+    container.querySelectorAll(".sidenav-question-input").forEach((input) => {
       input.addEventListener("input", (e) => {
         const idx = parseInt(e.target.dataset.index, 10);
         this.current.questions[idx].question = e.target.value;
       });
     });
 
-    container.querySelectorAll(".reflection-answer-input").forEach((textarea) => {
+    container.querySelectorAll(".sidenav-answer-input").forEach((textarea) => {
       textarea.addEventListener("input", (e) => {
         const idx = parseInt(e.target.dataset.index, 10);
         this.current.questions[idx].answer = e.target.value;
       });
     });
 
-    container.querySelectorAll(".reflection-question-move").forEach((btn) => {
+    container.querySelectorAll(".sidenav-question-move").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         const idx = parseInt(e.currentTarget.dataset.index, 10);
         const dir = e.currentTarget.dataset.dir;
@@ -241,7 +320,7 @@ export class ReflectionSidenavModule {
       });
     });
 
-    container.querySelectorAll(".reflection-question-remove").forEach((btn) => {
+    container.querySelectorAll(".sidenav-question-remove").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         const idx = parseInt(e.currentTarget.dataset.index, 10);
         this._removeQuestion(idx);
@@ -253,7 +332,7 @@ export class ReflectionSidenavModule {
     if (!this.current.questions) this.current.questions = [];
     this.current.questions.push({ question: "", answer: "" });
     this._renderQuestions();
-    const inputs = document.querySelectorAll(".reflection-question-input");
+    const inputs = document.querySelectorAll(".sidenav-question-input");
     if (inputs.length > 0) inputs[inputs.length - 1].focus();
   }
 
@@ -337,7 +416,7 @@ export class ReflectionSidenavModule {
 
       await this.tm.reflectionModule.load();
     } catch (error) {
-      console.error("Error saving reflection:", error);
+      console.error("ReflectionSidenavModule.save failed", { id: this.editingId, error: error.message });
       this._showSaveStatus("Error");
       showToast("Error saving reflection", "error");
     }
@@ -364,287 +443,13 @@ export class ReflectionSidenavModule {
       await this.tm.reflectionModule.load();
       this.close();
     } catch (error) {
-      console.error("Error deleting reflection:", error);
+      console.error("ReflectionSidenavModule.handleDelete failed", { id: this.editingId, error: error.message });
       showToast("Error deleting reflection", "error");
     }
   }
 
   _showSaveStatus(text) {
     const statusEl = document.getElementById("reflectionSidenavSaveStatus");
-    if (!statusEl) return;
-
-    statusEl.textContent = text;
-    statusEl.classList.remove(
-      "hidden",
-      "sidenav-status-saved",
-      "sidenav-status-saving",
-      "sidenav-status-error",
-    );
-
-    if (text === "Saved" || text === "Created") {
-      statusEl.classList.add("sidenav-status-saved");
-    } else if (text === "Error" || text === "Title required") {
-      statusEl.classList.add("sidenav-status-error");
-    } else {
-      statusEl.classList.add("sidenav-status-saving");
-    }
-
-    if (text === "Saved" || text === "Created" || text === "Error") {
-      setTimeout(() => statusEl.classList.add("hidden"), 2000);
-    }
-  }
-
-  // ============================================================
-  // Template sidenav
-  // ============================================================
-
-  openNewTemplate() {
-    this.editingTemplateId = null;
-    this.currentTemplate = {
-      title: "",
-      description: "",
-      tags: [],
-      questions: [...DEFAULT_QUESTIONS],
-    };
-
-    document.getElementById("reflectionTemplateSidenavHeader").textContent =
-      "New Template";
-    document
-      .getElementById("reflectionTemplateSidenavDelete")
-      .classList.add("hidden");
-    this._fillTemplateForm();
-    Sidenav.open("reflectionTemplateSidenav");
-    document.getElementById("reflectionTemplateSidenavTitle")?.focus();
-  }
-
-  openEditTemplate(id) {
-    const template = (this.tm.reflectionTemplates || []).find(
-      (t) => t.id === id,
-    );
-    if (!template) return;
-
-    this.editingTemplateId = id;
-    this.currentTemplate = JSON.parse(JSON.stringify(template));
-
-    document.getElementById("reflectionTemplateSidenavHeader").textContent =
-      "Edit Template";
-    document
-      .getElementById("reflectionTemplateSidenavDelete")
-      .classList.remove("hidden");
-    this._fillTemplateForm();
-    Sidenav.open("reflectionTemplateSidenav");
-  }
-
-  closeTemplate() {
-    Sidenav.close("reflectionTemplateSidenav");
-    this.editingTemplateId = null;
-    this.currentTemplate = null;
-  }
-
-  _fillTemplateForm() {
-    document.getElementById("reflectionTemplateSidenavTitle").value =
-      this.currentTemplate.title || "";
-    document.getElementById("reflectionTemplateSidenavDescription").value =
-      this.currentTemplate.description || "";
-    document.getElementById("reflectionTemplateSidenavTags").value =
-      (this.currentTemplate.tags || []).join(", ");
-    this._renderTemplateQuestions();
-  }
-
-  _renderTemplateQuestions() {
-    const container = document.getElementById(
-      "reflectionTemplateSidenavQuestionsContainer",
-    );
-    if (!container) return;
-
-    const questions = this.currentTemplate.questions || [];
-
-    if (questions.length === 0) {
-      container.innerHTML =
-        '<p class="text-sm text-muted py-4 text-center">No questions yet. Add one below.</p>';
-      return;
-    }
-
-    container.innerHTML = questions
-      .map(
-        (q, i) => `
-      <div class="reflection-question-item" data-index="${i}">
-        <div class="reflection-question-header">
-          <input type="text"
-                 class="reflection-template-question-input"
-                 value="${escapeHtml(q)}"
-                 placeholder="Question..."
-                 data-index="${i}">
-          <div class="reflection-question-actions">
-            ${i > 0 ? `<button type="button" class="reflection-template-question-move btn-ghost" data-dir="up" data-index="${i}" title="Move up">&#9650;</button>` : ""}
-            ${i < questions.length - 1 ? `<button type="button" class="reflection-template-question-move btn-ghost" data-dir="down" data-index="${i}" title="Move down">&#9660;</button>` : ""}
-            <button type="button" class="reflection-template-question-remove btn-danger-ghost" data-index="${i}" title="Remove">&#10005;</button>
-          </div>
-        </div>
-      </div>`,
-      )
-      .join("");
-
-    container
-      .querySelectorAll(".reflection-template-question-input")
-      .forEach((input) => {
-        input.addEventListener("input", (e) => {
-          const idx = parseInt(e.target.dataset.index, 10);
-          this.currentTemplate.questions[idx] = e.target.value;
-        });
-      });
-
-    container
-      .querySelectorAll(".reflection-template-question-move")
-      .forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          const idx = parseInt(e.currentTarget.dataset.index, 10);
-          const dir = e.currentTarget.dataset.dir;
-          this._moveTemplateQuestion(idx, dir);
-        });
-      });
-
-    container
-      .querySelectorAll(".reflection-template-question-remove")
-      .forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          const idx = parseInt(e.currentTarget.dataset.index, 10);
-          this.currentTemplate.questions.splice(idx, 1);
-          this._renderTemplateQuestions();
-        });
-      });
-  }
-
-  addTemplateQuestion() {
-    if (!this.currentTemplate.questions) this.currentTemplate.questions = [];
-    this.currentTemplate.questions.push("");
-    this._renderTemplateQuestions();
-    const inputs = document.querySelectorAll(
-      ".reflection-template-question-input",
-    );
-    if (inputs.length > 0) inputs[inputs.length - 1].focus();
-  }
-
-  _moveTemplateQuestion(index, direction) {
-    const questions = this.currentTemplate.questions;
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= questions.length) return;
-    const temp = questions[index];
-    questions[index] = questions[targetIndex];
-    questions[targetIndex] = temp;
-    this._renderTemplateQuestions();
-  }
-
-  _getTemplateFormData() {
-    const tags = document
-      .getElementById("reflectionTemplateSidenavTags")
-      .value.split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
-
-    return {
-      title: document
-        .getElementById("reflectionTemplateSidenavTitle")
-        .value.trim(),
-      description:
-        document
-          .getElementById("reflectionTemplateSidenavDescription")
-          .value.trim() || null,
-      tags: tags.length > 0 ? tags : null,
-      questions: (this.currentTemplate.questions || []).filter((q) =>
-        q.trim(),
-      ),
-    };
-  }
-
-  async saveTemplate() {
-    const data = this._getTemplateFormData();
-
-    if (!data.title) {
-      this._showTemplateSaveStatus("Title required");
-      return;
-    }
-
-    try {
-      if (this.editingTemplateId) {
-        const res = await ReflectionTemplatesAPI.update(
-          this.editingTemplateId,
-          data,
-        );
-        if (!res.ok) {
-          this._showTemplateSaveStatus("Error");
-          showToast("Failed to save template", "error");
-          return;
-        }
-        this._showTemplateSaveStatus("Saved");
-      } else {
-        const response = await ReflectionTemplatesAPI.create(data);
-        if (!response.ok) {
-          this._showTemplateSaveStatus("Error");
-          showToast("Failed to create template", "error");
-          return;
-        }
-        let result;
-        try {
-          result = await response.json();
-        } catch {
-          this._showTemplateSaveStatus("Error");
-          showToast("Unexpected server response", "error");
-          return;
-        }
-        if (!result?.id) {
-          this._showTemplateSaveStatus("Error");
-          showToast("Invalid response from server", "error");
-          return;
-        }
-        this.editingTemplateId = result.id;
-        this._showTemplateSaveStatus("Created");
-        document.getElementById(
-          "reflectionTemplateSidenavHeader",
-        ).textContent = "Edit Template";
-        document
-          .getElementById("reflectionTemplateSidenavDelete")
-          .classList.remove("hidden");
-      }
-
-      await this.tm.reflectionModule.load();
-    } catch (error) {
-      console.error("Error saving template:", error);
-      this._showTemplateSaveStatus("Error");
-      showToast("Error saving template", "error");
-    }
-  }
-
-  async handleDeleteTemplate() {
-    if (!this.editingTemplateId) return;
-
-    if (
-      !(await showConfirm(
-        `Delete template "${this.currentTemplate.title}"? Existing reflections are unaffected.`,
-      ))
-    ) {
-      return;
-    }
-
-    try {
-      const res = await ReflectionTemplatesAPI.delete(this.editingTemplateId);
-      if (!res.ok) {
-        showToast("Failed to delete template", "error");
-        return;
-      }
-      showToast("Template deleted", "success");
-      await this.tm.reflectionModule.load();
-      this.closeTemplate();
-    } catch (error) {
-      console.error("Error deleting template:", error);
-      showToast("Error deleting template", "error");
-    }
-  }
-
-  _showTemplateSaveStatus(text) {
-    const statusEl = document.getElementById(
-      "reflectionTemplateSidenavSaveStatus",
-    );
     if (!statusEl) return;
 
     statusEl.textContent = text;

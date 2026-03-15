@@ -6,7 +6,7 @@
  * Iterates ENTITIES registry for FTS-enabled types — no hardcoded methods.
  */
 
-import { CacheDatabase } from "./database.ts";
+import { type BindValue, CacheDatabase } from "./database.ts";
 import { ENTITIES, type EntityDef } from "./entities.ts";
 
 export type SearchResultType =
@@ -42,6 +42,7 @@ export interface SearchOptions {
   limit?: number;
   types?: SearchResultType[];
   offset?: number;
+  project?: string;
 }
 
 export interface SearchStats {
@@ -99,9 +100,10 @@ export class SearchEngine {
 
     const safeQuery = this.escapeQuery(trimmed);
 
+    const project = options?.project;
     for (const entity of FTS_ENTITIES) {
       if (!activeTypes.includes(entity.fts!.type as SearchResultType)) continue;
-      results.push(...this.searchEntity(entity, safeQuery, limit));
+      results.push(...this.searchEntity(entity, safeQuery, limit, project));
     }
 
     // Sort by score (lower is better in bm25; ID match uses -Infinity)
@@ -226,23 +228,34 @@ export class SearchEngine {
     entity: EntityDef,
     query: string,
     limit: number,
+    project?: string,
   ): SearchResult[] {
     const { fts, table } = entity;
     if (!fts) return [];
+
+    // When project filter is active, skip tables that lack a project column
+    const hasProjectCol = entity.schema.includes("project TEXT");
+    if (project && !hasProjectCol) return [];
+
     const contentColIdx = fts.columns.indexOf(fts.contentCol);
     try {
-      const rows = this.db.query<{
-        [key: string]: unknown;
-      }>(
-        `SELECT ${fts.titleCol}, id,
+      let sql = `SELECT ${fts.titleCol}, id,
           snippet(${table}_fts, ${contentColIdx}, '<mark>', '</mark>', '...', 32) as snippet,
           bm25(${table}_fts) as score
         FROM ${table}_fts
-        WHERE ${table}_fts MATCH ?
-        ORDER BY score
-        LIMIT ?`,
-        [query, limit],
-      );
+        WHERE ${table}_fts MATCH ?`;
+      const params: BindValue[] = [query];
+
+      if (project && hasProjectCol) {
+        sql +=
+          ` AND id IN (SELECT id FROM ${table} WHERE LOWER(project) = LOWER(?))`;
+        params.push(project);
+      }
+
+      sql += ` ORDER BY score LIMIT ?`;
+      params.push(limit);
+
+      const rows = this.db.query<{ [key: string]: unknown }>(sql, params);
       return rows.map((r) => ({
         id: r.id as string,
         title: r[fts.titleCol] as string,
@@ -304,6 +317,6 @@ export class SearchEngine {
       .split(/\s+/)
       .filter((term) => term.length > 0)
       .map((term) => `"${term}"*`)
-      .join(" OR ");
+      .join(" AND ");
   }
 }

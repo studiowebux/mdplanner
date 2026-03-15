@@ -134,6 +134,22 @@ export function markdownToHtml(markdown) {
   return `<div class="markdown-content">${html}</div>`;
 }
 
+/**
+ * Filter items by a search query. Each item is tested against text
+ * returned by getSearchableTexts (an array of strings).
+ * @param {Array} items
+ * @param {string} query
+ * @param {(item: any) => string[]} getSearchableTexts
+ * @returns {Array}
+ */
+export function filterBySearchQuery(items, query, getSearchableTexts) {
+  if (!query) return items;
+  const q = query.toLowerCase();
+  return items.filter((item) =>
+    getSearchableTexts(item).some((text) => text.toLowerCase().includes(q))
+  );
+}
+
 // Priority utilities
 export function getPriorityBadgeClasses(priority) {
   return PRIORITY_CLASSES[priority]?.badge || PRIORITY_CLASSES[5].badge;

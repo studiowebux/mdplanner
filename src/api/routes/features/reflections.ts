@@ -48,7 +48,7 @@ const ReflectionSchema = z
 const CreateReflectionSchema = z
   .object({
     title: z.string().openapi({ description: "Reflection title" }),
-    tags: z.array(z.string()).optional(),
+    tags: z.array(z.string()).nullish(),
     templateId: z.string().optional(),
     linkedProjects: z.array(z.string()).optional(),
     linkedTasks: z.array(z.string()).optional(),
@@ -196,7 +196,7 @@ reflectionsRouter.openapi(createReflectionRoute, async (c) => {
   const body = c.req.valid("json");
   const reflection = await parser.addReflection({
     title: body.title,
-    tags: body.tags,
+    tags: body.tags ?? undefined,
     templateId: body.templateId,
     linkedProjects: body.linkedProjects,
     linkedTasks: body.linkedTasks,

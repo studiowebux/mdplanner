@@ -57,6 +57,7 @@ import { BrainstormModule } from "./modules/features/brainstorm.js";
 import { BrainstormSidenavModule } from "./modules/features/brainstorm-sidenav.js";
 import { ReflectionModule } from "./modules/features/reflection.js";
 import { ReflectionSidenavModule } from "./modules/features/reflection-sidenav.js";
+import { ReflectionTemplateSidenavModule } from "./modules/features/reflection-template-sidenav.js";
 import { MeetingsModule } from "./modules/features/meetings.js";
 import { MeetingSidenavModule } from "./modules/features/meeting-sidenav.js";
 import { JournalModule } from "./modules/features/journal.js";
@@ -285,6 +286,7 @@ class TaskManager {
     this.brainstormSidenavModule = new BrainstormSidenavModule(this);
     this.reflectionModule = new ReflectionModule(this);
     this.reflectionSidenavModule = new ReflectionSidenavModule(this);
+    this.reflectionTemplateSidenavModule = new ReflectionTemplateSidenavModule(this);
     this.meetingsModule = new MeetingsModule(this);
     this.journalModule = new JournalModule(this);
     this.dnsModule = new DnsModule(this);
@@ -1020,6 +1022,7 @@ class TaskManager {
     this.ideaSidenavModule.bindEvents();
     this.brainstormSidenavModule.bindEvents();
     this.reflectionSidenavModule.bindEvents();
+    this.reflectionTemplateSidenavModule.bindEvents();
     this.c4SidenavModule.bindEvents();
 
     // Batch 4 sidenav bindings (Complex modules)
