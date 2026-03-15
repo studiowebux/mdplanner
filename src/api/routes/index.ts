@@ -441,8 +441,8 @@ export function createApiRouter(
   }
 
   // OpenAPI spec endpoint — auto-generated from Zod schemas
-  api.doc31("/doc", {
-    openapi: "3.1.0",
+  api.doc("/doc", {
+    openapi: "3.0.3",
     info: {
       title: "MDPlanner API",
       version: VERSION,
