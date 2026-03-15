@@ -1267,11 +1267,16 @@ class TaskManager {
       "cerveau",
     ];
 
-    // If no features configured, show everything
-    const showAll = !features || features.length === 0;
+    // Default feature set — shown when no explicit config exists
+    const defaultFeatures = [
+      "summary", "list", "board", "portfolio", "milestones", "people", "notes", "cerveau",
+    ];
+    const effectiveFeatures = (!features || features.length === 0)
+      ? defaultFeatures
+      : features;
 
     for (const view of allViews) {
-      const enabled = showAll || features.includes(view);
+      const enabled = effectiveFeatures.includes(view);
       const desktopBtn = document.getElementById(`${view}ViewBtn`);
       const mobileBtn = document.getElementById(`${view}ViewBtnMobile`);
 
@@ -1280,12 +1285,12 @@ class TaskManager {
     }
 
     // Quick search header button (not a nav view — handled separately)
-    const searchEnabled = showAll || (features && features.includes("quick-search"));
+    const searchEnabled = effectiveFeatures.includes("quick-search");
     document.getElementById("globalSearchBtn")?.classList.toggle("hidden", !searchEnabled);
     document.getElementById("globalSearchBtnMobile")?.classList.toggle("hidden", !searchEnabled);
 
     // Pomodoro header button (not a nav view — handled separately)
-    const pomodoroEnabled = showAll || (features && features.includes("pomodoro"));
+    const pomodoroEnabled = effectiveFeatures.includes("pomodoro");
     document.getElementById("pomodoroBtn")?.classList.toggle("hidden", !pomodoroEnabled);
     document.getElementById("pomodoroBtnMobile")?.classList.toggle("hidden", !pomodoroEnabled);
 
@@ -1298,8 +1303,8 @@ class TaskManager {
     });
 
     // If current view is hidden, fall back to first enabled view
-    if (!showAll && !features.includes(this.currentView) && this.currentView !== "config") {
-      const fallback = features[0] || "summary";
+    if (!effectiveFeatures.includes(this.currentView) && this.currentView !== "config") {
+      const fallback = effectiveFeatures[0] || "summary";
       this.switchView(fallback);
     }
   }

@@ -98,8 +98,16 @@ export function registerGoalTools(server: McpServer, pm: ProjectManager): void {
       },
     },
     async ({
-      title, description, status, type, kpi, kpiMetric, kpiTarget,
-      startDate, endDate, linkedPortfolioItems,
+      title,
+      description,
+      status,
+      type,
+      kpi,
+      kpiMetric,
+      kpiTarget,
+      startDate,
+      endDate,
+      linkedPortfolioItems,
     }) => {
       const id = await parser.addGoal({
         title,
@@ -143,8 +151,17 @@ export function registerGoalTools(server: McpServer, pm: ProjectManager): void {
     },
     async (
       {
-        id, title, description, status, type, kpi, kpiMetric, kpiTarget,
-        startDate, endDate, linkedPortfolioItems,
+        id,
+        title,
+        description,
+        status,
+        type,
+        kpi,
+        kpiMetric,
+        kpiTarget,
+        startDate,
+        endDate,
+        linkedPortfolioItems,
       },
     ) => {
       const success = await parser.updateGoal(id, {

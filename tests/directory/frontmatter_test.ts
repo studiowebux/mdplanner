@@ -452,6 +452,52 @@ Body`;
   assertEquals(result.frontmatter.links[1].url, "https://docs.example.com");
 });
 
+Deno.test("round-trip - preserves strings with newlines", () => {
+  const original = {
+    id: "test_nl",
+    body: "line1\nline2\nline3",
+    note: "has a backslash \\ here",
+    quoted: 'has "quotes" inside',
+  };
+
+  const serialized = serializeFrontmatter(original);
+  const parsed = parseFrontmatter<typeof original>(serialized + "\n\nBody");
+
+  assertEquals(parsed.frontmatter.body, original.body);
+  assertEquals(parsed.frontmatter.note, original.note);
+  assertEquals(parsed.frontmatter.quoted, original.quoted);
+});
+
+Deno.test("serializeFrontmatter - escapes newlines in strings", () => {
+  const data = { body: "line1\nline2" };
+  const result = serializeFrontmatter(data);
+  // Must be on a single line with escaped \n
+  assertEquals(result, '---\nbody: "line1\\nline2"\n---');
+});
+
+Deno.test("parseFrontmatter - unescapes sequences in double-quoted strings", () => {
+  const content = `---
+body: "has\\nnewline"
+tab: "has\\ttab"
+quote: "has\\"quotes\\""
+slash: "has\\\\backslash"
+---
+
+Body`;
+
+  const result = parseFrontmatter<{
+    body: string;
+    tab: string;
+    quote: string;
+    slash: string;
+  }>(content);
+
+  assertEquals(result.frontmatter.body, "has\nnewline");
+  assertEquals(result.frontmatter.tab, "has\ttab");
+  assertEquals(result.frontmatter.quote, 'has"quotes"');
+  assertEquals(result.frontmatter.slash, "has\\backslash");
+});
+
 Deno.test("parseFrontmatter - parses mixed array items", () => {
   const content = `---
 items:

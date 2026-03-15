@@ -509,7 +509,12 @@ export class ConfigView {
     };
 
     const enabledFeatures = this.tm.projectConfig?.features || [];
-    const showAll = enabledFeatures.length === 0;
+    const defaultFeatures = [
+      "summary", "list", "board", "portfolio", "milestones", "people", "notes", "cerveau",
+    ];
+    const effectiveFeatures = enabledFeatures.length === 0
+      ? defaultFeatures
+      : enabledFeatures;
 
     for (const [group, features] of Object.entries(featureGroups)) {
       const groupDiv = document.createElement("div");
@@ -523,7 +528,7 @@ export class ConfigView {
       checkboxes.className = "space-y-1";
 
       for (const feature of features) {
-        const isEnabled = showAll || enabledFeatures.includes(feature.id);
+        const isEnabled = effectiveFeatures.includes(feature.id);
         const label = document.createElement("label");
         label.className = "flex items-center space-x-2 cursor-pointer";
         label.innerHTML = `
