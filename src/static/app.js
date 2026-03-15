@@ -1302,6 +1302,12 @@ class TaskManager {
       dropdown.classList.toggle("hidden", visibleButtons.length === 0);
     });
 
+    // Hide empty category groups (mobile)
+    document.querySelectorAll("#mobileMenu [role='group']").forEach((group) => {
+      const visibleBtns = group.querySelectorAll("button:not(.hidden)");
+      group.classList.toggle("hidden", visibleBtns.length === 0);
+    });
+
     // If current view is hidden, fall back to first enabled view
     if (!effectiveFeatures.includes(this.currentView) && this.currentView !== "config") {
       const fallback = effectiveFeatures[0] || "summary";
