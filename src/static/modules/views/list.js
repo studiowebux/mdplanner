@@ -935,6 +935,8 @@ export class ListView {
 
     document.getElementById("batchPriority").value = "";
     document.getElementById("batchTags").value = "";
+    const completedCb = document.getElementById("batchCompleted");
+    if (completedCb) completedCb.checked = false;
 
     panel.classList.remove("hidden");
   }
@@ -955,6 +957,8 @@ export class ListView {
     const tags = tagsRaw
       ? tagsRaw.split(",").map((t) => t.trim()).filter(Boolean)
       : null;
+    const completedCb = document.getElementById("batchCompleted");
+    const markCompleted = completedCb?.checked ?? false;
 
     const update = {};
     if (section) update.section = section;
@@ -962,25 +966,40 @@ export class ListView {
     if (milestone) update.milestone = milestone;
     if (priority) update.priority = priority;
     if (tags && tags.length > 0) update.tags = tags;
+    if (markCompleted) update.completed = true;
 
     if (Object.keys(update).length === 0) {
       this.closeBatchPanel();
       return;
     }
 
-    const updates = Array.from(this._selectedIds).map((id) => ({
+    const allUpdates = Array.from(this._selectedIds).map((id) => ({
       id,
       ...update,
     }));
 
+    // API batch limit is 50 — chunk to avoid 400 errors
+    const BATCH_SIZE = 50;
+    let totalUpdated = 0;
+    let totalFailed = 0;
+
     try {
-      const response = await TasksAPI.batchUpdate(updates);
-      const result = await response.json();
-      const failed = result.results?.filter((r) => !r.success).length || 0;
-      const msg = failed > 0
-        ? `${result.updated} updated, ${failed} failed`
-        : `${result.updated} task${result.updated !== 1 ? "s" : ""} updated`;
-      showToast(msg, failed > 0);
+      for (let i = 0; i < allUpdates.length; i += BATCH_SIZE) {
+        const chunk = allUpdates.slice(i, i + BATCH_SIZE);
+        const response = await TasksAPI.batchUpdate(chunk);
+        const result = await response.json();
+        if (!response.ok) {
+          const errMsg = result.message || result.error || "Server error";
+          showToast(`Batch update failed: ${errMsg}`, true);
+          return;
+        }
+        totalUpdated += result.updated ?? 0;
+        totalFailed += result.results?.filter((r) => !r.success).length ?? 0;
+      }
+      const msg = totalFailed > 0
+        ? `${totalUpdated} updated, ${totalFailed} failed`
+        : `${totalUpdated} task${totalUpdated !== 1 ? "s" : ""} updated`;
+      showToast(msg, totalFailed > 0);
       this.closeBatchPanel();
       this.exitBatchMode();
       await this.tm.loadTasks();
