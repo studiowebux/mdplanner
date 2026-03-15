@@ -275,7 +275,7 @@ export class BaseSidenavModule {
       const container = document.getElementById(`${this.prefix}Sidenav`);
       if (!container) return;
       banner = document.createElement("div");
-      banner.id = `${this.prefix}ConflictBanner`;
+      banner.id = `${this.prefix}SidenavConflictBanner`;
       banner.className = "sidenav-conflict-banner";
       const msg = document.createElement("p");
       msg.textContent = "This item was updated by someone else while you were editing.";
@@ -289,7 +289,7 @@ export class BaseSidenavModule {
         await this.reloadData();
         if (this.editingId) {
           const refreshed = this.findEntity(this.editingId);
-          if (refreshed) this.openEdit(refreshed);
+          if (refreshed) this.openEdit(this.editingId);
         }
       });
       const overwriteBtn = document.createElement("button");
@@ -362,7 +362,7 @@ export class BaseSidenavModule {
       const container = document.getElementById(this.panelId);
       if (!container) return;
       banner = document.createElement("div");
-      banner.id = `${this.prefix}StaleBanner`;
+      banner.id = `${this.prefix}SidenavStaleBanner`;
       banner.className = "sidenav-stale-banner";
       const msg = document.createElement("p");
       msg.textContent =
@@ -375,10 +375,7 @@ export class BaseSidenavModule {
       reloadBtn.addEventListener("click", async () => {
         this._hideStaleEditBanner();
         await this.reloadData();
-        if (this.editingId) {
-          const refreshed = this.findEntity(this.editingId);
-          if (refreshed) this.openEdit(refreshed);
-        }
+        if (this.editingId) this.openEdit(this.editingId);
       });
       const keepBtn = document.createElement("button");
       keepBtn.textContent = "Keep editing";
@@ -442,7 +439,7 @@ export class BaseSidenavModule {
       statusEl.classList.add("sidenav-status-saving");
     }
 
-    if (textStr === "Saved" || textStr === "Created" || textStr === "Error") {
+    if (textStr === "Saved" || textStr === "Created" || textStr !== "Saving...") {
       setTimeout(() => {
         if (this._hasAnyUnsavedChanges()) {
           statusEl.textContent = "Modified";
