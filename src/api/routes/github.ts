@@ -86,6 +86,73 @@ githubRouter.openapi(getRepoRoute, async (c) => {
   }
 });
 
+// GET /integrations/github/repo/:owner/:repo/issues — list issues
+const listIssuesRoute = createRoute({
+  method: "get",
+  path: "/repo/{owner}/{repo}/issues",
+  tags: ["GitHub"],
+  summary: "List issues for a repository",
+  operationId: "listGitHubIssues",
+  request: {
+    params: z.object({
+      owner: z.string().openapi({
+        param: { name: "owner", in: "path" },
+      }),
+      repo: z.string().openapi({
+        param: { name: "repo", in: "path" },
+      }),
+    }),
+    query: z.object({
+      state: z.enum(["open", "closed", "all"]).optional().openapi({
+        description: "Filter by state (default: open)",
+      }),
+      assignee: z.string().optional().openapi({
+        description: "Filter by assignee login",
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "List of issues",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Token not configured",
+    },
+    401: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Authentication failed",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Repository not found",
+    },
+    502: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "GitHub API error",
+    },
+  },
+});
+
+githubRouter.openapi(listIssuesRoute, async (c) => {
+  const token = await resolveToken(c);
+  if (!token) return c.json({ error: "GitHub token not configured" }, 400);
+
+  const { owner, repo } = c.req.valid("param");
+  const { state, assignee } = c.req.valid("query");
+
+  try {
+    const provider = new GitHubApiProvider(token);
+    const issues = await provider.listIssues(owner, repo, state, assignee);
+    return c.json(issues, 200);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "GitHub API error";
+    const status = msg.includes("404") ? 404 : msg.includes("401") ? 401 : 502;
+    return c.json({ error: msg }, status);
+  }
+});
+
 // GET /integrations/github/repo/:owner/:repo/issues/:number — single issue
 const getIssueRoute = createRoute({
   method: "get",
@@ -526,6 +593,70 @@ githubRouter.openapi(listRunsRoute, async (c) => {
   }
 });
 
+// GET /integrations/github/repo/:owner/:repo/pulls — list PRs
+const listPrsRoute = createRoute({
+  method: "get",
+  path: "/repo/{owner}/{repo}/pulls",
+  tags: ["GitHub"],
+  summary: "List pull requests for a repository",
+  operationId: "listGitHubPullRequests",
+  request: {
+    params: z.object({
+      owner: z.string().openapi({
+        param: { name: "owner", in: "path" },
+      }),
+      repo: z.string().openapi({
+        param: { name: "repo", in: "path" },
+      }),
+    }),
+    query: z.object({
+      state: z.enum(["open", "closed", "all"]).optional().openapi({
+        description: "Filter by state (default: open)",
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.any()) } },
+      description: "List of pull requests",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Token not configured",
+    },
+    401: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Authentication failed",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Repository not found",
+    },
+    502: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "GitHub API error",
+    },
+  },
+});
+
+githubRouter.openapi(listPrsRoute, async (c) => {
+  const token = await resolveToken(c);
+  if (!token) return c.json({ error: "GitHub token not configured" }, 400);
+
+  const { owner, repo } = c.req.valid("param");
+  const { state } = c.req.valid("query");
+
+  try {
+    const provider = new GitHubApiProvider(token);
+    const prs = await provider.listPRs(owner, repo, state);
+    return c.json(prs, 200);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "GitHub API error";
+    const status = msg.includes("404") ? 404 : msg.includes("401") ? 401 : 502;
+    return c.json({ error: msg }, status);
+  }
+});
+
 // GET /integrations/github/repo/:owner/:repo/pulls/:number — single PR status
 const getPrRoute = createRoute({
   method: "get",
@@ -585,6 +716,92 @@ githubRouter.openapi(getPrRoute, async (c) => {
   } catch (err) {
     const msg = err instanceof Error ? err.message : "GitHub API error";
     const status = msg.includes("404") ? 404 : msg.includes("401") ? 401 : 502;
+    return c.json({ error: msg }, status);
+  }
+});
+
+// PUT /integrations/github/repo/:owner/:repo/pulls/:number/merge — merge a PR
+const mergePrRoute = createRoute({
+  method: "put",
+  path: "/repo/{owner}/{repo}/pulls/{number}/merge",
+  tags: ["GitHub"],
+  summary: "Merge a pull request",
+  operationId: "mergeGitHubPullRequest",
+  request: {
+    params: z.object({
+      owner: z.string().openapi({
+        param: { name: "owner", in: "path" },
+      }),
+      repo: z.string().openapi({
+        param: { name: "repo", in: "path" },
+      }),
+      number: z.string().openapi({
+        param: { name: "number", in: "path" },
+      }),
+    }),
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            merge_method: z.enum(["merge", "squash", "rebase"]).optional(),
+          }),
+        },
+      },
+      required: false,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Pull request merged",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Token not configured or invalid PR number",
+    },
+    401: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Authentication failed",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Pull request not found",
+    },
+    409: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "PR not mergeable (conflicts, checks failing, etc.)",
+    },
+    502: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "GitHub API error",
+    },
+  },
+});
+
+githubRouter.openapi(mergePrRoute, async (c) => {
+  const token = await resolveToken(c);
+  if (!token) return c.json({ error: "GitHub token not configured" }, 400);
+
+  const { owner, repo, number } = c.req.valid("param");
+  const prNum = parseInt(number, 10);
+  if (isNaN(prNum)) return c.json({ error: "Invalid PR number" }, 400);
+
+  const body = c.req.valid("json");
+  const mergeMethod = body?.merge_method ?? "squash";
+
+  try {
+    const provider = new GitHubApiProvider(token);
+    const result = await provider.mergePR(owner, repo, prNum, mergeMethod);
+    return c.json(result, 200);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "GitHub API error";
+    const status = msg.includes("404")
+      ? 404
+      : msg.includes("405") || msg.includes("409")
+      ? 409
+      : msg.includes("401")
+      ? 401
+      : 502;
     return c.json({ error: msg }, status);
   }
 });

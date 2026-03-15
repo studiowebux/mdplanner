@@ -1496,6 +1496,31 @@ export const GitHubAPI = {
     );
     return response.json();
   },
+
+  /** List issues for a repository. */
+  async listIssues(owner, repo, state = "open", assignee) {
+    let url = `/api/integrations/github/repo/${owner}/${repo}/issues?state=${state}`;
+    if (assignee) url += `&assignee=${encodeURIComponent(assignee)}`;
+    const response = await get(url);
+    return response.json();
+  },
+
+  /** List pull requests for a repository. */
+  async listPRs(owner, repo, state = "open") {
+    const response = await get(
+      `/api/integrations/github/repo/${owner}/${repo}/pulls?state=${state}`,
+    );
+    return response.json();
+  },
+
+  /** Merge a pull request. */
+  async mergePR(owner, repo, number, mergeMethod = "squash") {
+    const response = await put(
+      `/api/integrations/github/repo/${owner}/${repo}/pulls/${number}/merge`,
+      { merge_method: mergeMethod },
+    );
+    return response.json();
+  },
 };
 
 // DNS API

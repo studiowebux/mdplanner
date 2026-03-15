@@ -163,6 +163,89 @@ export function registerGitHubTools(
   );
 
   server.registerTool(
+    "github_list_issues",
+    {
+      description:
+        "List issues for a GitHub repository. Filters out pull requests. Supports state and assignee filters.",
+      inputSchema: {
+        owner: z.string().describe("Repository owner"),
+        repo: z.string().describe("Repository name"),
+        state: z.enum(["open", "closed", "all"]).optional().describe(
+          "Filter by state (default: open)",
+        ),
+        assignee: z.string().optional().describe(
+          "Filter by assignee login",
+        ),
+      },
+    },
+    async ({ owner, repo, state, assignee }) => {
+      const provider = await resolveProvider(pm);
+      if (!provider) return err("GitHub token not configured");
+      try {
+        const issues = await provider.listIssues(owner, repo, state, assignee);
+        return ok(issues);
+      } catch (e) {
+        return err(e instanceof Error ? e.message : "GitHub API error");
+      }
+    },
+  );
+
+  server.registerTool(
+    "github_list_prs",
+    {
+      description:
+        "List pull requests for a GitHub repository. Supports state filter.",
+      inputSchema: {
+        owner: z.string().describe("Repository owner"),
+        repo: z.string().describe("Repository name"),
+        state: z.enum(["open", "closed", "all"]).optional().describe(
+          "Filter by state (default: open)",
+        ),
+      },
+    },
+    async ({ owner, repo, state }) => {
+      const provider = await resolveProvider(pm);
+      if (!provider) return err("GitHub token not configured");
+      try {
+        const prs = await provider.listPRs(owner, repo, state);
+        return ok(prs);
+      } catch (e) {
+        return err(e instanceof Error ? e.message : "GitHub API error");
+      }
+    },
+  );
+
+  server.registerTool(
+    "github_merge_pr",
+    {
+      description:
+        "Merge a GitHub pull request. Defaults to squash merge. Fails if PR is not mergeable.",
+      inputSchema: {
+        owner: z.string().describe("Repository owner"),
+        repo: z.string().describe("Repository name"),
+        number: z.number().int().positive().describe("Pull request number"),
+        merge_method: z.enum(["merge", "squash", "rebase"]).optional()
+          .describe("Merge strategy (default: squash)"),
+      },
+    },
+    async ({ owner, repo, number, merge_method }) => {
+      const provider = await resolveProvider(pm);
+      if (!provider) return err("GitHub token not configured");
+      try {
+        const result = await provider.mergePR(
+          owner,
+          repo,
+          number,
+          merge_method,
+        );
+        return ok(result);
+      } catch (e) {
+        return err(e instanceof Error ? e.message : "GitHub API error");
+      }
+    },
+  );
+
+  server.registerTool(
     "github_get_pr",
     {
       description:

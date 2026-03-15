@@ -1,4 +1,4 @@
-// GitHub view — overview of linked repos with live stats.
+// GitHub view — overview of linked repos with live stats, issues, PRs, merge.
 import { GitHubAPI, PortfolioAPI } from "../api.js";
 import { showLoading, hideLoading } from "../ui/loading.js";
 
@@ -15,6 +15,9 @@ export class GitHubView {
     this._runsTypeFilter = "";
     this._runsSortDir = "desc"; // "desc" = newest first
     this._runsBound = false;
+    this._expandedRows = new Set(); // track which repos are expanded
+    this._detailCache = {}; // cache fetched issues/PRs per "owner/repo"
+    this._login = null; // authenticated user login
   }
 
   async load() {
@@ -27,12 +30,11 @@ export class GitHubView {
 
     // Check token
     let connected = false;
-    let login = null;
     try {
       const status = await GitHubAPI.testConnection();
       if (status?.login) {
         connected = true;
-        login = status.login;
+        this._login = status.login;
       }
     } catch {
       // token not configured or invalid
@@ -63,7 +65,7 @@ export class GitHubView {
       <div class="github-view-header">
         <span class="github-view-connected">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.39.6.11.82-.26.82-.58 0-.28-.01-1.03-.02-2.02-3.34.73-4.04-1.61-4.04-1.61-.54-1.37-1.33-1.74-1.33-1.74-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02.004 2.04.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22 0 1.6-.01 2.9-.01 3.29 0 .32.21.7.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
-          Connected as <strong>@${login}</strong>
+          Connected as <strong>@${this._login}</strong>
         </span>
         <button type="button" id="githubRefreshBtn" class="btn-secondary">Refresh</button>
       </div>
@@ -165,6 +167,7 @@ export class GitHubView {
     let html = `<table class="github-view-table">
       <thead>
         <tr>
+          <th></th>
           <th>Project</th>
           <th>Repository</th>
           <th>Stars</th>
@@ -178,8 +181,12 @@ export class GitHubView {
       <tbody>`;
 
     for (const { project, data, release } of repos) {
+      const repoKey = project.githubRepo;
+      const isExpanded = this._expandedRows.has(repoKey);
+
       if (!data) {
         html += `<tr>
+          <td></td>
           <td>${this._esc(project.name)}</td>
           <td>${this._esc(project.githubRepo)}</td>
           <td colspan="6" class="text-muted text-sm">Failed to load</td>
@@ -188,12 +195,14 @@ export class GitHubView {
       }
       const lastPush = data.lastCommitAt
         ? new Date(data.lastCommitAt).toLocaleDateString()
-        : "—";
+        : "\u2014";
       const repoBase = `https://github.com/${this._esc(project.githubRepo)}`;
       const releaseCell = release
         ? `<a href="${this._esc(release.htmlUrl)}" target="_blank" rel="noopener noreferrer" class="github-view-repolink github-release-badge">${this._esc(release.tagName)}</a>`
-        : "—";
+        : "\u2014";
+      const expandIcon = isExpanded ? "\u25BC" : "\u25B6";
       html += `<tr>
+        <td><button type="button" class="github-expand-btn" data-repo="${this._esc(repoKey)}" aria-label="Toggle details">${expandIcon}</button></td>
         <td>${this._esc(project.name)}</td>
         <td>
           <a href="${this._esc(data.htmlUrl)}" target="_blank" rel="noopener noreferrer" class="github-view-repolink">
@@ -206,12 +215,187 @@ export class GitHubView {
         <td><a href="${repoBase}/pulls" target="_blank" rel="noopener noreferrer" class="github-view-repolink">${data.openPRs ?? 0}</a></td>
         <td>${releaseCell}</td>
         <td class="text-muted">${lastPush}</td>
-        <td>${data.license ? `<span class="github-license-badge">${this._esc(data.license)}</span>` : "—"}</td>
+        <td>${data.license ? `<span class="github-license-badge">${this._esc(data.license)}</span>` : "\u2014"}</td>
       </tr>`;
+
+      if (isExpanded) {
+        html += `<tr class="github-detail-row"><td colspan="9"><div class="github-detail-panel" id="ghDetail-${this._esc(repoKey).replace("/", "-")}"><span class="text-muted text-sm">Loading...</span></div></td></tr>`;
+      }
     }
 
     html += `</tbody></table>`;
     container.insertAdjacentHTML("beforeend", html);
+
+    // Bind expand buttons
+    container.querySelectorAll(".github-expand-btn").forEach((btn) => {
+      btn.addEventListener("click", () => this._toggleDetail(btn.dataset.repo));
+    });
+
+    // Render already-expanded detail panels from cache
+    for (const repoKey of this._expandedRows) {
+      if (this._detailCache[repoKey]) {
+        this._renderDetailPanel(repoKey, this._detailCache[repoKey]);
+      }
+    }
+  }
+
+  async _toggleDetail(repoKey) {
+    if (this._expandedRows.has(repoKey)) {
+      this._expandedRows.delete(repoKey);
+      this._renderTable();
+      return;
+    }
+
+    this._expandedRows.add(repoKey);
+    this._renderTable();
+
+    // Fetch issues and PRs if not cached
+    if (!this._detailCache[repoKey]) {
+      const [owner, repo] = repoKey.split("/");
+      try {
+        const [issues, prs] = await Promise.all([
+          GitHubAPI.listIssues(owner, repo, "open"),
+          GitHubAPI.listPRs(owner, repo, "open"),
+        ]);
+        this._detailCache[repoKey] = { issues, prs };
+      } catch {
+        this._detailCache[repoKey] = { issues: [], prs: [], error: true };
+      }
+    }
+
+    this._renderDetailPanel(repoKey, this._detailCache[repoKey]);
+  }
+
+  _renderDetailPanel(repoKey, data) {
+    const panelId = `ghDetail-${repoKey.replace("/", "-")}`;
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+
+    if (data.error) {
+      panel.innerHTML = `<span class="text-muted text-sm">Failed to load details.</span>`;
+      return;
+    }
+
+    const { issues, prs } = data;
+    const activeTab = panel.dataset.activeTab || "issues";
+
+    // Tabs
+    let html = `<div class="github-detail-tabs" role="tablist">
+      <button type="button" class="github-detail-tab" role="tab" aria-selected="${activeTab === "issues"}" data-tab="issues">Issues (${issues.length})</button>
+      <button type="button" class="github-detail-tab" role="tab" aria-selected="${activeTab === "prs"}" data-tab="prs">Pull Requests (${prs.length})</button>
+    </div>`;
+
+    if (activeTab === "issues") {
+      html += this._renderIssuesList(issues);
+    } else {
+      html += this._renderPRsList(repoKey, prs);
+    }
+
+    panel.innerHTML = html;
+    panel.dataset.activeTab = activeTab;
+
+    // Bind tab switches
+    panel.querySelectorAll(".github-detail-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        panel.dataset.activeTab = tab.dataset.tab;
+        this._renderDetailPanel(repoKey, data);
+      });
+    });
+
+    // Bind merge buttons
+    panel.querySelectorAll(".github-merge-btn").forEach((btn) => {
+      btn.addEventListener("click", () => this._handleMerge(repoKey, parseInt(btn.dataset.pr, 10), btn));
+    });
+  }
+
+  _renderIssuesList(issues) {
+    if (issues.length === 0) {
+      return `<div class="github-detail-empty">No open issues.</div>`;
+    }
+
+    let html = `<ul class="github-detail-list">`;
+    for (const issue of issues) {
+      const isMe = this._login && issue.assignee === this._login;
+      const assigneeHtml = isMe
+        ? `<span class="github-assigned-to-me">you</span>`
+        : issue.assignee
+        ? `<span class="github-detail-item-meta">${this._esc(issue.assignee)}</span>`
+        : "";
+      const labelsHtml = (issue.labels || [])
+        .slice(0, 3)
+        .map((l) => `<span class="github-label">${this._esc(l)}</span>`)
+        .join("");
+      html += `<li class="github-detail-item">
+        <span class="github-issue-badge github-issue-open">open</span>
+        <span class="github-detail-item-title">
+          <a href="${this._esc(issue.htmlUrl)}" target="_blank" rel="noopener noreferrer">#${issue.number} ${this._esc(issue.title)}</a>${labelsHtml}
+        </span>
+        ${assigneeHtml}
+        <span class="github-detail-item-meta">${this._timeAgo(issue.createdAt)}</span>
+      </li>`;
+    }
+    html += `</ul>`;
+    return html;
+  }
+
+  _renderPRsList(repoKey, prs) {
+    if (prs.length === 0) {
+      return `<div class="github-detail-empty">No open pull requests.</div>`;
+    }
+
+    let html = `<ul class="github-detail-list">`;
+    for (const pr of prs) {
+      const isMe = this._login && pr.assignee === this._login;
+      const assigneeHtml = isMe
+        ? `<span class="github-assigned-to-me">you</span>`
+        : pr.assignee
+        ? `<span class="github-detail-item-meta">${this._esc(pr.assignee)}</span>`
+        : "";
+      const stateClass = pr.merged ? "github-pr-merged" : pr.state === "open" ? "github-pr-open" : "github-pr-closed";
+      const stateLabel = pr.merged ? "merged" : pr.state;
+      const mergeBtn = pr.state === "open"
+        ? `<button type="button" class="github-merge-btn" data-pr="${pr.number}">Merge</button>`
+        : "";
+      html += `<li class="github-detail-item">
+        <span class="github-pr-badge ${stateClass}">${stateLabel}</span>
+        <span class="github-detail-item-title">
+          <a href="${this._esc(pr.htmlUrl)}" target="_blank" rel="noopener noreferrer">#${pr.number} ${this._esc(pr.title)}</a>
+          <span class="github-detail-item-meta">${this._esc(pr.headBranch)}</span>
+        </span>
+        ${assigneeHtml}
+        ${mergeBtn}
+        <span class="github-detail-item-meta">${this._timeAgo(pr.createdAt)}</span>
+      </li>`;
+    }
+    html += `</ul>`;
+    return html;
+  }
+
+  async _handleMerge(repoKey, prNumber, btn) {
+    btn.disabled = true;
+    btn.textContent = "Merging...";
+
+    const [owner, repo] = repoKey.split("/");
+    try {
+      const result = await GitHubAPI.mergePR(owner, repo, prNumber);
+      if (result.merged) {
+        btn.textContent = "Merged";
+        // Refresh the detail cache for this repo
+        delete this._detailCache[repoKey];
+        const [issues, prs] = await Promise.all([
+          GitHubAPI.listIssues(owner, repo, "open"),
+          GitHubAPI.listPRs(owner, repo, "open"),
+        ]);
+        this._detailCache[repoKey] = { issues, prs };
+        this._renderDetailPanel(repoKey, this._detailCache[repoKey]);
+      } else {
+        btn.textContent = result.message || "Failed";
+        btn.disabled = false;
+      }
+    } catch (err) {
+      btn.textContent = "Error";
+      btn.disabled = false;
+    }
   }
 
   _bindRefresh() {
@@ -224,6 +408,8 @@ export class GitHubView {
       this._runsSortDir = "desc";
       this._filtersBound = false;
       this._runsBound = false;
+      this._expandedRows.clear();
+      this._detailCache = {};
       this.load();
     });
   }
@@ -322,7 +508,7 @@ export class GitHubView {
 
     if (page.length === 0) {
       tableEl.innerHTML =
-        `<p class="text-muted" style="padding:1rem">No workflow runs match the filter.</p>`;
+        `<p class="text-muted github-detail-empty">No workflow runs match the filter.</p>`;
     } else {
       let html =
         `<table class="github-view-table"><thead><tr><th>Status</th><th>Workflow</th><th>Repository</th><th>Branch</th><th>Event</th><th>Time</th></tr></thead><tbody>`;
@@ -343,7 +529,7 @@ export class GitHubView {
     const from = total === 0 ? 0 : start + 1;
     const to = Math.min(start + RUNS_PER_PAGE, total);
     pagerEl.innerHTML = `
-      <span class="github-runs-count">Showing ${from}–${to} of ${total}</span>
+      <span class="github-runs-count">Showing ${from}\u2013${to} of ${total}</span>
       <div class="github-runs-nav">
         <button id="githubRunsPrev" class="btn-secondary" ${this._runsPage <= 1 ? "disabled" : ""}>Previous</button>
         <span class="github-runs-page">Page ${this._runsPage} of ${totalPages}</span>
