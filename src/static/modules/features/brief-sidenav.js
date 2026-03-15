@@ -5,7 +5,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { BriefAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { showConfirm } from "../ui/confirm.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, extractErrorMessage, validateRequired, clearAllFieldErrors } from "../utils.js";
 
 export class BriefSidenavModule {
   constructor(taskManager) {
@@ -177,27 +177,40 @@ export class BriefSidenavModule {
   }
 
   async save() {
+    // Clear previous errors
+    clearAllFieldErrors(document.getElementById("briefSidenav"));
+    // Validate required fields
+    const errors = validateRequired([
+      { id: "briefSidenavTitle", label: "Title" },
+    ]);
+    if (errors.length > 0) {
+      if (this.showSaveStatus) this.showSaveStatus(errors[0].message);
+      else showToast(errors[0].message, "error");
+      return;
+    }
+
     this.currentBrief.title = document.getElementById("briefSidenavTitle").value
       .trim();
     this.currentBrief.date = document.getElementById("briefSidenavDate").value;
-
-    if (!this.currentBrief.title) {
-      this.showSaveStatus("Title required");
-      return;
-    }
 
     try {
       if (this.editingBriefId) {
         const res = await BriefAPI.update(this.editingBriefId, this.currentBrief);
         if (!res.ok) {
-          showToast("Failed to save brief", "error");
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         this.showSaveStatus("Saved");
       } else {
         const response = await BriefAPI.create(this.currentBrief);
         if (!response.ok) {
-          showToast("Failed to create brief", "error");
+          const errBody = await response.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         const result = await response.json();
@@ -213,8 +226,8 @@ export class BriefSidenavModule {
       await this.tm.briefModule.load();
     } catch (error) {
       console.error("Error saving Brief:", error);
-      this.showSaveStatus("Error");
-      showToast("Error saving Brief", "error");
+      this.showSaveStatus(error.message || "Error");
+      showToast(error.message || "Error saving Brief", "error");
     }
   }
 
@@ -227,7 +240,9 @@ export class BriefSidenavModule {
     try {
       const res = await BriefAPI.delete(this.editingBriefId);
       if (!res.ok) {
-        showToast("Failed to delete brief", "error");
+        const errBody = await res.json().catch(() => ({}));
+        const errMsg = extractErrorMessage(errBody);
+        showToast(errMsg, "error");
         return;
       }
       showToast("Brief deleted", "success");
@@ -235,7 +250,7 @@ export class BriefSidenavModule {
       this.close();
     } catch (error) {
       console.error("Error deleting Brief:", error);
-      showToast("Error deleting Brief", "error");
+      showToast(error.message || "Error deleting Brief", "error");
     }
   }
 

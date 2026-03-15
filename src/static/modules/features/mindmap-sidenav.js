@@ -4,7 +4,7 @@
 import { Sidenav } from "../ui/sidenav.js";
 import { MindmapsAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, extractErrorMessage } from "../utils.js";
 import { showConfirm } from "../ui/confirm.js";
 
 export class MindmapSidenavModule {
@@ -224,14 +224,20 @@ export class MindmapSidenavModule {
       if (this.editingMindmapId) {
         const res = await MindmapsAPI.update(this.editingMindmapId, data);
         if (!res.ok) {
-          showToast("Failed to save mindmap", "error");
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         this.showSaveStatus("Saved");
       } else {
         const response = await MindmapsAPI.create(data);
         if (!response.ok) {
-          showToast("Failed to create mindmap", "error");
+          const errBody = await response.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         const result = await response.json();
@@ -254,7 +260,7 @@ export class MindmapSidenavModule {
     } catch (error) {
       console.error("Error saving mindmap:", error);
       this.showSaveStatus("Error");
-      showToast("Error saving mindmap", "error");
+      showToast(error.message || "Error saving mindmap", "error");
     }
   }
 
@@ -271,7 +277,8 @@ export class MindmapSidenavModule {
     try {
       const res = await MindmapsAPI.delete(this.editingMindmapId);
       if (!res.ok) {
-        showToast("Failed to delete mindmap", "error");
+        const errBody = await res.json().catch(() => ({}));
+        showToast(extractErrorMessage(errBody), "error");
         return;
       }
       showToast("Mindmap deleted", "success");
@@ -279,7 +286,7 @@ export class MindmapSidenavModule {
       this.close();
     } catch (error) {
       console.error("Error deleting mindmap:", error);
-      showToast("Error deleting mindmap", "error");
+      showToast(error.message || "Error deleting mindmap", "error");
     }
   }
 

@@ -4,6 +4,7 @@
 import { OnboardingTemplatesAPI } from "../api.js";
 import { Sidenav } from "../ui/sidenav.js";
 import { showConfirm } from "../ui/confirm.js";
+import { extractErrorMessage } from "../utils.js";
 
 export class OnboardingTemplateSidenavModule {
   constructor(taskManager) {
@@ -106,14 +107,16 @@ export class OnboardingTemplateSidenavModule {
       if (this.editingId) {
         const res = await OnboardingTemplatesAPI.update(this.editingId, payload);
         if (!res.ok) {
-          statusEl.textContent = "Error saving";
+          const errBody = await res.json().catch(() => ({}));
+          statusEl.textContent = extractErrorMessage(errBody);
           statusEl.classList.remove("hidden");
           return;
         }
       } else {
         const res = await OnboardingTemplatesAPI.create(payload);
         if (!res.ok) {
-          statusEl.textContent = "Error saving";
+          const errBody = await res.json().catch(() => ({}));
+          statusEl.textContent = extractErrorMessage(errBody);
           statusEl.classList.remove("hidden");
           return;
         }
@@ -125,7 +128,7 @@ export class OnboardingTemplateSidenavModule {
       this._closePanel();
     } catch (err) {
       console.error("Error saving template:", err);
-      statusEl.textContent = "Error saving";
+      statusEl.textContent = err.message || "Error saving";
       statusEl.classList.remove("hidden");
     }
   }
@@ -136,7 +139,8 @@ export class OnboardingTemplateSidenavModule {
     try {
       const res = await OnboardingTemplatesAPI.delete(this.editingId);
       if (!res.ok) {
-        console.error("Error deleting onboarding template");
+        const errBody = await res.json().catch(() => ({}));
+        console.error("Error deleting onboarding template:", extractErrorMessage(errBody));
         return;
       }
       await this.taskManager.onboardingModule.load();

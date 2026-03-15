@@ -5,7 +5,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { RiskAnalysisAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { showConfirm } from "../ui/confirm.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, extractErrorMessage } from "../utils.js";
 
 export class RiskSidenavModule {
   constructor(taskManager) {
@@ -183,14 +183,20 @@ export class RiskSidenavModule {
       if (this.editingRiskId) {
         const res = await RiskAnalysisAPI.update(this.editingRiskId, this.currentRisk);
         if (!res.ok) {
-          showToast("Failed to save risk analysis", "error");
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         this.showSaveStatus("Saved");
       } else {
         const response = await RiskAnalysisAPI.create(this.currentRisk);
         if (!response.ok) {
-          showToast("Failed to create risk analysis", "error");
+          const errBody = await response.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         const result = await response.json();
@@ -205,7 +211,7 @@ export class RiskSidenavModule {
     } catch (error) {
       console.error("Error saving risk analysis:", error);
       this.showSaveStatus("Error");
-      showToast("Error saving risk analysis", "error");
+      showToast(error.message || "Error saving risk analysis", "error");
     }
   }
 
@@ -218,7 +224,8 @@ export class RiskSidenavModule {
     try {
       const res = await RiskAnalysisAPI.delete(this.editingRiskId);
       if (!res.ok) {
-        showToast("Failed to delete risk analysis", "error");
+        const errBody = await res.json().catch(() => ({}));
+        showToast(extractErrorMessage(errBody), "error");
         return;
       }
       showToast("Risk analysis deleted", "success");
@@ -226,7 +233,7 @@ export class RiskSidenavModule {
       this.close();
     } catch (error) {
       console.error("Error deleting risk analysis:", error);
-      showToast("Error deleting risk analysis", "error");
+      showToast(error.message || "Error deleting risk analysis", "error");
     }
   }
 

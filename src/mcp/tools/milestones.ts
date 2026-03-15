@@ -36,7 +36,28 @@ export function registerMilestoneTools(
           (m.project ?? "").toLowerCase() === project.toLowerCase()
         );
       }
-      return ok(milestones);
+
+      // Enrich with task counts and completion percentage
+      const tasks = await parser.readTasks();
+      const flat = flattenTasks(tasks);
+      const enriched = milestones.map((m) => {
+        const linked = flat.filter(
+          (t) =>
+            (t.config?.milestone ?? "").toLowerCase() ===
+              m.name.toLowerCase(),
+        );
+        const taskCount = linked.length;
+        const doneCount = linked.filter((t) => t.completed).length;
+        return {
+          ...m,
+          taskCount,
+          doneCount,
+          completionPct: taskCount > 0
+            ? Math.round((doneCount / taskCount) * 100)
+            : 0,
+        };
+      });
+      return ok(enriched);
     },
   );
 
@@ -125,6 +146,9 @@ export function registerMilestoneTools(
 
       const totalDone = sections["Done"].length;
       const totalOpen = flat.length - totalDone;
+      const completionPct = flat.length > 0
+        ? Math.round((totalDone / flat.length) * 100)
+        : 0;
 
       return ok({
         milestone: m.name,
@@ -134,6 +158,7 @@ export function registerMilestoneTools(
         target: m.target,
         totalOpen,
         totalDone,
+        completionPct,
         sections,
       });
     },

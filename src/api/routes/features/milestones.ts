@@ -200,6 +200,7 @@ const MilestoneSummarySchema = z.object({
   target: z.string().optional(),
   totalOpen: z.number(),
   totalDone: z.number(),
+  completionPct: z.number().min(0).max(100),
   sections: z.record(z.string(), z.array(TaskStubSchema)),
 }).openapi("MilestoneSummary");
 
@@ -362,6 +363,9 @@ milestonesRouter.openapi(summaryRoute, async (c) => {
 
   const totalDone = sections["Done"].length;
   const totalOpen = flat.length - totalDone;
+  const completionPct = flat.length > 0
+    ? Math.round((totalDone / flat.length) * 100)
+    : 0;
 
   return c.json(
     {
@@ -372,6 +376,7 @@ milestonesRouter.openapi(summaryRoute, async (c) => {
       target: m.target,
       totalOpen,
       totalDone,
+      completionPct,
       sections,
     },
     200,

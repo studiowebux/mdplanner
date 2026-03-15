@@ -5,7 +5,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { CapacityAPI, PeopleAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { showConfirm } from "../ui/confirm.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, extractErrorMessage } from "../utils.js";
 
 export class CapacitySidenavModule {
   constructor(taskManager) {
@@ -296,7 +296,7 @@ export class CapacitySidenavModule {
       await this.tm.capacityModule?.load();
     } catch (error) {
       console.error("Error saving team member:", error);
-      showToast("Error saving team member", "error");
+      showToast(error.message || "Error saving team member", "error");
     }
   }
 
@@ -327,7 +327,7 @@ export class CapacitySidenavModule {
       showToast("Team member removed", "success");
     } catch (error) {
       console.error("Error removing team member:", error);
-      showToast("Error removing team member", "error");
+      showToast(error.message || "Error removing team member", "error");
     }
   }
 
@@ -424,7 +424,7 @@ export class CapacitySidenavModule {
       showToast(`Imported ${selectedIds.length} person(s)`, "success");
     } catch (error) {
       console.error("Error importing people:", error);
-      showToast("Error importing people", "error");
+      showToast(error.message || "Error importing people", "error");
     }
   }
 
@@ -449,7 +449,10 @@ export class CapacitySidenavModule {
           budgetHours: this.currentPlan.budgetHours,
         });
         if (!res.ok) {
-          showToast("Failed to save capacity plan", "error");
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         this.showSaveStatus("Saved");
@@ -460,7 +463,10 @@ export class CapacitySidenavModule {
           budgetHours: this.currentPlan.budgetHours,
         });
         if (!response.ok) {
-          showToast("Failed to create capacity plan", "error");
+          const errBody = await response.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         const result = await response.json();
@@ -486,8 +492,8 @@ export class CapacitySidenavModule {
       await this.tm.capacityModule?.load();
     } catch (error) {
       console.error("Error saving capacity plan:", error);
-      this.showSaveStatus("Error");
-      showToast("Error saving capacity plan", "error");
+      this.showSaveStatus(error.message || "Error");
+      showToast(error.message || "Error saving capacity plan", "error");
     }
   }
 
@@ -500,7 +506,9 @@ export class CapacitySidenavModule {
     try {
       const res = await CapacityAPI.delete(this.editingPlanId);
       if (!res.ok) {
-        showToast("Failed to delete capacity plan", "error");
+        const errBody = await res.json().catch(() => ({}));
+        const errMsg = extractErrorMessage(errBody);
+        showToast(errMsg, "error");
         return;
       }
       showToast("Capacity plan deleted", "success");
@@ -509,7 +517,7 @@ export class CapacitySidenavModule {
       this.close();
     } catch (error) {
       console.error("Error deleting capacity plan:", error);
-      showToast("Error deleting capacity plan", "error");
+      showToast(error.message || "Error deleting capacity plan", "error");
     }
   }
 

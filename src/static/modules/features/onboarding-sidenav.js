@@ -7,6 +7,7 @@ import { OnboardingAPI } from "../api.js";
 import { Sidenav } from "../ui/sidenav.js";
 import { showConfirm } from "../ui/confirm.js";
 import { bindAutocomplete } from "../ui/autocomplete.js";
+import { extractErrorMessage } from "../utils.js";
 
 const CATEGORY_ORDER = ["equipment", "accounts", "docs", "training", "intro", "other"];
 
@@ -82,7 +83,8 @@ export class OnboardingSidenavModule {
           steps: existing?.steps ?? [],
         });
         if (!res.ok) {
-          statusEl.textContent = "Error";
+          const errBody = await res.json().catch(() => ({}));
+          statusEl.textContent = extractErrorMessage(errBody);
           statusEl.classList.remove("hidden");
           return;
         }
@@ -105,7 +107,8 @@ export class OnboardingSidenavModule {
         }
         const res = await OnboardingAPI.create({ employeeName: name, role, startDate, personId, notes, steps });
         if (!res.ok) {
-          statusEl.textContent = "Error";
+          const errBody = await res.json().catch(() => ({}));
+          statusEl.textContent = extractErrorMessage(errBody);
           statusEl.classList.remove("hidden");
           return;
         }
@@ -117,7 +120,7 @@ export class OnboardingSidenavModule {
       Sidenav.close("onboardingSidenav");
     } catch (err) {
       console.error("Error saving onboarding:", err);
-      statusEl.textContent = "Error";
+      statusEl.textContent = err.message || "Error";
       statusEl.classList.remove("hidden");
     }
   }
@@ -128,7 +131,8 @@ export class OnboardingSidenavModule {
     try {
       const res = await OnboardingAPI.delete(this.editingId);
       if (!res.ok) {
-        console.error("Error deleting onboarding record");
+        const errBody = await res.json().catch(() => ({}));
+        console.error("Error deleting onboarding record:", extractErrorMessage(errBody));
         return;
       }
       await this.taskManager.onboardingModule.load();
@@ -218,7 +222,8 @@ export class OnboardingSidenavModule {
     try {
       const res = await OnboardingAPI.update(this.detailRecord.id, this.detailRecord);
       if (!res.ok) {
-        console.error("Error saving onboarding steps");
+        const errBody = await res.json().catch(() => ({}));
+        console.error("Error saving onboarding steps:", extractErrorMessage(errBody));
         return;
       }
       this.taskManager.onboardingRecords = await OnboardingAPI.fetchAll();

@@ -5,7 +5,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { C4API } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
 import { showToast } from "../ui/toast.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, extractErrorMessage } from "../utils.js";
 
 export class C4SidenavModule {
   constructor(taskManager) {
@@ -477,8 +477,8 @@ export class C4SidenavModule {
       this.tm.c4Module.render();
     } catch (error) {
       console.error("Error saving C4 component:", error);
-      this.showSaveStatus("Error");
-      showToast("Error saving component", "error");
+      this.showSaveStatus(error.message || "Error");
+      showToast(error.message || "Error saving component", "error");
     }
   }
 
@@ -515,7 +515,7 @@ export class C4SidenavModule {
       this.close();
     } catch (error) {
       console.error("Error deleting component:", error);
-      showToast("Error deleting component", "error");
+      showToast(error.message || "Error deleting component", "error");
     }
   }
 

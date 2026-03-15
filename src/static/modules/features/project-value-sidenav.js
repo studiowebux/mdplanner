@@ -5,7 +5,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { ProjectValueAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { showConfirm } from "../ui/confirm.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, extractErrorMessage } from "../utils.js";
 
 export class ProjectValueSidenavModule {
   constructor(taskManager) {
@@ -173,14 +173,20 @@ export class ProjectValueSidenavModule {
       if (this.editingBoardId) {
         const res = await ProjectValueAPI.update(this.editingBoardId, this.currentBoard);
         if (!res.ok) {
-          showToast("Failed to save Project Value Board", "error");
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         this.showSaveStatus("Saved");
       } else {
         const response = await ProjectValueAPI.create(this.currentBoard);
         if (!response.ok) {
-          showToast("Failed to create Project Value Board", "error");
+          const errBody = await response.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         const result = await response.json();
@@ -195,7 +201,7 @@ export class ProjectValueSidenavModule {
     } catch (error) {
       console.error("Error saving Project Value Board:", error);
       this.showSaveStatus("Error");
-      showToast("Error saving Project Value Board", "error");
+      showToast(error.message || "Error saving Project Value Board", "error");
     }
   }
 
@@ -208,7 +214,8 @@ export class ProjectValueSidenavModule {
     try {
       const res = await ProjectValueAPI.delete(this.editingBoardId);
       if (!res.ok) {
-        showToast("Failed to delete Project Value Board", "error");
+        const errBody = await res.json().catch(() => ({}));
+        showToast(extractErrorMessage(errBody), "error");
         return;
       }
       showToast("Project Value Board deleted", "success");
@@ -216,7 +223,7 @@ export class ProjectValueSidenavModule {
       this.close();
     } catch (error) {
       console.error("Error deleting Project Value Board:", error);
-      showToast("Error deleting Project Value Board", "error");
+      showToast(error.message || "Error deleting Project Value Board", "error");
     }
   }
 

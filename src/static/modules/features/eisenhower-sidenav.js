@@ -4,7 +4,7 @@
 import { Sidenav } from "../ui/sidenav.js";
 import { EisenhowerAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, extractErrorMessage } from "../utils.js";
 import { showConfirm } from "../ui/confirm.js";
 
 const QUADRANTS = [
@@ -192,14 +192,20 @@ export class EisenhowerSidenavModule {
           this.currentMatrix,
         );
         if (!res.ok) {
-          showToast("Failed to save Eisenhower matrix", "error");
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         this.showSaveStatus("Saved");
       } else {
         const response = await EisenhowerAPI.create(this.currentMatrix);
         if (!response.ok) {
-          showToast("Failed to create Eisenhower matrix", "error");
+          const errBody = await response.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         const result = await response.json();
@@ -216,7 +222,7 @@ export class EisenhowerSidenavModule {
     } catch (error) {
       console.error("Error saving Eisenhower matrix:", error);
       this.showSaveStatus("Error");
-      showToast("Error saving Eisenhower matrix", "error");
+      showToast(error.message || "Error saving Eisenhower matrix", "error");
     }
   }
 
@@ -231,7 +237,8 @@ export class EisenhowerSidenavModule {
     try {
       const res = await EisenhowerAPI.delete(this.editingEisenhowerId);
       if (!res.ok) {
-        showToast("Failed to delete Eisenhower matrix", "error");
+        const errBody = await res.json().catch(() => ({}));
+        showToast(extractErrorMessage(errBody), "error");
         return;
       }
       showToast("Eisenhower matrix deleted", "success");
@@ -239,7 +246,7 @@ export class EisenhowerSidenavModule {
       this.close();
     } catch (error) {
       console.error("Error deleting Eisenhower matrix:", error);
-      showToast("Error deleting Eisenhower matrix", "error");
+      showToast(error.message || "Error deleting Eisenhower matrix", "error");
     }
   }
 

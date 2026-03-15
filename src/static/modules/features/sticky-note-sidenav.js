@@ -19,6 +19,9 @@ export class StickyNoteSidenavModule extends BaseSidenavModule {
   get editLabel() { return "Edit Sticky Note"; }
   get inputIds() { return ["stickySidenavContent"]; }
 
+  getRequiredFields() { return [{ id: "stickySidenavContent", label: "Content" }]; }
+  getFieldMap() { return { content: "stickySidenavContent" }; }
+
   bindEvents() {
     super.bindEvents();
 

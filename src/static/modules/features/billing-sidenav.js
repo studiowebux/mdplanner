@@ -5,7 +5,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { BillingAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { showConfirm } from "../ui/confirm.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, extractErrorMessage } from "../utils.js";
 
 export class BillingSidenavModule {
   constructor(taskManager) {
@@ -659,8 +659,9 @@ export class BillingSidenavModule {
       await this.tm.billingModule?.load();
     } catch (error) {
       console.error(`Error saving ${this.entityType}:`, error);
-      this.showSaveStatus("Error");
-      showToast(`Error saving ${this.entityType}`, "error");
+      const errMsg = error.message || `Error saving ${this.entityType}`;
+      this.showSaveStatus(errMsg);
+      showToast(errMsg, "error");
     }
   }
 
@@ -744,7 +745,7 @@ export class BillingSidenavModule {
       this.close();
     } catch (error) {
       console.error(`Error deleting ${this.entityType}:`, error);
-      showToast(`Error deleting ${this.entityType}`, "error");
+      showToast(error.message || `Error deleting ${this.entityType}`, "error");
     }
   }
 

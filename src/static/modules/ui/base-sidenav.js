@@ -6,6 +6,12 @@ import { Sidenav } from "./sidenav.js";
 import { showToast } from "./toast.js";
 import { showConfirm } from "./confirm.js";
 import { UndoManager } from "./undo-manager.js";
+import {
+  clearAllFieldErrors,
+  extractErrorMessage,
+  showServerFieldErrors,
+  validateRequired,
+} from "../utils.js";
 
 /** Global set of BaseSidenavModule instances that have unsaved changes. */
 const _dirtyModules = new Set();
@@ -103,6 +109,7 @@ export class BaseSidenavModule {
     this._setDirty(false);
     this.el("Header").textContent = this.newLabel;
     this.clearForm();
+    clearAllFieldErrors(document.getElementById(this.panelId));
     this.el("Delete")?.classList.add("hidden");
     Sidenav.registerModule(this);
     Sidenav.open(this.panelId);
@@ -121,6 +128,7 @@ export class BaseSidenavModule {
     this._setDirty(false);
     this.el("Header").textContent = this.editLabel;
     this.fillForm(entity);
+    clearAllFieldErrors(document.getElementById(this.panelId));
     this.el("Delete")?.classList.remove("hidden");
     Sidenav.registerModule(this);
     Sidenav.open(this.panelId);
@@ -149,15 +157,44 @@ export class BaseSidenavModule {
     this.close();
   }
 
+  /**
+   * Override in subclass to declare required fields for client-side validation.
+   * Each entry: { id: "inputElementId", label: "Display Name", maxLength?: 200 }
+   * @returns {{ id: string, label: string, maxLength?: number }[]}
+   */
+  getRequiredFields() {
+    return [];
+  }
+
+  /**
+   * Override in subclass to map server field names to input IDs for inline errors.
+   * Example: { title: "goalSidenavTitle", name: "milestoneSidenavName" }
+   * @returns {Record<string, string>}
+   */
+  getFieldMap() {
+    return {};
+  }
+
   async save() {
     if (this.isSaving) return;
 
     const data = this.getFormData();
 
-    const requiredValue = data[this.titleField];
-    if (!requiredValue || (typeof requiredValue === "string" && !requiredValue.trim())) {
-      this.showSaveStatus(`${this.titleField.charAt(0).toUpperCase() + this.titleField.slice(1)} required`);
-      return;
+    // Client-side validation — required fields
+    const requiredFields = this.getRequiredFields();
+    if (requiredFields.length > 0) {
+      const errors = validateRequired(requiredFields);
+      if (errors.length > 0) {
+        this.showSaveStatus(errors[0].message);
+        return;
+      }
+    } else {
+      // Fallback: legacy titleField check for modules that haven't adopted getRequiredFields
+      const requiredValue = data[this.titleField];
+      if (!requiredValue || (typeof requiredValue === "string" && !requiredValue.trim())) {
+        this.showSaveStatus(`${this.titleField.charAt(0).toUpperCase() + this.titleField.slice(1)} required`);
+        return;
+      }
     }
 
     this.isSaving = true;
@@ -185,9 +222,10 @@ export class BaseSidenavModule {
         }
         if (!response.ok) {
           const body = await response.json().catch(() => ({}));
-          const errMsg = this._extractErrorMessage(body);
+          const errMsg = extractErrorMessage(body);
           this.showSaveStatus(errMsg);
           showToast(errMsg || `Error saving ${this.entityName}`, "error");
+          showServerFieldErrors(errMsg, this.getFieldMap());
           return;
         }
 
@@ -202,9 +240,10 @@ export class BaseSidenavModule {
         const response = await this.api.create(data);
         const result = await response.json();
         if (!response.ok) {
-          const errMsg = this._extractErrorMessage(result);
+          const errMsg = extractErrorMessage(result);
           this.showSaveStatus(errMsg);
           showToast(errMsg || `Error creating ${this.entityName}`, "error");
+          showServerFieldErrors(errMsg, this.getFieldMap());
           return;
         }
         this.editingId = result.id;
@@ -236,7 +275,7 @@ export class BaseSidenavModule {
       const container = document.getElementById(`${this.prefix}Sidenav`);
       if (!container) return;
       banner = document.createElement("div");
-      banner.id = `${this.prefix}ConflictBanner`;
+      banner.id = `${this.prefix}SidenavConflictBanner`;
       banner.className = "sidenav-conflict-banner";
       const msg = document.createElement("p");
       msg.textContent = "This item was updated by someone else while you were editing.";
@@ -250,7 +289,7 @@ export class BaseSidenavModule {
         await this.reloadData();
         if (this.editingId) {
           const refreshed = this.findEntity(this.editingId);
-          if (refreshed) this.openEdit(refreshed);
+          if (refreshed) this.openEdit(this.editingId);
         }
       });
       const overwriteBtn = document.createElement("button");
@@ -323,7 +362,7 @@ export class BaseSidenavModule {
       const container = document.getElementById(this.panelId);
       if (!container) return;
       banner = document.createElement("div");
-      banner.id = `${this.prefix}StaleBanner`;
+      banner.id = `${this.prefix}SidenavStaleBanner`;
       banner.className = "sidenav-stale-banner";
       const msg = document.createElement("p");
       msg.textContent =
@@ -336,10 +375,7 @@ export class BaseSidenavModule {
       reloadBtn.addEventListener("click", async () => {
         this._hideStaleEditBanner();
         await this.reloadData();
-        if (this.editingId) {
-          const refreshed = this.findEntity(this.editingId);
-          if (refreshed) this.openEdit(refreshed);
-        }
+        if (this.editingId) this.openEdit(this.editingId);
       });
       const keepBtn = document.createElement("button");
       keepBtn.textContent = "Keep editing";
@@ -380,23 +416,7 @@ export class BaseSidenavModule {
     }
   }
 
-  /** Extract a human-readable error message from API error responses. */
-  _extractErrorMessage(body) {
-    if (!body) return "Error";
-    // String error field
-    if (typeof body.error === "string") return body.error;
-    // Zod validation error — flatten issues into readable text
-    if (body.error?.issues && Array.isArray(body.error.issues)) {
-      return body.error.issues
-        .map((i) => `${i.path?.join(".") || "field"}: ${i.message}`)
-        .join("; ");
-    }
-    // message field (defaultHook format)
-    if (typeof body.message === "string") return body.message;
-    return "Error";
-  }
-
-  // --- Status display (replaces hardcoded Tailwind colors) ---
+  // --- Status display ---
 
   showSaveStatus(text) {
     const statusEl = this.el("SaveStatus");
@@ -419,7 +439,7 @@ export class BaseSidenavModule {
       statusEl.classList.add("sidenav-status-saving");
     }
 
-    if (textStr === "Saved" || textStr === "Created" || textStr === "Error") {
+    if (textStr === "Saved" || textStr === "Created" || textStr !== "Saving...") {
       setTimeout(() => {
         if (this._hasAnyUnsavedChanges()) {
           statusEl.textContent = "Modified";

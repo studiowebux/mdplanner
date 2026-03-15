@@ -7,7 +7,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { FishboneAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { showConfirm } from "../ui/confirm.js";
-import { escapeHtml, markdownToHtml } from "../utils.js";
+import { escapeHtml, markdownToHtml, extractErrorMessage } from "../utils.js";
 
 const DEFAULT_CATEGORIES = [
   "People",
@@ -318,10 +318,10 @@ export class FishboneSidenavModule {
 
     if (this.editingId) {
       const res = await FishboneAPI.update(this.editingId, data);
-      if (!res.ok) { showToast("Failed to save diagram", "error"); return; }
+      if (!res.ok) { const errBody = await res.json().catch(() => ({})); showToast(extractErrorMessage(errBody), "error"); return; }
     } else {
       const res = await FishboneAPI.create(data);
-      if (!res.ok) { showToast("Failed to create diagram", "error"); return; }
+      if (!res.ok) { const errBody = await res.json().catch(() => ({})); showToast(extractErrorMessage(errBody), "error"); return; }
       const json = await res.json();
       this.editingId = json.id;
     }
@@ -345,7 +345,7 @@ export class FishboneSidenavModule {
     if (!confirmed) return;
 
     const res = await FishboneAPI.delete(this.editingId);
-    if (!res.ok) { showToast("Failed to delete diagram", "error"); return; }
+    if (!res.ok) { const errBody = await res.json().catch(() => ({})); showToast(extractErrorMessage(errBody), "error"); return; }
 
     this.tm.fishbones = await FishboneAPI.fetchAll();
     this.tm.fishboneModule.renderView();

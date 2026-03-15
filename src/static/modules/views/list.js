@@ -546,11 +546,14 @@ export class ListView {
         (t) => t.section === section && !t.parentId,
       ).length;
       const anchorId = `section-${section.toLowerCase().replace(/\s+/g, "-")}`;
-      const pill = document.createElement("a");
-      pill.href = `#${anchorId}`;
+      const pill = document.createElement("button");
+      pill.type = "button";
       pill.className = "section-jump-pill";
       pill.dataset.section = section;
       pill.textContent = `${section} (${count})`;
+      pill.addEventListener("click", () => {
+        document.getElementById(anchorId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
       bar.appendChild(pill);
     });
 
@@ -987,12 +990,13 @@ export class ListView {
       for (let i = 0; i < allUpdates.length; i += BATCH_SIZE) {
         const chunk = allUpdates.slice(i, i + BATCH_SIZE);
         const response = await TasksAPI.batchUpdate(chunk);
-        const result = await response.json();
         if (!response.ok) {
-          const errMsg = result.message || result.error || "Server error";
+          const errBody = await response.json().catch(() => ({}));
+          const errMsg = errBody.message || errBody.error || "Server error";
           showToast(`Batch update failed: ${errMsg}`, true);
           return;
         }
+        const result = await response.json();
         totalUpdated += result.updated ?? 0;
         totalFailed += result.results?.filter((r) => !r.success).length ?? 0;
       }
