@@ -546,11 +546,14 @@ export class ListView {
         (t) => t.section === section && !t.parentId,
       ).length;
       const anchorId = `section-${section.toLowerCase().replace(/\s+/g, "-")}`;
-      const pill = document.createElement("a");
-      pill.href = `#${anchorId}`;
+      const pill = document.createElement("button");
+      pill.type = "button";
       pill.className = "section-jump-pill";
       pill.dataset.section = section;
       pill.textContent = `${section} (${count})`;
+      pill.addEventListener("click", () => {
+        document.getElementById(anchorId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
       bar.appendChild(pill);
     });
 
