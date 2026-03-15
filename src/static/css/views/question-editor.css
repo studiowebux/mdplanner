@@ -1,11 +1,11 @@
 /* Shared sidenav question editor — used by brainstorm + reflection modules */
 
 .sidenav-question-item {
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--color-border-default);
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 8px;
-  background: var(--bg-primary);
+  background: var(--color-bg-primary);
 }
 
 .sidenav-question-header {
@@ -21,14 +21,15 @@
   font-size: 0.875rem;
   background: transparent;
   border: none;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--color-border-default);
   padding: 4px 0;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   outline: none;
 }
 
 .sidenav-question-input:focus {
-  border-bottom-color: var(--accent-color);
+  outline: none;
+  border-bottom-color: var(--color-border-focus);
 }
 
 .sidenav-question-actions {
@@ -46,18 +47,20 @@
 .sidenav-answer-input {
   width: 100%;
   font-size: 0.875rem;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-default);
   border-radius: 6px;
   padding: 8px;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   resize: vertical;
   min-height: 60px;
   outline: none;
 }
 
 .sidenav-answer-input:focus {
-  border-color: var(--accent-color);
+  outline: none;
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.2);
 }
 
 .sidenav-filter-bar {
@@ -65,7 +68,7 @@
   align-items: center;
   gap: 12px;
   padding: 12px 24px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--color-border-default);
 }
 
 .sidenav-filter-bar input[type="text"] {
@@ -73,13 +76,13 @@
   max-width: 320px;
   padding: 6px 12px;
   font-size: 0.875rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--color-border-default);
   border-radius: 6px;
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
 }
 
 .sidenav-filter-bar input[type="text"]:focus {
   outline: none;
-  border-color: var(--accent-color);
+  border-color: var(--color-border-focus);
 }

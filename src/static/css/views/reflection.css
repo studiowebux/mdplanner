@@ -51,13 +51,13 @@
   padding: 4px 10px;
   font-size: 0.75rem;
   border-radius: 9999px;
-  background: var(--bg-active);
-  color: var(--text-secondary);
+  background: var(--color-bg-active);
+  color: var(--color-text-secondary);
   cursor: pointer;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--color-border-default);
   transition: background 0.15s;
 }
 
 .reflection-template-chip:hover {
-  background: var(--bg-hover);
+  background: var(--color-bg-hover);
 }
