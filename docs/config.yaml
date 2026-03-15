@@ -65,6 +65,10 @@ landing:
   nav:
     - text: "Docs"
       url: "/getting-started/quick-start.html"
+    - text: "REST API"
+      url: "/openapi/"
+    - text: "MCP Tools"
+      url: "/mcp/"
     - text: "GitHub"
       url: "https://github.com/studiowebux/mdplanner"
     - text: "Discord"
