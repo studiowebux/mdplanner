@@ -169,7 +169,12 @@ goalsRouter.openapi(updateGoalRoute, async (c) => {
   const parser = getParser(c);
   const { id: goalId } = c.req.valid("param");
   const body = c.req.valid("json");
-  const success = await parser.updateGoal(goalId, body);
+  const update = {
+    ...body,
+    kpiMetric: body.kpiMetric ?? undefined,
+    kpiTarget: body.kpiTarget ?? undefined,
+  };
+  const success = await parser.updateGoal(goalId, update);
 
   if (success) {
     await cacheWriteThrough(c, "goals");
