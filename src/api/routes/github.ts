@@ -223,6 +223,63 @@ githubRouter.openapi(createIssueRoute, async (c) => {
   }
 });
 
+// GET /integrations/github/repo/:owner/:repo/releases/latest — latest release
+const getLatestReleaseRoute = createRoute({
+  method: "get",
+  path: "/repo/{owner}/{repo}/releases/latest",
+  tags: ["GitHub"],
+  summary: "Get the latest published release for a repository",
+  operationId: "getGitHubLatestRelease",
+  request: {
+    params: z.object({
+      owner: z.string().openapi({
+        param: { name: "owner", in: "path" },
+      }),
+      repo: z.string().openapi({
+        param: { name: "repo", in: "path" },
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.any() } },
+      description: "Latest release details",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Token not configured",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "No releases found",
+    },
+    502: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "GitHub API error",
+    },
+  },
+});
+
+githubRouter.openapi(getLatestReleaseRoute, async (c) => {
+  const token = await resolveToken(c);
+  if (!token) return c.json({ error: "GitHub token not configured" }, 400);
+
+  const { owner, repo } = c.req.valid("param");
+
+  try {
+    const provider = new GitHubApiProvider(token);
+    const release = await provider.getLatestRelease(owner, repo);
+    if (!release) {
+      return c.json({ error: "No releases found" }, 404);
+    }
+    return c.json(release, 200);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "GitHub API error";
+    if (msg.includes("404")) return c.json({ error: msg }, 404);
+    return c.json({ error: msg }, 502);
+  }
+});
+
 // GET /integrations/github/repos?query=:q — list accessible repos (for autocomplete)
 const listReposRoute = createRoute({
   method: "get",

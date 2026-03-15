@@ -121,6 +121,37 @@
   background: var(--color-bg-tertiary);
 }
 
+.github-release-badge {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  background: var(--color-bg-tertiary);
+  font-weight: 500;
+}
+
+.github-quick-links {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.github-quick-links a {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+}
+
+.github-quick-links a:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-focus);
+}
+
 /* Issue state badges */
 .github-issue-badge {
   display: inline-block;

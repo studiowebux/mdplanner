@@ -1,11 +1,12 @@
 /**
  * MCP tools for milestone operations.
- * Tools: list_milestones, get_milestone, create_milestone, update_milestone, delete_milestone
+ * Tools: list_milestones, get_milestone, get_milestone_summary, create_milestone, update_milestone, delete_milestone
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { ProjectManager } from "../../lib/project-manager.ts";
+import { Task } from "../../lib/types.ts";
 import { err, ok } from "./utils.ts";
 
 export function registerMilestoneTools(
@@ -64,6 +65,77 @@ export function registerMilestoneTools(
       const m = await parser.readMilestoneByName(name);
       if (!m) return err(`Milestone '${name}' not found`);
       return ok(m);
+    },
+  );
+
+  server.registerTool(
+    "get_milestone_summary",
+    {
+      description:
+        "Get a milestone's tasks pre-grouped by section with slim fields. " +
+        "Returns milestone metadata plus tasks grouped into In Progress, " +
+        "Pending Review, Todo, Done (and any other sections). " +
+        "Each task stub has only id, title, and tags. " +
+        "Replaces list_tasks { milestone } + manual grouping — one call, ~3 KB instead of ~60 KB.",
+      inputSchema: {
+        milestone: z.string().describe("Milestone name (e.g. 'v0.36.2')"),
+        project: z.string().optional().describe(
+          "Filter tasks by project name (case-insensitive)",
+        ),
+      },
+    },
+    async ({ milestone, project }) => {
+      const m = await parser.readMilestoneByName(milestone);
+      if (!m) return err(`Milestone '${milestone}' not found`);
+
+      const tasks = await parser.readTasks();
+      let flat = flattenTasks(tasks);
+
+      // Filter to tasks in this milestone
+      flat = flat.filter(
+        (t) =>
+          (t.config?.milestone ?? "").toLowerCase() ===
+            milestone.toLowerCase(),
+      );
+      if (project) {
+        flat = flat.filter(
+          (t) =>
+            (t.config?.project ?? "").toLowerCase() === project.toLowerCase(),
+        );
+      }
+
+      // Group by section, ordered: In Progress, Pending Review, Todo, Done, then any others
+      const sectionOrder = ["In Progress", "Pending Review", "Todo", "Done"];
+      const sections: Record<
+        string,
+        { id: string; title: string; tags: string[] }[]
+      > = {};
+      for (const name of sectionOrder) {
+        sections[name] = [];
+      }
+      for (const t of flat) {
+        const sec = t.section;
+        if (!sections[sec]) sections[sec] = [];
+        sections[sec].push({
+          id: t.id,
+          title: t.title,
+          tags: t.config?.tags ?? [],
+        });
+      }
+
+      const totalDone = sections["Done"].length;
+      const totalOpen = flat.length - totalDone;
+
+      return ok({
+        milestone: m.name,
+        id: m.id,
+        status: m.status,
+        description: m.description,
+        target: m.target,
+        totalOpen,
+        totalDone,
+        sections,
+      });
     },
   );
 
@@ -156,4 +228,16 @@ export function registerMilestoneTools(
       return ok({ success: true });
     },
   );
+}
+
+/** Flattens a task tree into a single-level array. */
+function flattenTasks(tasks: Task[]): Task[] {
+  const result: Task[] = [];
+  for (const task of tasks) {
+    result.push(task);
+    if (task.children?.length) {
+      result.push(...flattenTasks(task.children));
+    }
+  }
+  return result;
 }

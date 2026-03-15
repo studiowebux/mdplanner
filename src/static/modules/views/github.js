@@ -82,19 +82,22 @@ export class GitHubView {
       return;
     }
 
-    // Fetch stats for each linked repo in parallel
+    // Fetch stats and latest release for each linked repo in parallel
     const results = await Promise.allSettled(
       linked.map(async (p) => {
         const [owner, repo] = p.githubRepo.split("/");
-        const data = await GitHubAPI.getRepo(owner, repo);
-        return { project: p, data };
+        const [data, release] = await Promise.all([
+          GitHubAPI.getRepo(owner, repo),
+          GitHubAPI.getLatestRelease(owner, repo).catch(() => null),
+        ]);
+        return { project: p, data, release };
       }),
     );
 
     // Build repo list (include failed ones with null data)
     this._repos = results.map((result, i) => {
       if (result.status === "rejected") {
-        return { project: linked[i], data: null };
+        return { project: linked[i], data: null, release: null };
       }
       return result.value;
     });
@@ -167,18 +170,19 @@ export class GitHubView {
           <th>Stars</th>
           <th>Open Issues</th>
           <th>Open PRs</th>
+          <th>Release</th>
           <th>Last Push</th>
           <th>License</th>
         </tr>
       </thead>
       <tbody>`;
 
-    for (const { project, data } of repos) {
+    for (const { project, data, release } of repos) {
       if (!data) {
         html += `<tr>
           <td>${this._esc(project.name)}</td>
           <td>${this._esc(project.githubRepo)}</td>
-          <td colspan="5" class="text-muted text-sm">Failed to load</td>
+          <td colspan="6" class="text-muted text-sm">Failed to load</td>
         </tr>`;
         continue;
       }
@@ -186,6 +190,9 @@ export class GitHubView {
         ? new Date(data.lastCommitAt).toLocaleDateString()
         : "—";
       const repoBase = `https://github.com/${this._esc(project.githubRepo)}`;
+      const releaseCell = release
+        ? `<a href="${this._esc(release.htmlUrl)}" target="_blank" rel="noopener noreferrer" class="github-view-repolink github-release-badge">${this._esc(release.tagName)}</a>`
+        : "—";
       html += `<tr>
         <td>${this._esc(project.name)}</td>
         <td>
@@ -197,6 +204,7 @@ export class GitHubView {
         <td>${data.stars}</td>
         <td><a href="${repoBase}/issues" target="_blank" rel="noopener noreferrer" class="github-view-repolink">${data.openIssues}</a></td>
         <td><a href="${repoBase}/pulls" target="_blank" rel="noopener noreferrer" class="github-view-repolink">${data.openPRs ?? 0}</a></td>
+        <td>${releaseCell}</td>
         <td class="text-muted">${lastPush}</td>
         <td>${data.license ? `<span class="github-license-badge">${this._esc(data.license)}</span>` : "—"}</td>
       </tr>`;
