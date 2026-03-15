@@ -2,6 +2,7 @@
 import { NotesAPI, ProjectAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
 import { showLoading, hideLoading } from "../ui/loading.js";
+import { showToast } from "../ui/toast.js";
 
 /**
  * Notes management - CRUD, selection, save
@@ -323,7 +324,7 @@ export class NotesModule {
         this.tm.notes[this.tm.activeNote].title = title;
 
         // Show saved status
-        this.showSaveStatus("Saved");
+        this.showSaveStatus("Saved"); showToast("Saved", "success");
 
         // Update tab title if it changed
         this.renderView();

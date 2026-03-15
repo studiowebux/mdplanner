@@ -439,7 +439,7 @@ export class C4SidenavModule {
           data.id = this.editingComponentId;
           this.tm.c4Components[index] = data;
         }
-        this.showSaveStatus("Saved");
+        this.showSaveStatus("Saved"); showToast("Saved", "success");
       } else {
         // Create new component
         data.id = this.generateId();
@@ -460,7 +460,7 @@ export class C4SidenavModule {
         }
 
         this.tm.c4Components.push(data);
-        this.showSaveStatus("Created");
+        this.showSaveStatus("Created"); showToast("Created", "success");
 
         // Update UI
         document.getElementById("c4SidenavHeader").textContent =

@@ -189,7 +189,7 @@ export class OrgChartSidenavModule extends BaseSidenavModule {
           showToast("Failed to save team member", "error");
           return;
         }
-        this.showSaveStatus("Saved");
+        this.showSaveStatus("Saved"); showToast("Saved", "success");
       } else {
         const res = await OrgChartAPI.create(data);
         if (!res.ok) {

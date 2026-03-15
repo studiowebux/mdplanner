@@ -4,6 +4,7 @@
 import { FinancesAPI } from "../api.js";
 import { Sidenav } from "../ui/sidenav.js";
 import { showConfirm } from "../ui/confirm.js";
+import { showToast } from "../ui/toast.js";
 
 export class FinancesSidenavModule {
   constructor(taskManager) {
@@ -162,6 +163,7 @@ export class FinancesSidenavModule {
       statusEl.textContent = "Saved";
       statusEl.classList.remove("hidden");
       setTimeout(() => statusEl.classList.add("hidden"), 1500);
+      showToast("Saved", "success");
       await this.taskManager.financesModule.load();
       Sidenav.close("financesSidenav");
     } catch (err) {

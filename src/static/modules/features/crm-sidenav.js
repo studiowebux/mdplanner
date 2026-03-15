@@ -705,11 +705,11 @@ export class CRMSidenavModule {
     try {
       if (this.editingId) {
         await this.updateEntity(data);
-        this.showSaveStatus("Saved");
+        this.showSaveStatus("Saved"); showToast("Saved", "success");
       } else {
         const result = await this.createEntity(data);
         this.editingId = result.id;
-        this.showSaveStatus("Created");
+        this.showSaveStatus("Created"); showToast("Created", "success");
         document.getElementById("crmSidenavDelete").classList.remove("hidden");
       }
       await this.tm.crmModule?.load();

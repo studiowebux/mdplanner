@@ -198,7 +198,7 @@ export class EisenhowerSidenavModule {
           showToast(errMsg, "error");
           return;
         }
-        this.showSaveStatus("Saved");
+        this.showSaveStatus("Saved"); showToast("Saved", "success");
       } else {
         const response = await EisenhowerAPI.create(this.currentMatrix);
         if (!response.ok) {
@@ -211,7 +211,7 @@ export class EisenhowerSidenavModule {
         const result = await response.json();
         this.editingEisenhowerId = result.id;
         this.currentMatrix.id = result.id;
-        this.showSaveStatus("Created");
+        this.showSaveStatus("Created"); showToast("Created", "success");
         document.getElementById("eisenhowerSidenavHeader").textContent =
           "Edit Eisenhower Matrix";
         document.getElementById("eisenhowerSidenavDelete").classList.remove(

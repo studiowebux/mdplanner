@@ -236,6 +236,7 @@ export class BaseSidenavModule {
         this._markAllSaved();
         this._setDirty(false);
         this.showSaveStatus("Saved");
+        showToast(`${this.entityName} saved`, "success");
       } else {
         const response = await this.api.create(data);
         const result = await response.json();
@@ -251,6 +252,7 @@ export class BaseSidenavModule {
         this._markAllSaved();
         this._setDirty(false);
         this.showSaveStatus("Created");
+        showToast(`${this.entityName} created`, "success");
 
         this.el("Header").textContent = this.editLabel;
         this.el("Delete")?.classList.remove("hidden");

@@ -386,7 +386,7 @@ export class ReflectionSidenavModule {
           showToast(errMsg, "error");
           return;
         }
-        this._showSaveStatus("Saved");
+        this._showSaveStatus("Saved"); showToast("Saved", "success");
       } else {
         const response = await ReflectionsAPI.create(data);
         if (!response.ok) {
@@ -410,7 +410,7 @@ export class ReflectionSidenavModule {
           return;
         }
         this.editingId = result.id;
-        this._showSaveStatus("Created");
+        this._showSaveStatus("Created"); showToast("Created", "success");
         document.getElementById("reflectionSidenavHeader").textContent =
           "Edit Reflection";
         document

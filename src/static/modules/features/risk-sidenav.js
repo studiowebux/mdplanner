@@ -189,7 +189,7 @@ export class RiskSidenavModule {
           showToast(errMsg, "error");
           return;
         }
-        this.showSaveStatus("Saved");
+        this.showSaveStatus("Saved"); showToast("Saved", "success");
       } else {
         const response = await RiskAnalysisAPI.create(this.currentRisk);
         if (!response.ok) {
@@ -202,7 +202,7 @@ export class RiskSidenavModule {
         const result = await response.json();
         this.editingRiskId = result.id;
         this.currentRisk.id = result.id;
-        this.showSaveStatus("Created");
+        this.showSaveStatus("Created"); showToast("Created", "success");
         document.getElementById("riskSidenavHeader").textContent =
           "Edit Risk Analysis";
         document.getElementById("riskSidenavDelete").classList.remove("hidden");

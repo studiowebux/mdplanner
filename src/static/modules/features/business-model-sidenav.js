@@ -194,7 +194,7 @@ export class BusinessModelSidenavModule {
           showToast(errMsg, "error");
           return;
         }
-        this.showSaveStatus("Saved");
+        this.showSaveStatus("Saved"); showToast("Saved", "success");
       } else {
         const response = await BusinessModelAPI.create(this.currentCanvas);
         if (!response.ok) {
@@ -207,7 +207,7 @@ export class BusinessModelSidenavModule {
         const result = await response.json();
         this.editingCanvasId = result.id;
         this.currentCanvas.id = result.id;
-        this.showSaveStatus("Created");
+        this.showSaveStatus("Created"); showToast("Created", "success");
         document.getElementById("bmcSidenavHeader").textContent =
           "Edit Business Model Canvas";
         document.getElementById("bmcSidenavDelete").classList.remove("hidden");
