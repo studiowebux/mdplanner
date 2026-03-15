@@ -28,10 +28,12 @@ export class CerveauModule {
       } else {
         this.enabled = true;
         this.brains = result;
+        // Optional metadata — 404 is expected when files are absent; never
+        // let these failures disable the viewer
         const [protocol, registry, manifest] = await Promise.all([
-          CerveauAPI.fetchProtocol(),
-          CerveauAPI.fetchRegistry(),
-          CerveauAPI.fetchManifest(),
+          CerveauAPI.fetchProtocol().catch(() => null),
+          CerveauAPI.fetchRegistry().catch(() => null),
+          CerveauAPI.fetchManifest().catch(() => null),
         ]);
         this.protocol = protocol;
         this.registry = registry;

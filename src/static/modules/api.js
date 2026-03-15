@@ -1708,6 +1708,8 @@ export const CerveauAPI = {
 
   async fetchBrains() {
     const response = await get("/api/cerveau/brains");
+    // 404 means the route is not mounted (--cerveau-dir not set) — not an error
+    if (response.status === 404) return null;
     return ensureOk(response);
   },
 
