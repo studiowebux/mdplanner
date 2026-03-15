@@ -48,7 +48,7 @@ const CreateJournalEntrySchema = z
     time: z.string().optional().openapi({ description: "Time (HH:MM)" }),
     title: z.string().optional(),
     mood: journalMood.optional(),
-    tags: z.array(z.string()).optional(),
+    tags: z.array(z.string()).nullish(),
     body: z.string().optional(),
   })
   .openapi("CreateJournalEntry");
@@ -59,7 +59,7 @@ const UpdateJournalEntrySchema = z
     time: z.string().optional(),
     title: z.string().optional(),
     mood: journalMood.optional(),
-    tags: z.array(z.string()).optional(),
+    tags: z.array(z.string()).nullish(),
     body: z.string().optional(),
     updatedAt: z.string().optional().openapi({
       description: "Last known updatedAt for conflict detection",
@@ -195,7 +195,7 @@ journalRouter.openapi(createJournalRoute, async (c) => {
     time: body.time,
     title: body.title,
     mood: body.mood,
-    tags: body.tags,
+    tags: body.tags ?? undefined,
     body: body.body || "",
   });
   await cacheWriteThrough(c, "journal");
@@ -217,7 +217,7 @@ journalRouter.openapi(updateJournalRoute, async (c) => {
     time: body.time,
     title: body.title,
     mood: body.mood,
-    tags: body.tags,
+    tags: body.tags ?? undefined,
     body: body.body,
   });
   if (!updated) return c.json({ error: "Not found" }, 404);

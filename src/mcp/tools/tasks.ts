@@ -493,7 +493,9 @@ export function registerTaskTools(server: McpServer, pm: ProjectManager): void {
         ),
       },
     },
-    async ({ id, assignee, expected_section, expected_revision, withResult }) => {
+    async (
+      { id, assignee, expected_section, expected_revision, withResult },
+    ) => {
       try {
         if (expected_revision !== undefined) {
           const current = await parser.readTask(id);

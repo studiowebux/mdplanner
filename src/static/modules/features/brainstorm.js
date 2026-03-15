@@ -79,7 +79,7 @@ export class BrainstormModule {
           .join("");
 
         return `
-      <div class="bg-secondary rounded-lg p-4 border border-default brainstorm-card">
+      <div class="bg-secondary rounded-lg p-4 border border-default brainstorm-card cursor-pointer" onclick="taskManager.brainstormSidenavModule.openView('${b.id}')">
         <div class="flex justify-between items-start mb-2">
           <h3 class="font-medium text-primary">${b.title}</h3>
           <span class="px-2 py-1 text-xs rounded bg-info-bg text-info-text">${answeredCount}/${totalCount}</span>
@@ -97,8 +97,8 @@ export class BrainstormModule {
           ${totalCount > 3 ? `<p class="text-xs text-muted">+${totalCount - 3} more</p>` : ""}
         </div>
         <div class="flex justify-end gap-1 mt-3">
-          <button type="button" onclick="taskManager.brainstormSidenavModule.openEdit('${b.id}')" class="btn-ghost">Edit</button>
-          <button type="button" onclick="taskManager.deleteBrainstorm('${b.id}')" class="btn-danger-ghost">Delete</button>
+          <button type="button" onclick="event.stopPropagation(); taskManager.brainstormSidenavModule.openEdit('${b.id}')" class="btn-ghost">Edit</button>
+          <button type="button" onclick="event.stopPropagation(); taskManager.deleteBrainstorm('${b.id}')" class="btn-danger-ghost">Delete</button>
         </div>
       </div>`;
       })

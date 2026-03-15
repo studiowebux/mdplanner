@@ -129,7 +129,7 @@ export class ReflectionModule {
           : null;
 
         return `
-      <div class="bg-secondary rounded-lg p-4 border border-default reflection-card">
+      <div class="bg-secondary rounded-lg p-4 border border-default reflection-card cursor-pointer" onclick="taskManager.reflectionSidenavModule.openView('${r.id}')">
         <div class="flex justify-between items-start mb-2">
           <h3 class="font-medium text-primary">${r.title}</h3>
           <span class="px-2 py-1 text-xs rounded bg-info-bg text-info-text">${answeredCount}/${totalCount}</span>
@@ -148,8 +148,8 @@ export class ReflectionModule {
           ${totalCount > 3 ? `<p class="text-xs text-muted">+${totalCount - 3} more</p>` : ""}
         </div>
         <div class="flex justify-end gap-1 mt-3">
-          <button type="button" onclick="taskManager.reflectionSidenavModule.openEdit('${r.id}')" class="btn-ghost">Edit</button>
-          <button type="button" onclick="taskManager.deleteReflection('${r.id}')" class="btn-danger-ghost">Delete</button>
+          <button type="button" onclick="event.stopPropagation(); taskManager.reflectionSidenavModule.openEdit('${r.id}')" class="btn-ghost">Edit</button>
+          <button type="button" onclick="event.stopPropagation(); taskManager.deleteReflection('${r.id}')" class="btn-danger-ghost">Delete</button>
         </div>
       </div>`;
       })

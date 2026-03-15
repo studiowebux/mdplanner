@@ -33,7 +33,7 @@
     >
       <div class="max-w-7xl mx-auto px-4">
         <!-- Mobile header -->
-        <div class="flex items-center justify-between h-14 lg:hidden">
+        <div class="flex items-center justify-between h-14 xl:hidden">
           <h1 class="text-base font-semibold text-primary">
             MD Planner
           </h1>
@@ -64,7 +64,7 @@
         </div>
 
         <!-- Desktop header - Row 1: Logo, Project, Actions -->
-        <div class="hidden lg:flex items-center justify-between h-12">
+        <div class="hidden xl:flex items-center justify-between h-12">
           <div class="flex items-center gap-4">
             <h1
               class="text-base font-semibold text-primary"
@@ -381,7 +381,7 @@
         <!-- Desktop header - Row 2: Category Navigation -->
         <nav
           aria-label="Main navigation"
-          class="hidden lg:flex items-center gap-1 h-10 border-t border-default"
+          class="hidden xl:flex items-center gap-1 h-10 border-t border-default"
         >
           <!-- Summary - Top level button -->
           <button
@@ -935,7 +935,7 @@
       <!-- Mobile menu -->
       <div
         id="mobileMenu"
-        class="hidden lg:hidden border-t border-default bg-primary max-h-[80vh] overflow-y-auto"
+        class="hidden xl:hidden border-t border-default bg-primary max-h-[80vh] overflow-y-auto"
       >
         <div class="py-2">
           <!-- Project name -->
@@ -14083,7 +14083,10 @@
           </button>
         </div>
       </div>
-      <div class="sidenav-content">
+      <!-- View mode (read-only) -->
+      <div id="brainstormSidenavViewBody" class="sidenav-content hidden"></div>
+      <!-- Edit mode -->
+      <div id="brainstormSidenavEditBody" class="sidenav-content">
         <div class="sidenav-section">
           <label for="brainstormSidenavTitle" class="form-label">Title</label>
           <input type="text" id="brainstormSidenavTitle" class="form-input" placeholder="What do you want to explore?">
@@ -14107,6 +14110,13 @@
           class="btn-danger-ghost hidden"
         >
           Delete
+        </button>
+        <button
+          type="button"
+          id="brainstormSidenavEdit"
+          class="btn-secondary hidden"
+        >
+          Edit
         </button>
         <button
           type="button"
@@ -14139,7 +14149,10 @@
           </button>
         </div>
       </div>
-      <div class="sidenav-content">
+      <!-- View mode (read-only) -->
+      <div id="reflectionSidenavViewBody" class="sidenav-content hidden"></div>
+      <!-- Edit mode -->
+      <div id="reflectionSidenavEditBody" class="sidenav-content">
         <div class="sidenav-section">
           <label for="reflectionSidenavTitle" class="form-label">Title</label>
           <input
@@ -14184,6 +14197,13 @@
           class="btn-danger-ghost hidden"
         >
           Delete
+        </button>
+        <button
+          type="button"
+          id="reflectionSidenavEdit"
+          class="btn-secondary hidden"
+        >
+          Edit
         </button>
         <button
           type="button"

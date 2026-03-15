@@ -1,5 +1,5 @@
 // Reflection Sidenav Module
-// Slide-in panel for reflection creation and editing
+// Slide-in panel for reflection viewing, creation, and editing
 
 import { Sidenav } from "../ui/sidenav.js";
 import { ReflectionsAPI } from "../api.js";
@@ -20,6 +20,7 @@ export class ReflectionSidenavModule {
     this.tm = taskManager;
     this.editingId = null;
     this.current = null;
+    this.isViewMode = false;
   }
 
   bindEvents() {
@@ -43,6 +44,10 @@ export class ReflectionSidenavModule {
       "click",
       () => this.addQuestion(),
     );
+    document.getElementById("reflectionSidenavEdit")?.addEventListener(
+      "click",
+      () => this._setEditMode(),
+    );
   }
 
   openNew() {
@@ -58,6 +63,7 @@ export class ReflectionSidenavModule {
     document.getElementById("reflectionSidenavHeader").textContent =
       "New Reflection";
     document.getElementById("reflectionSidenavDelete").classList.add("hidden");
+    this._setEditMode();
     this._fillForm();
     Sidenav.open("reflectionSidenav");
     document.getElementById("reflectionSidenavTitle")?.focus();
@@ -81,9 +87,27 @@ export class ReflectionSidenavModule {
     document.getElementById("reflectionSidenavHeader").textContent =
       "New Reflection";
     document.getElementById("reflectionSidenavDelete").classList.add("hidden");
+    this._setEditMode();
     this._fillForm();
     Sidenav.open("reflectionSidenav");
     document.getElementById("reflectionSidenavTitle")?.focus();
+  }
+
+  openView(id) {
+    const reflection = (this.tm.reflections || []).find((r) => r.id === id);
+    if (!reflection) return;
+
+    this.editingId = id;
+    this.current = JSON.parse(JSON.stringify(reflection));
+
+    document.getElementById("reflectionSidenavHeader").textContent =
+      reflection.title;
+    document
+      .getElementById("reflectionSidenavDelete")
+      .classList.remove("hidden");
+    this._setViewMode();
+
+    Sidenav.open("reflectionSidenav");
   }
 
   openEdit(id) {
@@ -99,14 +123,97 @@ export class ReflectionSidenavModule {
     document
       .getElementById("reflectionSidenavDelete")
       .classList.remove("hidden");
+    this._setEditMode();
     this._fillForm();
     Sidenav.open("reflectionSidenav");
+  }
+
+  _setViewMode() {
+    this.isViewMode = true;
+    document.getElementById("reflectionSidenavViewBody")?.classList.remove(
+      "hidden",
+    );
+    document.getElementById("reflectionSidenavEditBody")?.classList.add(
+      "hidden",
+    );
+    document.getElementById("reflectionSidenavEdit")?.classList.remove(
+      "hidden",
+    );
+    document.getElementById("reflectionSidenavSave")?.classList.add("hidden");
+    document.getElementById("reflectionSidenavCancel")?.classList.add("hidden");
+    this._renderViewBody();
+  }
+
+  _setEditMode() {
+    this.isViewMode = false;
+    document.getElementById("reflectionSidenavViewBody")?.classList.add(
+      "hidden",
+    );
+    document.getElementById("reflectionSidenavEditBody")?.classList.remove(
+      "hidden",
+    );
+    document.getElementById("reflectionSidenavEdit")?.classList.add("hidden");
+    document.getElementById("reflectionSidenavSave")?.classList.remove(
+      "hidden",
+    );
+    document.getElementById("reflectionSidenavCancel")?.classList.remove(
+      "hidden",
+    );
+    if (this.editingId) {
+      document.getElementById("reflectionSidenavHeader").textContent =
+        "Edit Reflection";
+      this._renderTemplatePicker();
+      this._fillForm();
+    }
+  }
+
+  _renderViewBody() {
+    const viewBody = document.getElementById("reflectionSidenavViewBody");
+    if (!viewBody || !this.current) return;
+
+    const tags = (this.current.tags || [])
+      .map(
+        (t) =>
+          `<span class="inline-block px-2 py-0.5 text-xs bg-active text-secondary rounded">${escapeHtml(t)}</span>`,
+      )
+      .join("");
+
+    const templateName = this.current.templateId
+      ? this._templateName(this.current.templateId)
+      : null;
+
+    const questions = (this.current.questions || [])
+      .map(
+        (q) => `
+      <div class="sidenav-section">
+        <h4 class="font-medium text-primary text-sm mb-1">${escapeHtml(q.question)}</h4>
+        <p class="text-sm text-secondary whitespace-pre-wrap">${q.answer ? escapeHtml(q.answer) : '<span class="text-muted">No answer yet</span>'}</p>
+      </div>`,
+      )
+      .join("");
+
+    viewBody.innerHTML = `
+      ${tags ? `<div class="sidenav-section"><div class="flex flex-wrap gap-1">${tags}</div></div>` : ""}
+      <div class="sidenav-section">
+        ${templateName ? `<p class="text-xs text-muted mb-1">Template: ${escapeHtml(templateName)}</p>` : ""}
+        <p class="text-xs text-muted">Created: ${this.current.created ? this.current.created.slice(0, 10) : "Unknown"}</p>
+      </div>
+      ${questions || '<div class="sidenav-section"><p class="text-sm text-muted">No questions yet.</p></div>'}
+    `;
+  }
+
+  _templateName(templateId) {
+    const template = (this.tm.reflectionTemplates || []).find(
+      (t) => t.id === templateId,
+    );
+    return template ? template.title : null;
   }
 
   close() {
     Sidenav.close("reflectionSidenav");
     this.editingId = null;
     this.current = null;
+    this.isViewMode = false;
   }
 
   _fillForm() {
