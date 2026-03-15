@@ -553,14 +553,15 @@ export class TaskSidenavModule {
           taskData.parentId = this.parentTaskId;
         }
         const res = await TasksAPI.create(taskData);
-        if (res.ok && this.pendingAttachments.length) {
-          const { id: newId } = await res.json();
-          if (newId) {
-            await TasksAPI.addAttachments(newId, this.pendingAttachments);
-          }
+        const { id: newId } = await res.json().catch(() => ({}));
+        if (newId && this.pendingAttachments.length) {
+          await TasksAPI.addAttachments(newId, this.pendingAttachments);
         }
         this.pendingAttachments = [];
-        showToast("Task created", "success");
+        showToast(`"${taskData.title}" created`, "success", newId ? () => {
+          const task = this.tm.findTaskById(newId);
+          if (task) this.tm.taskSidenavModule.open(task);
+        } : null);
       }
 
       this._descUndoManager?.markSaved();

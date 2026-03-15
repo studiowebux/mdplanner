@@ -1307,6 +1307,11 @@ select.input {
   color: var(--color-warning);
 }
 
+.toast.toast-clickable {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 /* --------------------------------------------------------------------------
    Global task loading overlay (#loading)
    Fixed overlay — never affects document flow or causes layout shifts.
