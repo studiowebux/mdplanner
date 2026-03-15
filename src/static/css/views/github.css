@@ -121,6 +121,17 @@
   background: var(--color-bg-tertiary);
 }
 
+.github-release-badge {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  background: var(--color-bg-tertiary);
+  font-weight: 500;
+}
+
 /* Issue state badges */
 .github-issue-badge {
   display: inline-block;

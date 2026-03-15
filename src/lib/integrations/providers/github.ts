@@ -16,6 +16,7 @@ import type {
   GitHubMilestone,
   GitHubPR,
   GitHubProvider,
+  GitHubRelease,
   GitHubRepo,
   GitHubRepoSummary,
   GitHubUser,
@@ -164,6 +165,27 @@ export class GitHubApiProvider implements GitHubProvider {
       fullName: r.full_name,
       description: r.description ?? "",
     }));
+  }
+
+  async getLatestRelease(
+    owner: string,
+    repo: string,
+  ): Promise<GitHubRelease | null> {
+    try {
+      // deno-lint-ignore no-explicit-any
+      const data = await this.ghGet(
+        `/repos/${owner}/${repo}/releases/latest`,
+      ) as any;
+      return {
+        tagName: data.tag_name,
+        name: data.name ?? null,
+        publishedAt: data.published_at ?? null,
+        htmlUrl: data.html_url,
+      };
+    } catch {
+      // 404 means no releases exist
+      return null;
+    }
   }
 
   async listMilestones(

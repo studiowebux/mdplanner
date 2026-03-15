@@ -72,6 +72,13 @@ export interface GitHubWorkflowRun {
   htmlUrl: string;
 }
 
+export interface GitHubRelease {
+  tagName: string;
+  name: string | null;
+  publishedAt: string | null;
+  htmlUrl: string;
+}
+
 export interface GitHubProvider {
   /** Verify the PAT and return the authenticated user. */
   getAuthenticatedUser(): Promise<GitHubUser>;
@@ -111,6 +118,12 @@ export interface GitHubProvider {
     owner: string,
     repo: string,
   ): Promise<GitHubWorkflowRun[]>;
+
+  /** Fetch the latest published release for a repository. Returns null if none exist. */
+  getLatestRelease(
+    owner: string,
+    repo: string,
+  ): Promise<GitHubRelease | null>;
 
   /** Set an issue's state to "open" or "closed". */
   setIssueState(

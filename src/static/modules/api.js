@@ -1464,6 +1464,15 @@ export const GitHubAPI = {
     return response.json();
   },
 
+  /** Fetch the latest published release for owner/repo. Returns null on 404. */
+  async getLatestRelease(owner, repo) {
+    const response = await get(
+      `/api/integrations/github/repo/${owner}/${repo}/releases/latest`,
+    );
+    if (!response.ok) return null;
+    return response.json();
+  },
+
   /** List open milestones for owner/repo. */
   async listMilestones(owner, repo) {
     const response = await get(
