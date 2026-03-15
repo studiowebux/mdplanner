@@ -2944,6 +2944,10 @@
           <div class="notes-layout" id="notesLayout">
             <!-- Sidebar: search + list -->
             <div class="notes-sidebar">
+              <div class="notes-sidebar-header">
+                <span class="notes-sidebar-title">Notes</span>
+                <span id="notesCount" class="notes-sidebar-count"></span>
+              </div>
               <div class="notes-search-area">
                 <input
                   id="notesSearch"
@@ -2959,11 +2963,6 @@
               <ul id="notesTabNav" class="notes-list">
                 <!-- Note list items rendered dynamically -->
               </ul>
-              <div class="notes-sidebar-footer">
-                <button id="addNoteTabBtn" class="notes-add-btn" title="Add Note">
-                  + Add Note
-                </button>
-              </div>
             </div>
 
             <!-- Note content pane -->
