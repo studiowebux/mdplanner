@@ -28,6 +28,8 @@ export class PortfolioView {
     this.isCreating = false;
     /** @type {FuzzyAutocomplete[]} */
     this._fuzzyInstances = [];
+    /** @type {string[]} Cached GitHub repo full names for autocomplete */
+    this._githubRepos = [];
   }
 
   getPersonName(personId) {
@@ -1183,6 +1185,22 @@ export class PortfolioView {
             if (found) customerInput.dataset.selectedId = found.id;
           },
         },
+      ));
+    }
+
+    const githubInput = document.getElementById("portfolioDetailGithubRepo");
+    if (githubInput) {
+      // Fetch repos lazily on first sidenav open, cache for subsequent opens
+      if (!this._githubRepos.length) {
+        GitHubAPI.listRepos().then((repos) => {
+          this._githubRepos = repos.map((r) => r.fullName);
+        }).catch(() => {
+          // Token not configured or API error — autocomplete stays empty
+        });
+      }
+      this._fuzzyInstances.push(new FuzzyAutocomplete(
+        githubInput,
+        () => this._githubRepos,
       ));
     }
   }
