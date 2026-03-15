@@ -187,12 +187,21 @@ function parseValue(value: string): string | number | boolean | null {
   if (value === "true") return true;
   if (value === "false") return false;
 
-  // Remove quotes if present
+  // Remove quotes and unescape sequences
   if (
     (value.startsWith('"') && value.endsWith('"')) ||
     (value.startsWith("'") && value.endsWith("'"))
   ) {
-    return value.slice(1, -1);
+    const raw = value.slice(1, -1);
+    // Only unescape double-quoted strings (YAML spec)
+    if (value.startsWith('"')) {
+      return raw
+        .replace(/\\n/g, "\n")
+        .replace(/\\t/g, "\t")
+        .replace(/\\"/g, '"')
+        .replace(/\\\\/g, "\\");
+    }
+    return raw;
   }
 
   // Try number
@@ -297,9 +306,15 @@ function serializeYamlLine(
     // Quote strings that might be ambiguous
     if (
       value.includes(":") || value.includes("#") || value.includes("\n") ||
+      value.includes("\\") ||
       value === "true" || value === "false" || !isNaN(Number(value))
     ) {
-      return `${prefix}${key}: "${value.replace(/"/g, '\\"')}"`;
+      const escaped = value
+        .replace(/\\/g, "\\\\")
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, "\\n")
+        .replace(/\t/g, "\\t");
+      return `${prefix}${key}: "${escaped}"`;
     }
     return `${prefix}${key}: ${value}`;
   }
@@ -364,8 +379,16 @@ function serializeValue(value: unknown): string {
   if (typeof value === "boolean") return String(value);
   if (typeof value === "number") return String(value);
   if (typeof value === "string") {
-    if (value.includes(":") || value.includes(",") || value.includes("#")) {
-      return `"${value.replace(/"/g, '\\"')}"`;
+    if (
+      value.includes(":") || value.includes(",") || value.includes("#") ||
+      value.includes("\n") || value.includes("\\")
+    ) {
+      const escaped = value
+        .replace(/\\/g, "\\\\")
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, "\\n")
+        .replace(/\t/g, "\\t");
+      return `"${escaped}"`;
     }
     return value;
   }
