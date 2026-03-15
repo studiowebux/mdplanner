@@ -18,6 +18,7 @@ openapi:
   enabled: true
   spec_files:
     - "openapi/mdplanner.openapi.json"
+  path: "api"
 
 mcp:
   enabled: true
@@ -66,7 +67,7 @@ landing:
     - text: "Docs"
       url: "/getting-started/quick-start.html"
     - text: "REST API"
-      url: "/openapi/"
+      url: "/api/"
     - text: "MCP Tools"
       url: "/mcp/"
     - text: "GitHub"

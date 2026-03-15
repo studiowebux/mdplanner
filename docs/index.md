@@ -19,6 +19,6 @@ database. Edit files directly, use the web UI, or connect via MCP or WebDAV.
   minute
 - [Features](01-getting-started/03-features.md) — full feature table
 - [CLI Reference](03-reference/01-cli.md) — all flags and commands
-- [MCP Tools](03-reference/03-mcp-tools.md) — 244 tools for AI agents
+- [MCP Tools](/mcp/) — tools for AI agents
 - [Docker Deployment](02-guides/01-docker-deployment.md) — container setup
 - [GitHub](https://github.com/studiowebux/mdplanner) — source code and releases

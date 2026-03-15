@@ -92,5 +92,4 @@ Add to `.claude/settings.json` or `~/.claude/settings.json`:
 
 ## Tool reference
 
-See [MCP Tools](../03-reference/03-mcp-tools.md) for the complete list of 244
-tools grouped by entity.
+See [MCP Tools](/mcp/) for the complete list of tools grouped by entity.
