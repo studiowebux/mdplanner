@@ -711,7 +711,7 @@ export class NoteSidenavModule {
         const response = await NotesAPI.create(noteData);
         if (response.ok) {
           this._markAllNoteSaved();
-          this.showSaveStatus("Saved"); showToast("Saved", "success");
+          showToast("Saved", "success");
           this._clearTempNote();
           this.isNewNote = false;
 
@@ -759,7 +759,7 @@ export class NoteSidenavModule {
         const response = await NotesAPI.update(note.id, saveData);
         if (response.ok) {
           this._markAllNoteSaved();
-          this.showSaveStatus("Saved"); showToast("Saved", "success");
+          showToast("Saved", "success");
           this.tm.renderNotesView();
         } else {
           const errBody = await response.json().catch(() => ({}));

@@ -222,7 +222,7 @@ export class ReflectionTemplateSidenavModule {
           showToast(errMsg, "error");
           return;
         }
-        this._showSaveStatus("Saved"); showToast("Saved", "success");
+        showToast("Saved", "success");
       } else {
         const response = await ReflectionTemplatesAPI.create(data);
         if (!response.ok) {
@@ -246,7 +246,7 @@ export class ReflectionTemplateSidenavModule {
           return;
         }
         this.editingTemplateId = result.id;
-        this._showSaveStatus("Created"); showToast("Created", "success");
+        showToast("Created", "success");
         document.getElementById(
           "reflectionTemplateSidenavHeader",
         ).textContent = "Edit Template";

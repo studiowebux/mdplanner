@@ -272,7 +272,7 @@ export class CapacitySidenavModule {
         if (updatedPlan) {
           this.currentPlan = JSON.parse(JSON.stringify(updatedPlan));
         }
-        this.showSaveStatus("Saved"); showToast("Saved", "success");
+        showToast("Saved", "success");
       } else {
         // Plan not saved yet, update locally
         if (this.editingMemberId) {
@@ -455,7 +455,7 @@ export class CapacitySidenavModule {
           showToast(errMsg, "error");
           return;
         }
-        this.showSaveStatus("Saved"); showToast("Saved", "success");
+        showToast("Saved", "success");
       } else {
         const response = await CapacityAPI.create({
           title: this.currentPlan.title,
@@ -481,7 +481,7 @@ export class CapacitySidenavModule {
           }
         }
 
-        this.showSaveStatus("Created"); showToast("Created", "success");
+        showToast("Created", "success");
         document.getElementById("capacitySidenavHeader").textContent =
           "Edit Capacity Plan";
         document.getElementById("capacitySidenavDelete").classList.remove(

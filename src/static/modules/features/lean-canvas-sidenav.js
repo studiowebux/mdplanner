@@ -275,7 +275,7 @@ export class LeanCanvasSidenavModule {
           showToast(errMsg, "error");
           return;
         }
-        this.showSaveStatus("Saved"); showToast("Saved", "success");
+        showToast("Saved", "success");
       } else {
         const response = await LeanCanvasAPI.create(this.currentCanvas);
         if (!response.ok) {
@@ -288,7 +288,7 @@ export class LeanCanvasSidenavModule {
         const result = await response.json();
         this.editingCanvasId = result.id;
         this.currentCanvas.id = result.id;
-        this.showSaveStatus("Created"); showToast("Created", "success");
+        showToast("Created", "success");
         document.getElementById("leanCanvasSidenavHeader").textContent =
           "Edit Lean Canvas";
         document.getElementById("leanCanvasSidenavDelete").classList.remove(

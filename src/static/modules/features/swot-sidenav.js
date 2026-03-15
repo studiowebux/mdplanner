@@ -184,7 +184,7 @@ export class SwotSidenavModule {
           showToast(errMsg, "error");
           return;
         }
-        this.showSaveStatus("Saved"); showToast("Saved", "success");
+        showToast("Saved", "success");
       } else {
         const response = await SwotAPI.create(this.currentSwot);
         if (!response.ok) {
@@ -197,7 +197,7 @@ export class SwotSidenavModule {
         const result = await response.json();
         this.editingSwotId = result.id;
         this.currentSwot.id = result.id;
-        this.showSaveStatus("Created"); showToast("Created", "success");
+        showToast("Created", "success");
         document.getElementById("swotSidenavHeader").textContent =
           "Edit SWOT Analysis";
         document.getElementById("swotSidenavDelete").classList.remove("hidden");

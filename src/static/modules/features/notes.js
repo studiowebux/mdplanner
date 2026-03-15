@@ -381,7 +381,7 @@ export class NotesModule {
         this.tm.notes[this.tm.activeNote].title = title;
 
         // Show saved status
-        this.showSaveStatus("Saved"); showToast("Saved", "success");
+        showToast("Saved", "success");
 
         // Update tab title if it changed
         this.renderView();

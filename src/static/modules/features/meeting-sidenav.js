@@ -367,7 +367,7 @@ export class MeetingSidenavModule {
           showToast(errMsg, "error");
           return;
         }
-        this.showSaveStatus("Saved"); showToast("Saved", "success");
+        showToast("Saved", "success");
       } else {
         const res = await MeetingsAPI.create(data);
         if (!res.ok) {
@@ -385,7 +385,7 @@ export class MeetingSidenavModule {
         document.getElementById("meetingSidenavDelete").classList.remove(
           "hidden",
         );
-        this.showSaveStatus("Created"); showToast("Created", "success");
+        showToast("Created", "success");
       }
 
       await this.tm.meetingsModule.load();

@@ -331,7 +331,7 @@ export class BrainstormSidenavModule {
           showToast(errMsg, "error");
           return;
         }
-        this.showSaveStatus("Saved"); showToast("Saved", "success");
+        showToast("Saved", "success");
       } else {
         const response = await BrainstormsAPI.create(data);
         if (!response.ok) {
@@ -355,7 +355,7 @@ export class BrainstormSidenavModule {
           return;
         }
         this.editingId = result.id;
-        this.showSaveStatus("Created"); showToast("Created", "success");
+        showToast("Created", "success");
 
         document.getElementById("brainstormSidenavHeader").textContent =
           "Edit Brainstorm";
