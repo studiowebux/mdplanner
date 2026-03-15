@@ -71,8 +71,8 @@ jobs:
 
       - name: Generate OpenAPI spec
         run: |
-          mkdir -p docs/openapi
-          deno run --allow-net --allow-read --allow-write --allow-env main.ts --cache ./example &
+          mkdir -p docs/openapi /tmp/cerveau
+          deno run --allow-net --allow-read --allow-write --allow-env main.ts --cache --cerveau-dir /tmp/cerveau ./example &
           SERVER_PID=$!
           for i in $(seq 1 30); do curl -sf http://localhost:8003/api/health > /dev/null && break; sleep 1; done
           curl -sf http://localhost:8003/api/doc -o docs/openapi/mdplanner.openapi.json
