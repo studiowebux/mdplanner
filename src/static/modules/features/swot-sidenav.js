@@ -5,7 +5,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { SwotAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
 import { showToast } from "../ui/toast.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, extractErrorMessage } from "../utils.js";
 
 export class SwotSidenavModule {
   constructor(taskManager) {
@@ -178,14 +178,20 @@ export class SwotSidenavModule {
       if (this.editingSwotId) {
         const res = await SwotAPI.update(this.editingSwotId, this.currentSwot);
         if (!res.ok) {
-          showToast("Failed to save SWOT analysis", "error");
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         this.showSaveStatus("Saved");
       } else {
         const response = await SwotAPI.create(this.currentSwot);
         if (!response.ok) {
-          showToast("Failed to create SWOT analysis", "error");
+          const errBody = await response.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         const result = await response.json();
@@ -200,7 +206,7 @@ export class SwotSidenavModule {
     } catch (error) {
       console.error("Error saving SWOT:", error);
       this.showSaveStatus("Error");
-      showToast("Error saving SWOT analysis", "error");
+      showToast(error.message || "Error saving SWOT analysis", "error");
     }
   }
 
@@ -213,7 +219,8 @@ export class SwotSidenavModule {
     try {
       const res = await SwotAPI.delete(this.editingSwotId);
       if (!res.ok) {
-        showToast("Failed to delete SWOT analysis", "error");
+        const errBody = await res.json().catch(() => ({}));
+        showToast(extractErrorMessage(errBody), "error");
         return;
       }
       showToast("SWOT analysis deleted", "success");
@@ -221,7 +228,7 @@ export class SwotSidenavModule {
       this.close();
     } catch (error) {
       console.error("Error deleting SWOT:", error);
-      showToast("Error deleting SWOT analysis", "error");
+      showToast(error.message || "Error deleting SWOT analysis", "error");
     }
   }
 

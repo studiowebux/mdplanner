@@ -6,7 +6,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { HabitsAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { showConfirm } from "../ui/confirm.js";
-import { escapeHtml, markdownToHtml } from "../utils.js";
+import { escapeHtml, markdownToHtml, extractErrorMessage, validateRequired, clearAllFieldErrors } from "../utils.js";
 
 // ---------------------------------------------------------------
 // Date helpers
@@ -352,9 +352,10 @@ export class HabitSidenavModule {
       return;
     }
     if (!res.ok) {
-      const msg = await res.text().catch(() => "");
-      showToast(`Failed to mark habit as done (${res.status})`, "error");
-      console.error("[Habits] markComplete error:", res.status, msg);
+      const errBody = await res.json().catch(() => ({}));
+      const errMsg = extractErrorMessage(errBody);
+      showToast(errMsg, "error");
+      console.error("[Habits] markComplete error:", res.status, errMsg);
       return;
     }
 
@@ -374,22 +375,33 @@ export class HabitSidenavModule {
   }
 
   async handleSave() {
-    const data = this._collectForm();
-    if (!data.name) {
-      showToast("Habit name is required", "error");
+    // Clear previous errors
+    clearAllFieldErrors(document.getElementById("habitSidenav"));
+    // Validate required fields
+    const errors = validateRequired([
+      { id: "habitSidenavName", label: "Name" },
+    ]);
+    if (errors.length > 0) {
+      showToast(errors[0].message, "error");
       return;
     }
+
+    const data = this._collectForm();
 
     if (this.editingId) {
       const res = await HabitsAPI.update(this.editingId, data);
       if (!res.ok) {
-        showToast("Failed to save habit", "error");
+        const errBody = await res.json().catch(() => ({}));
+        const errMsg = extractErrorMessage(errBody);
+        showToast(errMsg, "error");
         return;
       }
     } else {
       const res = await HabitsAPI.create({ ...data, completions: [] });
       if (!res.ok) {
-        showToast("Failed to create habit", "error");
+        const errBody = await res.json().catch(() => ({}));
+        const errMsg = extractErrorMessage(errBody);
+        showToast(errMsg, "error");
         return;
       }
       const json = await res.json();
@@ -417,7 +429,9 @@ export class HabitSidenavModule {
 
     const res = await HabitsAPI.delete(this.editingId);
     if (!res.ok) {
-      showToast("Failed to delete habit", "error");
+      const errBody = await res.json().catch(() => ({}));
+      const errMsg = extractErrorMessage(errBody);
+      showToast(errMsg, "error");
       return;
     }
 

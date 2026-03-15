@@ -28,6 +28,9 @@ export class PeopleSidenavModule extends BaseSidenavModule {
     ];
   }
 
+  getRequiredFields() { return [{ id: "peopleSidenavName", label: "Name" }]; }
+  getFieldMap() { return { name: "peopleSidenavName" }; }
+
   openNew() {
     super.openNew();
     this.populateReportsToDropdown();

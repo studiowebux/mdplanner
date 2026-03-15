@@ -15,6 +15,9 @@ export class RetrospectiveSidenavModule extends BaseSidenavModule {
     ];
   }
 
+  getRequiredFields() { return [{ id: "retroSidenavTitle", label: "Title" }]; }
+  getFieldMap() { return { title: "retroSidenavTitle" }; }
+
   parseItems(text) {
     return text.split("\n").map((s) => s.trim()).filter((s) => s);
   }

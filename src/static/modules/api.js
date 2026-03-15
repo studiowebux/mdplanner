@@ -22,6 +22,25 @@ async function request(url, options = {}) {
   return response;
 }
 
+/**
+ * Check response status and parse JSON. Throws on non-ok responses with
+ * a human-readable message extracted from the error body.
+ * @param {Response} response
+ * @returns {Promise<any>}
+ */
+async function ensureOk(response) {
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    const msg = typeof body?.message === "string"
+      ? body.message
+      : typeof body?.error === "string"
+        ? body.error
+        : `HTTP ${response.status}`;
+    throw new Error(msg);
+  }
+  return response.json();
+}
+
 export async function get(url) {
   return request(url);
 }
@@ -57,12 +76,12 @@ export async function patch(url, data) {
 export const UploadsAPI = {
   async list() {
     const response = await get("/api/uploads");
-    return response.json();
+    return ensureOk(response);
   },
 
   async orphans() {
     const response = await get("/api/uploads/orphans");
-    return response.json();
+    return ensureOk(response);
   },
 
   async delete(year, month, day, filename) {
@@ -76,12 +95,12 @@ export const UploadsAPI = {
 export const BackupAPI = {
   async status() {
     const response = await get("/api/backup/status");
-    return response.json();
+    return ensureOk(response);
   },
 
   async trigger() {
     const response = await post("/api/backup/trigger", {});
-    return response.json();
+    return ensureOk(response);
   },
 
   /** Returns a Blob of the archive (encrypted if server has a public key configured). */
@@ -104,7 +123,7 @@ export const BackupAPI = {
     if (privateKeyHex) headers["X-Backup-Private-Key"] = privateKeyHex;
     const url = `/api/backup/import${overwrite ? "?overwrite=true" : ""}`;
     const response = await fetch(url, { method: "POST", headers, body: data, credentials: "include" });
-    return response.json();
+    return ensureOk(response);
   },
 };
 
@@ -112,12 +131,12 @@ export const BackupAPI = {
 export const TasksAPI = {
   async fetchAll() {
     const response = await get("/api/tasks");
-    return response.json();
+    return ensureOk(response);
   },
 
   async fetchOne(id) {
     const response = await get(`/api/tasks/${id}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(task) {
@@ -184,7 +203,7 @@ export const TasksAPI = {
       ? `/api/tasks?section=Pending%20Review&project=${encodeURIComponent(project)}`
       : `/api/tasks?section=Pending%20Review`;
     const response = await get(url);
-    return response.json();
+    return ensureOk(response);
   },
 
   async batchUpdate(updates) {
@@ -196,12 +215,12 @@ export const TasksAPI = {
 export const ProjectAPI = {
   async getInfo() {
     const response = await get("/api/project");
-    return response.json();
+    return ensureOk(response);
   },
 
   async getConfig() {
     const response = await get("/api/project/config");
-    return response.json();
+    return ensureOk(response);
   },
 
   async saveConfig(config) {
@@ -216,7 +235,7 @@ export const ProjectAPI = {
 
   async getSections() {
     const response = await get("/api/project/sections");
-    return response.json();
+    return ensureOk(response);
   },
 
   async rewrite(data) {
@@ -226,12 +245,12 @@ export const ProjectAPI = {
 
   async getVersion() {
     const response = await get("/api/version");
-    return response.json();
+    return ensureOk(response);
   },
 
   async getActiveProject() {
     const response = await get("/api/projects/active");
-    return response.json();
+    return ensureOk(response);
   },
 };
 
@@ -239,22 +258,22 @@ export const ProjectAPI = {
 export const PortfolioAPI = {
   async fetchAll() {
     const response = await get("/api/portfolio");
-    return response.json();
+    return ensureOk(response);
   },
 
   async getSummary() {
     const response = await get("/api/portfolio/summary");
-    return response.json();
+    return ensureOk(response);
   },
 
   async get(id) {
     const response = await get(`/api/portfolio/${id}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(data) {
     const response = await post("/api/portfolio", data);
-    return response.json();
+    return ensureOk(response);
   },
 
   async update(id, data) {
@@ -272,7 +291,7 @@ export const PortfolioAPI = {
 export const NotesAPI = {
   async fetchAll() {
     const response = await get("/api/notes");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(note) {
@@ -313,7 +332,7 @@ export const GoalsAPI = {
 export const MilestonesAPI = {
   async fetchAll() {
     const response = await get("/api/milestones");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(milestone) {
@@ -336,12 +355,12 @@ export const MilestonesAPI = {
 export const MeetingsAPI = {
   async fetchAll() {
     const response = await get("/api/meetings");
-    return response.json();
+    return ensureOk(response);
   },
 
   async fetchOne(id) {
     const response = await get(`/api/meetings/${id}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(meeting) {
@@ -361,7 +380,7 @@ export const MeetingsAPI = {
 export const OnboardingAPI = {
   async fetchAll() {
     const response = await get("/api/onboarding");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(record) {
@@ -381,7 +400,7 @@ export const OnboardingAPI = {
 export const OnboardingTemplatesAPI = {
   async fetchAll() {
     const response = await get("/api/onboarding-templates");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(template) {
@@ -401,7 +420,7 @@ export const OnboardingTemplatesAPI = {
 export const IdeasAPI = {
   async fetchAll() {
     const response = await get("/api/ideas");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(idea) {
@@ -424,12 +443,12 @@ export const IdeasAPI = {
 export const BrainstormsAPI = {
   async fetchAll() {
     const response = await get("/api/brainstorms");
-    return response.json();
+    return ensureOk(response);
   },
 
   async fetchOne(id) {
     const response = await get(`/api/brainstorms/${id}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(brainstorm) {
@@ -452,12 +471,12 @@ export const BrainstormsAPI = {
 export const ReflectionTemplatesAPI = {
   async fetchAll() {
     const response = await get("/api/reflection-templates");
-    return response.json();
+    return ensureOk(response);
   },
 
   async fetchOne(id) {
     const response = await get(`/api/reflection-templates/${id}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(template) {
@@ -480,12 +499,12 @@ export const ReflectionTemplatesAPI = {
 export const ReflectionsAPI = {
   async fetchAll() {
     const response = await get("/api/reflections");
-    return response.json();
+    return ensureOk(response);
   },
 
   async fetchOne(id) {
     const response = await get(`/api/reflections/${id}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(reflection) {
@@ -508,7 +527,7 @@ export const ReflectionsAPI = {
 export const RetrospectivesAPI = {
   async fetchAll() {
     const response = await get("/api/retrospectives");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(retrospective) {
@@ -531,7 +550,7 @@ export const RetrospectivesAPI = {
 export const MoscowAPI = {
   async fetchAll() {
     const response = await get("/api/moscow");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(analysis) {
@@ -554,7 +573,7 @@ export const MoscowAPI = {
 export const EisenhowerAPI = {
   async fetchAll() {
     const response = await get("/api/eisenhower");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(matrix) {
@@ -577,7 +596,7 @@ export const EisenhowerAPI = {
 export const SafeAPI = {
   async fetchAll() {
     const response = await get("/api/safe");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(agreement) {
@@ -600,7 +619,7 @@ export const SafeAPI = {
 export const InvestorAPI = {
   async fetchAll() {
     const response = await get("/api/investors");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(investor) {
@@ -623,7 +642,7 @@ export const InvestorAPI = {
 export const KpiAPI = {
   async fetchAll() {
     const response = await get("/api/kpis");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(snapshot) {
@@ -646,7 +665,7 @@ export const KpiAPI = {
 export const SwotAPI = {
   async fetchAll() {
     const response = await get("/api/swot");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(swot) {
@@ -669,7 +688,7 @@ export const SwotAPI = {
 export const RiskAnalysisAPI = {
   async fetchAll() {
     const response = await get("/api/risk-analysis");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(risk) {
@@ -692,7 +711,7 @@ export const RiskAnalysisAPI = {
 export const LeanCanvasAPI = {
   async fetchAll() {
     const response = await get("/api/lean-canvas");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(canvas) {
@@ -715,7 +734,7 @@ export const LeanCanvasAPI = {
 export const BusinessModelAPI = {
   async fetchAll() {
     const response = await get("/api/business-model");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(model) {
@@ -738,7 +757,7 @@ export const BusinessModelAPI = {
 export const ProjectValueAPI = {
   async fetchAll() {
     const response = await get("/api/project-value-board");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(board) {
@@ -761,7 +780,7 @@ export const ProjectValueAPI = {
 export const BriefAPI = {
   async fetchAll() {
     const response = await get("/api/brief");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(brief) {
@@ -784,7 +803,7 @@ export const BriefAPI = {
 export const CapacityAPI = {
   async fetchAll() {
     const response = await get("/api/capacity");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(plan) {
@@ -804,12 +823,12 @@ export const CapacityAPI = {
 
   async getUtilization(id) {
     const response = await get(`/api/capacity/${id}/utilization`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async suggestAssignments(id) {
     const response = await get(`/api/capacity/${id}/suggest-assignments`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async applyAssignments(id, assignments) {
@@ -860,12 +879,12 @@ export const CapacityAPI = {
 export const TimeTrackingAPI = {
   async fetchAll() {
     const response = await get("/api/time-entries");
-    return response.json();
+    return ensureOk(response);
   },
 
   async fetchForTask(taskId) {
     const response = await get(`/api/time-entries/${taskId}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(taskId, entry) {
@@ -883,7 +902,7 @@ export const TimeTrackingAPI = {
 export const CanvasAPI = {
   async fetchAll() {
     const response = await get("/api/canvas/sticky_notes");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(note) {
@@ -906,7 +925,7 @@ export const CanvasAPI = {
 export const MindmapsAPI = {
   async fetchAll() {
     const response = await get("/api/mindmaps");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(mindmap) {
@@ -929,7 +948,7 @@ export const MindmapsAPI = {
 export const C4API = {
   async fetchAll() {
     const response = await get("/api/c4");
-    return response.json();
+    return ensureOk(response);
   },
 
   async save(components) {
@@ -942,7 +961,7 @@ export const C4API = {
 export const StrategicLevelsAPI = {
   async fetchAll() {
     const response = await get("/api/strategic-levels");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(builder) {
@@ -989,13 +1008,13 @@ export const StrategicLevelsAPI = {
 export const BillingAPI = {
   async fetchAll() {
     const response = await get("/api/billing");
-    return response.json();
+    return ensureOk(response);
   },
 
   // Customers
   async fetchCustomers() {
     const response = await get("/api/customers");
-    return response.json();
+    return ensureOk(response);
   },
 
   async createCustomer(customer) {
@@ -1101,12 +1120,12 @@ export const CRMAPI = {
   // Companies
   async fetchCompanies() {
     const response = await get("/api/companies");
-    return response.json();
+    return ensureOk(response);
   },
 
   async getCompany(id) {
     const response = await get(`/api/companies/${id}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async createCompany(company) {
@@ -1126,28 +1145,28 @@ export const CRMAPI = {
 
   async getCompanyContacts(companyId) {
     const response = await get(`/api/companies/${companyId}/contacts`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async getCompanyDeals(companyId) {
     const response = await get(`/api/companies/${companyId}/deals`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async getCompanyInteractions(companyId) {
     const response = await get(`/api/companies/${companyId}/interactions`);
-    return response.json();
+    return ensureOk(response);
   },
 
   // Contacts
   async fetchContacts() {
     const response = await get("/api/contacts");
-    return response.json();
+    return ensureOk(response);
   },
 
   async getContact(id) {
     const response = await get(`/api/contacts/${id}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async createContact(contact) {
@@ -1168,12 +1187,12 @@ export const CRMAPI = {
   // Deals
   async fetchDeals() {
     const response = await get("/api/deals");
-    return response.json();
+    return ensureOk(response);
   },
 
   async getDeal(id) {
     const response = await get(`/api/deals/${id}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async createDeal(deal) {
@@ -1198,18 +1217,18 @@ export const CRMAPI = {
 
   async getDealInteractions(dealId) {
     const response = await get(`/api/deals/${dealId}/interactions`);
-    return response.json();
+    return ensureOk(response);
   },
 
   // Interactions
   async fetchInteractions() {
     const response = await get("/api/interactions");
-    return response.json();
+    return ensureOk(response);
   },
 
   async getInteraction(id) {
     const response = await get(`/api/interactions/${id}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async createInteraction(interaction) {
@@ -1230,7 +1249,7 @@ export const CRMAPI = {
   // Summary
   async getSummary() {
     const response = await get("/api/crm/summary");
-    return response.json();
+    return ensureOk(response);
   },
 };
 
@@ -1238,32 +1257,32 @@ export const CRMAPI = {
 export const PeopleAPI = {
   async fetchAll() {
     const response = await get("/api/people");
-    return response.json();
+    return ensureOk(response);
   },
 
   async fetchTree() {
     const response = await get("/api/people/tree");
-    return response.json();
+    return ensureOk(response);
   },
 
   async getSummary() {
     const response = await get("/api/people/summary");
-    return response.json();
+    return ensureOk(response);
   },
 
   async getDepartments() {
     const response = await get("/api/people/departments");
-    return response.json();
+    return ensureOk(response);
   },
 
   async get(id) {
     const response = await get(`/api/people/${id}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async getDirectReports(id) {
     const response = await get(`/api/people/${id}/reports`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(person) {
@@ -1286,32 +1305,32 @@ export const PeopleAPI = {
 export const OrgChartAPI = {
   async fetchAll() {
     const response = await get("/api/orgchart");
-    return response.json();
+    return ensureOk(response);
   },
 
   async fetchTree() {
     const response = await get("/api/orgchart/tree");
-    return response.json();
+    return ensureOk(response);
   },
 
   async getSummary() {
     const response = await get("/api/orgchart/summary");
-    return response.json();
+    return ensureOk(response);
   },
 
   async getDepartments() {
     const response = await get("/api/orgchart/departments");
-    return response.json();
+    return ensureOk(response);
   },
 
   async get(id) {
     const response = await get(`/api/orgchart/${id}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async getDirectReports(id) {
     const response = await get(`/api/orgchart/${id}/reports`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(member) {
@@ -1336,12 +1355,12 @@ export const SearchAPI = {
     const params = new URLSearchParams({ q: query, limit: String(limit) });
     if (types) params.set("types", types.join(","));
     const response = await get(`/api/search?${params}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async status() {
     const response = await get("/api/search/status");
-    return response.json();
+    return ensureOk(response);
   },
 };
 
@@ -1349,7 +1368,7 @@ export const SearchAPI = {
 export const FinancesAPI = {
   async fetchAll() {
     const response = await get("/api/finances");
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(record) {
@@ -1369,12 +1388,12 @@ export const FinancesAPI = {
 export const JournalAPI = {
   async fetchAll() {
     const response = await get("/api/journal");
-    return response.json();
+    return ensureOk(response);
   },
 
   async fetchOne(id) {
     const response = await get(`/api/journal/${id}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(entry) {
@@ -1394,7 +1413,7 @@ export const JournalAPI = {
 export const IntegrationsAPI = {
   async getCloudflare() {
     const response = await get("/api/integrations/cloudflare");
-    return response.json();
+    return ensureOk(response);
   },
 
   async saveCloudflare(token) {
@@ -1409,7 +1428,7 @@ export const IntegrationsAPI = {
 export const GitHubAPI = {
   async getStatus() {
     const response = await get("/api/integrations/github");
-    return response.json();
+    return ensureOk(response);
   },
 
   async saveToken(token) {
@@ -1422,21 +1441,21 @@ export const GitHubAPI = {
 
   async testConnection() {
     const response = await get("/api/integrations/github/test");
-    return response.json();
+    return ensureOk(response);
   },
 
   async getRepo(owner, repo) {
     const response = await get(
       `/api/integrations/github/repo/${owner}/${repo}`,
     );
-    return response.json();
+    return ensureOk(response);
   },
 
   async getIssue(owner, repo, number) {
     const response = await get(
       `/api/integrations/github/repo/${owner}/${repo}/issues/${number}`,
     );
-    return response.json();
+    return ensureOk(response);
   },
 
   async setIssueState(owner, repo, number, state) {
@@ -1444,7 +1463,7 @@ export const GitHubAPI = {
       `/api/integrations/github/repo/${owner}/${repo}/issues/${number}`,
       { state },
     );
-    return response.json();
+    return ensureOk(response);
   },
 
   async createIssue(owner, repo, title, body) {
@@ -1452,7 +1471,7 @@ export const GitHubAPI = {
       `/api/integrations/github/repo/${owner}/${repo}/issues`,
       { title, body },
     );
-    return response.json();
+    return ensureOk(response);
   },
 
   /** List repos accessible to the authenticated user, optionally filtered. */
@@ -1461,7 +1480,7 @@ export const GitHubAPI = {
       ? `/api/integrations/github/repos?query=${encodeURIComponent(query)}`
       : "/api/integrations/github/repos";
     const response = await get(url);
-    return response.json();
+    return ensureOk(response);
   },
 
   /** Fetch the latest published release for owner/repo. Returns null on 404. */
@@ -1470,7 +1489,7 @@ export const GitHubAPI = {
       `/api/integrations/github/repo/${owner}/${repo}/releases/latest`,
     );
     if (!response.ok) return null;
-    return response.json();
+    return ensureOk(response);
   },
 
   /** List open milestones for owner/repo. */
@@ -1478,7 +1497,7 @@ export const GitHubAPI = {
     const response = await get(
       `/api/integrations/github/repo/${owner}/${repo}/milestones`,
     );
-    return response.json();
+    return ensureOk(response);
   },
 
   /** List recent workflow runs for a repository. */
@@ -1486,7 +1505,7 @@ export const GitHubAPI = {
     const response = await get(
       `/api/integrations/github/repo/${owner}/${repo}/actions/runs`,
     );
-    return response.json();
+    return ensureOk(response);
   },
 
   /** Fetch a single PR by number. */
@@ -1494,7 +1513,7 @@ export const GitHubAPI = {
     const response = await get(
       `/api/integrations/github/repo/${owner}/${repo}/pulls/${number}`,
     );
-    return response.json();
+    return ensureOk(response);
   },
 
   /** List issues for a repository. */
@@ -1502,7 +1521,7 @@ export const GitHubAPI = {
     let url = `/api/integrations/github/repo/${owner}/${repo}/issues?state=${state}`;
     if (assignee) url += `&assignee=${encodeURIComponent(assignee)}`;
     const response = await get(url);
-    return response.json();
+    return ensureOk(response);
   },
 
   /** List pull requests for a repository. */
@@ -1510,7 +1529,7 @@ export const GitHubAPI = {
     const response = await get(
       `/api/integrations/github/repo/${owner}/${repo}/pulls?state=${state}`,
     );
-    return response.json();
+    return ensureOk(response);
   },
 
   /** Merge a pull request. */
@@ -1519,7 +1538,7 @@ export const GitHubAPI = {
       `/api/integrations/github/repo/${owner}/${repo}/pulls/${number}/merge`,
       { merge_method: mergeMethod },
     );
-    return response.json();
+    return ensureOk(response);
   },
 };
 
@@ -1527,12 +1546,12 @@ export const GitHubAPI = {
 export const DnsAPI = {
   async fetchAll() {
     const response = await get("/api/dns");
-    return response.json();
+    return ensureOk(response);
   },
 
   async fetchOne(id) {
     const response = await get(`/api/dns/${id}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(domain) {
@@ -1553,7 +1572,7 @@ export const DnsAPI = {
 
   async previewCloudflare() {
     const response = await get("/api/integrations/cloudflare/zones");
-    return response.json();
+    return ensureOk(response);
   },
 };
 
@@ -1561,12 +1580,12 @@ export const DnsAPI = {
 export const HabitsAPI = {
   async fetchAll() {
     const response = await get("/api/habits");
-    return response.json();
+    return ensureOk(response);
   },
 
   async fetchOne(id) {
     const response = await get(`/api/habits/${id}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(habit) {
@@ -1604,12 +1623,12 @@ export const HabitsAPI = {
 export const MarketingPlansAPI = {
   async fetchAll() {
     const response = await get("/api/marketing-plans");
-    return response.json();
+    return ensureOk(response);
   },
 
   async fetchOne(id) {
     const response = await get(`/api/marketing-plans/${id}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(plan) {
@@ -1628,12 +1647,12 @@ export const MarketingPlansAPI = {
 export const FishboneAPI = {
   async fetchAll() {
     const response = await get("/api/fishbone");
-    return response.json();
+    return ensureOk(response);
   },
 
   async fetchOne(id) {
     const response = await get(`/api/fishbone/${id}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async create(diagram) {
@@ -1654,7 +1673,7 @@ export const AnalyticsAPI = {
   async fetch() {
     const response = await get("/api/analytics");
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.json();
+    return ensureOk(response);
   },
 };
 
@@ -1679,7 +1698,7 @@ export const TtsAPI = {
 
   async voices(ttsUrl) {
     const response = await post("/api/tts/voices", { ttsUrl });
-    return response.json();
+    return ensureOk(response);
   },
 };
 
@@ -1687,38 +1706,38 @@ export const CerveauAPI = {
   async fetchManifest() {
     const response = await get("/api/cerveau/manifest");
     if (!response.ok) return null;
-    return response.json();
+    return ensureOk(response);
   },
 
   async fetchBrains() {
     const response = await get("/api/cerveau/brains");
     if (!response.ok) return null;
-    return response.json();
+    return ensureOk(response);
   },
 
   async fetchRegistry() {
     const response = await get("/api/cerveau/registry");
     if (!response.ok) return null;
-    return response.json();
+    return ensureOk(response);
   },
 
   async fetchProtocol() {
     const response = await get("/api/cerveau/protocol");
     if (!response.ok) return null;
-    return response.json();
+    return ensureOk(response);
   },
 
   async fetchFiles(path = "") {
     const q = path ? `?path=${encodeURIComponent(path)}` : "";
     const response = await get(`/api/cerveau/files${q}`);
-    return response.json();
+    return ensureOk(response);
   },
 
   async fetchTree(path) {
     const response = await get(
       `/api/cerveau/tree?path=${encodeURIComponent(path)}`,
     );
-    return response.json();
+    return ensureOk(response);
   },
 
   async fetchFile(path) {
@@ -1732,7 +1751,7 @@ export const CerveauAPI = {
     const response = await get(
       `/api/cerveau/brains/${encodeURIComponent(name)}/memory`,
     );
-    return response.json();
+    return ensureOk(response);
   },
 
   async isAvailable() {

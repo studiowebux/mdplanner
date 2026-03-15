@@ -6,7 +6,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { JournalAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { showConfirm } from "../ui/confirm.js";
-import { escapeHtml, markdownToHtml } from "../utils.js";
+import { escapeHtml, markdownToHtml, extractErrorMessage, validateRequired, clearAllFieldErrors } from "../utils.js";
 import { UndoManager } from "../ui/undo-manager.js";
 
 const MOOD_LABELS = {
@@ -249,18 +249,33 @@ export class JournalSidenavModule {
   // ------------------------------------------------------------------
 
   async handleSave() {
+    // Clear previous errors
+    clearAllFieldErrors(document.getElementById("journalSidenav"));
+    // Validate required fields
+    const errors = validateRequired([
+      { id: "journalSidenavDate", label: "Date" },
+    ]);
+    if (errors.length > 0) {
+      showToast(errors[0].message, "error");
+      return;
+    }
+
     const data = this._collectForm();
 
     if (this.editingId) {
       const res = await JournalAPI.update(this.editingId, data);
       if (!res.ok) {
-        showToast("Failed to save entry", "error");
+        const errBody = await res.json().catch(() => ({}));
+        const errMsg = extractErrorMessage(errBody);
+        showToast(errMsg, "error");
         return;
       }
     } else {
       const res = await JournalAPI.create(data);
       if (!res.ok) {
-        showToast("Failed to create entry", "error");
+        const errBody = await res.json().catch(() => ({}));
+        const errMsg = extractErrorMessage(errBody);
+        showToast(errMsg, "error");
         return;
       }
       const json = await res.json();
@@ -296,7 +311,9 @@ export class JournalSidenavModule {
 
     const res = await JournalAPI.delete(this.editingId);
     if (!res.ok) {
-      showToast("Failed to delete entry", "error");
+      const errBody = await res.json().catch(() => ({}));
+      const errMsg = extractErrorMessage(errBody);
+      showToast(errMsg, "error");
       return;
     }
 

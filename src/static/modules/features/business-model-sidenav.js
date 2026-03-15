@@ -5,7 +5,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { BusinessModelAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { showConfirm } from "../ui/confirm.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, extractErrorMessage } from "../utils.js";
 
 export class BusinessModelSidenavModule {
   constructor(taskManager) {
@@ -188,14 +188,20 @@ export class BusinessModelSidenavModule {
       if (this.editingCanvasId) {
         const res = await BusinessModelAPI.update(this.editingCanvasId, this.currentCanvas);
         if (!res.ok) {
-          showToast("Failed to save Business Model Canvas", "error");
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         this.showSaveStatus("Saved");
       } else {
         const response = await BusinessModelAPI.create(this.currentCanvas);
         if (!response.ok) {
-          showToast("Failed to create Business Model Canvas", "error");
+          const errBody = await response.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         const result = await response.json();
@@ -210,7 +216,7 @@ export class BusinessModelSidenavModule {
     } catch (error) {
       console.error("Error saving Business Model Canvas:", error);
       this.showSaveStatus("Error");
-      showToast("Error saving Business Model Canvas", "error");
+      showToast(error.message || "Error saving Business Model Canvas", "error");
     }
   }
 
@@ -223,7 +229,8 @@ export class BusinessModelSidenavModule {
     try {
       const res = await BusinessModelAPI.delete(this.editingCanvasId);
       if (!res.ok) {
-        showToast("Failed to delete Business Model Canvas", "error");
+        const errBody = await res.json().catch(() => ({}));
+        showToast(extractErrorMessage(errBody), "error");
         return;
       }
       showToast("Business Model Canvas deleted", "success");
@@ -231,7 +238,7 @@ export class BusinessModelSidenavModule {
       this.close();
     } catch (error) {
       console.error("Error deleting Business Model Canvas:", error);
-      showToast("Error deleting Business Model Canvas", "error");
+      showToast(error.message || "Error deleting Business Model Canvas", "error");
     }
   }
 

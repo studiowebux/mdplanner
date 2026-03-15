@@ -4,7 +4,7 @@
 import { Sidenav } from "../ui/sidenav.js";
 import { BrainstormsAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, extractErrorMessage, validateRequired, clearAllFieldErrors } from "../utils.js";
 import { showConfirm } from "../ui/confirm.js";
 
 const DEFAULT_QUESTIONS = [
@@ -307,27 +307,38 @@ export class BrainstormSidenavModule {
   }
 
   async save() {
-    const data = this.getFormData();
-
-    if (!data.title) {
-      this.showSaveStatus("Title required");
+    // Clear previous errors
+    clearAllFieldErrors(document.getElementById("brainstormSidenav"));
+    // Validate required fields
+    const errors = validateRequired([
+      { id: "brainstormSidenavTitle", label: "Title" },
+    ]);
+    if (errors.length > 0) {
+      if (this.showSaveStatus) this.showSaveStatus(errors[0].message);
+      else showToast(errors[0].message, "error");
       return;
     }
+
+    const data = this.getFormData();
 
     try {
       if (this.editingId) {
         const res = await BrainstormsAPI.update(this.editingId, data);
         if (!res.ok) {
-          this.showSaveStatus("Error");
-          showToast("Failed to save brainstorm", "error");
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         this.showSaveStatus("Saved");
       } else {
         const response = await BrainstormsAPI.create(data);
         if (!response.ok) {
-          this.showSaveStatus("Error");
-          showToast("Failed to create brainstorm", "error");
+          const errBody = await response.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         let result;
@@ -357,7 +368,7 @@ export class BrainstormSidenavModule {
     } catch (error) {
       console.error("BrainstormSidenavModule.save failed", { id: this.editingId, error: error.message });
       this.showSaveStatus("Error");
-      showToast("Error saving brainstorm", "error");
+      showToast(error.message || "Error saving brainstorm", "error");
     }
   }
 
@@ -375,7 +386,8 @@ export class BrainstormSidenavModule {
     try {
       const res = await BrainstormsAPI.delete(this.editingId);
       if (!res.ok) {
-        showToast("Failed to delete brainstorm", "error");
+        const errBody = await res.json().catch(() => ({}));
+        showToast(extractErrorMessage(errBody), "error");
         return;
       }
       showToast("Brainstorm deleted", "success");
@@ -383,7 +395,7 @@ export class BrainstormSidenavModule {
       this.close();
     } catch (error) {
       console.error("BrainstormSidenavModule.handleDelete failed", { id: this.editingId, error: error.message });
-      showToast("Error deleting brainstorm", "error");
+      showToast(error.message || "Error deleting brainstorm", "error");
     }
   }
 

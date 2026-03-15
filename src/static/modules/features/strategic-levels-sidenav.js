@@ -5,7 +5,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { MilestonesAPI, StrategicLevelsAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
 import { showToast } from "../ui/toast.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, extractErrorMessage } from "../utils.js";
 
 export class StrategicLevelsSidenavModule {
   constructor(taskManager) {
@@ -431,14 +431,20 @@ export class StrategicLevelsSidenavModule {
         if (this.editingBuilderId) {
           const res = await StrategicLevelsAPI.update(this.editingBuilderId, data);
           if (!res.ok) {
-            showToast("Failed to save strategy", "error");
+            const errBody = await res.json().catch(() => ({}));
+            const errMsg = extractErrorMessage(errBody);
+            this.showSaveStatus(errMsg);
+            showToast(errMsg, "error");
             return;
           }
           this.showSaveStatus("Saved");
         } else {
           const response = await StrategicLevelsAPI.create(data);
           if (!response.ok) {
-            showToast("Failed to create strategy", "error");
+            const errBody = await response.json().catch(() => ({}));
+            const errMsg = extractErrorMessage(errBody);
+            this.showSaveStatus(errMsg);
+            showToast(errMsg, "error");
             return;
           }
           const result = await response.json();
@@ -462,7 +468,10 @@ export class StrategicLevelsSidenavModule {
             data,
           );
           if (!res.ok) {
-            showToast("Failed to save level", "error");
+            const errBody = await res.json().catch(() => ({}));
+            const errMsg = extractErrorMessage(errBody);
+            this.showSaveStatus(errMsg);
+            showToast(errMsg, "error");
             return;
           }
           this.showSaveStatus("Saved");
@@ -472,7 +481,10 @@ export class StrategicLevelsSidenavModule {
             data,
           );
           if (!res.ok) {
-            showToast("Failed to create level", "error");
+            const errBody = await res.json().catch(() => ({}));
+            const errMsg = extractErrorMessage(errBody);
+            this.showSaveStatus(errMsg);
+            showToast(errMsg, "error");
             return;
           }
           this.editingLevelId = true; // Mark as created
@@ -487,7 +499,7 @@ export class StrategicLevelsSidenavModule {
     } catch (error) {
       console.error(`Error saving ${this.mode}:`, error);
       this.showSaveStatus("Error");
-      showToast(`Error saving ${this.mode}`, "error");
+      showToast(error.message || `Error saving ${this.mode}`, "error");
     }
   }
 
@@ -515,7 +527,7 @@ export class StrategicLevelsSidenavModule {
       this.close();
     } catch (error) {
       console.error("Error saving links:", error);
-      showToast("Error saving links", "error");
+      showToast(error.message || "Error saving links", "error");
     }
   }
 
@@ -527,7 +539,8 @@ export class StrategicLevelsSidenavModule {
         }
         const delRes = await StrategicLevelsAPI.delete(this.editingBuilderId);
         if (!delRes.ok) {
-          showToast("Failed to delete strategy", "error");
+          const errBody = await delRes.json().catch(() => ({}));
+          showToast(extractErrorMessage(errBody), "error");
           return;
         }
         this.tm.selectedStrategicBuilderId = null;
@@ -556,7 +569,8 @@ export class StrategicLevelsSidenavModule {
           this.editingLevelId,
         );
         if (!delRes.ok) {
-          showToast("Failed to delete level", "error");
+          const errBody = await delRes.json().catch(() => ({}));
+          showToast(extractErrorMessage(errBody), "error");
           return;
         }
         showToast("Level deleted", "success");
@@ -566,7 +580,7 @@ export class StrategicLevelsSidenavModule {
       this.close();
     } catch (error) {
       console.error(`Error deleting ${this.mode}:`, error);
-      showToast(`Error deleting ${this.mode}`, "error");
+      showToast(error.message || `Error deleting ${this.mode}`, "error");
     }
   }
 

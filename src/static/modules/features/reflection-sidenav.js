@@ -4,7 +4,7 @@
 import { Sidenav } from "../ui/sidenav.js";
 import { ReflectionsAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, extractErrorMessage } from "../utils.js";
 import { showConfirm } from "../ui/confirm.js";
 
 const DEFAULT_QUESTIONS = [
@@ -380,16 +380,20 @@ export class ReflectionSidenavModule {
       if (this.editingId) {
         const res = await ReflectionsAPI.update(this.editingId, data);
         if (!res.ok) {
-          this._showSaveStatus("Error");
-          showToast("Failed to save reflection", "error");
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this._showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         this._showSaveStatus("Saved");
       } else {
         const response = await ReflectionsAPI.create(data);
         if (!response.ok) {
-          this._showSaveStatus("Error");
-          showToast("Failed to create reflection", "error");
+          const errBody = await response.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this._showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         let result;
@@ -417,8 +421,8 @@ export class ReflectionSidenavModule {
       await this.tm.reflectionModule.load();
     } catch (error) {
       console.error("ReflectionSidenavModule.save failed", { id: this.editingId, error: error.message });
-      this._showSaveStatus("Error");
-      showToast("Error saving reflection", "error");
+      this._showSaveStatus(error.message || "Error");
+      showToast(error.message || "Error saving reflection", "error");
     }
   }
 
@@ -436,7 +440,9 @@ export class ReflectionSidenavModule {
     try {
       const res = await ReflectionsAPI.delete(this.editingId);
       if (!res.ok) {
-        showToast("Failed to delete reflection", "error");
+        const errBody = await res.json().catch(() => ({}));
+        const errMsg = extractErrorMessage(errBody);
+        showToast(errMsg, "error");
         return;
       }
       showToast("Reflection deleted", "success");
@@ -444,7 +450,7 @@ export class ReflectionSidenavModule {
       this.close();
     } catch (error) {
       console.error("ReflectionSidenavModule.handleDelete failed", { id: this.editingId, error: error.message });
-      showToast("Error deleting reflection", "error");
+      showToast(error.message || "Error deleting reflection", "error");
     }
   }
 

@@ -5,7 +5,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { MeetingsAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { showConfirm } from "../ui/confirm.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, extractErrorMessage, validateRequired, clearAllFieldErrors } from "../utils.js";
 import { bindAutocomplete } from "../ui/autocomplete.js";
 
 export class MeetingSidenavModule {
@@ -341,12 +341,19 @@ export class MeetingSidenavModule {
   }
 
   async save() {
-    const data = this.getFormData();
-
-    if (!data.title) {
-      this.showSaveStatus("Title required");
+    // Clear previous errors
+    clearAllFieldErrors(document.getElementById("meetingSidenav"));
+    // Validate required fields
+    const errors = validateRequired([
+      { id: "meetingSidenavTitle", label: "Title" },
+    ]);
+    if (errors.length > 0) {
+      if (this.showSaveStatus) this.showSaveStatus(errors[0].message);
+      else showToast(errors[0].message, "error");
       return;
     }
+
+    const data = this.getFormData();
 
     Object.assign(this.currentMeeting, data);
 
@@ -354,14 +361,20 @@ export class MeetingSidenavModule {
       if (this.editingMeetingId) {
         const res = await MeetingsAPI.update(this.editingMeetingId, data);
         if (!res.ok) {
-          showToast("Failed to save meeting", "error");
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         this.showSaveStatus("Saved");
       } else {
         const res = await MeetingsAPI.create(data);
         if (!res.ok) {
-          showToast("Failed to create meeting", "error");
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         const result = await res.json();
@@ -379,7 +392,7 @@ export class MeetingSidenavModule {
     } catch (error) {
       console.error("Error saving meeting:", error);
       this.showSaveStatus("Error");
-      showToast("Error saving meeting", "error");
+      showToast(error.message || "Error saving meeting", "error");
     }
   }
 
@@ -393,7 +406,8 @@ export class MeetingSidenavModule {
     try {
       const res = await MeetingsAPI.delete(this.editingMeetingId);
       if (!res.ok) {
-        showToast("Failed to delete meeting", "error");
+        const errBody = await res.json().catch(() => ({}));
+        showToast(extractErrorMessage(errBody), "error");
         return;
       }
       showToast("Meeting deleted", "success");
@@ -401,7 +415,7 @@ export class MeetingSidenavModule {
       this.close();
     } catch (error) {
       console.error("Error deleting meeting:", error);
-      showToast("Error deleting meeting", "error");
+      showToast(error.message || "Error deleting meeting", "error");
     }
   }
 

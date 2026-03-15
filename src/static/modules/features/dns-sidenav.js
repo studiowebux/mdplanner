@@ -1,6 +1,7 @@
 // DNS domain create/edit sidenav
 import { DnsAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
+import { extractErrorMessage } from "../utils.js";
 
 export class DnsSidenavModule {
   constructor(taskManager) {
@@ -107,13 +108,17 @@ export class DnsSidenavModule {
       if (this.editingId) {
         const res = await DnsAPI.update(this.editingId, payload);
         if (!res.ok) {
-          showToast("Failed to save domain", "error");
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          showToast(errMsg, "error");
           return;
         }
       } else {
         const res = await DnsAPI.create(payload);
         if (!res.ok) {
-          showToast("Failed to create domain", "error");
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          showToast(errMsg, "error");
           return;
         }
       }
@@ -134,7 +139,9 @@ export class DnsSidenavModule {
     try {
       const res = await DnsAPI.delete(this.editingId);
       if (!res.ok) {
-        showToast("Failed to delete domain", "error");
+        const errBody = await res.json().catch(() => ({}));
+        const errMsg = extractErrorMessage(errBody);
+        showToast(errMsg, "error");
         return;
       }
       this.close();

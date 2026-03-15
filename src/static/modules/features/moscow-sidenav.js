@@ -4,7 +4,7 @@
 import { Sidenav } from "../ui/sidenav.js";
 import { MoscowAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, extractErrorMessage } from "../utils.js";
 import { showConfirm } from "../ui/confirm.js";
 
 const CATEGORIES = ["must", "should", "could", "wont"];
@@ -185,14 +185,20 @@ export class MoscowSidenavModule {
       if (this.editingMoscowId) {
         const res = await MoscowAPI.update(this.editingMoscowId, this.currentAnalysis);
         if (!res.ok) {
-          showToast("Failed to save MoSCoW analysis", "error");
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         this.showSaveStatus("Saved");
       } else {
         const response = await MoscowAPI.create(this.currentAnalysis);
         if (!response.ok) {
-          showToast("Failed to create MoSCoW analysis", "error");
+          const errBody = await response.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         const result = await response.json();
@@ -209,7 +215,7 @@ export class MoscowSidenavModule {
     } catch (error) {
       console.error("Error saving MoSCoW:", error);
       this.showSaveStatus("Error");
-      showToast("Error saving MoSCoW analysis", "error");
+      showToast(error.message || "Error saving MoSCoW analysis", "error");
     }
   }
 
@@ -224,7 +230,8 @@ export class MoscowSidenavModule {
     try {
       const res = await MoscowAPI.delete(this.editingMoscowId);
       if (!res.ok) {
-        showToast("Failed to delete MoSCoW analysis", "error");
+        const errBody = await res.json().catch(() => ({}));
+        showToast(extractErrorMessage(errBody), "error");
         return;
       }
       showToast("MoSCoW analysis deleted", "success");
@@ -232,7 +239,7 @@ export class MoscowSidenavModule {
       this.close();
     } catch (error) {
       console.error("Error deleting MoSCoW:", error);
-      showToast("Error deleting MoSCoW analysis", "error");
+      showToast(error.message || "Error deleting MoSCoW analysis", "error");
     }
   }
 

@@ -125,6 +125,113 @@ marked.setOptions({
 });
 
 /**
+ * Extract a human-readable error message from an API error response body.
+ * Handles Zod validation errors, string error/message fields, and fallback.
+ * @param {object} body - Parsed JSON response body
+ * @returns {string}
+ */
+export function extractErrorMessage(body) {
+  if (!body) return "Error";
+  if (typeof body.error === "string") return body.error;
+  if (body.error?.issues && Array.isArray(body.error.issues)) {
+    return body.error.issues
+      .map((i) => `${i.path?.join(".") || "field"}: ${i.message}`)
+      .join("; ");
+  }
+  if (typeof body.message === "string") return body.message;
+  return "Error";
+}
+
+/**
+ * Validate required form fields. Returns array of error objects.
+ * Each entry in `fields` is { id: "inputId", label: "Field Name" }.
+ * Shows inline errors on failing fields and clears errors on passing ones.
+ * @param {{ id: string, label: string, maxLength?: number }[]} fields
+ * @returns {{ id: string, label: string, message: string }[]} errors (empty = valid)
+ */
+export function validateRequired(fields) {
+  const errors = [];
+  for (const field of fields) {
+    const el = document.getElementById(field.id);
+    if (!el) continue;
+    const value = el.value?.trim() ?? "";
+    if (!value) {
+      errors.push({ id: field.id, label: field.label, message: `${field.label} is required` });
+      showFieldError(field.id, `${field.label} is required`);
+    } else if (field.maxLength && value.length > field.maxLength) {
+      errors.push({ id: field.id, label: field.label, message: `${field.label} must be ${field.maxLength} characters or fewer` });
+      showFieldError(field.id, `Max ${field.maxLength} characters`);
+    } else {
+      clearFieldError(field.id);
+    }
+  }
+  return errors;
+}
+
+/**
+ * Show an inline error on a form field (red border + message below).
+ * @param {string} inputId
+ * @param {string} message
+ */
+export function showFieldError(inputId, message) {
+  const el = document.getElementById(inputId);
+  if (!el) return;
+  el.classList.add("form-input-error");
+  // Remove existing error text if any
+  const existing = el.parentElement?.querySelector(".form-error-text");
+  if (existing) existing.remove();
+  // Add error text
+  const span = document.createElement("span");
+  span.className = "form-error-text";
+  span.textContent = message;
+  el.insertAdjacentElement("afterend", span);
+  // Clear on next input
+  el.addEventListener("input", () => clearFieldError(inputId), { once: true });
+}
+
+/**
+ * Clear inline error from a form field.
+ * @param {string} inputId
+ */
+export function clearFieldError(inputId) {
+  const el = document.getElementById(inputId);
+  if (!el) return;
+  el.classList.remove("form-input-error");
+  const errText = el.parentElement?.querySelector(".form-error-text");
+  if (errText) errText.remove();
+}
+
+/**
+ * Clear all field errors within a container element.
+ * @param {HTMLElement} container
+ */
+export function clearAllFieldErrors(container) {
+  if (!container) return;
+  container.querySelectorAll(".form-input-error").forEach((el) =>
+    el.classList.remove("form-input-error")
+  );
+  container.querySelectorAll(".form-error-text").forEach((el) => el.remove());
+}
+
+/**
+ * Parse server error "field: message; field: message" format and show inline errors.
+ * @param {string} errorMessage - Server error message string
+ * @param {Record<string, string>} fieldMap - Maps server field names to input IDs
+ */
+export function showServerFieldErrors(errorMessage, fieldMap) {
+  if (!errorMessage) return;
+  const parts = errorMessage.split(";").map((s) => s.trim());
+  for (const part of parts) {
+    const colonIdx = part.indexOf(":");
+    if (colonIdx === -1) continue;
+    const field = part.slice(0, colonIdx).trim();
+    const msg = part.slice(colonIdx + 1).trim();
+    const inputId = fieldMap[field];
+    if (inputId) showFieldError(inputId, msg);
+  }
+}
+
+/**
  * @param {string} markdown - Markdown text
  * @returns {string} HTML rendered by marked.js, wrapped in .markdown-content
  */

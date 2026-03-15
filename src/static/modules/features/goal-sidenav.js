@@ -20,6 +20,9 @@ export class GoalSidenavModule extends BaseSidenavModule {
     ];
   }
 
+  getRequiredFields() { return [{ id: "goalSidenavTitle", label: "Title" }]; }
+  getFieldMap() { return { title: "goalSidenavTitle" }; }
+
   clearForm() {
     document.getElementById("goalSidenavTitle").value = "";
     document.getElementById("goalSidenavType").value = "project";

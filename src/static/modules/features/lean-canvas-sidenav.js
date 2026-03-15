@@ -4,7 +4,7 @@
 import { Sidenav } from "../ui/sidenav.js";
 import { LeanCanvasAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, extractErrorMessage } from "../utils.js";
 import { showConfirm } from "../ui/confirm.js";
 
 export class LeanCanvasSidenavModule {
@@ -269,14 +269,20 @@ export class LeanCanvasSidenavModule {
       if (this.editingCanvasId) {
         const res = await LeanCanvasAPI.update(this.editingCanvasId, this.currentCanvas);
         if (!res.ok) {
-          showToast("Failed to save Lean Canvas", "error");
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         this.showSaveStatus("Saved");
       } else {
         const response = await LeanCanvasAPI.create(this.currentCanvas);
         if (!response.ok) {
-          showToast("Failed to create Lean Canvas", "error");
+          const errBody = await response.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         const result = await response.json();
@@ -293,7 +299,7 @@ export class LeanCanvasSidenavModule {
     } catch (error) {
       console.error("Error saving Lean Canvas:", error);
       this.showSaveStatus("Error");
-      showToast("Error saving Lean Canvas", "error");
+      showToast(error.message || "Error saving Lean Canvas", "error");
     }
   }
 
@@ -306,7 +312,8 @@ export class LeanCanvasSidenavModule {
     try {
       const res = await LeanCanvasAPI.delete(this.editingCanvasId);
       if (!res.ok) {
-        showToast("Failed to delete Lean Canvas", "error");
+        const errBody = await res.json().catch(() => ({}));
+        showToast(extractErrorMessage(errBody), "error");
         return;
       }
       showToast("Lean Canvas deleted", "success");
@@ -314,7 +321,7 @@ export class LeanCanvasSidenavModule {
       this.close();
     } catch (error) {
       console.error("Error deleting Lean Canvas:", error);
-      showToast("Error deleting Lean Canvas", "error");
+      showToast(error.message || "Error deleting Lean Canvas", "error");
     }
   }
 

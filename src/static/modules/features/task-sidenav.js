@@ -7,7 +7,7 @@ import { FuzzyAutocomplete } from "../ui/fuzzy-autocomplete.js";
 import { showToast } from "../ui/toast.js";
 import { UndoManager } from "../ui/undo-manager.js";
 import { showConfirm } from "../ui/confirm.js";
-import { markdownToHtml, escapeHtml } from "../utils.js";
+import { markdownToHtml, escapeHtml, extractErrorMessage, validateRequired, clearAllFieldErrors } from "../utils.js";
 
 export class TaskSidenavModule {
   constructor(taskManager) {
@@ -480,6 +480,17 @@ export class TaskSidenavModule {
   }
 
   async handleSubmit() {
+    // Clear previous errors
+    clearAllFieldErrors(document.getElementById("sidenavTask"));
+    // Validate required fields
+    const errors = validateRequired([
+      { id: "sidenavTaskTitleInput", label: "Title" },
+    ]);
+    if (errors.length > 0) {
+      showToast(errors[0].message, "error");
+      return;
+    }
+
     const getValue = (id) => {
       const el = document.getElementById(id);
       return el ? el.value : "";
@@ -531,7 +542,9 @@ export class TaskSidenavModule {
       if (this.editingTask) {
         const res = await TasksAPI.update(this.editingTask.id, taskData);
         if (!res.ok) {
-          showToast("Failed to save task", "error");
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          showToast(errMsg, "error");
           return;
         }
         showToast("Task updated", "success");
@@ -556,7 +569,7 @@ export class TaskSidenavModule {
       this.tm.renderTasks();
     } catch (error) {
       console.error("Error saving task:", error);
-      showToast("Error saving task", "error");
+      showToast(error.message || "Error saving task", "error");
     }
   }
 

@@ -5,7 +5,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { MarketingPlansAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { showConfirm } from "../ui/confirm.js";
-import { escapeHtml, markdownToHtml } from "../utils.js";
+import { escapeHtml, extractErrorMessage, markdownToHtml } from "../utils.js";
 
 const STATUS_OPTIONS = ["draft", "active", "completed", "archived"];
 const CHANNEL_STATUS_OPTIONS = ["planned", "active", "paused", "completed"];
@@ -534,13 +534,15 @@ export class MarketingPlansSidenavModule {
     if (this.editingId) {
       const res = await MarketingPlansAPI.update(this.editingId, data);
       if (!res.ok) {
-        showToast("Failed to save plan", "error");
+        const errBody = await res.json().catch(() => ({}));
+        showToast(extractErrorMessage(errBody), "error");
         return;
       }
     } else {
       const res = await MarketingPlansAPI.create(data);
       if (!res.ok) {
-        showToast("Failed to create plan", "error");
+        const errBody = await res.json().catch(() => ({}));
+        showToast(extractErrorMessage(errBody), "error");
         return;
       }
       const json = await res.json();
@@ -571,7 +573,8 @@ export class MarketingPlansSidenavModule {
 
     const res = await MarketingPlansAPI.delete(this.editingId);
     if (!res.ok) {
-      showToast("Failed to delete plan", "error");
+      const errBody = await res.json().catch(() => ({}));
+      showToast(extractErrorMessage(errBody), "error");
       return;
     }
 

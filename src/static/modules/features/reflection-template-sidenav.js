@@ -4,7 +4,7 @@
 import { Sidenav } from "../ui/sidenav.js";
 import { ReflectionTemplatesAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, extractErrorMessage } from "../utils.js";
 import { showConfirm } from "../ui/confirm.js";
 
 const DEFAULT_QUESTIONS = [
@@ -216,16 +216,20 @@ export class ReflectionTemplateSidenavModule {
           data,
         );
         if (!res.ok) {
-          this._showSaveStatus("Error");
-          showToast("Failed to save template", "error");
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this._showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         this._showSaveStatus("Saved");
       } else {
         const response = await ReflectionTemplatesAPI.create(data);
         if (!response.ok) {
-          this._showSaveStatus("Error");
-          showToast("Failed to create template", "error");
+          const errBody = await response.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this._showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         let result;
@@ -254,8 +258,8 @@ export class ReflectionTemplateSidenavModule {
       await this.tm.reflectionModule.load();
     } catch (error) {
       console.error("ReflectionTemplateSidenavModule.save failed", { id: this.editingTemplateId, error: error.message });
-      this._showSaveStatus("Error");
-      showToast("Error saving template", "error");
+      this._showSaveStatus(error.message || "Error");
+      showToast(error.message || "Error saving template", "error");
     }
   }
 
@@ -273,7 +277,9 @@ export class ReflectionTemplateSidenavModule {
     try {
       const res = await ReflectionTemplatesAPI.delete(this.editingTemplateId);
       if (!res.ok) {
-        showToast("Failed to delete template", "error");
+        const errBody = await res.json().catch(() => ({}));
+        const errMsg = extractErrorMessage(errBody);
+        showToast(errMsg, "error");
         return;
       }
       showToast("Template deleted", "success");
@@ -281,7 +287,7 @@ export class ReflectionTemplateSidenavModule {
       this.close();
     } catch (error) {
       console.error("ReflectionTemplateSidenavModule.handleDelete failed", { id: this.editingTemplateId, error: error.message });
-      showToast("Error deleting template", "error");
+      showToast(error.message || "Error deleting template", "error");
     }
   }
 

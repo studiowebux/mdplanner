@@ -18,6 +18,9 @@ export class MilestoneSidenavModule extends BaseSidenavModule {
     ];
   }
 
+  getRequiredFields() { return [{ id: "milestoneSidenavName", label: "Name" }]; }
+  getFieldMap() { return { name: "milestoneSidenavName" }; }
+
   openNew() {
     super.openNew();
     document.getElementById("milestoneSidenavProgress")?.classList.add("hidden");

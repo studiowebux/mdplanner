@@ -6,7 +6,7 @@ import { Sidenav } from "../ui/sidenav.js";
 import { NotesAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
 import { showConfirm } from "../ui/confirm.js";
-import { escapeHtml, markdownToHtml } from "../utils.js";
+import { escapeHtml, markdownToHtml, extractErrorMessage, validateRequired, clearAllFieldErrors } from "../utils.js";
 import { UndoManager } from "../ui/undo-manager.js";
 import { FuzzyAutocomplete } from "../ui/fuzzy-autocomplete.js";
 
@@ -674,14 +674,21 @@ export class NoteSidenavModule {
   }
 
   async save() {
+    // Clear previous errors
+    clearAllFieldErrors(document.getElementById("noteSidenav"));
+    // Validate required fields
+    const errors = validateRequired([
+      { id: "noteSidenavTitle", label: "Title" },
+    ]);
+    if (errors.length > 0) {
+      if (this.showSaveStatus) this.showSaveStatus(errors[0].message);
+      else showToast(errors[0].message, "error");
+      return;
+    }
+
     const title = document.getElementById("noteSidenavTitle").value.trim();
     const isEnhanced = document.getElementById("noteSidenavModeEnhanced")
       .classList.contains("bg-info");
-
-    if (!title) {
-      this.showSaveStatus("Title required");
-      return;
-    }
 
     try {
       if (this.isNewNote) {
@@ -721,7 +728,9 @@ export class NoteSidenavModule {
             "hidden",
           );
         } else {
-          this.showSaveStatus("Error");
+          const errBody = await response.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
         }
       } else {
         // Update existing note
@@ -753,12 +762,14 @@ export class NoteSidenavModule {
           this.showSaveStatus("Saved");
           this.tm.renderNotesView();
         } else {
-          this.showSaveStatus("Error");
+          const errBody = await response.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
         }
       }
     } catch (error) {
       console.error("Error saving note:", error);
-      this.showSaveStatus("Error");
+      this.showSaveStatus(error.message || "Error");
     }
   }
 
@@ -863,7 +874,9 @@ export class NoteSidenavModule {
     try {
       const res = await NotesAPI.delete(note.id);
       if (!res.ok) {
-        showToast("Failed to delete note", "error");
+        const errBody = await res.json().catch(() => ({}));
+        const errMsg = extractErrorMessage(errBody);
+        showToast(errMsg, "error");
         return;
       }
       showToast("Note deleted", "success");
@@ -873,7 +886,7 @@ export class NoteSidenavModule {
       this.close();
     } catch (error) {
       console.error("Error deleting note:", error);
-      showToast("Error deleting note", "error");
+      showToast(error.message || "Error deleting note", "error");
     }
   }
 

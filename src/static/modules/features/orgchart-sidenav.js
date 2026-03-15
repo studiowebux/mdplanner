@@ -25,6 +25,9 @@ export class OrgChartSidenavModule extends BaseSidenavModule {
     ];
   }
 
+  getRequiredFields() { return [{ id: "orgchartSidenavName", label: "Name" }]; }
+  getFieldMap() { return { name: "orgchartSidenavName" }; }
+
   openNew() {
     super.openNew();
     this.selectedDepts = [];

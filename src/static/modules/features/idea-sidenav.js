@@ -4,7 +4,7 @@
 import { Sidenav } from "../ui/sidenav.js";
 import { IdeasAPI } from "../api.js";
 import { showToast } from "../ui/toast.js";
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, extractErrorMessage, validateRequired, clearAllFieldErrors } from "../utils.js";
 import { FuzzyAutocomplete } from "../ui/fuzzy-autocomplete.js";
 import { showConfirm } from "../ui/confirm.js";
 
@@ -385,12 +385,19 @@ export class IdeaSidenavModule {
   }
 
   async save() {
-    const data = this.getFormData();
-
-    if (!data.title) {
-      this.showSaveStatus("Title required");
+    // Clear previous errors
+    clearAllFieldErrors(document.getElementById("ideaSidenav"));
+    // Validate required fields
+    const errors = validateRequired([
+      { id: "ideaSidenavTitle", label: "Title" },
+    ]);
+    if (errors.length > 0) {
+      if (this.showSaveStatus) this.showSaveStatus(errors[0].message);
+      else showToast(errors[0].message, "error");
       return;
     }
+
+    const data = this.getFormData();
 
     // Update currentIdea with form data
     Object.assign(this.currentIdea, data);
@@ -401,8 +408,10 @@ export class IdeaSidenavModule {
       if (this.editingIdeaId) {
         const res = await IdeasAPI.update(this.editingIdeaId, data);
         if (!res.ok) {
-          this.showSaveStatus("Error");
-          showToast("Failed to save idea", "error");
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         this.showSaveStatus("Saved");
@@ -419,8 +428,10 @@ export class IdeaSidenavModule {
       } else {
         const response = await IdeasAPI.create(data);
         if (!response.ok) {
-          this.showSaveStatus("Error");
-          showToast("Failed to create idea", "error");
+          const errBody = await response.json().catch(() => ({}));
+          const errMsg = extractErrorMessage(errBody);
+          this.showSaveStatus(errMsg);
+          showToast(errMsg, "error");
           return;
         }
         const result = await response.json();
@@ -441,7 +452,7 @@ export class IdeaSidenavModule {
     } catch (error) {
       console.error("Error saving idea:", error);
       this.showSaveStatus("Error");
-      showToast("Error saving idea", "error");
+      showToast(error.message || "Error saving idea", "error");
     }
   }
 
@@ -455,7 +466,8 @@ export class IdeaSidenavModule {
     try {
       const res = await IdeasAPI.delete(this.editingIdeaId);
       if (!res.ok) {
-        showToast("Failed to delete idea", "error");
+        const errBody = await res.json().catch(() => ({}));
+        showToast(extractErrorMessage(errBody), "error");
         return;
       }
       showToast("Idea deleted", "success");
@@ -463,7 +475,7 @@ export class IdeaSidenavModule {
       this.close();
     } catch (error) {
       console.error("Error deleting idea:", error);
-      showToast("Error deleting idea", "error");
+      showToast(error.message || "Error deleting idea", "error");
     }
   }
 
