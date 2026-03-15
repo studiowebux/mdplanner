@@ -683,6 +683,8 @@ export class ConfigView {
       await GitHubAPI.saveToken(token);
       input.value = "";
       await this.initGitHubPanel();
+      this.tm.githubConfigured = true;
+      this.tm.applyGitHubVisibility();
     } catch {
       alert("Failed to save GitHub token");
     } finally {
@@ -696,6 +698,8 @@ export class ConfigView {
     try {
       await GitHubAPI.deleteToken();
       await this.initGitHubPanel();
+      this.tm.githubConfigured = false;
+      this.tm.applyGitHubVisibility();
     } catch {
       alert("Failed to remove GitHub credentials");
     }

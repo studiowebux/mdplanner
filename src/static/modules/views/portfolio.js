@@ -618,6 +618,13 @@ export class PortfolioView {
    * @param {HTMLElement} container
    */
   async loadGitHubStats(container) {
+    if (!this.tm.githubConfigured) {
+      container.querySelectorAll(".github-stats-placeholder[data-github-repo]")
+        .forEach((el) => {
+          el.innerHTML = "";
+        });
+      return;
+    }
     const placeholders = container.querySelectorAll(
       ".github-stats-placeholder[data-github-repo]",
     );
@@ -1208,11 +1215,11 @@ export class PortfolioView {
     const githubInput = document.getElementById("portfolioDetailGithubRepo");
     if (githubInput) {
       // Fetch repos lazily on first sidenav open, cache for subsequent opens
-      if (!this._githubRepos.length) {
+      if (this.tm.githubConfigured && !this._githubRepos.length) {
         GitHubAPI.listRepos().then((repos) => {
           this._githubRepos = repos.map((r) => r.fullName);
         }).catch(() => {
-          // Token not configured or API error — autocomplete stays empty
+          // API error — autocomplete stays empty
         });
       }
       this._fuzzyInstances.push(new FuzzyAutocomplete(

@@ -9,7 +9,7 @@ import { Breadcrumb } from "./modules/ui/breadcrumb.js";
 import { Sidenav } from "./modules/ui/sidenav.js";
 import { Help } from "./modules/ui/help.js";
 import { TaskSidenavModule } from "./modules/features/task-sidenav.js";
-import { PeopleAPI, PortfolioAPI, ProjectAPI, TasksAPI } from "./modules/api.js";
+import { GitHubAPI, PeopleAPI, PortfolioAPI, ProjectAPI, TasksAPI } from "./modules/api.js";
 import { markdownToHtml as markdownToHtmlUtil } from "./modules/utils.js";
 import { SummaryView } from "./modules/views/summary.js";
 import { ListView } from "./modules/views/list.js";
@@ -116,6 +116,7 @@ class TaskManager {
     this.searchQuery = "";
     this.projectInfo = null;
     this.projectConfig = null;
+    this.githubConfigured = false;
     this.peopleMap = new Map();
     this.sections = [];
     this.currentView = "summary";
@@ -366,7 +367,9 @@ class TaskManager {
     this.bindEvents();
     await this.loadProjects(); // Load projects first
     await this.loadProjectConfig();
+    await this.loadGitHubStatus();
     this.applyFeatureVisibility();
+    this.applyGitHubVisibility();
     await this.loadPeople();
     await this.loadSections();
     const savedView = localStorage.getItem("mdplanner_current_view") ||
@@ -2084,6 +2087,27 @@ class TaskManager {
         this.projectConfig.workingDaysPerWeek;
       document.getElementById("customDaysContainer").classList.add("hidden");
     }
+  }
+
+  async loadGitHubStatus() {
+    try {
+      const status = await GitHubAPI.getStatus();
+      this.githubConfigured = status.configured === true;
+    } catch {
+      this.githubConfigured = false;
+    }
+  }
+
+  applyGitHubVisibility() {
+    const show = this.githubConfigured;
+    document.getElementById("sidenavGithubSection")?.classList.toggle(
+      "hidden",
+      !show,
+    );
+    document.getElementById("goalSidenavGithubSection")?.classList.toggle(
+      "hidden",
+      !show,
+    );
   }
 
   async loadSections() {
