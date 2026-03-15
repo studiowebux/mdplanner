@@ -28,12 +28,14 @@ export class CerveauModule {
       } else {
         this.enabled = true;
         this.brains = result;
-        // Optional metadata — 404 is expected when files are absent; never
-        // let these failures disable the viewer
+        // These three files are optional — a Cerveau brain is fully usable
+        // without them. 404 (file absent) and network errors both resolve to
+        // null so the viewer renders with whatever subset is available.
+        // Propagating the error would incorrectly disable the entire viewer.
         const [protocol, registry, manifest] = await Promise.all([
-          CerveauAPI.fetchProtocol().catch(() => null),
-          CerveauAPI.fetchRegistry().catch(() => null),
-          CerveauAPI.fetchManifest().catch(() => null),
+          CerveauAPI.fetchProtocol().catch(() => null), // optional: brain protocol definition
+          CerveauAPI.fetchRegistry().catch(() => null), // optional: agent/tool registry
+          CerveauAPI.fetchManifest().catch(() => null), // optional: brain manifest metadata
         ]);
         this.protocol = protocol;
         this.registry = registry;
