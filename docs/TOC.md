@@ -19,8 +19,6 @@
   - [GitHub Integration](02-guides/08-github-integration.md)
 - Reference
   - [CLI](03-reference/01-cli.md)
-  - [REST API](03-reference/02-api.md)
-  - [MCP Tools](03-reference/03-mcp-tools.md)
   - [Directory Schema](03-reference/04-directory-schema.md)
   - [Environment Variables](03-reference/05-environment-variables.md)
 - Resources

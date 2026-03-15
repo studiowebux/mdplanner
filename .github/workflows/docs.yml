@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "docs/**"
+      - "src/**"
       - "CHANGELOG.md"
       - ".github/workflows/docs.yml"
   workflow_dispatch:
@@ -67,6 +68,15 @@ jobs:
             };
             Deno.writeTextFileSync("docs/mcp/mdplanner.mcp.json", JSON.stringify(spec, null, 2));
           '
+
+      - name: Generate OpenAPI spec
+        run: |
+          mkdir -p docs/openapi
+          deno run --allow-net --allow-read --allow-write --allow-env main.ts --cache ./example &
+          SERVER_PID=$!
+          for i in $(seq 1 30); do curl -sf http://localhost:8003/api/health > /dev/null && break; sleep 1; done
+          curl -sf http://localhost:8003/api/doc -o docs/openapi/mdplanner.openapi.json
+          kill $SERVER_PID
 
       - name: Build docs
         run: minimaldoc build docs -o _site

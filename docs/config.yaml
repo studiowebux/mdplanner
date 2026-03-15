@@ -14,6 +14,11 @@ changelog:
   rss_enabled: true
   repository: "https://github.com/studiowebux/mdplanner"
 
+openapi:
+  enabled: true
+  spec_files:
+    - "openapi/mdplanner.openapi.json"
+
 mcp:
   enabled: true
   spec_files:
