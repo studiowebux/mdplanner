@@ -1048,6 +1048,16 @@ export class PortfolioView {
       this.escapeHtml(project.githubRepo || "")
     }" placeholder="owner/repo (e.g. studiowebux/mdplanner)">
             </div>
+            ${
+      project.githubRepo && project.githubRepo.includes("/")
+        ? `<div class="github-quick-links">
+                <a href="https://github.com/${this.escapeHtml(project.githubRepo)}" target="_blank" rel="noopener noreferrer">Repo</a>
+                <a href="https://github.com/${this.escapeHtml(project.githubRepo)}/issues" target="_blank" rel="noopener noreferrer">Issues</a>
+                <a href="https://github.com/${this.escapeHtml(project.githubRepo)}/pulls" target="_blank" rel="noopener noreferrer">PRs</a>
+                <a href="https://github.com/${this.escapeHtml(project.githubRepo)}/actions" target="_blank" rel="noopener noreferrer">Actions</a>
+              </div>`
+        : ""
+    }
             <div class="flex items-center gap-2">
               <input type="checkbox" id="portfolioDetailBrainManaged" ${
       project.brainManaged ? "checked" : ""
