@@ -1,4 +1,5 @@
-/* App shell — sidebar + topbar + content layout. */
+/* App shell — sidebar + topbar + content layout.
+   Mobile breakpoint: 768px (CSS vars can't be used in @media conditions). */
 
 /* -------------------------------------------------------------------------
    Shell grid
@@ -20,6 +21,17 @@
 .app-shell__content {
   flex: 1;
   overflow-y: auto;
+}
+
+/* Mobile — sidebar hidden until hamburger task is implemented */
+@media (max-width: 768px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    display: none;
+  }
 }
 
 /* -------------------------------------------------------------------------
@@ -52,6 +64,7 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   text-decoration: none;
+  letter-spacing: 0.01em;
 }
 
 .sidebar__nav {
@@ -68,11 +81,13 @@
 .sidebar__link {
   display: block;
   padding: var(--space-sm) var(--space-lg);
+  padding-left: calc(var(--space-lg) - var(--sidebar-active-border-width));
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   text-decoration: none;
-  border-radius: 0;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  border-left: var(--sidebar-active-border-width) var(--border-style) transparent;
+  transition: background var(--transition-fast), color var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .sidebar__link:hover {
@@ -84,6 +99,7 @@
   background: var(--color-bg-active);
   color: var(--color-text-primary);
   font-weight: var(--font-weight-medium);
+  border-left-color: var(--color-accent);
 }
 
 /* -------------------------------------------------------------------------
@@ -106,6 +122,9 @@
 }
 
 .topbar__search-input {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
   width: 100%;
   max-width: var(--topbar-search-max-width);
   padding: var(--space-xs) var(--space-sm);
@@ -117,6 +136,15 @@
   border-radius: var(--radius-md);
   outline: none;
   transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.topbar__search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.topbar__search-input::-webkit-search-decoration,
+.topbar__search-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
 }
 
 .topbar__search-input:focus {
@@ -139,14 +167,16 @@
   font-family: var(--font-sans);
   color: var(--color-text-secondary);
   background: transparent;
-  border: none;
+  border: var(--border-width) var(--border-style) transparent;
   border-radius: var(--radius-md);
   cursor: pointer;
   text-decoration: none;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition: background var(--transition-fast), color var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .topbar__action-btn:hover {
   background: var(--color-bg-hover);
   color: var(--color-text-primary);
+  border-color: var(--color-border-default);
 }

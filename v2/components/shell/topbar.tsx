@@ -7,7 +7,7 @@ export const Topbar: FC = () => (
         type="search"
         name="q"
         class="topbar__search-input"
-        placeholder="Search..."
+        placeholder="Search tasks, notes, goals..."
         autocomplete="off"
         aria-label="Search"
       />
