@@ -26,7 +26,10 @@ const Field: FC<{ def: FieldDef }> = ({ def }) => {
 
   return (
     <div class="form__field">
-      <label class="form__label" for={def.id}>{def.label}</label>
+      <label class="form__label" for={def.id}>
+        {def.label}
+        {def.required && <span class="form__required" aria-hidden="true">*</span>}
+      </label>
       {def.type === "text" && (
         <input
           type="text"

@@ -143,6 +143,9 @@ code, pre { font-family: var(--font-mono); }
 
   /* Sidenav resize */
   --sidenav-resize-width: 4px;
+
+  /* Table compact */
+  --table-compact-cell-max-width: 16rem;
 }
 
 

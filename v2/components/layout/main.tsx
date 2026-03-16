@@ -58,6 +58,7 @@ export const MainLayout: FC<Props> = ({ title, nonce, activePath, styles = [], s
         <script src="/js/domain-filter.js" />
         <script src="/js/domain-search.js" />
         <script src="/js/column-toggle.js" />
+        <script src="/js/hide-completed.js" />
         {scripts.map((src) => <script key={src} src={src} />)}
       </body>
     </html>

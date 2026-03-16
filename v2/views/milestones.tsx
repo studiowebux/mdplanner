@@ -127,6 +127,7 @@ export const MilestonesView: FC<Props> = ({ milestones, nonce, activePath }) => 
         filters={buildFilters(milestones)}
         columns={COLUMN_DEFS}
         searchPlaceholder="Search milestones..."
+        completedStatus="completed"
       />
 
       {milestones.length === 0
@@ -139,6 +140,7 @@ export const MilestonesView: FC<Props> = ({ milestones, nonce, activePath }) => 
             <DataTable
               id="milestones-table"
               domain="milestones"
+              compact
               columns={TABLE_COLUMNS}
               rows={milestones.map((m) => ({
                 id: m.id,

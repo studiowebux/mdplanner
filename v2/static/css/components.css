@@ -351,6 +351,12 @@
   min-height: var(--space-xl);
 }
 
+.form__required {
+  color: var(--color-error);
+  margin-left: var(--space-xs);
+  font-weight: var(--font-weight-bold);
+}
+
 .form__actions {
   display: flex;
   justify-content: flex-end;
@@ -724,6 +730,46 @@
 
 .sidenav__resize:hover {
   background: var(--color-border-focus);
+}
+
+/* -------------------------------------------------------------------------
+   Toolbar toggle (hide completed checkbox)
+   ------------------------------------------------------------------------- */
+
+.domain-toolbar__toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.domain-toolbar__toggle-label {
+  user-select: none;
+}
+
+/* -------------------------------------------------------------------------
+   Data table compact mode — tighter padding, hover detail row
+   ------------------------------------------------------------------------- */
+
+.data-table--compact .data-table__th {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-xs);
+}
+
+.data-table--compact .data-table__td {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: var(--table-compact-cell-max-width);
+}
+
+.data-table--compact .data-table__row {
+  transition: background var(--transition-fast);
 }
 
 @media (max-width: 768px) {

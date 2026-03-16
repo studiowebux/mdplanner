@@ -10,17 +10,18 @@ export type ColumnDef = {
 type Props = {
   id?: string;
   domain?: string;
+  compact?: boolean;
   columns: ColumnDef[];
   rows: Record<string, unknown>[];
   rowId?: string;
   rowFilterAttrs?: (row: Record<string, unknown>) => Record<string, string>;
 };
 
-export const DataTable: FC<Props> = ({ id, domain, columns, rows, rowId = "id", rowFilterAttrs }) => (
+export const DataTable: FC<Props> = ({ id, domain, compact, columns, rows, rowId = "id", rowFilterAttrs }) => (
   <div class="data-table-wrapper">
     <table
       id={id}
-      class="data-table"
+      class={`data-table${compact ? " data-table--compact" : ""}`}
       {...(domain ? { "data-column-table": domain } : {})}
     >
       <thead class="data-table__head">

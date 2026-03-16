@@ -72,15 +72,17 @@ window.sseBus.on("milestone:", function (event) {
     "milestone-"
   ).then(function (added) {
     if (added && isNew) updateCount(1);
-    // Reapply filters + search after card swap
+    // Reapply filters + search + hide-completed after card swap
     if (window.domainFilter) window.domainFilter.apply("milestones");
     if (window.domainSearch) window.domainSearch.apply("milestones");
+    if (window.hideCompleted) window.hideCompleted.apply("milestones");
   });
 
   swapTableRow("/milestones/" + event.id + "/row", event.id).then(function () {
-    // Reapply column visibility after row swap
+    // Reapply column visibility + filters + search + hide-completed after row swap
     if (window.columnToggle) window.columnToggle.apply("milestones");
     if (window.domainFilter) window.domainFilter.apply("milestones");
     if (window.domainSearch) window.domainSearch.apply("milestones");
+    if (window.hideCompleted) window.hideCompleted.apply("milestones");
   });
 });
