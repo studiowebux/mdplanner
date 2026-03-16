@@ -1,19 +1,16 @@
 ---
 id: task_cicd
 completed: true
-tag: [infra]
+revision: 1
+assignee: diana
 priority: 1
 effort: 8
-assignee: diana
 milestone: Alpha Release
 ---
 
 # CI/CD Pipeline
 
 Set up automated deployment pipeline.
-
-## Completed
-
 - GitHub Actions workflow
 - Automated testing on PR
 - Staging deployment on merge

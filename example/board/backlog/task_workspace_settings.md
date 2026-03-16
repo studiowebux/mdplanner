@@ -1,7 +1,7 @@
 ---
 id: task_workspace_settings
 completed: false
-tag: [feature]
+revision: 1
 due_date: "2026-02-17T19:00"
 assignee: bob
 priority: 1

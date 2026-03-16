@@ -1,7 +1,7 @@
 ---
 id: task_mobile_app
 completed: false
-tag: [feature, mobile]
+revision: 1
 priority: 3
 effort: 40
 milestone: Enterprise Features

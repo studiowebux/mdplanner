@@ -1,19 +1,16 @@
 ---
 id: task_auth
 completed: true
-tag: [feature, security]
+revision: 1
+assignee: alice
 priority: 1
 effort: 12
-assignee: alice
 milestone: Alpha Release
 ---
 
 # Authentication System
 
 Implement user authentication with Auth0.
-
-## Completed
-
 - Email/password login
 - Social login (Google, GitHub)
 - JWT token management

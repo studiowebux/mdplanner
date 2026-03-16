@@ -1,7 +1,7 @@
 ---
 id: task_api_versioning
 completed: false
-tag: [feature, api]
+revision: 1
 assignee: bob
 priority: 2
 effort: 8

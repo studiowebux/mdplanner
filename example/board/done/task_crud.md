@@ -1,19 +1,16 @@
 ---
 id: task_crud
 completed: true
-tag: [feature]
+revision: 1
+assignee: bob
 priority: 1
 effort: 8
-assignee: bob
 milestone: Alpha Release
 ---
 
 # Task CRUD Operations
 
 Basic task management functionality.
-
-## Completed
-
 - Create, read, update, delete tasks
 - Task status transitions
 - Assignee management
