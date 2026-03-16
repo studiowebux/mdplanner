@@ -9,7 +9,9 @@ export const MilestoneCard: FC<Props> = ({ milestone }) => (
     id={`milestone-${milestone.id}`}
   >
     <header class="milestone-card__header">
-      <h2 class="milestone-card__name">{milestone.name}</h2>
+      <h2 class="milestone-card__name">
+        <a href={`/milestones/${milestone.id}`}>{milestone.name}</a>
+      </h2>
       <span class={`milestone-card__badge milestone-card__badge--${milestone.status}`}>
         {milestone.status}
       </span>

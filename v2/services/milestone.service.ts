@@ -3,8 +3,8 @@
 
 import type { MilestoneRepository } from "../repositories/milestone.repository.ts";
 import type { TaskRepository } from "../repositories/task.repository.ts";
-import type { Milestone } from "../types/milestone.types.ts";
-import type { CreateMilestone, UpdateMilestone } from "../types/milestone.types.ts";
+import type { Milestone, CreateMilestone, UpdateMilestone } from "../types/milestone.types.ts";
+import type { Task } from "../types/task.types.ts";
 import { enrichMilestone, enrichMilestones } from "../domains/milestone/milestone.ts";
 
 export class MilestoneService {
@@ -54,5 +54,10 @@ export class MilestoneService {
 
   async delete(id: string): Promise<boolean> {
     return this.milestoneRepo.delete(id);
+  }
+
+  async getTasksForMilestone(milestoneName: string): Promise<Task[]> {
+    const tasks = await this.taskRepo.findAll();
+    return tasks.filter((t) => t.milestone === milestoneName);
   }
 }
