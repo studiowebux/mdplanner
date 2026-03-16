@@ -46,6 +46,8 @@ export const MainLayout: FC<Props> = ({ title, nonce, activePath, styles = [], s
         <AppShell activePath={activePath}>
           {children}
         </AppShell>
+        <script src="/js/vendor/htmx-2.0.8.min.js" />
+        <script src="/js/vendor/htmx-ext-sse-2.2.4.min.js" />
         <script src="/js/sse-bus.js" />
         <script src="/js/theme-toggle.js" />
         <script src="/js/sidebar-toggle.js" />
