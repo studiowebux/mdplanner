@@ -5,7 +5,7 @@ import { timeAgo, duration, variance, dueIn, formatDate } from "../../utils/time
 type Props = { milestone: Milestone };
 
 export const MilestoneRow: FC<Props> = ({ milestone: m }) => (
-  <tr class="data-table__row" data-row-id={m.id}>
+  <tr class="data-table__row" data-row-id={m.id} data-filter-status={m.status} data-filter-project={m.project ?? ""}>
     <td class="data-table__td">{m.name}</td>
     <td class="data-table__td">
       <span class={`milestone-card__badge milestone-card__badge--${m.status}`}>

@@ -1,5 +1,5 @@
 // Milestone form — create, edit, delete via fetch.
-// Uses sidenav.js for open/close + confirm-dialog.js for delete.
+// Uses sidenav.js for open/close, confirm-dialog.js for delete, toast.js for feedback.
 
 (function () {
   var form = document.getElementById("milestone-form-body");
@@ -37,6 +37,14 @@
     if (fieldProjectSearch) fieldProjectSearch.value = proj;
   }
 
+  function extractError(response) {
+    return response.json().then(function (data) {
+      return data.message || data.error || "Unknown error";
+    }).catch(function () {
+      return "Request failed (" + response.status + ")";
+    });
+  }
+
   // Create vs edit mode
   document.addEventListener("click", function (e) {
     var btn = e.target.closest("[data-milestone-action]");
@@ -66,7 +74,11 @@
         if (!ok) return;
         fetch("/api/v1/milestones/" + id, { method: "DELETE" })
           .then(function (r) {
-            if (!r.ok) throw new Error("Delete failed");
+            if (!r.ok) return extractError(r).then(function (msg) { throw new Error(msg); });
+            window.toast({ type: "success", message: "Milestone deleted" });
+          })
+          .catch(function (err) {
+            window.toast({ type: "error", message: err.message });
           });
       });
     }
@@ -96,7 +108,7 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       }).then(function (r) {
-        if (!r.ok) throw new Error("Save failed");
+        if (!r.ok) return extractError(r).then(function (msg) { throw new Error(msg); });
         // Close sidenav — SSE handles grid + table updates
         if (window.sidenavResetDirty) window.sidenavResetDirty("milestone-form");
         if (sidenav) {
@@ -104,6 +116,9 @@
           sidenav.setAttribute("aria-hidden", "true");
         }
         clearForm();
+        window.toast({ type: "success", message: isEdit ? "Milestone updated" : "Milestone created" });
+      }).catch(function (err) {
+        window.toast({ type: "error", message: err.message });
       });
     });
   }

@@ -9,14 +9,20 @@ export type ColumnDef = {
 
 type Props = {
   id?: string;
+  domain?: string;
   columns: ColumnDef[];
   rows: Record<string, unknown>[];
   rowId?: string;
+  rowFilterAttrs?: (row: Record<string, unknown>) => Record<string, string>;
 };
 
-export const DataTable: FC<Props> = ({ id, columns, rows, rowId = "id" }) => (
+export const DataTable: FC<Props> = ({ id, domain, columns, rows, rowId = "id", rowFilterAttrs }) => (
   <div class="data-table-wrapper">
-    <table id={id} class="data-table">
+    <table
+      id={id}
+      class="data-table"
+      {...(domain ? { "data-column-table": domain } : {})}
+    >
       <thead class="data-table__head">
         <tr>
           {columns.map((col) => (
@@ -32,7 +38,12 @@ export const DataTable: FC<Props> = ({ id, columns, rows, rowId = "id" }) => (
       </thead>
       <tbody class="data-table__body">
         {rows.map((row) => (
-          <tr key={String(row[rowId])} class="data-table__row" data-row-id={String(row[rowId])}>
+          <tr
+            key={String(row[rowId])}
+            class="data-table__row"
+            data-row-id={String(row[rowId])}
+            {...(rowFilterAttrs ? rowFilterAttrs(row) : {})}
+          >
             {columns.map((col) => (
               <td key={col.key} class="data-table__td">
                 {col.render

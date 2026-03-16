@@ -4,10 +4,11 @@ import { MilestoneCard } from "./components/milestone-card.tsx";
 import { MilestoneForm } from "./components/milestone-form.tsx";
 import { CardGrid } from "../components/ui/card-grid.tsx";
 import { DataTable } from "../components/ui/data-table.tsx";
-import { ViewToggle } from "../components/ui/view-toggle.tsx";
+import { DomainToolbar } from "../components/ui/domain-toolbar.tsx";
 import { EmptyState } from "../components/ui/empty-state.tsx";
 import type { Milestone } from "../types/milestone.types.ts";
 import type { ColumnDef } from "../components/ui/data-table.tsx";
+import type { FilterDef } from "../components/ui/filter-bar.tsx";
 import type { ViewProps } from "../types/app.ts";
 import { timeAgo, duration, variance, dueIn, formatDate } from "../utils/time.ts";
 
@@ -70,6 +71,31 @@ const TABLE_COLUMNS: ColumnDef[] = [
   { key: "_actions", label: "", render: actionBtns },
 ];
 
+const COLUMN_DEFS = TABLE_COLUMNS
+  .filter((c) => c.label)
+  .map((c) => ({ key: c.key, label: c.label }));
+
+function buildFilters(milestones: Milestone[]): FilterDef[] {
+  const projects = [...new Set(milestones.map((m) => m.project).filter(Boolean))] as string[];
+  return [
+    {
+      key: "status",
+      label: "Status",
+      options: [
+        { value: "open", label: "Open" },
+        { value: "completed", label: "Completed" },
+      ],
+    },
+    ...(projects.length > 0
+      ? [{
+          key: "project",
+          label: "Project",
+          options: projects.sort().map((p) => ({ value: p, label: p })),
+        }]
+      : []),
+  ];
+}
+
 type Props = ViewProps & { milestones: Milestone[] };
 
 export const MilestonesView: FC<Props> = ({ milestones, nonce, activePath }) => (
@@ -80,11 +106,10 @@ export const MilestonesView: FC<Props> = ({ milestones, nonce, activePath }) => 
     styles={["/css/views/milestones.css"]}
     scripts={["/js/milestones-sse.js", "/js/milestones-form.js"]}
   >
-    <main class="milestones-page">
-      <header class="milestones-page__header">
-        <h1 class="milestones-page__title">Milestones</h1>
-        <span class="milestones-page__count">{milestones.length} total</span>
-        <ViewToggle domain="milestones" />
+    <main class="domain-page" data-domain="milestones">
+      <header class="domain-page__header">
+        <h1 class="domain-page__title">Milestones</h1>
+        <span class="domain-page__count" data-filter-count>{milestones.length} total</span>
         <button
           class="btn btn--primary"
           type="button"
@@ -95,6 +120,13 @@ export const MilestonesView: FC<Props> = ({ milestones, nonce, activePath }) => 
         </button>
       </header>
 
+      <DomainToolbar
+        domain="milestones"
+        filters={buildFilters(milestones)}
+        columns={COLUMN_DEFS}
+        searchPlaceholder="Search milestones..."
+      />
+
       {milestones.length === 0
         ? <EmptyState message="No milestones yet. Create one to get started." />
         : (
@@ -104,6 +136,7 @@ export const MilestonesView: FC<Props> = ({ milestones, nonce, activePath }) => 
             </CardGrid>
             <DataTable
               id="milestones-table"
+              domain="milestones"
               columns={TABLE_COLUMNS}
               rows={milestones.map((m) => ({
                 id: m.id,
@@ -117,6 +150,10 @@ export const MilestonesView: FC<Props> = ({ milestones, nonce, activePath }) => 
                 completedAt: m.completedAt ?? "",
                 description: m.description ?? "",
               }))}
+              rowFilterAttrs={(row) => ({
+                "data-filter-status": String(row.status),
+                "data-filter-project": String(row.project),
+              })}
             />
           </div>
         )}

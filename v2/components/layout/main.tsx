@@ -54,6 +54,10 @@ export const MainLayout: FC<Props> = ({ title, nonce, activePath, styles = [], s
         <script src="/js/autocomplete.js" />
         <script src="/js/view-toggle.js" />
         <script src="/js/data-table-sort.js" />
+        <script src="/js/toast.js" />
+        <script src="/js/domain-filter.js" />
+        <script src="/js/domain-search.js" />
+        <script src="/js/column-toggle.js" />
         {scripts.map((src) => <script key={src} src={src} />)}
       </body>
     </html>

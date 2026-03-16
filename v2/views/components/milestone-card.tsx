@@ -12,6 +12,9 @@ export const MilestoneCard: FC<Props> = ({ milestone }) => {
     <article
       class={`milestone-card${milestone.status === "completed" ? " milestone-card--completed" : ""}`}
       id={`milestone-${milestone.id}`}
+      data-filterable-card
+      data-filter-status={milestone.status}
+      data-filter-project={milestone.project ?? ""}
     >
       <header class="milestone-card__header">
         <h2 class="milestone-card__name">

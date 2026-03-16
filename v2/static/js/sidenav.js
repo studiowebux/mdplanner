@@ -1,7 +1,5 @@
-// Sidenav — open/close via data attributes, ESC key, dirty state tracking.
-// Open:  data-sidenav-open="<sidenav-id>" on any trigger element.
-// Close: data-sidenav-close, backdrop click, or ESC key.
-// Dirty: warns before closing if form inputs were modified.
+// Sidenav — open/close via data attributes, ESC key, dirty state tracking,
+// visual dirty indicator, and resize handle.
 
 (function () {
   var dirtyNavs = {};
@@ -16,6 +14,7 @@
     el.classList.add("is-open");
     el.setAttribute("aria-hidden", "false");
     dirtyNavs[id] = false;
+    updateDirtyIndicator(el, false);
     trackDirty(el, id);
   }
 
@@ -39,13 +38,28 @@
     el.classList.remove("is-open");
     el.setAttribute("aria-hidden", "true");
     dirtyNavs[el.id] = false;
+    updateDirtyIndicator(el, false);
+  }
+
+  function updateDirtyIndicator(el, dirty) {
+    var title = el.querySelector(".sidenav__title");
+    if (!title) return;
+    if (dirty) {
+      title.classList.add("sidenav__title--dirty");
+    } else {
+      title.classList.remove("sidenav__title--dirty");
+    }
   }
 
   function trackDirty(el, id) {
     var inputs = el.querySelectorAll("input, select, textarea");
     for (var i = 0; i < inputs.length; i++) {
+      // Remove old listeners by replacing node — prevents stacking
+      if (inputs[i].hasAttribute("data-dirty-tracked")) continue;
+      inputs[i].setAttribute("data-dirty-tracked", "");
       inputs[i].addEventListener("input", function () {
         dirtyNavs[id] = true;
+        updateDirtyIndicator(el, true);
       });
     }
   }
@@ -53,6 +67,8 @@
   // Reset dirty state on successful form submit (called by domain form JS).
   window.sidenavResetDirty = function (id) {
     dirtyNavs[id] = false;
+    var el = document.getElementById(id);
+    if (el) updateDirtyIndicator(el, false);
   };
 
   // Click handlers — open + close
@@ -80,4 +96,39 @@
       closeSidenav(open);
     }
   });
+
+  // Resize handle — drag to resize sidenav panel width
+  (function () {
+    var resizing = false;
+    var panel = null;
+
+    document.addEventListener("mousedown", function (e) {
+      var handle = e.target.closest("[data-sidenav-resize]");
+      if (!handle) return;
+      panel = handle.closest(".sidenav__panel");
+      if (!panel) return;
+      resizing = true;
+      e.preventDefault();
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+    });
+
+    document.addEventListener("mousemove", function (e) {
+      if (!resizing || !panel) return;
+      var width = window.innerWidth - e.clientX;
+      var minW = 280;
+      var maxW = window.innerWidth * 0.8;
+      if (width < minW) width = minW;
+      if (width > maxW) width = maxW;
+      panel.style.width = width + "px";
+    });
+
+    document.addEventListener("mouseup", function () {
+      if (!resizing) return;
+      resizing = false;
+      panel = null;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    });
+  })();
 })();

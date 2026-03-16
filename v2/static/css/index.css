@@ -123,6 +123,26 @@ code, pre { font-family: var(--font-mono); }
 
   /* Autocomplete */
   --autocomplete-max-height: 12rem;
+
+  /* Toast */
+  --z-toast: 400;
+
+  /* Dropdown */
+  --z-dropdown: 250;
+
+  /* Table */
+  --z-table-head: 1;
+  --progress-col-min-width: 6rem;
+
+  /* Toolbar */
+  --toolbar-search-min-width: 12rem;
+  --toolbar-search-max-width: 20rem;
+
+  /* Column toggle */
+  --column-toggle-min-width: 10rem;
+
+  /* Sidenav resize */
+  --sidenav-resize-width: 4px;
 }
 
 

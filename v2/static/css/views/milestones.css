@@ -1,37 +1,5 @@
-/* Milestones view */
-
-.milestones-page {
-  padding: var(--page-padding);
-  max-width: var(--page-max-width);
-  margin: 0 auto;
-}
-
-.milestones-page__header {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-md);
-  margin-bottom: var(--space-lg);
-}
-
-.milestones-page__title {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-}
-
-.milestones-page__count {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-}
-
-.milestones-page__header .btn {
-  margin-left: auto;
-}
-
-.milestones-page__empty {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-}
+/* Milestones view — domain-specific styles only.
+   Page layout uses shared .domain-page from components.css. */
 
 
 /* Milestone card */

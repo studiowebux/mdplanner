@@ -1,8 +1,9 @@
 // Milestone SSE handler — subscribes to milestone:* events via the shared
 // sse-bus. Updates both card grid and table row without page reload.
+// Reapplies column toggle and filters after fragment swaps.
 
 function updateCount(delta) {
-  var el = document.querySelector(".milestones-page__count");
+  var el = document.querySelector("[data-filter-count]");
   if (!el) return;
   var n = parseInt(el.textContent, 10);
   if (!isNaN(n)) el.textContent = (n + delta) + " total";
@@ -71,7 +72,15 @@ window.sseBus.on("milestone:", function (event) {
     "milestone-"
   ).then(function (added) {
     if (added && isNew) updateCount(1);
+    // Reapply filters + search after card swap
+    if (window.domainFilter) window.domainFilter.apply("milestones");
+    if (window.domainSearch) window.domainSearch.apply("milestones");
   });
 
-  swapTableRow("/milestones/" + event.id + "/row", event.id);
+  swapTableRow("/milestones/" + event.id + "/row", event.id).then(function () {
+    // Reapply column visibility after row swap
+    if (window.columnToggle) window.columnToggle.apply("milestones");
+    if (window.domainFilter) window.domainFilter.apply("milestones");
+    if (window.domainSearch) window.domainSearch.apply("milestones");
+  });
 });

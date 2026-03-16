@@ -12,9 +12,10 @@ export const Sidenav: FC<Props> = ({ id, title, children }) => (
   <aside class="sidenav" id={id} aria-hidden="true">
     <div class="sidenav__backdrop" data-sidenav-close />
     <div class="sidenav__panel">
+      <div class="sidenav__resize" data-sidenav-resize />
       <div class="sidenav__header">
         <h2 class="sidenav__title">{title}</h2>
-        <button class="sidenav__close-btn" type="button" data-sidenav-close>
+        <button class="btn btn--ghost btn--sm sidenav__close-btn" type="button" data-sidenav-close>
           Close
         </button>
       </div>
