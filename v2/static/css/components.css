@@ -12,6 +12,7 @@
   font-size: var(--font-size-sm);
   font-family: var(--font-sans);
   font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast),

@@ -148,4 +148,5 @@
   display: flex;
   justify-content: flex-end;
   gap: var(--space-sm);
+  margin-top: auto;
 }
