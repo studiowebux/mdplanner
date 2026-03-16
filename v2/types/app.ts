@@ -9,3 +9,6 @@ export type ViewProps = {
   nonce?: string;
   activePath?: string;
 };
+
+// View mode for domain list pages — grid (card) or table.
+export type ViewMode = "grid" | "table";
