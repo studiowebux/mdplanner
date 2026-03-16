@@ -54,6 +54,19 @@ export class TaskBuilder {
       }));
     }
 
+    if (fm.approvalRequest != null && typeof fm.approvalRequest === "object") {
+      const ar = fm.approvalRequest as Record<string, unknown>;
+      this.task.approvalRequest = {
+        id: String(ar.id ?? ""),
+        requestedAt: String(ar.requestedAt ?? ""),
+        requestedBy: String(ar.requestedBy ?? ""),
+        summary: String(ar.summary ?? ""),
+        ...(ar.commitHash != null && { commitHash: String(ar.commitHash) }),
+        ...(Array.isArray(ar.artifactUrls) && { artifactUrls: ar.artifactUrls.map(String) }),
+        ...(ar.verdict != null && typeof ar.verdict === "object" && { verdict: ar.verdict as any }),
+      };
+    }
+
     if (Array.isArray(fm.comments)) {
       this.task.comments = fm.comments.map((c: any) => ({
         id: String(c.id ?? ""),

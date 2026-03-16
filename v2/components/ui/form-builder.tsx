@@ -97,7 +97,7 @@ export const FormBuilder: FC<Props> = ({ id, title, fields, submitLabel }) => (
     <form id={`${id}-body`} class="form">
       {fields.map((def) => <Field key={def.id} def={def} />)}
       <div class="form__actions">
-        <button type="submit" class="form__submit">{submitLabel ?? "Save"}</button>
+        <button type="submit" class="btn btn--primary">{submitLabel ?? "Save"}</button>
       </div>
     </form>
   </Sidenav>

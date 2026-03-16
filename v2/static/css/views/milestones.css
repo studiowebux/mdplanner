@@ -24,6 +24,10 @@
   color: var(--color-text-muted);
 }
 
+.milestones-page__header .btn {
+  margin-left: auto;
+}
+
 .milestones-page__empty {
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
@@ -138,4 +142,10 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   line-height: var(--body-line-height);
+}
+
+.milestone-card__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
 }

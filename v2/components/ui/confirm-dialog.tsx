@@ -8,8 +8,8 @@ export const ConfirmDialog: FC = () => (
       <h2 class="confirm-dialog__title" id="confirm-dialog-title">Confirm</h2>
       <p class="confirm-dialog__message" id="confirm-dialog-message">Are you sure?</p>
       <div class="confirm-dialog__actions">
-        <button class="confirm-dialog__cancel" type="button">Cancel</button>
-        <button class="confirm-dialog__confirm" type="button">Confirm</button>
+        <button class="btn btn--secondary confirm-dialog__cancel" type="button">Cancel</button>
+        <button class="btn btn--danger confirm-dialog__confirm" type="button">Confirm</button>
       </div>
     </div>
   </dialog>

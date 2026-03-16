@@ -1,6 +1,74 @@
 /* Shared UI components — loaded globally. */
 
 /* -------------------------------------------------------------------------
+   Buttons
+   ------------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.btn--primary {
+  color: var(--color-text-inverse);
+  background: var(--color-accent);
+  border: var(--border-width) var(--border-style) var(--color-accent);
+}
+
+.btn--primary:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.btn--secondary {
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+}
+
+.btn--secondary:hover {
+  background: var(--color-bg-hover);
+}
+
+.btn--danger {
+  color: var(--color-error-text);
+  background: var(--color-error-bg);
+  border: var(--border-width) var(--border-style) var(--color-error-border);
+}
+
+.btn--danger:hover {
+  background: var(--color-error);
+  color: var(--color-text-inverse);
+  border-color: var(--color-error);
+}
+
+.btn--ghost {
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: var(--border-width) var(--border-style) transparent;
+}
+
+.btn--ghost:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-default);
+}
+
+.btn--sm {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-xs);
+}
+
+/* -------------------------------------------------------------------------
    Sidenav (slide-in panel)
    ------------------------------------------------------------------------- */
 
@@ -110,34 +178,6 @@
   gap: var(--space-sm);
 }
 
-.confirm-dialog__cancel,
-.confirm-dialog__confirm {
-  padding: var(--space-xs) var(--space-md);
-  font-size: var(--font-size-sm);
-  font-family: var(--font-sans);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-}
-
-.confirm-dialog__cancel {
-  color: var(--color-text-secondary);
-  background: var(--color-bg-secondary);
-  border: var(--border-width) var(--border-style) var(--color-border-default);
-}
-
-.confirm-dialog__cancel:hover {
-  background: var(--color-bg-hover);
-}
-
-.confirm-dialog__confirm {
-  color: var(--color-text-inverse);
-  background: var(--color-error);
-  border: var(--border-width) var(--border-style) var(--color-error);
-}
-
-.confirm-dialog__confirm:hover {
-  background: var(--color-error-border);
-}
 
 /* -------------------------------------------------------------------------
    Form (shared across all domain forms via FormBuilder)
@@ -191,23 +231,6 @@
   display: flex;
   justify-content: flex-end;
   padding-top: var(--space-sm);
-}
-
-.form__submit {
-  padding: var(--space-xs) var(--space-lg);
-  font-size: var(--font-size-sm);
-  font-family: var(--font-sans);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-inverse);
-  background: var(--color-accent);
-  border: var(--border-width) var(--border-style) var(--color-accent);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
-
-.form__submit:hover {
-  background: var(--color-accent-hover);
 }
 
 /* -------------------------------------------------------------------------

@@ -37,5 +37,31 @@ export const MilestoneCard: FC<Props> = ({ milestone }) => (
         dangerouslySetInnerHTML={{ __html: milestone.descriptionHtml }}
       />
     )}
+
+    <div class="milestone-card__actions">
+      <button
+        class="btn btn--ghost btn--sm"
+        type="button"
+        data-sidenav-open="milestone-form"
+        data-milestone-action="edit"
+        data-milestone-id={milestone.id}
+        data-milestone-name={milestone.name}
+        data-milestone-status={milestone.status}
+        data-milestone-target={milestone.target ?? ""}
+        data-milestone-description={milestone.description ?? ""}
+        data-milestone-project={milestone.project ?? ""}
+      >
+        Edit
+      </button>
+      <button
+        class="btn btn--danger btn--sm"
+        type="button"
+        data-milestone-action="delete"
+        data-milestone-id={milestone.id}
+        data-milestone-name={milestone.name}
+      >
+        Delete
+      </button>
+    </div>
   </article>
 );
