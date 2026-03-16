@@ -33,7 +33,7 @@ export const MilestoneCard: FC<Props> = ({ milestone }) => (
 
     {milestone.descriptionHtml && (
       <div
-        class="milestone-card__description"
+        class="milestone-card__description markdown-body"
         dangerouslySetInnerHTML={{ __html: milestone.descriptionHtml }}
       />
     )}

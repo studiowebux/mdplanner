@@ -71,6 +71,46 @@
 }
 
 /* -------------------------------------------------------------------------
+   Markdown content — restores heading/list styles inside rendered markdown
+   ------------------------------------------------------------------------- */
+
+.markdown-body h2 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-xs);
+}
+
+.markdown-body h3 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-xs);
+}
+
+.markdown-body p {
+  margin-bottom: var(--space-sm);
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: var(--space-lg);
+  margin-bottom: var(--space-sm);
+}
+
+.markdown-body ul {
+  list-style: disc;
+}
+
+.markdown-body ol {
+  list-style: decimal;
+}
+
+.markdown-body li {
+  margin-bottom: var(--space-xs);
+}
+
+/* -------------------------------------------------------------------------
    Sidenav (slide-in panel)
    ------------------------------------------------------------------------- */
 
