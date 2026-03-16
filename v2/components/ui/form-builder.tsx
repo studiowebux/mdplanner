@@ -34,7 +34,7 @@ const Field: FC<{ def: FieldDef }> = ({ def }) => {
           class="form__input"
           required={def.required}
           placeholder={def.placeholder}
-          autocomplete="off"
+          autocomplete="do-not-autofill"
         />
       )}
       {def.type === "number" && (
