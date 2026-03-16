@@ -32,12 +32,13 @@
 
 .btn--secondary {
   color: var(--color-text-primary);
-  background: var(--color-bg-secondary);
-  border: var(--border-width) var(--border-style) var(--color-border-default);
+  background: var(--color-bg-tertiary);
+  border: var(--border-width) var(--border-style) var(--color-border-strong);
 }
 
 .btn--secondary:hover {
   background: var(--color-bg-hover);
+  border-color: var(--color-border-focus);
 }
 
 .btn--danger {

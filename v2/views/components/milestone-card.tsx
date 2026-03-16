@@ -40,7 +40,7 @@ export const MilestoneCard: FC<Props> = ({ milestone }) => (
 
     <div class="milestone-card__actions">
       <button
-        class="btn btn--ghost btn--sm"
+        class="btn btn--secondary btn--sm"
         type="button"
         data-sidenav-open="milestone-form"
         data-milestone-action="edit"
