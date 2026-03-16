@@ -51,6 +51,7 @@ export const MainLayout: FC<Props> = ({ title, nonce, activePath, styles = [], s
         <script src="/js/sidebar-toggle.js" />
         <script src="/js/sidenav.js" />
         <script src="/js/confirm-dialog.js" />
+        <script src="/js/autocomplete.js" />
         {scripts.map((src) => <script key={src} src={src} />)}
       </body>
     </html>

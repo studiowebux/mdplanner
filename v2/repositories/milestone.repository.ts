@@ -2,17 +2,12 @@
 
 import { join } from "@std/path";
 import { parseFrontmatter, serializeFrontmatter } from "../utils/frontmatter.ts";
+import { generateId } from "../utils/id.ts";
 import type {
   CreateMilestone,
   MilestoneBase,
   UpdateMilestone,
 } from "../types/milestone.types.ts";
-
-function generateId(): string {
-  const ts = Date.now();
-  const rand = Math.random().toString(36).slice(2, 8);
-  return `milestone_${ts}_${rand}`;
-}
 
 export class MilestoneRepository {
   private milestonesDir: string;
@@ -50,7 +45,7 @@ export class MilestoneRepository {
 
   async create(data: CreateMilestone): Promise<MilestoneBase> {
     await Deno.mkdir(this.milestonesDir, { recursive: true });
-    const id = generateId();
+    const id = generateId("milestone");
     const fm: Record<string, unknown> = { id, status: data.status ?? "open" };
     if (data.target) fm.target = data.target;
     if (data.project) fm.project = data.project;
