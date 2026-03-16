@@ -39,6 +39,7 @@ export const MainLayout: FC<Props> = ({ title, nonce, activePath, styles = [], s
         />
         <link rel="stylesheet" href="/css/index.css" />
         <link rel="stylesheet" href="/css/shell.css" />
+        <link rel="stylesheet" href="/css/components.css" />
         {styles.map((href) => <link key={href} rel="stylesheet" href={href} />)}
       </head>
       <body>
@@ -48,6 +49,8 @@ export const MainLayout: FC<Props> = ({ title, nonce, activePath, styles = [], s
         <script src="/js/sse-bus.js" />
         <script src="/js/theme-toggle.js" />
         <script src="/js/sidebar-toggle.js" />
+        <script src="/js/sidenav.js" />
+        <script src="/js/confirm-dialog.js" />
         {scripts.map((src) => <script key={src} src={src} />)}
       </body>
     </html>

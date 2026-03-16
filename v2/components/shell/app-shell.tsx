@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { Sidebar } from "./sidebar.tsx";
 import { Topbar } from "./topbar.tsx";
+import { ConfirmDialog } from "../ui/confirm-dialog.tsx";
 
 type Props = { activePath?: string; children?: unknown };
 
@@ -14,5 +15,6 @@ export const AppShell: FC<Props> = ({ activePath, children }) => (
         {children}
       </div>
     </div>
+    <ConfirmDialog />
   </div>
 );

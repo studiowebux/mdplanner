@@ -44,7 +44,7 @@ html.sidebar-collapsed .app-shell {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--overlay-bg);
   z-index: var(--z-overlay);
 }
 

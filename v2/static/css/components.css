@@ -1,0 +1,182 @@
+/* Shared UI components — loaded globally. */
+
+/* -------------------------------------------------------------------------
+   Sidenav (slide-in panel)
+   ------------------------------------------------------------------------- */
+
+.sidenav {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-sidenav);
+}
+
+.sidenav.is-open {
+  display: flex;
+}
+
+.sidenav__backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--overlay-bg);
+}
+
+.sidenav__panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--sidenav-width);
+  max-width: 100%;
+  height: 100%;
+  background: var(--color-bg-primary);
+  border-left: var(--border-width) var(--border-style) var(--color-border-default);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidenav__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: var(--border-width) var(--border-style) var(--color-border-default);
+  flex-shrink: 0;
+}
+
+.sidenav__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.sidenav__close-btn {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.sidenav__close-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.sidenav__body {
+  flex: 1;
+  padding: var(--space-lg);
+  overflow-y: auto;
+}
+
+/* -------------------------------------------------------------------------
+   Confirm dialog (native <dialog>)
+   ------------------------------------------------------------------------- */
+
+.confirm-dialog {
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 0;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-lg);
+  max-width: var(--dialog-max-width);
+  width: 90%;
+}
+
+.confirm-dialog::backdrop {
+  background: var(--overlay-bg);
+}
+
+.confirm-dialog__content {
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.confirm-dialog__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.confirm-dialog__message {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--body-line-height);
+}
+
+.confirm-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+}
+
+.confirm-dialog__cancel,
+.confirm-dialog__confirm {
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.confirm-dialog__cancel {
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+}
+
+.confirm-dialog__cancel:hover {
+  background: var(--color-bg-hover);
+}
+
+.confirm-dialog__confirm {
+  color: var(--color-text-inverse);
+  background: var(--color-error);
+  border: var(--border-width) var(--border-style) var(--color-error);
+}
+
+.confirm-dialog__confirm:hover {
+  background: var(--color-error-border);
+}
+
+/* -------------------------------------------------------------------------
+   Empty state
+   ------------------------------------------------------------------------- */
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+}
+
+.empty-state__message {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* -------------------------------------------------------------------------
+   Loading spinner
+   ------------------------------------------------------------------------- */
+
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+}
+
+.loading-spinner__ring {
+  width: var(--spinner-size);
+  height: var(--spinner-size);
+  border: var(--spinner-border-width) var(--border-style) var(--color-border-default);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

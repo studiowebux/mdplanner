@@ -58,6 +58,20 @@
   /* Z-index scale */
   --z-sidebar: 200;
   --z-overlay: 199;
+  --z-sidenav: 300;
+
+  /* Overlay */
+  --overlay-bg: rgba(0, 0, 0, 0.4);
+
+  /* Sidenav */
+  --sidenav-width: 24rem;
+
+  /* Dialog */
+  --dialog-max-width: 28rem;
+
+  /* Spinner */
+  --spinner-size: 1.5rem;
+  --spinner-border-width: 2px;
 }
 
 
