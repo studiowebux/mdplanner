@@ -97,7 +97,8 @@
         body: JSON.stringify(body),
       }).then(function (r) {
         if (!r.ok) throw new Error("Save failed");
-        // Close sidenav — SSE handles the card update
+        // Reset dirty + close — SSE handles the card update
+        if (window.sidenavResetDirty) window.sidenavResetDirty("milestone-form");
         if (sidenav) {
           sidenav.classList.remove("is-open");
           sidenav.setAttribute("aria-hidden", "true");
