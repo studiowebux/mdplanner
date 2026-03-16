@@ -10,7 +10,7 @@ const LINKS: NavLink[] = [
 type Props = { activePath?: string };
 
 export const Sidebar: FC<Props> = ({ activePath }) => (
-  <aside class="sidebar">
+  <aside class="sidebar" id="app-sidebar">
     <div class="sidebar__brand">
       <a href="/" class="sidebar__brand-link">MDPlanner</a>
     </div>

@@ -2,6 +2,16 @@ import type { FC } from "hono/jsx";
 
 export const Topbar: FC = () => (
   <header class="topbar">
+    <button
+      id="sidebar-toggle"
+      class="topbar__action-btn topbar__sidebar-toggle"
+      type="button"
+      aria-label="Toggle sidebar"
+      aria-expanded="true"
+      aria-controls="app-sidebar"
+    >
+      Menu
+    </button>
     <div class="topbar__search">
       <form action="/search" method="get" role="search">
         <input

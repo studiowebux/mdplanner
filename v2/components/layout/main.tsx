@@ -47,6 +47,7 @@ export const MainLayout: FC<Props> = ({ title, nonce, activePath, styles = [], s
         </AppShell>
         <script src="/js/sse-bus.js" />
         <script src="/js/theme-toggle.js" />
+        <script src="/js/sidebar-toggle.js" />
         {scripts.map((src) => <script key={src} src={src} />)}
       </body>
     </html>
