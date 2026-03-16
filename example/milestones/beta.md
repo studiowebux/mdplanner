@@ -1,8 +1,10 @@
 ---
 id: milestone_beta
-name: Public Beta
-target: 2026-03-15
-status: open
+status: completed
+target: 2026-02-15
+createdAt: "2025-12-01T10:00:00.000Z"
+completedAt: "2026-03-01T16:45:00.000Z"
+project: "TaskFlow Platform"
 ---
 
 # Public Beta

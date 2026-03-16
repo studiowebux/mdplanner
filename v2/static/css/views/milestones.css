@@ -93,9 +93,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-xs) var(--space-md);
-}
-
-.milestone-card__meta-item {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }

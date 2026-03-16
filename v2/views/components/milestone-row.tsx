@@ -65,5 +65,5 @@ function varianceClass(target?: string, completedAt?: string): string {
   const diff = new Date(completedAt).getTime() - new Date(target).getTime();
   if (diff > 0) return "text-error";
   if (diff < 0) return "text-success";
-  return "";
+  return "text-success";
 }

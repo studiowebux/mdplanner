@@ -6,7 +6,7 @@ type Props = { milestone: Milestone };
 
 export const MilestoneCard: FC<Props> = ({ milestone }) => {
   const v = variance(milestone.target, milestone.completedAt);
-  const vClass = v.includes("late") ? "text-error" : v.includes("early") ? "text-success" : "";
+  const vClass = v.includes("late") ? "text-error" : v ? "text-success" : "";
 
   return (
     <article

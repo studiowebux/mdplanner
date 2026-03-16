@@ -60,7 +60,7 @@ const TABLE_COLUMNS: ColumnDef[] = [
     return <span class={d.includes("overdue") ? "text-error" : ""}>{d}</span>;
   }},
   { key: "completedAt", label: "Completed", sortable: true, render: (v) => formatDate(v as string) },
-  { key: "duration", label: "Completed in", render: (_, row) => duration(row.createdAt as string, row.completedAt as string) },
+  { key: "duration", label: "Duration", render: (_, row) => duration(row.createdAt as string, row.completedAt as string) },
   { key: "variance", label: "Planned vs Actual", render: (_, row) => {
     const v = variance(row.target as string, row.completedAt as string);
     if (!v) return "";

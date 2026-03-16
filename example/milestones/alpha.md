@@ -1,8 +1,10 @@
 ---
 id: milestone_alpha
-name: Alpha Release
-target: 2026-01-31
 status: completed
+target: 2026-01-31
+createdAt: "2025-11-15T09:00:00.000Z"
+completedAt: "2026-02-10T14:30:00.000Z"
+project: "TaskFlow Platform"
 ---
 
 # Alpha Release
