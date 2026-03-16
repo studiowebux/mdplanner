@@ -281,6 +281,7 @@
 
 .form__autocomplete {
   position: relative;
+  width: 100%;
 }
 
 .form__autocomplete-list {
