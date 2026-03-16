@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MD Planner v2 — POC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    >
+    <!-- Apply theme before CSS loads to prevent white flash in dark mode -->
+    <script>
+      (function () {
+        var s = localStorage.getItem("darkMode");
+        var p = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (s === "true" || (s === null && p)) {
+          document.documentElement.classList.add("dark");
+        }
+      }());
+    </script>
+    <link rel="stylesheet" href="/css/index.css">
+  </head>
+  <body class="bg-secondary min-h-screen transition-colors">
+    <header class="v2-header">
+      <span class="v2-header-title">MD Planner v2 POC</span>
+      <nav class="v2-nav">
+        <button type="button" id="analyticsViewBtn" data-view="analytics" class="v2-nav-btn">Analytics</button>
+      </nav>
+    </header>
+
+    <main id="viewContainer" aria-label="View content"></main>
+
+    <script type="module" src="/v2/app.js"></script>
+  </body>
+</html>
