@@ -4,7 +4,8 @@ export type AppVariables = {
   nonce: string;
 };
 
-// Base props for all SSR views — every view receives a nonce for CSP.
+// Base props for all SSR views — every view receives nonce + activePath.
 export type ViewProps = {
   nonce?: string;
+  activePath?: string;
 };

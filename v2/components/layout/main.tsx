@@ -1,5 +1,6 @@
 import type { FC } from "hono/jsx";
 import { APP_NAME, APP_VERSION } from "../../constants/mod.ts";
+import { AppShell } from "../shell/app-shell.tsx";
 
 // Runs before CSS loads — must stay inline to prevent FOUC.
 // Kept minimal deliberately; nonce is required for CSP compliance.
@@ -9,12 +10,13 @@ const DARK_MODE_SCRIPT =
 type Props = {
   title?: string;
   nonce?: string;
+  activePath?: string;
   styles?: string[];
   scripts?: string[];
   children?: unknown;
 };
 
-export const MainLayout: FC<Props> = ({ title, nonce, styles = [], scripts = [], children }) => {
+export const MainLayout: FC<Props> = ({ title, nonce, activePath, styles = [], scripts = [], children }) => {
   const pageTitle = title
     ? `${title} — ${APP_NAME}`
     : `${APP_NAME} v${APP_VERSION}`;
@@ -36,10 +38,15 @@ export const MainLayout: FC<Props> = ({ title, nonce, styles = [], scripts = [],
           dangerouslySetInnerHTML={{ __html: DARK_MODE_SCRIPT }}
         />
         <link rel="stylesheet" href="/css/index.css" />
+        <link rel="stylesheet" href="/css/shell.css" />
         {styles.map((href) => <link key={href} rel="stylesheet" href={href} />)}
       </head>
       <body>
-        {children}
+        <AppShell activePath={activePath}>
+          {children}
+        </AppShell>
+        <script src="/js/sse-bus.js" />
+        <script src="/js/theme-toggle.js" />
         {scripts.map((src) => <script key={src} src={src} />)}
       </body>
     </html>

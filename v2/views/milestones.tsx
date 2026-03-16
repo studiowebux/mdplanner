@@ -6,10 +6,11 @@ import type { ViewProps } from "../types/app.ts";
 
 type Props = ViewProps & { milestones: Milestone[] };
 
-export const MilestonesView: FC<Props> = ({ milestones, nonce }) => (
+export const MilestonesView: FC<Props> = ({ milestones, nonce, activePath }) => (
   <MainLayout
     title="Milestones"
     nonce={nonce}
+    activePath={activePath}
     styles={["/css/views/milestones.css"]}
     scripts={["/js/milestones-sse.js"]}
   >

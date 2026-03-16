@@ -45,7 +45,17 @@
   /* Page */
   --page-padding: var(--space-lg);
   --page-max-width: 1200px;
+
+  /* Borders */
+  --border-width: 1px;
+  --border-style: solid;
+
+  /* Nav / Shell */
+  --nav-height: 3rem;
+  --sidebar-width: 14rem;
+  --topbar-search-max-width: 28rem;
 }
+
 
 /* Dark theme overrides — matches .dark and .theme-dark from variables.css */
 .theme-dark,

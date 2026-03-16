@@ -9,7 +9,7 @@ export const milestonesViewRouter = new Hono<{ Variables: AppVariables }>();
 milestonesViewRouter.get("/", async (c) => {
   const milestones = await getMilestoneService().list();
   return c.html(
-    MilestonesView({ milestones, nonce: c.get("nonce") }) as unknown as string,
+    MilestonesView({ milestones, nonce: c.get("nonce"), activePath: "/milestones" }) as unknown as string,
   );
 });
 
