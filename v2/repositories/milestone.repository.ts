@@ -1,0 +1,144 @@
+// Milestone repository — reads and writes milestone markdown files from disk.
+
+import { join } from "@std/path";
+import { parseFrontmatter, serializeFrontmatter } from "../utils/frontmatter.ts";
+import type {
+  CreateMilestone,
+  MilestoneBase,
+  UpdateMilestone,
+} from "../types/milestone.types.ts";
+
+function generateId(): string {
+  const ts = Date.now();
+  const rand = Math.random().toString(36).slice(2, 8);
+  return `milestone_${ts}_${rand}`;
+}
+
+export class MilestoneRepository {
+  private milestonesDir: string;
+
+  constructor(projectDir: string) {
+    this.milestonesDir = join(projectDir, "milestones");
+  }
+
+  async findAll(): Promise<MilestoneBase[]> {
+    const milestones: MilestoneBase[] = [];
+    try {
+      for await (const entry of Deno.readDir(this.milestonesDir)) {
+        if (!entry.isFile || !entry.name.endsWith(".md")) continue;
+        const content = await Deno.readTextFile(
+          join(this.milestonesDir, entry.name),
+        );
+        const m = this.parse(content);
+        if (m) milestones.push(m);
+      }
+    } catch (err) {
+      if (!(err instanceof Deno.errors.NotFound)) throw err;
+    }
+    return milestones;
+  }
+
+  async findById(id: string): Promise<MilestoneBase | null> {
+    const { base } = await this.findFileById(id);
+    return base;
+  }
+
+  async findByName(name: string): Promise<MilestoneBase | null> {
+    const all = await this.findAll();
+    return all.find((m) => m.name === name) ?? null;
+  }
+
+  async create(data: CreateMilestone): Promise<MilestoneBase> {
+    await Deno.mkdir(this.milestonesDir, { recursive: true });
+    const id = generateId();
+    const fm: Record<string, unknown> = { id, status: data.status ?? "open" };
+    if (data.target) fm.target = data.target;
+    if (data.project) fm.project = data.project;
+    const body =
+      `# ${data.name}\n\n${data.description ?? ""}`.trimEnd();
+    await Deno.writeTextFile(
+      join(this.milestonesDir, `${id}.md`),
+      serializeFrontmatter(fm, body),
+    );
+    return {
+      id,
+      name: data.name,
+      status: data.status ?? "open",
+      target: data.target,
+      description: data.description,
+      project: data.project,
+    };
+  }
+
+  async update(
+    id: string,
+    data: UpdateMilestone,
+  ): Promise<MilestoneBase | null> {
+    const { file, base } = await this.findFileById(id);
+    if (!file || !base) return null;
+    const updated: MilestoneBase = { ...base };
+    if (data.name !== undefined) updated.name = data.name;
+    if (data.status !== undefined) updated.status = data.status;
+    if (data.target !== undefined) updated.target = data.target ?? undefined;
+    if (data.description !== undefined) updated.description = data.description ?? undefined;
+    if (data.project !== undefined) updated.project = data.project ?? undefined;
+    const fm: Record<string, unknown> = { id: updated.id, status: updated.status };
+    if (updated.target) fm.target = updated.target;
+    if (updated.project) fm.project = updated.project;
+    if (updated.completedAt) fm.completedAt = updated.completedAt;
+    const body =
+      `# ${updated.name}\n\n${updated.description ?? ""}`.trimEnd();
+    await Deno.writeTextFile(file, serializeFrontmatter(fm, body));
+    return updated;
+  }
+
+  async delete(id: string): Promise<boolean> {
+    const { file } = await this.findFileById(id);
+    if (!file) return false;
+    await Deno.remove(file);
+    return true;
+  }
+
+  private async findFileById(
+    id: string,
+  ): Promise<{ file: string | null; base: MilestoneBase | null }> {
+    try {
+      for await (const entry of Deno.readDir(this.milestonesDir)) {
+        if (!entry.isFile || !entry.name.endsWith(".md")) continue;
+        const filePath = join(this.milestonesDir, entry.name);
+        const content = await Deno.readTextFile(filePath);
+        const m = this.parse(content);
+        if (m?.id === id) return { file: filePath, base: m };
+      }
+    } catch (err) {
+      if (!(err instanceof Deno.errors.NotFound)) throw err;
+    }
+    return { file: null, base: null };
+  }
+
+  private parse(content: string): MilestoneBase | null {
+    const { frontmatter: fm, body } = parseFrontmatter(content);
+    if (!fm.id) return null;
+
+    // Title from first # heading
+    const titleMatch = body.match(/^#\s+(.+)/m);
+    const name = titleMatch?.[1]?.trim() ?? String(fm.id);
+
+    // Description: everything after the title line
+    const lines = body.split("\n");
+    const titleIdx = lines.findIndex((l) => /^#\s+/.test(l));
+    const desc = titleIdx >= 0
+      ? lines.slice(titleIdx + 1).join("\n").trim()
+      : undefined;
+
+    return {
+      id: String(fm.id),
+      name,
+      status: fm.status === "completed" ? "completed" : "open",
+      target: fm.target != null ? String(fm.target) : undefined,
+      description: desc || undefined,
+      project: fm.project != null ? String(fm.project) : undefined,
+      completedAt: fm.completedAt != null ? String(fm.completedAt) : undefined,
+    };
+  }
+}

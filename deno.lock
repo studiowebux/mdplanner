@@ -17,6 +17,7 @@
     "npm:@opentelemetry/sdk-logs@0.200": "0.200.0_@opentelemetry+api@1.9.0",
     "npm:@scalar/hono-api-reference@0.10.2": "0.10.2_hono@4.12.5",
     "npm:hono@4.12.5": "4.12.5",
+    "npm:marked@15": "15.0.12",
     "npm:zod@3.25.76": "3.25.76"
   },
   "jsr": {
@@ -452,6 +453,10 @@
     "json-schema-typed@8.0.2": {
       "integrity": "sha512-fQhoXdcvc3V28x7C7BMs4P5+kNlgUURe2jmUT1T//oBRMDrqy1QPelJimwZGo7Hg9VPV3EQV5Bnq4hbFy2vetA=="
     },
+    "marked@15.0.12": {
+      "integrity": "sha512-8dD6FusOQSrpv9Z1rdNMdlSgQOIP880DHqnohobOmYLElGEqAL/JvxvuxZO16r4HtjTlfPRDC1hbvxC9dPN2nA==",
+      "bin": true
+    },
     "math-intrinsics@1.1.0": {
       "integrity": "sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g=="
     },
@@ -744,6 +749,7 @@
       "npm:@modelcontextprotocol/sdk@1.26.0",
       "npm:@scalar/hono-api-reference@0.10.2",
       "npm:hono@4.12.5",
+      "npm:marked@15",
       "npm:zod@3.25.76"
     ]
   }

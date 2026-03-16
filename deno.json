@@ -25,7 +25,8 @@
     }
   },
   "tasks": {
-    "dev": "deno run --allow-net --allow-read --allow-write --allow-env --watch main.ts --cache ./example",
+    "dev": "deno run --allow-net --allow-read --allow-write --allow-env --watch main.ts ./example",
+    "dev:v2": "deno run --allow-net --allow-read --allow-write --allow-env --watch v2/bin.ts ./example",
     "start": "deno run --allow-net --allow-read --allow-write --allow-env main.ts",
     "mcp": "deno run --allow-read --allow-write --allow-env mcp.ts",
     "test": "deno test --allow-read --allow-write --allow-env tests/",
@@ -55,8 +56,11 @@
     "hono/deno": "npm:hono@4.12.5/deno",
     "hono/body-limit": "npm:hono@4.12.5/body-limit",
     "hono/logger": "npm:hono@4.12.5/logger",
+    "hono/jsx": "npm:hono@4.12.5/jsx",
+    "hono/jsx/dom": "npm:hono@4.12.5/jsx/dom",
     "@hono/zod-openapi": "npm:@hono/zod-openapi@0.19.9",
     "@scalar/hono-api-reference": "npm:@scalar/hono-api-reference@0.10.2",
+    "marked": "npm:marked@15",
     "zod": "npm:zod@3.25.76",
     "@modelcontextprotocol/sdk/server/mcp.js": "npm:@modelcontextprotocol/sdk@1.26.0/server/mcp.js",
     "@modelcontextprotocol/sdk/server/stdio.js": "npm:@modelcontextprotocol/sdk@1.26.0/server/stdio.js",
@@ -67,6 +71,8 @@
   },
   "compilerOptions": {
     "strict": true,
-    "lib": ["dom", "deno.ns"]
+    "lib": ["dom", "deno.ns"],
+    "jsx": "precompile",
+    "jsxImportSource": "hono/jsx"
   }
 }

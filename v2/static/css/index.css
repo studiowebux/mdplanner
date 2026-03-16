@@ -1,0 +1,56 @@
+/* v2 — foundation only. Per-view styles load via MainLayout styles prop. */
+@import url("/css/variables.css");
+@import url("/css/base.css");
+@import url("/css/utilities.css");
+
+/* -------------------------------------------------------------------------
+   Component tokens — shared defaults across all v2 views.
+   Change here, consistent everywhere.
+   ------------------------------------------------------------------------- */
+
+:root {
+  /* Accent — progress bars, active badges, links */
+  --color-accent: #0369a1;
+  --color-accent-subtle: #e0f2fe;
+  --color-accent-muted: #7dd3fc;
+
+  /* Card */
+  --card-bg: var(--color-bg-primary);
+  --card-border: 1px solid var(--color-border-default);
+  --card-radius: var(--radius-lg);
+  --card-padding: var(--space-lg);
+  --card-gap: var(--space-md);
+  --card-shadow: var(--shadow-sm);
+  --card-shadow-hover: var(--shadow-md);
+  --card-opacity-muted: 0.75;
+
+  /* Badge */
+  --badge-padding: 2px var(--space-sm);
+  --badge-font-weight: 500;
+
+  /* Progress bar */
+  --progress-bar-height: 6px;
+
+  /* Typography */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --body-line-height: 1.6;
+
+  /* Grid */
+  --grid-col-min: 320px;
+  --grid-gap: var(--space-lg);
+
+  /* Page */
+  --page-padding: var(--space-lg);
+  --page-max-width: 1200px;
+}
+
+/* Dark theme overrides — matches .dark and .theme-dark from variables.css */
+.theme-dark,
+.dark {
+  --color-accent: #38bdf8;
+  --color-accent-subtle: #0c4a6e;
+  --color-accent-muted: #0369a1;
+}
