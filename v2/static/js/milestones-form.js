@@ -97,7 +97,7 @@
         body: JSON.stringify(body),
       }).then(function (r) {
         if (!r.ok) throw new Error("Save failed");
-        // Reset dirty + close — SSE handles the card update
+        // Close sidenav — SSE handles grid + table updates
         if (window.sidenavResetDirty) window.sidenavResetDirty("milestone-form");
         if (sidenav) {
           sidenav.classList.remove("is-open");

@@ -46,7 +46,8 @@ export class MilestoneRepository {
   async create(data: CreateMilestone): Promise<MilestoneBase> {
     await Deno.mkdir(this.milestonesDir, { recursive: true });
     const id = generateId("milestone");
-    const fm: Record<string, unknown> = { id, status: data.status ?? "open" };
+    const createdAt = new Date().toISOString();
+    const fm: Record<string, unknown> = { id, status: data.status ?? "open", createdAt };
     if (data.target) fm.target = data.target;
     if (data.project) fm.project = data.project;
     const body =
@@ -62,6 +63,7 @@ export class MilestoneRepository {
       target: data.target,
       description: data.description,
       project: data.project,
+      createdAt,
     };
   }
 
@@ -73,7 +75,14 @@ export class MilestoneRepository {
     if (!file || !base) return null;
     const updated: MilestoneBase = { ...base };
     if (data.name !== undefined) updated.name = data.name;
-    if (data.status !== undefined) updated.status = data.status;
+    if (data.status !== undefined) {
+      updated.status = data.status;
+      if (data.status === "completed" && base.status !== "completed") {
+        updated.completedAt = new Date().toISOString();
+      } else if (data.status === "open") {
+        updated.completedAt = undefined;
+      }
+    }
     if (data.target !== undefined) updated.target = data.target ?? undefined;
     if (data.description !== undefined) updated.description = data.description ?? undefined;
     if (data.project !== undefined) updated.project = data.project ?? undefined;
@@ -134,6 +143,7 @@ export class MilestoneRepository {
       description: desc || undefined,
       project: fm.project != null ? String(fm.project) : undefined,
       completedAt: fm.completedAt != null ? String(fm.completedAt) : undefined,
+      createdAt: fm.createdAt != null ? String(fm.createdAt) : undefined,
     };
   }
 }

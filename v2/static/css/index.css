@@ -126,6 +126,15 @@ code, pre { font-family: var(--font-mono); }
 }
 
 
+/* -------------------------------------------------------------------------
+   Semantic text colors
+   ------------------------------------------------------------------------- */
+
+.text-success { color: var(--color-success); }
+.text-error { color: var(--color-error); }
+.text-warning { color: var(--color-warning); }
+.text-muted { color: var(--color-text-muted); }
+
 /* Dark theme overrides — matches .dark and .theme-dark from variables.css */
 .theme-dark,
 .dark {

@@ -52,6 +52,8 @@ export const MainLayout: FC<Props> = ({ title, nonce, activePath, styles = [], s
         <script src="/js/sidenav.js" />
         <script src="/js/confirm-dialog.js" />
         <script src="/js/autocomplete.js" />
+        <script src="/js/view-toggle.js" />
+        <script src="/js/data-table-sort.js" />
         {scripts.map((src) => <script key={src} src={src} />)}
       </body>
     </html>

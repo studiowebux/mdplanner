@@ -71,6 +71,80 @@
 }
 
 /* -------------------------------------------------------------------------
+   Card grid
+   ------------------------------------------------------------------------- */
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--grid-col-min), 1fr));
+  gap: var(--grid-gap);
+}
+
+/* -------------------------------------------------------------------------
+   Data table
+   ------------------------------------------------------------------------- */
+
+.data-table-wrapper {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.data-table__th {
+  text-align: left;
+  padding: var(--space-sm) var(--space-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  border-bottom: var(--border-width) var(--border-style) var(--color-border-strong);
+  white-space: nowrap;
+}
+
+.data-table__th--sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.data-table__th--sortable:hover {
+  color: var(--color-text-primary);
+}
+
+.data-table__th--asc::after {
+  content: " \2191";
+}
+
+.data-table__th--desc::after {
+  content: " \2193";
+}
+
+.data-table__td {
+  padding: var(--space-sm) var(--space-md);
+  color: var(--color-text-primary);
+  border-bottom: var(--border-width) var(--border-style) var(--color-border-default);
+}
+
+.data-table__row:hover {
+  background: var(--color-bg-hover);
+}
+
+/* -------------------------------------------------------------------------
+   View toggle
+   ------------------------------------------------------------------------- */
+
+.view-toggle {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.view-toggle__btn--active {
+  background: var(--color-bg-active);
+  border-color: var(--color-border-focus);
+}
+
+/* -------------------------------------------------------------------------
    Markdown content — restores heading/list styles inside rendered markdown
    ------------------------------------------------------------------------- */
 

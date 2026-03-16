@@ -3,6 +3,7 @@ import { getMilestoneService } from "../../singletons/services.ts";
 import { MilestonesView } from "../milestones.tsx";
 import { MilestoneDetailView } from "../milestone-detail.tsx";
 import { MilestoneCard } from "../components/milestone-card.tsx";
+import { MilestoneRow } from "../components/milestone-row.tsx";
 import type { AppVariables } from "../../types/app.ts";
 
 export const milestonesViewRouter = new Hono<{ Variables: AppVariables }>();
@@ -28,6 +29,16 @@ milestonesViewRouter.get("/:id", async (c) => {
       nonce: c.get("nonce"),
       activePath: "/milestones",
     }) as unknown as string,
+  );
+});
+
+// Row fragment — fetched by the SSE client to swap table rows.
+milestonesViewRouter.get("/:id/row", async (c) => {
+  const id = c.req.param("id");
+  const m = await getMilestoneService().getById(id);
+  if (!m) return c.notFound();
+  return c.html(
+    MilestoneRow({ milestone: m }) as unknown as string,
   );
 });
 

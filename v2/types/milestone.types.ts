@@ -18,6 +18,7 @@ export const MilestoneBaseSchema = z.object({
   description: z.string().optional(),
   project: z.string().optional(),
   completedAt: z.string().optional(),
+  createdAt: z.string().optional(),
 });
 
 export type MilestoneBase = z.infer<typeof MilestoneBaseSchema>;
