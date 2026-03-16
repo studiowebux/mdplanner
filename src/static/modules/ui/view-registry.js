@@ -25,6 +25,18 @@ export const VIEWS = {
     bind: (tm) => tm.analyticsModule.bindEvents(),
     load: (tm) => tm.analyticsModule.load(),
   },
+  milestones: {
+    partial: "/views/milestones",
+    navBtnId: "milestonesViewBtn",
+    mobileBtnId: "milestonesViewBtnMobile",
+    label: "Milestones",
+    category: "Planning",
+    bind: (tm) => {
+      tm.milestonesModule.bindEvents();
+      tm.milestoneSidenavModule.bindEvents();
+    },
+    load: (tm) => tm.milestonesModule.load(),
+  },
 };
 
 /**

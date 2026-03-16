@@ -7,12 +7,15 @@
 import { VIEWS } from "../modules/ui/view-registry.js";
 import { ensureView } from "../modules/ui/view-loader.js";
 import { AnalyticsModule } from "../modules/views/analytics.js";
+import { MilestonesModule } from "../modules/features/milestones.js";
+import { MilestoneSidenavModule } from "../modules/features/milestone-sidenav.js";
 
 // Build a minimal TaskManager stand-in that satisfies the registry's
-// bind/load callbacks. AnalyticsModule stores tm but never uses it
-// for data loading — it calls AnalyticsAPI.fetch() directly.
+// bind/load callbacks.
 const tm = {};
 tm.analyticsModule = new AnalyticsModule(tm);
+tm.milestonesModule = new MilestonesModule(tm);
+tm.milestoneSidenavModule = new MilestoneSidenavModule(tm);
 
 /** @type {Set<string>} Track which views have had bind() called */
 const _bound = new Set();
