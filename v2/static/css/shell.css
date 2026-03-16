@@ -37,7 +37,7 @@ html.sidebar-collapsed .app-shell {
 }
 
 /* -------------------------------------------------------------------------
-   Sidebar overlay + mobile
+   Sidebar overlay
    ------------------------------------------------------------------------- */
 
 .sidebar-overlay {
@@ -46,34 +46,6 @@ html.sidebar-collapsed .app-shell {
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
   z-index: var(--z-overlay);
-}
-
-@media (max-width: 768px) {
-  .app-shell {
-    display: block;
-  }
-
-  .app-shell__main {
-    width: 100%;
-  }
-
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    z-index: var(--z-sidebar);
-    transform: translateX(-100%);
-    transition: transform var(--transition-base);
-  }
-
-  html.sidebar-open .sidebar {
-    transform: translateX(0);
-  }
-
-  html.sidebar-open .sidebar-overlay {
-    display: block;
-  }
 }
 
 /* -------------------------------------------------------------------------
@@ -229,4 +201,32 @@ html.sidebar-collapsed .app-shell {
   background: var(--color-bg-hover);
   color: var(--color-text-primary);
   border-color: var(--color-border-default);
+}
+
+/* -------------------------------------------------------------------------
+   Mobile — must come AFTER all base styles (same specificity, source order)
+   ------------------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .app-shell {
+    display: block;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  html.sidebar-open .sidebar {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    z-index: var(--z-sidebar);
+  }
+
+  html.sidebar-open .sidebar-overlay {
+    display: block;
+  }
 }

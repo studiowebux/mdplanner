@@ -4,8 +4,8 @@ import { AppShell } from "../shell/app-shell.tsx";
 
 // Runs before CSS loads — must stay inline to prevent FOUC.
 // Kept minimal deliberately; nonce is required for CSP compliance.
-const DARK_MODE_SCRIPT =
-  `(function(){var s=localStorage.getItem("darkMode");var p=window.matchMedia("(prefers-color-scheme: dark)").matches;if(s==="true"||(s===null&&p)){document.documentElement.classList.add("dark");}})();`;
+const INIT_SCRIPT =
+  `(function(){var d=document.documentElement;var s=localStorage.getItem("darkMode");var p=window.matchMedia("(prefers-color-scheme: dark)").matches;if(s==="true"||(s===null&&p)){d.classList.add("dark");}if(localStorage.getItem("sidebarCollapsed")==="true"){d.classList.add("sidebar-collapsed");}})();`;
 
 type Props = {
   title?: string;
@@ -35,7 +35,7 @@ export const MainLayout: FC<Props> = ({ title, nonce, activePath, styles = [], s
         />
         <script
           nonce={nonce}
-          dangerouslySetInnerHTML={{ __html: DARK_MODE_SCRIPT }}
+          dangerouslySetInnerHTML={{ __html: INIT_SCRIPT }}
         />
         <link rel="stylesheet" href="/css/index.css" />
         <link rel="stylesheet" href="/css/shell.css" />

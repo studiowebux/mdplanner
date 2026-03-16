@@ -4,10 +4,10 @@ import type { ViewProps } from "../types/app.ts";
 
 export const HomeView: FC<ViewProps> = ({ nonce }) => {
   return (
-    <MainLayout title="Home" nonce={nonce}>
-      <main class="p-6">
-        <h1 class="text-lg font-medium text-primary">MDPlanner v2</h1>
-        <p class="text-sm text-secondary mt-2">
+    <MainLayout title="Home" nonce={nonce} styles={["/css/views/home.css"]}>
+      <main class="home-page">
+        <h1 class="home-page__title">MDPlanner v2</h1>
+        <p class="home-page__subtitle">
           Clean architecture scaffold. Server is running.
         </p>
       </main>

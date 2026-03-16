@@ -1,7 +1,6 @@
 /* v2 — foundation only. Per-view styles load via MainLayout styles prop. */
 @import url("/css/variables.css");
 @import url("/css/base.css");
-@import url("/css/utilities.css");
 
 /* -------------------------------------------------------------------------
    Component tokens — shared defaults across all v2 views.
