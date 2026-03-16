@@ -110,8 +110,8 @@
   display: flex;
   align-items: center;
   gap: var(--space-md);
-  height: var(--nav-height);
-  padding: 0 var(--page-padding);
+  min-height: var(--nav-height);
+  padding: var(--space-sm) var(--page-padding);
   border-bottom: var(--border-width) var(--border-style) var(--color-border-default);
   background: var(--color-bg-primary);
   flex-shrink: 0;
@@ -119,6 +119,13 @@
 
 .topbar__search {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.topbar__search form {
+  display: contents;
 }
 
 .topbar__search-input {

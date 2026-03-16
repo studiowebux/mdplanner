@@ -2,16 +2,18 @@ import type { FC } from "hono/jsx";
 
 export const Topbar: FC = () => (
   <header class="topbar">
-    <form class="topbar__search" action="/search" method="get" role="search">
-      <input
-        type="search"
-        name="q"
-        class="topbar__search-input"
-        placeholder="Search tasks, notes, goals..."
-        autocomplete="off"
-        aria-label="Search"
-      />
-    </form>
+    <div class="topbar__search">
+      <form action="/search" method="get" role="search">
+        <input
+          type="search"
+          name="q"
+          class="topbar__search-input"
+          placeholder="Search tasks, notes, goals..."
+          autocomplete="off"
+          aria-label="Search"
+        />
+      </form>
+    </div>
     <div class="topbar__actions">
       <button
         id="theme-toggle"
