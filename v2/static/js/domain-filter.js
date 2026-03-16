@@ -1,15 +1,17 @@
 // Domain filter — client-side filtering for card grids and data tables.
 // Reads filter definitions from data-filter-key on <select> elements
 // inside a [data-filter-domain] container. Hides non-matching cards and rows.
+// Persists filter selections to localStorage per domain.
 // Fully generic — no domain-specific class names.
 
 (function () {
+  var STORAGE_PREFIX = "filters:";
+
   function getFilterContainer(domain) {
     return document.querySelector("[data-filter-domain=\"" + domain + "\"]");
   }
 
   function getPageRoot(domain) {
-    // The page root is the closest [data-domain] ancestor
     var filterBar = getFilterContainer(domain);
     if (!filterBar) return null;
     return filterBar.closest("[data-domain]") || filterBar.parentElement;
@@ -24,6 +26,33 @@
       if (val) filters[key] = val;
     }
     return filters;
+  }
+
+  function saveFilters(domain, container) {
+    var state = {};
+    var selects = container.querySelectorAll("[data-filter-key]");
+    for (var i = 0; i < selects.length; i++) {
+      var key = selects[i].getAttribute("data-filter-key");
+      state[key] = selects[i].value;
+    }
+    localStorage.setItem(STORAGE_PREFIX + domain, JSON.stringify(state));
+  }
+
+  function restoreFilters(domain) {
+    var raw = localStorage.getItem(STORAGE_PREFIX + domain);
+    if (!raw) return;
+    var state;
+    try { state = JSON.parse(raw); } catch (_) { return; }
+    var container = getFilterContainer(domain);
+    if (!container) return;
+    var selects = container.querySelectorAll("[data-filter-key]");
+    for (var i = 0; i < selects.length; i++) {
+      var key = selects[i].getAttribute("data-filter-key");
+      if (state[key] != null) {
+        selects[i].value = state[key];
+      }
+    }
+    applyFilters(domain);
   }
 
   function matchesFilters(el, filters) {
@@ -56,7 +85,7 @@
         cards[i].setAttribute("data-filter-hidden", "");
       } else {
         cards[i].removeAttribute("data-filter-hidden");
-        if (!cards[i].hasAttribute("data-search-hidden")) {
+        if (!cards[i].hasAttribute("data-search-hidden") && !cards[i].hasAttribute("data-completed-hidden")) {
           cards[i].style.display = "";
           visibleCards++;
         }
@@ -73,7 +102,7 @@
         rows[j].setAttribute("data-filter-hidden", "");
       } else {
         rows[j].removeAttribute("data-filter-hidden");
-        if (!rows[j].hasAttribute("data-search-hidden")) {
+        if (!rows[j].hasAttribute("data-search-hidden") && !rows[j].hasAttribute("data-completed-hidden")) {
           rows[j].style.display = "";
           visibleRows++;
         }
@@ -81,10 +110,10 @@
     }
 
     // Update count
-    updateCount(page, cards.length || rows.length);
+    updateCount(page);
   }
 
-  function updateCount(page, total) {
+  function updateCount(page) {
     var countEl = page.querySelector("[data-filter-count]");
     if (!countEl) return;
     var cards = page.querySelectorAll("[data-filterable-card]");
@@ -109,6 +138,7 @@
     var container = select.closest("[data-filter-domain]");
     if (!container) return;
     var domain = container.getAttribute("data-filter-domain");
+    saveFilters(domain, container);
     applyFilters(domain);
   });
 
@@ -123,9 +153,20 @@
     for (var i = 0; i < selects.length; i++) {
       selects[i].value = "";
     }
+    saveFilters(domain, container);
     applyFilters(domain);
   });
 
-  // Expose for programmatic use (e.g. after SSE updates)
+  // Init — restore saved filters on page load
+  function initAll() {
+    var containers = document.querySelectorAll("[data-filter-domain]");
+    for (var i = 0; i < containers.length; i++) {
+      var domain = containers[i].getAttribute("data-filter-domain");
+      restoreFilters(domain);
+    }
+  }
+
   window.domainFilter = { apply: applyFilters };
+
+  initAll();
 })();
