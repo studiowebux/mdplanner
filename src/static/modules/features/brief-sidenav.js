@@ -203,7 +203,7 @@ export class BriefSidenavModule {
           showToast(errMsg, "error");
           return;
         }
-        this.showSaveStatus("Saved");
+        showToast("Saved", "success");
       } else {
         const response = await BriefAPI.create(this.currentBrief);
         if (!response.ok) {
@@ -216,7 +216,7 @@ export class BriefSidenavModule {
         const result = await response.json();
         this.editingBriefId = result.id;
         this.currentBrief.id = result.id;
-        this.showSaveStatus("Created");
+        showToast("Created", "success");
         document.getElementById("briefSidenavHeader").textContent =
           "Edit Brief";
         document.getElementById("briefSidenavDelete").classList.remove(

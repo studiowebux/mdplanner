@@ -354,6 +354,26 @@
   border-left: 3px solid var(--color-accent);
 }
 
+/* Select button — always sticky in the section jump bar, right-aligned */
+.section-jump-select-btn {
+  margin-left: auto;
+  font-size: var(--font-size-sm);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: 0.125rem 0.5rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition:
+    color var(--transition-base),
+    border-color var(--transition-base),
+    background var(--transition-base);
+}
+
+.section-jump-select-btn:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-strong);
+}
+
 /* Active state for the Select toggle button */
 #batchSelectBtn.active {
   background: var(--color-bg-tertiary);

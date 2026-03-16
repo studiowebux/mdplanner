@@ -1,0 +1,23 @@
+/* Config view — sticky save footer */
+
+#configStickyFooter:not(.hidden) {
+  position: fixed;
+  bottom: 36px; /* sits above the app-footer bar */
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0.5rem 1.5rem;
+  background-color: var(--color-bg-primary);
+  border-top: 1px solid var(--color-border-default);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.config-dirty-notice {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}

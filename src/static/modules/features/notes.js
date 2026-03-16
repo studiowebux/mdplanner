@@ -2,6 +2,7 @@
 import { NotesAPI, ProjectAPI } from "../api.js";
 import { showConfirm } from "../ui/confirm.js";
 import { showLoading, hideLoading } from "../ui/loading.js";
+import { showToast } from "../ui/toast.js";
 
 /**
  * Notes management - CRUD, selection, save
@@ -12,6 +13,8 @@ export class NotesModule {
     this.tm = taskManager;
     this._projectFilter = "";
     this._searchFilter = "";
+    this._collapsedGroups = new Set();
+    this._groupKeys = [];
   }
 
   async load() {
@@ -33,6 +36,7 @@ export class NotesModule {
     const tabNav = document.getElementById("notesTabNav");
     const emptyState = document.getElementById("emptyNotesState");
     const activeContent = document.getElementById("activeNoteContent");
+    const countEl = document.getElementById("notesCount");
 
     // Populate project filter dropdown
     this._populateProjectFilter();
@@ -49,6 +53,9 @@ export class NotesModule {
       visibleNotes = visibleNotes.filter((n) => n.title.toLowerCase().includes(q));
     }
 
+    // Update total count in sidebar header
+    if (countEl) countEl.textContent = `(${visibleNotes.length})`;
+
     if (visibleNotes.length === 0) {
       tabNav.innerHTML = "";
       emptyState.classList.remove("hidden");
@@ -59,35 +66,86 @@ export class NotesModule {
 
     emptyState.classList.add("hidden");
 
-    // Render vertical list items
-    tabNav.innerHTML = visibleNotes
-      .map((note) => {
+    // Group notes by project — named projects sorted A-Z, unassigned last
+    const groups = new Map();
+    for (const note of visibleNotes) {
+      const key = note.project || "";
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(note);
+    }
+    const sortedKeys = [...groups.keys()].sort((a, b) => {
+      if (a === "" && b !== "") return 1;
+      if (b === "" && a !== "") return -1;
+      return a.localeCompare(b);
+    });
+    this._groupKeys = sortedKeys;
+
+    // Render grouped list
+    tabNav.innerHTML = sortedKeys.map((key, groupIndex) => {
+      const groupNotes = groups.get(key);
+      const label = key || "Unassigned";
+      const isCollapsed = this._collapsedGroups.has(key);
+      const chevronClass = `notes-group-chevron${isCollapsed ? " collapsed" : ""}`;
+
+      const notesHtml = groupNotes.map((note) => {
         const index = this.tm.notes.indexOf(note);
         const isActive = this.tm.activeNote === index;
         const isEnhanced = note.mode === "enhanced";
-        const meta = [
-          isEnhanced ? "enhanced" : "",
-          note.project ? `[${note.project}]` : "",
-        ].filter(Boolean).join(" · ");
+        const meta = isEnhanced ? "enhanced" : "";
         return `
           <li><button class="notes-list-item${isActive ? " active" : ""}"
-            onclick="taskManager.selectNote(${index})" title="${note.title}">
+            data-note-index="${index}"
+            onclick="taskManager.selectNote(${index})"
+            title="${note.title}">
             <span class="notes-list-item-title">${note.title}</span>
-            ${meta ? `<span class="notes-list-item-meta text-muted" style="font-size:var(--font-size-xs)">${meta}</span>` : ""}
+            ${meta ? `<span class="notes-list-item-meta text-muted">${meta}</span>` : ""}
           </button></li>
         `;
-      })
-      .join("");
+      }).join("");
+
+      return `
+        <li class="notes-group">
+          <button class="notes-group-header"
+            onclick="taskManager.notesModule.toggleGroup(${groupIndex})"
+            aria-expanded="${!isCollapsed}">
+            <span class="notes-group-label">${label}</span>
+            <span class="notes-group-count">${groupNotes.length}</span>
+            <svg class="${chevronClass}" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <ul class="notes-group-list${isCollapsed ? " hidden" : ""}">
+            ${notesHtml}
+          </ul>
+        </li>
+      `;
+    }).join("");
 
     // Show first note if none selected
     if (this.tm.activeNote === null && this.tm.notes.length > 0) {
       this.tm.activeNote = 0;
     }
 
+    // Scroll active note into view within its group
+    const activeBtn = tabNav.querySelector(".notes-list-item.active");
+    if (activeBtn) activeBtn.scrollIntoView({ block: "nearest", behavior: "smooth" });
+
     // Mobile: toggle note-active class
     this._setMobileActive(this.tm.activeNote !== null);
 
     this.renderActive();
+  }
+
+  /** Toggle collapsed state of a project group by its index in _groupKeys. */
+  toggleGroup(groupIndex) {
+    const key = this._groupKeys[groupIndex];
+    if (key === undefined) return;
+    if (this._collapsedGroups.has(key)) {
+      this._collapsedGroups.delete(key);
+    } else {
+      this._collapsedGroups.add(key);
+    }
+    this.renderView();
   }
 
   renderActive() {
@@ -323,7 +381,7 @@ export class NotesModule {
         this.tm.notes[this.tm.activeNote].title = title;
 
         // Show saved status
-        this.showSaveStatus("Saved");
+        showToast("Saved", "success");
 
         // Update tab title if it changed
         this.renderView();
@@ -584,12 +642,9 @@ export class NotesModule {
         if (emptyState) emptyState.classList.remove("hidden");
       });
 
-    // Add note buttons (header and inline tab) - use sidenav
+    // Add note button (header only — sidebar footer button removed)
     document
       .getElementById("addNoteBtn")
-      .addEventListener("click", () => this.tm.noteSidenavModule.openNew());
-    document
-      .getElementById("addNoteTabBtn")
       .addEventListener("click", () => this.tm.noteSidenavModule.openNew());
 
     // Cancel note modal

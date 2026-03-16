@@ -437,7 +437,7 @@ export class StrategicLevelsSidenavModule {
             showToast(errMsg, "error");
             return;
           }
-          this.showSaveStatus("Saved");
+          showToast("Saved", "success");
         } else {
           const response = await StrategicLevelsAPI.create(data);
           if (!response.ok) {
@@ -450,7 +450,7 @@ export class StrategicLevelsSidenavModule {
           const result = await response.json();
           this.editingBuilderId = result.id;
           this.tm.selectedStrategicBuilderId = result.id;
-          this.showSaveStatus("Created");
+          showToast("Created", "success");
           document.getElementById("strategicSidenavDelete").classList.remove(
             "hidden",
           );
@@ -474,7 +474,7 @@ export class StrategicLevelsSidenavModule {
             showToast(errMsg, "error");
             return;
           }
-          this.showSaveStatus("Saved");
+          showToast("Saved", "success");
         } else {
           const res = await StrategicLevelsAPI.createLevel(
             this.tm.selectedStrategicBuilderId,
@@ -488,7 +488,7 @@ export class StrategicLevelsSidenavModule {
             return;
           }
           this.editingLevelId = true; // Mark as created
-          this.showSaveStatus("Created");
+          showToast("Created", "success");
           document.getElementById("strategicSidenavDelete").classList.remove(
             "hidden",
           );

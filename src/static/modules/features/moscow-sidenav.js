@@ -191,7 +191,7 @@ export class MoscowSidenavModule {
           showToast(errMsg, "error");
           return;
         }
-        this.showSaveStatus("Saved");
+        showToast("Saved", "success");
       } else {
         const response = await MoscowAPI.create(this.currentAnalysis);
         if (!response.ok) {
@@ -204,7 +204,7 @@ export class MoscowSidenavModule {
         const result = await response.json();
         this.editingMoscowId = result.id;
         this.currentAnalysis.id = result.id;
-        this.showSaveStatus("Created");
+        showToast("Created", "success");
         document.getElementById("moscowSidenavHeader").textContent =
           "Edit MoSCoW Analysis";
         document.getElementById("moscowSidenavDelete").classList.remove(

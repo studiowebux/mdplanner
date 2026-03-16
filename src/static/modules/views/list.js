@@ -535,29 +535,38 @@ export class ListView {
     if (!bar) return;
     bar.innerHTML = "";
 
-    // Hide when section filter narrows to one section
-    if (this.tm.listFilters.section) {
-      listView?.classList.remove("jump-bar-active");
-      return;
+    // Section pills — omitted when a section filter narrows to one section
+    if (!this.tm.listFilters.section) {
+      sections.forEach((section) => {
+        const count = allTasks.filter(
+          (t) => t.section === section && !t.parentId,
+        ).length;
+        const anchorId = `section-${section.toLowerCase().replace(/\s+/g, "-")}`;
+        const pill = document.createElement("button");
+        pill.type = "button";
+        pill.className = "section-jump-pill";
+        pill.dataset.section = section;
+        pill.textContent = `${section} (${count})`;
+        pill.addEventListener("click", () => {
+          document.getElementById(anchorId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+        bar.appendChild(pill);
+      });
     }
 
-    sections.forEach((section) => {
-      const count = allTasks.filter(
-        (t) => t.section === section && !t.parentId,
-      ).length;
-      const anchorId = `section-${section.toLowerCase().replace(/\s+/g, "-")}`;
-      const pill = document.createElement("button");
-      pill.type = "button";
-      pill.className = "section-jump-pill";
-      pill.dataset.section = section;
-      pill.textContent = `${section} (${count})`;
-      pill.addEventListener("click", () => {
-        document.getElementById(anchorId)?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-      bar.appendChild(pill);
-    });
+    // Select button — always sticky in the jump bar, right-aligned
+    const selectBtn = document.createElement("button");
+    selectBtn.type = "button";
+    selectBtn.id = "batchSelectBtn";
+    selectBtn.className = "section-jump-select-btn";
+    selectBtn.title = "Enter multi-select mode";
+    selectBtn.textContent = "Select";
+    if (this.tm.multiSelectMode) selectBtn.classList.add("active");
+    selectBtn.addEventListener("click", () => this.toggleBatchMode());
+    bar.appendChild(selectBtn);
 
-    listView?.classList.toggle("jump-bar-active", bar.children.length > 0);
+    // Jump bar is always active — the Select button is always present
+    listView?.classList.add("jump-bar-active");
   }
 
   /** IntersectionObserver scroll-spy — highlights the pill for the visible section. */
@@ -969,7 +978,10 @@ export class ListView {
     if (milestone) update.milestone = milestone;
     if (priority) update.priority = priority;
     if (tags && tags.length > 0) update.tags = tags;
-    if (markCompleted) update.completed = true;
+    if (markCompleted) {
+      update.completed = true;
+      if (!update.section) update.section = "Done";
+    }
 
     if (Object.keys(update).length === 0) {
       this.closeBatchPanel();
@@ -1036,10 +1048,6 @@ export class ListView {
       .getElementById("clearFilters")
       .addEventListener("click", () => this.clearFilters());
 
-    document.getElementById("batchSelectBtn")?.addEventListener(
-      "click",
-      () => this.toggleBatchMode(),
-    );
     document.getElementById("batchCancelBtn")?.addEventListener(
       "click",
       () => this.exitBatchMode(),

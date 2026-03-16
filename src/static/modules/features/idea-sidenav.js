@@ -414,7 +414,7 @@ export class IdeaSidenavModule {
           showToast(errMsg, "error");
           return;
         }
-        this.showSaveStatus("Saved");
+        showToast("Saved", "success");
         if (
           ARCHIVED_STATUSES.includes(data.status) &&
           !this.tm.ideasModule.showArchived
@@ -437,7 +437,7 @@ export class IdeaSidenavModule {
         const result = await response.json();
         this.editingIdeaId = result.id;
         this.currentIdea.id = result.id;
-        this.showSaveStatus("Created");
+        showToast("Created", "success");
 
         // Update header and show delete/links
         document.getElementById("ideaSidenavHeader").textContent = "Edit Idea";

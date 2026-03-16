@@ -179,7 +179,7 @@ export class ProjectValueSidenavModule {
           showToast(errMsg, "error");
           return;
         }
-        this.showSaveStatus("Saved");
+        showToast("Saved", "success");
       } else {
         const response = await ProjectValueAPI.create(this.currentBoard);
         if (!response.ok) {
@@ -192,7 +192,7 @@ export class ProjectValueSidenavModule {
         const result = await response.json();
         this.editingBoardId = result.id;
         this.currentBoard.id = result.id;
-        this.showSaveStatus("Created");
+        showToast("Created", "success");
         document.getElementById("pvbSidenavHeader").textContent =
           "Edit Project Value Board";
         document.getElementById("pvbSidenavDelete").classList.remove("hidden");

@@ -570,6 +570,7 @@ export class ConfigView {
 
     // Apply immediately so nav updates — persist only on explicit Save
     this.tm.applyFeatureVisibility();
+    this.tm._setConfigDirty(true);
   }
 
   _setAllFeatures(checked) {
@@ -683,6 +684,8 @@ export class ConfigView {
       await GitHubAPI.saveToken(token);
       input.value = "";
       await this.initGitHubPanel();
+      this.tm.githubConfigured = true;
+      this.tm.applyGitHubVisibility();
     } catch {
       alert("Failed to save GitHub token");
     } finally {
@@ -696,6 +699,8 @@ export class ConfigView {
     try {
       await GitHubAPI.deleteToken();
       await this.initGitHubPanel();
+      this.tm.githubConfigured = false;
+      this.tm.applyGitHubVisibility();
     } catch {
       alert("Failed to remove GitHub credentials");
     }
@@ -733,10 +738,13 @@ export class ConfigView {
   }
 
   bindEvents() {
-    // Save project config button
+    // Save project config buttons (header + sticky footer)
     document
       .getElementById("saveProjectConfig")
       .addEventListener("click", () => this.tm.saveProjectConfig());
+    document
+      .getElementById("configStickySave")
+      ?.addEventListener("click", () => this.tm.saveProjectConfig());
 
     // Feature visibility — Select All / Deselect All
     document.getElementById("featureSelectAll")?.addEventListener(
@@ -748,6 +756,11 @@ export class ConfigView {
       () => this._setAllFeatures(false),
     );
 
+    // Project start date — marks config dirty
+    document
+      .getElementById("projectStartDate")
+      ?.addEventListener("change", () => this.tm._setConfigDirty(true));
+
     // Working days dropdown change
     document
       .getElementById("workingDays")
@@ -757,6 +770,16 @@ export class ConfigView {
           customContainer.classList.remove("hidden");
         } else {
           customContainer.classList.add("hidden");
+        }
+        this.tm._setConfigDirty(true);
+      });
+
+    // Custom working-day checkboxes
+    document
+      .getElementById("customDaysContainer")
+      ?.addEventListener("change", (e) => {
+        if (e.target.classList.contains("working-day-checkbox")) {
+          this.tm._setConfigDirty(true);
         }
       });
 

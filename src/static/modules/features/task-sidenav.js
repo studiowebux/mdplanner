@@ -553,14 +553,28 @@ export class TaskSidenavModule {
           taskData.parentId = this.parentTaskId;
         }
         const res = await TasksAPI.create(taskData);
-        if (res.ok && this.pendingAttachments.length) {
-          const { id: newId } = await res.json();
-          if (newId) {
-            await TasksAPI.addAttachments(newId, this.pendingAttachments);
-          }
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          showToast(extractErrorMessage(errBody), "error");
+          return;
         }
-        this.pendingAttachments = [];
-        showToast("Task created", "success");
+        // res.json() can fail on an empty or non-JSON body (proxy error,
+        // truncated response). If it does, newId is undefined and we warn
+        // the user that attachments could not be uploaded.
+        const { id: newId } = await res.json().catch(() => ({}));
+        if (newId && this.pendingAttachments.length) {
+          await TasksAPI.addAttachments(newId, this.pendingAttachments);
+          this.pendingAttachments = [];
+        } else if (!newId && this.pendingAttachments.length) {
+          showToast("Task created but attachments could not be uploaded — please re-attach them", "error");
+          // leave pendingAttachments intact so the user can retry
+        } else {
+          this.pendingAttachments = [];
+        }
+        showToast(`"${taskData.title}" created`, "success", newId ? () => {
+          const task = this.tm.findTaskById(newId);
+          if (task) this.tm.taskSidenavModule.open(task);
+        } : null);
       }
 
       this._descUndoManager?.markSaved();

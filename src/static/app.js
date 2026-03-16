@@ -1,6 +1,6 @@
 import { showToast } from "./modules/ui/toast.js";
 import { clearAllDirtyModules, hasDirtyBaseSidenav } from "./modules/ui/base-sidenav.js";
-import { initConfirmModal } from "./modules/ui/confirm.js";
+import { initConfirmModal, showConfirm } from "./modules/ui/confirm.js";
 import { ThemeManager } from "./modules/ui/theme.js";
 import { closeMobileMenu, toggleMobileMenu } from "./modules/ui/mobile.js";
 import { AccessibilityManager } from "./modules/ui/accessibility.js";
@@ -9,7 +9,7 @@ import { Breadcrumb } from "./modules/ui/breadcrumb.js";
 import { Sidenav } from "./modules/ui/sidenav.js";
 import { Help } from "./modules/ui/help.js";
 import { TaskSidenavModule } from "./modules/features/task-sidenav.js";
-import { PeopleAPI, PortfolioAPI, ProjectAPI, TasksAPI } from "./modules/api.js";
+import { GitHubAPI, PeopleAPI, PortfolioAPI, ProjectAPI, TasksAPI } from "./modules/api.js";
 import { markdownToHtml as markdownToHtmlUtil } from "./modules/utils.js";
 import { SummaryView } from "./modules/views/summary.js";
 import { ListView } from "./modules/views/list.js";
@@ -116,6 +116,8 @@ class TaskManager {
     this.searchQuery = "";
     this.projectInfo = null;
     this.projectConfig = null;
+    this.githubConfigured = false;
+    this._configDirty = false;
     this.peopleMap = new Map();
     this.sections = [];
     this.currentView = "summary";
@@ -366,7 +368,9 @@ class TaskManager {
     this.bindEvents();
     await this.loadProjects(); // Load projects first
     await this.loadProjectConfig();
+    await this.loadGitHubStatus();
     this.applyFeatureVisibility();
+    this.applyGitHubVisibility();
     await this.loadPeople();
     await this.loadSections();
     const savedView = localStorage.getItem("mdplanner_current_view") ||
@@ -1302,6 +1306,12 @@ class TaskManager {
       dropdown.classList.toggle("hidden", visibleButtons.length === 0);
     });
 
+    // Hide empty category groups (mobile)
+    document.querySelectorAll("#mobileMenu [role='group']").forEach((group) => {
+      const visibleBtns = group.querySelectorAll("button:not(.hidden)");
+      group.classList.toggle("hidden", visibleBtns.length === 0);
+    });
+
     // If current view is hidden, fall back to first enabled view
     if (!effectiveFeatures.includes(this.currentView) && this.currentView !== "config") {
       const fallback = effectiveFeatures[0] || "summary";
@@ -1382,6 +1392,16 @@ class TaskManager {
   }
 
   async switchView(view) {
+    // Guard: unsaved settings changes when leaving config view
+    if (this.currentView === "config" && this._configDirty && view !== "config") {
+      const confirmed = await showConfirm(
+        "You have unsaved settings. Leave anyway?",
+        "Leave",
+      );
+      if (!confirmed) return;
+      this._setConfigDirty(false);
+    }
+
     // Clear any sidenav dirty-state that leaked via overlay-click close or
     // view-switching without an explicit BaseSidenavModule.close() call.
     // The beforeunload handler guards against genuine unsaved changes on page
@@ -1402,6 +1422,12 @@ class TaskManager {
     localStorage.setItem("mdplanner_current_view", view);
     // Set data attribute on body for CSS targeting
     document.body.setAttribute("data-current-view", view);
+
+    // Show sticky save footer only in config view
+    document.getElementById("configStickyFooter")?.classList.toggle(
+      "hidden",
+      view !== "config",
+    );
 
     // Update breadcrumb
     Breadcrumb.render(view);
@@ -2080,6 +2106,35 @@ class TaskManager {
     }
   }
 
+  async loadGitHubStatus() {
+    try {
+      const status = await GitHubAPI.getStatus();
+      this.githubConfigured = status.configured === true;
+    } catch {
+      this.githubConfigured = false;
+    }
+  }
+
+  _setConfigDirty(dirty) {
+    this._configDirty = dirty;
+    document.getElementById("configDirtyNotice")?.classList.toggle(
+      "hidden",
+      !dirty,
+    );
+  }
+
+  applyGitHubVisibility() {
+    const show = this.githubConfigured;
+    document.getElementById("sidenavGithubSection")?.classList.toggle(
+      "hidden",
+      !show,
+    );
+    document.getElementById("goalSidenavGithubSection")?.classList.toggle(
+      "hidden",
+      !show,
+    );
+  }
+
   async loadSections() {
     try {
       this.sections = await ProjectAPI.getSections();
@@ -2129,6 +2184,7 @@ class TaskManager {
 
       if (response.ok) {
         this.projectConfig = config;
+        this._setConfigDirty(false);
         this.applyFeatureVisibility();
         if (this.currentView === "timeline") {
           this.timelineView.generate();

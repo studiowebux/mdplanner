@@ -10,8 +10,11 @@
     "jsr:@std/path@1": "1.1.1",
     "jsr:@std/path@^1.1.1": "1.1.1",
     "jsr:@std/streams@^1.0.17": "1.0.17",
+    "jsr:@studiowebux/deno-minilog@0.4.1": "0.4.1",
     "npm:@hono/zod-openapi@0.19.9": "0.19.9_hono@4.12.5_zod@3.25.76",
     "npm:@modelcontextprotocol/sdk@1.26.0": "1.26.0_zod@3.25.76_hono@4.12.5_ajv@8.18.0_express@5.2.1",
+    "npm:@opentelemetry/api-logs@0.200": "0.200.0",
+    "npm:@opentelemetry/sdk-logs@0.200": "0.200.0_@opentelemetry+api@1.9.0",
     "npm:@scalar/hono-api-reference@0.10.2": "0.10.2_hono@4.12.5",
     "npm:hono@4.12.5": "4.12.5",
     "npm:zod@3.25.76": "3.25.76"
@@ -49,6 +52,13 @@
       "integrity": "7859f3d9deed83cf4b41f19223d4a67661b3d3819e9fc117698f493bf5992140",
       "dependencies": [
         "jsr:@std/bytes"
+      ]
+    },
+    "@studiowebux/deno-minilog@0.4.1": {
+      "integrity": "88c0800e3236449448c523c0255311f9dc905ce84940a6c60c0aada0f8203670",
+      "dependencies": [
+        "npm:@opentelemetry/api-logs",
+        "npm:@opentelemetry/sdk-logs"
       ]
     }
   },
@@ -104,6 +114,42 @@
         "zod@3.25.76",
         "zod-to-json-schema"
       ]
+    },
+    "@opentelemetry/api-logs@0.200.0": {
+      "integrity": "sha512-IKJBQxh91qJ+3ssRly5hYEJ8NDHu9oY/B1PXVSCWf7zytmYO9RNLB0Ox9XQ/fJ8m6gY6Q6NtBWlmXfaXt5Uc4Q==",
+      "dependencies": [
+        "@opentelemetry/api"
+      ]
+    },
+    "@opentelemetry/api@1.9.0": {
+      "integrity": "sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg=="
+    },
+    "@opentelemetry/core@2.0.0_@opentelemetry+api@1.9.0": {
+      "integrity": "sha512-SLX36allrcnVaPYG3R78F/UZZsBsvbc7lMCLx37LyH5MJ1KAAZ2E3mW9OAD3zGz0G8q/BtoS5VUrjzDydhD6LQ==",
+      "dependencies": [
+        "@opentelemetry/api",
+        "@opentelemetry/semantic-conventions"
+      ]
+    },
+    "@opentelemetry/resources@2.0.0_@opentelemetry+api@1.9.0": {
+      "integrity": "sha512-rnZr6dML2z4IARI4zPGQV4arDikF/9OXZQzrC01dLmn0CZxU5U5OLd/m1T7YkGRj5UitjeoCtg/zorlgMQcdTg==",
+      "dependencies": [
+        "@opentelemetry/api",
+        "@opentelemetry/core",
+        "@opentelemetry/semantic-conventions"
+      ]
+    },
+    "@opentelemetry/sdk-logs@0.200.0_@opentelemetry+api@1.9.0": {
+      "integrity": "sha512-VZG870063NLfObmQQNtCVcdXXLzI3vOjjrRENmU37HYiPFa0ZXpXVDsTD02Nh3AT3xYJzQaWKl2X2lQ2l7TWJA==",
+      "dependencies": [
+        "@opentelemetry/api",
+        "@opentelemetry/api-logs",
+        "@opentelemetry/core",
+        "@opentelemetry/resources"
+      ]
+    },
+    "@opentelemetry/semantic-conventions@1.38.0": {
+      "integrity": "sha512-kocjix+/sSggfJhwXqClZ3i9Y/MI0fp7b+g7kCRm6psy2dsf8uApTRclwG18h8Avm7C9+fnt+O36PspJ/OzoWg=="
     },
     "@scalar/core@0.4.2": {
       "integrity": "sha512-Ff+/Oad4eRsqqAxswLGhdgxBWluQYCqp8y7jLl20+U7Y7BDSRq+pE1LVwFW5AIRK5i3/uSWXtLZEVm7N0aszPA==",
@@ -693,6 +739,7 @@
       "jsr:@std/fs@1",
       "jsr:@std/path@1",
       "jsr:@std/streams@^1.0.17",
+      "jsr:@studiowebux/deno-minilog@0.4.1",
       "npm:@hono/zod-openapi@0.19.9",
       "npm:@modelcontextprotocol/sdk@1.26.0",
       "npm:@scalar/hono-api-reference@0.10.2",

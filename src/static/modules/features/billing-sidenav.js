@@ -647,11 +647,11 @@ export class BillingSidenavModule {
     try {
       if (this.editingId) {
         await this.updateEntity(data);
-        this.showSaveStatus("Saved");
+        showToast("Saved", "success");
       } else {
         const result = await this.createEntity(data);
         this.editingId = result.id;
-        this.showSaveStatus("Created");
+        showToast("Created", "success");
         document.getElementById("billingSidenavDelete").classList.remove(
           "hidden",
         );

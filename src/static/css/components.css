@@ -190,6 +190,30 @@ select.input {
   padding-right: 2.5rem;
 }
 
+/* Global form-select — matches sidenav form-input style with custom arrow */
+.form-select {
+  width: 100%;
+  padding: 0.625rem 2.25rem 0.625rem 0.875rem;
+  font-size: var(--font-size-base);
+  border: 1px solid var(--color-border-default);
+  border-radius: 0.375rem;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.625rem center;
+  background-size: 1rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--color-border-focus, #9ca3af);
+  box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.2);
+}
+
 /* --------------------------------------------------------------------------
    Dropdowns
    -------------------------------------------------------------------------- */
@@ -1281,6 +1305,40 @@ select.input {
 .toast.toast-error::before {
   content: "⚠";
   color: var(--color-warning);
+}
+
+.toast.toast-clickable {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Global task loading overlay (#loading)
+   Fixed overlay — never affects document flow or causes layout shifts.
+   -------------------------------------------------------------------------- */
+
+#loading:not(.hidden) {
+  position: fixed;
+  top: 3.5rem; /* below the header */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  z-index: 10;
+  pointer-events: none;
+}
+
+#loading:not(.hidden)::after {
+  content: "";
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-text-secondary);
+  border-radius: 50%;
+  animation: view-spin 0.6s linear infinite;
 }
 
 /* --------------------------------------------------------------------------
