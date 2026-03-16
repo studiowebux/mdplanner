@@ -26,14 +26,14 @@ export const MilestoneCard: FC<Props> = ({ milestone }) => {
       </header>
 
       <div class="milestone-card__meta">
-        {milestone.target && (
-          <span class="milestone-card__meta-item">Target: {formatDate(milestone.target)}</span>
-        )}
         {milestone.project && (
           <span class="milestone-card__meta-item">Project: {milestone.project}</span>
         )}
-        {milestone.createdAt && (
-          <span class="milestone-card__meta-item">Created: {formatDate(milestone.createdAt)} ({timeAgo(milestone.createdAt)})</span>
+        {milestone.target && (
+          <span class="milestone-card__meta-item">Target: {formatDate(milestone.target)}</span>
+        )}
+        {milestone.status !== "completed" && milestone.createdAt && (
+          <span class="milestone-card__meta-item">Created: {timeAgo(milestone.createdAt)}</span>
         )}
         {milestone.status !== "completed" && milestone.target && (
           <span class={`milestone-card__meta-item${dueIn(milestone.target).includes("overdue") ? " text-error" : ""}`}>
@@ -41,10 +41,11 @@ export const MilestoneCard: FC<Props> = ({ milestone }) => {
           </span>
         )}
         {milestone.status === "completed" && milestone.completedAt && (
-          <span class="milestone-card__meta-item">Completed: {formatDate(milestone.completedAt)}</span>
-        )}
-        {milestone.status === "completed" && duration(milestone.createdAt, milestone.completedAt) && (
-          <span class="milestone-card__meta-item">in {duration(milestone.createdAt, milestone.completedAt)}</span>
+          <span class="milestone-card__meta-item">
+            Completed: {formatDate(milestone.completedAt)}
+            {duration(milestone.createdAt, milestone.completedAt) &&
+              ` (${duration(milestone.createdAt, milestone.completedAt)})`}
+          </span>
         )}
         {v && (
           <span class={`milestone-card__meta-item ${vClass}`}>{v}</span>
