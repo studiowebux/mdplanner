@@ -75,10 +75,12 @@
     if (input) fetchResults(input);
   });
 
-  // Select item
+  // Select item or close on outside click
   document.addEventListener("click", function (e) {
     var item = e.target.closest(".form__autocomplete-item");
     if (!item) {
+      // Don't close if clicking inside the autocomplete wrapper (input, list, etc.)
+      if (e.target.closest(".form__autocomplete")) return;
       var lists = document.querySelectorAll(".form__autocomplete-list");
       for (var i = 0; i < lists.length; i++) lists[i].innerHTML = "";
       return;

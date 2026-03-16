@@ -81,6 +81,7 @@ function buildFilters(milestones: Milestone[]): FilterDef[] {
     {
       key: "status",
       label: "Status",
+      allLabel: "All statuses",
       options: [
         { value: "open", label: "Open" },
         { value: "completed", label: "Completed" },
@@ -90,6 +91,7 @@ function buildFilters(milestones: Milestone[]): FilterDef[] {
       ? [{
           key: "project",
           label: "Project",
+          allLabel: "All projects",
           options: projects.sort().map((p) => ({ value: p, label: p })),
         }]
       : []),

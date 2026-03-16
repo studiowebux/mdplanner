@@ -53,6 +53,17 @@
   border-color: var(--color-error);
 }
 
+.btn--tertiary {
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+}
+
+.btn--tertiary:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
 .btn--ghost {
   color: var(--color-text-secondary);
   background: transparent;
@@ -352,6 +363,10 @@
 
 .form__autocomplete {
   position: relative;
+  width: 100%;
+}
+
+.form__autocomplete .form__input {
   width: 100%;
 }
 

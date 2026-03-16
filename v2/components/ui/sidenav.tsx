@@ -15,7 +15,7 @@ export const Sidenav: FC<Props> = ({ id, title, children }) => (
       <div class="sidenav__resize" data-sidenav-resize />
       <div class="sidenav__header">
         <h2 class="sidenav__title">{title}</h2>
-        <button class="btn btn--ghost btn--sm sidenav__close-btn" type="button" data-sidenav-close>
+        <button class="btn btn--tertiary btn--sm sidenav__close-btn" type="button" data-sidenav-close>
           Close
         </button>
       </div>

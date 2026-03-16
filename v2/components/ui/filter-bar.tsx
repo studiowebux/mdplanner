@@ -5,6 +5,7 @@ type FilterOption = { value: string; label: string };
 export type FilterDef = {
   key: string;
   label: string;
+  allLabel?: string;
   options: FilterOption[];
 };
 
@@ -22,7 +23,7 @@ export const FilterBar: FC<Props> = ({ domain, filters }) => (
           data-filter-key={f.key}
           aria-label={`Filter by ${f.label}`}
         >
-          <option value="">{f.label}</option>
+          <option value="">{f.allLabel ?? `All ${f.label}`}</option>
           {f.options.map((o) => (
             <option key={o.value} value={o.value}>{o.label}</option>
           ))}
@@ -30,7 +31,7 @@ export const FilterBar: FC<Props> = ({ domain, filters }) => (
       </div>
     ))}
     <button
-      class="btn btn--ghost btn--sm"
+      class="btn btn--tertiary btn--sm"
       type="button"
       data-filter-clear={domain}
     >
