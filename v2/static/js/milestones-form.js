@@ -9,7 +9,7 @@
     : null;
 
   var fieldId = document.getElementById("milestone-form-id");
-  var fieldName = document.getElementById("milestone-form-name");
+  var fieldName = document.getElementById("milestone-form-title");
   var fieldTarget = document.getElementById("milestone-form-target");
   var fieldStatus = document.getElementById("milestone-form-status");
   var fieldDesc = document.getElementById("milestone-form-description");

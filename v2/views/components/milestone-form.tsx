@@ -4,7 +4,7 @@ import type { FieldDef } from "../../components/ui/form-builder.tsx";
 
 const FIELDS: FieldDef[] = [
   { type: "hidden", id: "milestone-form-id" },
-  { type: "text", id: "milestone-form-name", label: "Name", required: true },
+  { type: "text", id: "milestone-form-title", label: "Title", required: true },
   { type: "date", id: "milestone-form-target", label: "Target date" },
   { type: "select", id: "milestone-form-status", label: "Status", options: [
     { value: "open", label: "Open" },
