@@ -28,9 +28,7 @@ const FORM_FIELDS: FieldDef[] = [
     type: "autocomplete",
     name: "project",
     label: "Project",
-    sourceUrl: "/api/v1/portfolio",
-    displayKey: "name",
-    valueKey: "name",
+    source: "portfolio",
     placeholder: "Search projects...",
   },
 ];

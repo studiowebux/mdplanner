@@ -39,9 +39,7 @@ export type FieldDef =
     type: "autocomplete";
     name: string;
     label: string;
-    sourceUrl: string;
-    displayKey?: string;
-    valueKey?: string;
+    source: string;
     required?: boolean;
     placeholder?: string;
   };
@@ -145,10 +143,12 @@ const Field: FC<{ formId: string; def: FieldDef; value?: string }> = (
             placeholder={def.placeholder ?? "Search..."}
             value={value ?? ""}
             autocomplete="off"
-            data-autocomplete-source={def.sourceUrl}
-            data-autocomplete-display={def.displayKey ?? "name"}
-            data-autocomplete-value={def.valueKey ?? "name"}
+            name="q"
             data-autocomplete-target={id}
+            hx-get={`/autocomplete/${def.source}`}
+            hx-trigger="input changed delay:150ms, focus"
+            hx-target={`#${id}-results`}
+            hx-swap="innerHTML"
           />
           <input
             type="hidden"
