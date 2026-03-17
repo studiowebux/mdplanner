@@ -2,9 +2,9 @@ import type { FC } from "hono/jsx";
 import type { Milestone } from "../../types/milestone.types.ts";
 import { timeAgo, duration, variance, dueIn, formatDate } from "../../utils/time.ts";
 
-type Props = { milestone: Milestone };
+type Props = { milestone: Milestone; oobSwap?: string };
 
-export const MilestoneCard: FC<Props> = ({ milestone }) => {
+export const MilestoneCard: FC<Props> = ({ milestone, oobSwap }) => {
   const v = variance(milestone.target, milestone.completedAt);
   const vClass = v.includes("late") ? "text-error" : v ? "text-success" : "";
 
@@ -15,6 +15,7 @@ export const MilestoneCard: FC<Props> = ({ milestone }) => {
       data-filterable-card
       data-filter-status={milestone.status}
       data-filter-project={milestone.project ?? ""}
+      {...(oobSwap ? { "hx-swap-oob": oobSwap } : {})}
     >
       <header class="milestone-card__header">
         <h2 class="milestone-card__name">

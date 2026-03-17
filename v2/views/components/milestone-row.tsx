@@ -2,10 +2,10 @@ import type { FC } from "hono/jsx";
 import type { Milestone } from "../../types/milestone.types.ts";
 import { timeAgo, duration, variance, dueIn, formatDate } from "../../utils/time.ts";
 
-type Props = { milestone: Milestone };
+type Props = { milestone: Milestone; oobSwap?: string };
 
-export const MilestoneRow: FC<Props> = ({ milestone: m }) => (
-  <tr class="data-table__row" data-row-id={m.id} data-filter-status={m.status} data-filter-project={m.project ?? ""}>
+export const MilestoneRow: FC<Props> = ({ milestone: m, oobSwap }) => (
+  <tr class="data-table__row" data-row-id={m.id} id={`milestone-row-${m.id}`} data-filter-status={m.status} data-filter-project={m.project ?? ""} {...(oobSwap ? { "hx-swap-oob": oobSwap } : {})}>
     <td class="data-table__td">{m.name}</td>
     <td class="data-table__td">
       <span class={`milestone-card__badge milestone-card__badge--${m.status}`}>

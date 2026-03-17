@@ -9,6 +9,7 @@ import { api } from "./api/mod.ts";
 import { views } from "./views/mod.ts";
 import { APP_NAME, APP_VERSION, DEFAULT_PORT } from "./constants/mod.ts";
 import type { AppVariables } from "./types/app.ts";
+import { parseViewMode } from "./utils/view.ts";
 
 const __dirname = dirname(fromFileUrl(import.meta.url));
 
@@ -36,9 +37,10 @@ app.use("*", async (c, next) => {
   );
 });
 
-// SSE — domain-agnostic broadcast stream.
+// SSE — domain-agnostic broadcast stream. Client declares view mode via ?view=.
 app.get("/sse", (c) => {
-  const stream = subscribe().pipeThrough(new TextEncoderStream());
+  const view = parseViewMode(c.req.query("view"));
+  const stream = subscribe(view).pipeThrough(new TextEncoderStream());
   return new Response(stream, {
     headers: {
       "Content-Type": "text/event-stream",

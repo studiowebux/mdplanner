@@ -45,9 +45,14 @@ export const MilestonesView: FC<Props> = ({ milestones, nonce, activePath, view 
     nonce={nonce}
     activePath={activePath}
     styles={["/css/views/milestones.css"]}
-    scripts={["/js/milestones-sse.js", "/js/milestones-form.js"]}
+    scripts={["/js/milestones-form.js"]}
   >
-    <main class="domain-page" data-domain="milestones">
+    <main
+      class="domain-page"
+      data-domain="milestones"
+      hx-ext="sse"
+      sse-connect={`/sse?view=${view}`}
+    >
       <header class="domain-page__header">
         <h1 class="domain-page__title">Milestones</h1>
         <span class="domain-page__count" data-filter-count>{milestones.length} total</span>
@@ -70,7 +75,12 @@ export const MilestonesView: FC<Props> = ({ milestones, nonce, activePath, view 
         view={view}
       />
 
-      <div id="milestones-view" class="view-container">
+      <div
+        id="milestones-view"
+        class="view-container"
+        sse-swap="milestone:created milestone:updated milestone:deleted"
+        hx-swap="none"
+      >
         {milestones.length === 0
           ? <EmptyState message="No milestones yet. Create one to get started." />
           : view === "table"
