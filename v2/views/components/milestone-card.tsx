@@ -114,6 +114,9 @@ export const MilestoneCard: FC<Props> = ({ milestone, q }) => {
       )}
 
       <div class="milestone-card__actions">
+        <a class="btn btn--secondary" href={`/milestones/${milestone.id}`}>
+          View
+        </a>
         <button
           class="btn btn--secondary"
           type="button"

@@ -70,6 +70,7 @@ code, pre { font-family: var(--font-mono); }
   --card-shadow: var(--shadow-sm);
   --card-shadow-hover: var(--shadow-md);
   --card-opacity-muted: 0.5;
+  --card-description-max-height: 12rem;
 
   /* Badge */
   --badge-padding: 2px var(--space-sm);

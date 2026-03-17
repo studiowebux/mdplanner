@@ -48,6 +48,9 @@ export const MilestoneRow: FC<Props> = ({ milestone: m, q }) => (
     </td>
     <td class="data-table__td">
       <div class="milestone-card__actions">
+        <a class="btn btn--secondary btn--sm" href={`/milestones/${m.id}`}>
+          View
+        </a>
         <button
           class="btn btn--secondary btn--sm"
           type="button"

@@ -117,6 +117,8 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   line-height: var(--body-line-height);
+  max-height: var(--card-description-max-height);
+  overflow-y: auto;
 }
 
 .milestone-card__actions {

@@ -15,10 +15,10 @@ const TOGGLEABLE_COLUMNS = MILESTONE_TABLE_COLUMNS.filter(
   (c) => c.key !== "name" && c.key !== "_actions" && c.label,
 );
 
-const ColumnToggle: FC = () => (
+const ColumnToggle: FC<{ view: ViewMode }> = ({ view }) => (
   <details
     id="milestones-column-toggle"
-    class="column-toggle"
+    class={`column-toggle${view !== "table" ? " is-hidden" : ""}`}
     data-column-toggle="milestones"
   >
     <summary class="btn btn--secondary btn--sm">Columns</summary>
@@ -103,6 +103,14 @@ export const MilestonesViewContainer: FC<
       </span>
     )}
     {fragment && <ViewToggleButtons view={state.view} oobSwap="true" />}
+    {fragment && (
+      <div
+        id="milestones-column-toggle-wrapper"
+        {...{ "hx-swap-oob": "true" }}
+      >
+        <ColumnToggle view={state.view} />
+      </div>
+    )}
     {milestones.length === 0
       ? <EmptyState message="No milestones yet. Create one to get started." />
       : state.view === "table"
@@ -241,7 +249,9 @@ export const MilestonesView: FC<Props> = (
           </label>
         </div>
         <div class="domain-toolbar__right">
-          <ColumnToggle />
+          <div id="milestones-column-toggle-wrapper">
+            <ColumnToggle view={state.view} />
+          </div>
           <ViewToggleButtons view={state.view} />
         </div>
       </div>

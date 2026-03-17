@@ -14,6 +14,9 @@ import {
 // Action buttons render function for table rows.
 const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
   <div class="milestone-card__actions">
+    <a class="btn btn--secondary btn--sm" href={`/milestones/${row.id}`}>
+      View
+    </a>
     <button
       class="btn btn--secondary btn--sm"
       type="button"
@@ -41,7 +44,11 @@ export const MILESTONE_TABLE_COLUMNS: ColumnDef[] = [
     key: "name",
     label: "Name",
     sortable: true,
-    render: (v, row) => <Highlight text={String(v)} q={row._q as string} />,
+    render: (v, row) => (
+      <a href={`/milestones/${row.id}`}>
+        <Highlight text={String(v)} q={row._q as string} />
+      </a>
+    ),
   },
   {
     key: "status",
