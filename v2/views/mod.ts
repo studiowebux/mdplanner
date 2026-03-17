@@ -4,6 +4,7 @@
 import { Hono } from "hono";
 import { homeViewRouter } from "./home/routes.ts";
 import { milestonesRouter } from "./milestones/routes.ts";
+import { searchRouter } from "./search/routes.ts";
 import {
   autocompleteRouter,
   registerAutocompleteSource,
@@ -23,4 +24,5 @@ export const views = new Hono<{ Variables: AppVariables }>();
 
 views.route("/", homeViewRouter);
 views.route("/milestones", milestonesRouter);
+views.route("/search", searchRouter);
 views.route("/autocomplete", autocompleteRouter);
