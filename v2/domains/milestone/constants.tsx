@@ -21,7 +21,7 @@ const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
       class="btn btn--secondary btn--sm"
       type="button"
       hx-get={`/milestones/${row.id}/edit`}
-      hx-target="#milestone-form-container"
+      hx-target="#milestones-form-container"
       hx-swap="innerHTML"
     >
       Edit

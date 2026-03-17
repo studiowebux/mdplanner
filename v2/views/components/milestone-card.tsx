@@ -121,7 +121,7 @@ export const MilestoneCard: FC<Props> = ({ milestone, q }) => {
           class="btn btn--secondary"
           type="button"
           hx-get={`/milestones/${milestone.id}/edit`}
-          hx-target="#milestone-form-container"
+          hx-target="#milestones-form-container"
           hx-swap="innerHTML"
         >
           Edit
