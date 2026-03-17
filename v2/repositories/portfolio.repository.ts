@@ -2,10 +2,12 @@ import { join } from "@std/path";
 import { parseFrontmatter, serializeFrontmatter } from "../utils/frontmatter.ts";
 import { toKebab } from "../utils/slug.ts";
 import { generateId } from "../utils/id.ts";
+import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
 import type { PortfolioItem, PortfolioStatusUpdate } from "../types/portfolio.types.ts";
 
 export class PortfolioRepository {
   private dir: string;
+  private writer = new SafeWriter();
 
   constructor(projectDir: string) {
     this.dir = join(projectDir, "portfolio");
@@ -88,7 +90,9 @@ export class PortfolioRepository {
       statusUpdates: data.statusUpdates,
     };
 
-    await Deno.writeTextFile(filePath, this.serialize(item));
+    await this.writer.write(id, () =>
+      atomicWrite(filePath, this.serialize(item))
+    );
     return item;
   }
 
@@ -96,7 +100,9 @@ export class PortfolioRepository {
     const existing = await this.findById(id);
     if (!existing) return null;
     const updated: PortfolioItem = { ...existing, ...data, id: existing.id };
-    await Deno.writeTextFile(join(this.dir, `${id}.md`), this.serialize(updated));
+    await this.writer.write(id, () =>
+      atomicWrite(join(this.dir, `${id}.md`), this.serialize(updated))
+    );
     return updated;
   }
 

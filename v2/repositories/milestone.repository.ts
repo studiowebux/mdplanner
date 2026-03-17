@@ -3,6 +3,7 @@
 import { join } from "@std/path";
 import { parseFrontmatter, serializeFrontmatter } from "../utils/frontmatter.ts";
 import { generateId } from "../utils/id.ts";
+import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
 import type {
   CreateMilestone,
   MilestoneBase,
@@ -11,6 +12,7 @@ import type {
 
 export class MilestoneRepository {
   private milestonesDir: string;
+  private writer = new SafeWriter();
 
   constructor(projectDir: string) {
     this.milestonesDir = join(projectDir, "milestones");
@@ -52,9 +54,9 @@ export class MilestoneRepository {
     if (data.project) fm.project = data.project;
     const body =
       `# ${data.name}\n\n${data.description ?? ""}`.trimEnd();
-    await Deno.writeTextFile(
-      join(this.milestonesDir, `${id}.md`),
-      serializeFrontmatter(fm, body),
+    const filePath = join(this.milestonesDir, `${id}.md`);
+    await this.writer.write(id, () =>
+      atomicWrite(filePath, serializeFrontmatter(fm, body))
     );
     return {
       id,
@@ -92,7 +94,9 @@ export class MilestoneRepository {
     if (updated.completedAt) fm.completedAt = updated.completedAt;
     const body =
       `# ${updated.name}\n\n${updated.description ?? ""}`.trimEnd();
-    await Deno.writeTextFile(file, serializeFrontmatter(fm, body));
+    await this.writer.write(id, () =>
+      atomicWrite(file, serializeFrontmatter(fm, body))
+    );
     return updated;
   }
 
