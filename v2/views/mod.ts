@@ -3,10 +3,10 @@
 
 import { Hono } from "hono";
 import { homeViewRouter } from "./home/routes.ts";
-import { milestonesViewRouter } from "./milestones/routes.ts";
+import { milestonesFactoryRouter } from "./milestones/factory-routes.ts";
 import type { AppVariables } from "../types/app.ts";
 
 export const views = new Hono<{ Variables: AppVariables }>();
 
 views.route("/", homeViewRouter);
-views.route("/milestones", milestonesViewRouter);
+views.route("/milestones", milestonesFactoryRouter);
