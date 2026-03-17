@@ -71,6 +71,7 @@ export const DataTable: FC<Props> = (
         {rows.map((row) => (
           <tr
             key={String(row[rowId])}
+            id={String(row[rowId])}
             class="data-table__row"
             data-row-id={String(row[rowId])}
           >

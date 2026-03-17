@@ -926,3 +926,15 @@
   color: var(--color-text-muted);
   text-align: center;
 }
+
+/* -------------------------------------------------------------------------
+   Hash scroll highlight
+   ------------------------------------------------------------------------- */
+
+.data-table__row {
+  transition: background var(--transition-slow);
+}
+
+.is-hash-target {
+  background: var(--color-highlight, var(--color-warning-bg));
+}

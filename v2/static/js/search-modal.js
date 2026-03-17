@@ -65,6 +65,17 @@
     });
   }
 
+  function navigateToResult(item) {
+    var href = item.getAttribute("data-href");
+    if (href) {
+      close();
+      window.location.href = href;
+    } else {
+      close();
+      window.location.href = "/search?q=" + encodeURIComponent(input.value);
+    }
+  }
+
   // Keyboard navigation inside modal
   input.addEventListener("keydown", function (e) {
     var items = getItems();
@@ -77,9 +88,7 @@
     } else if (e.key === "Enter") {
       e.preventDefault();
       if (activeIndex >= 0 && items[activeIndex]) {
-        // Navigate to selected result — future: detail page routing
-        close();
-        window.location.href = "/search?q=" + encodeURIComponent(input.value);
+        navigateToResult(items[activeIndex]);
       } else if (input.value.trim()) {
         close();
         window.location.href = "/search?q=" + encodeURIComponent(input.value);
@@ -91,8 +100,7 @@
   resultsList.addEventListener("click", function (e) {
     var item = e.target.closest(".search-dialog__result");
     if (!item) return;
-    close();
-    window.location.href = "/search?q=" + encodeURIComponent(input.value);
+    navigateToResult(item);
   });
 
   // Reset active index when results change (htmx swap)
