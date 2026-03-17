@@ -79,7 +79,7 @@ html.sidebar-collapsed .app-shell {
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   text-decoration: none;
-  letter-spacing: 0.01em;
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 .sidebar__nav {
@@ -137,13 +137,25 @@ html.sidebar-collapsed .app-shell {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
-.topbar__search form {
-  display: contents;
+.topbar__search-kbd {
+  position: absolute;
+  right: var(--space-sm);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-sans);
+  color: var(--color-text-muted);
+  background: var(--color-bg-primary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  line-height: 1;
+  pointer-events: none;
 }
 
 .topbar__search-input {
+  cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
   box-sizing: border-box;

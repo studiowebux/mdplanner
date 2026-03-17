@@ -13,16 +13,15 @@ export const Topbar: FC = () => (
       Menu
     </button>
     <div class="topbar__search">
-      <form action="/search" method="get" role="search">
-        <input
-          type="search"
-          name="q"
-          class="topbar__search-input"
-          placeholder="Search tasks, notes, goals..."
-          autocomplete="off"
-          aria-label="Search"
-        />
-      </form>
+      <input
+        type="search"
+        class="topbar__search-input"
+        placeholder="Search..."
+        autocomplete="off"
+        aria-label="Search"
+        readonly
+      />
+      <kbd class="topbar__search-kbd">&#8984;K</kbd>
     </div>
     <div class="topbar__actions">
       <button

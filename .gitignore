@@ -6,4 +6,7 @@ mdplanner
 *.mdplanner.db
 *.mdplanner.db-shm
 *.mdplanner.db-wal
+*.mdplanner-cache.db
+*.mdplanner-cache.db-shm
+*.mdplanner-cache.db-wal
 docker-compose.override.yml

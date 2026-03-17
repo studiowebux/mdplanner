@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import { Sidebar } from "./sidebar.tsx";
 import { Topbar } from "./topbar.tsx";
 import { ConfirmDialog } from "../ui/confirm-dialog.tsx";
+import { SearchDialog } from "../ui/search-dialog.tsx";
 
 type Props = { activePath?: string; children?: unknown };
 
@@ -16,5 +17,6 @@ export const AppShell: FC<Props> = ({ activePath, children }) => (
       </div>
     </div>
     <ConfirmDialog />
+    <SearchDialog />
   </div>
 );

@@ -74,6 +74,7 @@ export const MainLayout: FC<Props> = (
         <script src="/js/toast.js" />
         <script src="/js/htmx-triggers.js" />
         <script src="/js/column-toggle.js" />
+        <script src="/js/search-modal.js" />
         {scripts.map((src) => <script key={src} src={src} />)}
       </body>
     </html>
