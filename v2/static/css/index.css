@@ -153,6 +153,8 @@ code, pre { font-family: var(--font-mono); }
    Semantic text colors
    ------------------------------------------------------------------------- */
 
+.is-hidden { display: none; }
+
 .text-success { color: var(--color-success); }
 .text-error { color: var(--color-error); }
 .text-warning { color: var(--color-warning); }

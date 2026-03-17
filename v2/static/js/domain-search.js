@@ -27,12 +27,12 @@
       var text = normalize(cards[i].textContent || "");
       var match = query.length === 0 || text.indexOf(query) !== -1;
       if (!match) {
-        cards[i].style.display = "none";
+        cards[i].classList.add("is-hidden");
         cards[i].setAttribute("data-search-hidden", "");
       } else {
         cards[i].removeAttribute("data-search-hidden");
         if (!cards[i].hasAttribute("data-filter-hidden")) {
-          cards[i].style.display = "";
+          cards[i].classList.remove("is-hidden");
         }
       }
     }
@@ -43,12 +43,12 @@
       var rowText = normalize(rows[j].textContent || "");
       var showRow = query.length === 0 || rowText.indexOf(query) !== -1;
       if (!showRow) {
-        rows[j].style.display = "none";
+        rows[j].classList.add("is-hidden");
         rows[j].setAttribute("data-search-hidden", "");
       } else {
         rows[j].removeAttribute("data-search-hidden");
         if (!rows[j].hasAttribute("data-filter-hidden")) {
-          rows[j].style.display = "";
+          rows[j].classList.remove("is-hidden");
         }
       }
     }
@@ -59,7 +59,7 @@
       var items = cards.length > 0 ? cards : rows;
       var visible = 0;
       for (var k = 0; k < items.length; k++) {
-        if (items[k].style.display !== "none") visible++;
+        if (!items[k].classList.contains("is-hidden")) visible++;
       }
       if (visible < items.length) {
         countEl.textContent = visible + " of " + items.length;

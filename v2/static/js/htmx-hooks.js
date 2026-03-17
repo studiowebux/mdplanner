@@ -38,7 +38,7 @@
     var domain = page.getAttribute("data-domain");
 
     if (isHiddenByFilter(el, domain) || isHiddenBySearch(el, domain) || isHiddenByCompleted(el, domain)) {
-      el.style.display = "none";
+      el.classList.add("is-hidden");
     }
   });
 })();

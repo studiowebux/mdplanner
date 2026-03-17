@@ -25,12 +25,12 @@
       var cardStatus = cards[i].getAttribute("data-filter-status");
       if (cardStatus === status) {
         if (hide) {
-          cards[i].style.display = "none";
+          cards[i].classList.add("is-hidden");
           cards[i].setAttribute("data-completed-hidden", "");
         } else {
           cards[i].removeAttribute("data-completed-hidden");
           if (!cards[i].hasAttribute("data-filter-hidden") && !cards[i].hasAttribute("data-search-hidden")) {
-            cards[i].style.display = "";
+            cards[i].classList.remove("is-hidden");
           }
         }
       }
@@ -42,12 +42,12 @@
       var rowStatus = rows[j].getAttribute("data-filter-status");
       if (rowStatus === status) {
         if (hide) {
-          rows[j].style.display = "none";
+          rows[j].classList.add("is-hidden");
           rows[j].setAttribute("data-completed-hidden", "");
         } else {
           rows[j].removeAttribute("data-completed-hidden");
           if (!rows[j].hasAttribute("data-filter-hidden") && !rows[j].hasAttribute("data-search-hidden")) {
-            rows[j].style.display = "";
+            rows[j].classList.remove("is-hidden");
           }
         }
       }
@@ -59,7 +59,7 @@
       var items = cards.length > 0 ? cards : rows;
       var visible = 0;
       for (var k = 0; k < items.length; k++) {
-        if (items[k].style.display !== "none") visible++;
+        if (!items[k].classList.contains("is-hidden")) visible++;
       }
       if (visible < items.length) {
         countEl.textContent = visible + " of " + items.length;

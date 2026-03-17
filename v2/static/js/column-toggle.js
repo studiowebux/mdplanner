@@ -27,7 +27,7 @@
 
     // Apply to header
     for (var i = 0; i < ths.length; i++) {
-      ths[i].style.display = state[i] === false ? "none" : "";
+      if (state[i] === false) { ths[i].classList.add("is-hidden"); } else { ths[i].classList.remove("is-hidden"); }
     }
 
     // Apply to body rows
@@ -35,7 +35,7 @@
     for (var r = 0; r < rows.length; r++) {
       var cells = rows[r].querySelectorAll(".data-table__td");
       for (var c = 0; c < cells.length; c++) {
-        cells[c].style.display = state[c] === false ? "none" : "";
+        if (state[c] === false) { cells[c].classList.add("is-hidden"); } else { cells[c].classList.remove("is-hidden"); }
       }
     }
 
