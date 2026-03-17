@@ -58,11 +58,21 @@
 }
 
 .milestone-card__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-xs) var(--space-md);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-xs) var(--space-sm);
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.milestone-card__meta-label {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+}
+
+.milestone-card__meta-value {
+  margin: 0;
 }
 
 .milestone-card__progress {

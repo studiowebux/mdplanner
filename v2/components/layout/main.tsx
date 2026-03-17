@@ -16,7 +16,9 @@ type Props = {
   children?: unknown;
 };
 
-export const MainLayout: FC<Props> = ({ title, nonce, activePath, styles = [], scripts = [], children }) => {
+export const MainLayout: FC<Props> = (
+  { title, nonce, activePath, styles = [], scripts = [], children },
+) => {
   const pageTitle = title
     ? `${title} — ${APP_NAME}`
     : `${APP_NAME} v${APP_VERSION}`;
@@ -25,15 +27,28 @@ export const MainLayout: FC<Props> = ({ title, nonce, activePath, styles = [], s
     <html lang="en">
       <head>
         <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+        />
         <title>{pageTitle}</title>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin=""
+        />
         <link
           href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
-        <meta name="htmx-config" content={JSON.stringify({ inlineStyleNonce: nonce, useTemplateFragments: true })} />
+        <meta
+          name="htmx-config"
+          content={JSON.stringify({
+            inlineStyleNonce: nonce,
+            useTemplateFragments: true,
+          })}
+        />
         <script
           nonce={nonce}
           dangerouslySetInnerHTML={{ __html: INIT_SCRIPT }}
@@ -56,6 +71,8 @@ export const MainLayout: FC<Props> = ({ title, nonce, activePath, styles = [], s
         <script src="/js/confirm-dialog.js" />
         <script src="/js/autocomplete.js" />
         <script src="/js/toast.js" />
+        <script src="/js/htmx-triggers.js" />
+        <script src="/js/column-toggle.js" />
         {scripts.map((src) => <script key={src} src={src} />)}
       </body>
     </html>

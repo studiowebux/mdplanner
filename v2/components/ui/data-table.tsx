@@ -7,6 +7,14 @@ export type ColumnDef = {
   render?: (value: unknown, row: Record<string, unknown>) => unknown;
 };
 
+type SortConfig = {
+  url: string;
+  target: string;
+  include?: string;
+  current?: string;
+  order?: "asc" | "desc";
+};
+
 type Props = {
   id?: string;
   domain?: string;
@@ -14,9 +22,12 @@ type Props = {
   columns: ColumnDef[];
   rows: Record<string, unknown>[];
   rowId?: string;
+  sort?: SortConfig;
 };
 
-export const DataTable: FC<Props> = ({ id, domain, compact, columns, rows, rowId = "id" }) => (
+export const DataTable: FC<Props> = (
+  { id, domain, compact, columns, rows, rowId = "id", sort },
+) => (
   <div class="data-table-wrapper">
     <table
       id={id}
@@ -25,15 +36,35 @@ export const DataTable: FC<Props> = ({ id, domain, compact, columns, rows, rowId
     >
       <thead class="data-table__head">
         <tr>
-          {columns.map((col) => (
-            <th
-              key={col.key}
-              class={`data-table__th${col.sortable ? " data-table__th--sortable" : ""}`}
-              data-sort-key={col.sortable ? col.key : undefined}
-            >
-              {col.label}
-            </th>
-          ))}
+          {columns.map((col) => {
+            const isSorted = sort?.current === col.key;
+            const nextOrder = isSorted && sort?.order === "asc"
+              ? "desc"
+              : "asc";
+            const sortIndicator = isSorted
+              ? (sort?.order === "asc" ? " \u25B2" : " \u25BC")
+              : "";
+            return (
+              <th
+                key={col.key}
+                class={`data-table__th${
+                  col.sortable ? " data-table__th--sortable" : ""
+                }${isSorted ? " data-table__th--sorted" : ""}`}
+                data-col={col.key}
+                {...(col.sortable && sort
+                  ? {
+                    "hx-get": `${sort.url}?sort=${col.key}&order=${nextOrder}`,
+                    "hx-target": sort.target,
+                    "hx-swap": "outerHTML swap:100ms",
+                    ...(sort.include ? { "hx-include": sort.include } : {}),
+                  }
+                  : {})}
+              >
+                {col.label}
+                {sortIndicator}
+              </th>
+            );
+          })}
         </tr>
       </thead>
       <tbody class="data-table__body">
@@ -44,7 +75,7 @@ export const DataTable: FC<Props> = ({ id, domain, compact, columns, rows, rowId
             data-row-id={String(row[rowId])}
           >
             {columns.map((col) => (
-              <td key={col.key} class="data-table__td">
+              <td key={col.key} class="data-table__td" data-col={col.key}>
                 {col.render
                   ? col.render(row[col.key], row)
                   : String(row[col.key] ?? "")}

@@ -1,10 +1,20 @@
 import { Hono } from "hono";
 import { getMilestoneService } from "../../singletons/services.ts";
-import { readUiState, writeUiState, mergeParams } from "../../utils/ui-state.ts";
+import { publish } from "../../singletons/event-bus.ts";
+import {
+  mergeParams,
+  readUiState,
+  writeUiState,
+} from "../../utils/ui-state.ts";
+import { hxTrigger } from "../../utils/hx-trigger.ts";
 import { MilestonesView, MilestonesViewContainer } from "../milestones.tsx";
+import { MilestoneForm } from "../components/milestone-form.tsx";
 import type { MilestoneFilterState } from "../milestones.tsx";
 import { MilestoneDetailView } from "../milestone-detail.tsx";
-import { MILESTONE_DOMAIN, MILESTONE_STATE_KEYS } from "../../domains/milestone/constants.tsx";
+import {
+  MILESTONE_DOMAIN,
+  MILESTONE_STATE_KEYS,
+} from "../../domains/milestone/constants.tsx";
 import type { Milestone } from "../../types/milestone.types.ts";
 import type { AppVariables, ViewMode } from "../../types/app.ts";
 
@@ -22,9 +32,14 @@ function buildState(merged: Record<string, string>): MilestoneFilterState {
   };
 }
 
-function applyFilters(milestones: Milestone[], state: MilestoneFilterState): Milestone[] {
+function applyFilters(
+  milestones: Milestone[],
+  state: MilestoneFilterState,
+): Milestone[] {
   let result = milestones;
-  if (state.hideCompleted) result = result.filter((m) => m.status !== "completed");
+  if (state.hideCompleted) {
+    result = result.filter((m) => m.status !== "completed");
+  }
   if (state.status) result = result.filter((m) => m.status === state.status);
   if (state.project) result = result.filter((m) => m.project === state.project);
   if (state.q) {
@@ -46,7 +61,9 @@ function applyFilters(milestones: Milestone[], state: MilestoneFilterState): Mil
 }
 
 function extractProjects(milestones: Milestone[]): string[] {
-  return [...new Set(milestones.map((m) => m.project).filter(Boolean) as string[])].sort();
+  return [
+    ...new Set(milestones.map((m) => m.project).filter(Boolean) as string[]),
+  ].sort();
 }
 
 // Middleware — reads state from query params + cookie, persists after response.
@@ -88,8 +105,109 @@ milestonesViewRouter.get("/view", async (c) => {
   const state = c.get("filterState" as never) as MilestoneFilterState;
   const all = await getMilestoneService().list();
   return c.html(
-    MilestonesViewContainer({ milestones: applyFilters(all, state), state, fragment: true }) as unknown as string,
+    MilestonesViewContainer({
+      milestones: applyFilters(all, state),
+      state,
+      fragment: true,
+    }) as unknown as string,
   );
+});
+
+// ---------------------------------------------------------------------------
+// Form routes — server-rendered forms loaded into sidenav via htmx
+// ---------------------------------------------------------------------------
+
+// Empty create form.
+milestonesViewRouter.get("/new", (c) => {
+  return c.html(MilestoneForm({}) as unknown as string);
+});
+
+// Create submission.
+milestonesViewRouter.post("/new", async (c) => {
+  const body = await c.req.parseBody();
+  try {
+    await getMilestoneService().create({
+      name: String(body.name || ""),
+      target: body.target ? String(body.target) : undefined,
+      status: (body.status as "open" | "completed") || "open",
+      description: body.description ? String(body.description) : undefined,
+      project: body.project ? String(body.project) : undefined,
+    });
+    publish("milestone.created");
+    return new Response(null, {
+      status: 204,
+      headers: { "HX-Trigger": hxTrigger("success", "Milestone created") },
+    });
+  } catch (err) {
+    const message = err instanceof Error
+      ? err.message
+      : "Failed to create milestone";
+    return new Response(null, {
+      status: 422,
+      headers: { "HX-Trigger": hxTrigger("error", message) },
+    });
+  }
+});
+
+// Populated edit form.
+milestonesViewRouter.get("/:id/edit", async (c) => {
+  const id = c.req.param("id");
+  const milestone = await getMilestoneService().getById(id);
+  if (!milestone) return c.notFound();
+  return c.html(MilestoneForm({ milestone }) as unknown as string);
+});
+
+// Update submission.
+milestonesViewRouter.post("/:id/edit", async (c) => {
+  const id = c.req.param("id");
+  const body = await c.req.parseBody();
+  try {
+    const updated = await getMilestoneService().update(id, {
+      name: body.name ? String(body.name) : undefined,
+      target: body.target ? String(body.target) : null,
+      status: body.status
+        ? (String(body.status) as "open" | "completed")
+        : undefined,
+      description: body.description ? String(body.description) : null,
+      project: body.project ? String(body.project) : null,
+    });
+    if (!updated) {
+      return new Response(null, {
+        status: 404,
+        headers: { "HX-Trigger": hxTrigger("error", "Milestone not found") },
+      });
+    }
+    publish("milestone.updated");
+    return new Response(null, {
+      status: 204,
+      headers: { "HX-Trigger": hxTrigger("success", "Milestone updated") },
+    });
+  } catch (err) {
+    const message = err instanceof Error
+      ? err.message
+      : "Failed to update milestone";
+    return new Response(null, {
+      status: 422,
+      headers: { "HX-Trigger": hxTrigger("error", message) },
+    });
+  }
+});
+
+// Delete.
+milestonesViewRouter.delete("/:id", async (c) => {
+  const id = c.req.param("id");
+  const ok = await getMilestoneService().delete(id);
+  if (!ok) {
+    return new Response(null, {
+      status: 404,
+      headers: { "HX-Trigger": hxTrigger("error", "Milestone not found") },
+    });
+  }
+  publish("milestone.deleted");
+  return new Response(null, {
+    status: 204,
+    headers: { "HX-Trigger": hxTrigger("success", "Milestone deleted") },
+  });
 });
 
 // Detail view.
