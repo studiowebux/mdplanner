@@ -64,17 +64,6 @@
   color: var(--color-text-primary);
 }
 
-.btn--ghost {
-  color: var(--color-text-secondary);
-  background: transparent;
-  border: var(--border-width) var(--border-style) transparent;
-}
-
-.btn--ghost:hover {
-  background: var(--color-bg-hover);
-  color: var(--color-text-primary);
-  border-color: var(--color-border-default);
-}
 
 .btn--sm {
   padding: var(--space-xs) var(--space-sm);
