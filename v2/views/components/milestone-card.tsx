@@ -1,10 +1,11 @@
 import type { FC } from "hono/jsx";
 import type { Milestone } from "../../types/milestone.types.ts";
 import { timeAgo, duration, variance, dueIn, formatDate } from "../../utils/time.ts";
+import { Highlight, highlightHtml } from "../../utils/highlight.tsx";
 
-type Props = { milestone: Milestone };
+type Props = { milestone: Milestone; q?: string };
 
-export const MilestoneCard: FC<Props> = ({ milestone }) => {
+export const MilestoneCard: FC<Props> = ({ milestone, q }) => {
   const v = variance(milestone.target, milestone.completedAt);
   const vClass = v.includes("late") ? "text-error" : v ? "text-success" : "";
 
@@ -16,7 +17,7 @@ export const MilestoneCard: FC<Props> = ({ milestone }) => {
     >
       <header class="milestone-card__header">
         <h2 class="milestone-card__name">
-          <a href={`/milestones/${milestone.id}`}>{milestone.name}</a>
+          <a href={`/milestones/${milestone.id}`}><Highlight text={milestone.name} q={q} /></a>
         </h2>
         <span class={`milestone-card__badge milestone-card__badge--${milestone.status}`}>
           {milestone.status}
@@ -25,7 +26,7 @@ export const MilestoneCard: FC<Props> = ({ milestone }) => {
 
       <div class="milestone-card__meta">
         {milestone.project && (
-          <span class="milestone-card__meta-item">Project: {milestone.project}</span>
+          <span class="milestone-card__meta-item">Project: <Highlight text={milestone.project!} q={q} /></span>
         )}
         {milestone.target && (
           <span class="milestone-card__meta-item">Target: {formatDate(milestone.target)}</span>
@@ -65,7 +66,7 @@ export const MilestoneCard: FC<Props> = ({ milestone }) => {
       {milestone.descriptionHtml && (
         <div
           class="milestone-card__description markdown-body"
-          dangerouslySetInnerHTML={{ __html: milestone.descriptionHtml }}
+          dangerouslySetInnerHTML={{ __html: highlightHtml(milestone.descriptionHtml!, q) }}
         />
       )}
 

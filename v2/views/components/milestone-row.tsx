@@ -1,12 +1,13 @@
 import type { FC } from "hono/jsx";
 import type { Milestone } from "../../types/milestone.types.ts";
 import { timeAgo, duration, variance, dueIn, formatDate } from "../../utils/time.ts";
+import { Highlight } from "../../utils/highlight.tsx";
 
-type Props = { milestone: Milestone };
+type Props = { milestone: Milestone; q?: string };
 
-export const MilestoneRow: FC<Props> = ({ milestone: m }) => (
+export const MilestoneRow: FC<Props> = ({ milestone: m, q }) => (
   <tr class="data-table__row" data-row-id={m.id}>
-    <td class="data-table__td">{m.name}</td>
+    <td class="data-table__td"><Highlight text={m.name} q={q} /></td>
     <td class="data-table__td">
       <span class={`milestone-card__badge milestone-card__badge--${m.status}`}>
         {m.status}
@@ -15,7 +16,7 @@ export const MilestoneRow: FC<Props> = ({ milestone: m }) => (
     <td class="data-table__td">{formatDate(m.target)}</td>
     <td class="data-table__td">{m.progress}%</td>
     <td class="data-table__td">{m.completedCount}/{m.taskCount}</td>
-    <td class="data-table__td">{m.project ?? ""}</td>
+    <td class="data-table__td"><Highlight text={m.project ?? ""} q={q} /></td>
     <td class="data-table__td">{formatDate(m.createdAt)}</td>
     <td class="data-table__td">{timeAgo(m.createdAt)}</td>
     <td class="data-table__td">

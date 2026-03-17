@@ -1,6 +1,7 @@
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { Milestone } from "../../types/milestone.types.ts";
 import { statusBadgeRenderer } from "../../components/ui/status-badge.tsx";
+import { Highlight } from "../../utils/highlight.tsx";
 import { timeAgo, duration, variance, dueIn, formatDate } from "../../utils/time.ts";
 
 // Action buttons render function for table rows.
@@ -33,12 +34,12 @@ const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
 );
 
 export const MILESTONE_TABLE_COLUMNS: ColumnDef[] = [
-  { key: "name", label: "Name", sortable: true },
+  { key: "name", label: "Name", sortable: true, render: (v, row) => <Highlight text={String(v)} q={row._q as string} /> },
   { key: "status", label: "Status", sortable: true, render: statusBadgeRenderer("milestone-card__badge") },
   { key: "target", label: "Target", sortable: true },
   { key: "progress", label: "Progress", sortable: true },
   { key: "taskCount", label: "Tasks", sortable: true },
-  { key: "project", label: "Project", sortable: true },
+  { key: "project", label: "Project", sortable: true, render: (v, row) => <Highlight text={String(v)} q={row._q as string} /> },
   { key: "createdAt", label: "Created", sortable: true, render: (v) => formatDate(v as string) },
   { key: "age", label: "Age", render: (_, row) => timeAgo(row.createdAt as string) },
   { key: "due", label: "Due", render: (_, row) => {

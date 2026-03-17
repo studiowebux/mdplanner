@@ -7,10 +7,7 @@ import { DataTable } from "../components/ui/data-table.tsx";
 import { EmptyState } from "../components/ui/empty-state.tsx";
 import type { Milestone } from "../types/milestone.types.ts";
 import type { ViewProps, ViewMode } from "../types/app.ts";
-import {
-  MILESTONE_TABLE_COLUMNS,
-  milestoneToRow,
-} from "../domains/milestone/constants.tsx";
+import { MILESTONE_TABLE_COLUMNS, milestoneToRow } from "../domains/milestone/constants.tsx";
 
 const ViewToggleButtons: FC<{ view: ViewMode; oobSwap?: string }> = ({ view, oobSwap }) => (
   <div id="milestones-view-toggle" class="view-toggle" {...(oobSwap ? { "hx-swap-oob": oobSwap } : {})}>
@@ -71,12 +68,12 @@ export const MilestonesViewContainer: FC<{ milestones: Milestone[]; state: Miles
             domain="milestones"
             compact
             columns={MILESTONE_TABLE_COLUMNS}
-            rows={milestones.map(milestoneToRow)}
+            rows={milestones.map((m) => ({ ...milestoneToRow(m), _q: state.q }))}
           />
         )
         : (
           <CardGrid id="milestones-grid">
-            {milestones.map((m) => <MilestoneCard key={m.id} milestone={m} />)}
+            {milestones.map((m) => <MilestoneCard key={m.id} milestone={m} q={state.q} />)}
           </CardGrid>
         )}
   </div>
@@ -126,7 +123,7 @@ export const MilestonesView: FC<Props> = ({ milestones, nonce, activePath, state
             placeholder="Search milestones..."
             aria-label="Search"
             hx-get="/milestones/view"
-            hx-trigger="keyup changed delay:300ms"
+            hx-trigger="input changed delay:300ms, search"
             hx-target="#milestones-view"
             hx-swap="outerHTML"
             hx-include="#milestones-toolbar"
