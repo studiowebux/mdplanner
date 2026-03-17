@@ -4,8 +4,10 @@ import type { DomainConfig } from "../../factories/domain.types.ts";
 import type {
   CreateMilestone,
   Milestone,
+  MilestoneStatus,
   UpdateMilestone,
 } from "../../types/milestone.types.ts";
+import { MILESTONE_STATUS_OPTIONS } from "../../types/milestone.types.ts";
 import { getMilestoneService } from "../../singletons/services.ts";
 import { MilestoneCard } from "../../views/components/milestone-card.tsx";
 import { MILESTONE_TABLE_COLUMNS, milestoneToRow } from "./constants.tsx";
@@ -18,10 +20,7 @@ const FORM_FIELDS: FieldDef[] = [
     type: "select",
     name: "status",
     label: "Status",
-    options: [
-      { value: "open", label: "Open" },
-      { value: "completed", label: "Completed" },
-    ],
+    options: MILESTONE_STATUS_OPTIONS,
   },
   { type: "textarea", name: "description", label: "Description", rows: 4 },
   {
@@ -61,10 +60,7 @@ export const milestoneConfig: DomainConfig<
     {
       name: "status",
       label: "All statuses",
-      options: [
-        { value: "open", label: "Open" },
-        { value: "completed", label: "Completed" },
-      ],
+      options: MILESTONE_STATUS_OPTIONS,
     },
     {
       name: "project",
@@ -82,7 +78,7 @@ export const milestoneConfig: DomainConfig<
   parseCreate: (body) => ({
     name: String(body.name || ""),
     target: body.target ? String(body.target) : undefined,
-    status: (String(body.status) || "open") as "open" | "completed",
+    status: (String(body.status) || "open") as MilestoneStatus,
     description: body.description ? String(body.description) : undefined,
     project: body.project ? String(body.project) : undefined,
   }),
@@ -91,7 +87,7 @@ export const milestoneConfig: DomainConfig<
     name: body.name ? String(body.name) : undefined,
     target: body.target ? String(body.target) : null,
     status: body.status
-      ? String(body.status) as "open" | "completed"
+      ? String(body.status) as MilestoneStatus
       : undefined,
     description: body.description ? String(body.description) : null,
     project: body.project ? String(body.project) : null,

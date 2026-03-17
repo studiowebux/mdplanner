@@ -7,6 +7,7 @@ import { bootCacheSync, initServices } from "./singletons/services.ts";
 import { subscribe } from "./singletons/event-bus.ts";
 import { api } from "./api/mod.ts";
 import { views } from "./views/mod.ts";
+import { createMcpHonoRouter } from "./mcp/mod.ts";
 import { APP_NAME, APP_VERSION, DEFAULT_PORT } from "./constants/mod.ts";
 import type { AppVariables } from "./types/app.ts";
 
@@ -50,6 +51,8 @@ app.get("/sse", () => {
   });
 });
 
+const mcpToken = Deno.env.get("MCP_TOKEN");
+app.route("/mcp", createMcpHonoRouter({ token: mcpToken }));
 app.route("/api", api);
 app.route("/", views);
 

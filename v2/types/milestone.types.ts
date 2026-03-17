@@ -6,6 +6,14 @@ import { z } from "@hono/zod-openapi";
 
 export const MILESTONE_STATUSES = ["open", "completed"] as const;
 
+export type MilestoneStatus = (typeof MILESTONE_STATUSES)[number];
+
+/** Label map for UI selects and filters — derived from MILESTONE_STATUSES. */
+export const MILESTONE_STATUS_OPTIONS = MILESTONE_STATUSES.map((s) => ({
+  value: s,
+  label: s.charAt(0).toUpperCase() + s.slice(1),
+}));
+
 // ---------------------------------------------------------------------------
 // Base — raw milestone as stored on disk (parser output)
 // ---------------------------------------------------------------------------
@@ -81,3 +89,29 @@ export const UpdateMilestoneSchema = z.object({
 }).openapi("UpdateMilestone");
 
 export type UpdateMilestone = z.infer<typeof UpdateMilestoneSchema>;
+
+// ---------------------------------------------------------------------------
+// List filter — shared by MCP, REST, and SSR consumers
+// ---------------------------------------------------------------------------
+
+export const ListMilestoneOptionsSchema = z.object({
+  status: z.enum(MILESTONE_STATUSES).optional().openapi({
+    description: "Filter by milestone status",
+  }),
+  project: z.string().optional().openapi({
+    description: "Filter by project name (case-insensitive)",
+  }),
+}).openapi("ListMilestoneOptions");
+
+// ---------------------------------------------------------------------------
+// Summary query — input for get_milestone_summary (MCP) and future REST
+// ---------------------------------------------------------------------------
+
+export const MilestoneSummaryQuerySchema = z.object({
+  milestone: z.string().openapi({
+    description: "Milestone name (e.g. 'v0.36.2')",
+  }),
+  project: z.string().optional().openapi({
+    description: "Filter tasks by project name (case-insensitive)",
+  }),
+}).openapi("MilestoneSummaryQuery");

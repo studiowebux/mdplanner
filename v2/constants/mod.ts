@@ -2,6 +2,20 @@ export const APP_NAME = "MDPlanner";
 export const APP_VERSION = "2.0.0-alpha";
 export const DEFAULT_PORT = 8003;
 
+/**
+ * Preferred display order for task board sections in summary views.
+ * Sections discovered on disk that are not in this list appear after these.
+ */
+export const SECTION_DISPLAY_ORDER = [
+  "In Progress",
+  "Pending Review",
+  "Todo",
+  "Done",
+] as const;
+
+/** The section name that represents completed tasks. */
+export const DONE_SECTION = "Done" as const;
+
 export const ENTITY_TYPE_LABELS: Record<string, string> = {
   task: "Task",
   note: "Note",

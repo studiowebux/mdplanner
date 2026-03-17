@@ -5,6 +5,7 @@ import { getMilestoneService } from "../../../singletons/services.ts";
 import { publish } from "../../../singletons/event-bus.ts";
 import {
   CreateMilestoneSchema,
+  ListMilestoneOptionsSchema,
   MilestoneSchema,
   UpdateMilestoneSchema,
 } from "../../../types/milestone.types.ts";
@@ -19,6 +20,9 @@ const listMilestonesRoute = createRoute({
   tags: ["Milestones"],
   summary: "List all milestones",
   operationId: "listMilestones",
+  request: {
+    query: ListMilestoneOptionsSchema,
+  },
   responses: {
     200: {
       content: { "application/json": { schema: z.array(MilestoneSchema) } },
@@ -28,7 +32,8 @@ const listMilestonesRoute = createRoute({
 });
 
 milestonesRouter.openapi(listMilestonesRoute, async (c) => {
-  const milestones = await getMilestoneService().list();
+  const { status, project } = c.req.valid("query");
+  const milestones = await getMilestoneService().list({ status, project });
   return c.json(milestones, 200);
 });
 

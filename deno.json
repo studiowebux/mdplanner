@@ -62,12 +62,12 @@
     "@scalar/hono-api-reference": "npm:@scalar/hono-api-reference@0.10.2",
     "marked": "npm:marked@15",
     "zod": "npm:zod@3.25.76",
-    "@modelcontextprotocol/sdk/server/mcp.js": "npm:@modelcontextprotocol/sdk@1.26.0/server/mcp.js",
-    "@modelcontextprotocol/sdk/server/stdio.js": "npm:@modelcontextprotocol/sdk@1.26.0/server/stdio.js",
-    "@modelcontextprotocol/sdk/server/streamableHttp.js": "npm:@modelcontextprotocol/sdk@1.26.0/server/streamableHttp.js",
-    "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js": "npm:@modelcontextprotocol/sdk@1.26.0/server/webStandardStreamableHttp.js",
-    "@modelcontextprotocol/sdk/client/index.js": "npm:@modelcontextprotocol/sdk@1.26.0/client/index.js",
-    "@modelcontextprotocol/sdk/inMemory.js": "npm:@modelcontextprotocol/sdk@1.26.0/inMemory.js"
+    "@modelcontextprotocol/sdk/server/mcp.js": "npm:@modelcontextprotocol/sdk@1.27.1/server/mcp.js",
+    "@modelcontextprotocol/sdk/server/stdio.js": "npm:@modelcontextprotocol/sdk@1.27.1/server/stdio.js",
+    "@modelcontextprotocol/sdk/server/streamableHttp.js": "npm:@modelcontextprotocol/sdk@1.27.1/server/streamableHttp.js",
+    "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js": "npm:@modelcontextprotocol/sdk@1.27.1/server/webStandardStreamableHttp.js",
+    "@modelcontextprotocol/sdk/client/index.js": "npm:@modelcontextprotocol/sdk@1.27.1/client/index.js",
+    "@modelcontextprotocol/sdk/inMemory.js": "npm:@modelcontextprotocol/sdk@1.27.1/inMemory.js"
   },
   "compilerOptions": {
     "strict": true,
