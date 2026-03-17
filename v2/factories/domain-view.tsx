@@ -150,7 +150,11 @@ export function createDomainViewContainer<T>(cfg: DomainConfig<T, any, any>) {
           <CardGrid id={`${cfg.name}-grid`}>
             {items.map((item) => {
               const row = cfg.toRow(item);
-              return <cfg.Card key={String(row.id)} item={item} q={state.q} />;
+              return (
+                <div key={String(row.id)} id={String(row.id)}>
+                  <cfg.Card item={item} q={state.q} />
+                </div>
+              );
             })}
           </CardGrid>
         )}
