@@ -32,7 +32,7 @@ app.use("*", async (c, next) => {
     "Content-Security-Policy",
     `default-src 'self'; ` +
       `script-src 'nonce-${nonce}' 'self'; ` +
-      `style-src 'self' https://fonts.googleapis.com; ` +
+      `style-src 'nonce-${nonce}' 'self' https://fonts.googleapis.com; ` +
       `font-src https://fonts.gstatic.com`,
   );
 });
