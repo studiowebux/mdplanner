@@ -3,7 +3,7 @@ import { logger } from "hono/logger";
 import { serveStatic } from "hono/deno";
 import { dirname, fromFileUrl, join } from "@std/path";
 import { log } from "./singletons/logger.ts";
-import { initServices } from "./singletons/services.ts";
+import { bootCacheSync, initServices } from "./singletons/services.ts";
 import { subscribe } from "./singletons/event-bus.ts";
 import { api } from "./api/mod.ts";
 import { views } from "./views/mod.ts";
@@ -14,8 +14,10 @@ const __dirname = dirname(fromFileUrl(import.meta.url));
 
 const projectDir = Deno.args[0] ?? Deno.env.get("PROJECT_DIR") ?? "./example";
 const port = parseInt(Deno.env.get("PORT") ?? String(DEFAULT_PORT), 10);
+const cache = Deno.env.get("CACHE") !== "false";
 
-initServices(projectDir);
+initServices(projectDir, { cache });
+await bootCacheSync();
 
 const app = new Hono<{ Variables: AppVariables }>();
 
