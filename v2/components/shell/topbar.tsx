@@ -34,6 +34,14 @@ export const Topbar: FC = () => (
         Motion
       </button>
       <button
+        id="font-toggle"
+        class="topbar__action-btn"
+        type="button"
+        aria-label="Toggle font"
+      >
+        Font
+      </button>
+      <button
         id="theme-toggle"
         class="topbar__action-btn"
         type="button"

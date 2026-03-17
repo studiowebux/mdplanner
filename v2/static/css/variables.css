@@ -21,7 +21,7 @@
 :root {
   /* Typography - shared across all themes */
   --font-sans: "Roboto", system-ui, sans-serif;
-  --font-mono: "Roboto Mono", monospace;
+  --font-mono: "JetBrains Mono", monospace;
 
   /* Font size scale */
   --font-size-xs: 0.75rem;       /* 12px — minimum floor: badges, micro labels */
@@ -66,6 +66,10 @@
   --color-level-key-result: #eab308;
   --color-level-initiative: #f97316;
   --color-level-project: #ef4444;
+}
+
+html.font-mono {
+  --font-sans: "JetBrains Mono", monospace;
 }
 
 /* --------------------------------------------------------------------------

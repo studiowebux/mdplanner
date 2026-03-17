@@ -5,7 +5,7 @@ import { AppShell } from "../shell/app-shell.tsx";
 // Runs before CSS loads — must stay inline to prevent FOUC.
 // Kept minimal deliberately; nonce is required for CSP compliance.
 const INIT_SCRIPT =
-  `(function(){var d=document.documentElement;var s=localStorage.getItem("darkMode");var p=window.matchMedia("(prefers-color-scheme: dark)").matches;if(s==="true"||(s===null&&p)){d.classList.add("dark");}if(localStorage.getItem("sidebarCollapsed")==="true"){d.classList.add("sidebar-collapsed");}if(localStorage.getItem("noAnimations")==="true"){d.classList.add("no-animations");}})();`;
+  `(function(){var d=document.documentElement;var s=localStorage.getItem("darkMode");var p=window.matchMedia("(prefers-color-scheme: dark)").matches;if(s==="true"||(s===null&&p)){d.classList.add("dark");}if(localStorage.getItem("sidebarCollapsed")==="true"){d.classList.add("sidebar-collapsed");}if(localStorage.getItem("noAnimations")==="true"){d.classList.add("no-animations");}if(localStorage.getItem("fontMono")==="true"){d.classList.add("font-mono");}})();`;
 
 type Props = {
   title?: string;
@@ -39,7 +39,7 @@ export const MainLayout: FC<Props> = (
           crossOrigin=""
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
         <meta
@@ -65,6 +65,7 @@ export const MainLayout: FC<Props> = (
         <script src="/js/vendor/htmx-2.0.8.min.js" />
         <script src="/js/vendor/htmx-ext-sse-2.2.4.min.js" />
         <script src="/js/theme-toggle.js" />
+        <script src="/js/font-toggle.js" />
         <script src="/js/animations-toggle.js" />
         <script src="/js/sidebar-toggle.js" />
         <script src="/js/sidenav.js" />
