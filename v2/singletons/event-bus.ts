@@ -1,46 +1,30 @@
-// SSE event broadcast bus — domain-agnostic. Each subscriber declares a view
-// mode. Publishers render per-view and the bus sends only the matching fragment.
+// SSE event broadcast bus — domain-agnostic.
+// Publishes named SSE events (no payload). Clients use hx-trigger="sse:<name>"
+// to trigger a server fetch that renders the correct filtered view.
 
-import type { ViewMode } from "../types/app.ts";
+const subscribers = new Set<ReadableStreamDefaultController<string>>();
 
-type Subscriber = {
-  ctrl: ReadableStreamDefaultController<string>;
-  view: ViewMode;
-};
-
-const subscribers = new Set<Subscriber>();
-
-export function subscribe(view: ViewMode): ReadableStream<string> {
-  let sub!: Subscriber;
+export function subscribe(): ReadableStream<string> {
+  let ctrl!: ReadableStreamDefaultController<string>;
   return new ReadableStream<string>({
     start(controller) {
-      sub = { ctrl: controller, view };
-      subscribers.add(sub);
+      ctrl = controller;
+      subscribers.add(controller);
       controller.enqueue(": ping\n\n");
     },
     cancel() {
-      subscribers.delete(sub);
+      subscribers.delete(ctrl);
     },
   });
 }
 
-// Returns the view mode that has active subscribers, or null if none.
-// When multiple views are active (rare — multiple tabs), returns both.
-export function subscribedViews(): Set<ViewMode> {
-  const views = new Set<ViewMode>();
-  for (const sub of subscribers) views.add(sub.view);
-  return views;
-}
-
-// Send a named SSE event to all subscribers of the given view mode.
-export function send(type: string, view: ViewMode, html: string): void {
-  const message = `event: ${type}\ndata: ${html}\n\n`;
-  for (const sub of subscribers) {
-    if (sub.view !== view) continue;
+export function publish(type: string): void {
+  const message = `event: ${type}\ndata: \n\n`;
+  for (const ctrl of subscribers) {
     try {
-      sub.ctrl.enqueue(message);
+      ctrl.enqueue(message);
     } catch {
-      subscribers.delete(sub);
+      subscribers.delete(ctrl);
     }
   }
 }

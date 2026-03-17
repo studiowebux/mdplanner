@@ -2,15 +2,12 @@
 
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { getMilestoneService } from "../../../singletons/services.ts";
-import { publishEvent, publishHtml } from "../../../utils/sse.ts";
-import { MilestoneCard } from "../../../views/components/milestone-card.tsx";
-import { MilestoneRow } from "../../../views/components/milestone-row.tsx";
+import { publish } from "../../../singletons/event-bus.ts";
 import {
   CreateMilestoneSchema,
   MilestoneSchema,
   UpdateMilestoneSchema,
 } from "../../../types/milestone.types.ts";
-import type { Milestone } from "../../../types/milestone.types.ts";
 import { ErrorSchema } from "../../../types/api.ts";
 
 export const milestonesRouter = new OpenAPIHono();
@@ -95,10 +92,7 @@ const createMilestoneRoute = createRoute({
 milestonesRouter.openapi(createMilestoneRoute, async (c) => {
   const data = c.req.valid("json");
   const m = await getMilestoneService().create(data);
-  await publishEvent("milestone:created", {
-    grid: () => MilestoneCard({ milestone: m, oobSwap: "beforeend:#milestones-grid" }),
-    table: () => MilestoneRow({ milestone: m, oobSwap: "beforeend:#milestones-table tbody" }),
-  });
+  publish("milestone.created");
   return c.json(m, 201);
 });
 
@@ -140,10 +134,7 @@ milestonesRouter.openapi(updateMilestoneRoute, async (c) => {
       404,
     );
   }
-  await publishEvent("milestone:updated", {
-    grid: () => MilestoneCard({ milestone: m, oobSwap: "true" }),
-    table: () => MilestoneRow({ milestone: m, oobSwap: "true" }),
-  });
+  publish("milestone.updated");
   return c.json(m, 200);
 });
 
@@ -177,9 +168,6 @@ milestonesRouter.openapi(deleteMilestoneRoute, async (c) => {
       404,
     );
   }
-  publishHtml("milestone:deleted", {
-    grid: `<article id="milestone-${id}" hx-swap-oob="delete"></article>`,
-    table: `<template><tr data-row-id="${id}" hx-swap-oob="delete"></tr></template>`,
-  });
+  publish("milestone.deleted");
   return new Response(null, { status: 204 });
 });

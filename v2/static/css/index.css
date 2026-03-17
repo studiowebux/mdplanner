@@ -69,7 +69,7 @@ code, pre { font-family: var(--font-mono); }
   --card-gap: var(--space-md);
   --card-shadow: var(--shadow-sm);
   --card-shadow-hover: var(--shadow-md);
-  --card-opacity-muted: 0.75;
+  --card-opacity-muted: 0.5;
 
   /* Badge */
   --badge-padding: 2px var(--space-sm);
@@ -143,6 +143,9 @@ code, pre { font-family: var(--font-mono); }
 
   /* Sidenav resize */
   --sidenav-resize-width: 4px;
+
+  /* Swap animation */
+  --swap-transition-duration: 0.05s;
 
   /* Table compact */
   --table-compact-cell-max-width: 16rem;

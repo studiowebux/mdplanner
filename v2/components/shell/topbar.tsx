@@ -26,6 +26,14 @@ export const Topbar: FC = () => (
     </div>
     <div class="topbar__actions">
       <button
+        id="animations-toggle"
+        class="topbar__action-btn"
+        type="button"
+        aria-label="Toggle animations"
+      >
+        Motion
+      </button>
+      <button
         id="theme-toggle"
         class="topbar__action-btn"
         type="button"

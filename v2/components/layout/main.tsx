@@ -5,7 +5,7 @@ import { AppShell } from "../shell/app-shell.tsx";
 // Runs before CSS loads — must stay inline to prevent FOUC.
 // Kept minimal deliberately; nonce is required for CSP compliance.
 const INIT_SCRIPT =
-  `(function(){var d=document.documentElement;var s=localStorage.getItem("darkMode");var p=window.matchMedia("(prefers-color-scheme: dark)").matches;if(s==="true"||(s===null&&p)){d.classList.add("dark");}if(localStorage.getItem("sidebarCollapsed")==="true"){d.classList.add("sidebar-collapsed");}})();`;
+  `(function(){var d=document.documentElement;var s=localStorage.getItem("darkMode");var p=window.matchMedia("(prefers-color-scheme: dark)").matches;if(s==="true"||(s===null&&p)){d.classList.add("dark");}if(localStorage.getItem("sidebarCollapsed")==="true"){d.classList.add("sidebar-collapsed");}if(localStorage.getItem("noAnimations")==="true"){d.classList.add("no-animations");}})();`;
 
 type Props = {
   title?: string;
@@ -33,7 +33,7 @@ export const MainLayout: FC<Props> = ({ title, nonce, activePath, styles = [], s
           href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
-        <meta name="htmx-config" content={JSON.stringify({ inlineStyleNonce: nonce })} />
+        <meta name="htmx-config" content={JSON.stringify({ inlineStyleNonce: nonce, useTemplateFragments: true })} />
         <script
           nonce={nonce}
           dangerouslySetInnerHTML={{ __html: INIT_SCRIPT }}
@@ -49,19 +49,13 @@ export const MainLayout: FC<Props> = ({ title, nonce, activePath, styles = [], s
         </AppShell>
         <script src="/js/vendor/htmx-2.0.8.min.js" />
         <script src="/js/vendor/htmx-ext-sse-2.2.4.min.js" />
-        <script src="/js/htmx-hooks.js" />
         <script src="/js/theme-toggle.js" />
+        <script src="/js/animations-toggle.js" />
         <script src="/js/sidebar-toggle.js" />
         <script src="/js/sidenav.js" />
         <script src="/js/confirm-dialog.js" />
         <script src="/js/autocomplete.js" />
-        <script src="/js/view-toggle.js" />
-        <script src="/js/data-table-sort.js" />
         <script src="/js/toast.js" />
-        <script src="/js/domain-filter.js" />
-        <script src="/js/domain-search.js" />
-        <script src="/js/column-toggle.js" />
-        <script src="/js/hide-completed.js" />
         {scripts.map((src) => <script key={src} src={src} />)}
       </body>
     </html>

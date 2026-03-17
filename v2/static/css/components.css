@@ -772,6 +772,26 @@
   transition: background var(--transition-fast);
 }
 
+
+/* Swap animations — works in all browsers via htmx CSS classes */
+
+.view-container {
+  opacity: 1;
+  transition: opacity 0.1s ease;
+}
+
+.view-container.htmx-swapping {
+  opacity: 0;
+  transition: opacity 0.1s ease;
+}
+
+/* Disable swap animations */
+.no-animations .view-container,
+.no-animations .view-container.htmx-swapping {
+  transition: none;
+  opacity: 1;
+}
+
 @media (max-width: 768px) {
   .domain-toolbar {
     flex-direction: column;

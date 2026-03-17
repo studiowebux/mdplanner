@@ -1,5 +1,4 @@
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
-import type { FilterDef } from "../../components/ui/filter-bar.tsx";
 import type { Milestone } from "../../types/milestone.types.ts";
 import { statusBadgeRenderer } from "../../components/ui/status-badge.tsx";
 import { timeAgo, duration, variance, dueIn, formatDate } from "../../utils/time.ts";
@@ -58,32 +57,9 @@ export const MILESTONE_TABLE_COLUMNS: ColumnDef[] = [
   { key: "_actions", label: "", render: actionBtns },
 ];
 
-export const MILESTONE_COLUMN_DEFS = MILESTONE_TABLE_COLUMNS
-  .filter((c) => c.label)
-  .map((c) => ({ key: c.key, label: c.label }));
+export const MILESTONE_DOMAIN = "milestones";
 
-export function buildMilestoneFilters(milestones: Milestone[]): FilterDef[] {
-  const projects = [...new Set(milestones.map((m) => m.project).filter(Boolean))] as string[];
-  return [
-    {
-      key: "status",
-      label: "Status",
-      allLabel: "All statuses",
-      options: [
-        { value: "open", label: "Open" },
-        { value: "completed", label: "Completed" },
-      ],
-    },
-    ...(projects.length > 0
-      ? [{
-          key: "project",
-          label: "Project",
-          allLabel: "All projects",
-          options: projects.sort().map((p) => ({ value: p, label: p })),
-        }]
-      : []),
-  ];
-}
+export const MILESTONE_STATE_KEYS = ["view", "status", "project", "q", "hideCompleted", "sort", "order"] as const;
 
 export function milestoneToRow(m: Milestone): Record<string, unknown> {
   return {

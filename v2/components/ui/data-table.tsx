@@ -14,10 +14,9 @@ type Props = {
   columns: ColumnDef[];
   rows: Record<string, unknown>[];
   rowId?: string;
-  rowFilterAttrs?: (row: Record<string, unknown>) => Record<string, string>;
 };
 
-export const DataTable: FC<Props> = ({ id, domain, compact, columns, rows, rowId = "id", rowFilterAttrs }) => (
+export const DataTable: FC<Props> = ({ id, domain, compact, columns, rows, rowId = "id" }) => (
   <div class="data-table-wrapper">
     <table
       id={id}
@@ -43,7 +42,6 @@ export const DataTable: FC<Props> = ({ id, domain, compact, columns, rows, rowId
             key={String(row[rowId])}
             class="data-table__row"
             data-row-id={String(row[rowId])}
-            {...(rowFilterAttrs ? rowFilterAttrs(row) : {})}
           >
             {columns.map((col) => (
               <td key={col.key} class="data-table__td">

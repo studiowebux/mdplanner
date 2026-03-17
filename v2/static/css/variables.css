@@ -87,7 +87,7 @@
   /* Text */
   --color-text-primary: #111827;
   --color-text-secondary: #4b5563;
-  --color-text-muted: #9ca3af;
+  --color-text-muted: #6b7280;
   --color-text-inverse: #ffffff;
 
   /* Borders */
@@ -143,7 +143,7 @@
   /* Text - true white */
   --color-text-primary: #ffffff;
   --color-text-secondary: #e5e5e5;
-  --color-text-muted: #a3a3a3;
+  --color-text-muted: #d4d4d4;
   --color-text-inverse: #000000;
 
   /* Borders - neutral gray */
