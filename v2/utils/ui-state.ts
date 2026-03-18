@@ -10,7 +10,11 @@ type Ctx = Context<any, any, any>;
 function parseUiCookie(
   raw: string | undefined,
 ): Record<string, Record<string, unknown>> {
-  if (!raw) return {};
+  if (!raw) {
+    log.info("[ui-state] cookie is empty/undefined");
+    return {};
+  }
+  log.info(`[ui-state] raw cookie: ${raw.substring(0, 200)}`);
   try {
     const parsed = JSON.parse(raw);
     if (typeof parsed !== "object" || parsed === null) {

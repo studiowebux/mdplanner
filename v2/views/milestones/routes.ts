@@ -4,6 +4,7 @@ import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { milestoneConfig } from "../../domains/milestone/config.tsx";
 import { getMilestoneService } from "../../singletons/services.ts";
 import { MilestoneDetailView } from "../milestone-detail.tsx";
+import { viewProps } from "../../middleware/view-props.ts";
 
 export const milestonesRouter = createDomainRoutes(milestoneConfig);
 
@@ -16,11 +17,9 @@ milestonesRouter.get("/:id", async (c) => {
   const tasks = await svc.getTasksForMilestone(milestone.name);
   return c.html(
     MilestoneDetailView({
+      ...viewProps(c, "/milestones"),
       milestone,
       tasks,
-      nonce: c.get("nonce"),
-      activePath: "/milestones",
-      enabledFeatures: c.get("enabledFeatures"),
     }) as unknown as string,
   );
 });

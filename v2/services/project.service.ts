@@ -7,6 +7,9 @@ import type {
   ProjectLink,
   UpdateProjectConfig,
 } from "../domains/project/types.ts";
+import { WEEKDAYS } from "../constants/mod.ts";
+
+type Weekday = typeof WEEKDAYS[number];
 
 export class ProjectService {
   constructor(private repo: ProjectRepository) {}
@@ -27,6 +30,9 @@ export class ProjectService {
     if (data.tags !== undefined) current.tags = data.tags;
     if (data.links !== undefined) current.links = data.links;
     if (data.features !== undefined) current.features = data.features;
+    if (data.navCategories !== undefined) {
+      current.navCategories = data.navCategories;
+    }
     await this.repo.write(current);
     return current;
   }
@@ -54,7 +60,7 @@ export class ProjectService {
   async updateSchedule(data: {
     startDate?: string;
     workingDaysPerWeek?: number;
-    workingDays?: string[];
+    workingDays?: Weekday[];
   }): Promise<void> {
     const current = await this.repo.read();
     current.startDate = data.startDate || undefined;

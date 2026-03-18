@@ -6,6 +6,7 @@ import { homeViewRouter } from "./home/routes.ts";
 import { milestonesRouter } from "./milestones/routes.ts";
 import { settingsViewRouter } from "./settings/routes.ts";
 import { searchRouter } from "./search/routes.ts";
+import { sidebarRouter } from "./sidebar/routes.ts";
 import {
   autocompleteRouter,
   registerAutocompleteSource,
@@ -28,3 +29,4 @@ views.route("/milestones", milestonesRouter);
 views.route("/settings", settingsViewRouter);
 views.route("/search", searchRouter);
 views.route("/autocomplete", autocompleteRouter);
+views.route("/sidebar", sidebarRouter);

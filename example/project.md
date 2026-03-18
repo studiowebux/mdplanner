@@ -4,16 +4,16 @@ working_days_per_week: 5
 working_days: [Mon, Tue, Wed, Thu, Fri]
 tags: [feature, bug, enhancement, docs, infra, security]
 links:
-  - title: Repository
-    url: "https://github.com/taskflow/app"
-  - title: Documentation
-    url: "https://docs.taskflow.io"
-  - title: Discord
-    url: "https://discord.gg/taskflow"
-  - title: Figma Designs
-    url: "https://figma.com/file/taskflow"
-features: [milestone]
-last_updated: "2026-03-18T01:46:16.700Z"
+  - url: "https://github.com/taskflow/app"
+    title: Repository
+  - url: "https://docs.taskflow.io"
+    title: Documentation
+  - url: "https://discord.gg/taskflow"
+    title: Discord
+  - url: "https://figma.com/file/taskflow"
+    title: Figma Designs
+features: [brainstorm, brief, capacity_plan, milestone, business_model, c4_component]
+last_updated: "2026-03-18T03:40:22.283Z"
 ---
 
 # MD Planner Demo

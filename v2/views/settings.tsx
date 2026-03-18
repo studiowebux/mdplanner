@@ -4,22 +4,19 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { ViewProps } from "../types/app.ts";
-import { ENTITY_TYPE_LABELS } from "../constants/mod.ts";
+import { ENTITY_TYPE_LABELS, WEEKDAYS } from "../constants/mod.ts";
 import type { ProjectConfig } from "../domains/project/types.ts";
 
 type SettingsProps = ViewProps & {
-  enabledFeatures: string[];
   config: ProjectConfig;
 };
 
-const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
 export const SettingsView: FC<SettingsProps> = ({
-  nonce,
-  enabledFeatures,
   config,
+  enabledFeatures,
+  ...viewProps
 }) => {
-  const enabled = new Set(enabledFeatures);
+  const enabled = new Set(enabledFeatures ?? []);
   const allFeatures = Object.entries(ENTITY_TYPE_LABELS).sort(([, a], [, b]) =>
     a.localeCompare(b)
   );
@@ -31,9 +28,9 @@ export const SettingsView: FC<SettingsProps> = ({
   return (
     <MainLayout
       title="Settings"
-      nonce={nonce}
-      activePath="/settings"
+      {...viewProps}
       enabledFeatures={enabledFeatures}
+      activePath="/settings"
       styles={["/css/views/settings.css"]}
       scripts={["/js/settings.js"]}
     >

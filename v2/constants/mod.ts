@@ -13,6 +13,16 @@ export const SECTION_DISPLAY_ORDER = [
   "Done",
 ] as const;
 
+export const WEEKDAYS = [
+  "Mon",
+  "Tue",
+  "Wed",
+  "Thu",
+  "Fri",
+  "Sat",
+  "Sun",
+] as const;
+
 /** The section name that represents completed tasks. */
 export const DONE_SECTION = "Done" as const;
 
@@ -65,6 +75,112 @@ export const ENTITY_TYPE_LABELS: Record<string, string> = {
   fishbone: "Fishbone",
   marketing_plan: "Marketing Plan",
 };
+
+/**
+ * Default sidebar navigation categories — used when project.md has no
+ * nav_categories field. Insertion order defines display order.
+ * Keys not listed here fall into "Other".
+ */
+export const DEFAULT_NAV_CATEGORIES: Record<string, string[]> = {
+  Work: ["task", "milestone", "goal"],
+  Planning: [
+    "idea",
+    "brainstorm",
+    "brief",
+    "reflection",
+    "reflection_template",
+    "retrospective",
+  ],
+  Prioritization: ["moscow", "eisenhower"],
+  Strategy: [
+    "swot",
+    "risk",
+    "lean_canvas",
+    "business_model",
+    "project_value",
+    "strategic_builder",
+    "fishbone",
+    "marketing_plan",
+  ],
+  Finances: [
+    "invoice",
+    "quote",
+    "rate",
+    "payment",
+    "customer",
+    "investor",
+    "financial_period",
+    "kpi_snapshot",
+  ],
+  CRM: ["company", "contact", "deal", "interaction"],
+  Team: [
+    "person",
+    "org_member",
+    "meeting",
+    "capacity_plan",
+    "time_entry",
+    "onboarding",
+    "onboarding_template",
+    "safe_agreement",
+  ],
+  Notes: ["note", "journal", "habit"],
+  Diagrams: ["sticky_note", "mindmap", "c4_component"],
+  Portfolio: ["portfolio"],
+  Infrastructure: ["dns_domain"],
+};
+
+// -- Nav link types and builders ------------------------------------------
+
+export type NavLink = { key: string; href: string; label: string };
+export type CategoryGroup = { name: string; links: NavLink[] };
+
+/** Build sorted nav links from enabled feature keys. */
+export function buildNavLinks(enabledFeatures: string[]): NavLink[] {
+  return enabledFeatures
+    .filter((key) => ENTITY_TYPE_ROUTES[key] && ENTITY_TYPE_LABELS[key])
+    .map((key) => ({
+      key,
+      href: ENTITY_TYPE_ROUTES[key],
+      label: ENTITY_TYPE_LABELS[key],
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+}
+
+/** Group nav links into ordered categories. Uncategorized keys go to "Other". */
+export function groupByCategory(
+  links: NavLink[],
+  categories: Record<string, string[]> = DEFAULT_NAV_CATEGORIES,
+): CategoryGroup[] {
+  const keyToCategory: Record<string, string> = {};
+  for (const [category, keys] of Object.entries(categories)) {
+    for (const key of keys) {
+      keyToCategory[key] = category;
+    }
+  }
+
+  const groups: Record<string, NavLink[]> = {};
+  const uncategorized: NavLink[] = [];
+
+  for (const link of links) {
+    const cat = keyToCategory[link.key];
+    if (cat) {
+      (groups[cat] ??= []).push(link);
+    } else {
+      uncategorized.push(link);
+    }
+  }
+
+  const ordered: CategoryGroup[] = [];
+  for (const name of Object.keys(categories)) {
+    if (groups[name]?.length) {
+      ordered.push({ name, links: groups[name] });
+    }
+  }
+  if (uncategorized.length) {
+    ordered.push({ name: "Other", links: uncategorized });
+  }
+  return ordered;
+}
 
 /** Maps entity FTS type to the URL path prefix for that domain's list view. */
 export const ENTITY_TYPE_ROUTES: Record<string, string> = {

@@ -5,6 +5,7 @@ import { Hono } from "hono";
 import { publish } from "../singletons/event-bus.ts";
 import { mergeParams, readUiState, writeUiState } from "../utils/ui-state.ts";
 import { hxTrigger } from "../utils/hx-trigger.ts";
+import { viewProps } from "../middleware/view-props.ts";
 import type { AppVariables, ViewMode } from "../types/app.ts";
 import type { DomainConfig, DomainFilterState } from "./domain.types.ts";
 import { createDomainPage } from "./domain-view.tsx";
@@ -132,10 +133,8 @@ export function createDomainRoutes<T extends Record<string, any>, C, U>(
     const dynamicFilterOptions = cfg.extractFilterOptions?.(all);
     return c.html(
       DomainPage({
+        ...viewProps(c, cfg.path),
         items: applyFilters(all, state),
-        nonce: c.get("nonce"),
-        activePath: cfg.path,
-        enabledFeatures: c.get("enabledFeatures"),
         state,
         dynamicFilterOptions,
       }) as unknown as string,
@@ -258,10 +257,8 @@ export function createDomainRoutes<T extends Record<string, any>, C, U>(
       if (!item) return c.notFound();
       return c.html(
         cfg.DetailView!({
+          ...viewProps(c, cfg.path),
           item,
-          nonce: c.get("nonce"),
-          activePath: cfg.path,
-          enabledFeatures: c.get("enabledFeatures"),
         }) as unknown as string,
       );
     });

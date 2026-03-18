@@ -1,6 +1,7 @@
 // Project configuration types — sourced from project.md frontmatter.
 
 import { z } from "@hono/zod-openapi";
+import { WEEKDAYS } from "../../constants/mod.ts";
 
 export const ProjectLinkSchema = z.object({
   title: z.string().openapi({
@@ -32,7 +33,7 @@ export const ProjectConfigSchema = z.object({
     description: "Number of working days per week for capacity planning",
     example: 5,
   }),
-  workingDays: z.array(z.string()).optional().openapi({
+  workingDays: z.array(z.enum(WEEKDAYS)).optional().openapi({
     description: "Working day names for scheduling",
     example: ["Mon", "Tue", "Wed", "Thu", "Fri"],
   }),
@@ -47,6 +48,15 @@ export const ProjectConfigSchema = z.object({
     description:
       "Enabled feature/domain keys — controls which views appear in the sidebar",
     example: ["milestones", "tasks", "notes", "goals"],
+  }),
+  navCategories: z.record(z.array(z.string())).optional().openapi({
+    description:
+      "Sidebar navigation categories. Keys are category names, values are arrays of entity keys. " +
+      "Uncategorized enabled features go to 'Other'. When absent, built-in defaults are used.",
+    example: {
+      Work: ["task", "milestone", "goal"],
+      Notes: ["note", "journal", "habit"],
+    },
   }),
   lastUpdated: z.string().optional().openapi({
     description: "ISO timestamp of last project.md write",
@@ -72,7 +82,7 @@ export const UpdateProjectConfigSchema = z.object({
     description: "Number of working days per week. Omit to leave unchanged.",
     example: 5,
   }),
-  workingDays: z.array(z.string()).optional().openapi({
+  workingDays: z.array(z.enum(WEEKDAYS)).optional().openapi({
     description: "Working day names. Omit to leave unchanged.",
     example: ["Mon", "Tue", "Wed", "Thu", "Fri"],
   }),
@@ -87,6 +97,9 @@ export const UpdateProjectConfigSchema = z.object({
     description:
       "Enabled feature keys — replaces the full list. Omit to leave unchanged.",
     example: ["milestones", "tasks", "notes"],
+  }),
+  navCategories: z.record(z.array(z.string())).optional().openapi({
+    description: "Sidebar navigation categories. Omit to leave unchanged.",
   }),
 }).openapi("UpdateProjectConfig");
 

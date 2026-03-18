@@ -10,16 +10,14 @@ interface SearchViewProps extends ViewProps {
 }
 
 export const SearchView: FC<SearchViewProps> = ({
-  nonce,
-  enabledFeatures,
   query,
   results,
+  ...viewProps
 }) => {
   return (
     <MainLayout
       title={query ? `Search: ${query}` : "Search"}
-      nonce={nonce}
-      enabledFeatures={enabledFeatures}
+      {...viewProps}
       styles={["/css/views/search.css"]}
     >
       <main class="search-page">

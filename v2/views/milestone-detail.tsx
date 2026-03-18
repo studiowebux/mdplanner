@@ -11,16 +11,14 @@ type Props = ViewProps & {
 };
 
 export const MilestoneDetailView: FC<Props> = (
-  { milestone, tasks, nonce, activePath, enabledFeatures },
+  { milestone, tasks, ...viewProps },
 ) => {
   const sections = groupBy(tasks, (t) => t.section ?? "Uncategorized");
 
   return (
     <MainLayout
       title={milestone.name}
-      nonce={nonce}
-      activePath={activePath}
-      enabledFeatures={enabledFeatures}
+      {...viewProps}
       styles={["/css/views/milestones.css"]}
     >
       <main class="milestone-detail">

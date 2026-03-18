@@ -7,6 +7,7 @@ import {
 } from "../utils/frontmatter.ts";
 import { atomicWrite } from "../utils/safe-io.ts";
 import type { ProjectConfig, ProjectLink } from "../domains/project/types.ts";
+import { WEEKDAYS } from "../constants/mod.ts";
 
 export class ProjectRepository {
   private filePath: string;
@@ -39,6 +40,7 @@ export class ProjectRepository {
     if (config.features && config.features.length > 0) {
       fm.features = config.features;
     }
+    if (config.navCategories) fm.nav_categories = config.navCategories;
     fm.last_updated = new Date().toISOString();
 
     let body = `# ${config.name}`;
@@ -47,6 +49,19 @@ export class ProjectRepository {
     }
 
     await atomicWrite(this.filePath, serializeFrontmatter(fm, body.trimEnd()));
+  }
+
+  private parseNavCategories(
+    raw: unknown,
+  ): Record<string, string[]> | undefined {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+    const result: Record<string, string[]> = {};
+    for (const [key, val] of Object.entries(raw as Record<string, unknown>)) {
+      if (Array.isArray(val)) {
+        result[key] = val.map(String);
+      }
+    }
+    return Object.keys(result).length > 0 ? result : undefined;
   }
 
   private parse(content: string): ProjectConfig {
@@ -75,7 +90,10 @@ export class ProjectRepository {
         ? fm.working_days_per_week
         : undefined,
       workingDays: Array.isArray(fm.working_days)
-        ? (fm.working_days as unknown[]).map(String)
+        ? (fm.working_days as unknown[]).map(String).filter(
+          (d): d is typeof WEEKDAYS[number] =>
+            (WEEKDAYS as readonly string[]).includes(d),
+        )
         : undefined,
       tags: Array.isArray(fm.tags)
         ? (fm.tags as unknown[]).map(String)
@@ -84,6 +102,7 @@ export class ProjectRepository {
       features: Array.isArray(fm.features)
         ? (fm.features as unknown[]).map(String)
         : undefined,
+      navCategories: this.parseNavCategories(fm.nav_categories),
       lastUpdated: fm.last_updated != null
         ? String(fm.last_updated)
         : undefined,

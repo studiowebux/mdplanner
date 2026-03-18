@@ -3,15 +3,12 @@ import { logger } from "hono/logger";
 import { serveStatic } from "hono/deno";
 import { dirname, fromFileUrl, join } from "@std/path";
 import { log } from "./singletons/logger.ts";
-import {
-  bootCacheSync,
-  getProjectService,
-  initServices,
-} from "./singletons/services.ts";
+import { bootCacheSync, initServices } from "./singletons/services.ts";
 import { subscribe } from "./singletons/event-bus.ts";
 import { api } from "./api/mod.ts";
 import { views } from "./views/mod.ts";
 import { createMcpHonoRouter } from "./mcp/mod.ts";
+import { contextMiddleware } from "./middleware/context.ts";
 import { APP_NAME, APP_VERSION, DEFAULT_PORT } from "./constants/mod.ts";
 import type { AppVariables } from "./types/app.ts";
 
@@ -28,23 +25,7 @@ const app = new Hono<{ Variables: AppVariables }>();
 
 app.use("*", logger((msg: string) => log.info(msg)));
 
-// Per-request nonce + enabled features for sidebar rendering.
-app.use("*", async (c, next) => {
-  const bytes = crypto.getRandomValues(new Uint8Array(16));
-  const nonce = btoa(String.fromCharCode(...bytes));
-  c.set("nonce", nonce);
-  c.set("enabledFeatures", await getProjectService().getEnabledFeatures());
-  await next();
-  // Scalar API reference serves its own HTML page — skip CSP for that route.
-  if (c.req.path === "/api/v1/reference") return;
-  c.header(
-    "Content-Security-Policy",
-    `default-src 'self'; ` +
-      `script-src 'nonce-${nonce}' 'self'; ` +
-      `style-src 'nonce-${nonce}' 'self' https://fonts.googleapis.com; ` +
-      `font-src https://fonts.gstatic.com`,
-  );
-});
+app.use("*", contextMiddleware);
 
 // SSE — domain-agnostic broadcast stream. Named events only, no payload.
 app.get("/sse", () => {

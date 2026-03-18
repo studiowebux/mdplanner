@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { SearchView } from "../search.tsx";
 import { getSearchEngine } from "../../singletons/services.ts";
 import { ENTITY_TYPE_LABELS, ENTITY_TYPE_ROUTES } from "../../constants/mod.ts";
+import { viewProps } from "../../middleware/view-props.ts";
 import type { AppVariables } from "../../types/app.ts";
 
 export const searchRouter = new Hono<{ Variables: AppVariables }>();
@@ -13,8 +14,7 @@ searchRouter.get("/", (c) => {
   const results = engine ? engine.search(query) : [];
   return c.html(
     SearchView({
-      nonce: c.get("nonce"),
-      enabledFeatures: c.get("enabledFeatures"),
+      ...viewProps(c),
       query,
       results,
     }) as unknown as string,

@@ -12,6 +12,8 @@ type Props = {
   nonce?: string;
   activePath?: string;
   enabledFeatures?: string[];
+  pinnedKeys?: string[];
+  navCategories?: Record<string, string[]>;
   styles?: string[];
   scripts?: string[];
   children?: unknown;
@@ -23,6 +25,8 @@ export const MainLayout: FC<Props> = (
     nonce,
     activePath,
     enabledFeatures = [],
+    pinnedKeys = [],
+    navCategories,
     styles = [],
     scripts = [],
     children,
@@ -68,7 +72,12 @@ export const MainLayout: FC<Props> = (
         {styles.map((href) => <link key={href} rel="stylesheet" href={href} />)}
       </head>
       <body>
-        <AppShell activePath={activePath} enabledFeatures={enabledFeatures}>
+        <AppShell
+          activePath={activePath}
+          enabledFeatures={enabledFeatures}
+          pinnedKeys={pinnedKeys}
+          navCategories={navCategories}
+        >
           {children}
         </AppShell>
         <script src="/js/vendor/htmx-2.0.8.min.js" />
@@ -77,6 +86,7 @@ export const MainLayout: FC<Props> = (
         <script src="/js/font-toggle.js" />
         <script src="/js/animations-toggle.js" />
         <script src="/js/sidebar-toggle.js" />
+        <script src="/js/sidebar-nav.js" />
         <script src="/js/sidenav.js" />
         <script src="/js/confirm-dialog.js" />
         <script src="/js/autocomplete.js" />

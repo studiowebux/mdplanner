@@ -3,7 +3,10 @@
 import { Hono } from "hono";
 import { SettingsView } from "../settings.tsx";
 import { getProjectService } from "../../singletons/services.ts";
+import { SidebarContent } from "../../components/shell/sidebar.tsx";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
+import { viewProps } from "../../middleware/view-props.ts";
+import { WEEKDAYS } from "../../constants/mod.ts";
 import type { AppVariables } from "../../types/app.ts";
 import type { ProjectLink } from "../../domains/project/types.ts";
 
@@ -13,8 +16,7 @@ settingsViewRouter.get("/", async (c) => {
   const config = await getProjectService().getConfig();
   return c.html(
     SettingsView({
-      nonce: c.get("nonce"),
-      enabledFeatures: c.get("enabledFeatures"),
+      ...viewProps(c, "/settings"),
       config,
     }) as unknown as string,
   );
@@ -30,11 +32,20 @@ settingsViewRouter.post("/features", async (c) => {
     ? [String(raw)]
     : [];
   await getProjectService().setFeatures(features);
-  return new Response(null, {
-    status: 204,
+  // Return updated sidebar via OOB swap so nav reflects the change without full reload.
+  const sidebarHtml = SidebarContent({
+    activePath: "/settings",
+    enabledFeatures: features,
+    pinnedKeys: c.get("pinnedKeys"),
+    navCategories: c.get("navCategories"),
+  }) as unknown as string;
+  const oob =
+    `<div id="sidebar-content" hx-swap-oob="innerHTML">${sidebarHtml}</div>`;
+  return new Response(oob, {
+    status: 200,
     headers: {
+      "Content-Type": "text/html",
       "HX-Trigger": hxTrigger("success", "Features saved"),
-      "HX-Refresh": "true",
     },
   });
 });
@@ -56,11 +67,15 @@ settingsViewRouter.post("/project", async (c) => {
 settingsViewRouter.post("/schedule", async (c) => {
   const body = await c.req.parseBody({ all: true });
   const rawDays = body.workingDays;
-  const workingDays = Array.isArray(rawDays)
+  const allDays = Array.isArray(rawDays)
     ? rawDays.map(String)
     : rawDays
     ? [String(rawDays)]
     : [];
+  const validDays = new Set<string>(WEEKDAYS);
+  const workingDays = allDays.filter(
+    (d): d is typeof WEEKDAYS[number] => validDays.has(d),
+  );
   const perWeek = body.workingDaysPerWeek
     ? Number(body.workingDaysPerWeek)
     : undefined;
