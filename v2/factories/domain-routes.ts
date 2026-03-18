@@ -135,7 +135,7 @@ export function createDomainRoutes<T extends Record<string, any>, C, U>(
   router.get("/", async (c) => {
     const state = c.get("filterState" as never) as DomainFilterState;
     const all = await cfg.getService().list();
-    const dynamicFilterOptions = cfg.extractFilterOptions?.(all);
+    const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
     return c.html(
       DomainPage({
         ...viewProps(c, cfg.path),
@@ -197,7 +197,17 @@ export function createDomainRoutes<T extends Record<string, any>, C, U>(
     const id = c.req.param("id");
     const item = await cfg.getService().getById(id);
     if (!item) return c.notFound();
-    return c.html(DomainForm({ item }) as unknown as string);
+    let displayValues: Record<string, string> | undefined;
+    if (cfg.resolveFormValues) {
+      const raw: Record<string, string> = {};
+      for (const f of cfg.formFields) {
+        raw[f.name] = String((item as Record<string, unknown>)[f.name] ?? "");
+      }
+      displayValues = await cfg.resolveFormValues(raw);
+    }
+    return c.html(
+      DomainForm({ item, displayValues }) as unknown as string,
+    );
   });
 
   // Update submission

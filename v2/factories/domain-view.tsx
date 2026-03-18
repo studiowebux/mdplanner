@@ -307,7 +307,9 @@ export function createDomainForm<T extends Record<string, any>>(cfg: {
   fields: FieldDef[];
   idField?: string;
 }) {
-  const DomainForm: FC<{ item?: T }> = ({ item }) => {
+  const DomainForm: FC<{ item?: T; displayValues?: Record<string, string> }> = (
+    { item, displayValues },
+  ) => {
     const isEdit = !!item;
     const id = isEdit ? item[cfg.idField ?? "id"] : undefined;
     const values: Record<string, string> = {};
@@ -322,6 +324,7 @@ export function createDomainForm<T extends Record<string, any>>(cfg: {
         title={isEdit ? `Edit ${cfg.singular}` : `Create ${cfg.singular}`}
         fields={cfg.fields}
         values={isEdit ? values : undefined}
+        displayValues={displayValues}
         action={isEdit ? `/${cfg.domain}/${id}/edit` : `/${cfg.domain}/new`}
         method="post"
         open

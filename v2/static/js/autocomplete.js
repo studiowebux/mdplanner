@@ -1,5 +1,6 @@
 // Autocomplete — selection handler only. Results are server-rendered via htmx.
 // Clicking an <li> sets the hidden input value and visible text, then clears the list.
+// Freetext mode: typing also syncs to the hidden input (for fields that allow new values).
 
 (function () {
   document.addEventListener("click", function (e) {
@@ -12,16 +13,28 @@
         ? search.getAttribute("data-autocomplete-target")
         : null;
       var hidden = targetId ? document.getElementById(targetId) : null;
-      if (hidden) hidden.value = item.getAttribute("data-value") || "";
+      if (hidden) {
+        hidden.value = item.getAttribute("data-value") || "";
+        hidden.dispatchEvent(new Event("input", { bubbles: true }));
+      }
       if (search) search.value = item.textContent || "";
       var list = item.closest(".form__autocomplete-list");
       if (list) list.innerHTML = "";
       return;
     }
     // Click outside — close all open lists
-    if (!e.target.closest(".form__autocomplete")) {
+    if (!e.target.closest(".form__autocomplete") && !e.target.closest(".form__tags")) {
       var lists = document.querySelectorAll(".form__autocomplete-list");
       for (var i = 0; i < lists.length; i++) lists[i].innerHTML = "";
     }
+  });
+
+  // Freetext mode — sync typed text to hidden input on every keystroke
+  document.addEventListener("input", function (e) {
+    var search = e.target.closest("[data-freetext]");
+    if (!search) return;
+    var targetId = search.getAttribute("data-autocomplete-target");
+    var hidden = targetId ? document.getElementById(targetId) : null;
+    if (hidden) hidden.value = search.value;
   });
 })();

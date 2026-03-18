@@ -17,11 +17,11 @@ const FORM_FIELDS: FieldDef[] = [
   { type: "text", name: "title", label: "Title" },
   { type: "text", name: "role", label: "Role" },
   {
-    type: "autocomplete",
+    type: "tags",
     name: "departments",
     label: "Departments",
     source: "people-departments",
-    placeholder: "Search departments...",
+    placeholder: "Type and press Enter...",
   },
   { type: "text", name: "email", label: "Email" },
   { type: "text", name: "phone", label: "Phone" },
@@ -41,10 +41,11 @@ const FORM_FIELDS: FieldDef[] = [
     options: AGENT_TYPE_OPTIONS,
   },
   {
-    type: "text",
+    type: "tags",
     name: "skills",
     label: "Skills",
-    placeholder: "Comma-separated",
+    source: "people-skills",
+    placeholder: "Type and press Enter...",
   },
 ];
 
@@ -131,6 +132,15 @@ export const peopleConfig: DomainConfig<
   }),
 
   getService: () => getPeopleService(),
+
+  resolveFormValues: async (values) => {
+    const resolved = { ...values };
+    if (values.reportsTo) {
+      const manager = await getPeopleService().getById(values.reportsTo);
+      if (manager) resolved.reportsTo = manager.name;
+    }
+    return resolved;
+  },
 
   extractFilterOptions: (items) => ({
     department: [

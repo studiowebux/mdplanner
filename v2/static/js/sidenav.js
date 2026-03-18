@@ -87,6 +87,22 @@
     }
   });
 
+  // Detect htmx-swapped sidenavs that render already open (domain factory forms)
+  document.addEventListener("htmx:afterSwap", function (e) {
+    var nav = e.target.querySelector
+      ? e.target.querySelector(".sidenav.is-open")
+      : null;
+    if (!nav && e.target.classList && e.target.classList.contains("sidenav") &&
+      e.target.classList.contains("is-open")) {
+      nav = e.target;
+    }
+    if (nav && nav.id) {
+      dirtyNavs[nav.id] = false;
+      updateDirtyIndicator(nav, false);
+      trackDirty(nav, nav.id);
+    }
+  });
+
   // ESC key — close the topmost open sidenav
   document.addEventListener("keydown", function (e) {
     if (e.key !== "Escape") return;

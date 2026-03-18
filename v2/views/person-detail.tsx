@@ -215,11 +215,13 @@ export const PersonDetailView: FC<Props> = (
             hx-swap="none"
             hx-confirm-dialog={`Delete "${person.name}"? This cannot be undone.`}
             data-confirm-name={person.name}
+            hx-on--after-request="if(event.detail.successful) window.location.href='/people'"
           >
             Delete
           </button>
         </div>
       </main>
+      <div id="people-form-container" />
     </MainLayout>
   );
 };

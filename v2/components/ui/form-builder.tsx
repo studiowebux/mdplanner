@@ -42,6 +42,17 @@ export type FieldDef =
     source: string;
     required?: boolean;
     placeholder?: string;
+    /** Allow free text alongside suggestions. Typed text syncs to hidden input. */
+    freetext?: boolean;
+  }
+  | {
+    type: "tags";
+    name: string;
+    label: string;
+    required?: boolean;
+    /** Autocomplete source for suggestions. Omit for freetext-only tags. */
+    source?: string;
+    placeholder?: string;
   };
 
 type Props = {
@@ -49,6 +60,8 @@ type Props = {
   title: string;
   fields: FieldDef[];
   values?: Record<string, string>;
+  /** Display overrides for autocomplete search inputs (show name, store ID). */
+  displayValues?: Record<string, string>;
   submitLabel?: string;
   action: string;
   method: "post" | "put";
@@ -57,8 +70,10 @@ type Props = {
 
 const fieldId = (formId: string, name: string) => `${formId}-${name}`;
 
-const Field: FC<{ formId: string; def: FieldDef; value?: string }> = (
-  { formId, def, value },
+const Field: FC<
+  { formId: string; def: FieldDef; value?: string; displayValue?: string }
+> = (
+  { formId, def, value, displayValue },
 ) => {
   const id = fieldId(formId, def.name);
 
@@ -141,10 +156,11 @@ const Field: FC<{ formId: string; def: FieldDef; value?: string }> = (
             id={`${id}-search`}
             class="form__input"
             placeholder={def.placeholder ?? "Search..."}
-            value={value ?? ""}
+            value={displayValue ?? value ?? ""}
             autocomplete="off"
             name="q"
             data-autocomplete-target={id}
+            {...(def.freetext ? { "data-freetext": "true" } : {})}
             hx-get={`/autocomplete/${def.source}`}
             hx-trigger="input changed delay:150ms, focus"
             hx-target={`#${id}-results`}
@@ -160,12 +176,62 @@ const Field: FC<{ formId: string; def: FieldDef; value?: string }> = (
           <ul class="form__autocomplete-list" id={`${id}-results`} />
         </div>
       )}
+      {def.type === "tags" && (() => {
+        const tags = (value ?? "").split(",").map((s) => s.trim()).filter(
+          Boolean,
+        );
+        return (
+          <div class="form__tags" data-tags-field={id}>
+            <div class="form__tags-pills" id={`${id}-pills`}>
+              {tags.map((tag) => (
+                <span key={tag} class="form__tags-pill" data-tag-value={tag}>
+                  {tag}
+                  <button
+                    type="button"
+                    class="form__tags-pill-remove"
+                    data-tag-remove={tag}
+                    aria-label={`Remove ${tag}`}
+                  >
+                    &times;
+                  </button>
+                </span>
+              ))}
+            </div>
+            <input
+              type="text"
+              id={`${id}-input`}
+              class="form__input form__tags-input"
+              placeholder={def.placeholder ?? "Type and press Enter..."}
+              autocomplete="off"
+              name="q"
+              data-tags-target={id}
+              {...(def.source
+                ? {
+                  "hx-get": `/autocomplete/${def.source}`,
+                  "hx-trigger": "input changed delay:150ms, focus",
+                  "hx-target": `#${id}-results`,
+                  "hx-swap": "innerHTML",
+                }
+                : {})}
+            />
+            <input
+              type="hidden"
+              id={id}
+              name={def.name}
+              value={value ?? ""}
+            />
+            {def.source && (
+              <ul class="form__autocomplete-list" id={`${id}-results`} />
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 };
 
 export const FormBuilder: FC<Props> = (
-  { id, title, fields, values, submitLabel, action, method, open },
+  { id, title, fields, values, displayValues, submitLabel, action, method, open },
 ) => (
   <Sidenav id={id} title={title} open={open}>
     <form
@@ -180,6 +246,7 @@ export const FormBuilder: FC<Props> = (
           formId={id}
           def={def}
           value={values?.[def.name]}
+          displayValue={displayValues?.[def.name]}
         />
       ))}
       <div class="form__actions">

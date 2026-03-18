@@ -76,10 +76,15 @@ export type DomainConfig<T, C, U> = {
   getService: () => DomainService<T, C, U>;
 
   // Optional: extract unique values for a filter field from all items.
-  extractFilterOptions?: (items: T[]) => Record<string, string[]>;
+  extractFilterOptions?: (items: T[]) => Record<string, string[]> | Promise<Record<string, string[]>>;
 
   // Optional: custom text search predicate (defaults to searching all string fields).
   searchPredicate?: (item: T, q: string) => boolean;
+
+  // Optional: resolve form values for display (e.g., ID → name for autocomplete fields).
+  resolveFormValues?: (
+    values: Record<string, string>,
+  ) => Promise<Record<string, string>>;
 
   // Optional: detail page renderer (if the domain has a detail view).
   DetailView?: FC<ViewProps & { item: T }>;

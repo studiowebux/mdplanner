@@ -8,7 +8,10 @@ import type {
   UpdateMilestone,
 } from "../../types/milestone.types.ts";
 import { MILESTONE_STATUS_OPTIONS } from "../../types/milestone.types.ts";
-import { getMilestoneService } from "../../singletons/services.ts";
+import {
+  getMilestoneService,
+  getPortfolioService,
+} from "../../singletons/services.ts";
 import { MilestoneCard } from "../../views/components/milestone-card.tsx";
 import { MILESTONE_TABLE_COLUMNS, milestoneToRow } from "./constants.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
@@ -93,11 +96,12 @@ export const milestoneConfig: DomainConfig<
 
   getService: () => getMilestoneService(),
 
-  extractFilterOptions: (items) => ({
-    project: [
-      ...new Set(items.map((m) => m.project).filter(Boolean) as string[]),
-    ].sort(),
-  }),
+  extractFilterOptions: async () => {
+    const portfolio = await getPortfolioService().list();
+    return {
+      project: portfolio.map((p) => p.name).sort(),
+    };
+  },
 
   searchPredicate: (item, q) =>
     item.name.toLowerCase().includes(q) ||

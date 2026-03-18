@@ -90,6 +90,7 @@ export const MainLayout: FC<Props> = (
         <script src="/js/sidenav.js" />
         <script src="/js/confirm-dialog.js" />
         <script src="/js/autocomplete.js" />
+        <script src="/js/tags-input.js" />
         <script src="/js/toast.js" />
         <script src="/js/htmx-triggers.js" />
         <script src="/js/column-toggle.js" />

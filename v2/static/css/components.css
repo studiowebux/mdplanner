@@ -424,6 +424,61 @@
 }
 
 /* -------------------------------------------------------------------------
+   Tags input (multi-value pills)
+   ------------------------------------------------------------------------- */
+
+.form__tags {
+  position: relative;
+}
+
+.form__tags-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-xs);
+}
+
+.form__tags-pills:empty {
+  display: none;
+}
+
+.form__tags-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--badge-padding);
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+.form__tags-pill-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: 1;
+}
+
+.form__tags-pill-remove:hover {
+  color: var(--color-error);
+}
+
+.form__tags .form__autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: var(--z-dropdown);
+}
+
+/* -------------------------------------------------------------------------
    Empty state
    ------------------------------------------------------------------------- */
 
