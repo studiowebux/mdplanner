@@ -1,12 +1,14 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { apiReference } from "@scalar/hono-api-reference";
 import { milestonesRouter } from "./v1/milestones/routes.ts";
+import { peopleRouter } from "./v1/people/routes.ts";
 import { portfolioRouter } from "./v1/portfolio/routes.ts";
 import { settingsRouter } from "./v1/settings/routes.ts";
 import { APP_NAME, APP_VERSION } from "../constants/mod.ts";
 
 const v1 = new OpenAPIHono();
 v1.route("/milestones", milestonesRouter);
+v1.route("/people", peopleRouter);
 v1.route("/portfolio", portfolioRouter);
 v1.route("/settings", settingsRouter);
 

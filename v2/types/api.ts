@@ -14,3 +14,7 @@ export const ErrorSchema = z
     }),
   })
   .openapi("Error");
+
+export const IdParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+});

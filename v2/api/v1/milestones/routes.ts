@@ -9,7 +9,7 @@ import {
   MilestoneSchema,
   UpdateMilestoneSchema,
 } from "../../../types/milestone.types.ts";
-import { ErrorSchema } from "../../../types/api.ts";
+import { ErrorSchema, IdParam } from "../../../types/api.ts";
 
 export const milestonesRouter = new OpenAPIHono();
 
@@ -45,9 +45,7 @@ const getMilestoneRoute = createRoute({
   summary: "Get milestone by ID",
   operationId: "getMilestone",
   request: {
-    params: z.object({
-      id: z.string().openapi({ param: { name: "id", in: "path" } }),
-    }),
+    params: IdParam,
   },
   responses: {
     200: {
@@ -109,9 +107,7 @@ const updateMilestoneRoute = createRoute({
   summary: "Update a milestone",
   operationId: "updateMilestone",
   request: {
-    params: z.object({
-      id: z.string().openapi({ param: { name: "id", in: "path" } }),
-    }),
+    params: IdParam,
     body: {
       content: { "application/json": { schema: UpdateMilestoneSchema } },
       required: true,
@@ -151,9 +147,7 @@ const deleteMilestoneRoute = createRoute({
   summary: "Delete a milestone",
   operationId: "deleteMilestone",
   request: {
-    params: z.object({
-      id: z.string().openapi({ param: { name: "id", in: "path" } }),
-    }),
+    params: IdParam,
   },
   responses: {
     204: { description: "Deleted" },
