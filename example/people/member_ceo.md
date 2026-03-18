@@ -5,6 +5,8 @@ role: CEO
 departments:
   - Executive
   - Strategy
+agentType: human
+skills: [leadership, strategy, fundraising, business-development, public-speaking]
 email: ceo@example.com
 phone: "+1-555-0100"
 startDate: "2020-01-15"

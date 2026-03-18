@@ -6,6 +6,8 @@ departments:
   - Finance
   - Executive
 reportsTo: member_ceo
+agentType: human
+skills: [financial-planning, budgeting, investor-relations, risk-management, compliance]
 email: cfo@example.com
 phone: "+1-555-0102"
 startDate: "2020-06-15"

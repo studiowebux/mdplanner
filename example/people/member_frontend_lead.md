@@ -6,6 +6,8 @@ departments:
   - Engineering
   - Design
 reportsTo: member_cto
+agentType: human
+skills: [typescript, react, performance, accessibility, design-systems]
 email: frontend.lead@example.com
 startDate: "2021-04-15"
 hoursPerDay: 8

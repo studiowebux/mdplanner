@@ -199,7 +199,7 @@ export function createDomainPage<T>(cfg: DomainConfig<T, any, any>) {
         hx-include={`#${cfg.name}-toolbar`}
       >
         <header class="domain-page__header">
-          <h1 class="domain-page__title">{cfg.singular}s</h1>
+          <h1 class="domain-page__title">{cfg.plural ?? `${cfg.singular}s`}</h1>
           <span id={`${cfg.name}-count`} class="domain-page__count">
             {items.length} total
           </span>

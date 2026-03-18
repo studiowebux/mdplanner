@@ -5,6 +5,8 @@ role: Senior Developer
 departments:
   - Engineering
 reportsTo: member_eng_lead
+agentType: human
+skills: [go, postgresql, microservices, testing, performance-tuning]
 email: dev1@example.com
 startDate: "2022-01-10"
 hoursPerDay: 8

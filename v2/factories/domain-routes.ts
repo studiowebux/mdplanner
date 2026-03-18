@@ -63,9 +63,14 @@ export function createDomainRoutes<T extends Record<string, any>, C, U>(
       for (const f of cfg.filters) {
         const val = state[f.name];
         if (val && typeof val === "string") {
-          result = result.filter((item) =>
-            String(item[f.name as keyof T] ?? "") === val
-          );
+          const field = f.field ?? f.name;
+          result = result.filter((item) => {
+            const itemVal = item[field as keyof T];
+            if (Array.isArray(itemVal)) {
+              return (itemVal as string[]).some((v) => v === val);
+            }
+            return String(itemVal ?? "") === val;
+          });
         }
       }
     }

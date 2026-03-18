@@ -5,6 +5,8 @@ role: Backend Engineer
 departments:
   - Engineering
 reportsTo: member_eng_lead
+agentType: human
+skills: [go, postgresql, api-design, testing, docker]
 hoursPerDay: 8
 workingDays:
   - Mon

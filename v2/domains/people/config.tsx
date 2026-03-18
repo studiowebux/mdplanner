@@ -55,6 +55,7 @@ export const peopleConfig: DomainConfig<
 > = {
   name: "people",
   singular: "Person",
+  plural: "People",
   path: "/people",
   ssePrefix: "person",
   styles: ["/css/views/people.css"],
@@ -76,6 +77,7 @@ export const peopleConfig: DomainConfig<
       name: "department",
       label: "All departments",
       options: [],
+      field: "departments",
     },
     {
       name: "agentType",

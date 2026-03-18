@@ -144,6 +144,10 @@
 
 .person-card__meta-value {
   color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .person-card__meta-value a {
@@ -178,4 +182,148 @@
   justify-content: flex-end;
   gap: var(--space-sm);
   margin-top: auto;
+}
+
+/* -------------------------------------------------------------------------
+   Detail view
+   ------------------------------------------------------------------------- */
+
+.person-detail {
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  padding: var(--page-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.person-detail__back {
+  margin-bottom: var(--space-sm);
+}
+
+.person-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.person-detail__identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.person-detail__name {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.person-detail__title {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+}
+
+.person-detail__meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-xs) var(--space-lg);
+  font-size: var(--font-size-base);
+}
+
+.person-detail__meta dt {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.person-detail__meta dd {
+  color: var(--color-text-primary);
+}
+
+.person-detail__meta dd a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.person-detail__meta dd a:hover {
+  text-decoration: underline;
+}
+
+.person-detail__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.person-detail__section h2 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.person-detail__count {
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-base);
+}
+
+.person-detail__prompt {
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--space-md);
+}
+
+.person-detail__prompt summary {
+  cursor: pointer;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.person-detail__prompt pre {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.person-detail__notes {
+  font-size: var(--font-size-base);
+  line-height: var(--body-line-height);
+  color: var(--color-text-secondary);
+}
+
+.person-detail__reports {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.person-detail__reports li {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.person-detail__reports a {
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+}
+
+.person-detail__reports a:hover {
+  text-decoration: underline;
+}
+
+.person-detail__report-title {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.person-detail__actions {
+  display: flex;
+  gap: var(--space-sm);
 }

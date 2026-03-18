@@ -19,6 +19,8 @@ export type FilterDef = {
   name: string;
   label: string;
   options: { value: string; label: string }[];
+  /** Item field to filter on. Defaults to `name` if omitted. Supports array fields. */
+  field?: string;
 };
 
 // Domain filter state — generic across all domains.
@@ -42,6 +44,8 @@ export type DomainConfig<T, C, U> = {
   // Identity
   name: string;
   singular: string;
+  /** Page heading override. Defaults to `singular + "s"`. */
+  plural?: string;
   path: string;
   ssePrefix: string;
 

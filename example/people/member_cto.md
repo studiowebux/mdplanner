@@ -6,6 +6,8 @@ departments:
   - Engineering
   - Security
 reportsTo: member_ceo
+agentType: human
+skills: [architecture, engineering, cloud, security, technical-strategy]
 email: cto@example.com
 phone: "+1-555-0101"
 startDate: "2020-03-01"

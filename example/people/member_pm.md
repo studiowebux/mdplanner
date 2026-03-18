@@ -6,6 +6,8 @@ departments:
   - Product
   - Engineering
 reportsTo: member_ceo
+agentType: human
+skills: [product-strategy, roadmapping, user-research, agile, stakeholder-management]
 email: pm@example.com
 startDate: "2021-08-01"
 hoursPerDay: 8
