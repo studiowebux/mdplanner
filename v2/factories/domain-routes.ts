@@ -135,6 +135,7 @@ export function createDomainRoutes<T extends Record<string, any>, C, U>(
         items: applyFilters(all, state),
         nonce: c.get("nonce"),
         activePath: cfg.path,
+        enabledFeatures: c.get("enabledFeatures"),
         state,
         dynamicFilterOptions,
       }) as unknown as string,
@@ -260,6 +261,7 @@ export function createDomainRoutes<T extends Record<string, any>, C, U>(
           item,
           nonce: c.get("nonce"),
           activePath: cfg.path,
+          enabledFeatures: c.get("enabledFeatures"),
         }) as unknown as string,
       );
     });

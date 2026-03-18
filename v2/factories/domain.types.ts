@@ -3,7 +3,7 @@
 import type { FC } from "hono/jsx";
 import type { FieldDef } from "../components/ui/form-builder.tsx";
 import type { ColumnDef } from "../components/ui/data-table.tsx";
-import type { ViewMode } from "../types/app.ts";
+import type { ViewMode, ViewProps } from "../types/app.ts";
 
 // Minimal service contract every domain must satisfy.
 export interface DomainService<T, C, U> {
@@ -78,5 +78,5 @@ export type DomainConfig<T, C, U> = {
   searchPredicate?: (item: T, q: string) => boolean;
 
   // Optional: detail page renderer (if the domain has a detail view).
-  DetailView?: FC<{ item: T; nonce?: string; activePath?: string }>;
+  DetailView?: FC<ViewProps & { item: T }>;
 };

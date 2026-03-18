@@ -3,5 +3,14 @@
 import { z } from "@hono/zod-openapi";
 
 export const ErrorSchema = z
-  .object({ error: z.string(), message: z.string() })
+  .object({
+    error: z.string().openapi({
+      description: "Error code (UPPER_SNAKE_CASE)",
+      example: "MILESTONE_NOT_FOUND",
+    }),
+    message: z.string().openapi({
+      description: "Human-readable error description",
+      example: "Milestone not found",
+    }),
+  })
   .openapi("Error");

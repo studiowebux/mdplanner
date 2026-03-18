@@ -14,6 +14,7 @@ searchRouter.get("/", (c) => {
   return c.html(
     SearchView({
       nonce: c.get("nonce"),
+      enabledFeatures: c.get("enabledFeatures"),
       query,
       results,
     }) as unknown as string,

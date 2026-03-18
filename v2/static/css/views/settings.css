@@ -1,0 +1,336 @@
+/* Settings view — tabs, collapsibles, feature grid, form fields */
+
+:root {
+  --settings-input-narrow-max: var(--toolbar-search-min-width);
+  --settings-textarea-min-height: var(--autocomplete-max-height);
+  --settings-tab-indicator: var(--sidebar-active-border-width);
+}
+
+.settings-page {
+  padding: var(--page-padding);
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+}
+
+.settings-page__title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-lg);
+}
+
+/* ---------------------------------------------------------------------------
+   Tabs — CSS-only via hidden radio buttons
+   --------------------------------------------------------------------------- */
+
+.settings-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, auto) 1fr;
+  grid-template-rows: auto 1fr;
+}
+
+.settings-tabs__radio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.settings-tabs__label {
+  grid-row: 1;
+  padding: var(--space-sm) var(--space-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-bottom: var(--settings-tab-indicator) var(--border-style) transparent;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+  user-select: none;
+}
+
+.settings-tabs__label:hover {
+  color: var(--color-text-primary);
+}
+
+.settings-tabs__radio:checked + .settings-tabs__label {
+  color: var(--color-text-primary);
+  border-bottom-color: var(--color-accent);
+}
+
+.settings-tabs__label--dirty::after {
+  content: " \2022";
+  color: var(--color-warning);
+}
+
+.settings-tabs__panel {
+  display: none;
+  grid-row: 2;
+  grid-column: 1 / -1;
+  padding-top: var(--space-lg);
+}
+
+#tab-views:checked ~ .settings-tabs__panel--views,
+#tab-project:checked ~ .settings-tabs__panel--project,
+#tab-schedule:checked ~ .settings-tabs__panel--schedule,
+#tab-tags:checked ~ .settings-tabs__panel--tags,
+#tab-links:checked ~ .settings-tabs__panel--links {
+  display: block;
+}
+
+/* ---------------------------------------------------------------------------
+   Collapsible sections (details/summary)
+   --------------------------------------------------------------------------- */
+
+.settings-collapse {
+  margin-bottom: var(--space-md);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.settings-collapse__trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+
+.settings-collapse__trigger::-webkit-details-marker {
+  display: none;
+}
+
+.settings-collapse__trigger::before {
+  content: "\25B6";
+  font-size: var(--font-size-xs);
+  transition: transform var(--transition-fast);
+}
+
+.settings-collapse[open] > .settings-collapse__trigger::before {
+  transform: rotate(90deg);
+}
+
+.settings-collapse__trigger:hover {
+  background: var(--color-bg-hover);
+}
+
+/* ---------------------------------------------------------------------------
+   Search filter
+   --------------------------------------------------------------------------- */
+
+.settings-page__search {
+  display: block;
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+  transition: border-color var(--transition-fast);
+}
+
+.settings-page__search:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+/* ---------------------------------------------------------------------------
+   Bulk actions
+   --------------------------------------------------------------------------- */
+
+.settings-page__bulk-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+/* ---------------------------------------------------------------------------
+   Feature grid
+   --------------------------------------------------------------------------- */
+
+.settings-page__feature-list {
+  list-style: none;
+  padding: var(--space-md);
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--grid-col-min), 1fr));
+  gap: var(--space-sm);
+}
+
+.settings-page__feature-item {
+  padding: var(--space-md);
+  background: var(--color-bg-primary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.settings-page__feature-item:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-strong);
+}
+
+.settings-page__feature-item:has(input:checked) {
+  border-color: var(--color-accent);
+  background: var(--color-bg-tertiary);
+}
+
+.settings-page__feature-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  cursor: pointer;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  user-select: none;
+}
+
+.settings-page__checkbox {
+  flex-shrink: 0;
+  width: var(--font-size-lg-plus);
+  height: var(--font-size-lg-plus);
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.settings-page__feature-key {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  margin-left: auto;
+  font-family: var(--font-mono);
+}
+
+/* ---------------------------------------------------------------------------
+   General tab — form fields
+   --------------------------------------------------------------------------- */
+
+.settings-field {
+  margin-bottom: var(--space-lg);
+}
+
+.settings-field__label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.settings-field__input,
+.settings-field__textarea {
+  display: block;
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast);
+}
+
+.settings-field__input:focus,
+.settings-field__textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.settings-field__input--narrow {
+  max-width: var(--settings-input-narrow-max);
+}
+
+.settings-field__textarea {
+  resize: vertical;
+  min-height: var(--settings-textarea-min-height);
+}
+
+.settings-field__hint {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-xs);
+}
+
+.settings-page__form-actions {
+  display: flex;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+}
+
+/* ---------------------------------------------------------------------------
+   Schedule — day checkboxes
+   --------------------------------------------------------------------------- */
+
+.settings-field--fieldset {
+  border: none;
+  padding: 0;
+}
+
+.settings-page__day-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.settings-page__day-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.settings-page__day-label:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-strong);
+}
+
+.settings-page__day-label:has(input:checked) {
+  border-color: var(--color-accent);
+  background: var(--color-bg-tertiary);
+}
+
+/* ---------------------------------------------------------------------------
+   Tags — input rows
+   --------------------------------------------------------------------------- */
+
+.settings-tag-list {
+  margin-bottom: var(--space-md);
+}
+
+.settings-tag-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-sm);
+  align-items: center;
+  margin-bottom: var(--space-sm);
+}
+
+/* ---------------------------------------------------------------------------
+   Links — title + url rows
+   --------------------------------------------------------------------------- */
+
+.settings-link-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  gap: var(--space-sm);
+  align-items: center;
+  margin-bottom: var(--space-sm);
+}

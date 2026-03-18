@@ -4,12 +4,12 @@ import { Topbar } from "./topbar.tsx";
 import { ConfirmDialog } from "../ui/confirm-dialog.tsx";
 import { SearchDialog } from "../ui/search-dialog.tsx";
 
-type Props = { activePath?: string; children?: unknown };
+type Props = { activePath?: string; enabledFeatures?: string[]; children?: unknown };
 
-export const AppShell: FC<Props> = ({ activePath, children }) => (
+export const AppShell: FC<Props> = ({ activePath, enabledFeatures = [], children }) => (
   <div class="app-shell">
     <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true" />
-    <Sidebar activePath={activePath} />
+    <Sidebar activePath={activePath} enabledFeatures={enabledFeatures} />
     <div class="app-shell__main">
       <Topbar />
       <div class="app-shell__content">

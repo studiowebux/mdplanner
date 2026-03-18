@@ -177,7 +177,7 @@ export const TaskSchema: z.ZodType<Task> = z.lazy(() =>
     files: z.array(z.string()).optional().openapi({
       description: "Relevant source file paths (relative to codebase root)",
     }),
-  })
+  }).openapi("Task")
 );
 
 export type Task = {

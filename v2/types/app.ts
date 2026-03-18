@@ -2,12 +2,14 @@
 
 export type AppVariables = {
   nonce: string;
+  enabledFeatures: string[];
 };
 
-// Base props for all SSR views — every view receives nonce + activePath.
+// Base props for all SSR views — every view receives nonce + activePath + enabledFeatures.
 export type ViewProps = {
   nonce?: string;
   activePath?: string;
+  enabledFeatures?: string[];
 };
 
 // View mode for domain list pages — grid (card) or table.

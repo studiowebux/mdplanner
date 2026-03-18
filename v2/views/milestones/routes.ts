@@ -20,6 +20,7 @@ milestonesRouter.get("/:id", async (c) => {
       tasks,
       nonce: c.get("nonce"),
       activePath: "/milestones",
+      enabledFeatures: c.get("enabledFeatures"),
     }) as unknown as string,
   );
 });

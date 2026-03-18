@@ -179,12 +179,13 @@ export function createDomainPage<T>(cfg: DomainConfig<T, any, any>) {
   };
 
   const DomainPage: FC<PageProps> = (
-    { items, nonce, activePath, state, dynamicFilterOptions },
+    { items, nonce, activePath, enabledFeatures, state, dynamicFilterOptions },
   ) => (
     <MainLayout
       title={cfg.singular}
       nonce={nonce}
       activePath={activePath}
+      enabledFeatures={enabledFeatures}
       styles={cfg.styles}
       scripts={[]}
     >

@@ -19,14 +19,38 @@ export const MILESTONE_STATUS_OPTIONS = MILESTONE_STATUSES.map((s) => ({
 // ---------------------------------------------------------------------------
 
 export const MilestoneBaseSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  status: z.enum(MILESTONE_STATUSES),
-  target: z.string().optional(),
-  description: z.string().optional(),
-  project: z.string().optional(),
-  completedAt: z.string().optional(),
-  createdAt: z.string().optional(),
+  id: z.string().openapi({
+    description: "Unique milestone identifier",
+    example: "milestone_1773631350959_ohutdh",
+  }),
+  name: z.string().openapi({
+    description: "Milestone display name",
+    example: "v2.0.0",
+  }),
+  status: z.enum(MILESTONE_STATUSES).openapi({
+    description: "Milestone lifecycle status",
+    example: "open",
+  }),
+  target: z.string().optional().openapi({
+    description: "Target completion date (YYYY-MM-DD)",
+    example: "2026-06-01",
+  }),
+  description: z.string().optional().openapi({
+    description: "Milestone description (markdown)",
+    example: "Full v2 clean architecture rewrite.",
+  }),
+  project: z.string().optional().openapi({
+    description: "Project this milestone belongs to",
+    example: "MD Planner",
+  }),
+  completedAt: z.string().optional().openapi({
+    description: "ISO date when milestone was marked completed",
+    example: "2026-05-15",
+  }),
+  createdAt: z.string().optional().openapi({
+    description: "ISO timestamp of creation",
+    example: "2026-03-16T03:22:47.963Z",
+  }),
 });
 
 export type MilestoneBase = z.infer<typeof MilestoneBaseSchema>;
@@ -36,10 +60,21 @@ export type MilestoneBase = z.infer<typeof MilestoneBaseSchema>;
 // ---------------------------------------------------------------------------
 
 export const MilestoneSchema = MilestoneBaseSchema.extend({
-  descriptionHtml: z.string().optional(),
-  taskCount: z.number(),
-  completedCount: z.number(),
-  progress: z.number().min(0).max(100),
+  descriptionHtml: z.string().optional().openapi({
+    description: "Description rendered as HTML",
+  }),
+  taskCount: z.number().openapi({
+    description: "Total tasks linked to this milestone",
+    example: 12,
+  }),
+  completedCount: z.number().openapi({
+    description: "Number of completed tasks",
+    example: 5,
+  }),
+  progress: z.number().min(0).max(100).openapi({
+    description: "Completion percentage (0-100)",
+    example: 42,
+  }),
 }).openapi("Milestone");
 
 export type Milestone = z.infer<typeof MilestoneSchema>;
@@ -49,18 +84,26 @@ export type Milestone = z.infer<typeof MilestoneSchema>;
 // ---------------------------------------------------------------------------
 
 export const CreateMilestoneSchema = z.object({
-  name: z.string().min(1).openapi({ description: "Milestone name" }),
+  name: z.string().min(1).openapi({
+    description: "Milestone display name",
+    example: "v2.1.0",
+  }),
   target: z.string().optional().openapi({
-    description: "Target date (YYYY-MM-DD)",
+    description: "Target completion date (YYYY-MM-DD)",
+    example: "2026-06-01",
   }),
   status: z.enum(MILESTONE_STATUSES).default("open").openapi({
     description: "Milestone status",
+    example: "open",
   }),
   description: z.string().optional().openapi({
-    description: "Optional description",
+    description: "What this milestone delivers (markdown). Use headings and lists for structure.",
+    example:
+      "Search improvements and performance tuning.\n\n## Deliverables\n\n- FTS5 index rebuild on schema change\n- Sub-200ms search for 10k entities\n- Search result highlighting",
   }),
   project: z.string().optional().openapi({
-    description: "Project filter scope",
+    description: "Project this milestone belongs to",
+    example: "MD Planner",
   }),
 }).openapi("CreateMilestone");
 
@@ -72,19 +115,23 @@ export type CreateMilestone = z.infer<typeof CreateMilestoneSchema>;
 
 export const UpdateMilestoneSchema = z.object({
   name: z.string().min(1).optional().openapi({
-    description: "Milestone name",
+    description: "Milestone display name",
+    example: "v2.1.0",
   }),
   target: z.string().nullable().optional().openapi({
-    description: "Target date (YYYY-MM-DD)",
+    description: "Target completion date (YYYY-MM-DD). Set to null to clear.",
+    example: "2026-06-01",
   }),
   status: z.enum(MILESTONE_STATUSES).optional().openapi({
-    description: "Milestone status",
+    description: "Milestone status. Setting to 'completed' auto-sets completedAt.",
+    example: "completed",
   }),
   description: z.string().nullable().optional().openapi({
-    description: "Optional description",
+    description: "Milestone description (markdown). Set to null to clear.",
   }),
   project: z.string().nullable().optional().openapi({
-    description: "Project filter scope",
+    description: "Project this milestone belongs to. Set to null to clear.",
+    example: "MD Planner",
   }),
 }).openapi("UpdateMilestone");
 
@@ -97,9 +144,11 @@ export type UpdateMilestone = z.infer<typeof UpdateMilestoneSchema>;
 export const ListMilestoneOptionsSchema = z.object({
   status: z.enum(MILESTONE_STATUSES).optional().openapi({
     description: "Filter by milestone status",
+    example: "open",
   }),
   project: z.string().optional().openapi({
-    description: "Filter by project name (case-insensitive)",
+    description: "Filter by project name (case-insensitive match on milestone.project)",
+    example: "MD Planner",
   }),
 }).openapi("ListMilestoneOptions");
 
@@ -109,9 +158,11 @@ export const ListMilestoneOptionsSchema = z.object({
 
 export const MilestoneSummaryQuerySchema = z.object({
   milestone: z.string().openapi({
-    description: "Milestone name (e.g. 'v0.36.2')",
+    description: "Milestone name to summarize (exact match)",
+    example: "v2.0.0",
   }),
   project: z.string().optional().openapi({
-    description: "Filter tasks by project name (case-insensitive)",
+    description: "Filter tasks within the milestone by project name (case-insensitive)",
+    example: "MD Planner",
   }),
 }).openapi("MilestoneSummaryQuery");

@@ -11,13 +11,14 @@ type Props = {
   title?: string;
   nonce?: string;
   activePath?: string;
+  enabledFeatures?: string[];
   styles?: string[];
   scripts?: string[];
   children?: unknown;
 };
 
 export const MainLayout: FC<Props> = (
-  { title, nonce, activePath, styles = [], scripts = [], children },
+  { title, nonce, activePath, enabledFeatures = [], styles = [], scripts = [], children },
 ) => {
   const pageTitle = title
     ? `${title} — ${APP_NAME}`
@@ -59,7 +60,7 @@ export const MainLayout: FC<Props> = (
         {styles.map((href) => <link key={href} rel="stylesheet" href={href} />)}
       </head>
       <body>
-        <AppShell activePath={activePath}>
+        <AppShell activePath={activePath} enabledFeatures={enabledFeatures}>
           {children}
         </AppShell>
         <script src="/js/vendor/htmx-2.0.8.min.js" />

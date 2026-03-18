@@ -3,7 +3,11 @@ import { logger } from "hono/logger";
 import { serveStatic } from "hono/deno";
 import { dirname, fromFileUrl, join } from "@std/path";
 import { log } from "./singletons/logger.ts";
-import { bootCacheSync, initServices } from "./singletons/services.ts";
+import {
+  bootCacheSync,
+  getProjectService,
+  initServices,
+} from "./singletons/services.ts";
 import { subscribe } from "./singletons/event-bus.ts";
 import { api } from "./api/mod.ts";
 import { views } from "./views/mod.ts";
@@ -24,12 +28,15 @@ const app = new Hono<{ Variables: AppVariables }>();
 
 app.use("*", logger((msg: string) => log.info(msg)));
 
-// Per-request nonce for CSP — covers the inline dark-mode script in MainLayout.
+// Per-request nonce + enabled features for sidebar rendering.
 app.use("*", async (c, next) => {
   const bytes = crypto.getRandomValues(new Uint8Array(16));
   const nonce = btoa(String.fromCharCode(...bytes));
   c.set("nonce", nonce);
+  c.set("enabledFeatures", await getProjectService().getEnabledFeatures());
   await next();
+  // Scalar API reference serves its own HTML page — skip CSP for that route.
+  if (c.req.path === "/api/v1/reference") return;
   c.header(
     "Content-Security-Policy",
     `default-src 'self'; ` +

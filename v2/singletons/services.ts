@@ -4,8 +4,10 @@ import { log } from "./logger.ts";
 import { MilestoneRepository } from "../repositories/milestone.repository.ts";
 import { TaskRepository } from "../repositories/task.repository.ts";
 import { PortfolioRepository } from "../repositories/portfolio.repository.ts";
+import { ProjectRepository } from "../repositories/project.repository.ts";
 import { MilestoneService } from "../services/milestone.service.ts";
 import { PortfolioService } from "../services/portfolio.service.ts";
+import { ProjectService } from "../services/project.service.ts";
 import {
   CacheDatabase,
   CacheSync,
@@ -21,6 +23,7 @@ export interface InitOptions {
 
 let milestoneService: MilestoneService | null = null;
 let portfolioService: PortfolioService | null = null;
+let projectService: ProjectService | null = null;
 let cacheSync: CacheSync | null = null;
 let searchEngine: SearchEngine | null = null;
 let cacheEnabled = false;
@@ -34,8 +37,10 @@ export function initServices(
   const milestoneRepo = new MilestoneRepository(projectDir);
   const taskRepo = new TaskRepository(projectDir);
   const portfolioRepo = new PortfolioRepository(projectDir);
+  const projectRepo = new ProjectRepository(projectDir);
   milestoneService = new MilestoneService(milestoneRepo, taskRepo);
   portfolioService = new PortfolioService(portfolioRepo);
+  projectService = new ProjectService(projectRepo);
 
   if (useCache) {
     const cacheDb = new CacheDatabase(`${projectDir}/.mdplanner-cache.db`);
@@ -63,6 +68,13 @@ export function getPortfolioService(): PortfolioService {
     throw new Error("Services not initialized — call initServices() first");
   }
   return portfolioService;
+}
+
+export function getProjectService(): ProjectService {
+  if (!projectService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return projectService;
 }
 
 export function getCacheSync(): CacheSync | null {
