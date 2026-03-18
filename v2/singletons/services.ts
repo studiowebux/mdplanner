@@ -16,12 +16,15 @@ import {
 import { registerMilestoneEntity } from "../domains/milestone/cache.ts";
 import { registerTaskEntity } from "../domains/task/cache.ts";
 import { registerPortfolioEntity } from "../domains/portfolio/cache.ts";
+import { registerPeopleEntity } from "../domains/people/cache.ts";
+import { PeopleRepository } from "../repositories/people.repository.ts";
 
 export interface InitOptions {
   cache?: boolean;
 }
 
 let taskRepo: TaskRepository | null = null;
+let peopleRepo: PeopleRepository | null = null;
 let milestoneService: MilestoneService | null = null;
 let portfolioService: PortfolioService | null = null;
 let projectService: ProjectService | null = null;
@@ -39,6 +42,7 @@ export function initServices(
   taskRepo = new TaskRepository(projectDir);
   const portfolioRepo = new PortfolioRepository(projectDir);
   const projectRepo = new ProjectRepository(projectDir);
+  peopleRepo = new PeopleRepository(projectDir);
   milestoneService = new MilestoneService(milestoneRepo, taskRepo);
   portfolioService = new PortfolioService(portfolioRepo);
   projectService = new ProjectService(projectRepo);
@@ -50,11 +54,13 @@ export function initServices(
     registerMilestoneEntity(milestoneRepo);
     registerTaskEntity(taskRepo);
     registerPortfolioEntity(portfolioRepo);
+    registerPeopleEntity(peopleRepo);
 
     // Pass cacheDb to repos for read-path caching
     milestoneRepo.setCacheDb(cacheDb);
     taskRepo.setCacheDb(cacheDb);
     portfolioRepo.setCacheDb(cacheDb);
+    peopleRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -73,6 +79,13 @@ export function getTaskRepository(): TaskRepository {
     throw new Error("Services not initialized — call initServices() first");
   }
   return taskRepo;
+}
+
+export function getPeopleRepository(): PeopleRepository {
+  if (!peopleRepo) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return peopleRepo;
 }
 
 export function getMilestoneService(): MilestoneService {

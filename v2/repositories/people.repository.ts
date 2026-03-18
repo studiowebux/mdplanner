@@ -14,16 +14,34 @@ import type {
 } from "../types/person.types.ts";
 import { AgentModelSchema } from "../types/person.types.ts";
 import { WEEKDAYS } from "../constants/mod.ts";
+import type { CacheDatabase } from "../database/sqlite/mod.ts";
+import { rowToPerson } from "../domains/people/cache.ts";
+import { PEOPLE_TABLE } from "../domains/people/constants.cache.ts";
 
 export class PeopleRepository {
   private dir: string;
   private writer = new SafeWriter();
+  private cacheDb: CacheDatabase | null = null;
 
   constructor(projectDir: string) {
     this.dir = join(projectDir, "people");
   }
 
+  setCacheDb(db: CacheDatabase): void {
+    this.cacheDb = db;
+  }
+
   async findAll(): Promise<Person[]> {
+    if (this.cacheDb) {
+      try {
+        const count = this.cacheDb.count(PEOPLE_TABLE);
+        if (count > 0) {
+          return this.cacheDb.query<Record<string, unknown>>(
+            `SELECT * FROM "${PEOPLE_TABLE}"`,
+          ).map(rowToPerson);
+        }
+      } catch { /* fall through to disk */ }
+    }
     return this.findAllFromDisk();
   }
 
@@ -44,12 +62,30 @@ export class PeopleRepository {
   }
 
   async findById(id: string): Promise<Person | null> {
+    if (this.cacheDb) {
+      try {
+        const row = this.cacheDb.queryOne<Record<string, unknown>>(
+          `SELECT * FROM "${PEOPLE_TABLE}" WHERE id = ?`,
+          [id],
+        );
+        if (row) return rowToPerson(row);
+      } catch { /* fall through to disk */ }
+    }
     const { person } = await this.findFileById(id);
     return person;
   }
 
   async findByName(name: string): Promise<Person | null> {
-    const all = await this.findAll();
+    if (this.cacheDb) {
+      try {
+        const row = this.cacheDb.queryOne<Record<string, unknown>>(
+          `SELECT * FROM "${PEOPLE_TABLE}" WHERE LOWER(name) = LOWER(?)`,
+          [name],
+        );
+        if (row) return rowToPerson(row);
+      } catch { /* fall through to disk */ }
+    }
+    const all = await this.findAllFromDisk();
     const lower = name.toLowerCase();
     return all.find((p) => p.name.toLowerCase() === lower) ?? null;
   }
