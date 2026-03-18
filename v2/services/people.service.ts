@@ -6,7 +6,9 @@ import type {
   CreatePerson,
   PeopleSummary,
   Person,
+  PersonSkillMatch,
   PersonWithChildren,
+  PersonWorkload,
   UpdatePerson,
 } from "../types/person.types.ts";
 import type { CacheSync } from "../database/sqlite/mod.ts";
@@ -128,6 +130,56 @@ export class PeopleService {
       totalPeople: all.length,
       totalDepartments: departments.length,
       departments,
+    };
+  }
+
+  /** Filter people by skill (case-insensitive). */
+  async listBySkill(skill: string): Promise<Person[]> {
+    const all = await this.repo.findAll();
+    const lower = skill.toLowerCase();
+    return all.filter(
+      (p) => p.skills?.some((s) => s.toLowerCase() === lower),
+    );
+  }
+
+  /** Get available people — excludes offline agents by default. */
+  async getAvailable(excludeOffline = true): Promise<Person[]> {
+    const all = await this.repo.findAll();
+    if (!excludeOffline) return all;
+    return all.filter((p) => p.status !== "offline");
+  }
+
+  /** Find people matching required skills, ranked by match count. Excludes offline. */
+  async findForSkills(skills: string[]): Promise<PersonSkillMatch[]> {
+    const all = await this.repo.findAll();
+    const required = skills.map((s) => s.toLowerCase());
+    const matches: PersonSkillMatch[] = [];
+
+    for (const p of all) {
+      if (p.status === "offline") continue;
+      const personSkills = (p.skills ?? []).map((s) => s.toLowerCase());
+      const matched = required.filter((r) => personSkills.includes(r));
+      if (matched.length > 0) {
+        matches.push({ person: p, matchedSkills: matched, score: matched.length });
+      }
+    }
+
+    matches.sort((a, b) => b.score - a.score);
+    return matches;
+  }
+
+  /** Get workload info for a person — capacity and current assignment. */
+  async getWorkload(id: string): Promise<PersonWorkload | null> {
+    const p = await this.repo.findById(id);
+    if (!p) return null;
+    return {
+      id: p.id,
+      name: p.name,
+      status: p.status,
+      currentTaskId: p.currentTaskId,
+      hoursPerDay: p.hoursPerDay,
+      workingDays: p.workingDays,
+      agentType: p.agentType,
     };
   }
 }

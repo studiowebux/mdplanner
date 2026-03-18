@@ -6,6 +6,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { APP_VERSION } from "../constants/mod.ts";
 import { registerMilestoneTools } from "./tools/milestones.ts";
+import { registerPeopleTools } from "./tools/people.ts";
 
 export function createMcpServer(): McpServer {
   const server = new McpServer({
@@ -14,6 +15,7 @@ export function createMcpServer(): McpServer {
   });
 
   registerMilestoneTools(server);
+  registerPeopleTools(server);
 
   return server;
 }

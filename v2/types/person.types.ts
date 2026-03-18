@@ -176,3 +176,89 @@ export const PeopleSummarySchema = z.object({
 }).openapi("PeopleSummary");
 
 export type PeopleSummary = z.infer<typeof PeopleSummarySchema>;
+
+// ---------------------------------------------------------------------------
+// List options — query filter for list_people
+// ---------------------------------------------------------------------------
+
+export const ListPeopleOptionsSchema = z.object({
+  department: z.string().optional().openapi({
+    description: "Filter by department",
+  }),
+}).openapi("ListPeopleOptions");
+
+export type ListPeopleOptions = z.infer<typeof ListPeopleOptionsSchema>;
+
+// ---------------------------------------------------------------------------
+// Heartbeat input — agent liveness signal
+// ---------------------------------------------------------------------------
+
+export const HeartbeatInputSchema = z.object({
+  id: PersonSchema.shape.id.describe("Person ID of the agent"),
+  status: PersonSchema.shape.status.describe(
+    "Agent status (default: keeps current value)",
+  ),
+  currentTaskId: PersonSchema.shape.currentTaskId.describe(
+    "Task ID the agent is currently working on (empty string to clear)",
+  ),
+}).openapi("HeartbeatInput");
+
+// ---------------------------------------------------------------------------
+// List by skill — filter people who have a specific skill
+// ---------------------------------------------------------------------------
+
+export const ListPeopleBySkillSchema = z.object({
+  skill: z.string().openapi({
+    description: "Skill to filter by (case-insensitive match)",
+    example: "typescript",
+  }),
+}).openapi("ListPeopleBySkill");
+
+// ---------------------------------------------------------------------------
+// Availability filter
+// ---------------------------------------------------------------------------
+
+export const GetPeopleAvailabilitySchema = z.object({
+  excludeOffline: z.boolean().optional().openapi({
+    description: "Exclude offline agents (default: true)",
+  }),
+}).openapi("GetPeopleAvailability");
+
+// ---------------------------------------------------------------------------
+// Find person for task — skills-based matching
+// ---------------------------------------------------------------------------
+
+export const FindPersonForSkillsSchema = z.object({
+  skills: z.array(z.string()).openapi({
+    description: "Required skills to match against people",
+    example: ["typescript", "testing"],
+  }),
+}).openapi("FindPersonForSkills");
+
+export const PersonSkillMatchSchema = z.object({
+  person: PersonSchema,
+  matchedSkills: z.array(z.string()).openapi({
+    description: "Skills that matched",
+  }),
+  score: z.number().openapi({
+    description: "Number of matched skills",
+  }),
+}).openapi("PersonSkillMatch");
+
+export type PersonSkillMatch = z.infer<typeof PersonSkillMatchSchema>;
+
+// ---------------------------------------------------------------------------
+// Workload — capacity and current assignment info
+// ---------------------------------------------------------------------------
+
+export const PersonWorkloadSchema = z.object({
+  id: PersonSchema.shape.id,
+  name: PersonSchema.shape.name,
+  status: PersonSchema.shape.status,
+  currentTaskId: PersonSchema.shape.currentTaskId,
+  hoursPerDay: PersonSchema.shape.hoursPerDay,
+  workingDays: PersonSchema.shape.workingDays,
+  agentType: PersonSchema.shape.agentType,
+}).openapi("PersonWorkload");
+
+export type PersonWorkload = z.infer<typeof PersonWorkloadSchema>;
