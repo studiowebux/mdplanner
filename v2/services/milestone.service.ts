@@ -15,7 +15,8 @@ import {
   enrichMilestone,
   enrichMilestones,
 } from "../domains/milestone/milestone.ts";
-import { val } from "../database/sqlite/mod.ts";
+import { insertMilestoneRow } from "../domains/milestone/cache.ts";
+import { MILESTONE_TABLE } from "../domains/milestone/constants.cache.ts";
 import { DONE_SECTION, SECTION_DISPLAY_ORDER } from "../constants/mod.ts";
 
 export interface ListMilestoneOptions {
@@ -48,18 +49,18 @@ export class MilestoneService {
   }
 
   private cacheUpsert(m: Milestone): void {
-    this.cache?.upsert("milestones", {
-      id: val(m.id),
-      name: val(m.name),
-      status: val(m.status),
-      target: val(m.target),
-      description: val(m.description),
-      project: val(m.project),
-      completed_at: val(m.completedAt),
-      created_at: val(m.createdAt),
-      task_count: m.taskCount,
-      completed_count: m.completedCount,
-      progress: m.progress,
+    if (!this.cache) return;
+    // Write-through: delete + insert base data so cache stays fresh
+    this.cache.remove(MILESTONE_TABLE, m.id);
+    insertMilestoneRow(this.cache.getDb(), {
+      id: m.id,
+      name: m.name,
+      status: m.status,
+      target: m.target,
+      description: m.description,
+      project: m.project,
+      completedAt: m.completedAt,
+      createdAt: m.createdAt,
     });
   }
 

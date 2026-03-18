@@ -7,6 +7,7 @@ export {
   FILES_INDEX,
   FILES_SCHEMA,
   json,
+  parseJson,
   val,
 } from "./entities.ts";
 export type { EntityDef, FTSConfig, TableSyncer } from "./entities.ts";

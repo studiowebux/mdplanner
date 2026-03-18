@@ -13,14 +13,15 @@ import {
   CacheSync,
   SearchEngine,
 } from "../database/sqlite/mod.ts";
-
-// Entity registrations — import for side-effect (pushes into ENTITIES array)
-import "../domains/milestone/cache.ts";
+import { registerMilestoneEntity } from "../domains/milestone/cache.ts";
+import { registerTaskEntity } from "../domains/task/cache.ts";
+import { registerPortfolioEntity } from "../domains/portfolio/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
 }
 
+let taskRepo: TaskRepository | null = null;
 let milestoneService: MilestoneService | null = null;
 let portfolioService: PortfolioService | null = null;
 let projectService: ProjectService | null = null;
@@ -35,7 +36,7 @@ export function initServices(
   const useCache = options.cache ?? true;
 
   const milestoneRepo = new MilestoneRepository(projectDir);
-  const taskRepo = new TaskRepository(projectDir);
+  taskRepo = new TaskRepository(projectDir);
   const portfolioRepo = new PortfolioRepository(projectDir);
   const projectRepo = new ProjectRepository(projectDir);
   milestoneService = new MilestoneService(milestoneRepo, taskRepo);
@@ -44,6 +45,17 @@ export function initServices(
 
   if (useCache) {
     const cacheDb = new CacheDatabase(`${projectDir}/.mdplanner-cache.db`);
+
+    // Register cache entities with repo references for sync
+    registerMilestoneEntity(milestoneRepo);
+    registerTaskEntity(taskRepo);
+    registerPortfolioEntity(portfolioRepo);
+
+    // Pass cacheDb to repos for read-path caching
+    milestoneRepo.setCacheDb(cacheDb);
+    taskRepo.setCacheDb(cacheDb);
+    portfolioRepo.setCacheDb(cacheDb);
+
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
     searchEngine = new SearchEngine(cacheDb);
@@ -54,6 +66,13 @@ export function initServices(
 
 export function isCacheEnabled(): boolean {
   return cacheEnabled;
+}
+
+export function getTaskRepository(): TaskRepository {
+  if (!taskRepo) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return taskRepo;
 }
 
 export function getMilestoneService(): MilestoneService {

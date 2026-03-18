@@ -30,8 +30,12 @@ export interface FTSConfig {
 /**
  * Sync function signature for v2. Each entity provides a function that
  * reads from v2 services and populates the cache table. Returns row count.
+ * syncedAt: ISO timestamp stamped on each row for version-based cleanup.
  */
-export type TableSyncer = (db: CacheDatabase) => Promise<number>;
+export type TableSyncer = (
+  db: CacheDatabase,
+  syncedAt: string,
+) => Promise<number>;
 
 export interface EntityDef {
   table: string;
@@ -60,6 +64,17 @@ export function val(v: any): BindValue {
 // deno-lint-ignore no-explicit-any
 export function json(v: any): string {
   return JSON.stringify(v ?? []);
+}
+
+/** Parse a JSON string from a cache column back to a typed value. */
+export function parseJson<T>(v: unknown): T | undefined {
+  if (v == null || v === "[]" || v === "null") return undefined;
+  try {
+    const parsed = JSON.parse(v as string);
+    return Array.isArray(parsed) && parsed.length === 0 ? undefined : parsed;
+  } catch {
+    return undefined;
+  }
 }
 
 // ============================================================

@@ -33,9 +33,32 @@ export class CacheSync {
 
   constructor(private db: CacheDatabase) {}
 
+  /** Expose underlying database for read queries by services. */
+  getDb(): CacheDatabase {
+    return this.db;
+  }
+
   init(): void {
     initSchema(this.db);
+    if (this.schemaNeedsRebuild()) {
+      dropSchema(this.db);
+      initSchema(this.db);
+    }
     this.setMeta("initialized", new Date().toISOString());
+  }
+
+  /** Detect schema mismatch by checking for synced_at column on entity tables. */
+  private schemaNeedsRebuild(): boolean {
+    for (const entity of ENTITIES) {
+      try {
+        this.db.query(
+          `SELECT synced_at FROM "${entity.table}" LIMIT 0`,
+        );
+      } catch {
+        return true;
+      }
+    }
+    return false;
   }
 
   async fullSync(options?: SyncOptions): Promise<SyncResult> {
@@ -53,9 +76,16 @@ export class CacheSync {
     this.db.exec("BEGIN TRANSACTION");
     try {
       for (const table of tables) {
-        const count = await this.syncTable(table);
+        const count = await this.syncTable(table, syncTimestamp);
         result.tables++;
         result.items += count;
+      }
+      // Purge rows not touched during this sync (deleted from disk)
+      for (const table of tables) {
+        this.db.execute(
+          `DELETE FROM "${table}" WHERE synced_at IS NULL OR synced_at < ?`,
+          [syncTimestamp],
+        );
       }
       // Mark files not touched during this sync as stale
       for (const table of tables) {
@@ -85,12 +115,15 @@ export class CacheSync {
     return this.fullSync({ force: true });
   }
 
-  private async syncTable(table: string): Promise<number> {
+  private async syncTable(
+    table: string,
+    syncedAt: string,
+  ): Promise<number> {
     const entity = ENTITIES.find((e) => e.table === table);
     if (!entity) {
       throw new Error(`Unknown table: ${table}`);
     }
-    return entity.sync(this.db);
+    return entity.sync(this.db, syncedAt);
   }
 
   upsert(table: string, record: Record<string, unknown>): void {

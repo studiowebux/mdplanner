@@ -10,16 +10,39 @@ import type {
   PortfolioItem,
   PortfolioStatusUpdate,
 } from "../types/portfolio.types.ts";
+import type { CacheDatabase } from "../database/sqlite/mod.ts";
+import { rowToPortfolioItem } from "../domains/portfolio/cache.ts";
+import { PORTFOLIO_TABLE } from "../domains/portfolio/constants.ts";
 
 export class PortfolioRepository {
   private dir: string;
   private writer = new SafeWriter();
+  private cacheDb: CacheDatabase | null = null;
 
   constructor(projectDir: string) {
     this.dir = join(projectDir, "portfolio");
   }
 
+  setCacheDb(db: CacheDatabase): void {
+    this.cacheDb = db;
+  }
+
   async findAll(): Promise<PortfolioItem[]> {
+    if (this.cacheDb) {
+      try {
+        const count = this.cacheDb.count(PORTFOLIO_TABLE);
+        if (count > 0) {
+          return this.cacheDb.query<Record<string, unknown>>(
+            `SELECT * FROM "${PORTFOLIO_TABLE}" ORDER BY category, name`,
+          ).map(rowToPortfolioItem);
+        }
+      } catch { /* fall through to disk */ }
+    }
+    return this.findAllFromDisk();
+  }
+
+  /** Always read from disk — used by cache sync. */
+  async findAllFromDisk(): Promise<PortfolioItem[]> {
     const items: PortfolioItem[] = [];
     try {
       for await (const entry of Deno.readDir(this.dir)) {
@@ -37,6 +60,15 @@ export class PortfolioRepository {
   }
 
   async findById(id: string): Promise<PortfolioItem | null> {
+    if (this.cacheDb) {
+      try {
+        const row = this.cacheDb.queryOne<Record<string, unknown>>(
+          `SELECT * FROM "${PORTFOLIO_TABLE}" WHERE id = ?`,
+          [id],
+        );
+        if (row) return rowToPortfolioItem(row);
+      } catch { /* fall through to disk */ }
+    }
     try {
       const content = await Deno.readTextFile(join(this.dir, `${id}.md`));
       return this.parse(`${id}.md`, content);
@@ -47,10 +79,19 @@ export class PortfolioRepository {
   }
 
   async findByName(name: string): Promise<PortfolioItem | null> {
+    if (this.cacheDb) {
+      try {
+        const row = this.cacheDb.queryOne<Record<string, unknown>>(
+          `SELECT * FROM "${PORTFOLIO_TABLE}" WHERE LOWER(name) = LOWER(?)`,
+          [name],
+        );
+        if (row) return rowToPortfolioItem(row);
+      } catch { /* fall through to disk */ }
+    }
     const slug = toKebab(name);
     const fast = await this.findById(slug);
     if (fast) return fast;
-    const all = await this.findAll();
+    const all = await this.findAllFromDisk();
     return all.find((i) => i.name.toLowerCase() === name.toLowerCase()) ?? null;
   }
 

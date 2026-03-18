@@ -1,4 +1,4 @@
-// Milestone repository — reads and writes milestone markdown files from disk.
+// Milestone repository — reads and writes milestone markdown files from disk or SQLite cache.
 
 import { join } from "@std/path";
 import {
@@ -12,16 +12,39 @@ import type {
   MilestoneBase,
   UpdateMilestone,
 } from "../types/milestone.types.ts";
+import type { CacheDatabase } from "../database/sqlite/mod.ts";
+import { rowToMilestone } from "../domains/milestone/cache.ts";
+import { MILESTONE_TABLE } from "../domains/milestone/constants.cache.ts";
 
 export class MilestoneRepository {
   private milestonesDir: string;
   private writer = new SafeWriter();
+  private cacheDb: CacheDatabase | null = null;
 
   constructor(projectDir: string) {
     this.milestonesDir = join(projectDir, "milestones");
   }
 
+  setCacheDb(db: CacheDatabase): void {
+    this.cacheDb = db;
+  }
+
   async findAll(): Promise<MilestoneBase[]> {
+    if (this.cacheDb) {
+      try {
+        const count = this.cacheDb.count(MILESTONE_TABLE);
+        if (count > 0) {
+          return this.cacheDb.query<Record<string, unknown>>(
+            `SELECT * FROM "${MILESTONE_TABLE}"`,
+          ).map(rowToMilestone);
+        }
+      } catch { /* fall through to disk */ }
+    }
+    return this.findAllFromDisk();
+  }
+
+  /** Always read from disk — used by cache sync. */
+  async findAllFromDisk(): Promise<MilestoneBase[]> {
     const milestones: MilestoneBase[] = [];
     try {
       for await (const entry of Deno.readDir(this.milestonesDir)) {
@@ -39,12 +62,30 @@ export class MilestoneRepository {
   }
 
   async findById(id: string): Promise<MilestoneBase | null> {
+    if (this.cacheDb) {
+      try {
+        const row = this.cacheDb.queryOne<Record<string, unknown>>(
+          `SELECT * FROM "${MILESTONE_TABLE}" WHERE id = ?`,
+          [id],
+        );
+        if (row) return rowToMilestone(row);
+      } catch { /* fall through to disk */ }
+    }
     const { base } = await this.findFileById(id);
     return base;
   }
 
   async findByName(name: string): Promise<MilestoneBase | null> {
-    const all = await this.findAll();
+    if (this.cacheDb) {
+      try {
+        const row = this.cacheDb.queryOne<Record<string, unknown>>(
+          `SELECT * FROM "${MILESTONE_TABLE}" WHERE name = ?`,
+          [name],
+        );
+        if (row) return rowToMilestone(row);
+      } catch { /* fall through to disk */ }
+    }
+    const all = await this.findAllFromDisk();
     return all.find((m) => m.name === name) ?? null;
   }
 

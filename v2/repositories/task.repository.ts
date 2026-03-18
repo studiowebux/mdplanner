@@ -1,10 +1,13 @@
-// Task repository — reads task markdown files from disk.
+// Task repository — reads task markdown files from disk or SQLite cache.
 // Discovers board sections dynamically. Uses TaskBuilder for parsing.
 
 import { join } from "@std/path";
 import { parseFrontmatter } from "../utils/frontmatter.ts";
 import { TaskBuilder } from "../builders/task.builder.ts";
 import type { Task } from "../types/task.types.ts";
+import type { CacheDatabase } from "../database/sqlite/mod.ts";
+import { rowToTask } from "../domains/task/cache.ts";
+import { TASK_TABLE } from "../domains/task/constants.ts";
 
 /**
  * Convert a directory name to a display section name.
@@ -19,9 +22,14 @@ function dirToSection(dir: string): string {
 
 export class TaskRepository {
   private boardDir: string;
+  private cacheDb: CacheDatabase | null = null;
 
   constructor(projectDir: string) {
     this.boardDir = join(projectDir, "board");
+  }
+
+  setCacheDb(db: CacheDatabase): void {
+    this.cacheDb = db;
   }
 
   /**
@@ -47,6 +55,21 @@ export class TaskRepository {
   }
 
   async findAll(): Promise<Task[]> {
+    if (this.cacheDb) {
+      try {
+        const count = this.cacheDb.count(TASK_TABLE);
+        if (count > 0) {
+          return this.cacheDb.query<Record<string, unknown>>(
+            `SELECT * FROM "${TASK_TABLE}"`,
+          ).map(rowToTask);
+        }
+      } catch { /* fall through to disk */ }
+    }
+    return this.findAllFromDisk();
+  }
+
+  /** Always read from disk — used by cache sync. */
+  async findAllFromDisk(): Promise<Task[]> {
     const sections = await this.discoverSections();
     const tasks: Task[] = [];
 
@@ -70,7 +93,16 @@ export class TaskRepository {
   }
 
   async findById(id: string): Promise<Task | null> {
-    const all = await this.findAll();
+    if (this.cacheDb) {
+      try {
+        const row = this.cacheDb.queryOne<Record<string, unknown>>(
+          `SELECT * FROM "${TASK_TABLE}" WHERE id = ?`,
+          [id],
+        );
+        if (row) return rowToTask(row);
+      } catch { /* fall through to disk */ }
+    }
+    const all = await this.findAllFromDisk();
     return all.find((t) => t.id === id) ?? null;
   }
 
