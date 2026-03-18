@@ -4,7 +4,6 @@
 import type { MiddlewareHandler } from "hono";
 import { getProjectService } from "../singletons/services.ts";
 import { readUiState } from "../utils/ui-state.ts";
-import { log } from "../singletons/logger.ts";
 import type { AppVariables } from "../types/app.ts";
 
 export const contextMiddleware: MiddlewareHandler<{
@@ -19,11 +18,10 @@ export const contextMiddleware: MiddlewareHandler<{
   c.set("navCategories", config.navCategories);
 
   const sidebarState = readUiState<{ pinned?: string[] }>(c, "sidebar");
-  const pinnedKeys = Array.isArray(sidebarState.pinned)
-    ? sidebarState.pinned
-    : [];
-  log.info(`[context] pinnedKeys=${JSON.stringify(pinnedKeys)}`);
-  c.set("pinnedKeys", pinnedKeys);
+  c.set(
+    "pinnedKeys",
+    Array.isArray(sidebarState.pinned) ? sidebarState.pinned : [],
+  );
 
   await next();
 

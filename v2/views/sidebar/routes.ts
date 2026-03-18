@@ -3,7 +3,6 @@
 import { Hono } from "hono";
 import { SidebarContent } from "../../components/shell/sidebar.tsx";
 import { readUiState, writeUiState } from "../../utils/ui-state.ts";
-import { log } from "../../singletons/logger.ts";
 import type { AppVariables } from "../../types/app.ts";
 
 type SidebarUiState = { pinned: string[] };
@@ -17,16 +16,12 @@ sidebarRouter.post("/pin", async (c) => {
 
   const state = readUiState<SidebarUiState>(c, "sidebar");
   const pinned = Array.isArray(state.pinned) ? [...state.pinned] : [];
-  log.info(
-    `[sidebar/pin] key=${key} before=${JSON.stringify(pinned)}`,
-  );
   const idx = pinned.indexOf(key);
   if (idx >= 0) {
     pinned.splice(idx, 1);
   } else {
     pinned.push(key);
   }
-  log.info(`[sidebar/pin] after=${JSON.stringify(pinned)}`);
   writeUiState(c, "sidebar", { ...state, pinned });
 
   const activePath = c.req.header("HX-Current-URL")
