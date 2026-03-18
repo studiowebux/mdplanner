@@ -6,6 +6,7 @@ import { TaskRepository } from "../repositories/task.repository.ts";
 import { PortfolioRepository } from "../repositories/portfolio.repository.ts";
 import { ProjectRepository } from "../repositories/project.repository.ts";
 import { MilestoneService } from "../services/milestone.service.ts";
+import { PeopleService } from "../services/people.service.ts";
 import { PortfolioService } from "../services/portfolio.service.ts";
 import { ProjectService } from "../services/project.service.ts";
 import {
@@ -26,6 +27,7 @@ export interface InitOptions {
 let taskRepo: TaskRepository | null = null;
 let peopleRepo: PeopleRepository | null = null;
 let milestoneService: MilestoneService | null = null;
+let peopleService: PeopleService | null = null;
 let portfolioService: PortfolioService | null = null;
 let projectService: ProjectService | null = null;
 let cacheSync: CacheSync | null = null;
@@ -44,6 +46,7 @@ export function initServices(
   const projectRepo = new ProjectRepository(projectDir);
   peopleRepo = new PeopleRepository(projectDir);
   milestoneService = new MilestoneService(milestoneRepo, taskRepo);
+  peopleService = new PeopleService(peopleRepo);
   portfolioService = new PortfolioService(portfolioRepo);
   projectService = new ProjectService(projectRepo);
 
@@ -66,6 +69,7 @@ export function initServices(
     cacheSync.init();
     searchEngine = new SearchEngine(cacheDb);
     milestoneService.setCache(cacheSync);
+    peopleService.setCache(cacheSync);
     cacheEnabled = true;
   }
 }
@@ -86,6 +90,13 @@ export function getPeopleRepository(): PeopleRepository {
     throw new Error("Services not initialized — call initServices() first");
   }
   return peopleRepo;
+}
+
+export function getPeopleService(): PeopleService {
+  if (!peopleService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return peopleService;
 }
 
 export function getMilestoneService(): MilestoneService {
