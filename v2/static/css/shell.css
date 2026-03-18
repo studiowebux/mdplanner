@@ -59,7 +59,8 @@ html.sidebar-collapsed .app-shell {
   height: 100vh;
   position: sticky;
   top: 0;
-  border-right: var(--border-width) var(--border-style) var(--color-border-default);
+  border-right: var(--border-width) var(--border-style)
+    var(--color-border-default);
   background: var(--color-bg-secondary);
   overflow-y: auto;
   transition: width var(--transition-base);
@@ -70,7 +71,8 @@ html.sidebar-collapsed .app-shell {
   align-items: center;
   height: var(--nav-height);
   padding: 0 var(--space-lg);
-  border-bottom: var(--border-width) var(--border-style) var(--color-border-default);
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-border-default);
   flex-shrink: 0;
 }
 
@@ -100,8 +102,11 @@ html.sidebar-collapsed .app-shell {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   text-decoration: none;
-  border-left: var(--sidebar-active-border-width) var(--border-style) transparent;
-  transition: background var(--transition-fast), color var(--transition-fast),
+  border-left: var(--sidebar-active-border-width) var(--border-style)
+    transparent;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
     border-color var(--transition-fast);
 }
 
@@ -127,7 +132,8 @@ html.sidebar-collapsed .app-shell {
   gap: var(--space-md);
   min-height: var(--nav-height);
   padding: var(--space-sm) var(--page-padding);
-  border-bottom: var(--border-width) var(--border-style) var(--color-border-default);
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-border-default);
   background: var(--color-bg-primary);
   flex-shrink: 0;
 }
@@ -169,7 +175,9 @@ html.sidebar-collapsed .app-shell {
   border: var(--border-width) var(--border-style) var(--color-border-default);
   border-radius: var(--radius-md);
   outline: none;
-  transition: border-color var(--transition-fast), background var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast);
 }
 
 .topbar__search-input::placeholder {
@@ -205,7 +213,9 @@ html.sidebar-collapsed .app-shell {
   border-radius: var(--radius-md);
   cursor: pointer;
   text-decoration: none;
-  transition: background var(--transition-fast), color var(--transition-fast),
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
     border-color var(--transition-fast);
 }
 

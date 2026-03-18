@@ -1,5 +1,8 @@
 import type { PortfolioRepository } from "../repositories/portfolio.repository.ts";
-import type { PortfolioItem, PortfolioStatusUpdate } from "../types/portfolio.types.ts";
+import type {
+  PortfolioItem,
+  PortfolioStatusUpdate,
+} from "../types/portfolio.types.ts";
 
 export class PortfolioService {
   constructor(private repo: PortfolioRepository) {}
@@ -20,11 +23,16 @@ export class PortfolioService {
     return this.repo.search(query);
   }
 
-  async create(data: Partial<PortfolioItem> & { name: string }): Promise<PortfolioItem> {
+  async create(
+    data: Partial<PortfolioItem> & { name: string },
+  ): Promise<PortfolioItem> {
     return this.repo.create(data);
   }
 
-  async update(id: string, data: Partial<PortfolioItem>): Promise<PortfolioItem | null> {
+  async update(
+    id: string,
+    data: Partial<PortfolioItem>,
+  ): Promise<PortfolioItem | null> {
     return this.repo.update(id, data);
   }
 
@@ -32,7 +40,10 @@ export class PortfolioService {
     return this.repo.delete(id);
   }
 
-  async addStatusUpdate(id: string, message: string): Promise<PortfolioStatusUpdate | null> {
+  async addStatusUpdate(
+    id: string,
+    message: string,
+  ): Promise<PortfolioStatusUpdate | null> {
     return this.repo.addStatusUpdate(id, message);
   }
 

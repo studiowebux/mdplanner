@@ -86,9 +86,7 @@ export const milestoneConfig: DomainConfig<
   parseUpdate: (body) => ({
     name: body.name ? String(body.name) : undefined,
     target: body.target ? String(body.target) : null,
-    status: body.status
-      ? String(body.status) as MilestoneStatus
-      : undefined,
+    status: body.status ? String(body.status) as MilestoneStatus : undefined,
     description: body.description ? String(body.description) : null,
     project: body.project ? String(body.project) : null,
   }),

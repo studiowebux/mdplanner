@@ -7,7 +7,9 @@ const COOKIE_NAME = "ui_state";
 // deno-lint-ignore no-explicit-any
 type Ctx = Context<any, any, any>;
 
-function parseUiCookie(raw: string | undefined): Record<string, Record<string, unknown>> {
+function parseUiCookie(
+  raw: string | undefined,
+): Record<string, Record<string, unknown>> {
   if (!raw) return {};
   try {
     const parsed = JSON.parse(raw);

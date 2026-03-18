@@ -21,7 +21,10 @@ export function createMcpHonoRouter(options?: McpHttpOptions): Hono {
     const expected = `Bearer ${options.token}`;
     router.use("*", async (c, next) => {
       if (c.req.header("Authorization") !== expected) {
-        return c.json({ error: "UNAUTHORIZED", message: "Invalid or missing token" }, 401);
+        return c.json({
+          error: "UNAUTHORIZED",
+          message: "Invalid or missing token",
+        }, 401);
       }
       await next();
     });
@@ -32,8 +35,7 @@ export function createMcpHonoRouter(options?: McpHttpOptions): Hono {
       c.json(
         { error: "READ_ONLY_MODE", message: "Server is in read-only mode" },
         405,
-      )
-    );
+      ));
   }
 
   router.all("*", async (c) => {

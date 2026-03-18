@@ -20,7 +20,9 @@ export class ProjectService {
     if (data.name !== undefined) current.name = data.name;
     if (data.description !== undefined) current.description = data.description;
     if (data.startDate !== undefined) current.startDate = data.startDate;
-    if (data.workingDaysPerWeek !== undefined) current.workingDaysPerWeek = data.workingDaysPerWeek;
+    if (data.workingDaysPerWeek !== undefined) {
+      current.workingDaysPerWeek = data.workingDaysPerWeek;
+    }
     if (data.workingDays !== undefined) current.workingDays = data.workingDays;
     if (data.tags !== undefined) current.tags = data.tags;
     if (data.links !== undefined) current.links = data.links;
@@ -40,7 +42,9 @@ export class ProjectService {
     await this.repo.write(current);
   }
 
-  async updateProject(data: { name: string; description?: string }): Promise<void> {
+  async updateProject(
+    data: { name: string; description?: string },
+  ): Promise<void> {
     const current = await this.repo.read();
     current.name = data.name;
     current.description = data.description;

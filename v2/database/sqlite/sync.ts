@@ -108,7 +108,9 @@ export class CacheSync {
       return String(v);
     });
     this.db.execute(
-      `INSERT OR REPLACE INTO "${table}" (${cols.join(", ")}) VALUES (${placeholders})`,
+      `INSERT OR REPLACE INTO "${table}" (${
+        cols.join(", ")
+      }) VALUES (${placeholders})`,
       values,
     );
   }
@@ -141,7 +143,9 @@ export class CacheSync {
     return this.db.execute(`DELETE FROM files WHERE stale = 1`);
   }
 
-  listStale(): Array<{ entity_type: string; entity_id: string; file_path: string }> {
+  listStale(): Array<
+    { entity_type: string; entity_id: string; file_path: string }
+  > {
     return this.db.query(
       `SELECT entity_type, entity_id, file_path FROM files WHERE stale = 1`,
     );

@@ -68,7 +68,9 @@
       return dirtyForms[k];
     });
     if (anyDirty) {
-      window.onbeforeunload = function () { return true; };
+      window.onbeforeunload = function () {
+        return true;
+      };
     } else {
       window.onbeforeunload = null;
     }
@@ -78,8 +80,12 @@
     var form = document.getElementById(formId);
     if (!form) return;
     snapshotForm(formId);
-    form.addEventListener("input", function () { checkDirty(formId); });
-    form.addEventListener("change", function () { checkDirty(formId); });
+    form.addEventListener("input", function () {
+      checkDirty(formId);
+    });
+    form.addEventListener("change", function () {
+      checkDirty(formId);
+    });
   }
 
   // Re-snapshot on successful save
@@ -92,7 +98,9 @@
   });
 
   // Track all settings forms
-  ["project-form", "schedule-form", "tags-form", "links-form"].forEach(trackForm);
+  ["project-form", "schedule-form", "tags-form", "links-form"].forEach(
+    trackForm,
+  );
 
   // -----------------------------------------------------------------------
   // Features: check all / uncheck all
@@ -102,16 +110,26 @@
 
   if (featuresForm) {
     function toggleAll(checked) {
-      featuresForm.querySelectorAll('input[name="features"]').forEach(function (cb) {
-        cb.checked = checked;
-      });
+      featuresForm.querySelectorAll('input[name="features"]').forEach(
+        function (cb) {
+          cb.checked = checked;
+        },
+      );
       htmx.trigger(featuresForm, "change");
     }
 
     var checkAll = featuresForm.querySelector("[data-check-all]");
     var uncheckAll = featuresForm.querySelector("[data-uncheck-all]");
-    if (checkAll) checkAll.addEventListener("click", function () { toggleAll(true); });
-    if (uncheckAll) uncheckAll.addEventListener("click", function () { toggleAll(false); });
+    if (checkAll) {
+      checkAll.addEventListener("click", function () {
+        toggleAll(true);
+      });
+    }
+    if (uncheckAll) {
+      uncheckAll.addEventListener("click", function () {
+        toggleAll(false);
+      });
+    }
   }
 
   // -----------------------------------------------------------------------
@@ -120,11 +138,16 @@
   if (search && featuresForm) {
     search.addEventListener("input", function () {
       var query = search.value.toLowerCase().trim();
-      featuresForm.querySelectorAll(".settings-page__feature-item").forEach(function (item) {
-        var label = item.querySelector(".settings-page__feature-label");
-        var text = label ? label.textContent.toLowerCase() : "";
-        item.classList.toggle("is-hidden", query !== "" && text.indexOf(query) === -1);
-      });
+      featuresForm.querySelectorAll(".settings-page__feature-item").forEach(
+        function (item) {
+          var label = item.querySelector(".settings-page__feature-label");
+          var text = label ? label.textContent.toLowerCase() : "";
+          item.classList.toggle(
+            "is-hidden",
+            query !== "" && text.indexOf(query) === -1,
+          );
+        },
+      );
     });
   }
 
@@ -170,9 +193,10 @@
       var i = nextLinkIndex();
       var row = document.createElement("div");
       row.className = "settings-link-row";
-      row.innerHTML =
-        '<input type="text" name="link_title_' + i + '" placeholder="Title" class="settings-field__input" />' +
-        '<input type="url" name="link_url_' + i + '" placeholder="https://..." class="settings-field__input" />' +
+      row.innerHTML = '<input type="text" name="link_title_' + i +
+        '" placeholder="Title" class="settings-field__input" />' +
+        '<input type="url" name="link_url_' + i +
+        '" placeholder="https://..." class="settings-field__input" />' +
         '<button type="button" class="btn btn--danger btn--sm" data-remove-link>Remove</button>';
       linksList.appendChild(row);
       row.querySelector("input").focus();

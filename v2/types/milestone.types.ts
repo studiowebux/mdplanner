@@ -97,7 +97,8 @@ export const CreateMilestoneSchema = z.object({
     example: "open",
   }),
   description: z.string().optional().openapi({
-    description: "What this milestone delivers (markdown). Use headings and lists for structure.",
+    description:
+      "What this milestone delivers (markdown). Use headings and lists for structure.",
     example:
       "Search improvements and performance tuning.\n\n## Deliverables\n\n- FTS5 index rebuild on schema change\n- Sub-200ms search for 10k entities\n- Search result highlighting",
   }),
@@ -123,7 +124,8 @@ export const UpdateMilestoneSchema = z.object({
     example: "2026-06-01",
   }),
   status: z.enum(MILESTONE_STATUSES).optional().openapi({
-    description: "Milestone status. Setting to 'completed' auto-sets completedAt.",
+    description:
+      "Milestone status. Setting to 'completed' auto-sets completedAt.",
     example: "completed",
   }),
   description: z.string().nullable().optional().openapi({
@@ -147,7 +149,8 @@ export const ListMilestoneOptionsSchema = z.object({
     example: "open",
   }),
   project: z.string().optional().openapi({
-    description: "Filter by project name (case-insensitive match on milestone.project)",
+    description:
+      "Filter by project name (case-insensitive match on milestone.project)",
     example: "MD Planner",
   }),
 }).openapi("ListMilestoneOptions");
@@ -162,7 +165,8 @@ export const MilestoneSummaryQuerySchema = z.object({
     example: "v2.0.0",
   }),
   project: z.string().optional().openapi({
-    description: "Filter tasks within the milestone by project name (case-insensitive)",
+    description:
+      "Filter tasks within the milestone by project name (case-insensitive)",
     example: "MD Planner",
   }),
 }).openapi("MilestoneSummaryQuery");

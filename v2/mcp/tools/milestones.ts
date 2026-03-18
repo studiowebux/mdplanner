@@ -11,7 +11,7 @@ import {
   UpdateMilestoneSchema,
 } from "../../types/milestone.types.ts";
 import { DuplicateMilestoneError } from "../../services/milestone.service.ts";
-import { ok, err } from "../utils.ts";
+import { err, ok } from "../utils.ts";
 
 export function registerMilestoneTools(server: McpServer): void {
   const service = getMilestoneService();
@@ -32,7 +32,9 @@ export function registerMilestoneTools(server: McpServer): void {
     "get_milestone",
     {
       description: "Get a single milestone by its ID.",
-      inputSchema: { id: MilestoneBaseSchema.shape.id.describe("Milestone ID") },
+      inputSchema: {
+        id: MilestoneBaseSchema.shape.id.describe("Milestone ID"),
+      },
     },
     async ({ id }) => {
       const m = await service.getById(id);
@@ -46,7 +48,9 @@ export function registerMilestoneTools(server: McpServer): void {
     {
       description:
         "Get a milestone by its name (case-insensitive). Prefer this over list_milestones when the name is known.",
-      inputSchema: { name: MilestoneBaseSchema.shape.name.describe("Milestone name") },
+      inputSchema: {
+        name: MilestoneBaseSchema.shape.name.describe("Milestone name"),
+      },
     },
     async ({ name }) => {
       const m = await service.getByName(name);
@@ -123,7 +127,9 @@ export function registerMilestoneTools(server: McpServer): void {
     "delete_milestone",
     {
       description: "Delete a milestone by its ID.",
-      inputSchema: { id: MilestoneBaseSchema.shape.id.describe("Milestone ID") },
+      inputSchema: {
+        id: MilestoneBaseSchema.shape.id.describe("Milestone ID"),
+      },
     },
     async ({ id }) => {
       const success = await service.delete(id);

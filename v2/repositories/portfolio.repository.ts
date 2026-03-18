@@ -1,9 +1,15 @@
 import { join } from "@std/path";
-import { parseFrontmatter, serializeFrontmatter } from "../utils/frontmatter.ts";
+import {
+  parseFrontmatter,
+  serializeFrontmatter,
+} from "../utils/frontmatter.ts";
 import { toKebab } from "../utils/slug.ts";
 import { generateId } from "../utils/id.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
-import type { PortfolioItem, PortfolioStatusUpdate } from "../types/portfolio.types.ts";
+import type {
+  PortfolioItem,
+  PortfolioStatusUpdate,
+} from "../types/portfolio.types.ts";
 
 export class PortfolioRepository {
   private dir: string;
@@ -54,7 +60,9 @@ export class PortfolioRepository {
     return all.filter((item) => item.name.toLowerCase().includes(q));
   }
 
-  async create(data: Partial<PortfolioItem> & { name: string }): Promise<PortfolioItem> {
+  async create(
+    data: Partial<PortfolioItem> & { name: string },
+  ): Promise<PortfolioItem> {
     await Deno.mkdir(this.dir, { recursive: true });
     let id = toKebab(data.name);
     let filePath = join(this.dir, `${id}.md`);
@@ -90,18 +98,23 @@ export class PortfolioRepository {
       statusUpdates: data.statusUpdates,
     };
 
-    await this.writer.write(id, () =>
-      atomicWrite(filePath, this.serialize(item))
+    await this.writer.write(
+      id,
+      () => atomicWrite(filePath, this.serialize(item)),
     );
     return item;
   }
 
-  async update(id: string, data: Partial<PortfolioItem>): Promise<PortfolioItem | null> {
+  async update(
+    id: string,
+    data: Partial<PortfolioItem>,
+  ): Promise<PortfolioItem | null> {
     const existing = await this.findById(id);
     if (!existing) return null;
     const updated: PortfolioItem = { ...existing, ...data, id: existing.id };
-    await this.writer.write(id, () =>
-      atomicWrite(join(this.dir, `${id}.md`), this.serialize(updated))
+    await this.writer.write(
+      id,
+      () => atomicWrite(join(this.dir, `${id}.md`), this.serialize(updated)),
     );
     return updated;
   }
@@ -116,7 +129,10 @@ export class PortfolioRepository {
     }
   }
 
-  async addStatusUpdate(id: string, message: string): Promise<PortfolioStatusUpdate | null> {
+  async addStatusUpdate(
+    id: string,
+    message: string,
+  ): Promise<PortfolioStatusUpdate | null> {
     const item = await this.findById(id);
     if (!item) return null;
     const update: PortfolioStatusUpdate = {
@@ -133,7 +149,9 @@ export class PortfolioRepository {
     const item = await this.findById(id);
     if (!item) return false;
     const before = item.statusUpdates?.length ?? 0;
-    const filtered = (item.statusUpdates ?? []).filter((u) => u.id !== updateId);
+    const filtered = (item.statusUpdates ?? []).filter((u) =>
+      u.id !== updateId
+    );
     if (filtered.length === before) return false;
     await this.update(id, { statusUpdates: filtered });
     return true;
@@ -152,9 +170,7 @@ export class PortfolioRepository {
     const { frontmatter: fm, body } = parseFrontmatter(content);
     const id = filename.replace(/\.md$/, "");
     const titleMatch = body.match(/^#\s+(.+)/m);
-    const name = fm.name
-      ? String(fm.name)
-      : titleMatch?.[1]?.trim() ?? id;
+    const name = fm.name ? String(fm.name) : titleMatch?.[1]?.trim() ?? id;
 
     const lines = body.split("\n");
     const titleIdx = lines.findIndex((l) => /^#\s+/.test(l));
@@ -175,16 +191,26 @@ export class PortfolioRepository {
       startDate: fm.startDate != null ? String(fm.startDate) : undefined,
       endDate: fm.endDate != null ? String(fm.endDate) : undefined,
       team: Array.isArray(fm.team) ? fm.team.map(String) : undefined,
-      techStack: Array.isArray(fm.techStack) ? fm.techStack.map(String) : undefined,
+      techStack: Array.isArray(fm.techStack)
+        ? fm.techStack.map(String)
+        : undefined,
       logo: fm.logo != null ? String(fm.logo) : undefined,
       license: fm.license != null ? String(fm.license) : undefined,
       githubRepo: fm.githubRepo != null ? String(fm.githubRepo) : undefined,
-      billingCustomerId: fm.billingCustomerId != null ? String(fm.billingCustomerId) : undefined,
-      brainManaged: typeof fm.brainManaged === "boolean" ? fm.brainManaged : undefined,
-      linkedGoals: Array.isArray(fm.linkedGoals) ? fm.linkedGoals.map(String) : undefined,
+      billingCustomerId: fm.billingCustomerId != null
+        ? String(fm.billingCustomerId)
+        : undefined,
+      brainManaged: typeof fm.brainManaged === "boolean"
+        ? fm.brainManaged
+        : undefined,
+      linkedGoals: Array.isArray(fm.linkedGoals)
+        ? fm.linkedGoals.map(String)
+        : undefined,
       kpis: Array.isArray(fm.kpis) ? fm.kpis : undefined,
       urls: Array.isArray(fm.urls) ? fm.urls : undefined,
-      statusUpdates: Array.isArray(fm.statusUpdates) ? fm.statusUpdates : undefined,
+      statusUpdates: Array.isArray(fm.statusUpdates)
+        ? fm.statusUpdates
+        : undefined,
     };
   }
 

@@ -1,6 +1,6 @@
 // Settings API routes — reads/writes project.md configuration.
 
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { getProjectService } from "../../../singletons/services.ts";
 import {
   FeaturesListSchema,
@@ -38,8 +38,7 @@ const updateSettingsRoute = createRoute({
   path: "/",
   tags: ["Settings"],
   summary: "Update project configuration",
-  description:
-    "Partial update — only provided fields are changed. " +
+  description: "Partial update — only provided fields are changed. " +
     "Omitted fields remain unchanged.",
   operationId: "updateSettings",
   request: {
@@ -68,8 +67,7 @@ const getFeaturesRoute = createRoute({
   path: "/features",
   tags: ["Settings"],
   summary: "Get enabled features list",
-  description:
-    "Returns the array of enabled feature keys from project.md. " +
+  description: "Returns the array of enabled feature keys from project.md. " +
     "These keys control which domain views appear in the sidebar.",
   operationId: "getFeatures",
   responses: {
@@ -91,8 +89,7 @@ const updateFeaturesRoute = createRoute({
   path: "/features",
   tags: ["Settings"],
   summary: "Replace enabled features list",
-  description:
-    "Replaces the entire features array in project.md. " +
+  description: "Replaces the entire features array in project.md. " +
     "Send the full list of feature keys to enable.",
   operationId: "updateFeatures",
   request: {

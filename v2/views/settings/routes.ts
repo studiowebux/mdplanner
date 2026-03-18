@@ -27,8 +27,8 @@ settingsViewRouter.post("/features", async (c) => {
   const features = Array.isArray(raw)
     ? raw.map(String)
     : raw
-      ? [String(raw)]
-      : [];
+    ? [String(raw)]
+    : [];
   await getProjectService().setFeatures(features);
   return new Response(null, {
     status: 204,
@@ -59,8 +59,8 @@ settingsViewRouter.post("/schedule", async (c) => {
   const workingDays = Array.isArray(rawDays)
     ? rawDays.map(String)
     : rawDays
-      ? [String(rawDays)]
-      : [];
+    ? [String(rawDays)]
+    : [];
   const perWeek = body.workingDaysPerWeek
     ? Number(body.workingDaysPerWeek)
     : undefined;
@@ -93,7 +93,7 @@ settingsViewRouter.post("/tags", async (c) => {
 settingsViewRouter.post("/links", async (c) => {
   const body = await c.req.parseBody();
   const links: ProjectLink[] = [];
-  for (let i = 0; ; i++) {
+  for (let i = 0;; i++) {
     const title = body[`link_title_${i}`];
     const url = body[`link_url_${i}`];
     if (title === undefined && url === undefined) break;

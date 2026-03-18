@@ -26,7 +26,8 @@ export const SearchView: FC<SearchViewProps> = ({
         <h1 class="search-page__title">Search</h1>
         {query && (
           <p class="search-page__summary">
-            {results.length} result{results.length !== 1 ? "s" : ""} for "{query}"
+            {results.length} result{results.length !== 1 ? "s" : ""}{" "}
+            for "{query}"
           </p>
         )}
         {!query && (
@@ -38,7 +39,9 @@ export const SearchView: FC<SearchViewProps> = ({
           <ul class="search-results">
             {results.map((r) => (
               <li class="search-results__item">
-                <span class={`search-results__badge search-results__badge--${r.type}`}>
+                <span
+                  class={`search-results__badge search-results__badge--${r.type}`}
+                >
                   {ENTITY_TYPE_LABELS[r.type] ?? r.type}
                 </span>
                 <div class="search-results__content">

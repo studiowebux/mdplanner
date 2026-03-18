@@ -11,7 +11,10 @@ export class TaskBuilder {
     body: string,
     section: string,
   ): TaskBuilder {
-    return new TaskBuilder().applyFrontmatter(frontmatter).applyBody(body, section);
+    return new TaskBuilder().applyFrontmatter(frontmatter).applyBody(
+      body,
+      section,
+    );
   }
 
   applyFrontmatter(fm: Record<string, unknown>): this {
@@ -62,8 +65,10 @@ export class TaskBuilder {
         requestedBy: String(ar.requestedBy ?? ""),
         summary: String(ar.summary ?? ""),
         ...(ar.commitHash != null && { commitHash: String(ar.commitHash) }),
-        ...(Array.isArray(ar.artifactUrls) && { artifactUrls: ar.artifactUrls.map(String) }),
-        ...(ar.verdict != null && typeof ar.verdict === "object" && { verdict: ar.verdict as any }),
+        ...(Array.isArray(ar.artifactUrls) &&
+          { artifactUrls: ar.artifactUrls.map(String) }),
+        ...(ar.verdict != null && typeof ar.verdict === "object" &&
+          { verdict: ar.verdict as any }),
       };
     }
 
@@ -94,14 +99,10 @@ export class TaskBuilder {
     }
 
     // Description: lines after title, before ## Subtasks
-    const subtaskIdx = lines.findIndex((l) =>
-      /^##\s+Subtasks?\s*$/i.test(l)
-    );
+    const subtaskIdx = lines.findIndex((l) => /^##\s+Subtasks?\s*$/i.test(l));
     const descStart = titleMatch >= 0 ? titleMatch + 1 : 0;
     const descEnd = subtaskIdx >= 0 ? subtaskIdx : lines.length;
-    const desc = lines.slice(descStart, descEnd).filter((l) =>
-      l.trim() !== ""
-    );
+    const desc = lines.slice(descStart, descEnd).filter((l) => l.trim() !== "");
     if (desc.length > 0) this.task.description = desc;
 
     // Subtasks: - [x] (id) title

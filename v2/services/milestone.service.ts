@@ -138,8 +138,7 @@ export class MilestoneService {
   async getTasksForMilestone(milestoneName: string): Promise<Task[]> {
     const tasks = await this.taskRepo.findAll();
     return tasks.filter(
-      (t) =>
-        (t.milestone ?? "").toLowerCase() === milestoneName.toLowerCase(),
+      (t) => (t.milestone ?? "").toLowerCase() === milestoneName.toLowerCase(),
     );
   }
 

@@ -1,7 +1,10 @@
 // Milestone repository — reads and writes milestone markdown files from disk.
 
 import { join } from "@std/path";
-import { parseFrontmatter, serializeFrontmatter } from "../utils/frontmatter.ts";
+import {
+  parseFrontmatter,
+  serializeFrontmatter,
+} from "../utils/frontmatter.ts";
 import { generateId } from "../utils/id.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
 import type {
@@ -49,14 +52,18 @@ export class MilestoneRepository {
     await Deno.mkdir(this.milestonesDir, { recursive: true });
     const id = generateId("milestone");
     const createdAt = new Date().toISOString();
-    const fm: Record<string, unknown> = { id, status: data.status ?? "open", createdAt };
+    const fm: Record<string, unknown> = {
+      id,
+      status: data.status ?? "open",
+      createdAt,
+    };
     if (data.target) fm.target = data.target;
     if (data.project) fm.project = data.project;
-    const body =
-      `# ${data.name}\n\n${data.description ?? ""}`.trimEnd();
+    const body = `# ${data.name}\n\n${data.description ?? ""}`.trimEnd();
     const filePath = join(this.milestonesDir, `${id}.md`);
-    await this.writer.write(id, () =>
-      atomicWrite(filePath, serializeFrontmatter(fm, body))
+    await this.writer.write(
+      id,
+      () => atomicWrite(filePath, serializeFrontmatter(fm, body)),
     );
     return {
       id,
@@ -86,16 +93,21 @@ export class MilestoneRepository {
       }
     }
     if (data.target !== undefined) updated.target = data.target ?? undefined;
-    if (data.description !== undefined) updated.description = data.description ?? undefined;
+    if (data.description !== undefined) {
+      updated.description = data.description ?? undefined;
+    }
     if (data.project !== undefined) updated.project = data.project ?? undefined;
-    const fm: Record<string, unknown> = { id: updated.id, status: updated.status };
+    const fm: Record<string, unknown> = {
+      id: updated.id,
+      status: updated.status,
+    };
     if (updated.target) fm.target = updated.target;
     if (updated.project) fm.project = updated.project;
     if (updated.completedAt) fm.completedAt = updated.completedAt;
-    const body =
-      `# ${updated.name}\n\n${updated.description ?? ""}`.trimEnd();
-    await this.writer.write(id, () =>
-      atomicWrite(file, serializeFrontmatter(fm, body))
+    const body = `# ${updated.name}\n\n${updated.description ?? ""}`.trimEnd();
+    await this.writer.write(
+      id,
+      () => atomicWrite(file, serializeFrontmatter(fm, body)),
     );
     return updated;
   }

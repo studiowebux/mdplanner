@@ -27,7 +27,9 @@ export class TaskRepository {
   /**
    * Discover all section directories under board/.
    */
-  private async discoverSections(): Promise<{ dir: string; section: string }[]> {
+  private async discoverSections(): Promise<
+    { dir: string; section: string }[]
+  > {
     const sections: { dir: string; section: string }[] = [];
     try {
       for await (const entry of Deno.readDir(this.boardDir)) {
@@ -53,7 +55,9 @@ export class TaskRepository {
       try {
         for await (const entry of Deno.readDir(sectionPath)) {
           if (!entry.isFile || !entry.name.endsWith(".md")) continue;
-          const content = await Deno.readTextFile(join(sectionPath, entry.name));
+          const content = await Deno.readTextFile(
+            join(sectionPath, entry.name),
+          );
           const task = this.parse(content, section);
           if (task) tasks.push(task);
         }

@@ -187,8 +187,7 @@ export class SearchEngine {
 
     const contentColIdx = fts.columns.indexOf(fts.contentCol);
     try {
-      let sql =
-        `SELECT "${fts.titleCol}", id,
+      let sql = `SELECT "${fts.titleCol}", id,
          snippet(${table}_fts, ${contentColIdx}, '<mark>', '</mark>', '...', 32) as snippet,
          bm25(${table}_fts) as score
        FROM ${table}_fts

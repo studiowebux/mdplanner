@@ -37,8 +37,12 @@ searchRouter.get("/results", (c) => {
     const title = escapeHtml(r.title);
     const route = ENTITY_TYPE_ROUTES[r.type];
     const href = route ? `${route}#${escapeHtml(r.id)}` : "";
-    return `<li class="search-dialog__result" data-type="${escapeHtml(r.type)}" data-id="${escapeHtml(r.id)}" data-href="${href}">` +
-      `<span class="search-dialog__badge search-dialog__badge--${escapeHtml(r.type)}">${label}</span>` +
+    return `<li class="search-dialog__result" data-type="${
+      escapeHtml(r.type)
+    }" data-id="${escapeHtml(r.id)}" data-href="${href}">` +
+      `<span class="search-dialog__badge search-dialog__badge--${
+        escapeHtml(r.type)
+      }">${label}</span>` +
       `<span class="search-dialog__result-title">${title}</span>` +
       `<span class="search-dialog__result-snippet">${r.snippet}</span>` +
       `</li>`;

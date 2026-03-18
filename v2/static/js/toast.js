@@ -32,7 +32,9 @@
     close.type = "button";
     close.setAttribute("aria-label", "Dismiss");
     close.textContent = "\u00d7";
-    close.addEventListener("click", function () { dismiss(el); });
+    close.addEventListener("click", function () {
+      dismiss(el);
+    });
     el.appendChild(close);
 
     ensureContainer().appendChild(el);
@@ -43,7 +45,9 @@
     });
 
     if (duration > 0) {
-      setTimeout(function () { dismiss(el); }, duration);
+      setTimeout(function () {
+        dismiss(el);
+      }, duration);
     }
 
     return el;

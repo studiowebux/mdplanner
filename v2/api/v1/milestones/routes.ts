@@ -1,6 +1,6 @@
 // Milestone CRUD routes — OpenAPIHono router consumed by api/mod.ts.
 
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getMilestoneService } from "../../../singletons/services.ts";
 import { publish } from "../../../singletons/event-bus.ts";
 import {

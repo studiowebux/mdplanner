@@ -24,13 +24,13 @@
   --font-mono: "JetBrains Mono", monospace;
 
   /* Font size scale */
-  --font-size-xs: 0.75rem;       /* 12px — minimum floor: badges, micro labels */
-  --font-size-sm: 0.875rem;      /* 14px — captions, secondary info */
-  --font-size-base: 1rem;        /* 16px — body text, interactive elements */
-  --font-size-lg: 1.125rem;      /* 18px — subheadings, section titles */
-  --font-size-lg-plus: 1.25rem;  /* 20px — section headers, sidenav titles */
-  --font-size-xl: 1.5rem;        /* 24px — headings */
-  --font-size-xxl: 2rem;         /* 32px — display numbers, hero values */
+  --font-size-xs: 0.75rem; /* 12px — minimum floor: badges, micro labels */
+  --font-size-sm: 0.875rem; /* 14px — captions, secondary info */
+  --font-size-base: 1rem; /* 16px — body text, interactive elements */
+  --font-size-lg: 1.125rem; /* 18px — subheadings, section titles */
+  --font-size-lg-plus: 1.25rem; /* 20px — section headers, sidenav titles */
+  --font-size-xl: 1.5rem; /* 24px — headings */
+  --font-size-xxl: 2rem; /* 32px — display numbers, hero values */
 
   /* Spacing scale */
   --space-xs: 0.25rem;

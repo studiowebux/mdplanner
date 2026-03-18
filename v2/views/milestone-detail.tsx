@@ -110,7 +110,6 @@ export const MilestoneDetailView: FC<Props> = (
               </div>
             )}
         </section>
-
       </main>
     </MainLayout>
   );

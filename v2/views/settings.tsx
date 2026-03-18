@@ -42,19 +42,47 @@ export const SettingsView: FC<SettingsProps> = ({
 
         <div class="settings-tabs">
           {/* Tab radios + labels */}
-          <input type="radio" name="settings-tab" id="tab-views" class="settings-tabs__radio" checked />
+          <input
+            type="radio"
+            name="settings-tab"
+            id="tab-views"
+            class="settings-tabs__radio"
+            checked
+          />
           <label for="tab-views" class="settings-tabs__label">Views</label>
 
-          <input type="radio" name="settings-tab" id="tab-project" class="settings-tabs__radio" />
+          <input
+            type="radio"
+            name="settings-tab"
+            id="tab-project"
+            class="settings-tabs__radio"
+          />
           <label for="tab-project" class="settings-tabs__label">Project</label>
 
-          <input type="radio" name="settings-tab" id="tab-schedule" class="settings-tabs__radio" />
-          <label for="tab-schedule" class="settings-tabs__label">Schedule</label>
+          <input
+            type="radio"
+            name="settings-tab"
+            id="tab-schedule"
+            class="settings-tabs__radio"
+          />
+          <label for="tab-schedule" class="settings-tabs__label">
+            Schedule
+          </label>
 
-          <input type="radio" name="settings-tab" id="tab-tags" class="settings-tabs__radio" />
+          <input
+            type="radio"
+            name="settings-tab"
+            id="tab-tags"
+            class="settings-tabs__radio"
+          />
           <label for="tab-tags" class="settings-tabs__label">Tags</label>
 
-          <input type="radio" name="settings-tab" id="tab-links" class="settings-tabs__radio" />
+          <input
+            type="radio"
+            name="settings-tab"
+            id="tab-links"
+            class="settings-tabs__radio"
+          />
           <label for="tab-links" class="settings-tabs__label">Links</label>
 
           {/* ---- Views tab ---- */}
@@ -74,10 +102,18 @@ export const SettingsView: FC<SettingsProps> = ({
               hx-swap="none"
             >
               <div class="settings-page__bulk-actions">
-                <button type="button" class="btn btn--secondary btn--sm" data-check-all>
+                <button
+                  type="button"
+                  class="btn btn--secondary btn--sm"
+                  data-check-all
+                >
                   Check all
                 </button>
-                <button type="button" class="btn btn--secondary btn--sm" data-uncheck-all>
+                <button
+                  type="button"
+                  class="btn btn--secondary btn--sm"
+                  data-uncheck-all
+                >
                   Uncheck all
                 </button>
               </div>
@@ -90,7 +126,13 @@ export const SettingsView: FC<SettingsProps> = ({
                   {enabledList.map(([key, label]) => (
                     <li key={key} class="settings-page__feature-item">
                       <label class="settings-page__feature-label">
-                        <input type="checkbox" name="features" value={key} checked class="settings-page__checkbox" />
+                        <input
+                          type="checkbox"
+                          name="features"
+                          value={key}
+                          checked
+                          class="settings-page__checkbox"
+                        />
                         {label}
                         <span class="settings-page__feature-key">{key}</span>
                       </label>
@@ -107,7 +149,12 @@ export const SettingsView: FC<SettingsProps> = ({
                   {disabledList.map(([key, label]) => (
                     <li key={key} class="settings-page__feature-item">
                       <label class="settings-page__feature-label">
-                        <input type="checkbox" name="features" value={key} class="settings-page__checkbox" />
+                        <input
+                          type="checkbox"
+                          name="features"
+                          value={key}
+                          class="settings-page__checkbox"
+                        />
                         {label}
                         <span class="settings-page__feature-key">{key}</span>
                       </label>
@@ -127,13 +174,28 @@ export const SettingsView: FC<SettingsProps> = ({
               hx-swap="none"
             >
               <div class="settings-field">
-                <label class="settings-field__label" for="cfg-name">Project name</label>
-                <input type="text" id="cfg-name" name="name" value={config.name} class="settings-field__input" />
+                <label class="settings-field__label" for="cfg-name">
+                  Project name
+                </label>
+                <input
+                  type="text"
+                  id="cfg-name"
+                  name="name"
+                  value={config.name}
+                  class="settings-field__input"
+                />
               </div>
 
               <div class="settings-field">
-                <label class="settings-field__label" for="cfg-description">Description</label>
-                <textarea id="cfg-description" name="description" class="settings-field__textarea" rows={4}>
+                <label class="settings-field__label" for="cfg-description">
+                  Description
+                </label>
+                <textarea
+                  id="cfg-description"
+                  name="description"
+                  class="settings-field__textarea"
+                  rows={4}
+                >
                   {config.description ?? ""}
                 </textarea>
               </div>
@@ -153,7 +215,9 @@ export const SettingsView: FC<SettingsProps> = ({
               hx-swap="none"
             >
               <div class="settings-field">
-                <label class="settings-field__label" for="cfg-start-date">Project start date</label>
+                <label class="settings-field__label" for="cfg-start-date">
+                  Project start date
+                </label>
                 <input
                   type="date"
                   id="cfg-start-date"
@@ -164,7 +228,12 @@ export const SettingsView: FC<SettingsProps> = ({
               </div>
 
               <div class="settings-field">
-                <label class="settings-field__label" for="cfg-working-days-per-week">Working days per week</label>
+                <label
+                  class="settings-field__label"
+                  for="cfg-working-days-per-week"
+                >
+                  Working days per week
+                </label>
                 <input
                   type="number"
                   id="cfg-working-days-per-week"
@@ -217,7 +286,11 @@ export const SettingsView: FC<SettingsProps> = ({
                       value={tag}
                       class="settings-field__input"
                     />
-                    <button type="button" class="btn btn--danger btn--sm" data-remove-tag>
+                    <button
+                      type="button"
+                      class="btn btn--danger btn--sm"
+                      data-remove-tag
+                    >
                       Remove
                     </button>
                   </div>
@@ -225,7 +298,11 @@ export const SettingsView: FC<SettingsProps> = ({
               </div>
 
               <div class="settings-page__bulk-actions">
-                <button type="button" class="btn btn--secondary btn--sm" data-add-tag>
+                <button
+                  type="button"
+                  class="btn btn--secondary btn--sm"
+                  data-add-tag
+                >
                   Add tag
                 </button>
               </div>
@@ -261,7 +338,11 @@ export const SettingsView: FC<SettingsProps> = ({
                       placeholder="https://..."
                       class="settings-field__input"
                     />
-                    <button type="button" class="btn btn--danger btn--sm" data-remove-link>
+                    <button
+                      type="button"
+                      class="btn btn--danger btn--sm"
+                      data-remove-link
+                    >
                       Remove
                     </button>
                   </div>
@@ -269,7 +350,11 @@ export const SettingsView: FC<SettingsProps> = ({
               </div>
 
               <div class="settings-page__bulk-actions">
-                <button type="button" class="btn btn--secondary btn--sm" data-add-link>
+                <button
+                  type="button"
+                  class="btn btn--secondary btn--sm"
+                  data-add-link
+                >
                   Add link
                 </button>
               </div>

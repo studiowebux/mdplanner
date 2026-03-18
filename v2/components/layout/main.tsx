@@ -18,7 +18,15 @@ type Props = {
 };
 
 export const MainLayout: FC<Props> = (
-  { title, nonce, activePath, enabledFeatures = [], styles = [], scripts = [], children },
+  {
+    title,
+    nonce,
+    activePath,
+    enabledFeatures = [],
+    styles = [],
+    scripts = [],
+    children,
+  },
 ) => {
   const pageTitle = title
     ? `${title} — ${APP_NAME}`

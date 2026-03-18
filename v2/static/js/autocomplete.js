@@ -8,7 +8,9 @@
       var wrapper = item.closest(".form__autocomplete");
       if (!wrapper) return;
       var search = wrapper.querySelector("[data-autocomplete-target]");
-      var targetId = search ? search.getAttribute("data-autocomplete-target") : null;
+      var targetId = search
+        ? search.getAttribute("data-autocomplete-target")
+        : null;
       var hidden = targetId ? document.getElementById(targetId) : null;
       if (hidden) hidden.value = item.getAttribute("data-value") || "";
       if (search) search.value = item.textContent || "";

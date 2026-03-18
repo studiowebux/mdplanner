@@ -1,7 +1,10 @@
 // Project repository — reads and writes project.md frontmatter from disk.
 
 import { join } from "@std/path";
-import { parseFrontmatter, serializeFrontmatter } from "../utils/frontmatter.ts";
+import {
+  parseFrontmatter,
+  serializeFrontmatter,
+} from "../utils/frontmatter.ts";
 import { atomicWrite } from "../utils/safe-io.ts";
 import type { ProjectConfig, ProjectLink } from "../domains/project/types.ts";
 
@@ -60,8 +63,8 @@ export class ProjectRepository {
 
     const links = Array.isArray(fm.links)
       ? (fm.links as Record<string, unknown>[]).filter(
-          (l) => typeof l.url === "string" && typeof l.title === "string",
-        ) as ProjectLink[]
+        (l) => typeof l.url === "string" && typeof l.title === "string",
+      ) as ProjectLink[]
       : undefined;
 
     return {

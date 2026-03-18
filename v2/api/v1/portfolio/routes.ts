@@ -1,4 +1,4 @@
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getPortfolioService } from "../../../singletons/services.ts";
 import { PortfolioItemSchema } from "../../../types/portfolio.types.ts";
 import { ErrorSchema } from "../../../types/api.ts";
@@ -15,7 +15,9 @@ const listRoute = createRoute({
   request: {
     query: z.object({
       q: z.string().optional().openapi({ description: "Search query" }),
-      status: z.string().optional().openapi({ description: "Filter by status" }),
+      status: z.string().optional().openapi({
+        description: "Filter by status",
+      }),
     }),
   },
   responses: {
@@ -63,7 +65,10 @@ portfolioRouter.openapi(getRoute, async (c) => {
   const item = await getPortfolioService().getById(id);
   if (!item) {
     return c.json(
-      { error: "PORTFOLIO_ITEM_NOT_FOUND", message: `Portfolio item ${id} not found` },
+      {
+        error: "PORTFOLIO_ITEM_NOT_FOUND",
+        message: `Portfolio item ${id} not found`,
+      },
       404,
     );
   }

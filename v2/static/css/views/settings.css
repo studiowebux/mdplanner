@@ -170,7 +170,9 @@
   background: var(--color-bg-primary);
   border: var(--border-width) var(--border-style) var(--color-border-default);
   border-radius: var(--radius-md);
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .settings-page__feature-item:hover {
@@ -294,7 +296,9 @@
   font-weight: var(--font-weight-medium);
   cursor: pointer;
   user-select: none;
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .settings-page__day-label:hover {

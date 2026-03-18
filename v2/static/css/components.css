@@ -15,7 +15,9 @@
   color: var(--color-text-primary);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast),
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
     border-color var(--transition-fast);
 }
 
@@ -64,7 +66,6 @@
   color: var(--color-text-primary);
 }
 
-
 .btn--sm {
   padding: var(--space-xs) var(--space-sm);
   font-size: var(--font-size-xs);
@@ -99,7 +100,8 @@
   padding: var(--space-sm) var(--space-md);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
-  border-bottom: var(--border-width) var(--border-style) var(--color-border-strong);
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-border-strong);
   white-space: nowrap;
 }
 
@@ -123,7 +125,8 @@
 .data-table__td {
   padding: var(--space-sm) var(--space-md);
   color: var(--color-text-primary);
-  border-bottom: var(--border-width) var(--border-style) var(--color-border-default);
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-border-default);
 }
 
 /* -------------------------------------------------------------------------
@@ -209,7 +212,8 @@
   max-width: 100%;
   height: 100%;
   background: var(--color-bg-primary);
-  border-left: var(--border-width) var(--border-style) var(--color-border-default);
+  border-left: var(--border-width) var(--border-style)
+    var(--color-border-default);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -220,7 +224,8 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-md) var(--space-lg);
-  border-bottom: var(--border-width) var(--border-style) var(--color-border-default);
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-border-default);
   flex-shrink: 0;
 }
 
@@ -291,7 +296,6 @@
   gap: var(--space-sm);
 }
 
-
 /* -------------------------------------------------------------------------
    Form (shared across all domain forms via FormBuilder)
    ------------------------------------------------------------------------- */
@@ -325,7 +329,9 @@
   border: var(--border-width) var(--border-style) var(--color-border-default);
   border-radius: var(--radius-md);
   outline: none;
-  transition: border-color var(--transition-fast), background var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast);
 }
 
 .form__input:focus,
@@ -438,7 +444,8 @@
 .loading-spinner__ring {
   width: var(--spinner-size);
   height: var(--spinner-size);
-  border: var(--spinner-border-width) var(--border-style) var(--color-border-default);
+  border: var(--spinner-border-width) var(--border-style)
+    var(--color-border-default);
   border-top-color: var(--color-accent);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
@@ -757,7 +764,6 @@
   transition: background var(--transition-fast);
 }
 
-
 /* Swap animations — works in all browsers via htmx CSS classes */
 
 .view-container {
@@ -829,7 +835,8 @@
   align-items: center;
   gap: var(--space-sm);
   padding: var(--space-md);
-  border-bottom: var(--border-width) var(--border-style) var(--color-border-default);
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-border-default);
 }
 
 .search-dialog__input {

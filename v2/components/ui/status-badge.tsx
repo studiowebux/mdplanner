@@ -14,5 +14,6 @@ export const StatusBadge: FC<Props> = ({ status, prefix = "status-badge" }) => (
 );
 
 // Render function compatible with DataTable column definitions.
-export const statusBadgeRenderer = (prefix?: string) =>
-  (value: unknown) => <StatusBadge status={String(value)} prefix={prefix} />;
+export const statusBadgeRenderer = (prefix?: string) => (value: unknown) => (
+  <StatusBadge status={String(value)} prefix={prefix} />
+);

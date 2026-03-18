@@ -1,8 +1,5 @@
 import type { FC } from "hono/jsx";
-import {
-  ENTITY_TYPE_LABELS,
-  ENTITY_TYPE_ROUTES,
-} from "../../constants/mod.ts";
+import { ENTITY_TYPE_LABELS, ENTITY_TYPE_ROUTES } from "../../constants/mod.ts";
 
 type NavLink = { href: string; label: string };
 
@@ -35,7 +32,9 @@ export const Sidebar: FC<Props> = ({ activePath, enabledFeatures = [] }) => {
             <li key={link.href}>
               <a
                 href={link.href}
-                class={`sidebar__link${activePath === link.href ? " sidebar__link--active" : ""}`}
+                class={`sidebar__link${
+                  activePath === link.href ? " sidebar__link--active" : ""
+                }`}
               >
                 {link.label}
               </a>
@@ -46,7 +45,9 @@ export const Sidebar: FC<Props> = ({ activePath, enabledFeatures = [] }) => {
       <div class="sidebar__footer">
         <a
           href="/settings"
-          class={`sidebar__link${activePath === "/settings" ? " sidebar__link--active" : ""}`}
+          class={`sidebar__link${
+            activePath === "/settings" ? " sidebar__link--active" : ""
+          }`}
         >
           Settings
         </a>

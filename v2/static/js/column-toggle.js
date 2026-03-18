@@ -20,7 +20,7 @@
   function applyCols(domain) {
     var hidden = getHidden(domain);
     var cells = document.querySelectorAll(
-      '[data-column-table="' + domain + '"] [data-col]'
+      '[data-column-table="' + domain + '"] [data-col]',
     );
     for (var i = 0; i < cells.length; i++) {
       var key = cells[i].getAttribute("data-col");
@@ -34,11 +34,14 @@
 
   function syncCheckboxes(domain) {
     var hidden = getHidden(domain);
-    var toggle = document.querySelector('[data-column-toggle="' + domain + '"]');
+    var toggle = document.querySelector(
+      '[data-column-toggle="' + domain + '"]',
+    );
     if (!toggle) return;
     var boxes = toggle.querySelectorAll("[data-column-key]");
     for (var i = 0; i < boxes.length; i++) {
-      boxes[i].checked = hidden.indexOf(boxes[i].getAttribute("data-column-key")) < 0;
+      boxes[i].checked =
+        hidden.indexOf(boxes[i].getAttribute("data-column-key")) < 0;
     }
   }
 
