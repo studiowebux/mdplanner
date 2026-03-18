@@ -1,0 +1,181 @@
+/* People view — domain-specific styles only.
+   Page layout uses shared .domain-page from components.css. */
+
+/* Person card */
+
+.person-card {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--card-gap);
+  box-shadow: var(--card-shadow);
+  transition: box-shadow var(--transition-fast);
+}
+
+.person-card:hover {
+  box-shadow: var(--card-shadow-hover);
+}
+
+/* Header — avatar + name + badge */
+
+.person-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.person-card__identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.person-card__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  border-radius: var(--radius-full);
+  font-size: var(--avatar-font-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-inverse);
+  flex-shrink: 0;
+}
+
+.person-card__avatar--human {
+  background: var(--color-success);
+}
+
+.person-card__avatar--ai {
+  background: var(--color-accent);
+}
+
+.person-card__avatar--hybrid {
+  background: var(--color-warning);
+}
+
+.person-card__name {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--body-line-height);
+}
+
+.person-card__name a {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.person-card__name a:hover {
+  color: var(--color-accent);
+}
+
+.person-card__title {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* Agent type badge */
+
+.person-card__badge {
+  font-size: var(--font-size-xs);
+  font-weight: var(--badge-font-weight);
+  padding: var(--badge-padding);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.person-card__badge--human {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.person-card__badge--ai {
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
+}
+
+.person-card__badge--hybrid {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+/* Agent status badge (table view) */
+
+.person-card__status {
+  font-size: var(--font-size-xs);
+  font-weight: var(--badge-font-weight);
+  padding: var(--badge-padding);
+  border-radius: var(--radius-full);
+}
+
+.person-card__status--idle {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+}
+
+.person-card__status--working {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.person-card__status--offline {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+/* Metadata */
+
+.person-card__meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-xs) var(--space-md);
+  font-size: var(--font-size-sm);
+}
+
+.person-card__meta-label {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.person-card__meta-value {
+  color: var(--color-text-secondary);
+}
+
+.person-card__meta-value a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.person-card__meta-value a:hover {
+  text-decoration: underline;
+}
+
+/* Skills tags */
+
+.person-card__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.person-card__skill-tag {
+  font-size: var(--font-size-xs);
+  padding: var(--badge-padding);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+/* Actions */
+
+.person-card__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: auto;
+}
