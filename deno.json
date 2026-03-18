@@ -2,6 +2,7 @@
   "fmt": {
     "exclude": [
       "src/static/",
+      "v2/static/js/vendor/",
       "example/",
       "docs/",
       "__trash/",
