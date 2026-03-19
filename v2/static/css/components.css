@@ -44,15 +44,15 @@
 }
 
 .btn--danger {
-  color: var(--color-error-text);
-  background: var(--color-error-bg);
-  border: var(--border-width) var(--border-style) var(--color-error-border);
+  color: var(--color-static-white);
+  background: var(--color-error);
+  border: var(--border-width) var(--border-style) var(--color-error);
 }
 
 .btn--danger:hover {
-  background: var(--color-error);
-  color: var(--color-text-inverse);
-  border-color: var(--color-error);
+  background: var(--color-error-text);
+  color: var(--color-static-white);
+  border-color: var(--color-error-text);
 }
 
 .btn--tertiary {

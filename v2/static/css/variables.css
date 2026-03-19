@@ -93,15 +93,54 @@
   --orgchart-controls-slider-w: 8rem;
   --orgchart-controls-label-min-w: 3rem;
 
-  /* Org chart department palette — add entries to extend cycling range */
-  --orgchart-dept-color-0: var(--color-accent, #3b82f6);
-  --orgchart-dept-color-1: var(--color-success, #10b981);
-  --orgchart-dept-color-2: var(--color-warning, #f59e0b);
-  --orgchart-dept-color-3: var(--color-error, #ef4444);
-  --orgchart-dept-color-4: #8b5cf6;
-  --orgchart-dept-color-5: #ec4899;
-  --orgchart-dept-color-6: #06b6d4;
-  --orgchart-dept-color-7: #84cc16;
+  /* ── Category color palette ─────────────────────────────────────────
+     Reusable across domains: org chart departments, tags, status badges.
+     Each category has light/base/dark variants. */
+
+  /* Orange */
+  --color-cat-orange-light: #ed8b00;
+  --color-cat-orange: #e57200;
+  --color-cat-orange-dark: #dc4405;
+
+  /* Yellow */
+  --color-cat-yellow-light: #fedb00;
+  --color-cat-yellow: #ffc600;
+  --color-cat-yellow-dark: #f2a900;
+
+  /* Green */
+  --color-cat-green-light: #78be20;
+  --color-cat-green: #4c8c2b;
+  --color-cat-green-dark: #44693d;
+
+  /* Blue */
+  --color-cat-blue-light: #00a3e0;
+  --color-cat-blue: #0085ad;
+  --color-cat-blue-dark: #005670;
+
+  /* Dark Blue */
+  --color-cat-navy-light: #006298;
+  --color-cat-navy: #003865;
+  --color-cat-navy-dark: #041e42;
+
+  /* Purple */
+  --color-cat-purple-light: #93328e;
+  --color-cat-purple: #642f6c;
+  --color-cat-purple-dark: #3c1053;
+
+  /* Pink */
+  --color-cat-pink-light: #ce0f69;
+  --color-cat-pink: #ac145a;
+  --color-cat-pink-dark: #6c1d45;
+
+  /* Org chart department palette — references category base colors */
+  --orgchart-dept-color-0: var(--color-cat-orange);
+  --orgchart-dept-color-1: var(--color-cat-green);
+  --orgchart-dept-color-2: var(--color-cat-blue);
+  --orgchart-dept-color-3: var(--color-cat-navy);
+  --orgchart-dept-color-4: var(--color-cat-purple);
+  --orgchart-dept-color-5: var(--color-cat-pink);
+  --orgchart-dept-color-6: var(--color-cat-yellow-dark);
+  --orgchart-dept-color-7: var(--color-cat-green-dark);
 }
 
 html.font-mono {
@@ -118,50 +157,52 @@ html.font-mono {
 
   /* Backgrounds */
   --color-bg-primary: #ffffff;
-  --color-bg-secondary: #f9fafb;
-  --color-bg-tertiary: #f3f4f6;
-  --color-bg-inverse: #111827;
-  --color-bg-hover: #f3f4f6;
-  --color-bg-active: #e5e7eb;
+  --color-bg-secondary: #f5f5f5;
+  --color-bg-tertiary: #ebebeb;
+  --color-bg-inverse: #000000;
+  --color-bg-hover: #f5f5f5;
+  --color-bg-active: #e0e0e0;
 
   /* Text */
-  --color-text-primary: #111827;
-  --color-text-secondary: #4b5563;
-  --color-text-muted: #6b7280;
+  --color-text-primary: #000000;
+  --color-text-secondary: #2c2c2c;
+  --color-text-muted: #6b6b6b;
   --color-text-inverse: #ffffff;
 
   /* Borders */
-  --color-border-default: #e5e7eb;
-  --color-border-strong: #d1d5db;
-  --color-border-focus: #9ca3af;
+  --color-border-default: #e0e0e0;
+  --color-border-strong: #c0c0c0;
+  --color-border-focus: #8e8e8e;
 
-  /* Accent */
-  --color-accent: #111827;
-  --color-accent-hover: #374151;
+  /* Accent — amber/gold */
+  --color-accent: #ffab00;
+  --color-accent-hover: #e69a00;
+  --color-accent-subtle: #fff3d0;
+  --color-accent-muted: #ffd666;
 
   /* Success */
-  --color-success: #059669;
-  --color-success-bg: #ecfdf5;
-  --color-success-border: #a7f3d0;
-  --color-success-text: #065f46;
+  --color-success: #04b34f;
+  --color-success-bg: #e8f5e9;
+  --color-success-border: #a5d6a7;
+  --color-success-text: #2e7d32;
 
   /* Warning */
-  --color-warning: #d97706;
-  --color-warning-bg: #fffbeb;
-  --color-warning-border: #fde68a;
-  --color-warning-text: #92400e;
+  --color-warning: #ff9900;
+  --color-warning-bg: #fff3e0;
+  --color-warning-border: #ffcc80;
+  --color-warning-text: #000000;
 
   /* Error */
-  --color-error: #dc2626;
-  --color-error-bg: #fef2f2;
-  --color-error-border: #fecaca;
-  --color-error-text: #991b1b;
+  --color-error: #a6192e;
+  --color-error-bg: #fbe9ec;
+  --color-error-border: #f1b8bf;
+  --color-error-text: #a6192e;
 
   /* Info */
-  --color-info: #2563eb;
-  --color-info-bg: #eff6ff;
-  --color-info-border: #bfdbfe;
-  --color-info-text: #1e40af;
+  --color-info: #0057b8;
+  --color-info-bg: #e3f2fd;
+  --color-info-border: #90caf9;
+  --color-info-text: #0057b8;
 }
 
 /* --------------------------------------------------------------------------
@@ -172,58 +213,59 @@ html.font-mono {
 .dark {
   color-scheme: dark;
 
-  /* Backgrounds - true black */
-  --color-bg-primary: #000000;
-  --color-bg-secondary: #0a0a0a;
-  --color-bg-tertiary: #141414;
-  --color-bg-inverse: #ffffff;
-  --color-bg-hover: #1a1a1a;
-  --color-bg-active: #262626;
+  /* Backgrounds — warm dark */
+  --color-bg-primary: #343434;
+  --color-bg-secondary: #3e3e3e;
+  --color-bg-tertiary: #4a4a4a;
+  --color-bg-inverse: #f3f3f3;
+  --color-bg-hover: #4a4a4a;
+  --color-bg-active: #555555;
 
-  /* Text - true white */
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #e5e5e5;
-  --color-text-muted: #d4d4d4;
-  --color-text-inverse: #000000;
+  /* Text — warm cream/beige */
+  --color-text-primary: #f3f3f3;
+  --color-text-secondary: #e9dcbe;
+  --color-text-muted: #8e8b82;
+  --color-text-inverse: #343434;
 
-  /* Borders - neutral gray */
-  --color-border-default: #262626;
-  --color-border-strong: #404040;
-  --color-border-focus: #525252;
+  /* Borders — warm gray */
+  --color-border-default: #4a4a4a;
+  --color-border-strong: #5e5e5e;
+  --color-border-focus: #8e8b82;
 
-  /* Accent */
-  --color-accent: #ffffff;
-  --color-accent-hover: #e5e5e5;
-  --color-accent-control: #818cf8;
+  /* Accent — cream/beige */
+  --color-accent: #e9dcbe;
+  --color-accent-hover: #f3f3f3;
+  --color-accent-subtle: #4a4540;
+  --color-accent-muted: #b3a78e;
 
   /* Success */
-  --color-success: #22c55e;
-  --color-success-bg: #052e16;
-  --color-success-border: #166534;
-  --color-success-text: #86efac;
+  --color-success: #04b34f;
+  --color-success-bg: #1a3a2a;
+  --color-success-border: #2e7d32;
+  --color-success-text: #a5d6a7;
 
   /* Warning */
-  --color-warning: #eab308;
-  --color-warning-bg: #422006;
-  --color-warning-border: #854d0e;
-  --color-warning-text: #fef08a;
+  --color-warning: #ff9900;
+  --color-warning-bg: #3d2e10;
+  --color-warning-border: #b36b00;
+  --color-warning-text: #ffcc80;
 
   /* Error */
-  --color-error: #ef4444;
-  --color-error-bg: #450a0a;
-  --color-error-border: #991b1b;
-  --color-error-text: #fca5a5;
+  --color-error: #a6192e;
+  --color-error-bg: #3d1520;
+  --color-error-border: #7a1222;
+  --color-error-text: #dc3545;
 
   /* Info */
-  --color-info: #3b82f6;
-  --color-info-bg: #172554;
-  --color-info-border: #1e40af;
-  --color-info-text: #93c5fd;
+  --color-info: #0057b8;
+  --color-info-bg: #152a45;
+  --color-info-border: #003d82;
+  --color-info-text: #90caf9;
 
-  /* Shadows - darker for dark theme */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.6);
+  /* Shadows — deeper for dark theme */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.7);
 }
 
 /* --------------------------------------------------------------------------

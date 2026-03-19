@@ -48,7 +48,7 @@
 
 .milestone-card__badge--open {
   background: var(--color-accent-subtle);
-  color: var(--color-accent);
+  color: var(--color-text-primary);
 }
 
 .milestone-card__badge--completed {

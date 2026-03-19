@@ -6,6 +6,7 @@
   "use strict";
 
   var draggedId = null;
+  var currentDropTargetId = null;
 
   // ── Zoom / Pan state ──────────────────────────────────────────────
 
@@ -197,22 +198,60 @@
       body: JSON.stringify({
         reportsTo: newManagerId != null ? newManagerId : "",
       }),
+    }).then(function (res) {
+      if (res.ok && window.toast) {
+        window.toast({
+          type: "success",
+          message: newManagerId ? "Reporting structure updated" : "Manager removed",
+        });
+      }
     });
   }
 
-  // ── dragstart — only on orgchart nodes ────────────────────────────
+  // ── Drop target tracking — update visuals only when target changes ──
+
+  function setDropTarget(id) {
+    if (id === currentDropTargetId) return;
+    clearDropStates();
+    currentDropTargetId = id;
+    if (!id) return;
+    var node = document.querySelector('.orgchart-node[data-member-id="' + id + '"]');
+    if (!node) return;
+    if (isDescendantOf(draggedId, id)) {
+      node.classList.add("orgchart-drop-invalid");
+    } else {
+      node.classList.add("orgchart-drop-target");
+    }
+  }
+
+  // ── dragstart ─────────────────────────────────────────────────────
 
   document.addEventListener("dragstart", function (e) {
     var node = e.target.closest(".orgchart-node[data-member-id]");
     if (!node) return;
     draggedId = node.dataset.memberId;
-    node.classList.add("orgchart-dragging");
-    var tree = document.querySelector(".orgchart-tree");
-    if (tree) tree.classList.add("orgchart-is-dragging");
+    currentDropTargetId = null;
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", draggedId);
-    var zone = document.getElementById("orgchartUnlinkZone");
-    if (zone) zone.classList.add("active");
+
+    // Custom ghost — clone at current zoom scale outside the transformed viewport
+    document.documentElement.style.setProperty("--orgchart-current-zoom", zoom);
+    var ghost = node.cloneNode(true);
+    var ghostW = Math.round(node.offsetWidth * zoom);
+    var ghostH = Math.round(node.offsetHeight * zoom);
+    ghost.classList.add("orgchart-drag-ghost");
+    document.body.appendChild(ghost);
+    e.dataTransfer.setDragImage(ghost, ghostW / 2, ghostH / 2);
+    setTimeout(function () { document.body.removeChild(ghost); }, 0);
+
+    // Delay visual change so ghost captures clean state
+    setTimeout(function () {
+      node.classList.add("orgchart-dragging");
+      var tree = document.querySelector(".orgchart-tree");
+      if (tree) tree.classList.add("orgchart-is-dragging");
+      var zone = document.getElementById("orgchartUnlinkZone");
+      if (zone) zone.classList.add("active");
+    }, 0);
   });
 
   // ── dragend — cleanup ─────────────────────────────────────────────
@@ -224,12 +263,12 @@
     var tree = document.querySelector(".orgchart-tree");
     if (tree) tree.classList.remove("orgchart-is-dragging");
     draggedId = null;
-    clearDropStates();
+    setDropTarget(null);
     var zone = document.getElementById("orgchartUnlinkZone");
     if (zone) zone.classList.remove("active", "drag-over");
   });
 
-  // ── dragover — prevent default only inside org chart ──────────────
+  // ── dragover — preventDefault + track target via ID ───────────────
 
   document.addEventListener("dragover", function (e) {
     if (!draggedId || !inOrgChart(e)) return;
@@ -238,58 +277,31 @@
     if (zone) {
       e.preventDefault();
       e.dataTransfer.dropEffect = "move";
-      return;
-    }
-
-    var node = e.target.closest(".orgchart-node[data-member-id]");
-    if (!node || node.dataset.memberId === draggedId) return;
-    e.preventDefault();
-    e.dataTransfer.dropEffect = isDescendantOf(
-      draggedId,
-      node.dataset.memberId,
-    )
-      ? "none"
-      : "move";
-  });
-
-  // ── dragenter — visual feedback ───────────────────────────────────
-
-  document.addEventListener("dragenter", function (e) {
-    if (!draggedId || !inOrgChart(e)) return;
-
-    var zone = e.target.closest("#orgchartUnlinkZone");
-    if (zone) {
-      e.preventDefault();
+      setDropTarget(null);
       zone.classList.add("drag-over");
       return;
     }
 
     var node = e.target.closest(".orgchart-node[data-member-id]");
-    if (!node || node.dataset.memberId === draggedId) return;
-    e.preventDefault();
-    clearDropStates();
-    if (isDescendantOf(draggedId, node.dataset.memberId)) {
-      node.classList.add("orgchart-drop-invalid");
-    } else {
-      node.classList.add("orgchart-drop-target");
-    }
-  });
-
-  // ── dragleave — clear visual feedback ─────────────────────────────
-
-  document.addEventListener("dragleave", function (e) {
-    if (!draggedId) return;
-
-    var zone = e.target.closest("#orgchartUnlinkZone");
-    if (zone && !zone.contains(e.relatedTarget)) {
-      zone.classList.remove("drag-over");
+    if (!node || node.dataset.memberId === draggedId) {
+      setDropTarget(null);
       return;
     }
 
-    var node = e.target.closest(".orgchart-node[data-member-id]");
-    if (!node) return;
-    if (e.relatedTarget && node.contains(e.relatedTarget)) return;
-    node.classList.remove("orgchart-drop-target", "orgchart-drop-invalid");
+    e.preventDefault();
+    var targetId = node.dataset.memberId;
+    e.dataTransfer.dropEffect = isDescendantOf(draggedId, targetId) ? "none" : "move";
+    setDropTarget(targetId);
+  });
+
+  // ── dragleave — only for unlink zone ──────────────────────────────
+
+  document.addEventListener("dragleave", function (e) {
+    if (!draggedId) return;
+    var zone = e.target.closest("#orgchartUnlinkZone");
+    if (zone && !zone.contains(e.relatedTarget)) {
+      zone.classList.remove("drag-over");
+    }
   });
 
   // ── drop — reparent or unlink ─────────────────────────────────────

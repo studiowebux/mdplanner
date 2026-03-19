@@ -96,7 +96,7 @@
 
 .person-card__badge--ai {
   background: var(--color-accent-subtle);
-  color: var(--color-accent);
+  color: var(--color-text-primary);
 }
 
 .person-card__badge--hybrid {
@@ -124,8 +124,8 @@
 }
 
 .person-card__status--offline {
-  background: var(--color-error-bg);
-  color: var(--color-error-text);
+  background: var(--color-error);
+  color: var(--color-static-white);
 }
 
 /* Metadata */
@@ -544,24 +544,22 @@
 
 /* ── Hover highlight — dim non-hovered branches, keep subtree ────── */
 /* Disabled during drag (container gets .orgchart-is-dragging via JS) */
+/* All rules share the .orgchart-tree:not(.orgchart-is-dragging) prefix for equal specificity */
 
 .orgchart-tree:not(.orgchart-is-dragging):has(.orgchart-node:hover) .orgchart-node {
   opacity: var(--orgchart-drag-opacity);
   transition: opacity var(--transition-fast);
 }
 
-/* The hovered node stays full opacity */
-.orgchart-node:hover {
+.orgchart-tree:not(.orgchart-is-dragging) .orgchart-node:hover {
   opacity: 1;
 }
 
-/* Ancestor nodes (parent chain up to root) stay full */
-.orgchart-node-wrapper:has(.orgchart-node:hover) > .orgchart-node {
+.orgchart-tree:not(.orgchart-is-dragging) .orgchart-node-wrapper:has(.orgchart-node:hover) > .orgchart-node {
   opacity: 1;
 }
 
-/* Direct reports (and their subtrees) of the hovered node stay full */
-.orgchart-node:hover + .orgchart-children .orgchart-node {
+.orgchart-tree:not(.orgchart-is-dragging) .orgchart-node:hover + .orgchart-children .orgchart-node {
   opacity: 1;
 }
 
@@ -598,22 +596,27 @@
     opacity var(--transition-fast);
 }
 
+.orgchart-drag-ghost {
+  position: absolute;
+  top: -9999px;
+  transform: scale(var(--orgchart-current-zoom, 1));
+  transform-origin: 0 0;
+}
+
 .orgchart-node.orgchart-dragging {
   opacity: var(--orgchart-drag-opacity);
   cursor: grabbing;
-  transform: scale(var(--orgchart-drag-scale-down));
 }
 
 .orgchart-node.orgchart-drop-target {
-  border-color: var(--color-accent);
-  border-width: var(--orgchart-dept-border-width);
+  outline: var(--orgchart-dept-border-width) solid var(--color-accent);
+  outline-offset: var(--orgchart-drop-ring-size);
   box-shadow: 0 0 0 var(--orgchart-drop-ring-size) var(--color-accent-subtle);
-  transform: scale(var(--orgchart-drop-scale-up));
 }
 
 .orgchart-node.orgchart-drop-invalid {
-  border-color: var(--color-error);
-  border-width: var(--orgchart-dept-border-width);
+  outline: var(--orgchart-dept-border-width) solid var(--color-error);
+  outline-offset: var(--orgchart-drop-ring-size);
   box-shadow: 0 0 0 var(--orgchart-drop-ring-size) var(--color-error-bg);
   cursor: not-allowed;
 }
