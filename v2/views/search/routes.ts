@@ -36,7 +36,8 @@ searchRouter.get("/results", (c) => {
     const label = escapeHtml(ENTITY_TYPE_LABELS[r.type] ?? r.type);
     const title = escapeHtml(r.title);
     const route = ENTITY_TYPE_ROUTES[r.type];
-    const href = route ? `${route}#${escapeHtml(r.id)}` : "";
+    const href = route ? `${route}/${escapeHtml(r.id)}` : "";
+    const snippet = r.snippet && r.snippet !== "null" ? r.snippet : "";
     return `<li class="search-dialog__result" data-type="${
       escapeHtml(r.type)
     }" data-id="${escapeHtml(r.id)}" data-href="${href}">` +
@@ -44,7 +45,7 @@ searchRouter.get("/results", (c) => {
         escapeHtml(r.type)
       }">${label}</span>` +
       `<span class="search-dialog__result-title">${title}</span>` +
-      `<span class="search-dialog__result-snippet">${r.snippet}</span>` +
+      `<span class="search-dialog__result-snippet">${snippet}</span>` +
       `</li>`;
   }).join("");
   return c.html(html);

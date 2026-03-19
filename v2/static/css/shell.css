@@ -271,15 +271,16 @@ html.sidebar-collapsed .app-shell {
 
 .topbar__search {
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
+  max-width: var(--topbar-search-max-width);
+  margin: 0 auto;
 }
 
 .topbar__search-kbd {
   position: absolute;
   right: var(--space-sm);
+  top: 50%;
+  transform: translateY(-50%);
   font-size: var(--font-size-xs);
   font-family: var(--font-sans);
   color: var(--color-text-muted);
@@ -297,7 +298,6 @@ html.sidebar-collapsed .app-shell {
   appearance: none;
   box-sizing: border-box;
   width: 100%;
-  max-width: var(--topbar-search-max-width);
   padding: var(--space-xs) var(--space-sm);
   font-size: var(--font-size-sm);
   font-family: var(--font-sans);
