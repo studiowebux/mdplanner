@@ -332,16 +332,50 @@
    Org Chart — tree view with connector lines
    ========================================================================= */
 
+/* ── Controls bar — zoom slider, fit button ──────────────────────── */
+
+.orgchart-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: var(--orgchart-connector-width) solid var(--color-border-default);
+}
+
+.orgchart-controls__slider {
+  width: var(--orgchart-controls-slider-w);
+  accent-color: var(--color-accent);
+}
+
+.orgchart-controls__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  min-width: var(--orgchart-controls-label-min-w);
+}
+
 /* ── Container + viewport ─────────────────────────────────────────── */
+
+/* Lock parent to prevent page scroll when org canvas is visible */
+.app-shell__content:has(.orgchart-container) {
+  overflow: hidden;
+}
 
 .orgchart-container {
   position: relative;
   overflow: hidden;
-  min-height: var(--orgchart-min-height);
+  height: var(--orgchart-canvas-height);
+  cursor: grab;
+  border: var(--orgchart-connector-width) solid var(--color-border-default);
+  border-radius: var(--card-radius);
+}
+
+.orgchart-container:active {
+  cursor: grabbing;
 }
 
 .orgchart-viewport {
   transform-origin: 0 0;
+  will-change: transform;
 }
 
 /* ── Tree layout — centered column ────────────────────────────────── */
@@ -471,7 +505,7 @@
   left: 50%;
   width: var(--orgchart-connector-width);
   height: var(--space-md);
-  background: var(--color-border-default);
+  background: var(--orgchart-connector-color);
 }
 
 /* Horizontal line across siblings */
@@ -483,7 +517,7 @@
   left: 0;
   right: 0;
   height: var(--orgchart-connector-width);
-  background: var(--color-border-default);
+  background: var(--orgchart-connector-color);
 }
 
 /* Single child — no horizontal line */
@@ -505,12 +539,13 @@
   left: 50%;
   width: var(--orgchart-connector-width);
   height: var(--space-md);
-  background: var(--color-border-default);
+  background: var(--orgchart-connector-color);
 }
 
 /* ── Hover highlight — dim non-hovered branches, keep subtree ────── */
+/* Disabled during drag (container gets .orgchart-is-dragging via JS) */
 
-.orgchart-tree:has(.orgchart-node:hover) .orgchart-node {
+.orgchart-tree:not(.orgchart-is-dragging):has(.orgchart-node:hover) .orgchart-node {
   opacity: var(--orgchart-drag-opacity);
   transition: opacity var(--transition-fast);
 }

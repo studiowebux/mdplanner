@@ -78,6 +78,7 @@
   --orgchart-node-min-w-mobile: 9.375rem;
   --orgchart-node-max-w-mobile: 11.25rem;
   --orgchart-connector-width: 1px;
+  --orgchart-connector-color: var(--color-text-secondary);
   --orgchart-dept-border-width: 4px;
   --orgchart-drag-opacity: 0.4;
   --orgchart-drag-scale-down: 0.98;
@@ -88,6 +89,9 @@
   --orgchart-handle-spacing: -0.1em;
   --orgchart-dept-spacing: 0.05em;
   --orgchart-z-unlink: 100;
+
+  --orgchart-controls-slider-w: 8rem;
+  --orgchart-controls-label-min-w: 3rem;
 
   /* Org chart department palette — add entries to extend cycling range */
   --orgchart-dept-color-0: var(--color-accent, #3b82f6);

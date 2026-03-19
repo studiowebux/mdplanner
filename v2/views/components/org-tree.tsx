@@ -105,6 +105,27 @@ export const OrgTree: FC<Props> = ({ tree }) => {
 
   return (
     <div id="orgchartContainer" class="orgchart-container">
+      <div class="orgchart-controls">
+        <button
+          id="orgchartFit"
+          class="btn btn--secondary btn--sm"
+          type="button"
+        >
+          Fit
+        </button>
+        <input
+          id="orgchartZoom"
+          class="orgchart-controls__slider"
+          type="range"
+          min="0.25"
+          max="2"
+          step="0.05"
+          value="1"
+        />
+        <span id="orgchartZoomLabel" class="orgchart-controls__label">
+          100%
+        </span>
+      </div>
       <div id="orgchartViewport" class="orgchart-viewport">
         <div class="orgchart-tree">
           {tree.map((root) => (

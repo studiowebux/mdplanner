@@ -7,6 +7,160 @@
 
   var draggedId = null;
 
+  // ── Zoom / Pan state ──────────────────────────────────────────────
+
+  var zoom = 1;
+  var panX = 0;
+  var panY = 0;
+  var isPanning = false;
+  var panStartX = 0;
+  var panStartY = 0;
+  var panOriginX = 0;
+  var panOriginY = 0;
+
+  function applyTransform() {
+    var vp = document.getElementById("orgchartViewport");
+    if (vp) {
+      vp.style.transform =
+        "translate(" + panX + "px, " + panY + "px) scale(" + zoom + ")";
+    }
+  }
+
+  function updateZoomLabel() {
+    var label = document.getElementById("orgchartZoomLabel");
+    if (label) label.textContent = Math.round(zoom * 100) + "%";
+    var slider = document.getElementById("orgchartZoom");
+    if (slider) slider.value = String(zoom);
+  }
+
+  function fitToViewport() {
+    var container = document.getElementById("orgchartContainer");
+    var vp = document.getElementById("orgchartViewport");
+    if (!container || !vp) return;
+
+    // Reset transform to measure natural positions
+    vp.style.transform = "translate(0px, 0px) scale(1)";
+    void vp.offsetHeight; // force reflow
+
+    // Compute true bounding box from all rendered nodes
+    var nodes = vp.querySelectorAll(".orgchart-node");
+    if (nodes.length === 0) return;
+
+    var vpRect = vp.getBoundingClientRect();
+    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    nodes.forEach(function (node) {
+      var r = node.getBoundingClientRect();
+      var left = r.left - vpRect.left;
+      var top = r.top - vpRect.top;
+      if (left < minX) minX = left;
+      if (top < minY) minY = top;
+      if (left + r.width > maxX) maxX = left + r.width;
+      if (top + r.height > maxY) maxY = top + r.height;
+    });
+
+    // Add padding around content (tree has internal padding + connectors need space)
+    var pad = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--space-xl")) * 16 || 32;
+    var contentW = maxX - minX + pad * 2;
+    var contentH = maxY - minY + pad * 2;
+    minX -= pad;
+    minY -= pad;
+    if (contentW === 0 || contentH === 0) return;
+
+    // Available space — use container's actual dimensions
+    var controls = container.querySelector(".orgchart-controls");
+    var controlsH = controls ? controls.offsetHeight : 0;
+    var availW = container.clientWidth;
+    var availH = container.clientHeight - controlsH;
+
+    // Scale to fit — cap at 1
+    var scaleX = availW / contentW;
+    var scaleY = availH / contentH;
+    zoom = Math.min(scaleX, scaleY, 1);
+    zoom = Math.max(zoom, 0.1);
+
+    // Center: offset so the content bounding box is centered
+    var scaledW = contentW * zoom;
+    var scaledH = contentH * zoom;
+    panX = (availW - scaledW) / 2 - minX * zoom;
+    panY = (availH - scaledH) / 2 - minY * zoom;
+
+    applyTransform();
+    updateZoomLabel();
+  }
+
+  // ── Zoom slider ───────────────────────────────────────────────────
+
+  document.addEventListener("input", function (e) {
+    if (e.target.id !== "orgchartZoom") return;
+    zoom = parseFloat(e.target.value);
+    applyTransform();
+    updateZoomLabel();
+  });
+
+  // ── Fit button ────────────────────────────────────────────────────
+
+  document.addEventListener("click", function (e) {
+    if (e.target.id !== "orgchartFit" && !e.target.closest("#orgchartFit")) {
+      return;
+    }
+    fitToViewport();
+  });
+
+  // ── Pan (mousedown on empty container space) ──────────────────────
+
+  document.addEventListener("mousedown", function (e) {
+    if (draggedId) return;
+    var container = e.target.closest("#orgchartContainer");
+    if (!container) return;
+    if (e.target.closest(".orgchart-node")) return;
+    if (e.target.closest(".orgchart-controls")) return;
+    isPanning = true;
+    panStartX = e.clientX;
+    panStartY = e.clientY;
+    panOriginX = panX;
+    panOriginY = panY;
+    container.style.cursor = "grabbing";
+    e.preventDefault();
+  });
+
+  document.addEventListener("mousemove", function (e) {
+    if (!isPanning) return;
+    panX = panOriginX + (e.clientX - panStartX);
+    panY = panOriginY + (e.clientY - panStartY);
+    applyTransform();
+  });
+
+  document.addEventListener("mouseup", function () {
+    if (!isPanning) return;
+    isPanning = false;
+    var container = document.getElementById("orgchartContainer");
+    if (container) container.style.cursor = "";
+  });
+
+  // ── Wheel zoom ────────────────────────────────────────────────────
+
+  document.addEventListener("wheel", function (e) {
+    var container = e.target.closest("#orgchartContainer");
+    if (!container) return;
+    if (e.target.closest(".orgchart-controls")) return;
+    e.preventDefault();
+
+    var oldZoom = zoom;
+    // Multiplicative zoom — smooth and proportional to scroll speed
+    var factor = 1 - e.deltaY * 0.001;
+    zoom = Math.min(2, Math.max(0.25, zoom * factor));
+
+    // Zoom towards cursor: keep the point under the mouse fixed
+    var rect = container.getBoundingClientRect();
+    var mouseX = e.clientX - rect.left;
+    var mouseY = e.clientY - rect.top;
+    panX = mouseX - (mouseX - panX) * (zoom / oldZoom);
+    panY = mouseY - (mouseY - panY) * (zoom / oldZoom);
+
+    applyTransform();
+    updateZoomLabel();
+  }, { passive: false });
+
   /** Check if event target is inside the org chart area. */
   function inOrgChart(e) {
     return !!(
@@ -53,6 +207,8 @@
     if (!node) return;
     draggedId = node.dataset.memberId;
     node.classList.add("orgchart-dragging");
+    var tree = document.querySelector(".orgchart-tree");
+    if (tree) tree.classList.add("orgchart-is-dragging");
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", draggedId);
     var zone = document.getElementById("orgchartUnlinkZone");
@@ -65,6 +221,8 @@
     if (!draggedId) return;
     var node = e.target.closest(".orgchart-node[data-member-id]");
     if (node) node.classList.remove("orgchart-dragging");
+    var tree = document.querySelector(".orgchart-tree");
+    if (tree) tree.classList.remove("orgchart-is-dragging");
     draggedId = null;
     clearDropStates();
     var zone = document.getElementById("orgchartUnlinkZone");
@@ -156,4 +314,46 @@
     if (isDescendantOf(draggedId, targetId)) return;
     updateReportsTo(draggedId, targetId);
   });
+
+  // ── Canvas lifecycle — single entry point ───────────────────────
+
+  var isOrgActive = false;
+  var canvasSized = false;
+
+  /**
+   * Single function handles all org chart states:
+   * - First entry: calculate canvas height, set CSS var on :root, fit content
+   * - Already active (filter/SSE): refit content (height persists via :root var)
+   * - No org container: clean up
+   */
+  function syncOrgView() {
+    var container = document.getElementById("orgchartContainer");
+
+    if (!container) {
+      if (isOrgActive) {
+        isOrgActive = false;
+        canvasSized = false;
+        document.documentElement.style.removeProperty("--orgchart-canvas-height");
+      }
+      return;
+    }
+
+    // Calculate and set canvas height once on :root — survives htmx swaps
+    if (!canvasSized) {
+      var top = container.getBoundingClientRect().top;
+      var cs = getComputedStyle(container);
+      var borderV = parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
+      var page = container.closest(".domain-page");
+      var padB = page ? parseFloat(getComputedStyle(page).paddingBottom) : 0;
+      var h = window.innerHeight - top - borderV - padB;
+      document.documentElement.style.setProperty("--orgchart-canvas-height", h + "px");
+      canvasSized = true;
+    }
+
+    isOrgActive = true;
+    fitToViewport();
+  }
+
+  document.addEventListener("DOMContentLoaded", syncOrgView);
+  document.addEventListener("htmx:afterSettle", syncOrgView);
 })();
