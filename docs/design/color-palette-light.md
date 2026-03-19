@@ -97,6 +97,35 @@
 - [x] error-text (#A6192E) on error-bg (#FBE9EC) — 6.2:1
 - [x] info-text (#0057B8) on info-bg (#E3F2FD) — 5.9:1
 
-## Known Issue
+## Usage Patterns
 
-accent (#FFAB00) on white fails WCAG AA for normal text (2.1:1). For badges with accent-subtle background, use text-primary (#000000) or text-secondary (#2C2C2C) as text color instead of accent.
+### Buttons
+
+| Button | Background | Text | Hover bg |
+|--------|-----------|------|----------|
+| Primary | accent | text-primary | accent-hover |
+| Danger | error | static-white | error-text |
+| Secondary | bg-secondary | text-primary | bg-hover |
+
+### Badges (on subtle backgrounds)
+
+| Badge | Background | Text |
+|-------|-----------|------|
+| Accent (open, active) | accent-subtle | text-primary |
+| Success (completed) | success-bg | success-text |
+| Error (offline) | error | static-white |
+| Warning (hybrid) | warning-bg | warning-text |
+
+### Inline text (no background)
+
+| Usage | Token |
+|-------|-------|
+| Error text (overdue) | error-text |
+| Success text | success-text |
+| Warning text | warning-text |
+| Muted text | text-muted |
+
+## Known Issues
+
+- accent (#FFAB00) on white fails WCAG AA for normal text (2.1:1) — use text-primary on accent-subtle backgrounds, not accent as text color
+- accent works for large text, icons, borders, and button backgrounds
