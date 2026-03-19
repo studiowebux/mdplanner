@@ -77,6 +77,7 @@ export const PEOPLE_TABLE_COLUMNS: ColumnDef[] = [
 
 export const PEOPLE_DOMAIN = "people";
 
+
 export const PEOPLE_STATE_KEYS = [
   "view",
   "department",

@@ -1,5 +1,6 @@
 import { z } from "@hono/zod-openapi";
 import { WEEKDAYS } from "../constants/mod.ts";
+import type { ViewMode } from "./app.ts";
 
 // ---------------------------------------------------------------------------
 // Agent model — AI agent configuration
@@ -262,3 +263,9 @@ export const PersonWorkloadSchema = z.object({
 }).openapi("PersonWorkload");
 
 export type PersonWorkload = z.infer<typeof PersonWorkloadSchema>;
+
+// ---------------------------------------------------------------------------
+// People-specific view mode — extends base ViewMode with org chart
+// ---------------------------------------------------------------------------
+
+export type PeopleViewMode = ViewMode | "org";

@@ -131,17 +131,24 @@ export function createDomainRoutes<T extends Record<string, any>, C, U>(
   // Views
   // ---------------------------------------------------------------------------
 
+  const extraKeys = new Set((cfg.extraViewModes ?? []).map((m) => m.key));
+
   // Full page
   router.get("/", async (c) => {
     const state = c.get("filterState" as never) as DomainFilterState;
     const all = await cfg.getService().list();
     const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
+    const filtered = applyFilters(all, state);
+    const customContent = extraKeys.has(state.view) && cfg.customViewRenderer
+      ? await cfg.customViewRenderer(state.view, state, filtered)
+      : undefined;
     return c.html(
       DomainPage({
         ...viewProps(c, cfg.path),
-        items: applyFilters(all, state),
+        items: filtered,
         state,
         dynamicFilterOptions,
+        customContent,
       }) as unknown as string,
     );
   });
@@ -150,11 +157,16 @@ export function createDomainRoutes<T extends Record<string, any>, C, U>(
   router.get("/view", async (c) => {
     const state = c.get("filterState" as never) as DomainFilterState;
     const all = await cfg.getService().list();
+    const filtered = applyFilters(all, state);
+    const customContent = extraKeys.has(state.view) && cfg.customViewRenderer
+      ? await cfg.customViewRenderer(state.view, state, filtered)
+      : undefined;
     return c.html(
       DomainViewContainer({
-        items: applyFilters(all, state),
+        items: filtered,
         state,
         fragment: true,
+        customContent,
       }) as unknown as string,
     );
   });

@@ -1,4 +1,4 @@
-// People routes — factory-generated + custom detail route.
+// People routes — factory-generated + custom detail view.
 
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { peopleConfig } from "../../domains/people/config.tsx";

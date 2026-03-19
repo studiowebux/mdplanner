@@ -51,6 +51,7 @@ export type DomainConfig<T, C, U> = {
 
   // Presentation
   styles: string[];
+  scripts?: string[];
   emptyMessage: string;
 
   // Data shape
@@ -85,6 +86,17 @@ export type DomainConfig<T, C, U> = {
   resolveFormValues?: (
     values: Record<string, string>,
   ) => Promise<Record<string, string>>;
+
+  // Optional: extra view modes beyond grid/table (e.g. "org" for org chart).
+  // Rendered as additional toggle buttons. The factory calls customViewRenderer
+  // when the view mode matches an extra key.
+  extraViewModes?: { key: string; label: string }[];
+
+  // Optional: render custom view content for extra view modes.
+  // Called by the factory when state.view matches an extraViewModes key.
+  // Receives the view key, filter state, and filtered items.
+  // deno-lint-ignore no-explicit-any
+  customViewRenderer?: (view: string, state: DomainFilterState, items: T[]) => Promise<any>;
 
   // Optional: detail page renderer (if the domain has a detail view).
   DetailView?: FC<ViewProps & { item: T }>;

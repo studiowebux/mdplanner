@@ -4,7 +4,7 @@
 import { Hono } from "hono";
 import { homeViewRouter } from "./home/routes.ts";
 import { milestonesRouter } from "./milestones/routes.ts";
-import { peopleRouter } from "./people/routes.ts";
+import { peopleRouter } from "./people/routes.tsx";
 import { settingsViewRouter } from "./settings/routes.ts";
 import { searchRouter } from "./search/routes.ts";
 import { sidebarRouter } from "./sidebar/routes.ts";

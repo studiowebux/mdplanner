@@ -88,8 +88,13 @@ export class PeopleService {
   /** Build hierarchical org tree from reportsTo references. */
   async getTree(): Promise<PersonWithChildren[]> {
     const all = await this.repo.findAll();
+    return PeopleService.buildTree(all);
+  }
+
+  /** Build a tree from a given list of people. */
+  static buildTree(people: Person[]): PersonWithChildren[] {
     const map = new Map<string, PersonWithChildren>();
-    for (const p of all) {
+    for (const p of people) {
       map.set(p.id, { ...p, children: [] });
     }
 

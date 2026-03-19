@@ -1,6 +1,8 @@
 // People domain config — drives the factory for routes, views, and forms.
 
 import type { DomainConfig } from "../../factories/domain.types.ts";
+import { OrgTree } from "../../views/components/org-tree.tsx";
+import { PeopleService } from "../../services/people.service.ts";
 import type {
   CreatePerson,
   Person,
@@ -60,6 +62,7 @@ export const peopleConfig: DomainConfig<
   path: "/people",
   ssePrefix: "person",
   styles: ["/css/views/people.css"],
+  scripts: ["/js/org-tree.js"],
   emptyMessage: "No people yet. Add someone to get started.",
 
   stateKeys: [
@@ -155,4 +158,11 @@ export const peopleConfig: DomainConfig<
     (item.email ?? "").toLowerCase().includes(q) ||
     (item.departments ?? []).some((d) => d.toLowerCase().includes(q)) ||
     (item.skills ?? []).some((s) => s.toLowerCase().includes(q)),
+
+  extraViewModes: [{ key: "org", label: "Org" }],
+
+  customViewRenderer: async (_view, _state, items) => {
+    const tree = PeopleService.buildTree(items);
+    return <OrgTree tree={tree} />;
+  },
 };

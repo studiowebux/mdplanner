@@ -41,6 +41,18 @@ export function writeUiState<T>(c: Ctx, domain: string, state: T): void {
   });
 }
 
+/** Get the current view mode for a domain — query param wins, then cookie, then fallback. */
+export function getViewMode<T extends string = string>(
+  c: Ctx,
+  domain: string,
+  fallback: T = "grid" as T,
+): T {
+  const fromQuery = c.req.query("view") as T | undefined;
+  if (fromQuery) return fromQuery;
+  const saved = readUiState<{ view?: string }>(c, domain);
+  return (saved.view as T) ?? fallback;
+}
+
 // Merge query params over saved state. Params take precedence when present.
 export function mergeParams(
   params: Record<string, string | undefined>,

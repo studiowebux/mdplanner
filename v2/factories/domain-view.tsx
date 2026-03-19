@@ -16,10 +16,11 @@ import type { DomainConfig, DomainFilterState } from "./domain.types.ts";
 // ---------------------------------------------------------------------------
 
 function ViewToggleButtons(
-  { domain, view, oobSwap }: {
+  { domain, view, oobSwap, extraModes }: {
     domain: string;
-    view: ViewMode;
+    view: string;
     oobSwap?: string;
+    extraModes?: { key: string; label: string }[];
   },
 ) {
   const id = `${domain}-view-toggle`;
@@ -53,6 +54,21 @@ function ViewToggleButtons(
       >
         Table
       </button>
+      {extraModes?.map((mode) => (
+        <button
+          key={mode.key}
+          class={`btn btn--secondary view-toggle__btn${
+            view === mode.key ? " view-toggle__btn--active" : ""
+          }`}
+          type="button"
+          hx-get={`/${domain}/view?view=${mode.key}`}
+          hx-target={`#${domain}-view`}
+          hx-swap="outerHTML swap:100ms"
+          hx-include={`#${domain}-toolbar`}
+        >
+          {mode.label}
+        </button>
+      ))}
     </div>
   );
 }
@@ -96,11 +112,15 @@ function ColumnToggle(
 
 // deno-lint-ignore no-explicit-any
 export function createDomainViewContainer<T>(cfg: DomainConfig<T, any, any>) {
+  const extraKeys = new Set((cfg.extraViewModes ?? []).map((m) => m.key));
+
   const DomainViewContainer: FC<{
     items: T[];
     state: DomainFilterState;
     fragment?: boolean;
-  }> = ({ items, state, fragment }) => (
+    // deno-lint-ignore no-explicit-any
+    customContent?: any;
+  }> = ({ items, state, fragment, customContent }) => (
     <div id={`${cfg.name}-view`} class="view-container">
       <input type="hidden" name="view" value={state.view} />
       {fragment && (
@@ -113,7 +133,7 @@ export function createDomainViewContainer<T>(cfg: DomainConfig<T, any, any>) {
         </span>
       )}
       {fragment && (
-        <ViewToggleButtons domain={cfg.name} view={state.view} oobSwap="true" />
+        <ViewToggleButtons domain={cfg.name} view={state.view} oobSwap="true" extraModes={cfg.extraViewModes} />
       )}
       {fragment && (
         <div
@@ -127,7 +147,9 @@ export function createDomainViewContainer<T>(cfg: DomainConfig<T, any, any>) {
           />
         </div>
       )}
-      {items.length === 0
+      {customContent
+        ? customContent
+        : items.length === 0
         ? <EmptyState message={cfg.emptyMessage} />
         : state.view === "table"
         ? (
@@ -176,16 +198,18 @@ export function createDomainPage<T>(cfg: DomainConfig<T, any, any>) {
     items: T[];
     state: DomainFilterState;
     dynamicFilterOptions?: Record<string, string[]>;
+    // deno-lint-ignore no-explicit-any
+    customContent?: any;
   };
 
   const DomainPage: FC<PageProps> = (
-    { items, state, dynamicFilterOptions, ...viewProps },
+    { items, state, dynamicFilterOptions, customContent, ...viewProps },
   ) => (
     <MainLayout
       title={cfg.singular}
       {...viewProps}
       styles={cfg.styles}
-      scripts={[]}
+      scripts={cfg.scripts ?? []}
     >
       <main
         class="domain-page"
@@ -283,11 +307,11 @@ export function createDomainPage<T>(cfg: DomainConfig<T, any, any>) {
                 view={state.view}
               />
             </div>
-            <ViewToggleButtons domain={cfg.name} view={state.view} />
+            <ViewToggleButtons domain={cfg.name} view={state.view} extraModes={cfg.extraViewModes} />
           </div>
         </div>
 
-        <ViewContainer items={items} state={state} />
+        <ViewContainer items={items} state={state} customContent={customContent} />
       </main>
       <div id={`${cfg.name}-form-container`} />
     </MainLayout>

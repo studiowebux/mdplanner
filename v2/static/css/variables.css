@@ -70,6 +70,34 @@
   --color-level-key-result: #eab308;
   --color-level-initiative: #f97316;
   --color-level-project: #ef4444;
+
+  /* Org chart tokens */
+  --orgchart-min-height: 25rem;
+  --orgchart-node-min-w: 11.25rem;
+  --orgchart-node-max-w: 15rem;
+  --orgchart-node-min-w-mobile: 9.375rem;
+  --orgchart-node-max-w-mobile: 11.25rem;
+  --orgchart-connector-width: 1px;
+  --orgchart-dept-border-width: 4px;
+  --orgchart-drag-opacity: 0.4;
+  --orgchart-drag-scale-down: 0.98;
+  --orgchart-drop-scale-up: 1.02;
+  --orgchart-drop-ring-size: 4px;
+  --orgchart-unlink-scale: 1.05;
+  --orgchart-handle-opacity: 0.6;
+  --orgchart-handle-spacing: -0.1em;
+  --orgchart-dept-spacing: 0.05em;
+  --orgchart-z-unlink: 100;
+
+  /* Org chart department palette — add entries to extend cycling range */
+  --orgchart-dept-color-0: var(--color-accent, #3b82f6);
+  --orgchart-dept-color-1: var(--color-success, #10b981);
+  --orgchart-dept-color-2: var(--color-warning, #f59e0b);
+  --orgchart-dept-color-3: var(--color-error, #ef4444);
+  --orgchart-dept-color-4: #8b5cf6;
+  --orgchart-dept-color-5: #ec4899;
+  --orgchart-dept-color-6: #06b6d4;
+  --orgchart-dept-color-7: #84cc16;
 }
 
 html.font-mono {
