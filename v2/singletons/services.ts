@@ -30,6 +30,7 @@ let milestoneService: MilestoneService | null = null;
 let peopleService: PeopleService | null = null;
 let portfolioService: PortfolioService | null = null;
 let projectService: ProjectService | null = null;
+let cacheDb: CacheDatabase | null = null;
 let cacheSync: CacheSync | null = null;
 let searchEngine: SearchEngine | null = null;
 let cacheEnabled = false;
@@ -51,7 +52,7 @@ export function initServices(
   projectService = new ProjectService(projectRepo);
 
   if (useCache) {
-    const cacheDb = new CacheDatabase(`${projectDir}/.mdplanner-cache.db`);
+    cacheDb = new CacheDatabase(`${projectDir}/.mdplanner-cache.db`);
 
     // Register cache entities with repo references for sync
     registerMilestoneEntity(milestoneRepo);
@@ -143,3 +144,4 @@ export async function bootCacheSync(): Promise<void> {
     );
   }
 }
+

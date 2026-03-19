@@ -34,6 +34,12 @@ export class CacheDatabase {
     this.db.exec("PRAGMA journal_mode = WAL");
     this.db.exec("PRAGMA synchronous = NORMAL");
     this.db.exec("PRAGMA foreign_keys = ON");
+
+    // Graceful shutdown — close db on process exit to prevent corruption
+    const cleanup = () => this.close();
+    globalThis.addEventListener("unload", cleanup);
+    try { Deno.addSignalListener("SIGINT", cleanup); } catch { /* workers */ }
+    try { Deno.addSignalListener("SIGTERM", cleanup); } catch { /* workers */ }
   }
 
   query<T = QueryResult>(sql: string, params: BindParams = []): T[] {
@@ -97,7 +103,11 @@ export class CacheDatabase {
     return this.dbPath;
   }
 
+  private closed = false;
+
   close(): void {
+    if (this.closed) return;
+    this.closed = true;
     this.db.close();
   }
 }
