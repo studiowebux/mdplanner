@@ -85,100 +85,110 @@ export type ApprovalRequest = z.infer<typeof ApprovalRequestSchema>;
 // Task — flat structure, no nested config bag
 // ---------------------------------------------------------------------------
 
-export const TaskSchema: z.ZodType<Task> = z.lazy(() =>
-  z.object({
-    id: z.string().openapi({ description: "Task ID" }),
-    title: z.string().openapi({ description: "Task title" }),
-    completed: z.boolean().openapi({ description: "Whether task is done" }),
-    completedAt: z.string().optional().openapi({
-      description: "ISO date when completed",
-    }),
-    createdAt: z.string().optional().openapi({
-      description: "ISO date of creation",
-    }),
-    updatedAt: z.string().optional().openapi({
-      description: "ISO date of last update",
-    }),
-    revision: z.number().openapi({
-      description: "Monotonic counter for optimistic locking",
-    }),
-    section: z.string().openapi({
-      description: "Board section (Todo, In Progress, Done, etc.)",
-    }),
-    description: z.array(z.string()).optional().openapi({
-      description: "Task description paragraphs (markdown)",
-    }),
-    children: z.array(TaskSchema).optional().openapi({
-      description: "Subtasks",
-    }),
-    parentId: z.string().optional().openapi({
-      description: "Parent task ID (if subtask)",
-    }),
-    tags: z.array(z.string()).optional().openapi({
-      description: "Task labels/tags",
-    }),
-    due_date: z.string().optional().openapi({
-      description: "Due date (YYYY-MM-DD)",
-    }),
-    assignee: z.string().optional().openapi({
-      description: "Assigned person ID",
-    }),
-    priority: z.number().min(1).max(5).optional().openapi({
-      description: "Priority 1 (highest) to 5 (lowest)",
-    }),
-    effort: z.number().optional().openapi({
-      description: "Effort estimate (story points or hours)",
-    }),
-    blocked_by: z.array(z.string()).optional().openapi({
-      description: "Task IDs this task is blocked by",
-    }),
-    milestone: z.string().optional().openapi({
-      description: "Linked milestone name",
-    }),
-    planned_start: z.string().optional().openapi({
-      description: "Planned start date (YYYY-MM-DD)",
-    }),
-    planned_end: z.string().optional().openapi({
-      description: "Planned end date (YYYY-MM-DD)",
-    }),
-    time_entries: z.array(TimeEntrySchema).optional().openapi({
-      description: "Time tracking entries",
-    }),
-    order: z.number().optional().openapi({
-      description: "Sort order within section",
-    }),
-    attachments: z.array(z.string()).optional().openapi({
-      description: "Attachment file paths",
-    }),
-    project: z.string().optional().openapi({
-      description: "Project name scope",
-    }),
-    githubIssue: z.number().optional().openapi({
-      description: "Linked GitHub issue number",
-    }),
-    githubRepo: z.string().optional().openapi({
-      description: "GitHub repository (owner/repo)",
-    }),
-    githubPR: z.number().optional().openapi({
-      description: "Linked GitHub PR number",
-    }),
-    comments: z.array(TaskCommentSchema).optional().openapi({
-      description: "Task comment thread",
-    }),
-    claimedBy: z.string().optional().openapi({
-      description: "Person ID of agent actively working on this task",
-    }),
-    claimedAt: z.string().optional().openapi({
-      description: "ISO timestamp when claimed",
-    }),
-    approvalRequest: ApprovalRequestSchema.optional().openapi({
-      description: "Pending approval request",
-    }),
-    files: z.array(z.string()).optional().openapi({
-      description: "Relevant source file paths (relative to codebase root)",
-    }),
-  }).openapi("Task")
-);
+// Non-recursive schema for OpenAPI doc generation.
+// Children are flattened to an array of objects with id/title/completed
+// since the REST API doesn't need deep recursion.
+const TaskChildSchema = z.object({
+  id: z.string().openapi({ description: "Subtask ID" }),
+  title: z.string().openapi({ description: "Subtask title" }),
+  completed: z.boolean().openapi({ description: "Whether subtask is done" }),
+  parentId: z.string().optional().openapi({ description: "Parent task ID" }),
+  section: z.string().openapi({ description: "Board section" }),
+  revision: z.number().openapi({ description: "Revision counter" }),
+}).openapi("TaskChild");
+
+export const TaskSchema = z.object({
+  id: z.string().openapi({ description: "Task ID" }),
+  title: z.string().openapi({ description: "Task title" }),
+  completed: z.boolean().openapi({ description: "Whether task is done" }),
+  completedAt: z.string().optional().openapi({
+    description: "ISO date when completed",
+  }),
+  createdAt: z.string().optional().openapi({
+    description: "ISO date of creation",
+  }),
+  updatedAt: z.string().optional().openapi({
+    description: "ISO date of last update",
+  }),
+  revision: z.number().openapi({
+    description: "Monotonic counter for optimistic locking",
+  }),
+  section: z.string().openapi({
+    description: "Board section (Todo, In Progress, Done, etc.)",
+  }),
+  description: z.array(z.string()).optional().openapi({
+    description: "Task description paragraphs (markdown)",
+  }),
+  children: z.array(TaskChildSchema).optional().openapi({
+    description: "Subtasks (one level deep)",
+  }),
+  parentId: z.string().optional().openapi({
+    description: "Parent task ID (if subtask)",
+  }),
+  tags: z.array(z.string()).optional().openapi({
+    description: "Task labels/tags",
+  }),
+  due_date: z.string().optional().openapi({
+    description: "Due date (YYYY-MM-DD)",
+  }),
+  assignee: z.string().optional().openapi({
+    description: "Assigned person ID",
+  }),
+  priority: z.number().min(1).max(5).optional().openapi({
+    description: "Priority 1 (highest) to 5 (lowest)",
+  }),
+  effort: z.number().optional().openapi({
+    description: "Effort estimate (story points or hours)",
+  }),
+  blocked_by: z.array(z.string()).optional().openapi({
+    description: "Task IDs this task is blocked by",
+  }),
+  milestone: z.string().optional().openapi({
+    description: "Linked milestone name",
+  }),
+  planned_start: z.string().optional().openapi({
+    description: "Planned start date (YYYY-MM-DD)",
+  }),
+  planned_end: z.string().optional().openapi({
+    description: "Planned end date (YYYY-MM-DD)",
+  }),
+  time_entries: z.array(TimeEntrySchema).optional().openapi({
+    description: "Time tracking entries",
+  }),
+  order: z.number().optional().openapi({
+    description: "Sort order within section",
+  }),
+  attachments: z.array(z.string()).optional().openapi({
+    description: "Attachment file paths",
+  }),
+  project: z.string().optional().openapi({
+    description: "Project name scope",
+  }),
+  githubIssue: z.number().optional().openapi({
+    description: "Linked GitHub issue number",
+  }),
+  githubRepo: z.string().optional().openapi({
+    description: "GitHub repository (owner/repo)",
+  }),
+  githubPR: z.number().optional().openapi({
+    description: "Linked GitHub PR number",
+  }),
+  comments: z.array(TaskCommentSchema).optional().openapi({
+    description: "Task comment thread",
+  }),
+  claimedBy: z.string().optional().openapi({
+    description: "Person ID of agent actively working on this task",
+  }),
+  claimedAt: z.string().optional().openapi({
+    description: "ISO timestamp when claimed",
+  }),
+  approvalRequest: ApprovalRequestSchema.optional().openapi({
+    description: "Pending approval request",
+  }),
+  files: z.array(z.string()).optional().openapi({
+    description: "Relevant source file paths (relative to codebase root)",
+  }),
+}).openapi("Task");
 
 export type Task = {
   id: string;

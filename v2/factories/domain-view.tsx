@@ -9,18 +9,19 @@ import { EmptyState } from "../components/ui/empty-state.tsx";
 import { FormBuilder } from "../components/ui/form-builder.tsx";
 import type { FieldDef } from "../components/ui/form-builder.tsx";
 import type { ViewMode, ViewProps } from "../types/app.ts";
-import type { DomainConfig, DomainFilterState } from "./domain.types.ts";
+import type { DomainConfig, DomainFilterState, Entity } from "./domain.types.ts";
 
 // ---------------------------------------------------------------------------
 // View toggle buttons
 // ---------------------------------------------------------------------------
 
 function ViewToggleButtons(
-  { domain, view, oobSwap, extraModes }: {
+  { domain, view, oobSwap, extraModes, hideDefault }: {
     domain: string;
     view: string;
     oobSwap?: string;
     extraModes?: { key: string; label: string }[];
+    hideDefault?: boolean;
   },
 ) {
   const id = `${domain}-view-toggle`;
@@ -30,30 +31,34 @@ function ViewToggleButtons(
       class="view-toggle"
       {...(oobSwap ? { "hx-swap-oob": oobSwap } : {})}
     >
-      <button
-        class={`btn btn--secondary view-toggle__btn${
-          view === "grid" ? " view-toggle__btn--active" : ""
-        }`}
-        type="button"
-        hx-get={`/${domain}/view?view=grid`}
-        hx-target={`#${domain}-view`}
-        hx-swap="outerHTML swap:100ms"
-        hx-include={`#${domain}-toolbar`}
-      >
-        Grid
-      </button>
-      <button
-        class={`btn btn--secondary view-toggle__btn${
-          view === "table" ? " view-toggle__btn--active" : ""
-        }`}
-        type="button"
-        hx-get={`/${domain}/view?view=table`}
-        hx-target={`#${domain}-view`}
-        hx-swap="outerHTML swap:100ms"
-        hx-include={`#${domain}-toolbar`}
-      >
-        Table
-      </button>
+      {!hideDefault && (
+        <button
+          class={`btn btn--secondary view-toggle__btn${
+            view === "grid" ? " view-toggle__btn--active" : ""
+          }`}
+          type="button"
+          hx-get={`/${domain}/view?view=grid`}
+          hx-target={`#${domain}-view`}
+          hx-swap="outerHTML swap:100ms"
+          hx-include={`#${domain}-toolbar`}
+        >
+          Grid
+        </button>
+      )}
+      {!hideDefault && (
+        <button
+          class={`btn btn--secondary view-toggle__btn${
+            view === "table" ? " view-toggle__btn--active" : ""
+          }`}
+          type="button"
+          hx-get={`/${domain}/view?view=table`}
+          hx-target={`#${domain}-view`}
+          hx-swap="outerHTML swap:100ms"
+          hx-include={`#${domain}-toolbar`}
+        >
+          Table
+        </button>
+      )}
       {extraModes?.map((mode) => (
         <button
           key={mode.key}
@@ -107,19 +112,44 @@ function ColumnToggle(
 }
 
 // ---------------------------------------------------------------------------
+// Grid view — extracted so TypeScript narrows the optional Card prop
+// ---------------------------------------------------------------------------
+
+function GridView<T extends Entity>(
+  { Card, items, toRow, name, q }: {
+    Card: FC<{ item: T; q?: string }>;
+    items: T[];
+    toRow: (item: T) => Record<string, unknown>;
+    name: string;
+    q?: string;
+  },
+) {
+  return (
+    <CardGrid id={`${name}-grid`}>
+      {items.map((item) => {
+        const row = toRow(item);
+        return (
+          <div key={String(row.id)} id={String(row.id)}>
+            <Card item={item} q={q} />
+          </div>
+        );
+      })}
+    </CardGrid>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // View container — swapped via htmx on filter/toggle/SSE
 // ---------------------------------------------------------------------------
 
-// deno-lint-ignore no-explicit-any
-export function createDomainViewContainer<T>(cfg: DomainConfig<T, any, any>) {
+export function createDomainViewContainer<T extends Entity>(cfg: DomainConfig<T, unknown, unknown>) {
   const extraKeys = new Set((cfg.extraViewModes ?? []).map((m) => m.key));
 
   const DomainViewContainer: FC<{
     items: T[];
     state: DomainFilterState;
     fragment?: boolean;
-    // deno-lint-ignore no-explicit-any
-    customContent?: any;
+    customContent?: ReturnType<FC>;
   }> = ({ items, state, fragment, customContent }) => (
     <div id={`${cfg.name}-view`} class="view-container">
       <input type="hidden" name="view" value={state.view} />
@@ -133,7 +163,7 @@ export function createDomainViewContainer<T>(cfg: DomainConfig<T, any, any>) {
         </span>
       )}
       {fragment && (
-        <ViewToggleButtons domain={cfg.name} view={state.view} oobSwap="true" extraModes={cfg.extraViewModes} />
+        <ViewToggleButtons domain={cfg.name} view={state.view} oobSwap="true" extraModes={cfg.extraViewModes} hideDefault={cfg.hideDefaultViews} />
       )}
       {fragment && (
         <div
@@ -168,18 +198,9 @@ export function createDomainViewContainer<T>(cfg: DomainConfig<T, any, any>) {
             }}
           />
         )
-        : (
-          <CardGrid id={`${cfg.name}-grid`}>
-            {items.map((item) => {
-              const row = cfg.toRow(item);
-              return (
-                <div key={String(row.id)} id={String(row.id)}>
-                  <cfg.Card item={item} q={state.q} />
-                </div>
-              );
-            })}
-          </CardGrid>
-        )}
+        : cfg.Card
+        ? <GridView Card={cfg.Card} items={items} toRow={cfg.toRow} name={cfg.name} q={state.q} />
+        : <EmptyState message={cfg.emptyMessage} />}
     </div>
   );
 
@@ -190,16 +211,14 @@ export function createDomainViewContainer<T>(cfg: DomainConfig<T, any, any>) {
 // Full page — toolbar + view container + form container
 // ---------------------------------------------------------------------------
 
-// deno-lint-ignore no-explicit-any
-export function createDomainPage<T>(cfg: DomainConfig<T, any, any>) {
+export function createDomainPage<T extends Entity>(cfg: DomainConfig<T, unknown, unknown>) {
   const ViewContainer = createDomainViewContainer(cfg);
 
   type PageProps = ViewProps & {
     items: T[];
     state: DomainFilterState;
     dynamicFilterOptions?: Record<string, string[]>;
-    // deno-lint-ignore no-explicit-any
-    customContent?: any;
+    customContent?: ReturnType<FC>;
   };
 
   const DomainPage: FC<PageProps> = (
@@ -307,7 +326,7 @@ export function createDomainPage<T>(cfg: DomainConfig<T, any, any>) {
                 view={state.view}
               />
             </div>
-            <ViewToggleButtons domain={cfg.name} view={state.view} extraModes={cfg.extraViewModes} />
+            <ViewToggleButtons domain={cfg.name} view={state.view} extraModes={cfg.extraViewModes} hideDefault={cfg.hideDefaultViews} />
           </div>
         </div>
 
@@ -324,8 +343,7 @@ export function createDomainPage<T>(cfg: DomainConfig<T, any, any>) {
 // Form component factory
 // ---------------------------------------------------------------------------
 
-// deno-lint-ignore no-explicit-any
-export function createDomainForm<T extends Record<string, any>>(cfg: {
+export function createDomainForm<T extends Entity>(cfg: {
   domain: string;
   singular: string;
   fields: FieldDef[];

@@ -5,8 +5,11 @@ import type { FieldDef } from "../components/ui/form-builder.tsx";
 import type { ColumnDef } from "../components/ui/data-table.tsx";
 import type { ViewMode, ViewProps } from "../types/app.ts";
 
+/** Base constraint for all domain entity types. */
+export type Entity = Record<string, unknown>;
+
 // Minimal service contract every domain must satisfy.
-export interface DomainService<T, C, U> {
+export interface DomainService<T extends Entity, C, U> {
   list(): Promise<T[]>;
   getById(id: string): Promise<T | null>;
   create(data: C): Promise<T>;
@@ -34,13 +37,13 @@ export type DomainFilterState = {
 };
 
 // Card component contract — receives one item + optional search query.
-export type CardComponent<T> = FC<{ item: T; q?: string }>;
+export type CardComponent<T extends Entity> = FC<{ item: T; q?: string }>;
 
 // How to extract a form body into create/update data.
 export type FormParser<C> = (body: Record<string, string | File>) => C;
 
 // Full domain config — everything the factory needs.
-export type DomainConfig<T, C, U> = {
+export type DomainConfig<T extends Entity, C, U> = {
   // Identity
   name: string;
   singular: string;
@@ -53,6 +56,8 @@ export type DomainConfig<T, C, U> = {
   styles: string[];
   scripts?: string[];
   emptyMessage: string;
+  /** Default view mode. Defaults to "grid" if omitted. */
+  defaultView?: string;
 
   // Data shape
   stateKeys: readonly string[];
@@ -66,8 +71,8 @@ export type DomainConfig<T, C, U> = {
   // Row mapper — converts domain item to flat Record for DataTable.
   toRow: (item: T) => Record<string, unknown>;
 
-  // Card component for grid view.
-  Card: CardComponent<T>;
+  // Card component for grid view. Optional if grid view is not used.
+  Card?: CardComponent<T>;
 
   // Form body parsing.
   parseCreate: FormParser<C>;
@@ -87,6 +92,9 @@ export type DomainConfig<T, C, U> = {
     values: Record<string, string>,
   ) => Promise<Record<string, string>>;
 
+  /** Hide the default Grid/Table view toggle buttons. Use when all views are custom. */
+  hideDefaultViews?: boolean;
+
   // Optional: extra view modes beyond grid/table (e.g. "org" for org chart).
   // Rendered as additional toggle buttons. The factory calls customViewRenderer
   // when the view mode matches an extra key.
@@ -95,8 +103,7 @@ export type DomainConfig<T, C, U> = {
   // Optional: render custom view content for extra view modes.
   // Called by the factory when state.view matches an extraViewModes key.
   // Receives the view key, filter state, and filtered items.
-  // deno-lint-ignore no-explicit-any
-  customViewRenderer?: (view: string, state: DomainFilterState, items: T[]) => Promise<any>;
+  customViewRenderer?: (view: string, state: DomainFilterState, items: T[]) => Promise<ReturnType<FC> | undefined>;
 
   // Optional: detail page renderer (if the domain has a detail view).
   DetailView?: FC<ViewProps & { item: T }>;

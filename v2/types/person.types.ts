@@ -119,14 +119,19 @@ export type Person = z.infer<typeof PersonSchema>;
 // Person with children — for org tree
 // ---------------------------------------------------------------------------
 
-export const PersonWithChildrenSchema: z.ZodType<PersonWithChildren> = z.lazy(
-  () =>
+export const PersonWithChildrenSchema = PersonSchema.extend({
+  children: z.array(
     PersonSchema.extend({
-      children: z.array(PersonWithChildrenSchema).optional().openapi({
-        description: "Direct reports",
-      }),
-    }).openapi("PersonWithChildren"),
-);
+      children: z.array(
+        PersonSchema.extend({
+          children: z.array(PersonSchema).optional().openapi({
+            description: "Direct reports (level 3)",
+          }),
+        }).openapi("PersonTreeLevel3"),
+      ).optional().openapi({ description: "Direct reports (level 2)" }),
+    }).openapi("PersonTreeLevel2"),
+  ).optional().openapi({ description: "Direct reports" }),
+}).openapi("PersonWithChildren");
 
 export type PersonWithChildren = Person & {
   children?: PersonWithChildren[];

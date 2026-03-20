@@ -7,12 +7,11 @@ import { mergeParams, readUiState, writeUiState } from "../utils/ui-state.ts";
 import { hxTrigger } from "../utils/hx-trigger.ts";
 import { viewProps } from "../middleware/view-props.ts";
 import type { AppVariables, ViewMode } from "../types/app.ts";
-import type { DomainConfig, DomainFilterState } from "./domain.types.ts";
+import type { DomainConfig, DomainFilterState, Entity } from "./domain.types.ts";
 import { createDomainPage } from "./domain-view.tsx";
 import { createDomainForm } from "./domain-view.tsx";
 
-// deno-lint-ignore no-explicit-any
-export function createDomainRoutes<T extends Record<string, any>, C, U>(
+export function createDomainRoutes<T extends Entity, C, U>(
   cfg: DomainConfig<T, C, U>,
 ) {
   const router = new Hono<{ Variables: AppVariables }>();
@@ -29,7 +28,7 @@ export function createDomainRoutes<T extends Record<string, any>, C, U>(
 
   function buildState(merged: Record<string, string>): DomainFilterState {
     const state: DomainFilterState = {
-      view: (merged.view || "grid") as ViewMode,
+      view: (merged.view || cfg.defaultView || "grid") as ViewMode,
       q: merged.q || undefined,
       hideCompleted: merged.hideCompleted === "true",
       sort: merged.sort || undefined,
