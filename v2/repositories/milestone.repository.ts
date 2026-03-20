@@ -7,6 +7,7 @@ import {
 } from "../utils/frontmatter.ts";
 import { generateId } from "../utils/id.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
+import { buildFrontmatter, mergeFields } from "../utils/repo-helpers.ts";
 import type {
   CreateMilestone,
   MilestoneBase,
@@ -14,7 +15,10 @@ import type {
 } from "../types/milestone.types.ts";
 import type { CacheDatabase } from "../database/sqlite/mod.ts";
 import { rowToMilestone } from "../domains/milestone/cache.ts";
-import { MILESTONE_TABLE } from "../domains/milestone/constants.cache.ts";
+import {
+  MILESTONE_BODY_KEYS,
+  MILESTONE_TABLE,
+} from "../domains/milestone/constants.cache.ts";
 
 export class MilestoneRepository {
   private milestonesDir: string;
@@ -93,28 +97,24 @@ export class MilestoneRepository {
     await Deno.mkdir(this.milestonesDir, { recursive: true });
     const id = generateId("milestone");
     const createdAt = new Date().toISOString();
-    const fm: Record<string, unknown> = {
+    const status = data.status ?? "open";
+
+    const { name, description, ...rest } = data;
+    const fm = {
       id,
-      status: data.status ?? "open",
+      ...buildFrontmatter(rest as Record<string, unknown>, []),
+      status,
       createdAt,
     };
-    if (data.target) fm.target = data.target;
-    if (data.project) fm.project = data.project;
-    const body = `# ${data.name}\n\n${data.description ?? ""}`.trimEnd();
+
+    const body = `# ${name}\n\n${description ?? ""}`.trimEnd();
     const filePath = join(this.milestonesDir, `${id}.md`);
     await this.writer.write(
       id,
       () => atomicWrite(filePath, serializeFrontmatter(fm, body)),
     );
-    return {
-      id,
-      name: data.name,
-      status: data.status ?? "open",
-      target: data.target,
-      description: data.description,
-      project: data.project,
-      createdAt,
-    };
+
+    return { id, name, status, target: data.target, description, project: data.project, createdAt };
   }
 
   async update(
@@ -123,34 +123,32 @@ export class MilestoneRepository {
   ): Promise<MilestoneBase | null> {
     const { file, base } = await this.findFileById(id);
     if (!file || !base) return null;
-    const updated: MilestoneBase = { ...base };
-    if (data.name !== undefined) updated.name = data.name;
+
+    const updated = mergeFields(
+      { ...base },
+      data as Record<string, unknown>,
+    );
+
+    // Special case: status change triggers completedAt
     if (data.status !== undefined) {
-      updated.status = data.status;
       if (data.status === "completed" && base.status !== "completed") {
         updated.completedAt = new Date().toISOString();
       } else if (data.status === "open") {
         updated.completedAt = undefined;
       }
     }
-    if (data.target !== undefined) updated.target = data.target ?? undefined;
-    if (data.description !== undefined) {
-      updated.description = data.description ?? undefined;
-    }
-    if (data.project !== undefined) updated.project = data.project ?? undefined;
-    const fm: Record<string, unknown> = {
-      id: updated.id,
-      status: updated.status,
-    };
-    if (updated.target) fm.target = updated.target;
-    if (updated.project) fm.project = updated.project;
-    if (updated.completedAt) fm.completedAt = updated.completedAt;
+
+    const fm = buildFrontmatter(
+      updated as Record<string, unknown>,
+      MILESTONE_BODY_KEYS,
+    );
     const body = `# ${updated.name}\n\n${updated.description ?? ""}`.trimEnd();
     await this.writer.write(
       id,
       () => atomicWrite(file, serializeFrontmatter(fm, body)),
     );
-    return updated;
+
+    return updated as MilestoneBase;
   }
 
   async delete(id: string): Promise<boolean> {

@@ -15,6 +15,7 @@ import {
 import {
   getPeopleService,
   getPortfolioService,
+  getTaskService,
 } from "../singletons/services.ts";
 import type { AppVariables } from "../types/app.ts";
 
@@ -60,6 +61,17 @@ registerAutocompleteSource("people-skills", {
   },
   displayKey: "name",
   valueKey: "name",
+});
+
+registerAutocompleteSource("tasks", {
+  list: () => getTaskService().list(),
+  search: async (q) => {
+    const all = await getTaskService().list();
+    const lower = q.toLowerCase();
+    return all.filter((t) => t.title.toLowerCase().includes(lower));
+  },
+  displayKey: "title",
+  valueKey: "id",
 });
 
 registerAutocompleteSource("people-departments", {

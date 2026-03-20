@@ -1,4 +1,7 @@
-// People cache table name and schema constants.
+// People domain constants.
+
+/** Keys stored in the markdown body, not in frontmatter. */
+export const PEOPLE_BODY_KEYS = ["name", "notes"] as const;
 
 export const PEOPLE_TABLE = "people";
 

@@ -1,4 +1,7 @@
-// Milestone cache table name and schema constants.
+// Milestone domain constants.
+
+/** Keys stored in the markdown body, not in frontmatter. */
+export const MILESTONE_BODY_KEYS = ["name", "description"] as const;
 
 export const MILESTONE_TABLE = "milestones";
 
