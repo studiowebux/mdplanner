@@ -353,6 +353,13 @@
   min-width: var(--orgchart-controls-label-min-w);
 }
 
+.orgchart-controls__sep {
+  width: var(--orgchart-connector-width);
+  height: var(--space-md);
+  background: var(--color-border-default);
+  flex-shrink: 0;
+}
+
 /* ── Container + viewport ─────────────────────────────────────────── */
 
 /* Lock parent to prevent page scroll when org canvas is visible */

@@ -62,7 +62,7 @@ export const peopleConfig: DomainConfig<
   path: "/people",
   ssePrefix: "person",
   styles: ["/css/views/people.css"],
-  scripts: ["/js/org-tree.js"],
+  scripts: ["/js/org-tree.js", "/js/org-tree-export.js"],
   emptyMessage: "No people yet. Add someone to get started.",
 
   stateKeys: [

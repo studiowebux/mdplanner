@@ -125,6 +125,21 @@ export const OrgTree: FC<Props> = ({ tree }) => {
         <span id="orgchartZoomLabel" class="orgchart-controls__label">
           100%
         </span>
+        <span class="orgchart-controls__sep"></span>
+        <button
+          id="orgchartExportSVG"
+          class="btn btn--secondary btn--sm"
+          type="button"
+        >
+          Export SVG
+        </button>
+        <button
+          id="orgchartExportPDF"
+          class="btn btn--secondary btn--sm"
+          type="button"
+        >
+          Print
+        </button>
       </div>
       <div id="orgchartViewport" class="orgchart-viewport">
         <div class="orgchart-tree">
