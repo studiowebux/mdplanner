@@ -254,6 +254,10 @@
   --task-actions-w: 24rem;
   --task-detail-input-w: 14rem;
 
+  /* Note views */
+  --note-tab-indicator-w: 2px;
+  --note-timeline-dot-size: 0.75rem;
+
   /* Settings */
   --settings-input-narrow-max: var(--toolbar-search-min-width);
   --settings-textarea-min-height: var(--autocomplete-max-height);
