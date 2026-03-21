@@ -1,8 +1,7 @@
 ---
 id: milestone_notifications
 status: open
-createdAt: "2026-03-10T14:00:00.000Z"
-project: Acme Internal
+project: Client Portal
 ---
 
 # Notification System

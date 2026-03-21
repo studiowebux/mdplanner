@@ -57,12 +57,9 @@ export const TASK_TABLE_COLUMNS: ColumnDef[] = [
     sortable: true,
     render: (v) => {
       if (!v) return "";
-      const labels: Record<string, string> = {
-        "1": "P1", "2": "P2", "3": "P3", "4": "P4", "5": "P5",
-      };
       return (
         <span class={`task-priority task-priority--${v}`}>
-          {labels[String(v)] ?? String(v)}
+          {TASK_PRIORITY_LABELS[String(v)] ?? String(v)}
         </span>
       );
     },
@@ -102,7 +99,16 @@ export const TASK_STATE_KEYS = [
   "hideCompleted",
   "sort",
   "order",
+  "zoom",
 ] as const;
+
+export const TASK_PRIORITY_LABELS: Record<string, string> = {
+  "1": "P1",
+  "2": "P2",
+  "3": "P3",
+  "4": "P4",
+  "5": "P5",
+};
 
 export const TASK_PRIORITY_OPTIONS = [
   { value: "1", label: "P1 — Critical" },
@@ -111,6 +117,19 @@ export const TASK_PRIORITY_OPTIONS = [
   { value: "4", label: "P4 — Low" },
   { value: "5", label: "P5 — Minimal" },
 ];
+
+/** Sort tasks by order, then priority, then title. */
+export function sortTasks(tasks: Task[]): Task[] {
+  return [...tasks].sort((a, b) => {
+    if ((a.order ?? Infinity) !== (b.order ?? Infinity)) {
+      return (a.order ?? Infinity) - (b.order ?? Infinity);
+    }
+    if ((a.priority ?? 5) !== (b.priority ?? 5)) {
+      return (a.priority ?? 5) - (b.priority ?? 5);
+    }
+    return a.title.localeCompare(b.title);
+  });
+}
 
 /** Build section options dynamically from discovered task sections. */
 export function buildSectionOptions(

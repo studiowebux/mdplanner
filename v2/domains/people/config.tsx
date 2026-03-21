@@ -161,7 +161,7 @@ export const peopleConfig: DomainConfig<
 
   extraViewModes: [{ key: "org", label: "Org" }],
 
-  customViewRenderer: async (_view, _state, items) => {
+  customViewRenderer: async (_view, _state, items, _nonce) => {
     const tree = PeopleService.buildTree(items);
     return <OrgTree tree={tree} />;
   },

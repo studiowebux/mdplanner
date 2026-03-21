@@ -150,7 +150,7 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
       section: sections.map((s) => s.value),
       project: portfolio.map((p) => p.name).sort(),
       milestone: [...new Set(milestones.map((m) => m.name))].sort(),
-      assignee: people.map((p) => p.id).sort(),
+      assignee: [...new Set(items.map((t) => t.assignee).filter(Boolean) as string[])].sort(),
     };
   },
 
@@ -168,7 +168,7 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
     { key: "timeline", label: "Timeline" },
   ],
 
-  customViewRenderer: async (view, _state, items) => {
+  customViewRenderer: async (view, state, items, nonce) => {
     if (view === "list") {
       const { TaskListView } = await import(
         "../../views/components/task-list.tsx"
@@ -185,7 +185,8 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
       const { TaskTimelineView } = await import(
         "../../views/components/task-timeline.tsx"
       );
-      return <TaskTimelineView tasks={items} />;
+      const zoom = parseInt(String(state.zoom ?? "1")) || 1;
+      return <TaskTimelineView tasks={items} zoom={zoom} />;
     }
     return undefined;
   },

@@ -7,9 +7,10 @@ export const DEFAULT_PORT = 8003;
  * Sections discovered on disk that are not in this list appear after these.
  */
 export const SECTION_DISPLAY_ORDER = [
+  "Backlog",
+  "Todo",
   "In Progress",
   "Pending Review",
-  "Todo",
   "Done",
 ] as const;
 

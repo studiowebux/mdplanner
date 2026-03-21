@@ -3,9 +3,13 @@ id: task_sso
 completed: false
 revision: 1
 assignee: diana
-priority: 2
+priority: 3
 effort: 16
 milestone: Enterprise Features
+project: Client Portal
+tags: [security, enterprise, sso]
+planned_start: 2026-05-01
+planned_end: 2026-05-20
 ---
 
 # SSO/SAML Integration

@@ -226,6 +226,17 @@ export type Task = {
 };
 
 // ---------------------------------------------------------------------------
+// View component props — shared across list, board, timeline views
+// ---------------------------------------------------------------------------
+
+export type TaskViewProps = {
+  tasks: Task[];
+  zoom?: number;
+};
+
+export type ScheduledTask = Task & { _start: Date; _end: Date };
+
+// ---------------------------------------------------------------------------
 // Create — input for POST
 // ---------------------------------------------------------------------------
 
@@ -455,7 +466,9 @@ export const AddAttachmentsInputSchema = z.object({
 
 export const RequestApprovalInputSchema = z.object({
   requestedBy: z.string().openapi({ description: "Agent person ID" }),
-  summary: z.string().openapi({ description: "Summary of work done (markdown)" }),
+  summary: z.string().openapi({
+    description: "Summary of work done (markdown)",
+  }),
   commitHash: z.string().optional().openapi({ description: "Git commit hash" }),
   artifactUrls: z.array(z.string()).optional().openapi({
     description: "Build artifact or deployment URLs",

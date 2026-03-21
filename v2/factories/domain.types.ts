@@ -103,7 +103,7 @@ export type DomainConfig<T extends Entity, C, U> = {
   // Optional: render custom view content for extra view modes.
   // Called by the factory when state.view matches an extraViewModes key.
   // Receives the view key, filter state, and filtered items.
-  customViewRenderer?: (view: string, state: DomainFilterState, items: T[]) => Promise<ReturnType<FC> | undefined>;
+  customViewRenderer?: (view: string, state: DomainFilterState, items: T[], nonce?: string) => Promise<ReturnType<FC> | undefined>;
 
   // Optional: detail page renderer (if the domain has a detail view).
   DetailView?: FC<ViewProps & { item: T }>;

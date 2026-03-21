@@ -3,7 +3,7 @@ id: agent_copilot
 title: Code Assistant
 role: AI Agent
 departments: [Engineering]
-reportsTo: member_frontend_lead
+reportsTo: member_eng_lead
 agentType: ai
 skills: [typescript, css, react, frontend]
 models:
