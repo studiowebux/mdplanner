@@ -61,7 +61,6 @@ export class NoteRepository {
       id,
       title: data.title,
       content: data.content ?? "",
-      mode: data.mode ?? "enhanced",
       paragraphs: data.paragraphs,
       customSections: data.customSections,
       createdAt: now,
@@ -146,30 +145,14 @@ export class NoteRepository {
     }
 
     const bodyContent = lines.slice(contentStartIndex).join("\n").trim();
-    const isEnhanced = fm.mode === "enhanced" ||
-      bodyContent.includes("<!-- Custom Section:");
-
-    if (isEnhanced) {
-      const { paragraphs, customSections } = this.parseEnhanced(bodyContent);
-      return {
-        id: String(fm.id),
-        title,
-        content: bodyContent,
-        paragraphs,
-        customSections,
-        mode: "enhanced",
-        createdAt: String(fm.created ?? fm.createdAt ?? ""),
-        updatedAt: String(fm.updated ?? fm.updatedAt ?? ""),
-        revision: Number(fm.revision ?? 1),
-        project: fm.project != null ? String(fm.project) : undefined,
-      };
-    }
+    const { paragraphs, customSections } = this.parseEnhanced(bodyContent);
 
     return {
       id: String(fm.id),
       title,
       content: bodyContent,
-      mode: "simple",
+      paragraphs,
+      customSections,
       createdAt: String(fm.created ?? fm.createdAt ?? ""),
       updatedAt: String(fm.updated ?? fm.updatedAt ?? ""),
       revision: Number(fm.revision ?? 1),
@@ -187,16 +170,13 @@ export class NoteRepository {
       created: note.createdAt,
       updated: note.updatedAt,
       revision: note.revision,
-      mode: note.mode ?? "enhanced",
+      mode: "enhanced",
       ...(note.project ? { project: note.project } : {}),
     };
 
     let body = `# ${note.title}\n\n`;
 
-    if (
-      note.mode === "enhanced" &&
-      (note.paragraphs?.length || note.customSections?.length)
-    ) {
+    if (note.paragraphs?.length || note.customSections?.length) {
       body += this.serializeEnhanced(
         note.paragraphs ?? [],
         note.customSections ?? [],

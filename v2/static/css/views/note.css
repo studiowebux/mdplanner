@@ -1,0 +1,77 @@
+/* Note views — card, list, and detail.
+   All values use CSS vars from variables.css + index.css tokens. */
+
+/* =========================================================================
+   Card view
+   ========================================================================= */
+
+.note-card {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  transition: box-shadow var(--transition-fast);
+}
+
+.note-card:hover {
+  box-shadow: var(--card-shadow-hover);
+}
+
+.note-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+
+.note-card__title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  line-height: var(--body-line-height);
+}
+
+.note-card__title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.note-card__title a:hover {
+  color: var(--color-accent);
+}
+
+.note-card__meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-xs) var(--space-md);
+  font-size: var(--font-size-sm);
+}
+
+.note-card__meta-label {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.note-card__meta-value {
+  color: var(--color-text-secondary);
+}
+
+.note-card__excerpt {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: var(--body-line-height);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.note-card__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: auto;
+}

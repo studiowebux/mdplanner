@@ -5,6 +5,7 @@ import { Hono } from "hono";
 import { homeViewRouter } from "./home/routes.ts";
 import { milestonesRouter } from "./milestones/routes.ts";
 import { peopleRouter } from "./people/routes.tsx";
+import { notesRouter as notesViewRouter } from "./notes/routes.ts";
 import { tasksRouter } from "./tasks/routes.ts";
 import { settingsViewRouter } from "./settings/routes.ts";
 import { searchRouter } from "./search/routes.ts";
@@ -132,6 +133,7 @@ export const views = new Hono<{ Variables: AppVariables }>();
 
 views.route("/", homeViewRouter);
 views.route("/milestones", milestonesRouter);
+views.route("/notes", notesViewRouter);
 views.route("/people", peopleRouter);
 views.route("/tasks", tasksRouter);
 views.route("/settings", settingsViewRouter);

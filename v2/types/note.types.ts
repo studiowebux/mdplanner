@@ -105,7 +105,7 @@ export const CustomSectionSchema = z.object({
 export type CustomSection = z.infer<typeof CustomSectionSchema>;
 
 // ---------------------------------------------------------------------------
-// Note — enhanced mode (paragraphs + custom sections)
+// Note — always enhanced (paragraphs + custom sections)
 // ---------------------------------------------------------------------------
 
 export const NoteSchema = z.object({
@@ -118,15 +118,10 @@ export const NoteSchema = z.object({
     example: "[decision] MD Planner — SSE event naming",
   }),
   content: z.string().openapi({
-    description: "Raw markdown content (backward compat). " +
-      "Enhanced notes use paragraphs + customSections instead.",
-  }),
-  mode: z.enum(["simple", "enhanced"]).optional().openapi({
-    description:
-      "Note mode. Simple uses content string, enhanced uses paragraphs + customSections.",
+    description: "Raw markdown content (backward compat for simple notes)",
   }),
   paragraphs: z.array(NoteParagraphSchema).optional().openapi({
-    description: "Structured content blocks (enhanced mode)",
+    description: "Structured content blocks",
   }),
   customSections: z.array(CustomSectionSchema).optional().openapi({
     description: "Custom layout sections — tabs, timeline, split-view",
@@ -160,11 +155,8 @@ export const CreateNoteSchema = z.object({
   content: z.string().default("").openapi({
     description: "Raw markdown content",
   }),
-  mode: z.enum(["simple", "enhanced"]).default("enhanced").openapi({
-    description: "Note mode (default: enhanced)",
-  }),
   paragraphs: z.array(NoteParagraphSchema).optional().openapi({
-    description: "Structured content blocks (enhanced mode)",
+    description: "Structured content blocks",
   }),
   customSections: z.array(CustomSectionSchema).optional().openapi({
     description: "Custom layout sections",
