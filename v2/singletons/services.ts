@@ -6,6 +6,7 @@ import { TaskRepository } from "../repositories/task.repository.ts";
 import { PortfolioRepository } from "../repositories/portfolio.repository.ts";
 import { ProjectRepository } from "../repositories/project.repository.ts";
 import { MilestoneService } from "../services/milestone.service.ts";
+import { NoteService } from "../services/note.service.ts";
 import { PeopleService } from "../services/people.service.ts";
 import { PortfolioService } from "../services/portfolio.service.ts";
 import { ProjectService } from "../services/project.service.ts";
@@ -19,6 +20,7 @@ import { registerMilestoneEntity } from "../domains/milestone/cache.ts";
 import { registerTaskEntity } from "../domains/task/cache.ts";
 import { registerPortfolioEntity } from "../domains/portfolio/cache.ts";
 import { registerPeopleEntity } from "../domains/people/cache.ts";
+import { NoteRepository } from "../repositories/note.repository.ts";
 import { PeopleRepository } from "../repositories/people.repository.ts";
 
 export interface InitOptions {
@@ -30,6 +32,7 @@ let peopleRepo: PeopleRepository | null = null;
 let milestoneService: MilestoneService | null = null;
 let taskService: TaskService | null = null;
 let peopleService: PeopleService | null = null;
+let noteService: NoteService | null = null;
 let portfolioService: PortfolioService | null = null;
 let projectService: ProjectService | null = null;
 let cacheDb: CacheDatabase | null = null;
@@ -45,12 +48,14 @@ export function initServices(
 
   const milestoneRepo = new MilestoneRepository(projectDir);
   taskRepo = new TaskRepository(projectDir);
+  const noteRepo = new NoteRepository(projectDir);
   const portfolioRepo = new PortfolioRepository(projectDir);
   const projectRepo = new ProjectRepository(projectDir);
   peopleRepo = new PeopleRepository(projectDir);
   milestoneService = new MilestoneService(milestoneRepo, taskRepo);
   taskService = new TaskService(taskRepo, peopleRepo);
   peopleService = new PeopleService(peopleRepo);
+  noteService = new NoteService(noteRepo);
   portfolioService = new PortfolioService(portfolioRepo);
   projectService = new ProjectService(projectRepo);
 
@@ -116,6 +121,13 @@ export function getMilestoneService(): MilestoneService {
     throw new Error("Services not initialized — call initServices() first");
   }
   return milestoneService;
+}
+
+export function getNoteService(): NoteService {
+  if (!noteService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return noteService;
 }
 
 export function getPortfolioService(): PortfolioService {
