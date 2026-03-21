@@ -359,7 +359,14 @@ export function createDomainForm<T extends Entity>(cfg: {
     const values: Record<string, string> = {};
     if (item) {
       for (const f of cfg.fields) {
-        values[f.name] = String(item[f.name as keyof T] ?? "");
+        const raw = item[f.name as keyof T];
+        if (f.type === "textarea" && Array.isArray(raw)) {
+          values[f.name] = raw.join("\n");
+        } else if (f.type === "tags" && Array.isArray(raw)) {
+          values[f.name] = raw.join(",");
+        } else {
+          values[f.name] = String(raw ?? "");
+        }
       }
     }
     return (

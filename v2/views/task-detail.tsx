@@ -209,6 +209,15 @@ export const TaskDetailView: FC<Props> = (
       styles={["/css/views/task.css"]}
       scripts={[]}
     >
+      <div
+        hx-ext="sse"
+        sse-connect="/sse"
+        hx-get={`/tasks/${task.id}`}
+        hx-trigger="sse:task.updated, sse:task.deleted"
+        hx-target="#task-detail-root"
+        hx-select="#task-detail-root"
+        hx-swap="outerHTML"
+      />
       <main id="task-detail-root" class="task-detail">
         {/* Back link — matches person-detail / milestone-detail pattern */}
         <div class="task-detail__back">

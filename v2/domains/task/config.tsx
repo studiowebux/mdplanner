@@ -14,6 +14,7 @@ import {
   getPortfolioService,
   getTaskService,
 } from "../../singletons/services.ts";
+import { SECTION_DISPLAY_ORDER } from "../../constants/mod.ts";
 import {
   buildSectionOptions,
   TASK_PRIORITY_OPTIONS,
@@ -30,7 +31,7 @@ const FORM_FIELDS: FieldDef[] = [
     type: "select",
     name: "section",
     label: "Section",
-    options: [],
+    options: SECTION_DISPLAY_ORDER.map((s) => ({ value: s, label: s })),
   },
   {
     type: "select",

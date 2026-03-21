@@ -14,6 +14,7 @@ import {
   registerAutocompleteSource,
 } from "./autocomplete/routes.ts";
 import {
+  getMilestoneService,
   getPeopleService,
   getPortfolioService,
   getTaskService,
@@ -73,6 +74,42 @@ registerAutocompleteSource("tasks", {
   },
   displayKey: "title",
   valueKey: "id",
+});
+
+registerAutocompleteSource("milestones", {
+  list: () => getMilestoneService().list(),
+  search: async (q) => {
+    const all = await getMilestoneService().list();
+    const lower = q.toLowerCase();
+    return all.filter((m) => m.name.toLowerCase().includes(lower));
+  },
+  displayKey: "name",
+  valueKey: "name",
+});
+
+registerAutocompleteSource("project-tags", {
+  list: async () => {
+    const all = await getTaskService().list();
+    const tags = new Set<string>();
+    for (const t of all) {
+      for (const tag of t.tags ?? []) tags.add(tag);
+    }
+    return [...tags].sort().map((t) => ({ name: t }));
+  },
+  search: async (q) => {
+    const all = await getTaskService().list();
+    const tags = new Set<string>();
+    for (const t of all) {
+      for (const tag of t.tags ?? []) tags.add(tag);
+    }
+    const lower = q.toLowerCase();
+    return [...tags]
+      .filter((t) => t.toLowerCase().includes(lower))
+      .sort()
+      .map((t) => ({ name: t }));
+  },
+  displayKey: "name",
+  valueKey: "name",
 });
 
 registerAutocompleteSource("people-departments", {
