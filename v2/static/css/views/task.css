@@ -297,11 +297,28 @@
    Board view
    ========================================================================= */
 
+/* Board needs full-height flex chain from app-shell__content down */
+
+.domain-page:has(.task-board) {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.domain-page:has(.task-board) > :last-child {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .task-board {
   display: flex;
   gap: var(--space-md);
   overflow-x: auto;
   padding-bottom: var(--space-md);
+  flex: 1;
+  min-height: 0;
 }
 
 .task-board__column {
@@ -313,6 +330,7 @@
   background: var(--color-bg-secondary);
   border-radius: var(--card-radius);
   border: var(--border-width) var(--border-style) var(--color-border-default);
+  min-height: 0;
 }
 
 .task-board__column-header {
@@ -321,10 +339,7 @@
   justify-content: space-between;
   padding: var(--space-sm) var(--space-md);
   border-bottom: var(--border-width) var(--border-style) var(--color-border-default);
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: var(--color-bg-secondary);
+  flex-shrink: 0;
 }
 
 .task-board__column-title {
@@ -345,6 +360,8 @@
   gap: var(--space-sm);
   padding: var(--space-sm);
   flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .task-board__column-empty {

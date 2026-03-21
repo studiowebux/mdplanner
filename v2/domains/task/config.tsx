@@ -94,7 +94,7 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
   defaultView: "list",
   hideDefaultViews: true,
   styles: ["/css/views/task.css"],
-  scripts: ["/js/task-list.js", "/js/task-board.js", "/js/task-timeline.js"],
+  scripts: ["/js/task-list.js", "/js/task-board.js", "/js/task-timeline.js", "/js/task-timeline-export.js"],
   emptyMessage: "No tasks yet. Create one to get started.",
 
   stateKeys: TASK_STATE_KEYS,

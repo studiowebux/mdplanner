@@ -147,6 +147,12 @@ const ZoomControls: FC<{ current: number }> = ({ current }) => (
         {z === 1 ? "1x" : `1/${z}`}
       </button>
     ))}
+    <button id="timelineExportSVG" type="button" class="btn btn--tertiary btn--sm">
+      Export SVG
+    </button>
+    <button id="timelineExportPDF" type="button" class="btn btn--tertiary btn--sm">
+      Print
+    </button>
   </div>
 );
 
