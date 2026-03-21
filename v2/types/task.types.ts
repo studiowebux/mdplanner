@@ -234,6 +234,8 @@ export type TaskViewProps = {
   zoom?: number;
 };
 
+export type TaskSortableCol = { key: string; label: string; cls: string };
+
 export type ScheduledTask = Task & { _start: Date; _end: Date };
 
 // ---------------------------------------------------------------------------

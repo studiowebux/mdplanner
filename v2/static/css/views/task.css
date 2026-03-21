@@ -103,6 +103,23 @@
   opacity: 1;
 }
 
+.task-list__column-label--sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.task-list__column-label--sortable:hover {
+  color: var(--color-accent);
+}
+
+.task-list__column-label--sorted {
+  color: var(--color-text-primary);
+}
+
+.task-list__sort-arrow {
+  font-size: var(--font-size-xs);
+}
+
 .task-list__column-header .task-list__meta,
 .task-list__column-label {
   font-size: var(--font-size-xs);

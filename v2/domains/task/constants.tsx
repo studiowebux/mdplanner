@@ -1,7 +1,7 @@
 // Task domain view constants — table columns, row mapper, state keys.
 
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
-import type { Task } from "../../types/task.types.ts";
+import type { Task, TaskSortableCol } from "../../types/task.types.ts";
 import { statusBadgeRenderer } from "../../components/ui/status-badge.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
@@ -104,6 +104,13 @@ export const TASK_STATE_KEYS = [
   "zoom",
 ] as const;
 
+export const TASK_SORTABLE_COLS: TaskSortableCol[] = [
+  { key: "assignee", label: "Assignee", cls: "task-list__meta--assignee" },
+  { key: "milestone", label: "Milestone", cls: "task-list__meta--milestone" },
+  { key: "due_date", label: "Due", cls: "task-list__meta--due" },
+  { key: "effort", label: "Effort", cls: "task-list__meta--effort" },
+];
+
 export const TASK_PRIORITY_LABELS: Record<string, string> = {
   "1": "P1",
   "2": "P2",
@@ -131,6 +138,20 @@ export function sortTasks(tasks: Task[]): Task[] {
     }
     return a.title.localeCompare(b.title);
   });
+}
+
+/** Sort tasks within a section — uses explicit sort/order when provided, falls back to default. */
+export function sortTasksInSection(
+  tasks: Task[],
+  sort?: string,
+  order?: string,
+): Task[] {
+  if (!sort) return sortTasks(tasks);
+  const dir = order === "desc" ? -1 : 1;
+  return [...tasks].sort((a, b) =>
+    String((a as Record<string, unknown>)[sort] ?? "")
+      .localeCompare(String((b as Record<string, unknown>)[sort] ?? "")) * dir
+  );
 }
 
 /** Build section options dynamically from discovered task sections. */

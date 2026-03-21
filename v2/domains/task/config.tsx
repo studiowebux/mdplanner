@@ -195,7 +195,7 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
       const { TaskListView } = await import(
         "../../views/components/task-list.tsx"
       );
-      return <TaskListView tasks={items} />;
+      return <TaskListView tasks={items} sort={state.sort} order={state.order} />;
     }
     if (view === "board") {
       const { TaskBoardView } = await import(

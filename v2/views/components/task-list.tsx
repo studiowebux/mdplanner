@@ -7,8 +7,9 @@ import { SECTION_DISPLAY_ORDER } from "../../constants/mod.ts";
 import { groupBy } from "../../utils/group.ts";
 import { formatDate } from "../../utils/time.ts";
 import {
-  sortTasks,
+  sortTasksInSection,
   TASK_PRIORITY_LABELS,
+  TASK_SORTABLE_COLS,
 } from "../../domains/task/constants.tsx";
 
 // ---------------------------------------------------------------------------
@@ -115,17 +116,44 @@ const SectionHeader: FC<{ name: string; count: number }> = (
 // Column header — labels for the row-right metadata columns
 // ---------------------------------------------------------------------------
 
-const ColumnHeader: FC = () => (
+const SortIndicator = ({ active, order }: { active: boolean; order?: string }) => {
+  if (!active) return null;
+  return <span class="task-list__sort-arrow">{order === "desc" ? " \u25BC" : " \u25B2"}</span>;
+};
+
+const ColumnHeader: FC<{ sort?: string; order?: string }> = ({ sort, order }) => (
   <div class="task-list__row task-list__column-header" aria-hidden="true">
     <div class="task-list__row-main">
       <div class="task-list__row-left">
-        <span class="task-list__column-label">Task</span>
+        <span
+          class={`task-list__column-label task-list__column-label--sortable${sort === "title" ? " task-list__column-label--sorted" : ""}`}
+          hx-get={`/tasks/view?sort=title&order=${sort === "title" && order === "asc" ? "desc" : "asc"}`}
+          hx-target="#tasks-view"
+          hx-swap="outerHTML swap:100ms"
+          hx-include="#tasks-toolbar"
+        >
+          Task
+          <SortIndicator active={sort === "title"} order={order} />
+        </span>
       </div>
       <div class="task-list__row-right">
-        <span class="task-list__meta task-list__meta--assignee">Assignee</span>
-        <span class="task-list__meta task-list__meta--milestone">Milestone</span>
-        <span class="task-list__meta task-list__meta--due">Due</span>
-        <span class="task-list__meta task-list__meta--effort">Effort</span>
+        {TASK_SORTABLE_COLS.map((col) => {
+          const active = sort === col.key;
+          const nextOrder = active && order === "asc" ? "desc" : "asc";
+          return (
+            <span
+              key={col.key}
+              class={`task-list__meta ${col.cls} task-list__column-label--sortable${active ? " task-list__column-label--sorted" : ""}`}
+              hx-get={`/tasks/view?sort=${col.key}&order=${nextOrder}`}
+              hx-target="#tasks-view"
+              hx-swap="outerHTML swap:100ms"
+              hx-include="#tasks-toolbar"
+            >
+              {col.label}
+              <SortIndicator active={active} order={order} />
+            </span>
+          );
+        })}
       </div>
     </div>
     <div class="task-list__row-actions task-list__column-label">Actions</div>
@@ -154,7 +182,7 @@ const SectionJumpBar: FC<{ sections: string[] }> = ({ sections }) => (
 // Main component
 // ---------------------------------------------------------------------------
 
-export const TaskListView: FC<TaskViewProps> = ({ tasks }) => {
+export const TaskListView: FC<TaskViewProps & { sort?: string; order?: string }> = ({ tasks, sort, order }) => {
   if (tasks.length === 0) {
     return (
       <div class="task-list__empty">
@@ -170,10 +198,10 @@ export const TaskListView: FC<TaskViewProps> = ({ tasks }) => {
     <div class="task-list">
       <div class="task-list__sticky-header">
         {sectionNames.length > 1 && <SectionJumpBar sections={sectionNames} />}
-        <ColumnHeader />
+        <ColumnHeader sort={sort} order={order} />
       </div>
       {sectionNames.map((name) => {
-        const sorted = sortTasks(grouped[name]);
+        const sorted = sortTasksInSection(grouped[name], sort, order);
         return (
           <div key={name} class="task-list__section">
             <SectionHeader name={name} count={sorted.length} />
