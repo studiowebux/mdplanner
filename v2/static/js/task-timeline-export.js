@@ -70,7 +70,11 @@
     var inner = chart.querySelector(".task-timeline__chart-inner");
     var savedMinWidth = inner ? inner.style.minWidth : "";
 
-    var html = chart.innerHTML;
+    // Clone and strip interactive elements (zoom, export buttons)
+    var clone = chart.cloneNode(true);
+    var zoom = clone.querySelector(".task-timeline__zoom");
+    if (zoom) zoom.remove();
+    var html = clone.innerHTML;
 
     if (inner) inner.style.minWidth = savedMinWidth;
 
