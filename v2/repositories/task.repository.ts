@@ -230,7 +230,9 @@ export class TaskRepository {
 
   private async findFileById(
     id: string,
-  ): Promise<{ file: string | null; task: Task | null; sectionDir: string | null }> {
+  ): Promise<
+    { file: string | null; task: Task | null; sectionDir: string | null }
+  > {
     const sections = await this.discoverSections();
     for (const { dir, section } of sections) {
       const sectionPath = join(this.boardDir, dir);

@@ -1,21 +1,26 @@
 {
   "fmt": {
     "exclude": [
-      "src/static/",
+      "src/",
       "v2/static/js/vendor/",
       "example/",
       "docs/",
       "__trash/",
-      "dist/"
+      "dist/",
+      "main.ts",
+      "mcp.ts"
     ]
   },
   "lint": {
     "exclude": [
-      "src/static/",
+      "src/",
+      "v2/static/js/",
       "example/",
       "docs/",
       "__trash/",
-      "dist/"
+      "dist/",
+      "main.ts",
+      "mcp.ts"
     ],
     "rules": {
       "exclude": [

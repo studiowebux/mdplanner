@@ -21,7 +21,9 @@ export function rowToPerson(row: Record<string, unknown>): Person {
   if (row.email != null) person.email = row.email as string;
   if (row.phone != null) person.phone = row.phone as string;
   if (row.start_date != null) person.startDate = row.start_date as string;
-  if (row.hours_per_day != null) person.hoursPerDay = row.hours_per_day as number;
+  if (row.hours_per_day != null) {
+    person.hoursPerDay = row.hours_per_day as number;
+  }
   const wd = parseJson<string[]>(row.working_days);
   if (wd) person.workingDays = wd as Person["workingDays"];
   if (row.notes != null) person.notes = row.notes as string;

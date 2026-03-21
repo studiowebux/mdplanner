@@ -339,7 +339,8 @@
   align-items: center;
   gap: var(--space-sm);
   padding: var(--space-sm) var(--space-md);
-  border-bottom: var(--orgchart-connector-width) solid var(--color-border-default);
+  border-bottom: var(--orgchart-connector-width) solid
+    var(--color-border-default);
 }
 
 .orgchart-controls__slider {
@@ -399,7 +400,8 @@
 
 .orgchart-tree > .orgchart-node-wrapper {
   padding-top: var(--space-lg);
-  border-top: var(--orgchart-connector-width) dashed var(--color-border-default);
+  border-top: var(--orgchart-connector-width) dashed
+    var(--color-border-default);
 }
 
 .orgchart-tree > .orgchart-node-wrapper:first-child {
@@ -425,7 +427,9 @@
   min-width: var(--orgchart-node-min-w);
   max-width: var(--orgchart-node-max-w);
   cursor: pointer;
-  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .orgchart-node:hover {
@@ -484,15 +488,41 @@
   border-left: var(--orgchart-dept-border-width) solid var(--color-text-muted);
 }
 
-.orgchart-dept-0 { border-left: var(--orgchart-dept-border-width) solid var(--orgchart-dept-color-0); }
-.orgchart-dept-1 { border-left: var(--orgchart-dept-border-width) solid var(--orgchart-dept-color-1); }
-.orgchart-dept-2 { border-left: var(--orgchart-dept-border-width) solid var(--orgchart-dept-color-2); }
-.orgchart-dept-3 { border-left: var(--orgchart-dept-border-width) solid var(--orgchart-dept-color-3); }
-.orgchart-dept-4 { border-left: var(--orgchart-dept-border-width) solid var(--orgchart-dept-color-4); }
-.orgchart-dept-5 { border-left: var(--orgchart-dept-border-width) solid var(--orgchart-dept-color-5); }
-.orgchart-dept-6 { border-left: var(--orgchart-dept-border-width) solid var(--orgchart-dept-color-6); }
-.orgchart-dept-7 { border-left: var(--orgchart-dept-border-width) solid var(--orgchart-dept-color-7); }
-.orgchart-dept-none { border-left: var(--orgchart-dept-border-width) solid var(--color-text-muted); }
+.orgchart-dept-0 {
+  border-left: var(--orgchart-dept-border-width) solid
+    var(--orgchart-dept-color-0);
+}
+.orgchart-dept-1 {
+  border-left: var(--orgchart-dept-border-width) solid
+    var(--orgchart-dept-color-1);
+}
+.orgchart-dept-2 {
+  border-left: var(--orgchart-dept-border-width) solid
+    var(--orgchart-dept-color-2);
+}
+.orgchart-dept-3 {
+  border-left: var(--orgchart-dept-border-width) solid
+    var(--orgchart-dept-color-3);
+}
+.orgchart-dept-4 {
+  border-left: var(--orgchart-dept-border-width) solid
+    var(--orgchart-dept-color-4);
+}
+.orgchart-dept-5 {
+  border-left: var(--orgchart-dept-border-width) solid
+    var(--orgchart-dept-color-5);
+}
+.orgchart-dept-6 {
+  border-left: var(--orgchart-dept-border-width) solid
+    var(--orgchart-dept-color-6);
+}
+.orgchart-dept-7 {
+  border-left: var(--orgchart-dept-border-width) solid
+    var(--orgchart-dept-color-7);
+}
+.orgchart-dept-none {
+  border-left: var(--orgchart-dept-border-width) solid var(--color-text-muted);
+}
 
 /* ── Connector lines ──────────────────────────────────────────────── */
 
@@ -553,7 +583,8 @@
 /* Disabled during drag (container gets .orgchart-is-dragging via JS) */
 /* All rules share the .orgchart-tree:not(.orgchart-is-dragging) prefix for equal specificity */
 
-.orgchart-tree:not(.orgchart-is-dragging):has(.orgchart-node:hover) .orgchart-node {
+.orgchart-tree:not(.orgchart-is-dragging):has(.orgchart-node:hover)
+  .orgchart-node {
   opacity: var(--orgchart-drag-opacity);
   transition: opacity var(--transition-fast);
 }
@@ -562,11 +593,16 @@
   opacity: 1;
 }
 
-.orgchart-tree:not(.orgchart-is-dragging) .orgchart-node-wrapper:has(.orgchart-node:hover) > .orgchart-node {
+.orgchart-tree:not(.orgchart-is-dragging)
+  .orgchart-node-wrapper:has(.orgchart-node:hover)
+  > .orgchart-node {
   opacity: 1;
 }
 
-.orgchart-tree:not(.orgchart-is-dragging) .orgchart-node:hover + .orgchart-children .orgchart-node {
+.orgchart-tree:not(.orgchart-is-dragging)
+  .orgchart-node:hover
+  + .orgchart-children
+  .orgchart-node {
   opacity: 1;
 }
 

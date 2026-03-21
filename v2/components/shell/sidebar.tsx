@@ -58,7 +58,7 @@ export const SidebarContent: FC<Props> = ({
                 key={link.href}
                 link={link}
                 active={activePath === link.href}
-                pinned={true}
+                pinned
               />
             ))}
           </ul>

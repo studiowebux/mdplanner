@@ -92,8 +92,10 @@
     var nav = e.target.querySelector
       ? e.target.querySelector(".sidenav.is-open")
       : null;
-    if (!nav && e.target.classList && e.target.classList.contains("sidenav") &&
-      e.target.classList.contains("is-open")) {
+    if (
+      !nav && e.target.classList && e.target.classList.contains("sidenav") &&
+      e.target.classList.contains("is-open")
+    ) {
       nav = e.target;
     }
     if (nav && nav.id) {

@@ -15,9 +15,7 @@ peopleRouter.get("/:id", async (c) => {
   const person = await svc.getById(id);
   if (!person) return c.notFound();
   const reports = await svc.getDirectReports(id);
-  const manager = person.reportsTo
-    ? await svc.getById(person.reportsTo)
-    : null;
+  const manager = person.reportsTo ? await svc.getById(person.reportsTo) : null;
   return c.html(
     PersonDetailView({
       ...viewProps(c, "/people"),

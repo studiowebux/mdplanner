@@ -114,7 +114,15 @@ export class MilestoneRepository {
       () => atomicWrite(filePath, serializeFrontmatter(fm, body)),
     );
 
-    return { id, name, status, target: data.target, description, project: data.project, createdAt };
+    return {
+      id,
+      name,
+      status,
+      target: data.target,
+      description,
+      project: data.project,
+      createdAt,
+    };
   }
 
   async update(

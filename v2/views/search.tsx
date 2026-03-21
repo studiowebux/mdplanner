@@ -46,7 +46,7 @@ export const SearchView: FC<SearchViewProps> = ({
                   <span class="search-results__title">{r.title}</span>
                   <span
                     class="search-results__snippet"
-                    // deno-lint-ignore react/no-danger
+                    // deno-lint-ignore react-no-danger
                     dangerouslySetInnerHTML={{ __html: r.snippet }}
                   />
                 </div>

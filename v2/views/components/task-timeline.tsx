@@ -138,7 +138,9 @@ const ZoomControls: FC<{ current: number }> = ({ current }) => (
       <button
         key={z}
         type="button"
-        class={`btn btn--secondary btn--sm${current === z ? " view-toggle__btn--active" : ""}`}
+        class={`btn btn--secondary btn--sm${
+          current === z ? " view-toggle__btn--active" : ""
+        }`}
         hx-get={`/tasks/view?zoom=${z}`}
         hx-target="#tasks-view"
         hx-swap="outerHTML"
@@ -147,10 +149,18 @@ const ZoomControls: FC<{ current: number }> = ({ current }) => (
         {z === 1 ? "1x" : `1/${z}`}
       </button>
     ))}
-    <button id="timelineExportSVG" type="button" class="btn btn--tertiary btn--sm">
+    <button
+      id="timelineExportSVG"
+      type="button"
+      class="btn btn--tertiary btn--sm"
+    >
       Export SVG
     </button>
-    <button id="timelineExportPDF" type="button" class="btn btn--tertiary btn--sm">
+    <button
+      id="timelineExportPDF"
+      type="button"
+      class="btn btn--tertiary btn--sm"
+    >
       Print
     </button>
   </div>
@@ -199,7 +209,10 @@ export const TaskTimelineView: FC<TaskViewProps> = ({ tasks, zoom = 1 }) => {
           <>
             <ZoomControls current={zoom} />
             <div class="task-timeline__chart">
-              <div class="task-timeline__chart-inner" data-min-width={chartWidth}>
+              <div
+                class="task-timeline__chart-inner"
+                data-min-width={chartWidth}
+              >
                 {/* Header — month markers */}
                 <div class="task-timeline__row task-timeline__row--header">
                   <div class="task-timeline__label task-timeline__label--header">
@@ -210,7 +223,9 @@ export const TaskTimelineView: FC<TaskViewProps> = ({ tasks, zoom = 1 }) => {
                       <div
                         key={m.label}
                         class={`task-timeline__month-marker${
-                          m.quarter ? " task-timeline__month-marker--quarter" : ""
+                          m.quarter
+                            ? " task-timeline__month-marker--quarter"
+                            : ""
                         }`}
                         data-left={m.leftPct}
                       >
@@ -225,7 +240,13 @@ export const TaskTimelineView: FC<TaskViewProps> = ({ tasks, zoom = 1 }) => {
                   const blocked = t.blocked_by && t.blocked_by.length > 0;
                   const pos = barDataAttrs(t, rangeStart, totalDays);
                   return (
-                    <div key={t.id} class={`task-timeline__row${t.completed ? " task-timeline__row--completed" : ""}`} data-task-id={t.id}>
+                    <div
+                      key={t.id}
+                      class={`task-timeline__row${
+                        t.completed ? " task-timeline__row--completed" : ""
+                      }`}
+                      data-task-id={t.id}
+                    >
                       <div class="task-timeline__label">
                         {t.priority && (
                           <span
@@ -235,7 +256,10 @@ export const TaskTimelineView: FC<TaskViewProps> = ({ tasks, zoom = 1 }) => {
                               `P${t.priority}`}
                           </span>
                         )}
-                        <a href={`/tasks/${t.id}`} class="task-timeline__row-title">
+                        <a
+                          href={`/tasks/${t.id}`}
+                          class="task-timeline__row-title"
+                        >
                           {t.title}
                         </a>
                         {blocked && (
@@ -253,7 +277,9 @@ export const TaskTimelineView: FC<TaskViewProps> = ({ tasks, zoom = 1 }) => {
                           <div
                             key={`line-${m.label}`}
                             class={`task-timeline__grid-line${
-                              m.quarter ? " task-timeline__grid-line--quarter" : ""
+                              m.quarter
+                                ? " task-timeline__grid-line--quarter"
+                                : ""
                             }`}
                             data-left={m.leftPct}
                           />
@@ -262,13 +288,15 @@ export const TaskTimelineView: FC<TaskViewProps> = ({ tasks, zoom = 1 }) => {
                         <div
                           class={`task-timeline__bar task-timeline__bar--p${
                             t.priority ?? 3
-                          }${t.completed ? " task-timeline__bar--completed" : ""}`}
+                          }${
+                            t.completed ? " task-timeline__bar--completed" : ""
+                          }`}
                           data-left={pos.left}
                           data-width={pos.width}
                         >
                           <span class="task-timeline__bar-dates">
-                            {formatShortDate(t._start)} — {formatShortDate(t._end)}
-                            {" "}
+                            {formatShortDate(t._start)} —{" "}
+                            {formatShortDate(t._end)}{" "}
                             ({daysBetween(t._start, t._end)}d)
                           </span>
                         </div>

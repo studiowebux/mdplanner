@@ -165,7 +165,11 @@ export class PeopleService {
       const personSkills = (p.skills ?? []).map((s) => s.toLowerCase());
       const matched = required.filter((r) => personSkills.includes(r));
       if (matched.length > 0) {
-        matches.push({ person: p, matchedSkills: matched, score: matched.length });
+        matches.push({
+          person: p,
+          matchedSkills: matched,
+          score: matched.length,
+        });
       }
     }
 

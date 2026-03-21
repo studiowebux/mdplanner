@@ -25,14 +25,14 @@
     warningBg: "#fff3e0",
     warningText: "#000000",
     // Category palette (dept colors)
-    cat0: "#e57200",  // orange
-    cat1: "#4c8c2b",  // green
-    cat2: "#0085ad",  // blue
-    cat3: "#003865",  // navy
-    cat4: "#642f6c",  // purple
-    cat5: "#ac145a",  // pink
-    cat6: "#f2a900",  // yellow-dark
-    cat7: "#44693d",  // green-dark
+    cat0: "#e57200", // orange
+    cat1: "#4c8c2b", // green
+    cat2: "#0085ad", // blue
+    cat3: "#003865", // navy
+    cat4: "#642f6c", // purple
+    cat5: "#ac145a", // pink
+    cat6: "#f2a900", // yellow-dark
+    cat7: "#44693d", // green-dark
   };
 
   function getExportStyles() {
@@ -122,9 +122,12 @@
       "  border-radius: 9999px;",
       "  white-space: nowrap;",
       "}",
-      ".person-card__badge--human { background: " + C.successBg + "; color: " + C.successText + "; }",
-      ".person-card__badge--ai { background: " + C.bgSecondary + "; color: " + C.textPrimary + "; }",
-      ".person-card__badge--hybrid { background: " + C.warningBg + "; color: " + C.warningText + "; }",
+      ".person-card__badge--human { background: " + C.successBg + "; color: " +
+      C.successText + "; }",
+      ".person-card__badge--ai { background: " + C.bgSecondary + "; color: " +
+      C.textPrimary + "; }",
+      ".person-card__badge--hybrid { background: " + C.warningBg + "; color: " +
+      C.warningText + "; }",
       ".orgchart-children {",
       "  display: flex;",
       "  gap: 1.5rem;",
@@ -226,8 +229,7 @@
     // Remove ALL constraints: position off-screen, unlimited width/height,
     // no overflow clipping, so the tree can expand to its natural size.
     vp.style.transform = "translate(0px, 0px) scale(1)";
-    container.style.cssText =
-      "position: fixed; left: -99999px; top: 0; " +
+    container.style.cssText = "position: fixed; left: -99999px; top: 0; " +
       "width: max-content; height: max-content; " +
       "overflow: visible; border: none;";
     void vp.offsetHeight;
@@ -265,7 +267,9 @@
     var styles = getExportStyles();
     var svg = [
       '<?xml version="1.0" encoding="UTF-8"?>',
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + data.width + ' ' + data.height + '" width="' + data.width + '" height="' + data.height + '">',
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + data.width +
+      " " + data.height + '" width="' + data.width + '" height="' +
+      data.height + '">',
       "  <style>",
       styles,
       "  </style>",
@@ -281,7 +285,8 @@
     var blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
     var url = URL.createObjectURL(blob);
     var link = document.createElement("a");
-    link.download = "orgchart-" + new Date().toISOString().split("T")[0] + ".svg";
+    link.download = "orgchart-" + new Date().toISOString().split("T")[0] +
+      ".svg";
     link.href = url;
     link.click();
     URL.revokeObjectURL(url);
@@ -296,7 +301,8 @@
     var pageStyles = [
       "* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }",
       "@page { size: A4 landscape; margin: 1cm; }",
-      "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: white; margin: 0; padding: 0; min-width: " + data.width + "px; }",
+      "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: white; margin: 0; padding: 0; min-width: " +
+      data.width + "px; }",
     ].join("\n");
 
     var html = "<!DOCTYPE html><html><head><title>Org Chart</title>" +
@@ -313,7 +319,8 @@
     // Hidden iframe — avoids popup blockers and document.write quirks
     var iframe = document.createElement("iframe");
     iframe.setAttribute("aria-hidden", "true");
-    iframe.style.cssText = "position:fixed;left:-99999px;width:0;height:0;border:none;";
+    iframe.style.cssText =
+      "position:fixed;left:-99999px;width:0;height:0;border:none;";
     document.body.appendChild(iframe);
 
     var idoc = iframe.contentDocument || iframe.contentWindow.document;
@@ -350,17 +357,25 @@
     setTimeout(function () {
       iframe.contentWindow.print();
       // Clean up after print dialog closes
-      setTimeout(function () { document.body.removeChild(iframe); }, 1000);
+      setTimeout(function () {
+        document.body.removeChild(iframe);
+      }, 1000);
     }, 250);
   }
 
   // ── Delegated click handlers ────────────────────────────────────
 
   document.addEventListener("click", function (e) {
-    if (e.target.id === "orgchartExportSVG" || e.target.closest("#orgchartExportSVG")) {
+    if (
+      e.target.id === "orgchartExportSVG" ||
+      e.target.closest("#orgchartExportSVG")
+    ) {
       exportSVG();
     }
-    if (e.target.id === "orgchartExportPDF" || e.target.closest("#orgchartExportPDF")) {
+    if (
+      e.target.id === "orgchartExportPDF" ||
+      e.target.closest("#orgchartExportPDF")
+    ) {
       exportPDF();
     }
   });

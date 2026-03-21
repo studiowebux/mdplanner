@@ -17,7 +17,9 @@ export const PersonCard: FC<Props> = ({ person, q }) => {
       <header class="person-card__header">
         <div class="person-card__identity">
           <span
-            class={`person-card__avatar person-card__avatar--${person.agentType ?? "human"}`}
+            class={`person-card__avatar person-card__avatar--${
+              person.agentType ?? "human"
+            }`}
           >
             {initials}
           </span>

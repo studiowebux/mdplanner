@@ -52,8 +52,7 @@ export const PEOPLE_TABLE_COLUMNS: ColumnDef[] = [
   {
     key: "email",
     label: "Email",
-    render: (v) =>
-      v ? <a href={`mailto:${v}`}>{String(v)}</a> : "",
+    render: (v) => v ? <a href={`mailto:${v}`}>{String(v)}</a> : "",
   },
   {
     key: "agentType",
@@ -76,7 +75,6 @@ export const PEOPLE_TABLE_COLUMNS: ColumnDef[] = [
 ];
 
 export const PEOPLE_DOMAIN = "people";
-
 
 export const PEOPLE_STATE_KEYS = [
   "view",

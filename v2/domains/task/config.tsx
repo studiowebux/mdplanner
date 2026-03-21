@@ -3,11 +3,7 @@
 // No grid view — list is the primary layout with section grouping.
 
 import type { DomainConfig } from "../../factories/domain.types.ts";
-import type {
-  CreateTask,
-  Task,
-  UpdateTask,
-} from "../../types/task.types.ts";
+import type { CreateTask, Task, UpdateTask } from "../../types/task.types.ts";
 import {
   getMilestoneService,
   getPeopleService,
@@ -94,7 +90,12 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
   defaultView: "list",
   hideDefaultViews: true,
   styles: ["/css/views/task.css"],
-  scripts: ["/js/task-list.js", "/js/task-board.js", "/js/task-timeline.js", "/js/task-timeline-export.js"],
+  scripts: [
+    "/js/task-list.js",
+    "/js/task-board.js",
+    "/js/task-timeline.js",
+    "/js/task-timeline-export.js",
+  ],
   emptyMessage: "No tasks yet. Create one to get started.",
 
   stateKeys: TASK_STATE_KEYS,
@@ -143,7 +144,10 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
     parseFormBody(FORM_FIELDS, body, { splitTextarea: true }) as CreateTask,
 
   parseUpdate: (body) =>
-    parseFormBody(FORM_FIELDS, body, { clearEmpty: true, splitTextarea: true }) as Partial<UpdateTask>,
+    parseFormBody(FORM_FIELDS, body, {
+      clearEmpty: true,
+      splitTextarea: true,
+    }) as Partial<UpdateTask>,
 
   getService: () => getTaskService(),
 
@@ -158,7 +162,9 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
 
   extractFilterOptions: async (items) => {
     const sections = buildSectionOptions(items);
-    const assigneeIds = [...new Set(items.map((t) => t.assignee).filter(Boolean) as string[])];
+    const assigneeIds = [
+      ...new Set(items.map((t) => t.assignee).filter(Boolean) as string[]),
+    ];
     const [portfolio, milestones, people] = await Promise.all([
       getPortfolioService().list(),
       getMilestoneService().list(),
@@ -199,7 +205,14 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
       const peopleOptions = people
         .map((p) => ({ value: p.id, label: p.name }))
         .sort((a, b) => a.label.localeCompare(b.label));
-      return <TaskListView tasks={items} sort={state.sort} order={state.order} peopleOptions={peopleOptions} />;
+      return (
+        <TaskListView
+          tasks={items}
+          sort={state.sort}
+          order={state.order}
+          peopleOptions={peopleOptions}
+        />
+      );
     }
     if (view === "board") {
       return <TaskBoardView tasks={items} />;

@@ -87,7 +87,9 @@ export type DomainConfig<T extends Entity, C, U> = {
 
   // Optional: extract unique values for a filter field from all items.
   // Each key maps to either plain strings (value === label) or value/label pairs.
-  extractFilterOptions?: (items: T[]) => DynamicFilterOptions | Promise<DynamicFilterOptions>;
+  extractFilterOptions?: (
+    items: T[],
+  ) => DynamicFilterOptions | Promise<DynamicFilterOptions>;
 
   // Optional: custom text search predicate (defaults to searching all string fields).
   searchPredicate?: (item: T, q: string) => boolean;
@@ -108,7 +110,12 @@ export type DomainConfig<T extends Entity, C, U> = {
   // Optional: render custom view content for extra view modes.
   // Called by the factory when state.view matches an extraViewModes key.
   // Receives the view key, filter state, and filtered items.
-  customViewRenderer?: (view: string, state: DomainFilterState, items: T[], nonce?: string) => Promise<ReturnType<FC> | undefined>;
+  customViewRenderer?: (
+    view: string,
+    state: DomainFilterState,
+    items: T[],
+    nonce?: string,
+  ) => Promise<ReturnType<FC> | undefined>;
 
   // Optional: detail page renderer (if the domain has a detail view).
   DetailView?: FC<ViewProps & { item: T }>;

@@ -7,7 +7,11 @@ import { mergeParams, readUiState, writeUiState } from "../utils/ui-state.ts";
 import { hxTrigger } from "../utils/hx-trigger.ts";
 import { viewProps } from "../middleware/view-props.ts";
 import type { AppVariables, ViewMode } from "../types/app.ts";
-import type { DomainConfig, DomainFilterState, Entity } from "./domain.types.ts";
+import type {
+  DomainConfig,
+  DomainFilterState,
+  Entity,
+} from "./domain.types.ts";
 import { createDomainPage } from "./domain-view.tsx";
 import { createDomainForm } from "./domain-view.tsx";
 
@@ -139,7 +143,12 @@ export function createDomainRoutes<T extends Entity, C, U>(
     const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
     const filtered = applyFilters(all, state);
     const customContent = extraKeys.has(state.view) && cfg.customViewRenderer
-      ? await cfg.customViewRenderer(state.view, state, filtered, c.get("nonce"))
+      ? await cfg.customViewRenderer(
+        state.view,
+        state,
+        filtered,
+        c.get("nonce"),
+      )
       : undefined;
     return c.html(
       DomainPage({
@@ -158,7 +167,12 @@ export function createDomainRoutes<T extends Entity, C, U>(
     const all = await cfg.getService().list();
     const filtered = applyFilters(all, state);
     const customContent = extraKeys.has(state.view) && cfg.customViewRenderer
-      ? await cfg.customViewRenderer(state.view, state, filtered, c.get("nonce"))
+      ? await cfg.customViewRenderer(
+        state.view,
+        state,
+        filtered,
+        c.get("nonce"),
+      )
       : undefined;
     return c.html(
       DomainViewContainer({

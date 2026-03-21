@@ -64,8 +64,7 @@ export function registerPeopleTools(server: McpServer): void {
   server.registerTool(
     "get_people_summary",
     {
-      description:
-        "Get people registry summary statistics: total headcount, " +
+      description: "Get people registry summary statistics: total headcount, " +
         "breakdown by department.",
       inputSchema: {},
     },
@@ -160,8 +159,7 @@ export function registerPeopleTools(server: McpServer): void {
   server.registerTool(
     "get_person_by_name",
     {
-      description:
-        "Get a person by their name (case-insensitive). " +
+      description: "Get a person by their name (case-insensitive). " +
         "Prefer this over list_people when the name is known.",
       inputSchema: {
         name: PersonSchema.shape.name.describe("Person name"),
@@ -178,8 +176,7 @@ export function registerPeopleTools(server: McpServer): void {
   server.registerTool(
     "list_people_by_skill",
     {
-      description:
-        "List people who have a specific skill. " +
+      description: "List people who have a specific skill. " +
         "Use this to find candidates for task assignment.",
       inputSchema: ListPeopleBySkillSchema.shape,
     },

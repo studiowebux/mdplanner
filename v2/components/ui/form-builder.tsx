@@ -231,7 +231,17 @@ const Field: FC<
 };
 
 export const FormBuilder: FC<Props> = (
-  { id, title, fields, values, displayValues, submitLabel, action, method, open },
+  {
+    id,
+    title,
+    fields,
+    values,
+    displayValues,
+    submitLabel,
+    action,
+    method,
+    open,
+  },
 ) => (
   <Sidenav id={id} title={title} open={open}>
     <form

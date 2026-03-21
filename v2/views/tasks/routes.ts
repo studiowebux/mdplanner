@@ -6,10 +6,7 @@ import { taskConfig } from "../../domains/task/config.tsx";
 import type { AppVariables } from "../../types/app.ts";
 import { getTaskService } from "../../singletons/services.ts";
 import { publish } from "../../singletons/event-bus.ts";
-import {
-  resolveTaskDetailProps,
-  TaskDetailView,
-} from "../task-detail.tsx";
+import { resolveTaskDetailProps, TaskDetailView } from "../task-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 

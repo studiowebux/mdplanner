@@ -23,7 +23,10 @@
       return;
     }
     // Click outside — close all open lists
-    if (!e.target.closest(".form__autocomplete") && !e.target.closest(".form__tags")) {
+    if (
+      !e.target.closest(".form__autocomplete") &&
+      !e.target.closest(".form__tags")
+    ) {
       var lists = document.querySelectorAll(".form__autocomplete-list");
       for (var i = 0; i < lists.length; i++) lists[i].innerHTML = "";
     }

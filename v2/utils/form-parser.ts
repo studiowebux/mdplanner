@@ -38,7 +38,9 @@ export function parseFormBody(
         result[field.name] = Number(val);
         break;
       case "tags":
-        result[field.name] = val.split(",").map((s) => s.trim()).filter(Boolean);
+        result[field.name] = val.split(",").map((s) => s.trim()).filter(
+          Boolean,
+        );
         break;
       case "textarea":
         result[field.name] = splitTextarea ? val.split("\n") : val;

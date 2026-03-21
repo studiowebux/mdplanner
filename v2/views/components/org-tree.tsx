@@ -35,7 +35,11 @@ const OrgNode: FC<NodeProps> = ({ node, level, allDepts }) => {
         data-member-id={node.id}
         draggable="true"
       >
-        <div class={`orgchart-node-header orgchart-dept-${deptIdx >= 0 ? deptIdx : "none"}`}>
+        <div
+          class={`orgchart-node-header orgchart-dept-${
+            deptIdx >= 0 ? deptIdx : "none"
+          }`}
+        >
           <div
             class="orgchart-drag-handle"
             title="Drag to change reporting structure"
@@ -44,7 +48,9 @@ const OrgNode: FC<NodeProps> = ({ node, level, allDepts }) => {
           </div>
           <div class="orgchart-node-identity">
             <span
-              class={`person-card__avatar person-card__avatar--${node.agentType ?? "human"}`}
+              class={`person-card__avatar person-card__avatar--${
+                node.agentType ?? "human"
+              }`}
             >
               {initials}
             </span>

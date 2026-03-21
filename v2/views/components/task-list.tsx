@@ -18,7 +18,9 @@ import {
 
 type PeopleOption = { value: string; label: string };
 
-const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = ({ task, peopleOptions }) => (
+const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = (
+  { task, peopleOptions },
+) => (
   <div
     class={`task-list__row${
       task.completed ? " task-list__row--completed" : ""
@@ -98,7 +100,13 @@ const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = ({ task, peo
         >
           <option value="">Unassigned</option>
           {peopleOptions.map((p) => (
-            <option key={p.value} value={p.value} selected={p.value === task.assignee}>{p.label}</option>
+            <option
+              key={p.value}
+              value={p.value}
+              selected={p.value === task.assignee}
+            >
+              {p.label}
+            </option>
           ))}
         </select>
       )}
@@ -145,18 +153,30 @@ const SectionHeader: FC<{ name: string; count: number }> = (
 // Column header — labels for the row-right metadata columns
 // ---------------------------------------------------------------------------
 
-const SortIndicator = ({ active, order }: { active: boolean; order?: string }) => {
+const SortIndicator = (
+  { active, order }: { active: boolean; order?: string },
+) => {
   if (!active) return null;
-  return <span class="task-list__sort-arrow">{order === "desc" ? " \u25BC" : " \u25B2"}</span>;
+  return (
+    <span class="task-list__sort-arrow">
+      {order === "desc" ? " \u25BC" : " \u25B2"}
+    </span>
+  );
 };
 
-const ColumnHeader: FC<{ sort?: string; order?: string }> = ({ sort, order }) => (
+const ColumnHeader: FC<{ sort?: string; order?: string }> = (
+  { sort, order },
+) => (
   <div class="task-list__row task-list__column-header" aria-hidden="true">
     <div class="task-list__row-main">
       <div class="task-list__row-left">
         <span
-          class={`task-list__column-label task-list__column-label--sortable${sort === "title" ? " task-list__column-label--sorted" : ""}`}
-          hx-get={`/tasks/view?sort=title&order=${sort === "title" && order === "asc" ? "desc" : "asc"}`}
+          class={`task-list__column-label task-list__column-label--sortable${
+            sort === "title" ? " task-list__column-label--sorted" : ""
+          }`}
+          hx-get={`/tasks/view?sort=title&order=${
+            sort === "title" && order === "asc" ? "desc" : "asc"
+          }`}
           hx-target="#tasks-view"
           hx-swap="outerHTML swap:100ms"
           hx-include="#tasks-toolbar"
@@ -172,7 +192,9 @@ const ColumnHeader: FC<{ sort?: string; order?: string }> = ({ sort, order }) =>
           return (
             <span
               key={col.key}
-              class={`task-list__meta ${col.cls} task-list__column-label--sortable${active ? " task-list__column-label--sorted" : ""}`}
+              class={`task-list__meta ${col.cls} task-list__column-label--sortable${
+                active ? " task-list__column-label--sorted" : ""
+              }`}
               hx-get={`/tasks/view?sort=${col.key}&order=${nextOrder}`}
               hx-target="#tasks-view"
               hx-swap="outerHTML swap:100ms"
@@ -217,7 +239,9 @@ type ListProps = TaskViewProps & {
   peopleOptions?: { value: string; label: string }[];
 };
 
-export const TaskListView: FC<ListProps> = ({ tasks, sort, order, peopleOptions }) => {
+export const TaskListView: FC<ListProps> = (
+  { tasks, sort, order, peopleOptions },
+) => {
   if (tasks.length === 0) {
     return (
       <div class="task-list__empty">
@@ -241,7 +265,9 @@ export const TaskListView: FC<ListProps> = ({ tasks, sort, order, peopleOptions 
           <div key={name} class="task-list__section">
             <SectionHeader name={name} count={sorted.length} />
             <div class="task-list__rows">
-              {sorted.map((t) => <TaskRow key={t.id} task={t} peopleOptions={peopleOptions} />)}
+              {sorted.map((t) => (
+                <TaskRow key={t.id} task={t} peopleOptions={peopleOptions} />
+              ))}
             </div>
           </div>
         );

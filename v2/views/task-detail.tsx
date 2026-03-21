@@ -402,7 +402,7 @@ export const TaskDetailView: FC<Props> = (
                     {task.claimedBy}
                     {task.claimedAt && (
                       <span class="task-detail__meta-hint">
-                        {" "}({timeAgo(task.claimedAt)})
+                        &nbsp;({timeAgo(task.claimedAt)})
                       </span>
                     )}
                   </MetaField>
@@ -508,7 +508,9 @@ export const TaskDetailView: FC<Props> = (
                 <h2>Attachments</h2>
                 <ul class="task-detail__files">
                   {task.attachments.map((a) => (
-                    <li key={a}><code>{a}</code></li>
+                    <li key={a}>
+                      <code>{a}</code>
+                    </li>
                   ))}
                 </ul>
               </section>
@@ -520,7 +522,9 @@ export const TaskDetailView: FC<Props> = (
                 <h2>Files</h2>
                 <ul class="task-detail__files">
                   {task.files.map((f) => (
-                    <li key={f}><code>{f}</code></li>
+                    <li key={f}>
+                      <code>{f}</code>
+                    </li>
                   ))}
                 </ul>
               </section>

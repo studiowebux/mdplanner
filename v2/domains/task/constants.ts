@@ -1,7 +1,12 @@
 // Task domain constants.
 
 /** Keys stored in the markdown body, not in frontmatter. */
-export const TASK_BODY_KEYS = ["title", "section", "children", "description"] as const;
+export const TASK_BODY_KEYS = [
+  "title",
+  "section",
+  "children",
+  "description",
+] as const;
 
 export const TASK_TABLE = "tasks";
 

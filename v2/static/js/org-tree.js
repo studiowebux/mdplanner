@@ -22,8 +22,8 @@
   function applyTransform() {
     var vp = document.getElementById("orgchartViewport");
     if (vp) {
-      vp.style.transform =
-        "translate(" + panX + "px, " + panY + "px) scale(" + zoom + ")";
+      vp.style.transform = "translate(" + panX + "px, " + panY + "px) scale(" +
+        zoom + ")";
     }
   }
 
@@ -60,7 +60,11 @@
     });
 
     // Add padding around content (tree has internal padding + connectors need space)
-    var pad = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--space-xl")) * 16 || 32;
+    var pad = parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue(
+            "--space-xl",
+          ),
+        ) * 16 || 32;
     var contentW = maxX - minX + pad * 2;
     var contentH = maxY - minY + pad * 2;
     minX -= pad;
@@ -202,7 +206,9 @@
       if (res.ok && window.toast) {
         window.toast({
           type: "success",
-          message: newManagerId ? "Reporting structure updated" : "Manager removed",
+          message: newManagerId
+            ? "Reporting structure updated"
+            : "Manager removed",
         });
       }
     });
@@ -215,7 +221,9 @@
     clearDropStates();
     currentDropTargetId = id;
     if (!id) return;
-    var node = document.querySelector('.orgchart-node[data-member-id="' + id + '"]');
+    var node = document.querySelector(
+      '.orgchart-node[data-member-id="' + id + '"]',
+    );
     if (!node) return;
     if (isDescendantOf(draggedId, id)) {
       node.classList.add("orgchart-drop-invalid");
@@ -242,7 +250,9 @@
     ghost.classList.add("orgchart-drag-ghost");
     document.body.appendChild(ghost);
     e.dataTransfer.setDragImage(ghost, ghostW / 2, ghostH / 2);
-    setTimeout(function () { document.body.removeChild(ghost); }, 0);
+    setTimeout(function () {
+      document.body.removeChild(ghost);
+    }, 0);
 
     // Delay visual change so ghost captures clean state
     setTimeout(function () {
@@ -290,7 +300,9 @@
 
     e.preventDefault();
     var targetId = node.dataset.memberId;
-    e.dataTransfer.dropEffect = isDescendantOf(draggedId, targetId) ? "none" : "move";
+    e.dataTransfer.dropEffect = isDescendantOf(draggedId, targetId)
+      ? "none"
+      : "move";
     setDropTarget(targetId);
   });
 
@@ -345,7 +357,9 @@
       if (isOrgActive) {
         isOrgActive = false;
         canvasSized = false;
-        document.documentElement.style.removeProperty("--orgchart-canvas-height");
+        document.documentElement.style.removeProperty(
+          "--orgchart-canvas-height",
+        );
       }
       return;
     }
@@ -354,11 +368,15 @@
     if (!canvasSized) {
       var top = container.getBoundingClientRect().top;
       var cs = getComputedStyle(container);
-      var borderV = parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
+      var borderV = parseFloat(cs.borderTopWidth) +
+        parseFloat(cs.borderBottomWidth);
       var page = container.closest(".domain-page");
       var padB = page ? parseFloat(getComputedStyle(page).paddingBottom) : 0;
       var h = window.innerHeight - top - borderV - padB;
-      document.documentElement.style.setProperty("--orgchart-canvas-height", h + "px");
+      document.documentElement.style.setProperty(
+        "--orgchart-canvas-height",
+        h + "px",
+      );
       canvasSized = true;
     }
 

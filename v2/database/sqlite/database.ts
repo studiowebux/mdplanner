@@ -38,8 +38,12 @@ export class CacheDatabase {
     // Graceful shutdown — close db on process exit to prevent corruption
     const cleanup = () => this.close();
     globalThis.addEventListener("unload", cleanup);
-    try { Deno.addSignalListener("SIGINT", cleanup); } catch { /* workers */ }
-    try { Deno.addSignalListener("SIGTERM", cleanup); } catch { /* workers */ }
+    try {
+      Deno.addSignalListener("SIGINT", cleanup);
+    } catch { /* workers */ }
+    try {
+      Deno.addSignalListener("SIGTERM", cleanup);
+    } catch { /* workers */ }
   }
 
   query<T = QueryResult>(sql: string, params: BindParams = []): T[] {

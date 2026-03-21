@@ -9,7 +9,12 @@ import { EmptyState } from "../components/ui/empty-state.tsx";
 import { FormBuilder } from "../components/ui/form-builder.tsx";
 import type { FieldDef } from "../components/ui/form-builder.tsx";
 import type { ViewMode, ViewProps } from "../types/app.ts";
-import type { DomainConfig, DomainFilterState, DynamicFilterOptions, Entity } from "./domain.types.ts";
+import type {
+  DomainConfig,
+  DomainFilterState,
+  DynamicFilterOptions,
+  Entity,
+} from "./domain.types.ts";
 
 // ---------------------------------------------------------------------------
 // View toggle buttons
@@ -142,7 +147,9 @@ function GridView<T extends Entity>(
 // View container — swapped via htmx on filter/toggle/SSE
 // ---------------------------------------------------------------------------
 
-export function createDomainViewContainer<T extends Entity>(cfg: DomainConfig<T, unknown, unknown>) {
+export function createDomainViewContainer<T extends Entity>(
+  cfg: DomainConfig<T, unknown, unknown>,
+) {
   const extraKeys = new Set((cfg.extraViewModes ?? []).map((m) => m.key));
 
   const DomainViewContainer: FC<{
@@ -163,7 +170,13 @@ export function createDomainViewContainer<T extends Entity>(cfg: DomainConfig<T,
         </span>
       )}
       {fragment && (
-        <ViewToggleButtons domain={cfg.name} view={state.view} oobSwap="true" extraModes={cfg.extraViewModes} hideDefault={cfg.hideDefaultViews} />
+        <ViewToggleButtons
+          domain={cfg.name}
+          view={state.view}
+          oobSwap="true"
+          extraModes={cfg.extraViewModes}
+          hideDefault={cfg.hideDefaultViews}
+        />
       )}
       {fragment && (
         <div
@@ -199,7 +212,15 @@ export function createDomainViewContainer<T extends Entity>(cfg: DomainConfig<T,
           />
         )
         : cfg.Card
-        ? <GridView Card={cfg.Card} items={items} toRow={cfg.toRow} name={cfg.name} q={state.q} />
+        ? (
+          <GridView
+            Card={cfg.Card}
+            items={items}
+            toRow={cfg.toRow}
+            name={cfg.name}
+            q={state.q}
+          />
+        )
         : <EmptyState message={cfg.emptyMessage} />}
     </div>
   );
@@ -211,7 +232,9 @@ export function createDomainViewContainer<T extends Entity>(cfg: DomainConfig<T,
 // Full page — toolbar + view container + form container
 // ---------------------------------------------------------------------------
 
-export function createDomainPage<T extends Entity>(cfg: DomainConfig<T, unknown, unknown>) {
+export function createDomainPage<T extends Entity>(
+  cfg: DomainConfig<T, unknown, unknown>,
+) {
   const ViewContainer = createDomainViewContainer(cfg);
 
   type PageProps = ViewProps & {
@@ -328,11 +351,20 @@ export function createDomainPage<T extends Entity>(cfg: DomainConfig<T, unknown,
                 view={state.view}
               />
             </div>
-            <ViewToggleButtons domain={cfg.name} view={state.view} extraModes={cfg.extraViewModes} hideDefault={cfg.hideDefaultViews} />
+            <ViewToggleButtons
+              domain={cfg.name}
+              view={state.view}
+              extraModes={cfg.extraViewModes}
+              hideDefault={cfg.hideDefaultViews}
+            />
           </div>
         </div>
 
-        <ViewContainer items={items} state={state} customContent={customContent} />
+        <ViewContainer
+          items={items}
+          state={state}
+          customContent={customContent}
+        />
       </main>
       <div id={`${cfg.name}-form-container`} />
     </MainLayout>

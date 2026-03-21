@@ -36,7 +36,9 @@ export const PersonDetailView: FC<Props> = (
         <header class="person-detail__header">
           <div class="person-detail__identity">
             <span
-              class={`person-card__avatar person-card__avatar--${person.agentType ?? "human"}`}
+              class={`person-card__avatar person-card__avatar--${
+                person.agentType ?? "human"
+              }`}
             >
               {initials}
             </span>
@@ -189,7 +191,7 @@ export const PersonDetailView: FC<Props> = (
                   <a href={`/people/${r.id}`}>{r.name}</a>
                   {r.title && (
                     <span class="person-detail__report-title">
-                      {" "}&mdash; {r.title}
+                      &nbsp;&mdash; {r.title}
                     </span>
                   )}
                 </li>
