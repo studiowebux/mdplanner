@@ -141,6 +141,117 @@
   --orgchart-dept-color-5: var(--color-cat-pink);
   --orgchart-dept-color-6: var(--color-cat-yellow-dark);
   --orgchart-dept-color-7: var(--color-cat-green-dark);
+
+  /* ── Component tokens ────────────────────────────────────────────────── */
+
+  /* Typography weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --body-line-height: 1.6;
+
+  /* Card */
+  --card-bg: var(--color-bg-primary);
+  --card-border: 1px solid var(--color-border-default);
+  --card-radius: var(--radius-lg);
+  --card-padding: var(--space-lg);
+  --card-gap: var(--space-md);
+  --card-shadow: var(--shadow-sm);
+  --card-shadow-hover: var(--shadow-md);
+  --card-opacity-muted: 0.5;
+  --card-opacity-completed: 0.9;
+  --card-description-max-height: 16rem;
+  --card-description-fade: 2rem;
+
+  /* Avatar */
+  --avatar-size: var(--space-xl);
+  --avatar-font-size: var(--font-size-sm);
+
+  /* Badge */
+  --badge-padding: var(--space-xs) var(--space-sm);
+  --badge-font-weight: 500;
+
+  /* Progress bar */
+  --progress-bar-height: 6px;
+
+  /* Grid */
+  --grid-col-min: 320px;
+  --grid-gap: var(--space-lg);
+
+  /* Page */
+  --page-padding: var(--space-lg);
+  --page-max-width: 1200px;
+
+  /* Borders */
+  --border-width: 1px;
+  --border-style: solid;
+
+  /* Nav / Shell */
+  --nav-height: 3rem;
+  --sidebar-width: 14rem;
+  --topbar-search-max-width: 28rem;
+  --sidebar-active-border-width: 2px;
+
+  /* Z-index scale */
+  --z-sidebar: 200;
+  --z-overlay: 199;
+  --z-sidenav: 300;
+  --z-toast: 400;
+  --z-dropdown: 250;
+  --z-table-head: 1;
+
+  /* Overlay */
+  --overlay-bg: rgba(0, 0, 0, 0.4);
+
+  /* Sidenav */
+  --sidenav-width: 24rem;
+  --sidenav-resize-width: 4px;
+
+  /* Dialog */
+  --dialog-max-width: 28rem;
+
+  /* Search dialog */
+  --search-dialog-max-width: 40rem;
+  --search-dialog-max-height: 28rem;
+  --search-badge-min-width: 5rem;
+
+  /* Spinner */
+  --spinner-size: 1.5rem;
+  --spinner-border-width: 2px;
+
+  /* Autocomplete */
+  --autocomplete-max-height: 12rem;
+
+  /* Table */
+  --progress-col-min-width: 6rem;
+  --table-compact-cell-max-width: 16rem;
+
+  /* Toolbar */
+  --toolbar-search-min-width: 12rem;
+  --toolbar-search-max-width: 20rem;
+
+  /* Column toggle */
+  --column-toggle-min-width: 10rem;
+
+  /* Swap animation */
+  --swap-transition-duration: 0.05s;
+
+  /* Task views */
+  --task-board-col-min-w: 18rem;
+  --task-board-col-max-w: 28rem;
+  --task-timeline-label-w: 20rem;
+  --task-timeline-label-w-mobile: 12rem;
+  --task-meta-assignee-w: 8rem;
+  --task-meta-milestone-w: 10rem;
+  --task-meta-due-w: 6rem;
+  --task-meta-effort-w: 3rem;
+  --task-actions-w: 8rem;
+
+  /* Settings */
+  --settings-input-narrow-max: var(--toolbar-search-min-width);
+  --settings-textarea-min-height: var(--autocomplete-max-height);
+  --settings-tab-indicator: var(--sidebar-active-border-width);
 }
 
 html.font-mono {

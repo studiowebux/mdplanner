@@ -1,11 +1,5 @@
 /* Settings view — tabs, collapsibles, feature grid, form fields */
 
-:root {
-  --settings-input-narrow-max: var(--toolbar-search-min-width);
-  --settings-textarea-min-height: var(--autocomplete-max-height);
-  --settings-tab-indicator: var(--sidebar-active-border-width);
-}
-
 .settings-page {
   padding: var(--page-padding);
   max-width: var(--page-max-width);

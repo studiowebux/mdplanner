@@ -103,6 +103,9 @@ export class CacheSync {
       return result;
     }
 
+    // Rebuild FTS indexes after sync to ensure consistency
+    this.rebuildFts();
+
     this.lastSyncTime = new Date();
     this.setMeta("last_sync", this.lastSyncTime.toISOString());
     result.duration = Date.now() - start;
@@ -196,6 +199,20 @@ export class CacheSync {
 
   needsSync(): boolean {
     return this.getMeta("last_sync") === null;
+  }
+
+  private rebuildFts(): void {
+    for (const entity of ENTITIES) {
+      if (entity.fts) {
+        try {
+          this.db.exec(
+            `INSERT INTO ${entity.table}_fts(${entity.table}_fts) VALUES('rebuild')`,
+          );
+        } catch {
+          // FTS table may not exist yet on first run
+        }
+      }
+    }
   }
 
   private setMeta(key: string, value: string): void {

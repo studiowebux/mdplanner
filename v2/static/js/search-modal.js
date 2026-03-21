@@ -78,6 +78,11 @@
 
   // Keyboard navigation inside modal
   input.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      close();
+      return;
+    }
     var items = getItems();
     if (e.key === "ArrowDown") {
       e.preventDefault();
