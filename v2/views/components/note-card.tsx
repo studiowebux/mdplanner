@@ -54,18 +54,19 @@ export const NoteCard: FC<Props> = ({ note, q }) => {
       )}
 
       <div class="note-card__actions">
-        <a class="btn btn--secondary" href={`/notes/${note.id}`}>
-          View
-        </a>
         <button
           class="btn btn--secondary"
           type="button"
-          hx-get={`/notes/${note.id}/edit`}
+          hx-get={`/notes/${note.id}/preview`}
           hx-target="#notes-form-container"
           hx-swap="innerHTML"
+          data-sidenav-open
         >
-          Edit
+          View
         </button>
+        <a class="btn btn--secondary" href={`/notes/${note.id}`}>
+          Edit
+        </a>
         <button
           class="btn btn--danger"
           type="button"

@@ -75,3 +75,44 @@
   gap: var(--space-sm);
   margin-top: auto;
 }
+
+/* =========================================================================
+   Preview — sidenav read-only view
+   ========================================================================= */
+
+.note-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-md);
+}
+
+.note-preview__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.note-preview__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.note-preview__meta {
+  display: flex;
+  gap: var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.note-preview__project {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.note-preview__body {
+  font-size: var(--font-size-base);
+  line-height: var(--body-line-height);
+  color: var(--color-text-secondary);
+}

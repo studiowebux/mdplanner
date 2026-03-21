@@ -5,18 +5,19 @@ import { formatDate, timeAgo } from "../../utils/time.ts";
 
 const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
   <div class="note-card__actions">
-    <a class="btn btn--secondary btn--sm" href={`/notes/${row.id}`}>
-      View
-    </a>
     <button
       class="btn btn--secondary btn--sm"
       type="button"
-      hx-get={`/notes/${row.id}/edit`}
+      hx-get={`/notes/${row.id}/preview`}
       hx-target="#notes-form-container"
       hx-swap="innerHTML"
+      data-sidenav-open
     >
-      Edit
+      View
     </button>
+    <a class="btn btn--secondary btn--sm" href={`/notes/${row.id}`}>
+      Edit
+    </a>
     <button
       class="btn btn--danger btn--sm"
       type="button"
