@@ -350,6 +350,11 @@
   background: var(--color-bg-primary);
 }
 
+.form__select--sm {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-xs);
+}
+
 .form__textarea {
   resize: vertical;
   min-height: var(--space-xl);

@@ -15,6 +15,9 @@ import {
   getTaskService,
 } from "../../singletons/services.ts";
 import { SECTION_DISPLAY_ORDER } from "../../constants/mod.ts";
+import { TaskListView } from "../../views/components/task-list.tsx";
+import { TaskBoardView } from "../../views/components/task-board.tsx";
+import { TaskTimelineView } from "../../views/components/task-timeline.tsx";
 import {
   buildSectionOptions,
   TASK_PRIORITY_OPTIONS,
@@ -190,23 +193,18 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
     { key: "timeline", label: "Timeline" },
   ],
 
-  customViewRenderer: async (view, state, items, nonce) => {
+  customViewRenderer: async (view, state, items) => {
     if (view === "list") {
-      const { TaskListView } = await import(
-        "../../views/components/task-list.tsx"
-      );
-      return <TaskListView tasks={items} sort={state.sort} order={state.order} />;
+      const people = await getPeopleService().list();
+      const peopleOptions = people
+        .map((p) => ({ value: p.id, label: p.name }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+      return <TaskListView tasks={items} sort={state.sort} order={state.order} peopleOptions={peopleOptions} />;
     }
     if (view === "board") {
-      const { TaskBoardView } = await import(
-        "../../views/components/task-board.tsx"
-      );
       return <TaskBoardView tasks={items} />;
     }
     if (view === "timeline") {
-      const { TaskTimelineView } = await import(
-        "../../views/components/task-timeline.tsx"
-      );
       const zoom = parseInt(String(state.zoom ?? "1")) || 1;
       return <TaskTimelineView tasks={items} zoom={zoom} />;
     }

@@ -16,7 +16,9 @@ import {
 // Task row
 // ---------------------------------------------------------------------------
 
-const TaskRow: FC<{ task: Task }> = ({ task }) => (
+type PeopleOption = { value: string; label: string };
+
+const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = ({ task, peopleOptions }) => (
   <div
     class={`task-list__row${
       task.completed ? " task-list__row--completed" : ""
@@ -73,6 +75,33 @@ const TaskRow: FC<{ task: Task }> = ({ task }) => (
       </div>
     </div>
     <div class="task-list__row-actions">
+      <select
+        class="form__select form__select--sm"
+        hx-post={`/tasks/${task.id}/move`}
+        hx-swap="none"
+        hx-trigger="change"
+        name="section"
+        aria-label="Move section"
+      >
+        {(SECTION_DISPLAY_ORDER as readonly string[]).map((s) => (
+          <option key={s} value={s} selected={s === task.section}>{s}</option>
+        ))}
+      </select>
+      {peopleOptions && peopleOptions.length > 0 && (
+        <select
+          class="form__select form__select--sm"
+          hx-post={`/tasks/${task.id}/assign`}
+          hx-swap="none"
+          hx-trigger="change"
+          name="assignee"
+          aria-label="Assign"
+        >
+          <option value="">Unassigned</option>
+          {peopleOptions.map((p) => (
+            <option key={p.value} value={p.value} selected={p.value === task.assignee}>{p.label}</option>
+          ))}
+        </select>
+      )}
       <button
         class="btn btn--secondary btn--sm"
         type="button"
@@ -182,7 +211,13 @@ const SectionJumpBar: FC<{ sections: string[] }> = ({ sections }) => (
 // Main component
 // ---------------------------------------------------------------------------
 
-export const TaskListView: FC<TaskViewProps & { sort?: string; order?: string }> = ({ tasks, sort, order }) => {
+type ListProps = TaskViewProps & {
+  sort?: string;
+  order?: string;
+  peopleOptions?: { value: string; label: string }[];
+};
+
+export const TaskListView: FC<ListProps> = ({ tasks, sort, order, peopleOptions }) => {
   if (tasks.length === 0) {
     return (
       <div class="task-list__empty">
@@ -206,7 +241,7 @@ export const TaskListView: FC<TaskViewProps & { sort?: string; order?: string }>
           <div key={name} class="task-list__section">
             <SectionHeader name={name} count={sorted.length} />
             <div class="task-list__rows">
-              {sorted.map((t) => <TaskRow key={t.id} task={t} />)}
+              {sorted.map((t) => <TaskRow key={t.id} task={t} peopleOptions={peopleOptions} />)}
             </div>
           </div>
         );
