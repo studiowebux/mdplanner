@@ -19,6 +19,10 @@ v1.route("/tasks", tasksRouter);
 v1.doc("/doc", {
   openapi: "3.1.0",
   info: { title: `${APP_NAME} API`, version: APP_VERSION },
+  servers: [
+    { url: "/api/v1", description: "JSON API (v1)" },
+    { url: "/", description: "htmx views (SSR HTML)" },
+  ],
 });
 
 v1.get(
