@@ -321,6 +321,10 @@
   justify-content: space-between;
   padding: var(--space-sm) var(--space-md);
   border-bottom: var(--border-width) var(--border-style) var(--color-border-default);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--color-bg-secondary);
 }
 
 .task-board__column-title {
