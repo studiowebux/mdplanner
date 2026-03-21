@@ -181,7 +181,7 @@
 
   /* Page */
   --page-padding: var(--space-lg);
-  --page-max-width: 1200px;
+  --page-max-width: 100%;
 
   /* Borders */
   --border-width: 1px;
@@ -239,7 +239,8 @@
 
   /* Task views */
   --task-board-col-min-w: 18rem;
-  --task-board-col-max-w: 28rem;
+  --task-board-col-max-w: none;
+  --task-board-card-min-h: 8rem;
   --task-timeline-label-w: 20rem;
   --task-timeline-label-w-mobile: 12rem;
   --task-meta-assignee-w: 8rem;

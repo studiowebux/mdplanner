@@ -31,9 +31,9 @@ const BoardCard: FC<{ task: Task }> = ({ task }) => (
         {task.title}
       </a>
     </div>
-    {(task.assignee || task.due_date) && (
-      <div class="task-board__card-meta">
-        {task.assignee && (
+    <div class="task-board__card-meta">
+      {task.assignee
+        ? (
           <a
             class="task-board__card-assignee"
             href={`/people?q=${encodeURIComponent(task.assignee)}`}
@@ -41,12 +41,12 @@ const BoardCard: FC<{ task: Task }> = ({ task }) => (
           >
             {task.assignee}
           </a>
-        )}
-        {task.due_date && (
-          <span class="task-board__card-due">{task.due_date}</span>
-        )}
-      </div>
-    )}
+        )
+        : <span class="task-board__card-unassigned">Unassigned</span>}
+      {task.due_date && (
+        <span class="task-board__card-due">{task.due_date}</span>
+      )}
+    </div>
     {task.tags && task.tags.length > 0 && (
       <div class="task-board__card-tags">
         {task.tags.map((tag) => (

@@ -297,28 +297,11 @@
    Board view
    ========================================================================= */
 
-/* Board needs full-height flex chain from app-shell__content down */
-
-.domain-page:has(.task-board) {
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
-}
-
-.domain-page:has(.task-board) > :last-child {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
 .task-board {
   display: flex;
   gap: var(--space-md);
   overflow-x: auto;
   padding-bottom: var(--space-md);
-  flex: 1;
-  min-height: 0;
 }
 
 .task-board__column {
@@ -330,16 +313,17 @@
   background: var(--color-bg-secondary);
   border-radius: var(--card-radius);
   border: var(--border-width) var(--border-style) var(--color-border-default);
-  min-height: 0;
 }
 
+/* NOTE: sticky headers not possible here — .task-board has overflow-x: auto
+   which breaks position: sticky on all descendants. Would need to remove
+   horizontal scroll or redesign the board layout. */
 .task-board__column-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: var(--space-sm) var(--space-md);
   border-bottom: var(--border-width) var(--border-style) var(--color-border-default);
-  flex-shrink: 0;
 }
 
 .task-board__column-title {
@@ -360,8 +344,6 @@
   gap: var(--space-sm);
   padding: var(--space-sm);
   flex: 1;
-  overflow-y: auto;
-  min-height: 0;
 }
 
 .task-board__column-empty {
@@ -384,6 +366,7 @@
   transition: box-shadow var(--transition-fast);
   overflow: hidden;
   min-width: 0;
+  min-height: var(--task-board-card-min-h);
 }
 
 .task-board__card:hover {
@@ -436,12 +419,19 @@
   gap: var(--space-sm);
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
+  margin-top: auto;
+}
+
+.task-board__card-unassigned {
+  color: var(--color-text-muted);
+  font-style: italic;
 }
 
 .task-board__card-tags {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-xs);
+  margin-top: auto;
 }
 
 /* Board empty */
