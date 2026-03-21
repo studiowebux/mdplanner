@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import type { Note } from "../../types/note.types.ts";
-import { Highlight } from "../../utils/highlight.tsx";
+import { Highlight, highlightHtml } from "../../utils/highlight.tsx";
+import { markdownToHtml } from "../../utils/markdown.ts";
 import { timeAgo } from "../../utils/time.ts";
 
 type Props = { note: Note; q?: string };
@@ -8,6 +9,7 @@ type Props = { note: Note; q?: string };
 export const NoteCard: FC<Props> = ({ note, q }) => {
   const sectionCount = note.customSections?.length ?? 0;
   const paragraphCount = note.paragraphs?.length ?? 0;
+  const contentHtml = markdownToHtml(note.content?.slice(0, 300));
 
   return (
     <article class="note-card" data-filterable-card>
@@ -42,11 +44,13 @@ export const NoteCard: FC<Props> = ({ note, q }) => {
         )}
       </dl>
 
-      {note.content && (
-        <p class="note-card__excerpt">
-          {note.content.slice(0, 120)}
-          {note.content.length > 120 ? "..." : ""}
-        </p>
+      {contentHtml && (
+        <div
+          class="note-card__excerpt markdown-body"
+          dangerouslySetInnerHTML={{
+            __html: highlightHtml(contentHtml, q),
+          }}
+        />
       )}
 
       <div class="note-card__actions">
