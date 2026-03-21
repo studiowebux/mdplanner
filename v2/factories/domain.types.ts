@@ -17,6 +17,10 @@ export interface DomainService<T extends Entity, C, U> {
   delete(id: string): Promise<boolean>;
 }
 
+// Dynamic filter option values — plain strings or value/label pairs.
+export type FilterOptionEntry = string | { value: string; label: string };
+export type DynamicFilterOptions = Record<string, FilterOptionEntry[]>;
+
 // Filter field shown in the toolbar (select dropdown).
 export type FilterDef = {
   name: string;
@@ -82,7 +86,8 @@ export type DomainConfig<T extends Entity, C, U> = {
   getService: () => DomainService<T, C, U>;
 
   // Optional: extract unique values for a filter field from all items.
-  extractFilterOptions?: (items: T[]) => Record<string, string[]> | Promise<Record<string, string[]>>;
+  // Each key maps to either plain strings (value === label) or value/label pairs.
+  extractFilterOptions?: (items: T[]) => DynamicFilterOptions | Promise<DynamicFilterOptions>;
 
   // Optional: custom text search predicate (defaults to searching all string fields).
   searchPredicate?: (item: T, q: string) => boolean;

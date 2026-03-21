@@ -38,10 +38,30 @@ const TaskRow: FC<{ task: Task }> = ({ task }) => (
       </div>
       <div class="task-list__row-right">
         <span class="task-list__meta task-list__meta--assignee">
-          {task.assignee ?? ""}
+          {task.assignee
+            ? (
+              <a
+                href={`/people?q=${encodeURIComponent(task.assignee)}`}
+                target="_blank"
+                class="task-list__assignee-link"
+              >
+                {task.assignee}
+              </a>
+            )
+            : ""}
         </span>
         <span class="task-list__meta task-list__meta--milestone">
-          {task.milestone ?? ""}
+          {task.milestone
+            ? (
+              <a
+                href={`/milestones?q=${encodeURIComponent(task.milestone)}`}
+                target="_blank"
+                class="task-list__milestone-link"
+              >
+                {task.milestone}
+              </a>
+            )
+            : ""}
         </span>
         <span class="task-list__meta task-list__meta--due">
           {task.due_date ? formatDate(task.due_date) : ""}
@@ -92,6 +112,27 @@ const SectionHeader: FC<{ name: string; count: number }> = (
 );
 
 // ---------------------------------------------------------------------------
+// Column header — labels for the row-right metadata columns
+// ---------------------------------------------------------------------------
+
+const ColumnHeader: FC = () => (
+  <div class="task-list__row task-list__column-header" aria-hidden="true">
+    <div class="task-list__row-main">
+      <div class="task-list__row-left">
+        <span class="task-list__column-label">Task</span>
+      </div>
+      <div class="task-list__row-right">
+        <span class="task-list__meta task-list__meta--assignee">Assignee</span>
+        <span class="task-list__meta task-list__meta--milestone">Milestone</span>
+        <span class="task-list__meta task-list__meta--due">Due</span>
+        <span class="task-list__meta task-list__meta--effort">Effort</span>
+      </div>
+    </div>
+    <div class="task-list__row-actions task-list__column-label">Actions</div>
+  </div>
+);
+
+// ---------------------------------------------------------------------------
 // Section jump bar
 // ---------------------------------------------------------------------------
 
@@ -127,7 +168,10 @@ export const TaskListView: FC<TaskViewProps> = ({ tasks }) => {
 
   return (
     <div class="task-list">
-      {sectionNames.length > 1 && <SectionJumpBar sections={sectionNames} />}
+      <div class="task-list__sticky-header">
+        {sectionNames.length > 1 && <SectionJumpBar sections={sectionNames} />}
+        <ColumnHeader />
+      </div>
       {sectionNames.map((name) => {
         const sorted = sortTasks(grouped[name]);
         return (

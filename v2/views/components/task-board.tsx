@@ -34,7 +34,13 @@ const BoardCard: FC<{ task: Task }> = ({ task }) => (
     {(task.assignee || task.due_date) && (
       <div class="task-board__card-meta">
         {task.assignee && (
-          <span class="task-board__card-assignee">{task.assignee}</span>
+          <a
+            class="task-board__card-assignee"
+            href={`/people?q=${encodeURIComponent(task.assignee)}`}
+            target="_blank"
+          >
+            {task.assignee}
+          </a>
         )}
         {task.due_date && (
           <span class="task-board__card-due">{task.due_date}</span>

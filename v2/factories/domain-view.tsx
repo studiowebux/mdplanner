@@ -9,7 +9,7 @@ import { EmptyState } from "../components/ui/empty-state.tsx";
 import { FormBuilder } from "../components/ui/form-builder.tsx";
 import type { FieldDef } from "../components/ui/form-builder.tsx";
 import type { ViewMode, ViewProps } from "../types/app.ts";
-import type { DomainConfig, DomainFilterState, Entity } from "./domain.types.ts";
+import type { DomainConfig, DomainFilterState, DynamicFilterOptions, Entity } from "./domain.types.ts";
 
 // ---------------------------------------------------------------------------
 // View toggle buttons
@@ -217,7 +217,7 @@ export function createDomainPage<T extends Entity>(cfg: DomainConfig<T, unknown,
   type PageProps = ViewProps & {
     items: T[];
     state: DomainFilterState;
-    dynamicFilterOptions?: Record<string, string[]>;
+    dynamicFilterOptions?: DynamicFilterOptions;
     customContent?: ReturnType<FC>;
   };
 
@@ -275,7 +275,9 @@ export function createDomainPage<T extends Entity>(cfg: DomainConfig<T, unknown,
             {cfg.filters?.map((f) => {
               const dynamicOpts = dynamicFilterOptions?.[f.name];
               const options = dynamicOpts
-                ? dynamicOpts.map((v) => ({ value: v, label: v }))
+                ? dynamicOpts.map((v) =>
+                  typeof v === "string" ? { value: v, label: v } : v
+                )
                 : f.options;
               return (
                 <select

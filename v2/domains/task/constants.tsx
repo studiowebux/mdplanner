@@ -95,6 +95,8 @@ export const TASK_STATE_KEYS = [
   "project",
   "milestone",
   "assignee",
+  "priority",
+  "tags",
   "q",
   "hideCompleted",
   "sort",

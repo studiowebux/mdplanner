@@ -118,6 +118,17 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
       label: "All assignees",
       options: [],
     },
+    {
+      name: "priority",
+      label: "All priorities",
+      options: [],
+    },
+    {
+      name: "tags",
+      label: "All tags",
+      options: [],
+      field: "tags",
+    },
   ],
 
   hideCompleted: { field: "completed", value: "true" },
@@ -143,14 +154,24 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
 
   extractFilterOptions: async (items) => {
     const sections = buildSectionOptions(items);
-    const portfolio = await getPortfolioService().list();
-    const milestones = await getMilestoneService().list();
-    const people = await getPeopleService().list();
+    const assigneeIds = [...new Set(items.map((t) => t.assignee).filter(Boolean) as string[])];
+    const [portfolio, milestones, people] = await Promise.all([
+      getPortfolioService().list(),
+      getMilestoneService().list(),
+      getPeopleService().list(),
+    ]);
+    const peopleMap = new Map(people.map((p) => [p.id, p.name]));
     return {
       section: sections.map((s) => s.value),
       project: portfolio.map((p) => p.name).sort(),
       milestone: [...new Set(milestones.map((m) => m.name))].sort(),
-      assignee: [...new Set(items.map((t) => t.assignee).filter(Boolean) as string[])].sort(),
+      assignee: assigneeIds
+        .map((id) => ({ value: id, label: peopleMap.get(id) ?? id }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+      priority: TASK_PRIORITY_OPTIONS.filter((o) =>
+        items.some((t) => String(t.priority) === o.value)
+      ),
+      tags: [...new Set(items.flatMap((t) => t.tags ?? []))].sort(),
     };
   },
 

@@ -198,6 +198,7 @@ pre {
   --task-meta-milestone-w: 10rem;
   --task-meta-due-w: 6rem;
   --task-meta-effort-w: 3rem;
+  --task-actions-w: 8rem;
 
   /* Table compact */
   --table-compact-cell-max-width: 16rem;
