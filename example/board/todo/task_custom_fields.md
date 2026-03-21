@@ -9,8 +9,8 @@ effort: 14
 milestone: Version 1.0
 project: TaskFlow Platform
 order: 4
-planned_start: 2026-06-10
-planned_end: 2026-06-30
+planned_start: 2026-06-15
+planned_end: 2026-07-05
 tags: [feature, extensibility]
 blocked_by: [task_plugin_system]
 ---

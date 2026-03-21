@@ -12,6 +12,7 @@ order: 2
 planned_start: 2026-03-20
 planned_end: 2026-04-08
 tags: [time-tracking, productivity]
+blocked_by: [task_crud]
 time_entries:
   -
     id: te_1

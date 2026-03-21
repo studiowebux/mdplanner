@@ -28,7 +28,7 @@
     return [
       "body, .task-timeline-export { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: " +
       C.bgPrimary + "; }",
-      ".task-timeline__chart-inner { padding-right: 2rem; }",
+      ".task-timeline__chart-inner { padding-right: 2rem; position: relative; }",
       ".task-timeline__row { display: flex; border-bottom: 1px solid " +
       C.border + "; }",
       ".task-timeline__row:last-child { border-bottom: none; }",
@@ -84,6 +84,10 @@
       ".task-timeline__unscheduled-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 1rem; font-size: 0.875rem; }",
       ".task-timeline__unscheduled-row a { color: " + C.textPrimary +
       "; text-decoration: none; }",
+      ".task-timeline__deps { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; overflow: visible; }",
+      ".task-timeline__dep-line { fill: none; stroke: " + C.borderStrong +
+      "; stroke-width: 1.5; stroke-dasharray: 4 3; }",
+      ".task-timeline__dep-arrow { fill: " + C.borderStrong + "; }",
     ].join("\n");
   }
 
@@ -99,6 +103,24 @@
     var clone = chart.cloneNode(true);
     var zoom = clone.querySelector(".task-timeline__zoom");
     if (zoom) zoom.remove();
+
+    // Prep the dep SVG for foreignObject rendering:
+    // - Add xmlns so it's recognized as SVG inside XHTML
+    // - Convert fixed width/height attrs to viewBox so paths scale with container
+    //   (CSS width:100% height:100% handles sizing, viewBox preserves coordinates)
+    var depSvg = clone.querySelector(".task-timeline__deps");
+    if (depSvg) {
+      depSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      var svgW = depSvg.getAttribute("width");
+      var svgH = depSvg.getAttribute("height");
+      if (svgW && svgH) {
+        depSvg.setAttribute("viewBox", "0 0 " + svgW + " " + svgH);
+        depSvg.setAttribute("preserveAspectRatio", "none");
+      }
+      depSvg.removeAttribute("width");
+      depSvg.removeAttribute("height");
+    }
+
     var html = clone.innerHTML;
 
     if (inner) inner.style.minWidth = savedMinWidth;
@@ -191,6 +213,11 @@
         "min-width",
         printInner.dataset.minWidth + "px",
       );
+    }
+
+    // Draw dependency lines in the print context
+    if (window.drawDependencyLines) {
+      window.drawDependencyLines(idoc, false);
     }
 
     iframe.contentWindow.focus();

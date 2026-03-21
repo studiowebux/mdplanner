@@ -468,6 +468,7 @@
 
 .task-timeline__chart-inner {
   padding-right: var(--space-xl);
+  position: relative;
 }
 
 .task-timeline__chart {
@@ -624,6 +625,40 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-primary);
   white-space: nowrap;
+}
+
+/* Dependency lines — SVG overlay spanning the chart area */
+
+.task-timeline__deps {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+  overflow: visible;
+}
+
+.task-timeline__dep-line {
+  fill: none;
+  stroke: var(--color-border-strong);
+  stroke-width: var(--task-dep-stroke-w);
+  stroke-dasharray: var(--task-dep-dash);
+}
+
+.task-timeline__dep-arrow {
+  fill: var(--color-border-strong);
+}
+
+.task-timeline__dep-line.task-timeline__dep--active {
+  stroke: var(--color-accent);
+  stroke-width: var(--task-dep-stroke-w-active);
+  stroke-dasharray: none;
+}
+
+.task-timeline__dep-arrow.task-timeline__dep--active {
+  fill: var(--color-accent);
 }
 
 /* No dates message */

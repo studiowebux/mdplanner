@@ -13,6 +13,7 @@ order: 1
 planned_start: 2026-03-28
 planned_end: 2026-04-05
 tags: [search, fts]
+blocked_by: [task_crud]
 ---
 
 # Global Search

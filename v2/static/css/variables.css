@@ -243,6 +243,10 @@
   --task-board-card-min-h: 8rem;
   --task-timeline-label-w: 20rem;
   --task-timeline-label-w-mobile: 12rem;
+  --task-dep-stroke-w: 1.5;
+  --task-dep-stroke-w-active: 2.5;
+  --task-dep-dash: 4 3;
+  --task-dep-arrow-size: 5;
   --task-meta-assignee-w: 8rem;
   --task-meta-milestone-w: 10rem;
   --task-meta-due-w: 6rem;

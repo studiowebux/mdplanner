@@ -13,6 +13,7 @@ order: 0
 planned_start: 2026-03-10
 planned_end: 2026-03-28
 tags: [notifications, email]
+blocked_by: [task_auth]
 claimedBy: charlie
 claimedAt: "2026-03-10T09:00:00.000Z"
 ---

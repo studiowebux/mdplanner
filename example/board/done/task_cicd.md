@@ -14,6 +14,7 @@ order: 3
 planned_start: 2026-02-20
 planned_end: 2026-02-28
 tags: [devops, ci]
+blocked_by: [task_project_structure]
 ---
 
 # CI/CD Pipeline

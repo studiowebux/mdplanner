@@ -10,8 +10,8 @@ effort: 12
 milestone: Dashboard MVP
 project: Analytics Dashboard
 order: 0
-planned_start: 2026-03-25
-planned_end: 2026-04-12
+planned_start: 2026-04-10
+planned_end: 2026-04-28
 tags: [analytics, charts]
 blocked_by: [task_crud, task_time_tracking]
 ---

@@ -235,6 +235,9 @@ export const TaskTimelineView: FC<TaskViewProps> = ({ tasks, zoom = 1 }) => {
                   </div>
                 </div>
 
+                {/* SVG overlay for dependency lines */}
+                <svg class="task-timeline__deps" aria-hidden="true" />
+
                 {/* Task rows */}
                 {scheduled.map((t) => {
                   const blocked = t.blocked_by && t.blocked_by.length > 0;
@@ -246,6 +249,9 @@ export const TaskTimelineView: FC<TaskViewProps> = ({ tasks, zoom = 1 }) => {
                         t.completed ? " task-timeline__row--completed" : ""
                       }`}
                       data-task-id={t.id}
+                      {...(blocked
+                        ? { "data-blocked-by": t.blocked_by!.join(",") }
+                        : {})}
                     >
                       <div class="task-timeline__label">
                         {t.priority && (
