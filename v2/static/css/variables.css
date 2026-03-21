@@ -247,6 +247,7 @@
   --task-meta-due-w: 6rem;
   --task-meta-effort-w: 3rem;
   --task-actions-w: 8rem;
+  --task-detail-input-w: 14rem;
 
   /* Settings */
   --settings-input-narrow-max: var(--toolbar-search-min-width);

@@ -1054,7 +1054,7 @@
 }
 
 .task-detail__action-group .form__autocomplete {
-  width: var(--task-detail-input-w, 14rem);
+  width: var(--task-detail-input-w);
 }
 
 /* =========================================================================
@@ -1062,34 +1062,67 @@
    ========================================================================= */
 
 @media (max-width: 768px) {
+  /* List — hide column header, stack rows vertically */
+  .task-list__column-header {
+    display: none;
+  }
+
   .task-list__row {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--space-sm);
+    gap: var(--space-xs);
+  }
+
+  .task-list__row-main {
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .task-list__row-left {
+    flex-wrap: wrap;
   }
 
   .task-list__row-right {
     flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-sm);
+  }
+
+  .task-list__meta {
+    width: auto;
+    text-align: left;
+    font-size: var(--font-size-xs);
+  }
+
+  .task-list__meta:empty {
+    display: none;
   }
 
   .task-list__row-actions {
     opacity: 1;
+    width: auto;
   }
 
-  .task-detail__columns {
-    grid-template-columns: 1fr;
-  }
-
+  /* Board — single column */
   .task-board {
     flex-direction: column;
   }
 
   .task-board__column {
     max-width: none;
+    min-width: 0;
   }
 
-  .task-timeline__header-label,
-  .task-timeline__row-label {
+  /* Timeline — narrower labels */
+  .task-timeline__label {
     width: var(--task-timeline-label-w-mobile);
+  }
+
+  /* Detail — single column, stack quick actions */
+  .task-detail__columns {
+    grid-template-columns: 1fr;
+  }
+
+  .task-detail__quick-actions {
+    justify-content: flex-start;
   }
 }
