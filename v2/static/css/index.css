@@ -190,8 +190,8 @@ pre {
   --swap-transition-duration: 0.05s;
 
   /* Task views */
-  --task-board-col-min-w: 15rem;
-  --task-board-col-max-w: 22rem;
+  --task-board-col-min-w: 18rem;
+  --task-board-col-max-w: 28rem;
   --task-timeline-label-w: 20rem;
   --task-timeline-label-w-mobile: 12rem;
   --task-meta-assignee-w: 8rem;

@@ -61,6 +61,9 @@ type MonthMarker = {
   quarter: boolean;
 };
 
+/** Minimum percentage gap between month markers to avoid text overlap. */
+const MIN_MARKER_GAP_PCT = 5;
+
 function buildMonthMarkers(
   rangeStart: Date,
   rangeEnd: Date,
@@ -69,17 +72,21 @@ function buildMonthMarkers(
   const markers: MonthMarker[] = [];
   const cursor = new Date(rangeStart);
   cursor.setDate(1);
+  let lastPct = -MIN_MARKER_GAP_PCT;
   while (cursor <= rangeEnd) {
     const offset = daysBetween(rangeStart, cursor);
     const pct = Math.max(0, (offset / totalDays) * 100);
-    markers.push({
-      label: cursor.toLocaleString("en-US", {
-        month: "short",
-        year: "numeric",
-      }),
-      leftPct: `${pct.toFixed(2)}%`,
-      quarter: cursor.getMonth() % 3 === 0,
-    });
+    if (pct - lastPct >= MIN_MARKER_GAP_PCT) {
+      markers.push({
+        label: cursor.toLocaleString("en-US", {
+          month: "short",
+          year: "numeric",
+        }),
+        leftPct: `${pct.toFixed(2)}%`,
+        quarter: cursor.getMonth() % 3 === 0,
+      });
+      lastPct = pct;
+    }
     cursor.setMonth(cursor.getMonth() + 1);
   }
   return markers;
@@ -212,7 +219,7 @@ export const TaskTimelineView: FC<TaskViewProps> = ({ tasks, zoom = 1 }) => {
                   const blocked = t.blocked_by && t.blocked_by.length > 0;
                   const pos = barDataAttrs(t, rangeStart, totalDays);
                   return (
-                    <div key={t.id} class="task-timeline__row" data-task-id={t.id}>
+                    <div key={t.id} class={`task-timeline__row${t.completed ? " task-timeline__row--completed" : ""}`} data-task-id={t.id}>
                       <div class="task-timeline__label">
                         {t.priority && (
                           <span
