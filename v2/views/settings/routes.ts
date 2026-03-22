@@ -50,12 +50,16 @@ settingsViewRouter.post("/features", async (c) => {
   });
 });
 
-// -- Project tab: name + description --
+// -- Project tab: name, description, locale, currency, port --
 settingsViewRouter.post("/project", async (c) => {
   const body = await c.req.parseBody();
-  await getProjectService().updateProject({
+  const portRaw = body.port ? Number(body.port) : undefined;
+  await getProjectService().updateConfig({
     name: String(body.name ?? ""),
     description: body.description ? String(body.description) : undefined,
+    locale: body.locale ? String(body.locale).trim() : undefined,
+    currency: body.currency ? String(body.currency).trim() : undefined,
+    port: portRaw && !isNaN(portRaw) ? portRaw : undefined,
   });
   return new Response(null, {
     status: 204,
@@ -135,5 +139,35 @@ settingsViewRouter.post("/sections", async (c) => {
   return new Response(null, {
     status: 204,
     headers: { "HX-Trigger": hxTrigger("success", "Sections saved") },
+  });
+});
+
+// -- Navigation tab: nav categories --
+settingsViewRouter.post("/nav-categories", async (c) => {
+  const body = await c.req.parseBody({ all: true });
+  // Preserve all category names (including empty ones) from hidden inputs
+  const rawCats = body.categories;
+  const allCats = (Array.isArray(rawCats) ? rawCats : rawCats ? [rawCats] : [])
+    .map((c) => String(c).trim())
+    .filter(Boolean);
+  const navCategories: Record<string, string[]> = {};
+  for (const cat of allCats) navCategories[cat] = [];
+  // Assign features to categories from nav_<featureKey> selects
+  for (const [key, rawValue] of Object.entries(body)) {
+    if (!key.startsWith("nav_")) continue;
+    const featureKey = key.slice(4);
+    const value = Array.isArray(rawValue) ? rawValue[0] : rawValue;
+    const category = String(value ?? "").trim();
+    if (!category) continue;
+    if (!navCategories[category]) navCategories[category] = [];
+    navCategories[category].push(featureKey);
+  }
+  await getProjectService().updateNavCategories(navCategories);
+  return new Response(null, {
+    status: 200,
+    headers: {
+      "HX-Trigger": hxTrigger("success", "Navigation saved"),
+      "HX-Refresh": "true",
+    },
   });
 });

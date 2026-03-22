@@ -14,18 +14,48 @@
     if (radio) radio.checked = true;
   }
 
+  var activeRadio = null;
+
+  function getCheckedRadio() {
+    for (var i = 0; i < tabRadios.length; i++) {
+      if (tabRadios[i].checked) return tabRadios[i];
+    }
+    return tabRadios[0] || null;
+  }
+
   activateTabFromHash();
+  activeRadio = getCheckedRadio();
 
   tabRadios.forEach(function (radio) {
-    radio.addEventListener("change", function () {
-      if (radio.checked) {
-        var tabName = radio.id.replace("tab-", "");
-        history.replaceState(null, "", "#" + tabName);
+    radio.addEventListener("click", function (e) {
+      if (radio === activeRadio) return;
+      // Check if any form is dirty
+      var dirtyTab = null;
+      for (var formId in dirtyForms) {
+        if (dirtyForms[formId]) {
+          dirtyTab = formId;
+          break;
+        }
       }
+      if (dirtyTab) {
+        e.preventDefault();
+        if (window.toast) {
+          window.toast({ type: "warning", message: "Save or discard changes before switching tabs" });
+        }
+        // Re-check the active radio
+        if (activeRadio) activeRadio.checked = true;
+        return;
+      }
+      activeRadio = radio;
+      var tabName = radio.id.replace("tab-", "");
+      history.replaceState(null, "", "#" + tabName);
     });
   });
 
-  window.addEventListener("hashchange", activateTabFromHash);
+  window.addEventListener("hashchange", function () {
+    activateTabFromHash();
+    activeRadio = getCheckedRadio();
+  });
 
   // -----------------------------------------------------------------------
   // Snapshot-based dirty tracking
@@ -67,7 +97,12 @@
   function setDirty(formId, dirty) {
     dirtyForms[formId] = dirty;
     updateTabIndicator(formId, dirty);
-    updateBeforeUnload();
+    var form = document.getElementById(formId);
+    if (form) form.classList.toggle("settings-form--dirty", dirty);
+    var anyDirty = Object.keys(dirtyForms).some(function (k) {
+      return dirtyForms[k];
+    });
+    window.onbeforeunload = anyDirty ? function () { return true; } : null;
   }
 
   var tabMap = {
@@ -77,6 +112,7 @@
     "tags-form": "tab-tags",
     "links-form": "tab-links",
     "sections-form": "tab-sections",
+    "nav-categories-form": "tab-navigation",
   };
 
   function updateTabIndicator(formId, dirty) {
@@ -89,18 +125,6 @@
     label.classList.toggle("settings-tabs__label--dirty", dirty);
   }
 
-  function updateBeforeUnload() {
-    var anyDirty = Object.keys(dirtyForms).some(function (k) {
-      return dirtyForms[k];
-    });
-    if (anyDirty) {
-      window.onbeforeunload = function () {
-        return true;
-      };
-    } else {
-      window.onbeforeunload = null;
-    }
-  }
 
   function trackForm(formId) {
     var form = document.getElementById(formId);
@@ -112,7 +136,17 @@
     form.addEventListener("change", function () {
       checkDirty(formId);
     });
+    form.addEventListener("submit", function () {
+      setDirty(formId, false);
+    });
   }
+
+  // Discard — reload page on current tab to reset all state
+  document.body.addEventListener("click", function (e) {
+    if (!e.target.closest("[data-discard]")) return;
+    window.onbeforeunload = null;
+    window.location.reload();
+  });
 
   // Re-snapshot on successful save
   document.body.addEventListener("htmx:afterRequest", function (e) {
@@ -124,8 +158,10 @@
   });
 
   // Track all settings forms
-  ["project-form", "schedule-form", "tags-form", "links-form", "sections-form"]
-    .forEach(trackForm);
+  [
+    "project-form", "schedule-form", "tags-form", "links-form",
+    "sections-form", "nav-categories-form",
+  ].forEach(trackForm);
 
   // -----------------------------------------------------------------------
   // Features: check all / uncheck all
@@ -374,6 +410,13 @@
   }
 
   if (addSectionBtn && sectionNewInput && sectionsList) {
+    sectionNewInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addSectionBtn.click();
+      }
+    });
+
     addSectionBtn.addEventListener("click", function () {
       var name = sectionNewInput.value.trim();
       if (!name) return;
@@ -392,6 +435,79 @@
       sectionsList.appendChild(row);
       sectionNewInput.value = "";
       refreshSectionPositions();
+    });
+  }
+
+  // -----------------------------------------------------------------------
+  // Navigation: add new category to all select dropdowns
+  // -----------------------------------------------------------------------
+  var addCatBtn = document.querySelector("[data-add-category]");
+  var catNewInput = document.getElementById("nav-category-new-name");
+  var navForm = document.getElementById("nav-categories-form");
+
+  // Expand / collapse all nav categories
+  var navCatsList = document.getElementById("nav-categories-list");
+  var expandAllBtn = document.querySelector("[data-nav-expand-all]");
+  var collapseAllBtn = document.querySelector("[data-nav-collapse-all]");
+
+  if (navCatsList && expandAllBtn) {
+    expandAllBtn.addEventListener("click", function () {
+      navCatsList.querySelectorAll("details").forEach(function (d) {
+        d.open = true;
+      });
+    });
+  }
+  if (navCatsList && collapseAllBtn) {
+    collapseAllBtn.addEventListener("click", function () {
+      navCatsList.querySelectorAll("details").forEach(function (d) {
+        d.open = false;
+      });
+    });
+  }
+
+  // Jump nav — open details and scroll
+  var jumpBar = document.querySelector("[data-nav-jump]");
+  if (jumpBar) {
+    jumpBar.addEventListener("click", function (e) {
+      var pill = e.target.closest("[data-nav-target]");
+      if (!pill) return;
+      e.preventDefault();
+      var target = document.getElementById(pill.getAttribute("data-nav-target"));
+      if (target) {
+        target.open = true;
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  }
+
+  if (addCatBtn && catNewInput && navForm) {
+    catNewInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addCatBtn.click();
+      }
+    });
+
+    addCatBtn.addEventListener("click", function () {
+      var name = catNewInput.value.trim();
+      if (!name) return;
+      navForm.querySelectorAll('.settings-nav__feature-row select').forEach(
+        function (sel) {
+          // Skip if option already exists
+          for (var i = 0; i < sel.options.length; i++) {
+            if (sel.options[i].value === name) return;
+          }
+          var opt = document.createElement("option");
+          opt.value = name;
+          opt.textContent = name;
+          sel.appendChild(opt);
+        },
+      );
+      catNewInput.value = "";
+      checkDirty("nav-categories-form");
+      if (window.toast) {
+        window.toast({ type: "success", message: 'Category "' + name + '" added — assign features and save' });
+      }
     });
   }
 })();

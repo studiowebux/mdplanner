@@ -10,6 +10,7 @@ import type {
 } from "../../types/task.types.ts";
 import { getSectionOrder } from "../../constants/mod.ts";
 import { TASK_PRIORITY_LABELS } from "../../domains/task/constants.tsx";
+import { getLocale } from "../../utils/format.ts";
 
 // ---------------------------------------------------------------------------
 // Date helpers
@@ -24,7 +25,7 @@ function parseDate(s: string): Date {
 }
 
 function formatShortDate(d: Date): string {
-  const m = d.toLocaleString("en-US", { month: "short" });
+  const m = d.toLocaleString(getLocale(), { month: "short" });
   return `${m} ${d.getDate()}`;
 }
 
@@ -78,7 +79,7 @@ function buildMonthMarkers(
     const pct = Math.max(0, (offset / totalDays) * 100);
     if (pct - lastPct >= MIN_MARKER_GAP_PCT) {
       markers.push({
-        label: cursor.toLocaleString("en-US", {
+        label: cursor.toLocaleString(getLocale(), {
           month: "short",
           year: "numeric",
         }),

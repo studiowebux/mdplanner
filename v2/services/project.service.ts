@@ -86,4 +86,12 @@ export class ProjectService {
     current.sectionOrder = sections;
     await this.repo.write(current);
   }
+
+  async updateNavCategories(
+    navCategories: Record<string, string[]>,
+  ): Promise<void> {
+    const current = await this.repo.read();
+    current.navCategories = navCategories;
+    await this.repo.write(current);
+  }
 }

@@ -9,6 +9,11 @@ export function setFormatConfig(
   if (opts.currency) _currency = opts.currency;
 }
 
+/** Get the active locale. */
+export function getLocale(): string {
+  return _locale;
+}
+
 /** Format a number as currency (no decimals). Returns "" for 0/undefined. */
 export function formatCurrency(n: number | undefined | null): string {
   if (!n) return "";

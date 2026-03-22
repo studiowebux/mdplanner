@@ -4,8 +4,15 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { ViewProps } from "../types/app.ts";
-import { APP_VERSION, ENTITY_TYPE_LABELS, getSectionOrder, WEEKDAYS } from "../constants/mod.ts";
+import {
+  APP_VERSION,
+  DEFAULT_NAV_CATEGORIES,
+  ENTITY_TYPE_LABELS,
+  getSectionOrder,
+  WEEKDAYS,
+} from "../constants/mod.ts";
 import type { ProjectConfig } from "../domains/project/types.ts";
+import { FormActions } from "../components/ui/form-actions.tsx";
 
 type SettingsProps = ViewProps & {
   config: ProjectConfig;
@@ -24,6 +31,29 @@ export const SettingsView: FC<SettingsProps> = ({
   const disabledList = allFeatures.filter(([key]) => !enabled.has(key));
   const activeWorkingDays = new Set(config.workingDays ?? []);
   const links = config.links ?? [];
+  const navCategories = config.navCategories ?? DEFAULT_NAV_CATEGORIES;
+  const categoryNames = Object.keys(navCategories).sort((a, b) =>
+    a.localeCompare(b)
+  );
+  const featureToCategory: Record<string, string> = {};
+  for (const [cat, keys] of Object.entries(navCategories)) {
+    for (const key of keys) featureToCategory[key] = cat;
+  }
+  // Group features by current category for display
+  const featuresByCategory: Record<string, [string, string][]> = {};
+  for (const [key, label] of allFeatures) {
+    const cat = featureToCategory[key] ?? categoryNames[0] ?? "Uncategorized";
+    if (!featuresByCategory[cat]) featuresByCategory[cat] = [];
+    featuresByCategory[cat].push([key, label]);
+  }
+  // Include empty categories too (they exist in navCategories but have no features)
+  for (const cat of categoryNames) {
+    if (!featuresByCategory[cat]) featuresByCategory[cat] = [];
+  }
+  const groupOrder = [...new Set([...categoryNames, ...Object.keys(featuresByCategory)])];
+  const sortedCategoryOptions = [...categoryNames].sort((a, b) =>
+    a.localeCompare(b)
+  );
 
   return (
     <MainLayout
@@ -81,6 +111,16 @@ export const SettingsView: FC<SettingsProps> = ({
             class="settings-tabs__radio"
           />
           <label for="tab-links" class="settings-tabs__label">Links</label>
+
+          <input
+            type="radio"
+            name="settings-tab"
+            id="tab-navigation"
+            class="settings-tabs__radio"
+          />
+          <label for="tab-navigation" class="settings-tabs__label">
+            Navigation
+          </label>
 
           <input
             type="radio"
@@ -206,7 +246,7 @@ export const SettingsView: FC<SettingsProps> = ({
 
               <div class="settings-field">
                 <label class="settings-field__label" for="cfg-description">
-                  Description
+                  Description (markdown)
                 </label>
                 <textarea
                   id="cfg-description"
@@ -218,9 +258,54 @@ export const SettingsView: FC<SettingsProps> = ({
                 </textarea>
               </div>
 
-              <div class="settings-page__form-actions">
-                <button type="submit" class="btn btn--primary">Save</button>
+              <div class="settings-field settings-field--row">
+                <div class="settings-field">
+                  <label class="settings-field__label" for="cfg-locale">
+                    Locale (BCP 47)
+                  </label>
+                  <input
+                    type="text"
+                    id="cfg-locale"
+                    name="locale"
+                    value={config.locale ?? "en-US"}
+                    placeholder="en-US"
+                    class="settings-field__input"
+                  />
+                </div>
+                <div class="settings-field">
+                  <label class="settings-field__label" for="cfg-currency">
+                    Currency (ISO 4217)
+                  </label>
+                  <input
+                    type="text"
+                    id="cfg-currency"
+                    name="currency"
+                    value={config.currency ?? "USD"}
+                    placeholder="USD"
+                    class="settings-field__input"
+                  />
+                </div>
               </div>
+
+              <div class="settings-field">
+                <label class="settings-field__label" for="cfg-port">
+                  Server port
+                </label>
+                <input
+                  type="number"
+                  id="cfg-port"
+                  name="port"
+                  value={config.port ?? 8003}
+                  min={1}
+                  max={65535}
+                  class="settings-field__input settings-field__input--narrow"
+                />
+                <span class="settings-field__hint">
+                  PORT env var takes precedence. Restart required after change.
+                </span>
+              </div>
+
+              <FormActions />
             </form>
           </div>
 
@@ -281,9 +366,7 @@ export const SettingsView: FC<SettingsProps> = ({
                 </div>
               </fieldset>
 
-              <div class="settings-page__form-actions">
-                <button type="submit" class="btn btn--primary">Save</button>
-              </div>
+              <FormActions />
             </form>
           </div>
 
@@ -325,9 +408,7 @@ export const SettingsView: FC<SettingsProps> = ({
                 </button>
               </div>
 
-              <div class="settings-page__form-actions">
-                <button type="submit" class="btn btn--primary">Save</button>
-              </div>
+              <FormActions />
             </form>
           </div>
 
@@ -385,6 +466,105 @@ export const SettingsView: FC<SettingsProps> = ({
                 Licensed under MIT
               </p>
             </section>
+          </div>
+
+          {/* ---- Navigation tab ---- */}
+          <div class="settings-tabs__panel settings-tabs__panel--navigation">
+            <form
+              id="nav-categories-form"
+              hx-post="/settings/nav-categories"
+              hx-trigger="submit"
+              hx-swap="none"
+            >
+              <div class="settings-nav__add-category">
+                <input
+                  type="text"
+                  id="nav-category-new-name"
+                  class="settings-field__input"
+                  placeholder="New category name..."
+                />
+                <button
+                  type="button"
+                  class="btn btn--secondary btn--sm"
+                  data-add-category
+                >
+                  Add category
+                </button>
+              </div>
+
+              {/* Jump links */}
+              <div class="settings-page__bulk-actions">
+                <button type="button" class="btn btn--secondary btn--sm" data-nav-expand-all>
+                  Expand all
+                </button>
+                <button type="button" class="btn btn--secondary btn--sm" data-nav-collapse-all>
+                  Collapse all
+                </button>
+              </div>
+              <nav class="settings-nav__jump-bar" data-nav-jump>
+                {groupOrder.map((g) => (
+                  <a
+                    key={g}
+                    class="settings-nav__jump-pill"
+                    href={`#settings-nav-${g.toLowerCase().replace(/\s+/g, "-")}`}
+                    data-nav-target={`settings-nav-${g.toLowerCase().replace(/\s+/g, "-")}`}
+                  >
+                    {g} ({featuresByCategory[g].length})
+                  </a>
+                ))}
+              </nav>
+
+              {/* Hidden inputs to preserve category names (including empty ones) */}
+              {categoryNames.map((cat) => (
+                <input key={cat} type="hidden" name="categories" value={cat} />
+              ))}
+
+              <div id="nav-categories-list" class="settings-nav__feature-list">
+                {groupOrder.map((groupName) => (
+                  <details
+                    key={groupName}
+                    class="settings-collapse"
+                    id={`settings-nav-${groupName.toLowerCase().replace(/\s+/g, "-")}`}
+                  >
+                    <summary class="settings-collapse__trigger">
+                      {`${groupName} (`}<span class="settings-collapse__count">{featuresByCategory[groupName].length}</span>{`)`}
+                    </summary>
+                    <div class="settings-nav__group-content">
+                      {featuresByCategory[groupName].length === 0
+                        ? (
+                          <p class="settings-nav__empty">
+                            No features assigned
+                          </p>
+                        )
+                        : featuresByCategory[groupName].map(([key, label]) => (
+                          <div key={key} class="settings-nav__feature-row">
+                            <span class="settings-nav__feature-label">
+                              {label}
+                            </span>
+                            <select
+                              name={`nav_${key}`}
+                              class="form__select settings-nav__select"
+                            >
+                              <option value="" disabled>Select category</option>
+                              {sortedCategoryOptions.map((cat) => (
+                                <option
+                                  key={cat}
+                                  value={cat}
+                                  selected={featureToCategory[key] === cat}
+                                >
+                                  {cat}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        ))}
+                    </div>
+                  </details>
+                ))}
+              </div>
+
+              <FormActions />
+            </form>
           </div>
 
           {/* ---- Sections tab ---- */}
@@ -451,9 +631,7 @@ export const SettingsView: FC<SettingsProps> = ({
                 </button>
               </div>
 
-              <div class="settings-page__form-actions">
-                <button type="submit" class="btn btn--primary">Save</button>
-              </div>
+              <FormActions />
             </form>
           </div>
 
@@ -503,9 +681,7 @@ export const SettingsView: FC<SettingsProps> = ({
                 </button>
               </div>
 
-              <div class="settings-page__form-actions">
-                <button type="submit" class="btn btn--primary">Save</button>
-              </div>
+              <FormActions />
             </form>
           </div>
         </div>

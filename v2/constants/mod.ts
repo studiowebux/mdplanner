@@ -87,6 +87,10 @@ export const ENTITY_TYPE_LABELS: Record<string, string> = {
   dns_domain: "DNS Domain",
   fishbone: "Fishbone",
   marketing_plan: "Marketing Plan",
+  ai_chat: "AI Chat",
+  analytics: "Analytics",
+  github: "GitHub",
+  upload: "Uploads",
 };
 
 /**
@@ -139,7 +143,9 @@ export const DEFAULT_NAV_CATEGORIES: Record<string, string[]> = {
   Notes: ["note", "journal", "habit"],
   Diagrams: ["sticky_note", "mindmap", "c4_component"],
   Portfolio: ["portfolio"],
-  Infrastructure: ["dns_domain"],
+  Infrastructure: ["dns_domain", "github"],
+  AI: ["ai_chat"],
+  Tools: ["analytics", "upload"],
 };
 
 // -- Nav link types and builders ------------------------------------------
@@ -244,4 +250,8 @@ export const ENTITY_TYPE_ROUTES: Record<string, string> = {
   dns_domain: "/dns",
   fishbone: "/fishbones",
   marketing_plan: "/marketing-plans",
+  ai_chat: "/ai-chat",
+  analytics: "/analytics",
+  github: "/github",
+  upload: "/uploads",
 };

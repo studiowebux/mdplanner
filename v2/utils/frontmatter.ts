@@ -117,6 +117,36 @@ function parseYaml(yaml: string): Record<string, unknown> {
         i = j;
         continue;
       }
+
+      // Nested map: indented key: value lines
+      const map: Record<string, unknown> = {};
+      let m = i + 1;
+      while (
+        m < lines.length &&
+        lines[m].trim() !== "" &&
+        (lines[m].match(/^(\s+)/)?.[1]?.length ?? 0) > 0
+      ) {
+        const mapLine = lines[m].trim();
+        const mc = mapLine.indexOf(":");
+        if (mc !== -1) {
+          const mk = mapLine.slice(0, mc).trim();
+          const mv = mapLine.slice(mc + 1).trim();
+          if (mv.startsWith("[") && mv.endsWith("]")) {
+            const inner = mv.slice(1, -1);
+            map[mk] = inner
+              ? inner.split(",").map((s) => parseScalar(s.trim()))
+              : [];
+          } else {
+            map[mk] = parseScalar(mv);
+          }
+        }
+        m++;
+      }
+      if (Object.keys(map).length > 0) {
+        result[key] = map;
+        i = m;
+        continue;
+      }
     }
 
     // Scalar value
@@ -176,6 +206,17 @@ export function serializeFrontmatter(
           return `${k}:\n${items.join("\n")}`;
         }
         return `${k}: [${v.map(serializeScalar).join(", ")}]`;
+      }
+      if (typeof v === "object") {
+        const entries = Object.entries(v as Record<string, unknown>);
+        if (entries.length === 0) return `${k}: {}`;
+        const nested = entries.map(([nk, nv]) => {
+          if (Array.isArray(nv)) {
+            return `  ${nk}: [${(nv as unknown[]).map(serializeScalar).join(", ")}]`;
+          }
+          return `  ${nk}: ${serializeScalar(nv)}`;
+        });
+        return `${k}:\n${nested.join("\n")}`;
       }
       return `${k}: ${serializeScalar(v)}`;
     })
