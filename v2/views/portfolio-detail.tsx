@@ -84,7 +84,16 @@ export const PortfolioDetailView: FC<Props> = ({ item, ...viewProps }) => {
       styles={["/css/views/portfolio.css", "/css/views/github.css"]}
       scripts={item.githubRepo ? ["/js/github-tabs.js"] : []}
     >
-      <main class="portfolio-detail">
+      <div
+        hx-ext="sse"
+        sse-connect="/sse"
+        hx-get={`/portfolio/${item.id}`}
+        hx-trigger="sse:portfolio.updated, sse:portfolio.deleted"
+        hx-target="#portfolio-detail-root"
+        hx-select="#portfolio-detail-root"
+        hx-swap="outerHTML"
+      />
+      <main id="portfolio-detail-root" class="portfolio-detail">
         <div class="portfolio-detail__back">
           <a href="/portfolio" class="btn btn--secondary">
             Back to portfolio
