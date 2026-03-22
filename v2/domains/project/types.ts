@@ -197,40 +197,42 @@ export const FrontmatterProjectSchema = z.object({
   github_token: z.string().optional(),
   pipelines_per_page: z.number().optional(),
   last_updated: z.string().optional(),
-}).transform(async (fm): Promise<Omit<ProjectConfig, "name" | "description">> => {
-  const githubToken = fm.github_token
-    ? (await decryptSecret(fm.github_token) ?? undefined)
-    : undefined;
+}).transform(
+  async (fm): Promise<Omit<ProjectConfig, "name" | "description">> => {
+    const githubToken = fm.github_token
+      ? (await decryptSecret(fm.github_token) ?? undefined)
+      : undefined;
 
-  return {
-    startDate: fm.start_date,
-    workingDaysPerWeek: fm.working_days_per_week,
-    workingDays: Array.isArray(fm.working_days)
-      ? (fm.working_days as unknown[]).map(String).filter(
-        (d): d is typeof WEEKDAYS[number] =>
-          (WEEKDAYS as readonly string[]).includes(d),
-      )
-      : undefined,
-    tags: Array.isArray(fm.tags)
-      ? (fm.tags as unknown[]).map(String)
-      : undefined,
-    links: Array.isArray(fm.links)
-      ? (fm.links as Record<string, unknown>[]).filter(
-        (l) => typeof l.url === "string" && typeof l.title === "string",
-      ) as ProjectLink[]
-      : undefined,
-    features: Array.isArray(fm.features)
-      ? (fm.features as unknown[]).map(String)
-      : undefined,
-    navCategories: parseFrontmatterNavCategories(fm.nav_categories),
-    port: fm.port,
-    locale: fm.locale,
-    currency: fm.currency,
-    sectionOrder: Array.isArray(fm.section_order)
-      ? (fm.section_order as unknown[]).map(String)
-      : undefined,
-    githubToken,
-    pipelinesPerPage: fm.pipelines_per_page,
-    lastUpdated: fm.last_updated,
-  };
-});
+    return {
+      startDate: fm.start_date,
+      workingDaysPerWeek: fm.working_days_per_week,
+      workingDays: Array.isArray(fm.working_days)
+        ? (fm.working_days as unknown[]).map(String).filter(
+          (d): d is typeof WEEKDAYS[number] =>
+            (WEEKDAYS as readonly string[]).includes(d),
+        )
+        : undefined,
+      tags: Array.isArray(fm.tags)
+        ? (fm.tags as unknown[]).map(String)
+        : undefined,
+      links: Array.isArray(fm.links)
+        ? (fm.links as Record<string, unknown>[]).filter(
+          (l) => typeof l.url === "string" && typeof l.title === "string",
+        ) as ProjectLink[]
+        : undefined,
+      features: Array.isArray(fm.features)
+        ? (fm.features as unknown[]).map(String)
+        : undefined,
+      navCategories: parseFrontmatterNavCategories(fm.nav_categories),
+      port: fm.port,
+      locale: fm.locale,
+      currency: fm.currency,
+      sectionOrder: Array.isArray(fm.section_order)
+        ? (fm.section_order as unknown[]).map(String)
+        : undefined,
+      githubToken,
+      pipelinesPerPage: fm.pipelines_per_page,
+      lastUpdated: fm.last_updated,
+    };
+  },
+);

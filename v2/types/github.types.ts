@@ -36,7 +36,8 @@ export const GITHUB_WORKFLOW_RUN_CONCLUSIONS = [
   "action_required",
 ] as const;
 export type GitHubWorkflowRunConclusion =
-  typeof GITHUB_WORKFLOW_RUN_CONCLUSIONS[number] | null;
+  | typeof GITHUB_WORKFLOW_RUN_CONCLUSIONS[number]
+  | null;
 
 export const GITHUB_WORKFLOW_EVENTS = [
   "push",

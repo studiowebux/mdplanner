@@ -249,7 +249,14 @@ export function createDomainPage<T extends Entity>(
   };
 
   const DomainPage: FC<PageProps> = (
-    { items, totalCount, state, dynamicFilterOptions, customContent, ...viewProps },
+    {
+      items,
+      totalCount,
+      state,
+      dynamicFilterOptions,
+      customContent,
+      ...viewProps
+    },
   ) => (
     <MainLayout
       title={cfg.singular}

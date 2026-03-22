@@ -36,7 +36,9 @@ portfolioRouter.get("/:id/github/card", async (c) => {
   const item = await getPortfolioService().getById(id);
   if (!item?.githubRepo) {
     return c.html(
-      GitHubError({ message: "No GitHub repository configured" }) as unknown as string,
+      GitHubError({
+        message: "No GitHub repository configured",
+      }) as unknown as string,
     );
   }
   try {
@@ -59,7 +61,9 @@ portfolioRouter.get("/:id/github/issues", async (c) => {
   const item = await getPortfolioService().getById(id);
   if (!item?.githubRepo) {
     return c.html(
-      GitHubError({ message: "No GitHub repository configured" }) as unknown as string,
+      GitHubError({
+        message: "No GitHub repository configured",
+      }) as unknown as string,
     );
   }
   try {
@@ -78,7 +82,9 @@ portfolioRouter.get("/:id/github/pulls", async (c) => {
   const item = await getPortfolioService().getById(id);
   if (!item?.githubRepo) {
     return c.html(
-      GitHubError({ message: "No GitHub repository configured" }) as unknown as string,
+      GitHubError({
+        message: "No GitHub repository configured",
+      }) as unknown as string,
     );
   }
   try {
@@ -97,7 +103,9 @@ portfolioRouter.get("/:id/github/milestones", async (c) => {
   const item = await getPortfolioService().getById(id);
   if (!item?.githubRepo) {
     return c.html(
-      GitHubError({ message: "No GitHub repository configured" }) as unknown as string,
+      GitHubError({
+        message: "No GitHub repository configured",
+      }) as unknown as string,
     );
   }
   try {
@@ -116,7 +124,9 @@ portfolioRouter.get("/:id/github/pipelines", async (c) => {
   const item = await getPortfolioService().getById(id);
   if (!item?.githubRepo) {
     return c.html(
-      GitHubError({ message: "No GitHub repository configured" }) as unknown as string,
+      GitHubError({
+        message: "No GitHub repository configured",
+      }) as unknown as string,
     );
   }
   try {
@@ -166,7 +176,9 @@ portfolioRouter.get("/:id/github/pipelines/results", async (c) => {
   const item = await getPortfolioService().getById(id);
   if (!item?.githubRepo) {
     return c.html(
-      GitHubError({ message: "No GitHub repository configured" }) as unknown as string,
+      GitHubError({
+        message: "No GitHub repository configured",
+      }) as unknown as string,
     );
   }
   try {

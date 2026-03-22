@@ -9,7 +9,12 @@ import { api } from "./api/mod.ts";
 import { views } from "./views/mod.ts";
 import { createMcpHonoRouter } from "./mcp/mod.ts";
 import { contextMiddleware } from "./middleware/context.ts";
-import { APP_NAME, APP_VERSION, DEFAULT_PORT, setSectionOrder } from "./constants/mod.ts";
+import {
+  APP_NAME,
+  APP_VERSION,
+  DEFAULT_PORT,
+  setSectionOrder,
+} from "./constants/mod.ts";
 import { getProjectService } from "./singletons/services.ts";
 import { setFormatConfig } from "./utils/format.ts";
 import { setTimeLocale } from "./utils/time.ts";
@@ -25,11 +30,18 @@ await bootCacheSync();
 
 const projectConfig = await getProjectService().getConfig();
 const envPort = Deno.env.get("PORT");
-const port = envPort ? parseInt(envPort, 10) : (projectConfig.port ?? DEFAULT_PORT);
+const port = envPort
+  ? parseInt(envPort, 10)
+  : (projectConfig.port ?? DEFAULT_PORT);
 
-setFormatConfig({ locale: projectConfig.locale, currency: projectConfig.currency });
+setFormatConfig({
+  locale: projectConfig.locale,
+  currency: projectConfig.currency,
+});
 if (projectConfig.locale) setTimeLocale(projectConfig.locale);
-if (projectConfig.sectionOrder?.length) setSectionOrder(projectConfig.sectionOrder);
+if (projectConfig.sectionOrder?.length) {
+  setSectionOrder(projectConfig.sectionOrder);
+}
 
 const app = new Hono<{ Variables: AppVariables }>();
 

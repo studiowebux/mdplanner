@@ -148,8 +148,8 @@ export class GitHubProvider {
       "/user/repos?per_page=100&sort=pushed&affiliation=owner,collaborator",
     ) as any[];
 
-    const repos: { full_name: string; description: string | null }[] =
-      data ?? [];
+    const repos: { full_name: string; description: string | null }[] = data ??
+      [];
 
     const q = query?.toLowerCase().trim();
     const filtered = q

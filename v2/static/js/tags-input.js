@@ -5,7 +5,11 @@
   function getState(field) {
     var hidden = field.querySelector("input[type='hidden']");
     var val = hidden ? hidden.value : "";
-    return val ? val.split(",").map(function (s) { return s.trim(); }).filter(Boolean) : [];
+    return val
+      ? val.split(",").map(function (s) {
+        return s.trim();
+      }).filter(Boolean)
+      : [];
   }
 
   function setState(field, tags) {
@@ -47,7 +51,9 @@
   }
 
   function removeTag(field, value) {
-    var tags = getState(field).filter(function (t) { return t !== value; });
+    var tags = getState(field).filter(function (t) {
+      return t !== value;
+    });
     setState(field, tags);
     renderPills(field, tags);
   }

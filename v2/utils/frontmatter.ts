@@ -212,7 +212,9 @@ export function serializeFrontmatter(
         if (entries.length === 0) return `${k}: {}`;
         const nested = entries.map(([nk, nv]) => {
           if (Array.isArray(nv)) {
-            return `  ${nk}: [${(nv as unknown[]).map(serializeScalar).join(", ")}]`;
+            return `  ${nk}: [${
+              (nv as unknown[]).map(serializeScalar).join(", ")
+            }]`;
           }
           return `  ${nk}: ${serializeScalar(nv)}`;
         });

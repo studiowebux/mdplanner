@@ -6,7 +6,10 @@ import { getPortfolioService } from "../../../singletons/services.ts";
  * Map GitHub service errors to HTTP responses via c.json().
  */
 // deno-lint-ignore no-explicit-any
-export function githubError(c: { json: (d: any, s: number) => any }, err: unknown) {
+export function githubError(
+  c: { json: (d: any, s: number) => any },
+  err: unknown,
+) {
   const msg = err instanceof Error ? err.message : String(err);
   if (
     msg.startsWith("GITHUB_TOKEN_NOT_CONFIGURED") ||
@@ -36,7 +39,10 @@ export function githubError(c: { json: (d: any, s: number) => any }, err: unknow
  */
 export async function resolveRepo(
   // deno-lint-ignore no-explicit-any
-  c: { req: { param: (k: string) => string }; json: (d: any, s: number) => any },
+  c: {
+    req: { param: (k: string) => string };
+    json: (d: any, s: number) => any;
+  },
 ): Promise<string | Response> {
   const portfolioId = c.req.param("id");
   const item = await getPortfolioService().getById(portfolioId);

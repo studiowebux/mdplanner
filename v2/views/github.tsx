@@ -32,24 +32,22 @@ export const GitHubRepoCard: FC<{
       >
         {repo.owner}/{repo.repo}
       </a>
-      {repo.license && (
-        <span class="github-card__license">{repo.license}</span>
-      )}
+      {repo.license && <span class="github-card__license">{repo.license}</span>}
     </div>
     <div class="github-card__stats">
       <span class="github-card__stat">
-        <span class="github-card__stat-value">{repo.stars}</span>
-        {" "}{repo.stars === 1 ? "star" : "stars"}
+        <span class="github-card__stat-value">{repo.stars}</span>{" "}
+        {repo.stars === 1 ? "star" : "stars"}
       </span>
       <span class="github-card__stat">
         <span class="github-card__stat-value">
           {Math.max(0, repo.openIssues - repo.openPRs)}
-        </span>
-        {" "}{repo.openIssues - repo.openPRs === 1 ? "issue" : "issues"}
+        </span>{" "}
+        {repo.openIssues - repo.openPRs === 1 ? "issue" : "issues"}
       </span>
       <span class="github-card__stat">
-        <span class="github-card__stat-value">{repo.openPRs}</span>
-        {" "}{repo.openPRs === 1 ? "PR" : "PRs"}
+        <span class="github-card__stat-value">{repo.openPRs}</span>{" "}
+        {repo.openPRs === 1 ? "PR" : "PRs"}
       </span>
     </div>
     <div class="github-card__footer">
@@ -317,7 +315,9 @@ export const GitHubPipelinesTable: FC<{
           class="github-pipeline__search github-pipeline__search--branch"
           autocomplete="off"
         />
-        <span id="github-pipeline-spinner" class="htmx-indicator"><div class="loading-spinner__ring" /></span>
+        <span id="github-pipeline-spinner" class="htmx-indicator">
+          <div class="loading-spinner__ring" />
+        </span>
       </form>
 
       <div id="github-pipeline-results">
@@ -491,7 +491,9 @@ export const GitHubSection: FC<{ itemId: string }> = ({ itemId }) => (
       hx-trigger="load"
       hx-swap="innerHTML"
     >
-      <div class="loading-spinner" aria-label="Loading"><div class="loading-spinner__ring" /></div>
+      <div class="loading-spinner" aria-label="Loading">
+        <div class="loading-spinner__ring" />
+      </div>
     </div>
 
     <div class="github-tabs">
@@ -547,7 +549,9 @@ export const GitHubSection: FC<{ itemId: string }> = ({ itemId }) => (
       hx-trigger="load"
       hx-swap="innerHTML"
     >
-      <div class="loading-spinner" aria-label="Loading"><div class="loading-spinner__ring" /></div>
+      <div class="loading-spinner" aria-label="Loading">
+        <div class="loading-spinner__ring" />
+      </div>
     </div>
   </section>
 );
