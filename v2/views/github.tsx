@@ -345,7 +345,7 @@ export const GitHubPipelineResults: FC<{
 }> = ({ runs, total, itemId, page, hasNext, resultsUrl }) => (
   <>
     <span class="github-pipeline__count">
-      {runs.length}/{total} runs (page {page})
+      {total} runs — page {page}
     </span>
 
     {runs.length === 0
