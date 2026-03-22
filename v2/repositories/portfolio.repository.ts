@@ -60,6 +60,17 @@ export class PortfolioRepository {
     );
   }
 
+  /** Read a single item from disk, bypassing cache. */
+  async findFromDisk(id: string): Promise<PortfolioItem | null> {
+    try {
+      const content = await Deno.readTextFile(join(this.dir, `${id}.md`));
+      return this.parse(`${id}.md`, content);
+    } catch (err) {
+      if (err instanceof Deno.errors.NotFound) return null;
+      throw err;
+    }
+  }
+
   async findById(id: string): Promise<PortfolioItem | null> {
     if (this.cacheDb) {
       try {
@@ -185,6 +196,20 @@ export class PortfolioRepository {
     const updates = [update, ...(item.statusUpdates ?? [])];
     await this.update(id, { statusUpdates: updates });
     return update;
+  }
+
+  async updateStatusUpdate(
+    id: string,
+    updateId: string,
+    message: string,
+  ): Promise<PortfolioStatusUpdate | null> {
+    const item = await this.findById(id);
+    if (!item) return null;
+    const target = (item.statusUpdates ?? []).find((u) => u.id === updateId);
+    if (!target) return null;
+    target.message = message;
+    await this.update(id, { statusUpdates: item.statusUpdates });
+    return target;
   }
 
   async deleteStatusUpdate(id: string, updateId: string): Promise<boolean> {

@@ -3,9 +3,73 @@ import { MainLayout } from "../components/layout/main.tsx";
 import type { PortfolioItem } from "../types/portfolio.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatCurrency } from "../utils/format.ts";
+import { formatDate } from "../utils/time.ts";
 import { markdownToHtml } from "../utils/markdown.ts";
 
+import type { PortfolioStatusUpdate } from "../types/portfolio.types.ts";
+
 type Props = ViewProps & { item: PortfolioItem };
+
+/** Single status update row — reused by detail page and fragment routes. */
+export const StatusUpdateRow: FC<{
+  u: PortfolioStatusUpdate;
+  itemId: string;
+}> = ({ u, itemId }) => (
+  <div id={`update-${u.id}`} class="portfolio-detail__update">
+    <span class="portfolio-detail__update-date">{formatDate(u.date)}</span>
+    <span class="portfolio-detail__update-message">{u.message}</span>
+    <span class="portfolio-detail__update-actions">
+      <button
+        class="btn btn--secondary btn--sm"
+        type="button"
+        hx-get={`/portfolio/${itemId}/status-updates/${u.id}/edit`}
+        hx-target={`#update-${u.id}`}
+        hx-swap="outerHTML"
+      >
+        Edit
+      </button>
+      <button
+        class="btn btn--danger btn--sm"
+        type="button"
+        hx-delete={`/portfolio/${itemId}/status-updates/${u.id}`}
+        hx-target={`#update-${u.id}`}
+        hx-swap="outerHTML"
+        hx-confirm-dialog="Delete this status update?"
+      >
+        Delete
+      </button>
+    </span>
+  </div>
+);
+
+/** Inline edit form — swapped in by GET /:id/status-updates/:updateId/edit */
+export const StatusUpdateEditRow: FC<{
+  u: PortfolioStatusUpdate;
+  itemId: string;
+}> = ({ u, itemId }) => (
+  <form
+    id={`update-${u.id}`}
+    class="portfolio-detail__update portfolio-detail__update--editing"
+    hx-post={`/portfolio/${itemId}/status-updates/${u.id}`}
+    hx-target={`#update-${u.id}`}
+    hx-swap="outerHTML"
+  >
+    <span class="portfolio-detail__update-date">{formatDate(u.date)}</span>
+    <textarea class="form__input" name="message" rows={2}>{u.message}</textarea>
+    <span class="portfolio-detail__update-actions">
+      <button class="btn btn--primary btn--sm" type="submit">Save</button>
+      <button
+        class="btn btn--secondary btn--sm"
+        type="button"
+        hx-get={`/portfolio/${itemId}/status-updates/${u.id}/row`}
+        hx-target={`#update-${u.id}`}
+        hx-swap="outerHTML"
+      >
+        Cancel
+      </button>
+    </span>
+  </form>
+);
 
 export const PortfolioDetailView: FC<Props> = ({ item, ...viewProps }) => {
   const descHtml = markdownToHtml(item.description);
@@ -161,30 +225,33 @@ export const PortfolioDetailView: FC<Props> = ({ item, ...viewProps }) => {
           </section>
         )}
 
-        {item.statusUpdates && item.statusUpdates.length > 0 && (
-          <section class="portfolio-detail__status-updates">
-            <h2 class="portfolio-detail__section-heading">Status Updates</h2>
-            {item.statusUpdates.map((u) => (
-              <div key={u.id} class="portfolio-detail__update">
-                <span class="portfolio-detail__update-date">{u.date}</span>
-                <span class="portfolio-detail__update-message">
-                  {u.message}
-                </span>
-                <span class="portfolio-detail__update-actions">
-                  <button
-                    class="btn btn--danger btn--sm"
-                    type="button"
-                    hx-delete={`/api/v1/portfolio/${item.id}/status-updates/${u.id}`}
-                    hx-swap="none"
-                    hx-confirm-dialog="Delete this status update?"
-                  >
-                    Delete
-                  </button>
-                </span>
-              </div>
+        <section class="portfolio-detail__status-updates">
+          <h2 class="portfolio-detail__section-heading">Status Updates</h2>
+
+          <form
+            class="portfolio-detail__update-form"
+            hx-post={`/portfolio/${item.id}/status-updates`}
+            hx-target="#status-updates-list"
+            hx-swap="afterbegin"
+          >
+            <textarea
+              class="form__input"
+              name="message"
+              placeholder="Add a status update..."
+              rows={2}
+              required
+            />
+            <button class="btn btn--primary btn--sm" type="submit">
+              Add Update
+            </button>
+          </form>
+
+          <div id="status-updates-list">
+            {(item.statusUpdates ?? []).map((u) => (
+              <StatusUpdateRow key={u.id} u={u} itemId={item.id} />
             ))}
-          </section>
-        )}
+          </div>
+        </section>
 
         {item.githubRepo && (
           <section class="portfolio-detail__section">
@@ -230,6 +297,7 @@ export const PortfolioDetailView: FC<Props> = ({ item, ...viewProps }) => {
           </button>
         </div>
       </main>
+      <div id="portfolio-form-container" />
     </MainLayout>
   );
 };

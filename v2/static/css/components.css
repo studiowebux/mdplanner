@@ -340,6 +340,8 @@
 .form__input,
 .form__select,
 .form__textarea {
+  width: 100%;
+  box-sizing: border-box;
   padding: var(--space-xs) var(--space-sm);
   font-size: var(--font-size-sm);
   font-family: var(--font-sans);

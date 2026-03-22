@@ -270,6 +270,47 @@ portfolioRouter.openapi(addStatusUpdateRoute, async (c) => {
   return c.json(update, 201);
 });
 
+// PUT /:id/status-updates/:updateId
+const updateStatusUpdateRoute = createRoute({
+  method: "put",
+  path: "/{id}/status-updates/{updateId}",
+  tags: ["Portfolio"],
+  summary: "Update a status update message",
+  operationId: "updatePortfolioStatusUpdate",
+  request: {
+    params: IdWithUpdateIdParam,
+    body: {
+      content: { "application/json": { schema: AddStatusUpdateSchema } },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": { schema: PortfolioStatusUpdateSchema },
+      },
+      description: "Updated status update",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+portfolioRouter.openapi(updateStatusUpdateRoute, async (c) => {
+  const { id, updateId } = c.req.valid("param");
+  const { message } = c.req.valid("json");
+  const update = await getPortfolioService().updateStatusUpdate(
+    id,
+    updateId,
+    message,
+  );
+  if (!update) return c.json(notFound("STATUS_UPDATE", updateId), 404);
+  publish("portfolio.updated");
+  return c.json(update, 200);
+});
+
 // DELETE /:id/status-updates/:updateId
 const deleteStatusUpdateRoute = createRoute({
   method: "delete",

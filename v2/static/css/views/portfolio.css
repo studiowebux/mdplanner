@@ -301,6 +301,26 @@
   padding: var(--card-padding);
 }
 
+.portfolio-detail__update-form {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+  margin-bottom: var(--space-md);
+}
+
+.portfolio-detail__update-form textarea,
+.portfolio-detail__update--editing textarea {
+  flex: 1;
+}
+
+.portfolio-detail__update--editing {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+  padding: var(--space-sm) 0;
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
 .portfolio-detail__update {
   display: flex;
   gap: var(--space-sm);
@@ -326,6 +346,8 @@
 }
 
 .portfolio-detail__update-actions {
+  display: flex;
+  gap: var(--space-xs);
   flex-shrink: 0;
 }
 
@@ -367,6 +389,15 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin-bottom: var(--space-md);
+}
+
+.portfolio-detail__section a:not(.btn) {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.portfolio-detail__section a:not(.btn):hover {
+  color: var(--color-accent);
 }
 
 .portfolio-detail__back {}

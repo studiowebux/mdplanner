@@ -69,19 +69,31 @@ export class PortfolioService {
     message: string,
   ): Promise<PortfolioStatusUpdate | null> {
     const update = await this.repo.addStatusUpdate(id, message);
-    if (update) {
-      const item = await this.repo.findById(id);
-      if (item) this.cacheUpsert(item);
-    }
+    if (update) await this.cacheRefreshFromDisk(id);
+    return update;
+  }
+
+  async updateStatusUpdate(
+    id: string,
+    updateId: string,
+    message: string,
+  ): Promise<PortfolioStatusUpdate | null> {
+    const update = await this.repo.updateStatusUpdate(id, updateId, message);
+    if (update) await this.cacheRefreshFromDisk(id);
     return update;
   }
 
   async deleteStatusUpdate(id: string, updateId: string): Promise<boolean> {
     const deleted = await this.repo.deleteStatusUpdate(id, updateId);
-    if (deleted) {
-      const item = await this.repo.findById(id);
-      if (item) this.cacheUpsert(item);
-    }
+    if (deleted) await this.cacheRefreshFromDisk(id);
     return deleted;
+  }
+
+  /** Re-read from disk and upsert cache — avoids stale cache reads after sub-entity mutations. */
+  private async cacheRefreshFromDisk(id: string): Promise<void> {
+    if (!this.cache) return;
+    this.cache.remove(PORTFOLIO_TABLE, id);
+    const fresh = await this.repo.findFromDisk(id);
+    if (fresh) insertPortfolioRow(this.cache.getDb(), fresh);
   }
 }

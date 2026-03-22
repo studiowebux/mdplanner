@@ -114,6 +114,31 @@ registerAutocompleteSource("project-tags", {
   valueKey: "name",
 });
 
+registerAutocompleteSource("portfolio-tech-stack", {
+  list: async () => {
+    const all = await getPortfolioService().list();
+    const techs = new Set<string>();
+    for (const p of all) {
+      for (const t of p.techStack ?? []) techs.add(t);
+    }
+    return [...techs].sort().map((t) => ({ name: t }));
+  },
+  search: async (q) => {
+    const all = await getPortfolioService().list();
+    const techs = new Set<string>();
+    for (const p of all) {
+      for (const t of p.techStack ?? []) techs.add(t);
+    }
+    const lower = q.toLowerCase();
+    return [...techs]
+      .filter((t) => t.toLowerCase().includes(lower))
+      .sort()
+      .map((t) => ({ name: t }));
+  },
+  displayKey: "name",
+  valueKey: "name",
+});
+
 registerAutocompleteSource("portfolio-categories", {
   list: async () => {
     const all = await getPortfolioService().list();
