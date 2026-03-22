@@ -9,6 +9,7 @@ import { MilestoneService } from "../services/milestone.service.ts";
 import { NoteService } from "../services/note.service.ts";
 import { PeopleService } from "../services/people.service.ts";
 import { PortfolioService } from "../services/portfolio.service.ts";
+import { GitHubService } from "../services/github.service.ts";
 import { ProjectService } from "../services/project.service.ts";
 import { TaskService } from "../services/task.service.ts";
 import {
@@ -35,6 +36,7 @@ let peopleService: PeopleService | null = null;
 let noteService: NoteService | null = null;
 let portfolioService: PortfolioService | null = null;
 let projectService: ProjectService | null = null;
+let githubService: GitHubService | null = null;
 let cacheDb: CacheDatabase | null = null;
 let cacheSync: CacheSync | null = null;
 let searchEngine: SearchEngine | null = null;
@@ -58,6 +60,7 @@ export function initServices(
   noteService = new NoteService(noteRepo);
   portfolioService = new PortfolioService(portfolioRepo);
   projectService = new ProjectService(projectRepo);
+  githubService = new GitHubService(projectService);
 
   if (useCache) {
     cacheDb = new CacheDatabase(`${projectDir}/.mdplanner-cache.db`);
@@ -143,6 +146,13 @@ export function getProjectService(): ProjectService {
     throw new Error("Services not initialized — call initServices() first");
   }
   return projectService;
+}
+
+export function getGitHubService(): GitHubService {
+  if (!githubService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return githubService;
 }
 
 export function getCacheSync(): CacheSync | null {
