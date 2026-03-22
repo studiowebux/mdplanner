@@ -108,13 +108,51 @@
   var featuresForm = document.getElementById("features-form");
   var search = document.getElementById("features-search");
 
+  var enabledDetails = document.getElementById("features-enabled");
+  var disabledDetails = document.getElementById("features-disabled");
+  var enabledList = enabledDetails
+    ? enabledDetails.querySelector(".settings-page__feature-list")
+    : null;
+  var disabledList = disabledDetails
+    ? disabledDetails.querySelector(".settings-page__feature-list")
+    : null;
+
+  function updateSectionCounts() {
+    if (enabledDetails) {
+      var ec = enabledDetails.querySelector(".settings-collapse__count");
+      if (ec) ec.textContent = String(enabledList.children.length);
+    }
+    if (disabledDetails) {
+      var dc = disabledDetails.querySelector(".settings-collapse__count");
+      if (dc) dc.textContent = String(disabledList.children.length);
+    }
+  }
+
+  if (featuresForm && enabledList && disabledList) {
+    featuresForm.addEventListener("change", function (e) {
+      var cb = e.target.closest('input[name="features"]');
+      if (!cb) return;
+      var item = cb.closest(".settings-page__feature-item");
+      if (!item) return;
+      var targetList = cb.checked ? enabledList : disabledList;
+      targetList.appendChild(item);
+      updateSectionCounts();
+    });
+  }
+
   if (featuresForm) {
     function toggleAll(checked) {
       featuresForm.querySelectorAll('input[name="features"]').forEach(
         function (cb) {
           cb.checked = checked;
+          var item = cb.closest(".settings-page__feature-item");
+          if (item) {
+            var targetList = checked ? enabledList : disabledList;
+            if (targetList) targetList.appendChild(item);
+          }
         },
       );
+      updateSectionCounts();
       htmx.trigger(featuresForm, "change");
     }
 
@@ -133,21 +171,67 @@
   }
 
   // -----------------------------------------------------------------------
-  // Features: search filter
+  // Features: search filter with count + auto-open collapsibles
   // -----------------------------------------------------------------------
+  var featuresCount = document.getElementById("features-count");
+  var collapseStates = {};
+
   if (search && featuresForm) {
     search.addEventListener("input", function () {
       var query = search.value.toLowerCase().trim();
-      featuresForm.querySelectorAll(".settings-page__feature-item").forEach(
-        function (item) {
-          var label = item.querySelector(".settings-page__feature-label");
-          var text = label ? label.textContent.toLowerCase() : "";
-          item.classList.toggle(
-            "is-hidden",
-            query !== "" && text.indexOf(query) === -1,
-          );
-        },
-      );
+      var items = featuresForm.querySelectorAll(".settings-page__feature-item");
+      var total = items.length;
+      var visible = 0;
+
+      items.forEach(function (item) {
+        var label = item.querySelector(".settings-page__feature-label");
+        var text = label ? label.textContent.toLowerCase() : "";
+        var hidden = query !== "" && text.indexOf(query) === -1;
+        item.classList.toggle("is-hidden", hidden);
+        if (!hidden) visible++;
+      });
+
+      // Update count
+      if (featuresCount) {
+        featuresCount.textContent = query
+          ? visible + "/" + total
+          : total + " total";
+      }
+
+      // Update collapsible header counts
+      var collapses = featuresForm.querySelectorAll(".settings-collapse");
+      collapses.forEach(function (el) {
+        var countSpan = el.querySelector(".settings-collapse__count");
+        if (countSpan) {
+          var visibleInSection = el.querySelectorAll(
+            ".settings-page__feature-item:not(.is-hidden)",
+          ).length;
+          var totalInSection = el.querySelectorAll(
+            ".settings-page__feature-item",
+          ).length;
+          countSpan.textContent = query
+            ? visibleInSection + "/" + totalInSection
+            : String(totalInSection);
+        }
+      });
+
+      // Auto-open/restore collapsibles
+      if (query) {
+        collapses.forEach(function (el) {
+          if (!(el.id in collapseStates)) {
+            collapseStates[el.id || collapses.length] = el.open;
+          }
+          el.open = true;
+        });
+      } else {
+        collapses.forEach(function (el) {
+          var key = el.id || collapses.length;
+          if (key in collapseStates) {
+            el.open = collapseStates[key];
+          }
+        });
+        collapseStates = {};
+      }
     });
   }
 

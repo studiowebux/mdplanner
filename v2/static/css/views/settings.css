@@ -119,9 +119,16 @@
    Search filter
    --------------------------------------------------------------------------- */
 
+.settings-page__search-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
 .settings-page__search {
   display: block;
-  width: 100%;
+  flex: 1;
   padding: var(--space-sm) var(--space-md);
   font-size: var(--font-size-base);
   font-family: inherit;
@@ -129,7 +136,6 @@
   background: var(--color-bg-primary);
   border: var(--border-width) var(--border-style) var(--color-border-default);
   border-radius: var(--radius-md);
-  margin-bottom: var(--space-md);
   transition: border-color var(--transition-fast);
 }
 

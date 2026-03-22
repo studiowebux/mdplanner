@@ -102,13 +102,16 @@ export const SettingsView: FC<SettingsProps> = ({
 
           {/* ---- Views tab ---- */}
           <div class="settings-tabs__panel settings-tabs__panel--views">
-            <input
-              type="search"
-              id="features-search"
-              class="settings-page__search"
-              placeholder="Filter views..."
-              autocomplete="off"
-            />
+            <div class="settings-page__search-row">
+              <input
+                type="search"
+                id="features-search"
+                class="settings-page__search"
+                placeholder="Filter views..."
+                autocomplete="off"
+              />
+              <span id="features-count" class="domain-page__count"></span>
+            </div>
 
             <form
               id="features-form"
@@ -133,9 +136,9 @@ export const SettingsView: FC<SettingsProps> = ({
                 </button>
               </div>
 
-              <details class="settings-collapse" open>
+              <details id="features-enabled" class="settings-collapse" open>
                 <summary class="settings-collapse__trigger">
-                  Enabled ({enabledList.length})
+                  Enabled (<span class="settings-collapse__count">{enabledList.length}</span>)
                 </summary>
                 <ul class="settings-page__feature-list">
                   {enabledList.map(([key, label]) => (
@@ -156,9 +159,9 @@ export const SettingsView: FC<SettingsProps> = ({
                 </ul>
               </details>
 
-              <details class="settings-collapse">
+              <details id="features-disabled" class="settings-collapse">
                 <summary class="settings-collapse__trigger">
-                  Disabled ({disabledList.length})
+                  Disabled (<span class="settings-collapse__count">{disabledList.length}</span>)
                 </summary>
                 <ul class="settings-page__feature-list">
                   {disabledList.map(([key, label]) => (
