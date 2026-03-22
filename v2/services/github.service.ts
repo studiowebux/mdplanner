@@ -46,11 +46,6 @@ export class GitHubService {
 
   private async provider(): Promise<GitHubProvider> {
     const config = await this.projectService.getConfig();
-    if (!config.githubToken) {
-      throw new Error(
-        "GITHUB_TOKEN_NOT_CONFIGURED: set a GitHub PAT in Settings > Project",
-      );
-    }
     return new GitHubProvider(config.githubToken);
   }
 

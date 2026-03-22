@@ -30,18 +30,19 @@ import type {
 const GITHUB_API = "https://api.github.com";
 
 export class GitHubProvider {
-  private token: string;
+  private token?: string;
 
-  constructor(token: string) {
+  constructor(token?: string) {
     this.token = token;
   }
 
   private get headers(): HeadersInit {
-    return {
-      Authorization: `Bearer ${this.token}`,
+    const h: Record<string, string> = {
       Accept: "application/vnd.github+json",
       "X-GitHub-Api-Version": "2022-11-28",
     };
+    if (this.token) h.Authorization = `Bearer ${this.token}`;
+    return h;
   }
 
   private async ghGet(path: string): Promise<unknown> {
