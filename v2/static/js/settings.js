@@ -3,6 +3,31 @@
 
 (function () {
   // -----------------------------------------------------------------------
+  // Tab persistence via URL hash
+  // -----------------------------------------------------------------------
+  var tabRadios = document.querySelectorAll('.settings-tabs__radio');
+
+  function activateTabFromHash() {
+    var hash = location.hash.replace("#", "");
+    if (!hash) return;
+    var radio = document.getElementById("tab-" + hash);
+    if (radio) radio.checked = true;
+  }
+
+  activateTabFromHash();
+
+  tabRadios.forEach(function (radio) {
+    radio.addEventListener("change", function () {
+      if (radio.checked) {
+        var tabName = radio.id.replace("tab-", "");
+        history.replaceState(null, "", "#" + tabName);
+      }
+    });
+  });
+
+  window.addEventListener("hashchange", activateTabFromHash);
+
+  // -----------------------------------------------------------------------
   // Snapshot-based dirty tracking
   // -----------------------------------------------------------------------
   var snapshots = {};
