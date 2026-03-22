@@ -526,4 +526,17 @@
       }
     });
   }
+
+  // -- Clear input buttons (data-clear-input="<input-id>") --
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest("[data-clear-input]");
+    if (!btn) return;
+    var inputId = btn.getAttribute("data-clear-input");
+    var input = document.getElementById(inputId);
+    if (!input) return;
+    input.value = "";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    var form = input.closest("form");
+    if (form && form.id) checkDirty(form.id);
+  });
 })();

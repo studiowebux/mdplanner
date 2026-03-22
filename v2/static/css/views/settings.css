@@ -276,6 +276,17 @@
   margin-top: var(--space-xs);
 }
 
+.settings-field__input-row {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.settings-field__input-row .settings-field__input {
+  flex: 1;
+  min-width: 0;
+}
+
 .settings-page__form-actions {
   display: none;
   gap: var(--space-sm);

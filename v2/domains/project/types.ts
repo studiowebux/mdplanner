@@ -145,6 +145,14 @@ export const UpdateProjectConfigSchema = z.object({
     description: "ISO 4217 currency code. Omit to leave unchanged.",
     example: "USD",
   }),
+  githubRepo: z.string().optional().openapi({
+    description: "GitHub repository (owner/repo). Omit to leave unchanged.",
+    example: "studiowebux/mdplanner",
+  }),
+  githubToken: z.string().optional().openapi({
+    description: "GitHub Personal Access Token. Omit to leave unchanged.",
+    example: "ghp_...",
+  }),
 }).openapi("UpdateProjectConfig");
 
 export type UpdateProjectConfig = z.infer<typeof UpdateProjectConfigSchema>;

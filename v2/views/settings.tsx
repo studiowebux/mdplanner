@@ -50,7 +50,9 @@ export const SettingsView: FC<SettingsProps> = ({
   for (const cat of categoryNames) {
     if (!featuresByCategory[cat]) featuresByCategory[cat] = [];
   }
-  const groupOrder = [...new Set([...categoryNames, ...Object.keys(featuresByCategory)])];
+  const groupOrder = [
+    ...new Set([...categoryNames, ...Object.keys(featuresByCategory)]),
+  ];
   const sortedCategoryOptions = [...categoryNames].sort((a, b) =>
     a.localeCompare(b)
   );
@@ -178,7 +180,9 @@ export const SettingsView: FC<SettingsProps> = ({
 
               <details id="features-enabled" class="settings-collapse" open>
                 <summary class="settings-collapse__trigger">
-                  Enabled (<span class="settings-collapse__count">{enabledList.length}</span>)
+                  Enabled (<span class="settings-collapse__count">
+                    {enabledList.length}
+                  </span>)
                 </summary>
                 <ul class="settings-page__feature-list">
                   {enabledList.map(([key, label]) => (
@@ -201,7 +205,9 @@ export const SettingsView: FC<SettingsProps> = ({
 
               <details id="features-disabled" class="settings-collapse">
                 <summary class="settings-collapse__trigger">
-                  Disabled (<span class="settings-collapse__count">{disabledList.length}</span>)
+                  Disabled (<span class="settings-collapse__count">
+                    {disabledList.length}
+                  </span>)
                 </summary>
                 <ul class="settings-page__feature-list">
                   {disabledList.map(([key, label]) => (
@@ -303,6 +309,48 @@ export const SettingsView: FC<SettingsProps> = ({
                 <span class="settings-field__hint">
                   PORT env var takes precedence. Restart required after change.
                 </span>
+              </div>
+
+              <div class="settings-field settings-field--row">
+                <div class="settings-field">
+                  <label class="settings-field__label" for="cfg-github-repo">
+                    GitHub repository
+                  </label>
+                  <input
+                    type="text"
+                    id="cfg-github-repo"
+                    name="githubRepo"
+                    value={config.githubRepo ?? ""}
+                    placeholder="owner/repo"
+                    class="settings-field__input"
+                  />
+                </div>
+                <div class="settings-field">
+                  <label class="settings-field__label" for="cfg-github-token">
+                    GitHub token (PAT)
+                  </label>
+                  <div class="settings-field__input-row">
+                    <input
+                      type="password"
+                      id="cfg-github-token"
+                      name="githubToken"
+                      value={config.githubToken ?? ""}
+                      placeholder="ghp_..."
+                      class="settings-field__input"
+                      autocomplete="off"
+                    />
+                    <button
+                      type="button"
+                      class="btn btn--secondary btn--sm"
+                      data-clear-input="cfg-github-token"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  <span class="settings-field__hint">
+                    Stored locally. Set MDPLANNER_SECRET_KEY to encrypt at rest.
+                  </span>
+                </div>
               </div>
 
               <FormActions />
@@ -423,17 +471,29 @@ export const SettingsView: FC<SettingsProps> = ({
               <h3 class="settings-support__subheading">Funding</h3>
               <ul class="settings-support__links">
                 <li>
-                  <a href="https://buymeacoffee.com/studiowebux" target="_blank" rel="noopener">
+                  <a
+                    href="https://buymeacoffee.com/studiowebux"
+                    target="_blank"
+                    rel="noopener"
+                  >
                     Buy Me a Coffee
                   </a>
                 </li>
                 <li>
-                  <a href="https://github.com/sponsors/studiowebux" target="_blank" rel="noopener">
+                  <a
+                    href="https://github.com/sponsors/studiowebux"
+                    target="_blank"
+                    rel="noopener"
+                  >
                     GitHub Sponsors
                   </a>
                 </li>
                 <li>
-                  <a href="https://patreon.com/studiowebux" target="_blank" rel="noopener">
+                  <a
+                    href="https://patreon.com/studiowebux"
+                    target="_blank"
+                    rel="noopener"
+                  >
                     Patreon
                   </a>
                 </li>
@@ -442,12 +502,20 @@ export const SettingsView: FC<SettingsProps> = ({
               <h3 class="settings-support__subheading">Support</h3>
               <ul class="settings-support__links">
                 <li>
-                  <a href="https://github.com/studiowebux/mdplanner/issues" target="_blank" rel="noopener">
+                  <a
+                    href="https://github.com/studiowebux/mdplanner/issues"
+                    target="_blank"
+                    rel="noopener"
+                  >
                     Bug Tracker (GitHub Issues)
                   </a>
                 </li>
                 <li>
-                  <a href="https://discord.gg/BG5Erm9fNv" target="_blank" rel="noopener">
+                  <a
+                    href="https://discord.gg/BG5Erm9fNv"
+                    target="_blank"
+                    rel="noopener"
+                  >
                     Discord
                   </a>
                 </li>
@@ -456,7 +524,11 @@ export const SettingsView: FC<SettingsProps> = ({
               <h3 class="settings-support__subheading">Contact</h3>
               <ul class="settings-support__links">
                 <li>
-                  <a href="https://studiowebux.com" target="_blank" rel="noopener">
+                  <a
+                    href="https://studiowebux.com"
+                    target="_blank"
+                    rel="noopener"
+                  >
                     Studio Webux
                   </a>
                 </li>
@@ -494,10 +566,18 @@ export const SettingsView: FC<SettingsProps> = ({
 
               {/* Jump links */}
               <div class="settings-page__bulk-actions">
-                <button type="button" class="btn btn--secondary btn--sm" data-nav-expand-all>
+                <button
+                  type="button"
+                  class="btn btn--secondary btn--sm"
+                  data-nav-expand-all
+                >
                   Expand all
                 </button>
-                <button type="button" class="btn btn--secondary btn--sm" data-nav-collapse-all>
+                <button
+                  type="button"
+                  class="btn btn--secondary btn--sm"
+                  data-nav-collapse-all
+                >
                   Collapse all
                 </button>
               </div>
@@ -506,8 +586,12 @@ export const SettingsView: FC<SettingsProps> = ({
                   <a
                     key={g}
                     class="settings-nav__jump-pill"
-                    href={`#settings-nav-${g.toLowerCase().replace(/\s+/g, "-")}`}
-                    data-nav-target={`settings-nav-${g.toLowerCase().replace(/\s+/g, "-")}`}
+                    href={`#settings-nav-${
+                      g.toLowerCase().replace(/\s+/g, "-")
+                    }`}
+                    data-nav-target={`settings-nav-${
+                      g.toLowerCase().replace(/\s+/g, "-")
+                    }`}
                   >
                     {g} ({featuresByCategory[g].length})
                   </a>
@@ -524,10 +608,16 @@ export const SettingsView: FC<SettingsProps> = ({
                   <details
                     key={groupName}
                     class="settings-collapse"
-                    id={`settings-nav-${groupName.toLowerCase().replace(/\s+/g, "-")}`}
+                    id={`settings-nav-${
+                      groupName.toLowerCase().replace(/\s+/g, "-")
+                    }`}
                   >
                     <summary class="settings-collapse__trigger">
-                      {`${groupName} (`}<span class="settings-collapse__count">{featuresByCategory[groupName].length}</span>{`)`}
+                      {`${groupName} (`}
+                      <span class="settings-collapse__count">
+                        {featuresByCategory[groupName].length}
+                      </span>
+                      {`)`}
                     </summary>
                     <div class="settings-nav__group-content">
                       {featuresByCategory[groupName].length === 0

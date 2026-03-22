@@ -6,7 +6,11 @@ import { getProjectService } from "../../singletons/services.ts";
 import { SidebarContent } from "../../components/shell/sidebar.tsx";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 import { viewProps } from "../../middleware/view-props.ts";
-import { getSectionOrder, setSectionOrder, WEEKDAYS } from "../../constants/mod.ts";
+import {
+  getSectionOrder,
+  setSectionOrder,
+  WEEKDAYS,
+} from "../../constants/mod.ts";
 import type { AppVariables } from "../../types/app.ts";
 import type { ProjectLink } from "../../domains/project/types.ts";
 
@@ -50,7 +54,7 @@ settingsViewRouter.post("/features", async (c) => {
   });
 });
 
-// -- Project tab: name, description, locale, currency, port --
+// -- Project tab: name, description, locale, currency, port, github --
 settingsViewRouter.post("/project", async (c) => {
   const body = await c.req.parseBody();
   const portRaw = body.port ? Number(body.port) : undefined;
@@ -60,6 +64,8 @@ settingsViewRouter.post("/project", async (c) => {
     locale: body.locale ? String(body.locale).trim() : undefined,
     currency: body.currency ? String(body.currency).trim() : undefined,
     port: portRaw && !isNaN(portRaw) ? portRaw : undefined,
+    githubRepo: body.githubRepo ? String(body.githubRepo).trim() : undefined,
+    githubToken: body.githubToken ? String(body.githubToken) : undefined,
   });
   return new Response(null, {
     status: 204,
