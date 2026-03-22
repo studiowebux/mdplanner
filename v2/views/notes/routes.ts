@@ -23,6 +23,37 @@ notesRouter.get("/:id", async (c) => {
   );
 });
 
+// Update title — inline edit via htmx
+notesRouter.post("/:id/title", async (c) => {
+  const id = c.req.param("id");
+  const body = await c.req.parseBody();
+  const title = String(body.title || "").trim();
+  if (!title) return c.text("Title required", 400);
+  const note = await getNoteService().update(id, { title });
+  if (!note) return c.notFound();
+  return c.html(
+    NoteDetailView({
+      ...viewProps(c, "/notes"),
+      note,
+    }) as unknown as string,
+  );
+});
+
+// Update project — htmx autocomplete hidden input triggers this
+notesRouter.post("/:id/project", async (c) => {
+  const id = c.req.param("id");
+  const body = await c.req.parseBody();
+  const project = body.project ? String(body.project) : null;
+  const note = await getNoteService().update(id, { project });
+  if (!note) return c.notFound();
+  return c.html(
+    NoteDetailView({
+      ...viewProps(c, "/notes"),
+      note,
+    }) as unknown as string,
+  );
+});
+
 // Preview — rendered markdown in sidenav (read-only)
 notesRouter.get("/:id/preview", async (c) => {
   const id = c.req.param("id");
