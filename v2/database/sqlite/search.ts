@@ -117,7 +117,7 @@ export class SearchEngine {
           if (row) {
             return {
               id: row.id as string,
-              title: ((row.title ?? row.name ?? id) as string),
+              title: (row.title ?? row.name ?? id) as string,
               snippet: "Exact match by ID",
               score: -Infinity,
               type: table,
@@ -159,7 +159,7 @@ export class SearchEngine {
           for (const row of rows) {
             results.push({
               id: row.id as string,
-              title: ((row.title ?? row.name ?? row.id) as string),
+              title: (row.title ?? row.name ?? row.id) as string,
               snippet: "ID suffix match",
               score: -Infinity,
               type: table,
