@@ -495,6 +495,9 @@ export class NoteRepository {
     };
 
     for (const line of lines) {
+      // Skip metadata comment lines (tab-id, column-index, item-id)
+      if (/^<!--\s*(tab-id|column-index|item-id):/.test(line.trim())) continue;
+
       if (line.startsWith("```")) {
         if (!inCodeBlock) {
           flush();

@@ -236,6 +236,10 @@
   padding-top: var(--space-md);
 }
 
+.note-detail__tab-panel.is-hidden {
+  display: none;
+}
+
 /* ---- Timeline ---- */
 
 .note-detail__timeline {

@@ -54,7 +54,7 @@ function drawDependencyLines(root, withHover) {
   try {
     var v = parseFloat(
       getComputedStyle(root.documentElement)
-        .getPropertyValue("--task-dep-arrow-size")
+        .getPropertyValue("--task-dep-arrow-size"),
     );
     if (v > 0) arrowSize = v;
   } catch (_e) { /* iframe may not have the var */ }
@@ -69,7 +69,7 @@ function drawDependencyLines(root, withHover) {
 
     blockerIds.forEach(function (blockerId) {
       var blockerRow = inner.querySelector(
-        '.task-timeline__row[data-task-id="' + blockerId + '"]'
+        '.task-timeline__row[data-task-id="' + blockerId + '"]',
       );
       if (!blockerRow) return;
       var blockerBar = blockerRow.querySelector(".task-timeline__bar");
@@ -93,9 +93,9 @@ function drawDependencyLines(root, withHover) {
       path.setAttribute(
         "d",
         "M" + x1 + "," + y1 +
-        " C" + (x1 + dx) + "," + y1 +
-        " " + (x2 - dx) + "," + y2 +
-        " " + x2 + "," + y2
+          " C" + (x1 + dx) + "," + y1 +
+          " " + (x2 - dx) + "," + y2 +
+          " " + x2 + "," + y2,
       );
       path.setAttribute("class", "task-timeline__dep-line");
       svg.appendChild(path);
@@ -107,8 +107,8 @@ function drawDependencyLines(root, withHover) {
       arrow.setAttribute(
         "points",
         (x2 - arrowSize) + "," + (y2 - arrowSize / 2) + " " +
-        x2 + "," + y2 + " " +
-        (x2 - arrowSize) + "," + (y2 + arrowSize / 2)
+          x2 + "," + y2 + " " +
+          (x2 - arrowSize) + "," + (y2 + arrowSize / 2),
       );
       arrow.setAttribute("class", "task-timeline__dep-arrow");
       svg.appendChild(arrow);
@@ -176,5 +176,5 @@ function unbindDepHover() {
   boundRows = [];
 }
 
-applyTimelinePositions();
+document.addEventListener("DOMContentLoaded", applyTimelinePositions);
 document.addEventListener("htmx:afterSettle", applyTimelinePositions);

@@ -142,13 +142,22 @@
 
   function convertToEditable() {
     // Paragraphs — replace rendered HTML with textareas
-    qsa("[data-block-id]").forEach(function (block) {
-      if (block.dataset.blockEditable) return;
-      block.dataset.blockEditable = "true";
+    qsa("[data-block-id]").forEach(function (origBlock) {
+      if (origBlock.dataset.blockEditable) return;
 
-      var type = block.dataset.blockType;
-      var content = block.dataset.blockContent || "";
-      var lang = block.dataset.blockLang || "";
+      var type = origBlock.dataset.blockType;
+      var content = origBlock.dataset.blockContent || "";
+      var lang = origBlock.dataset.blockLang || "";
+
+      // Replace <pre> with <div> so layout works correctly
+      var block = document.createElement("div");
+      block.className = "note-detail__paragraph note-editor__block";
+      block.dataset.blockId = origBlock.dataset.blockId;
+      block.dataset.blockType = type;
+      block.dataset.blockContent = content;
+      block.dataset.blockEditable = "true";
+      if (lang) block.dataset.blockLang = lang;
+      origBlock.replaceWith(block);
 
       var controls = document.createElement("div");
       controls.className = "note-editor__block-controls";
@@ -159,17 +168,9 @@
         (type === "code" ? "Text" : "Code") + "</button>" +
         '<button type="button" class="btn btn--tertiary btn--sm" data-action="preview-block">Preview</button>' +
         '<button type="button" class="btn btn--danger btn--sm" data-action="delete-block">Del</button>';
-
-      var textarea = document.createElement("textarea");
-      textarea.className = "note-editor__textarea";
-      textarea.value = content;
-      textarea.rows = Math.max(3, content.split("\n").length + 1);
-      textarea.addEventListener("input", autoResize);
-
-      // Replace content with editor
-      block.innerHTML = "";
       block.appendChild(controls);
-      if (type === "code" && lang) {
+
+      if (type === "code") {
         var langInput = document.createElement("input");
         langInput.type = "text";
         langInput.className = "note-editor__lang-input";
@@ -177,6 +178,12 @@
         langInput.placeholder = "language";
         block.appendChild(langInput);
       }
+
+      var textarea = document.createElement("textarea");
+      textarea.className = "note-editor__textarea";
+      textarea.value = content;
+      textarea.rows = Math.max(3, content.split("\n").length + 1);
+      textarea.addEventListener("input", autoResize);
       block.appendChild(textarea);
     });
 
@@ -285,7 +292,7 @@
         escapeHtml(content) + "</code></pre>";
     } else {
       // Fetch rendered markdown from server
-      fetch("/api/v1/notes/preview-block", {
+      fetch("/notes/preview-block", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: content }),
@@ -373,12 +380,10 @@
 
     if (type === "tabs") {
       config.tabs = [];
-      qsa("[data-tab-id]", el).forEach(function (tabEl) {
-        // Skip tab buttons in the tab bar (view mode remnants)
-        if (tabEl.getAttribute("role") === "tab") return;
+      qsa("[data-tab-panel]", el).forEach(function (tabEl) {
         config.tabs.push({
-          id: tabEl.dataset.tabId,
-          title: tabEl.dataset.tabTitle || "Tab",
+          id: tabEl.dataset.tabPanel,
+          title: tabEl.dataset.tabPanelTitle || "Tab",
           content: collectSubBlocks(tabEl),
         });
       });

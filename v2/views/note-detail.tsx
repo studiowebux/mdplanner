@@ -120,8 +120,7 @@ const TabsSection: FC<{ section: CustomSection }> = ({ section }) => {
           role="tabpanel"
           class={`note-detail__tab-panel${i === 0 ? "" : " is-hidden"}`}
           data-tab-panel={tab.id}
-          data-tab-id={tab.id}
-          data-tab-title={tab.title}
+          data-tab-panel-title={tab.title}
         >
           {tab.content.map((p) => (
             <ParagraphBlock key={p.id} paragraph={p} sub />
