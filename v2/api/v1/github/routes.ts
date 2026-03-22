@@ -516,7 +516,8 @@ githubRouter.openapi(
     try {
       const repo = await resolveRepo(c);
       if (typeof repo !== "string") return repo;
-      return c.json(await getGitHubService().listWorkflowRuns(repo), 200);
+      const { runs } = await getGitHubService().listWorkflowRuns(repo);
+      return c.json(runs, 200);
     } catch (err) {
       return githubError(c, err);
     }

@@ -281,7 +281,7 @@ export const GitHubPipelinesTable: FC<{
         hx-get={`/portfolio/${itemId}/github/pipelines/results`}
         hx-target="#github-pipeline-results"
         hx-swap="innerHTML"
-        hx-trigger="change, input delay:300ms"
+        hx-trigger="change from:select, search from:input, input delay:300ms from:[name=q], input delay:300ms from:[name=branch]"
         hx-indicator="#github-pipeline-spinner"
         hx-vals={JSON.stringify({ page: 1 })}
       >
