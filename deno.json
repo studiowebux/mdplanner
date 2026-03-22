@@ -3,6 +3,7 @@
     "exclude": [
       "src/",
       "v2/static/js/vendor/",
+      "v2/static/css/vendor/",
       "example/",
       "docs/",
       "__trash/",

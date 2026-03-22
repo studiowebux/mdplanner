@@ -5,7 +5,7 @@
   // -----------------------------------------------------------------------
   // Tab persistence via URL hash
   // -----------------------------------------------------------------------
-  var tabRadios = document.querySelectorAll('.settings-tabs__radio');
+  var tabRadios = document.querySelectorAll(".settings-tabs__radio");
 
   function activateTabFromHash() {
     var hash = location.hash.replace("#", "");
@@ -40,7 +40,10 @@
       if (dirtyTab) {
         e.preventDefault();
         if (window.toast) {
-          window.toast({ type: "warning", message: "Save or discard changes before switching tabs" });
+          window.toast({
+            type: "warning",
+            message: "Save or discard changes before switching tabs",
+          });
         }
         // Re-check the active radio
         if (activeRadio) activeRadio.checked = true;
@@ -102,7 +105,11 @@
     var anyDirty = Object.keys(dirtyForms).some(function (k) {
       return dirtyForms[k];
     });
-    window.onbeforeunload = anyDirty ? function () { return true; } : null;
+    window.onbeforeunload = anyDirty
+      ? function () {
+        return true;
+      }
+      : null;
   }
 
   var tabMap = {
@@ -124,7 +131,6 @@
     if (!label) return;
     label.classList.toggle("settings-tabs__label--dirty", dirty);
   }
-
 
   function trackForm(formId) {
     var form = document.getElementById(formId);
@@ -159,8 +165,12 @@
 
   // Track all settings forms
   [
-    "project-form", "schedule-form", "tags-form", "links-form",
-    "sections-form", "nav-categories-form",
+    "project-form",
+    "schedule-form",
+    "tags-form",
+    "links-form",
+    "sections-form",
+    "nav-categories-form",
   ].forEach(trackForm);
 
   // -----------------------------------------------------------------------
@@ -423,9 +433,10 @@
       var count = sectionsList.querySelectorAll(".settings-section-row").length;
       var row = document.createElement("div");
       row.className = "settings-section-row";
-      row.innerHTML =
-        '<span class="settings-section-row__position">' + (count + 1) + "</span>" +
-        '<input type="text" name="sections" value="' + name.replace(/"/g, "&quot;") +
+      row.innerHTML = '<span class="settings-section-row__position">' +
+        (count + 1) + "</span>" +
+        '<input type="text" name="sections" value="' +
+        name.replace(/"/g, "&quot;") +
         '" class="settings-field__input" readonly />' +
         '<div class="settings-section-row__actions">' +
         '<button type="button" class="btn btn--secondary btn--sm" data-section-up>&#9650;</button>' +
@@ -472,7 +483,9 @@
       var pill = e.target.closest("[data-nav-target]");
       if (!pill) return;
       e.preventDefault();
-      var target = document.getElementById(pill.getAttribute("data-nav-target"));
+      var target = document.getElementById(
+        pill.getAttribute("data-nav-target"),
+      );
       if (target) {
         target.open = true;
         target.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -491,7 +504,7 @@
     addCatBtn.addEventListener("click", function () {
       var name = catNewInput.value.trim();
       if (!name) return;
-      navForm.querySelectorAll('.settings-nav__feature-row select').forEach(
+      navForm.querySelectorAll(".settings-nav__feature-row select").forEach(
         function (sel) {
           // Skip if option already exists
           for (var i = 0; i < sel.options.length; i++) {
@@ -506,7 +519,10 @@
       catNewInput.value = "";
       checkDirty("nav-categories-form");
       if (window.toast) {
-        window.toast({ type: "success", message: 'Category "' + name + '" added — assign features and save' });
+        window.toast({
+          type: "success",
+          message: 'Category "' + name + '" added — assign features and save',
+        });
       }
     });
   }
