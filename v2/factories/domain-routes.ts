@@ -154,6 +154,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
       DomainPage({
         ...viewProps(c, cfg.path),
         items: filtered,
+        totalCount: all.length,
         state,
         dynamicFilterOptions,
         customContent,
@@ -177,6 +178,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
     return c.html(
       DomainViewContainer({
         items: filtered,
+        totalCount: all.length,
         state,
         fragment: true,
         customContent,

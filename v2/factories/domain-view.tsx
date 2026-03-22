@@ -154,10 +154,11 @@ export function createDomainViewContainer<T extends Entity>(
 
   const DomainViewContainer: FC<{
     items: T[];
+    totalCount?: number;
     state: DomainFilterState;
     fragment?: boolean;
     customContent?: ReturnType<FC>;
-  }> = ({ items, state, fragment, customContent }) => (
+  }> = ({ items, totalCount, state, fragment, customContent }) => (
     <div id={`${cfg.name}-view`} class="view-container">
       <input type="hidden" name="view" value={state.view} />
       {fragment && (
@@ -166,7 +167,9 @@ export function createDomainViewContainer<T extends Entity>(
           class="domain-page__count"
           {...{ "hx-swap-oob": "true" }}
         >
-          {items.length} total
+          {totalCount !== undefined && items.length !== totalCount
+            ? `${items.length}/${totalCount}`
+            : `${items.length} total`}
         </span>
       )}
       {fragment && (
@@ -239,13 +242,14 @@ export function createDomainPage<T extends Entity>(
 
   type PageProps = ViewProps & {
     items: T[];
+    totalCount?: number;
     state: DomainFilterState;
     dynamicFilterOptions?: DynamicFilterOptions;
     customContent?: ReturnType<FC>;
   };
 
   const DomainPage: FC<PageProps> = (
-    { items, state, dynamicFilterOptions, customContent, ...viewProps },
+    { items, totalCount, state, dynamicFilterOptions, customContent, ...viewProps },
   ) => (
     <MainLayout
       title={cfg.singular}
@@ -267,7 +271,9 @@ export function createDomainPage<T extends Entity>(
         <header class="domain-page__header">
           <h1 class="domain-page__title">{cfg.plural ?? `${cfg.singular}s`}</h1>
           <span id={`${cfg.name}-count`} class="domain-page__count">
-            {items.length} total
+            {totalCount !== undefined && items.length !== totalCount
+              ? `${items.length}/${totalCount}`
+              : `${items.length} total`}
           </span>
           <button
             class="btn btn--primary"
