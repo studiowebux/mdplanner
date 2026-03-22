@@ -47,6 +47,7 @@ const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = (
                 hx-post={`/tasks/${task.id}/assign`}
                 hx-swap="none"
                 hx-trigger="change"
+                hx-include="this"
                 name="assignee"
                 aria-label="Assign"
               >
@@ -91,6 +92,7 @@ const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = (
         hx-post={`/tasks/${task.id}/move`}
         hx-swap="none"
         hx-trigger="change"
+        hx-include="this"
         name="section"
         aria-label="Move section"
       >
