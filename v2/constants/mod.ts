@@ -3,7 +3,7 @@ export const APP_VERSION = "2.0.0-alpha";
 export const DEFAULT_PORT = 8003;
 
 /**
- * Preferred display order for task board sections in summary views.
+ * Default display order for task board sections in summary views.
  * Sections discovered on disk that are not in this list appear after these.
  */
 export const SECTION_DISPLAY_ORDER = [
@@ -13,6 +13,18 @@ export const SECTION_DISPLAY_ORDER = [
   "Pending Review",
   "Done",
 ] as const;
+
+let _sectionOrder: readonly string[] = SECTION_DISPLAY_ORDER;
+
+/** Set section order from project config. Call once after boot. */
+export function setSectionOrder(order: string[]): void {
+  _sectionOrder = order;
+}
+
+/** Get the active section display order (project config or default). */
+export function getSectionOrder(): readonly string[] {
+  return _sectionOrder;
+}
 
 export const WEEKDAYS = [
   "Mon",

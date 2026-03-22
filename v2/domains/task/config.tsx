@@ -10,7 +10,7 @@ import {
   getPortfolioService,
   getTaskService,
 } from "../../singletons/services.ts";
-import { SECTION_DISPLAY_ORDER } from "../../constants/mod.ts";
+import { getSectionOrder } from "../../constants/mod.ts";
 import { TaskListView } from "../../views/components/task-list.tsx";
 import { TaskBoardView } from "../../views/components/task-board.tsx";
 import { TaskTimelineView } from "../../views/components/task-timeline.tsx";
@@ -30,7 +30,7 @@ const FORM_FIELDS: FieldDef[] = [
     type: "select",
     name: "section",
     label: "Section",
-    options: SECTION_DISPLAY_ORDER.map((s) => ({ value: s, label: s })),
+    options: getSectionOrder().map((s) => ({ value: s, label: s })),
   },
   {
     type: "select",

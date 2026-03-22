@@ -1,3 +1,10 @@
+let _locale = "en-US";
+
+/** Set locale from project config. Call once after boot. */
+export function setTimeLocale(locale: string): void {
+  _locale = locale;
+}
+
 /**
  * Format an ISO date string to local timezone (e.g., "2026-03-15 10:30 PM").
  */
@@ -10,7 +17,7 @@ export function formatDate(
   if (isNaN(d.getTime())) return "";
   const date = d.toLocaleDateString("en-CA"); // YYYY-MM-DD
   if (!includeTime) return date;
-  const time = d.toLocaleTimeString("en-US", {
+  const time = d.toLocaleTimeString(_locale, {
     hour: "numeric",
     minute: "2-digit",
   });

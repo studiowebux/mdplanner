@@ -3,7 +3,7 @@
 
 import type { FC } from "hono/jsx";
 import type { Task, TaskViewProps } from "../../types/task.types.ts";
-import { SECTION_DISPLAY_ORDER } from "../../constants/mod.ts";
+import { getSectionOrder } from "../../constants/mod.ts";
 import { groupBy } from "../../utils/group.ts";
 import {
   sortTasks,
@@ -89,7 +89,7 @@ export const TaskBoardView: FC<TaskViewProps> = ({ tasks }) => {
     );
   }
 
-  const grouped = groupBy(tasks, (t) => t.section, [...SECTION_DISPLAY_ORDER]);
+  const grouped = groupBy(tasks, (t) => t.section, [...getSectionOrder()]);
 
   return (
     <div class="task-board">

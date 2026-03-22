@@ -5,7 +5,7 @@ import type { Task, TaskSortableCol } from "../../types/task.types.ts";
 import { statusBadgeRenderer } from "../../components/ui/status-badge.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
-import { SECTION_DISPLAY_ORDER } from "../../constants/mod.ts";
+import { getSectionOrder } from "../../constants/mod.ts";
 
 const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
   <div class="task-card__actions">
@@ -163,7 +163,7 @@ export function buildSectionOptions(
     seen.add(t.section);
   }
   const ordered: { value: string; label: string }[] = [];
-  for (const s of SECTION_DISPLAY_ORDER) {
+  for (const s of getSectionOrder()) {
     if (seen.has(s)) {
       ordered.push({ value: s, label: s });
       seen.delete(s);

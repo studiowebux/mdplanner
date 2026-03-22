@@ -9,7 +9,7 @@ import type { Milestone } from "../types/milestone.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate, timeAgo } from "../utils/time.ts";
 import { TASK_PRIORITY_LABELS } from "../domains/task/constants.tsx";
-import { SECTION_DISPLAY_ORDER } from "../constants/mod.ts";
+import { getSectionOrder } from "../constants/mod.ts";
 import {
   getMilestoneService,
   getPeopleService,
@@ -199,7 +199,7 @@ const ApprovalSection: FC<{ approval: Task["approvalRequest"] }> = (
 export const TaskDetailView: FC<Props> = (
   { task, assigneePerson, milestonEntity, blockedByTasks, ...rest },
 ) => {
-  const sections = SECTION_DISPLAY_ORDER as readonly string[];
+  const sections = getSectionOrder();
   const assigneeDisplayName = assigneePerson?.name ?? "";
 
   return (

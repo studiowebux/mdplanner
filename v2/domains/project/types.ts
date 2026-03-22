@@ -58,6 +58,25 @@ export const ProjectConfigSchema = z.object({
       Notes: ["note", "journal", "habit"],
     },
   }),
+  port: z.number().optional().openapi({
+    description:
+      "HTTP server port. Overridden by PORT env var. Defaults to 8003.",
+    example: 8003,
+  }),
+  sectionOrder: z.array(z.string()).optional().openapi({
+    description:
+      "Display order for task board sections. Sections not listed appear at the end. " +
+      "Defaults to: Backlog, Todo, In Progress, Pending Review, Done.",
+    example: ["Backlog", "Todo", "In Progress", "Pending Review", "Done"],
+  }),
+  locale: z.string().optional().openapi({
+    description: "BCP 47 locale for date/number formatting. Defaults to en-US.",
+    example: "en-US",
+  }),
+  currency: z.string().optional().openapi({
+    description: "ISO 4217 currency code for money formatting. Defaults to USD.",
+    example: "USD",
+  }),
   lastUpdated: z.string().optional().openapi({
     description: "ISO timestamp of last project.md write",
     example: "2026-03-17T19:00:00.000Z",
@@ -100,6 +119,21 @@ export const UpdateProjectConfigSchema = z.object({
   }),
   navCategories: z.record(z.array(z.string())).optional().openapi({
     description: "Sidebar navigation categories. Omit to leave unchanged.",
+  }),
+  port: z.number().optional().openapi({
+    description: "HTTP server port. Omit to leave unchanged.",
+    example: 8003,
+  }),
+  sectionOrder: z.array(z.string()).optional().openapi({
+    description: "Section display order. Omit to leave unchanged.",
+  }),
+  locale: z.string().optional().openapi({
+    description: "BCP 47 locale. Omit to leave unchanged.",
+    example: "en-US",
+  }),
+  currency: z.string().optional().openapi({
+    description: "ISO 4217 currency code. Omit to leave unchanged.",
+    example: "USD",
   }),
 }).openapi("UpdateProjectConfig");
 

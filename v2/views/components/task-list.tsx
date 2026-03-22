@@ -1,9 +1,9 @@
 // Task list view — section-grouped task rows with sticky headers.
-// Uses shared groupBy + SECTION_DISPLAY_ORDER for ordering.
+// Uses shared groupBy + getSectionOrder() for ordering.
 
 import type { FC } from "hono/jsx";
 import type { Task, TaskViewProps } from "../../types/task.types.ts";
-import { SECTION_DISPLAY_ORDER } from "../../constants/mod.ts";
+import { getSectionOrder } from "../../constants/mod.ts";
 import { groupBy } from "../../utils/group.ts";
 import { formatDate } from "../../utils/time.ts";
 import {
@@ -96,7 +96,7 @@ const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = (
         name="section"
         aria-label="Move section"
       >
-        {(SECTION_DISPLAY_ORDER as readonly string[]).map((s) => (
+        {(getSectionOrder() as readonly string[]).map((s) => (
           <option key={s} value={s} selected={s === task.section}>{s}</option>
         ))}
       </select>
@@ -240,7 +240,7 @@ export const TaskListView: FC<ListProps> = (
     );
   }
 
-  const grouped = groupBy(tasks, (t) => t.section, [...SECTION_DISPLAY_ORDER]);
+  const grouped = groupBy(tasks, (t) => t.section, [...getSectionOrder()]);
   const sectionNames = Object.keys(grouped);
 
   return (

@@ -17,7 +17,7 @@ import {
 } from "../domains/milestone/milestone.ts";
 import { insertMilestoneRow } from "../domains/milestone/cache.ts";
 import { MILESTONE_TABLE } from "../domains/milestone/constants.cache.ts";
-import { DONE_SECTION, SECTION_DISPLAY_ORDER } from "../constants/mod.ts";
+import { DONE_SECTION, getSectionOrder } from "../constants/mod.ts";
 
 export interface ListMilestoneOptions {
   status?: MilestoneStatus;
@@ -160,7 +160,7 @@ export class MilestoneService {
 
     // Seed known sections in display order, then append any extras from data
     const sections: MilestoneSummary["sections"] = {};
-    for (const name of SECTION_DISPLAY_ORDER) {
+    for (const name of getSectionOrder()) {
       sections[name] = [];
     }
     for (const t of tasks) {

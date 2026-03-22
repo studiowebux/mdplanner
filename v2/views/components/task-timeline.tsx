@@ -8,7 +8,7 @@ import type {
   Task,
   TaskViewProps,
 } from "../../types/task.types.ts";
-import { SECTION_DISPLAY_ORDER } from "../../constants/mod.ts";
+import { getSectionOrder } from "../../constants/mod.ts";
 import { TASK_PRIORITY_LABELS } from "../../domains/task/constants.tsx";
 
 // ---------------------------------------------------------------------------
@@ -190,7 +190,7 @@ export const TaskTimelineView: FC<TaskViewProps> = ({ tasks, zoom = 1 }) => {
   }
 
   const sectionOrder = new Map<string, number>(
-    SECTION_DISPLAY_ORDER.map((s, i) => [s, i]),
+    getSectionOrder().map((s, i) => [s, i]),
   );
   scheduled.sort((a, b) => {
     const da = a._start.getTime() - b._start.getTime();
