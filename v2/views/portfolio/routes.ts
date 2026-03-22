@@ -16,9 +16,11 @@ import {
   GitHubError,
   GitHubIssuesTable,
   GitHubMilestonesList,
+  GitHubPipelinesTable,
   GitHubPRsTable,
   GitHubRepoCard,
 } from "../github.tsx";
+import type { PipelineFilters } from "../github.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 
@@ -99,6 +101,44 @@ portfolioRouter.get("/:id/github/milestones", async (c) => {
     const milestones = await getGitHubService().listMilestones(item.githubRepo);
     return c.html(
       GitHubMilestonesList({ milestones }) as unknown as string,
+    );
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return c.html(GitHubError({ message: msg }) as unknown as string);
+  }
+});
+
+portfolioRouter.get("/:id/github/pipelines", async (c) => {
+  const id = c.req.param("id");
+  const item = await getPortfolioService().getById(id);
+  if (!item?.githubRepo) {
+    return c.html(
+      GitHubError({ message: "No GitHub repository configured" }) as unknown as string,
+    );
+  }
+  try {
+    const allRuns = await getGitHubService().listWorkflowRuns(item.githubRepo);
+    const filters: PipelineFilters = {
+      status: c.req.query("status") || undefined,
+      event: c.req.query("event") || undefined,
+      branch: c.req.query("branch") || undefined,
+      q: c.req.query("q") || undefined,
+    };
+    const filtered = allRuns.filter((r) => {
+      const badge = r.conclusion ?? r.status;
+      if (filters.status && badge !== filters.status) return false;
+      if (filters.event && r.event !== filters.event) return false;
+      if (filters.branch && !r.headBranch.toLowerCase().includes(filters.branch.toLowerCase())) return false;
+      if (filters.q && !r.name.toLowerCase().includes(filters.q.toLowerCase())) return false;
+      return true;
+    });
+    return c.html(
+      GitHubPipelinesTable({
+        runs: filtered,
+        total: allRuns.length,
+        itemId: id,
+        filters,
+      }) as unknown as string,
     );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

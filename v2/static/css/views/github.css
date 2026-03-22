@@ -256,6 +256,103 @@
   font-size: var(--font-size-sm);
 }
 
+/* ---- Pipeline filters ---- */
+
+.github-pipeline__filters {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+}
+
+.github-pipeline__search {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  border: var(--card-border);
+  border-radius: var(--radius-sm);
+  background: var(--card-bg);
+  color: var(--color-text-primary);
+  min-width: var(--space-xl);
+}
+
+.github-pipeline__search--branch {
+  max-width: calc(var(--space-xl) * 4);
+}
+
+.github-pipeline__select {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  border: var(--card-border);
+  border-radius: var(--radius-sm);
+  background: var(--card-bg);
+  color: var(--color-text-primary);
+}
+
+.github-pipeline__count {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.github-pipeline__actions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+/* ---- Pipeline status badges ---- */
+
+.github-badge--in_progress {
+  background: var(--color-info-bg);
+  color: var(--color-info-text);
+}
+
+.github-badge--queued {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.github-badge--success {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.github-badge--failure {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.github-badge--timed_out {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.github-badge--cancelled {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+}
+
+.github-badge--skipped {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+}
+
+.github-badge--neutral {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+}
+
+.github-badge--action_required {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.github-badge--waiting {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
 /* ---- Section spacing ---- */
 
 .github-section {

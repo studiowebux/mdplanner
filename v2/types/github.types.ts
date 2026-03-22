@@ -38,6 +38,24 @@ export const GITHUB_WORKFLOW_RUN_CONCLUSIONS = [
 export type GitHubWorkflowRunConclusion =
   typeof GITHUB_WORKFLOW_RUN_CONCLUSIONS[number] | null;
 
+export const GITHUB_WORKFLOW_EVENTS = [
+  "push",
+  "pull_request",
+  "schedule",
+  "workflow_dispatch",
+] as const;
+export type GitHubWorkflowEvent = typeof GITHUB_WORKFLOW_EVENTS[number];
+
+export const GITHUB_PIPELINE_STATUSES = [
+  "success",
+  "failure",
+  "cancelled",
+  "timed_out",
+  "in_progress",
+  "queued",
+] as const;
+export type GitHubPipelineStatus = typeof GITHUB_PIPELINE_STATUSES[number];
+
 export const GITHUB_WORKFLOW_STATES = [
   "active",
   "deleted",

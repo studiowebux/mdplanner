@@ -1,12 +1,17 @@
 // GitHub fragment components — loaded via htmx into portfolio detail page.
 
 import type { FC } from "hono/jsx";
+import {
+  GITHUB_PIPELINE_STATUSES,
+  GITHUB_WORKFLOW_EVENTS,
+} from "../types/github.types.ts";
 import type {
   GitHubIssue,
   GitHubMilestone,
   GitHubPR,
-  GitHubRepo,
   GitHubRelease,
+  GitHubRepo,
+  GitHubWorkflowRun,
 } from "../types/github.types.ts";
 
 // ---------------------------------------------------------------------------
@@ -240,6 +245,158 @@ export const GitHubMilestonesList: FC<{ milestones: GitHubMilestone[] }> = ({
 );
 
 // ---------------------------------------------------------------------------
+// Pipelines table
+// ---------------------------------------------------------------------------
+
+export type PipelineFilters = {
+  status?: string;
+  event?: string;
+  branch?: string;
+  q?: string;
+};
+
+export const GitHubPipelinesTable: FC<{
+  runs: GitHubWorkflowRun[];
+  total: number;
+  itemId: string;
+  filters: PipelineFilters;
+}> = ({ runs, total, itemId, filters }) => (
+  <div class="github-table-wrap">
+    <form
+      class="github-pipeline__filters"
+      hx-get={`/portfolio/${itemId}/github/pipelines`}
+      hx-target="#github-tab-content"
+      hx-swap="innerHTML"
+      hx-trigger="change, input delay:300ms"
+    >
+      <input
+        type="search"
+        name="q"
+        placeholder="Search workflow..."
+        value={filters.q ?? ""}
+        class="github-pipeline__search"
+        autocomplete="off"
+      />
+      <select name="status" class="github-pipeline__select">
+        <option value="">All statuses</option>
+        {GITHUB_PIPELINE_STATUSES.map((s) => (
+          <option key={s} value={s} selected={filters.status === s}>
+            {s}
+          </option>
+        ))}
+      </select>
+      <select name="event" class="github-pipeline__select">
+        <option value="">All events</option>
+        {GITHUB_WORKFLOW_EVENTS.map((e) => (
+          <option key={e} value={e} selected={filters.event === e}>
+            {e}
+          </option>
+        ))}
+      </select>
+      <input
+        type="text"
+        name="branch"
+        placeholder="Branch..."
+        value={filters.branch ?? ""}
+        class="github-pipeline__search github-pipeline__search--branch"
+        autocomplete="off"
+      />
+    </form>
+
+    <span class="github-pipeline__count">{runs.length}/{total} runs</span>
+
+    {runs.length === 0
+      ? <p class="github-empty">No workflow runs match filters</p>
+      : (
+        <table class="github-table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Workflow</th>
+              <th>Branch</th>
+              <th>Event</th>
+              <th>Started</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {runs.map((run) => {
+              const badge = run.conclusion ?? run.status;
+              const canCancel = run.status === "queued" ||
+                run.status === "in_progress";
+              const canRerun = run.status === "completed";
+              return (
+                <tr key={run.id}>
+                  <td>
+                    <span
+                      class={`github-badge github-badge--${badge}`}
+                    >
+                      {badge}
+                    </span>
+                  </td>
+                  <td>
+                    <a
+                      href={run.htmlUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {run.name}
+                    </a>
+                  </td>
+                  <td>
+                    <code class="github-branch">{run.headBranch}</code>
+                  </td>
+                  <td>{run.event}</td>
+                  <td class="github-table__date">
+                    {new Date(run.createdAt).toLocaleDateString()}
+                  </td>
+                  <td class="github-pipeline__actions">
+                    {canCancel && (
+                      <button
+                        class="btn btn--danger btn--sm"
+                        type="button"
+                        hx-post={`/api/v1/portfolio/${itemId}/github/actions/runs/${run.id}/cancel`}
+                        hx-swap="none"
+                        hx-on-htmx-after-request={`htmx.ajax('GET', '/portfolio/${itemId}/github/pipelines', {target: '#github-tab-content', swap: 'innerHTML'})`}
+                      >
+                        Cancel
+                      </button>
+                    )}
+                    {canRerun && (
+                      <>
+                        <button
+                          class="btn btn--secondary btn--sm"
+                          type="button"
+                          hx-post={`/api/v1/portfolio/${itemId}/github/actions/runs/${run.id}/rerun`}
+                          hx-swap="none"
+                          hx-on-htmx-after-request={`htmx.ajax('GET', '/portfolio/${itemId}/github/pipelines', {target: '#github-tab-content', swap: 'innerHTML'})`}
+                        >
+                          Re-run
+                        </button>
+                        {run.conclusion === "failure" && (
+                          <button
+                            class="btn btn--secondary btn--sm"
+                            type="button"
+                            hx-post={`/api/v1/portfolio/${itemId}/github/actions/runs/${run.id}/rerun-failed`}
+                            hx-swap="none"
+                            hx-on-htmx-after-request={`htmx.ajax('GET', '/portfolio/${itemId}/github/pipelines', {target: '#github-tab-content', swap: 'innerHTML'})`}
+                          >
+                            Re-run failed
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
+  </div>
+);
+
+// ---------------------------------------------------------------------------
 // Error / not configured
 // ---------------------------------------------------------------------------
 
@@ -299,6 +456,17 @@ export const GitHubSection: FC<{ itemId: string }> = ({ itemId }) => (
         data-github-tab
       >
         Milestones
+      </button>
+      <button
+        class="github-tabs__btn"
+        type="button"
+        hx-get={`/portfolio/${itemId}/github/pipelines`}
+        hx-target="#github-tab-content"
+        hx-swap="innerHTML"
+        hx-trigger="click"
+        data-github-tab
+      >
+        Pipelines
       </button>
     </div>
 
