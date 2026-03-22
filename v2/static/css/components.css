@@ -138,6 +138,16 @@
     var(--color-border-default);
 }
 
+.data-table__td a:not(.btn) {
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-semibold);
+}
+
+.data-table__td a:not(.btn):hover {
+  color: var(--color-accent);
+}
+
 /* -------------------------------------------------------------------------
    View toggle
    ------------------------------------------------------------------------- */

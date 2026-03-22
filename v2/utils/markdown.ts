@@ -25,10 +25,9 @@ renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
-  const langLabel = lang
-    ? `<span class="code-language-label">${lang}</span>`
-    : "";
-  return `<div class="code-block">${langLabel}<button type="button" class="code-copy-btn" onclick="navigator.clipboard.writeText(this.parentElement.querySelector('code').textContent)">Copy</button><pre><code>${escaped}</code></pre></div>`;
+  const langLabel = lang ? `<span class="code-block__lang">${lang}</span>` : "";
+  const langClass = lang ? ` class="language-${lang}"` : "";
+  return `<div class="code-block"><div class="code-block__header">${langLabel}<button type="button" class="code-block__copy" data-action="copy-code">Copy</button></div><pre class="note-detail__code"><code${langClass}>${escaped}</code></pre></div>`;
 };
 
 marked.use({ renderer, gfm: true, breaks: true });

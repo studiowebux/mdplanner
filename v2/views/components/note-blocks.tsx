@@ -47,20 +47,31 @@ export const ParagraphBlock: FC<{
     : { "data-block-id": paragraph.id };
 
   if (paragraph.type === "code") {
+    const lang = paragraph.language ?? "";
     return (
-      <pre
-        class="note-detail__code"
+      <div
+        class="code-block"
         {...idAttr}
         data-block-type="code"
         data-block-content={paragraph.content}
-        data-block-lang={paragraph.language ?? ""}
+        data-block-lang={lang}
       >
-        <code
-          class={paragraph.language ? `language-${paragraph.language}` : ""}
-        >
-          {paragraph.content}
-        </code>
-      </pre>
+        <div class="code-block__header">
+          {lang && <span class="code-block__lang">{lang}</span>}
+          <button
+            type="button"
+            class="code-block__copy"
+            data-action="copy-code"
+          >
+            Copy
+          </button>
+        </div>
+        <pre class="note-detail__code">
+          <code class={lang ? `language-${lang}` : ""}>
+            {paragraph.content}
+          </code>
+        </pre>
+      </div>
     );
   }
 

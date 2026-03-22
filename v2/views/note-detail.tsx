@@ -26,8 +26,17 @@ export const NoteDetailView: FC<Props> = (props) => {
       {...layoutProps}
       title={note.title}
       activePath="/notes"
-      styles={["/css/views/note.css"]}
-      scripts={["/js/note-tabs.js", "/js/note-editor.js"]}
+      styles={[
+        "/css/vendor/highlight-github-11.11.1.min.css",
+        "/css/vendor/highlight-github-dark-scoped-11.11.1.css",
+        "/css/views/note.css",
+      ]}
+      scripts={[
+        "/js/vendor/highlight-11.11.1.min.js",
+        "/js/note-highlight.js",
+        "/js/note-tabs.js",
+        "/js/note-editor.js",
+      ]}
     >
       <main class="note-detail" id="note-detail-root" data-note-id={note.id}>
         <div class="note-detail__top-bar">

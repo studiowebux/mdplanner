@@ -27,8 +27,16 @@ export const noteConfig: DomainConfig<Note, CreateNote, UpdateNote> = {
   singular: "Note",
   path: "/notes",
   ssePrefix: "note",
-  styles: ["/css/views/note.css"],
-  scripts: ["/js/note-tabs.js"],
+  styles: [
+    "/css/vendor/highlight-github-11.11.1.min.css",
+    "/css/vendor/highlight-github-dark-scoped-11.11.1.css",
+    "/css/views/note.css",
+  ],
+  scripts: [
+    "/js/vendor/highlight-11.11.1.min.js",
+    "/js/note-highlight.js",
+    "/js/note-tabs.js",
+  ],
   defaultView: "table",
   emptyMessage: "No notes yet. Create one to get started.",
 
