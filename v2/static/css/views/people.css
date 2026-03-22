@@ -151,11 +151,13 @@
 }
 
 .person-card__meta-value a {
-  color: var(--color-accent);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-bold);
   text-decoration: none;
 }
 
 .person-card__meta-value a:hover {
+  color: var(--color-accent);
   text-decoration: underline;
 }
 

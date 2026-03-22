@@ -37,23 +37,32 @@ const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = (
         <a class="task-list__row-title" href={`/tasks/${task.id}`}>
           {task.title}
         </a>
-        {task.tags?.map((tag) => (
-          <span key={tag} class="task-list__tag">{tag}</span>
-        ))}
       </div>
       <div class="task-list__row-right">
         <span class="task-list__meta task-list__meta--assignee">
-          {task.assignee
+          {peopleOptions && peopleOptions.length > 0
             ? (
-              <a
-                href={`/people?q=${encodeURIComponent(task.assignee)}`}
-                target="_blank"
-                class="task-list__assignee-link"
+              <select
+                class="form__select form__select--sm"
+                hx-post={`/tasks/${task.id}/assign`}
+                hx-swap="none"
+                hx-trigger="change"
+                name="assignee"
+                aria-label="Assign"
               >
-                {task.assignee}
-              </a>
+                <option value="">Unassigned</option>
+                {peopleOptions.map((p) => (
+                  <option
+                    key={p.value}
+                    value={p.value}
+                    selected={p.value === task.assignee}
+                  >
+                    {p.label}
+                  </option>
+                ))}
+              </select>
             )
-            : ""}
+            : (task.assignee ?? "")}
         </span>
         <span class="task-list__meta task-list__meta--milestone">
           {task.milestone
@@ -89,27 +98,6 @@ const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = (
           <option key={s} value={s} selected={s === task.section}>{s}</option>
         ))}
       </select>
-      {peopleOptions && peopleOptions.length > 0 && (
-        <select
-          class="form__select form__select--sm"
-          hx-post={`/tasks/${task.id}/assign`}
-          hx-swap="none"
-          hx-trigger="change"
-          name="assignee"
-          aria-label="Assign"
-        >
-          <option value="">Unassigned</option>
-          {peopleOptions.map((p) => (
-            <option
-              key={p.value}
-              value={p.value}
-              selected={p.value === task.assignee}
-            >
-              {p.label}
-            </option>
-          ))}
-        </select>
-      )}
       <button
         class="btn btn--secondary btn--sm"
         type="button"

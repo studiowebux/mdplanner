@@ -214,8 +214,8 @@ html.sidebar-collapsed .app-shell {
   align-items: center;
   padding: var(--space-xs) var(--space-lg);
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-muted);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wide);
   cursor: pointer;
