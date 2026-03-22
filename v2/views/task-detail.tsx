@@ -206,7 +206,7 @@ export const TaskDetailView: FC<Props> = (
     <MainLayout
       title={task.title}
       {...rest}
-      styles={["/css/views/task.css"]}
+      styles={["/css/views/task.css", "/css/views/github.css"]}
       scripts={[]}
     >
       <div
@@ -530,23 +530,20 @@ export const TaskDetailView: FC<Props> = (
               </section>
             )}
 
-            {/* GitHub links */}
-            {(task.githubRepo || task.githubIssue || task.githubPR) && (
-              <section class="task-detail__section">
-                <h2>GitHub</h2>
-                <dl class="task-detail__meta">
-                  {task.githubRepo && (
-                    <MetaField label="Repo">{task.githubRepo}</MetaField>
-                  )}
-                  {task.githubIssue && (
-                    <MetaField label="Issue">#{task.githubIssue}</MetaField>
-                  )}
-                  {task.githubPR && (
-                    <MetaField label="PR">#{task.githubPR}</MetaField>
-                  )}
-                </dl>
-              </section>
-            )}
+            {/* GitHub section — live data loaded via htmx */}
+            <section class="task-detail__section">
+              <h2>GitHub</h2>
+              <div
+                id="task-github-section"
+                hx-get={`/tasks/${task.id}/github`}
+                hx-trigger="load"
+                hx-swap="innerHTML"
+              >
+                <div class="loading-spinner" aria-label="Loading">
+                  <div class="loading-spinner__ring" />
+                </div>
+              </div>
+            </section>
           </div>
         </div>
 
