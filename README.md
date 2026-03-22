@@ -4,6 +4,8 @@
 
 # MD Planner
 
+> 2026-03-22: Complete overhaul to get a proper codebase / V1 release. Plan is to be compatible as much as possible with this alpha version. This is my main focus for the next few weeks.
+
 Markdown-based project management with directory storage.
 
 Bug Tracker:
