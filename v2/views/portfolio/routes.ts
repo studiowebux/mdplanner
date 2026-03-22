@@ -120,32 +120,30 @@ portfolioRouter.get("/:id/github/pipelines", async (c) => {
     );
   }
   try {
-    const page = Math.max(1, Number(c.req.query("page")) || 1);
-    const projectConfig = await getProjectService().getConfig();
-    const perPage = projectConfig.pipelinesPerPage ?? GITHUB_PIPELINES_PER_PAGE;
-    const { runs: allRuns, totalCount } = await getGitHubService()
-      .listWorkflowRuns(item.githubRepo, page, perPage);
     const filters: PipelineFilters = {
       status: c.req.query("status") || undefined,
       event: c.req.query("event") || undefined,
       branch: c.req.query("branch") || undefined,
       q: c.req.query("q") || undefined,
     };
-    const filtered = allRuns.filter((r) => {
-      const badge = r.conclusion ?? r.status;
-      if (filters.status && badge !== filters.status) return false;
-      if (filters.event && r.event !== filters.event) return false;
-      if (
-        filters.branch &&
-        !r.headBranch.toLowerCase().includes(filters.branch.toLowerCase())
-      ) return false;
-      if (
-        filters.q &&
-        !r.name.toLowerCase().includes(filters.q.toLowerCase())
-      ) return false;
-      return true;
-    });
-    const hasNext = allRuns.length === perPage;
+    const page = Math.max(1, Number(c.req.query("page")) || 1);
+    const projectConfig = await getProjectService().getConfig();
+    const perPage = projectConfig.pipelinesPerPage ?? GITHUB_PIPELINES_PER_PAGE;
+    const { runs, totalCount } = await getGitHubService()
+      .listWorkflowRuns(item.githubRepo, {
+        page,
+        perPage,
+        status: filters.status,
+        branch: filters.branch,
+        event: filters.event,
+      });
+    // q is local-only — GitHub API has no workflow name search
+    const filtered = filters.q
+      ? runs.filter((r) =>
+        r.name.toLowerCase().includes(filters.q!.toLowerCase())
+      )
+      : runs;
+    const hasNext = runs.length === perPage;
     return c.html(
       GitHubPipelinesTable({
         runs: filtered,
@@ -172,32 +170,29 @@ portfolioRouter.get("/:id/github/pipelines/results", async (c) => {
     );
   }
   try {
-    const page = Math.max(1, Number(c.req.query("page")) || 1);
-    const projectConfig = await getProjectService().getConfig();
-    const perPage = projectConfig.pipelinesPerPage ?? GITHUB_PIPELINES_PER_PAGE;
-    const { runs: allRuns, totalCount } = await getGitHubService()
-      .listWorkflowRuns(item.githubRepo, page, perPage);
     const filters: PipelineFilters = {
       status: c.req.query("status") || undefined,
       event: c.req.query("event") || undefined,
       branch: c.req.query("branch") || undefined,
       q: c.req.query("q") || undefined,
     };
-    const filtered = allRuns.filter((r) => {
-      const badge = r.conclusion ?? r.status;
-      if (filters.status && badge !== filters.status) return false;
-      if (filters.event && r.event !== filters.event) return false;
-      if (
-        filters.branch &&
-        !r.headBranch.toLowerCase().includes(filters.branch.toLowerCase())
-      ) return false;
-      if (
-        filters.q &&
-        !r.name.toLowerCase().includes(filters.q.toLowerCase())
-      ) return false;
-      return true;
-    });
-    const hasNext = allRuns.length === perPage;
+    const page = Math.max(1, Number(c.req.query("page")) || 1);
+    const projectConfig = await getProjectService().getConfig();
+    const perPage = projectConfig.pipelinesPerPage ?? GITHUB_PIPELINES_PER_PAGE;
+    const { runs, totalCount } = await getGitHubService()
+      .listWorkflowRuns(item.githubRepo, {
+        page,
+        perPage,
+        status: filters.status,
+        branch: filters.branch,
+        event: filters.event,
+      });
+    const filtered = filters.q
+      ? runs.filter((r) =>
+        r.name.toLowerCase().includes(filters.q!.toLowerCase())
+      )
+      : runs;
+    const hasNext = runs.length === perPage;
     const filterQs = [
       filters.status ? `status=${filters.status}` : "",
       filters.event ? `event=${filters.event}` : "",
@@ -235,6 +230,7 @@ portfolioRouter.post("/:id/github/pipelines/cancel/:runId", async (c) => {
   } catch { /* run may already be done */ }
   const { runs, totalCount } = await getGitHubService().listWorkflowRuns(
     item.githubRepo,
+    {},
   );
   const resultsUrl = (p: number) =>
     `/portfolio/${id}/github/pipelines/results?page=${p}`;
@@ -260,6 +256,7 @@ portfolioRouter.post("/:id/github/pipelines/rerun/:runId", async (c) => {
   } catch { /* may fail if run is too old */ }
   const { runs, totalCount } = await getGitHubService().listWorkflowRuns(
     item.githubRepo,
+    {},
   );
   const resultsUrl = (p: number) =>
     `/portfolio/${id}/github/pipelines/results?page=${p}`;
