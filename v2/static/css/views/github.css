@@ -353,6 +353,26 @@
   color: var(--color-warning-text);
 }
 
+/* ---- Pipeline pagination ---- */
+
+.github-pipeline__pagination {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: center;
+  margin-top: var(--space-md);
+}
+
+/* ---- htmx indicator ---- */
+
+.htmx-indicator {
+  display: none;
+}
+
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+  display: inline-block;
+}
+
 /* ---- Section spacing ---- */
 
 .github-section {

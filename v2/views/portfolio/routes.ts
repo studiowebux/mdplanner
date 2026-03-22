@@ -16,6 +16,7 @@ import {
   GitHubError,
   GitHubIssuesTable,
   GitHubMilestonesList,
+  GitHubPipelineResults,
   GitHubPipelinesTable,
   GitHubPRsTable,
   GitHubRepoCard,
@@ -117,7 +118,13 @@ portfolioRouter.get("/:id/github/pipelines", async (c) => {
     );
   }
   try {
-    const allRuns = await getGitHubService().listWorkflowRuns(item.githubRepo);
+    const page = Math.max(1, Number(c.req.query("page")) || 1);
+    const perPage = 20;
+    const allRuns = await getGitHubService().listWorkflowRuns(
+      item.githubRepo,
+      page,
+      perPage,
+    );
     const filters: PipelineFilters = {
       status: c.req.query("status") || undefined,
       event: c.req.query("event") || undefined,
@@ -128,16 +135,25 @@ portfolioRouter.get("/:id/github/pipelines", async (c) => {
       const badge = r.conclusion ?? r.status;
       if (filters.status && badge !== filters.status) return false;
       if (filters.event && r.event !== filters.event) return false;
-      if (filters.branch && !r.headBranch.toLowerCase().includes(filters.branch.toLowerCase())) return false;
-      if (filters.q && !r.name.toLowerCase().includes(filters.q.toLowerCase())) return false;
+      if (
+        filters.branch &&
+        !r.headBranch.toLowerCase().includes(filters.branch.toLowerCase())
+      ) return false;
+      if (
+        filters.q &&
+        !r.name.toLowerCase().includes(filters.q.toLowerCase())
+      ) return false;
       return true;
     });
+    const hasNext = allRuns.length === perPage;
     return c.html(
       GitHubPipelinesTable({
         runs: filtered,
         total: allRuns.length,
         itemId: id,
         filters,
+        page,
+        hasNext,
       }) as unknown as string,
     );
   } catch (err) {
@@ -145,6 +161,146 @@ portfolioRouter.get("/:id/github/pipelines", async (c) => {
     return c.html(GitHubError({ message: msg }) as unknown as string);
   }
 });
+
+// Pipeline results fragment — swapped independently by filters and pagination
+portfolioRouter.get("/:id/github/pipelines/results", async (c) => {
+  const id = c.req.param("id");
+  const item = await getPortfolioService().getById(id);
+  if (!item?.githubRepo) {
+    return c.html(
+      GitHubError({ message: "No GitHub repository configured" }) as unknown as string,
+    );
+  }
+  try {
+    const page = Math.max(1, Number(c.req.query("page")) || 1);
+    const perPage = 20;
+    const allRuns = await getGitHubService().listWorkflowRuns(
+      item.githubRepo,
+      page,
+      perPage,
+    );
+    const filters: PipelineFilters = {
+      status: c.req.query("status") || undefined,
+      event: c.req.query("event") || undefined,
+      branch: c.req.query("branch") || undefined,
+      q: c.req.query("q") || undefined,
+    };
+    const filtered = allRuns.filter((r) => {
+      const badge = r.conclusion ?? r.status;
+      if (filters.status && badge !== filters.status) return false;
+      if (filters.event && r.event !== filters.event) return false;
+      if (
+        filters.branch &&
+        !r.headBranch.toLowerCase().includes(filters.branch.toLowerCase())
+      ) return false;
+      if (
+        filters.q &&
+        !r.name.toLowerCase().includes(filters.q.toLowerCase())
+      ) return false;
+      return true;
+    });
+    const hasNext = allRuns.length === perPage;
+    const filterQs = [
+      filters.status ? `status=${filters.status}` : "",
+      filters.event ? `event=${filters.event}` : "",
+      filters.branch ? `branch=${encodeURIComponent(filters.branch)}` : "",
+      filters.q ? `q=${encodeURIComponent(filters.q)}` : "",
+    ].filter(Boolean).join("&");
+    const resultsUrl = (p: number) => {
+      const params = [`page=${p}`, filterQs].filter(Boolean).join("&");
+      return `/portfolio/${id}/github/pipelines/results?${params}`;
+    };
+    return c.html(
+      GitHubPipelineResults({
+        runs: filtered,
+        total: allRuns.length,
+        itemId: id,
+        page,
+        hasNext,
+        resultsUrl,
+      }) as unknown as string,
+    );
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return c.html(GitHubError({ message: msg }) as unknown as string);
+  }
+});
+
+// Pipeline actions — perform action then return updated results
+portfolioRouter.post("/:id/github/pipelines/cancel/:runId", async (c) => {
+  const id = c.req.param("id");
+  const runId = c.req.param("runId");
+  const item = await getPortfolioService().getById(id);
+  if (!item?.githubRepo) return c.notFound();
+  try {
+    await getGitHubService().cancelRun(item.githubRepo, Number(runId));
+  } catch { /* run may already be done */ }
+  const runs = await getGitHubService().listWorkflowRuns(item.githubRepo);
+  const resultsUrl = (p: number) =>
+    `/portfolio/${id}/github/pipelines/results?page=${p}`;
+  return c.html(
+    GitHubPipelineResults({
+      runs,
+      total: runs.length,
+      itemId: id,
+      page: 1,
+      hasNext: runs.length === 20,
+      resultsUrl,
+    }) as unknown as string,
+  );
+});
+
+portfolioRouter.post("/:id/github/pipelines/rerun/:runId", async (c) => {
+  const id = c.req.param("id");
+  const runId = c.req.param("runId");
+  const item = await getPortfolioService().getById(id);
+  if (!item?.githubRepo) return c.notFound();
+  try {
+    await getGitHubService().rerunRun(item.githubRepo, Number(runId));
+  } catch { /* may fail if run is too old */ }
+  const runs = await getGitHubService().listWorkflowRuns(item.githubRepo);
+  const resultsUrl = (p: number) =>
+    `/portfolio/${id}/github/pipelines/results?page=${p}`;
+  return c.html(
+    GitHubPipelineResults({
+      runs,
+      total: runs.length,
+      itemId: id,
+      page: 1,
+      hasNext: runs.length === 20,
+      resultsUrl,
+    }) as unknown as string,
+  );
+});
+
+portfolioRouter.post(
+  "/:id/github/pipelines/rerun-failed/:runId",
+  async (c) => {
+    const id = c.req.param("id");
+    const runId = c.req.param("runId");
+    const item = await getPortfolioService().getById(id);
+    if (!item?.githubRepo) return c.notFound();
+    try {
+      await getGitHubService().rerunFailedJobs(
+        item.githubRepo,
+        Number(runId),
+      );
+    } catch { /* may fail if run is too old */ }
+    const runs = await getGitHubService().listWorkflowRuns(item.githubRepo);
+    const resultsUrl = (p: number) =>
+      `/portfolio/${id}/github/pipelines/results?page=${p}`;
+    return c.html(
+      GitHubPipelineResults({
+        runs,
+        total: runs.length,
+        itemId: id,
+        page: 1,
+        hasNext: runs.length === 20,
+        resultsUrl,
+      }) as unknown as string,
+    );
+  },
+);
 
 // Detail view
 portfolioRouter.get("/:id", async (c) => {

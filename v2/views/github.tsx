@@ -260,50 +260,93 @@ export const GitHubPipelinesTable: FC<{
   total: number;
   itemId: string;
   filters: PipelineFilters;
-}> = ({ runs, total, itemId, filters }) => (
-  <div class="github-table-wrap">
-    <form
-      class="github-pipeline__filters"
-      hx-get={`/portfolio/${itemId}/github/pipelines`}
-      hx-target="#github-tab-content"
-      hx-swap="innerHTML"
-      hx-trigger="change, input delay:300ms"
-    >
-      <input
-        type="search"
-        name="q"
-        placeholder="Search workflow..."
-        value={filters.q ?? ""}
-        class="github-pipeline__search"
-        autocomplete="off"
-      />
-      <select name="status" class="github-pipeline__select">
-        <option value="">All statuses</option>
-        {GITHUB_PIPELINE_STATUSES.map((s) => (
-          <option key={s} value={s} selected={filters.status === s}>
-            {s}
-          </option>
-        ))}
-      </select>
-      <select name="event" class="github-pipeline__select">
-        <option value="">All events</option>
-        {GITHUB_WORKFLOW_EVENTS.map((e) => (
-          <option key={e} value={e} selected={filters.event === e}>
-            {e}
-          </option>
-        ))}
-      </select>
-      <input
-        type="text"
-        name="branch"
-        placeholder="Branch..."
-        value={filters.branch ?? ""}
-        class="github-pipeline__search github-pipeline__search--branch"
-        autocomplete="off"
-      />
-    </form>
+  page: number;
+  hasNext: boolean;
+}> = ({ runs, total, itemId, filters, page, hasNext }) => {
+  const filterQs = [
+    filters.status ? `status=${filters.status}` : "",
+    filters.event ? `event=${filters.event}` : "",
+    filters.branch ? `branch=${encodeURIComponent(filters.branch)}` : "",
+    filters.q ? `q=${encodeURIComponent(filters.q)}` : "",
+  ].filter(Boolean).join("&");
+  const resultsUrl = (p: number) => {
+    const params = [`page=${p}`, filterQs].filter(Boolean).join("&");
+    return `/portfolio/${itemId}/github/pipelines/results?${params}`;
+  };
 
-    <span class="github-pipeline__count">{runs.length}/{total} runs</span>
+  return (
+    <div class="github-table-wrap">
+      <form
+        class="github-pipeline__filters"
+        hx-get={`/portfolio/${itemId}/github/pipelines/results`}
+        hx-target="#github-pipeline-results"
+        hx-swap="innerHTML"
+        hx-trigger="change, input delay:300ms"
+        hx-indicator="#github-pipeline-spinner"
+        hx-vals={JSON.stringify({ page: 1 })}
+      >
+        <input
+          type="search"
+          name="q"
+          placeholder="Search workflow..."
+          value={filters.q ?? ""}
+          class="github-pipeline__search"
+          autocomplete="off"
+        />
+        <select name="status" class="github-pipeline__select">
+          <option value="">All statuses</option>
+          {GITHUB_PIPELINE_STATUSES.map((s) => (
+            <option key={s} value={s} selected={filters.status === s}>
+              {s}
+            </option>
+          ))}
+        </select>
+        <select name="event" class="github-pipeline__select">
+          <option value="">All events</option>
+          {GITHUB_WORKFLOW_EVENTS.map((e) => (
+            <option key={e} value={e} selected={filters.event === e}>
+              {e}
+            </option>
+          ))}
+        </select>
+        <input
+          type="text"
+          name="branch"
+          placeholder="Branch..."
+          value={filters.branch ?? ""}
+          class="github-pipeline__search github-pipeline__search--branch"
+          autocomplete="off"
+        />
+        <span id="github-pipeline-spinner" class="loading-spinner htmx-indicator" />
+      </form>
+
+      <div id="github-pipeline-results">
+        <GitHubPipelineResults
+          runs={runs}
+          total={total}
+          itemId={itemId}
+          page={page}
+          hasNext={hasNext}
+          resultsUrl={resultsUrl}
+        />
+      </div>
+    </div>
+  );
+};
+
+/** Inner results — swapped independently by filters and pagination. */
+export const GitHubPipelineResults: FC<{
+  runs: GitHubWorkflowRun[];
+  total: number;
+  itemId: string;
+  page: number;
+  hasNext: boolean;
+  resultsUrl: (p: number) => string;
+}> = ({ runs, total, itemId, page, hasNext, resultsUrl }) => (
+  <>
+    <span class="github-pipeline__count">
+      {runs.length}/{total} runs (page {page})
+    </span>
 
     {runs.length === 0
       ? <p class="github-empty">No workflow runs match filters</p>
@@ -328,9 +371,7 @@ export const GitHubPipelinesTable: FC<{
               return (
                 <tr key={run.id}>
                   <td>
-                    <span
-                      class={`github-badge github-badge--${badge}`}
-                    >
+                    <span class={`github-badge github-badge--${badge}`}>
                       {badge}
                     </span>
                   </td>
@@ -355,9 +396,10 @@ export const GitHubPipelinesTable: FC<{
                       <button
                         class="btn btn--danger btn--sm"
                         type="button"
-                        hx-post={`/api/v1/portfolio/${itemId}/github/actions/runs/${run.id}/cancel`}
-                        hx-swap="none"
-                        hx-on-htmx-after-request={`htmx.ajax('GET', '/portfolio/${itemId}/github/pipelines', {target: '#github-tab-content', swap: 'innerHTML'})`}
+                        hx-post={`/portfolio/${itemId}/github/pipelines/cancel/${run.id}`}
+                        hx-target="#github-pipeline-results"
+                        hx-swap="innerHTML"
+                        hx-indicator="#github-pipeline-spinner"
                       >
                         Cancel
                       </button>
@@ -367,9 +409,10 @@ export const GitHubPipelinesTable: FC<{
                         <button
                           class="btn btn--secondary btn--sm"
                           type="button"
-                          hx-post={`/api/v1/portfolio/${itemId}/github/actions/runs/${run.id}/rerun`}
-                          hx-swap="none"
-                          hx-on-htmx-after-request={`htmx.ajax('GET', '/portfolio/${itemId}/github/pipelines', {target: '#github-tab-content', swap: 'innerHTML'})`}
+                          hx-post={`/portfolio/${itemId}/github/pipelines/rerun/${run.id}`}
+                          hx-target="#github-pipeline-results"
+                          hx-swap="innerHTML"
+                          hx-indicator="#github-pipeline-spinner"
                         >
                           Re-run
                         </button>
@@ -377,9 +420,10 @@ export const GitHubPipelinesTable: FC<{
                           <button
                             class="btn btn--secondary btn--sm"
                             type="button"
-                            hx-post={`/api/v1/portfolio/${itemId}/github/actions/runs/${run.id}/rerun-failed`}
-                            hx-swap="none"
-                            hx-on-htmx-after-request={`htmx.ajax('GET', '/portfolio/${itemId}/github/pipelines', {target: '#github-tab-content', swap: 'innerHTML'})`}
+                            hx-post={`/portfolio/${itemId}/github/pipelines/rerun-failed/${run.id}`}
+                            hx-target="#github-pipeline-results"
+                            hx-swap="innerHTML"
+                            hx-indicator="#github-pipeline-spinner"
                           >
                             Re-run failed
                           </button>
@@ -393,7 +437,34 @@ export const GitHubPipelinesTable: FC<{
           </tbody>
         </table>
       )}
-  </div>
+
+    <div class="github-pipeline__pagination">
+      {page > 1 && (
+        <button
+          class="btn btn--secondary btn--sm"
+          type="button"
+          hx-get={resultsUrl(page - 1)}
+          hx-target="#github-pipeline-results"
+          hx-swap="innerHTML"
+          hx-indicator="#github-pipeline-spinner"
+        >
+          Previous
+        </button>
+      )}
+      {hasNext && (
+        <button
+          class="btn btn--secondary btn--sm"
+          type="button"
+          hx-get={resultsUrl(page + 1)}
+          hx-target="#github-pipeline-results"
+          hx-swap="innerHTML"
+          hx-indicator="#github-pipeline-spinner"
+        >
+          Next
+        </button>
+      )}
+    </div>
+  </>
 );
 
 // ---------------------------------------------------------------------------

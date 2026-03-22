@@ -167,9 +167,11 @@ export class GitHubService {
 
   async listWorkflowRuns(
     githubRepo: string,
+    page = 1,
+    perPage = 20,
   ): Promise<GitHubWorkflowRun[]> {
     const { provider, owner, repo } = await this.resolve(githubRepo);
-    return provider.listWorkflowRuns(owner, repo);
+    return provider.listWorkflowRuns(owner, repo, page, perPage);
   }
 
   async cancelRun(githubRepo: string, runId: number): Promise<void> {

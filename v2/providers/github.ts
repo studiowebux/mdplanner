@@ -341,10 +341,12 @@ export class GitHubProvider {
   async listWorkflowRuns(
     owner: string,
     repo: string,
+    page = 1,
+    perPage = 20,
   ): Promise<GitHubWorkflowRun[]> {
     // deno-lint-ignore no-explicit-any
     const data = await this.ghGet(
-      `/repos/${owner}/${repo}/actions/runs?per_page=20`,
+      `/repos/${owner}/${repo}/actions/runs?per_page=${perPage}&page=${page}`,
     ) as any;
     // deno-lint-ignore no-explicit-any
     const runs: any[] = data?.workflow_runs ?? [];
