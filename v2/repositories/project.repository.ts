@@ -48,7 +48,6 @@ export class ProjectRepository {
     if (config.sectionOrder && config.sectionOrder.length > 0) {
       fm.section_order = config.sectionOrder;
     }
-    if (config.githubRepo) fm.github_repo = config.githubRepo;
     if (config.githubToken) {
       fm.github_token = await encryptSecret(config.githubToken);
     }

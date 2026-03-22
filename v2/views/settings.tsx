@@ -311,46 +311,32 @@ export const SettingsView: FC<SettingsProps> = ({
                 </span>
               </div>
 
-              <div class="settings-field settings-field--row">
-                <div class="settings-field">
-                  <label class="settings-field__label" for="cfg-github-repo">
-                    GitHub repository
-                  </label>
+              <div class="settings-field">
+                <label class="settings-field__label" for="cfg-github-token">
+                  GitHub token (PAT)
+                </label>
+                <div class="settings-field__input-row">
                   <input
-                    type="text"
-                    id="cfg-github-repo"
-                    name="githubRepo"
-                    value={config.githubRepo ?? ""}
-                    placeholder="owner/repo"
+                    type="password"
+                    id="cfg-github-token"
+                    name="githubToken"
+                    value={config.githubToken ?? ""}
+                    placeholder="ghp_..."
                     class="settings-field__input"
+                    autocomplete="off"
                   />
+                  <button
+                    type="button"
+                    class="btn btn--secondary btn--sm"
+                    data-clear-input="cfg-github-token"
+                  >
+                    Clear
+                  </button>
                 </div>
-                <div class="settings-field">
-                  <label class="settings-field__label" for="cfg-github-token">
-                    GitHub token (PAT)
-                  </label>
-                  <div class="settings-field__input-row">
-                    <input
-                      type="password"
-                      id="cfg-github-token"
-                      name="githubToken"
-                      value={config.githubToken ?? ""}
-                      placeholder="ghp_..."
-                      class="settings-field__input"
-                      autocomplete="off"
-                    />
-                    <button
-                      type="button"
-                      class="btn btn--secondary btn--sm"
-                      data-clear-input="cfg-github-token"
-                    >
-                      Clear
-                    </button>
-                  </div>
-                  <span class="settings-field__hint">
-                    Stored locally. Set MDPLANNER_SECRET_KEY to encrypt at rest.
-                  </span>
-                </div>
+                <span class="settings-field__hint">
+                  Shared across all portfolio items. Set MDPLANNER_SECRET_KEY to
+                  encrypt at rest.
+                </span>
               </div>
 
               <FormActions />

@@ -17,8 +17,12 @@ import {
   IdWithUpdateIdParam,
   notFound,
 } from "../../../types/api.ts";
+import { githubRouter } from "../github/routes.ts";
 
 export const portfolioRouter = new OpenAPIHono();
+
+// Mount GitHub sub-routes under /:id/github
+portfolioRouter.route("/:id/github", githubRouter);
 
 // GET /
 const listRoute = createRoute({

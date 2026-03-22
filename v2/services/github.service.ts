@@ -1,5 +1,5 @@
-// GitHub service — wraps GitHubProvider, auto-injects owner/repo from project config.
-// Reads config on every call so token/repo changes in settings take effect immediately.
+// GitHub service — wraps GitHubProvider.
+// Token from project config, repo from portfolio item (passed by caller).
 
 import { GitHubProvider } from "../providers/github.ts";
 import type { ProjectService } from "./project.service.ts";
@@ -24,32 +24,24 @@ export class GitHubService {
   constructor(private projectService: ProjectService) {}
 
   // ---------------------------------------------------------------------------
-  // Internal — resolve provider + owner/repo from current project config
+  // Internal
   // ---------------------------------------------------------------------------
 
-  private async resolve(): Promise<
+  private async resolve(githubRepo: string): Promise<
     { provider: GitHubProvider; owner: string; repo: string }
   > {
-    const config = await this.projectService.getConfig();
-    if (!config.githubToken) {
-      throw new Error(
-        "GITHUB_TOKEN_NOT_CONFIGURED: set a GitHub PAT in Settings > Project",
-      );
-    }
-    if (!config.githubRepo) {
-      throw new Error(
-        "GITHUB_REPO_NOT_CONFIGURED: set a GitHub repository in Settings > Project",
-      );
-    }
-    const slash = config.githubRepo.indexOf("/");
+    const provider = await this.provider();
+    const slash = githubRepo.indexOf("/");
     if (slash === -1) {
       throw new Error(
-        `GITHUB_REPO_INVALID: expected "owner/repo", got "${config.githubRepo}"`,
+        `GITHUB_REPO_INVALID: expected "owner/repo", got "${githubRepo}"`,
       );
     }
-    const owner = config.githubRepo.slice(0, slash);
-    const repo = config.githubRepo.slice(slash + 1);
-    return { provider: new GitHubProvider(config.githubToken), owner, repo };
+    return {
+      provider,
+      owner: githubRepo.slice(0, slash),
+      repo: githubRepo.slice(slash + 1),
+    };
   }
 
   private async provider(): Promise<GitHubProvider> {
@@ -74,8 +66,8 @@ export class GitHubService {
   // Repos
   // ---------------------------------------------------------------------------
 
-  async getRepo(): Promise<GitHubRepo> {
-    const { provider, owner, repo } = await this.resolve();
+  async getRepo(githubRepo: string): Promise<GitHubRepo> {
+    const { provider, owner, repo } = await this.resolve(githubRepo);
     return provider.getRepo(owner, repo);
   }
 
@@ -87,32 +79,35 @@ export class GitHubService {
   // Issues
   // ---------------------------------------------------------------------------
 
-  async getIssue(number: number): Promise<GitHubIssue> {
-    const { provider, owner, repo } = await this.resolve();
+  async getIssue(githubRepo: string, number: number): Promise<GitHubIssue> {
+    const { provider, owner, repo } = await this.resolve(githubRepo);
     return provider.getIssue(owner, repo, number);
   }
 
   async createIssue(
+    githubRepo: string,
     title: string,
     body: string,
   ): Promise<GitHubCreatedIssue> {
-    const { provider, owner, repo } = await this.resolve();
+    const { provider, owner, repo } = await this.resolve(githubRepo);
     return provider.createIssue(owner, repo, title, body);
   }
 
   async setIssueState(
+    githubRepo: string,
     number: number,
     state: GitHubIssueState,
   ): Promise<GitHubIssue> {
-    const { provider, owner, repo } = await this.resolve();
+    const { provider, owner, repo } = await this.resolve(githubRepo);
     return provider.setIssueState(owner, repo, number, state);
   }
 
   async listIssues(
+    githubRepo: string,
     state: GitHubIssueState | "all" = "open",
     assignee?: string,
   ): Promise<GitHubIssue[]> {
-    const { provider, owner, repo } = await this.resolve();
+    const { provider, owner, repo } = await this.resolve(githubRepo);
     return provider.listIssues(owner, repo, state, assignee);
   }
 
@@ -120,21 +115,25 @@ export class GitHubService {
   // Pull Requests
   // ---------------------------------------------------------------------------
 
-  async getPR(number: number): Promise<GitHubPR> {
-    const { provider, owner, repo } = await this.resolve();
+  async getPR(githubRepo: string, number: number): Promise<GitHubPR> {
+    const { provider, owner, repo } = await this.resolve(githubRepo);
     return provider.getPR(owner, repo, number);
   }
 
-  async listPRs(state: GitHubPRState = "open"): Promise<GitHubPR[]> {
-    const { provider, owner, repo } = await this.resolve();
+  async listPRs(
+    githubRepo: string,
+    state: GitHubPRState = "open",
+  ): Promise<GitHubPR[]> {
+    const { provider, owner, repo } = await this.resolve(githubRepo);
     return provider.listPRs(owner, repo, state);
   }
 
   async mergePR(
+    githubRepo: string,
     number: number,
     mergeMethod: GitHubMergeMethod = "squash",
   ): Promise<GitHubMergeResult> {
-    const { provider, owner, repo } = await this.resolve();
+    const { provider, owner, repo } = await this.resolve(githubRepo);
     return provider.mergePR(owner, repo, number, mergeMethod);
   }
 
@@ -142,8 +141,8 @@ export class GitHubService {
   // Milestones
   // ---------------------------------------------------------------------------
 
-  async listMilestones(): Promise<GitHubMilestone[]> {
-    const { provider, owner, repo } = await this.resolve();
+  async listMilestones(githubRepo: string): Promise<GitHubMilestone[]> {
+    const { provider, owner, repo } = await this.resolve(githubRepo);
     return provider.listMilestones(owner, repo);
   }
 
@@ -151,8 +150,10 @@ export class GitHubService {
   // Releases
   // ---------------------------------------------------------------------------
 
-  async getLatestRelease(): Promise<GitHubRelease | null> {
-    const { provider, owner, repo } = await this.resolve();
+  async getLatestRelease(
+    githubRepo: string,
+  ): Promise<GitHubRelease | null> {
+    const { provider, owner, repo } = await this.resolve(githubRepo);
     return provider.getLatestRelease(owner, repo);
   }
 
@@ -160,8 +161,8 @@ export class GitHubService {
   // Actions — Workflows
   // ---------------------------------------------------------------------------
 
-  async listWorkflows(): Promise<GitHubWorkflow[]> {
-    const { provider, owner, repo } = await this.resolve();
+  async listWorkflows(githubRepo: string): Promise<GitHubWorkflow[]> {
+    const { provider, owner, repo } = await this.resolve(githubRepo);
     return provider.listWorkflows(owner, repo);
   }
 
@@ -169,32 +170,41 @@ export class GitHubService {
   // Actions — Workflow Runs
   // ---------------------------------------------------------------------------
 
-  async listWorkflowRuns(): Promise<GitHubWorkflowRun[]> {
-    const { provider, owner, repo } = await this.resolve();
+  async listWorkflowRuns(
+    githubRepo: string,
+  ): Promise<GitHubWorkflowRun[]> {
+    const { provider, owner, repo } = await this.resolve(githubRepo);
     return provider.listWorkflowRuns(owner, repo);
   }
 
-  async cancelRun(runId: number): Promise<void> {
-    const { provider, owner, repo } = await this.resolve();
+  async cancelRun(githubRepo: string, runId: number): Promise<void> {
+    const { provider, owner, repo } = await this.resolve(githubRepo);
     return provider.cancelRun(owner, repo, runId);
   }
 
-  async rerunRun(runId: number): Promise<void> {
-    const { provider, owner, repo } = await this.resolve();
+  async rerunRun(githubRepo: string, runId: number): Promise<void> {
+    const { provider, owner, repo } = await this.resolve(githubRepo);
     return provider.rerunRun(owner, repo, runId);
   }
 
-  async rerunFailedJobs(runId: number): Promise<void> {
-    const { provider, owner, repo } = await this.resolve();
+  async rerunFailedJobs(githubRepo: string, runId: number): Promise<void> {
+    const { provider, owner, repo } = await this.resolve(githubRepo);
     return provider.rerunFailedJobs(owner, repo, runId);
   }
 
   async triggerWorkflowDispatch(
+    githubRepo: string,
     workflowId: number | string,
     ref: string,
     inputs?: Record<string, string>,
   ): Promise<void> {
-    const { provider, owner, repo } = await this.resolve();
-    return provider.triggerWorkflowDispatch(owner, repo, workflowId, ref, inputs);
+    const { provider, owner, repo } = await this.resolve(githubRepo);
+    return provider.triggerWorkflowDispatch(
+      owner,
+      repo,
+      workflowId,
+      ref,
+      inputs,
+    );
   }
 }

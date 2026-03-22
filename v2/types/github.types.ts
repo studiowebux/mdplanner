@@ -253,9 +253,19 @@ export const ListPRsQuerySchema = z.object({
 }).openapi("ListPRsQuery");
 
 // NumberParam — for GitHub issue/PR number path params (:number).
-// For :id path params reuse IdParam from types/api.ts.
+// For portfolio :id path params reuse IdParam from types/api.ts.
 export const NumberParam = z.object({
   number: z.string().openapi({ param: { name: "number", in: "path" } }),
+});
+
+export const RunIdParam = z.object({
+  runId: z.string().openapi({ param: { name: "runId", in: "path" } }),
+});
+
+export const WorkflowIdParam = z.object({
+  workflowId: z.string().openapi({
+    param: { name: "workflowId", in: "path" },
+  }),
 });
 
 export const CreateIssueBodySchema = z.object({

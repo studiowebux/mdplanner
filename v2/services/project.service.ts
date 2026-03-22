@@ -33,7 +33,6 @@ export class ProjectService {
     if (data.navCategories !== undefined) {
       current.navCategories = data.navCategories;
     }
-    if (data.githubRepo !== undefined) current.githubRepo = data.githubRepo;
     if (data.githubToken !== undefined) current.githubToken = data.githubToken;
     await this.repo.write(current);
     return current;

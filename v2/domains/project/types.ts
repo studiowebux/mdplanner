@@ -83,10 +83,6 @@ export const ProjectConfigSchema = z.object({
     description: "ISO timestamp of last project.md write",
     example: "2026-03-17T19:00:00.000Z",
   }),
-  githubRepo: z.string().optional().openapi({
-    description: "GitHub repository in owner/repo format",
-    example: "studiowebux/mdplanner",
-  }),
   githubToken: z.string().optional().openapi({
     description: "GitHub Personal Access Token (stored in project.md)",
     example: "ghp_...",
@@ -145,10 +141,6 @@ export const UpdateProjectConfigSchema = z.object({
     description: "ISO 4217 currency code. Omit to leave unchanged.",
     example: "USD",
   }),
-  githubRepo: z.string().optional().openapi({
-    description: "GitHub repository (owner/repo). Omit to leave unchanged.",
-    example: "studiowebux/mdplanner",
-  }),
   githubToken: z.string().optional().openapi({
     description: "GitHub Personal Access Token. Omit to leave unchanged.",
     example: "ghp_...",
@@ -194,7 +186,6 @@ export const FrontmatterProjectSchema = z.object({
   locale: z.string().optional(),
   currency: z.string().optional(),
   section_order: z.array(z.unknown()).optional(),
-  github_repo: z.string().optional(),
   github_token: z.string().optional(),
   last_updated: z.string().optional(),
 }).transform(async (fm): Promise<Omit<ProjectConfig, "name" | "description">> => {
@@ -229,7 +220,6 @@ export const FrontmatterProjectSchema = z.object({
     sectionOrder: Array.isArray(fm.section_order)
       ? (fm.section_order as unknown[]).map(String)
       : undefined,
-    githubRepo: fm.github_repo,
     githubToken,
     lastUpdated: fm.last_updated,
   };

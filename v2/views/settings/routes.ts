@@ -64,7 +64,6 @@ settingsViewRouter.post("/project", async (c) => {
     locale: body.locale ? String(body.locale).trim() : undefined,
     currency: body.currency ? String(body.currency).trim() : undefined,
     port: portRaw && !isNaN(portRaw) ? portRaw : undefined,
-    githubRepo: body.githubRepo ? String(body.githubRepo).trim() : undefined,
     githubToken: body.githubToken ? String(body.githubToken) : undefined,
   });
   return new Response(null, {
