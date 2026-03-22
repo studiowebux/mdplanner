@@ -19,7 +19,7 @@
 
 .settings-tabs {
   display: grid;
-  grid-template-columns: repeat(5, auto) 1fr;
+  grid-template-columns: repeat(6, auto) 1fr;
   grid-template-rows: auto 1fr;
 }
 
@@ -66,7 +66,8 @@
 #tab-project:checked ~ .settings-tabs__panel--project,
 #tab-schedule:checked ~ .settings-tabs__panel--schedule,
 #tab-tags:checked ~ .settings-tabs__panel--tags,
-#tab-links:checked ~ .settings-tabs__panel--links {
+#tab-links:checked ~ .settings-tabs__panel--links,
+#tab-support:checked ~ .settings-tabs__panel--support {
   display: block;
 }
 
@@ -331,4 +332,55 @@
   gap: var(--space-sm);
   align-items: center;
   margin-bottom: var(--space-sm);
+}
+
+/* ---------------------------------------------------------------------------
+   Support — funding, contact, version
+   --------------------------------------------------------------------------- */
+
+.settings-support__heading {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.settings-support__version {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-lg);
+}
+
+.settings-support__subheading {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+
+.settings-support__links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.settings-support__links a {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+}
+
+.settings-support__links a:hover {
+  color: var(--color-accent);
+}
+
+.settings-support__license {
+  margin-top: var(--space-xl);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
 }

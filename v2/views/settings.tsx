@@ -4,7 +4,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { ViewProps } from "../types/app.ts";
-import { ENTITY_TYPE_LABELS, WEEKDAYS } from "../constants/mod.ts";
+import { APP_VERSION, ENTITY_TYPE_LABELS, WEEKDAYS } from "../constants/mod.ts";
 import type { ProjectConfig } from "../domains/project/types.ts";
 
 type SettingsProps = ViewProps & {
@@ -81,6 +81,14 @@ export const SettingsView: FC<SettingsProps> = ({
             class="settings-tabs__radio"
           />
           <label for="tab-links" class="settings-tabs__label">Links</label>
+
+          <input
+            type="radio"
+            name="settings-tab"
+            id="tab-support"
+            class="settings-tabs__radio"
+          />
+          <label for="tab-support" class="settings-tabs__label">Support</label>
 
           {/* ---- Views tab ---- */}
           <div class="settings-tabs__panel settings-tabs__panel--views">
@@ -308,6 +316,62 @@ export const SettingsView: FC<SettingsProps> = ({
                 <button type="submit" class="btn btn--primary">Save</button>
               </div>
             </form>
+          </div>
+
+          {/* ---- Support tab ---- */}
+          <div class="settings-tabs__panel settings-tabs__panel--support">
+            <section class="settings-support">
+              <h2 class="settings-support__heading">MDPlanner</h2>
+              <p class="settings-support__version">
+                Version {APP_VERSION}
+              </p>
+
+              <h3 class="settings-support__subheading">Funding</h3>
+              <ul class="settings-support__links">
+                <li>
+                  <a href="https://buymeacoffee.com/studiowebux" target="_blank" rel="noopener">
+                    Buy Me a Coffee
+                  </a>
+                </li>
+                <li>
+                  <a href="https://github.com/sponsors/studiowebux" target="_blank" rel="noopener">
+                    GitHub Sponsors
+                  </a>
+                </li>
+                <li>
+                  <a href="https://patreon.com/studiowebux" target="_blank" rel="noopener">
+                    Patreon
+                  </a>
+                </li>
+              </ul>
+
+              <h3 class="settings-support__subheading">Support</h3>
+              <ul class="settings-support__links">
+                <li>
+                  <a href="https://github.com/studiowebux/mdplanner/issues" target="_blank" rel="noopener">
+                    Bug Tracker (GitHub Issues)
+                  </a>
+                </li>
+                <li>
+                  <a href="https://discord.gg/BG5Erm9fNv" target="_blank" rel="noopener">
+                    Discord
+                  </a>
+                </li>
+              </ul>
+
+              <h3 class="settings-support__subheading">Contact</h3>
+              <ul class="settings-support__links">
+                <li>
+                  <a href="https://studiowebux.com" target="_blank" rel="noopener">
+                    Studio Webux
+                  </a>
+                </li>
+              </ul>
+
+              <p class="settings-support__license">
+                Licensed under MIT
+              </p>
+            </section>
           </div>
 
           {/* ---- Links tab ---- */}
