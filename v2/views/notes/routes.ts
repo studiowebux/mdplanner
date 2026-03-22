@@ -7,6 +7,8 @@ import { Sidenav } from "../../components/ui/sidenav.tsx";
 import { NotePreview } from "../components/note-preview.tsx";
 import { NoteDetailView } from "../note-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
+import { hxTrigger } from "../../utils/hx-trigger.ts";
+import { markdownToHtml } from "../../utils/markdown.ts";
 
 export const notesRouter = createDomainRoutes(noteConfig);
 
@@ -31,6 +33,7 @@ notesRouter.post("/:id/title", async (c) => {
   if (!title) return c.text("Title required", 400);
   const note = await getNoteService().update(id, { title });
   if (!note) return c.notFound();
+  c.header("HX-Trigger", hxTrigger("success", "Title updated"));
   return c.html(
     NoteDetailView({
       ...viewProps(c, "/notes"),
@@ -46,12 +49,21 @@ notesRouter.post("/:id/project", async (c) => {
   const project = body.project ? String(body.project) : null;
   const note = await getNoteService().update(id, { project });
   if (!note) return c.notFound();
+  c.header("HX-Trigger", hxTrigger("success", "Project updated"));
   return c.html(
     NoteDetailView({
       ...viewProps(c, "/notes"),
       note,
     }) as unknown as string,
   );
+});
+
+// Preview a single block — returns rendered markdown HTML fragment
+notesRouter.post("/preview-block", async (c) => {
+  const body = await c.req.json();
+  const content = String(body.content ?? "");
+  const html = markdownToHtml(content) ?? "";
+  return c.html(html);
 });
 
 // Preview — rendered markdown in sidenav (read-only)

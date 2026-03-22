@@ -492,6 +492,49 @@
   margin-bottom: var(--space-xs);
 }
 
+/* ---- Sticky save bar ---- */
+
+.note-editor__save-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-bg-secondary);
+  border-top: var(--border-width) var(--border-style)
+    var(--color-border-default);
+  box-shadow: var(--card-shadow-hover);
+  z-index: 50;
+  transform: translateY(100%);
+  transition: transform var(--transition-fast);
+}
+
+.note-editor__save-bar--visible {
+  transform: translateY(0);
+}
+
+.note-editor__save-bar-text {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-warning-text);
+}
+
+/* ---- Block preview ---- */
+
+.note-editor__preview {
+  margin-top: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--color-bg-primary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  line-height: var(--body-line-height);
+}
+
 /* ---- Responsive ---- */
 
 @media (max-width: 768px) {

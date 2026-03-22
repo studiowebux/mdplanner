@@ -10,6 +10,9 @@
 
   var noteId = null;
   var editing = false;
+  var dirty = false;
+  var saveBar = null;
+  var timelineCounter = 0;
 
   function getNoteId() {
     if (noteId) return noteId;
@@ -39,6 +42,56 @@
   }
 
   // -------------------------------------------------------------------------
+  // Dirty tracking
+  // -------------------------------------------------------------------------
+
+  function markDirty() {
+    if (dirty) return;
+    dirty = true;
+    updateSaveBar();
+  }
+
+  function clearDirty() {
+    dirty = false;
+    updateSaveBar();
+  }
+
+  function updateSaveBar() {
+    if (!saveBar) return;
+    if (dirty) {
+      saveBar.classList.add("note-editor__save-bar--visible");
+    } else {
+      saveBar.classList.remove("note-editor__save-bar--visible");
+    }
+  }
+
+  function createSaveBar() {
+    if (saveBar) return;
+    saveBar = document.createElement("div");
+    saveBar.className = "note-editor__save-bar";
+    saveBar.innerHTML =
+      '<span class="note-editor__save-bar-text">Unsaved changes</span>' +
+      '<button type="button" class="btn btn--primary btn--sm" data-action="save-content">Save</button>' +
+      '<button type="button" class="btn btn--secondary btn--sm" data-action="cancel-edit">Cancel</button>';
+    document.body.appendChild(saveBar);
+  }
+
+  function removeSaveBar() {
+    if (saveBar) {
+      saveBar.remove();
+      saveBar = null;
+    }
+  }
+
+  // Warn before leaving with unsaved changes
+  window.addEventListener("beforeunload", function (e) {
+    if (editing && dirty) {
+      e.preventDefault();
+      e.returnValue = "";
+    }
+  });
+
+  // -------------------------------------------------------------------------
   // Toggle edit mode
   // -------------------------------------------------------------------------
 
@@ -50,15 +103,37 @@
 
     if (editing) {
       body.classList.add("note-detail__body--editing");
-      btn.textContent = "Save";
-      btn.classList.add("btn--primary");
+      btn.textContent = "Cancel";
+      btn.classList.add("btn--danger");
       btn.classList.remove("btn--secondary");
+      createSaveBar();
       showEditorControls();
       convertToEditable();
+      trackDirtyInputs();
     } else {
-      flushFromDOM();
-      save();
+      // Cancel — reload to discard changes
+      if (dirty) {
+        window.confirmAction({
+          title: "Discard changes",
+          message: "You have unsaved changes. Discard them?",
+          confirmLabel: "Discard",
+        }).then(function (ok) {
+          if (ok) window.location.reload();
+          else {
+            editing = true; // stay in edit mode
+          }
+        });
+      } else {
+        window.location.reload();
+      }
     }
+  }
+
+  function trackDirtyInputs() {
+    // Any input/textarea change marks dirty
+    var body = qs(".note-detail__body");
+    if (!body) return;
+    body.addEventListener("input", markDirty);
   }
 
   // -------------------------------------------------------------------------
@@ -82,6 +157,7 @@
         '<button type="button" class="btn btn--tertiary btn--sm" data-action="move-down">Down</button>' +
         '<button type="button" class="btn btn--tertiary btn--sm" data-action="toggle-type">' +
         (type === "code" ? "Text" : "Code") + "</button>" +
+        '<button type="button" class="btn btn--tertiary btn--sm" data-action="preview-block">Preview</button>' +
         '<button type="button" class="btn btn--danger btn--sm" data-action="delete-block">Del</button>';
 
       var textarea = document.createElement("textarea");
@@ -125,7 +201,6 @@
         sub.dataset.blockEditable = "true";
 
         var subContent = sub.dataset.blockContent || "";
-        var subType = sub.dataset.blockType || "text";
 
         var ta = document.createElement("textarea");
         ta.className = "note-editor__textarea";
@@ -137,7 +212,6 @@
         sub.appendChild(ta);
       });
 
-      // Add block button for tabs/timeline/split-view
       addSectionAddButtons(section);
     });
   }
@@ -182,9 +256,53 @@
     if (body) body.before(toolbar);
   }
 
-  function hideEditorControls() {
-    var toolbar = qs(".note-editor__toolbar");
-    if (toolbar) toolbar.remove();
+  // -------------------------------------------------------------------------
+  // Preview a single block
+  // -------------------------------------------------------------------------
+
+  function previewBlock(block) {
+    var ta = qs(".note-editor__textarea", block);
+    if (!ta) return;
+    block.dataset.blockContent = ta.value;
+
+    var type = block.dataset.blockType;
+    var content = ta.value;
+    var previewDiv = qs(".note-editor__preview", block);
+
+    if (previewDiv) {
+      // Toggle off — remove preview
+      previewDiv.remove();
+      return;
+    }
+
+    previewDiv = document.createElement("div");
+    previewDiv.className = "note-editor__preview markdown-body";
+
+    if (type === "code") {
+      var lang = block.dataset.blockLang || "";
+      previewDiv.innerHTML = "<pre><code" +
+        (lang ? ' class="language-' + lang + '"' : "") + ">" +
+        escapeHtml(content) + "</code></pre>";
+    } else {
+      // Fetch rendered markdown from server
+      fetch("/api/v1/notes/preview-block", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: content }),
+      }).then(function (res) {
+        return res.text();
+      }).then(function (html) {
+        previewDiv.innerHTML = html;
+      });
+    }
+
+    block.appendChild(previewDiv);
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
   }
 
   // -------------------------------------------------------------------------
@@ -223,7 +341,6 @@
     var customSections = [];
     var globalOrder = 0;
 
-    // All top-level blocks in order
     var body = qs(".note-detail__body");
     if (!body) {
       return { paragraphs: paragraphs, customSections: customSections };
@@ -231,21 +348,20 @@
 
     body.querySelectorAll(
       ":scope > [data-block-id], :scope > [data-section-id]",
-    )
-      .forEach(function (el) {
-        if (el.dataset.blockId) {
-          paragraphs.push({
-            id: el.dataset.blockId,
-            type: el.dataset.blockType || "text",
-            content: el.dataset.blockContent || "",
-            language: el.dataset.blockLang || undefined,
-            order: paragraphs.length,
-            globalOrder: globalOrder++,
-          });
-        } else if (el.dataset.sectionId) {
-          customSections.push(collectSection(el, globalOrder++));
-        }
-      });
+    ).forEach(function (el) {
+      if (el.dataset.blockId) {
+        paragraphs.push({
+          id: el.dataset.blockId,
+          type: el.dataset.blockType || "text",
+          content: el.dataset.blockContent || "",
+          language: el.dataset.blockLang || undefined,
+          order: paragraphs.length,
+          globalOrder: globalOrder++,
+        });
+      } else if (el.dataset.sectionId) {
+        customSections.push(collectSection(el, globalOrder++));
+      }
+    });
 
     return { paragraphs: paragraphs, customSections: customSections };
   }
@@ -258,6 +374,8 @@
     if (type === "tabs") {
       config.tabs = [];
       qsa("[data-tab-id]", el).forEach(function (tabEl) {
+        // Skip tab buttons in the tab bar (view mode remnants)
+        if (tabEl.getAttribute("role") === "tab") return;
         config.tabs.push({
           id: tabEl.dataset.tabId,
           title: tabEl.dataset.tabTitle || "Tab",
@@ -315,6 +433,7 @@
     var id = getNoteId();
     if (!id) return;
 
+    flushFromDOM();
     var data = collectBlocks();
 
     fetch("/api/v1/notes/" + id, {
@@ -326,6 +445,7 @@
       }),
     }).then(function (res) {
       if (res.ok) {
+        dirty = false; // prevent beforeunload warning
         window.location.reload();
       }
     });
@@ -338,11 +458,13 @@
   function addTextBlock() {
     var block = createBlockElement(genId("para"), "text", "", "");
     appendToBody(block);
+    markDirty();
   }
 
   function addCodeBlock() {
     var block = createBlockElement(genId("code"), "code", "", "javascript");
     appendToBody(block);
+    markDirty();
   }
 
   function createBlockElement(id, type, content, lang) {
@@ -361,6 +483,7 @@
       '<button type="button" class="btn btn--tertiary btn--sm" data-action="move-down">Down</button>' +
       '<button type="button" class="btn btn--tertiary btn--sm" data-action="toggle-type">' +
       (type === "code" ? "Text" : "Code") + "</button>" +
+      '<button type="button" class="btn btn--tertiary btn--sm" data-action="preview-block">Preview</button>' +
       '<button type="button" class="btn btn--danger btn--sm" data-action="delete-block">Del</button>';
     div.appendChild(controls);
 
@@ -402,6 +525,7 @@
     qs("[data-tabs-container]", section).appendChild(tab);
     addSectionAddButtons(section);
     appendToBody(section);
+    markDirty();
   }
 
   function addTimelineSection() {
@@ -410,15 +534,17 @@
       "timeline",
       "New Timeline",
     );
+    timelineCounter = 1;
     var item = createTimelineItemElement(
       genId("timeline"),
-      "Item 1",
+      "Timeline 1",
       "pending",
       "",
     );
     qs("[data-timeline-container]", section).appendChild(item);
     addSectionAddButtons(section);
     appendToBody(section);
+    markDirty();
   }
 
   function addSplitSection() {
@@ -432,6 +558,7 @@
     container.appendChild(createColumnElement(1));
     addSectionAddButtons(section);
     appendToBody(section);
+    markDirty();
   }
 
   function createSectionShell(id, type, title) {
@@ -521,7 +648,7 @@
     header.className = "note-editor__timeline-header";
     header.innerHTML =
       '<input type="text" class="note-editor__timeline-title-input" value="' +
-      title + '" placeholder="Title">' +
+      escapeHtml(title) + '" placeholder="Title">' +
       '<select class="note-editor__status-select">' +
       '<option value="pending"' + (status === "pending" ? " selected" : "") +
       ">Pending</option>" +
@@ -534,7 +661,6 @@
       (date || "") + '">' +
       '<button type="button" class="btn btn--danger btn--sm" data-action="delete-timeline-item">Del</button>';
 
-    // Sync inputs to data attrs
     qs("input[type=text]", header).addEventListener("input", function () {
       div.dataset.timelineTitle = this.value;
     });
@@ -604,6 +730,7 @@
     var prev = el.previousElementSibling;
     if (prev && !prev.classList.contains("note-editor__toolbar")) {
       el.parentNode.insertBefore(el, prev);
+      markDirty();
     }
   }
 
@@ -611,6 +738,7 @@
     var next = el.nextElementSibling;
     if (next) {
       el.parentNode.insertBefore(next, el);
+      markDirty();
     }
   }
 
@@ -621,7 +749,6 @@
   document.addEventListener("click", function (e) {
     var btn = e.target.closest("[data-action]");
     if (!btn) {
-      // Edit toggle
       if (e.target.closest("[data-note-edit-toggle]")) {
         toggleEdit();
       }
@@ -641,7 +768,10 @@
         if (block) moveDown(block);
         break;
       case "delete-block":
-        if (block) block.remove();
+        if (block) {
+          block.remove();
+          markDirty();
+        }
         break;
       case "toggle-type": {
         if (!block) break;
@@ -650,8 +780,21 @@
         var current = block.dataset.blockType;
         block.dataset.blockType = current === "code" ? "text" : "code";
         btn.textContent = current === "code" ? "Code" : "Text";
+        markDirty();
         break;
       }
+      case "preview-block":
+        if (block) previewBlock(block);
+        break;
+
+      // Save bar actions
+      case "save-content":
+        save();
+        break;
+      case "cancel-edit":
+        editing = true; // force toggleEdit to handle cancel path
+        toggleEdit();
+        break;
 
       // Toolbar actions
       case "add-text":
@@ -684,7 +827,10 @@
             message: "Delete this section and all its content?",
             confirmLabel: "Delete",
           }).then(function (ok) {
-            if (ok) section.remove();
+            if (ok) {
+              section.remove();
+              markDirty();
+            }
           });
         }
         break;
@@ -697,12 +843,16 @@
           tabsContainer.appendChild(
             createTabElement(genId("tab"), "Tab " + (count + 1)),
           );
+          markDirty();
         }
         break;
       }
       case "delete-tab": {
         var tabEl = btn.closest("[data-tab-id]");
-        if (tabEl) tabEl.remove();
+        if (tabEl) {
+          tabEl.remove();
+          markDirty();
+        }
         break;
       }
 
@@ -710,15 +860,26 @@
       case "add-timeline-item": {
         var tlContainer = qs("[data-timeline-container]", section);
         if (tlContainer) {
+          var tlCount = qsa("[data-timeline-item-id]", tlContainer).length;
+          timelineCounter = tlCount + 1;
           tlContainer.appendChild(
-            createTimelineItemElement(genId("timeline"), "", "pending", ""),
+            createTimelineItemElement(
+              genId("timeline"),
+              "Timeline " + timelineCounter,
+              "pending",
+              "",
+            ),
           );
+          markDirty();
         }
         break;
       }
       case "delete-timeline-item": {
         var itemEl = btn.closest("[data-timeline-item-id]");
-        if (itemEl) itemEl.remove();
+        if (itemEl) {
+          itemEl.remove();
+          markDirty();
+        }
         break;
       }
 
@@ -728,6 +889,7 @@
         if (splitContainer) {
           var colCount = qsa("[data-column-index]", splitContainer).length;
           splitContainer.appendChild(createColumnElement(colCount));
+          markDirty();
         }
         break;
       }
@@ -738,6 +900,7 @@
         var newBlock = createSubBlockElement(genId("block"), "text", "");
         parent.insertBefore(newBlock, btn);
         qs(".note-editor__textarea", newBlock).focus();
+        markDirty();
         break;
       }
     }
