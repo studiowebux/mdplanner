@@ -257,6 +257,7 @@
   /* Note views */
   --note-tab-indicator-w: 2px;
   --note-timeline-dot-size: 0.75rem;
+  --note-split-col-min-w: 15rem;
 
   /* Settings */
   --settings-input-narrow-max: var(--toolbar-search-min-width);

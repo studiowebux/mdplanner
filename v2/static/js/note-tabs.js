@@ -1,43 +1,33 @@
-// Note tabs — switches tab panels on click. Vanilla JS, no framework.
+// Note tabs — event-delegated click handler. No init needed, works on
+// any dynamically loaded content (sidenav, htmx swaps, etc.).
 
 (function () {
-  function initNoteTabs() {
-    document.querySelectorAll("[data-note-tabs]").forEach(function (container) {
-      // Skip already-initialized containers
-      if (container.dataset.tabsInit) return;
-      container.dataset.tabsInit = "true";
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest("[data-tab-id]");
+    if (!btn || btn.getAttribute("role") !== "tab") return;
 
-      var buttons = container.querySelectorAll("[data-tab-id]");
-      var panels = container.querySelectorAll("[data-tab-panel]");
+    var container = btn.closest("[data-note-tabs]");
+    if (!container) return;
 
-      buttons.forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          var targetId = btn.dataset.tabId;
+    var targetId = btn.dataset.tabId;
 
-          buttons.forEach(function (b) {
-            b.classList.toggle(
-              "note-detail__tab-btn--active",
-              b.dataset.tabId === targetId,
-            );
-            b.setAttribute(
-              "aria-selected",
-              b.dataset.tabId === targetId ? "true" : "false",
-            );
-          });
+    // Toggle active button
+    container.querySelectorAll("[data-tab-id][role='tab']").forEach(
+      function (b) {
+        b.classList.toggle(
+          "note-detail__tab-btn--active",
+          b.dataset.tabId === targetId,
+        );
+        b.setAttribute(
+          "aria-selected",
+          b.dataset.tabId === targetId ? "true" : "false",
+        );
+      },
+    );
 
-          panels.forEach(function (p) {
-            p.classList.toggle("is-hidden", p.dataset.tabPanel !== targetId);
-          });
-        });
-      });
+    // Toggle panels
+    container.querySelectorAll("[data-tab-panel]").forEach(function (p) {
+      p.classList.toggle("is-hidden", p.dataset.tabPanel !== targetId);
     });
-  }
-
-  // Run when DOM ready or immediately if already loaded
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initNoteTabs);
-  } else {
-    initNoteTabs();
-  }
-  document.addEventListener("htmx:afterSettle", initNoteTabs);
+  });
 })();

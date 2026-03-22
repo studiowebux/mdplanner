@@ -37,7 +37,7 @@ export const NOTE_TABLE_COLUMNS: ColumnDef[] = [
     label: "Title",
     sortable: true,
     render: (v, row) => (
-      <a href={`/notes/${row.id}`}>
+      <a class="note-list__link" href={`/notes/${row.id}`}>
         <Highlight text={String(v)} q={row._q as string} />
       </a>
     ),
@@ -46,7 +46,18 @@ export const NOTE_TABLE_COLUMNS: ColumnDef[] = [
     key: "project",
     label: "Project",
     sortable: true,
-    render: (v, row) => <Highlight text={String(v)} q={row._q as string} />,
+    render: (v, row) => {
+      const name = String(v);
+      if (!name) return "";
+      return (
+        <a
+          class="note-list__link"
+          href={`/portfolio?q=${encodeURIComponent(name)}`}
+        >
+          <Highlight text={name} q={row._q as string} />
+        </a>
+      );
+    },
   },
   {
     key: "updatedAt",

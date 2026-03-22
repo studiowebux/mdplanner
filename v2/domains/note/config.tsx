@@ -28,6 +28,7 @@ export const noteConfig: DomainConfig<Note, CreateNote, UpdateNote> = {
   path: "/notes",
   ssePrefix: "note",
   styles: ["/css/views/note.css"],
+  scripts: ["/js/note-tabs.js"],
   defaultView: "table",
   emptyMessage: "No notes yet. Create one to get started.",
 

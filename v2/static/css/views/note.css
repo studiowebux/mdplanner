@@ -2,6 +2,20 @@
    All values use CSS vars from variables.css + index.css tokens. */
 
 /* =========================================================================
+   List view — table links
+   ========================================================================= */
+
+.note-list__link {
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-semibold);
+}
+
+.note-list__link:hover {
+  color: var(--color-accent);
+}
+
+/* =========================================================================
    Card view
    ========================================================================= */
 
@@ -118,16 +132,23 @@
   overflow-x: auto;
 }
 
-.note-preview .note-detail__body {
-  overflow-x: auto;
+.note-preview {
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
-.note-preview .note-detail__code {
-  overflow-x: auto;
+.note-preview .note-detail__body {
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .note-preview .note-detail__split-view {
-  grid-template-columns: 1fr;
+  grid-template-columns:
+    repeat(auto-fit, minmax(var(--note-split-col-min-w), 1fr));
+}
+
+.note-preview .note-detail__tab-bar {
+  flex-wrap: wrap;
 }
 
 /* =========================================================================
@@ -173,6 +194,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
+  min-width: 0;
 }
 
 /* Paragraphs */
@@ -190,6 +212,7 @@
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
   overflow-x: auto;
+  max-width: 100%;
   color: var(--color-text-primary);
 }
 
@@ -203,6 +226,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  overflow-x: auto;
+  min-width: 0;
 }
 
 .note-detail__section-title {
@@ -352,7 +377,8 @@
 
 .note-detail__split-view {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns:
+    repeat(auto-fit, minmax(var(--note-split-col-min-w), 1fr));
   gap: var(--space-lg);
 }
 
@@ -360,6 +386,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  min-width: 0;
+  overflow-x: auto;
 }
 
 /* ---- Title input ---- */
