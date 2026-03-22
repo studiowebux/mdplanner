@@ -43,7 +43,7 @@ export const PortfolioDetailView: FC<Props> = ({ item, ...viewProps }) => {
           </p>
           <div class="portfolio-detail__progress">
             <div class="portfolio-progress">
-              <div class="portfolio-progress__bar" style={`width:${pct}%`} />
+              <progress class="portfolio-progress__bar" value={pct} max={100} />
               <span class="portfolio-progress__label">{pct}%</span>
             </div>
           </div>

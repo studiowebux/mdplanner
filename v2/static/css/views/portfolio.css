@@ -103,30 +103,45 @@
   gap: var(--space-xs);
 }
 
-/* Shared progress bar — used by card, table, and detail */
+/* Shared progress bar — uses native <progress>, styled via pseudo-elements */
 
 .portfolio-progress {
-  position: relative;
-  height: var(--progress-bar-height);
-  background: var(--color-bg-tertiary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.portfolio-progress__bar {
+  appearance: none;
+  flex: 1;
+  height: var(--space-sm);
+  border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
 
-.portfolio-progress__bar {
-  height: 100%;
+.portfolio-progress__bar::-webkit-progress-bar {
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+}
+
+.portfolio-progress__bar::-webkit-progress-value {
   background: var(--color-accent);
   border-radius: var(--radius-full);
   transition: width var(--transition-base);
 }
 
+.portfolio-progress__bar::-moz-progress-bar {
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+}
+
 .portfolio-progress__label {
-  position: absolute;
-  right: var(--space-xs);
-  top: 50%;
-  transform: translateY(-50%);
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
+  white-space: nowrap;
+  min-width: var(--space-xl);
+  text-align: right;
 }
 
 /* Tech stack pills */
