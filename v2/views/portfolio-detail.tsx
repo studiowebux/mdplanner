@@ -82,6 +82,7 @@ export const PortfolioDetailView: FC<Props> = ({ item, ...viewProps }) => {
       title={item.name}
       {...viewProps}
       styles={["/css/views/portfolio.css", "/css/views/github.css"]}
+      scripts={item.githubRepo ? ["/js/github-tabs.js"] : []}
     >
       <main class="portfolio-detail">
         <div class="portfolio-detail__back">

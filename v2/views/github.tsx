@@ -33,13 +33,18 @@ export const GitHubRepoCard: FC<{
     </div>
     <div class="github-card__stats">
       <span class="github-card__stat">
-        <span class="github-card__stat-value">{repo.stars}</span> stars
+        <span class="github-card__stat-value">{repo.stars}</span>
+        {" "}{repo.stars === 1 ? "star" : "stars"}
       </span>
       <span class="github-card__stat">
-        <span class="github-card__stat-value">{repo.openIssues}</span> issues
+        <span class="github-card__stat-value">
+          {Math.max(0, repo.openIssues - repo.openPRs)}
+        </span>
+        {" "}{repo.openIssues - repo.openPRs === 1 ? "issue" : "issues"}
       </span>
       <span class="github-card__stat">
-        <span class="github-card__stat-value">{repo.openPRs}</span> PRs
+        <span class="github-card__stat-value">{repo.openPRs}</span>
+        {" "}{repo.openPRs === 1 ? "PR" : "PRs"}
       </span>
     </div>
     <div class="github-card__footer">
