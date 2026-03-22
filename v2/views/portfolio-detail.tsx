@@ -5,6 +5,7 @@ import type { ViewProps } from "../types/app.ts";
 import { formatCurrency } from "../utils/format.ts";
 import { formatDate } from "../utils/time.ts";
 import { markdownToHtml } from "../utils/markdown.ts";
+import { GitHubSection } from "./github.tsx";
 
 import type { PortfolioStatusUpdate } from "../types/portfolio.types.ts";
 
@@ -80,7 +81,7 @@ export const PortfolioDetailView: FC<Props> = ({ item, ...viewProps }) => {
     <MainLayout
       title={item.name}
       {...viewProps}
-      styles={["/css/views/portfolio.css"]}
+      styles={["/css/views/portfolio.css", "/css/views/github.css"]}
     >
       <main class="portfolio-detail">
         <div class="portfolio-detail__back">
@@ -253,18 +254,7 @@ export const PortfolioDetailView: FC<Props> = ({ item, ...viewProps }) => {
           </div>
         </section>
 
-        {item.githubRepo && (
-          <section class="portfolio-detail__section">
-            <h2 class="portfolio-detail__section-heading">Repository</h2>
-            <a
-              href={`https://github.com/${item.githubRepo}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {item.githubRepo}
-            </a>
-          </section>
-        )}
+        {item.githubRepo && <GitHubSection itemId={item.id} />}
 
         {item.linkedGoals && item.linkedGoals.length > 0 && (
           <section class="portfolio-detail__section">

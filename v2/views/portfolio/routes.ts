@@ -2,17 +2,109 @@
 
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { portfolioConfig } from "../../domains/portfolio/config.tsx";
-import { getPortfolioService } from "../../singletons/services.ts";
+import {
+  getGitHubService,
+  getPortfolioService,
+} from "../../singletons/services.ts";
 import { publish } from "../../singletons/event-bus.ts";
 import {
   PortfolioDetailView,
   StatusUpdateEditRow,
   StatusUpdateRow,
 } from "../portfolio-detail.tsx";
+import {
+  GitHubError,
+  GitHubIssuesTable,
+  GitHubMilestonesList,
+  GitHubPRsTable,
+  GitHubRepoCard,
+} from "../github.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 
 export const portfolioRouter = createDomainRoutes(portfolioConfig);
+
+// -- GitHub fragment routes (htmx partials for portfolio detail) --
+
+portfolioRouter.get("/:id/github/card", async (c) => {
+  const id = c.req.param("id");
+  const item = await getPortfolioService().getById(id);
+  if (!item?.githubRepo) {
+    return c.html(
+      GitHubError({ message: "No GitHub repository configured" }) as unknown as string,
+    );
+  }
+  try {
+    const gh = getGitHubService();
+    const [repo, release] = await Promise.all([
+      gh.getRepo(item.githubRepo),
+      gh.getLatestRelease(item.githubRepo),
+    ]);
+    return c.html(
+      GitHubRepoCard({ repo, release }) as unknown as string,
+    );
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return c.html(GitHubError({ message: msg }) as unknown as string);
+  }
+});
+
+portfolioRouter.get("/:id/github/issues", async (c) => {
+  const id = c.req.param("id");
+  const item = await getPortfolioService().getById(id);
+  if (!item?.githubRepo) {
+    return c.html(
+      GitHubError({ message: "No GitHub repository configured" }) as unknown as string,
+    );
+  }
+  try {
+    const issues = await getGitHubService().listIssues(item.githubRepo);
+    return c.html(
+      GitHubIssuesTable({ issues, itemId: id }) as unknown as string,
+    );
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return c.html(GitHubError({ message: msg }) as unknown as string);
+  }
+});
+
+portfolioRouter.get("/:id/github/pulls", async (c) => {
+  const id = c.req.param("id");
+  const item = await getPortfolioService().getById(id);
+  if (!item?.githubRepo) {
+    return c.html(
+      GitHubError({ message: "No GitHub repository configured" }) as unknown as string,
+    );
+  }
+  try {
+    const prs = await getGitHubService().listPRs(item.githubRepo);
+    return c.html(
+      GitHubPRsTable({ prs, itemId: id }) as unknown as string,
+    );
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return c.html(GitHubError({ message: msg }) as unknown as string);
+  }
+});
+
+portfolioRouter.get("/:id/github/milestones", async (c) => {
+  const id = c.req.param("id");
+  const item = await getPortfolioService().getById(id);
+  if (!item?.githubRepo) {
+    return c.html(
+      GitHubError({ message: "No GitHub repository configured" }) as unknown as string,
+    );
+  }
+  try {
+    const milestones = await getGitHubService().listMilestones(item.githubRepo);
+    return c.html(
+      GitHubMilestonesList({ milestones }) as unknown as string,
+    );
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return c.html(GitHubError({ message: msg }) as unknown as string);
+  }
+});
 
 // Detail view
 portfolioRouter.get("/:id", async (c) => {
