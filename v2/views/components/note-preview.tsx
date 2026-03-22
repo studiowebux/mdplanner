@@ -1,15 +1,14 @@
-// Note preview — read-only rendered markdown for the sidenav.
+// Note preview — read-only rendered content for the sidenav.
+// Uses shared NoteBlocks for full enhanced rendering.
 
 import type { FC } from "hono/jsx";
 import type { Note } from "../../types/note.types.ts";
-import { markdownToHtml } from "../../utils/markdown.ts";
 import { timeAgo } from "../../utils/time.ts";
+import { NoteBlocks } from "./note-blocks.tsx";
 
 type Props = { note: Note };
 
 export const NotePreview: FC<Props> = ({ note }) => {
-  const contentHtml = markdownToHtml(note.content);
-
   return (
     <div class="note-preview">
       <header class="note-preview__header">
@@ -23,13 +22,7 @@ export const NotePreview: FC<Props> = ({ note }) => {
           </span>
         </div>
       </header>
-
-      {contentHtml && (
-        <div
-          class="note-preview__body markdown-body"
-          dangerouslySetInnerHTML={{ __html: contentHtml }}
-        />
-      )}
+      <NoteBlocks note={note} />
     </div>
   );
 };

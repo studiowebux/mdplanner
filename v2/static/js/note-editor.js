@@ -110,6 +110,7 @@
       showEditorControls();
       convertToEditable();
       trackDirtyInputs();
+      disableFieldSwaps();
     } else {
       // Cancel — reload to discard changes
       if (dirty) {
@@ -134,6 +135,22 @@
     var body = qs(".note-detail__body");
     if (!body) return;
     body.addEventListener("input", markDirty);
+  }
+
+  // -------------------------------------------------------------------------
+  // Disable htmx page swaps on title/project while editing
+  // -------------------------------------------------------------------------
+
+  function disableFieldSwaps() {
+    var fields = document.querySelectorAll(
+      "[hx-target='#note-detail-root']",
+    );
+    fields.forEach(function (el) {
+      el.setAttribute("hx-swap", "none");
+      el.removeAttribute("hx-target");
+      el.removeAttribute("hx-select");
+      if (window.htmx) window.htmx.process(el);
+    });
   }
 
   // -------------------------------------------------------------------------
@@ -202,24 +219,77 @@
       var title = qs(".note-detail__section-title", section);
       if (title) title.after(sectionControls);
 
-      // Make section sub-blocks editable
-      qsa("[data-sub-block-id]", section).forEach(function (sub) {
-        if (sub.dataset.blockEditable) return;
-        sub.dataset.blockEditable = "true";
-
-        var subContent = sub.dataset.blockContent || "";
-
-        var ta = document.createElement("textarea");
-        ta.className = "note-editor__textarea";
-        ta.value = subContent;
-        ta.rows = Math.max(2, subContent.split("\n").length + 1);
-        ta.addEventListener("input", autoResize);
-
-        sub.innerHTML = "";
-        sub.appendChild(ta);
-      });
+      // Merge all sub-blocks into one raw markdown textarea per container.
+      // Code blocks get their ``` fences restored. The parser splits them
+      // back into typed blocks on save.
+      mergeSubBlocksToMarkdown(section);
 
       addSectionAddButtons(section);
+    });
+  }
+
+  // Merge sub-blocks inside a container (tab panel, timeline item, column)
+  // into a single raw markdown textarea. Code blocks get ``` fences restored.
+  function mergeSubBlocksToMarkdown(section) {
+    var containers = [];
+    // Tabs: each tab panel
+    qsa("[data-tab-panel]", section).forEach(function (el) {
+      containers.push(el);
+    });
+    // Timeline: each timeline item content area
+    qsa("[data-timeline-item-id]", section).forEach(function (el) {
+      var content = qs(".note-detail__timeline-content", el);
+      if (content) containers.push(content);
+      else containers.push(el);
+    });
+    // Split: each column
+    qsa("[data-column-index]", section).forEach(function (el) {
+      containers.push(el);
+    });
+
+    containers.forEach(function (container) {
+      var subs = container.querySelectorAll("[data-sub-block-id]");
+      if (subs.length === 0) return;
+
+      // Build raw markdown from sub-blocks
+      var md = [];
+      subs.forEach(function (sub) {
+        var type = sub.dataset.blockType || "text";
+        var content = sub.dataset.blockContent || "";
+        var lang = sub.dataset.blockLang || "";
+        if (type === "code") {
+          md.push("```" + lang);
+          md.push(content);
+          md.push("```");
+        } else {
+          md.push(content);
+        }
+        md.push("");
+      });
+
+      // Remove sub-blocks from DOM
+      subs.forEach(function (sub) {
+        sub.remove();
+      });
+
+      // Create single textarea with raw markdown
+      var wrapper = document.createElement("div");
+      wrapper.className = "note-editor__raw-block";
+      wrapper.dataset.rawMarkdown = "true";
+
+      var ta = document.createElement("textarea");
+      ta.className = "note-editor__textarea";
+      ta.value = md.join("\n").trim();
+      ta.rows = Math.max(3, ta.value.split("\n").length + 1);
+      ta.addEventListener("input", autoResize);
+      wrapper.appendChild(ta);
+
+      // Insert before any add-block buttons
+      var addBtn = qs("[data-action='add-sub-block']", container);
+      if (addBtn) {
+        addBtn.remove(); // raw editing replaces add-block buttons
+      }
+      container.appendChild(wrapper);
     });
   }
 
@@ -333,10 +403,8 @@
       if (langInput) block.dataset.blockLang = langInput.value;
     });
 
-    qsa("[data-sub-block-id][data-block-editable]").forEach(function (sub) {
-      var ta = qs(".note-editor__textarea", sub);
-      if (ta) sub.dataset.blockContent = ta.value;
-    });
+    // Raw markdown blocks don't need flushing — textarea value is read
+    // directly by collectContainerContent at save time.
   }
 
   // -------------------------------------------------------------------------
@@ -384,7 +452,17 @@
         config.tabs.push({
           id: tabEl.dataset.tabPanel,
           title: tabEl.dataset.tabPanelTitle || "Tab",
-          content: collectSubBlocks(tabEl),
+          content: collectContainerContent(tabEl),
+        });
+      });
+      // Also collect from editor-created tab items
+      qsa("[data-tab-id]", el).forEach(function (tabEl) {
+        if (tabEl.getAttribute("role") === "tab") return; // skip tab bar buttons
+        if (tabEl.dataset.tabPanel) return; // skip panels already collected
+        config.tabs.push({
+          id: tabEl.dataset.tabId,
+          title: tabEl.dataset.tabTitle || "Tab",
+          content: collectContainerContent(tabEl),
         });
       });
     } else if (type === "timeline") {
@@ -395,13 +473,13 @@
           title: itemEl.dataset.timelineTitle || "",
           status: itemEl.dataset.timelineStatus || "pending",
           date: itemEl.dataset.timelineDate || undefined,
-          content: collectSubBlocks(itemEl),
+          content: collectContainerContent(itemEl),
         });
       });
     } else if (type === "split-view") {
       var columns = [];
       qsa("[data-column-index]", el).forEach(function (colEl) {
-        columns.push(collectSubBlocks(colEl));
+        columns.push(collectContainerContent(colEl));
       });
       config.splitView = { columns: columns };
     }
@@ -416,7 +494,13 @@
     };
   }
 
-  function collectSubBlocks(parent) {
+  // Collect content from a container — checks for raw markdown textarea first,
+  // falls back to individual sub-blocks.
+  function collectContainerContent(parent) {
+    var rawEl = qs("[data-raw-markdown] .note-editor__textarea", parent);
+    if (rawEl) return parseMarkdownToBlocks(rawEl.value);
+
+    // Fallback: collect individual sub-blocks (for newly created sections)
     var blocks = [];
     qsa("[data-sub-block-id]", parent).forEach(function (sub) {
       blocks.push({
@@ -427,6 +511,60 @@
         order: blocks.length,
       });
     });
+    return blocks;
+  }
+
+  // Parse raw markdown string into NoteParagraph-like blocks.
+  // Splits on code fences and blank-line-separated paragraphs.
+  function parseMarkdownToBlocks(md) {
+    var blocks = [];
+    var lines = md.split("\n");
+    var current = [];
+    var inCode = false;
+    var codeLang = "";
+    var order = 0;
+
+    function flush() {
+      var text = current.join("\n").trim();
+      if (text) {
+        blocks.push({
+          id: genId("block"),
+          type: "text",
+          content: text,
+          order: order++,
+        });
+      }
+      current = [];
+    }
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      if (line.startsWith("```")) {
+        if (!inCode) {
+          flush();
+          inCode = true;
+          codeLang = line.slice(3).trim();
+        } else {
+          var codeContent = current.join("\n");
+          if (codeContent.trim()) {
+            blocks.push({
+              id: genId("code"),
+              type: "code",
+              content: codeContent,
+              language: codeLang || undefined,
+              order: order++,
+            });
+          }
+          current = [];
+          inCode = false;
+          codeLang = "";
+        }
+        continue;
+      }
+      current.push(line);
+    }
+
+    flush();
     return blocks;
   }
 
@@ -628,15 +766,7 @@
     header.appendChild(delBtn);
     div.appendChild(header);
 
-    var block = createSubBlockElement(genId("block"), "text", "");
-    div.appendChild(block);
-
-    var addBtn = document.createElement("button");
-    addBtn.type = "button";
-    addBtn.className = "btn btn--tertiary btn--sm";
-    addBtn.textContent = "+ Block";
-    addBtn.dataset.action = "add-sub-block";
-    div.appendChild(addBtn);
+    div.appendChild(createRawMarkdownBlock(""));
 
     return div;
   }
@@ -677,16 +807,7 @@
     });
 
     div.appendChild(header);
-
-    var block = createSubBlockElement(genId("block"), "text", "");
-    div.appendChild(block);
-
-    var addBtn = document.createElement("button");
-    addBtn.type = "button";
-    addBtn.className = "btn btn--tertiary btn--sm";
-    addBtn.textContent = "+ Block";
-    addBtn.dataset.action = "add-sub-block";
-    div.appendChild(addBtn);
+    div.appendChild(createRawMarkdownBlock(""));
 
     return div;
   }
@@ -695,36 +816,24 @@
     var div = document.createElement("div");
     div.className = "note-detail__split-col";
     div.dataset.columnIndex = String(index);
-
-    var block = createSubBlockElement(genId("block"), "text", "");
-    div.appendChild(block);
-
-    var addBtn = document.createElement("button");
-    addBtn.type = "button";
-    addBtn.className = "btn btn--tertiary btn--sm";
-    addBtn.textContent = "+ Block";
-    addBtn.dataset.action = "add-sub-block";
-    div.appendChild(addBtn);
-
+    div.appendChild(createRawMarkdownBlock(""));
     return div;
   }
 
-  function createSubBlockElement(id, type, content) {
-    var div = document.createElement("div");
-    div.dataset.subBlockId = id;
-    div.dataset.blockType = type;
-    div.dataset.blockContent = content;
-    div.dataset.blockEditable = "true";
-    div.className = "note-editor__sub-block";
+  // Creates a raw markdown textarea wrapper for section content editing.
+  function createRawMarkdownBlock(content) {
+    var wrapper = document.createElement("div");
+    wrapper.className = "note-editor__raw-block";
+    wrapper.dataset.rawMarkdown = "true";
 
     var ta = document.createElement("textarea");
     ta.className = "note-editor__textarea";
     ta.value = content;
-    ta.rows = 2;
+    ta.rows = Math.max(3, content.split("\n").length + 1);
     ta.addEventListener("input", autoResize);
-    div.appendChild(ta);
+    wrapper.appendChild(ta);
 
-    return div;
+    return wrapper;
   }
 
   // -------------------------------------------------------------------------
@@ -842,12 +951,13 @@
 
       // Tab actions
       case "add-tab": {
-        var tabsContainer = qs("[data-tabs-container]", section);
-        if (tabsContainer) {
-          var count = qsa("[data-tab-id]", tabsContainer).length;
-          tabsContainer.appendChild(
-            createTabElement(genId("tab"), "Tab " + (count + 1)),
-          );
+        if (section) {
+          var addBar = qs(".note-editor__add-bar", section);
+          var count = section.querySelectorAll("[data-tab-id]").length +
+            section.querySelectorAll("[data-tab-panel]").length;
+          var newTab = createTabElement(genId("tab"), "Tab " + (count + 1));
+          if (addBar) section.insertBefore(newTab, addBar);
+          else section.appendChild(newTab);
           markDirty();
         }
         break;
@@ -863,18 +973,18 @@
 
       // Timeline actions
       case "add-timeline-item": {
-        var tlContainer = qs("[data-timeline-container]", section);
-        if (tlContainer) {
-          var tlCount = qsa("[data-timeline-item-id]", tlContainer).length;
-          timelineCounter = tlCount + 1;
-          tlContainer.appendChild(
-            createTimelineItemElement(
-              genId("timeline"),
-              "Timeline " + timelineCounter,
-              "pending",
-              "",
-            ),
+        if (section) {
+          var addBarTl = qs(".note-editor__add-bar", section);
+          var tlCount =
+            section.querySelectorAll("[data-timeline-item-id]").length;
+          var newItem = createTimelineItemElement(
+            genId("timeline"),
+            "Timeline " + (tlCount + 1),
+            "pending",
+            "",
           );
+          if (addBarTl) section.insertBefore(newItem, addBarTl);
+          else section.appendChild(newItem);
           markDirty();
         }
         break;
@@ -890,22 +1000,16 @@
 
       // Column actions
       case "add-column": {
-        var splitContainer = qs("[data-split-container]", section);
-        if (splitContainer) {
-          var colCount = qsa("[data-column-index]", splitContainer).length;
-          splitContainer.appendChild(createColumnElement(colCount));
-          markDirty();
+        if (section) {
+          var splitCont = qs("[data-split-container]", section) ||
+            qs(".note-detail__split-view", section);
+          if (splitCont) {
+            var colCount =
+              splitCont.querySelectorAll("[data-column-index]").length;
+            splitCont.appendChild(createColumnElement(colCount));
+            markDirty();
+          }
         }
-        break;
-      }
-
-      // Sub-block actions
-      case "add-sub-block": {
-        var parent = btn.parentElement;
-        var newBlock = createSubBlockElement(genId("block"), "text", "");
-        parent.insertBefore(newBlock, btn);
-        qs(".note-editor__textarea", newBlock).focus();
-        markDirty();
         break;
       }
     }

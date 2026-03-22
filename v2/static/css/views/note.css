@@ -115,6 +115,19 @@
   font-size: var(--font-size-base);
   line-height: var(--body-line-height);
   color: var(--color-text-secondary);
+  overflow-x: auto;
+}
+
+.note-preview .note-detail__body {
+  overflow-x: auto;
+}
+
+.note-preview .note-detail__code {
+  overflow-x: auto;
+}
+
+.note-preview .note-detail__split-view {
+  grid-template-columns: 1fr;
 }
 
 /* =========================================================================
