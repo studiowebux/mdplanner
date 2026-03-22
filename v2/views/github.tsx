@@ -317,7 +317,7 @@ export const GitHubPipelinesTable: FC<{
           class="github-pipeline__search github-pipeline__search--branch"
           autocomplete="off"
         />
-        <span id="github-pipeline-spinner" class="loading-spinner htmx-indicator" />
+        <span id="github-pipeline-spinner" class="htmx-indicator"><div class="loading-spinner__ring" /></span>
       </form>
 
       <div id="github-pipeline-results">
@@ -491,7 +491,7 @@ export const GitHubSection: FC<{ itemId: string }> = ({ itemId }) => (
       hx-trigger="load"
       hx-swap="innerHTML"
     >
-      <span class="loading-spinner" />
+      <div class="loading-spinner" aria-label="Loading"><div class="loading-spinner__ring" /></div>
     </div>
 
     <div class="github-tabs">
@@ -547,7 +547,7 @@ export const GitHubSection: FC<{ itemId: string }> = ({ itemId }) => (
       hx-trigger="load"
       hx-swap="innerHTML"
     >
-      <span class="loading-spinner" />
+      <div class="loading-spinner" aria-label="Loading"><div class="loading-spinner__ring" /></div>
     </div>
   </section>
 );

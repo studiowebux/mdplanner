@@ -24,6 +24,7 @@ import {
 import type { PipelineFilters } from "../github.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
+import { GITHUB_PIPELINES_PER_PAGE } from "../../types/github.types.ts";
 
 export const portfolioRouter = createDomainRoutes(portfolioConfig);
 
@@ -119,7 +120,7 @@ portfolioRouter.get("/:id/github/pipelines", async (c) => {
   }
   try {
     const page = Math.max(1, Number(c.req.query("page")) || 1);
-    const perPage = 20;
+    const perPage = GITHUB_PIPELINES_PER_PAGE;
     const allRuns = await getGitHubService().listWorkflowRuns(
       item.githubRepo,
       page,
@@ -173,7 +174,7 @@ portfolioRouter.get("/:id/github/pipelines/results", async (c) => {
   }
   try {
     const page = Math.max(1, Number(c.req.query("page")) || 1);
-    const perPage = 20;
+    const perPage = GITHUB_PIPELINES_PER_PAGE;
     const allRuns = await getGitHubService().listWorkflowRuns(
       item.githubRepo,
       page,
@@ -244,7 +245,7 @@ portfolioRouter.post("/:id/github/pipelines/cancel/:runId", async (c) => {
       total: runs.length,
       itemId: id,
       page: 1,
-      hasNext: runs.length === 20,
+      hasNext: runs.length === GITHUB_PIPELINES_PER_PAGE,
       resultsUrl,
     }) as unknown as string,
   );
@@ -267,7 +268,7 @@ portfolioRouter.post("/:id/github/pipelines/rerun/:runId", async (c) => {
       total: runs.length,
       itemId: id,
       page: 1,
-      hasNext: runs.length === 20,
+      hasNext: runs.length === GITHUB_PIPELINES_PER_PAGE,
       resultsUrl,
     }) as unknown as string,
   );
@@ -295,7 +296,7 @@ portfolioRouter.post(
         total: runs.length,
         itemId: id,
         page: 1,
-        hasNext: runs.length === 20,
+        hasNext: runs.length === GITHUB_PIPELINES_PER_PAGE,
         resultsUrl,
       }) as unknown as string,
     );

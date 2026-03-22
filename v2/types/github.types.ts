@@ -46,6 +46,8 @@ export const GITHUB_WORKFLOW_EVENTS = [
 ] as const;
 export type GitHubWorkflowEvent = typeof GITHUB_WORKFLOW_EVENTS[number];
 
+export const GITHUB_PIPELINES_PER_PAGE = 10;
+
 export const GITHUB_PIPELINE_STATUSES = [
   "success",
   "failure",
