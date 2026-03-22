@@ -4,7 +4,6 @@ import type { DomainConfig } from "../../factories/domain.types.ts";
 import type {
   CreateMilestone,
   Milestone,
-  MilestoneStatus,
   UpdateMilestone,
 } from "../../types/milestone.types.ts";
 import { MILESTONE_STATUS_OPTIONS } from "../../types/milestone.types.ts";
@@ -15,6 +14,7 @@ import {
 import { MilestoneCard } from "../../views/components/milestone-card.tsx";
 import { MILESTONE_TABLE_COLUMNS, milestoneToRow } from "./constants.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
+import { parseFormBody } from "../../utils/form-parser.ts";
 
 const FORM_FIELDS: FieldDef[] = [
   { type: "text", name: "name", label: "Title", required: true },
@@ -78,21 +78,12 @@ export const milestoneConfig: DomainConfig<
 
   Card: ({ item, q }) => <MilestoneCard milestone={item} q={q} />,
 
-  parseCreate: (body) => ({
-    name: String(body.name || ""),
-    target: body.target ? String(body.target) : undefined,
-    status: (String(body.status) || "open") as MilestoneStatus,
-    description: body.description ? String(body.description) : undefined,
-    project: body.project ? String(body.project) : undefined,
-  }),
+  parseCreate: (body) => parseFormBody(FORM_FIELDS, body) as CreateMilestone,
 
-  parseUpdate: (body) => ({
-    name: body.name ? String(body.name) : undefined,
-    target: body.target ? String(body.target) : null,
-    status: body.status ? String(body.status) as MilestoneStatus : undefined,
-    description: body.description ? String(body.description) : null,
-    project: body.project ? String(body.project) : null,
-  }),
+  parseUpdate: (body) =>
+    parseFormBody(FORM_FIELDS, body, {
+      clearEmpty: true,
+    }) as Partial<UpdateMilestone>,
 
   getService: () => getMilestoneService(),
 

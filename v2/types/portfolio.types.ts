@@ -1,5 +1,28 @@
 import { z } from "@hono/zod-openapi";
 
+// ---------------------------------------------------------------------------
+// Status enum — shared across all portfolio schemas
+// ---------------------------------------------------------------------------
+
+export const PORTFOLIO_STATUSES = [
+  "active",
+  "completed",
+  "on-hold",
+  "planning",
+  "production",
+  "maintenance",
+  "paused",
+  "archived",
+  "cancelled",
+] as const;
+
+export type PortfolioStatus = (typeof PORTFOLIO_STATUSES)[number];
+
+export const PORTFOLIO_STATUS_OPTIONS = PORTFOLIO_STATUSES.map((s) => ({
+  value: s,
+  label: s.charAt(0).toUpperCase() + s.slice(1).replace("-", " "),
+}));
+
 export const PortfolioKpiSchema = z.object({
   name: z.string().openapi({
     description: "KPI metric name",
@@ -58,7 +81,7 @@ export const PortfolioItemSchema = z.object({
     description: "Portfolio category for grouping",
     example: "SaaS Products",
   }),
-  status: z.string().openapi({
+  status: z.enum(PORTFOLIO_STATUSES).openapi({
     description: "Current project status",
     example: "active",
   }),
@@ -163,3 +186,48 @@ export const PortfolioSummarySchema = z.object({
 }).openapi("PortfolioSummary");
 
 export type PortfolioSummary = z.infer<typeof PortfolioSummarySchema>;
+
+// ---------------------------------------------------------------------------
+// Create — derived from PortfolioItemSchema, name required, rest optional
+// ---------------------------------------------------------------------------
+
+export const CreatePortfolioItemSchema = PortfolioItemSchema
+  .omit({ id: true, statusUpdates: true })
+  .extend({
+    name: z.string().min(1).openapi({
+      description: "Project or product name",
+      example: "MDPlanner",
+    }),
+    category: z.string().optional().openapi({
+      description: "Portfolio category for grouping",
+      example: "SaaS Products",
+    }),
+    status: z.enum(PORTFOLIO_STATUSES).optional().openapi({
+      description: "Current project status",
+      example: "active",
+    }),
+  })
+  .openapi("CreatePortfolioItem");
+
+export type CreatePortfolioItem = z.infer<typeof CreatePortfolioItemSchema>;
+
+// ---------------------------------------------------------------------------
+// Update — all Create fields optional
+// ---------------------------------------------------------------------------
+
+export const UpdatePortfolioItemSchema = CreatePortfolioItemSchema
+  .partial()
+  .openapi("UpdatePortfolioItem");
+
+export type UpdatePortfolioItem = z.infer<typeof UpdatePortfolioItemSchema>;
+
+// ---------------------------------------------------------------------------
+// Status update — input for POST /:id/status-updates
+// ---------------------------------------------------------------------------
+
+export const AddStatusUpdateSchema = z.object({
+  message: z.string().min(1).openapi({
+    description: "Status update message (markdown)",
+    example: "Completed sprint 4. On track for Q2 release.",
+  }),
+}).openapi("AddPortfolioStatusUpdate");

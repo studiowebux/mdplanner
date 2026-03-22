@@ -80,62 +80,38 @@ export const MilestoneSchema = MilestoneBaseSchema.extend({
 export type Milestone = z.infer<typeof MilestoneSchema>;
 
 // ---------------------------------------------------------------------------
-// Create — input for POST
+// Create — derived from MilestoneBaseSchema, name required with min(1)
 // ---------------------------------------------------------------------------
 
-export const CreateMilestoneSchema = z.object({
-  name: z.string().min(1).openapi({
-    description: "Milestone display name",
-    example: "v2.1.0",
-  }),
-  target: z.string().optional().openapi({
-    description: "Target completion date (YYYY-MM-DD)",
-    example: "2026-06-01",
-  }),
-  status: z.enum(MILESTONE_STATUSES).default("open").openapi({
-    description: "Milestone status",
-    example: "open",
-  }),
-  description: z.string().optional().openapi({
-    description:
-      "What this milestone delivers (markdown). Use headings and lists for structure.",
-    example:
-      "Search improvements and performance tuning.\n\n## Deliverables\n\n- FTS5 index rebuild on schema change\n- Sub-200ms search for 10k entities\n- Search result highlighting",
-  }),
-  project: z.string().optional().openapi({
-    description: "Project this milestone belongs to",
-    example: "MD Planner",
-  }),
-}).openapi("CreateMilestone");
+export const CreateMilestoneSchema = MilestoneBaseSchema
+  .omit({ id: true, completedAt: true, createdAt: true })
+  .extend({
+    name: z.string().min(1).openapi({
+      description: "Milestone display name",
+      example: "v2.1.0",
+    }),
+    status: z.enum(MILESTONE_STATUSES).default("open").openapi({
+      description: "Milestone status",
+      example: "open",
+    }),
+    description: z.string().optional().openapi({
+      description:
+        "What this milestone delivers (markdown). Use headings and lists for structure.",
+      example:
+        "Search improvements and performance tuning.\n\n## Deliverables\n\n- FTS5 index rebuild on schema change\n- Sub-200ms search for 10k entities\n- Search result highlighting",
+    }),
+  })
+  .openapi("CreateMilestone");
 
 export type CreateMilestone = z.infer<typeof CreateMilestoneSchema>;
 
 // ---------------------------------------------------------------------------
-// Update — input for PUT (all fields optional)
+// Update — all Create fields optional
 // ---------------------------------------------------------------------------
 
-export const UpdateMilestoneSchema = z.object({
-  name: z.string().min(1).optional().openapi({
-    description: "Milestone display name",
-    example: "v2.1.0",
-  }),
-  target: z.string().nullable().optional().openapi({
-    description: "Target completion date (YYYY-MM-DD). Set to null to clear.",
-    example: "2026-06-01",
-  }),
-  status: z.enum(MILESTONE_STATUSES).optional().openapi({
-    description:
-      "Milestone status. Setting to 'completed' auto-sets completedAt.",
-    example: "completed",
-  }),
-  description: z.string().nullable().optional().openapi({
-    description: "Milestone description (markdown). Set to null to clear.",
-  }),
-  project: z.string().nullable().optional().openapi({
-    description: "Project this milestone belongs to. Set to null to clear.",
-    example: "MD Planner",
-  }),
-}).openapi("UpdateMilestone");
+export const UpdateMilestoneSchema = CreateMilestoneSchema
+  .partial()
+  .openapi("UpdateMilestone");
 
 export type UpdateMilestone = z.infer<typeof UpdateMilestoneSchema>;
 

@@ -4,7 +4,10 @@
 import { ENTITIES, json, parseJson, val } from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { PortfolioRepository } from "../../repositories/portfolio.repository.ts";
-import type { PortfolioItem } from "../../types/portfolio.types.ts";
+import type {
+  PortfolioItem,
+  PortfolioStatus,
+} from "../../types/portfolio.types.ts";
 import { PORTFOLIO_SCHEMA, PORTFOLIO_TABLE } from "./constants.ts";
 
 /** Deserialize a SQLite row to a PortfolioItem. */
@@ -15,7 +18,7 @@ export function rowToPortfolioItem(
     id: row.id as string,
     name: row.name as string,
     category: row.category as string,
-    status: row.status as string,
+    status: row.status as PortfolioStatus,
   };
   if (row.description != null) item.description = row.description as string;
   if (row.client != null) item.client = row.client as string;

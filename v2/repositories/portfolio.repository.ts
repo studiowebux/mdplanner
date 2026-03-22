@@ -8,6 +8,7 @@ import { generateId } from "../utils/id.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
 import type {
   PortfolioItem,
+  PortfolioStatus,
   PortfolioStatusUpdate,
 } from "../types/portfolio.types.ts";
 import type { CacheDatabase } from "../database/sqlite/mod.ts";
@@ -223,7 +224,7 @@ export class PortfolioRepository {
       id,
       name,
       category: String(fm.category ?? "Uncategorized"),
-      status: String(fm.status ?? "active"),
+      status: String(fm.status ?? "active") as PortfolioStatus,
       description: desc || undefined,
       client: fm.client != null ? String(fm.client) : undefined,
       revenue: typeof fm.revenue === "number" ? fm.revenue : undefined,

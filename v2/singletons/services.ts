@@ -80,6 +80,7 @@ export function initServices(
     milestoneService.setCache(cacheSync);
     taskService.setCache(cacheSync);
     peopleService.setCache(cacheSync);
+    portfolioService.setCache(cacheSync);
     cacheEnabled = true;
   }
 }

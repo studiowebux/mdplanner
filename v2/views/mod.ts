@@ -113,6 +113,27 @@ registerAutocompleteSource("project-tags", {
   valueKey: "name",
 });
 
+registerAutocompleteSource("portfolio-categories", {
+  list: async () => {
+    const all = await getPortfolioService().list();
+    const cats = new Set<string>();
+    for (const p of all) cats.add(p.category);
+    return [...cats].sort().map((c) => ({ name: c }));
+  },
+  search: async (q) => {
+    const all = await getPortfolioService().list();
+    const cats = new Set<string>();
+    for (const p of all) cats.add(p.category);
+    const lower = q.toLowerCase();
+    return [...cats]
+      .filter((c) => c.toLowerCase().includes(lower))
+      .sort()
+      .map((c) => ({ name: c }));
+  },
+  displayKey: "name",
+  valueKey: "name",
+});
+
 registerAutocompleteSource("people-departments", {
   list: async () => {
     const depts = await getPeopleService().getDepartments();

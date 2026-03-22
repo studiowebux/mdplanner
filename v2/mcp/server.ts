@@ -8,6 +8,7 @@ import { APP_VERSION } from "../constants/mod.ts";
 import { registerMilestoneTools } from "./tools/milestones.ts";
 import { registerNoteTools } from "./tools/notes.ts";
 import { registerPeopleTools } from "./tools/people.ts";
+import { registerPortfolioTools } from "./tools/portfolio.ts";
 import { registerTaskTools } from "./tools/tasks.ts";
 
 export function createMcpServer(): McpServer {
@@ -19,6 +20,7 @@ export function createMcpServer(): McpServer {
   registerMilestoneTools(server);
   registerNoteTools(server);
   registerPeopleTools(server);
+  registerPortfolioTools(server);
   registerTaskTools(server);
 
   return server;
