@@ -51,6 +51,7 @@
     "schedule-form": "tab-schedule",
     "tags-form": "tab-tags",
     "links-form": "tab-links",
+    "sections-form": "tab-sections",
   };
 
   function updateTabIndicator(formId, dirty) {
@@ -98,9 +99,8 @@
   });
 
   // Track all settings forms
-  ["project-form", "schedule-form", "tags-form", "links-form"].forEach(
-    trackForm,
-  );
+  ["project-form", "schedule-form", "tags-form", "links-form", "sections-form"]
+    .forEach(trackForm);
 
   // -----------------------------------------------------------------------
   // Features: check all / uncheck all
@@ -209,6 +209,80 @@
         btn.closest(".settings-link-row").remove();
         checkDirty("links-form");
       }
+    });
+  }
+
+  // -----------------------------------------------------------------------
+  // Sections: add / remove / reorder rows
+  // -----------------------------------------------------------------------
+  var sectionsList = document.getElementById("sections-list");
+  var addSectionBtn = document.querySelector("[data-section-add]");
+  var sectionNewInput = document.getElementById("section-new-name");
+
+  function refreshSectionPositions() {
+    if (!sectionsList) return;
+    var rows = sectionsList.querySelectorAll(".settings-section-row");
+    for (var i = 0; i < rows.length; i++) {
+      var pos = rows[i].querySelector(".settings-section-row__position");
+      if (pos) pos.textContent = String(i + 1);
+      var upBtn = rows[i].querySelector("[data-section-up]");
+      var downBtn = rows[i].querySelector("[data-section-down]");
+      if (upBtn) upBtn.disabled = i === 0;
+      if (downBtn) downBtn.disabled = i === rows.length - 1;
+    }
+    checkDirty("sections-form");
+  }
+
+  if (sectionsList) {
+    sectionsList.addEventListener("click", function (e) {
+      var row = e.target.closest(".settings-section-row");
+      if (!row) return;
+
+      if (e.target.closest("[data-section-remove]")) {
+        row.remove();
+        refreshSectionPositions();
+        return;
+      }
+
+      if (e.target.closest("[data-section-up]")) {
+        var prev = row.previousElementSibling;
+        if (prev) {
+          sectionsList.insertBefore(row, prev);
+          refreshSectionPositions();
+        }
+        return;
+      }
+
+      if (e.target.closest("[data-section-down]")) {
+        var next = row.nextElementSibling;
+        if (next) {
+          sectionsList.insertBefore(next, row);
+          refreshSectionPositions();
+        }
+        return;
+      }
+    });
+  }
+
+  if (addSectionBtn && sectionNewInput && sectionsList) {
+    addSectionBtn.addEventListener("click", function () {
+      var name = sectionNewInput.value.trim();
+      if (!name) return;
+      var count = sectionsList.querySelectorAll(".settings-section-row").length;
+      var row = document.createElement("div");
+      row.className = "settings-section-row";
+      row.innerHTML =
+        '<span class="settings-section-row__position">' + (count + 1) + "</span>" +
+        '<input type="text" name="sections" value="' + name.replace(/"/g, "&quot;") +
+        '" class="settings-field__input" readonly />' +
+        '<div class="settings-section-row__actions">' +
+        '<button type="button" class="btn btn--secondary btn--sm" data-section-up>&#9650;</button>' +
+        '<button type="button" class="btn btn--secondary btn--sm" data-section-down disabled>&#9660;</button>' +
+        '<button type="button" class="btn btn--danger btn--sm" data-section-remove>Remove</button>' +
+        "</div>";
+      sectionsList.appendChild(row);
+      sectionNewInput.value = "";
+      refreshSectionPositions();
     });
   }
 })();

@@ -19,7 +19,7 @@
 
 .settings-tabs {
   display: grid;
-  grid-template-columns: repeat(6, auto) 1fr;
+  grid-template-columns: repeat(7, auto) 1fr;
   grid-template-rows: auto 1fr;
 }
 
@@ -67,7 +67,8 @@
 #tab-schedule:checked ~ .settings-tabs__panel--schedule,
 #tab-tags:checked ~ .settings-tabs__panel--tags,
 #tab-links:checked ~ .settings-tabs__panel--links,
-#tab-support:checked ~ .settings-tabs__panel--support {
+#tab-support:checked ~ .settings-tabs__panel--support,
+#tab-sections:checked ~ .settings-tabs__panel--sections {
   display: block;
 }
 
@@ -383,4 +384,40 @@
   margin-top: var(--space-xl);
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Sections — ordered list with reorder arrows
+   --------------------------------------------------------------------------- */
+
+.settings-section-list {
+  margin-bottom: var(--space-md);
+}
+
+.settings-section-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-sm);
+  align-items: center;
+  margin-bottom: var(--space-sm);
+}
+
+.settings-section-row__position {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+  min-width: var(--space-lg);
+  text-align: center;
+}
+
+.settings-section-row__actions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.settings-section-add {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
 }

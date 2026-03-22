@@ -6,7 +6,7 @@ import { getProjectService } from "../../singletons/services.ts";
 import { SidebarContent } from "../../components/shell/sidebar.tsx";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 import { viewProps } from "../../middleware/view-props.ts";
-import { WEEKDAYS } from "../../constants/mod.ts";
+import { getSectionOrder, setSectionOrder, WEEKDAYS } from "../../constants/mod.ts";
 import type { AppVariables } from "../../types/app.ts";
 import type { ProjectLink } from "../../domains/project/types.ts";
 
@@ -120,5 +120,20 @@ settingsViewRouter.post("/links", async (c) => {
   return new Response(null, {
     status: 204,
     headers: { "HX-Trigger": hxTrigger("success", "Links saved") },
+  });
+});
+
+// -- Sections tab: ordered section names --
+settingsViewRouter.post("/sections", async (c) => {
+  const body = await c.req.parseBody({ all: true });
+  const raw = body.sections;
+  const sections = (Array.isArray(raw) ? raw : raw ? [raw] : [])
+    .map((s) => String(s).trim())
+    .filter(Boolean);
+  await getProjectService().updateSectionOrder(sections);
+  setSectionOrder(sections);
+  return new Response(null, {
+    status: 204,
+    headers: { "HX-Trigger": hxTrigger("success", "Sections saved") },
   });
 });

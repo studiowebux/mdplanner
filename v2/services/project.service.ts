@@ -80,4 +80,10 @@ export class ProjectService {
     current.links = links;
     await this.repo.write(current);
   }
+
+  async updateSectionOrder(sections: string[]): Promise<void> {
+    const current = await this.repo.read();
+    current.sectionOrder = sections;
+    await this.repo.write(current);
+  }
 }

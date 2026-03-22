@@ -4,7 +4,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { ViewProps } from "../types/app.ts";
-import { APP_VERSION, ENTITY_TYPE_LABELS, WEEKDAYS } from "../constants/mod.ts";
+import { APP_VERSION, ENTITY_TYPE_LABELS, getSectionOrder, WEEKDAYS } from "../constants/mod.ts";
 import type { ProjectConfig } from "../domains/project/types.ts";
 
 type SettingsProps = ViewProps & {
@@ -89,6 +89,16 @@ export const SettingsView: FC<SettingsProps> = ({
             class="settings-tabs__radio"
           />
           <label for="tab-support" class="settings-tabs__label">Support</label>
+
+          <input
+            type="radio"
+            name="settings-tab"
+            id="tab-sections"
+            class="settings-tabs__radio"
+          />
+          <label for="tab-sections" class="settings-tabs__label">
+            Sections
+          </label>
 
           {/* ---- Views tab ---- */}
           <div class="settings-tabs__panel settings-tabs__panel--views">
@@ -372,6 +382,76 @@ export const SettingsView: FC<SettingsProps> = ({
                 Licensed under MIT
               </p>
             </section>
+          </div>
+
+          {/* ---- Sections tab ---- */}
+          <div class="settings-tabs__panel settings-tabs__panel--sections">
+            <form
+              id="sections-form"
+              hx-post="/settings/sections"
+              hx-trigger="submit"
+              hx-swap="none"
+            >
+              <div id="sections-list" class="settings-section-list">
+                {getSectionOrder().map((s, i) => (
+                  <div key={i} class="settings-section-row">
+                    <span class="settings-section-row__position">{i + 1}</span>
+                    <input
+                      type="text"
+                      name="sections"
+                      value={s}
+                      class="settings-field__input"
+                      readonly
+                    />
+                    <div class="settings-section-row__actions">
+                      <button
+                        type="button"
+                        class="btn btn--secondary btn--sm"
+                        data-section-up
+                        disabled={i === 0}
+                      >
+                        &#9650;
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn--secondary btn--sm"
+                        data-section-down
+                        disabled={i === getSectionOrder().length - 1}
+                      >
+                        &#9660;
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn--danger btn--sm"
+                        data-section-remove
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div class="settings-section-add">
+                <input
+                  type="text"
+                  id="section-new-name"
+                  class="settings-field__input"
+                  placeholder="New section name..."
+                />
+                <button
+                  type="button"
+                  class="btn btn--secondary btn--sm"
+                  data-section-add
+                >
+                  Add
+                </button>
+              </div>
+
+              <div class="settings-page__form-actions">
+                <button type="submit" class="btn btn--primary">Save</button>
+              </div>
+            </form>
           </div>
 
           {/* ---- Links tab ---- */}
