@@ -85,20 +85,20 @@ export const SettingsView: FC<SettingsProps> = ({
           <input
             type="radio"
             name="settings-tab"
-            id="tab-support"
-            class="settings-tabs__radio"
-          />
-          <label for="tab-support" class="settings-tabs__label">Support</label>
-
-          <input
-            type="radio"
-            name="settings-tab"
             id="tab-sections"
             class="settings-tabs__radio"
           />
           <label for="tab-sections" class="settings-tabs__label">
             Sections
           </label>
+
+          <input
+            type="radio"
+            name="settings-tab"
+            id="tab-support"
+            class="settings-tabs__radio"
+          />
+          <label for="tab-support" class="settings-tabs__label">Support</label>
 
           {/* ---- Views tab ---- */}
           <div class="settings-tabs__panel settings-tabs__panel--views">
