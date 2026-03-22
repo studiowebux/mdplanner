@@ -33,6 +33,15 @@
   margin: 0;
 }
 
+.portfolio-card__name a {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.portfolio-card__name a:hover {
+  color: var(--color-accent);
+}
+
 .portfolio-card__badge {
   font-size: var(--font-size-xs);
   font-weight: var(--badge-font-weight);
