@@ -2,6 +2,7 @@
 
 import { z } from "@hono/zod-openapi";
 import { WEEKDAYS } from "../../constants/mod.ts";
+import { decryptSecret } from "../../utils/secrets.ts";
 
 export const ProjectLinkSchema = z.object({
   title: z.string().openapi({
@@ -74,12 +75,21 @@ export const ProjectConfigSchema = z.object({
     example: "en-US",
   }),
   currency: z.string().optional().openapi({
-    description: "ISO 4217 currency code for money formatting. Defaults to USD.",
+    description:
+      "ISO 4217 currency code for money formatting. Defaults to USD.",
     example: "USD",
   }),
   lastUpdated: z.string().optional().openapi({
     description: "ISO timestamp of last project.md write",
     example: "2026-03-17T19:00:00.000Z",
+  }),
+  githubRepo: z.string().optional().openapi({
+    description: "GitHub repository in owner/repo format",
+    example: "studiowebux/mdplanner",
+  }),
+  githubToken: z.string().optional().openapi({
+    description: "GitHub Personal Access Token (stored in project.md)",
+    example: "ghp_...",
   }),
 }).openapi("ProjectConfig");
 
@@ -146,3 +156,73 @@ export type UpdateProjectConfig = z.infer<typeof UpdateProjectConfigSchema>;
 export const FeaturesListSchema = z.array(z.string()).openapi(
   "FeaturesList",
 );
+
+// ---------------------------------------------------------------------------
+// FrontmatterProjectSchema — internal
+// Maps raw project.md frontmatter (snake_case) → ProjectConfig (camelCase).
+// Used only by ProjectRepository. Not registered in OpenAPI.
+// ---------------------------------------------------------------------------
+
+function parseFrontmatterNavCategories(
+  raw: unknown,
+): Record<string, string[]> | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const result: Record<string, string[]> = {};
+  for (const [key, val] of Object.entries(raw as Record<string, unknown>)) {
+    if (Array.isArray(val)) result[key] = val.map(String);
+  }
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
+export const FrontmatterProjectSchema = z.object({
+  start_date: z.string().optional(),
+  working_days_per_week: z.number().optional(),
+  working_days: z.array(z.unknown()).optional(),
+  tags: z.array(z.unknown()).optional(),
+  links: z.array(z.unknown()).optional(),
+  features: z.array(z.unknown()).optional(),
+  nav_categories: z.unknown().optional(),
+  port: z.number().optional(),
+  locale: z.string().optional(),
+  currency: z.string().optional(),
+  section_order: z.array(z.unknown()).optional(),
+  github_repo: z.string().optional(),
+  github_token: z.string().optional(),
+  last_updated: z.string().optional(),
+}).transform(async (fm): Promise<Omit<ProjectConfig, "name" | "description">> => {
+  const githubToken = fm.github_token
+    ? (await decryptSecret(fm.github_token) ?? undefined)
+    : undefined;
+
+  return {
+    startDate: fm.start_date,
+    workingDaysPerWeek: fm.working_days_per_week,
+    workingDays: Array.isArray(fm.working_days)
+      ? (fm.working_days as unknown[]).map(String).filter(
+        (d): d is typeof WEEKDAYS[number] =>
+          (WEEKDAYS as readonly string[]).includes(d),
+      )
+      : undefined,
+    tags: Array.isArray(fm.tags)
+      ? (fm.tags as unknown[]).map(String)
+      : undefined,
+    links: Array.isArray(fm.links)
+      ? (fm.links as Record<string, unknown>[]).filter(
+        (l) => typeof l.url === "string" && typeof l.title === "string",
+      ) as ProjectLink[]
+      : undefined,
+    features: Array.isArray(fm.features)
+      ? (fm.features as unknown[]).map(String)
+      : undefined,
+    navCategories: parseFrontmatterNavCategories(fm.nav_categories),
+    port: fm.port,
+    locale: fm.locale,
+    currency: fm.currency,
+    sectionOrder: Array.isArray(fm.section_order)
+      ? (fm.section_order as unknown[]).map(String)
+      : undefined,
+    githubRepo: fm.github_repo,
+    githubToken,
+    lastUpdated: fm.last_updated,
+  };
+});
