@@ -9,6 +9,7 @@ import { notesRouter as notesViewRouter } from "./notes/routes.ts";
 import { tasksRouter } from "./tasks/routes.ts";
 import { settingsViewRouter } from "./settings/routes.ts";
 import { portfolioRouter } from "./portfolio/routes.ts";
+import { githubSummaryRouter } from "./github-summary/routes.ts";
 import { searchRouter } from "./search/routes.ts";
 import { sidebarRouter } from "./sidebar/routes.ts";
 import {
@@ -184,6 +185,7 @@ views.route("/notes", notesViewRouter);
 views.route("/people", peopleRouter);
 views.route("/portfolio", portfolioRouter);
 views.route("/tasks", tasksRouter);
+views.route("/github", githubSummaryRouter);
 views.route("/settings", settingsViewRouter);
 views.route("/search", searchRouter);
 views.route("/autocomplete", autocompleteRouter);
