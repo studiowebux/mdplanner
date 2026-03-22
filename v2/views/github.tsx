@@ -541,6 +541,13 @@ export const GitHubSection: FC<{ itemId: string }> = ({ itemId }) => (
       >
         Pipelines
       </button>
+      <button
+        class="github-tabs__btn github-tabs__refresh"
+        type="button"
+        data-github-refresh
+      >
+        Refresh
+      </button>
     </div>
 
     <div

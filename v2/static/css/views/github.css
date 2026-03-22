@@ -100,6 +100,13 @@
   font-weight: var(--font-weight-semibold);
 }
 
+.github-tabs__refresh {
+  margin-left: auto;
+  border-bottom: none;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
 /* ---- Table ---- */
 
 .github-table-wrap {
