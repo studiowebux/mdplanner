@@ -3,8 +3,13 @@
  * Pattern: Provider pattern — interfaces used by GitHubProvider.
  */
 
+import { z } from "@hono/zod-openapi";
+
 export const GITHUB_ISSUE_STATES = ["open", "closed"] as const;
 export type GitHubIssueState = typeof GITHUB_ISSUE_STATES[number];
+
+export const GITHUB_FILTER_STATES = ["open", "closed", "all"] as const;
+export type GitHubFilterState = typeof GITHUB_FILTER_STATES[number];
 
 export const GITHUB_PR_STATES = ["open", "closed", "all"] as const;
 export type GitHubPRState = typeof GITHUB_PR_STATES[number];
@@ -42,6 +47,8 @@ export const GITHUB_WORKFLOW_STATES = [
 ] as const;
 export type GitHubWorkflowState = typeof GITHUB_WORKFLOW_STATES[number];
 
+// ---------------------------------------------------------------------------
+// Interfaces
 // ---------------------------------------------------------------------------
 
 export interface GitHubRepo {
@@ -133,3 +140,142 @@ export interface GitHubRelease {
   publishedAt: string | null;
   htmlUrl: string;
 }
+
+// ---------------------------------------------------------------------------
+// Zod schemas — used for OpenAPI route definitions
+// ---------------------------------------------------------------------------
+
+export const GitHubRepoSchema = z.object({
+  owner: z.string(),
+  repo: z.string(),
+  stars: z.number(),
+  openIssues: z.number(),
+  openPRs: z.number(),
+  lastCommitAt: z.string().nullable(),
+  license: z.string().nullable(),
+  htmlUrl: z.string(),
+}).openapi("GitHubRepo");
+
+export const GitHubIssueSchema = z.object({
+  number: z.number(),
+  title: z.string(),
+  state: z.enum(GITHUB_ISSUE_STATES),
+  labels: z.array(z.string()),
+  assignee: z.string().nullable(),
+  createdAt: z.string(),
+  htmlUrl: z.string(),
+}).openapi("GitHubIssue");
+
+export const GitHubCreatedIssueSchema = z.object({
+  number: z.number(),
+  htmlUrl: z.string(),
+}).openapi("GitHubCreatedIssue");
+
+export const GitHubUserSchema = z.object({
+  login: z.string(),
+}).openapi("GitHubUser");
+
+export const GitHubRepoSummarySchema = z.object({
+  fullName: z.string(),
+  description: z.string(),
+}).openapi("GitHubRepoSummary");
+
+export const GitHubMilestoneSchema = z.object({
+  number: z.number(),
+  title: z.string(),
+  openIssues: z.number(),
+  closedIssues: z.number(),
+  htmlUrl: z.string(),
+}).openapi("GitHubMilestone");
+
+export const GitHubPRSchema = z.object({
+  number: z.number(),
+  title: z.string(),
+  state: z.enum(GITHUB_ISSUE_STATES),
+  merged: z.boolean(),
+  assignee: z.string().nullable(),
+  headBranch: z.string(),
+  createdAt: z.string(),
+  reviewDecision: z.string().nullable(),
+  htmlUrl: z.string(),
+}).openapi("GitHubPR");
+
+export const GitHubMergeResultSchema = z.object({
+  sha: z.string(),
+  merged: z.boolean(),
+  message: z.string(),
+}).openapi("GitHubMergeResult");
+
+export const GitHubWorkflowRunSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  status: z.enum(GITHUB_WORKFLOW_RUN_STATUSES),
+  conclusion: z.enum(GITHUB_WORKFLOW_RUN_CONCLUSIONS).nullable(),
+  headBranch: z.string(),
+  event: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  htmlUrl: z.string(),
+}).openapi("GitHubWorkflowRun");
+
+export const GitHubWorkflowSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  path: z.string(),
+  state: z.enum(GITHUB_WORKFLOW_STATES),
+  htmlUrl: z.string(),
+}).openapi("GitHubWorkflow");
+
+export const GitHubReleaseSchema = z.object({
+  tagName: z.string(),
+  name: z.string().nullable(),
+  publishedAt: z.string().nullable(),
+  htmlUrl: z.string(),
+}).openapi("GitHubRelease");
+
+// ---------------------------------------------------------------------------
+// Request schemas
+// ---------------------------------------------------------------------------
+
+export const ListIssuesQuerySchema = z.object({
+  state: z.enum(GITHUB_FILTER_STATES).optional().openapi({
+    description: "Filter by state (default: open)",
+  }),
+  assignee: z.string().optional().openapi({
+    description: "Filter by assignee login",
+  }),
+}).openapi("ListIssuesQuery");
+
+export const ListPRsQuerySchema = z.object({
+  state: z.enum(GITHUB_PR_STATES).optional().openapi({
+    description: "Filter by state (default: open)",
+  }),
+}).openapi("ListPRsQuery");
+
+// NumberParam — for GitHub issue/PR number path params (:number).
+// For :id path params reuse IdParam from types/api.ts.
+export const NumberParam = z.object({
+  number: z.string().openapi({ param: { name: "number", in: "path" } }),
+});
+
+export const CreateIssueBodySchema = z.object({
+  title: z.string().min(1).openapi({ description: "Issue title" }),
+  body: z.string().openapi({ description: "Issue body (markdown)" }),
+}).openapi("CreateIssueBody");
+
+export const PatchIssueBodySchema = z.object({
+  state: z.enum(GITHUB_ISSUE_STATES).openapi({ description: "New state" }),
+}).openapi("PatchIssueBody");
+
+export const MergePRBodySchema = z.object({
+  mergeMethod: z.enum(GITHUB_MERGE_METHODS).optional().openapi({
+    description: "Merge method (default: squash)",
+  }),
+}).openapi("MergePRBody");
+
+export const WorkflowDispatchBodySchema = z.object({
+  ref: z.string().openapi({ description: "Branch or tag to run on" }),
+  inputs: z.record(z.string()).optional().openapi({
+    description: "Workflow input parameters",
+  }),
+}).openapi("WorkflowDispatchBody");
