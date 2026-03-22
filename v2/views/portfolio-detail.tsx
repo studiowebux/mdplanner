@@ -1,0 +1,235 @@
+import type { FC } from "hono/jsx";
+import { MainLayout } from "../components/layout/main.tsx";
+import type { PortfolioItem } from "../types/portfolio.types.ts";
+import type { ViewProps } from "../types/app.ts";
+import { formatCurrency } from "../utils/format.ts";
+import { markdownToHtml } from "../utils/markdown.ts";
+
+type Props = ViewProps & { item: PortfolioItem };
+
+export const PortfolioDetailView: FC<Props> = ({ item, ...viewProps }) => {
+  const descHtml = markdownToHtml(item.description);
+  const profit = (item.revenue ?? 0) - (item.expenses ?? 0);
+  const pct = item.progress ?? 0;
+
+  return (
+    <MainLayout
+      title={item.name}
+      {...viewProps}
+      styles={["/css/views/portfolio.css"]}
+    >
+      <main class="portfolio-detail">
+        <div class="portfolio-detail__back">
+          <a href="/portfolio" class="btn btn--secondary">
+            Back to portfolio
+          </a>
+        </div>
+
+        <header class="portfolio-detail__header">
+          <div class="portfolio-detail__title-row">
+            <h1 class="portfolio-detail__title">{item.name}</h1>
+            <span
+              class={`portfolio-card__badge portfolio-card__badge--${item.status}`}
+            >
+              {item.status}
+            </span>
+          </div>
+          <p class="portfolio-detail__meta">
+            {item.category}
+            {item.client && <>&middot; {item.client}</>}
+            {item.startDate && <>&middot; {item.startDate}</>}
+            {item.endDate && <>to {item.endDate}</>}
+            {item.license && <>&middot; {item.license}</>}
+          </p>
+          <div class="portfolio-detail__progress">
+            <div class="portfolio-progress">
+              <div class="portfolio-progress__bar" style={`width:${pct}%`} />
+              <span class="portfolio-progress__label">{pct}%</span>
+            </div>
+          </div>
+        </header>
+
+        {(item.revenue != null || item.expenses != null) && (
+          <div class="portfolio-detail__financials">
+            <div class="portfolio-detail__financial-card">
+              <div class="portfolio-detail__financial-label">Revenue</div>
+              <div class="portfolio-detail__financial-value">
+                {formatCurrency(item.revenue) || "$0"}
+              </div>
+            </div>
+            <div class="portfolio-detail__financial-card">
+              <div class="portfolio-detail__financial-label">Expenses</div>
+              <div class="portfolio-detail__financial-value">
+                {formatCurrency(item.expenses) || "$0"}
+              </div>
+            </div>
+            <div class="portfolio-detail__financial-card">
+              <div class="portfolio-detail__financial-label">Profit</div>
+              <div
+                class={`portfolio-detail__financial-value ${
+                  profit >= 0
+                    ? "portfolio-detail__financial-value--profit"
+                    : "portfolio-detail__financial-value--loss"
+                }`}
+              >
+                {formatCurrency(profit) || "$0"}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {descHtml && (
+          <section class="portfolio-detail__section">
+            <h2 class="portfolio-detail__section-heading">Description</h2>
+            <div
+              class="markdown-body"
+              dangerouslySetInnerHTML={{ __html: descHtml }}
+            />
+          </section>
+        )}
+
+        {item.techStack && item.techStack.length > 0 && (
+          <section class="portfolio-detail__section">
+            <h2 class="portfolio-detail__section-heading">Tech Stack</h2>
+            <div class="portfolio-card__tech-stack">
+              {item.techStack.map((t) => (
+                <span key={t} class="portfolio-pill">{t}</span>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {item.team && item.team.length > 0 && (
+          <section class="portfolio-detail__section">
+            <h2 class="portfolio-detail__section-heading">Team</h2>
+            <div class="portfolio-detail__team">
+              {item.team.map((m) => (
+                <span key={m} class="portfolio-detail__team-chip">{m}</span>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {item.kpis && item.kpis.length > 0 && (
+          <section class="portfolio-detail__kpis">
+            <h2 class="portfolio-detail__section-heading">KPIs</h2>
+            <table class="portfolio-detail__kpi-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Value</th>
+                  <th>Target</th>
+                  <th>Unit</th>
+                </tr>
+              </thead>
+              <tbody>
+                {item.kpis.map((kpi) => {
+                  const met = kpi.target != null &&
+                    Number(kpi.value) >= Number(kpi.target);
+                  return (
+                    <tr key={kpi.name}>
+                      <td>{kpi.name}</td>
+                      <td class={met ? "portfolio-detail__kpi-met" : ""}>
+                        {kpi.value}
+                      </td>
+                      <td>{kpi.target ?? ""}</td>
+                      <td>{kpi.unit ?? ""}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </section>
+        )}
+
+        {item.urls && item.urls.length > 0 && (
+          <section class="portfolio-detail__section">
+            <h2 class="portfolio-detail__section-heading">Links</h2>
+            <div class="portfolio-detail__urls">
+              {item.urls.map((u) => (
+                <a
+                  key={u.href}
+                  href={u.href}
+                  class="btn btn--secondary"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {u.label}
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {item.statusUpdates && item.statusUpdates.length > 0 && (
+          <section class="portfolio-detail__status-updates">
+            <h2 class="portfolio-detail__section-heading">Status Updates</h2>
+            {item.statusUpdates.map((u) => (
+              <div key={u.id} class="portfolio-detail__update">
+                <span class="portfolio-detail__update-date">{u.date}</span>
+                <span class="portfolio-detail__update-message">
+                  {u.message}
+                </span>
+                <span class="portfolio-detail__update-actions">
+                  <button
+                    class="btn btn--danger btn--sm"
+                    type="button"
+                    hx-delete={`/api/v1/portfolio/${item.id}/status-updates/${u.id}`}
+                    hx-swap="none"
+                    hx-confirm-dialog="Delete this status update?"
+                  >
+                    Delete
+                  </button>
+                </span>
+              </div>
+            ))}
+          </section>
+        )}
+
+        {item.githubRepo && (
+          <section class="portfolio-detail__section">
+            <h2 class="portfolio-detail__section-heading">Repository</h2>
+            <a
+              href={`https://github.com/${item.githubRepo}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {item.githubRepo}
+            </a>
+          </section>
+        )}
+
+        {item.linkedGoals && item.linkedGoals.length > 0 && (
+          <section class="portfolio-detail__section">
+            <h2 class="portfolio-detail__section-heading">Linked Goals</h2>
+            <ul>
+              {item.linkedGoals.map((g) => <li key={g}>{g}</li>)}
+            </ul>
+          </section>
+        )}
+
+        <div class="portfolio-card__actions">
+          <button
+            class="btn btn--secondary"
+            type="button"
+            hx-get={`/portfolio/${item.id}/edit`}
+            hx-target="#portfolio-form-container"
+            hx-swap="innerHTML"
+          >
+            Edit
+          </button>
+          <button
+            class="btn btn--danger"
+            type="button"
+            hx-delete={`/portfolio/${item.id}`}
+            hx-swap="none"
+            hx-confirm-dialog={`Delete "${item.name}"? This cannot be undone.`}
+            data-confirm-name={item.name}
+          >
+            Delete
+          </button>
+        </div>
+      </main>
+    </MainLayout>
+  );
+};

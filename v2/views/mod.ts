@@ -8,6 +8,7 @@ import { peopleRouter } from "./people/routes.tsx";
 import { notesRouter as notesViewRouter } from "./notes/routes.ts";
 import { tasksRouter } from "./tasks/routes.ts";
 import { settingsViewRouter } from "./settings/routes.ts";
+import { portfolioRouter } from "./portfolio/routes.ts";
 import { searchRouter } from "./search/routes.ts";
 import { sidebarRouter } from "./sidebar/routes.ts";
 import {
@@ -156,6 +157,7 @@ views.route("/", homeViewRouter);
 views.route("/milestones", milestonesRouter);
 views.route("/notes", notesViewRouter);
 views.route("/people", peopleRouter);
+views.route("/portfolio", portfolioRouter);
 views.route("/tasks", tasksRouter);
 views.route("/settings", settingsViewRouter);
 views.route("/search", searchRouter);

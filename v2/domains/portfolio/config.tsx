@@ -8,6 +8,7 @@ import type {
 } from "../../types/portfolio.types.ts";
 import { PORTFOLIO_STATUS_OPTIONS } from "../../types/portfolio.types.ts";
 import { getPortfolioService } from "../../singletons/services.ts";
+import { PortfolioCard } from "../../views/components/portfolio-card.tsx";
 import { PORTFOLIO_TABLE_COLUMNS, portfolioToRow } from "./constants.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
@@ -99,6 +100,8 @@ export const portfolioConfig: DomainConfig<
   ],
 
   toRow: portfolioToRow,
+
+  Card: ({ item, q }) => <PortfolioCard item={item} q={q} />,
 
   parseCreate: (body) => {
     const parsed = parseFormBody(FORM_FIELDS, body);

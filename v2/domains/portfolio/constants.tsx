@@ -2,6 +2,7 @@ import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { PortfolioItem } from "../../types/portfolio.types.ts";
 import { statusBadgeRenderer } from "../../components/ui/status-badge.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
+import { formatCurrency } from "../../utils/format.ts";
 import { formatDate } from "../../utils/time.ts";
 
 const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
@@ -41,15 +42,7 @@ const progressRenderer = (v: unknown) => {
   );
 };
 
-const currencyRenderer = (v: unknown) => {
-  const n = Number(v);
-  if (!n) return "";
-  return n.toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  });
-};
+const currencyRenderer = (v: unknown) => formatCurrency(Number(v) || undefined);
 
 export const PORTFOLIO_TABLE_COLUMNS: ColumnDef[] = [
   {
