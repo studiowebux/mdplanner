@@ -48,6 +48,9 @@ export class ProjectRepository {
     if (config.sectionOrder && config.sectionOrder.length > 0) {
       fm.section_order = config.sectionOrder;
     }
+    if (config.pipelinesPerPage !== undefined) {
+      fm.pipelines_per_page = config.pipelinesPerPage;
+    }
     if (config.githubToken) {
       fm.github_token = await encryptSecret(config.githubToken);
     }

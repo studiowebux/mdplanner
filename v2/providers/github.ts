@@ -343,14 +343,17 @@ export class GitHubProvider {
     repo: string,
     page = 1,
     perPage = 20,
-  ): Promise<GitHubWorkflowRun[]> {
+  ): Promise<{ runs: GitHubWorkflowRun[]; totalCount: number }> {
     // deno-lint-ignore no-explicit-any
     const data = await this.ghGet(
       `/repos/${owner}/${repo}/actions/runs?per_page=${perPage}&page=${page}`,
     ) as any;
     // deno-lint-ignore no-explicit-any
     const runs: any[] = data?.workflow_runs ?? [];
-    return runs.map(mapWorkflowRun);
+    return {
+      runs: runs.map(mapWorkflowRun),
+      totalCount: data?.total_count ?? 0,
+    };
   }
 
   async cancelRun(

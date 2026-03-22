@@ -169,7 +169,7 @@ export class GitHubService {
     githubRepo: string,
     page = 1,
     perPage = 20,
-  ): Promise<GitHubWorkflowRun[]> {
+  ): Promise<{ runs: GitHubWorkflowRun[]; totalCount: number }> {
     const { provider, owner, repo } = await this.resolve(githubRepo);
     return provider.listWorkflowRuns(owner, repo, page, perPage);
   }

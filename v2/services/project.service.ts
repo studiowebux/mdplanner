@@ -34,6 +34,9 @@ export class ProjectService {
       current.navCategories = data.navCategories;
     }
     if (data.githubToken !== undefined) current.githubToken = data.githubToken;
+    if (data.pipelinesPerPage !== undefined) {
+      current.pipelinesPerPage = data.pipelinesPerPage;
+    }
     await this.repo.write(current);
     return current;
   }

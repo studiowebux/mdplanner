@@ -87,6 +87,10 @@ export const ProjectConfigSchema = z.object({
     description: "GitHub Personal Access Token (stored in project.md)",
     example: "ghp_...",
   }),
+  pipelinesPerPage: z.number().optional().openapi({
+    description: "Number of pipeline runs per page (default: 10)",
+    example: 10,
+  }),
 }).openapi("ProjectConfig");
 
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
@@ -145,6 +149,10 @@ export const UpdateProjectConfigSchema = z.object({
     description: "GitHub Personal Access Token. Omit to leave unchanged.",
     example: "ghp_...",
   }),
+  pipelinesPerPage: z.number().optional().openapi({
+    description: "Pipelines per page. Omit to leave unchanged.",
+    example: 10,
+  }),
 }).openapi("UpdateProjectConfig");
 
 export type UpdateProjectConfig = z.infer<typeof UpdateProjectConfigSchema>;
@@ -187,6 +195,7 @@ export const FrontmatterProjectSchema = z.object({
   currency: z.string().optional(),
   section_order: z.array(z.unknown()).optional(),
   github_token: z.string().optional(),
+  pipelines_per_page: z.number().optional(),
   last_updated: z.string().optional(),
 }).transform(async (fm): Promise<Omit<ProjectConfig, "name" | "description">> => {
   const githubToken = fm.github_token
@@ -221,6 +230,7 @@ export const FrontmatterProjectSchema = z.object({
       ? (fm.section_order as unknown[]).map(String)
       : undefined,
     githubToken,
+    pipelinesPerPage: fm.pipelines_per_page,
     lastUpdated: fm.last_updated,
   };
 });

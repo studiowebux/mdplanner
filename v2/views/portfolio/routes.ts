@@ -5,6 +5,7 @@ import { portfolioConfig } from "../../domains/portfolio/config.tsx";
 import {
   getGitHubService,
   getPortfolioService,
+  getProjectService,
 } from "../../singletons/services.ts";
 import { publish } from "../../singletons/event-bus.ts";
 import {
@@ -120,12 +121,10 @@ portfolioRouter.get("/:id/github/pipelines", async (c) => {
   }
   try {
     const page = Math.max(1, Number(c.req.query("page")) || 1);
-    const perPage = GITHUB_PIPELINES_PER_PAGE;
-    const allRuns = await getGitHubService().listWorkflowRuns(
-      item.githubRepo,
-      page,
-      perPage,
-    );
+    const projectConfig = await getProjectService().getConfig();
+    const perPage = projectConfig.pipelinesPerPage ?? GITHUB_PIPELINES_PER_PAGE;
+    const { runs: allRuns, totalCount } = await getGitHubService()
+      .listWorkflowRuns(item.githubRepo, page, perPage);
     const filters: PipelineFilters = {
       status: c.req.query("status") || undefined,
       event: c.req.query("event") || undefined,
@@ -150,7 +149,7 @@ portfolioRouter.get("/:id/github/pipelines", async (c) => {
     return c.html(
       GitHubPipelinesTable({
         runs: filtered,
-        total: allRuns.length,
+        total: totalCount,
         itemId: id,
         filters,
         page,
@@ -174,12 +173,10 @@ portfolioRouter.get("/:id/github/pipelines/results", async (c) => {
   }
   try {
     const page = Math.max(1, Number(c.req.query("page")) || 1);
-    const perPage = GITHUB_PIPELINES_PER_PAGE;
-    const allRuns = await getGitHubService().listWorkflowRuns(
-      item.githubRepo,
-      page,
-      perPage,
-    );
+    const projectConfig = await getProjectService().getConfig();
+    const perPage = projectConfig.pipelinesPerPage ?? GITHUB_PIPELINES_PER_PAGE;
+    const { runs: allRuns, totalCount } = await getGitHubService()
+      .listWorkflowRuns(item.githubRepo, page, perPage);
     const filters: PipelineFilters = {
       status: c.req.query("status") || undefined,
       event: c.req.query("event") || undefined,
@@ -214,7 +211,7 @@ portfolioRouter.get("/:id/github/pipelines/results", async (c) => {
     return c.html(
       GitHubPipelineResults({
         runs: filtered,
-        total: allRuns.length,
+        total: totalCount,
         itemId: id,
         page,
         hasNext,
@@ -236,13 +233,15 @@ portfolioRouter.post("/:id/github/pipelines/cancel/:runId", async (c) => {
   try {
     await getGitHubService().cancelRun(item.githubRepo, Number(runId));
   } catch { /* run may already be done */ }
-  const runs = await getGitHubService().listWorkflowRuns(item.githubRepo);
+  const { runs, totalCount } = await getGitHubService().listWorkflowRuns(
+    item.githubRepo,
+  );
   const resultsUrl = (p: number) =>
     `/portfolio/${id}/github/pipelines/results?page=${p}`;
   return c.html(
     GitHubPipelineResults({
       runs,
-      total: runs.length,
+      total: totalCount,
       itemId: id,
       page: 1,
       hasNext: runs.length === GITHUB_PIPELINES_PER_PAGE,
@@ -259,13 +258,15 @@ portfolioRouter.post("/:id/github/pipelines/rerun/:runId", async (c) => {
   try {
     await getGitHubService().rerunRun(item.githubRepo, Number(runId));
   } catch { /* may fail if run is too old */ }
-  const runs = await getGitHubService().listWorkflowRuns(item.githubRepo);
+  const { runs, totalCount } = await getGitHubService().listWorkflowRuns(
+    item.githubRepo,
+  );
   const resultsUrl = (p: number) =>
     `/portfolio/${id}/github/pipelines/results?page=${p}`;
   return c.html(
     GitHubPipelineResults({
       runs,
-      total: runs.length,
+      total: totalCount,
       itemId: id,
       page: 1,
       hasNext: runs.length === GITHUB_PIPELINES_PER_PAGE,
@@ -287,13 +288,15 @@ portfolioRouter.post(
         Number(runId),
       );
     } catch { /* may fail if run is too old */ }
-    const runs = await getGitHubService().listWorkflowRuns(item.githubRepo);
+    const { runs, totalCount } = await getGitHubService().listWorkflowRuns(
+      item.githubRepo,
+    );
     const resultsUrl = (p: number) =>
       `/portfolio/${id}/github/pipelines/results?page=${p}`;
     return c.html(
       GitHubPipelineResults({
         runs,
-        total: runs.length,
+        total: totalCount,
         itemId: id,
         page: 1,
         hasNext: runs.length === GITHUB_PIPELINES_PER_PAGE,
