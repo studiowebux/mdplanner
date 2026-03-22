@@ -504,6 +504,7 @@ export const GitHubSection: FC<{ itemId: string }> = ({ itemId }) => (
         hx-target="#github-tab-content"
         hx-swap="innerHTML"
         hx-trigger="click"
+        hx-indicator="#github-tab-spinner"
         data-github-tab
       >
         Issues
@@ -515,6 +516,7 @@ export const GitHubSection: FC<{ itemId: string }> = ({ itemId }) => (
         hx-target="#github-tab-content"
         hx-swap="innerHTML"
         hx-trigger="click"
+        hx-indicator="#github-tab-spinner"
         data-github-tab
       >
         PRs
@@ -526,6 +528,7 @@ export const GitHubSection: FC<{ itemId: string }> = ({ itemId }) => (
         hx-target="#github-tab-content"
         hx-swap="innerHTML"
         hx-trigger="click"
+        hx-indicator="#github-tab-spinner"
         data-github-tab
       >
         Milestones
@@ -537,6 +540,7 @@ export const GitHubSection: FC<{ itemId: string }> = ({ itemId }) => (
         hx-target="#github-tab-content"
         hx-swap="innerHTML"
         hx-trigger="click"
+        hx-indicator="#github-tab-spinner"
         data-github-tab
       >
         Pipelines
@@ -548,6 +552,9 @@ export const GitHubSection: FC<{ itemId: string }> = ({ itemId }) => (
       >
         Refresh
       </button>
+      <span id="github-tab-spinner" class="htmx-indicator">
+        <div class="loading-spinner__ring" />
+      </span>
     </div>
 
     <div
@@ -555,6 +562,7 @@ export const GitHubSection: FC<{ itemId: string }> = ({ itemId }) => (
       hx-get={`/portfolio/${itemId}/github/issues`}
       hx-trigger="load"
       hx-swap="innerHTML"
+      hx-indicator="#github-tab-spinner"
     >
       <div class="loading-spinner" aria-label="Loading">
         <div class="loading-spinner__ring" />

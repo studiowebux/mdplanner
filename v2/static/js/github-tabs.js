@@ -16,6 +16,6 @@ document.addEventListener("click", function (e) {
     var container = refresh.closest(".github-tabs");
     if (!container) return;
     var active = container.querySelector(".github-tabs__btn--active");
-    if (active) active.click();
+    if (active && window.htmx) window.htmx.trigger(active, "click");
   }
 });
