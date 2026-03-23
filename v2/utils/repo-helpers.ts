@@ -1,5 +1,31 @@
 // Shared repository helpers — eliminates repetitive field-by-field mapping
-// across People, Milestone, and Task repositories.
+// across People, Milestone, Task, DNS, and other repositories.
+
+import { join } from "@std/path";
+import { parseFrontmatter } from "./frontmatter.ts";
+
+/**
+ * Read all .md files from a directory, parse each with the provided function.
+ * Returns empty array if directory does not exist. Skips non-.md files.
+ */
+export async function readMarkdownDir<T>(
+  dir: string,
+  parse: (filename: string, fm: Record<string, unknown>, body: string) => T | null,
+): Promise<T[]> {
+  const items: T[] = [];
+  try {
+    for await (const entry of Deno.readDir(dir)) {
+      if (!entry.isFile || !entry.name.endsWith(".md")) continue;
+      const content = await Deno.readTextFile(join(dir, entry.name));
+      const { frontmatter, body } = parseFrontmatter(content);
+      const item = parse(entry.name, frontmatter, body);
+      if (item) items.push(item);
+    }
+  } catch (err) {
+    if (!(err instanceof Deno.errors.NotFound)) throw err;
+  }
+  return items;
+}
 
 /**
  * Build a frontmatter record from an entity, excluding body-only keys.
