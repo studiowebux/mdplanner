@@ -273,6 +273,18 @@ export const ListPRsQuerySchema = z.object({
   }),
 }).openapi("ListPRsQuery");
 
+// ---------------------------------------------------------------------------
+// Reusable input fields
+// ---------------------------------------------------------------------------
+
+export const GitHubRepoInput = z.string().describe(
+  "GitHub repository in owner/repo format",
+);
+
+export const GitHubNumberInput = z.number().describe(
+  "GitHub issue or PR number",
+);
+
 // NumberParam — for GitHub issue/PR number path params (:number).
 // For portfolio :id path params reuse IdParam from types/api.ts.
 export const NumberParam = z.object({
