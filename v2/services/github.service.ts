@@ -3,6 +3,7 @@
 
 import { GitHubProvider } from "../providers/github.ts";
 import type { ProjectService } from "./project.service.ts";
+import type { IGitProvider } from "../types/github.types.ts";
 import type {
   GitHubCreatedIssue,
   GitHubIssue,
@@ -28,7 +29,7 @@ export class GitHubService {
   // ---------------------------------------------------------------------------
 
   private async resolve(githubRepo: string): Promise<
-    { provider: GitHubProvider; owner: string; repo: string }
+    { provider: IGitProvider; owner: string; repo: string }
   > {
     const provider = await this.provider();
     const slash = githubRepo.indexOf("/");
@@ -44,7 +45,7 @@ export class GitHubService {
     };
   }
 
-  private async provider(): Promise<GitHubProvider> {
+  private async provider(): Promise<IGitProvider> {
     const config = await this.projectService.getConfig();
     return new GitHubProvider(config.githubToken);
   }
