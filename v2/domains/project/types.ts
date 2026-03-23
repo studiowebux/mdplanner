@@ -87,6 +87,10 @@ export const ProjectConfigSchema = z.object({
     description: "GitHub Personal Access Token (stored in project.md)",
     example: "ghp_...",
   }),
+  cloudflareToken: z.string().optional().openapi({
+    description:
+      "Cloudflare API Token for DNS sync (stored in project.md, encrypted at rest)",
+  }),
   pipelinesPerPage: z.number().optional().openapi({
     description: "Number of pipeline runs per page (default: 10)",
     example: 10,
@@ -95,65 +99,9 @@ export const ProjectConfigSchema = z.object({
 
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
 
-export const UpdateProjectConfigSchema = z.object({
-  name: z.string().optional().openapi({
-    description: "Project display name",
-    example: "MDPlanner",
-  }),
-  description: z.string().optional().openapi({
-    description: "Project description (markdown)",
-  }),
-  startDate: z.string().optional().openapi({
-    description: "Project start date (YYYY-MM-DD). Omit to leave unchanged.",
-    example: "2026-01-01",
-  }),
-  workingDaysPerWeek: z.number().optional().openapi({
-    description: "Number of working days per week. Omit to leave unchanged.",
-    example: 5,
-  }),
-  workingDays: z.array(z.enum(WEEKDAYS)).optional().openapi({
-    description: "Working day names. Omit to leave unchanged.",
-    example: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-  }),
-  tags: z.array(z.string()).optional().openapi({
-    description: "Available task tags. Omit to leave unchanged.",
-    example: ["feature", "bug", "enhancement"],
-  }),
-  links: z.array(ProjectLinkSchema).optional().openapi({
-    description: "External links. Omit to leave unchanged.",
-  }),
-  features: z.array(z.string()).optional().openapi({
-    description:
-      "Enabled feature keys — replaces the full list. Omit to leave unchanged.",
-    example: ["milestones", "tasks", "notes"],
-  }),
-  navCategories: z.record(z.array(z.string())).optional().openapi({
-    description: "Sidebar navigation categories. Omit to leave unchanged.",
-  }),
-  port: z.number().optional().openapi({
-    description: "HTTP server port. Omit to leave unchanged.",
-    example: 8003,
-  }),
-  sectionOrder: z.array(z.string()).optional().openapi({
-    description: "Section display order. Omit to leave unchanged.",
-  }),
-  locale: z.string().optional().openapi({
-    description: "BCP 47 locale. Omit to leave unchanged.",
-    example: "en-US",
-  }),
-  currency: z.string().optional().openapi({
-    description: "ISO 4217 currency code. Omit to leave unchanged.",
-    example: "USD",
-  }),
-  githubToken: z.string().optional().openapi({
-    description: "GitHub Personal Access Token. Omit to leave unchanged.",
-    example: "ghp_...",
-  }),
-  pipelinesPerPage: z.number().optional().openapi({
-    description: "Pipelines per page. Omit to leave unchanged.",
-    example: 10,
-  }),
-}).openapi("UpdateProjectConfig");
+export const UpdateProjectConfigSchema = ProjectConfigSchema.partial().openapi(
+  "UpdateProjectConfig",
+);
 
 export type UpdateProjectConfig = z.infer<typeof UpdateProjectConfigSchema>;
 
@@ -195,12 +143,16 @@ export const FrontmatterProjectSchema = z.object({
   currency: z.string().optional(),
   section_order: z.array(z.unknown()).optional(),
   github_token: z.string().optional(),
+  cloudflare_token: z.string().optional(),
   pipelines_per_page: z.number().optional(),
   last_updated: z.string().optional(),
 }).transform(
   async (fm): Promise<Omit<ProjectConfig, "name" | "description">> => {
     const githubToken = fm.github_token
       ? (await decryptSecret(fm.github_token) ?? undefined)
+      : undefined;
+    const cloudflareToken = fm.cloudflare_token
+      ? (await decryptSecret(fm.cloudflare_token) ?? undefined)
       : undefined;
 
     return {
@@ -231,6 +183,7 @@ export const FrontmatterProjectSchema = z.object({
         ? (fm.section_order as unknown[]).map(String)
         : undefined,
       githubToken,
+      cloudflareToken,
       pipelinesPerPage: fm.pipelines_per_page,
       lastUpdated: fm.last_updated,
     };

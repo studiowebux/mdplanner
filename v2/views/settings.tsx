@@ -339,6 +339,34 @@ export const SettingsView: FC<SettingsProps> = ({
                 </span>
               </div>
 
+              <div class="settings-field">
+                <label class="settings-field__label" for="cfg-cloudflare-token">
+                  Cloudflare token (API Token)
+                </label>
+                <div class="settings-field__input-row">
+                  <input
+                    type="password"
+                    id="cfg-cloudflare-token"
+                    name="cloudflareToken"
+                    value={config.cloudflareToken ?? ""}
+                    placeholder="Bearer token..."
+                    class="settings-field__input"
+                    autocomplete="off"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn--secondary btn--sm"
+                    data-clear-input="cfg-cloudflare-token"
+                  >
+                    Clear
+                  </button>
+                </div>
+                <span class="settings-field__hint">
+                  Used for DNS sync. Requires Zone:Read, DNS:Read permissions.
+                  Registrar:Read is optional for expiry data.
+                </span>
+              </div>
+
               <FormActions />
             </form>
           </div>

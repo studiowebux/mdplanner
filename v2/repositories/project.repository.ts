@@ -54,6 +54,9 @@ export class ProjectRepository {
     if (config.githubToken) {
       fm.github_token = await encryptSecret(config.githubToken);
     }
+    if (config.cloudflareToken) {
+      fm.cloudflare_token = await encryptSecret(config.cloudflareToken);
+    }
     fm.last_updated = new Date().toISOString();
 
     let body = `# ${config.name}`;
