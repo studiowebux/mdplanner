@@ -322,3 +322,29 @@ export const WorkflowDispatchBodySchema = z.object({
     description: "Workflow input parameters",
   }),
 }).openapi("WorkflowDispatchBody");
+
+// ---------------------------------------------------------------------------
+// Task GitHub linking schemas
+// ---------------------------------------------------------------------------
+
+export const LinkIssueInputSchema = z.object({
+  githubRepo: GitHubRepoInput,
+  issueNumber: GitHubNumberInput.describe("GitHub issue number"),
+  prNumber: GitHubNumberInput.optional().describe(
+    "GitHub PR number (optional, link both at once)",
+  ),
+}).openapi("LinkIssueInput");
+
+export const LinkPRInputSchema = z.object({
+  githubRepo: GitHubRepoInput,
+  prNumber: GitHubNumberInput.describe("GitHub PR number"),
+}).openapi("LinkPRInput");
+
+export const UnlinkGitHubInputSchema = z.object({
+  unlinkIssue: z.boolean().optional().openapi({
+    description: "Unlink the GitHub issue (default: true)",
+  }),
+  unlinkPR: z.boolean().optional().openapi({
+    description: "Unlink the GitHub PR (default: true)",
+  }),
+}).openapi("UnlinkGitHubInput");

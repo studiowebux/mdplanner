@@ -5,6 +5,11 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { getPeopleService, getTaskService } from "../../singletons/services.ts";
 import {
+  LinkIssueInputSchema,
+  LinkPRInputSchema,
+  UnlinkGitHubInputSchema,
+} from "../../types/github.types.ts";
+import {
   AddAttachmentsInputSchema,
   AddCommentInputSchema,
   ApproveTaskInputSchema,
@@ -517,6 +522,74 @@ export function registerTaskTools(server: McpServer): void {
         };
       });
       return ok(stubs);
+    },
+  );
+
+  // -- GitHub linking tools --
+
+  server.registerTool(
+    "github_link_issue",
+    {
+      description:
+        "Link a GitHub issue to a task. Sets githubIssue, githubRepo, and optionally githubPR on the task.",
+      inputSchema: {
+        id: TaskSchema.shape.id.describe("Task ID"),
+        ...LinkIssueInputSchema.shape,
+      },
+    },
+    async ({ id, githubRepo, issueNumber, prNumber }) => {
+      const task = await service.getById(id);
+      if (!task) return err(`Task '${id}' not found`);
+      const updates: Record<string, unknown> = {
+        githubRepo,
+        githubIssue: issueNumber,
+      };
+      if (prNumber) updates.githubPR = prNumber;
+      await service.update(id, updates);
+      return ok({
+        id,
+        githubRepo,
+        githubIssue: issueNumber,
+        githubPR: prNumber,
+      });
+    },
+  );
+
+  server.registerTool(
+    "github_link_pr",
+    {
+      description:
+        "Link a GitHub PR to a task. Sets githubPR and githubRepo on the task.",
+      inputSchema: {
+        id: TaskSchema.shape.id.describe("Task ID"),
+        ...LinkPRInputSchema.shape,
+      },
+    },
+    async ({ id, githubRepo, prNumber }) => {
+      const task = await service.getById(id);
+      if (!task) return err(`Task '${id}' not found`);
+      await service.update(id, { githubRepo, githubPR: prNumber });
+      return ok({ id, githubRepo, githubPR: prNumber });
+    },
+  );
+
+  server.registerTool(
+    "github_unlink",
+    {
+      description: "Remove GitHub issue and/or PR link from a task.",
+      inputSchema: {
+        id: TaskSchema.shape.id.describe("Task ID"),
+        ...UnlinkGitHubInputSchema.shape,
+      },
+    },
+    async ({ id, unlinkIssue, unlinkPR }) => {
+      const task = await service.getById(id);
+      if (!task) return err(`Task '${id}' not found`);
+      const updates: Record<string, unknown> = {};
+      if (unlinkIssue !== false) updates.githubIssue = undefined;
+      if (unlinkPR !== false) updates.githubPR = undefined;
+      await service.update(id, updates);
+      return ok({ id, unlinked: true });
     },
   );
 }
