@@ -25,11 +25,12 @@ import type {
   GitHubUser,
   GitHubWorkflow,
   GitHubWorkflowRun,
+  IGitProvider,
 } from "../types/github.types.ts";
 
 const GITHUB_API = "https://api.github.com";
 
-export class GitHubProvider {
+export class GitHubProvider implements IGitProvider {
   private token?: string;
 
   constructor(token?: string) {

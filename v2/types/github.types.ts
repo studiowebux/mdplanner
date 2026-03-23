@@ -274,6 +274,74 @@ export const ListPRsQuerySchema = z.object({
 }).openapi("ListPRsQuery");
 
 // ---------------------------------------------------------------------------
+// IGitProvider — shared interface for multi-forge support (GitHub, Gitea)
+// ---------------------------------------------------------------------------
+
+export interface IGitProvider {
+  getAuthenticatedUser(): Promise<GitHubUser>;
+  getRepo(owner: string, repo: string): Promise<GitHubRepo>;
+  listRepos(query?: string): Promise<GitHubRepoSummary[]>;
+  getIssue(owner: string, repo: string, number: number): Promise<GitHubIssue>;
+  createIssue(
+    owner: string,
+    repo: string,
+    title: string,
+    body: string,
+  ): Promise<GitHubCreatedIssue>;
+  setIssueState(
+    owner: string,
+    repo: string,
+    number: number,
+    state: GitHubIssueState,
+  ): Promise<GitHubIssue>;
+  listIssues(
+    owner: string,
+    repo: string,
+    state?: GitHubIssueState | "all",
+    assignee?: string,
+  ): Promise<GitHubIssue[]>;
+  getPR(owner: string, repo: string, number: number): Promise<GitHubPR>;
+  listPRs(
+    owner: string,
+    repo: string,
+    state?: GitHubPRState,
+  ): Promise<GitHubPR[]>;
+  mergePR(
+    owner: string,
+    repo: string,
+    number: number,
+    mergeMethod?: GitHubMergeMethod,
+  ): Promise<GitHubMergeResult>;
+  listMilestones(owner: string, repo: string): Promise<GitHubMilestone[]>;
+  getLatestRelease(
+    owner: string,
+    repo: string,
+  ): Promise<GitHubRelease | null>;
+  listWorkflows(owner: string, repo: string): Promise<GitHubWorkflow[]>;
+  listWorkflowRuns(
+    owner: string,
+    repo: string,
+    options?: {
+      page?: number;
+      perPage?: number;
+      status?: string;
+      branch?: string;
+      event?: string;
+    },
+  ): Promise<{ runs: GitHubWorkflowRun[]; totalCount: number }>;
+  cancelRun(owner: string, repo: string, runId: number): Promise<void>;
+  rerunRun(owner: string, repo: string, runId: number): Promise<void>;
+  rerunFailedJobs(owner: string, repo: string, runId: number): Promise<void>;
+  triggerWorkflowDispatch(
+    owner: string,
+    repo: string,
+    workflowId: number | string,
+    ref: string,
+    inputs?: Record<string, string>,
+  ): Promise<void>;
+}
+
+// ---------------------------------------------------------------------------
 // Reusable input fields
 // ---------------------------------------------------------------------------
 
