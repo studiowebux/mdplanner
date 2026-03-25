@@ -25,6 +25,12 @@ export const IdWithUpdateIdParam = z.object({
   updateId: z.string().openapi({ param: { name: "updateId", in: "path" } }),
 });
 
+/** Path params: /{id}/records/{index} */
+export const IdWithIndexParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+  index: z.string().openapi({ param: { name: "index", in: "path" } }),
+});
+
 /**
  * Standard 404 error body.
  * Usage: `c.json(notFound("TASK", id), 404)`
