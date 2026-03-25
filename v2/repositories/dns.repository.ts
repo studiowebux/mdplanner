@@ -30,8 +30,9 @@ export class DnsRepository {
   }
 
   async findAll(): Promise<DnsDomain[]> {
-    const items = await readMarkdownDir(this.dir, (filename, fm, body) =>
-      this.parse(filename, fm, body)
+    const items = await readMarkdownDir(
+      this.dir,
+      (filename, fm, body) => this.parse(filename, fm, body),
     );
     return items.sort((a, b) => a.domain.localeCompare(b.domain));
   }
@@ -49,9 +50,8 @@ export class DnsRepository {
 
   async findByDomain(domain: string): Promise<DnsDomain | null> {
     const all = await this.findAll();
-    return all.find((d) =>
-      d.domain.toLowerCase() === domain.toLowerCase()
-    ) ?? null;
+    return all.find((d) => d.domain.toLowerCase() === domain.toLowerCase()) ??
+      null;
   }
 
   async create(data: CreateDnsDomain): Promise<DnsDomain> {
@@ -171,9 +171,7 @@ export class DnsRepository {
       id,
       domain: String(fm.domain),
       expiryDate: fm.expiryDate != null ? String(fm.expiryDate) : undefined,
-      autoRenew: typeof fm.autoRenew === "boolean"
-        ? fm.autoRenew
-        : undefined,
+      autoRenew: typeof fm.autoRenew === "boolean" ? fm.autoRenew : undefined,
       renewalCostUsd: typeof fm.renewalCostUsd === "number"
         ? fm.renewalCostUsd
         : undefined,

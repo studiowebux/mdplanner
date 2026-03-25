@@ -10,7 +10,11 @@ import { parseFrontmatter } from "./frontmatter.ts";
  */
 export async function readMarkdownDir<T>(
   dir: string,
-  parse: (filename: string, fm: Record<string, unknown>, body: string) => T | null,
+  parse: (
+    filename: string,
+    fm: Record<string, unknown>,
+    body: string,
+  ) => T | null,
 ): Promise<T[]> {
   const items: T[] = [];
   try {
