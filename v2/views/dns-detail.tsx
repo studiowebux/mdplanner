@@ -109,7 +109,9 @@ export const DnsRecordForm: FC<{
       title={isEdit ? "Edit DNS Record" : "Add DNS Record"}
       fields={DNS_RECORD_FORM_FIELDS}
       values={values}
-      action={isEdit ? `/dns/${domainId}/records/${index}` : `/dns/${domainId}/records`}
+      action={isEdit
+        ? `/dns/${domainId}/records/${index}`
+        : `/dns/${domainId}/records`}
       method="post"
       open
     />

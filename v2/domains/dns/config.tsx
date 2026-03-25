@@ -31,12 +31,21 @@ const FORM_FIELDS: FieldDef[] = [
       { value: "true", label: "Yes" },
     ],
   },
-  { type: "number", name: "renewalCostUsd", label: "Renewal cost (USD/yr)", min: 0 },
+  {
+    type: "number",
+    name: "renewalCostUsd",
+    label: "Renewal cost (USD/yr)",
+    min: 0,
+  },
   { type: "text", name: "project", label: "Project" },
   { type: "textarea", name: "notes", label: "Notes", rows: 4 },
 ];
 
-export const dnsConfig: DomainConfig<DnsDomain, CreateDnsDomain, UpdateDnsDomain> = {
+export const dnsConfig: DomainConfig<
+  DnsDomain,
+  CreateDnsDomain,
+  UpdateDnsDomain
+> = {
   name: "dns",
   singular: "DNS domain",
   plural: "DNS",

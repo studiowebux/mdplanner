@@ -24,7 +24,8 @@ dnsRouter.post("/sync", async (c) => {
         "HX-Trigger": JSON.stringify({
           showToast: {
             type: "success",
-            message: `Synced ${result.synced} domain(s): ${result.created} created, ${result.updated} updated`,
+            message:
+              `Synced ${result.synced} domain(s): ${result.created} created, ${result.updated} updated`,
           },
         }),
       },

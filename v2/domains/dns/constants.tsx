@@ -14,7 +14,13 @@ export const DNS_RECORD_FORM_FIELDS: FieldDef[] = [
     required: true,
     options: DNS_RECORD_TYPES.map((t) => ({ value: t, label: t })),
   },
-  { type: "text", name: "name", label: "Name", required: true, placeholder: "@" },
+  {
+    type: "text",
+    name: "name",
+    label: "Name",
+    required: true,
+    placeholder: "@",
+  },
   { type: "text", name: "value", label: "Value", required: true },
   { type: "number", name: "ttl", label: "TTL (1 = Auto)", min: 1 },
   {
