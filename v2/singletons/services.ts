@@ -23,6 +23,7 @@ import { registerTaskEntity } from "../domains/task/cache.ts";
 import { registerPortfolioEntity } from "../domains/portfolio/cache.ts";
 import { registerPeopleEntity } from "../domains/people/cache.ts";
 import { registerDnsEntity } from "../domains/dns/cache.ts";
+import { registerNoteEntity } from "../domains/note/cache.ts";
 import { DnsRepository } from "../repositories/dns.repository.ts";
 import { NoteRepository } from "../repositories/note.repository.ts";
 import { PeopleRepository } from "../repositories/people.repository.ts";
@@ -77,6 +78,7 @@ export function initServices(
     registerPortfolioEntity(portfolioRepo);
     registerPeopleEntity(peopleRepo);
     registerDnsEntity(dnsRepo);
+    registerNoteEntity(noteRepo);
 
     // Pass cacheDb to repos for read-path caching
     milestoneRepo.setCacheDb(cacheDb);
