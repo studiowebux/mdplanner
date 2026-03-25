@@ -553,7 +553,7 @@
   border-top: var(--border-width) var(--border-style)
     var(--color-border-default);
   box-shadow: var(--card-shadow-hover);
-  z-index: 50;
+  z-index: var(--z-dropdown);
   transform: translateY(100%);
   transition: transform var(--transition-fast);
 }

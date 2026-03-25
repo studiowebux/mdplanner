@@ -10,6 +10,7 @@ import { DNS_PROVIDERS } from "../../types/dns.types.ts";
 import { getDnsService } from "../../singletons/services.ts";
 import { DNS_TABLE_COLUMNS, dnsToRow } from "./constants.tsx";
 import { DnsDetailView } from "../../views/dns-detail.tsx";
+import { DnsCard } from "../../views/components/dns-card.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
 
@@ -37,7 +38,13 @@ const FORM_FIELDS: FieldDef[] = [
     label: "Renewal cost (USD/yr)",
     min: 0,
   },
-  { type: "text", name: "project", label: "Project" },
+  {
+    type: "autocomplete",
+    name: "project",
+    label: "Project",
+    source: "portfolio",
+    placeholder: "Search projects...",
+  },
   { type: "textarea", name: "notes", label: "Notes", rows: 4 },
 ];
 
@@ -53,6 +60,7 @@ export const dnsConfig: DomainConfig<
   ssePrefix: "dns",
   styles: ["/css/views/dns.css"],
   emptyMessage: "No DNS domains yet. Add one or sync from Cloudflare.",
+  defaultView: "table",
 
   stateKeys: ["view", "provider", "q", "sort", "order"],
   columns: DNS_TABLE_COLUMNS,
@@ -67,6 +75,8 @@ export const dnsConfig: DomainConfig<
   ],
 
   toRow: dnsToRow,
+
+  Card: ({ item, q }) => <DnsCard item={item} q={q} />,
 
   parseCreate: (body) => {
     const parsed = parseFormBody(FORM_FIELDS, body);

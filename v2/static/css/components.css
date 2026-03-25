@@ -622,8 +622,6 @@
   gap: var(--space-md);
   margin-bottom: var(--space-lg);
   flex-wrap: wrap;
-  position: relative;
-  z-index: var(--z-dropdown);
 }
 
 .domain-toolbar__left {
@@ -695,6 +693,8 @@
 
 .column-toggle {
   position: relative;
+  z-index: var(--z-dropdown);
+  transform: translateZ(0);
 }
 
 .column-toggle__panel {
@@ -767,7 +767,6 @@
 .data-table__head {
   position: sticky;
   top: 0;
-  z-index: var(--z-table-head);
   background: var(--color-bg-primary);
 }
 

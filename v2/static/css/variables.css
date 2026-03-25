@@ -193,13 +193,15 @@
   --topbar-search-max-width: 28rem;
   --sidebar-active-border-width: 2px;
 
-  /* Z-index scale */
-  --z-sidebar: 200;
+  /* Z-index scale — single source of truth, ascending order */
+  --z-table-head: 2;
+  --z-table-sticky: 3;
+  --z-toolbar: 10;
+  --z-dropdown: 250;
   --z-overlay: 199;
+  --z-sidebar: 200;
   --z-sidenav: 300;
   --z-toast: 400;
-  --z-dropdown: 250;
-  --z-table-head: 1;
 
   /* Overlay */
   --overlay-bg: rgba(0, 0, 0, 0.4);
