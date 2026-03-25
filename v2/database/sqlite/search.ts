@@ -62,6 +62,9 @@ export class SearchEngine {
       results.push(...this.searchEntity(entity, safeQuery, limit, project));
     }
 
+    // Type-name search: "person" → all people, "tasks" → all tasks
+    results.push(...this.searchByTypeName(trimmed, limit, project));
+
     results.sort((a, b) => a.score - b.score);
 
     const seen = new Set<string>();
@@ -170,6 +173,56 @@ export class SearchEngine {
         continue;
       }
     }
+    return results;
+  }
+
+  private searchByTypeName(
+    query: string,
+    limit: number,
+    project?: string,
+  ): SearchResult[] {
+    const q = query.toLowerCase();
+    const results: SearchResult[] = [];
+
+    for (const entity of ENTITIES) {
+      const { fts, table } = entity;
+      const type = fts?.type ?? table;
+      const typeLower = type.toLowerCase();
+
+      // Match exact type or simple plural (e.g. "tasks" → "task")
+      if (typeLower !== q && `${typeLower}s` !== q) continue;
+
+      const titleCol = fts?.titleCol ?? "name";
+      const hasProjectCol = entity.schema.includes("project TEXT");
+      if (project && !hasProjectCol) continue;
+
+      try {
+        let sql = `SELECT id, "${titleCol}" as _title FROM "${table}"`;
+        const params: BindValue[] = [];
+
+        if (project && hasProjectCol) {
+          sql += ` WHERE LOWER(project) = LOWER(?)`;
+          params.push(project);
+        }
+
+        sql += ` LIMIT ?`;
+        params.push(limit);
+
+        const rows = this.db.query<Record<string, unknown>>(sql, params);
+        for (const row of rows) {
+          results.push({
+            id: row.id as string,
+            title: (row._title as string) ?? (row.id as string),
+            snippet: `All ${type}s`,
+            score: 0,
+            type,
+          });
+        }
+      } catch {
+        continue;
+      }
+    }
+
     return results;
   }
 
