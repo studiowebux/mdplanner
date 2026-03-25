@@ -357,6 +357,7 @@ export function createDomainPage<T extends Entity>(
             )}
           </div>
           <div class="domain-toolbar__right">
+            {cfg.toolbarActions && <cfg.toolbarActions />}
             <div id={`${cfg.name}-column-toggle-wrapper`}>
               <ColumnToggle
                 domain={cfg.name}

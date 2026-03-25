@@ -119,4 +119,7 @@ export type DomainConfig<T extends Entity, C, U> = {
 
   // Optional: detail page renderer (if the domain has a detail view).
   DetailView?: FC<ViewProps & { item: T }>;
+
+  // Optional: extra buttons rendered in the toolbar right area (before view toggles).
+  toolbarActions?: FC;
 };

@@ -160,14 +160,6 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
           <button
             class="btn btn--secondary btn--sm"
             type="button"
-            hx-post="/dns/sync"
-            hx-swap="none"
-          >
-            Sync Cloudflare
-          </button>
-          <button
-            class="btn btn--secondary btn--sm"
-            type="button"
             hx-get={`/dns/${domain.id}/edit`}
             hx-target="#dns-form-container"
             hx-swap="innerHTML"

@@ -92,6 +92,17 @@ export const dnsConfig: DomainConfig<
     (item.notes ?? "").toLowerCase().includes(q) ||
     (item.project ?? "").toLowerCase().includes(q),
 
+  toolbarActions: () => (
+    <button
+      class="btn btn--secondary btn--sm"
+      type="button"
+      hx-post="/dns/sync"
+      hx-swap="none"
+    >
+      Sync Cloudflare
+    </button>
+  ),
+
   DetailView: ({ item, ...viewProps }) =>
     DnsDetailView({ item, ...viewProps }) as ReturnType<typeof DnsDetailView>,
 };
