@@ -622,6 +622,8 @@
   gap: var(--space-md);
   margin-bottom: var(--space-lg);
   flex-wrap: wrap;
+  position: relative;
+  z-index: var(--z-dropdown);
 }
 
 .domain-toolbar__left {
