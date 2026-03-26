@@ -218,12 +218,12 @@
 }
 
 .person-detail__meta dd a {
-  color: var(--color-accent);
+  color: var(--color-text-primary);
   text-decoration: none;
 }
 
 .person-detail__meta dd a:hover {
-  text-decoration: underline;
+  color: var(--color-accent);
 }
 
 .person-detail__section {
