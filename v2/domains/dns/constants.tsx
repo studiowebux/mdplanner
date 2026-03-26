@@ -35,7 +35,7 @@ export const DNS_RECORD_FORM_FIELDS: FieldDef[] = [
 ];
 
 const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
-  <div class="dns-card__actions">
+  <div class="domain-card__actions">
     <a class="btn btn--secondary btn--sm" href={`/dns/${row.id}`}>
       View
     </a>

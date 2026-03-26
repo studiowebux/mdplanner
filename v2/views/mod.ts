@@ -3,6 +3,7 @@
 
 import { Hono } from "hono";
 import { dnsRouter } from "./dns/routes.ts";
+import { goalsRouter as goalsViewRouter } from "./goals/routes.ts";
 import { homeViewRouter } from "./home/routes.ts";
 import { milestonesRouter } from "./milestones/routes.ts";
 import { peopleRouter } from "./people/routes.tsx";
@@ -182,6 +183,7 @@ export const views = new Hono<{ Variables: AppVariables }>();
 
 views.route("/", homeViewRouter);
 views.route("/dns", dnsRouter);
+views.route("/goals", goalsViewRouter);
 views.route("/milestones", milestonesRouter);
 views.route("/notes", notesViewRouter);
 views.route("/people", peopleRouter);

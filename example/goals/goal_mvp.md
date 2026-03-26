@@ -5,6 +5,7 @@ kpi: "Launch public beta"
 start: 2026-01-01
 end: 2026-03-31
 status: on-track
+project: TaskFlow Platform
 ---
 
 # Launch MVP

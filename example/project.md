@@ -12,7 +12,7 @@ links:
     url: "https://discord.gg/taskflow"
   - title: Figma Designs
     url: "https://figma.com/file/taskflow"
-features: [dns_domain, milestone, note, person, portfolio, task, github]
+features: [dns_domain, goal, milestone, note, person, portfolio, task, github]
 nav_categories:
   Admin: [upload, analytics]
   CRM: [company, contact, deal, interaction]

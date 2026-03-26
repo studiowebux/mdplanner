@@ -45,73 +45,7 @@
   flex-shrink: 0;
 }
 
-/* ---------------------------------------------------------------------------
-   Card view
---------------------------------------------------------------------------- */
-
-.dns-card {
-  background: var(--card-bg);
-  border: var(--card-border);
-  border-radius: var(--card-radius);
-  padding: var(--card-padding);
-  display: flex;
-  flex-direction: column;
-  gap: var(--card-gap);
-  box-shadow: var(--card-shadow);
-  transition: box-shadow var(--transition-fast);
-}
-
-.dns-card:hover {
-  box-shadow: var(--card-shadow-hover);
-}
-
-.dns-card__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-sm);
-}
-
-.dns-card__name {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin: 0;
-}
-
-.dns-card__name a {
-  color: var(--color-text-primary);
-  text-decoration: none;
-}
-
-.dns-card__name a:hover {
-  color: var(--color-accent);
-}
-
-.dns-card__meta {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--space-xs) var(--space-sm);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  margin: 0;
-}
-
-.dns-card__meta-label {
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-muted);
-}
-
-.dns-card__meta-value {
-  margin: 0;
-}
-
-.dns-card__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-sm);
-  margin-top: auto;
-}
+/* Card base provided by .domain-card in components.css */
 
 /* ---------------------------------------------------------------------------
    Detail view
@@ -168,8 +102,7 @@
 
 .dns-detail__info-grid {
   display: grid;
-  grid-template-columns:
-    repeat(auto-fill, minmax(var(--card-min-width, 160px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr));
   gap: var(--space-sm);
   background: var(--card-bg);
   border: var(--card-border);

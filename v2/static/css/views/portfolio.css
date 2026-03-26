@@ -1,46 +1,6 @@
 /* Portfolio view — domain-specific styles only.
-   Page layout uses shared .domain-page from components.css. */
-
-/* Portfolio card */
-
-.portfolio-card {
-  background: var(--card-bg);
-  border: var(--card-border);
-  border-radius: var(--card-radius);
-  padding: var(--card-padding);
-  display: flex;
-  flex-direction: column;
-  gap: var(--card-gap);
-  box-shadow: var(--card-shadow);
-  transition: box-shadow var(--transition-fast);
-}
-
-.portfolio-card:hover {
-  box-shadow: var(--card-shadow-hover);
-}
-
-.portfolio-card__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-sm);
-}
-
-.portfolio-card__name {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin: 0;
-}
-
-.portfolio-card__name a {
-  color: var(--color-text-primary);
-  text-decoration: none;
-}
-
-.portfolio-card__name a:hover {
-  color: var(--color-accent);
-}
+   Card base provided by .domain-card in components.css.
+   Header, name, meta, actions provided by .domain-card__* */
 
 .portfolio-card__badge {
   font-size: var(--font-size-xs);
@@ -86,24 +46,6 @@
 .portfolio-card__badge--maintenance {
   background: var(--color-warning-bg);
   color: var(--color-warning-text);
-}
-
-.portfolio-card__meta {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--space-xs) var(--space-sm);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  margin: 0;
-}
-
-.portfolio-card__meta-label {
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-muted);
-}
-
-.portfolio-card__meta-value {
-  margin: 0;
 }
 
 .portfolio-card__progress {
@@ -176,13 +118,6 @@
 }
 
 /* Card actions */
-
-.portfolio-card__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-sm);
-  margin-top: auto;
-}
 
 /* Detail view */
 

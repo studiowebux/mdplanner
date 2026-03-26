@@ -1,5 +1,6 @@
 import type { FC } from "hono/jsx";
 import type { Milestone } from "../../types/milestone.types.ts";
+import { DomainCard } from "../../components/ui/domain-card.tsx";
 import {
   dueIn,
   duration,
@@ -17,55 +18,53 @@ export const MilestoneCard: FC<Props> = ({ milestone, q }) => {
   const vClass = varianceClass(milestone.target, milestone.completedAt);
 
   return (
-    <article
-      class={`milestone-card${
-        milestone.status === "completed" ? " milestone-card--completed" : ""
-      }`}
-      data-filterable-card
-    >
-      <header class="milestone-card__header">
-        <h2 class="milestone-card__name">
-          <a href={`/milestones/${milestone.id}`}>
-            <Highlight text={milestone.name} q={q} />
-          </a>
-        </h2>
+    <DomainCard
+      href={`/milestones/${milestone.id}`}
+      name={milestone.name}
+      q={q}
+      domain="milestones"
+      id={milestone.id}
+      className={milestone.status === "completed"
+        ? "milestone-card--completed"
+        : undefined}
+      badge={
         <span
           class={`milestone-card__badge milestone-card__badge--${milestone.status}`}
         >
           {milestone.status}
         </span>
-      </header>
-
-      <dl class="milestone-card__meta">
+      }
+    >
+      <dl class="domain-card__meta">
         {milestone.project && (
           <>
-            <dt class="milestone-card__meta-label">Project</dt>
-            <dd class="milestone-card__meta-value">
+            <dt class="domain-card__meta-label">Project</dt>
+            <dd class="domain-card__meta-value">
               <Highlight text={milestone.project!} q={q} />
             </dd>
           </>
         )}
         {milestone.target && (
           <>
-            <dt class="milestone-card__meta-label">Target</dt>
-            <dd class="milestone-card__meta-value">
+            <dt class="domain-card__meta-label">Target</dt>
+            <dd class="domain-card__meta-value">
               {formatDate(milestone.target)}
             </dd>
           </>
         )}
         {milestone.status !== "completed" && milestone.createdAt && (
           <>
-            <dt class="milestone-card__meta-label">Created</dt>
-            <dd class="milestone-card__meta-value">
+            <dt class="domain-card__meta-label">Created</dt>
+            <dd class="domain-card__meta-value">
               {timeAgo(milestone.createdAt)}
             </dd>
           </>
         )}
         {milestone.status !== "completed" && milestone.target && (
           <>
-            <dt class="milestone-card__meta-label">Due</dt>
+            <dt class="domain-card__meta-label">Due</dt>
             <dd
-              class={`milestone-card__meta-value${
+              class={`domain-card__meta-value${
                 dueIn(milestone.target).includes("overdue") ? " text-error" : ""
               }`}
             >
@@ -75,8 +74,8 @@ export const MilestoneCard: FC<Props> = ({ milestone, q }) => {
         )}
         {milestone.status === "completed" && milestone.completedAt && (
           <>
-            <dt class="milestone-card__meta-label">Completed</dt>
-            <dd class="milestone-card__meta-value">
+            <dt class="domain-card__meta-label">Completed</dt>
+            <dd class="domain-card__meta-value">
               {formatDate(milestone.completedAt)}
               {duration(milestone.createdAt, milestone.completedAt) &&
                 ` (${duration(milestone.createdAt, milestone.completedAt)})`}
@@ -85,8 +84,8 @@ export const MilestoneCard: FC<Props> = ({ milestone, q }) => {
         )}
         {v && (
           <>
-            <dt class="milestone-card__meta-label">Variance</dt>
-            <dd class={`milestone-card__meta-value ${vClass}`}>{v}</dd>
+            <dt class="domain-card__meta-label">Variance</dt>
+            <dd class={`domain-card__meta-value ${vClass}`}>{v}</dd>
           </>
         )}
       </dl>
@@ -111,31 +110,6 @@ export const MilestoneCard: FC<Props> = ({ milestone, q }) => {
           }}
         />
       )}
-
-      <div class="milestone-card__actions">
-        <a class="btn btn--secondary" href={`/milestones/${milestone.id}`}>
-          View
-        </a>
-        <button
-          class="btn btn--secondary"
-          type="button"
-          hx-get={`/milestones/${milestone.id}/edit`}
-          hx-target="#milestones-form-container"
-          hx-swap="innerHTML"
-        >
-          Edit
-        </button>
-        <button
-          class="btn btn--danger"
-          type="button"
-          hx-delete={`/milestones/${milestone.id}`}
-          hx-swap="none"
-          hx-confirm-dialog={`Delete "${milestone.name}"? This cannot be undone.`}
-          data-confirm-name={milestone.name}
-        >
-          Delete
-        </button>
-      </div>
-    </article>
+    </DomainCard>
   );
 };

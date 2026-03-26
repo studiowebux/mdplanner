@@ -1,0 +1,134 @@
+/**
+ * Goal types — Zod schemas (single source), inferred types.
+ */
+
+import { z } from "@hono/zod-openapi";
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+export const GOAL_STATUSES = [
+  "planning",
+  "on-track",
+  "at-risk",
+  "late",
+  "success",
+  "failed",
+] as const;
+
+export const GOAL_TYPES = ["enterprise", "project"] as const;
+
+// ---------------------------------------------------------------------------
+// Zod schemas — single source of truth
+// ---------------------------------------------------------------------------
+
+export const GoalSchema = z.object({
+  id: z.string().openapi({ description: "Goal ID", example: "goal_mvp" }),
+  title: z.string().openapi({
+    description: "Goal title",
+    example: "Launch MVP",
+  }),
+  description: z.string().openapi({
+    description: "Goal description (markdown)",
+  }),
+  type: z.enum(GOAL_TYPES).openapi({
+    description: "Goal type",
+    example: "project",
+  }),
+  kpi: z.string().openapi({
+    description: "Human-readable KPI target",
+    example: "$50k MRR",
+  }),
+  kpiMetric: z.string().optional().openapi({
+    description:
+      "KPI snapshot metric field name (e.g. mrr, active_users, growth_rate)",
+  }),
+  kpiTarget: z.number().optional().openapi({
+    description: "Numeric target value for the KPI metric",
+  }),
+  startDate: z.string().openapi({
+    description: "Start date (YYYY-MM-DD)",
+    example: "2026-01-01",
+  }),
+  endDate: z.string().openapi({
+    description: "End date (YYYY-MM-DD)",
+    example: "2026-12-31",
+  }),
+  status: z.enum(GOAL_STATUSES).openapi({
+    description: "Goal status",
+    example: "on-track",
+  }),
+  githubRepo: z.string().optional().openapi({
+    description: "Linked GitHub repository (owner/repo)",
+  }),
+  githubMilestone: z.number().optional().openapi({
+    description: "Linked GitHub milestone number",
+  }),
+  linkedPortfolioItems: z.array(z.string()).optional().openapi({
+    description: "Linked portfolio item IDs",
+  }),
+  project: z.string().optional().openapi({
+    description: "Linked project name",
+  }),
+  created: z.string().openapi({ description: "ISO creation timestamp" }),
+  updated: z.string().openapi({ description: "ISO last-updated timestamp" }),
+}).openapi("Goal");
+
+export type Goal = z.infer<typeof GoalSchema>;
+
+// ---------------------------------------------------------------------------
+// Create / Update — derived from GoalSchema
+// ---------------------------------------------------------------------------
+
+export const CreateGoalSchema = GoalSchema.pick({
+  title: true,
+  description: true,
+  type: true,
+  kpi: true,
+  kpiMetric: true,
+  kpiTarget: true,
+  startDate: true,
+  endDate: true,
+  status: true,
+  githubRepo: true,
+  githubMilestone: true,
+  linkedPortfolioItems: true,
+  project: true,
+}).partial({
+  description: true,
+  kpi: true,
+  kpiMetric: true,
+  kpiTarget: true,
+  startDate: true,
+  endDate: true,
+  status: true,
+  githubRepo: true,
+  githubMilestone: true,
+  linkedPortfolioItems: true,
+  project: true,
+}).openapi("CreateGoal");
+
+export type CreateGoal = z.infer<typeof CreateGoalSchema>;
+
+export const UpdateGoalSchema = CreateGoalSchema.partial().openapi(
+  "UpdateGoal",
+);
+
+export type UpdateGoal = z.infer<typeof UpdateGoalSchema>;
+
+// ---------------------------------------------------------------------------
+// Query options
+// ---------------------------------------------------------------------------
+
+export const ListGoalOptionsSchema = z.object({
+  status: z.enum(GOAL_STATUSES).optional().openapi({
+    param: { name: "status", in: "query" },
+  }),
+  type: z.enum(GOAL_TYPES).optional().openapi({
+    param: { name: "type", in: "query" },
+  }),
+  project: z.string().optional().openapi({
+    param: { name: "project", in: "query" },
+  }),
+});
