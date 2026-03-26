@@ -120,6 +120,7 @@
     "links-form": "tab-links",
     "sections-form": "tab-sections",
     "nav-categories-form": "tab-navigation",
+    "kpi-metrics-form": "tab-goals",
   };
 
   function updateTabIndicator(formId, dirty) {
@@ -171,6 +172,7 @@
     "links-form",
     "sections-form",
     "nav-categories-form",
+    "kpi-metrics-form",
   ].forEach(trackForm);
 
   // -----------------------------------------------------------------------
@@ -523,6 +525,33 @@
           type: "success",
           message: 'Category "' + name + '" added — assign features and save',
         });
+      }
+    });
+  }
+
+  // -----------------------------------------------------------------------
+  // KPI Metrics: add / remove rows
+  // -----------------------------------------------------------------------
+  var kpiMetricsList = document.getElementById("kpi-metrics-list");
+  var addKpiMetricBtn = document.querySelector("[data-add-kpi-metric]");
+
+  if (kpiMetricsList && addKpiMetricBtn) {
+    addKpiMetricBtn.addEventListener("click", function () {
+      var row = document.createElement("div");
+      row.className = "settings-tag-row";
+      row.innerHTML =
+        '<input type="text" name="kpiMetrics" placeholder="e.g. mrr" class="settings-field__input" />' +
+        '<button type="button" class="btn btn--danger btn--sm" data-remove-kpi-metric>Remove</button>';
+      kpiMetricsList.appendChild(row);
+      row.querySelector("input").focus();
+      checkDirty("kpi-metrics-form");
+    });
+
+    kpiMetricsList.addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-remove-kpi-metric]");
+      if (btn) {
+        btn.closest(".settings-tag-row").remove();
+        checkDirty("kpi-metrics-form");
       }
     });
   }

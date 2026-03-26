@@ -98,4 +98,10 @@ export class ProjectService {
     current.navCategories = navCategories;
     await this.repo.write(current);
   }
+
+  async updateKpiMetrics(metrics: string[]): Promise<void> {
+    const current = await this.repo.read();
+    current.kpiMetrics = metrics;
+    await this.repo.write(current);
+  }
 }

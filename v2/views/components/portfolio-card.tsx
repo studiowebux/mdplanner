@@ -77,6 +77,15 @@ export const PortfolioCard: FC<Props> = ({ item, q }) => {
           )}
         </div>
       )}
+
+      {item.linkedGoals && item.linkedGoals.length > 0 && (
+        <div class="portfolio-card__tech-stack">
+          <span class="portfolio-pill">
+            {item.linkedGoals.length}{" "}
+            goal{item.linkedGoals.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+      )}
     </DomainCard>
   );
 };

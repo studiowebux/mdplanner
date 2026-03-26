@@ -13,7 +13,6 @@ import {
   goalToRow,
 } from "./constants.tsx";
 import { GoalCard } from "../../views/components/goal-card.tsx";
-import { GoalDetailView } from "../../views/goal-detail.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
 
 export const goalConfig: DomainConfig<Goal, CreateGoal, UpdateGoal> = {
@@ -74,7 +73,4 @@ export const goalConfig: DomainConfig<Goal, CreateGoal, UpdateGoal> = {
     (item.description ?? "").toLowerCase().includes(q) ||
     (item.kpi ?? "").toLowerCase().includes(q) ||
     (item.project ?? "").toLowerCase().includes(q),
-
-  DetailView: ({ item, ...viewProps }) =>
-    GoalDetailView({ item, ...viewProps }) as ReturnType<typeof GoalDetailView>,
 };

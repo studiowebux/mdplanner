@@ -19,7 +19,7 @@
 
 .settings-tabs {
   display: grid;
-  grid-template-columns: repeat(8, auto) 1fr;
+  grid-template-columns: repeat(9, auto) 1fr;
   grid-template-rows: auto 1fr;
 }
 
@@ -69,7 +69,8 @@
 #tab-links:checked ~ .settings-tabs__panel--links,
 #tab-support:checked ~ .settings-tabs__panel--support,
 #tab-navigation:checked ~ .settings-tabs__panel--navigation,
-#tab-sections:checked ~ .settings-tabs__panel--sections {
+#tab-sections:checked ~ .settings-tabs__panel--sections,
+#tab-goals:checked ~ .settings-tabs__panel--goals {
   display: block;
 }
 

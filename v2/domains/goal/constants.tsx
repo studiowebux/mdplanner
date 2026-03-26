@@ -105,6 +105,14 @@ export const GOAL_FORM_FIELDS: FieldDef[] = [
     label: "Success criteria",
     placeholder: "e.g. $50k MRR, 10k users, Churn below 3%",
   },
+  {
+    type: "autocomplete",
+    name: "kpiMetric",
+    label: "KPI metric",
+    source: "kpi-metrics",
+    placeholder: "Search metrics...",
+    freetext: true,
+  },
   { type: "number", name: "kpiTarget", label: "Target value", min: 0 },
   { type: "date", name: "startDate", label: "Start date" },
   { type: "date", name: "endDate", label: "End date" },
@@ -114,6 +122,13 @@ export const GOAL_FORM_FIELDS: FieldDef[] = [
     label: "Project",
     source: "portfolio",
     placeholder: "Search projects...",
+  },
+  {
+    type: "tags",
+    name: "linkedPortfolioItems",
+    label: "Linked portfolio items",
+    source: "portfolio-by-id",
+    placeholder: "Search portfolio items...",
   },
   { type: "textarea", name: "description", label: "Description", rows: 4 },
 ];

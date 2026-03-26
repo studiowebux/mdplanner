@@ -4,6 +4,7 @@ import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { portfolioConfig } from "../../domains/portfolio/config.tsx";
 import {
   getGitHubService,
+  getGoalService,
   getPortfolioService,
   getProjectService,
 } from "../../singletons/services.ts";
@@ -320,10 +321,18 @@ portfolioRouter.get("/:id", async (c) => {
   const id = c.req.param("id");
   const item = await getPortfolioService().getById(id);
   if (!item) return c.notFound();
+
+  const goals = item.linkedGoals?.length
+    ? (await getGoalService().list()).filter((g) =>
+      item.linkedGoals!.includes(g.id)
+    )
+    : [];
+
   return c.html(
     PortfolioDetailView({
       ...viewProps(c, "/portfolio"),
       item,
+      goals,
     }) as unknown as string,
   );
 });

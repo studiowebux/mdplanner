@@ -19,11 +19,14 @@ import {
   registerAutocompleteSource,
 } from "./autocomplete/routes.ts";
 import {
+  getGoalService,
   getMilestoneService,
   getPeopleService,
   getPortfolioService,
+  getProjectService,
   getTaskService,
 } from "../singletons/services.ts";
+import { DEFAULT_KPI_METRICS } from "../constants/mod.ts";
 import type { AppVariables } from "../types/app.ts";
 
 // Register autocomplete sources — add new ones here as domains grow.
@@ -174,6 +177,50 @@ registerAutocompleteSource("people-departments", {
     return depts
       .filter((d) => d.toLowerCase().includes(lower))
       .map((d) => ({ name: d }));
+  },
+  displayKey: "name",
+  valueKey: "name",
+});
+
+registerAutocompleteSource("portfolio-by-id", {
+  list: () => getPortfolioService().list(),
+  search: async (q) => {
+    const all = await getPortfolioService().list();
+    const lower = q.toLowerCase();
+    return all.filter((p) => p.name.toLowerCase().includes(lower));
+  },
+  displayKey: "name",
+  valueKey: "id",
+});
+
+registerAutocompleteSource("goals-by-id", {
+  list: () => getGoalService().list(),
+  search: async (q) => {
+    const all = await getGoalService().list();
+    const lower = q.toLowerCase();
+    return all.filter((g) => g.title.toLowerCase().includes(lower));
+  },
+  displayKey: "title",
+  valueKey: "id",
+});
+
+registerAutocompleteSource("kpi-metrics", {
+  list: async () => {
+    const config = await getProjectService().getConfig();
+    const metrics = config.kpiMetrics?.length
+      ? config.kpiMetrics
+      : DEFAULT_KPI_METRICS;
+    return metrics.map((m) => ({ name: m }));
+  },
+  search: async (q) => {
+    const config = await getProjectService().getConfig();
+    const metrics = config.kpiMetrics?.length
+      ? config.kpiMetrics
+      : DEFAULT_KPI_METRICS;
+    const lower = q.toLowerCase();
+    return metrics
+      .filter((m) => m.toLowerCase().includes(lower))
+      .map((m) => ({ name: m }));
   },
   displayKey: "name",
   valueKey: "name",

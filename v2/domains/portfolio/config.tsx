@@ -62,6 +62,13 @@ const FORM_FIELDS: FieldDef[] = [
       { value: "true", label: "Yes" },
     ],
   },
+  {
+    type: "tags",
+    name: "linkedGoals",
+    label: "Linked goals",
+    source: "goals-by-id",
+    placeholder: "Search goals...",
+  },
 ];
 
 export const portfolioConfig: DomainConfig<

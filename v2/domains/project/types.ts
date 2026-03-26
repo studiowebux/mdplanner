@@ -95,6 +95,11 @@ export const ProjectConfigSchema = z.object({
     description: "Number of pipeline runs per page (default: 10)",
     example: 10,
   }),
+  kpiMetrics: z.array(z.string()).optional().openapi({
+    description:
+      "Configurable KPI metric keys shown in goal form (e.g. mrr, arr, active_users)",
+    example: ["mrr", "arr", "churn_rate"],
+  }),
 }).openapi("ProjectConfig");
 
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
@@ -145,6 +150,7 @@ export const FrontmatterProjectSchema = z.object({
   github_token: z.string().optional(),
   cloudflare_token: z.string().optional(),
   pipelines_per_page: z.number().optional(),
+  kpi_metrics: z.array(z.unknown()).optional(),
   last_updated: z.string().optional(),
 }).transform(
   async (fm): Promise<Omit<ProjectConfig, "name" | "description">> => {
@@ -185,6 +191,9 @@ export const FrontmatterProjectSchema = z.object({
       githubToken,
       cloudflareToken,
       pipelinesPerPage: fm.pipelines_per_page,
+      kpiMetrics: Array.isArray(fm.kpi_metrics)
+        ? (fm.kpi_metrics as unknown[]).map(String)
+        : undefined,
       lastUpdated: fm.last_updated,
     };
   },

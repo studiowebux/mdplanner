@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { PortfolioItem } from "../types/portfolio.types.ts";
+import type { Goal } from "../types/goal.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatCurrency } from "../utils/format.ts";
 import { formatDate } from "../utils/time.ts";
@@ -9,7 +10,7 @@ import { GitHubSection } from "./github.tsx";
 
 import type { PortfolioStatusUpdate } from "../types/portfolio.types.ts";
 
-type Props = ViewProps & { item: PortfolioItem };
+type Props = ViewProps & { item: PortfolioItem; goals?: Goal[] };
 
 /** Single status update row — reused by detail page and fragment routes. */
 export const StatusUpdateRow: FC<{
@@ -72,7 +73,9 @@ export const StatusUpdateEditRow: FC<{
   </form>
 );
 
-export const PortfolioDetailView: FC<Props> = ({ item, ...viewProps }) => {
+export const PortfolioDetailView: FC<Props> = (
+  { item, goals = [], ...viewProps },
+) => {
   const descHtml = markdownToHtml(item.description);
   const profit = (item.revenue ?? 0) - (item.expenses ?? 0);
   const pct = item.progress ?? 0;
@@ -81,7 +84,11 @@ export const PortfolioDetailView: FC<Props> = ({ item, ...viewProps }) => {
     <MainLayout
       title={item.name}
       {...viewProps}
-      styles={["/css/views/portfolio.css", "/css/views/github.css"]}
+      styles={[
+        "/css/views/portfolio.css",
+        "/css/views/github.css",
+        ...(goals.length ? ["/css/views/goals.css"] : []),
+      ]}
       scripts={item.githubRepo ? ["/js/github-tabs.js"] : []}
     >
       <div
@@ -266,12 +273,23 @@ export const PortfolioDetailView: FC<Props> = ({ item, ...viewProps }) => {
 
         {item.githubRepo && <GitHubSection itemId={item.id} />}
 
-        {item.linkedGoals && item.linkedGoals.length > 0 && (
+        {goals.length > 0 && (
           <section class="portfolio-detail__section">
             <h2 class="portfolio-detail__section-heading">Linked Goals</h2>
-            <ul>
-              {item.linkedGoals.map((g) => <li key={g}>{g}</li>)}
-            </ul>
+            <div class="goal-detail__links">
+              {goals.map((g) => (
+                <a
+                  key={g.id}
+                  href={`/goals/${g.id}`}
+                  class="btn btn--secondary btn--sm"
+                >
+                  <span class={`goal-status goal-status--${g.status}`}>
+                    {g.status}
+                  </span>{" "}
+                  {g.title}
+                </a>
+              ))}
+            </div>
           </section>
         )}
 

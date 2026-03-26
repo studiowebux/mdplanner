@@ -1,13 +1,19 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { Goal } from "../types/goal.types.ts";
+import type { PortfolioItem } from "../types/portfolio.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { dueIn, formatDate } from "../utils/time.ts";
 import { markdownToHtml } from "../utils/markdown.ts";
 
-export const GoalDetailView: FC<ViewProps & { item: Goal }> = (
-  { item: goal, ...viewProps },
+export const GoalDetailView: FC<
+  ViewProps & { item: Goal; portfolioItems?: PortfolioItem[] }
+> = (
+  { item: goal, portfolioItems = [], ...viewProps },
 ) => {
+  const portfolioNameMap = new Map(
+    portfolioItems.map((p) => [p.id, p.name]),
+  );
   const descHtml = markdownToHtml(goal.description);
   const isCompleted = goal.status === "success" || goal.status === "failed";
   const deadline = isCompleted ? "" : dueIn(goal.endDate);
@@ -158,7 +164,7 @@ export const GoalDetailView: FC<ViewProps & { item: Goal }> = (
                   href={`/portfolio/${pid}`}
                   class="btn btn--secondary btn--sm"
                 >
-                  {pid}
+                  {portfolioNameMap.get(pid) ?? pid}
                 </a>
               ))}
             </div>

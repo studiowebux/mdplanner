@@ -51,6 +51,9 @@ export class ProjectRepository {
     if (config.pipelinesPerPage !== undefined) {
       fm.pipelines_per_page = config.pipelinesPerPage;
     }
+    if (config.kpiMetrics && config.kpiMetrics.length > 0) {
+      fm.kpi_metrics = config.kpiMetrics;
+    }
     if (config.githubToken) {
       fm.github_token = await encryptSecret(config.githubToken);
     }

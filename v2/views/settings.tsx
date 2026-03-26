@@ -6,6 +6,7 @@ import { MainLayout } from "../components/layout/main.tsx";
 import type { ViewProps } from "../types/app.ts";
 import {
   APP_VERSION,
+  DEFAULT_KPI_METRICS,
   DEFAULT_NAV_CATEGORIES,
   ENTITY_TYPE_LABELS,
   getSectionOrder,
@@ -133,6 +134,14 @@ export const SettingsView: FC<SettingsProps> = ({
           <label for="tab-sections" class="settings-tabs__label">
             Sections
           </label>
+
+          <input
+            type="radio"
+            name="settings-tab"
+            id="tab-goals"
+            class="settings-tabs__radio"
+          />
+          <label for="tab-goals" class="settings-tabs__label">Goals</label>
 
           <input
             type="radio"
@@ -467,6 +476,52 @@ export const SettingsView: FC<SettingsProps> = ({
                   data-add-tag
                 >
                   Add tag
+                </button>
+              </div>
+
+              <FormActions />
+            </form>
+          </div>
+
+          {/* ---- Goals tab ---- */}
+          <div class="settings-tabs__panel settings-tabs__panel--goals">
+            <form
+              id="kpi-metrics-form"
+              hx-post="/settings/kpi-metrics"
+              hx-trigger="submit"
+              hx-swap="none"
+            >
+              <p class="settings-field__hint" style="">
+                KPI metric keys available in the goal form. Falls back to
+                defaults when empty.
+              </p>
+              <div id="kpi-metrics-list" class="settings-tag-list">
+                {(config.kpiMetrics ?? DEFAULT_KPI_METRICS).map((m, i) => (
+                  <div key={i} class="settings-tag-row">
+                    <input
+                      type="text"
+                      name="kpiMetrics"
+                      value={m}
+                      class="settings-field__input"
+                    />
+                    <button
+                      type="button"
+                      class="btn btn--danger btn--sm"
+                      data-remove-kpi-metric
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div class="settings-page__bulk-actions">
+                <button
+                  type="button"
+                  class="btn btn--secondary btn--sm"
+                  data-add-kpi-metric
+                >
+                  Add metric
                 </button>
               </div>
 

@@ -147,6 +147,20 @@ settingsViewRouter.post("/sections", async (c) => {
   });
 });
 
+// -- Goals tab: KPI metric keys --
+settingsViewRouter.post("/kpi-metrics", async (c) => {
+  const body = await c.req.parseBody({ all: true });
+  const raw = body.kpiMetrics;
+  const metrics = (Array.isArray(raw) ? raw : raw ? [raw] : [])
+    .map((m) => String(m).trim())
+    .filter(Boolean);
+  await getProjectService().updateKpiMetrics(metrics);
+  return new Response(null, {
+    status: 204,
+    headers: { "HX-Trigger": hxTrigger("success", "KPI metrics saved") },
+  });
+});
+
 // -- Navigation tab: nav categories --
 settingsViewRouter.post("/nav-categories", async (c) => {
   const body = await c.req.parseBody({ all: true });

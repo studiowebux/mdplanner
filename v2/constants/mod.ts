@@ -39,6 +39,19 @@ export const WEEKDAYS = [
 /** The section name that represents completed tasks. */
 export const DONE_SECTION = "Done" as const;
 
+/** Default KPI metric keys — shown in goal form when project has none configured. */
+export const DEFAULT_KPI_METRICS: string[] = [
+  "mrr",
+  "arr",
+  "churn_rate",
+  "ltv",
+  "cac",
+  "growth_rate",
+  "active_users",
+  "nrr",
+  "gross_margin",
+];
+
 export const ENTITY_TYPE_LABELS: Record<string, string> = {
   task: "Task",
   note: "Note",
