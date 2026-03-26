@@ -12,6 +12,15 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
   const isCompleted = item.status === "success" || item.status === "failed";
   const deadline = isCompleted ? "" : dueIn(item.endDate);
   const isOverdue = deadline.includes("overdue");
+  const tookDays = isCompleted && item.startDate
+    ? Math.max(
+      0,
+      Math.round(
+        (new Date(item.updated).getTime() -
+          new Date(item.startDate).getTime()) / 86400000,
+      ),
+    )
+    : null;
   const now = Date.now();
   const start = item.startDate ? new Date(item.startDate).getTime() : 0;
   const end = item.endDate ? new Date(item.endDate).getTime() : 0;
@@ -100,6 +109,11 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
                 class={`goal-deadline${isOverdue ? " goal-deadline--overdue" : ""}`}
               >
                 {" — "}{deadline}
+              </span>
+            )}
+            {tookDays !== null && (
+              <span class="goal-deadline">
+                {" — "}took {tookDays} day{tookDays !== 1 ? "s" : ""}
               </span>
             )}
           </span>

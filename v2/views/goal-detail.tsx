@@ -12,6 +12,15 @@ export const GoalDetailView: FC<ViewProps & { item: Goal }> = (
   const isCompleted = goal.status === "success" || goal.status === "failed";
   const deadline = isCompleted ? "" : dueIn(goal.endDate);
   const isOverdue = deadline.includes("overdue");
+  const tookDays = isCompleted && goal.startDate
+    ? Math.max(
+      0,
+      Math.round(
+        (new Date(goal.updated).getTime() -
+          new Date(goal.startDate).getTime()) / 86400000,
+      ),
+    )
+    : null;
 
   return (
     <MainLayout
@@ -47,6 +56,11 @@ export const GoalDetailView: FC<ViewProps & { item: Goal }> = (
                 class={`goal-deadline${isOverdue ? " goal-deadline--overdue" : ""}`}
               >
                 {deadline}
+              </span>
+            )}
+            {tookDays !== null && (
+              <span class="goal-deadline">
+                took {tookDays} day{tookDays !== 1 ? "s" : ""}
               </span>
             )}
           </div>
