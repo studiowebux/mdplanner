@@ -1,5 +1,4 @@
 ---
-id: portfolio_analytics_dashboard
 name: Analytics Dashboard
 category: SaaS Products
 status: planning
