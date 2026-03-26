@@ -7,6 +7,7 @@ import { formatCurrency } from "../utils/format.ts";
 import { formatDate } from "../utils/time.ts";
 import { markdownToHtml } from "../utils/markdown.ts";
 import { GitHubSection } from "./github.tsx";
+import { KpiGauge } from "../components/ui/kpi-gauge.tsx";
 
 import type { PortfolioStatusUpdate } from "../types/portfolio.types.ts";
 
@@ -89,7 +90,10 @@ export const PortfolioDetailView: FC<Props> = (
         "/css/views/github.css",
         ...(goals.length ? ["/css/views/goals.css"] : []),
       ]}
-      scripts={item.githubRepo ? ["/js/github-tabs.js"] : []}
+      scripts={[
+        ...(item.githubRepo ? ["/js/github-tabs.js"] : []),
+        ...(goals.length ? ["/js/kpi-gauge.js"] : []),
+      ]}
     >
       <div
         hx-ext="sse"
@@ -289,6 +293,7 @@ export const PortfolioDetailView: FC<Props> = (
                   <th>Status</th>
                   <th>KPI</th>
                   <th>Metric</th>
+                  <th>Value</th>
                   <th>Target</th>
                 </tr>
               </thead>
@@ -307,6 +312,11 @@ export const PortfolioDetailView: FC<Props> = (
                     </td>
                     <td>{g.kpi ?? ""}</td>
                     <td>{g.kpiMetric ?? ""}</td>
+                    <td>
+                      {g.kpiValue !== undefined && g.kpiTarget !== undefined
+                        ? <KpiGauge value={g.kpiValue} target={g.kpiTarget} />
+                        : (g.kpiValue ?? "")}
+                    </td>
                     <td>{g.kpiTarget ?? ""}</td>
                   </tr>
                 ))}

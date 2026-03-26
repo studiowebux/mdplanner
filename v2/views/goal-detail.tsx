@@ -5,6 +5,7 @@ import type { PortfolioItem } from "../types/portfolio.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { dueIn, formatDate } from "../utils/time.ts";
 import { markdownToHtml } from "../utils/markdown.ts";
+import { KpiGauge } from "../components/ui/kpi-gauge.tsx";
 
 export const GoalDetailView: FC<
   ViewProps & { item: Goal; portfolioItems?: PortfolioItem[] }
@@ -32,6 +33,7 @@ export const GoalDetailView: FC<
       title={goal.title}
       {...viewProps}
       styles={["/css/views/goals.css"]}
+      scripts={["/js/kpi-gauge.js"]}
     >
       <div
         hx-ext="sse"
@@ -107,12 +109,35 @@ export const GoalDetailView: FC<
               <span class="goal-detail__info-value">{goal.kpiMetric}</span>
             </div>
           )}
-          {goal.kpiTarget !== undefined && (
-            <div class="goal-detail__info-item">
-              <span class="goal-detail__info-label">KPI Target</span>
-              <span class="goal-detail__info-value">{goal.kpiTarget}</span>
-            </div>
-          )}
+          {goal.kpiValue !== undefined && goal.kpiTarget !== undefined
+            ? (
+              <div class="goal-detail__info-item">
+                <span class="goal-detail__info-label">Progress</span>
+                <span class="goal-detail__info-value">
+                  <KpiGauge value={goal.kpiValue} target={goal.kpiTarget} />
+                </span>
+              </div>
+            )
+            : (
+              <>
+                {goal.kpiTarget !== undefined && (
+                  <div class="goal-detail__info-item">
+                    <span class="goal-detail__info-label">KPI Target</span>
+                    <span class="goal-detail__info-value">
+                      {goal.kpiTarget}
+                    </span>
+                  </div>
+                )}
+                {goal.kpiValue !== undefined && (
+                  <div class="goal-detail__info-item">
+                    <span class="goal-detail__info-label">KPI Value</span>
+                    <span class="goal-detail__info-value">
+                      {goal.kpiValue}
+                    </span>
+                  </div>
+                )}
+              </>
+            )}
           {goal.startDate && (
             <div class="goal-detail__info-item">
               <span class="goal-detail__info-label">Start</span>
@@ -134,9 +159,11 @@ export const GoalDetailView: FC<
               <span class="goal-detail__info-label">Project</span>
               <span class="goal-detail__info-value">
                 <a
-                  href={portfolioIdByName
-                    ? `/portfolio/${portfolioIdByName}`
-                    : `/portfolio?q=${encodeURIComponent(goal.project)}`}
+                  href={`/portfolio/${
+                    portfolioIdByName ??
+                      goal.project.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+                        .replace(/(^-|-$)/g, "")
+                  }`}
                 >
                   {goal.project}
                 </a>

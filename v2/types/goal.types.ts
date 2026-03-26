@@ -47,6 +47,9 @@ export const GoalSchema = z.object({
   kpiTarget: z.number().optional().openapi({
     description: "Numeric target value for the KPI metric",
   }),
+  kpiValue: z.number().optional().openapi({
+    description: "Current actual value for the KPI metric",
+  }),
   startDate: z.string().openapi({
     description: "Start date (YYYY-MM-DD)",
     example: "2026-01-01",
@@ -88,6 +91,7 @@ export const CreateGoalSchema = GoalSchema.pick({
   kpi: true,
   kpiMetric: true,
   kpiTarget: true,
+  kpiValue: true,
   startDate: true,
   endDate: true,
   status: true,
@@ -100,6 +104,7 @@ export const CreateGoalSchema = GoalSchema.pick({
   kpi: true,
   kpiMetric: true,
   kpiTarget: true,
+  kpiValue: true,
   startDate: true,
   endDate: true,
   status: true,

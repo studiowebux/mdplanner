@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import type { Goal } from "../../types/goal.types.ts";
 import { DomainCard } from "../../components/ui/domain-card.tsx";
 import { highlightHtml } from "../../utils/highlight.tsx";
+import { KpiGauge } from "../../components/ui/kpi-gauge.tsx";
 import { dueIn, formatDate } from "../../utils/time.ts";
 import { markdownToHtml } from "../../utils/markdown.ts";
 
@@ -57,14 +58,23 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
         {item.kpi && (
           <>
             <dt class="domain-card__meta-label">KPI</dt>
-            <dd class="domain-card__meta-value">{item.kpi}</dd>
+            <dd class="domain-card__meta-value">
+              {item.kpiValue !== undefined && item.kpiTarget !== undefined
+                ? <KpiGauge value={item.kpiValue} target={item.kpiTarget} />
+                : item.kpi}
+            </dd>
           </>
         )}
         {item.project && (
           <>
             <dt class="domain-card__meta-label">Project</dt>
             <dd class="domain-card__meta-value">
-              <a href={`/portfolio?q=${encodeURIComponent(item.project)}`}>
+              <a
+                href={`/portfolio/${
+                  item.project.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+                    .replace(/(^-|-$)/g, "")
+                }`}
+              >
                 {item.project}
               </a>
             </dd>

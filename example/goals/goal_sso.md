@@ -1,16 +1,17 @@
 ---
-id: goal_sso
+title: Enterprise SSO Integration
 type: project
-kpi: "SSO for enterprise clients"
-kpi_metric: active_users
-kpi_target: 50
-start: 2026-01-15
-end: 2026-04-15
+kpi: SSO for enterprise clients
+kpiMetric: active_users
+kpiTarget: 50
+kpiValue: 0
+startDate: 2026-01-15
+endDate: 2026-04-15
 status: late
 project: API Gateway
+created: "2026-03-26T05:59:18.764Z"
+updated: "2026-03-26T05:59:18.764Z"
 ---
-
-# Enterprise SSO Integration
 
 Add SAML and OIDC single sign-on for enterprise customers. Missed original
 deadline due to security audit requirements.

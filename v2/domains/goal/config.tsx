@@ -21,6 +21,7 @@ export const goalConfig: DomainConfig<Goal, CreateGoal, UpdateGoal> = {
   path: "/goals",
   ssePrefix: "goal",
   styles: ["/css/views/goals.css"],
+  scripts: ["/js/kpi-gauge.js"],
   emptyMessage: "No goals yet. Create one to get started.",
   defaultView: "table",
 

@@ -6,6 +6,13 @@ import { statusBadgeRenderer } from "../../components/ui/status-badge.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
 
+function nameToSlug(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(
+    /(^-|-$)/g,
+    "",
+  );
+}
+
 const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
   <div class="domain-card__actions">
     <a class="btn btn--secondary btn--sm" href={`/goals/${row.id}`}>
@@ -76,7 +83,7 @@ export const GOAL_TABLE_COLUMNS: ColumnDef[] = [
     render: (v, row) =>
       v
         ? (
-          <a href={`/portfolio?q=${encodeURIComponent(String(v))}`}>
+          <a href={`/portfolio/${nameToSlug(String(v))}`}>
             <Highlight text={String(v)} q={row._q as string} />
           </a>
         )
@@ -114,6 +121,7 @@ export const GOAL_FORM_FIELDS: FieldDef[] = [
     freetext: true,
   },
   { type: "number", name: "kpiTarget", label: "Target value", min: 0 },
+  { type: "number", name: "kpiValue", label: "Current value", min: 0 },
   { type: "date", name: "startDate", label: "Start date" },
   { type: "date", name: "endDate", label: "End date" },
   {

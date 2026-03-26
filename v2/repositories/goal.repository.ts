@@ -67,6 +67,7 @@ export class GoalRepository {
       updated: now,
       ...(data.kpiMetric && { kpiMetric: data.kpiMetric }),
       ...(data.kpiTarget !== undefined && { kpiTarget: data.kpiTarget }),
+      ...(data.kpiValue !== undefined && { kpiValue: data.kpiValue }),
       ...(data.githubRepo && { githubRepo: data.githubRepo }),
       ...(data.githubMilestone !== undefined && {
         githubMilestone: data.githubMilestone,
@@ -148,6 +149,9 @@ export class GoalRepository {
         : undefined,
       kpiTarget: fm.kpi_target != null || fm.kpiTarget != null
         ? Number(fm.kpi_target ?? fm.kpiTarget)
+        : undefined,
+      kpiValue: fm.kpi_value != null || fm.kpiValue != null
+        ? Number(fm.kpi_value ?? fm.kpiValue)
         : undefined,
       // v1 uses start/end, v2 uses startDate/endDate
       startDate: String(fm.startDate ?? fm.start ?? ""),
