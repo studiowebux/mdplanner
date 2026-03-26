@@ -1121,14 +1121,6 @@
   margin-top: var(--space-xs);
 }
 
-/* Actions */
-
-.task-detail__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-sm);
-}
-
 .task-detail__action-group {
   display: flex;
   align-items: center;

@@ -188,12 +188,6 @@
   margin: 0;
 }
 
-.goal-detail__header-actions {
-  display: flex;
-  gap: var(--space-sm);
-  flex-shrink: 0;
-}
-
 .goal-detail__info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr));
@@ -222,6 +216,15 @@
 
 .goal-detail__info-value {
   color: var(--color-text-primary);
+}
+
+.goal-detail__info-value a {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.goal-detail__info-value a:hover {
+  color: var(--color-accent);
 }
 
 .goal-detail__section {

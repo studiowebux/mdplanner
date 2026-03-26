@@ -325,11 +325,6 @@
   font-size: var(--font-size-sm);
 }
 
-.person-detail__actions {
-  display: flex;
-  gap: var(--space-sm);
-}
-
 /* =========================================================================
    Org Chart — tree view with connector lines
    ========================================================================= */

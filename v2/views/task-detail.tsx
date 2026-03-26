@@ -553,7 +553,7 @@ export const TaskDetailView: FC<Props> = (
         <CommentsSection comments={task.comments} />
 
         {/* Edit + Delete at bottom — matches person-detail pattern */}
-        <div class="task-detail__actions">
+        <div class="detail-actions">
           <button
             class="btn btn--secondary"
             type="button"

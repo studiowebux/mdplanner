@@ -89,13 +89,6 @@
   word-break: break-all;
 }
 
-.dns-detail__header-actions {
-  display: flex;
-  gap: var(--space-sm);
-  flex-shrink: 0;
-  flex-wrap: wrap;
-}
-
 /* ---------------------------------------------------------------------------
    Info grid
 --------------------------------------------------------------------------- */

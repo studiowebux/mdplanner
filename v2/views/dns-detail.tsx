@@ -156,7 +156,7 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
             <span class="dns-provider-badge">{domain.provider}</span>
           )}
         </div>
-        <div class="dns-detail__header-actions">
+        <div class="detail-actions">
           <button
             class="btn btn--secondary btn--sm"
             type="button"

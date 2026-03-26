@@ -200,7 +200,7 @@ export const PersonDetailView: FC<Props> = (
           </section>
         )}
 
-        <div class="person-detail__actions">
+        <div class="detail-actions">
           <button
             class="btn btn--secondary"
             type="button"

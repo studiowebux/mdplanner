@@ -72,7 +72,7 @@ export const GoalDetailView: FC<
               </span>
             )}
           </div>
-          <div class="goal-detail__header-actions">
+          <div class="detail-actions">
             <button
               class="btn btn--secondary btn--sm"
               type="button"

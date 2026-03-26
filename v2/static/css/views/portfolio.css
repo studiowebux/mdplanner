@@ -213,7 +213,7 @@
 .portfolio-detail__kpi-table th,
 .portfolio-detail__kpi-table td {
   text-align: left;
-  padding: var(--space-xs) var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
   font-size: var(--font-size-sm);
   border-bottom: var(--border-width) solid var(--color-border);
 }
@@ -221,6 +221,11 @@
 .portfolio-detail__kpi-table th {
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+}
+
+.portfolio-detail__kpi-table tbody tr:hover {
+  background: var(--color-bg-hover);
 }
 
 .portfolio-detail__kpi-met {

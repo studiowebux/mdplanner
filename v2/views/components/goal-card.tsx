@@ -54,7 +54,7 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
             {item.type}
           </span>
           {item.type === "project" && item.project && (
-            <span>— {item.project}</span>
+            <span>{item.project}</span>
           )}
         </dd>
         {item.kpi && (
