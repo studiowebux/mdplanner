@@ -322,11 +322,11 @@ portfolioRouter.get("/:id", async (c) => {
   const item = await getPortfolioService().getById(id);
   if (!item) return c.notFound();
 
-  const goals = item.linkedGoals?.length
-    ? (await getGoalService().list()).filter((g) =>
-      item.linkedGoals!.includes(g.id)
-    )
-    : [];
+  const allGoals = await getGoalService().list();
+  const linkedById = new Set(item.linkedGoals ?? []);
+  const goals = allGoals.filter((g) =>
+    linkedById.has(g.id) || g.project === item.name
+  );
 
   return c.html(
     PortfolioDetailView({

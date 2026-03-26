@@ -2,6 +2,8 @@
 id: goal_api_v2
 type: project
 kpi: "Ship API v2 with OpenAPI spec"
+kpi_metric: active_users
+kpi_target: 42
 start: 2026-01-15
 end: 2026-02-28
 status: success

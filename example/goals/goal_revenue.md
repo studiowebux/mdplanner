@@ -2,6 +2,8 @@
 id: goal_revenue
 type: enterprise
 kpi: "$50k MRR"
+kpi_metric: mrr
+kpi_target: 50000
 start: 2026-04-01
 end: 2026-12-31
 status: planning

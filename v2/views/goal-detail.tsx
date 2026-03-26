@@ -11,9 +11,8 @@ export const GoalDetailView: FC<
 > = (
   { item: goal, portfolioItems = [], ...viewProps },
 ) => {
-  const portfolioNameMap = new Map(
-    portfolioItems.map((p) => [p.id, p.name]),
-  );
+  const portfolioByName = portfolioItems.find((p) => p.name === goal.project);
+  const portfolioIdByName = portfolioByName?.id;
   const descHtml = markdownToHtml(goal.description);
   const isCompleted = goal.status === "success" || goal.status === "failed";
   const deadline = isCompleted ? "" : dueIn(goal.endDate);
@@ -134,7 +133,11 @@ export const GoalDetailView: FC<
             <div class="goal-detail__info-item">
               <span class="goal-detail__info-label">Project</span>
               <span class="goal-detail__info-value">
-                <a href={`/portfolio?q=${encodeURIComponent(goal.project)}`}>
+                <a
+                  href={portfolioIdByName
+                    ? `/portfolio/${portfolioIdByName}`
+                    : `/portfolio?q=${encodeURIComponent(goal.project)}`}
+                >
                   {goal.project}
                 </a>
               </span>
@@ -149,25 +152,6 @@ export const GoalDetailView: FC<
               class="markdown-body"
               dangerouslySetInnerHTML={{ __html: descHtml }}
             />
-          </section>
-        )}
-
-        {goal.linkedPortfolioItems && goal.linkedPortfolioItems.length > 0 && (
-          <section class="detail-section goal-detail__section">
-            <h2 class="section-heading">
-              Linked Portfolio Items
-            </h2>
-            <div class="goal-detail__links">
-              {goal.linkedPortfolioItems.map((pid) => (
-                <a
-                  key={pid}
-                  href={`/portfolio/${pid}`}
-                  class="btn btn--secondary btn--sm"
-                >
-                  {portfolioNameMap.get(pid) ?? pid}
-                </a>
-              ))}
-            </div>
           </section>
         )}
       </main>

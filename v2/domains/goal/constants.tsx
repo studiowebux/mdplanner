@@ -123,13 +123,6 @@ export const GOAL_FORM_FIELDS: FieldDef[] = [
     source: "portfolio",
     placeholder: "Search projects...",
   },
-  {
-    type: "tags",
-    name: "linkedPortfolioItems",
-    label: "Linked portfolio items",
-    source: "portfolio-by-id",
-    placeholder: "Search portfolio items...",
-  },
   { type: "textarea", name: "description", label: "Description", rows: 4 },
 ];
 
@@ -144,6 +137,5 @@ export function goalToRow(g: Goal): Record<string, unknown> {
     endDate: g.endDate ?? "",
     project: g.project ?? "",
     description: g.description ?? "",
-    linkedPortfolioItems: g.linkedPortfolioItems ?? [],
   };
 }

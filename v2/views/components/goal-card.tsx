@@ -86,14 +86,6 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
             </dd>
           </>
         )}
-        {item.linkedPortfolioItems && item.linkedPortfolioItems.length > 0 && (
-          <>
-            <dt class="domain-card__meta-label">Linked</dt>
-            <dd class="domain-card__meta-value">
-              {item.linkedPortfolioItems.length} portfolio item(s)
-            </dd>
-          </>
-        )}
       </dl>
 
       {start > 0 && end > 0 && (
@@ -117,7 +109,7 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
             )}
             {tookDays !== null && (
               <span class="goal-deadline">
-                {" — "}took {tookDays} day{tookDays !== 1 ? "s" : ""}
+                &mdash; took {tookDays} day{tookDays !== 1 ? "s" : ""}
               </span>
             )}
           </span>

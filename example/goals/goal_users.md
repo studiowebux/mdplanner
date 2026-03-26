@@ -2,6 +2,8 @@
 id: goal_users
 type: enterprise
 kpi: "10,000 active users"
+kpi_metric: active_users
+kpi_target: 10000
 start: 2026-01-01
 end: 2026-12-31
 status: on-track

@@ -2,6 +2,8 @@
 id: goal_mvp
 type: project
 kpi: "Launch public beta"
+kpi_metric: active_users
+kpi_target: 100
 start: 2026-01-01
 end: 2026-03-31
 status: on-track

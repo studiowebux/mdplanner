@@ -279,27 +279,43 @@ export const PortfolioDetailView: FC<Props> = (
           </div>
         </section>
 
-        {item.githubRepo && <GitHubSection itemId={item.id} />}
-
         {goals.length > 0 && (
           <section class="detail-section portfolio-detail__section">
             <h2 class="section-heading">Linked Goals</h2>
-            <div class="goal-detail__links">
-              {goals.map((g) => (
-                <a
-                  key={g.id}
-                  href={`/goals/${g.id}`}
-                  class="btn btn--secondary btn--sm"
-                >
-                  <span class={`badge goal-status goal-status--${g.status}`}>
-                    {g.status}
-                  </span>{" "}
-                  {g.title}
-                </a>
-              ))}
-            </div>
+            <table class="portfolio-detail__kpi-table">
+              <thead>
+                <tr>
+                  <th>Goal</th>
+                  <th>Status</th>
+                  <th>KPI</th>
+                  <th>Metric</th>
+                  <th>Target</th>
+                </tr>
+              </thead>
+              <tbody>
+                {goals.map((g) => (
+                  <tr key={g.id}>
+                    <td>
+                      <a href={`/goals/${g.id}`}>{g.title}</a>
+                    </td>
+                    <td>
+                      <span
+                        class={`badge goal-status goal-status--${g.status}`}
+                      >
+                        {g.status}
+                      </span>
+                    </td>
+                    <td>{g.kpi ?? ""}</td>
+                    <td>{g.kpiMetric ?? ""}</td>
+                    <td>{g.kpiTarget ?? ""}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </section>
         )}
+
+        {item.githubRepo && <GitHubSection itemId={item.id} />}
 
         <div class="detail-actions">
           <button

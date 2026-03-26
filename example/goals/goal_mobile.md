@@ -2,6 +2,8 @@
 id: goal_mobile
 type: project
 kpi: "Ship iOS + Android apps"
+kpi_metric: active_users
+kpi_target: 500
 start: 2026-02-01
 end: 2026-06-30
 status: at-risk
