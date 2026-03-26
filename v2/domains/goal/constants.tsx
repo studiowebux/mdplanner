@@ -73,7 +73,14 @@ export const GOAL_TABLE_COLUMNS: ColumnDef[] = [
     key: "project",
     label: "Project",
     sortable: true,
-    render: (v, row) => <Highlight text={String(v)} q={row._q as string} />,
+    render: (v, row) =>
+      v
+        ? (
+          <a href={`/portfolio?q=${encodeURIComponent(String(v))}`}>
+            <Highlight text={String(v)} q={row._q as string} />
+          </a>
+        )
+        : "",
   },
   { key: "_actions", label: "", render: actionBtns },
 ];

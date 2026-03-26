@@ -2,13 +2,15 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { Goal } from "../types/goal.types.ts";
 import type { ViewProps } from "../types/app.ts";
-import { formatDate } from "../utils/time.ts";
+import { dueIn, formatDate } from "../utils/time.ts";
 import { markdownToHtml } from "../utils/markdown.ts";
 
 export const GoalDetailView: FC<ViewProps & { item: Goal }> = (
   { item: goal, ...viewProps },
 ) => {
   const descHtml = markdownToHtml(goal.description);
+  const deadline = dueIn(goal.endDate);
+  const isOverdue = deadline.includes("overdue");
 
   return (
     <MainLayout
@@ -39,6 +41,13 @@ export const GoalDetailView: FC<ViewProps & { item: Goal }> = (
             <span class={`goal-badge goal-badge--${goal.type}`}>
               {goal.type}
             </span>
+            {deadline && (
+              <span
+                class={`goal-deadline${isOverdue ? " goal-deadline--overdue" : ""}`}
+              >
+                {deadline}
+              </span>
+            )}
           </div>
           <div class="goal-detail__header-actions">
             <button
@@ -101,7 +110,11 @@ export const GoalDetailView: FC<ViewProps & { item: Goal }> = (
           {goal.project && (
             <div class="goal-detail__info-item">
               <span class="goal-detail__info-label">Project</span>
-              <span class="goal-detail__info-value">{goal.project}</span>
+              <span class="goal-detail__info-value">
+                <a href={`/portfolio?q=${encodeURIComponent(goal.project)}`}>
+                  {goal.project}
+                </a>
+              </span>
             </div>
           )}
         </div>

@@ -2,13 +2,15 @@ import type { FC } from "hono/jsx";
 import type { Goal } from "../../types/goal.types.ts";
 import { DomainCard } from "../../components/ui/domain-card.tsx";
 import { highlightHtml } from "../../utils/highlight.tsx";
-import { formatDate } from "../../utils/time.ts";
+import { dueIn, formatDate } from "../../utils/time.ts";
 import { markdownToHtml } from "../../utils/markdown.ts";
 
 type Props = { item: Goal; q?: string };
 
 export const GoalCard: FC<Props> = ({ item, q }) => {
   const descHtml = markdownToHtml(item.description);
+  const deadline = dueIn(item.endDate);
+  const isOverdue = deadline.includes("overdue");
   const now = Date.now();
   const start = item.startDate ? new Date(item.startDate).getTime() : 0;
   const end = item.endDate ? new Date(item.endDate).getTime() : 0;
@@ -54,7 +56,11 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
         {item.project && (
           <>
             <dt class="domain-card__meta-label">Project</dt>
-            <dd class="domain-card__meta-value">{item.project}</dd>
+            <dd class="domain-card__meta-value">
+              <a href={`/portfolio?q=${encodeURIComponent(item.project)}`}>
+                {item.project}
+              </a>
+            </dd>
           </>
         )}
         {item.startDate && (
@@ -86,7 +92,16 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
       {start > 0 && end > 0 && (
         <div class="goal-card__progress">
           <progress class="goal-card__bar" value={progress} max={100} />
-          <span class="goal-card__stats">{progress}% elapsed</span>
+          <span class="goal-card__stats">
+            {progress}% elapsed
+            {deadline && (
+              <span
+                class={`goal-deadline${isOverdue ? " goal-deadline--overdue" : ""}`}
+              >
+                {" — "}{deadline}
+              </span>
+            )}
+          </span>
         </div>
       )}
 
