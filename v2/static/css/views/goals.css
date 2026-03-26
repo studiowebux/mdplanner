@@ -77,30 +77,11 @@
 }
 
 .goal-card__bar {
-  appearance: none;
   display: block;
   width: 100%;
   height: var(--progress-bar-height);
   border: none;
-  border-radius: var(--radius-full);
   background: var(--color-bg-tertiary);
-  overflow: hidden;
-}
-
-.goal-card__bar::-webkit-progress-bar {
-  background: var(--color-bg-tertiary);
-  border-radius: var(--radius-full);
-}
-
-.goal-card__bar::-webkit-progress-value {
-  background: var(--color-accent);
-  border-radius: var(--radius-full);
-  transition: width var(--transition-base);
-}
-
-.goal-card__bar::-moz-progress-bar {
-  background: var(--color-accent);
-  border-radius: var(--radius-full);
 }
 
 .goal-card__stats {
@@ -165,15 +146,6 @@
 
 .goal-detail__info-value {
   color: var(--color-text-primary);
-}
-
-.goal-detail__info-value a {
-  color: var(--color-text-primary);
-  text-decoration: none;
-}
-
-.goal-detail__info-value a:hover {
-  color: var(--color-accent);
 }
 
 .goal-detail__links {

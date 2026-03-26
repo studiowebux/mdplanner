@@ -101,7 +101,11 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
 
       {start > 0 && end > 0 && (
         <div class="goal-card__progress">
-          <progress class="goal-card__bar" value={progress} max={100} />
+          <progress
+            class="progress-bar goal-card__bar"
+            value={progress}
+            max={100}
+          />
           <span class="goal-card__stats">
             {progress}% elapsed
             {deadline && (

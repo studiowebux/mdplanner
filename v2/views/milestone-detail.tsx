@@ -45,7 +45,7 @@ export const MilestoneDetailView: FC<Props> = (
 
           <div class="milestone-detail__progress">
             <progress
-              class="milestone-card__bar"
+              class="progress-bar milestone-card__bar"
               value={milestone.progress}
               max={100}
             />

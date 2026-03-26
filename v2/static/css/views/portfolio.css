@@ -54,28 +54,9 @@
 }
 
 .portfolio-progress__bar {
-  appearance: none;
   flex: 1;
   height: var(--space-sm);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-}
-
-.portfolio-progress__bar::-webkit-progress-bar {
-  background: var(--color-bg-tertiary);
-  border-radius: var(--radius-full);
-}
-
-.portfolio-progress__bar::-webkit-progress-value {
-  background: var(--color-accent);
-  border-radius: var(--radius-full);
-  transition: width var(--transition-base);
-}
-
-.portfolio-progress__bar::-moz-progress-bar {
-  background: var(--color-accent);
-  border-radius: var(--radius-full);
 }
 
 .portfolio-progress__label {

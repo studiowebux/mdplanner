@@ -92,7 +92,7 @@ export const MilestoneCard: FC<Props> = ({ milestone, q }) => {
 
       <div class="milestone-card__progress">
         <progress
-          class="milestone-card__bar"
+          class="progress-bar milestone-card__bar"
           value={milestone.progress}
           max={100}
         />

@@ -28,30 +28,11 @@
 }
 
 .milestone-card__bar {
-  appearance: none;
   display: block;
   width: 100%;
   height: var(--progress-bar-height);
   border: none;
-  border-radius: var(--radius-full);
   background: var(--color-bg-tertiary);
-  overflow: hidden;
-}
-
-.milestone-card__bar::-webkit-progress-bar {
-  background: var(--color-bg-tertiary);
-  border-radius: var(--radius-full);
-}
-
-.milestone-card__bar::-webkit-progress-value {
-  background: var(--color-accent);
-  border-radius: var(--radius-full);
-  transition: width var(--transition-base);
-}
-
-.milestone-card__bar::-moz-progress-bar {
-  background: var(--color-accent);
-  border-radius: var(--radius-full);
 }
 
 .milestone-card__stats {

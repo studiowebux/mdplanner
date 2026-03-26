@@ -217,6 +217,28 @@
   margin: 0 0 var(--space-md) 0;
 }
 
+.progress-bar {
+  appearance: none;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-bar::-webkit-progress-bar {
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+}
+
+.progress-bar::-webkit-progress-value {
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+  transition: width var(--transition-base);
+}
+
+.progress-bar::-moz-progress-bar {
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+}
+
 .detail-section a:not(.btn) {
   color: var(--color-text-primary);
   text-decoration: none;

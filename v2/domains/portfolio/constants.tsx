@@ -36,7 +36,11 @@ const progressRenderer = (v: unknown) => {
   const pct = Number(v) || 0;
   return (
     <div class="portfolio-progress">
-      <progress class="portfolio-progress__bar" value={pct} max={100} />
+      <progress
+        class="progress-bar portfolio-progress__bar"
+        value={pct}
+        max={100}
+      />
       <span class="portfolio-progress__label">{pct}%</span>
     </div>
   );
