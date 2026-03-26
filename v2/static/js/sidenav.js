@@ -57,10 +57,12 @@
       // Remove old listeners by replacing node — prevents stacking
       if (inputs[i].hasAttribute("data-dirty-tracked")) continue;
       inputs[i].setAttribute("data-dirty-tracked", "");
-      inputs[i].addEventListener("input", function () {
+      var markDirty = function () {
         dirtyNavs[id] = true;
         updateDirtyIndicator(el, true);
-      });
+      };
+      inputs[i].addEventListener("input", markDirty);
+      inputs[i].addEventListener("change", markDirty);
     }
   }
 
