@@ -2,15 +2,6 @@
    Card base provided by .domain-card in components.css.
    Header, name, meta, actions provided by .domain-card__* */
 
-.portfolio-card__badge {
-  font-size: var(--font-size-xs);
-  font-weight: var(--badge-font-weight);
-  padding: var(--badge-padding);
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
 .portfolio-card__badge--active {
   background: var(--color-accent-subtle);
   color: var(--color-text-primary);

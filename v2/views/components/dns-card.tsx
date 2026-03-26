@@ -14,7 +14,7 @@ export const DnsCard: FC<Props> = ({ item, q }) => (
     id={item.id}
     badge={item.status
       ? (
-        <span class={`dns-badge dns-badge--${item.status}`}>
+        <span class={`badge dns-badge dns-badge--${item.status}`}>
           {item.status}
         </span>
       )

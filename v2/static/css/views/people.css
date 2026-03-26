@@ -81,14 +81,6 @@
 
 /* Agent type badge */
 
-.person-card__badge {
-  font-size: var(--font-size-xs);
-  font-weight: var(--badge-font-weight);
-  padding: var(--badge-padding);
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-}
-
 .person-card__badge--human {
   background: var(--color-success-bg);
   color: var(--color-success-text);
@@ -105,13 +97,6 @@
 }
 
 /* Agent status badge (table view) */
-
-.person-card__status {
-  font-size: var(--font-size-xs);
-  font-weight: var(--badge-font-weight);
-  padding: var(--badge-padding);
-  border-radius: var(--radius-full);
-}
 
 .person-card__status--idle {
   background: var(--color-bg-tertiary);

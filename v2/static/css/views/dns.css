@@ -5,15 +5,6 @@
    Status / provider badges
 --------------------------------------------------------------------------- */
 
-.dns-badge {
-  font-size: var(--font-size-xs);
-  font-weight: var(--badge-font-weight);
-  padding: var(--badge-padding);
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
 .dns-badge--active {
   background: var(--color-success-bg);
   color: var(--color-success-text);
@@ -35,14 +26,9 @@
 }
 
 .dns-provider-badge {
-  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
-  padding: var(--badge-padding);
-  border-radius: var(--radius-full);
   background: var(--color-accent-subtle);
   color: var(--color-text-primary);
-  white-space: nowrap;
-  flex-shrink: 0;
 }
 
 /* Card base provided by .domain-card in components.css */

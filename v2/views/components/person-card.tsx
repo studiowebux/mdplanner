@@ -36,7 +36,7 @@ export const PersonCard: FC<Props> = ({ person, q }) => {
         </div>
         {person.agentType && (
           <span
-            class={`person-card__badge person-card__badge--${person.agentType}`}
+            class={`badge person-card__badge person-card__badge--${person.agentType}`}
           >
             {person.agentType}
           </span>

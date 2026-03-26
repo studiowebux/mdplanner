@@ -72,6 +72,21 @@
 }
 
 /* -------------------------------------------------------------------------
+   Badge — shared base for all domain badges (status, priority, type).
+   Domain CSS adds color variants via .XXX--modifier.
+   Compose: class="badge goal-status goal-status--on-track"
+   ------------------------------------------------------------------------- */
+
+.badge {
+  font-size: var(--font-size-xs);
+  font-weight: var(--badge-font-weight);
+  padding: var(--badge-padding);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* -------------------------------------------------------------------------
    Card grid
    ------------------------------------------------------------------------- */
 

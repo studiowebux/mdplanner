@@ -18,7 +18,7 @@ export const PortfolioCard: FC<Props> = ({ item, q }) => {
       id={item.id}
       badge={
         <span
-          class={`portfolio-card__badge portfolio-card__badge--${item.status}`}
+          class={`badge portfolio-card__badge portfolio-card__badge--${item.status}`}
         >
           {item.status}
         </span>

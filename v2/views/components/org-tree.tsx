@@ -65,7 +65,7 @@ const OrgNode: FC<NodeProps> = ({ node, level, allDepts }) => {
           </div>
           {node.agentType && (
             <span
-              class={`person-card__badge person-card__badge--${node.agentType}`}
+              class={`badge person-card__badge person-card__badge--${node.agentType}`}
             >
               {node.agentType}
             </span>

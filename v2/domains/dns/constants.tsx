@@ -63,8 +63,8 @@ const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
 
 const autoRenewRenderer = (v: unknown) =>
   v === true || v === "true"
-    ? <span class="dns-badge dns-badge--yes">Yes</span>
-    : <span class="dns-badge dns-badge--no">No</span>;
+    ? <span class="badge dns-badge dns-badge--yes">Yes</span>
+    : <span class="badge dns-badge dns-badge--no">No</span>;
 
 export const DNS_TABLE_COLUMNS: ColumnDef[] = [
   {

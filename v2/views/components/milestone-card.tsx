@@ -29,7 +29,7 @@ export const MilestoneCard: FC<Props> = ({ milestone, q }) => {
         : undefined}
       badge={
         <span
-          class={`milestone-card__badge milestone-card__badge--${milestone.status}`}
+          class={`badge milestone-card__badge milestone-card__badge--${milestone.status}`}
         >
           {milestone.status}
         </span>

@@ -42,7 +42,7 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
         ? "goal-card--completed"
         : undefined}
       badge={
-        <span class={`goal-status goal-status--${item.status}`}>
+        <span class={`badge goal-status goal-status--${item.status}`}>
           {item.status}
         </span>
       }
@@ -50,7 +50,7 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
       <dl class="domain-card__meta">
         <dt class="domain-card__meta-label">Type</dt>
         <dd class="domain-card__meta-value">
-          <span class={`goal-badge goal-badge--${item.type}`}>
+          <span class={`badge goal-badge goal-badge--${item.type}`}>
             {item.type}
           </span>
           {item.type === "project" && item.project && (

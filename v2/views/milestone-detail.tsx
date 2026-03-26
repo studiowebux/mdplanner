@@ -31,7 +31,7 @@ export const MilestoneDetailView: FC<Props> = (
           <div class="milestone-detail__title-row">
             <h1 class="milestone-detail__title">{milestone.name}</h1>
             <span
-              class={`milestone-card__badge milestone-card__badge--${milestone.status}`}
+              class={`badge milestone-card__badge milestone-card__badge--${milestone.status}`}
             >
               {milestone.status}
             </span>

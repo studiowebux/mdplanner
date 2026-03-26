@@ -5,15 +5,6 @@
    Status badges
 --------------------------------------------------------------------------- */
 
-.goal-status {
-  font-size: var(--font-size-xs);
-  font-weight: var(--badge-font-weight);
-  padding: var(--badge-padding);
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
 .goal-status--planning {
   background: var(--color-bg-tertiary);
   color: var(--color-text-muted);
@@ -47,15 +38,6 @@
 /* ---------------------------------------------------------------------------
    Type badges
 --------------------------------------------------------------------------- */
-
-.goal-badge {
-  font-size: var(--font-size-xs);
-  font-weight: var(--badge-font-weight);
-  padding: var(--badge-padding);
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
 
 .goal-badge--enterprise {
   background: var(--color-accent-subtle);

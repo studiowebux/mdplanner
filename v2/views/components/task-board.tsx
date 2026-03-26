@@ -23,7 +23,7 @@ const BoardCard: FC<{ task: Task }> = ({ task }) => (
   >
     <div class="task-board__card-header">
       {task.priority && (
-        <span class={`task-priority task-priority--${task.priority}`}>
+        <span class={`badge task-priority task-priority--${task.priority}`}>
           {TASK_PRIORITY_LABELS[String(task.priority)] ?? `P${task.priority}`}
         </span>
       )}

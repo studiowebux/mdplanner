@@ -148,12 +148,12 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
         <div class="dns-detail__title-row">
           <h1 class="dns-detail__title">{domain.domain}</h1>
           {domain.status && (
-            <span class={`dns-badge dns-badge--${domain.status}`}>
+            <span class={`badge dns-badge dns-badge--${domain.status}`}>
               {domain.status}
             </span>
           )}
           {domain.provider && (
-            <span class="dns-provider-badge">{domain.provider}</span>
+            <span class="badge dns-provider-badge">{domain.provider}</span>
           )}
         </div>
         <div class="detail-actions">

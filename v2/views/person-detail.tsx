@@ -51,7 +51,7 @@ export const PersonDetailView: FC<Props> = (
           </div>
           {person.agentType && (
             <span
-              class={`person-card__badge person-card__badge--${person.agentType}`}
+              class={`badge person-card__badge person-card__badge--${person.agentType}`}
             >
               {person.agentType}
             </span>
@@ -133,7 +133,7 @@ export const PersonDetailView: FC<Props> = (
                   <dt>Status</dt>
                   <dd>
                     <span
-                      class={`person-card__status person-card__status--${person.status}`}
+                      class={`badge person-card__status person-card__status--${person.status}`}
                     >
                       {person.status}
                     </span>

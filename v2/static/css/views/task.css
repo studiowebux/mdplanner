@@ -5,15 +5,6 @@
    Shared — priority badges, tags
    ========================================================================= */
 
-.task-priority {
-  font-size: var(--font-size-xs);
-  font-weight: var(--badge-font-weight);
-  padding: var(--badge-padding);
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
 .task-priority--1 {
   background: var(--color-error-bg);
   color: var(--color-error-text);
@@ -793,11 +784,6 @@
 /* Section badge */
 
 .task-detail__badge {
-  font-size: var(--font-size-xs);
-  font-weight: var(--badge-font-weight);
-  padding: var(--badge-padding);
-  border-radius: var(--radius-full);
-  white-space: nowrap;
   background: var(--color-bg-tertiary);
   color: var(--color-text-secondary);
 }

@@ -51,10 +51,10 @@ export const GoalDetailView: FC<
         <header class="goal-detail__header">
           <div class="goal-detail__title-row">
             <h1 class="goal-detail__title">{goal.title}</h1>
-            <span class={`goal-status goal-status--${goal.status}`}>
+            <span class={`badge goal-status goal-status--${goal.status}`}>
               {goal.status}
             </span>
-            <span class={`goal-badge goal-badge--${goal.type}`}>
+            <span class={`badge goal-badge goal-badge--${goal.type}`}>
               {goal.type}
             </span>
             {deadline && (

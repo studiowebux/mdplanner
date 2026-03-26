@@ -111,7 +111,7 @@ export const PortfolioDetailView: FC<Props> = (
           <div class="portfolio-detail__title-row">
             <h1 class="portfolio-detail__title">{item.name}</h1>
             <span
-              class={`portfolio-card__badge portfolio-card__badge--${item.status}`}
+              class={`badge portfolio-card__badge portfolio-card__badge--${item.status}`}
             >
               {item.status}
             </span>
@@ -287,7 +287,7 @@ export const PortfolioDetailView: FC<Props> = (
                   href={`/goals/${g.id}`}
                   class="btn btn--secondary btn--sm"
                 >
-                  <span class={`goal-status goal-status--${g.status}`}>
+                  <span class={`badge goal-status goal-status--${g.status}`}>
                     {g.status}
                   </span>{" "}
                   {g.title}

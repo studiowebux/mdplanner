@@ -58,7 +58,7 @@ export const TASK_TABLE_COLUMNS: ColumnDef[] = [
     render: (v) => {
       if (!v) return "";
       return (
-        <span class={`task-priority task-priority--${v}`}>
+        <span class={`badge task-priority task-priority--${v}`}>
           {TASK_PRIORITY_LABELS[String(v)] ?? String(v)}
         </span>
       );

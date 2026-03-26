@@ -11,15 +11,6 @@
 
 /* Header, name, meta, actions provided by .domain-card__* in components.css */
 
-.milestone-card__badge {
-  font-size: var(--font-size-xs);
-  font-weight: var(--badge-font-weight);
-  padding: var(--badge-padding);
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
 .milestone-card__badge--open {
   background: var(--color-accent-subtle);
   color: var(--color-text-primary);

@@ -117,7 +117,7 @@ function barDataAttrs(
 const UnscheduledRow: FC<{ task: Task }> = ({ task }) => (
   <div class="task-timeline__unscheduled-row">
     {task.priority && (
-      <span class={`task-priority task-priority--${task.priority}`}>
+      <span class={`badge task-priority task-priority--${task.priority}`}>
         {TASK_PRIORITY_LABELS[String(task.priority)] ?? `P${task.priority}`}
       </span>
     )}
@@ -257,7 +257,7 @@ export const TaskTimelineView: FC<TaskViewProps> = ({ tasks, zoom = 1 }) => {
                       <div class="task-timeline__label">
                         {t.priority && (
                           <span
-                            class={`task-priority task-priority--${t.priority}`}
+                            class={`badge task-priority task-priority--${t.priority}`}
                           >
                             {TASK_PRIORITY_LABELS[String(t.priority)] ??
                               `P${t.priority}`}

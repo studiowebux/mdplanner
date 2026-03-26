@@ -8,7 +8,7 @@ type Props = {
 // Reusable status badge — renders a pill with BEM modifier based on status value.
 // prefix defaults to "status-badge" for CSS class scoping per domain.
 export const StatusBadge: FC<Props> = ({ status, prefix = "status-badge" }) => (
-  <span class={`${prefix} ${prefix}--${status}`}>
+  <span class={`badge ${prefix} ${prefix}--${status}`}>
     {status}
   </span>
 );
