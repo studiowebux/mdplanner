@@ -706,17 +706,6 @@
    Detail view
    ========================================================================= */
 
-.task-detail {
-  max-width: var(--page-max-width);
-  margin: 0 auto;
-  padding: var(--page-padding);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-}
-
-.task-detail__back {}
-
 /* Quick actions bar — mark complete top-right, move + assign below */
 
 .task-detail__quick-actions {
@@ -753,26 +742,14 @@
 }
 
 .task-detail__header {
-  background: var(--card-bg);
-  border: var(--card-border);
-  border-radius: var(--card-radius);
-  padding: var(--card-padding);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
 }
 
 .task-detail__title-row {
-  display: flex;
   align-items: baseline;
-  flex-wrap: wrap;
   gap: var(--space-md);
-}
-
-.task-detail__title {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
 }
 
 .task-detail__completed-mark {
@@ -867,19 +844,12 @@
 /* Sections */
 
 .task-detail__section {
-  background: var(--card-bg);
-  border: var(--card-border);
-  border-radius: var(--card-radius);
-  padding: var(--card-padding);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
 }
 
 .task-detail__section h2 {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
   display: flex;
   align-items: center;
   gap: var(--space-sm);

@@ -180,6 +180,52 @@
   gap: var(--space-sm);
 }
 
+.detail-view {
+  padding: var(--page-padding);
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.detail-section {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+}
+
+.detail-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.detail-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.section-heading {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-md) 0;
+}
+
+.detail-section a:not(.btn) {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.detail-section a:not(.btn):hover {
+  color: var(--color-accent);
+}
+
 /* -------------------------------------------------------------------------
    Data table
    ------------------------------------------------------------------------- */

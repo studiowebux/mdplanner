@@ -37,22 +37,7 @@
    Detail view
 --------------------------------------------------------------------------- */
 
-.dns-detail {
-  padding: var(--page-padding);
-  max-width: var(--page-max-width);
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-}
-
-.dns-detail__back {}
-
 .dns-detail__header {
-  background: var(--card-bg);
-  border: var(--card-border);
-  border-radius: var(--card-radius);
-  padding: var(--card-padding);
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -60,18 +45,7 @@
   flex-wrap: wrap;
 }
 
-.dns-detail__title-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  flex-wrap: wrap;
-}
-
 .dns-detail__title {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin: 0;
   word-break: break-all;
 }
 
@@ -83,10 +57,6 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr));
   gap: var(--space-sm);
-  background: var(--card-bg);
-  border: var(--card-border);
-  border-radius: var(--card-radius);
-  padding: var(--card-padding);
 }
 
 .dns-detail__info-item {
@@ -119,26 +89,12 @@
    Sections
 --------------------------------------------------------------------------- */
 
-.dns-detail__section {
-  background: var(--card-bg);
-  border: var(--card-border);
-  border-radius: var(--card-radius);
-  padding: var(--card-padding);
-}
-
 .dns-detail__section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-sm);
   margin-bottom: var(--space-md);
-}
-
-.dns-detail__section-heading {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin: 0;
 }
 
 .dns-detail__notes {

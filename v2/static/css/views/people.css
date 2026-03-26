@@ -175,15 +175,6 @@
    Detail view
    ------------------------------------------------------------------------- */
 
-.person-detail {
-  max-width: var(--page-max-width);
-  margin: 0 auto;
-  padding: var(--page-padding);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
-}
-
 .person-detail__back {
   margin-bottom: var(--space-sm);
 }
@@ -202,7 +193,6 @@
 }
 
 .person-detail__name {
-  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
 }
 
@@ -240,11 +230,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
-}
-
-.person-detail__section h2 {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
 }
 
 .person-detail__count {

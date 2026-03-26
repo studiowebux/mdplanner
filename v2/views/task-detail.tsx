@@ -83,7 +83,7 @@ const MetaField: FC<{ label: string; children: unknown }> = (
 const CommentsSection: FC<{ comments: Task["comments"] }> = ({ comments }) => {
   if (!comments?.length) return null;
   return (
-    <section class="task-detail__section">
+    <section class="detail-section task-detail__section">
       <h2>
         Comments
         <span class="task-detail__count">({comments.length})</span>
@@ -119,7 +119,7 @@ const TimeEntriesSection: FC<{ entries: Task["time_entries"] }> = (
   if (!entries?.length) return null;
   const total = entries.reduce((sum, e) => sum + e.hours, 0);
   return (
-    <section class="task-detail__section">
+    <section class="detail-section task-detail__section">
       <h2>
         Time entries
         <span class="task-detail__count">({entries.length})</span>
@@ -162,7 +162,7 @@ const ApprovalSection: FC<{ approval: Task["approvalRequest"] }> = (
   if (!approval) return null;
   const verdict = approval.verdict;
   return (
-    <section class="task-detail__section">
+    <section class="detail-section task-detail__section">
       <h2>Approval request</h2>
       <dl class="task-detail__meta">
         <MetaField label="Requested by">{approval.requestedBy}</MetaField>
@@ -218,7 +218,7 @@ export const TaskDetailView: FC<Props> = (
         hx-select="#task-detail-root"
         hx-swap="outerHTML"
       />
-      <main id="task-detail-root" class="task-detail">
+      <main id="task-detail-root" class="detail-view task-detail">
         {/* Back link — matches person-detail / milestone-detail pattern */}
         <div class="task-detail__back">
           <a href="/tasks" class="btn btn--secondary">Back to tasks</a>
@@ -318,9 +318,9 @@ export const TaskDetailView: FC<Props> = (
         <div class="task-detail__columns">
           {/* Left column — header + metadata */}
           <div class="task-detail__col-left">
-            <header class="task-detail__header">
-              <div class="task-detail__title-row">
-                <h1 class="task-detail__title">
+            <header class="detail-section task-detail__header">
+              <div class="detail-title-row task-detail__title-row">
+                <h1 class="detail-title task-detail__title">
                   {task.completed && (
                     <span class="task-detail__completed-mark">[x]</span>
                   )}
@@ -420,7 +420,7 @@ export const TaskDetailView: FC<Props> = (
 
             {/* Subtasks */}
             {task.children && task.children.length > 0 && (
-              <section class="task-detail__section">
+              <section class="detail-section task-detail__section">
                 <h2>
                   Subtasks
                   <span class="task-detail__count">
@@ -456,7 +456,7 @@ export const TaskDetailView: FC<Props> = (
 
             {/* Blocked by */}
             {blockedByTasks.length > 0 && (
-              <section class="task-detail__section">
+              <section class="detail-section task-detail__section">
                 <h2>
                   Blocked by
                   <span class="task-detail__count">
@@ -494,7 +494,7 @@ export const TaskDetailView: FC<Props> = (
           {/* Right column — description */}
           <div class="task-detail__col-right">
             {task.description && task.description.length > 0 && (
-              <section class="task-detail__section">
+              <section class="detail-section task-detail__section">
                 <h2>Description</h2>
                 <div class="task-detail__description">
                   {task.description.map((p, i) => <p key={i}>{p}</p>)}
@@ -504,7 +504,7 @@ export const TaskDetailView: FC<Props> = (
 
             {/* Attachments */}
             {task.attachments && task.attachments.length > 0 && (
-              <section class="task-detail__section">
+              <section class="detail-section task-detail__section">
                 <h2>Attachments</h2>
                 <ul class="task-detail__files">
                   {task.attachments.map((a) => (
@@ -518,7 +518,7 @@ export const TaskDetailView: FC<Props> = (
 
             {/* Files */}
             {task.files && task.files.length > 0 && (
-              <section class="task-detail__section">
+              <section class="detail-section task-detail__section">
                 <h2>Files</h2>
                 <ul class="task-detail__files">
                   {task.files.map((f) => (
@@ -531,7 +531,7 @@ export const TaskDetailView: FC<Props> = (
             )}
 
             {/* GitHub section — live data loaded via htmx */}
-            <section class="task-detail__section">
+            <section class="detail-section task-detail__section">
               <h2>GitHub</h2>
               <div
                 id="task-github-section"

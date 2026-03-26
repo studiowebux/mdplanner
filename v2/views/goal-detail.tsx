@@ -43,14 +43,14 @@ export const GoalDetailView: FC<
         hx-select="#goal-detail-root"
         hx-swap="outerHTML"
       />
-      <main id="goal-detail-root" class="goal-detail">
+      <main id="goal-detail-root" class="detail-view goal-detail">
         <div class="goal-detail__back">
           <a href="/goals" class="btn btn--secondary">Back to Goals</a>
         </div>
 
-        <header class="goal-detail__header">
-          <div class="goal-detail__title-row">
-            <h1 class="goal-detail__title">{goal.title}</h1>
+        <header class="detail-section goal-detail__header">
+          <div class="detail-title-row goal-detail__title-row">
+            <h1 class="detail-title goal-detail__title">{goal.title}</h1>
             <span class={`badge goal-status goal-status--${goal.status}`}>
               {goal.status}
             </span>
@@ -95,7 +95,7 @@ export const GoalDetailView: FC<
           </div>
         </header>
 
-        <div class="goal-detail__info-grid">
+        <div class="detail-section goal-detail__info-grid">
           {goal.kpi && (
             <div class="goal-detail__info-item">
               <span class="goal-detail__info-label">KPI</span>
@@ -143,8 +143,8 @@ export const GoalDetailView: FC<
         </div>
 
         {descHtml && (
-          <section class="goal-detail__section">
-            <h2 class="goal-detail__section-heading">Description</h2>
+          <section class="detail-section goal-detail__section">
+            <h2 class="section-heading">Description</h2>
             <div
               class="markdown-body"
               dangerouslySetInnerHTML={{ __html: descHtml }}
@@ -153,8 +153,8 @@ export const GoalDetailView: FC<
         )}
 
         {goal.linkedPortfolioItems && goal.linkedPortfolioItems.length > 0 && (
-          <section class="goal-detail__section">
-            <h2 class="goal-detail__section-heading">
+          <section class="detail-section goal-detail__section">
+            <h2 class="section-heading">
               Linked Portfolio Items
             </h2>
             <div class="goal-detail__links">

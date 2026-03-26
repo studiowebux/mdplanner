@@ -483,7 +483,7 @@ export const GitHubError: FC<{ message: string }> = ({ message }) => (
 
 export const GitHubSection: FC<{ itemId: string }> = ({ itemId }) => (
   <section class="portfolio-detail__section github-section">
-    <h2 class="portfolio-detail__section-heading">GitHub</h2>
+    <h2 class="section-heading">GitHub</h2>
 
     <div
       id="github-repo-card"

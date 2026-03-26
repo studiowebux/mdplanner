@@ -155,27 +155,10 @@
    Detail view
    ========================================================================= */
 
-.note-detail {
-  max-width: var(--page-max-width);
-  margin: 0 auto;
-  padding: var(--page-padding);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
-}
-
-.note-detail__back {}
-
 .note-detail__header {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
-}
-
-.note-detail__title {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
 }
 
 .note-detail__meta {
@@ -219,21 +202,11 @@
 /* Section block wrapper */
 
 .note-detail__section-block {
-  background: var(--card-bg);
-  border: var(--card-border);
-  border-radius: var(--card-radius);
-  padding: var(--card-padding);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
   overflow-x: auto;
   min-width: 0;
-}
-
-.note-detail__section-title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
 }
 
 /* ---- Tabs ---- */

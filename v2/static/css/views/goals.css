@@ -133,22 +133,7 @@
    Detail view
 --------------------------------------------------------------------------- */
 
-.goal-detail {
-  padding: var(--page-padding);
-  max-width: var(--page-max-width);
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-}
-
-.goal-detail__back {}
-
 .goal-detail__header {
-  background: var(--card-bg);
-  border: var(--card-border);
-  border-radius: var(--card-radius);
-  padding: var(--card-padding);
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -156,28 +141,10 @@
   flex-wrap: wrap;
 }
 
-.goal-detail__title-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  flex-wrap: wrap;
-}
-
-.goal-detail__title {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin: 0;
-}
-
 .goal-detail__info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr));
   gap: var(--space-sm);
-  background: var(--card-bg);
-  border: var(--card-border);
-  border-radius: var(--card-radius);
-  padding: var(--card-padding);
 }
 
 .goal-detail__info-item {
@@ -207,20 +174,6 @@
 
 .goal-detail__info-value a:hover {
   color: var(--color-accent);
-}
-
-.goal-detail__section {
-  background: var(--card-bg);
-  border: var(--card-border);
-  border-radius: var(--card-radius);
-  padding: var(--card-padding);
-}
-
-.goal-detail__section-heading {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin: 0 0 var(--space-md) 0;
 }
 
 .goal-detail__links {

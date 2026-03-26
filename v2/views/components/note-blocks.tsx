@@ -200,7 +200,7 @@ export const SectionBlock: FC<{ section: CustomSection }> = ({ section }) => {
       data-section-type={section.type}
       data-section-title={section.title}
     >
-      <h3 class="note-detail__section-title">{section.title}</h3>
+      <h3 class="section-heading">{section.title}</h3>
       {section.type === "tabs" && <TabsSection section={section} />}
       {section.type === "timeline" && <TimelineSection section={section} />}
       {section.type === "split-view" && <SplitViewSection section={section} />}

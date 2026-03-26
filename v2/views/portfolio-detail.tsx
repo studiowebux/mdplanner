@@ -100,16 +100,16 @@ export const PortfolioDetailView: FC<Props> = (
         hx-select="#portfolio-detail-root"
         hx-swap="outerHTML"
       />
-      <main id="portfolio-detail-root" class="portfolio-detail">
+      <main id="portfolio-detail-root" class="detail-view portfolio-detail">
         <div class="portfolio-detail__back">
           <a href="/portfolio" class="btn btn--secondary">
             Back to portfolio
           </a>
         </div>
 
-        <header class="portfolio-detail__header">
-          <div class="portfolio-detail__title-row">
-            <h1 class="portfolio-detail__title">{item.name}</h1>
+        <header class="detail-section portfolio-detail__header">
+          <div class="detail-title-row portfolio-detail__title-row">
+            <h1 class="detail-title portfolio-detail__title">{item.name}</h1>
             <span
               class={`badge portfolio-card__badge portfolio-card__badge--${item.status}`}
             >
@@ -161,8 +161,8 @@ export const PortfolioDetailView: FC<Props> = (
         )}
 
         {descHtml && (
-          <section class="portfolio-detail__section">
-            <h2 class="portfolio-detail__section-heading">Description</h2>
+          <section class="detail-section portfolio-detail__section">
+            <h2 class="section-heading">Description</h2>
             <div
               class="markdown-body"
               dangerouslySetInnerHTML={{ __html: descHtml }}
@@ -171,8 +171,8 @@ export const PortfolioDetailView: FC<Props> = (
         )}
 
         {item.techStack && item.techStack.length > 0 && (
-          <section class="portfolio-detail__section">
-            <h2 class="portfolio-detail__section-heading">Tech Stack</h2>
+          <section class="detail-section portfolio-detail__section">
+            <h2 class="section-heading">Tech Stack</h2>
             <div class="portfolio-card__tech-stack">
               {item.techStack.map((t) => (
                 <span key={t} class="portfolio-pill">{t}</span>
@@ -182,8 +182,8 @@ export const PortfolioDetailView: FC<Props> = (
         )}
 
         {item.team && item.team.length > 0 && (
-          <section class="portfolio-detail__section">
-            <h2 class="portfolio-detail__section-heading">Team</h2>
+          <section class="detail-section portfolio-detail__section">
+            <h2 class="section-heading">Team</h2>
             <div class="portfolio-detail__team">
               {item.team.map((m) => (
                 <span key={m} class="portfolio-detail__team-chip">{m}</span>
@@ -194,7 +194,7 @@ export const PortfolioDetailView: FC<Props> = (
 
         {item.kpis && item.kpis.length > 0 && (
           <section class="portfolio-detail__kpis">
-            <h2 class="portfolio-detail__section-heading">KPIs</h2>
+            <h2 class="section-heading">KPIs</h2>
             <table class="portfolio-detail__kpi-table">
               <thead>
                 <tr>
@@ -229,8 +229,8 @@ export const PortfolioDetailView: FC<Props> = (
         )}
 
         {item.urls && item.urls.length > 0 && (
-          <section class="portfolio-detail__section">
-            <h2 class="portfolio-detail__section-heading">Links</h2>
+          <section class="detail-section portfolio-detail__section">
+            <h2 class="section-heading">Links</h2>
             <div class="portfolio-detail__urls">
               {item.urls.map((u) => (
                 <a
@@ -248,7 +248,7 @@ export const PortfolioDetailView: FC<Props> = (
         )}
 
         <section class="portfolio-detail__status-updates">
-          <h2 class="portfolio-detail__section-heading">Status Updates</h2>
+          <h2 class="section-heading">Status Updates</h2>
 
           <form
             class="portfolio-detail__update-form"
@@ -278,8 +278,8 @@ export const PortfolioDetailView: FC<Props> = (
         {item.githubRepo && <GitHubSection itemId={item.id} />}
 
         {goals.length > 0 && (
-          <section class="portfolio-detail__section">
-            <h2 class="portfolio-detail__section-heading">Linked Goals</h2>
+          <section class="detail-section portfolio-detail__section">
+            <h2 class="section-heading">Linked Goals</h2>
             <div class="goal-detail__links">
               {goals.map((g) => (
                 <a

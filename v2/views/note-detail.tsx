@@ -38,7 +38,11 @@ export const NoteDetailView: FC<Props> = (props) => {
         "/js/note-editor.js",
       ]}
     >
-      <main class="note-detail" id="note-detail-root" data-note-id={note.id}>
+      <main
+        class="detail-view note-detail"
+        id="note-detail-root"
+        data-note-id={note.id}
+      >
         <div class="note-detail__top-bar">
           <a href="/notes" class="btn btn--secondary">Back to notes</a>
           <button
@@ -51,7 +55,7 @@ export const NoteDetailView: FC<Props> = (props) => {
         </div>
 
         <header class="note-detail__header" id="note-detail-header">
-          <div class="note-detail__title-row">
+          <div class="detail-title-row note-detail__title-row">
             <input
               type="text"
               class="note-detail__title-input"

@@ -13,9 +13,12 @@ import { DNS_RECORD_FORM_FIELDS } from "../domains/dns/constants.tsx";
 export const DnsRecordsTable: FC<{ domain: DnsDomain }> = ({ domain }) => {
   const records = domain.dnsRecords ?? [];
   return (
-    <section id="dns-records-section" class="dns-detail__section">
+    <section
+      id="dns-records-section"
+      class="detail-section dns-detail__section"
+    >
       <div class="dns-detail__section-header">
-        <h2 class="dns-detail__section-heading">DNS Records</h2>
+        <h2 class="section-heading">DNS Records</h2>
         <button
           class="btn btn--primary btn--sm"
           type="button"
@@ -139,14 +142,14 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
       hx-select="#dns-detail-root"
       hx-swap="outerHTML"
     />
-    <main id="dns-detail-root" class="dns-detail">
+    <main id="dns-detail-root" class="detail-view dns-detail">
       <div class="dns-detail__back">
         <a href="/dns" class="btn btn--secondary">Back to DNS</a>
       </div>
 
-      <header class="dns-detail__header">
-        <div class="dns-detail__title-row">
-          <h1 class="dns-detail__title">{domain.domain}</h1>
+      <header class="detail-section dns-detail__header">
+        <div class="detail-title-row dns-detail__title-row">
+          <h1 class="detail-title dns-detail__title">{domain.domain}</h1>
           {domain.status && (
             <span class={`badge dns-badge dns-badge--${domain.status}`}>
               {domain.status}
@@ -179,7 +182,7 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
         </div>
       </header>
 
-      <div class="dns-detail__info-grid">
+      <div class="detail-section dns-detail__info-grid">
         {domain.expiryDate && (
           <div class="dns-detail__info-item">
             <span class="dns-detail__info-label">Expires</span>
@@ -221,8 +224,8 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
       </div>
 
       {domain.notes && (
-        <section class="dns-detail__section">
-          <h2 class="dns-detail__section-heading">Notes</h2>
+        <section class="detail-section dns-detail__section">
+          <h2 class="section-heading">Notes</h2>
           <p class="dns-detail__notes">{domain.notes}</p>
         </section>
       )}

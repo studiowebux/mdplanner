@@ -26,7 +26,7 @@ export const PersonDetailView: FC<Props> = (
       {...viewProps}
       styles={["/css/views/people.css"]}
     >
-      <main class="person-detail">
+      <main class="detail-view person-detail">
         <div class="person-detail__back">
           <a href="/people" class="btn btn--secondary">
             Back to people
@@ -43,7 +43,7 @@ export const PersonDetailView: FC<Props> = (
               {initials}
             </span>
             <div>
-              <h1 class="person-detail__name">{person.name}</h1>
+              <h1 class="detail-title person-detail__name">{person.name}</h1>
               {person.title && (
                 <p class="person-detail__title">{person.title}</p>
               )}
@@ -114,7 +114,7 @@ export const PersonDetailView: FC<Props> = (
         </dl>
 
         {person.skills && person.skills.length > 0 && (
-          <section class="person-detail__section">
+          <section class="detail-section person-detail__section">
             <h2>Skills</h2>
             <div class="person-card__skills">
               {person.skills.map((s) => (
@@ -125,7 +125,7 @@ export const PersonDetailView: FC<Props> = (
         )}
 
         {person.agentType && person.agentType !== "human" && (
-          <section class="person-detail__section">
+          <section class="detail-section person-detail__section">
             <h2>Agent</h2>
             <dl class="person-detail__meta">
               {person.status && (
@@ -173,14 +173,14 @@ export const PersonDetailView: FC<Props> = (
         )}
 
         {person.notes && (
-          <section class="person-detail__section">
+          <section class="detail-section person-detail__section">
             <h2>Notes</h2>
             <div class="person-detail__notes">{person.notes}</div>
           </section>
         )}
 
         {reports.length > 0 && (
-          <section class="person-detail__section">
+          <section class="detail-section person-detail__section">
             <h2>
               Direct reports
               <span class="person-detail__count">({reports.length})</span>

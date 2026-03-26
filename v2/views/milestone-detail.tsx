@@ -28,8 +28,10 @@ export const MilestoneDetailView: FC<Props> = (
           </a>
         </div>
         <header class="milestone-detail__header">
-          <div class="milestone-detail__title-row">
-            <h1 class="milestone-detail__title">{milestone.name}</h1>
+          <div class="detail-title-row milestone-detail__title-row">
+            <h1 class="detail-title milestone-detail__title">
+              {milestone.name}
+            </h1>
             <span
               class={`badge milestone-card__badge milestone-card__badge--${milestone.status}`}
             >
