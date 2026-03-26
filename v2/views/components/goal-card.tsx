@@ -54,7 +54,7 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
             {item.type}
           </span>
           {item.type === "project" && item.project && (
-            <span> — {item.project}</span>
+            <span>— {item.project}</span>
           )}
         </dd>
         {item.kpi && (
@@ -106,9 +106,12 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
             {progress}% elapsed
             {deadline && (
               <span
-                class={`goal-deadline${isOverdue ? " goal-deadline--overdue" : ""}`}
+                class={`goal-deadline${
+                  isOverdue ? " goal-deadline--overdue" : ""
+                }`}
               >
-                {" — "}{deadline}
+                {" — "}
+                {deadline}
               </span>
             )}
             {tookDays !== null && (

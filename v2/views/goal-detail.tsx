@@ -53,7 +53,9 @@ export const GoalDetailView: FC<ViewProps & { item: Goal }> = (
             </span>
             {deadline && (
               <span
-                class={`goal-deadline${isOverdue ? " goal-deadline--overdue" : ""}`}
+                class={`goal-deadline${
+                  isOverdue ? " goal-deadline--overdue" : ""
+                }`}
               >
                 {deadline}
               </span>
