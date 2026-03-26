@@ -53,9 +53,6 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
           <span class={`badge goal-badge goal-badge--${item.type}`}>
             {item.type}
           </span>
-          {item.type === "project" && item.project && (
-            <span>{item.project}</span>
-          )}
         </dd>
         {item.kpi && (
           <>

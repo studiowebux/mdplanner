@@ -168,6 +168,15 @@
   margin: 0;
 }
 
+.domain-card__meta-value a {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.domain-card__meta-value a:hover {
+  color: var(--color-accent);
+}
+
 .domain-card__actions {
   display: flex;
   justify-content: flex-end;
