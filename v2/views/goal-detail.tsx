@@ -9,7 +9,8 @@ export const GoalDetailView: FC<ViewProps & { item: Goal }> = (
   { item: goal, ...viewProps },
 ) => {
   const descHtml = markdownToHtml(goal.description);
-  const deadline = dueIn(goal.endDate);
+  const isCompleted = goal.status === "success" || goal.status === "failed";
+  const deadline = isCompleted ? "" : dueIn(goal.endDate);
   const isOverdue = deadline.includes("overdue");
 
   return (

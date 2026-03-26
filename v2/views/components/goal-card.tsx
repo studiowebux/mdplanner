@@ -9,7 +9,8 @@ type Props = { item: Goal; q?: string };
 
 export const GoalCard: FC<Props> = ({ item, q }) => {
   const descHtml = markdownToHtml(item.description);
-  const deadline = dueIn(item.endDate);
+  const isCompleted = item.status === "success" || item.status === "failed";
+  const deadline = isCompleted ? "" : dueIn(item.endDate);
   const isOverdue = deadline.includes("overdue");
   const now = Date.now();
   const start = item.startDate ? new Date(item.startDate).getTime() : 0;
