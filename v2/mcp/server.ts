@@ -10,6 +10,7 @@ import { registerGitHubTools } from "./tools/github.ts";
 import { registerGoalTools } from "./tools/goals.ts";
 import { registerIdeaTools } from "./tools/ideas.ts";
 import { registerMarketingPlanTools } from "./tools/marketing-plans.ts";
+import { registerSwotTools } from "./tools/swot.ts";
 import { registerMilestoneTools } from "./tools/milestones.ts";
 import { registerNoteTools } from "./tools/notes.ts";
 import { registerPeopleTools } from "./tools/people.ts";
@@ -27,6 +28,7 @@ export function createMcpServer(): McpServer {
   registerGoalTools(server);
   registerIdeaTools(server);
   registerMarketingPlanTools(server);
+  registerSwotTools(server);
   registerMilestoneTools(server);
   registerNoteTools(server);
   registerPeopleTools(server);

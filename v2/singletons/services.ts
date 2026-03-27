@@ -13,6 +13,7 @@ import { DnsService } from "../services/dns.service.ts";
 import { GoalService } from "../services/goal.service.ts";
 import { IdeaService } from "../services/idea.service.ts";
 import { MarketingPlanService } from "../services/marketing-plan.service.ts";
+import { SwotService } from "../services/swot.service.ts";
 import { GitHubService } from "../services/github.service.ts";
 import { ProjectService } from "../services/project.service.ts";
 import { TaskService } from "../services/task.service.ts";
@@ -30,10 +31,12 @@ import { registerNoteEntity } from "../domains/note/cache.ts";
 import { registerGoalEntity } from "../domains/goal/cache.ts";
 import { registerIdeaEntity } from "../domains/idea/cache.ts";
 import { registerMarketingPlanEntity } from "../domains/marketing-plan/cache.ts";
+import { registerSwotEntity } from "../domains/swot/cache.ts";
 import { DnsRepository } from "../repositories/dns.repository.ts";
 import { GoalRepository } from "../repositories/goal.repository.ts";
 import { IdeaRepository } from "../repositories/idea.repository.ts";
 import { MarketingPlanRepository } from "../repositories/marketing-plan.repository.ts";
+import { SwotRepository } from "../repositories/swot.repository.ts";
 import { NoteRepository } from "../repositories/note.repository.ts";
 import { PeopleRepository } from "../repositories/people.repository.ts";
 
@@ -52,6 +55,7 @@ let projectService: ProjectService | null = null;
 let goalService: GoalService | null = null;
 let ideaService: IdeaService | null = null;
 let marketingPlanService: MarketingPlanService | null = null;
+let swotService: SwotService | null = null;
 let dnsService: DnsService | null = null;
 let githubService: GitHubService | null = null;
 let cacheDb: CacheDatabase | null = null;
@@ -83,6 +87,8 @@ export function initServices(
   ideaService = new IdeaService(ideaRepo);
   const marketingPlanRepo = new MarketingPlanRepository(projectDir);
   marketingPlanService = new MarketingPlanService(marketingPlanRepo);
+  const swotRepo = new SwotRepository(projectDir);
+  swotService = new SwotService(swotRepo);
   const dnsRepo = new DnsRepository(projectDir);
   dnsService = new DnsService(dnsRepo, projectService);
   githubService = new GitHubService(projectService);
@@ -100,6 +106,7 @@ export function initServices(
     registerGoalEntity(goalRepo);
     registerIdeaEntity(ideaRepo);
     registerMarketingPlanEntity(marketingPlanRepo);
+    registerSwotEntity(swotRepo);
 
     // Pass cacheDb to repos for read-path caching
     milestoneRepo.setCacheDb(cacheDb);
@@ -197,6 +204,13 @@ export function getMarketingPlanService(): MarketingPlanService {
     throw new Error("Services not initialized — call initServices() first");
   }
   return marketingPlanService;
+}
+
+export function getSwotService(): SwotService {
+  if (!swotService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return swotService;
 }
 
 export function getDnsService(): DnsService {

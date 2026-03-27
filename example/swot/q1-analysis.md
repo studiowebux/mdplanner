@@ -2,6 +2,9 @@
 id: swot_q1
 title: Q1 2026 SWOT Analysis
 date: 2026-01-15
+project: TaskFlow Platform
+created: "2026-01-15T08:00:00.000Z"
+updated: "2026-01-15T08:00:00.000Z"
 ---
 
 # Q1 2026 SWOT Analysis
