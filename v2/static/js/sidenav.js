@@ -51,16 +51,22 @@
     }
   }
 
+  // Store handler references per sidenav ID so we can remove before re-adding
+  var dirtyHandlers = {};
+
   function trackDirty(el, id) {
-    // Event delegation — catches all inputs including dynamically added ones
-    if (el.hasAttribute("data-dirty-delegated")) return;
-    el.setAttribute("data-dirty-delegated", "");
+    // Remove previous listeners if they exist (prevents stacking after discard)
+    if (dirtyHandlers[id] && dirtyHandlers[id].el) {
+      dirtyHandlers[id].el.removeEventListener("input", dirtyHandlers[id].fn);
+      dirtyHandlers[id].el.removeEventListener("change", dirtyHandlers[id].fn);
+    }
     var markDirty = function () {
       dirtyNavs[id] = true;
       updateDirtyIndicator(el, true);
     };
     el.addEventListener("input", markDirty);
     el.addEventListener("change", markDirty);
+    dirtyHandlers[id] = { el: el, fn: markDirty };
   }
 
   // Reset dirty state on successful form submit (called by domain form JS).
@@ -86,8 +92,9 @@
     }
   });
 
-  // Detect htmx-swapped sidenavs that render already open (domain factory forms)
-  document.addEventListener("htmx:afterSwap", function (e) {
+  // Detect htmx-swapped sidenavs that render already open (domain factory forms).
+  // afterSettle (not afterSwap) — content must be in the DOM before querying.
+  document.addEventListener("htmx:afterSettle", function (e) {
     var target = e.detail.target || e.target;
     var nav = target.querySelector
       ? target.querySelector(".sidenav.is-open")

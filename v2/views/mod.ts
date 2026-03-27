@@ -4,6 +4,7 @@
 import { Hono } from "hono";
 import { dnsRouter } from "./dns/routes.ts";
 import { goalsRouter as goalsViewRouter } from "./goals/routes.ts";
+import { ideasRouter } from "./ideas/routes.ts";
 import { homeViewRouter } from "./home/routes.ts";
 import { milestonesRouter } from "./milestones/routes.ts";
 import { peopleRouter } from "./people/routes.tsx";
@@ -20,6 +21,7 @@ import {
 } from "./autocomplete/routes.ts";
 import {
   getGoalService,
+  getIdeaService,
   getMilestoneService,
   getPeopleService,
   getPortfolioService,
@@ -204,6 +206,17 @@ registerAutocompleteSource("goals-by-id", {
   valueKey: "id",
 });
 
+registerAutocompleteSource("ideas-by-id", {
+  list: () => getIdeaService().list(),
+  search: async (q) => {
+    const all = await getIdeaService().list();
+    const lower = q.toLowerCase();
+    return all.filter((i) => i.title.toLowerCase().includes(lower));
+  },
+  displayKey: "title",
+  valueKey: "id",
+});
+
 registerAutocompleteSource("kpi-metrics", {
   list: async () => {
     const config = await getProjectService().getConfig();
@@ -231,6 +244,7 @@ export const views = new Hono<{ Variables: AppVariables }>();
 views.route("/", homeViewRouter);
 views.route("/dns", dnsRouter);
 views.route("/goals", goalsViewRouter);
+views.route("/ideas", ideasRouter);
 views.route("/milestones", milestonesRouter);
 views.route("/notes", notesViewRouter);
 views.route("/people", peopleRouter);

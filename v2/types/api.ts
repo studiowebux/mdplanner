@@ -25,6 +25,12 @@ export const IdWithUpdateIdParam = z.object({
   updateId: z.string().openapi({ param: { name: "updateId", in: "path" } }),
 });
 
+/** Path params: /{id}/link/{targetId} */
+export const IdWithTargetIdParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+  targetId: z.string().openapi({ param: { name: "targetId", in: "path" } }),
+});
+
 /** Path params: /{id}/records/{index} */
 export const IdWithIndexParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),

@@ -11,6 +11,7 @@ import { PeopleService } from "../services/people.service.ts";
 import { PortfolioService } from "../services/portfolio.service.ts";
 import { DnsService } from "../services/dns.service.ts";
 import { GoalService } from "../services/goal.service.ts";
+import { IdeaService } from "../services/idea.service.ts";
 import { GitHubService } from "../services/github.service.ts";
 import { ProjectService } from "../services/project.service.ts";
 import { TaskService } from "../services/task.service.ts";
@@ -26,8 +27,10 @@ import { registerPeopleEntity } from "../domains/people/cache.ts";
 import { registerDnsEntity } from "../domains/dns/cache.ts";
 import { registerNoteEntity } from "../domains/note/cache.ts";
 import { registerGoalEntity } from "../domains/goal/cache.ts";
+import { registerIdeaEntity } from "../domains/idea/cache.ts";
 import { DnsRepository } from "../repositories/dns.repository.ts";
 import { GoalRepository } from "../repositories/goal.repository.ts";
+import { IdeaRepository } from "../repositories/idea.repository.ts";
 import { NoteRepository } from "../repositories/note.repository.ts";
 import { PeopleRepository } from "../repositories/people.repository.ts";
 
@@ -44,6 +47,7 @@ let noteService: NoteService | null = null;
 let portfolioService: PortfolioService | null = null;
 let projectService: ProjectService | null = null;
 let goalService: GoalService | null = null;
+let ideaService: IdeaService | null = null;
 let dnsService: DnsService | null = null;
 let githubService: GitHubService | null = null;
 let cacheDb: CacheDatabase | null = null;
@@ -71,6 +75,8 @@ export function initServices(
   projectService = new ProjectService(projectRepo);
   const goalRepo = new GoalRepository(projectDir);
   goalService = new GoalService(goalRepo);
+  const ideaRepo = new IdeaRepository(projectDir);
+  ideaService = new IdeaService(ideaRepo);
   const dnsRepo = new DnsRepository(projectDir);
   dnsService = new DnsService(dnsRepo, projectService);
   githubService = new GitHubService(projectService);
@@ -86,6 +92,7 @@ export function initServices(
     registerDnsEntity(dnsRepo);
     registerNoteEntity(noteRepo);
     registerGoalEntity(goalRepo);
+    registerIdeaEntity(ideaRepo);
 
     // Pass cacheDb to repos for read-path caching
     milestoneRepo.setCacheDb(cacheDb);
@@ -169,6 +176,13 @@ export function getGoalService(): GoalService {
     throw new Error("Services not initialized — call initServices() first");
   }
   return goalService;
+}
+
+export function getIdeaService(): IdeaService {
+  if (!ideaService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return ideaService;
 }
 
 export function getDnsService(): DnsService {
