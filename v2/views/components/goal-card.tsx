@@ -5,6 +5,7 @@ import { KpiGauge } from "../../components/ui/kpi-gauge.tsx";
 import { PRIORITY_LABELS } from "../../constants/mod.ts";
 import { goalPersonByName } from "../../domains/goal/config.tsx";
 import { dueIn } from "../../utils/time.ts";
+import { toKebab } from "../../utils/slug.ts";
 
 type Props = { item: Goal; q?: string };
 
@@ -58,6 +59,16 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
     >
       {/* Compact meta — owner + KPI only */}
       <dl class="domain-card__meta">
+        {item.project && (
+          <>
+            <dt class="domain-card__meta-label">Project</dt>
+            <dd class="domain-card__meta-value">
+              <a href={`/portfolio/${toKebab(item.project)}`}>
+                {item.project}
+              </a>
+            </dd>
+          </>
+        )}
         {item.owner && (
           <>
             <dt class="domain-card__meta-label">Owner</dt>

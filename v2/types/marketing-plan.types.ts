@@ -103,7 +103,6 @@ export const MarketingCampaignSchema = z.object({
 
 export type MarketingCampaign = z.infer<typeof MarketingCampaignSchema>;
 
-
 // ---------------------------------------------------------------------------
 // Main schema
 // ---------------------------------------------------------------------------

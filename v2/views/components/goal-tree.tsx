@@ -47,7 +47,9 @@ const GoalTreeNode: FC<{ node: GoalNode }> = ({ node }) => (
     </div>
     {node.children.length > 0 && (
       <ul class="goal-tree__children">
-        {node.children.map((child) => <GoalTreeNode node={child} />)}
+        {node.children.map((child) => (
+          <GoalTreeNode key={child.id} node={child} />
+        ))}
       </ul>
     )}
   </li>
@@ -62,7 +64,7 @@ export const GoalTree: FC<{ goals: Goal[] }> = ({ goals }) => {
 
   return (
     <ul class="goal-tree">
-      {tree.map((node) => <GoalTreeNode node={node} />)}
+      {tree.map((node) => <GoalTreeNode key={node.id} node={node} />)}
     </ul>
   );
 };

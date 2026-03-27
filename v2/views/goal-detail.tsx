@@ -262,7 +262,9 @@ export const GoalDetailView: FC<
             {(goal.tags?.length ?? 0) > 0 && (
               <InfoItem label="Tags">
                 <span class="goal-detail__links">
-                  {goal.tags!.map((t) => <span class="badge">{t}</span>)}
+                  {goal.tags!.map((t) => (
+                    <span key={t} class="badge">{t}</span>
+                  ))}
                 </span>
               </InfoItem>
             )}
