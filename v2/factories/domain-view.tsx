@@ -410,6 +410,8 @@ export function createDomainForm<T extends Entity>(cfg: {
           values[f.name] = raw.join("\n");
         } else if (f.type === "tags" && Array.isArray(raw)) {
           values[f.name] = raw.join(",");
+        } else if (f.type === "array-table" && Array.isArray(raw)) {
+          values[f.name] = JSON.stringify(raw);
         } else {
           values[f.name] = String(raw ?? "");
         }

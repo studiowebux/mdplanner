@@ -3,6 +3,20 @@ import { Sidenav } from "./sidenav.tsx";
 
 type Option = { value: string; label: string };
 
+/** Field definition for a single column within an array-table row. */
+export type ArrayTableItemField =
+  | { type: "text"; name: string; label: string; placeholder?: string }
+  | { type: "number"; name: string; label: string; min?: number; max?: number }
+  | { type: "date"; name: string; label: string }
+  | { type: "select"; name: string; label: string; options: Option[] }
+  | {
+    type: "textarea";
+    name: string;
+    label: string;
+    rows?: number;
+    placeholder?: string;
+  };
+
 export type FieldDef =
   | { type: "hidden"; name: string }
   | {
@@ -53,6 +67,17 @@ export type FieldDef =
     /** Autocomplete source for suggestions. Omit for freetext-only tags. */
     source?: string;
     placeholder?: string;
+  }
+  | {
+    type: "array-table";
+    name: string;
+    label: string;
+    /** Unique section key used in input names: `{section}[{idx}].{field}`. */
+    section: string;
+    /** Field definitions for each row (flat types only: text, number, date, select). */
+    itemFields: ArrayTableItemField[];
+    /** Label for the add button. Defaults to "Add {label}". */
+    addLabel?: string;
   };
 
 type Props = {
@@ -70,6 +95,104 @@ type Props = {
 
 const fieldId = (formId: string, name: string) => `${formId}-${name}`;
 
+// ---------------------------------------------------------------------------
+// Array-table helpers — render structured object arrays as editable rows
+// ---------------------------------------------------------------------------
+
+const ArrayTableRowField: FC<
+  { section: string; idx: number; field: ArrayTableItemField; value?: string }
+> = ({ section, idx, field, value }) => {
+  const name = `${section}[${idx}].${field.name}`;
+  return (
+    <div class="array-table__field">
+      <label class="array-table__field-label">{field.label}</label>
+      {field.type === "text" && (
+        <input
+          type="text"
+          name={name}
+          class="form__input"
+          value={value ?? ""}
+          placeholder={field.placeholder}
+          autocomplete="do-not-autofill"
+        />
+      )}
+      {field.type === "number" && (
+        <input
+          type="number"
+          name={name}
+          class="form__input"
+          value={value ?? ""}
+          min={field.min}
+          max={field.max}
+          autocomplete="off"
+        />
+      )}
+      {field.type === "date" && (
+        <input
+          type="date"
+          name={name}
+          class="form__input"
+          value={value ?? ""}
+        />
+      )}
+      {field.type === "select" && (
+        <select name={name} class="form__select">
+          <option value="">—</option>
+          {field.options.map((o) => (
+            <option key={o.value} value={o.value} selected={value === o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      )}
+      {field.type === "textarea" && (
+        <textarea
+          name={name}
+          class="form__textarea"
+          rows={field.rows ?? 2}
+          placeholder={field.placeholder}
+        >
+          {value ?? ""}
+        </textarea>
+      )}
+    </div>
+  );
+};
+
+const ArrayTableRow: FC<
+  {
+    section: string;
+    idx: number;
+    itemFields: ArrayTableItemField[];
+    rowData?: Record<string, unknown>;
+  }
+> = ({ section, idx, itemFields, rowData }) => (
+  <div class="array-table__row">
+    <div class="array-table__row-fields">
+      {itemFields.map((field) => (
+        <ArrayTableRowField
+          key={field.name}
+          section={section}
+          idx={idx}
+          field={field}
+          value={rowData ? String(rowData[field.name] ?? "") : ""}
+        />
+      ))}
+    </div>
+    <button
+      type="button"
+      class="array-table__remove"
+      aria-label="Remove row"
+      hx-on--click="this.closest('.array-table__row').remove()"
+    >
+      &times;
+    </button>
+  </div>
+);
+
+/** Exported for use by the array-row server endpoint (task 2). */
+export { ArrayTableRow, ArrayTableRowField };
+
 const Field: FC<
   { formId: string; def: FieldDef; value?: string; displayValue?: string }
 > = (
@@ -85,7 +208,7 @@ const Field: FC<
     <div class="form__field">
       <label class="form__label" for={id}>
         {def.label}
-        {def.required && (
+        {"required" in def && def.required && (
           <span class="form__required" aria-hidden="true">*</span>
         )}
       </label>
@@ -223,6 +346,42 @@ const Field: FC<
             {def.source && (
               <ul class="form__autocomplete-list" id={`${id}-results`} />
             )}
+          </div>
+        );
+      })()}
+      {def.type === "array-table" && (() => {
+        const items: Record<string, unknown>[] = (() => {
+          if (!value) return [];
+          try {
+            const parsed = JSON.parse(value);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch {
+            return [];
+          }
+        })();
+        const rowsId = `${id}-rows`;
+        return (
+          <div class="array-table" data-array-table={def.section}>
+            <div class="array-table__rows" id={rowsId}>
+              {items.map((rowData, idx) => (
+                <ArrayTableRow
+                  key={idx}
+                  section={def.section}
+                  idx={idx}
+                  itemFields={def.itemFields}
+                  rowData={rowData}
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              class="btn btn--secondary btn--sm array-table__add"
+              hx-get={`/forms/array-row/${def.section}`}
+              hx-target={`#${rowsId}`}
+              hx-swap="beforeend"
+            >
+              {def.addLabel ?? `Add ${def.label}`}
+            </button>
           </div>
         );
       })()}

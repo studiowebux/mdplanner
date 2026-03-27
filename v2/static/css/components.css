@@ -757,6 +757,83 @@ a.badge:hover {
 }
 
 /* -------------------------------------------------------------------------
+   Array-table — inline editable rows for structured object arrays
+   ------------------------------------------------------------------------- */
+
+.array-table {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.array-table__rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.array-table__row {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+  padding: var(--space-sm);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-secondary);
+}
+
+.array-table__row-fields {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-xs) var(--space-sm);
+}
+
+.array-table__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+}
+
+.array-table__field-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+}
+
+.array-table__remove {
+  flex-shrink: 0;
+  width: var(--space-lg);
+  height: var(--space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  line-height: 1;
+  margin-top: var(--space-md);
+}
+
+.array-table__remove:hover {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.array-table__add {
+  align-self: flex-start;
+}
+
+@media (max-width: 36rem) {
+  .array-table__row-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* -------------------------------------------------------------------------
    Empty state
    ------------------------------------------------------------------------- */
 

@@ -1,0 +1,251 @@
+/* Marketing Plans view — domain-specific styles only.
+   Card base uses shared .domain-card from components.css. */
+
+/* ---------------------------------------------------------------------------
+   Plan status badges
+--------------------------------------------------------------------------- */
+
+.mktplan-status--draft {
+  background: var(--color-accent-subtle);
+  color: var(--color-text-primary);
+}
+
+.mktplan-status--active {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.mktplan-status--completed {
+  background: var(--color-info-bg);
+  color: var(--color-info-text);
+}
+
+.mktplan-status--archived {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Channel / Campaign item status badges
+--------------------------------------------------------------------------- */
+
+.mktplan-item-status--planned {
+  background: var(--color-accent-subtle);
+  color: var(--color-text-primary);
+}
+
+.mktplan-item-status--active {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.mktplan-item-status--paused {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.mktplan-item-status--completed {
+  background: var(--color-info-bg);
+  color: var(--color-info-text);
+}
+
+/* ---------------------------------------------------------------------------
+   Card — extends .domain-card
+--------------------------------------------------------------------------- */
+
+.mktplan-card--completed {
+  opacity: var(--card-opacity-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Detail view
+--------------------------------------------------------------------------- */
+
+.mktplan-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.mktplan-detail__info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md) var(--space-xl);
+}
+
+.mktplan-detail__info-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.mktplan-detail__info-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.mktplan-detail__info-value {
+  color: var(--color-text-primary);
+}
+
+.mktplan-detail__description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Detail tables — audiences, channels, campaigns
+--------------------------------------------------------------------------- */
+
+.mktplan-detail__table {
+  width: 100%;
+  font-size: var(--font-size-sm);
+}
+
+.mktplan-detail__table th {
+  text-align: left;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.mktplan-detail__table td {
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: var(--border-width) solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.mktplan-detail__table tbody tr:hover td {
+  background: var(--color-bg-secondary);
+}
+
+/* ---------------------------------------------------------------------------
+   KPI progress
+--------------------------------------------------------------------------- */
+
+.mktplan-detail__kpis {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.mktplan-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+}
+
+.mktplan-kpi__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: var(--font-size-sm);
+}
+
+.mktplan-kpi__metric {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.mktplan-kpi__values {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.mktplan-kpi__bar {
+  height: var(--space-sm);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.mktplan-kpi__fill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: var(--radius-sm);
+  transition: width var(--transition-fast);
+}
+
+.mktplan-kpi__pct {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  align-self: flex-end;
+}
+
+/* ---------------------------------------------------------------------------
+   Hypothesis
+--------------------------------------------------------------------------- */
+
+.mktplan-detail__hypothesis-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.mktplan-detail__hypothesis-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.mktplan-detail__hypothesis-text {
+  flex: 1;
+}
+
+/* Verdict badges */
+
+.mktplan-verdict--pending {
+  background: var(--color-accent-subtle);
+  color: var(--color-text-primary);
+}
+
+.mktplan-verdict--confirmed {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.mktplan-verdict--partial {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.mktplan-verdict--rejected {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+/* ---------------------------------------------------------------------------
+   Team
+--------------------------------------------------------------------------- */
+
+.mktplan-detail__team {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+/* ---------------------------------------------------------------------------
+   Meta
+--------------------------------------------------------------------------- */
+
+.mktplan-detail__meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}

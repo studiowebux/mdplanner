@@ -19,6 +19,14 @@ import {
   autocompleteRouter,
   registerAutocompleteSource,
 } from "./autocomplete/routes.ts";
+import { marketingPlansRouter } from "./marketing-plans/routes.ts";
+import {
+  getArrayTableSection,
+  registerArrayTableSection,
+} from "../components/ui/array-table-registry.ts";
+import { ArrayTableRow } from "../components/ui/form-builder.tsx";
+import { MKTPLAN_FORM_FIELDS } from "../domains/marketing-plan/constants.tsx";
+import type { FieldDef } from "../components/ui/form-builder.tsx";
 import {
   getGoalService,
   getIdeaService,
@@ -253,5 +261,26 @@ views.route("/tasks", tasksRouter);
 views.route("/github", githubSummaryRouter);
 views.route("/settings", settingsViewRouter);
 views.route("/search", searchRouter);
+views.route("/marketing-plans", marketingPlansRouter);
 views.route("/autocomplete", autocompleteRouter);
 views.route("/sidebar", sidebarRouter);
+
+// Register array-table sections for server-rendered row fragments.
+for (const field of MKTPLAN_FORM_FIELDS) {
+  if ((field as FieldDef & { type: string }).type === "array-table") {
+    const f = field as Extract<FieldDef, { type: "array-table" }>;
+    registerArrayTableSection(f.section, f.itemFields);
+  }
+}
+
+// Array-table: return a single empty row fragment for the "Add" button.
+// Uses a timestamp-based index to guarantee uniqueness regardless of row removals.
+views.get("/forms/array-row/:section", (c) => {
+  const section = c.req.param("section");
+  const itemFields = getArrayTableSection(section);
+  if (!itemFields) return c.notFound();
+  const idx = Date.now();
+  return c.html(
+    ArrayTableRow({ section, idx, itemFields }) as unknown as string,
+  );
+});
