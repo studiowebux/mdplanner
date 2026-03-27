@@ -12,14 +12,6 @@
 .swot-card__counts {
   display: flex;
   gap: var(--space-xs);
-  margin-top: var(--space-xs);
-}
-
-.swot-card__count {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  padding: var(--space-xxs) var(--space-sm);
-  border-radius: var(--radius-sm);
 }
 
 .swot-card__count--s {
@@ -90,4 +82,10 @@
   margin-top: var(--space-lg);
   padding-top: var(--space-md);
   border-top: var(--border-width) solid var(--color-border);
+}
+
+/* -- Edit mode ------------------------------------------------------------ */
+
+.swot-detail--editing .quadrant-card__item:hover {
+  background: var(--color-bg-tertiary);
 }

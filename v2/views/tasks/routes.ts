@@ -1,9 +1,8 @@
 // Task view routes — factory-generated + custom detail + quick actions.
 
-import type { Context } from "hono";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { taskConfig } from "../../domains/task/config.tsx";
-import type { AppVariables } from "../../types/app.ts";
+import type { AppContext } from "../../types/app.ts";
 import { getGitHubService, getTaskService } from "../../singletons/services.ts";
 import { publish } from "../../singletons/event-bus.ts";
 import {
@@ -17,14 +16,11 @@ import { hxTrigger } from "../../utils/hx-trigger.ts";
 
 export const tasksRouter = createDomainRoutes(taskConfig);
 
-// deno-lint-ignore no-explicit-any
-type Ctx = Context<{ Variables: AppVariables }, any, any>;
-
 // ---------------------------------------------------------------------------
 // Shared — fetch task + resolve props + render
 // ---------------------------------------------------------------------------
 
-async function renderDetailPage(c: Ctx, id: string) {
+async function renderDetailPage(c: AppContext, id: string) {
   const task = await getTaskService().getById(id);
   if (!task) return c.notFound();
   const props = await resolveTaskDetailProps(task);

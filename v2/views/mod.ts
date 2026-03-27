@@ -27,7 +27,6 @@ import {
 } from "../components/ui/array-table-registry.ts";
 import { ArrayTableRow } from "../components/ui/form-builder.tsx";
 import { MKTPLAN_FORM_FIELDS } from "../domains/marketing-plan/constants.tsx";
-import { SWOT_FORM_FIELDS } from "../domains/swot/constants.tsx";
 import type { FieldDef } from "../components/ui/form-builder.tsx";
 import {
   getGoalService,
@@ -269,7 +268,7 @@ views.route("/autocomplete", autocompleteRouter);
 views.route("/sidebar", sidebarRouter);
 
 // Register array-table sections for server-rendered row fragments.
-for (const field of [...MKTPLAN_FORM_FIELDS, ...SWOT_FORM_FIELDS]) {
+for (const field of MKTPLAN_FORM_FIELDS) {
   if ((field as FieldDef & { type: string }).type === "array-table") {
     const f = field as Extract<FieldDef, { type: "array-table" }>;
     registerArrayTableSection(f.section, f.itemFields);

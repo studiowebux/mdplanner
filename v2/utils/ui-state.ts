@@ -1,11 +1,8 @@
-import type { Context } from "hono";
 import { getCookie, setCookie } from "hono/cookie";
 import { log } from "../singletons/logger.ts";
+import type { AppContext } from "../types/app.ts";
 
 const COOKIE_NAME = "ui_state";
-
-// deno-lint-ignore no-explicit-any
-type Ctx = Context<any, any, any>;
 
 function parseUiCookie(
   raw: string | undefined,
@@ -25,13 +22,13 @@ function parseUiCookie(
 }
 
 // Read a domain's saved UI state from the shared cookie.
-export function readUiState<T>(c: Ctx, domain: string): Partial<T> {
+export function readUiState<T>(c: AppContext, domain: string): Partial<T> {
   const all = parseUiCookie(getCookie(c, COOKIE_NAME));
   return (all[domain] ?? {}) as Partial<T>;
 }
 
 // Persist a domain's UI state into the shared cookie.
-export function writeUiState<T>(c: Ctx, domain: string, state: T): void {
+export function writeUiState<T>(c: AppContext, domain: string, state: T): void {
   const all = parseUiCookie(getCookie(c, COOKIE_NAME));
   all[domain] = state as Record<string, unknown>;
   setCookie(c, COOKIE_NAME, JSON.stringify(all), {
@@ -43,7 +40,7 @@ export function writeUiState<T>(c: Ctx, domain: string, state: T): void {
 
 /** Get the current view mode for a domain — query param wins, then cookie, then fallback. */
 export function getViewMode<T extends string = string>(
-  c: Ctx,
+  c: AppContext,
   domain: string,
   fallback: T = "grid" as T,
 ): T {

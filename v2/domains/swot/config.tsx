@@ -5,31 +5,11 @@ import type { CreateSwot, Swot, UpdateSwot } from "../../types/swot.types.ts";
 import { getSwotService } from "../../singletons/services.ts";
 import {
   SWOT_FORM_FIELDS,
-  SWOT_QUADRANTS,
   SWOT_TABLE_COLUMNS,
   swotToRow,
 } from "./constants.tsx";
 import { SwotCard } from "../../views/components/swot-card.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
-
-/** Convert array-table [{text: "..."}] objects to flat string[] for quadrants. */
-function flattenQuadrants(
-  data: Record<string, unknown>,
-): Record<string, unknown> {
-  const result = { ...data };
-  for (const name of SWOT_QUADRANTS) {
-    const key = name.toLowerCase();
-    const val = result[key];
-    if (Array.isArray(val)) {
-      result[key] = val.map((item: unknown) =>
-        typeof item === "object" && item !== null && "text" in item
-          ? String((item as Record<string, unknown>).text)
-          : String(item)
-      );
-    }
-  }
-  return result;
-}
 
 export const swotConfig: DomainConfig<Swot, CreateSwot, UpdateSwot> = {
   name: "swot",
@@ -63,15 +43,12 @@ export const swotConfig: DomainConfig<Swot, CreateSwot, UpdateSwot> = {
 
   Card: ({ item, q }) => <SwotCard item={item} q={q} />,
 
-  parseCreate: (body) => {
-    const raw = parseFormBody(SWOT_FORM_FIELDS, body);
-    return flattenQuadrants(raw) as CreateSwot;
-  },
+  parseCreate: (body) => parseFormBody(SWOT_FORM_FIELDS, body) as CreateSwot,
 
-  parseUpdate: (body) => {
-    const raw = parseFormBody(SWOT_FORM_FIELDS, body, { clearEmpty: true });
-    return flattenQuadrants(raw) as Partial<UpdateSwot>;
-  },
+  parseUpdate: (body) =>
+    parseFormBody(SWOT_FORM_FIELDS, body, { clearEmpty: true }) as Partial<
+      UpdateSwot
+    >,
 
   getService: () => getSwotService(),
 

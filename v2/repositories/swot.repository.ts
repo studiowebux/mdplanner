@@ -8,7 +8,7 @@ import {
 } from "../utils/frontmatter.ts";
 import { generateId } from "../utils/id.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
-import { readMarkdownDir } from "../utils/repo-helpers.ts";
+import { mergeFields, readMarkdownDir } from "../utils/repo-helpers.ts";
 import type { CreateSwot, Swot, UpdateSwot } from "../types/swot.types.ts";
 import {
   SWOT_QUADRANTS,
@@ -80,13 +80,11 @@ export class SwotRepository {
     const existing = await this.findById(id);
     if (!existing) return null;
 
-    const updated: Swot = {
-      ...existing,
-      ...data,
-      id: existing.id,
-      created: existing.created,
-      updated: new Date().toISOString(),
-    };
+    const updated = mergeFields(
+      { ...existing },
+      data as Record<string, unknown>,
+    );
+    updated.updated = new Date().toISOString();
 
     await this.writer.write(
       id,
@@ -131,9 +129,9 @@ export class SwotRepository {
     let pastQuadrants = false;
 
     for (const line of lines) {
-      // v1 compat: title may be # heading in body
-      if (!title && line.startsWith("# ")) {
-        title = line.slice(2).trim();
+      // v1 compat: title may be # heading in body — skip if already set
+      if (line.startsWith("# ")) {
+        if (!title) title = line.slice(2).trim();
         continue;
       }
 
@@ -167,12 +165,18 @@ export class SwotRepository {
 
       // Non-quadrant content between title and first ## is description/notes
       if (currentSection === null && !pastQuadrants) {
-        // Skip blank lines before first section
         if (line.trim()) extraLines.push(line);
         continue;
       }
 
-      // Content after quadrant sections → notes
+      // Non-bullet text after a quadrant section → notes
+      if (currentSection && !pastQuadrants && line.trim()) {
+        pastQuadrants = true;
+        extraLines.push(line);
+        continue;
+      }
+
+      // Content after quadrant sections → notes (including blank lines)
       if (pastQuadrants) {
         extraLines.push(line);
       }

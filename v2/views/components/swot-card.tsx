@@ -29,16 +29,16 @@ export const SwotCard: FC<Props> = ({ item, q }) => {
         )}
       </dl>
       <div class="swot-card__counts">
-        <span class="swot-card__count swot-card__count--s">
+        <span class="badge swot-card__count--s">
           S {item.strengths.length}
         </span>
-        <span class="swot-card__count swot-card__count--w">
+        <span class="badge swot-card__count--w">
           W {item.weaknesses.length}
         </span>
-        <span class="swot-card__count swot-card__count--o">
+        <span class="badge swot-card__count--o">
           O {item.opportunities.length}
         </span>
-        <span class="swot-card__count swot-card__count--t">
+        <span class="badge swot-card__count--t">
           T {item.threats.length}
         </span>
       </div>

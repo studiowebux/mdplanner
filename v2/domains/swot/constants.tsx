@@ -21,15 +21,27 @@ export type SwotQuadrantKey =
   | "opportunities"
   | "threats";
 
-/** Quadrant display metadata — label and CSS modifier. */
+/** Quadrant display metadata — label, singular, and CSS modifier. */
 export const SWOT_QUADRANT_META: Record<
   SwotQuadrantKey,
-  { label: string; modifier: string }
+  { label: string; singular: string; modifier: string }
 > = {
-  strengths: { label: "Strengths", modifier: "strengths" },
-  weaknesses: { label: "Weaknesses", modifier: "weaknesses" },
-  opportunities: { label: "Opportunities", modifier: "opportunities" },
-  threats: { label: "Threats", modifier: "threats" },
+  strengths: {
+    label: "Strengths",
+    singular: "strength",
+    modifier: "strengths",
+  },
+  weaknesses: {
+    label: "Weaknesses",
+    singular: "weakness",
+    modifier: "weaknesses",
+  },
+  opportunities: {
+    label: "Opportunities",
+    singular: "opportunity",
+    modifier: "opportunities",
+  },
+  threats: { label: "Threats", singular: "threat", modifier: "threats" },
 };
 
 /** Maps lowercase heading prefixes to quadrant field keys. */
@@ -109,66 +121,6 @@ export const SWOT_FORM_FIELDS: FieldDef[] = [
     label: "Project",
     source: "portfolio",
     placeholder: "Search projects...",
-  },
-  {
-    type: "array-table",
-    name: "strengths",
-    label: "Strength",
-    section: "strengths",
-    addLabel: "Add strength",
-    itemFields: [
-      {
-        type: "text",
-        name: "text",
-        label: "Strength",
-        placeholder: "e.g. Modern tech stack",
-      },
-    ],
-  },
-  {
-    type: "array-table",
-    name: "weaknesses",
-    label: "Weakness",
-    section: "weaknesses",
-    addLabel: "Add weakness",
-    itemFields: [
-      {
-        type: "text",
-        name: "text",
-        label: "Weakness",
-        placeholder: "e.g. Limited brand awareness",
-      },
-    ],
-  },
-  {
-    type: "array-table",
-    name: "opportunities",
-    label: "Opportunity",
-    section: "opportunities",
-    addLabel: "Add opportunity",
-    itemFields: [
-      {
-        type: "text",
-        name: "text",
-        label: "Opportunity",
-        placeholder: "e.g. Remote work trend",
-      },
-    ],
-  },
-  {
-    type: "array-table",
-    name: "threats",
-    label: "Threat",
-    section: "threats",
-    addLabel: "Add threat",
-    itemFields: [
-      {
-        type: "text",
-        name: "text",
-        label: "Threat",
-        placeholder: "e.g. Established competitors",
-      },
-    ],
   },
   { type: "textarea", name: "notes", label: "Notes", rows: 4 },
 ];
