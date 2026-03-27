@@ -1392,7 +1392,7 @@ a.badge:hover {
   background: var(--color-bg-secondary);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
-  border-top-width: var(--space-xs);
+  border-top: var(--space-sm) solid var(--color-border);
   overflow: hidden;
 }
 
