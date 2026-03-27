@@ -4,6 +4,7 @@ import { groupBy } from "../utils/group.ts";
 import type { Milestone } from "../types/milestone.types.ts";
 import type { Task } from "../types/task.types.ts";
 import type { ViewProps } from "../types/app.ts";
+import { toKebab } from "../utils/slug.ts";
 
 type Props = ViewProps & {
   milestone: Milestone;
@@ -21,7 +22,7 @@ export const MilestoneDetailView: FC<Props> = (
       {...viewProps}
       styles={["/css/views/milestones.css"]}
     >
-      <main class="milestone-detail">
+      <main class="detail-view milestone-detail">
         <div class="milestone-detail__back">
           <a href="/milestones" class="btn btn--secondary">
             Back to milestones
@@ -38,10 +39,39 @@ export const MilestoneDetailView: FC<Props> = (
               {milestone.status}
             </span>
           </div>
+          <div class="detail-actions">
+            <button
+              class="btn btn--secondary btn--sm"
+              type="button"
+              hx-get={`/milestones/${milestone.id}/edit`}
+              hx-target="#milestones-form-container"
+              hx-swap="innerHTML"
+            >
+              Edit
+            </button>
+            <button
+              class="btn btn--danger btn--sm"
+              type="button"
+              hx-delete={`/milestones/${milestone.id}`}
+              hx-swap="none"
+              hx-confirm-dialog={`Delete "${milestone.name}"? This cannot be undone.`}
+              data-confirm-name={milestone.name}
+            >
+              Delete
+            </button>
+          </div>
 
-          {milestone.target && (
-            <p class="milestone-detail__meta">Target: {milestone.target}</p>
-          )}
+          <div class="milestone-detail__meta">
+            {milestone.project && (
+              <span>
+                Project:{" "}
+                <a href={`/portfolio/${toKebab(milestone.project)}`}>
+                  {milestone.project}
+                </a>
+              </span>
+            )}
+            {milestone.target && <span>Target: {milestone.target}</span>}
+          </div>
 
           <div class="milestone-detail__progress">
             <progress

@@ -241,7 +241,7 @@
   --swap-transition-duration: 0.05s;
 
   /* Task views */
-  --task-board-col-min-w: 18rem;
+  --task-board-col-min-w: 22rem;
   --task-board-col-max-w: none;
   --task-board-card-min-h: 8rem;
   --task-timeline-label-w: 20rem;
@@ -303,6 +303,7 @@ html.font-mono {
   --color-accent: #ffab00;
   --color-accent-hover: #e69a00;
   --color-accent-subtle: #fff3d0;
+  --color-text-on-accent: #000;
   --color-accent-muted: #ffd666;
 
   /* Success */
@@ -360,6 +361,7 @@ html.font-mono {
   /* Accent — cream/beige */
   --color-accent: #e9dcbe;
   --color-accent-hover: #f3f3f3;
+  --color-text-on-accent: #000;
   --color-accent-subtle: #4a4540;
   --color-accent-muted: #b3a78e;
 
@@ -422,6 +424,7 @@ html.font-mono {
   /* Accent */
   --color-accent: #b45309;
   --color-accent-hover: #92400e;
+  --color-text-on-accent: #fff;
 
   /* Success */
   --color-success: #059669;
@@ -477,6 +480,7 @@ html.font-mono {
   /* Accent */
   --color-accent: #525252;
   --color-accent-hover: #404040;
+  --color-text-on-accent: #fff;
 
   /* Success - muted */
   --color-success: #4ade80;

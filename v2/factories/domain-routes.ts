@@ -56,8 +56,9 @@ export function createDomainRoutes<T extends Entity, C, U>(
     // Hide completed
     if (state.hideCompleted && cfg.hideCompleted) {
       const { field, value } = cfg.hideCompleted;
+      const values = Array.isArray(value) ? value : [value];
       result = result.filter((item) =>
-        String(item[field as keyof T] ?? "") !== value
+        !values.includes(String(item[field as keyof T] ?? ""))
       );
     }
 

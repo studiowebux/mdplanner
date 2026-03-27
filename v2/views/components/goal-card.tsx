@@ -1,15 +1,14 @@
 import type { FC } from "hono/jsx";
 import type { Goal } from "../../types/goal.types.ts";
 import { DomainCard } from "../../components/ui/domain-card.tsx";
-import { highlightHtml } from "../../utils/highlight.tsx";
 import { KpiGauge } from "../../components/ui/kpi-gauge.tsx";
-import { dueIn, formatDate } from "../../utils/time.ts";
-import { markdownToHtml } from "../../utils/markdown.ts";
+import { PRIORITY_LABELS } from "../../constants/mod.ts";
+import { goalPersonByName } from "../../domains/goal/config.tsx";
+import { dueIn } from "../../utils/time.ts";
 
 type Props = { item: Goal; q?: string };
 
 export const GoalCard: FC<Props> = ({ item, q }) => {
-  const descHtml = markdownToHtml(item.description);
   const isCompleted = item.status === "success" || item.status === "failed";
   const deadline = isCompleted ? "" : dueIn(item.endDate);
   const isOverdue = deadline.includes("overdue");
@@ -25,12 +24,16 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
   const now = Date.now();
   const start = item.startDate ? new Date(item.startDate).getTime() : 0;
   const end = item.endDate ? new Date(item.endDate).getTime() : 0;
-  const progress = start && end && end > start
+  const hasManualProgress = item.progress !== undefined &&
+    item.progress !== null;
+  const timeProgress = start && end && end > start
     ? Math.min(
       100,
       Math.max(0, Math.round(((now - start) / (end - start)) * 100)),
     )
     : 0;
+  const progress = hasManualProgress ? item.progress! : timeProgress;
+  const progressLabel = hasManualProgress ? "progress" : "elapsed";
 
   return (
     <DomainCard
@@ -39,22 +42,36 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
       q={q}
       domain="goals"
       id={item.id}
-      className={item.status === "success" || item.status === "failed"
-        ? "goal-card--completed"
-        : undefined}
+      className={isCompleted ? "goal-card--completed" : undefined}
       badge={
-        <span class={`badge goal-status goal-status--${item.status}`}>
-          {item.status}
-        </span>
+        <>
+          <span class={`badge goal-status goal-status--${item.status}`}>
+            {item.status}
+          </span>
+          {item.priority && (
+            <span class={`badge priority--${item.priority}`}>
+              {PRIORITY_LABELS[String(item.priority)] ?? `P${item.priority}`}
+            </span>
+          )}
+        </>
       }
     >
+      {/* Compact meta — owner + KPI only */}
       <dl class="domain-card__meta">
-        <dt class="domain-card__meta-label">Type</dt>
-        <dd class="domain-card__meta-value">
-          <span class={`badge goal-badge goal-badge--${item.type}`}>
-            {item.type}
-          </span>
-        </dd>
+        {item.owner && (
+          <>
+            <dt class="domain-card__meta-label">Owner</dt>
+            <dd class="domain-card__meta-value">
+              <a
+                href={goalPersonByName[item.owner!]
+                  ? `/people/${goalPersonByName[item.owner!]}`
+                  : `/people?q=${encodeURIComponent(item.owner!)}`}
+              >
+                {item.owner}
+              </a>
+            </dd>
+          </>
+        )}
         {item.kpi && (
           <>
             <dt class="domain-card__meta-label">KPI</dt>
@@ -65,40 +82,10 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
             </dd>
           </>
         )}
-        {item.project && (
-          <>
-            <dt class="domain-card__meta-label">Project</dt>
-            <dd class="domain-card__meta-value">
-              <a
-                href={`/portfolio/${
-                  item.project.toLowerCase().replace(/[^a-z0-9]+/g, "-")
-                    .replace(/(^-|-$)/g, "")
-                }`}
-              >
-                {item.project}
-              </a>
-            </dd>
-          </>
-        )}
-        {item.startDate && (
-          <>
-            <dt class="domain-card__meta-label">Start</dt>
-            <dd class="domain-card__meta-value">
-              {formatDate(item.startDate)}
-            </dd>
-          </>
-        )}
-        {item.endDate && (
-          <>
-            <dt class="domain-card__meta-label">End</dt>
-            <dd class="domain-card__meta-value">
-              {formatDate(item.endDate)}
-            </dd>
-          </>
-        )}
       </dl>
 
-      {start > 0 && end > 0 && (
+      {/* Progress bar — manual or time-elapsed */}
+      {(hasManualProgress || (start > 0 && end > 0)) && (
         <div class="goal-card__progress">
           <progress
             class="progress-bar goal-card__bar"
@@ -106,7 +93,7 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
             max={100}
           />
           <span class="goal-card__stats">
-            {progress}% elapsed
+            {progress}% {progressLabel}
             {deadline && (
               <span
                 class={`goal-deadline${
@@ -124,13 +111,6 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
             )}
           </span>
         </div>
-      )}
-
-      {descHtml && (
-        <div
-          class="goal-card__description markdown-body"
-          dangerouslySetInnerHTML={{ __html: highlightHtml(descHtml, q) }}
-        />
       )}
     </DomainCard>
   );

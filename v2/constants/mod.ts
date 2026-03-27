@@ -52,6 +52,22 @@ export const DEFAULT_KPI_METRICS: string[] = [
   "gross_margin",
 ];
 
+export const PRIORITY_OPTIONS = [
+  { value: "1", label: "P1 — Critical" },
+  { value: "2", label: "P2 — High" },
+  { value: "3", label: "P3 — Medium" },
+  { value: "4", label: "P4 — Low" },
+  { value: "5", label: "P5 — Minimal" },
+];
+
+export const PRIORITY_LABELS: Record<string, string> = {
+  "1": "P1",
+  "2": "P2",
+  "3": "P3",
+  "4": "P4",
+  "5": "P5",
+};
+
 export const ENTITY_TYPE_LABELS: Record<string, string> = {
   task: "Task",
   note: "Note",

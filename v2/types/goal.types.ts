@@ -74,6 +74,30 @@ export const GoalSchema = z.object({
   project: z.string().optional().openapi({
     description: "Linked project name",
   }),
+  owner: z.string().optional().openapi({
+    description: "Goal owner (person name)",
+  }),
+  contributors: z.array(z.string()).optional().openapi({
+    description: "Contributing people (names)",
+  }),
+  priority: z.number().min(1).max(5).optional().openapi({
+    description: "Priority 1 (highest) to 5 (lowest)",
+  }),
+  progress: z.number().min(0).max(100).optional().openapi({
+    description: "Manual progress percentage (0-100)",
+  }),
+  parentGoal: z.string().optional().openapi({
+    description: "Parent goal ID (for OKR hierarchy)",
+  }),
+  linkedMilestones: z.array(z.string()).optional().openapi({
+    description: "Linked milestone IDs",
+  }),
+  tags: z.array(z.string()).optional().openapi({
+    description: "Goal labels/tags",
+  }),
+  notes: z.string().optional().openapi({
+    description: "Additional notes (markdown)",
+  }),
   created: z.string().openapi({ description: "ISO creation timestamp" }),
   updated: z.string().openapi({ description: "ISO last-updated timestamp" }),
 }).openapi("Goal");
@@ -99,19 +123,20 @@ export const CreateGoalSchema = GoalSchema.pick({
   githubMilestone: true,
   linkedPortfolioItems: true,
   project: true,
+  owner: true,
+  contributors: true,
+  priority: true,
+  progress: true,
+  parentGoal: true,
+  linkedMilestones: true,
+  tags: true,
+  notes: true,
 }).partial({
   description: true,
   kpi: true,
-  kpiMetric: true,
-  kpiTarget: true,
-  kpiValue: true,
   startDate: true,
   endDate: true,
   status: true,
-  githubRepo: true,
-  githubMilestone: true,
-  linkedPortfolioItems: true,
-  project: true,
 }).openapi("CreateGoal");
 
 export type CreateGoal = z.infer<typeof CreateGoalSchema>;

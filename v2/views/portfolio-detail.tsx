@@ -120,12 +120,33 @@ export const PortfolioDetailView: FC<Props> = (
               {item.status}
             </span>
           </div>
+          <div class="detail-actions">
+            <button
+              class="btn btn--secondary btn--sm"
+              type="button"
+              hx-get={`/portfolio/${item.id}/edit`}
+              hx-target="#portfolio-form-container"
+              hx-swap="innerHTML"
+            >
+              Edit
+            </button>
+            <button
+              class="btn btn--danger btn--sm"
+              type="button"
+              hx-delete={`/portfolio/${item.id}`}
+              hx-swap="none"
+              hx-confirm-dialog={`Delete "${item.name}"? This cannot be undone.`}
+              data-confirm-name={item.name}
+            >
+              Delete
+            </button>
+          </div>
           <p class="portfolio-detail__meta">
             {item.category}
-            {item.client && <>&middot; {item.client}</>}
-            {item.startDate && <>&middot; {item.startDate}</>}
-            {item.endDate && <>to {item.endDate}</>}
-            {item.license && <>&middot; {item.license}</>}
+            {item.client && <>{" "}&middot; {item.client}</>}
+            {item.startDate && <>{" "}&middot; {item.startDate}</>}
+            {item.endDate && <>{" "}to {item.endDate}</>}
+            {item.license && <>{" "}&middot; {item.license}</>}
           </p>
           <div class="portfolio-detail__progress">
             <div class="portfolio-progress">
@@ -326,28 +347,6 @@ export const PortfolioDetailView: FC<Props> = (
         )}
 
         {item.githubRepo && <GitHubSection itemId={item.id} />}
-
-        <div class="detail-actions">
-          <button
-            class="btn btn--secondary"
-            type="button"
-            hx-get={`/portfolio/${item.id}/edit`}
-            hx-target="#portfolio-form-container"
-            hx-swap="innerHTML"
-          >
-            Edit
-          </button>
-          <button
-            class="btn btn--danger"
-            type="button"
-            hx-delete={`/portfolio/${item.id}`}
-            hx-swap="none"
-            hx-confirm-dialog={`Delete "${item.name}"? This cannot be undone.`}
-            data-confirm-name={item.name}
-          >
-            Delete
-          </button>
-        </div>
       </main>
       <div id="portfolio-form-container" />
     </MainLayout>

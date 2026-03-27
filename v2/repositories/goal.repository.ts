@@ -55,27 +55,16 @@ export class GoalRepository {
     const id = generateId("goal");
 
     const item: Goal = {
-      title: data.title,
+      ...data,
+      id,
       description: data.description ?? "",
       type: data.type ?? "project",
       kpi: data.kpi ?? "",
       startDate: data.startDate ?? "",
       endDate: data.endDate ?? "",
       status: data.status ?? "planning",
-      id,
       created: now,
       updated: now,
-      ...(data.kpiMetric && { kpiMetric: data.kpiMetric }),
-      ...(data.kpiTarget !== undefined && { kpiTarget: data.kpiTarget }),
-      ...(data.kpiValue !== undefined && { kpiValue: data.kpiValue }),
-      ...(data.githubRepo && { githubRepo: data.githubRepo }),
-      ...(data.githubMilestone !== undefined && {
-        githubMilestone: data.githubMilestone,
-      }),
-      ...(data.linkedPortfolioItems?.length && {
-        linkedPortfolioItems: data.linkedPortfolioItems,
-      }),
-      ...(data.project && { project: data.project }),
     };
 
     const filePath = join(this.dir, `${id}.md`);
@@ -172,6 +161,26 @@ export class GoalRepository {
         ).map(String)
         : undefined,
       project: fm.project != null ? String(fm.project) : undefined,
+      owner: fm.owner != null ? String(fm.owner) : undefined,
+      contributors: Array.isArray(fm.contributors)
+        ? (fm.contributors as unknown[]).map(String)
+        : undefined,
+      priority: fm.priority != null ? Number(fm.priority) : undefined,
+      progress: fm.progress != null ? Number(fm.progress) : undefined,
+      parentGoal: fm.parentGoal != null || fm.parent_goal != null
+        ? String(fm.parentGoal ?? fm.parent_goal)
+        : undefined,
+      linkedMilestones: Array.isArray(
+          fm.linkedMilestones ?? fm.linked_milestones,
+        )
+        ? (
+          (fm.linkedMilestones ?? fm.linked_milestones) as unknown[]
+        ).map(String)
+        : undefined,
+      tags: Array.isArray(fm.tags)
+        ? (fm.tags as unknown[]).map(String)
+        : undefined,
+      notes: fm.notes != null ? String(fm.notes) : undefined,
       created: fm.created ? String(fm.created) : new Date().toISOString(),
       updated: fm.updated ? String(fm.updated) : new Date().toISOString(),
     };

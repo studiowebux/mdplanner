@@ -5,6 +5,7 @@ import type { CreateGoal, Goal, UpdateGoal } from "../../types/goal.types.ts";
 import { GOAL_STATUSES, GOAL_TYPES } from "../../types/goal.types.ts";
 import {
   getGoalService,
+  getPeopleService,
   getPortfolioService,
 } from "../../singletons/services.ts";
 import {
@@ -13,7 +14,11 @@ import {
   goalToRow,
 } from "./constants.tsx";
 import { GoalCard } from "../../views/components/goal-card.tsx";
+import { GoalTree } from "../../views/components/goal-tree.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
+
+/** Name → person ID lookup, refreshed on every list render. */
+export let goalPersonByName: Record<string, string> = {};
 
 export const goalConfig: DomainConfig<Goal, CreateGoal, UpdateGoal> = {
   name: "goals",
@@ -21,11 +26,21 @@ export const goalConfig: DomainConfig<Goal, CreateGoal, UpdateGoal> = {
   path: "/goals",
   ssePrefix: "goal",
   styles: ["/css/views/goals.css"],
-  scripts: ["/js/kpi-gauge.js"],
+  scripts: ["/js/kpi-gauge.js", "/js/goal-smart.js"],
   emptyMessage: "No goals yet. Create one to get started.",
   defaultView: "table",
 
-  stateKeys: ["view", "status", "type", "project", "q", "sort", "order"],
+  stateKeys: [
+    "view",
+    "status",
+    "type",
+    "project",
+    "owner",
+    "q",
+    "sort",
+    "order",
+    "hideCompleted",
+  ],
   columns: GOAL_TABLE_COLUMNS,
   formFields: GOAL_FORM_FIELDS,
 
@@ -45,9 +60,14 @@ export const goalConfig: DomainConfig<Goal, CreateGoal, UpdateGoal> = {
       label: "All projects",
       options: [],
     },
+    {
+      name: "owner",
+      label: "All owners",
+      options: [],
+    },
   ],
 
-  hideCompleted: { field: "status", value: "success" },
+  hideCompleted: { field: "status", value: ["success", "failed"] },
 
   toRow: goalToRow,
 
@@ -63,9 +83,25 @@ export const goalConfig: DomainConfig<Goal, CreateGoal, UpdateGoal> = {
   getService: () => getGoalService(),
 
   extractFilterOptions: async () => {
-    const portfolio = await getPortfolioService().list();
+    const [portfolio, goals, people] = await Promise.all([
+      getPortfolioService().list(),
+      getGoalService().list(),
+      getPeopleService().list(),
+    ]);
+    const owners = [
+      ...new Set(
+        goals.map((g) => g.owner).filter(Boolean) as string[],
+      ),
+    ].sort();
+
+    // Refresh person name → ID lookup for cards
+    const lookup: Record<string, string> = {};
+    for (const p of people) lookup[p.name] = p.id;
+    goalPersonByName = lookup;
+
     return {
       project: portfolio.map((p) => p.name).sort(),
+      owner: owners,
     };
   },
 
@@ -74,4 +110,10 @@ export const goalConfig: DomainConfig<Goal, CreateGoal, UpdateGoal> = {
     (item.description ?? "").toLowerCase().includes(q) ||
     (item.kpi ?? "").toLowerCase().includes(q) ||
     (item.project ?? "").toLowerCase().includes(q),
+
+  extraViewModes: [{ key: "tree", label: "Tree" }],
+
+  customViewRenderer: async (_view, _state, items) => {
+    return <GoalTree goals={items} />;
+  },
 };

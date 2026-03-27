@@ -1,16 +1,18 @@
 ---
-id: goal_mobile
+title: Mobile App Launch
 type: project
-kpi: "Ship iOS + Android apps"
-kpi_metric: active_users
-kpi_target: 500
-start: 2026-02-01
-end: 2026-06-30
+kpi: Ship iOS + Android apps
+kpiMetric: active_users
+kpiTarget: 500
+startDate: 2026-02-01
+endDate: 2026-06-30
 status: at-risk
 project: Mobile App
+priority: 1
+notes: Test
+created: "2026-03-27T00:55:02.801Z"
+updated: "2026-03-27T00:55:02.801Z"
 ---
-
-# Mobile App Launch
 
 Deliver native mobile apps for iOS and Android with offline sync. Currently
 behind schedule due to API dependency delays.

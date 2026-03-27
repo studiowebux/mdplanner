@@ -70,7 +70,7 @@ export type DomainConfig<T extends Entity, C, U> = {
   filters?: FilterDef[];
   // Optional: field + value for the "hide completed" toggle.
   // Omit entirely if the domain has no completion concept.
-  hideCompleted?: { field: string; value: string };
+  hideCompleted?: { field: string; value: string | string[] };
 
   // Row mapper — converts domain item to flat Record for DataTable.
   toRow: (item: T) => Record<string, unknown>;

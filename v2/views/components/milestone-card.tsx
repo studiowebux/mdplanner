@@ -10,6 +10,7 @@ import {
   varianceClass,
 } from "../../utils/time.ts";
 import { Highlight, highlightHtml } from "../../utils/highlight.tsx";
+import { toKebab } from "../../utils/slug.ts";
 
 type Props = { milestone: Milestone; q?: string };
 
@@ -40,7 +41,9 @@ export const MilestoneCard: FC<Props> = ({ milestone, q }) => {
           <>
             <dt class="domain-card__meta-label">Project</dt>
             <dd class="domain-card__meta-value">
-              <Highlight text={milestone.project!} q={q} />
+              <a href={`/portfolio/${toKebab(milestone.project)}`}>
+                <Highlight text={milestone.project} q={q} />
+              </a>
             </dd>
           </>
         )}

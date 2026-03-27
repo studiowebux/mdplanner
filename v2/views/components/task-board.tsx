@@ -1,5 +1,4 @@
 // Task board view — kanban columns grouped by section.
-// Uses shared groupBy + sortTasks from constants.
 
 import type { FC } from "hono/jsx";
 import type { Task, TaskViewProps } from "../../types/task.types.ts";
@@ -9,53 +8,101 @@ import {
   sortTasks,
   TASK_PRIORITY_LABELS,
 } from "../../domains/task/constants.tsx";
+import {
+  taskMilestoneByName,
+  taskPersonById,
+} from "../../domains/task/config.tsx";
+import { toKebab } from "../../utils/slug.ts";
+import { dueIn } from "../../utils/time.ts";
 
 // ---------------------------------------------------------------------------
 // Board card
 // ---------------------------------------------------------------------------
 
-const BoardCard: FC<{ task: Task }> = ({ task }) => (
-  <div
-    class={`task-board__card${
-      task.completed ? " task-board__card--completed" : ""
-    }`}
-    data-task-id={task.id}
-  >
-    <div class="task-board__card-header">
-      {task.priority && (
-        <span class={`badge task-priority task-priority--${task.priority}`}>
-          {TASK_PRIORITY_LABELS[String(task.priority)] ?? `P${task.priority}`}
-        </span>
-      )}
+const BoardCard: FC<{ task: Task }> = ({ task }) => {
+  const deadline = task.due_date ? dueIn(task.due_date) : "";
+  const isOverdue = deadline.includes("overdue");
+  const assigneeName = task.assignee
+    ? (taskPersonById[task.assignee] ?? task.assignee)
+    : "";
+  const initials = assigneeName
+    ? assigneeName.split(/\s+/).map((w) => w[0]).slice(0, 2).join("")
+      .toUpperCase()
+    : "";
+  const childCount = task.children?.length ?? 0;
+
+  return (
+    <div
+      class={`task-board__card${
+        task.completed ? " task-board__card--completed" : ""
+      }`}
+      data-task-id={task.id}
+    >
       <a class="task-board__card-title" href={`/tasks/${task.id}`}>
         {task.title}
       </a>
-    </div>
-    <div class="task-board__card-meta">
-      {task.assignee
-        ? (
+
+      <div class="task-board__card-meta">
+        {task.project && (
           <a
-            class="task-board__card-assignee"
-            href={`/people?q=${encodeURIComponent(task.assignee)}`}
-            target="_blank"
+            class="task-board__card-project"
+            href={`/portfolio/${toKebab(task.project)}`}
           >
-            {task.assignee}
+            {task.project}
           </a>
-        )
-        : <span class="task-board__card-unassigned">Unassigned</span>}
-      {task.due_date && (
-        <span class="task-board__card-due">{task.due_date}</span>
-      )}
-    </div>
-    {task.tags && task.tags.length > 0 && (
-      <div class="task-board__card-tags">
-        {task.tags.map((tag) => (
-          <span key={tag} class="task-list__tag">{tag}</span>
-        ))}
+        )}
+        <span
+          class={`task-board__card-due${
+            isOverdue ? " task-board__card-due--overdue" : ""
+          }`}
+        >
+          {deadline || "no deadline"}
+        </span>
       </div>
-    )}
-  </div>
-);
+
+      <div class="task-board__card-footer">
+        <div class="task-board__card-left">
+          {task.priority && (
+            <span class={`badge priority--${task.priority}`}>
+              {TASK_PRIORITY_LABELS[String(task.priority)] ??
+                `P${task.priority}`}
+            </span>
+          )}
+          {task.milestone && (
+            <a
+              class="badge task-board__card-indicator"
+              href={taskMilestoneByName[task.milestone]
+                ? `/milestones/${taskMilestoneByName[task.milestone]}`
+                : `/milestones?q=${encodeURIComponent(task.milestone)}`}
+              title={task.milestone}
+            >
+              M
+            </a>
+          )}
+          {childCount > 0 && (
+            <span
+              class="badge task-board__card-indicator"
+              title={`${childCount} subtask${childCount !== 1 ? "s" : ""}`}
+            >
+              {childCount}
+            </span>
+          )}
+        </div>
+        {initials
+          ? (
+            <a
+              class="badge task-board__card-avatar"
+              href={`/people/${task.assignee}`}
+              title={assigneeName}
+            >
+              {initials}
+            </a>
+          )
+          : <span class="task-board__card-unassigned">--</span>}
+      </div>
+    </div>
+  );
+};
 
 // ---------------------------------------------------------------------------
 // Board column

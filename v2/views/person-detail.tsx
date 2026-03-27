@@ -56,6 +56,28 @@ export const PersonDetailView: FC<Props> = (
               {person.agentType}
             </span>
           )}
+          <div class="detail-actions">
+            <button
+              class="btn btn--secondary btn--sm"
+              type="button"
+              hx-get={`/people/${person.id}/edit`}
+              hx-target="#people-form-container"
+              hx-swap="innerHTML"
+            >
+              Edit
+            </button>
+            <button
+              class="btn btn--danger btn--sm"
+              type="button"
+              hx-delete={`/people/${person.id}`}
+              hx-swap="none"
+              hx-confirm-dialog={`Delete "${person.name}"? This cannot be undone.`}
+              data-confirm-name={person.name}
+              hx-on--after-request="if(event.detail.successful) window.location.href='/people'"
+            >
+              Delete
+            </button>
+          </div>
         </header>
 
         <dl class="person-detail__meta">
@@ -117,9 +139,7 @@ export const PersonDetailView: FC<Props> = (
           <section class="detail-section person-detail__section">
             <h2>Skills</h2>
             <div class="person-card__skills">
-              {person.skills.map((s) => (
-                <span key={s} class="person-card__skill-tag">{s}</span>
-              ))}
+              {person.skills.map((s) => <span key={s} class="badge">{s}</span>)}
             </div>
           </section>
         )}
@@ -199,29 +219,6 @@ export const PersonDetailView: FC<Props> = (
             </ul>
           </section>
         )}
-
-        <div class="detail-actions">
-          <button
-            class="btn btn--secondary"
-            type="button"
-            hx-get={`/people/${person.id}/edit`}
-            hx-target="#people-form-container"
-            hx-swap="innerHTML"
-          >
-            Edit
-          </button>
-          <button
-            class="btn btn--danger"
-            type="button"
-            hx-delete={`/people/${person.id}`}
-            hx-swap="none"
-            hx-confirm-dialog={`Delete "${person.name}"? This cannot be undone.`}
-            data-confirm-name={person.name}
-            hx-on--after-request="if(event.detail.successful) window.location.href='/people'"
-          >
-            Delete
-          </button>
-        </div>
       </main>
       <div id="people-form-container" />
     </MainLayout>

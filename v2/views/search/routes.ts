@@ -37,7 +37,11 @@ searchRouter.get("/results", (c) => {
     const title = escapeHtml(r.title);
     const route = ENTITY_TYPE_ROUTES[r.type];
     const href = route ? `${route}/${escapeHtml(r.id)}` : "";
-    const snippet = r.snippet && r.snippet !== "null" ? r.snippet : "";
+    const snippet = r.snippet && r.snippet !== "null"
+      ? escapeHtml(r.snippet)
+        .replace(/&lt;mark&gt;/g, "<mark>")
+        .replace(/&lt;\/mark&gt;/g, "</mark>")
+      : "";
     return `<li class="search-dialog__result" data-type="${
       escapeHtml(r.type)
     }" data-id="${escapeHtml(r.id)}" data-href="${href}">` +

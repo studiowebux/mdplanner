@@ -84,6 +84,41 @@
   border-radius: var(--radius-full);
   white-space: nowrap;
   flex-shrink: 0;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+a.badge:hover {
+  background: var(--color-accent);
+  color: var(--color-text-on-accent, #000);
+  text-decoration: none;
+}
+
+/* Shared priority badge colors — used by task, goal, and any future domain. */
+
+.priority--1 {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.priority--2 {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.priority--3 {
+  background: var(--color-info-bg);
+  color: var(--color-info-text);
+}
+
+.priority--4 {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+.priority--5 {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
 }
 
 /* -------------------------------------------------------------------------
@@ -92,7 +127,11 @@
 
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--grid-col-min), 1fr));
+  grid-template-columns:
+    repeat(
+    auto-fill,
+    minmax(max(var(--grid-col-min), calc(33.334% - var(--grid-gap))), 1fr)
+  );
   gap: var(--grid-gap);
 }
 
@@ -134,11 +173,31 @@
   gap: var(--space-sm);
 }
 
+.domain-card__leading {
+  flex-shrink: 0;
+}
+
+.domain-card__name-group {
+  flex: 1;
+  min-width: 0;
+}
+
 .domain-card__name {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin: 0;
+}
+
+.domain-card__subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.domain-card__badges {
+  display: flex;
+  gap: var(--space-xs);
+  flex-shrink: 0;
 }
 
 .domain-card__name a {
@@ -168,14 +227,7 @@
   margin: 0;
 }
 
-.domain-card__meta-value a {
-  color: var(--color-text-primary);
-  text-decoration: none;
-}
-
-.domain-card__meta-value a:hover {
-  color: var(--color-accent);
-}
+/* domain-card__meta-value links — uses shared .content-area a rule below */
 
 .domain-card__actions {
   display: flex;
@@ -187,6 +239,8 @@
 .detail-actions {
   display: flex;
   gap: var(--space-sm);
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .detail-view {
@@ -286,12 +340,14 @@
   padding: 0 var(--space-sm);
 }
 
-.detail-section a:not(.btn) {
+/* Universal content link style — applies across cards, detail views, all domains */
+.app-shell__content a:not(.btn):not(.badge) {
   color: var(--color-text-primary);
   text-decoration: none;
+  font-weight: var(--font-weight-medium);
 }
 
-.detail-section a:not(.btn):hover {
+.app-shell__content a:not(.btn):not(.badge):hover {
   color: var(--color-accent);
 }
 

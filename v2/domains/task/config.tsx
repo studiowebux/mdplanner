@@ -24,6 +24,11 @@ import {
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
 
+/** ID → person name lookup, refreshed on every list render. */
+export let taskPersonById: Record<string, string> = {};
+/** Milestone name → ID lookup, refreshed on every list render. */
+export let taskMilestoneByName: Record<string, string> = {};
+
 const FORM_FIELDS: FieldDef[] = [
   { type: "text", name: "title", label: "Title", required: true },
   {
@@ -171,6 +176,13 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
       getPeopleService().list(),
     ]);
     const peopleMap = new Map(people.map((p) => [p.id, p.name]));
+    // Refresh lookups for board cards
+    const pLookup: Record<string, string> = {};
+    for (const p of people) pLookup[p.id] = p.name;
+    taskPersonById = pLookup;
+    const mLookup: Record<string, string> = {};
+    for (const m of milestones) mLookup[m.name] = m.id;
+    taskMilestoneByName = mLookup;
     return {
       section: sections.map((s) => s.value),
       project: portfolio.map((p) => p.name).sort(),

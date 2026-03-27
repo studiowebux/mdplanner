@@ -52,18 +52,15 @@
   }
 
   function trackDirty(el, id) {
-    var inputs = el.querySelectorAll("input, select, textarea");
-    for (var i = 0; i < inputs.length; i++) {
-      // Remove old listeners by replacing node — prevents stacking
-      if (inputs[i].hasAttribute("data-dirty-tracked")) continue;
-      inputs[i].setAttribute("data-dirty-tracked", "");
-      var markDirty = function () {
-        dirtyNavs[id] = true;
-        updateDirtyIndicator(el, true);
-      };
-      inputs[i].addEventListener("input", markDirty);
-      inputs[i].addEventListener("change", markDirty);
-    }
+    // Event delegation — catches all inputs including dynamically added ones
+    if (el.hasAttribute("data-dirty-delegated")) return;
+    el.setAttribute("data-dirty-delegated", "");
+    var markDirty = function () {
+      dirtyNavs[id] = true;
+      updateDirtyIndicator(el, true);
+    };
+    el.addEventListener("input", markDirty);
+    el.addEventListener("change", markDirty);
   }
 
   // Reset dirty state on successful form submit (called by domain form JS).
@@ -91,14 +88,15 @@
 
   // Detect htmx-swapped sidenavs that render already open (domain factory forms)
   document.addEventListener("htmx:afterSwap", function (e) {
-    var nav = e.target.querySelector
-      ? e.target.querySelector(".sidenav.is-open")
+    var target = e.detail.target || e.target;
+    var nav = target.querySelector
+      ? target.querySelector(".sidenav.is-open")
       : null;
     if (
-      !nav && e.target.classList && e.target.classList.contains("sidenav") &&
-      e.target.classList.contains("is-open")
+      !nav && target.classList && target.classList.contains("sidenav") &&
+      target.classList.contains("is-open")
     ) {
-      nav = e.target;
+      nav = target;
     }
     if (nav && nav.id) {
       dirtyNavs[nav.id] = false;

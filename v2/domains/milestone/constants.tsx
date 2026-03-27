@@ -2,6 +2,7 @@ import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { Milestone } from "../../types/milestone.types.ts";
 import { statusBadgeRenderer } from "../../components/ui/status-badge.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
+import { toKebab } from "../../utils/slug.ts";
 import {
   dueIn,
   duration,
@@ -63,7 +64,14 @@ export const MILESTONE_TABLE_COLUMNS: ColumnDef[] = [
     key: "project",
     label: "Project",
     sortable: true,
-    render: (v, row) => <Highlight text={String(v)} q={row._q as string} />,
+    render: (v, row) =>
+      v
+        ? (
+          <a href={`/portfolio/${toKebab(String(v))}`}>
+            <Highlight text={String(v)} q={row._q as string} />
+          </a>
+        )
+        : "",
   },
   {
     key: "createdAt",

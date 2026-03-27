@@ -5,6 +5,7 @@ import type { DnsDomain } from "../types/dns.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
 import { DNS_RECORD_FORM_FIELDS } from "../domains/dns/constants.tsx";
+import { toKebab } from "../utils/slug.ts";
 
 // ---------------------------------------------------------------------------
 // DNS records table — standalone fragment for htmx swaps
@@ -210,7 +211,9 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
         {domain.project && (
           <div class="dns-detail__info-item">
             <span class="dns-detail__info-label">Project</span>
-            <span>{domain.project}</span>
+            <a href={`/portfolio/${toKebab(domain.project)}`}>
+              {domain.project}
+            </a>
           </div>
         )}
         {domain.nameservers && domain.nameservers.length > 0 && (

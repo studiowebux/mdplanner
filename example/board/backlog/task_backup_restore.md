@@ -1,15 +1,16 @@
 ---
 id: task_backup_restore
 completed: false
-revision: 1
-assignee: diana
-priority: 2
-effort: 8
+revision: 22
+updatedAt: "2026-03-27T01:16:23.752Z"
+assignee: person_1771824850093_s067dw
 milestone: Enterprise Features
-project: TaskFlow Platform
-tags: [ops, backup]
 planned_start: 2026-11-15
 planned_end: 2026-12-05
+project: TaskFlow Platform
+priority: 2
+effort: 8
+tags: [ops, backup]
 ---
 
 # Backup and Restore

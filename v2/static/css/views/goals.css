@@ -49,6 +49,25 @@
   color: var(--color-text-secondary);
 }
 
+/* Priority badge colors use shared .priority--N from components.css */
+
+/* ---------------------------------------------------------------------------
+   Progress cell (table)
+--------------------------------------------------------------------------- */
+
+.goal-progress-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.goal-progress-cell .progress-bar {
+  width: var(--progress-bar-inline-width, 5rem);
+  height: var(--progress-bar-height);
+}
+
 /* ---------------------------------------------------------------------------
    Deadline indicator
 --------------------------------------------------------------------------- */
@@ -122,10 +141,10 @@
   flex-wrap: wrap;
 }
 
-.goal-detail__info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr));
-  gap: var(--space-sm);
+.goal-detail__info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md) var(--space-xl);
 }
 
 .goal-detail__info-item {
@@ -152,4 +171,131 @@
   display: flex;
   gap: var(--space-sm);
   flex-wrap: wrap;
+}
+
+/* ---------------------------------------------------------------------------
+   SMART criteria hints (progressive enhancement via goal-smart.js)
+--------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   OKR tree view
+--------------------------------------------------------------------------- */
+
+.goal-tree {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.goal-tree__children {
+  list-style: none;
+  padding-left: var(--space-xl);
+  margin: 0;
+  border-left: var(--border-width) solid var(--color-border);
+}
+
+.goal-tree__item {
+  padding: var(--space-sm) 0;
+}
+
+.goal-tree__node {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.goal-tree__title {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.goal-tree__title:hover {
+  color: var(--color-accent);
+}
+
+.goal-tree__progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.goal-tree__progress .progress-bar {
+  width: var(--progress-bar-inline-width, 5rem);
+  height: var(--progress-bar-height);
+}
+
+.goal-tree__owner {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   SMART criteria hints (progressive enhancement via goal-smart.js)
+--------------------------------------------------------------------------- */
+
+.smart-hints {
+  padding: var(--space-md);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.smart-hints__title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  margin-bottom: var(--space-sm);
+}
+
+.smart-hints__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.smart-hints__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.smart-hints__icon {
+  display: inline-block;
+  width: var(--font-size-base);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.smart-hints__item--pass .smart-hints__icon::before {
+  content: "\2713";
+  color: var(--color-success-text);
+}
+
+.smart-hints__item--fail .smart-hints__icon::before {
+  content: "\2717";
+  color: var(--color-text-muted);
+}
+
+.smart-hints__item--neutral .smart-hints__icon::before {
+  content: "\2014";
+  color: var(--color-text-muted);
+}
+
+.smart-hints__item--pass .smart-hints__label {
+  color: var(--color-success-text);
+}
+
+.smart-hints__hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
 }

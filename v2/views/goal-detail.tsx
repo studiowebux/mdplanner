@@ -1,20 +1,56 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { Goal } from "../types/goal.types.ts";
+import type { MilestoneBase } from "../types/milestone.types.ts";
 import type { PortfolioItem } from "../types/portfolio.types.ts";
 import type { ViewProps } from "../types/app.ts";
+import { PRIORITY_LABELS } from "../constants/mod.ts";
 import { dueIn, formatDate } from "../utils/time.ts";
 import { markdownToHtml } from "../utils/markdown.ts";
 import { KpiGauge } from "../components/ui/kpi-gauge.tsx";
+import { toKebab } from "../utils/slug.ts";
+
+// ---------------------------------------------------------------------------
+// Helper — renders a label/value pair inside an info-row
+// ---------------------------------------------------------------------------
+
+const InfoItem: FC<{ label: string; children: unknown }> = (
+  { label, children },
+) => (
+  <div class="goal-detail__info-item">
+    <span class="goal-detail__info-label">{label}</span>
+    <span class="goal-detail__info-value">{children}</span>
+  </div>
+);
+
+// ---------------------------------------------------------------------------
+// Main view
+// ---------------------------------------------------------------------------
 
 export const GoalDetailView: FC<
-  ViewProps & { item: Goal; portfolioItems?: PortfolioItem[] }
+  ViewProps & {
+    item: Goal;
+    portfolioItems?: PortfolioItem[];
+    parentGoal?: Goal | null;
+    linkedMilestones?: MilestoneBase[];
+    childGoals?: Goal[];
+    personByName?: Record<string, string>;
+  }
 > = (
-  { item: goal, portfolioItems = [], ...viewProps },
+  {
+    item: goal,
+    portfolioItems = [],
+    parentGoal,
+    linkedMilestones = [],
+    childGoals = [],
+    personByName = {},
+    ...viewProps
+  },
 ) => {
   const portfolioByName = portfolioItems.find((p) => p.name === goal.project);
   const portfolioIdByName = portfolioByName?.id;
   const descHtml = markdownToHtml(goal.description);
+  const notesHtml = goal.notes ? markdownToHtml(goal.notes) : "";
   const isCompleted = goal.status === "success" || goal.status === "failed";
   const deadline = isCompleted ? "" : dueIn(goal.endDate);
   const isOverdue = deadline.includes("overdue");
@@ -27,6 +63,16 @@ export const GoalDetailView: FC<
       ),
     )
     : null;
+
+  const projectSlug = goal.project ? toKebab(goal.project) : "";
+
+  const hasOverview = goal.owner || goal.priority || goal.project || parentGoal;
+  const hasKpi = goal.kpi || goal.kpiMetric ||
+    goal.kpiValue !== undefined || goal.kpiTarget !== undefined ||
+    goal.progress !== undefined;
+  const hasTimeline = goal.startDate || goal.endDate;
+  const hasRelationships = (goal.contributors?.length ?? 0) > 0 ||
+    linkedMilestones.length > 0 || (goal.tags?.length ?? 0) > 0;
 
   return (
     <MainLayout
@@ -49,6 +95,7 @@ export const GoalDetailView: FC<
           <a href="/goals" class="btn btn--secondary">Back to Goals</a>
         </div>
 
+        {/* ── Header ─────────────────────────────────────────────── */}
         <header class="detail-section goal-detail__header">
           <div class="detail-title-row goal-detail__title-row">
             <h1 class="detail-title goal-detail__title">{goal.title}</h1>
@@ -96,82 +143,133 @@ export const GoalDetailView: FC<
           </div>
         </header>
 
-        <div class="detail-section goal-detail__info-grid">
-          {goal.kpi && (
-            <div class="goal-detail__info-item">
-              <span class="goal-detail__info-label">KPI</span>
-              <span class="goal-detail__info-value">{goal.kpi}</span>
-            </div>
-          )}
-          {goal.kpiMetric && (
-            <div class="goal-detail__info-item">
-              <span class="goal-detail__info-label">KPI Metric</span>
-              <span class="goal-detail__info-value">{goal.kpiMetric}</span>
-            </div>
-          )}
-          {goal.kpiValue !== undefined && goal.kpiTarget !== undefined
-            ? (
-              <div class="goal-detail__info-item">
-                <span class="goal-detail__info-label">Progress</span>
-                <span class="goal-detail__info-value">
-                  <KpiGauge value={goal.kpiValue} target={goal.kpiTarget} />
+        {/* ── Overview row ───────────────────────────────────────── */}
+        {hasOverview && (
+          <div class="detail-section goal-detail__info-row">
+            {goal.priority && (
+              <InfoItem label="Priority">
+                <span class={`badge priority--${goal.priority}`}>
+                  {PRIORITY_LABELS[String(goal.priority)] ??
+                    `P${goal.priority}`}
                 </span>
-              </div>
-            )
-            : (
-              <>
-                {goal.kpiTarget !== undefined && (
-                  <div class="goal-detail__info-item">
-                    <span class="goal-detail__info-label">KPI Target</span>
-                    <span class="goal-detail__info-value">
-                      {goal.kpiTarget}
-                    </span>
-                  </div>
-                )}
-                {goal.kpiValue !== undefined && (
-                  <div class="goal-detail__info-item">
-                    <span class="goal-detail__info-label">KPI Value</span>
-                    <span class="goal-detail__info-value">
-                      {goal.kpiValue}
-                    </span>
-                  </div>
-                )}
-              </>
+              </InfoItem>
             )}
-          {goal.startDate && (
-            <div class="goal-detail__info-item">
-              <span class="goal-detail__info-label">Start</span>
-              <span class="goal-detail__info-value">
-                {formatDate(goal.startDate)}
-              </span>
-            </div>
-          )}
-          {goal.endDate && (
-            <div class="goal-detail__info-item">
-              <span class="goal-detail__info-label">End</span>
-              <span class="goal-detail__info-value">
-                {formatDate(goal.endDate)}
-              </span>
-            </div>
-          )}
-          {goal.project && (
-            <div class="goal-detail__info-item">
-              <span class="goal-detail__info-label">Project</span>
-              <span class="goal-detail__info-value">
-                <a
-                  href={`/portfolio/${
-                    portfolioIdByName ??
-                      goal.project.toLowerCase().replace(/[^a-z0-9]+/g, "-")
-                        .replace(/(^-|-$)/g, "")
-                  }`}
-                >
+            {goal.owner && (
+              <InfoItem label="Owner">
+                {personByName[goal.owner]
+                  ? (
+                    <a href={`/people/${personByName[goal.owner]}`}>
+                      {goal.owner}
+                    </a>
+                  )
+                  : goal.owner}
+              </InfoItem>
+            )}
+            {goal.project && (
+              <InfoItem label="Project">
+                <a href={`/portfolio/${portfolioIdByName ?? projectSlug}`}>
                   {goal.project}
                 </a>
-              </span>
-            </div>
-          )}
-        </div>
+              </InfoItem>
+            )}
+            {parentGoal && (
+              <InfoItem label="Parent Goal">
+                <a href={`/goals/${parentGoal.id}`}>{parentGoal.title}</a>
+              </InfoItem>
+            )}
+          </div>
+        )}
 
+        {/* ── Measurement row ────────────────────────────────────── */}
+        {hasKpi && (
+          <div class="detail-section goal-detail__info-row">
+            {goal.kpi && <InfoItem label="KPI">{goal.kpi}</InfoItem>}
+            {goal.kpiMetric && (
+              <InfoItem label="Metric">{goal.kpiMetric}</InfoItem>
+            )}
+            {goal.kpiValue !== undefined && goal.kpiTarget !== undefined
+              ? (
+                <InfoItem label="KPI Progress">
+                  <KpiGauge value={goal.kpiValue} target={goal.kpiTarget} />
+                </InfoItem>
+              )
+              : (
+                <>
+                  {goal.kpiTarget !== undefined && (
+                    <InfoItem label="Target">{goal.kpiTarget}</InfoItem>
+                  )}
+                  {goal.kpiValue !== undefined && (
+                    <InfoItem label="Value">{goal.kpiValue}</InfoItem>
+                  )}
+                </>
+              )}
+            {goal.progress !== undefined && (
+              <InfoItem label="Progress">
+                <div class="goal-progress-cell">
+                  <progress
+                    class="progress-bar"
+                    value={goal.progress}
+                    max={100}
+                  />
+                  <span>{goal.progress}%</span>
+                </div>
+              </InfoItem>
+            )}
+          </div>
+        )}
+
+        {/* ── Timeline row ───────────────────────────────────────── */}
+        {hasTimeline && (
+          <div class="detail-section goal-detail__info-row">
+            {goal.startDate && (
+              <InfoItem label="Start">{formatDate(goal.startDate)}</InfoItem>
+            )}
+            {goal.endDate && (
+              <InfoItem label="End">{formatDate(goal.endDate)}</InfoItem>
+            )}
+          </div>
+        )}
+
+        {/* ── Relationships row ──────────────────────────────────── */}
+        {hasRelationships && (
+          <div class="detail-section goal-detail__info-row">
+            {(goal.contributors?.length ?? 0) > 0 && (
+              <InfoItem label="Contributors">
+                <span class="goal-detail__links">
+                  {goal.contributors!.map((c) => (
+                    personByName[c]
+                      ? (
+                        <a href={`/people/${personByName[c]}`} class="badge">
+                          {c}
+                        </a>
+                      )
+                      : <span class="badge">{c}</span>
+                  ))}
+                </span>
+              </InfoItem>
+            )}
+            {linkedMilestones.length > 0 && (
+              <InfoItem label="Milestones">
+                <span class="goal-detail__links">
+                  {linkedMilestones.map((m) => (
+                    <a href={`/milestones/${m.id}`} class="badge">
+                      {m.name}
+                    </a>
+                  ))}
+                </span>
+              </InfoItem>
+            )}
+            {(goal.tags?.length ?? 0) > 0 && (
+              <InfoItem label="Tags">
+                <span class="goal-detail__links">
+                  {goal.tags!.map((t) => <span class="badge">{t}</span>)}
+                </span>
+              </InfoItem>
+            )}
+          </div>
+        )}
+
+        {/* ── Description ────────────────────────────────────────── */}
         {descHtml && (
           <section class="detail-section goal-detail__section">
             <h2 class="section-heading">Description</h2>
@@ -179,6 +277,65 @@ export const GoalDetailView: FC<
               class="markdown-body"
               dangerouslySetInnerHTML={{ __html: descHtml }}
             />
+          </section>
+        )}
+
+        {/* ── Notes ──────────────────────────────────────────────── */}
+        {notesHtml && (
+          <section class="detail-section goal-detail__section">
+            <h2 class="section-heading">Notes</h2>
+            <div
+              class="markdown-body"
+              dangerouslySetInnerHTML={{ __html: notesHtml }}
+            />
+          </section>
+        )}
+
+        {/* ── Sub-Goals ──────────────────────────────────────────── */}
+        {childGoals.length > 0 && (
+          <section class="detail-section goal-detail__section">
+            <h2 class="section-heading">
+              Sub-Goals ({childGoals.length})
+            </h2>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th>Progress</th>
+                </tr>
+              </thead>
+              <tbody>
+                {childGoals.map((child) => (
+                  <tr>
+                    <td class="data-table__td">
+                      <a href={`/goals/${child.id}`}>{child.title}</a>
+                    </td>
+                    <td class="data-table__td">
+                      <span
+                        class={`badge goal-status goal-status--${child.status}`}
+                      >
+                        {child.status}
+                      </span>
+                    </td>
+                    <td class="data-table__td">
+                      {child.progress !== undefined
+                        ? (
+                          <div class="goal-progress-cell">
+                            <progress
+                              class="progress-bar"
+                              value={child.progress}
+                              max={100}
+                            />
+                            <span>{child.progress}%</span>
+                          </div>
+                        )
+                        : ""}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </section>
         )}
       </main>

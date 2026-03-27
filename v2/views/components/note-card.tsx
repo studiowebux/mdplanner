@@ -1,8 +1,10 @@
 import type { FC } from "hono/jsx";
 import type { Note } from "../../types/note.types.ts";
+import { DomainCard } from "../../components/ui/domain-card.tsx";
 import { Highlight, highlightHtml } from "../../utils/highlight.tsx";
 import { markdownToHtml } from "../../utils/markdown.ts";
 import { timeAgo } from "../../utils/time.ts";
+import { toKebab } from "../../utils/slug.ts";
 
 type Props = { note: Note; q?: string };
 
@@ -12,30 +14,57 @@ export const NoteCard: FC<Props> = ({ note, q }) => {
   const contentHtml = markdownToHtml(note.content?.slice(0, 300));
 
   return (
-    <article class="note-card" data-filterable-card>
-      <header class="note-card__header">
-        <h2 class="note-card__title">
-          <a href={`/notes/${note.id}`}>
-            <Highlight text={note.title} q={q} />
+    <DomainCard
+      href={`/notes/${note.id}`}
+      name={note.title}
+      q={q}
+      domain="notes"
+      id={note.id}
+      customActions={
+        <div class="domain-card__actions">
+          <button
+            class="btn btn--secondary btn--sm"
+            type="button"
+            hx-get={`/notes/${note.id}/preview`}
+            hx-target="#notes-form-container"
+            hx-swap="innerHTML"
+            data-sidenav-open
+          >
+            View
+          </button>
+          <a class="btn btn--secondary btn--sm" href={`/notes/${note.id}`}>
+            Edit
           </a>
-        </h2>
-      </header>
-
-      <dl class="note-card__meta">
+          <button
+            class="btn btn--danger btn--sm"
+            type="button"
+            hx-delete={`/notes/${note.id}`}
+            hx-swap="none"
+            hx-confirm-dialog={`Delete "${note.title}"? This cannot be undone.`}
+            data-confirm-name={note.title}
+          >
+            Delete
+          </button>
+        </div>
+      }
+    >
+      <dl class="domain-card__meta">
         {note.project && (
           <>
-            <dt class="note-card__meta-label">Project</dt>
-            <dd class="note-card__meta-value">
-              <Highlight text={note.project} q={q} />
+            <dt class="domain-card__meta-label">Project</dt>
+            <dd class="domain-card__meta-value">
+              <a href={`/portfolio/${toKebab(note.project)}`}>
+                <Highlight text={note.project} q={q} />
+              </a>
             </dd>
           </>
         )}
-        <dt class="note-card__meta-label">Updated</dt>
-        <dd class="note-card__meta-value">{timeAgo(note.updatedAt)}</dd>
+        <dt class="domain-card__meta-label">Updated</dt>
+        <dd class="domain-card__meta-value">{timeAgo(note.updatedAt)}</dd>
         {(paragraphCount > 0 || sectionCount > 0) && (
           <>
-            <dt class="note-card__meta-label">Content</dt>
-            <dd class="note-card__meta-value">
+            <dt class="domain-card__meta-label">Content</dt>
+            <dd class="domain-card__meta-value">
               {paragraphCount} block{paragraphCount !== 1 ? "s" : ""}
               {sectionCount > 0 &&
                 `, ${sectionCount} section${sectionCount !== 1 ? "s" : ""}`}
@@ -52,32 +81,6 @@ export const NoteCard: FC<Props> = ({ note, q }) => {
           }}
         />
       )}
-
-      <div class="note-card__actions">
-        <button
-          class="btn btn--secondary"
-          type="button"
-          hx-get={`/notes/${note.id}/preview`}
-          hx-target="#notes-form-container"
-          hx-swap="innerHTML"
-          data-sidenav-open
-        >
-          View
-        </button>
-        <a class="btn btn--secondary" href={`/notes/${note.id}`}>
-          Edit
-        </a>
-        <button
-          class="btn btn--danger"
-          type="button"
-          hx-delete={`/notes/${note.id}`}
-          hx-swap="none"
-          hx-confirm-dialog={`Delete "${note.title}"? This cannot be undone.`}
-          data-confirm-name={note.title}
-        >
-          Delete
-        </button>
-      </div>
-    </article>
+    </DomainCard>
   );
 };

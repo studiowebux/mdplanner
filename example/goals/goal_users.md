@@ -7,6 +7,18 @@ kpi_target: 10000
 start: 2026-01-01
 end: 2026-12-31
 status: on-track
+owner: Sarah Chen
+priority: 2
+progress: 25
+contributors:
+  - Chris Martinez
+  - Taylor Wong
+tags:
+  - growth
+  - marketing
+linkedMilestones:
+  - beta
+  - onboarding
 ---
 
 # User Growth

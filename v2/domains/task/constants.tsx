@@ -5,7 +5,12 @@ import type { Task, TaskSortableCol } from "../../types/task.types.ts";
 import { statusBadgeRenderer } from "../../components/ui/status-badge.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
-import { getSectionOrder } from "../../constants/mod.ts";
+import { toKebab } from "../../utils/slug.ts";
+import {
+  getSectionOrder,
+  PRIORITY_LABELS,
+  PRIORITY_OPTIONS,
+} from "../../constants/mod.ts";
 
 const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
   <div class="task-card__actions">
@@ -58,7 +63,7 @@ export const TASK_TABLE_COLUMNS: ColumnDef[] = [
     render: (v) => {
       if (!v) return "";
       return (
-        <span class={`badge task-priority task-priority--${v}`}>
+        <span class={`badge priority--${v}`}>
           {TASK_PRIORITY_LABELS[String(v)] ?? String(v)}
         </span>
       );
@@ -82,7 +87,14 @@ export const TASK_TABLE_COLUMNS: ColumnDef[] = [
     key: "project",
     label: "Project",
     sortable: true,
-    render: (v, row) => <Highlight text={String(v)} q={row._q as string} />,
+    render: (v, row) =>
+      v
+        ? (
+          <a href={`/portfolio/${toKebab(String(v))}`}>
+            <Highlight text={String(v)} q={row._q as string} />
+          </a>
+        )
+        : "",
   },
   { key: "_actions", label: "", render: actionBtns },
 ];
@@ -111,21 +123,8 @@ export const TASK_SORTABLE_COLS: TaskSortableCol[] = [
   { key: "effort", label: "Effort", cls: "task-list__meta--effort" },
 ];
 
-export const TASK_PRIORITY_LABELS: Record<string, string> = {
-  "1": "P1",
-  "2": "P2",
-  "3": "P3",
-  "4": "P4",
-  "5": "P5",
-};
-
-export const TASK_PRIORITY_OPTIONS = [
-  { value: "1", label: "P1 — Critical" },
-  { value: "2", label: "P2 — High" },
-  { value: "3", label: "P3 — Medium" },
-  { value: "4", label: "P4 — Low" },
-  { value: "5", label: "P5 — Minimal" },
-];
+export const TASK_PRIORITY_LABELS = PRIORITY_LABELS;
+export const TASK_PRIORITY_OPTIONS = PRIORITY_OPTIONS;
 
 /** Sort tasks by order, then priority, then title. */
 export function sortTasks(tasks: Task[]): Task[] {

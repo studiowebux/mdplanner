@@ -73,10 +73,20 @@
 }
 
 .milestone-detail__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm) var(--space-md);
   background: var(--card-bg);
   border: var(--card-border);
   border-radius: var(--card-radius);
   padding: var(--card-padding);
+}
+
+.milestone-detail__meta,
+.milestone-detail__progress {
+  width: 100%;
 }
 
 .milestone-detail__title-row {
@@ -93,9 +103,11 @@
 }
 
 .milestone-detail__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm) var(--space-lg);
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
-  margin-bottom: var(--space-sm);
 }
 
 .milestone-detail__progress {

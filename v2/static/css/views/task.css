@@ -5,30 +5,7 @@
    Shared — priority badges, tags
    ========================================================================= */
 
-.task-priority--1 {
-  background: var(--color-error-bg);
-  color: var(--color-error-text);
-}
-
-.task-priority--2 {
-  background: var(--color-warning-bg);
-  color: var(--color-warning-text);
-}
-
-.task-priority--3 {
-  background: var(--color-info-bg);
-  color: var(--color-info-text);
-}
-
-.task-priority--4 {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-secondary);
-}
-
-.task-priority--5 {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-muted);
-}
+/* Priority badge colors moved to components.css (.priority--N) */
 
 .task-list__tag {
   font-size: var(--font-size-xs);
@@ -349,7 +326,7 @@
   font-size: var(--font-size-sm);
 }
 
-/* Board card */
+/* Board card — 3 rows: title, meta, footer */
 
 .task-board__card {
   background: var(--card-bg);
@@ -360,9 +337,7 @@
   flex-direction: column;
   gap: var(--space-xs);
   transition: box-shadow var(--transition-fast);
-  overflow: hidden;
   min-width: 0;
-  min-height: var(--task-board-card-min-h);
 }
 
 .task-board__card:hover {
@@ -378,13 +353,7 @@
   color: var(--color-text-muted);
 }
 
-.task-board__card-header {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-sm);
-  min-width: 0;
-}
-
+/* Row 1 — title */
 .task-board__card-title {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
@@ -396,38 +365,82 @@
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  min-width: 0;
 }
 
-.task-board__card-title:hover,
-.task-board__card-assignee:hover {
+.task-board__card-title:hover {
   color: var(--color-accent);
 }
 
-.task-board__card-assignee {
-  color: inherit;
-  text-decoration: none;
-}
-
+/* Row 2 — project + due date */
 .task-board__card-meta {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-sm);
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
+}
+
+.task-board__card-project {
+  text-decoration: none;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.task-board__card-project:hover {
+  color: var(--color-accent);
+}
+
+.task-board__card-due {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.task-board__card-due--overdue {
+  color: var(--color-error-text);
+}
+
+/* Row 3 — priority + indicators (left) + assignee avatar (right) */
+.task-board__card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-top: auto;
+}
+
+.task-board__card-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.task-board__card-indicator,
+.task-board__card-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-xl);
+  height: var(--space-xl);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+a.task-board__card-indicator:hover,
+a.task-board__card-avatar:hover {
+  background: var(--color-accent);
+  color: var(--color-text-on-accent, #000);
 }
 
 .task-board__card-unassigned {
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-  font-style: italic;
-}
-
-.task-board__card-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-xs);
-  margin-top: auto;
 }
 
 /* Board empty */
@@ -760,10 +773,7 @@
 
 /* Section badge */
 
-.task-detail__badge {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-secondary);
-}
+/* task-detail__badge base bg/color — .badge provides padding + radius */
 
 .task-detail__badge--backlog {
   background: var(--color-bg-tertiary);
@@ -792,15 +802,7 @@
 
 /* Links — primary text, accent on hover (matches list view pattern) */
 
-.task-detail__link {
-  color: var(--color-text-primary);
-  text-decoration: none;
-  font-weight: var(--font-weight-medium);
-}
-
-.task-detail__link:hover {
-  color: var(--color-accent);
-}
+/* task-detail__link — removed, uses shared .detail-section a rule from components.css */
 
 /* Metadata grid */
 
@@ -1087,6 +1089,7 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-muted);
+  white-space: nowrap;
 }
 
 .task-detail__action-group .form__autocomplete {

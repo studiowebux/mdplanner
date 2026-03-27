@@ -8,6 +8,7 @@ import type { Person } from "../types/person.types.ts";
 import type { Milestone } from "../types/milestone.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate, timeAgo } from "../utils/time.ts";
+import { toKebab } from "../utils/slug.ts";
 import { TASK_PRIORITY_LABELS } from "../domains/task/constants.tsx";
 import { getSectionOrder } from "../constants/mod.ts";
 import {
@@ -60,11 +61,11 @@ export async function resolveTaskDetailProps(task: Task): Promise<{
 // ---------------------------------------------------------------------------
 
 const priorityClass = (p: number | undefined): string =>
-  p ? `task-priority task-priority--${p}` : "";
+  p ? `badge priority--${p}` : "";
 
 const sectionBadgeClass = (section: string): string => {
   const slug = section.toLowerCase().replace(/\s+/g, "-");
-  return `task-detail__badge task-detail__badge--${slug}`;
+  return `badge task-detail__badge task-detail__badge--${slug}`;
 };
 
 // ---------------------------------------------------------------------------
@@ -312,6 +313,25 @@ export const TaskDetailView: FC<Props> = (
                 Reopen
               </button>
             )}
+          <button
+            class="btn btn--secondary"
+            type="button"
+            hx-get={`/tasks/${task.id}/edit`}
+            hx-target="#tasks-form-container"
+            hx-swap="innerHTML"
+          >
+            Edit
+          </button>
+          <button
+            class="btn btn--danger"
+            type="button"
+            hx-delete={`/tasks/${task.id}`}
+            hx-swap="none"
+            hx-confirm-dialog={`Delete "${task.title}"? This cannot be undone.`}
+            data-confirm-name={task.title}
+          >
+            Delete
+          </button>
         </div>
 
         {/* Two-column layout: left = meta, right = description */}
@@ -339,14 +359,17 @@ export const TaskDetailView: FC<Props> = (
 
               <dl class="task-detail__meta">
                 {task.project && (
-                  <MetaField label="Project">{task.project}</MetaField>
+                  <MetaField label="Project">
+                    <a href={`/portfolio/${toKebab(task.project)}`}>
+                      {task.project}
+                    </a>
+                  </MetaField>
                 )}
                 {task.milestone && (
                   <MetaField label="Milestone">
                     {milestonEntity
                       ? (
                         <a
-                          class="task-detail__link"
                           href={`/milestones/${milestonEntity.id}`}
                         >
                           {task.milestone}
@@ -360,7 +383,6 @@ export const TaskDetailView: FC<Props> = (
                     {assigneePerson
                       ? (
                         <a
-                          class="task-detail__link"
                           href={`/people/${assigneePerson.id}`}
                         >
                           {assigneePerson.name}
@@ -553,27 +575,6 @@ export const TaskDetailView: FC<Props> = (
         <CommentsSection comments={task.comments} />
 
         {/* Edit + Delete at bottom — matches person-detail pattern */}
-        <div class="detail-actions">
-          <button
-            class="btn btn--secondary"
-            type="button"
-            hx-get={`/tasks/${task.id}/edit`}
-            hx-target="#tasks-form-container"
-            hx-swap="innerHTML"
-          >
-            Edit
-          </button>
-          <button
-            class="btn btn--danger"
-            type="button"
-            hx-delete={`/tasks/${task.id}`}
-            hx-swap="none"
-            hx-confirm-dialog={`Delete "${task.title}"? This cannot be undone.`}
-            data-confirm-name={task.title}
-          >
-            Delete
-          </button>
-        </div>
       </main>
       <div id="tasks-form-container" />
     </MainLayout>

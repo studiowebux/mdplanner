@@ -30,7 +30,7 @@ const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = (
     <div class="task-list__row-main">
       <div class="task-list__row-left">
         {task.priority && (
-          <span class={`badge task-priority task-priority--${task.priority}`}>
+          <span class={`badge priority--${task.priority}`}>
             {TASK_PRIORITY_LABELS[String(task.priority)] ?? `P${task.priority}`}
           </span>
         )}

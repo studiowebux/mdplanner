@@ -91,6 +91,19 @@
 
 /* Detail view */
 
+.portfolio-detail__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm) var(--space-md);
+}
+
+.portfolio-detail__meta,
+.portfolio-detail__progress {
+  width: 100%;
+}
+
 .portfolio-detail__title-row {
   align-items: baseline;
   gap: var(--space-md);
