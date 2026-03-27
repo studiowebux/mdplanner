@@ -113,9 +113,8 @@ const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = (
         class="btn btn--danger btn--sm"
         type="button"
         hx-delete={`/tasks/${task.id}`}
+        hx-confirm={`Delete "${task.title}"? This cannot be undone.`}
         hx-swap="none"
-        hx-confirm-dialog={`Delete "${task.title}"? This cannot be undone.`}
-        data-confirm-name={task.title}
       >
         Delete
       </button>

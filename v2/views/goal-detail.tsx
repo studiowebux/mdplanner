@@ -134,9 +134,8 @@ export const GoalDetailView: FC<
               class="btn btn--danger btn--sm"
               type="button"
               hx-delete={`/goals/${goal.id}`}
+              hx-confirm={`Delete "${goal.title}"? This cannot be undone.`}
               hx-swap="none"
-              hx-confirm-dialog={`Delete "${goal.title}"? This cannot be undone.`}
-              data-confirm-name={goal.title}
             >
               Delete
             </button>

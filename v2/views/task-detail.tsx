@@ -326,9 +326,8 @@ export const TaskDetailView: FC<Props> = (
             class="btn btn--danger"
             type="button"
             hx-delete={`/tasks/${task.id}`}
+            hx-confirm={`Delete "${task.title}"? This cannot be undone.`}
             hx-swap="none"
-            hx-confirm-dialog={`Delete "${task.title}"? This cannot be undone.`}
-            data-confirm-name={task.title}
           >
             Delete
           </button>

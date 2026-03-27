@@ -86,9 +86,8 @@ export const SwotDetailView: FC<
               class="btn btn--danger btn--sm"
               type="button"
               hx-delete={`/swot/${swot.id}`}
+              hx-confirm={`Delete "${swot.title}"? This cannot be undone.`}
               hx-swap="none"
-              hx-confirm-dialog={`Delete "${swot.title}"? This cannot be undone.`}
-              data-confirm-name={swot.title}
             >
               Delete
             </button>
@@ -148,11 +147,10 @@ export const SwotDetailView: FC<
                               type="button"
                               class="quadrant-card__remove"
                               hx-delete={`/swot/${swot.id}/${key}/${idx}${editSuffix}`}
+                              hx-confirm={`Remove "${item}"?`}
                               hx-target="#swot-detail-root"
                               hx-select="#swot-detail-root"
                               hx-swap="outerHTML"
-                              hx-confirm-dialog={`Remove "${item}"?`}
-                              data-confirm-name={item}
                               aria-label={`Remove "${item}"`}
                             >
                               &times;

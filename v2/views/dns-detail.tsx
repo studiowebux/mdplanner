@@ -78,10 +78,9 @@ export const DnsRecordsTable: FC<{ domain: DnsDomain }> = ({ domain }) => {
                           class="btn btn--danger btn--sm"
                           type="button"
                           hx-delete={`/dns/${domain.id}/records/${i}`}
+                          hx-confirm={`Delete "${r.type} ${r.name}"? This cannot be undone.`}
                           hx-target="#dns-records-section"
                           hx-swap="outerHTML"
-                          hx-confirm-dialog={`Delete "${r.type} ${r.name}"? This cannot be undone.`}
-                          data-confirm-name={`${r.type} ${r.name}`}
                         >
                           Delete
                         </button>
@@ -174,9 +173,8 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
             class="btn btn--danger btn--sm"
             type="button"
             hx-delete={`/dns/${domain.id}`}
+            hx-confirm={`Delete "${domain.domain}"? This cannot be undone.`}
             hx-swap="none"
-            hx-confirm-dialog={`Delete "${domain.domain}"? This cannot be undone.`}
-            data-confirm-name={domain.domain}
           >
             Delete
           </button>

@@ -77,10 +77,9 @@ export const DomainCard: FC<Props> = ({
           class="btn btn--danger btn--sm"
           type="button"
           hx-delete={`/${domain}/${id}`}
-          hx-swap="none"
-          hx-confirm-dialog={confirmMessage ??
+          hx-confirm={confirmMessage ??
             `Delete "${name}"? This cannot be undone.`}
-          data-confirm-name={name}
+          hx-swap="none"
         >
           Delete
         </button>

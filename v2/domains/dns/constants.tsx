@@ -52,9 +52,8 @@ const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
       class="btn btn--danger btn--sm"
       type="button"
       hx-delete={`/dns/${row.id}`}
+      hx-confirm={`Delete "${row.domain}"? This cannot be undone.`}
       hx-swap="none"
-      hx-confirm-dialog={`Delete "${row.domain}"? This cannot be undone.`}
-      data-confirm-name={String(row.domain)}
     >
       Delete
     </button>

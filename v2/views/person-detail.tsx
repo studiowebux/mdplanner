@@ -70,9 +70,8 @@ export const PersonDetailView: FC<Props> = (
               class="btn btn--danger btn--sm"
               type="button"
               hx-delete={`/people/${person.id}`}
+              hx-confirm={`Delete "${person.name}"? This cannot be undone.`}
               hx-swap="none"
-              hx-confirm-dialog={`Delete "${person.name}"? This cannot be undone.`}
-              data-confirm-name={person.name}
               hx-on--after-request="if(event.detail.successful) window.location.href='/people'"
             >
               Delete

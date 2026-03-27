@@ -53,9 +53,8 @@ export const MilestoneDetailView: FC<Props> = (
               class="btn btn--danger btn--sm"
               type="button"
               hx-delete={`/milestones/${milestone.id}`}
+              hx-confirm={`Delete "${milestone.name}"? This cannot be undone.`}
               hx-swap="none"
-              hx-confirm-dialog={`Delete "${milestone.name}"? This cannot be undone.`}
-              data-confirm-name={milestone.name}
             >
               Delete
             </button>

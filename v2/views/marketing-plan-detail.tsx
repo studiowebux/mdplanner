@@ -93,9 +93,8 @@ export const MarketingPlanDetailView: FC<
               class="btn btn--danger btn--sm"
               type="button"
               hx-delete={`/marketing-plans/${plan.id}`}
+              hx-confirm={`Delete "${plan.name}"? This cannot be undone.`}
               hx-swap="none"
-              hx-confirm-dialog={`Delete "${plan.name}"? This cannot be undone.`}
-              data-confirm-name={plan.name}
             >
               Delete
             </button>

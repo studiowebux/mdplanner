@@ -16,17 +16,14 @@
     open.setAttribute("aria-hidden", "true");
   });
 
-  // Intercept htmx:confirm on elements with hx-confirm-dialog attribute.
-  // Uses the promise-based confirm dialog instead of browser confirm().
+  // Intercept htmx:confirm and show the custom modal instead of browser confirm().
   document.addEventListener("htmx:confirm", function (e) {
-    var el = e.target;
-    var msg = el.getAttribute("hx-confirm-dialog");
+    var msg = e.detail.question;
     if (!msg) return;
     e.preventDefault();
-    var name = el.getAttribute("data-confirm-name") || "";
     window.confirmAction({
       title: "Confirm delete",
-      message: msg.replace("{name}", name),
+      message: msg,
       confirmLabel: "Delete",
     }).then(function (ok) {
       if (ok) e.detail.issueRequest();

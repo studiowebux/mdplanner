@@ -96,9 +96,8 @@ export const IdeaDetailView: FC<
               class="btn btn--danger btn--sm"
               type="button"
               hx-delete={`/ideas/${idea.id}`}
+              hx-confirm={`Delete "${idea.title}"? This cannot be undone.`}
               hx-swap="none"
-              hx-confirm-dialog={`Delete "${idea.title}"? This cannot be undone.`}
-              data-confirm-name={idea.title}
             >
               Delete
             </button>

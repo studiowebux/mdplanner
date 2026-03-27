@@ -35,9 +35,9 @@ export const StatusUpdateRow: FC<{
         class="btn btn--danger btn--sm"
         type="button"
         hx-delete={`/portfolio/${itemId}/status-updates/${u.id}`}
+        hx-confirm="Delete this status update?"
         hx-target={`#update-${u.id}`}
         hx-swap="outerHTML"
-        hx-confirm-dialog="Delete this status update?"
       >
         Delete
       </button>
@@ -134,9 +134,8 @@ export const PortfolioDetailView: FC<Props> = (
               class="btn btn--danger btn--sm"
               type="button"
               hx-delete={`/portfolio/${item.id}`}
+              hx-confirm={`Delete "${item.name}"? This cannot be undone.`}
               hx-swap="none"
-              hx-confirm-dialog={`Delete "${item.name}"? This cannot be undone.`}
-              data-confirm-name={item.name}
             >
               Delete
             </button>

@@ -39,9 +39,8 @@ export const NoteCard: FC<Props> = ({ note, q }) => {
             class="btn btn--danger btn--sm"
             type="button"
             hx-delete={`/notes/${note.id}`}
+            hx-confirm={`Delete "${note.title}"? This cannot be undone.`}
             hx-swap="none"
-            hx-confirm-dialog={`Delete "${note.title}"? This cannot be undone.`}
-            data-confirm-name={note.title}
           >
             Delete
           </button>
