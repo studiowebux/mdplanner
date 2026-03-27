@@ -8,6 +8,7 @@ import type {
 } from "../../types/marketing-plan.types.ts";
 import { MARKETING_PLAN_COMPLETED_STATUSES } from "../../types/marketing-plan.types.ts";
 import {
+  getGoalService,
   getMarketingPlanService,
   getPeopleService,
 } from "../../singletons/services.ts";
@@ -87,6 +88,15 @@ export const marketingPlanConfig: DomainConfig<
         if (person) names.push(person.name);
       }
       if (names.length) resolved.team = names.join(", ");
+    }
+    if (values.linkedGoals) {
+      const ids = values.linkedGoals.split(",").filter(Boolean);
+      const titles: string[] = [];
+      for (const id of ids) {
+        const goal = await getGoalService().getById(id.trim());
+        if (goal) titles.push(goal.title);
+      }
+      if (titles.length) resolved.linkedGoals = titles.join(", ");
     }
     return resolved;
   },

@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { MarketingPlan } from "../types/marketing-plan.types.ts";
+import type { Goal } from "../types/goal.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
 import { markdownToHtml } from "../utils/markdown.ts";
@@ -24,9 +25,9 @@ const InfoItem: FC<{ label: string; children: unknown }> = (
 // ---------------------------------------------------------------------------
 
 export const MarketingPlanDetailView: FC<
-  ViewProps & { item: MarketingPlan }
+  ViewProps & { item: MarketingPlan; goals?: Goal[] }
 > = (
-  { item: plan, ...viewProps },
+  { item: plan, goals = [], ...viewProps },
 ) => {
   const notesHtml = markdownToHtml(plan.notes ?? "");
   const budget = plan.budgetTotal != null
@@ -43,13 +44,13 @@ export const MarketingPlanDetailView: FC<
   const hasAudiences = (plan.targetAudiences?.length ?? 0) > 0;
   const hasChannels = (plan.channels?.length ?? 0) > 0;
   const hasCampaigns = (plan.campaigns?.length ?? 0) > 0;
-  const hasKpis = (plan.kpiTargets?.length ?? 0) > 0;
+  const hasGoals = goals.length > 0;
 
   return (
     <MainLayout
       title={plan.name}
       {...viewProps}
-      styles={["/css/views/marketing-plans.css"]}
+      styles={["/css/views/marketing-plans.css", "/css/views/goals.css"]}
       scripts={["/js/kpi-gauge.js"]}
     >
       <div
@@ -267,36 +268,60 @@ export const MarketingPlanDetailView: FC<
           </section>
         )}
 
-        {/* -- KPI Targets ----------------------------------------------- */}
-        {hasKpis && (
+        {/* -- Linked Goals ---------------------------------------------- */}
+        {hasGoals && (
           <section class="detail-section mktplan-detail__section">
             <h2 class="section-heading">
-              KPI Targets ({plan.kpiTargets!.length})
+              Linked Goals ({goals.length})
             </h2>
             <div class="mktplan-detail__kpis">
-              {plan.kpiTargets!.map((kpi, idx) => {
-                const pct = kpi.target > 0
+              {goals.map((goal) => {
+                const pct = goal.kpiTarget && goal.kpiTarget > 0
                   ? Math.min(
-                    Math.round(((kpi.current ?? 0) / kpi.target) * 100),
+                    Math.round(
+                      ((goal.kpiValue ?? 0) / goal.kpiTarget) * 100,
+                    ),
                     100,
                   )
-                  : 0;
+                  : goal.progress ?? 0;
                 return (
-                  <div key={idx} class="mktplan-kpi">
+                  <div key={goal.id} class="mktplan-kpi">
                     <div class="mktplan-kpi__header">
-                      <span class="mktplan-kpi__metric">{kpi.metric}</span>
-                      <span class="mktplan-kpi__values">
-                        {(kpi.current ?? 0).toLocaleString()} /{" "}
-                        {kpi.target.toLocaleString()}
+                      <a href={`/goals/${goal.id}`} class="mktplan-kpi__metric">
+                        {goal.title}
+                      </a>
+                      <span
+                        class={`badge goal-status goal-status--${goal.status}`}
+                      >
+                        {goal.status}
                       </span>
                     </div>
-                    <div class="mktplan-kpi__bar">
-                      <div
-                        class="mktplan-kpi__fill"
-                        data-pct={pct}
-                      />
-                    </div>
-                    <span class="mktplan-kpi__pct">{pct}%</span>
+                    {goal.kpi && (
+                      <span class="mktplan-kpi__label">{goal.kpi}</span>
+                    )}
+                    {goal.kpiTarget != null && (
+                      <>
+                        <div class="mktplan-kpi__values">
+                          {(goal.kpiValue ?? 0).toLocaleString()} /{" "}
+                          {goal.kpiTarget.toLocaleString()}
+                        </div>
+                        <div class="mktplan-kpi__bar">
+                          <div class="mktplan-kpi__fill" data-pct={pct} />
+                        </div>
+                        <span class="mktplan-kpi__pct">{pct}%</span>
+                      </>
+                    )}
+                    {goal.kpiTarget == null && goal.progress != null && (
+                      <>
+                        <div class="mktplan-kpi__bar">
+                          <div
+                            class="mktplan-kpi__fill"
+                            data-pct={goal.progress}
+                          />
+                        </div>
+                        <span class="mktplan-kpi__pct">{goal.progress}%</span>
+                      </>
+                    )}
                   </div>
                 );
               })}

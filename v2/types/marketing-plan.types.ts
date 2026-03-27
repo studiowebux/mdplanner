@@ -103,22 +103,6 @@ export const MarketingCampaignSchema = z.object({
 
 export type MarketingCampaign = z.infer<typeof MarketingCampaignSchema>;
 
-export const MarketingKPITargetSchema = z.object({
-  metric: z.string().openapi({
-    description: "KPI metric name",
-    example: "Monthly Website Visitors",
-  }),
-  target: z.number().openapi({
-    description: "Target value",
-    example: 100000,
-  }),
-  current: z.number().optional().openapi({
-    description: "Current value",
-    example: 45000,
-  }),
-}).openapi("MarketingKPITarget");
-
-export type MarketingKPITarget = z.infer<typeof MarketingKPITargetSchema>;
 
 // ---------------------------------------------------------------------------
 // Main schema
@@ -165,8 +149,8 @@ export const MarketingPlanSchema = z.object({
   campaigns: z.array(MarketingCampaignSchema).optional().openapi({
     description: "Marketing campaigns",
   }),
-  kpiTargets: z.array(MarketingKPITargetSchema).optional().openapi({
-    description: "KPI targets and progress",
+  linkedGoals: z.array(z.string()).optional().openapi({
+    description: "Linked goal IDs — KPI tracking lives in the goals module",
   }),
   project: z.string().optional().openapi({
     description: "Linked project name",
@@ -215,7 +199,7 @@ export const CreateMarketingPlanSchema = MarketingPlanSchema.pick({
   targetAudiences: true,
   channels: true,
   campaigns: true,
-  kpiTargets: true,
+  linkedGoals: true,
   project: true,
   responsible: true,
   team: true,

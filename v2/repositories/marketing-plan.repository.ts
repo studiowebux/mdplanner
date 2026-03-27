@@ -16,7 +16,6 @@ import type {
   CreateMarketingPlan,
   MarketingCampaign,
   MarketingChannel,
-  MarketingKPITarget,
   MarketingPlan,
   MarketingTargetAudience,
   UpdateMarketingPlan,
@@ -204,14 +203,9 @@ export class MarketingPlanRepository {
         fm.campaigns,
         parseCampaign,
       ),
-      kpiTargets: this.parseArray<MarketingKPITarget>(
-        fm.kpi_targets ?? fm.kpiTargets,
-        (raw) => ({
-          metric: String(raw.metric ?? ""),
-          target: Number(raw.target ?? 0),
-          current: raw.current != null ? Number(raw.current) : undefined,
-        }),
-      ),
+      linkedGoals: Array.isArray(fm.linked_goals ?? fm.linkedGoals)
+        ? ((fm.linked_goals ?? fm.linkedGoals) as unknown[]).map(String)
+        : undefined,
       project: fm.project != null ? String(fm.project) : undefined,
       responsible: fm.responsible != null ? String(fm.responsible) : undefined,
       team: Array.isArray(fm.team)
@@ -259,7 +253,7 @@ export class MarketingPlanRepository {
     if (item.campaigns?.length) {
       fm.campaigns = item.campaigns.map(serializeCampaign);
     }
-    if (item.kpiTargets?.length) fm.kpi_targets = item.kpiTargets;
+    if (item.linkedGoals?.length) fm.linked_goals = item.linkedGoals;
     if (item.project) fm.project = item.project;
     if (item.responsible) fm.responsible = item.responsible;
     if (item.team?.length) fm.team = item.team;

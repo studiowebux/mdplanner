@@ -97,7 +97,7 @@ export const MKTPLAN_TABLE_COLUMNS: ColumnDef[] = [
   { key: "audienceCount", label: "Audiences", sortable: true },
   { key: "channelCount", label: "Channels", sortable: true },
   { key: "campaignCount", label: "Campaigns", sortable: true },
-  { key: "kpiCount", label: "KPIs", sortable: true },
+  { key: "goalCount", label: "Goals", sortable: true },
   { key: "_actions", label: "", render: actionBtns },
 ];
 
@@ -211,21 +211,11 @@ export const MKTPLAN_FORM_FIELDS: FieldDef[] = [
     ],
   },
   {
-    type: "array-table",
-    name: "kpiTargets",
-    label: "KPI Target",
-    section: "kpi_targets",
-    addLabel: "Add KPI",
-    itemFields: [
-      {
-        type: "text",
-        name: "metric",
-        label: "Metric",
-        placeholder: "e.g. Website Visitors",
-      },
-      { type: "number", name: "target", label: "Target" },
-      { type: "number", name: "current", label: "Current" },
-    ],
+    type: "tags",
+    name: "linkedGoals",
+    label: "Linked Goals",
+    source: "goals-by-id",
+    placeholder: "Search goals...",
   },
   {
     type: "array-table",
@@ -281,6 +271,6 @@ export function marketingPlanToRow(
     audienceCount: p.targetAudiences?.length ?? 0,
     channelCount: p.channels?.length ?? 0,
     campaignCount: p.campaigns?.length ?? 0,
-    kpiCount: p.kpiTargets?.length ?? 0,
+    goalCount: p.linkedGoals?.length ?? 0,
   };
 }

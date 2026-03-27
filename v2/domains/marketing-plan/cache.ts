@@ -20,7 +20,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${TABLE} (
   target_audiences TEXT,
   channels TEXT,
   campaigns TEXT,
-  kpi_targets TEXT,
+  linked_goals TEXT,
   project TEXT,
   responsible TEXT,
   team TEXT,
@@ -40,7 +40,7 @@ function insertRow(
   db.execute(
     `INSERT OR REPLACE INTO ${TABLE} (id, name, description, status,
        budget_total, budget_currency, start_date, end_date,
-       target_audiences, channels, campaigns, kpi_targets,
+       target_audiences, channels, campaigns, linked_goals,
        project, responsible, team,
        hypothesis, learnings, notes, created, updated, synced_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -56,7 +56,7 @@ function insertRow(
       p.targetAudiences ? JSON.stringify(p.targetAudiences) : null,
       p.channels ? JSON.stringify(p.channels) : null,
       p.campaigns ? JSON.stringify(p.campaigns) : null,
-      p.kpiTargets ? JSON.stringify(p.kpiTargets) : null,
+      p.linkedGoals ? JSON.stringify(p.linkedGoals) : null,
       val(p.project),
       val(p.responsible),
       p.team ? JSON.stringify(p.team) : null,

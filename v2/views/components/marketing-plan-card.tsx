@@ -11,7 +11,7 @@ export const MarketingPlanCard: FC<Props> = ({ item, q }) => {
   const audienceCount = item.targetAudiences?.length ?? 0;
   const channelCount = item.channels?.length ?? 0;
   const campaignCount = item.campaigns?.length ?? 0;
-  const kpiCount = item.kpiTargets?.length ?? 0;
+  const goalCount = item.linkedGoals?.length ?? 0;
   const budget = item.budgetTotal != null
     ? `${item.budgetCurrency ?? ""} ${item.budgetTotal.toLocaleString()}`
       .trim()
@@ -75,10 +75,10 @@ export const MarketingPlanCard: FC<Props> = ({ item, q }) => {
             <dd class="domain-card__meta-value">{campaignCount}</dd>
           </>
         )}
-        {kpiCount > 0 && (
+        {goalCount > 0 && (
           <>
-            <dt class="domain-card__meta-label">KPIs</dt>
-            <dd class="domain-card__meta-value">{kpiCount}</dd>
+            <dt class="domain-card__meta-label">Goals</dt>
+            <dd class="domain-card__meta-value">{goalCount}</dd>
           </>
         )}
       </dl>
