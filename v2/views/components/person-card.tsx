@@ -28,7 +28,7 @@ export const PersonCard: FC<Props> = ({ person, q }) => {
           {initials}
         </span>
       }
-      subtitle={person.title}
+      subtitle={person.title ?? undefined}
       badge={person.agentType
         ? (
           <span

@@ -3,8 +3,10 @@
 
 import type { PortfolioRepository } from "../repositories/portfolio.repository.ts";
 import type {
+  CreatePortfolioItem,
   PortfolioItem,
   PortfolioStatusUpdate,
+  UpdatePortfolioItem,
 } from "../types/portfolio.types.ts";
 import type { CacheSync } from "../database/sqlite/mod.ts";
 import { insertPortfolioRow } from "../domains/portfolio/cache.ts";
@@ -41,9 +43,7 @@ export class PortfolioService {
     return this.repo.search(query);
   }
 
-  async create(
-    data: Partial<PortfolioItem> & { name: string },
-  ): Promise<PortfolioItem> {
+  async create(data: CreatePortfolioItem): Promise<PortfolioItem> {
     const item = await this.repo.create(data);
     this.cacheUpsert(item);
     return item;
@@ -51,7 +51,7 @@ export class PortfolioService {
 
   async update(
     id: string,
-    data: Partial<PortfolioItem>,
+    data: UpdatePortfolioItem,
   ): Promise<PortfolioItem | null> {
     const item = await this.repo.update(id, data);
     if (item) this.cacheUpsert(item);

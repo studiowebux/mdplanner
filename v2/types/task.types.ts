@@ -251,31 +251,31 @@ export const CreateTaskSchema = z.object({
     description: "Board section to place the task in",
     example: "Todo",
   }),
-  description: z.array(z.string()).optional().openapi({
+  description: z.array(z.string()).nullable().optional().openapi({
     description: "Task description paragraphs (markdown)",
   }),
-  parentId: z.string().optional().openapi({
+  parentId: z.string().nullable().optional().openapi({
     description: "Parent task ID (if subtask)",
   }),
-  tags: z.array(z.string()).optional().openapi({
+  tags: z.array(z.string()).nullable().optional().openapi({
     description: "Task labels/tags",
   }),
   due_date: z.string().nullable().optional().openapi({
     description: "Due date (YYYY-MM-DD)",
   }),
-  assignee: z.string().optional().openapi({
+  assignee: z.string().nullable().optional().openapi({
     description: "Assigned person ID",
   }),
-  priority: z.number().min(1).max(5).optional().openapi({
+  priority: z.number().min(1).max(5).nullable().optional().openapi({
     description: "Priority 1 (highest) to 5 (lowest)",
   }),
   effort: z.number().nullable().optional().openapi({
     description: "Effort estimate (story points or hours)",
   }),
-  blocked_by: z.array(z.string()).optional().openapi({
+  blocked_by: z.array(z.string()).nullable().optional().openapi({
     description: "Task IDs this task is blocked by",
   }),
-  milestone: z.string().optional().openapi({
+  milestone: z.string().nullable().optional().openapi({
     description: "Linked milestone name",
   }),
   planned_start: z.string().nullable().optional().openapi({
@@ -284,22 +284,22 @@ export const CreateTaskSchema = z.object({
   planned_end: z.string().nullable().optional().openapi({
     description: "Planned end date (YYYY-MM-DD)",
   }),
-  order: z.number().optional().openapi({
+  order: z.number().nullable().optional().openapi({
     description: "Sort order within section",
   }),
-  project: z.string().optional().openapi({
+  project: z.string().nullable().optional().openapi({
     description: "Project name scope",
   }),
-  githubIssue: z.number().optional().openapi({
+  githubIssue: z.number().nullable().optional().openapi({
     description: "Linked GitHub issue number",
   }),
-  githubRepo: z.string().optional().openapi({
+  githubRepo: z.string().nullable().optional().openapi({
     description: "GitHub repository (owner/repo)",
   }),
-  githubPR: z.number().optional().openapi({
+  githubPR: z.number().nullable().optional().openapi({
     description: "Linked GitHub PR number",
   }),
-  files: z.array(z.string()).optional().openapi({
+  files: z.array(z.string()).nullable().optional().openapi({
     description: "Relevant source file paths (relative to codebase root)",
   }),
 }).openapi("CreateTask");

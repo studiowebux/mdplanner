@@ -7,9 +7,11 @@ import { toKebab } from "../utils/slug.ts";
 import { generateId } from "../utils/id.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
 import type {
+  CreatePortfolioItem,
   PortfolioItem,
   PortfolioStatus,
   PortfolioStatusUpdate,
+  UpdatePortfolioItem,
 } from "../types/portfolio.types.ts";
 import type { CacheDatabase } from "../database/sqlite/mod.ts";
 import { rowToPortfolioItem } from "../domains/portfolio/cache.ts";
@@ -113,9 +115,7 @@ export class PortfolioRepository {
     return all.filter((item) => item.name.toLowerCase().includes(q));
   }
 
-  async create(
-    data: Partial<PortfolioItem> & { name: string },
-  ): Promise<PortfolioItem> {
+  async create(data: CreatePortfolioItem): Promise<PortfolioItem> {
     await Deno.mkdir(this.dir, { recursive: true });
     let id = toKebab(data.name);
     let filePath = join(this.dir, `${id}.md`);
@@ -148,7 +148,6 @@ export class PortfolioRepository {
       linkedGoals: data.linkedGoals,
       kpis: data.kpis,
       urls: data.urls,
-      statusUpdates: data.statusUpdates,
     };
 
     await this.writer.write(
@@ -160,16 +159,22 @@ export class PortfolioRepository {
 
   async update(
     id: string,
-    data: Partial<PortfolioItem>,
+    data: UpdatePortfolioItem,
   ): Promise<PortfolioItem | null> {
     const existing = await this.findById(id);
     if (!existing) return null;
-    const updated: PortfolioItem = { ...existing, ...data, id: existing.id };
+    // Type assertion: spread is safe — required fields (category, status) fall
+    // back to existing values when omitted from the update payload.
+    const updated = { ...existing, ...data, id: existing.id } as PortfolioItem;
+    await this.writeItem(id, updated);
+    return updated;
+  }
+
+  private async writeItem(id: string, item: PortfolioItem): Promise<void> {
     await this.writer.write(
       id,
-      () => atomicWrite(join(this.dir, `${id}.md`), this.serialize(updated)),
+      () => atomicWrite(join(this.dir, `${id}.md`), this.serialize(item)),
     );
-    return updated;
   }
 
   async delete(id: string): Promise<boolean> {
@@ -193,8 +198,10 @@ export class PortfolioRepository {
       date: new Date().toISOString().slice(0, 10),
       message,
     };
-    const updates = [update, ...(item.statusUpdates ?? [])];
-    await this.update(id, { statusUpdates: updates });
+    await this.writeItem(id, {
+      ...item,
+      statusUpdates: [update, ...(item.statusUpdates ?? [])],
+    });
     return update;
   }
 
@@ -208,7 +215,7 @@ export class PortfolioRepository {
     const target = (item.statusUpdates ?? []).find((u) => u.id === updateId);
     if (!target) return null;
     target.message = message;
-    await this.update(id, { statusUpdates: item.statusUpdates });
+    await this.writeItem(id, { ...item, statusUpdates: item.statusUpdates });
     return target;
   }
 
@@ -220,7 +227,7 @@ export class PortfolioRepository {
       u.id !== updateId
     );
     if (filtered.length === before) return false;
-    await this.update(id, { statusUpdates: filtered });
+    await this.writeItem(id, { ...item, statusUpdates: filtered });
     return true;
   }
 

@@ -333,7 +333,7 @@ export const PortfolioDetailView: FC<Props> = (
                     <td>{g.kpi ?? ""}</td>
                     <td>{g.kpiMetric ?? ""}</td>
                     <td>
-                      {g.kpiValue !== undefined && g.kpiTarget !== undefined
+                      {g.kpiValue != null && g.kpiTarget != null
                         ? <KpiGauge value={g.kpiValue} target={g.kpiTarget} />
                         : (g.kpiValue ?? "")}
                     </td>

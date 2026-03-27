@@ -177,8 +177,8 @@ export class MilestoneService {
       milestone: m.name,
       id: m.id,
       status: m.status,
-      description: m.description,
-      target: m.target,
+      description: m.description ?? undefined,
+      target: m.target ?? undefined,
       totalOpen: tasks.length - totalDone,
       totalDone,
       completionPct: tasks.length > 0

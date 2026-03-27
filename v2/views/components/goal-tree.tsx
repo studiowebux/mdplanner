@@ -37,7 +37,7 @@ const GoalTreeNode: FC<{ node: GoalNode }> = ({ node }) => (
           {PRIORITY_LABELS[String(node.priority)] ?? `P${node.priority}`}
         </span>
       )}
-      {node.progress !== undefined && (
+      {node.progress != null && (
         <span class="goal-tree__progress">
           <progress class="progress-bar" value={node.progress} max={100} />
           {node.progress}%

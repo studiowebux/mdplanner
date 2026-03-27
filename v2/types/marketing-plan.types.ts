@@ -36,10 +36,10 @@ export const MarketingTargetAudienceSchema = z.object({
     description: "Audience segment name",
     example: "Enterprise SaaS buyers",
   }),
-  description: z.string().optional().openapi({
+  description: z.string().nullable().optional().openapi({
     description: "Audience description",
   }),
-  size: z.string().optional().openapi({
+  size: z.string().nullable().optional().openapi({
     description: "Estimated audience size",
     example: "10k-50k",
   }),
@@ -54,11 +54,11 @@ export const MarketingChannelSchema = z.object({
     description: "Channel name",
     example: "Social Media",
   }),
-  budget: z.number().optional().openapi({
+  budget: z.number().nullable().optional().openapi({
     description: "Channel budget allocation",
     example: 15000,
   }),
-  goals: z.string().optional().openapi({
+  goals: z.string().nullable().optional().openapi({
     description: "Channel goals",
     example: "Increase engagement by 25%",
   }),
@@ -75,19 +75,19 @@ export const MarketingCampaignSchema = z.object({
     description: "Campaign name",
     example: "Spring Launch",
   }),
-  channel: z.string().optional().openapi({
+  channel: z.string().nullable().optional().openapi({
     description: "Associated channel name",
     example: "Social Media",
   }),
-  budget: z.number().optional().openapi({
+  budget: z.number().nullable().optional().openapi({
     description: "Campaign budget",
     example: 5000,
   }),
-  startDate: z.string().optional().openapi({
+  startDate: z.string().nullable().optional().openapi({
     description: "Campaign start date (YYYY-MM-DD)",
     example: "2026-03-01",
   }),
-  endDate: z.string().optional().openapi({
+  endDate: z.string().nullable().optional().openapi({
     description: "Campaign end date (YYYY-MM-DD)",
     example: "2026-03-31",
   }),
@@ -95,7 +95,7 @@ export const MarketingCampaignSchema = z.object({
     description: "Campaign status",
     example: "planned",
   }),
-  goals: z.string().optional().openapi({
+  goals: z.string().nullable().optional().openapi({
     description: "Campaign goals",
     example: "Generate 500 qualified leads",
   }),
@@ -116,65 +116,66 @@ export const MarketingPlanSchema = z.object({
     description: "Plan name",
     example: "Q2 Product Launch",
   }),
-  description: z.string().optional().openapi({
+  description: z.string().nullable().optional().openapi({
     description: "Plan description",
   }),
   status: z.enum(MARKETING_PLAN_STATUSES).openapi({
     description: "Plan status",
     example: "draft",
   }),
-  budgetTotal: z.number().optional().openapi({
+  budgetTotal: z.number().nullable().optional().openapi({
     description: "Total budget",
     example: 50000,
   }),
-  budgetCurrency: z.string().optional().openapi({
+  budgetCurrency: z.string().nullable().optional().openapi({
     description: "Budget currency code",
     example: "USD",
   }),
-  startDate: z.string().optional().openapi({
+  startDate: z.string().nullable().optional().openapi({
     description: "Plan start date (YYYY-MM-DD)",
     example: "2026-03-01",
   }),
-  endDate: z.string().optional().openapi({
+  endDate: z.string().nullable().optional().openapi({
     description: "Plan end date (YYYY-MM-DD)",
     example: "2026-06-30",
   }),
-  targetAudiences: z.array(MarketingTargetAudienceSchema).optional().openapi({
-    description: "Target audience segments",
-  }),
-  channels: z.array(MarketingChannelSchema).optional().openapi({
+  targetAudiences: z.array(MarketingTargetAudienceSchema).nullable().optional()
+    .openapi({
+      description: "Target audience segments",
+    }),
+  channels: z.array(MarketingChannelSchema).nullable().optional().openapi({
     description: "Marketing channels",
   }),
-  campaigns: z.array(MarketingCampaignSchema).optional().openapi({
+  campaigns: z.array(MarketingCampaignSchema).nullable().optional().openapi({
     description: "Marketing campaigns",
   }),
-  linkedGoals: z.array(z.string()).optional().openapi({
+  linkedGoals: z.array(z.string()).nullable().optional().openapi({
     description: "Linked goal IDs — KPI tracking lives in the goals module",
   }),
-  project: z.string().optional().openapi({
+  project: z.string().nullable().optional().openapi({
     description: "Linked project name",
   }),
-  responsible: z.string().optional().openapi({
+  responsible: z.string().nullable().optional().openapi({
     description: "Person ID of the plan owner",
   }),
-  team: z.array(z.string()).optional().openapi({
+  team: z.array(z.string()).nullable().optional().openapi({
     description: "Person IDs of team members",
   }),
   hypothesis: z.array(z.object({
     text: z.string().openapi({ description: "Hypothesis statement" }),
-    verdict: z.string().optional().openapi({
+    verdict: z.string().nullable().optional().openapi({
       description: "Verdict: confirmed, rejected, partial, or pending",
       example: "confirmed",
     }),
-  })).optional().openapi({
+  })).nullable().optional().openapi({
     description: "What we believe will happen",
   }),
   learnings: z.array(z.object({
     text: z.string().openapi({ description: "Learning or discovery" }),
-  })).optional().openapi({
+  })).nullable().optional().openapi({
     description: "What we discovered after execution",
   }),
-  notes: z.string().optional().openapi({
+  notes: z.string().nullable().optional().openapi({
     description: "Plan notes (markdown)",
   }),
   created: z.string().openapi({ description: "ISO creation timestamp" }),

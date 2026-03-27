@@ -87,7 +87,7 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
           <>
             <dt class="domain-card__meta-label">KPI</dt>
             <dd class="domain-card__meta-value">
-              {item.kpiValue !== undefined && item.kpiTarget !== undefined
+              {item.kpiValue != null && item.kpiTarget != null
                 ? <KpiGauge value={item.kpiValue} target={item.kpiTarget} />
                 : item.kpi}
             </dd>

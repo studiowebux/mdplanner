@@ -186,7 +186,7 @@ export const GoalDetailView: FC<
             {goal.kpiMetric && (
               <InfoItem label="Metric">{goal.kpiMetric}</InfoItem>
             )}
-            {goal.kpiValue !== undefined && goal.kpiTarget !== undefined
+            {goal.kpiValue != null && goal.kpiTarget != null
               ? (
                 <InfoItem label="KPI Progress">
                   <KpiGauge value={goal.kpiValue} target={goal.kpiTarget} />
@@ -194,15 +194,15 @@ export const GoalDetailView: FC<
               )
               : (
                 <>
-                  {goal.kpiTarget !== undefined && (
+                  {goal.kpiTarget != null && (
                     <InfoItem label="Target">{goal.kpiTarget}</InfoItem>
                   )}
-                  {goal.kpiValue !== undefined && (
+                  {goal.kpiValue != null && (
                     <InfoItem label="Value">{goal.kpiValue}</InfoItem>
                   )}
                 </>
               )}
-            {goal.progress !== undefined && (
+            {goal.progress != null && (
               <InfoItem label="Progress">
                 <div class="goal-progress-cell">
                   <progress
@@ -320,7 +320,7 @@ export const GoalDetailView: FC<
                       </span>
                     </td>
                     <td class="data-table__td">
-                      {child.progress !== undefined
+                      {child.progress != null
                         ? (
                           <div class="goal-progress-cell">
                             <progress

@@ -32,11 +32,11 @@ export const PortfolioKpiSchema = z.object({
     description: "Current KPI value",
     example: 1250,
   }),
-  target: z.union([z.string(), z.number()]).optional().openapi({
+  target: z.union([z.string(), z.number()]).nullable().optional().openapi({
     description: "Target KPI value",
     example: 2000,
   }),
-  unit: z.string().optional().openapi({
+  unit: z.string().nullable().optional().openapi({
     description: "Unit of measurement",
     example: "users",
   }),
@@ -85,72 +85,73 @@ export const PortfolioItemSchema = z.object({
     description: "Current project status",
     example: "active",
   }),
-  description: z.string().optional().openapi({
+  description: z.string().nullable().optional().openapi({
     description: "Project description (markdown)",
     example: "A modern project management platform for agile teams.",
   }),
-  client: z.string().optional().openapi({
+  client: z.string().nullable().optional().openapi({
     description: "Client or stakeholder name",
     example: "Internal",
   }),
-  revenue: z.number().optional().openapi({
+  revenue: z.number().nullable().optional().openapi({
     description: "Total revenue in base currency",
     example: 125000,
   }),
-  expenses: z.number().optional().openapi({
+  expenses: z.number().nullable().optional().openapi({
     description: "Total expenses in base currency",
     example: 45000,
   }),
-  progress: z.number().optional().openapi({
+  progress: z.number().nullable().optional().openapi({
     description: "Overall completion percentage (0-100)",
     example: 65,
   }),
-  startDate: z.string().optional().openapi({
+  startDate: z.string().nullable().optional().openapi({
     description: "Project start date (YYYY-MM-DD)",
     example: "2026-01-01",
   }),
-  endDate: z.string().optional().openapi({
+  endDate: z.string().nullable().optional().openapi({
     description: "Project end or target date (YYYY-MM-DD)",
     example: "2026-12-31",
   }),
-  team: z.array(z.string()).optional().openapi({
+  team: z.array(z.string()).nullable().optional().openapi({
     description: "Team member names or person IDs",
     example: ["alice", "bob"],
   }),
-  techStack: z.array(z.string()).optional().openapi({
+  techStack: z.array(z.string()).nullable().optional().openapi({
     description: "Technologies used in this project",
     example: ["Deno", "Hono", "SQLite"],
   }),
-  logo: z.string().optional().openapi({
+  logo: z.string().nullable().optional().openapi({
     description: "Path or URL to project logo image",
   }),
-  license: z.string().optional().openapi({
+  license: z.string().nullable().optional().openapi({
     description: "Software license identifier",
     example: "MIT",
   }),
-  githubRepo: z.string().optional().openapi({
+  githubRepo: z.string().nullable().optional().openapi({
     description: "GitHub repository (owner/repo)",
     example: "studiowebux/mdplanner",
   }),
-  billingCustomerId: z.string().optional().openapi({
+  billingCustomerId: z.string().nullable().optional().openapi({
     description: "External billing system customer ID",
   }),
   brainManaged: z.boolean().optional().openapi({
     description: "Whether this project is managed by a Cerveau brain",
     example: true,
   }),
-  linkedGoals: z.array(z.string()).optional().openapi({
+  linkedGoals: z.array(z.string()).nullable().optional().openapi({
     description: "Goal IDs linked to this portfolio item",
   }),
-  kpis: z.array(PortfolioKpiSchema).optional().openapi({
+  kpis: z.array(PortfolioKpiSchema).nullable().optional().openapi({
     description: "Key performance indicators tracked for this project",
   }),
-  urls: z.array(PortfolioUrlSchema).optional().openapi({
+  urls: z.array(PortfolioUrlSchema).nullable().optional().openapi({
     description: "External links (docs, repo, demo, etc.)",
   }),
-  statusUpdates: z.array(PortfolioStatusUpdateSchema).optional().openapi({
-    description: "Chronological status updates",
-  }),
+  statusUpdates: z.array(PortfolioStatusUpdateSchema).nullable().optional()
+    .openapi({
+      description: "Chronological status updates",
+    }),
 }).openapi("PortfolioItem");
 
 export type PortfolioItem = z.infer<typeof PortfolioItemSchema>;
