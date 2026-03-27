@@ -260,7 +260,7 @@ export const CreateTaskSchema = z.object({
   tags: z.array(z.string()).optional().openapi({
     description: "Task labels/tags",
   }),
-  due_date: z.string().optional().openapi({
+  due_date: z.string().nullable().optional().openapi({
     description: "Due date (YYYY-MM-DD)",
   }),
   assignee: z.string().optional().openapi({
@@ -269,7 +269,7 @@ export const CreateTaskSchema = z.object({
   priority: z.number().min(1).max(5).optional().openapi({
     description: "Priority 1 (highest) to 5 (lowest)",
   }),
-  effort: z.number().optional().openapi({
+  effort: z.number().nullable().optional().openapi({
     description: "Effort estimate (story points or hours)",
   }),
   blocked_by: z.array(z.string()).optional().openapi({
@@ -278,10 +278,10 @@ export const CreateTaskSchema = z.object({
   milestone: z.string().optional().openapi({
     description: "Linked milestone name",
   }),
-  planned_start: z.string().optional().openapi({
+  planned_start: z.string().nullable().optional().openapi({
     description: "Planned start date (YYYY-MM-DD)",
   }),
-  planned_end: z.string().optional().openapi({
+  planned_end: z.string().nullable().optional().openapi({
     description: "Planned end date (YYYY-MM-DD)",
   }),
   order: z.number().optional().openapi({
