@@ -646,6 +646,20 @@ a.badge:hover {
   font-weight: var(--font-weight-bold);
 }
 
+/* Field-level validation — red border after user interaction */
+.form__input:user-invalid,
+.form__select:user-invalid,
+.form__textarea:user-invalid {
+  border-color: var(--color-error-border);
+  background: var(--color-error-bg);
+}
+
+.form__input:user-invalid:focus,
+.form__select:user-invalid:focus,
+.form__textarea:user-invalid:focus {
+  border-color: var(--color-error);
+}
+
 .form__actions {
   display: flex;
   justify-content: flex-end;
