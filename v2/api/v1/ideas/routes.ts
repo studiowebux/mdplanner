@@ -35,9 +35,18 @@ const listIdeasRoute = createRoute({
 });
 
 ideasRouter.openapi(listIdeasRoute, async (c) => {
-  const { status, category, priority, q } = c.req.valid("query");
-  const ideas = await getIdeaService().list({ status, category, priority, q });
-  return c.json(ideas, 200);
+  try {
+    const { status, category, priority, q } = c.req.valid("query");
+    const ideas = await getIdeaService().list({
+      status,
+      category,
+      priority,
+      q,
+    });
+    return c.json(ideas, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // GET /{id}
@@ -61,10 +70,14 @@ const getIdeaRoute = createRoute({
 });
 
 ideasRouter.openapi(getIdeaRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const idea = await getIdeaService().getById(id);
-  if (!idea) return c.json(notFound("IDEA", id), 404);
-  return c.json(idea, 200);
+  try {
+    const { id } = c.req.valid("param");
+    const idea = await getIdeaService().getById(id);
+    if (!idea) return c.json(notFound("IDEA", id), 404);
+    return c.json(idea, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // POST /
@@ -89,10 +102,14 @@ const createIdeaRoute = createRoute({
 });
 
 ideasRouter.openapi(createIdeaRoute, async (c) => {
-  const data = c.req.valid("json");
-  const idea = await getIdeaService().create(data);
-  publish("idea.created");
-  return c.json(idea, 201);
+  try {
+    const data = c.req.valid("json");
+    const idea = await getIdeaService().create(data);
+    publish("idea.created");
+    return c.json(idea, 201);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // PUT /{id}
@@ -122,12 +139,16 @@ const updateIdeaRoute = createRoute({
 });
 
 ideasRouter.openapi(updateIdeaRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const data = c.req.valid("json");
-  const idea = await getIdeaService().update(id, data);
-  if (!idea) return c.json(notFound("IDEA", id), 404);
-  publish("idea.updated");
-  return c.json(idea, 200);
+  try {
+    const { id } = c.req.valid("param");
+    const data = c.req.valid("json");
+    const idea = await getIdeaService().update(id, data);
+    if (!idea) return c.json(notFound("IDEA", id), 404);
+    publish("idea.updated");
+    return c.json(idea, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // DELETE /{id}
@@ -148,11 +169,15 @@ const deleteIdeaRoute = createRoute({
 });
 
 ideasRouter.openapi(deleteIdeaRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const ok = await getIdeaService().delete(id);
-  if (!ok) return c.json(notFound("IDEA", id), 404);
-  publish("idea.deleted");
-  return new Response(null, { status: 204 });
+  try {
+    const { id } = c.req.valid("param");
+    const ok = await getIdeaService().delete(id);
+    if (!ok) return c.json(notFound("IDEA", id), 404);
+    publish("idea.deleted");
+    return new Response(null, { status: 204 });
+  } catch (err) {
+    throw err;
+  }
 });
 
 // POST /{id}/link/{targetId}
@@ -180,16 +205,20 @@ const linkIdeasRoute = createRoute({
 });
 
 ideasRouter.openapi(linkIdeasRoute, async (c) => {
-  const { id, targetId } = c.req.valid("param");
-  const ok = await getIdeaService().linkIdeas(id, targetId);
-  if (!ok) {
-    return c.json(
-      { error: "IDEA_NOT_FOUND", message: "One or both ideas not found" },
-      404,
-    );
+  try {
+    const { id, targetId } = c.req.valid("param");
+    const ok = await getIdeaService().linkIdeas(id, targetId);
+    if (!ok) {
+      return c.json(
+        { error: "IDEA_NOT_FOUND", message: "One or both ideas not found" },
+        404,
+      );
+    }
+    publish("idea.updated");
+    return c.json({ success: true }, 200);
+  } catch (err) {
+    throw err;
   }
-  publish("idea.updated");
-  return c.json({ success: true }, 200);
 });
 
 // DELETE /{id}/link/{targetId}
@@ -217,14 +246,18 @@ const unlinkIdeasRoute = createRoute({
 });
 
 ideasRouter.openapi(unlinkIdeasRoute, async (c) => {
-  const { id, targetId } = c.req.valid("param");
-  const ok = await getIdeaService().unlinkIdeas(id, targetId);
-  if (!ok) {
-    return c.json(
-      { error: "IDEA_NOT_FOUND", message: "One or both ideas not found" },
-      404,
-    );
+  try {
+    const { id, targetId } = c.req.valid("param");
+    const ok = await getIdeaService().unlinkIdeas(id, targetId);
+    if (!ok) {
+      return c.json(
+        { error: "IDEA_NOT_FOUND", message: "One or both ideas not found" },
+        404,
+      );
+    }
+    publish("idea.updated");
+    return c.json({ success: true }, 200);
+  } catch (err) {
+    throw err;
   }
-  publish("idea.updated");
-  return c.json({ success: true }, 200);
 });

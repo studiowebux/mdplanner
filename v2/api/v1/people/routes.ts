@@ -37,9 +37,13 @@ const listPeopleRoute = createRoute({
 });
 
 peopleRouter.openapi(listPeopleRoute, async (c) => {
-  const { department } = c.req.valid("query");
-  const people = await getPeopleService().list(department);
-  return c.json(people, 200);
+  try {
+    const { department } = c.req.valid("query");
+    const people = await getPeopleService().list(department);
+    return c.json(people, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // GET /tree
@@ -62,8 +66,12 @@ const getTreeRoute = createRoute({
 });
 
 peopleRouter.openapi(getTreeRoute, async (c) => {
-  const tree = await getPeopleService().getTree();
-  return c.json(tree, 200);
+  try {
+    const tree = await getPeopleService().getTree();
+    return c.json(tree, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // GET /summary
@@ -82,8 +90,12 @@ const getSummaryRoute = createRoute({
 });
 
 peopleRouter.openapi(getSummaryRoute, async (c) => {
-  const summary = await getPeopleService().getSummary();
-  return c.json(summary, 200);
+  try {
+    const summary = await getPeopleService().getSummary();
+    return c.json(summary, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // GET /departments
@@ -102,8 +114,12 @@ const getDepartmentsRoute = createRoute({
 });
 
 peopleRouter.openapi(getDepartmentsRoute, async (c) => {
-  const departments = await getPeopleService().getDepartments();
-  return c.json(departments, 200);
+  try {
+    const departments = await getPeopleService().getDepartments();
+    return c.json(departments, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // GET /:id
@@ -127,15 +143,19 @@ const getPersonRoute = createRoute({
 });
 
 peopleRouter.openapi(getPersonRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const person = await getPeopleService().getById(id);
-  if (!person) {
-    return c.json(
-      { error: "PERSON_NOT_FOUND", message: `Person ${id} not found` },
-      404,
-    );
+  try {
+    const { id } = c.req.valid("param");
+    const person = await getPeopleService().getById(id);
+    if (!person) {
+      return c.json(
+        { error: "PERSON_NOT_FOUND", message: `Person ${id} not found` },
+        404,
+      );
+    }
+    return c.json(person, 200);
+  } catch (err) {
+    throw err;
   }
-  return c.json(person, 200);
 });
 
 // GET /:id/reports
@@ -159,16 +179,20 @@ const getReportsRoute = createRoute({
 });
 
 peopleRouter.openapi(getReportsRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const person = await getPeopleService().getById(id);
-  if (!person) {
-    return c.json(
-      { error: "PERSON_NOT_FOUND", message: `Person ${id} not found` },
-      404,
-    );
+  try {
+    const { id } = c.req.valid("param");
+    const person = await getPeopleService().getById(id);
+    if (!person) {
+      return c.json(
+        { error: "PERSON_NOT_FOUND", message: `Person ${id} not found` },
+        404,
+      );
+    }
+    const reports = await getPeopleService().getDirectReports(id);
+    return c.json(reports, 200);
+  } catch (err) {
+    throw err;
   }
-  const reports = await getPeopleService().getDirectReports(id);
-  return c.json(reports, 200);
 });
 
 // POST /
@@ -193,10 +217,14 @@ const createPersonRoute = createRoute({
 });
 
 peopleRouter.openapi(createPersonRoute, async (c) => {
-  const data = c.req.valid("json");
-  const person = await getPeopleService().create(data);
-  publish("person.created");
-  return c.json(person, 201);
+  try {
+    const data = c.req.valid("json");
+    const person = await getPeopleService().create(data);
+    publish("person.created");
+    return c.json(person, 201);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // PUT /:id
@@ -226,17 +254,21 @@ const updatePersonRoute = createRoute({
 });
 
 peopleRouter.openapi(updatePersonRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const data = c.req.valid("json");
-  const person = await getPeopleService().update(id, data);
-  if (!person) {
-    return c.json(
-      { error: "PERSON_NOT_FOUND", message: `Person ${id} not found` },
-      404,
-    );
+  try {
+    const { id } = c.req.valid("param");
+    const data = c.req.valid("json");
+    const person = await getPeopleService().update(id, data);
+    if (!person) {
+      return c.json(
+        { error: "PERSON_NOT_FOUND", message: `Person ${id} not found` },
+        404,
+      );
+    }
+    publish("person.updated");
+    return c.json(person, 200);
+  } catch (err) {
+    throw err;
   }
-  publish("person.updated");
-  return c.json(person, 200);
 });
 
 // DELETE /:id
@@ -257,16 +289,20 @@ const deletePersonRoute = createRoute({
 });
 
 peopleRouter.openapi(deletePersonRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const ok = await getPeopleService().delete(id);
-  if (!ok) {
-    return c.json(
-      { error: "PERSON_NOT_FOUND", message: `Person ${id} not found` },
-      404,
-    );
+  try {
+    const { id } = c.req.valid("param");
+    const ok = await getPeopleService().delete(id);
+    if (!ok) {
+      return c.json(
+        { error: "PERSON_NOT_FOUND", message: `Person ${id} not found` },
+        404,
+      );
+    }
+    publish("person.deleted");
+    return new Response(null, { status: 204 });
+  } catch (err) {
+    throw err;
   }
-  publish("person.deleted");
-  return new Response(null, { status: 204 });
 });
 
 // POST /:id/heartbeat
@@ -310,14 +346,18 @@ const heartbeatRoute = createRoute({
 });
 
 peopleRouter.openapi(heartbeatRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const { status, currentTaskId } = c.req.valid("json");
-  const ok = await getPeopleService().heartbeat(id, status, currentTaskId);
-  if (!ok) {
-    return c.json(
-      { error: "PERSON_NOT_FOUND", message: `Person ${id} not found` },
-      404,
-    );
+  try {
+    const { id } = c.req.valid("param");
+    const { status, currentTaskId } = c.req.valid("json");
+    const ok = await getPeopleService().heartbeat(id, status, currentTaskId);
+    if (!ok) {
+      return c.json(
+        { error: "PERSON_NOT_FOUND", message: `Person ${id} not found` },
+        404,
+      );
+    }
+    return c.json({ success: true }, 200);
+  } catch (err) {
+    throw err;
   }
-  return c.json({ success: true }, 200);
 });

@@ -32,9 +32,13 @@ const listRoute = createRoute({
 });
 
 swotApiRouter.openapi(listRoute, async (c) => {
-  const { project, q } = c.req.valid("query");
-  const items = await getSwotService().list({ project, q });
-  return c.json(items, 200);
+  try {
+    const { project, q } = c.req.valid("query");
+    const items = await getSwotService().list({ project, q });
+    return c.json(items, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // GET /{id}
@@ -58,10 +62,14 @@ const getRoute = createRoute({
 });
 
 swotApiRouter.openapi(getRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const swot = await getSwotService().getById(id);
-  if (!swot) return c.json(notFound("SWOT", id), 404);
-  return c.json(swot, 200);
+  try {
+    const { id } = c.req.valid("param");
+    const swot = await getSwotService().getById(id);
+    if (!swot) return c.json(notFound("SWOT", id), 404);
+    return c.json(swot, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // POST /
@@ -86,10 +94,14 @@ const createSwotRoute = createRoute({
 });
 
 swotApiRouter.openapi(createSwotRoute, async (c) => {
-  const data = c.req.valid("json");
-  const swot = await getSwotService().create(data);
-  publish("swot.created");
-  return c.json(swot, 201);
+  try {
+    const data = c.req.valid("json");
+    const swot = await getSwotService().create(data);
+    publish("swot.created");
+    return c.json(swot, 201);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // PUT /{id}
@@ -119,12 +131,16 @@ const updateRoute = createRoute({
 });
 
 swotApiRouter.openapi(updateRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const data = c.req.valid("json");
-  const swot = await getSwotService().update(id, data);
-  if (!swot) return c.json(notFound("SWOT", id), 404);
-  publish("swot.updated");
-  return c.json(swot, 200);
+  try {
+    const { id } = c.req.valid("param");
+    const data = c.req.valid("json");
+    const swot = await getSwotService().update(id, data);
+    if (!swot) return c.json(notFound("SWOT", id), 404);
+    publish("swot.updated");
+    return c.json(swot, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // DELETE /{id}
@@ -145,9 +161,13 @@ const deleteRoute = createRoute({
 });
 
 swotApiRouter.openapi(deleteRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const ok = await getSwotService().delete(id);
-  if (!ok) return c.json(notFound("SWOT", id), 404);
-  publish("swot.deleted");
-  return new Response(null, { status: 204 });
+  try {
+    const { id } = c.req.valid("param");
+    const ok = await getSwotService().delete(id);
+    if (!ok) return c.json(notFound("SWOT", id), 404);
+    publish("swot.deleted");
+    return new Response(null, { status: 204 });
+  } catch (err) {
+    throw err;
+  }
 });

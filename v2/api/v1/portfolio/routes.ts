@@ -53,12 +53,16 @@ const listRoute = createRoute({
 });
 
 portfolioRouter.openapi(listRoute, async (c) => {
-  const { q, status, category } = c.req.valid("query");
-  const svc = getPortfolioService();
-  let items = q ? await svc.search(q) : await svc.list();
-  if (status) items = items.filter((i) => i.status === status);
-  if (category) items = items.filter((i) => i.category === category);
-  return c.json(items, 200);
+  try {
+    const { q, status, category } = c.req.valid("query");
+    const svc = getPortfolioService();
+    let items = q ? await svc.search(q) : await svc.list();
+    if (status) items = items.filter((i) => i.status === status);
+    if (category) items = items.filter((i) => i.category === category);
+    return c.json(items, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // GET /summary
@@ -77,34 +81,38 @@ const summaryRoute = createRoute({
 });
 
 portfolioRouter.openapi(summaryRoute, async (c) => {
-  const items = await getPortfolioService().list();
-  const byStatus: Record<string, number> = {};
-  const byCategory: Record<string, number> = {};
-  let totalRevenue = 0;
-  let totalExpenses = 0;
-  let progressSum = 0;
+  try {
+    const items = await getPortfolioService().list();
+    const byStatus: Record<string, number> = {};
+    const byCategory: Record<string, number> = {};
+    let totalRevenue = 0;
+    let totalExpenses = 0;
+    let progressSum = 0;
 
-  for (const item of items) {
-    byStatus[item.status] = (byStatus[item.status] ?? 0) + 1;
-    byCategory[item.category] = (byCategory[item.category] ?? 0) + 1;
-    totalRevenue += item.revenue ?? 0;
-    totalExpenses += item.expenses ?? 0;
-    progressSum += item.progress ?? 0;
+    for (const item of items) {
+      byStatus[item.status] = (byStatus[item.status] ?? 0) + 1;
+      byCategory[item.category] = (byCategory[item.category] ?? 0) + 1;
+      totalRevenue += item.revenue ?? 0;
+      totalExpenses += item.expenses ?? 0;
+      progressSum += item.progress ?? 0;
+    }
+
+    return c.json(
+      {
+        total: items.length,
+        byStatus,
+        byCategory,
+        avgProgress: items.length > 0
+          ? Math.round(progressSum / items.length)
+          : 0,
+        totalRevenue,
+        totalExpenses,
+      },
+      200,
+    );
+  } catch (err) {
+    throw err;
   }
-
-  return c.json(
-    {
-      total: items.length,
-      byStatus,
-      byCategory,
-      avgProgress: items.length > 0
-        ? Math.round(progressSum / items.length)
-        : 0,
-      totalRevenue,
-      totalExpenses,
-    },
-    200,
-  );
 });
 
 // GET /:id
@@ -128,10 +136,14 @@ const getRoute = createRoute({
 });
 
 portfolioRouter.openapi(getRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const item = await getPortfolioService().getById(id);
-  if (!item) return c.json(notFound("PORTFOLIO_ITEM", id), 404);
-  return c.json(item, 200);
+  try {
+    const { id } = c.req.valid("param");
+    const item = await getPortfolioService().getById(id);
+    if (!item) return c.json(notFound("PORTFOLIO_ITEM", id), 404);
+    return c.json(item, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // POST /
@@ -160,21 +172,25 @@ const createItemRoute = createRoute({
 });
 
 portfolioRouter.openapi(createItemRoute, async (c) => {
-  const data = c.req.valid("json");
-  const svc = getPortfolioService();
-  const existing = await svc.getByName(data.name);
-  if (existing) {
-    return c.json(
-      {
-        error: "PORTFOLIO_ITEM_DUPLICATE",
-        message: `Portfolio item '${data.name}' already exists`,
-      },
-      409,
-    );
+  try {
+    const data = c.req.valid("json");
+    const svc = getPortfolioService();
+    const existing = await svc.getByName(data.name);
+    if (existing) {
+      return c.json(
+        {
+          error: "PORTFOLIO_ITEM_DUPLICATE",
+          message: `Portfolio item '${data.name}' already exists`,
+        },
+        409,
+      );
+    }
+    const item = await svc.create(data);
+    publish("portfolio.created");
+    return c.json(item, 201);
+  } catch (err) {
+    throw err;
   }
-  const item = await svc.create(data);
-  publish("portfolio.created");
-  return c.json(item, 201);
 });
 
 // PUT /:id
@@ -204,12 +220,16 @@ const updateRoute = createRoute({
 });
 
 portfolioRouter.openapi(updateRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const data = c.req.valid("json");
-  const item = await getPortfolioService().update(id, data);
-  if (!item) return c.json(notFound("PORTFOLIO_ITEM", id), 404);
-  publish("portfolio.updated");
-  return c.json(item, 200);
+  try {
+    const { id } = c.req.valid("param");
+    const data = c.req.valid("json");
+    const item = await getPortfolioService().update(id, data);
+    if (!item) return c.json(notFound("PORTFOLIO_ITEM", id), 404);
+    publish("portfolio.updated");
+    return c.json(item, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // DELETE /:id
@@ -230,11 +250,15 @@ const deleteRoute = createRoute({
 });
 
 portfolioRouter.openapi(deleteRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const ok = await getPortfolioService().delete(id);
-  if (!ok) return c.json(notFound("PORTFOLIO_ITEM", id), 404);
-  publish("portfolio.deleted");
-  return new Response(null, { status: 204 });
+  try {
+    const { id } = c.req.valid("param");
+    const ok = await getPortfolioService().delete(id);
+    if (!ok) return c.json(notFound("PORTFOLIO_ITEM", id), 404);
+    publish("portfolio.deleted");
+    return new Response(null, { status: 204 });
+  } catch (err) {
+    throw err;
+  }
 });
 
 // POST /:id/status-updates
@@ -266,12 +290,16 @@ const addStatusUpdateRoute = createRoute({
 });
 
 portfolioRouter.openapi(addStatusUpdateRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const { message } = c.req.valid("json");
-  const update = await getPortfolioService().addStatusUpdate(id, message);
-  if (!update) return c.json(notFound("PORTFOLIO_ITEM", id), 404);
-  publish("portfolio.updated");
-  return c.json(update, 201);
+  try {
+    const { id } = c.req.valid("param");
+    const { message } = c.req.valid("json");
+    const update = await getPortfolioService().addStatusUpdate(id, message);
+    if (!update) return c.json(notFound("PORTFOLIO_ITEM", id), 404);
+    publish("portfolio.updated");
+    return c.json(update, 201);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // PUT /:id/status-updates/:updateId
@@ -303,16 +331,20 @@ const updateStatusUpdateRoute = createRoute({
 });
 
 portfolioRouter.openapi(updateStatusUpdateRoute, async (c) => {
-  const { id, updateId } = c.req.valid("param");
-  const { message } = c.req.valid("json");
-  const update = await getPortfolioService().updateStatusUpdate(
-    id,
-    updateId,
-    message,
-  );
-  if (!update) return c.json(notFound("STATUS_UPDATE", updateId), 404);
-  publish("portfolio.updated");
-  return c.json(update, 200);
+  try {
+    const { id, updateId } = c.req.valid("param");
+    const { message } = c.req.valid("json");
+    const update = await getPortfolioService().updateStatusUpdate(
+      id,
+      updateId,
+      message,
+    );
+    if (!update) return c.json(notFound("STATUS_UPDATE", updateId), 404);
+    publish("portfolio.updated");
+    return c.json(update, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // DELETE /:id/status-updates/:updateId
@@ -335,9 +367,13 @@ const deleteStatusUpdateRoute = createRoute({
 });
 
 portfolioRouter.openapi(deleteStatusUpdateRoute, async (c) => {
-  const { id, updateId } = c.req.valid("param");
-  const ok = await getPortfolioService().deleteStatusUpdate(id, updateId);
-  if (!ok) return c.json(notFound("STATUS_UPDATE", updateId), 404);
-  publish("portfolio.updated");
-  return new Response(null, { status: 204 });
+  try {
+    const { id, updateId } = c.req.valid("param");
+    const ok = await getPortfolioService().deleteStatusUpdate(id, updateId);
+    if (!ok) return c.json(notFound("STATUS_UPDATE", updateId), 404);
+    publish("portfolio.updated");
+    return new Response(null, { status: 204 });
+  } catch (err) {
+    throw err;
+  }
 });

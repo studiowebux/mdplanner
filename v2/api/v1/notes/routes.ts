@@ -32,9 +32,13 @@ const listNotesRoute = createRoute({
 });
 
 notesRouter.openapi(listNotesRoute, async (c) => {
-  const { search, project } = c.req.valid("query");
-  const notes = await getNoteService().list({ search, project });
-  return c.json(notes, 200);
+  try {
+    const { search, project } = c.req.valid("query");
+    const notes = await getNoteService().list({ search, project });
+    return c.json(notes, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // GET /:id
@@ -60,15 +64,19 @@ const getNoteRoute = createRoute({
 });
 
 notesRouter.openapi(getNoteRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const note = await getNoteService().getById(id);
-  if (!note) {
-    return c.json(
-      { error: "NOTE_NOT_FOUND", message: `Note ${id} not found` },
-      404,
-    );
+  try {
+    const { id } = c.req.valid("param");
+    const note = await getNoteService().getById(id);
+    if (!note) {
+      return c.json(
+        { error: "NOTE_NOT_FOUND", message: `Note ${id} not found` },
+        404,
+      );
+    }
+    return c.json(note, 200);
+  } catch (err) {
+    throw err;
   }
-  return c.json(note, 200);
 });
 
 // POST /
@@ -93,10 +101,14 @@ const createNoteRoute = createRoute({
 });
 
 notesRouter.openapi(createNoteRoute, async (c) => {
-  const data = c.req.valid("json");
-  const note = await getNoteService().create(data);
-  publish("note.created");
-  return c.json(note, 201);
+  try {
+    const data = c.req.valid("json");
+    const note = await getNoteService().create(data);
+    publish("note.created");
+    return c.json(note, 201);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // PUT /:id
@@ -126,17 +138,21 @@ const updateNoteRoute = createRoute({
 });
 
 notesRouter.openapi(updateNoteRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const data = c.req.valid("json");
-  const note = await getNoteService().update(id, data);
-  if (!note) {
-    return c.json(
-      { error: "NOTE_NOT_FOUND", message: `Note ${id} not found` },
-      404,
-    );
+  try {
+    const { id } = c.req.valid("param");
+    const data = c.req.valid("json");
+    const note = await getNoteService().update(id, data);
+    if (!note) {
+      return c.json(
+        { error: "NOTE_NOT_FOUND", message: `Note ${id} not found` },
+        404,
+      );
+    }
+    publish("note.updated");
+    return c.json(note, 200);
+  } catch (err) {
+    throw err;
   }
-  publish("note.updated");
-  return c.json(note, 200);
 });
 
 // DELETE /:id
@@ -159,14 +175,18 @@ const deleteNoteRoute = createRoute({
 });
 
 notesRouter.openapi(deleteNoteRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const ok = await getNoteService().delete(id);
-  if (!ok) {
-    return c.json(
-      { error: "NOTE_NOT_FOUND", message: `Note ${id} not found` },
-      404,
-    );
+  try {
+    const { id } = c.req.valid("param");
+    const ok = await getNoteService().delete(id);
+    if (!ok) {
+      return c.json(
+        { error: "NOTE_NOT_FOUND", message: `Note ${id} not found` },
+        404,
+      );
+    }
+    publish("note.deleted");
+    return new Response(null, { status: 204 });
+  } catch (err) {
+    throw err;
   }
-  publish("note.deleted");
-  return new Response(null, { status: 204 });
 });

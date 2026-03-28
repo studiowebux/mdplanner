@@ -30,9 +30,13 @@ const listGoalsRoute = createRoute({
 });
 
 goalsRouter.openapi(listGoalsRoute, async (c) => {
-  const { status, type, project } = c.req.valid("query");
-  const goals = await getGoalService().list({ status, type, project });
-  return c.json(goals, 200);
+  try {
+    const { status, type, project } = c.req.valid("query");
+    const goals = await getGoalService().list({ status, type, project });
+    return c.json(goals, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // GET /{id}
@@ -56,15 +60,19 @@ const getGoalRoute = createRoute({
 });
 
 goalsRouter.openapi(getGoalRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const goal = await getGoalService().getById(id);
-  if (!goal) {
-    return c.json(
-      { error: "GOAL_NOT_FOUND", message: `Goal ${id} not found` },
-      404,
-    );
+  try {
+    const { id } = c.req.valid("param");
+    const goal = await getGoalService().getById(id);
+    if (!goal) {
+      return c.json(
+        { error: "GOAL_NOT_FOUND", message: `Goal ${id} not found` },
+        404,
+      );
+    }
+    return c.json(goal, 200);
+  } catch (err) {
+    throw err;
   }
-  return c.json(goal, 200);
 });
 
 // POST /
@@ -89,10 +97,14 @@ const createGoalRoute = createRoute({
 });
 
 goalsRouter.openapi(createGoalRoute, async (c) => {
-  const data = c.req.valid("json");
-  const goal = await getGoalService().create(data);
-  publish("goal.created");
-  return c.json(goal, 201);
+  try {
+    const data = c.req.valid("json");
+    const goal = await getGoalService().create(data);
+    publish("goal.created");
+    return c.json(goal, 201);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // PUT /{id}
@@ -122,17 +134,21 @@ const updateGoalRoute = createRoute({
 });
 
 goalsRouter.openapi(updateGoalRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const data = c.req.valid("json");
-  const goal = await getGoalService().update(id, data);
-  if (!goal) {
-    return c.json(
-      { error: "GOAL_NOT_FOUND", message: `Goal ${id} not found` },
-      404,
-    );
+  try {
+    const { id } = c.req.valid("param");
+    const data = c.req.valid("json");
+    const goal = await getGoalService().update(id, data);
+    if (!goal) {
+      return c.json(
+        { error: "GOAL_NOT_FOUND", message: `Goal ${id} not found` },
+        404,
+      );
+    }
+    publish("goal.updated");
+    return c.json(goal, 200);
+  } catch (err) {
+    throw err;
   }
-  publish("goal.updated");
-  return c.json(goal, 200);
 });
 
 // DELETE /{id}
@@ -153,14 +169,18 @@ const deleteGoalRoute = createRoute({
 });
 
 goalsRouter.openapi(deleteGoalRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const ok = await getGoalService().delete(id);
-  if (!ok) {
-    return c.json(
-      { error: "GOAL_NOT_FOUND", message: `Goal ${id} not found` },
-      404,
-    );
+  try {
+    const { id } = c.req.valid("param");
+    const ok = await getGoalService().delete(id);
+    if (!ok) {
+      return c.json(
+        { error: "GOAL_NOT_FOUND", message: `Goal ${id} not found` },
+        404,
+      );
+    }
+    publish("goal.deleted");
+    return new Response(null, { status: 204 });
+  } catch (err) {
+    throw err;
   }
-  publish("goal.deleted");
-  return new Response(null, { status: 204 });
 });

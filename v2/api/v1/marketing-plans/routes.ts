@@ -32,9 +32,13 @@ const listRoute = createRoute({
 });
 
 marketingPlansRouter.openapi(listRoute, async (c) => {
-  const { status, q } = c.req.valid("query");
-  const plans = await getMarketingPlanService().list({ status, q });
-  return c.json(plans, 200);
+  try {
+    const { status, q } = c.req.valid("query");
+    const plans = await getMarketingPlanService().list({ status, q });
+    return c.json(plans, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // GET /{id}
@@ -58,10 +62,14 @@ const getRoute = createRoute({
 });
 
 marketingPlansRouter.openapi(getRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const plan = await getMarketingPlanService().getById(id);
-  if (!plan) return c.json(notFound("MARKETING_PLAN", id), 404);
-  return c.json(plan, 200);
+  try {
+    const { id } = c.req.valid("param");
+    const plan = await getMarketingPlanService().getById(id);
+    if (!plan) return c.json(notFound("MARKETING_PLAN", id), 404);
+    return c.json(plan, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // POST /
@@ -86,10 +94,14 @@ const createMktPlanRoute = createRoute({
 });
 
 marketingPlansRouter.openapi(createMktPlanRoute, async (c) => {
-  const data = c.req.valid("json");
-  const plan = await getMarketingPlanService().create(data);
-  publish("marketing-plan.created");
-  return c.json(plan, 201);
+  try {
+    const data = c.req.valid("json");
+    const plan = await getMarketingPlanService().create(data);
+    publish("marketing-plan.created");
+    return c.json(plan, 201);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // PUT /{id}
@@ -119,12 +131,16 @@ const updateRoute = createRoute({
 });
 
 marketingPlansRouter.openapi(updateRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const data = c.req.valid("json");
-  const plan = await getMarketingPlanService().update(id, data);
-  if (!plan) return c.json(notFound("MARKETING_PLAN", id), 404);
-  publish("marketing-plan.updated");
-  return c.json(plan, 200);
+  try {
+    const { id } = c.req.valid("param");
+    const data = c.req.valid("json");
+    const plan = await getMarketingPlanService().update(id, data);
+    if (!plan) return c.json(notFound("MARKETING_PLAN", id), 404);
+    publish("marketing-plan.updated");
+    return c.json(plan, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // DELETE /{id}
@@ -145,9 +161,13 @@ const deleteRoute = createRoute({
 });
 
 marketingPlansRouter.openapi(deleteRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const ok = await getMarketingPlanService().delete(id);
-  if (!ok) return c.json(notFound("MARKETING_PLAN", id), 404);
-  publish("marketing-plan.deleted");
-  return new Response(null, { status: 204 });
+  try {
+    const { id } = c.req.valid("param");
+    const ok = await getMarketingPlanService().delete(id);
+    if (!ok) return c.json(notFound("MARKETING_PLAN", id), 404);
+    publish("marketing-plan.deleted");
+    return new Response(null, { status: 204 });
+  } catch (err) {
+    throw err;
+  }
 });

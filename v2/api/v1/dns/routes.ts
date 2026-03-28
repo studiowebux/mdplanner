@@ -35,8 +35,12 @@ const listDnsRoute = createRoute({
 });
 
 dnsRouter.openapi(listDnsRoute, async (c) => {
-  const domains = await getDnsService().list();
-  return c.json(domains, 200);
+  try {
+    const domains = await getDnsService().list();
+    return c.json(domains, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // GET /{id}
@@ -60,15 +64,22 @@ const getDnsRoute = createRoute({
 });
 
 dnsRouter.openapi(getDnsRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const domain = await getDnsService().getById(id);
-  if (!domain) {
-    return c.json(
-      { error: "DNS_DOMAIN_NOT_FOUND", message: `DNS domain ${id} not found` },
-      404,
-    );
+  try {
+    const { id } = c.req.valid("param");
+    const domain = await getDnsService().getById(id);
+    if (!domain) {
+      return c.json(
+        {
+          error: "DNS_DOMAIN_NOT_FOUND",
+          message: `DNS domain ${id} not found`,
+        },
+        404,
+      );
+    }
+    return c.json(domain, 200);
+  } catch (err) {
+    throw err;
   }
-  return c.json(domain, 200);
 });
 
 // POST /
@@ -93,10 +104,14 @@ const createDnsRoute = createRoute({
 });
 
 dnsRouter.openapi(createDnsRoute, async (c) => {
-  const data = c.req.valid("json");
-  const domain = await getDnsService().create(data);
-  publish("dns.created");
-  return c.json(domain, 201);
+  try {
+    const data = c.req.valid("json");
+    const domain = await getDnsService().create(data);
+    publish("dns.created");
+    return c.json(domain, 201);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // PUT /{id}
@@ -126,17 +141,24 @@ const updateDnsRoute = createRoute({
 });
 
 dnsRouter.openapi(updateDnsRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const data = c.req.valid("json");
-  const domain = await getDnsService().update(id, data);
-  if (!domain) {
-    return c.json(
-      { error: "DNS_DOMAIN_NOT_FOUND", message: `DNS domain ${id} not found` },
-      404,
-    );
+  try {
+    const { id } = c.req.valid("param");
+    const data = c.req.valid("json");
+    const domain = await getDnsService().update(id, data);
+    if (!domain) {
+      return c.json(
+        {
+          error: "DNS_DOMAIN_NOT_FOUND",
+          message: `DNS domain ${id} not found`,
+        },
+        404,
+      );
+    }
+    publish("dns.updated");
+    return c.json(domain, 200);
+  } catch (err) {
+    throw err;
   }
-  publish("dns.updated");
-  return c.json(domain, 200);
 });
 
 // DELETE /{id}
@@ -157,16 +179,23 @@ const deleteDnsRoute = createRoute({
 });
 
 dnsRouter.openapi(deleteDnsRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const ok = await getDnsService().delete(id);
-  if (!ok) {
-    return c.json(
-      { error: "DNS_DOMAIN_NOT_FOUND", message: `DNS domain ${id} not found` },
-      404,
-    );
+  try {
+    const { id } = c.req.valid("param");
+    const ok = await getDnsService().delete(id);
+    if (!ok) {
+      return c.json(
+        {
+          error: "DNS_DOMAIN_NOT_FOUND",
+          message: `DNS domain ${id} not found`,
+        },
+        404,
+      );
+    }
+    publish("dns.deleted");
+    return new Response(null, { status: 204 });
+  } catch (err) {
+    throw err;
   }
-  publish("dns.deleted");
-  return new Response(null, { status: 204 });
 });
 
 // ---------------------------------------------------------------------------
@@ -242,15 +271,22 @@ const listDnsRecordsRoute = createRoute({
 });
 
 dnsRouter.openapi(listDnsRecordsRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const domain = await getDnsService().getById(id);
-  if (!domain) {
-    return c.json(
-      { error: "DNS_DOMAIN_NOT_FOUND", message: `DNS domain ${id} not found` },
-      404,
-    );
+  try {
+    const { id } = c.req.valid("param");
+    const domain = await getDnsService().getById(id);
+    if (!domain) {
+      return c.json(
+        {
+          error: "DNS_DOMAIN_NOT_FOUND",
+          message: `DNS domain ${id} not found`,
+        },
+        404,
+      );
+    }
+    return c.json(domain.dnsRecords ?? [], 200);
+  } catch (err) {
+    throw err;
   }
-  return c.json(domain.dnsRecords ?? [], 200);
 });
 
 // POST /{id}/records
@@ -280,17 +316,24 @@ const addDnsRecordRoute = createRoute({
 });
 
 dnsRouter.openapi(addDnsRecordRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const record = c.req.valid("json");
-  const domain = await getDnsService().addRecord(id, record);
-  if (!domain) {
-    return c.json(
-      { error: "DNS_DOMAIN_NOT_FOUND", message: `DNS domain ${id} not found` },
-      404,
-    );
+  try {
+    const { id } = c.req.valid("param");
+    const record = c.req.valid("json");
+    const domain = await getDnsService().addRecord(id, record);
+    if (!domain) {
+      return c.json(
+        {
+          error: "DNS_DOMAIN_NOT_FOUND",
+          message: `DNS domain ${id} not found`,
+        },
+        404,
+      );
+    }
+    publish("dns.updated");
+    return c.json(domain, 200);
+  } catch (err) {
+    throw err;
   }
-  publish("dns.updated");
-  return c.json(domain, 200);
 });
 
 // PUT /{id}/records/{index}
@@ -320,17 +363,28 @@ const updateDnsRecordRoute = createRoute({
 });
 
 dnsRouter.openapi(updateDnsRecordRoute, async (c) => {
-  const { id, index } = c.req.valid("param");
-  const fields = c.req.valid("json");
-  const domain = await getDnsService().updateRecord(id, Number(index), fields);
-  if (!domain) {
-    return c.json(
-      { error: "DNS_DOMAIN_NOT_FOUND", message: `DNS domain ${id} not found` },
-      404,
+  try {
+    const { id, index } = c.req.valid("param");
+    const fields = c.req.valid("json");
+    const domain = await getDnsService().updateRecord(
+      id,
+      Number(index),
+      fields,
     );
+    if (!domain) {
+      return c.json(
+        {
+          error: "DNS_DOMAIN_NOT_FOUND",
+          message: `DNS domain ${id} not found`,
+        },
+        404,
+      );
+    }
+    publish("dns.updated");
+    return c.json(domain, 200);
+  } catch (err) {
+    throw err;
   }
-  publish("dns.updated");
-  return c.json(domain, 200);
 });
 
 // DELETE /{id}/records/{index}
@@ -354,14 +408,21 @@ const deleteDnsRecordRoute = createRoute({
 });
 
 dnsRouter.openapi(deleteDnsRecordRoute, async (c) => {
-  const { id, index } = c.req.valid("param");
-  const domain = await getDnsService().deleteRecord(id, Number(index));
-  if (!domain) {
-    return c.json(
-      { error: "DNS_DOMAIN_NOT_FOUND", message: `DNS domain ${id} not found` },
-      404,
-    );
+  try {
+    const { id, index } = c.req.valid("param");
+    const domain = await getDnsService().deleteRecord(id, Number(index));
+    if (!domain) {
+      return c.json(
+        {
+          error: "DNS_DOMAIN_NOT_FOUND",
+          message: `DNS domain ${id} not found`,
+        },
+        404,
+      );
+    }
+    publish("dns.updated");
+    return c.json(domain, 200);
+  } catch (err) {
+    throw err;
   }
-  publish("dns.updated");
-  return c.json(domain, 200);
 });

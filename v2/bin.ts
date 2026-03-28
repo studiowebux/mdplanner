@@ -49,6 +49,14 @@ app.use("*", logger((msg: string) => log.info(msg)));
 
 app.use("*", contextMiddleware);
 
+app.onError((err, c) => {
+  log.error(err.message, err);
+  return c.json(
+    { error: "INTERNAL_ERROR", message: "An unexpected error occurred" },
+    500,
+  );
+});
+
 // SSE — domain-agnostic broadcast stream. Named events only, no payload.
 app.get("/sse", () => {
   const stream = subscribe().pipeThrough(new TextEncoderStream());

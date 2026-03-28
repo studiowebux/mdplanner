@@ -32,9 +32,13 @@ const listMilestonesRoute = createRoute({
 });
 
 milestonesRouter.openapi(listMilestonesRoute, async (c) => {
-  const { status, project } = c.req.valid("query");
-  const milestones = await getMilestoneService().list({ status, project });
-  return c.json(milestones, 200);
+  try {
+    const { status, project } = c.req.valid("query");
+    const milestones = await getMilestoneService().list({ status, project });
+    return c.json(milestones, 200);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // GET /:id
@@ -60,15 +64,19 @@ const getMilestoneRoute = createRoute({
 });
 
 milestonesRouter.openapi(getMilestoneRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const m = await getMilestoneService().getById(id);
-  if (!m) {
-    return c.json(
-      { error: "MILESTONE_NOT_FOUND", message: `Milestone ${id} not found` },
-      404,
-    );
+  try {
+    const { id } = c.req.valid("param");
+    const m = await getMilestoneService().getById(id);
+    if (!m) {
+      return c.json(
+        { error: "MILESTONE_NOT_FOUND", message: `Milestone ${id} not found` },
+        404,
+      );
+    }
+    return c.json(m, 200);
+  } catch (err) {
+    throw err;
   }
-  return c.json(m, 200);
 });
 
 // POST /
@@ -93,10 +101,14 @@ const createMilestoneRoute = createRoute({
 });
 
 milestonesRouter.openapi(createMilestoneRoute, async (c) => {
-  const data = c.req.valid("json");
-  const m = await getMilestoneService().create(data);
-  publish("milestone.created");
-  return c.json(m, 201);
+  try {
+    const data = c.req.valid("json");
+    const m = await getMilestoneService().create(data);
+    publish("milestone.created");
+    return c.json(m, 201);
+  } catch (err) {
+    throw err;
+  }
 });
 
 // PUT /:id
@@ -126,17 +138,21 @@ const updateMilestoneRoute = createRoute({
 });
 
 milestonesRouter.openapi(updateMilestoneRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const data = c.req.valid("json");
-  const m = await getMilestoneService().update(id, data);
-  if (!m) {
-    return c.json(
-      { error: "MILESTONE_NOT_FOUND", message: `Milestone ${id} not found` },
-      404,
-    );
+  try {
+    const { id } = c.req.valid("param");
+    const data = c.req.valid("json");
+    const m = await getMilestoneService().update(id, data);
+    if (!m) {
+      return c.json(
+        { error: "MILESTONE_NOT_FOUND", message: `Milestone ${id} not found` },
+        404,
+      );
+    }
+    publish("milestone.updated");
+    return c.json(m, 200);
+  } catch (err) {
+    throw err;
   }
-  publish("milestone.updated");
-  return c.json(m, 200);
 });
 
 // DELETE /:id
@@ -159,14 +175,18 @@ const deleteMilestoneRoute = createRoute({
 });
 
 milestonesRouter.openapi(deleteMilestoneRoute, async (c) => {
-  const { id } = c.req.valid("param");
-  const ok = await getMilestoneService().delete(id);
-  if (!ok) {
-    return c.json(
-      { error: "MILESTONE_NOT_FOUND", message: `Milestone ${id} not found` },
-      404,
-    );
+  try {
+    const { id } = c.req.valid("param");
+    const ok = await getMilestoneService().delete(id);
+    if (!ok) {
+      return c.json(
+        { error: "MILESTONE_NOT_FOUND", message: `Milestone ${id} not found` },
+        404,
+      );
+    }
+    publish("milestone.deleted");
+    return new Response(null, { status: 204 });
+  } catch (err) {
+    throw err;
   }
-  publish("milestone.deleted");
-  return new Response(null, { status: 204 });
 });
