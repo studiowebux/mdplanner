@@ -24,10 +24,10 @@ export const settingsViewRouter = new Hono<{ Variables: AppVariables }>();
 settingsViewRouter.get("/", async (c) => {
   const config = await getProjectService().getConfig();
   return c.html(
-    SettingsView({
+    (SettingsView({
       ...viewProps(c, "/settings"),
       config,
-    }) as unknown as string,
+    }))!,
   );
 });
 
@@ -42,12 +42,12 @@ settingsViewRouter.post("/features", async (c) => {
     : [];
   await getProjectService().setFeatures(features);
   // Return updated sidebar via OOB swap so nav reflects the change without full reload.
-  const sidebarHtml = SidebarContent({
+  const sidebarHtml = (SidebarContent({
     activePath: "/settings",
     enabledFeatures: features,
     pinnedKeys: c.get("pinnedKeys"),
     navCategories: c.get("navCategories"),
-  }) as unknown as string;
+  }))!;
   const oob =
     `<div id="sidebar-content" hx-swap-oob="innerHTML">${sidebarHtml}</div>`;
   return new Response(oob, {

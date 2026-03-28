@@ -51,7 +51,7 @@ goalsRouter.get("/:id", async (c) => {
   }
 
   return c.html(
-    GoalDetailView({
+    (GoalDetailView({
       ...viewProps(c, "/goals"),
       item: goal,
       portfolioItems,
@@ -59,6 +59,6 @@ goalsRouter.get("/:id", async (c) => {
       linkedMilestones,
       childGoals,
       personByName,
-    }) as unknown as string,
+    }))!,
   );
 });

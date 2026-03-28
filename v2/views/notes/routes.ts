@@ -18,10 +18,10 @@ notesRouter.get("/:id", async (c) => {
   const note = await getNoteService().getById(id);
   if (!note) return c.notFound();
   return c.html(
-    NoteDetailView({
+    (NoteDetailView({
       ...viewProps(c, "/notes"),
       note,
-    }) as unknown as string,
+    }))!,
   );
 });
 
@@ -35,10 +35,10 @@ notesRouter.post("/:id/title", async (c) => {
   if (!note) return c.notFound();
   c.header("HX-Trigger", hxTrigger("success", "Title updated"));
   return c.html(
-    NoteDetailView({
+    (NoteDetailView({
       ...viewProps(c, "/notes"),
       note,
-    }) as unknown as string,
+    }))!,
   );
 });
 
@@ -51,10 +51,10 @@ notesRouter.post("/:id/project", async (c) => {
   if (!note) return c.notFound();
   c.header("HX-Trigger", hxTrigger("success", "Project updated"));
   return c.html(
-    NoteDetailView({
+    (NoteDetailView({
       ...viewProps(c, "/notes"),
       note,
-    }) as unknown as string,
+    }))!,
   );
 });
 
@@ -72,11 +72,11 @@ notesRouter.get("/:id/preview", async (c) => {
   const note = await getNoteService().getById(id);
   if (!note) return c.notFound();
   return c.html(
-    Sidenav({
+    (Sidenav({
       id: "notes-preview-sidenav",
       title: note.title,
       open: true,
       children: NotePreview({ note }),
-    }) as unknown as string,
+    }))!,
   );
 });

@@ -14,11 +14,11 @@ searchRouter.get("/", (c) => {
   const engine = getSearchEngine();
   const results = engine ? engine.search(query) : [];
   return c.html(
-    SearchView({
+    (SearchView({
       ...viewProps(c),
       query,
       results,
-    }) as unknown as string,
+    }))!,
   );
 });
 

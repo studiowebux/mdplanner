@@ -50,7 +50,7 @@ dnsRouter.post("/sync", async (c) => {
 // GET /:id/records/new — render blank record form in sidenav
 dnsRouter.get("/:id/records/new", (c) => {
   const id = c.req.param("id");
-  return c.html(DnsRecordForm({ domainId: id }) as unknown as string);
+  return c.html((DnsRecordForm({ domainId: id }))!);
 });
 
 // GET /:id/records/:index/edit — render populated record form in sidenav
@@ -68,7 +68,7 @@ dnsRouter.get("/:id/records/:index/edit", async (c) => {
     proxied: record.proxied ? "true" : "",
   };
   return c.html(
-    DnsRecordForm({ domainId: id, index, values }) as unknown as string,
+    (DnsRecordForm({ domainId: id, index, values }))!,
   );
 });
 
@@ -85,7 +85,7 @@ dnsRouter.post("/:id/records", async (c) => {
   });
   if (!domain) return c.notFound();
   publish("dns.updated");
-  return c.html(DnsRecordsTable({ domain }) as unknown as string, 200, {
+  return c.html((DnsRecordsTable({ domain }))!, 200, {
     "HX-Trigger": hxTrigger("success", "Record added"),
   });
 });
@@ -104,7 +104,7 @@ dnsRouter.post("/:id/records/:index", async (c) => {
   const domain = await getDnsService().updateRecord(id, index, fields);
   if (!domain) return c.notFound();
   publish("dns.updated");
-  return c.html(DnsRecordsTable({ domain }) as unknown as string, 200, {
+  return c.html((DnsRecordsTable({ domain }))!, 200, {
     "HX-Trigger": hxTrigger("success", "Record updated"),
   });
 });
@@ -116,7 +116,7 @@ dnsRouter.delete("/:id/records/:index", async (c) => {
   const domain = await getDnsService().deleteRecord(id, index);
   if (!domain) return c.notFound();
   publish("dns.updated");
-  return c.html(DnsRecordsTable({ domain }) as unknown as string, 200, {
+  return c.html((DnsRecordsTable({ domain }))!, 200, {
     "HX-Trigger": hxTrigger("success", "Record deleted"),
   });
 });

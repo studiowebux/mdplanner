@@ -9,6 +9,6 @@ export const homeViewRouter = new Hono<{ Variables: AppVariables }>();
 homeViewRouter.get("/", async (c) => {
   const config = await getProjectService().getConfig();
   return c.html(
-    HomeView({ ...viewProps(c), config }) as unknown as string,
+    HomeView({ ...viewProps(c), config })!,
   );
 });

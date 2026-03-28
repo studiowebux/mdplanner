@@ -22,11 +22,11 @@ async function renderDetail(c: AppContext, id: string) {
   if (!swot) return c.notFound();
   const editing = c.req.query("editing") === "true";
   return c.html(
-    SwotDetailView({
+    (SwotDetailView({
       ...viewProps(c, "/swot"),
       item: swot,
       editing,
-    }) as unknown as string,
+    }))!,
   );
 }
 

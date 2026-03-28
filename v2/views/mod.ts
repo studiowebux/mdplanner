@@ -283,6 +283,6 @@ views.get("/forms/array-row/:section", (c) => {
   if (!itemFields) return c.notFound();
   const idx = Date.now();
   return c.html(
-    ArrayTableRow({ section, idx, itemFields }) as unknown as string,
+    (ArrayTableRow({ section, idx, itemFields }))!,
   );
 });
