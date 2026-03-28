@@ -1570,12 +1570,18 @@ a.badge:hover {
 
 .quadrant-card__input {
   width: 100%;
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
   padding: var(--space-xs) var(--space-sm);
   font-size: var(--font-size-sm);
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.quadrant-card__input:focus {
+  border-color: var(--color-border-focus);
 }
 
 .quadrant-card__input::placeholder {

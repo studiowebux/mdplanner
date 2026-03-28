@@ -294,9 +294,15 @@
   padding: var(--space-xs) var(--space-sm);
   font-size: var(--font-size-sm);
   border: var(--card-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   background: var(--card-bg);
   color: var(--color-text-primary);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.github-pipeline__select:focus {
+  border-color: var(--color-border-focus);
 }
 
 .github-pipeline__count {
@@ -415,9 +421,15 @@
   padding: var(--space-xs) var(--space-sm);
   font-size: var(--font-size-sm);
   border: var(--card-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   background: var(--card-bg);
   color: var(--color-text-primary);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.task-github__input:focus {
+  border-color: var(--color-border-focus);
 }
 
 .task-github__labels {
