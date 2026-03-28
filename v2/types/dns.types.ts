@@ -161,3 +161,31 @@ export const DnsSyncResponseSchema = z.object({
 export type IDnsProvider = {
   fetchDomains(): Promise<DnsSyncResult[]>;
 };
+
+/** Loose type for raw Cloudflare API JSON responses. */
+export type CfJson = Record<string, unknown>;
+
+/** Cloudflare API response types — raw shapes from the REST API. */
+
+export type CfAccount = { id: string; name: string };
+
+export type CfZone = {
+  id: string;
+  name: string;
+  status: string;
+  name_servers: string[];
+};
+
+export type CfDnsRecord = {
+  type: string;
+  name: string;
+  content: string;
+  ttl: number;
+  proxied?: boolean;
+};
+
+export type CfRegistrarDomain = {
+  name: string;
+  expires_at?: string;
+  auto_renew?: boolean;
+};

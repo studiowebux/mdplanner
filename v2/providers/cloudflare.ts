@@ -16,33 +16,17 @@
  */
 
 import type {
+  CfAccount,
+  CfDnsRecord,
+  CfJson,
+  CfRegistrarDomain,
+  CfZone,
   DnsRecord,
   DnsSyncResult,
   IDnsProvider,
 } from "../types/dns.types.ts";
 
 const CF_API = "https://api.cloudflare.com/client/v4";
-
-type CfZone = {
-  id: string;
-  name: string;
-  status: string;
-  name_servers: string[];
-};
-
-type CfDnsRecord = {
-  type: string;
-  name: string;
-  content: string;
-  ttl: number;
-  proxied?: boolean;
-};
-
-type CfRegistrarDomain = {
-  name: string;
-  expires_at?: string;
-  auto_renew?: boolean;
-};
 
 export class CloudflareDnsProvider implements IDnsProvider {
   private token: string;
@@ -65,9 +49,9 @@ export class CloudflareDnsProvider implements IDnsProvider {
 
   private async resolveAccountId(): Promise<string> {
     if (this.accountId) return this.accountId;
-    // deno-lint-ignore no-explicit-any
-    const data = await this.cfGet("/accounts") as any;
-    const accounts: { id: string; name: string }[] = data?.result ?? [];
+    const data = await this.cfGet("/accounts") as CfJson;
+    const raw = data?.result;
+    const accounts: CfAccount[] = Array.isArray(raw) ? raw : [];
     if (accounts.length === 0) {
       throw new Error(
         "CLOUDFLARE_NO_ACCOUNTS: no accounts found for this token",
@@ -84,16 +68,21 @@ export class CloudflareDnsProvider implements IDnsProvider {
     const zones: CfZone[] = [];
 
     do {
-      // deno-lint-ignore no-explicit-any
       const data = await this.cfGet(
         `/zones?page=${page}&per_page=${perPage}`,
-      ) as any;
-      const results: CfZone[] = data?.result ?? [];
+      ) as CfJson;
+      const rawZones = data?.result;
+      const results: CfZone[] = Array.isArray(rawZones) ? rawZones : [];
       zones.push(...results);
 
       const info = data?.result_info;
-      if (info?.total_count && info?.per_page) {
-        totalPages = Math.ceil(info.total_count / info.per_page);
+      if (
+        info && typeof info === "object" && "total_count" in info &&
+        "per_page" in info
+      ) {
+        const tc = Number(info.total_count);
+        const pp = Number(info.per_page);
+        if (tc > 0 && pp > 0) totalPages = Math.ceil(tc / pp);
       }
       page++;
     } while (page <= totalPages);
@@ -103,11 +92,11 @@ export class CloudflareDnsProvider implements IDnsProvider {
 
   private async fetchDnsRecords(zoneId: string): Promise<DnsRecord[]> {
     try {
-      // deno-lint-ignore no-explicit-any
       const data = await this.cfGet(
         `/zones/${zoneId}/dns_records?per_page=100`,
-      ) as any;
-      const raw: CfDnsRecord[] = data?.result ?? [];
+      ) as CfJson;
+      const rawRecords = data?.result;
+      const raw: CfDnsRecord[] = Array.isArray(rawRecords) ? rawRecords : [];
       return raw.map((r) => ({
         type: r.type,
         name: r.name,
@@ -125,11 +114,13 @@ export class CloudflareDnsProvider implements IDnsProvider {
     domainName: string,
   ): Promise<CfRegistrarDomain | null> {
     try {
-      // deno-lint-ignore no-explicit-any
       const data = await this.cfGet(
         `/accounts/${accountId}/registrar/domains/${domainName}`,
-      ) as any;
-      return (data?.result ?? null) as CfRegistrarDomain | null;
+      ) as CfJson;
+      const result = data?.result;
+      return result && typeof result === "object" && "name" in result
+        ? result as CfRegistrarDomain
+        : null;
     } catch {
       return null;
     }

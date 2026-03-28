@@ -11,6 +11,7 @@
  */
 
 import type {
+  GhJson,
   GitHubCreatedIssue,
   GitHubIssue,
   GitHubIssueState,
@@ -113,9 +114,8 @@ export class GitHubProvider implements IGitProvider {
   // ---------------------------------------------------------------------------
 
   async getAuthenticatedUser(): Promise<GitHubUser> {
-    // deno-lint-ignore no-explicit-any
-    const data = await this.ghGet("/user") as any;
-    return { login: data.login };
+    const data = await this.ghGet("/user") as GhJson;
+    return { login: String(data.login ?? "") };
   }
 
   // ---------------------------------------------------------------------------
@@ -123,43 +123,41 @@ export class GitHubProvider implements IGitProvider {
   // ---------------------------------------------------------------------------
 
   async getRepo(owner: string, repo: string): Promise<GitHubRepo> {
-    // deno-lint-ignore no-explicit-any
     const [data, prs] = await Promise.all([
-      this.ghGet(`/repos/${owner}/${repo}`) as Promise<any>,
+      this.ghGet(`/repos/${owner}/${repo}`) as Promise<GhJson>,
       this.ghGet(
         `/repos/${owner}/${repo}/pulls?state=open&per_page=100`,
-      ) as Promise<any[]>,
+      ) as Promise<GhJson[]>,
     ]);
 
+    const license = data.license as GhJson | null;
     return {
       owner,
       repo,
-      stars: data.stargazers_count ?? 0,
-      openIssues: data.open_issues_count ?? 0,
+      stars: Number(data.stargazers_count ?? 0),
+      openIssues: Number(data.open_issues_count ?? 0),
       openPRs: Array.isArray(prs) ? prs.length : 0,
-      lastCommitAt: data.pushed_at ?? null,
-      license: data.license?.spdx_id ?? null,
-      htmlUrl: data.html_url,
+      lastCommitAt: data.pushed_at ? String(data.pushed_at) : null,
+      license: license ? String(license.spdx_id ?? "") || null : null,
+      htmlUrl: String(data.html_url ?? ""),
     };
   }
 
   async listRepos(query?: string): Promise<GitHubRepoSummary[]> {
-    // deno-lint-ignore no-explicit-any
     const data = await this.ghGet(
       "/user/repos?per_page=100&sort=pushed&affiliation=owner,collaborator",
-    ) as any[];
+    ) as GhJson[];
 
-    const repos: { full_name: string; description: string | null }[] = data ??
-      [];
+    const repos = Array.isArray(data) ? data : [];
 
     const q = query?.toLowerCase().trim();
     const filtered = q
-      ? repos.filter((r) => r.full_name.toLowerCase().includes(q))
+      ? repos.filter((r) => String(r.full_name ?? "").toLowerCase().includes(q))
       : repos;
 
     return filtered.map((r) => ({
-      fullName: r.full_name,
-      description: r.description ?? "",
+      fullName: String(r.full_name ?? ""),
+      description: r.description ? String(r.description) : "",
     }));
   }
 
@@ -172,10 +170,9 @@ export class GitHubProvider implements IGitProvider {
     repo: string,
     number: number,
   ): Promise<GitHubIssue> {
-    // deno-lint-ignore no-explicit-any
     const data = await this.ghGet(
       `/repos/${owner}/${repo}/issues/${number}`,
-    ) as any;
+    ) as GhJson;
     return mapIssue(data);
   }
 
@@ -185,12 +182,14 @@ export class GitHubProvider implements IGitProvider {
     title: string,
     body: string,
   ): Promise<GitHubCreatedIssue> {
-    // deno-lint-ignore no-explicit-any
     const data = await this.ghPost(`/repos/${owner}/${repo}/issues`, {
       title,
       body,
-    }) as any;
-    return { number: data.number, htmlUrl: data.html_url };
+    }) as GhJson;
+    return {
+      number: Number(data.number),
+      htmlUrl: String(data.html_url ?? ""),
+    };
   }
 
   async setIssueState(
@@ -199,11 +198,10 @@ export class GitHubProvider implements IGitProvider {
     number: number,
     state: GitHubIssueState,
   ): Promise<GitHubIssue> {
-    // deno-lint-ignore no-explicit-any
     const data = await this.ghPatch(
       `/repos/${owner}/${repo}/issues/${number}`,
       { state },
-    ) as any;
+    ) as GhJson;
     return mapIssue(data);
   }
 
@@ -216,8 +214,7 @@ export class GitHubProvider implements IGitProvider {
     let path =
       `/repos/${owner}/${repo}/issues?state=${state}&per_page=100&sort=created&direction=desc`;
     if (assignee) path += `&assignee=${encodeURIComponent(assignee)}`;
-    // deno-lint-ignore no-explicit-any
-    const data = await this.ghGet(path) as any[];
+    const data = await this.ghGet(path) as GhJson[];
     // GitHub issues endpoint includes PRs — filter them out
     return (data ?? [])
       .filter((d) => !d.pull_request)
@@ -229,10 +226,9 @@ export class GitHubProvider implements IGitProvider {
   // ---------------------------------------------------------------------------
 
   async getPR(owner: string, repo: string, number: number): Promise<GitHubPR> {
-    // deno-lint-ignore no-explicit-any
     const data = await this.ghGet(
       `/repos/${owner}/${repo}/pulls/${number}`,
-    ) as any;
+    ) as GhJson;
     return mapPR(data);
   }
 
@@ -241,10 +237,9 @@ export class GitHubProvider implements IGitProvider {
     repo: string,
     state: GitHubPRState = "open",
   ): Promise<GitHubPR[]> {
-    // deno-lint-ignore no-explicit-any
     const data = await this.ghGet(
       `/repos/${owner}/${repo}/pulls?state=${state}&per_page=100&sort=created&direction=desc`,
-    ) as any[];
+    ) as GhJson[];
     return (data ?? []).map(mapPR);
   }
 
@@ -254,15 +249,14 @@ export class GitHubProvider implements IGitProvider {
     number: number,
     mergeMethod: GitHubMergeMethod = "squash",
   ): Promise<GitHubMergeResult> {
-    // deno-lint-ignore no-explicit-any
     const data = await this.ghPut(
       `/repos/${owner}/${repo}/pulls/${number}/merge`,
       { merge_method: mergeMethod },
-    ) as any;
+    ) as GhJson;
     return {
-      sha: data.sha ?? "",
+      sha: String(data.sha ?? ""),
       merged: data.merged === true,
-      message: data.message ?? "",
+      message: String(data.message ?? ""),
     };
   }
 
@@ -274,16 +268,16 @@ export class GitHubProvider implements IGitProvider {
     owner: string,
     repo: string,
   ): Promise<GitHubMilestone[]> {
-    // deno-lint-ignore no-explicit-any
     const data = await this.ghGet(
       `/repos/${owner}/${repo}/milestones?state=open&per_page=50`,
-    ) as any[];
-    return (data ?? []).map((m) => ({
-      number: m.number,
-      title: m.title,
-      openIssues: m.open_issues,
-      closedIssues: m.closed_issues,
-      htmlUrl: m.html_url,
+    ) as GhJson[];
+    const milestones = Array.isArray(data) ? data : [];
+    return milestones.map((m) => ({
+      number: Number(m.number),
+      title: String(m.title ?? ""),
+      openIssues: Number(m.open_issues ?? 0),
+      closedIssues: Number(m.closed_issues ?? 0),
+      htmlUrl: String(m.html_url ?? ""),
     }));
   }
 
@@ -296,15 +290,14 @@ export class GitHubProvider implements IGitProvider {
     repo: string,
   ): Promise<GitHubRelease | null> {
     try {
-      // deno-lint-ignore no-explicit-any
       const data = await this.ghGet(
         `/repos/${owner}/${repo}/releases/latest`,
-      ) as any;
+      ) as GhJson;
       return {
-        tagName: data.tag_name,
-        name: data.name ?? null,
-        publishedAt: data.published_at ?? null,
-        htmlUrl: data.html_url,
+        tagName: String(data.tag_name ?? ""),
+        name: data.name ? String(data.name) : null,
+        publishedAt: data.published_at ? String(data.published_at) : null,
+        htmlUrl: String(data.html_url ?? ""),
       };
     } catch {
       // 404 means no releases exist
@@ -320,18 +313,17 @@ export class GitHubProvider implements IGitProvider {
     owner: string,
     repo: string,
   ): Promise<GitHubWorkflow[]> {
-    // deno-lint-ignore no-explicit-any
     const data = await this.ghGet(
       `/repos/${owner}/${repo}/actions/workflows?per_page=100`,
-    ) as any;
-    // deno-lint-ignore no-explicit-any
-    const workflows: any[] = data?.workflows ?? [];
-    return workflows.map((w) => ({
-      id: w.id,
-      name: w.name,
-      path: w.path,
-      state: w.state,
-      htmlUrl: w.html_url,
+    ) as GhJson;
+    const raw = data?.workflows;
+    const workflows: GhJson[] = Array.isArray(raw) ? raw : [];
+    return workflows.map((w): GitHubWorkflow => ({
+      id: Number(w.id),
+      name: String(w.name ?? ""),
+      path: String(w.path ?? ""),
+      state: String(w.state ?? "") as GitHubWorkflow["state"],
+      htmlUrl: String(w.html_url ?? ""),
     }));
   }
 
@@ -356,15 +348,14 @@ export class GitHubProvider implements IGitProvider {
     if (options.status) params.set("status", options.status);
     if (options.branch) params.set("branch", options.branch);
     if (options.event) params.set("event", options.event);
-    // deno-lint-ignore no-explicit-any
     const data = await this.ghGet(
       `/repos/${owner}/${repo}/actions/runs?${params}`,
-    ) as any;
-    // deno-lint-ignore no-explicit-any
-    const runs: any[] = data?.workflow_runs ?? [];
+    ) as GhJson;
+    const rawRuns = data?.workflow_runs;
+    const runs: GhJson[] = Array.isArray(rawRuns) ? rawRuns : [];
     return {
       runs: runs.map(mapWorkflowRun),
-      totalCount: data?.total_count ?? 0,
+      totalCount: Number(data?.total_count ?? 0),
     };
   }
 
@@ -416,49 +407,52 @@ export class GitHubProvider implements IGitProvider {
 // Mappers — keep field mapping in one place
 // ---------------------------------------------------------------------------
 
-// deno-lint-ignore no-explicit-any
-function mapIssue(d: any): GitHubIssue {
+function mapIssue(d: GhJson): GitHubIssue {
+  const assignee = d.assignee as GhJson | null;
   return {
-    number: d.number,
-    title: d.title,
+    number: Number(d.number),
+    title: String(d.title ?? ""),
     state: d.state === "closed" ? "closed" : "open",
     labels: Array.isArray(d.labels)
-      ? d.labels.map((l: { name?: string }) =>
-        typeof l === "string" ? l : l.name ?? ""
+      ? (d.labels as GhJson[]).map((l) =>
+        typeof l === "string" ? l : String((l as GhJson).name ?? "")
       )
       : [],
-    assignee: d.assignee?.login ?? null,
-    createdAt: d.created_at,
-    htmlUrl: d.html_url,
+    assignee: assignee ? String(assignee.login ?? "") : null,
+    createdAt: String(d.created_at ?? ""),
+    htmlUrl: String(d.html_url ?? ""),
   };
 }
 
-// deno-lint-ignore no-explicit-any
-function mapPR(d: any): GitHubPR {
+function mapPR(d: GhJson): GitHubPR {
+  const assignee = d.assignee as GhJson | null;
+  const head = d.head as GhJson | null;
   return {
-    number: d.number,
-    title: d.title,
+    number: Number(d.number),
+    title: String(d.title ?? ""),
     state: d.state === "closed" ? "closed" : "open",
     merged: d.merged === true || d.merged_at !== null,
-    assignee: d.assignee?.login ?? null,
-    headBranch: d.head?.ref ?? "",
-    createdAt: d.created_at,
+    assignee: assignee ? String(assignee.login ?? "") : null,
+    headBranch: head ? String(head.ref ?? "") : "",
+    createdAt: String(d.created_at ?? ""),
     reviewDecision: null,
-    htmlUrl: d.html_url,
+    htmlUrl: String(d.html_url ?? ""),
   };
 }
 
-// deno-lint-ignore no-explicit-any
-function mapWorkflowRun(r: any): GitHubWorkflowRun {
+function mapWorkflowRun(r: GhJson): GitHubWorkflowRun {
   return {
-    id: r.id,
-    name: r.name,
-    status: r.status,
-    conclusion: r.conclusion ?? null,
-    headBranch: r.head_branch,
-    event: r.event,
-    createdAt: r.created_at,
-    updatedAt: r.updated_at,
-    htmlUrl: r.html_url,
+    id: Number(r.id),
+    name: String(r.name ?? ""),
+    status: String(r.status ?? "") as GitHubWorkflowRun["status"],
+    conclusion:
+      (r.conclusion ? String(r.conclusion) : null) as GitHubWorkflowRun[
+        "conclusion"
+      ],
+    headBranch: String(r.head_branch ?? ""),
+    event: String(r.event ?? ""),
+    createdAt: String(r.created_at ?? ""),
+    updatedAt: String(r.updated_at ?? ""),
+    htmlUrl: String(r.html_url ?? ""),
   };
 }

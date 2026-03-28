@@ -416,3 +416,6 @@ export const UnlinkGitHubInputSchema = z.object({
     description: "Unlink the GitHub PR (default: true)",
   }),
 }).openapi("UnlinkGitHubInput");
+
+/** Loose type for raw GitHub API JSON responses. */
+export type GhJson = Record<string, unknown>;
