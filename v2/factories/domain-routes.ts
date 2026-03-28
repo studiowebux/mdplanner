@@ -30,6 +30,28 @@ export function createDomainRoutes<T extends Entity, C, U>(
   // Helpers
   // ---------------------------------------------------------------------------
 
+  function buildCanonicalUrl(state: DomainFilterState): string {
+    const params = new URLSearchParams();
+    for (const key of cfg.stateKeys) {
+      if (key === "view") {
+        if (state.view && state.view !== (cfg.defaultView || "grid")) {
+          params.set("view", state.view);
+        }
+      } else if (key === "hideCompleted") {
+        if (state.hideCompleted) params.set("hideCompleted", "true");
+      } else if (key === "order") {
+        if (state.order && state.order !== "asc") {
+          params.set("order", state.order);
+        }
+      } else {
+        const val = state[key];
+        if (val !== undefined && val !== "") params.set(key, String(val));
+      }
+    }
+    const qs = params.toString();
+    return `${cfg.path}${qs ? `?${qs}` : ""}`;
+  }
+
   function buildState(merged: Record<string, string>): DomainFilterState {
     const state: DomainFilterState = {
       view: (merged.view || cfg.defaultView || "grid") as ViewMode,
@@ -184,6 +206,8 @@ export function createDomainRoutes<T extends Entity, C, U>(
         fragment: true,
         customContent,
       }) as unknown as string,
+      200,
+      { "HX-Replace-Url": buildCanonicalUrl(state) },
     );
   });
 
