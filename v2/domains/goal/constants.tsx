@@ -119,7 +119,13 @@ export const GOAL_PRIORITY_OPTIONS = PRIORITY_OPTIONS;
 const GOAL_PRIORITY_LABELS = PRIORITY_LABELS;
 
 export const GOAL_FORM_FIELDS: FieldDef[] = [
-  { type: "text", name: "title", label: "Title", required: true },
+  {
+    type: "text",
+    name: "title",
+    label: "Title",
+    required: true,
+    maxLength: 200,
+  },
   {
     type: "select",
     name: "type",

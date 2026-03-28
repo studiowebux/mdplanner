@@ -11,7 +11,13 @@ import { NoteCard } from "../../views/components/note-card.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 
 const FORM_FIELDS: FieldDef[] = [
-  { type: "text", name: "title", label: "Title", required: true },
+  {
+    type: "text",
+    name: "title",
+    label: "Title",
+    required: true,
+    maxLength: 200,
+  },
   {
     type: "autocomplete",
     name: "project",

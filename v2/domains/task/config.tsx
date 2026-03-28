@@ -30,7 +30,13 @@ export let taskPersonById: Record<string, string> = {};
 export let taskMilestoneByName: Record<string, string> = {};
 
 const FORM_FIELDS: FieldDef[] = [
-  { type: "text", name: "title", label: "Title", required: true },
+  {
+    type: "text",
+    name: "title",
+    label: "Title",
+    required: true,
+    maxLength: 200,
+  },
   {
     type: "select",
     name: "section",

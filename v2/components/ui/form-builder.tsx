@@ -25,6 +25,7 @@ export type FieldDef =
     label: string;
     required?: boolean;
     placeholder?: string;
+    maxLength?: number;
   }
   | {
     type: "number";
@@ -48,6 +49,7 @@ export type FieldDef =
     label: string;
     rows?: number;
     required?: boolean;
+    maxLength?: number;
   }
   | {
     type: "autocomplete";
@@ -220,6 +222,7 @@ const Field: FC<
           class="form__input"
           required={def.required}
           placeholder={def.placeholder}
+          maxlength={def.maxLength}
           value={value ?? ""}
           autocomplete="do-not-autofill"
         />
@@ -268,6 +271,7 @@ const Field: FC<
           class="form__textarea"
           rows={def.rows ?? 4}
           required={def.required}
+          maxlength={def.maxLength}
         >
           {value ?? ""}
         </textarea>

@@ -105,7 +105,7 @@ export const MKTPLAN_TABLE_COLUMNS: ColumnDef[] = [
 // ---------------------------------------------------------------------------
 
 export const MKTPLAN_FORM_FIELDS: FieldDef[] = [
-  { type: "text", name: "name", label: "Name", required: true },
+  { type: "text", name: "name", label: "Name", required: true, maxLength: 200 },
   {
     type: "select",
     name: "status",

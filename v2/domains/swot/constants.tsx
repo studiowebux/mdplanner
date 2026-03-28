@@ -112,7 +112,13 @@ export const SWOT_TABLE_COLUMNS: ColumnDef[] = [
 // ---------------------------------------------------------------------------
 
 export const SWOT_FORM_FIELDS: FieldDef[] = [
-  { type: "text", name: "title", label: "Title", required: true },
+  {
+    type: "text",
+    name: "title",
+    label: "Title",
+    required: true,
+    maxLength: 200,
+  },
   { type: "date", name: "date", label: "Date" },
   {
     type: "autocomplete",

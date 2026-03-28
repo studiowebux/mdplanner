@@ -15,7 +15,13 @@ import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
 
 const FORM_FIELDS: FieldDef[] = [
-  { type: "text", name: "domain", label: "Domain", required: true },
+  {
+    type: "text",
+    name: "domain",
+    label: "Domain",
+    required: true,
+    maxLength: 200,
+  },
   {
     type: "select",
     name: "provider",

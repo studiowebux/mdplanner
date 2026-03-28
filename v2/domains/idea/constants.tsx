@@ -118,7 +118,13 @@ export const IDEA_PRIORITY_OPTIONS = IDEA_PRIORITIES.map((p) => ({
 }));
 
 export const IDEA_FORM_FIELDS: FieldDef[] = [
-  { type: "text", name: "title", label: "Title", required: true },
+  {
+    type: "text",
+    name: "title",
+    label: "Title",
+    required: true,
+    maxLength: 200,
+  },
   {
     type: "select",
     name: "status",

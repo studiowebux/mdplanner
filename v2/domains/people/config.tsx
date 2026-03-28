@@ -15,7 +15,7 @@ import { PEOPLE_TABLE_COLUMNS, personToRow } from "./constants.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 
 const FORM_FIELDS: FieldDef[] = [
-  { type: "text", name: "name", label: "Name", required: true },
+  { type: "text", name: "name", label: "Name", required: true, maxLength: 200 },
   { type: "text", name: "title", label: "Title" },
   { type: "text", name: "role", label: "Role" },
   {
