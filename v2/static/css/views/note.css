@@ -149,6 +149,12 @@
 
 /* ---- Tabs ---- */
 
+.note-detail__tabs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
 .note-detail__tab-bar {
   display: flex;
   gap: var(--space-xs);
@@ -318,6 +324,11 @@
 .note-detail__title-input:focus {
   border-color: var(--color-accent);
   outline: none;
+}
+
+.note-detail__updated {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
 }
 
 .note-detail__top-bar {
