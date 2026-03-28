@@ -127,27 +127,11 @@ export class PortfolioRepository {
     }
 
     const item: PortfolioItem = {
+      ...data,
       id,
-      name: data.name,
       category: data.category ?? "Uncategorized",
       status: data.status ?? "active",
-      description: data.description,
-      client: data.client,
-      revenue: data.revenue,
-      expenses: data.expenses,
       progress: data.progress ?? 0,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      team: data.team,
-      techStack: data.techStack,
-      logo: data.logo,
-      license: data.license,
-      githubRepo: data.githubRepo,
-      billingCustomerId: data.billingCustomerId,
-      brainManaged: data.brainManaged,
-      linkedGoals: data.linkedGoals,
-      kpis: data.kpis,
-      urls: data.urls,
     };
 
     await this.writer.write(

@@ -58,15 +58,12 @@ export class NoteRepository {
     const now = new Date().toISOString();
 
     const note: Note = {
+      ...data,
       id,
-      title: data.title,
       content: data.content ?? "",
-      paragraphs: data.paragraphs,
-      customSections: data.customSections,
       createdAt: now,
       updatedAt: now,
       revision: 1,
-      project: data.project,
     };
 
     const filePath = join(this.notesDir, `${id}.md`);
