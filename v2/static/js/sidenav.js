@@ -112,9 +112,22 @@
     }
   });
 
-  // ESC key — close the topmost open sidenav
+  // ESC key — dismiss autocomplete first, then close sidenav
   document.addEventListener("keydown", function (e) {
     if (e.key !== "Escape") return;
+    // If an autocomplete dropdown is open, close it instead of the sidenav
+    var openLists = document.querySelectorAll(".form__autocomplete-list");
+    var dismissed = false;
+    for (var i = 0; i < openLists.length; i++) {
+      if (openLists[i].children.length > 0) {
+        openLists[i].innerHTML = "";
+        dismissed = true;
+      }
+    }
+    if (dismissed) {
+      e.preventDefault();
+      return;
+    }
     var open = getOpenSidenav();
     if (open) {
       e.preventDefault();
