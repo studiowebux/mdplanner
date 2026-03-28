@@ -18,7 +18,7 @@ import { rowToMilestone } from "../domains/milestone/cache.ts";
 import {
   MILESTONE_BODY_KEYS,
   MILESTONE_TABLE,
-} from "../domains/milestone/constants.cache.ts";
+} from "../domains/milestone/constants.ts";
 
 export class MilestoneRepository {
   private milestonesDir: string;

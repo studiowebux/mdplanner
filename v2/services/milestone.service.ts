@@ -14,7 +14,7 @@ import type { Task } from "../types/task.types.ts";
 import type { CacheSync } from "../database/sqlite/mod.ts";
 import { markdownToHtml } from "../utils/markdown.ts";
 import { insertMilestoneRow } from "../domains/milestone/cache.ts";
-import { MILESTONE_TABLE } from "../domains/milestone/constants.cache.ts";
+import { MILESTONE_TABLE } from "../domains/milestone/constants.ts";
 import { DONE_SECTION, getSectionOrder } from "../constants/mod.ts";
 
 function tasksByMilestone(tasks: Task[], name: string): Task[] {

@@ -5,7 +5,7 @@ import { ENTITIES, val } from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { MilestoneRepository } from "../../repositories/milestone.repository.ts";
 import type { MilestoneBase } from "../../types/milestone.types.ts";
-import { MILESTONE_SCHEMA, MILESTONE_TABLE } from "./constants.cache.ts";
+import { MILESTONE_SCHEMA, MILESTONE_TABLE } from "./constants.ts";
 
 /** Deserialize a SQLite row to a MilestoneBase. */
 export function rowToMilestone(row: Record<string, unknown>): MilestoneBase {
