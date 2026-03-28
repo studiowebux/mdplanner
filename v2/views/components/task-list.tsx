@@ -39,7 +39,10 @@ const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = (
         </a>
       </div>
       <div class="task-list__row-right">
-        <span class="task-list__meta task-list__meta--assignee">
+        <span
+          class="task-list__meta task-list__meta--assignee"
+          data-col="assignee"
+        >
           {peopleOptions && peopleOptions.length > 0
             ? (
               <select
@@ -65,7 +68,10 @@ const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = (
             )
             : (task.assignee ?? "")}
         </span>
-        <span class="task-list__meta task-list__meta--milestone">
+        <span
+          class="task-list__meta task-list__meta--milestone"
+          data-col="milestone"
+        >
           {task.milestone
             ? (
               <a
@@ -78,10 +84,10 @@ const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = (
             )
             : ""}
         </span>
-        <span class="task-list__meta task-list__meta--due">
+        <span class="task-list__meta task-list__meta--due" data-col="due">
           {task.due_date ? formatDate(task.due_date) : ""}
         </span>
-        <span class="task-list__meta task-list__meta--effort">
+        <span class="task-list__meta task-list__meta--effort" data-col="effort">
           {task.effort != null ? `${task.effort}d` : ""}
         </span>
       </div>
@@ -181,6 +187,7 @@ const ColumnHeader: FC<{ sort?: string; order?: string }> = (
           return (
             <span
               key={col.key}
+              data-col={col.cls.replace("task-list__meta--", "")}
               class={`task-list__meta ${col.cls} task-list__column-label--sortable${
                 active ? " task-list__column-label--sorted" : ""
               }`}
@@ -243,9 +250,31 @@ export const TaskListView: FC<ListProps> = (
   const sectionNames = Object.keys(grouped);
 
   return (
-    <div class="task-list">
+    <div class="task-list" data-column-table="tasks">
       <div class="task-list__sticky-header">
-        {sectionNames.length > 1 && <SectionJumpBar sections={sectionNames} />}
+        <div class="task-list__header-controls">
+          {sectionNames.length > 1 && (
+            <SectionJumpBar
+              sections={sectionNames}
+            />
+          )}
+          <details class="column-toggle" data-column-toggle="tasks">
+            <summary class="btn btn--secondary btn--sm">Columns</summary>
+            <div class="column-toggle__panel">
+              {[
+                { key: "assignee", label: "Assignee" },
+                { key: "milestone", label: "Milestone" },
+                { key: "due", label: "Due" },
+                { key: "effort", label: "Effort" },
+              ].map((col) => (
+                <label key={col.key} class="column-toggle__item">
+                  <input type="checkbox" checked data-column-key={col.key} />
+                  {col.label}
+                </label>
+              ))}
+            </div>
+          </details>
+        </div>
         <ColumnHeader sort={sort} order={order} />
       </div>
       {sectionNames.map((name) => {

@@ -63,6 +63,13 @@
   z-index: var(--z-table-sticky);
 }
 
+.task-list__header-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
 .task-list__column-header {
   border-bottom: var(--border-width) var(--border-style)
     var(--color-border-default);
