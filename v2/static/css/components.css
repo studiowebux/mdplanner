@@ -500,7 +500,6 @@ a.badge:hover {
     var(--color-border-default);
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
 }
 
 .sidenav__header {
@@ -695,7 +694,8 @@ a.badge:hover {
   text-overflow: ellipsis;
 }
 
-.form__autocomplete-item:hover {
+.form__autocomplete-item:hover,
+.form__autocomplete-item--active {
   background: var(--color-bg-hover);
 }
 
