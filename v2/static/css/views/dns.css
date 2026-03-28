@@ -76,7 +76,7 @@
   font-weight: var(--font-weight-medium);
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wide, 0.05em);
+  letter-spacing: var(--letter-spacing-wide);
 }
 
 .dns-detail__nameservers {

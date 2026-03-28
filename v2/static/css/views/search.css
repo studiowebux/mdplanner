@@ -49,8 +49,8 @@
   font-weight: var(--font-weight-medium);
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-sm);
-  background: var(--color-badge-bg, var(--color-surface-alt));
-  color: var(--color-badge-text, var(--color-text-secondary));
+  background: var(--color-badge-bg);
+  color: var(--color-badge-text);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wide);
 }
@@ -75,7 +75,7 @@
 }
 
 .search-results__snippet mark {
-  background: var(--color-highlight, var(--color-warning-bg));
+  background: var(--color-highlight);
   color: inherit;
   padding: 0 var(--space-xs);
   border-radius: var(--radius-sm);

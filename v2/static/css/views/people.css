@@ -508,7 +508,7 @@
 .orgchart-drag-ghost {
   position: absolute;
   top: -9999px;
-  transform: scale(var(--orgchart-current-zoom, 1));
+  transform: scale(var(--orgchart-current-zoom));
   transform-origin: 0 0;
 }
 

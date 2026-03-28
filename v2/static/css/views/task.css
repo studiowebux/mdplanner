@@ -95,7 +95,7 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: var(--letter-spacing-task-badge);
 }
 
 /* Jump bar — sticky at top, follows scroll */
@@ -435,7 +435,7 @@
 a.task-board__card-indicator:hover,
 a.task-board__card-avatar:hover {
   background: var(--color-accent);
-  color: var(--color-text-on-accent, #000);
+  color: var(--color-text-on-accent);
 }
 
 .task-board__card-unassigned {

@@ -42,6 +42,7 @@
   /* Letter spacing */
   --letter-spacing-tight: 0.01em;
   --letter-spacing-wide: 0.03em;
+  --letter-spacing-task-badge: 0.04em;
 
   /* Border radius */
   --radius-sm: 0.25rem;
@@ -271,6 +272,14 @@
   --settings-input-narrow-max: var(--toolbar-search-min-width);
   --settings-textarea-min-height: var(--autocomplete-max-height);
   --settings-tab-indicator: var(--sidebar-active-border-width);
+
+  /* Org chart — initial value overridden by JS at runtime */
+  --orgchart-current-zoom: 1;
+
+  /* Semantic color aliases — reference theme vars, resolve per active theme */
+  --color-badge-bg: var(--color-bg-secondary);
+  --color-badge-text: var(--color-text-secondary);
+  --color-highlight: var(--color-warning-bg);
 }
 
 html.font-mono {
