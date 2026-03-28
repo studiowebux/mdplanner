@@ -61,6 +61,15 @@ export const NoteDetailView: FC<Props> = (props) => {
             >
               Edit
             </button>
+            <button
+              class="btn btn--danger"
+              type="button"
+              hx-delete={`/notes/${note.id}`}
+              hx-confirm={`Delete "${note.title}"? This cannot be undone.`}
+              hx-swap="none"
+            >
+              Delete
+            </button>
           </div>
         </div>
 
