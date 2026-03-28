@@ -40,14 +40,14 @@ export const GoalSchema = z.object({
     description: "Human-readable KPI target",
     example: "$50k MRR",
   }),
-  kpiMetric: z.string().optional().openapi({
+  kpiMetric: z.string().nullable().optional().openapi({
     description:
       "KPI snapshot metric field name (e.g. mrr, active_users, growth_rate)",
   }),
-  kpiTarget: z.number().optional().openapi({
+  kpiTarget: z.number().nullable().optional().openapi({
     description: "Numeric target value for the KPI metric",
   }),
-  kpiValue: z.number().optional().openapi({
+  kpiValue: z.number().nullable().optional().openapi({
     description: "Current actual value for the KPI metric",
   }),
   startDate: z.string().openapi({
@@ -62,40 +62,40 @@ export const GoalSchema = z.object({
     description: "Goal status",
     example: "on-track",
   }),
-  githubRepo: z.string().optional().openapi({
+  githubRepo: z.string().nullable().optional().openapi({
     description: "Linked GitHub repository (owner/repo)",
   }),
-  githubMilestone: z.number().optional().openapi({
+  githubMilestone: z.number().nullable().optional().openapi({
     description: "Linked GitHub milestone number",
   }),
-  linkedPortfolioItems: z.array(z.string()).optional().openapi({
+  linkedPortfolioItems: z.array(z.string()).nullable().optional().openapi({
     description: "Linked portfolio item IDs",
   }),
-  project: z.string().optional().openapi({
+  project: z.string().nullable().optional().openapi({
     description: "Linked project name",
   }),
-  owner: z.string().optional().openapi({
+  owner: z.string().nullable().optional().openapi({
     description: "Goal owner (person name)",
   }),
-  contributors: z.array(z.string()).optional().openapi({
+  contributors: z.array(z.string()).nullable().optional().openapi({
     description: "Contributing people (names)",
   }),
-  priority: z.number().min(1).max(5).optional().openapi({
+  priority: z.number().min(1).max(5).nullable().optional().openapi({
     description: "Priority 1 (highest) to 5 (lowest)",
   }),
-  progress: z.number().min(0).max(100).optional().openapi({
+  progress: z.number().min(0).max(100).nullable().optional().openapi({
     description: "Manual progress percentage (0-100)",
   }),
-  parentGoal: z.string().optional().openapi({
+  parentGoal: z.string().nullable().optional().openapi({
     description: "Parent goal ID (for OKR hierarchy)",
   }),
-  linkedMilestones: z.array(z.string()).optional().openapi({
+  linkedMilestones: z.array(z.string()).nullable().optional().openapi({
     description: "Linked milestone IDs",
   }),
-  tags: z.array(z.string()).optional().openapi({
+  tags: z.array(z.string()).nullable().optional().openapi({
     description: "Goal labels/tags",
   }),
-  notes: z.string().optional().openapi({
+  notes: z.string().nullable().optional().openapi({
     description: "Additional notes (markdown)",
   }),
   created: z.string().openapi({ description: "ISO creation timestamp" }),

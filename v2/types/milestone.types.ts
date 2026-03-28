@@ -31,23 +31,23 @@ export const MilestoneBaseSchema = z.object({
     description: "Milestone lifecycle status",
     example: "open",
   }),
-  target: z.string().optional().openapi({
+  target: z.string().nullable().optional().openapi({
     description: "Target completion date (YYYY-MM-DD)",
     example: "2026-06-01",
   }),
-  description: z.string().optional().openapi({
+  description: z.string().nullable().optional().openapi({
     description: "Milestone description (markdown)",
     example: "Full v2 clean architecture rewrite.",
   }),
-  project: z.string().optional().openapi({
+  project: z.string().nullable().optional().openapi({
     description: "Project this milestone belongs to",
     example: "MD Planner",
   }),
-  completedAt: z.string().optional().openapi({
+  completedAt: z.string().nullable().optional().openapi({
     description: "ISO date when milestone was marked completed",
     example: "2026-05-15",
   }),
-  createdAt: z.string().optional().openapi({
+  createdAt: z.string().nullable().optional().openapi({
     description: "ISO timestamp of creation",
     example: "2026-03-16T03:22:47.963Z",
   }),
@@ -94,7 +94,7 @@ export const CreateMilestoneSchema = MilestoneBaseSchema
       description: "Milestone status",
       example: "open",
     }),
-    description: z.string().optional().openapi({
+    description: z.string().nullable().optional().openapi({
       description:
         "What this milestone delivers (markdown). Use headings and lists for structure.",
       example:

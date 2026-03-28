@@ -30,10 +30,10 @@ export const SwotSchema = z.object({
   threats: z.array(z.string()).openapi({
     description: "Threat items",
   }),
-  project: z.string().optional().openapi({
+  project: z.string().nullable().optional().openapi({
     description: "Linked project name",
   }),
-  notes: z.string().optional().openapi({
+  notes: z.string().nullable().optional().openapi({
     description: "Additional notes (markdown)",
   }),
   created: z.string().openapi({ description: "ISO creation timestamp" }),

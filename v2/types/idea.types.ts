@@ -40,42 +40,42 @@ export const IdeaSchema = z.object({
     description: "Idea status",
     example: "new",
   }),
-  category: z.string().optional().openapi({
+  category: z.string().nullable().optional().openapi({
     description: "Idea category (e.g. feature, enhancement, research)",
     example: "feature",
   }),
-  priority: z.enum(IDEA_PRIORITIES).optional().openapi({
+  priority: z.enum(IDEA_PRIORITIES).nullable().optional().openapi({
     description: "Priority level",
     example: "high",
   }),
-  project: z.string().optional().openapi({
+  project: z.string().nullable().optional().openapi({
     description: "Linked project name",
   }),
-  startDate: z.string().optional().openapi({
+  startDate: z.string().nullable().optional().openapi({
     description: "Planned start date (YYYY-MM-DD)",
     example: "2026-04-01",
   }),
-  endDate: z.string().optional().openapi({
+  endDate: z.string().nullable().optional().openapi({
     description: "Planned end date (YYYY-MM-DD)",
     example: "2026-06-30",
   }),
-  resources: z.string().optional().openapi({
+  resources: z.string().nullable().optional().openapi({
     description: "Resource requirements (free-text)",
     example: "2 devs, API budget",
   }),
-  subtasks: z.array(z.string()).optional().openapi({
+  subtasks: z.array(z.string()).nullable().optional().openapi({
     description: "Subtask descriptions",
   }),
-  description: z.string().optional().openapi({
+  description: z.string().nullable().optional().openapi({
     description: "Idea description (markdown)",
   }),
-  links: z.array(z.string()).optional().openapi({
+  links: z.array(z.string()).nullable().optional().openapi({
     description: "Linked idea IDs (Zettelkasten-style)",
   }),
-  implementedAt: z.string().optional().openapi({
+  implementedAt: z.string().nullable().optional().openapi({
     description: "ISO timestamp when status changed to implemented",
   }),
-  cancelledAt: z.string().optional().openapi({
+  cancelledAt: z.string().nullable().optional().openapi({
     description: "ISO timestamp when status changed to cancelled",
   }),
   created: z.string().openapi({ description: "ISO creation timestamp" }),

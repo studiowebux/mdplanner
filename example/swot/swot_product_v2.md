@@ -1,9 +1,9 @@
 ---
 title: Product V2 Competitive Analysis
 date: 2026-03-15
-project: MD Planner
+project: Inventory System
 created: "2026-03-15T10:00:00.000Z"
-updated: "2026-03-15T10:00:00.000Z"
+updated: "2026-03-27T21:07:30.140Z"
 ---
 
 ## Strengths
@@ -38,3 +38,5 @@ updated: "2026-03-15T10:00:00.000Z"
 - Developer fatigue with new productivity tools
 - Funding constraints limiting marketing reach
 - Cloud-native expectations conflicting with local-first approach
+
+Test 123

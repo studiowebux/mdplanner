@@ -120,10 +120,10 @@ export const NoteSchema = z.object({
   content: z.string().openapi({
     description: "Raw markdown content (backward compat for simple notes)",
   }),
-  paragraphs: z.array(NoteParagraphSchema).optional().openapi({
+  paragraphs: z.array(NoteParagraphSchema).nullable().optional().openapi({
     description: "Structured content blocks",
   }),
-  customSections: z.array(CustomSectionSchema).optional().openapi({
+  customSections: z.array(CustomSectionSchema).nullable().optional().openapi({
     description: "Custom layout sections — tabs, timeline, split-view",
   }),
   createdAt: z.string().openapi({
@@ -135,7 +135,7 @@ export const NoteSchema = z.object({
   revision: z.number().openapi({
     description: "Monotonic counter for optimistic locking",
   }),
-  project: z.string().optional().openapi({
+  project: z.string().nullable().optional().openapi({
     description: "Project scope",
     example: "MD Planner",
   }),
@@ -155,13 +155,13 @@ export const CreateNoteSchema = z.object({
   content: z.string().default("").openapi({
     description: "Raw markdown content",
   }),
-  paragraphs: z.array(NoteParagraphSchema).optional().openapi({
+  paragraphs: z.array(NoteParagraphSchema).nullable().optional().openapi({
     description: "Structured content blocks",
   }),
-  customSections: z.array(CustomSectionSchema).optional().openapi({
+  customSections: z.array(CustomSectionSchema).nullable().optional().openapi({
     description: "Custom layout sections",
   }),
-  project: z.string().optional().openapi({
+  project: z.string().nullable().optional().openapi({
     description: "Project scope",
     example: "MD Planner",
   }),
@@ -185,7 +185,7 @@ export const UpdateNoteSchema = CreateNoteSchema
     project: z.string().nullable().optional().openapi({
       description: "Project scope. Set to null to clear.",
     }),
-    updatedAt: z.string().optional().openapi({
+    updatedAt: z.string().nullable().optional().openapi({
       description: "Expected updatedAt for optimistic locking. " +
         "Reject if mismatch (stale update).",
     }),

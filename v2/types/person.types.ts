@@ -15,7 +15,7 @@ export const AgentModelSchema = z.object({
     description: "Model provider",
     example: "anthropic",
   }),
-  endpoint: z.string().optional().openapi({
+  endpoint: z.string().nullable().optional().openapi({
     description: "Custom endpoint URL",
   }),
 }).openapi("AgentModel");
@@ -50,65 +50,65 @@ export const PersonSchema = z.object({
     description: "Full name",
     example: "Jane Smith",
   }),
-  title: z.string().optional().openapi({
+  title: z.string().nullable().optional().openapi({
     description: "Job title",
     example: "Senior Engineer",
   }),
-  role: z.string().optional().openapi({
+  role: z.string().nullable().optional().openapi({
     description: "Role within team",
     example: "developer",
   }),
-  departments: z.array(z.string()).optional().openapi({
+  departments: z.array(z.string()).nullable().optional().openapi({
     description: "Department names",
     example: ["Engineering", "Platform"],
   }),
-  reportsTo: z.string().optional().openapi({
+  reportsTo: z.string().nullable().optional().openapi({
     description: "Person ID of direct manager",
   }),
-  email: z.string().optional().openapi({
+  email: z.string().nullable().optional().openapi({
     description: "Email address",
     example: "jane@example.com",
   }),
-  phone: z.string().optional().openapi({
+  phone: z.string().nullable().optional().openapi({
     description: "Phone number",
   }),
-  startDate: z.string().optional().openapi({
+  startDate: z.string().nullable().optional().openapi({
     description: "Start date (YYYY-MM-DD)",
     example: "2025-01-15",
   }),
-  hoursPerDay: z.number().optional().openapi({
+  hoursPerDay: z.number().nullable().optional().openapi({
     description: "Working hours per day",
     example: 8,
   }),
-  workingDays: z.array(z.enum(WEEKDAYS)).optional().openapi({
+  workingDays: z.array(z.enum(WEEKDAYS)).nullable().optional().openapi({
     description: "Working day names",
     example: ["Mon", "Tue", "Wed", "Thu", "Fri"],
   }),
-  notes: z.string().optional().openapi({
+  notes: z.string().nullable().optional().openapi({
     description: "Markdown notes (from file body after H1 heading)",
   }),
-  agentType: z.enum(AGENT_TYPES).optional().openapi({
+  agentType: z.enum(AGENT_TYPES).nullable().optional().openapi({
     description: "Agent classification",
     example: "human",
   }),
-  skills: z.array(z.string()).optional().openapi({
+  skills: z.array(z.string()).nullable().optional().openapi({
     description: "Capabilities",
     example: ["typescript", "go", "code-review"],
   }),
-  models: z.array(AgentModelSchema).optional().openapi({
+  models: z.array(AgentModelSchema).nullable().optional().openapi({
     description: "AI models the agent can use",
   }),
-  systemPrompt: z.string().optional().openapi({
+  systemPrompt: z.string().nullable().optional().openapi({
     description: "Default system prompt for AI agents",
   }),
-  status: z.enum(AGENT_STATUSES).optional().openapi({
+  status: z.enum(AGENT_STATUSES).nullable().optional().openapi({
     description: "Agent availability status",
     example: "idle",
   }),
-  lastSeen: z.string().optional().openapi({
+  lastSeen: z.string().nullable().optional().openapi({
     description: "ISO timestamp of last agent interaction",
   }),
-  currentTaskId: z.string().optional().openapi({
+  currentTaskId: z.string().nullable().optional().openapi({
     description: "Task ID the agent is actively working on",
   }),
 }).openapi("Person");
