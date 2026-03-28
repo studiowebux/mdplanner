@@ -132,10 +132,10 @@ export const MarketingPlanDetailView: FC<
         {hasTeam && (
           <section class="detail-section mktplan-detail__section">
             <h2 class="section-heading">
-              Team ({plan.team!.length})
+              Team ({(plan.team ?? []).length})
             </h2>
             <span class="mktplan-detail__team">
-              {plan.team!.map((id) => (
+              {(plan.team ?? []).map((id) => (
                 <a key={id} href={`/people/${id}`} class="badge">
                   {id}
                 </a>
@@ -156,7 +156,7 @@ export const MarketingPlanDetailView: FC<
         {hasAudiences && (
           <section class="detail-section mktplan-detail__section">
             <h2 class="section-heading">
-              Target Audiences ({plan.targetAudiences!.length})
+              Target Audiences ({(plan.targetAudiences ?? []).length})
             </h2>
             <table class="data-table mktplan-detail__table">
               <thead>
@@ -167,7 +167,7 @@ export const MarketingPlanDetailView: FC<
                 </tr>
               </thead>
               <tbody>
-                {plan.targetAudiences!.map((a, idx) => (
+                {(plan.targetAudiences ?? []).map((a, idx) => (
                   <tr key={idx}>
                     <td>{a.name}</td>
                     <td>{a.description ?? ""}</td>
@@ -183,7 +183,7 @@ export const MarketingPlanDetailView: FC<
         {hasChannels && (
           <section class="detail-section mktplan-detail__section">
             <h2 class="section-heading">
-              Channels ({plan.channels!.length})
+              Channels ({(plan.channels ?? []).length})
             </h2>
             <table class="data-table mktplan-detail__table">
               <thead>
@@ -195,7 +195,7 @@ export const MarketingPlanDetailView: FC<
                 </tr>
               </thead>
               <tbody>
-                {plan.channels!.map((ch, idx) => (
+                {(plan.channels ?? []).map((ch, idx) => (
                   <tr key={idx}>
                     <td>{ch.name}</td>
                     <td>
@@ -224,7 +224,7 @@ export const MarketingPlanDetailView: FC<
         {hasCampaigns && (
           <section class="detail-section mktplan-detail__section">
             <h2 class="section-heading">
-              Campaigns ({plan.campaigns!.length})
+              Campaigns ({(plan.campaigns ?? []).length})
             </h2>
             <table class="data-table mktplan-detail__table">
               <thead>
@@ -239,7 +239,7 @@ export const MarketingPlanDetailView: FC<
                 </tr>
               </thead>
               <tbody>
-                {plan.campaigns!.map((c, idx) => (
+                {(plan.campaigns ?? []).map((c, idx) => (
                   <tr key={idx}>
                     <td>{c.name}</td>
                     <td>{c.channel ?? ""}</td>
@@ -332,10 +332,10 @@ export const MarketingPlanDetailView: FC<
         {hasHypothesis && (
           <section class="detail-section mktplan-detail__section">
             <h2 class="section-heading">
-              Hypothesis ({plan.hypothesis!.length})
+              Hypothesis ({(plan.hypothesis ?? []).length})
             </h2>
             <ul class="mktplan-detail__hypothesis-list">
-              {plan.hypothesis!.map((h, idx) => (
+              {(plan.hypothesis ?? []).map((h, idx) => (
                 <li key={idx} class="mktplan-detail__hypothesis-item">
                   <span class="mktplan-detail__hypothesis-text">{h.text}</span>
                   {h.verdict && (
@@ -355,10 +355,12 @@ export const MarketingPlanDetailView: FC<
         {hasLearnings && (
           <section class="detail-section mktplan-detail__section">
             <h2 class="section-heading">
-              Learnings ({plan.learnings!.length})
+              Learnings ({(plan.learnings ?? []).length})
             </h2>
             <ul class="mktplan-detail__hypothesis-list">
-              {plan.learnings!.map((l, idx) => <li key={idx}>{l.text}</li>)}
+              {(plan.learnings ?? []).map((l, idx) => (
+                <li key={idx}>{l.text}</li>
+              ))}
             </ul>
           </section>
         )}

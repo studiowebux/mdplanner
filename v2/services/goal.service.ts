@@ -20,7 +20,7 @@ export class GoalService {
     }
     if (options?.project) {
       goals = goals.filter((g) =>
-        g.project?.toLowerCase() === options.project!.toLowerCase()
+        g.project?.toLowerCase() === options.project?.toLowerCase()
       );
     }
     return goals;

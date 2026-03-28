@@ -156,10 +156,10 @@ export const IdeaDetailView: FC<
         {hasSubtasks && (
           <section class="detail-section idea-detail__section">
             <h2 class="section-heading">
-              Subtasks ({idea.subtasks!.length})
+              Subtasks ({(idea.subtasks ?? []).length})
             </h2>
             <ul class="idea-detail__subtasks">
-              {idea.subtasks!.map((s, idx) => <li key={idx}>{s}</li>)}
+              {(idea.subtasks ?? []).map((s, idx) => <li key={idx}>{s}</li>)}
             </ul>
           </section>
         )}

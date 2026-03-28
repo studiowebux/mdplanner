@@ -14,7 +14,8 @@ export function buildGoalTree(goals: Goal[]): GoalNode[] {
   const roots: GoalNode[] = [];
   for (const node of byId.values()) {
     if (node.parentGoal && byId.has(node.parentGoal)) {
-      byId.get(node.parentGoal)!.children.push(node);
+      const parent = byId.get(node.parentGoal);
+      if (parent) parent.children.push(node);
     } else {
       roots.push(node);
     }

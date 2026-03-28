@@ -33,7 +33,7 @@ goalsRouter.get("/:id", async (c) => {
         : Promise.resolve(null),
       goal.linkedMilestones?.length
         ? getMilestoneService().list().then((all) =>
-          all.filter((m) => goal.linkedMilestones!.includes(m.id))
+          all.filter((m) => (goal.linkedMilestones ?? []).includes(m.id))
         )
         : Promise.resolve([]),
       getGoalService().list().then((all) =>

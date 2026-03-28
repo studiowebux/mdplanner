@@ -29,7 +29,7 @@ export class SearchEngine {
 
     const limit = options?.limit ?? 50;
     const activeTypes = options?.types ??
-      getFtsEntities().map((e) => e.fts!.type);
+      getFtsEntities().map((e) => e.fts?.type).filter((t): t is string => !!t);
 
     const results: SearchResult[] = [];
 
@@ -44,7 +44,7 @@ export class SearchEngine {
     const project = options?.project;
 
     for (const entity of getFtsEntities()) {
-      if (!activeTypes.includes(entity.fts!.type)) continue;
+      if (!entity.fts || !activeTypes.includes(entity.fts.type)) continue;
       results.push(...this.searchEntity(entity, safeQuery, limit, project));
     }
 

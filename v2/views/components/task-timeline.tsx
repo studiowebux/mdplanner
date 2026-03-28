@@ -251,7 +251,7 @@ export const TaskTimelineView: FC<TaskViewProps> = ({ tasks, zoom = 1 }) => {
                       }`}
                       data-task-id={t.id}
                       {...(blocked
-                        ? { "data-blocked-by": t.blocked_by!.join(",") }
+                        ? { "data-blocked-by": (t.blocked_by ?? []).join(",") }
                         : {})}
                     >
                       <div class="task-timeline__label">
@@ -272,9 +272,9 @@ export const TaskTimelineView: FC<TaskViewProps> = ({ tasks, zoom = 1 }) => {
                         {blocked && (
                           <span
                             class="task-timeline__blocked"
-                            title={t.blocked_by!.join(", ")}
+                            title={(t.blocked_by ?? []).join(", ")}
                           >
-                            {t.blocked_by!.length}
+                            {(t.blocked_by ?? []).length}
                           </span>
                         )}
                       </div>

@@ -75,7 +75,7 @@ const OrgNode: FC<NodeProps> = ({ node, level, allDepts }) => {
       </div>
       {hasChildren && (
         <div class="orgchart-children">
-          {node.children!.map((child) => (
+          {(node.children ?? []).map((child) => (
             <OrgNode
               key={child.id}
               node={child}

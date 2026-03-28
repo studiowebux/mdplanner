@@ -235,7 +235,7 @@ export const GoalDetailView: FC<
             {(goal.contributors?.length ?? 0) > 0 && (
               <InfoItem label="Contributors">
                 <span class="goal-detail__links">
-                  {goal.contributors!.map((c) => (
+                  {(goal.contributors ?? []).map((c) => (
                     personByName[c]
                       ? (
                         <a href={`/people/${personByName[c]}`} class="badge">
@@ -261,7 +261,7 @@ export const GoalDetailView: FC<
             {(goal.tags?.length ?? 0) > 0 && (
               <InfoItem label="Tags">
                 <span class="goal-detail__links">
-                  {goal.tags!.map((t) => (
+                  {(goal.tags ?? []).map((t) => (
                     <span key={t} class="badge">{t}</span>
                   ))}
                 </span>

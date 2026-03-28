@@ -19,7 +19,7 @@ export class IdeaService {
     }
     if (options?.category) {
       ideas = ideas.filter((i) =>
-        i.category?.toLowerCase() === options.category!.toLowerCase()
+        i.category?.toLowerCase() === options.category?.toLowerCase()
       );
     }
     if (options?.priority) {

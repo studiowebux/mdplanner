@@ -101,7 +101,8 @@ export class PeopleService {
     const roots: PersonWithChildren[] = [];
     for (const node of map.values()) {
       if (node.reportsTo && map.has(node.reportsTo)) {
-        map.get(node.reportsTo)!.children!.push(node);
+        const parent = map.get(node.reportsTo);
+        if (parent?.children) parent.children.push(node);
       } else {
         roots.push(node);
       }

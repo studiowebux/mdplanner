@@ -151,7 +151,7 @@ portfolioRouter.get("/:id/github/pipelines", async (c) => {
     // q is local-only — GitHub API has no workflow name search
     const filtered = filters.q
       ? runs.filter((r) =>
-        r.name.toLowerCase().includes(filters.q!.toLowerCase())
+        r.name.toLowerCase().includes(filters.q?.toLowerCase() ?? "")
       )
       : runs;
     const hasNext = runs.length === perPage;
@@ -202,7 +202,7 @@ portfolioRouter.get("/:id/github/pipelines/results", async (c) => {
       });
     const filtered = filters.q
       ? runs.filter((r) =>
-        r.name.toLowerCase().includes(filters.q!.toLowerCase())
+        r.name.toLowerCase().includes(filters.q?.toLowerCase() ?? "")
       )
       : runs;
     const hasNext = runs.length === perPage;
