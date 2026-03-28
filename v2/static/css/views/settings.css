@@ -67,6 +67,7 @@
 #tab-schedule:checked ~ .settings-tabs__panel--schedule,
 #tab-tags:checked ~ .settings-tabs__panel--tags,
 #tab-links:checked ~ .settings-tabs__panel--links,
+#tab-caching:checked ~ .settings-tabs__panel--caching,
 #tab-support:checked ~ .settings-tabs__panel--support,
 #tab-navigation:checked ~ .settings-tabs__panel--navigation,
 #tab-sections:checked ~ .settings-tabs__panel--sections,
@@ -576,4 +577,38 @@ html.sidebar-collapsed .settings-page__form-actions {
   .settings-link-row {
     grid-template-columns: 1fr;
   }
+}
+
+/* -------------------------------------------------------------------------
+   Cache management
+   ------------------------------------------------------------------------- */
+
+.settings-cache__table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--space-md);
+}
+
+.settings-cache__cell {
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-border-default);
+  text-align: left;
+  font-size: var(--font-size-sm);
+}
+
+.settings-cache__meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-md);
+}
+
+.settings-cache__actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.settings-cache__empty {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
 }

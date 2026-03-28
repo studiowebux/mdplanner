@@ -201,7 +201,7 @@ export class CacheSync {
     return this.getMeta("last_sync") === null;
   }
 
-  private rebuildFts(): void {
+  rebuildFts(): void {
     for (const entity of ENTITIES) {
       if (entity.fts) {
         try {

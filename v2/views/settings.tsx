@@ -146,6 +146,16 @@ export const SettingsView: FC<SettingsProps> = ({
           <input
             type="radio"
             name="settings-tab"
+            id="tab-caching"
+            class="settings-tabs__radio"
+          />
+          <label for="tab-caching" class="settings-tabs__label">
+            Caching
+          </label>
+
+          <input
+            type="radio"
+            name="settings-tab"
             id="tab-support"
             class="settings-tabs__radio"
           />
@@ -527,6 +537,39 @@ export const SettingsView: FC<SettingsProps> = ({
 
               <FormActions />
             </form>
+          </div>
+
+          {/* ---- Caching tab ---- */}
+          <div class="settings-tabs__panel settings-tabs__panel--caching">
+            <h2 class="settings-page__heading">Caching</h2>
+            <div
+              id="cache-stats"
+              hx-get="/settings/cache/stats"
+              hx-trigger="load"
+              hx-swap="innerHTML"
+            >
+              <span class="loading-spinner__ring" />
+            </div>
+            <div class="settings-cache__actions">
+              <button
+                class="btn btn--secondary"
+                type="button"
+                hx-post="/settings/cache/rebuild"
+                hx-swap="none"
+                hx-on--after-request="htmx.trigger('#cache-stats', 'load')"
+              >
+                Rebuild Cache
+              </button>
+              <button
+                class="btn btn--secondary"
+                type="button"
+                hx-post="/settings/cache/rebuild-fts"
+                hx-swap="none"
+                hx-on--after-request="htmx.trigger('#cache-stats', 'load')"
+              >
+                Rebuild FTS
+              </button>
+            </div>
           </div>
 
           {/* ---- Support tab ---- */}

@@ -2,7 +2,12 @@
 
 import { Hono } from "hono";
 import { SettingsView } from "../settings.tsx";
-import { getProjectService } from "../../singletons/services.ts";
+import {
+  getCacheSync,
+  getProjectService,
+  getSearchEngine,
+} from "../../singletons/services.ts";
+import { getLocale } from "../../utils/format.ts";
 import { SidebarContent } from "../../components/shell/sidebar.tsx";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 import { viewProps } from "../../middleware/view-props.ts";
@@ -189,4 +194,99 @@ settingsViewRouter.post("/nav-categories", async (c) => {
       "HX-Refresh": "true",
     },
   });
+});
+
+// -- Cache stats fragment (htmx partial) --
+settingsViewRouter.get("/cache/stats", (c) => {
+  const engine = getSearchEngine();
+  const sync = getCacheSync();
+  if (!engine || !sync) {
+    return c.html(
+      `<p class="settings-cache__empty">Cache is disabled.</p>`,
+    );
+  }
+  const stats = engine.getStats();
+  const lastSync = sync.getLastSyncTime();
+  const rows = Object.entries(stats)
+    .filter(([k]) => k !== "total")
+    .map(([name, count]) =>
+      `<tr><td class="settings-cache__cell">${name}</td>` +
+      `<td class="settings-cache__cell">${count}</td></tr>`
+    )
+    .join("");
+  const html = `<table class="settings-cache__table">` +
+    `<thead><tr><th class="settings-cache__cell">Entity</th>` +
+    `<th class="settings-cache__cell">Rows</th></tr></thead>` +
+    `<tbody>${rows}</tbody>` +
+    `<tfoot><tr><td class="settings-cache__cell"><strong>Total</strong></td>` +
+    `<td class="settings-cache__cell"><strong>${
+      stats.total ?? 0
+    }</strong></td></tr></tfoot>` +
+    `</table>` +
+    `<p class="settings-cache__meta">Last sync: ${
+      lastSync
+        ? lastSync.toLocaleString(getLocale(), {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })
+        : "never"
+    }</p>`;
+  return c.html(html);
+});
+
+// -- Cache rebuild action --
+settingsViewRouter.post("/cache/rebuild", async (c) => {
+  const sync = getCacheSync();
+  if (!sync) {
+    return new Response(null, {
+      status: 422,
+      headers: { "HX-Trigger": hxTrigger("error", "Cache is disabled") },
+    });
+  }
+  try {
+    const result = await sync.rebuild();
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "HX-Trigger": hxTrigger(
+          "success",
+          `Cache rebuilt: ${result.items} items in ${result.duration}ms`,
+        ),
+      },
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Rebuild failed";
+    return new Response(null, {
+      status: 500,
+      headers: { "HX-Trigger": hxTrigger("error", msg) },
+    });
+  }
+});
+
+// -- FTS rebuild action --
+settingsViewRouter.post("/cache/rebuild-fts", (c) => {
+  const sync = getCacheSync();
+  if (!sync) {
+    return new Response(null, {
+      status: 422,
+      headers: { "HX-Trigger": hxTrigger("error", "Cache is disabled") },
+    });
+  }
+  try {
+    const start = performance.now();
+    sync.rebuildFts();
+    const ms = Math.round(performance.now() - start);
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "HX-Trigger": hxTrigger("success", `FTS index rebuilt in ${ms}ms`),
+      },
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "FTS rebuild failed";
+    return new Response(null, {
+      status: 500,
+      headers: { "HX-Trigger": hxTrigger("error", msg) },
+    });
+  }
 });
