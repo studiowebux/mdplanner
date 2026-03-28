@@ -1124,6 +1124,17 @@ a.badge:hover {
   min-width: var(--progress-col-min-width);
 }
 
+/* Actions column: always right-aligned, no wrap */
+[data-col="_actions"] {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Status column: centered pills */
+[data-col="status"] {
+  text-align: center;
+}
+
 /* Sidenav dirty state indicator */
 
 .sidenav__title--dirty::after {
@@ -1255,6 +1266,13 @@ a.badge:hover {
   /* Touch targets: minimum 44px height on all buttons */
   .btn {
     min-height: 44px;
+  }
+
+  /* Actions column: sticky to right edge on horizontal scroll */
+  .data-table [data-col="_actions"] {
+    position: sticky;
+    right: 0;
+    background: var(--color-bg-primary);
   }
 }
 
