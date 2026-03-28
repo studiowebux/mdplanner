@@ -1,0 +1,177 @@
+<!-- Milestones View — HTML partial loaded by view-loader.js -->
+<div id="milestonesView" class="hidden pb-16">
+  <div class="bg-primary rounded-lg shadow">
+    <div
+      class="px-6 py-4 border-b border-default flex justify-between items-center view-header"
+    >
+      <h2 class="text-lg font-medium text-primary">
+        Milestones
+      </h2>
+      <div class="flex gap-2 items-center">
+        <label for="milestonesShowCompleted" class="ideas-filter-archive-label">
+          <input type="checkbox" id="milestonesShowCompleted">
+          Show completed
+        </label>
+        <button id="milestoneViewToggle" class="btn-secondary">Card view</button>
+        <button id="addMilestoneBtn" class="btn-primary py-2 rounded-lg">
+          + Add Milestone
+        </button>
+      </div>
+    </div>
+    <div class="p-6">
+      <div id="emptyMilestonesState" class="text-center py-12 hidden">
+        <svg
+          class="mx-auto h-12 w-12 text-muted"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+          />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-primary">
+          No milestones
+        </h3>
+        <p class="mt-1 text-sm text-muted">
+          Get started by creating a new milestone.
+        </p>
+      </div>
+      <div
+        id="milestonesContainer"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+      >
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Milestone Sidenav — injected alongside the view partial -->
+<div id="milestoneSidenav" class="sidenav-panel sidenav-md">
+  <div class="sidenav-header">
+    <h2 id="milestoneSidenavHeader" class="sidenav-title">New Milestone</h2>
+    <div class="flex items-center gap-2">
+      <span id="milestoneSidenavSaveStatus" class="text-xs hidden"></span>
+      <button
+        type="button"
+        id="milestoneSidenavClose"
+        class="sidenav-close"
+        aria-label="Close"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          >
+          </path>
+        </svg>
+      </button>
+    </div>
+  </div>
+  <form
+    id="milestoneSidenavForm"
+    class="flex flex-col flex-1 overflow-hidden"
+  >
+    <div class="sidenav-content">
+      <div class="sidenav-section">
+        <div class="form-group">
+          <label for="milestoneSidenavName" class="form-label form-label-required">Name</label>
+          <input
+            type="text"
+            id="milestoneSidenavName"
+            required
+            class="form-input"
+          >
+        </div>
+        <div class="form-group">
+          <label for="milestoneSidenavDescription" class="form-label">Description</label>
+          <textarea
+            id="milestoneSidenavDescription"
+            rows="3"
+            class="form-textarea"
+          ></textarea>
+        </div>
+      </div>
+      <div class="sidenav-section">
+        <h3 class="sidenav-section-title">Details</h3>
+        <div class="form-group">
+          <label for="milestoneSidenavProject" class="form-label">Project</label>
+          <input
+            type="text"
+            id="milestoneSidenavProject"
+            list="milestoneSidenavProjectList"
+            placeholder="Link to a portfolio project"
+            class="form-input"
+            autocomplete="off"
+          >
+          <datalist id="milestoneSidenavProjectList"></datalist>
+        </div>
+        <div class="sidenav-grid">
+          <div class="form-group">
+            <label for="milestoneSidenavTarget" class="form-label">Target Date</label>
+            <input
+              type="date"
+              id="milestoneSidenavTarget"
+              class="form-input"
+            >
+          </div>
+          <div class="form-group">
+            <label for="milestoneSidenavStatus" class="form-label">Status</label>
+            <select id="milestoneSidenavStatus" class="form-select">
+              <option value="open">Open</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div id="milestoneSidenavCompletedAtRow" class="hidden sidenav-meta-row">
+        Completed: <span id="milestoneSidenavCompletedAt"></span>
+      </div>
+      <div id="milestoneSidenavProgress" class="sidenav-section hidden">
+        <h3 class="sidenav-section-title">Progress</h3>
+        <div
+          class="text-sm text-secondary mb-2"
+          id="milestoneSidenavProgressText"
+        >
+          0/0 tasks (0%)
+        </div>
+        <div class="w-full bg-active rounded-full h-2">
+          <div
+            id="milestoneSidenavProgressBar"
+            class="bg-inverse h-2 rounded-full"
+            style="width: 0%"
+          >
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sidenav-footer">
+      <button
+        type="button"
+        id="milestoneSidenavDelete"
+        class="btn-danger-ghost hidden"
+      >
+        Delete
+      </button>
+      <div class="flex-1"></div>
+      <button
+        type="button"
+        id="milestoneSidenavCancel"
+        class="btn-ghost"
+      >
+        Cancel
+      </button>
+      <button type="submit" class="btn-primary">Save</button>
+    </div>
+  </form>
+</div>

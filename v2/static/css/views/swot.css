@@ -1,0 +1,91 @@
+/* SWOT-specific styles — builds on .quadrant-grid in components.css */
+
+/* -- Date badge ----------------------------------------------------------- */
+
+.swot-date-badge {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+/* -- Card counts ---------------------------------------------------------- */
+
+.swot-card__counts {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.swot-card__count--s {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.swot-card__count--w {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.swot-card__count--o {
+  background: var(--color-info-bg);
+  color: var(--color-info-text);
+}
+
+.swot-card__count--t {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+/* -- Detail page ---------------------------------------------------------- */
+
+.swot-detail__back {
+  margin-bottom: var(--space-md);
+}
+
+.swot-detail__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.swot-detail__title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.swot-detail__title {
+  margin: 0;
+}
+
+.swot-detail__info-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.swot-detail__info-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.swot-detail__section {
+  margin-top: var(--space-lg);
+}
+
+.swot-detail__meta {
+  display: flex;
+  gap: var(--space-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+/* -- Edit mode ------------------------------------------------------------ */
+
+.swot-detail--editing .quadrant-card__item:hover {
+  background: var(--color-bg-tertiary);
+}

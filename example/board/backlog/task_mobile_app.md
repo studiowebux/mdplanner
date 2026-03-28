@@ -1,10 +1,14 @@
 ---
 id: task_mobile_app
 completed: false
-tag: [feature, mobile]
-priority: 3
+revision: 1
+priority: 4
 effort: 40
 milestone: Enterprise Features
+project: Mobile App
+tags: [mobile, pwa]
+planned_start: 2026-06-01
+planned_end: 2026-07-15
 ---
 
 # Mobile App Development

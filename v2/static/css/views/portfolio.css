@@ -1,0 +1,284 @@
+/* Portfolio view — domain-specific styles only.
+   Card base provided by .domain-card in components.css.
+   Header, name, meta, actions provided by .domain-card__* */
+
+.portfolio-card__badge--active {
+  background: var(--color-accent-subtle);
+  color: var(--color-text-primary);
+}
+
+.portfolio-card__badge--completed {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.portfolio-card__badge--production {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.portfolio-card__badge--planning {
+  background: var(--color-info-bg);
+  color: var(--color-info-text);
+}
+
+.portfolio-card__badge--on-hold,
+.portfolio-card__badge--paused {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.portfolio-card__badge--archived,
+.portfolio-card__badge--cancelled {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+}
+
+.portfolio-card__badge--maintenance {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.portfolio-card__progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* Shared progress bar — uses native <progress>, styled via pseudo-elements */
+
+.portfolio-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.portfolio-progress__bar {
+  flex: 1;
+  height: var(--space-sm);
+  border: var(--border-width) solid var(--color-border);
+}
+
+.portfolio-progress__label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  min-width: var(--space-xl);
+  text-align: right;
+}
+
+/* Tech stack pills */
+
+.portfolio-card__tech-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.portfolio-pill {
+  font-size: var(--font-size-xs);
+  padding: var(--badge-padding);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.portfolio-pill--overflow {
+  background: var(--color-accent-subtle);
+  color: var(--color-text-muted);
+}
+
+/* Detail view */
+
+.portfolio-detail__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm) var(--space-md);
+}
+
+.portfolio-detail__meta,
+.portfolio-detail__progress {
+  width: 100%;
+}
+
+.portfolio-detail__title-row {
+  align-items: baseline;
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.portfolio-detail__meta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.portfolio-detail__progress {
+  margin-top: var(--space-sm);
+}
+
+/* Financials summary */
+
+.portfolio-detail__financials {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+}
+
+.portfolio-detail__financial-card {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+  text-align: center;
+}
+
+.portfolio-detail__financial-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-xs);
+}
+
+.portfolio-detail__financial-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.portfolio-detail__financial-value--profit {
+  color: var(--color-success);
+}
+
+.portfolio-detail__financial-value--loss {
+  color: var(--color-error);
+}
+
+/* KPI table */
+
+.portfolio-detail__kpis {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+}
+
+.portfolio-detail__kpi-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.portfolio-detail__kpi-table th,
+.portfolio-detail__kpi-table td {
+  text-align: left;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-sm);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.portfolio-detail__kpi-table th {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+}
+
+.portfolio-detail__kpi-table tbody tr:hover {
+  background: var(--color-bg-hover);
+}
+
+.portfolio-detail__kpi-met {
+  color: var(--color-success);
+}
+
+/* Status updates timeline */
+
+.portfolio-detail__status-updates {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+}
+
+.portfolio-detail__update-form {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+  margin-bottom: var(--space-md);
+}
+
+.portfolio-detail__update-form textarea,
+.portfolio-detail__update--editing textarea {
+  flex: 1;
+}
+
+.portfolio-detail__update--editing {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+  padding: var(--space-sm) 0;
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.portfolio-detail__update {
+  display: flex;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.portfolio-detail__update:last-child {
+  border-bottom: none;
+}
+
+.portfolio-detail__update-date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  min-width: var(--space-xxl);
+}
+
+.portfolio-detail__update-message {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  flex: 1;
+}
+
+.portfolio-detail__update-actions {
+  display: flex;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
+/* URLs list */
+
+.portfolio-detail__urls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+/* Team chips */
+
+.portfolio-detail__team {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.portfolio-detail__team-chip {
+  font-size: var(--font-size-xs);
+  padding: var(--badge-padding);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-full);
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+  .portfolio-detail__financials {
+    grid-template-columns: 1fr;
+  }
+}

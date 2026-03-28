@@ -1,15 +1,17 @@
 ---
 id: task_workspace_settings
 completed: false
-tag: [feature]
-due_date: "2026-02-17T19:00"
+revision: 1
+due_date: 2026-05-15
 assignee: bob
-priority: 1
+priority: 2
 effort: 6
-milestone: Alpha Release
-planned_start: 2026-02-12
-planned_end: 2026-02-18
+milestone: Version 1.0
+project: TaskFlow Platform
 order: 0
+planned_start: 2026-04-20
+planned_end: 2026-05-02
+tags: [settings, workspace]
 ---
 
 # Workspace Settings Page
@@ -19,5 +21,4 @@ Build settings page for workspace configuration.
 - Members and roles
 - Integrations
 - Billing (link to Stripe portal)
-- Danger zone (delete workspace) Currently implementing member management with
-  invite flow.
+- Danger zone (delete workspace)

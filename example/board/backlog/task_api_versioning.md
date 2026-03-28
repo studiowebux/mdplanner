@@ -1,11 +1,15 @@
 ---
 id: task_api_versioning
 completed: false
-tag: [feature, api]
-assignee: bob
-priority: 2
+revision: 1
+assignee: agent_claude
+priority: 3
 effort: 8
 milestone: Version 1.0
+project: API Gateway
+tags: [api, versioning]
+planned_start: 2026-05-05
+planned_end: 2026-05-15
 ---
 
 # Implement API Versioning

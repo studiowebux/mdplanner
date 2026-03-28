@@ -1,22 +1,26 @@
 ---
 id: task_crud
 completed: true
-tag: [feature]
+completedAt: "2026-02-18T16:00:00.000Z"
+updatedAt: "2026-02-18T16:00:00.000Z"
+revision: 3
+due_date: 2026-02-20
+assignee: charlie
 priority: 1
 effort: 8
-assignee: bob
 milestone: Alpha Release
+project: TaskFlow Platform
+order: 2
+planned_start: 2026-02-06
+planned_end: 2026-02-18
+tags: [api, crud]
+blocked_by: [task_auth]
 ---
 
-# Task CRUD Operations
+# Core CRUD Operations
 
-Basic task management functionality.
-
-## Completed
-
-- Create, read, update, delete tasks
-- Task status transitions
-- Assignee management
-- Due dates
-- Priority levels
-- Drag and drop reordering
+Build the repository pattern and REST API for task management.
+- TaskRepository with create, read, update, delete
+- OpenAPI-documented endpoints
+- Validation with Zod schemas
+- Error handling middleware
