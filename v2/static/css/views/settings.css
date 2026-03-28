@@ -560,3 +560,20 @@ html.sidebar-collapsed .settings-page__form-actions {
   color: var(--color-text-muted);
   padding: var(--space-sm) 0;
 }
+
+@media (max-width: 768px) {
+  /* Tab bar — horizontal scroll on mobile (9 tabs won't fit) */
+  .settings-tabs {
+    overflow-x: auto;
+  }
+
+  /* Two-column form rows — stack to single column */
+  .settings-field--row {
+    grid-template-columns: 1fr;
+  }
+
+  /* Link rows (title | url | delete) — stack to single column */
+  .settings-link-row {
+    grid-template-columns: 1fr;
+  }
+}

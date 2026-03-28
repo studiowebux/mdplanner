@@ -199,3 +199,9 @@
 }
 
 .milestone-detail__back {}
+
+@media (max-width: 768px) {
+  .milestone-detail {
+    padding: var(--space-md);
+  }
+}
