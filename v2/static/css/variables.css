@@ -165,7 +165,7 @@
   --card-shadow: var(--shadow-sm);
   --card-shadow-hover: var(--shadow-md);
   --card-opacity-muted: 0.5;
-  --card-opacity-completed: 0.9;
+  --card-opacity-completed: 0.55;
   --card-description-max-height: 16rem;
   --card-min-width: 10rem;
   --card-description-fade: 2rem;
