@@ -1222,6 +1222,36 @@ a.badge:hover {
   .domain-toolbar__right {
     justify-content: flex-end;
   }
+
+  /* Filter selects full-width on mobile */
+  .filter-bar__select {
+    width: 100%;
+  }
+
+  /* Card grid: single column */
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Domain page header: allow New button to wrap below title+count */
+  .domain-page__header {
+    flex-wrap: wrap;
+  }
+
+  /* Detail views: reduce page padding on small screens */
+  .detail-view {
+    padding: var(--space-md);
+  }
+
+  /* Sidenav: hide resize handle (drag-to-resize is not useful on touch) */
+  .sidenav__resize {
+    display: none;
+  }
+
+  /* Touch targets: minimum 44px height on all buttons */
+  .btn {
+    min-height: 44px;
+  }
 }
 
 /* -------------------------------------------------------------------------

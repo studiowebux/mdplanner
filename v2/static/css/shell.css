@@ -382,4 +382,18 @@ html.sidebar-collapsed .app-shell {
   html.sidebar-open .sidebar-overlay {
     display: block;
   }
+
+  .topbar {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  /* Hide secondary controls — accessible via Settings page */
+  .topbar__actions {
+    display: none;
+  }
+
+  /* No keyboard shortcut on touch devices */
+  .topbar__search-kbd {
+    display: none;
+  }
 }
