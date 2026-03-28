@@ -337,6 +337,11 @@
   align-items: center;
 }
 
+.note-detail__top-bar-actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
 .note-detail__action-group {
   display: flex;
   align-items: center;

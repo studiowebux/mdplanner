@@ -37,6 +37,22 @@ html.sidebar-collapsed .app-shell {
 }
 
 /* -------------------------------------------------------------------------
+   Fullscreen reading mode — hides sidebar + topbar
+   ------------------------------------------------------------------------- */
+
+html.fullscreen-reading .sidebar {
+  display: none;
+}
+
+html.fullscreen-reading .app-shell {
+  grid-template-columns: 1fr;
+}
+
+html.fullscreen-reading .topbar {
+  display: none;
+}
+
+/* -------------------------------------------------------------------------
    Sidebar overlay
    ------------------------------------------------------------------------- */
 

@@ -36,6 +36,7 @@ export const NoteDetailView: FC<Props> = (props) => {
         "/js/note-highlight.js",
         "/js/note-tabs.js",
         "/js/note-editor.js",
+        "/js/fullscreen-reading.js",
       ]}
     >
       <main
@@ -45,13 +46,22 @@ export const NoteDetailView: FC<Props> = (props) => {
       >
         <div class="note-detail__top-bar">
           <a href="/notes" class="btn btn--secondary">Back to notes</a>
-          <button
-            type="button"
-            class="btn btn--secondary"
-            data-note-edit-toggle
-          >
-            Edit
-          </button>
+          <div class="note-detail__top-bar-actions">
+            <button
+              type="button"
+              class="btn btn--secondary"
+              data-fullscreen-toggle
+            >
+              Focus
+            </button>
+            <button
+              type="button"
+              class="btn btn--secondary"
+              data-note-edit-toggle
+            >
+              Edit
+            </button>
+          </div>
         </div>
 
         <header class="note-detail__header" id="note-detail-header">
