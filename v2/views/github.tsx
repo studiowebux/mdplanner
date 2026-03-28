@@ -233,7 +233,7 @@ export const GitHubMilestonesList: FC<{ milestones: GitHubMilestone[] }> = ({
             <div class="github-milestone__bar">
               <div
                 class="github-milestone__fill"
-                style={`width: ${pct}%`}
+                data-pct={pct}
               />
             </div>
           </div>

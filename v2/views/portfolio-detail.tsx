@@ -92,7 +92,7 @@ export const PortfolioDetailView: FC<Props> = (
       ]}
       scripts={[
         ...(item.githubRepo ? ["/js/github-tabs.js"] : []),
-        ...(goals.length ? ["/js/kpi-gauge.js"] : []),
+        ...(goals.length || item.githubRepo ? ["/js/kpi-gauge.js"] : []),
       ]}
     >
       <div
