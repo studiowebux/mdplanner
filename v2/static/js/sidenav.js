@@ -169,21 +169,13 @@
       document.body.style.userSelect = "";
     });
 
-    // Double-click resize handle — toggle fullscreen width
-    var prevWidth = null;
+    // Double-click resize handle — toggle expanded (90vw) / default
     document.addEventListener("dblclick", function (e) {
       var handle = e.target.closest("[data-sidenav-resize]");
       if (!handle) return;
       var p = handle.closest(".sidenav__panel");
       if (!p) return;
-      var fullW = window.innerWidth + "px";
-      if (prevWidth) {
-        p.style.width = prevWidth;
-        prevWidth = null;
-      } else {
-        prevWidth = p.style.width || "";
-        p.style.width = fullW;
-      }
+      p.classList.toggle("sidenav__panel--expanded");
     });
   })();
 })();

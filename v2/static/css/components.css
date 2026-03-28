@@ -502,6 +502,10 @@ a.badge:hover {
   flex-direction: column;
 }
 
+.sidenav__panel--expanded {
+  width: 90vw;
+}
+
 .sidenav__header {
   display: flex;
   align-items: center;
