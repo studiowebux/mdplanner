@@ -185,15 +185,21 @@ html.sidebar-collapsed .app-shell {
   border: none;
   cursor: pointer;
   opacity: 0;
-  transition: opacity var(--transition-fast), color var(--transition-fast);
+  visibility: hidden;
+  transition:
+    opacity var(--transition-fast),
+    color var(--transition-fast),
+    visibility var(--transition-fast);
 }
 
 .sidebar__item:hover .sidebar__pin-btn {
   opacity: 1;
+  visibility: visible;
 }
 
 .sidebar__pin-btn--active {
   opacity: 1;
+  visibility: visible;
   color: var(--color-accent);
 }
 
