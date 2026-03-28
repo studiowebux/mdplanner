@@ -17,10 +17,7 @@ import { AgentModelSchema } from "../types/person.types.ts";
 import { WEEKDAYS } from "../constants/mod.ts";
 import type { CacheDatabase } from "../database/sqlite/mod.ts";
 import { rowToPerson } from "../domains/people/cache.ts";
-import {
-  PEOPLE_BODY_KEYS,
-  PEOPLE_TABLE,
-} from "../domains/people/constants.cache.ts";
+import { PEOPLE_BODY_KEYS, PEOPLE_TABLE } from "../domains/people/constants.ts";
 
 export class PeopleRepository {
   private dir: string;

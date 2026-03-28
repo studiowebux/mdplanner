@@ -5,7 +5,7 @@ import { ENTITIES, json, parseJson, val } from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { PeopleRepository } from "../../repositories/people.repository.ts";
 import type { Person } from "../../types/person.types.ts";
-import { PEOPLE_SCHEMA, PEOPLE_TABLE } from "./constants.cache.ts";
+import { PEOPLE_SCHEMA, PEOPLE_TABLE } from "./constants.ts";
 
 /** Deserialize a SQLite row to a Person. */
 export function rowToPerson(row: Record<string, unknown>): Person {

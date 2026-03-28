@@ -13,7 +13,7 @@ import type {
 } from "../types/person.types.ts";
 import type { CacheSync } from "../database/sqlite/mod.ts";
 import { insertPersonRow } from "../domains/people/cache.ts";
-import { PEOPLE_TABLE } from "../domains/people/constants.cache.ts";
+import { PEOPLE_TABLE } from "../domains/people/constants.ts";
 
 export class PeopleService {
   private cache: CacheSync | null = null;
