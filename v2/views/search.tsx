@@ -3,6 +3,7 @@ import { MainLayout } from "../components/layout/main.tsx";
 import type { ViewProps } from "../types/app.ts";
 import type { SearchResult } from "../types/search.types.ts";
 import { ENTITY_TYPE_LABELS } from "../constants/mod.ts";
+import { escapeSnippetHtml } from "../utils/html.ts";
 
 interface SearchViewProps extends ViewProps {
   query: string;
@@ -47,7 +48,9 @@ export const SearchView: FC<SearchViewProps> = ({
                   <span
                     class="search-results__snippet"
                     // deno-lint-ignore react-no-danger
-                    dangerouslySetInnerHTML={{ __html: r.snippet }}
+                    dangerouslySetInnerHTML={{
+                      __html: escapeSnippetHtml(r.snippet),
+                    }}
                   />
                 </div>
               </li>

@@ -4,6 +4,7 @@
 
 import { Hono } from "hono";
 import type { AppVariables } from "../../types/app.ts";
+import { escapeHtml } from "../../utils/html.ts";
 
 type AutocompleteSource = {
   search: (q: string) => Promise<Record<string, unknown>[]>;
@@ -61,11 +62,6 @@ function highlightMatch(text: string, q: string): string {
     `<strong>${escapeHtml(text.slice(idx, idx + q.length))}</strong>` +
     escapeHtml(text.slice(idx + q.length))
   );
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }
 
 function escapeAttr(s: string): string {

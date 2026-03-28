@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { SearchView } from "../search.tsx";
 import { getSearchEngine } from "../../singletons/services.ts";
 import { ENTITY_TYPE_LABELS, ENTITY_TYPE_ROUTES } from "../../constants/mod.ts";
+import { escapeHtml, escapeSnippetHtml } from "../../utils/html.ts";
 import { viewProps } from "../../middleware/view-props.ts";
 import type { AppVariables } from "../../types/app.ts";
 
@@ -38,9 +39,7 @@ searchRouter.get("/results", (c) => {
     const route = ENTITY_TYPE_ROUTES[r.type];
     const href = route ? `${route}/${escapeHtml(r.id)}` : "";
     const snippet = r.snippet && r.snippet !== "null"
-      ? escapeHtml(r.snippet)
-        .replace(/&lt;mark&gt;/g, "<mark>")
-        .replace(/&lt;\/mark&gt;/g, "</mark>")
+      ? escapeSnippetHtml(r.snippet)
       : "";
     return `<li class="search-dialog__result" data-type="${
       escapeHtml(r.type)
@@ -54,8 +53,3 @@ searchRouter.get("/results", (c) => {
   }).join("");
   return c.html(html);
 });
-
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
