@@ -8,21 +8,7 @@
 
 import { type BindValue, type CacheDatabase } from "./database.ts";
 import { ENTITIES, type EntityDef } from "./entities.ts";
-
-export interface SearchResult {
-  type: string;
-  id: string;
-  title: string;
-  snippet: string;
-  score: number;
-}
-
-export interface SearchOptions {
-  limit?: number;
-  types?: string[];
-  offset?: number;
-  project?: string;
-}
+import type { SearchOptions, SearchResult } from "../../types/search.types.ts";
 
 function getFtsEntities() {
   return ENTITIES.filter((e) => e.fts !== undefined);

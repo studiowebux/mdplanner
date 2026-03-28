@@ -15,4 +15,4 @@ export { dropSchema, initSchema } from "./schema.ts";
 export { CacheSync, getAllTables } from "./sync.ts";
 export type { SyncOptions, SyncResult } from "./sync.ts";
 export { SearchEngine } from "./search.ts";
-export type { SearchOptions, SearchResult } from "./search.ts";
+export type { SearchOptions, SearchResult } from "../../types/search.types.ts";

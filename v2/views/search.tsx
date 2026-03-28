@@ -1,7 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { ViewProps } from "../types/app.ts";
-import type { SearchResult } from "../database/sqlite/mod.ts";
+import type { SearchResult } from "../types/search.types.ts";
 import { ENTITY_TYPE_LABELS } from "../constants/mod.ts";
 
 interface SearchViewProps extends ViewProps {
