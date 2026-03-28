@@ -1,7 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { ViewProps } from "../types/app.ts";
-import type { ProjectConfig } from "../domains/project/types.ts";
+import type { ProjectConfig } from "../types/project.types.ts";
 import { APP_VERSION } from "../constants/mod.ts";
 import { markdownToHtml } from "../utils/markdown.ts";
 

@@ -1,8 +1,8 @@
 // Project configuration types — sourced from project.md frontmatter.
 
 import { z } from "@hono/zod-openapi";
-import { WEEKDAYS } from "../../constants/mod.ts";
-import { decryptSecret } from "../../utils/secrets.ts";
+import { WEEKDAYS } from "../constants/mod.ts";
+import { decryptSecret } from "../utils/secrets.ts";
 
 export const ProjectLinkSchema = z.object({
   title: z.string().openapi({

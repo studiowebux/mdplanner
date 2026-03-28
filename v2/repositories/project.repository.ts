@@ -6,8 +6,8 @@ import {
   serializeFrontmatter,
 } from "../utils/frontmatter.ts";
 import { atomicWrite } from "../utils/safe-io.ts";
-import type { ProjectConfig } from "../domains/project/types.ts";
-import { FrontmatterProjectSchema } from "../domains/project/types.ts";
+import type { ProjectConfig } from "../types/project.types.ts";
+import { FrontmatterProjectSchema } from "../types/project.types.ts";
 import { encryptSecret } from "../utils/secrets.ts";
 
 export class ProjectRepository {

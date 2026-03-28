@@ -6,7 +6,7 @@ import {
   FeaturesListSchema,
   ProjectConfigSchema,
   UpdateProjectConfigSchema,
-} from "../../../domains/project/types.ts";
+} from "../../../types/project.types.ts";
 
 export const settingsRouter = new OpenAPIHono();
 

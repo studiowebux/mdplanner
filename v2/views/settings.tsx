@@ -12,7 +12,7 @@ import {
   getSectionOrder,
   WEEKDAYS,
 } from "../constants/mod.ts";
-import type { ProjectConfig } from "../domains/project/types.ts";
+import type { ProjectConfig } from "../types/project.types.ts";
 import { FormActions } from "../components/ui/form-actions.tsx";
 
 type SettingsProps = ViewProps & {

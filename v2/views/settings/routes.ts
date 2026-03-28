@@ -12,7 +12,7 @@ import {
   WEEKDAYS,
 } from "../../constants/mod.ts";
 import type { AppVariables } from "../../types/app.ts";
-import type { ProjectLink } from "../../domains/project/types.ts";
+import type { ProjectLink } from "../../types/project.types.ts";
 
 export const settingsViewRouter = new Hono<{ Variables: AppVariables }>();
 

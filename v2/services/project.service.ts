@@ -6,7 +6,7 @@ import type {
   ProjectConfig,
   ProjectLink,
   UpdateProjectConfig,
-} from "../domains/project/types.ts";
+} from "../types/project.types.ts";
 import { WEEKDAYS } from "../constants/mod.ts";
 
 type Weekday = typeof WEEKDAYS[number];
