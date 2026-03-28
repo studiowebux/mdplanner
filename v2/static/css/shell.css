@@ -184,22 +184,15 @@ html.sidebar-collapsed .app-shell {
   background: none;
   border: none;
   cursor: pointer;
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity var(--transition-fast),
-    color var(--transition-fast),
-    visibility var(--transition-fast);
+  display: none;
 }
 
 .sidebar__item:hover .sidebar__pin-btn {
-  opacity: 1;
-  visibility: visible;
+  display: inline-flex;
 }
 
 .sidebar__pin-btn--active {
-  opacity: 1;
-  visibility: visible;
+  display: inline-flex;
   color: var(--color-accent);
 }
 
