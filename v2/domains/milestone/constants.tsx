@@ -57,7 +57,20 @@ export const MILESTONE_TABLE_COLUMNS: ColumnDef[] = [
     render: statusBadgeRenderer("milestone-card__badge"),
   },
   { key: "target", label: "Target", sortable: true },
-  { key: "progress", label: "Progress", sortable: true },
+  {
+    key: "progress",
+    label: "Progress",
+    sortable: true,
+    render: (v) => {
+      if (v === "" || v === undefined || v === null) return "";
+      return (
+        <div class="goal-progress-cell">
+          <progress class="progress-bar" value={Number(v)} max={100} />
+          <span>{v}%</span>
+        </div>
+      );
+    },
+  },
   { key: "taskCount", label: "Tasks", sortable: true },
   {
     key: "project",
@@ -140,7 +153,7 @@ export function milestoneToRow(m: Milestone): Record<string, unknown> {
     name: m.name,
     status: m.status,
     target: m.target ?? "",
-    progress: `${m.progress}%`,
+    progress: m.progress,
     taskCount: `${m.completedCount}/${m.taskCount}`,
     project: m.project ?? "",
     createdAt: m.createdAt ?? "",

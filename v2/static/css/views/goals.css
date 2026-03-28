@@ -64,7 +64,7 @@
 }
 
 .goal-progress-cell .progress-bar {
-  width: var(--progress-bar-inline-width, 5rem);
+  width: var(--progress-bar-inline-width);
   height: var(--progress-bar-height);
 }
 
@@ -224,7 +224,7 @@
 }
 
 .goal-tree__progress .progress-bar {
-  width: var(--progress-bar-inline-width, 5rem);
+  width: var(--progress-bar-inline-width);
   height: var(--progress-bar-height);
 }
 

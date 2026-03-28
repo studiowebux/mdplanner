@@ -232,6 +232,7 @@
 
   /* Table */
   --progress-col-min-width: 6rem;
+  --progress-bar-inline-width: 5rem;
   --table-compact-cell-max-width: 16rem;
 
   /* Toolbar */
