@@ -8,7 +8,8 @@
   function getHidden(domain) {
     try {
       return JSON.parse(localStorage.getItem(STORAGE_PREFIX + domain)) || [];
-    } catch (_e) {
+    } catch (e) {
+      console.debug("[column-toggle] localStorage parse failed:", e);
       return [];
     }
   }

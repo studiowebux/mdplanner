@@ -57,7 +57,9 @@ function drawDependencyLines(root, withHover) {
         .getPropertyValue("--task-dep-arrow-size"),
     );
     if (v > 0) arrowSize = v;
-  } catch (_e) { /* iframe may not have the var */ }
+  } catch (e) {
+    console.debug("[task-timeline] CSS var read failed:", e);
+  }
 
   var rows = inner.querySelectorAll(".task-timeline__row[data-blocked-by]");
   rows.forEach(function (row) {
