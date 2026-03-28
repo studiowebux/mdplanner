@@ -29,7 +29,7 @@ export const NoteDetailView: FC<Props> = (props) => {
       styles={[
         "/css/vendor/highlight-github-11.11.1.min.css",
         "/css/vendor/highlight-github-dark-scoped-11.11.1.css",
-        "/css/views/note.css",
+        "/css/views/notes.css",
       ]}
       scripts={[
         "/js/vendor/highlight-11.11.1.min.js",

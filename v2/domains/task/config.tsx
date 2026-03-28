@@ -94,7 +94,7 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
   ssePrefix: "task",
   defaultView: "list",
   hideDefaultViews: true,
-  styles: ["/css/views/task.css"],
+  styles: ["/css/views/tasks.css"],
   scripts: [
     "/js/task-list.js",
     "/js/task-board.js",

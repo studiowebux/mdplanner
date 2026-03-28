@@ -207,7 +207,7 @@ export const TaskDetailView: FC<Props> = (
     <MainLayout
       title={task.title}
       {...rest}
-      styles={["/css/views/task.css", "/css/views/github.css"]}
+      styles={["/css/views/tasks.css", "/css/views/github.css"]}
       scripts={[]}
     >
       <div
