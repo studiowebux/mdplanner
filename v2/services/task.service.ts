@@ -9,6 +9,7 @@ import type {
   BatchUpdateResult,
   CreateTask,
   ListTaskOptions,
+  RejectionType,
   Task,
   TaskComment,
   UpdateTask,
@@ -403,7 +404,7 @@ export class TaskService {
     id: string,
     decidedBy: string,
     feedback?: string,
-    rejectionType?: string,
+    rejectionType?: RejectionType,
   ): Promise<Task | null> {
     const task = await this.taskRepo.findById(id);
     if (!task) return null;
@@ -413,7 +414,7 @@ export class TaskService {
       decidedBy,
       decision: "rejected" as const,
       ...(feedback ? { feedback } : {}),
-      ...(rejectionType ? { rejectionType: rejectionType as any } : {}),
+      ...(rejectionType ? { rejectionType } : {}),
     };
 
     const approvalRequest = task.approvalRequest

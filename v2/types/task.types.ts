@@ -11,6 +11,8 @@ export const REJECTION_TYPES = [
   "needs-discussion",
 ] as const;
 
+export type RejectionType = (typeof REJECTION_TYPES)[number];
+
 // ---------------------------------------------------------------------------
 // Time Entry
 // ---------------------------------------------------------------------------
