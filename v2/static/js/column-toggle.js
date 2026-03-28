@@ -82,5 +82,5 @@
   });
 
   init();
-  document.addEventListener("htmx:afterSwap", init);
+  document.addEventListener("htmx:afterSettle", init);
 })();

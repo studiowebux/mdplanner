@@ -109,7 +109,7 @@
   });
 
   // Reset active index when results change (htmx swap)
-  resultsList.addEventListener("htmx:afterSwap", function () {
+  resultsList.addEventListener("htmx:afterSettle", function () {
     activeIndex = -1;
     clearActive();
   });

@@ -69,8 +69,8 @@
   }
 
   // Watch for htmx swaps that populate the autocomplete list
-  document.addEventListener("htmx:afterSwap", function (e) {
-    var field = e.target.closest(".form__tags");
+  document.addEventListener("htmx:afterSettle", function (e) {
+    var field = e.detail.target.closest(".form__tags");
     if (field) hideSelected(field);
   });
 

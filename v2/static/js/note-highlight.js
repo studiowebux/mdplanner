@@ -14,7 +14,6 @@
     highlightAll();
   }
   document.addEventListener("htmx:afterSettle", highlightAll);
-  document.addEventListener("htmx:afterSwap", highlightAll);
 
   // Copy button — event delegation
   document.addEventListener("click", function (e) {
