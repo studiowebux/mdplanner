@@ -1,7 +1,7 @@
 // Task builder — constructs a flat Task from raw frontmatter + body.
 // Validates and normalizes fields. Keeps parsing logic out of the repository.
 
-import type { Task } from "../types/task.types.ts";
+import type { ApprovalVerdict, Task } from "../types/task.types.ts";
 
 export class TaskBuilder {
   private task: Partial<Task> = {};
@@ -48,13 +48,18 @@ export class TaskBuilder {
     this.strArray(fm, "files");
 
     if (Array.isArray(fm.time_entries)) {
-      this.task.time_entries = fm.time_entries.map((e: any) => ({
-        id: String(e.id ?? ""),
-        date: String(e.date ?? ""),
-        hours: Number(e.hours ?? 0),
-        ...(e.person != null && { person: String(e.person) }),
-        ...(e.description != null && { description: String(e.description) }),
-      }));
+      this.task.time_entries = fm.time_entries.map((e: unknown) => {
+        const entry = e as Record<string, unknown>;
+        return {
+          id: String(entry.id ?? ""),
+          date: String(entry.date ?? ""),
+          hours: Number(entry.hours ?? 0),
+          ...(entry.person != null && { person: String(entry.person) }),
+          ...(entry.description != null && {
+            description: String(entry.description),
+          }),
+        };
+      });
     }
 
     if (fm.approvalRequest != null && typeof fm.approvalRequest === "object") {
@@ -68,18 +73,23 @@ export class TaskBuilder {
         ...(Array.isArray(ar.artifactUrls) &&
           { artifactUrls: ar.artifactUrls.map(String) }),
         ...(ar.verdict != null && typeof ar.verdict === "object" &&
-          { verdict: ar.verdict as any }),
+          { verdict: ar.verdict as ApprovalVerdict }),
       };
     }
 
     if (Array.isArray(fm.comments)) {
-      this.task.comments = fm.comments.map((c: any) => ({
-        id: String(c.id ?? ""),
-        timestamp: String(c.timestamp ?? ""),
-        body: String(c.body ?? ""),
-        ...(c.author != null && { author: String(c.author) }),
-        ...(c.metadata != null && { metadata: c.metadata }),
-      }));
+      this.task.comments = fm.comments.map((c: unknown) => {
+        const comment = c as Record<string, unknown>;
+        return {
+          id: String(comment.id ?? ""),
+          timestamp: String(comment.timestamp ?? ""),
+          body: String(comment.body ?? ""),
+          ...(comment.author != null && { author: String(comment.author) }),
+          ...(comment.metadata != null && {
+            metadata: comment.metadata as Record<string, unknown>,
+          }),
+        };
+      });
     }
 
     return this;
