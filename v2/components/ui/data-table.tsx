@@ -41,15 +41,20 @@ export const DataTable: FC<Props> = (
             const nextOrder = isSorted && sort?.order === "asc"
               ? "desc"
               : "asc";
-            const sortIndicator = isSorted
-              ? (sort?.order === "asc" ? " \u25B2" : " \u25BC")
-              : "";
             return (
               <th
                 key={col.key}
                 class={`data-table__th${
                   col.sortable ? " data-table__th--sortable" : ""
-                }${isSorted ? " data-table__th--sorted" : ""}`}
+                }${isSorted ? " data-table__th--sorted" : ""}${
+                  isSorted && sort?.order === "asc"
+                    ? " data-table__th--asc"
+                    : ""
+                }${
+                  isSorted && sort?.order === "desc"
+                    ? " data-table__th--desc"
+                    : ""
+                }`}
                 data-col={col.key}
                 {...(col.sortable && sort
                   ? {
@@ -61,7 +66,6 @@ export const DataTable: FC<Props> = (
                   : {})}
               >
                 {col.label}
-                {sortIndicator}
               </th>
             );
           })}
