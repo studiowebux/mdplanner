@@ -134,21 +134,26 @@ export class TaskBuilder {
 
   // --- private helpers ---
 
-  private str(fm: Record<string, unknown>, key: string): void {
-    if (fm[key] != null) {
-      (this.task as any)[key] = String(fm[key]);
+  private str<K extends keyof Task>(fm: Record<string, unknown>, key: K): void {
+    if (fm[key as string] != null) {
+      (this.task as Partial<Task>)[key] = String(fm[key as string]) as Task[K];
     }
   }
 
-  private num(fm: Record<string, unknown>, key: string): void {
-    if (typeof fm[key] === "number") {
-      (this.task as any)[key] = fm[key];
+  private num<K extends keyof Task>(fm: Record<string, unknown>, key: K): void {
+    if (typeof fm[key as string] === "number") {
+      (this.task as Partial<Task>)[key] = fm[key as string] as Task[K];
     }
   }
 
-  private strArray(fm: Record<string, unknown>, key: string): void {
-    if (Array.isArray(fm[key])) {
-      (this.task as any)[key] = (fm[key] as unknown[]).map(String);
+  private strArray<K extends keyof Task>(
+    fm: Record<string, unknown>,
+    key: K,
+  ): void {
+    if (Array.isArray(fm[key as string])) {
+      (this.task as Partial<Task>)[key] = (fm[key as string] as unknown[]).map(
+        String,
+      ) as Task[K];
     }
   }
 }
