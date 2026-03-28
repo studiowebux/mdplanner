@@ -6,18 +6,76 @@ import type { TaskRepository } from "../repositories/task.repository.ts";
 import type {
   CreateMilestone,
   Milestone,
+  MilestoneBase,
   MilestoneStatus,
   UpdateMilestone,
 } from "../types/milestone.types.ts";
 import type { Task } from "../types/task.types.ts";
 import type { CacheSync } from "../database/sqlite/mod.ts";
-import {
-  enrichMilestone,
-  enrichMilestones,
-} from "../domains/milestone/milestone.ts";
+import { markdownToHtml } from "../utils/markdown.ts";
 import { insertMilestoneRow } from "../domains/milestone/cache.ts";
 import { MILESTONE_TABLE } from "../domains/milestone/constants.cache.ts";
 import { DONE_SECTION, getSectionOrder } from "../constants/mod.ts";
+
+function tasksByMilestone(tasks: Task[], name: string): Task[] {
+  const result: Task[] = [];
+  const collect = (list: Task[]) => {
+    for (const t of list) {
+      if (t.milestone === name) result.push(t);
+      if (t.children) collect(t.children);
+    }
+  };
+  collect(tasks);
+  return result;
+}
+
+function enrichMilestone(raw: MilestoneBase, tasks: Task[]): Milestone {
+  const linked = tasksByMilestone(tasks, raw.name);
+  const completedCount = linked.filter((t) => t.completed).length;
+  return {
+    ...raw,
+    descriptionHtml: markdownToHtml(raw.description),
+    taskCount: linked.length,
+    completedCount,
+    progress: linked.length > 0
+      ? Math.round((completedCount / linked.length) * 100)
+      : 0,
+  };
+}
+
+function enrichMilestones(raw: MilestoneBase[], tasks: Task[]): Milestone[] {
+  const result = raw.map((m) => enrichMilestone(m, tasks));
+
+  // Surface virtual milestones referenced in tasks but with no backing file.
+  const existingNames = new Set(raw.map((m) => m.name));
+  const collect = (taskList: Task[]) => {
+    for (const task of taskList) {
+      if (task.milestone && !existingNames.has(task.milestone)) {
+        const name = task.milestone;
+        existingNames.add(name);
+        const linked = tasksByMilestone(tasks, name);
+        const completedCount = linked.filter((t) => t.completed).length;
+        result.push({
+          id: name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(
+            /^-|-$/g,
+            "",
+          ),
+          name,
+          status: "open",
+          taskCount: linked.length,
+          completedCount,
+          progress: linked.length > 0
+            ? Math.round((completedCount / linked.length) * 100)
+            : 0,
+        });
+      }
+      if (task.children) collect(task.children);
+    }
+  };
+  collect(tasks);
+
+  return result;
+}
 
 export interface ListMilestoneOptions {
   status?: MilestoneStatus;
