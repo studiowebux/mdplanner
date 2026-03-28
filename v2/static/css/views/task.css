@@ -1164,4 +1164,20 @@ a.task-board__card-avatar:hover {
   .task-detail__quick-actions {
     justify-content: flex-start;
   }
+
+  /* Time entries table — horizontal scroll on narrow screens */
+  .task-detail__table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  /* Assign/move autocomplete — full width on mobile */
+  .task-detail__action-group .form__autocomplete {
+    width: 100%;
+  }
+
+  /* Timeline chart inner — remove trailing padding (chart handles its own scroll) */
+  .task-timeline__chart-inner {
+    padding-right: 0;
+  }
 }
