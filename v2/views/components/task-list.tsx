@@ -26,6 +26,7 @@ const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = (
       task.completed ? " task-list__row--completed" : ""
     }`}
     data-task-id={task.id}
+    draggable="true"
   >
     <div class="task-list__row-main">
       <div class="task-list__row-left">
@@ -290,6 +291,13 @@ export const TaskListView: FC<ListProps> = (
           </div>
         );
       })}
+      <div class="task-list__drop-strip" aria-hidden="true">
+        {(getSectionOrder() as readonly string[]).map((s) => (
+          <div key={s} class="task-list__drop-zone" data-drop-section={s}>
+            {s}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

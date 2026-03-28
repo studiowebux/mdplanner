@@ -54,6 +54,55 @@
   gap: var(--space-md);
 }
 
+/* Drag-and-drop — row states, drop strip, section highlights */
+
+.task-list__row--dragging {
+  opacity: var(--card-opacity-muted);
+}
+
+.task-list__drop-strip {
+  display: none;
+  position: sticky;
+  bottom: 0;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  background: var(--color-bg-primary);
+  border-top: var(--border-width) var(--border-style)
+    var(--color-border-default);
+  z-index: var(--z-table-sticky);
+}
+
+.task-list--dragging .task-list__drop-strip {
+  display: flex;
+}
+
+.task-list__drop-zone {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) dashed var(--color-border-default);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.task-list__drop-zone--over {
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  border-style: solid;
+}
+
+.task-list__section-header--drag-over {
+  background: var(--color-accent-subtle);
+  outline: calc(var(--border-width) * 2) solid var(--color-accent);
+  outline-offset: calc(-1 * var(--border-width) * 2);
+  border-radius: var(--radius-md);
+}
+
 /* Column header — labels above data rows */
 
 .task-list__sticky-header {
