@@ -129,9 +129,9 @@ a.badge:hover {
   display: grid;
   grid-template-columns:
     repeat(
-    auto-fill,
-    minmax(max(var(--grid-col-min), calc(33.334% - var(--grid-gap))), 1fr)
-  );
+      auto-fill,
+      minmax(max(var(--grid-col-min), calc(33.334% - var(--grid-gap))), 1fr)
+    );
   gap: var(--grid-gap);
 }
 

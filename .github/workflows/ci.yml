@@ -21,7 +21,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version: v2.7.7
 
       - name: Cache Deno dependencies
         uses: actions/cache@v5
@@ -51,7 +51,7 @@ jobs:
         run: deno lint
 
       - name: Type check
-        run: deno check main.ts
+        run: deno check v2/bin.ts
 
       - name: Test
         run: deno task test
