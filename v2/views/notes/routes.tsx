@@ -17,12 +17,7 @@ notesRouter.get("/:id", async (c) => {
   const id = c.req.param("id");
   const note = await getNoteService().getById(id);
   if (!note) return c.notFound();
-  return c.html(
-    (NoteDetailView({
-      ...viewProps(c, "/notes"),
-      note,
-    }))!,
-  );
+  return c.html(<NoteDetailView {...viewProps(c, "/notes")} note={note} />);
 });
 
 // Update title — inline edit via htmx
@@ -34,12 +29,7 @@ notesRouter.post("/:id/title", async (c) => {
   const note = await getNoteService().update(id, { title });
   if (!note) return c.notFound();
   c.header("HX-Trigger", hxTrigger("success", "Title updated"));
-  return c.html(
-    (NoteDetailView({
-      ...viewProps(c, "/notes"),
-      note,
-    }))!,
-  );
+  return c.html(<NoteDetailView {...viewProps(c, "/notes")} note={note} />);
 });
 
 // Update project — htmx autocomplete hidden input triggers this
@@ -50,12 +40,7 @@ notesRouter.post("/:id/project", async (c) => {
   const note = await getNoteService().update(id, { project });
   if (!note) return c.notFound();
   c.header("HX-Trigger", hxTrigger("success", "Project updated"));
-  return c.html(
-    (NoteDetailView({
-      ...viewProps(c, "/notes"),
-      note,
-    }))!,
-  );
+  return c.html(<NoteDetailView {...viewProps(c, "/notes")} note={note} />);
 });
 
 // Preview a single block — returns rendered markdown HTML fragment
@@ -72,11 +57,8 @@ notesRouter.get("/:id/preview", async (c) => {
   const note = await getNoteService().getById(id);
   if (!note) return c.notFound();
   return c.html(
-    (Sidenav({
-      id: "notes-preview-sidenav",
-      title: note.title,
-      open: true,
-      children: NotePreview({ note }),
-    }))!,
+    <Sidenav id="notes-preview-sidenav" title={note.title} open>
+      <NotePreview note={note} />
+    </Sidenav>,
   );
 });

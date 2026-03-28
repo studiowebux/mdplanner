@@ -29,10 +29,10 @@ marketingPlansRouter.get("/:id", async (c) => {
   }
 
   return c.html(
-    (MarketingPlanDetailView({
-      ...viewProps(c, "/marketing-plans"),
-      item: plan,
-      goals,
-    }))!,
+    <MarketingPlanDetailView
+      {...viewProps(c, "/marketing-plans")}
+      item={plan}
+      goals={goals}
+    />,
   );
 });

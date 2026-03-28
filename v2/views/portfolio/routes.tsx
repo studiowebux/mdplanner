@@ -37,9 +37,7 @@ portfolioRouter.get("/:id/github/card", async (c) => {
   const item = await getPortfolioService().getById(id);
   if (!item?.githubRepo) {
     return c.html(
-      (GitHubError({
-        message: "No GitHub repository configured",
-      }))!,
+      <GitHubError message="No GitHub repository configured" />,
     );
   }
   try {
@@ -48,12 +46,10 @@ portfolioRouter.get("/:id/github/card", async (c) => {
       gh.getRepo(item.githubRepo),
       gh.getLatestRelease(item.githubRepo),
     ]);
-    return c.html(
-      (GitHubRepoCard({ repo, release }))!,
-    );
+    return c.html(<GitHubRepoCard repo={repo} release={release} />);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    return c.html((GitHubError({ message: msg }))!);
+    return c.html(<GitHubError message={msg} />);
   }
 });
 
@@ -62,19 +58,15 @@ portfolioRouter.get("/:id/github/issues", async (c) => {
   const item = await getPortfolioService().getById(id);
   if (!item?.githubRepo) {
     return c.html(
-      (GitHubError({
-        message: "No GitHub repository configured",
-      }))!,
+      <GitHubError message="No GitHub repository configured" />,
     );
   }
   try {
     const issues = await getGitHubService().listIssues(item.githubRepo);
-    return c.html(
-      (GitHubIssuesTable({ issues, itemId: id }))!,
-    );
+    return c.html(<GitHubIssuesTable issues={issues} itemId={id} />);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    return c.html((GitHubError({ message: msg }))!);
+    return c.html(<GitHubError message={msg} />);
   }
 });
 
@@ -83,19 +75,15 @@ portfolioRouter.get("/:id/github/pulls", async (c) => {
   const item = await getPortfolioService().getById(id);
   if (!item?.githubRepo) {
     return c.html(
-      (GitHubError({
-        message: "No GitHub repository configured",
-      }))!,
+      <GitHubError message="No GitHub repository configured" />,
     );
   }
   try {
     const prs = await getGitHubService().listPRs(item.githubRepo);
-    return c.html(
-      (GitHubPRsTable({ prs, itemId: id }))!,
-    );
+    return c.html(<GitHubPRsTable prs={prs} itemId={id} />);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    return c.html((GitHubError({ message: msg }))!);
+    return c.html(<GitHubError message={msg} />);
   }
 });
 
@@ -104,19 +92,15 @@ portfolioRouter.get("/:id/github/milestones", async (c) => {
   const item = await getPortfolioService().getById(id);
   if (!item?.githubRepo) {
     return c.html(
-      (GitHubError({
-        message: "No GitHub repository configured",
-      }))!,
+      <GitHubError message="No GitHub repository configured" />,
     );
   }
   try {
     const milestones = await getGitHubService().listMilestones(item.githubRepo);
-    return c.html(
-      (GitHubMilestonesList({ milestones }))!,
-    );
+    return c.html(<GitHubMilestonesList milestones={milestones} />);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    return c.html((GitHubError({ message: msg }))!);
+    return c.html(<GitHubError message={msg} />);
   }
 });
 
@@ -125,9 +109,7 @@ portfolioRouter.get("/:id/github/pipelines", async (c) => {
   const item = await getPortfolioService().getById(id);
   if (!item?.githubRepo) {
     return c.html(
-      (GitHubError({
-        message: "No GitHub repository configured",
-      }))!,
+      <GitHubError message="No GitHub repository configured" />,
     );
   }
   try {
@@ -156,18 +138,18 @@ portfolioRouter.get("/:id/github/pipelines", async (c) => {
       : runs;
     const hasNext = runs.length === perPage;
     return c.html(
-      (GitHubPipelinesTable({
-        runs: filtered,
-        total: totalCount,
-        itemId: id,
-        filters,
-        page,
-        hasNext,
-      }))!,
+      <GitHubPipelinesTable
+        runs={filtered}
+        total={totalCount}
+        itemId={id}
+        filters={filters}
+        page={page}
+        hasNext={hasNext}
+      />,
     );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    return c.html((GitHubError({ message: msg }))!);
+    return c.html(<GitHubError message={msg} />);
   }
 });
 
@@ -177,9 +159,7 @@ portfolioRouter.get("/:id/github/pipelines/results", async (c) => {
   const item = await getPortfolioService().getById(id);
   if (!item?.githubRepo) {
     return c.html(
-      (GitHubError({
-        message: "No GitHub repository configured",
-      }))!,
+      <GitHubError message="No GitHub repository configured" />,
     );
   }
   try {
@@ -217,18 +197,18 @@ portfolioRouter.get("/:id/github/pipelines/results", async (c) => {
       return `/portfolio/${id}/github/pipelines/results?${params}`;
     };
     return c.html(
-      (GitHubPipelineResults({
-        runs: filtered,
-        total: totalCount,
-        itemId: id,
-        page,
-        hasNext,
-        resultsUrl,
-      }))!,
+      <GitHubPipelineResults
+        runs={filtered}
+        total={totalCount}
+        itemId={id}
+        page={page}
+        hasNext={hasNext}
+        resultsUrl={resultsUrl}
+      />,
     );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    return c.html((GitHubError({ message: msg }))!);
+    return c.html(<GitHubError message={msg} />);
   }
 });
 
@@ -248,14 +228,14 @@ portfolioRouter.post("/:id/github/pipelines/cancel/:runId", async (c) => {
   const resultsUrl = (p: number) =>
     `/portfolio/${id}/github/pipelines/results?page=${p}`;
   return c.html(
-    (GitHubPipelineResults({
-      runs,
-      total: totalCount,
-      itemId: id,
-      page: 1,
-      hasNext: runs.length === GITHUB_PIPELINES_PER_PAGE,
-      resultsUrl,
-    }))!,
+    <GitHubPipelineResults
+      runs={runs}
+      total={totalCount}
+      itemId={id}
+      page={1}
+      hasNext={runs.length === GITHUB_PIPELINES_PER_PAGE}
+      resultsUrl={resultsUrl}
+    />,
   );
 });
 
@@ -274,14 +254,14 @@ portfolioRouter.post("/:id/github/pipelines/rerun/:runId", async (c) => {
   const resultsUrl = (p: number) =>
     `/portfolio/${id}/github/pipelines/results?page=${p}`;
   return c.html(
-    (GitHubPipelineResults({
-      runs,
-      total: totalCount,
-      itemId: id,
-      page: 1,
-      hasNext: runs.length === GITHUB_PIPELINES_PER_PAGE,
-      resultsUrl,
-    }))!,
+    <GitHubPipelineResults
+      runs={runs}
+      total={totalCount}
+      itemId={id}
+      page={1}
+      hasNext={runs.length === GITHUB_PIPELINES_PER_PAGE}
+      resultsUrl={resultsUrl}
+    />,
   );
 });
 
@@ -304,14 +284,14 @@ portfolioRouter.post(
     const resultsUrl = (p: number) =>
       `/portfolio/${id}/github/pipelines/results?page=${p}`;
     return c.html(
-      (GitHubPipelineResults({
-        runs,
-        total: totalCount,
-        itemId: id,
-        page: 1,
-        hasNext: runs.length === GITHUB_PIPELINES_PER_PAGE,
-        resultsUrl,
-      }))!,
+      <GitHubPipelineResults
+        runs={runs}
+        total={totalCount}
+        itemId={id}
+        page={1}
+        hasNext={runs.length === GITHUB_PIPELINES_PER_PAGE}
+        resultsUrl={resultsUrl}
+      />,
     );
   },
 );
@@ -329,11 +309,11 @@ portfolioRouter.get("/:id", async (c) => {
   );
 
   return c.html(
-    (PortfolioDetailView({
-      ...viewProps(c, "/portfolio"),
-      item,
-      goals,
-    }))!,
+    <PortfolioDetailView
+      {...viewProps(c, "/portfolio")}
+      item={item}
+      goals={goals}
+    />,
   );
 });
 
@@ -346,8 +326,7 @@ portfolioRouter.post("/:id/status-updates", async (c) => {
   const update = await getPortfolioService().addStatusUpdate(id, message);
   if (!update) return c.notFound();
   publish("portfolio.updated");
-  const html = (StatusUpdateRow({ u: update, itemId: id }))!;
-  return c.html(html, 200, {
+  return c.html(<StatusUpdateRow u={update} itemId={id} />, 200, {
     "HX-Trigger": hxTrigger("success", "Status update added"),
   });
 });
@@ -366,8 +345,7 @@ portfolioRouter.post("/:id/status-updates/:updateId", async (c) => {
   );
   if (!update) return c.notFound();
   publish("portfolio.updated");
-  const html = (StatusUpdateRow({ u: update, itemId: id }))!;
-  return c.html(html, 200, {
+  return c.html(<StatusUpdateRow u={update} itemId={id} />, 200, {
     "HX-Trigger": hxTrigger("success", "Status update saved"),
   });
 });
@@ -379,9 +357,7 @@ portfolioRouter.get("/:id/status-updates/:updateId/edit", async (c) => {
   const item = await getPortfolioService().getById(id);
   const u = item?.statusUpdates?.find((s) => s.id === updateId);
   if (!u) return c.notFound();
-  return c.html(
-    (StatusUpdateEditRow({ u, itemId: id }))!,
-  );
+  return c.html(<StatusUpdateEditRow u={u} itemId={id} />);
 });
 
 // Read-only row fragment — cancel swaps back from edit mode
@@ -391,9 +367,7 @@ portfolioRouter.get("/:id/status-updates/:updateId/row", async (c) => {
   const item = await getPortfolioService().getById(id);
   const u = item?.statusUpdates?.find((s) => s.id === updateId);
   if (!u) return c.notFound();
-  return c.html(
-    (StatusUpdateRow({ u, itemId: id }))!,
-  );
+  return c.html(<StatusUpdateRow u={u} itemId={id} />);
 });
 
 // Delete status update — returns empty, htmx removes the element

@@ -20,10 +20,7 @@ githubSummaryRouter.get("/", async (c) => {
   const all = await getPortfolioService().list();
   const items = all.filter((p) => p.githubRepo);
   return c.html(
-    (GitHubSummaryView({
-      ...viewProps(c, "/github"),
-      items,
-    }))!,
+    <GitHubSummaryView {...viewProps(c, "/github")} items={items} />,
   );
 });
 
@@ -32,11 +29,12 @@ githubSummaryRouter.get("/:id/card", async (c) => {
   const id = c.req.param("id");
   const item = await getPortfolioService().getById(id);
   if (!item?.githubRepo) {
+    const fallback = item ?? { id, name: id } as never;
     return c.html(
-      (GitHubSummaryCardError({
-        item: item ?? { id, name: id } as never,
-        message: "No GitHub repository configured",
-      }))!,
+      <GitHubSummaryCardError
+        item={fallback}
+        message="No GitHub repository configured"
+      />,
     );
   }
   try {
@@ -46,12 +44,10 @@ githubSummaryRouter.get("/:id/card", async (c) => {
       gh.getLatestRelease(item.githubRepo),
     ]);
     return c.html(
-      (GitHubSummaryCard({ item, repo, release }))!,
+      <GitHubSummaryCard item={item} repo={repo} release={release} />,
     );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    return c.html(
-      (GitHubSummaryCardError({ item, message: msg }))!,
-    );
+    return c.html(<GitHubSummaryCardError item={item} message={msg} />);
   }
 });

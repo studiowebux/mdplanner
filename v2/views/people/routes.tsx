@@ -17,11 +17,11 @@ peopleRouter.get("/:id", async (c) => {
   const reports = await svc.getDirectReports(id);
   const manager = person.reportsTo ? await svc.getById(person.reportsTo) : null;
   return c.html(
-    (PersonDetailView({
-      ...viewProps(c, "/people"),
-      person,
-      reports,
-      manager,
-    }))!,
+    <PersonDetailView
+      {...viewProps(c, "/people")}
+      person={person}
+      reports={reports}
+      manager={manager}
+    />,
   );
 });

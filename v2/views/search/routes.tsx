@@ -14,11 +14,7 @@ searchRouter.get("/", (c) => {
   const engine = getSearchEngine();
   const results = engine ? engine.search(query) : [];
   return c.html(
-    (SearchView({
-      ...viewProps(c),
-      query,
-      results,
-    }))!,
+    <SearchView {...viewProps(c)} query={query} results={results} />,
   );
 });
 

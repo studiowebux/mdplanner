@@ -51,14 +51,14 @@ goalsRouter.get("/:id", async (c) => {
   }
 
   return c.html(
-    (GoalDetailView({
-      ...viewProps(c, "/goals"),
-      item: goal,
-      portfolioItems,
-      parentGoal,
-      linkedMilestones,
-      childGoals,
-      personByName,
-    }))!,
+    <GoalDetailView
+      {...viewProps(c, "/goals")}
+      item={goal}
+      portfolioItems={portfolioItems}
+      parentGoal={parentGoal}
+      linkedMilestones={linkedMilestones}
+      childGoals={childGoals}
+      personByName={personByName}
+    />,
   );
 });

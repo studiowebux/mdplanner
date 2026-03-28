@@ -16,10 +16,10 @@ milestonesRouter.get("/:id", async (c) => {
   if (!milestone) return c.notFound();
   const tasks = await svc.getTasksForMilestone(milestone.name);
   return c.html(
-    (MilestoneDetailView({
-      ...viewProps(c, "/milestones"),
-      milestone,
-      tasks,
-    }))!,
+    <MilestoneDetailView
+      {...viewProps(c, "/milestones")}
+      milestone={milestone}
+      tasks={tasks}
+    />,
   );
 });

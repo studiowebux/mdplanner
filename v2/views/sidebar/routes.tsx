@@ -29,11 +29,11 @@ sidebarRouter.post("/pin", async (c) => {
     : undefined;
 
   return c.html(
-    (SidebarContent({
-      activePath,
-      enabledFeatures: c.get("enabledFeatures"),
-      pinnedKeys: pinned,
-      navCategories: c.get("navCategories"),
-    }))!,
+    <SidebarContent
+      activePath={activePath}
+      enabledFeatures={c.get("enabledFeatures")}
+      pinnedKeys={pinned}
+      navCategories={c.get("navCategories")}
+    />,
   );
 });

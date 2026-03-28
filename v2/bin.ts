@@ -6,7 +6,7 @@ import { log } from "./singletons/logger.ts";
 import { bootCacheSync, initServices } from "./singletons/services.ts";
 import { subscribe } from "./singletons/event-bus.ts";
 import { api } from "./api/mod.ts";
-import { views } from "./views/mod.ts";
+import { views } from "./views/mod.tsx";
 import { createMcpHonoRouter } from "./mcp/mod.ts";
 import { contextMiddleware } from "./middleware/context.ts";
 import {

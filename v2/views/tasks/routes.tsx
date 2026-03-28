@@ -25,11 +25,7 @@ async function renderDetailPage(c: AppContext, id: string) {
   if (!task) return c.notFound();
   const props = await resolveTaskDetailProps(task);
   return c.html(
-    (TaskDetailView({
-      ...viewProps(c, "/tasks"),
-      task,
-      ...props,
-    }))!,
+    <TaskDetailView {...viewProps(c, "/tasks")} task={task} {...props} />,
   );
 }
 
@@ -114,7 +110,7 @@ async function renderGitHubFragment(
 ) {
   const task = await getTaskService().getById(taskId);
   if (!task || !task.githubRepo) {
-    return c.html((TaskGitHubEmpty({ taskId }))!);
+    return c.html(<TaskGitHubEmpty taskId={taskId} />);
   }
   try {
     const gh = getGitHubService();
@@ -126,14 +122,10 @@ async function renderGitHubFragment(
         ? gh.getPR(task.githubRepo, task.githubPR)
         : Promise.resolve(null),
     ]);
-    return c.html(
-      (TaskGitHubSection({ task, issue, pr }))!,
-    );
+    return c.html(<TaskGitHubSection task={task} issue={issue} pr={pr} />);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    return c.html(
-      (TaskGitHubError({ taskId, message: msg }))!,
-    );
+    return c.html(<TaskGitHubError taskId={taskId} message={msg} />);
   }
 }
 

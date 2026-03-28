@@ -1,6 +1,7 @@
 // Settings view routes — SSR page + form handlers for each tab.
 
 import { Hono } from "hono";
+import { renderToString } from "hono/jsx/server";
 import { SettingsView } from "../settings.tsx";
 import {
   getCacheSync,
@@ -24,10 +25,7 @@ export const settingsViewRouter = new Hono<{ Variables: AppVariables }>();
 settingsViewRouter.get("/", async (c) => {
   const config = await getProjectService().getConfig();
   return c.html(
-    (SettingsView({
-      ...viewProps(c, "/settings"),
-      config,
-    }))!,
+    <SettingsView {...viewProps(c, "/settings")} config={config} />,
   );
 });
 
@@ -42,12 +40,14 @@ settingsViewRouter.post("/features", async (c) => {
     : [];
   await getProjectService().setFeatures(features);
   // Return updated sidebar via OOB swap so nav reflects the change without full reload.
-  const sidebarHtml = (SidebarContent({
-    activePath: "/settings",
-    enabledFeatures: features,
-    pinnedKeys: c.get("pinnedKeys"),
-    navCategories: c.get("navCategories"),
-  }))!;
+  const sidebarHtml = renderToString(
+    <SidebarContent
+      activePath="/settings"
+      enabledFeatures={features}
+      pinnedKeys={c.get("pinnedKeys")}
+      navCategories={c.get("navCategories")}
+    />,
+  );
   const oob =
     `<div id="sidebar-content" hx-swap-oob="innerHTML">${sidebarHtml}</div>`;
   return new Response(oob, {

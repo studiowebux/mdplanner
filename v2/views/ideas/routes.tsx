@@ -35,11 +35,11 @@ ideasRouter.get("/:id", async (c) => {
     .map((other) => ({ id: other.id, title: other.title }));
 
   return c.html(
-    (IdeaDetailView({
-      ...viewProps(c, "/ideas"),
-      item: idea,
-      linkedIdeas,
-      backlinks,
-    }))!,
+    <IdeaDetailView
+      {...viewProps(c, "/ideas")}
+      item={idea}
+      linkedIdeas={linkedIdeas}
+      backlinks={backlinks}
+    />,
   );
 });

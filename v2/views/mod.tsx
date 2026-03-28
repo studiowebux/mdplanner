@@ -1,26 +1,26 @@
 // SSR view router — mounts all view routers. Add new domains here.
-// Each domain owns its routes file under views/<domain>/routes.ts.
+// Each domain owns its routes file under views/<domain>/routes.tsx.
 
 import { Hono } from "hono";
-import { dnsRouter } from "./dns/routes.ts";
-import { goalsRouter as goalsViewRouter } from "./goals/routes.ts";
-import { ideasRouter } from "./ideas/routes.ts";
-import { homeViewRouter } from "./home/routes.ts";
-import { milestonesRouter } from "./milestones/routes.ts";
+import { dnsRouter } from "./dns/routes.tsx";
+import { goalsRouter as goalsViewRouter } from "./goals/routes.tsx";
+import { ideasRouter } from "./ideas/routes.tsx";
+import { homeViewRouter } from "./home/routes.tsx";
+import { milestonesRouter } from "./milestones/routes.tsx";
 import { peopleRouter } from "./people/routes.tsx";
-import { notesRouter as notesViewRouter } from "./notes/routes.ts";
-import { tasksRouter } from "./tasks/routes.ts";
-import { settingsViewRouter } from "./settings/routes.ts";
-import { portfolioRouter } from "./portfolio/routes.ts";
-import { githubSummaryRouter } from "./github-summary/routes.ts";
-import { searchRouter } from "./search/routes.ts";
-import { sidebarRouter } from "./sidebar/routes.ts";
+import { notesRouter as notesViewRouter } from "./notes/routes.tsx";
+import { tasksRouter } from "./tasks/routes.tsx";
+import { settingsViewRouter } from "./settings/routes.tsx";
+import { portfolioRouter } from "./portfolio/routes.tsx";
+import { githubSummaryRouter } from "./github-summary/routes.tsx";
+import { searchRouter } from "./search/routes.tsx";
+import { sidebarRouter } from "./sidebar/routes.tsx";
 import {
   autocompleteRouter,
   registerAutocompleteSource,
 } from "./autocomplete/routes.ts";
-import { marketingPlansRouter } from "./marketing-plans/routes.ts";
-import { swotRouter } from "./swot/routes.ts";
+import { marketingPlansRouter } from "./marketing-plans/routes.tsx";
+import { swotRouter } from "./swot/routes.tsx";
 import {
   getArrayTableSection,
   registerArrayTableSection,
@@ -283,6 +283,6 @@ views.get("/forms/array-row/:section", (c) => {
   if (!itemFields) return c.notFound();
   const idx = Date.now();
   return c.html(
-    (ArrayTableRow({ section, idx, itemFields }))!,
+    <ArrayTableRow section={section} idx={idx} itemFields={itemFields} />,
   );
 });
