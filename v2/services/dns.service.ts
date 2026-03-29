@@ -25,8 +25,8 @@ export class DnsService {
     return this.repo.findById(id);
   }
 
-  async getByDomain(domain: string): Promise<DnsDomain | null> {
-    return this.repo.findByDomain(domain);
+  async getByName(domain: string): Promise<DnsDomain | null> {
+    return this.repo.findByName(domain);
   }
 
   async create(data: CreateDnsDomain): Promise<DnsDomain> {

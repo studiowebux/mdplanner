@@ -50,7 +50,7 @@ export class DnsRepository {
     }
   }
 
-  async findByDomain(domain: string): Promise<DnsDomain | null> {
+  async findByName(domain: string): Promise<DnsDomain | null> {
     const all = await this.findAll();
     return all.find((d) => ciEquals(d.domain, domain)) ?? null;
   }
@@ -143,7 +143,7 @@ export class DnsRepository {
     domainName: string,
     fields: Partial<DnsDomain>,
   ): Promise<{ item: DnsDomain; created: boolean }> {
-    const existing = await this.findByDomain(domainName);
+    const existing = await this.findByName(domainName);
     if (existing) {
       const updated = await this.update(existing.id, fields as UpdateDnsDomain);
       return { item: updated!, created: false };
