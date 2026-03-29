@@ -90,13 +90,21 @@ export function createDomainRoutes<T extends Entity, C, U>(
         const val = state[f.name];
         if (val && typeof val === "string") {
           const field = f.field ?? f.name;
-          result = result.filter((item) => {
-            const itemVal = item[field as keyof T];
-            if (Array.isArray(itemVal)) {
-              return (itemVal as string[]).some((v) => v === val);
-            }
-            return String(itemVal ?? "") === val;
-          });
+          if (val === "__unassigned__") {
+            result = result.filter((item) => {
+              const itemVal = item[field as keyof T];
+              return itemVal === undefined || itemVal === null ||
+                itemVal === "";
+            });
+          } else {
+            result = result.filter((item) => {
+              const itemVal = item[field as keyof T];
+              if (Array.isArray(itemVal)) {
+                return (itemVal as string[]).some((v) => v === val);
+              }
+              return String(itemVal ?? "") === val;
+            });
+          }
         }
       }
     }

@@ -193,9 +193,12 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
       section: sections.map((s) => s.value),
       project: portfolio.map((p) => p.name).sort(),
       milestone: [...new Set(milestones.map((m) => m.name))].sort(),
-      assignee: assigneeIds
-        .map((id) => ({ value: id, label: peopleMap.get(id) ?? id }))
-        .sort((a, b) => a.label.localeCompare(b.label)),
+      assignee: [
+        { value: "__unassigned__", label: "Unassigned" },
+        ...assigneeIds
+          .map((id) => ({ value: id, label: peopleMap.get(id) ?? id }))
+          .sort((a, b) => a.label.localeCompare(b.label)),
+      ],
       priority: TASK_PRIORITY_OPTIONS.filter((o) =>
         items.some((t) => String(t.priority) === o.value)
       ),
