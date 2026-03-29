@@ -178,8 +178,8 @@
 }
 
 .task-list__jump-pill:hover {
-  background: var(--color-accent);
-  color: var(--color-text-inverse);
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
 }
 
 /* Section */
