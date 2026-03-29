@@ -1055,6 +1055,7 @@ a.badge:hover {
   position: relative;
   z-index: var(--z-dropdown);
   transform: translateZ(0);
+  margin-right: var(--space-sm);
 }
 
 .column-toggle__panel {

@@ -19,7 +19,7 @@
 
 .settings-tabs {
   display: grid;
-  grid-template-columns: repeat(9, auto) 1fr;
+  grid-template-columns: repeat(10, auto) 1fr;
   grid-template-rows: auto 1fr;
 }
 
