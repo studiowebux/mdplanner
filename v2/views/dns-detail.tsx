@@ -5,7 +5,10 @@ import { FormBuilder } from "../components/ui/form-builder.tsx";
 import type { DnsDomain } from "../types/dns.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
-import { DNS_RECORD_FORM_FIELDS } from "../domains/dns/constants.tsx";
+import {
+  DNS_RECORD_FORM_FIELDS,
+  DNS_STATUS_VARIANTS,
+} from "../domains/dns/constants.tsx";
 import { toKebab } from "../utils/slug.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
@@ -149,12 +152,16 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
         <div class="detail-title-row dns-detail__title-row">
           <h1 class="detail-title dns-detail__title">{domain.domain}</h1>
           {domain.status && (
-            <span class={`badge dns-badge dns-badge--${domain.status}`}>
+            <span
+              class={`badge badge--${
+                DNS_STATUS_VARIANTS[domain.status] ?? "neutral"
+              }`}
+            >
               {domain.status}
             </span>
           )}
           {domain.provider && (
-            <span class="badge dns-provider-badge">{domain.provider}</span>
+            <span class="badge badge--accent">{domain.provider}</span>
           )}
         </div>
         <DetailActions

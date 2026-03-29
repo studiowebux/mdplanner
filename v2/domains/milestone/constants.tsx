@@ -1,6 +1,9 @@
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { Milestone } from "../../types/milestone.types.ts";
-import { statusBadgeRenderer } from "../../components/ui/status-badge.tsx";
+import {
+  type BadgeVariant,
+  statusBadgeRenderer,
+} from "../../components/ui/status-badge.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { toKebab } from "../../utils/slug.ts";
 import {
@@ -11,6 +14,11 @@ import {
   variance,
   varianceClass,
 } from "../../utils/time.ts";
+
+export const MILESTONE_STATUS_VARIANTS: Record<string, BadgeVariant> = {
+  open: "accent",
+  completed: "success",
+};
 
 // Action buttons render function for table rows.
 const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
@@ -54,7 +62,7 @@ export const MILESTONE_TABLE_COLUMNS: ColumnDef[] = [
     key: "status",
     label: "Status",
     sortable: true,
-    render: statusBadgeRenderer("milestone-card__badge"),
+    render: statusBadgeRenderer(MILESTONE_STATUS_VARIANTS),
   },
   { key: "target", label: "Target", sortable: true },
   {

@@ -11,6 +11,8 @@ import { KpiGauge } from "../components/ui/kpi-gauge.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
+import { PORTFOLIO_STATUS_VARIANTS } from "../domains/portfolio/constants.tsx";
+import { GOAL_STATUS_VARIANTS } from "../domains/goal/constants.tsx";
 
 import type { PortfolioStatusUpdate } from "../types/portfolio.types.ts";
 
@@ -113,7 +115,9 @@ export const PortfolioDetailView: FC<Props> = (
           <div class="detail-title-row portfolio-detail__title-row">
             <h1 class="detail-title portfolio-detail__title">{item.name}</h1>
             <span
-              class={`badge portfolio-card__badge portfolio-card__badge--${item.status}`}
+              class={`badge badge--${
+                PORTFOLIO_STATUS_VARIANTS[item.status] ?? "neutral"
+              }`}
             >
               {item.status}
             </span>
@@ -311,7 +315,9 @@ export const PortfolioDetailView: FC<Props> = (
                     </td>
                     <td>
                       <span
-                        class={`badge goal-status goal-status--${g.status}`}
+                        class={`badge badge--${
+                          GOAL_STATUS_VARIANTS[g.status] ?? "neutral"
+                        }`}
                       >
                         {g.status}
                       </span>

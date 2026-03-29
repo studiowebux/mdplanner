@@ -4,6 +4,10 @@ import { IDEA_COMPLETED_STATUSES } from "../../types/idea.types.ts";
 import { DomainCard } from "../../components/ui/domain-card.tsx";
 import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 import { toKebab } from "../../utils/slug.ts";
+import {
+  IDEA_PRIORITY_VARIANTS,
+  IDEA_STATUS_VARIANTS,
+} from "../../domains/idea/constants.tsx";
 
 type Props = { item: Idea; q?: string };
 
@@ -22,11 +26,19 @@ export const IdeaCard: FC<Props> = ({ item, q }) => {
       className={isCompleted ? "idea-card--completed" : undefined}
       badge={
         <>
-          <span class={`badge idea-status idea-status--${item.status}`}>
+          <span
+            class={`badge badge--${
+              IDEA_STATUS_VARIANTS[item.status] ?? "neutral"
+            }`}
+          >
             {item.status}
           </span>
           {item.priority && (
-            <span class={`badge idea-priority--${item.priority}`}>
+            <span
+              class={`badge badge--${
+                IDEA_PRIORITY_VARIANTS[item.priority] ?? "neutral"
+              }`}
+            >
               {item.priority}
             </span>
           )}

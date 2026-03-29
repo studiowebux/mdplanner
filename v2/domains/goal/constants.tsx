@@ -3,11 +3,28 @@ import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import type { Goal } from "../../types/goal.types.ts";
 import { GOAL_STATUSES, GOAL_TYPES } from "../../types/goal.types.ts";
 import { PRIORITY_LABELS, PRIORITY_OPTIONS } from "../../constants/mod.ts";
-import { statusBadgeRenderer } from "../../components/ui/status-badge.tsx";
+import {
+  type BadgeVariant,
+  statusBadgeRenderer,
+} from "../../components/ui/status-badge.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
 
 import { toKebab } from "../../utils/slug.ts";
+
+export const GOAL_STATUS_VARIANTS: Record<string, BadgeVariant> = {
+  planning: "neutral",
+  "on-track": "success",
+  "at-risk": "warning",
+  late: "error",
+  success: "success",
+  failed: "error",
+};
+
+export const GOAL_TYPE_VARIANTS: Record<string, BadgeVariant> = {
+  enterprise: "accent",
+  project: "neutral",
+};
 
 const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
   <div class="domain-card__actions">
@@ -50,13 +67,13 @@ export const GOAL_TABLE_COLUMNS: ColumnDef[] = [
     key: "type",
     label: "Type",
     sortable: true,
-    render: statusBadgeRenderer("goal-badge"),
+    render: statusBadgeRenderer(GOAL_TYPE_VARIANTS),
   },
   {
     key: "status",
     label: "Status",
     sortable: true,
-    render: statusBadgeRenderer("goal-status"),
+    render: statusBadgeRenderer(GOAL_STATUS_VARIANTS),
   },
   {
     key: "priority",

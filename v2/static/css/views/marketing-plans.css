@@ -1,53 +1,7 @@
 /* Marketing Plans view — domain-specific styles only.
    Card base uses shared .domain-card from components.css. */
 
-/* ---------------------------------------------------------------------------
-   Plan status badges
---------------------------------------------------------------------------- */
-
-.mktplan-status--draft {
-  background: var(--color-accent-subtle);
-  color: var(--color-text-primary);
-}
-
-.mktplan-status--active {
-  background: var(--color-success-bg);
-  color: var(--color-success-text);
-}
-
-.mktplan-status--completed {
-  background: var(--color-info-bg);
-  color: var(--color-info-text);
-}
-
-.mktplan-status--archived {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-muted);
-}
-
-/* ---------------------------------------------------------------------------
-   Channel / Campaign item status badges
---------------------------------------------------------------------------- */
-
-.mktplan-item-status--planned {
-  background: var(--color-accent-subtle);
-  color: var(--color-text-primary);
-}
-
-.mktplan-item-status--active {
-  background: var(--color-success-bg);
-  color: var(--color-success-text);
-}
-
-.mktplan-item-status--paused {
-  background: var(--color-warning-bg);
-  color: var(--color-warning-text);
-}
-
-.mktplan-item-status--completed {
-  background: var(--color-info-bg);
-  color: var(--color-info-text);
-}
+/* Status + item status badge colors now use shared .badge--{variant} from components.css */
 
 /* ---------------------------------------------------------------------------
    Card — extends .domain-card
@@ -193,27 +147,7 @@
   flex: 1;
 }
 
-/* Verdict badges */
-
-.mktplan-verdict--pending {
-  background: var(--color-accent-subtle);
-  color: var(--color-text-primary);
-}
-
-.mktplan-verdict--confirmed {
-  background: var(--color-success-bg);
-  color: var(--color-success-text);
-}
-
-.mktplan-verdict--partial {
-  background: var(--color-warning-bg);
-  color: var(--color-warning-text);
-}
-
-.mktplan-verdict--rejected {
-  background: var(--color-error-bg);
-  color: var(--color-error-text);
-}
+/* Verdict badge colors now use shared .badge--{variant} from components.css */
 
 /* ---------------------------------------------------------------------------
    Team

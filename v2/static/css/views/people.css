@@ -28,39 +28,7 @@
   background: var(--color-warning);
 }
 
-/* Agent type badge */
-
-.person-card__badge--human {
-  background: var(--color-success-bg);
-  color: var(--color-success-text);
-}
-
-.person-card__badge--ai {
-  background: var(--color-accent-subtle);
-  color: var(--color-text-primary);
-}
-
-.person-card__badge--hybrid {
-  background: var(--color-warning-bg);
-  color: var(--color-warning-text);
-}
-
-/* Agent status badge (table view) */
-
-.person-card__status--idle {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-muted);
-}
-
-.person-card__status--working {
-  background: var(--color-success-bg);
-  color: var(--color-success-text);
-}
-
-.person-card__status--offline {
-  background: var(--color-error);
-  color: var(--color-static-white);
-}
+/* Agent type + status badge colors now use shared .badge--{variant} from components.css */
 
 /* Skills tags */
 

@@ -2,42 +2,7 @@
    Card base provided by .domain-card in components.css.
    Header, name, meta, actions provided by .domain-card__* */
 
-.portfolio-card__badge--active {
-  background: var(--color-accent-subtle);
-  color: var(--color-text-primary);
-}
-
-.portfolio-card__badge--completed {
-  background: var(--color-success-bg);
-  color: var(--color-success-text);
-}
-
-.portfolio-card__badge--production {
-  background: var(--color-success-bg);
-  color: var(--color-success-text);
-}
-
-.portfolio-card__badge--planning {
-  background: var(--color-info-bg);
-  color: var(--color-info-text);
-}
-
-.portfolio-card__badge--on-hold,
-.portfolio-card__badge--paused {
-  background: var(--color-warning-bg);
-  color: var(--color-warning-text);
-}
-
-.portfolio-card__badge--archived,
-.portfolio-card__badge--cancelled {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-muted);
-}
-
-.portfolio-card__badge--maintenance {
-  background: var(--color-warning-bg);
-  color: var(--color-warning-text);
-}
+/* Status badge colors now use shared .badge--{variant} from components.css */
 
 .portfolio-card__progress {
   display: flex;

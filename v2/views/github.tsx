@@ -1,5 +1,6 @@
 // GitHub fragment components — loaded via htmx into portfolio detail page.
 
+import type { BadgeVariant } from "../components/ui/status-badge.tsx";
 import type { FC } from "hono/jsx";
 import {
   GITHUB_PIPELINE_STATUSES,
@@ -13,6 +14,22 @@ import type {
   GitHubRepo,
   GitHubWorkflowRun,
 } from "../types/github.types.ts";
+
+export const GITHUB_STATE_VARIANTS: Record<string, BadgeVariant> = {
+  open: "success",
+  merged: "info",
+  closed: "error",
+  in_progress: "info",
+  queued: "warning",
+  success: "success",
+  failure: "error",
+  timed_out: "error",
+  cancelled: "neutral",
+  skipped: "neutral",
+  neutral: "neutral",
+  action_required: "warning",
+  waiting: "warning",
+};
 
 // ---------------------------------------------------------------------------
 // Repo card
@@ -185,7 +202,11 @@ export const GitHubPRsTable: FC<{
                     <code class="github-branch">{pr.headBranch}</code>
                   </td>
                   <td>
-                    <span class={`github-badge github-badge--${status}`}>
+                    <span
+                      class={`badge badge--${
+                        GITHUB_STATE_VARIANTS[status] ?? "neutral"
+                      }`}
+                    >
                       {status}
                     </span>
                   </td>
@@ -371,7 +392,11 @@ export const GitHubPipelineResults: FC<{
               return (
                 <tr key={run.id}>
                   <td>
-                    <span class={`github-badge github-badge--${badge}`}>
+                    <span
+                      class={`badge badge--${
+                        GITHUB_STATE_VARIANTS[badge] ?? "neutral"
+                      }`}
+                    >
                       {badge}
                     </span>
                   </td>

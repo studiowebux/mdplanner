@@ -1,6 +1,10 @@
 import type { FC } from "hono/jsx";
 import type { Goal } from "../../types/goal.types.ts";
 import { PRIORITY_LABELS } from "../../constants/mod.ts";
+import {
+  GOAL_STATUS_VARIANTS,
+  GOAL_TYPE_VARIANTS,
+} from "../../domains/goal/constants.tsx";
 
 type GoalNode = Goal & { children: GoalNode[] };
 
@@ -59,10 +63,16 @@ const GoalTreeNode: FC<{ node: GoalNode; depth: number }> = (
         >
           {node.title}
         </a>
-        <span class={`badge goal-status goal-status--${node.status}`}>
+        <span
+          class={`badge badge--${
+            GOAL_STATUS_VARIANTS[node.status] ?? "neutral"
+          }`}
+        >
           {node.status}
         </span>
-        <span class={`badge goal-badge goal-badge--${node.type}`}>
+        <span
+          class={`badge badge--${GOAL_TYPE_VARIANTS[node.type] ?? "neutral"}`}
+        >
           {node.type}
         </span>
         {node.priority && (

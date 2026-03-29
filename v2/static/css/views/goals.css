@@ -1,55 +1,7 @@
 /* Goals view — domain-specific styles only.
    Card base uses shared .domain-card from components.css. */
 
-/* ---------------------------------------------------------------------------
-   Status badges
---------------------------------------------------------------------------- */
-
-.goal-status--planning {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-muted);
-}
-
-.goal-status--on-track {
-  background: var(--color-success-bg);
-  color: var(--color-success-text);
-}
-
-.goal-status--at-risk {
-  background: var(--color-warning-bg);
-  color: var(--color-warning-text);
-}
-
-.goal-status--late {
-  background: var(--color-error-bg);
-  color: var(--color-error-text);
-}
-
-.goal-status--success {
-  background: var(--color-success-bg);
-  color: var(--color-success-text);
-}
-
-.goal-status--failed {
-  background: var(--color-error-bg);
-  color: var(--color-error-text);
-}
-
-/* ---------------------------------------------------------------------------
-   Type badges
---------------------------------------------------------------------------- */
-
-.goal-badge--enterprise {
-  background: var(--color-accent-subtle);
-  color: var(--color-text-primary);
-}
-
-.goal-badge--project {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-secondary);
-}
-
-/* Priority badge colors use shared .priority--N from components.css */
+/* Status + type + priority badge colors now use shared .badge--{variant} from components.css */
 
 /* ---------------------------------------------------------------------------
    Progress cell (table)

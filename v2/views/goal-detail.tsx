@@ -13,6 +13,10 @@ import { BackButton } from "./components/back-button.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
+import {
+  GOAL_STATUS_VARIANTS,
+  GOAL_TYPE_VARIANTS,
+} from "../domains/goal/constants.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -82,10 +86,18 @@ export const GoalDetailView: FC<
         <header class="detail-section goal-detail__header">
           <div class="detail-title-row goal-detail__title-row">
             <h1 class="detail-title goal-detail__title">{goal.title}</h1>
-            <span class={`badge goal-status goal-status--${goal.status}`}>
+            <span
+              class={`badge badge--${
+                GOAL_STATUS_VARIANTS[goal.status] ?? "neutral"
+              }`}
+            >
               {goal.status}
             </span>
-            <span class={`badge goal-badge goal-badge--${goal.type}`}>
+            <span
+              class={`badge badge--${
+                GOAL_TYPE_VARIANTS[goal.type] ?? "neutral"
+              }`}
+            >
               {goal.type}
             </span>
             {deadline && (
@@ -267,7 +279,9 @@ export const GoalDetailView: FC<
                     </td>
                     <td class="data-table__td">
                       <span
-                        class={`badge goal-status goal-status--${child.status}`}
+                        class={`badge badge--${
+                          GOAL_STATUS_VARIANTS[child.status] ?? "neutral"
+                        }`}
                       >
                         {child.status}
                       </span>

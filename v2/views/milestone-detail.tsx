@@ -7,6 +7,7 @@ import type { ViewProps } from "../types/app.ts";
 import { toKebab } from "../utils/slug.ts";
 import { BackButton } from "./components/back-button.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { MILESTONE_STATUS_VARIANTS } from "../domains/milestone/constants.tsx";
 
 type Props = ViewProps & {
   milestone: Milestone;
@@ -32,7 +33,9 @@ export const MilestoneDetailView: FC<Props> = (
               {milestone.name}
             </h1>
             <span
-              class={`badge milestone-card__badge milestone-card__badge--${milestone.status}`}
+              class={`badge badge--${
+                MILESTONE_STATUS_VARIANTS[milestone.status] ?? "neutral"
+              }`}
             >
               {milestone.status}
             </span>

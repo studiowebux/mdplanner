@@ -4,6 +4,7 @@ import { DomainCard } from "../../components/ui/domain-card.tsx";
 import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 import { formatCurrency } from "../../utils/format.ts";
 import { Highlight } from "../../utils/highlight.tsx";
+import { PORTFOLIO_STATUS_VARIANTS } from "../../domains/portfolio/constants.tsx";
 
 type Props = { item: PortfolioItem; q?: string };
 
@@ -19,7 +20,9 @@ export const PortfolioCard: FC<Props> = ({ item, q }) => {
       id={item.id}
       badge={
         <span
-          class={`badge portfolio-card__badge portfolio-card__badge--${item.status}`}
+          class={`badge badge--${
+            PORTFOLIO_STATUS_VARIANTS[item.status] ?? "neutral"
+          }`}
         >
           {item.status}
         </span>

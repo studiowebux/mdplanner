@@ -5,6 +5,10 @@ import type { ViewProps } from "../types/app.ts";
 import { formatDate, timeAgo } from "../utils/time.ts";
 import { BackButton } from "./components/back-button.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import {
+  PERSON_STATUS_VARIANTS,
+  PERSON_TYPE_VARIANTS,
+} from "../domains/people/constants.tsx";
 
 type Props = ViewProps & {
   person: Person;
@@ -49,7 +53,9 @@ export const PersonDetailView: FC<Props> = (
           </div>
           {person.agentType && (
             <span
-              class={`badge person-card__badge person-card__badge--${person.agentType}`}
+              class={`badge badge--${
+                PERSON_TYPE_VARIANTS[person.agentType] ?? "neutral"
+              }`}
             >
               {person.agentType}
             </span>
@@ -136,7 +142,9 @@ export const PersonDetailView: FC<Props> = (
                   <dt>Status</dt>
                   <dd>
                     <span
-                      class={`badge person-card__status person-card__status--${person.status}`}
+                      class={`badge badge--${
+                        PERSON_STATUS_VARIANTS[person.status] ?? "neutral"
+                      }`}
                     >
                       {person.status}
                     </span>

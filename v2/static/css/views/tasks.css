@@ -805,34 +805,7 @@ a.task-board__card-avatar:hover {
   margin-right: var(--space-xs);
 }
 
-/* Section badge */
-
-/* task-detail__badge base bg/color — .badge provides padding + radius */
-
-.task-detail__badge--backlog {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-muted);
-}
-
-.task-detail__badge--todo {
-  background: var(--color-accent-subtle);
-  color: var(--color-text-primary);
-}
-
-.task-detail__badge--in-progress {
-  background: var(--color-info-bg);
-  color: var(--color-info-text);
-}
-
-.task-detail__badge--pending-review {
-  background: var(--color-warning-bg);
-  color: var(--color-warning-text);
-}
-
-.task-detail__badge--done {
-  background: var(--color-success-bg);
-  color: var(--color-success-text);
-}
+/* Section badge colors now use shared .badge--{variant} from components.css */
 
 /* Links — primary text, accent on hover (matches list view pattern) */
 

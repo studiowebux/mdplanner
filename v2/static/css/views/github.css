@@ -173,31 +173,7 @@
   border-radius: var(--radius-sm);
 }
 
-/* ---- Badges ---- */
-
-.github-badge {
-  display: inline-block;
-  font-size: var(--font-size-xs);
-  padding: var(--badge-padding);
-  border-radius: var(--radius-sm);
-  font-weight: var(--font-weight-semibold);
-  text-transform: capitalize;
-}
-
-.github-badge--open {
-  background: var(--color-success-bg);
-  color: var(--color-success-text);
-}
-
-.github-badge--merged {
-  background: var(--color-info-bg);
-  color: var(--color-info-text);
-}
-
-.github-badge--closed {
-  background: var(--color-error-bg);
-  color: var(--color-error-text);
-}
+/* Badge colors now use shared .badge--{variant} from components.css */
 
 /* ---- Milestones ---- */
 
@@ -315,58 +291,6 @@
 .github-pipeline__actions {
   display: flex;
   gap: var(--space-xs);
-}
-
-/* ---- Pipeline status badges ---- */
-
-.github-badge--in_progress {
-  background: var(--color-info-bg);
-  color: var(--color-info-text);
-}
-
-.github-badge--queued {
-  background: var(--color-warning-bg);
-  color: var(--color-warning-text);
-}
-
-.github-badge--success {
-  background: var(--color-success-bg);
-  color: var(--color-success-text);
-}
-
-.github-badge--failure {
-  background: var(--color-error-bg);
-  color: var(--color-error-text);
-}
-
-.github-badge--timed_out {
-  background: var(--color-error-bg);
-  color: var(--color-error-text);
-}
-
-.github-badge--cancelled {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-muted);
-}
-
-.github-badge--skipped {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-muted);
-}
-
-.github-badge--neutral {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-muted);
-}
-
-.github-badge--action_required {
-  background: var(--color-warning-bg);
-  color: var(--color-warning-text);
-}
-
-.github-badge--waiting {
-  background: var(--color-warning-bg);
-  color: var(--color-warning-text);
 }
 
 /* ---- Pipeline pagination ---- */

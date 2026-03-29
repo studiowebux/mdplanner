@@ -10,6 +10,12 @@ import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
+import {
+  MKTPLAN_ITEM_STATUS_VARIANTS,
+  MKTPLAN_STATUS_VARIANTS,
+  MKTPLAN_VERDICT_VARIANTS,
+} from "../domains/marketing-plan/constants.tsx";
+import { GOAL_STATUS_VARIANTS } from "../domains/goal/constants.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -56,7 +62,9 @@ export const MarketingPlanDetailView: FC<
           <div class="detail-title-row mktplan-detail__title-row">
             <h1 class="detail-title mktplan-detail__title">{plan.name}</h1>
             <span
-              class={`badge mktplan-status mktplan-status--${plan.status}`}
+              class={`badge badge--${
+                MKTPLAN_STATUS_VARIANTS[plan.status] ?? "neutral"
+              }`}
             >
               {plan.status}
             </span>
@@ -173,7 +181,10 @@ export const MarketingPlanDetailView: FC<
                       {ch.status
                         ? (
                           <span
-                            class={`badge mktplan-item-status mktplan-item-status--${ch.status}`}
+                            class={`badge badge--${
+                              MKTPLAN_ITEM_STATUS_VARIANTS[ch.status] ??
+                                "neutral"
+                            }`}
                           >
                             {ch.status}
                           </span>
@@ -220,7 +231,10 @@ export const MarketingPlanDetailView: FC<
                       {c.status
                         ? (
                           <span
-                            class={`badge mktplan-item-status mktplan-item-status--${c.status}`}
+                            class={`badge badge--${
+                              MKTPLAN_ITEM_STATUS_VARIANTS[c.status] ??
+                                "neutral"
+                            }`}
                           >
                             {c.status}
                           </span>
@@ -258,7 +272,9 @@ export const MarketingPlanDetailView: FC<
                         {goal.title}
                       </a>
                       <span
-                        class={`badge goal-status goal-status--${goal.status}`}
+                        class={`badge badge--${
+                          GOAL_STATUS_VARIANTS[goal.status] ?? "neutral"
+                        }`}
                       >
                         {goal.status}
                       </span>
@@ -308,7 +324,9 @@ export const MarketingPlanDetailView: FC<
                   <span class="mktplan-detail__hypothesis-text">{h.text}</span>
                   {h.verdict && (
                     <span
-                      class={`badge mktplan-verdict mktplan-verdict--${h.verdict}`}
+                      class={`badge badge--${
+                        MKTPLAN_VERDICT_VARIANTS[h.verdict] ?? "neutral"
+                      }`}
                     >
                       {h.verdict}
                     </span>

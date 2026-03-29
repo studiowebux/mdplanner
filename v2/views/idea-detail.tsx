@@ -10,6 +10,10 @@ import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
+import {
+  IDEA_PRIORITY_VARIANTS,
+  IDEA_STATUS_VARIANTS,
+} from "../domains/idea/constants.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -57,11 +61,19 @@ export const IdeaDetailView: FC<
         <header class="detail-section idea-detail__header">
           <div class="detail-title-row idea-detail__title-row">
             <h1 class="detail-title idea-detail__title">{idea.title}</h1>
-            <span class={`badge idea-status idea-status--${idea.status}`}>
+            <span
+              class={`badge badge--${
+                IDEA_STATUS_VARIANTS[idea.status] ?? "neutral"
+              }`}
+            >
               {idea.status}
             </span>
             {idea.priority && (
-              <span class={`badge idea-priority--${idea.priority}`}>
+              <span
+                class={`badge badge--${
+                  IDEA_PRIORITY_VARIANTS[idea.priority] ?? "neutral"
+                }`}
+              >
                 {idea.priority}
               </span>
             )}
@@ -82,7 +94,11 @@ export const IdeaDetailView: FC<
             )}
             {idea.priority && (
               <InfoItem label="Priority">
-                <span class={`badge idea-priority--${idea.priority}`}>
+                <span
+                  class={`badge badge--${
+                    IDEA_PRIORITY_VARIANTS[idea.priority] ?? "neutral"
+                  }`}
+                >
                   {idea.priority}
                 </span>
               </InfoItem>

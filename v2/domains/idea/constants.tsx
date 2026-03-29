@@ -2,10 +2,29 @@ import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import type { Idea } from "../../types/idea.types.ts";
 import { IDEA_PRIORITIES, IDEA_STATUSES } from "../../types/idea.types.ts";
-import { statusBadgeRenderer } from "../../components/ui/status-badge.tsx";
+import {
+  type BadgeVariant,
+  statusBadgeRenderer,
+} from "../../components/ui/status-badge.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
 import { toKebab } from "../../utils/slug.ts";
+
+export const IDEA_STATUS_VARIANTS: Record<string, BadgeVariant> = {
+  new: "accent",
+  considering: "info",
+  planned: "warning",
+  approved: "success",
+  rejected: "error",
+  implemented: "success",
+  cancelled: "neutral",
+};
+
+export const IDEA_PRIORITY_VARIANTS: Record<string, BadgeVariant> = {
+  high: "error",
+  medium: "warning",
+  low: "neutral",
+};
 
 const IDEA_PRIORITY_LABELS: Record<string, string> = {
   high: "High",
@@ -54,7 +73,7 @@ export const IDEA_TABLE_COLUMNS: ColumnDef[] = [
     key: "status",
     label: "Status",
     sortable: true,
-    render: statusBadgeRenderer("idea-status"),
+    render: statusBadgeRenderer(IDEA_STATUS_VARIANTS),
   },
   {
     key: "category",
@@ -68,7 +87,11 @@ export const IDEA_TABLE_COLUMNS: ColumnDef[] = [
     render: (v) => {
       if (!v) return "";
       return (
-        <span class={`badge idea-priority--${v}`}>
+        <span
+          class={`badge badge--${
+            IDEA_PRIORITY_VARIANTS[String(v)] ?? "neutral"
+          }`}
+        >
           {IDEA_PRIORITY_LABELS[String(v)] ?? String(v)}
         </span>
       );

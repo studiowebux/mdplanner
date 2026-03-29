@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import type { Person } from "../../types/person.types.ts";
 import { DomainCard } from "../../components/ui/domain-card.tsx";
 import { CardMeta, CardMetaItem } from "./card-meta.tsx";
+import { PERSON_TYPE_VARIANTS } from "../../domains/people/constants.tsx";
 
 type Props = { person: Person; q?: string };
 
@@ -33,7 +34,9 @@ export const PersonCard: FC<Props> = ({ person, q }) => {
       badge={person.agentType
         ? (
           <span
-            class={`badge person-card__badge person-card__badge--${person.agentType}`}
+            class={`badge badge--${
+              PERSON_TYPE_VARIANTS[person.agentType] ?? "neutral"
+            }`}
           >
             {person.agentType}
           </span>

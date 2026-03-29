@@ -11,15 +11,7 @@
 
 /* Header, name, meta, actions provided by .domain-card__* in components.css */
 
-.milestone-card__badge--open {
-  background: var(--color-accent-subtle);
-  color: var(--color-text-primary);
-}
-
-.milestone-card__badge--completed {
-  background: var(--color-success-bg);
-  color: var(--color-success-text);
-}
+/* Status badge colors now use shared .badge--{variant} from components.css */
 
 .milestone-card__progress {
   display: flex;

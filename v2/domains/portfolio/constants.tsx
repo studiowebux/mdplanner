@@ -1,9 +1,24 @@
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { PortfolioItem } from "../../types/portfolio.types.ts";
-import { statusBadgeRenderer } from "../../components/ui/status-badge.tsx";
+import {
+  type BadgeVariant,
+  statusBadgeRenderer,
+} from "../../components/ui/status-badge.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatCurrency } from "../../utils/format.ts";
 import { formatDate } from "../../utils/time.ts";
+
+export const PORTFOLIO_STATUS_VARIANTS: Record<string, BadgeVariant> = {
+  active: "accent",
+  completed: "success",
+  production: "success",
+  planning: "info",
+  paused: "warning",
+  "on-hold": "warning",
+  maintenance: "warning",
+  archived: "neutral",
+  cancelled: "neutral",
+};
 
 const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
   <div class="portfolio-card__actions">
@@ -68,7 +83,7 @@ export const PORTFOLIO_TABLE_COLUMNS: ColumnDef[] = [
     key: "status",
     label: "Status",
     sortable: true,
-    render: statusBadgeRenderer("portfolio-card__badge"),
+    render: statusBadgeRenderer(PORTFOLIO_STATUS_VARIANTS),
   },
   {
     key: "client",

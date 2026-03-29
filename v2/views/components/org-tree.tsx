@@ -5,6 +5,7 @@
 import type { FC } from "hono/jsx";
 import type { PersonWithChildren } from "../../types/person.types.ts";
 import { collectFieldValues } from "../../utils/tree.ts";
+import { PERSON_TYPE_VARIANTS } from "../../domains/people/constants.tsx";
 
 // ---------------------------------------------------------------------------
 // Tree node
@@ -65,7 +66,9 @@ const OrgNode: FC<NodeProps> = ({ node, level, allDepts }) => {
           </div>
           {node.agentType && (
             <span
-              class={`badge person-card__badge person-card__badge--${node.agentType}`}
+              class={`badge badge--${
+                PERSON_TYPE_VARIANTS[node.agentType ?? "human"] ?? "neutral"
+              }`}
             >
               {node.agentType}
             </span>

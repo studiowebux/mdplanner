@@ -1,37 +1,7 @@
 /* DNS view — domain-specific styles only.
    Page layout uses shared .domain-page from components.css. */
 
-/* ---------------------------------------------------------------------------
-   Status / provider badges
---------------------------------------------------------------------------- */
-
-.dns-badge--active {
-  background: var(--color-success-bg);
-  color: var(--color-success-text);
-}
-
-.dns-badge--pending {
-  background: var(--color-warning-bg);
-  color: var(--color-warning-text);
-}
-
-.dns-badge--yes {
-  background: var(--color-success-bg);
-  color: var(--color-success-text);
-}
-
-.dns-badge--no {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-muted);
-}
-
-.dns-provider-badge {
-  font-weight: var(--font-weight-medium);
-  background: var(--color-accent-subtle);
-  color: var(--color-text-primary);
-}
-
-/* Card base provided by .domain-card in components.css */
+/* Status + provider badge colors now use shared .badge--{variant} from components.css */
 
 /* ---------------------------------------------------------------------------
    Detail view

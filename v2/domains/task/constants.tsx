@@ -2,7 +2,10 @@
 
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { Task, TaskSortableCol } from "../../types/task.types.ts";
-import { statusBadgeRenderer } from "../../components/ui/status-badge.tsx";
+import {
+  type BadgeVariant,
+  statusBadgeRenderer,
+} from "../../components/ui/status-badge.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
 import { toKebab } from "../../utils/slug.ts";
@@ -11,6 +14,14 @@ import {
   PRIORITY_LABELS,
   PRIORITY_OPTIONS,
 } from "../../constants/mod.ts";
+
+export const TASK_SECTION_VARIANTS: Record<string, BadgeVariant> = {
+  "backlog": "neutral",
+  "todo": "accent",
+  "in progress": "info",
+  "pending review": "warning",
+  "done": "success",
+};
 
 const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
   <div class="task-card__actions">
@@ -53,7 +64,7 @@ export const TASK_TABLE_COLUMNS: ColumnDef[] = [
     key: "section",
     label: "Section",
     sortable: true,
-    render: statusBadgeRenderer("task-card__badge"),
+    render: statusBadgeRenderer(TASK_SECTION_VARIANTS),
   },
   {
     key: "priority",

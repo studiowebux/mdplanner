@@ -5,9 +5,37 @@ import {
   MARKETING_ITEM_STATUSES,
   MARKETING_PLAN_STATUSES,
 } from "../../types/marketing-plan.types.ts";
-import { statusBadgeRenderer } from "../../components/ui/status-badge.tsx";
+import {
+  type BadgeVariant,
+  statusBadgeRenderer,
+} from "../../components/ui/status-badge.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
+
+// ---------------------------------------------------------------------------
+// Badge variant maps
+// ---------------------------------------------------------------------------
+
+export const MKTPLAN_STATUS_VARIANTS: Record<string, BadgeVariant> = {
+  draft: "accent",
+  active: "success",
+  completed: "info",
+  archived: "neutral",
+};
+
+export const MKTPLAN_ITEM_STATUS_VARIANTS: Record<string, BadgeVariant> = {
+  planned: "accent",
+  active: "success",
+  paused: "warning",
+  completed: "info",
+};
+
+export const MKTPLAN_VERDICT_VARIANTS: Record<string, BadgeVariant> = {
+  pending: "accent",
+  confirmed: "success",
+  partial: "warning",
+  rejected: "error",
+};
 
 // ---------------------------------------------------------------------------
 // Option lists
@@ -73,7 +101,7 @@ export const MKTPLAN_TABLE_COLUMNS: ColumnDef[] = [
     key: "status",
     label: "Status",
     sortable: true,
-    render: statusBadgeRenderer("mktplan-status"),
+    render: statusBadgeRenderer(MKTPLAN_STATUS_VARIANTS),
   },
   {
     key: "budget",

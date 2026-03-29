@@ -1,7 +1,22 @@
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { Person } from "../../types/person.types.ts";
-import { statusBadgeRenderer } from "../../components/ui/status-badge.tsx";
+import {
+  type BadgeVariant,
+  statusBadgeRenderer,
+} from "../../components/ui/status-badge.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
+
+export const PERSON_TYPE_VARIANTS: Record<string, BadgeVariant> = {
+  human: "success",
+  ai: "accent",
+  hybrid: "warning",
+};
+
+export const PERSON_STATUS_VARIANTS: Record<string, BadgeVariant> = {
+  idle: "neutral",
+  working: "success",
+  offline: "error-solid",
+};
 
 const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
   <div class="person-card__actions">
@@ -57,7 +72,7 @@ export const PEOPLE_TABLE_COLUMNS: ColumnDef[] = [
     key: "agentType",
     label: "Type",
     sortable: true,
-    render: statusBadgeRenderer("person-card__badge"),
+    render: statusBadgeRenderer(PERSON_TYPE_VARIANTS),
   },
   {
     key: "skills",
@@ -68,7 +83,7 @@ export const PEOPLE_TABLE_COLUMNS: ColumnDef[] = [
     key: "status",
     label: "Status",
     sortable: true,
-    render: statusBadgeRenderer("person-card__status"),
+    render: statusBadgeRenderer(PERSON_STATUS_VARIANTS),
   },
   { key: "_actions", label: "", render: actionBtns },
 ];

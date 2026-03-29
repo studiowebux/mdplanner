@@ -9,7 +9,10 @@ import type { Milestone } from "../types/milestone.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate, timeAgo } from "../utils/time.ts";
 import { toKebab } from "../utils/slug.ts";
-import { TASK_PRIORITY_LABELS } from "../domains/task/constants.tsx";
+import {
+  TASK_PRIORITY_LABELS,
+  TASK_SECTION_VARIANTS,
+} from "../domains/task/constants.tsx";
 import { getSectionOrder } from "../constants/mod.ts";
 import {
   getMilestoneService,
@@ -66,8 +69,8 @@ const priorityClass = (p: number | undefined): string =>
   p ? `badge priority--${p}` : "";
 
 const sectionBadgeClass = (section: string): string => {
-  const slug = section.toLowerCase().replace(/\s+/g, "-");
-  return `badge task-detail__badge task-detail__badge--${slug}`;
+  const key = section.toLowerCase();
+  return `badge badge--${TASK_SECTION_VARIANTS[key] ?? "neutral"}`;
 };
 
 // ---------------------------------------------------------------------------

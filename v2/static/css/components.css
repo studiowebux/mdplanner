@@ -73,8 +73,9 @@
 
 /* -------------------------------------------------------------------------
    Badge — shared base for all domain badges (status, priority, type).
-   Domain CSS adds color variants via .XXX--modifier.
-   Compose: class="badge goal-status goal-status--on-track"
+   Semantic color variants: badge--neutral, badge--accent, badge--info,
+   badge--warning, badge--success, badge--error.
+   Compose: class="badge badge--success"
    ------------------------------------------------------------------------- */
 
 .badge {
@@ -91,6 +92,41 @@
 .badge--overflow {
   background: var(--color-accent-subtle);
   color: var(--color-text-muted);
+}
+
+.badge--neutral {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+}
+
+.badge--accent {
+  background: var(--color-accent-subtle);
+  color: var(--color-text-primary);
+}
+
+.badge--info {
+  background: var(--color-info-bg);
+  color: var(--color-info-text);
+}
+
+.badge--warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.badge--success {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.badge--error {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.badge--error-solid {
+  background: var(--color-error);
+  color: var(--color-static-white);
 }
 
 a.badge:hover {
