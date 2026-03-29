@@ -3,7 +3,11 @@
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { taskConfig } from "../../domains/task/config.tsx";
 import type { AppContext } from "../../types/app.ts";
-import { getGitHubService, getTaskService } from "../../singletons/services.ts";
+import {
+  getGitHubService,
+  getPortfolioService,
+  getTaskService,
+} from "../../singletons/services.ts";
 import { publish } from "../../singletons/event-bus.ts";
 import {
   TaskGitHubEmpty,
@@ -103,26 +107,52 @@ tasksRouter.post("/:id/assign", async (c) => {
 // GitHub section fragment + link/unlink actions
 // ---------------------------------------------------------------------------
 
+async function resolveGitHubRepo(
+  task: { githubRepo?: string | null; project?: string | null },
+): Promise<{ repo: string; inherited: string | null } | null> {
+  if (task.githubRepo) return { repo: task.githubRepo, inherited: null };
+  if (!task.project) return null;
+  const all = await getPortfolioService().list();
+  const match = all.find((p) =>
+    p.name.toLowerCase() === task.project!.toLowerCase()
+  );
+  if (!match?.githubRepo) return null;
+  return { repo: match.githubRepo, inherited: match.name };
+}
+
 async function renderGitHubFragment(
   // deno-lint-ignore no-explicit-any
   c: { html: (h: any) => any },
   taskId: string,
 ) {
   const task = await getTaskService().getById(taskId);
-  if (!task || !task.githubRepo) {
+  if (!task) return c.html(<TaskGitHubEmpty taskId={taskId} />);
+
+  const resolved = await resolveGitHubRepo(task);
+  if (!resolved) {
     return c.html(<TaskGitHubEmpty taskId={taskId} />);
   }
+
+  const effectiveRepo = resolved.repo;
   try {
     const gh = getGitHubService();
     const [issue, pr] = await Promise.all([
       task.githubIssue
-        ? gh.getIssue(task.githubRepo, task.githubIssue)
+        ? gh.getIssue(effectiveRepo, task.githubIssue)
         : Promise.resolve(null),
       task.githubPR
-        ? gh.getPR(task.githubRepo, task.githubPR)
+        ? gh.getPR(effectiveRepo, task.githubPR)
         : Promise.resolve(null),
     ]);
-    return c.html(<TaskGitHubSection task={task} issue={issue} pr={pr} />);
+    return c.html(
+      <TaskGitHubSection
+        task={task}
+        issue={issue}
+        pr={pr}
+        inheritedFrom={resolved.inherited}
+        effectiveRepo={effectiveRepo}
+      />,
+    );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     return c.html(<TaskGitHubError taskId={taskId} message={msg} />);
