@@ -123,7 +123,7 @@ export const GoalTree: FC<{ goals: Goal[] }> = ({ goals }) => {
         {groups.map(({ project }) => (
           <a
             key={project}
-            class="goal-tree-groups__pill"
+            class="btn btn--secondary btn--sm"
             href={`#goal-group-${toSlug(project)}`}
           >
             {project || "Ungrouped"}
