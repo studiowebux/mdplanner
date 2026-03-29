@@ -9,6 +9,7 @@ import { markdownToHtml } from "../utils/markdown.ts";
 import { GitHubSection } from "./github.tsx";
 import { KpiGauge } from "../components/ui/kpi-gauge.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { DetailActions } from "./components/detail-actions.tsx";
 
 import type { PortfolioStatusUpdate } from "../types/portfolio.types.ts";
 
@@ -121,26 +122,12 @@ export const PortfolioDetailView: FC<Props> = (
               {item.status}
             </span>
           </div>
-          <div class="detail-actions">
-            <button
-              class="btn btn--secondary btn--sm"
-              type="button"
-              hx-get={`/portfolio/${item.id}/edit`}
-              hx-target="#portfolio-form-container"
-              hx-swap="innerHTML"
-            >
-              Edit
-            </button>
-            <button
-              class="btn btn--danger btn--sm"
-              type="button"
-              hx-delete={`/portfolio/${item.id}`}
-              hx-confirm={`Delete "${item.name}"? This cannot be undone.`}
-              hx-swap="none"
-            >
-              Delete
-            </button>
-          </div>
+          <DetailActions
+            entity="portfolio"
+            id={item.id}
+            title={item.name}
+            formContainerId="portfolio-form-container"
+          />
           <p class="portfolio-detail__meta">
             {item.category}
             {item.client && <>{" "}&middot; {item.client}</>}

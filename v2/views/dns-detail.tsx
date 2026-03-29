@@ -7,6 +7,7 @@ import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
 import { DNS_RECORD_FORM_FIELDS } from "../domains/dns/constants.tsx";
 import { toKebab } from "../utils/slug.ts";
+import { DetailActions } from "./components/detail-actions.tsx";
 
 // ---------------------------------------------------------------------------
 // DNS records table — standalone fragment for htmx swaps
@@ -158,26 +159,12 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
             <span class="badge dns-provider-badge">{domain.provider}</span>
           )}
         </div>
-        <div class="detail-actions">
-          <button
-            class="btn btn--secondary btn--sm"
-            type="button"
-            hx-get={`/dns/${domain.id}/edit`}
-            hx-target="#dns-form-container"
-            hx-swap="innerHTML"
-          >
-            Edit
-          </button>
-          <button
-            class="btn btn--danger btn--sm"
-            type="button"
-            hx-delete={`/dns/${domain.id}`}
-            hx-confirm={`Delete "${domain.domain}"? This cannot be undone.`}
-            hx-swap="none"
-          >
-            Delete
-          </button>
-        </div>
+        <DetailActions
+          entity="dns"
+          id={domain.id}
+          title={domain.domain}
+          formContainerId="dns-form-container"
+        />
       </header>
 
       <div class="detail-section dns-detail__info-grid">

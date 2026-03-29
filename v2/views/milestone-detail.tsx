@@ -6,6 +6,7 @@ import type { Task } from "../types/task.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { toKebab } from "../utils/slug.ts";
 import { BackButton } from "./components/back-button.tsx";
+import { DetailActions } from "./components/detail-actions.tsx";
 
 type Props = ViewProps & {
   milestone: Milestone;
@@ -36,26 +37,12 @@ export const MilestoneDetailView: FC<Props> = (
               {milestone.status}
             </span>
           </div>
-          <div class="detail-actions">
-            <button
-              class="btn btn--secondary btn--sm"
-              type="button"
-              hx-get={`/milestones/${milestone.id}/edit`}
-              hx-target="#milestones-form-container"
-              hx-swap="innerHTML"
-            >
-              Edit
-            </button>
-            <button
-              class="btn btn--danger btn--sm"
-              type="button"
-              hx-delete={`/milestones/${milestone.id}`}
-              hx-confirm={`Delete "${milestone.name}"? This cannot be undone.`}
-              hx-swap="none"
-            >
-              Delete
-            </button>
-          </div>
+          <DetailActions
+            entity="milestones"
+            id={milestone.id}
+            title={milestone.name}
+            formContainerId="milestones-form-container"
+          />
 
           <div class="milestone-detail__meta">
             {milestone.project && (

@@ -7,6 +7,7 @@ import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
 import { markdownToHtml } from "../utils/markdown.ts";
 import { toKebab } from "../utils/slug.ts";
+import { DetailActions } from "./components/detail-actions.tsx";
 
 // ---------------------------------------------------------------------------
 // Helper — label/value pair
@@ -76,26 +77,12 @@ export const MarketingPlanDetailView: FC<
               {plan.status}
             </span>
           </div>
-          <div class="detail-actions">
-            <button
-              class="btn btn--secondary btn--sm"
-              type="button"
-              hx-get={`/marketing-plans/${plan.id}/edit`}
-              hx-target="#marketing-plans-form-container"
-              hx-swap="innerHTML"
-            >
-              Edit
-            </button>
-            <button
-              class="btn btn--danger btn--sm"
-              type="button"
-              hx-delete={`/marketing-plans/${plan.id}`}
-              hx-confirm={`Delete "${plan.name}"? This cannot be undone.`}
-              hx-swap="none"
-            >
-              Delete
-            </button>
-          </div>
+          <DetailActions
+            entity="marketing-plans"
+            id={plan.id}
+            title={plan.name}
+            formContainerId="marketing-plans-form-container"
+          />
         </header>
 
         {/* -- Overview -------------------------------------------------- */}

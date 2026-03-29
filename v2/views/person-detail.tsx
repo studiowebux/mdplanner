@@ -4,6 +4,7 @@ import type { Person } from "../types/person.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate, timeAgo } from "../utils/time.ts";
 import { BackButton } from "./components/back-button.tsx";
+import { DetailActions } from "./components/detail-actions.tsx";
 
 type Props = ViewProps & {
   person: Person;
@@ -53,27 +54,13 @@ export const PersonDetailView: FC<Props> = (
               {person.agentType}
             </span>
           )}
-          <div class="detail-actions">
-            <button
-              class="btn btn--secondary btn--sm"
-              type="button"
-              hx-get={`/people/${person.id}/edit`}
-              hx-target="#people-form-container"
-              hx-swap="innerHTML"
-            >
-              Edit
-            </button>
-            <button
-              class="btn btn--danger btn--sm"
-              type="button"
-              hx-delete={`/people/${person.id}`}
-              hx-confirm={`Delete "${person.name}"? This cannot be undone.`}
-              hx-swap="none"
-              hx-on--after-request="if(event.detail.successful) window.location.href='/people'"
-            >
-              Delete
-            </button>
-          </div>
+          <DetailActions
+            entity="people"
+            id={person.id}
+            title={person.name}
+            formContainerId="people-form-container"
+            onDeleteRedirect="/people"
+          />
         </header>
 
         <dl class="person-detail__meta">

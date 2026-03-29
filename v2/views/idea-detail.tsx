@@ -7,6 +7,7 @@ import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
 import { markdownToHtml } from "../utils/markdown.ts";
 import { toKebab } from "../utils/slug.ts";
+import { DetailActions } from "./components/detail-actions.tsx";
 
 // ---------------------------------------------------------------------------
 // Helper — renders a label/value pair inside an info-row
@@ -81,26 +82,12 @@ export const IdeaDetailView: FC<
               </span>
             )}
           </div>
-          <div class="detail-actions">
-            <button
-              class="btn btn--secondary btn--sm"
-              type="button"
-              hx-get={`/ideas/${idea.id}/edit`}
-              hx-target="#ideas-form-container"
-              hx-swap="innerHTML"
-            >
-              Edit
-            </button>
-            <button
-              class="btn btn--danger btn--sm"
-              type="button"
-              hx-delete={`/ideas/${idea.id}`}
-              hx-confirm={`Delete "${idea.title}"? This cannot be undone.`}
-              hx-swap="none"
-            >
-              Delete
-            </button>
-          </div>
+          <DetailActions
+            entity="ideas"
+            id={idea.id}
+            title={idea.title}
+            formContainerId="ideas-form-container"
+          />
         </header>
 
         {/* -- Overview row ---------------------------------------------- */}

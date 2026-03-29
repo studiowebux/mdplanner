@@ -10,6 +10,7 @@ import { markdownToHtml } from "../utils/markdown.ts";
 import { KpiGauge } from "../components/ui/kpi-gauge.tsx";
 import { toKebab } from "../utils/slug.ts";
 import { BackButton } from "./components/back-button.tsx";
+import { DetailActions } from "./components/detail-actions.tsx";
 
 // ---------------------------------------------------------------------------
 // Helper — renders a label/value pair inside an info-row
@@ -119,26 +120,12 @@ export const GoalDetailView: FC<
               </span>
             )}
           </div>
-          <div class="detail-actions">
-            <button
-              class="btn btn--secondary btn--sm"
-              type="button"
-              hx-get={`/goals/${goal.id}/edit`}
-              hx-target="#goals-form-container"
-              hx-swap="innerHTML"
-            >
-              Edit
-            </button>
-            <button
-              class="btn btn--danger btn--sm"
-              type="button"
-              hx-delete={`/goals/${goal.id}`}
-              hx-confirm={`Delete "${goal.title}"? This cannot be undone.`}
-              hx-swap="none"
-            >
-              Delete
-            </button>
-          </div>
+          <DetailActions
+            entity="goals"
+            id={goal.id}
+            title={goal.title}
+            formContainerId="goals-form-container"
+          />
         </header>
 
         {/* ── Overview row ───────────────────────────────────────── */}

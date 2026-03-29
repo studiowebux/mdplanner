@@ -6,6 +6,7 @@ import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
 import { markdownToHtml } from "../utils/markdown.ts";
 import { toKebab } from "../utils/slug.ts";
+import { DetailActions } from "./components/detail-actions.tsx";
 import {
   SWOT_QUADRANT_META,
   SWOT_QUADRANTS,
@@ -54,16 +55,12 @@ export const SwotDetailView: FC<
             <h1 class="detail-title swot-detail__title">{swot.title}</h1>
             <span class="badge swot-date-badge">{formatDate(swot.date)}</span>
           </div>
-          <div class="detail-actions">
-            <button
-              class="btn btn--secondary btn--sm"
-              type="button"
-              hx-get={`/swot/${swot.id}/edit`}
-              hx-target="#swot-form-container"
-              hx-swap="innerHTML"
-            >
-              Edit Details
-            </button>
+          <DetailActions
+            entity="swot"
+            id={swot.id}
+            title={swot.title}
+            formContainerId="swot-form-container"
+          >
             {editing
               ? (
                 <a
@@ -81,16 +78,7 @@ export const SwotDetailView: FC<
                   Edit Items
                 </a>
               )}
-            <button
-              class="btn btn--danger btn--sm"
-              type="button"
-              hx-delete={`/swot/${swot.id}`}
-              hx-confirm={`Delete "${swot.title}"? This cannot be undone.`}
-              hx-swap="none"
-            >
-              Delete
-            </button>
-          </div>
+          </DetailActions>
         </header>
 
         {/* -- Project --------------------------------------------------- */}
