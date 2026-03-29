@@ -55,6 +55,9 @@ export function parseFormBody(
       case "number":
         result[field.name] = Number(val);
         break;
+      case "boolean":
+        result[field.name] = val === "true";
+        break;
       case "tags":
         result[field.name] = val.split(",").map((s) => s.trim()).filter(
           Boolean,

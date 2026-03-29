@@ -55,13 +55,9 @@ const FORM_FIELDS: FieldDef[] = [
   { type: "text", name: "githubRepo", label: "GitHub repo (owner/repo)" },
   { type: "text", name: "billingCustomerId", label: "Billing customer ID" },
   {
-    type: "select",
+    type: "boolean",
     name: "brainManaged",
     label: "Brain managed",
-    options: [
-      { value: "", label: "No" },
-      { value: "true", label: "Yes" },
-    ],
   },
   {
     type: "tags",
@@ -113,21 +109,13 @@ export const portfolioConfig: DomainConfig<
 
   Card: ({ item, q }) => <PortfolioCard item={item} q={q} />,
 
-  parseCreate: (body) => {
-    const parsed = parseFormBody(FORM_FIELDS, body);
-    if (parsed.brainManaged !== undefined) {
-      parsed.brainManaged = parsed.brainManaged === "true";
-    }
-    return parsed as CreatePortfolioItem;
-  },
+  parseCreate: (body) =>
+    parseFormBody(FORM_FIELDS, body) as CreatePortfolioItem,
 
-  parseUpdate: (body) => {
-    const parsed = parseFormBody(FORM_FIELDS, body, { clearEmpty: true });
-    if (parsed.brainManaged !== undefined) {
-      parsed.brainManaged = parsed.brainManaged === "true";
-    }
-    return parsed as Partial<UpdatePortfolioItem>;
-  },
+  parseUpdate: (body) =>
+    parseFormBody(FORM_FIELDS, body, { clearEmpty: true }) as Partial<
+      UpdatePortfolioItem
+    >,
 
   getService: () => getPortfolioService(),
 

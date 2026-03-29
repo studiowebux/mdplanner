@@ -10,6 +10,7 @@ import type {
 } from "../../types/person.types.ts";
 import { AGENT_TYPE_OPTIONS } from "../../types/person.types.ts";
 import { getPeopleService } from "../../singletons/services.ts";
+import { parseFormBody } from "../../utils/form-parser.ts";
 import { createSearchPredicate } from "../../utils/string.ts";
 import { PersonCard } from "../../views/components/person-card.tsx";
 import { PEOPLE_TABLE_COLUMNS, personToRow } from "./constants.tsx";
@@ -95,45 +96,12 @@ export const peopleConfig: DomainConfig<
 
   Card: ({ item, q }) => <PersonCard person={item} q={q} />,
 
-  parseCreate: (body) => ({
-    name: String(body.name || ""),
-    title: body.title ? String(body.title) : undefined,
-    role: body.role ? String(body.role) : undefined,
-    departments: body.departments
-      ? String(body.departments).split(",").map((s) => s.trim()).filter(Boolean)
-      : undefined,
-    reportsTo: body.reportsTo ? String(body.reportsTo) : undefined,
-    email: body.email ? String(body.email) : undefined,
-    phone: body.phone ? String(body.phone) : undefined,
-    startDate: body.startDate ? String(body.startDate) : undefined,
-    hoursPerDay: body.hoursPerDay ? Number(body.hoursPerDay) : undefined,
-    agentType: body.agentType
-      ? String(body.agentType) as Person["agentType"]
-      : undefined,
-    skills: body.skills
-      ? String(body.skills).split(",").map((s) => s.trim()).filter(Boolean)
-      : undefined,
-  }),
+  parseCreate: (body) => parseFormBody(FORM_FIELDS, body) as CreatePerson,
 
-  parseUpdate: (body) => ({
-    name: body.name ? String(body.name) : undefined,
-    title: body.title ? String(body.title) : undefined,
-    role: body.role ? String(body.role) : undefined,
-    departments: body.departments
-      ? String(body.departments).split(",").map((s) => s.trim()).filter(Boolean)
-      : undefined,
-    reportsTo: body.reportsTo ? String(body.reportsTo) : undefined,
-    email: body.email ? String(body.email) : undefined,
-    phone: body.phone ? String(body.phone) : undefined,
-    startDate: body.startDate ? String(body.startDate) : undefined,
-    hoursPerDay: body.hoursPerDay ? Number(body.hoursPerDay) : undefined,
-    agentType: body.agentType
-      ? String(body.agentType) as Person["agentType"]
-      : undefined,
-    skills: body.skills
-      ? String(body.skills).split(",").map((s) => s.trim()).filter(Boolean)
-      : undefined,
-  }),
+  parseUpdate: (body) =>
+    parseFormBody(FORM_FIELDS, body, { clearEmpty: true }) as Partial<
+      UpdatePerson
+    >,
 
   getService: () => getPeopleService(),
 

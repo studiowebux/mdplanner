@@ -30,15 +30,7 @@ const FORM_FIELDS: FieldDef[] = [
     options: DNS_PROVIDERS.map((p) => ({ value: p, label: p })),
   },
   { type: "date", name: "expiryDate", label: "Expiry date" },
-  {
-    type: "select",
-    name: "autoRenew",
-    label: "Auto-renew",
-    options: [
-      { value: "", label: "No" },
-      { value: "true", label: "Yes" },
-    ],
-  },
+  { type: "boolean", name: "autoRenew", label: "Auto-renew" },
   {
     type: "number",
     name: "renewalCostUsd",
@@ -85,21 +77,12 @@ export const dnsConfig: DomainConfig<
 
   Card: ({ item, q }) => <DnsCard item={item} q={q} />,
 
-  parseCreate: (body) => {
-    const parsed = parseFormBody(FORM_FIELDS, body);
-    if (parsed.autoRenew !== undefined) {
-      parsed.autoRenew = parsed.autoRenew === "true";
-    }
-    return parsed as CreateDnsDomain;
-  },
+  parseCreate: (body) => parseFormBody(FORM_FIELDS, body) as CreateDnsDomain,
 
-  parseUpdate: (body) => {
-    const parsed = parseFormBody(FORM_FIELDS, body, { clearEmpty: true });
-    if (parsed.autoRenew !== undefined) {
-      parsed.autoRenew = parsed.autoRenew === "true";
-    }
-    return parsed as Partial<UpdateDnsDomain>;
-  },
+  parseUpdate: (body) =>
+    parseFormBody(FORM_FIELDS, body, { clearEmpty: true }) as Partial<
+      UpdateDnsDomain
+    >,
 
   getService: () => getDnsService(),
 

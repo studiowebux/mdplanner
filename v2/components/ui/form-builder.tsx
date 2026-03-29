@@ -70,6 +70,7 @@ export type FieldDef =
     source?: string;
     placeholder?: string;
   }
+  | { type: "boolean"; name: string; label: string }
   | {
     type: "array-table";
     name: string;
@@ -275,6 +276,19 @@ const Field: FC<
         >
           {value ?? ""}
         </textarea>
+      )}
+      {def.type === "boolean" && (
+        <label class="form__checkbox-label">
+          <input
+            type="checkbox"
+            id={id}
+            name={def.name}
+            value="true"
+            checked={value === "true"}
+            class="form__checkbox"
+          />
+          {def.label}
+        </label>
       )}
       {def.type === "autocomplete" && (
         <div class="form__autocomplete">

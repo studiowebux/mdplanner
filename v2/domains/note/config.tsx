@@ -3,6 +3,7 @@
 import type { DomainConfig } from "../../factories/domain.types.ts";
 import type { CreateNote, Note, UpdateNote } from "../../types/note.types.ts";
 import { getNoteService } from "../../singletons/services.ts";
+import { parseFormBody } from "../../utils/form-parser.ts";
 import { createSearchPredicate } from "../../utils/string.ts";
 import { extractProjectNames } from "../../utils/filter-helpers.ts";
 import { NOTE_TABLE_COLUMNS, noteToRow } from "./constants.tsx";
@@ -61,17 +62,12 @@ export const noteConfig: DomainConfig<Note, CreateNote, UpdateNote> = {
 
   Card: ({ item, q }) => <NoteCard note={item} q={q} />,
 
-  parseCreate: (body) => ({
-    title: String(body.title || ""),
-    content: body.content ? String(body.content) : "",
-    project: body.project ? String(body.project) : undefined,
-  }),
+  parseCreate: (body) => parseFormBody(FORM_FIELDS, body) as CreateNote,
 
-  parseUpdate: (body) => ({
-    title: body.title ? String(body.title) : undefined,
-    content: body.content !== undefined ? String(body.content) : undefined,
-    project: body.project ? String(body.project) : null,
-  }),
+  parseUpdate: (body) =>
+    parseFormBody(FORM_FIELDS, body, { clearEmpty: true }) as Partial<
+      UpdateNote
+    >,
 
   getService: () => getNoteService(),
 
