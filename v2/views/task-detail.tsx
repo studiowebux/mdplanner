@@ -460,12 +460,9 @@ export const TaskDetailView: FC<Props> = (
                       >
                         {child.completed ? "[x]" : "[ ]"}
                       </span>
-                      <a
-                        class="task-detail__link"
-                        href={`/tasks/${child.id}`}
-                      >
+                      <span class="task-detail__subtask-title">
                         {child.title}
-                      </a>
+                      </span>
                       <span class={sectionBadgeClass(child.section)}>
                         {child.section}
                       </span>

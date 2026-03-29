@@ -3,6 +3,7 @@
 import type { FC } from "hono/jsx";
 import type { Task } from "../types/task.types.ts";
 import type { GitHubIssue, GitHubPR } from "../types/github.types.ts";
+import { toKebab } from "../utils/slug.ts";
 
 type Props = {
   task: Task;
@@ -21,7 +22,12 @@ export const TaskGitHubSection: FC<Props> = (
       {inheritedFrom && (
         <p class="task-github__hint">
           Repo: {repo}{" "}
-          <span class="badge badge--muted">via {inheritedFrom}</span>
+          <a
+            href={`/portfolio/${toKebab(inheritedFrom)}`}
+            class="badge badge--muted"
+          >
+            via {inheritedFrom}
+          </a>
         </p>
       )}
       {/* Linked issue */}

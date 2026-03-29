@@ -24,3 +24,6 @@ export type AppContext = Context<{ Variables: AppVariables }, any, any>;
 
 // View mode for domain list pages — grid (card) or table.
 export type ViewMode = "grid" | "table";
+
+/** Maps person name → person ID for linking people in views. */
+export type PersonByName = Record<string, string>;

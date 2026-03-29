@@ -35,14 +35,15 @@
 
   function syncCheckboxes(domain) {
     var hidden = getHidden(domain);
-    var toggle = document.querySelector(
+    var toggles = document.querySelectorAll(
       '[data-column-toggle="' + domain + '"]',
     );
-    if (!toggle) return;
-    var boxes = toggle.querySelectorAll("[data-column-key]");
-    for (var i = 0; i < boxes.length; i++) {
-      boxes[i].checked =
-        hidden.indexOf(boxes[i].getAttribute("data-column-key")) < 0;
+    for (var t = 0; t < toggles.length; t++) {
+      var boxes = toggles[t].querySelectorAll("[data-column-key]");
+      for (var i = 0; i < boxes.length; i++) {
+        boxes[i].checked =
+          hidden.indexOf(boxes[i].getAttribute("data-column-key")) < 0;
+      }
     }
   }
 
@@ -64,9 +65,12 @@
 
   // Apply on page load and after htmx swaps (table re-renders).
   function init() {
+    var seen = {};
     var toggles = document.querySelectorAll("[data-column-toggle]");
     for (var i = 0; i < toggles.length; i++) {
       var domain = toggles[i].getAttribute("data-column-toggle");
+      if (seen[domain]) continue;
+      seen[domain] = true;
       syncCheckboxes(domain);
       applyCols(domain);
     }

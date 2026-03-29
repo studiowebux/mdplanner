@@ -2,7 +2,7 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { PortfolioItem } from "../types/portfolio.types.ts";
 import type { Goal } from "../types/goal.types.ts";
-import type { ViewProps } from "../types/app.ts";
+import type { PersonByName, ViewProps } from "../types/app.ts";
 import { formatCurrency } from "../utils/format.ts";
 import { formatDate } from "../utils/time.ts";
 import { markdownToHtml } from "../utils/markdown.ts";
@@ -11,7 +11,11 @@ import { KpiGauge } from "../components/ui/kpi-gauge.tsx";
 
 import type { PortfolioStatusUpdate } from "../types/portfolio.types.ts";
 
-type Props = ViewProps & { item: PortfolioItem; goals?: Goal[] };
+type Props = ViewProps & {
+  item: PortfolioItem;
+  goals?: Goal[];
+  personByName?: PersonByName;
+};
 
 /** Single status update row — reused by detail page and fragment routes. */
 export const StatusUpdateRow: FC<{
@@ -75,7 +79,7 @@ export const StatusUpdateEditRow: FC<{
 );
 
 export const PortfolioDetailView: FC<Props> = (
-  { item, goals = [], ...viewProps },
+  { item, goals = [], personByName = {}, ...viewProps },
 ) => {
   const descHtml = markdownToHtml(item.description);
   const profit = (item.revenue ?? 0) - (item.expenses ?? 0);
@@ -214,7 +218,17 @@ export const PortfolioDetailView: FC<Props> = (
             <h2 class="section-heading">Team</h2>
             <div class="portfolio-detail__team">
               {item.team.map((m) => (
-                <span key={m} class="portfolio-detail__team-chip">{m}</span>
+                personByName[m]
+                  ? (
+                    <a
+                      key={m}
+                      href={`/people/${personByName[m]}`}
+                      class="portfolio-detail__team-chip"
+                    >
+                      {m}
+                    </a>
+                  )
+                  : <span key={m} class="portfolio-detail__team-chip">{m}</span>
               ))}
             </div>
           </section>

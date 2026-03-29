@@ -5,6 +5,7 @@ import { portfolioConfig } from "../../domains/portfolio/config.tsx";
 import {
   getGitHubService,
   getGoalService,
+  getPeopleService,
   getPortfolioService,
   getProjectService,
 } from "../../singletons/services.ts";
@@ -302,17 +303,28 @@ portfolioRouter.get("/:id", async (c) => {
   const item = await getPortfolioService().getById(id);
   if (!item) return c.notFound();
 
-  const allGoals = await getGoalService().list();
+  const teamNames = new Set(item.team ?? []);
+  const [allGoals, allPeople] = await Promise.all([
+    getGoalService().list(),
+    teamNames.size > 0 ? getPeopleService().list() : Promise.resolve([]),
+  ]);
   const linkedById = new Set(item.linkedGoals ?? []);
   const goals = allGoals.filter((g) =>
     linkedById.has(g.id) || g.project === item.name
   );
+  const personByName: Record<string, string> = {};
+  const teamLower = new Map([...teamNames].map((n) => [n.toLowerCase(), n]));
+  for (const p of allPeople) {
+    const orig = teamLower.get(p.name.toLowerCase());
+    if (orig) personByName[orig] = p.id;
+  }
 
   return c.html(
     <PortfolioDetailView
       {...viewProps(c, "/portfolio")}
       item={item}
       goals={goals}
+      personByName={personByName}
     />,
   );
 });
