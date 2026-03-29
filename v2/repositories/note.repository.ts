@@ -8,6 +8,7 @@ import {
   serializeFrontmatter,
 } from "../utils/frontmatter.ts";
 import { generateId } from "../utils/id.ts";
+import { findFileById } from "../utils/repo-helpers.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
 import { mergeFields } from "../utils/repo-helpers.ts";
 import type {
@@ -48,8 +49,12 @@ export class NoteRepository {
   }
 
   async findById(id: string): Promise<Note | null> {
-    const { note } = await this.findFileById(id);
-    return note;
+    const { entity } = await findFileById(
+      this.notesDir,
+      (c) => this.parse(c),
+      id,
+    );
+    return entity;
   }
 
   async create(data: CreateNote): Promise<Note> {
@@ -76,7 +81,11 @@ export class NoteRepository {
   }
 
   async update(id: string, data: UpdateNote): Promise<Note | null> {
-    const { file, note } = await this.findFileById(id);
+    const { file, entity: note } = await findFileById(
+      this.notesDir,
+      (c) => this.parse(c),
+      id,
+    );
     if (!file || !note) return null;
 
     const now = new Date().toISOString();
@@ -94,31 +103,14 @@ export class NoteRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    const { file } = await this.findFileById(id);
+    const { file } = await findFileById(
+      this.notesDir,
+      (c) => this.parse(c),
+      id,
+    );
     if (!file) return false;
     await Deno.remove(file);
     return true;
-  }
-
-  // -------------------------------------------------------------------------
-  // File lookup
-  // -------------------------------------------------------------------------
-
-  private async findFileById(
-    id: string,
-  ): Promise<{ file: string | null; note: Note | null }> {
-    try {
-      for await (const entry of Deno.readDir(this.notesDir)) {
-        if (!entry.isFile || !entry.name.endsWith(".md")) continue;
-        const filePath = join(this.notesDir, entry.name);
-        const content = await Deno.readTextFile(filePath);
-        const note = this.parse(content);
-        if (note?.id === id) return { file: filePath, note };
-      }
-    } catch (err) {
-      if (!(err instanceof Deno.errors.NotFound)) throw err;
-    }
-    return { file: null, note: null };
   }
 
   // -------------------------------------------------------------------------

@@ -7,7 +7,11 @@ import {
 } from "../utils/frontmatter.ts";
 import { generateId } from "../utils/id.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
-import { buildFrontmatter, mergeFields } from "../utils/repo-helpers.ts";
+import {
+  buildFrontmatter,
+  findFileById,
+  mergeFields,
+} from "../utils/repo-helpers.ts";
 import type {
   CreatePerson,
   Person,
@@ -72,8 +76,8 @@ export class PeopleRepository {
         if (row) return rowToPerson(row);
       } catch { /* fall through to disk */ }
     }
-    const { person } = await this.findFileById(id);
-    return person;
+    const { entity } = await findFileById(this.dir, (c) => this.parse(c), id);
+    return entity;
   }
 
   async findByName(name: string): Promise<Person | null> {
@@ -109,7 +113,11 @@ export class PeopleRepository {
   }
 
   async update(id: string, data: UpdatePerson): Promise<Person | null> {
-    const { file, person } = await this.findFileById(id);
+    const { file, entity: person } = await findFileById(
+      this.dir,
+      (c) => this.parse(c),
+      id,
+    );
     if (!file || !person) return null;
 
     const updated = mergeFields(
@@ -131,27 +139,10 @@ export class PeopleRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    const { file } = await this.findFileById(id);
+    const { file } = await findFileById(this.dir, (c) => this.parse(c), id);
     if (!file) return false;
     await Deno.remove(file);
     return true;
-  }
-
-  private async findFileById(
-    id: string,
-  ): Promise<{ file: string | null; person: Person | null }> {
-    try {
-      for await (const entry of Deno.readDir(this.dir)) {
-        if (!entry.isFile || !entry.name.endsWith(".md")) continue;
-        const filePath = join(this.dir, entry.name);
-        const content = await Deno.readTextFile(filePath);
-        const person = this.parse(content);
-        if (person?.id === id) return { file: filePath, person };
-      }
-    } catch (err) {
-      if (!(err instanceof Deno.errors.NotFound)) throw err;
-    }
-    return { file: null, person: null };
   }
 
   private parse(content: string): Person | null {

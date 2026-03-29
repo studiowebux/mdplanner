@@ -32,6 +32,32 @@ export async function readMarkdownDir<T>(
 }
 
 /**
+ * Find a single .md file by its frontmatter `id` field (O(n) disk scan).
+ * Use for flat-directory repositories (note, people, milestone).
+ * Task repository has a multi-section variant and stays separate.
+ */
+export async function findFileById<T>(
+  dir: string,
+  parse: (content: string) => T | null,
+  id: string,
+): Promise<{ file: string | null; entity: T | null }> {
+  try {
+    for await (const entry of Deno.readDir(dir)) {
+      if (!entry.isFile || !entry.name.endsWith(".md")) continue;
+      const filePath = join(dir, entry.name);
+      const content = await Deno.readTextFile(filePath);
+      const entity = parse(content);
+      if (entity && (entity as Record<string, unknown>).id === id) {
+        return { file: filePath, entity };
+      }
+    }
+  } catch (err) {
+    if (!(err instanceof Deno.errors.NotFound)) throw err;
+  }
+  return { file: null, entity: null };
+}
+
+/**
  * Build a frontmatter record from an entity, excluding body-only keys.
  * serializeFrontmatter already strips undefined/null, so no per-field guards needed.
  */

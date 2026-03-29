@@ -7,7 +7,11 @@ import {
 } from "../utils/frontmatter.ts";
 import { generateId } from "../utils/id.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
-import { buildFrontmatter, mergeFields } from "../utils/repo-helpers.ts";
+import {
+  buildFrontmatter,
+  findFileById,
+  mergeFields,
+} from "../utils/repo-helpers.ts";
 import type {
   CreateMilestone,
   MilestoneBase,
@@ -75,8 +79,12 @@ export class MilestoneRepository {
         if (row) return rowToMilestone(row);
       } catch { /* fall through to disk */ }
     }
-    const { base } = await this.findFileById(id);
-    return base;
+    const { entity } = await findFileById(
+      this.milestonesDir,
+      (c) => this.parse(c),
+      id,
+    );
+    return entity;
   }
 
   async findByName(name: string): Promise<MilestoneBase | null> {
@@ -129,7 +137,11 @@ export class MilestoneRepository {
     id: string,
     data: UpdateMilestone,
   ): Promise<MilestoneBase | null> {
-    const { file, base } = await this.findFileById(id);
+    const { file, entity: base } = await findFileById(
+      this.milestonesDir,
+      (c) => this.parse(c),
+      id,
+    );
     if (!file || !base) return null;
 
     const updated = mergeFields(
@@ -160,27 +172,14 @@ export class MilestoneRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    const { file } = await this.findFileById(id);
+    const { file } = await findFileById(
+      this.milestonesDir,
+      (c) => this.parse(c),
+      id,
+    );
     if (!file) return false;
     await Deno.remove(file);
     return true;
-  }
-
-  private async findFileById(
-    id: string,
-  ): Promise<{ file: string | null; base: MilestoneBase | null }> {
-    try {
-      for await (const entry of Deno.readDir(this.milestonesDir)) {
-        if (!entry.isFile || !entry.name.endsWith(".md")) continue;
-        const filePath = join(this.milestonesDir, entry.name);
-        const content = await Deno.readTextFile(filePath);
-        const m = this.parse(content);
-        if (m?.id === id) return { file: filePath, base: m };
-      }
-    } catch (err) {
-      if (!(err instanceof Deno.errors.NotFound)) throw err;
-    }
-    return { file: null, base: null };
   }
 
   private parse(content: string): MilestoneBase | null {
