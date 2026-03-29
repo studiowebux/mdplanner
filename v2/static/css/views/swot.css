@@ -36,10 +36,6 @@
 
 /* -- Detail page ---------------------------------------------------------- */
 
-.swot-detail__back {
-  margin-bottom: var(--space-md);
-}
-
 .swot-detail__header {
   display: flex;
   align-items: center;

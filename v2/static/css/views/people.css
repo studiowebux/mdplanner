@@ -74,10 +74,6 @@
    Detail view
    ------------------------------------------------------------------------- */
 
-.person-detail__back {
-  margin-bottom: var(--space-sm);
-}
-
 .person-detail__header {
   display: flex;
   align-items: flex-start;

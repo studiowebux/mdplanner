@@ -8,6 +8,7 @@ import { formatDate } from "../utils/time.ts";
 import { markdownToHtml } from "../utils/markdown.ts";
 import { GitHubSection } from "./github.tsx";
 import { KpiGauge } from "../components/ui/kpi-gauge.tsx";
+import { BackButton } from "./components/back-button.tsx";
 
 import type { PortfolioStatusUpdate } from "../types/portfolio.types.ts";
 
@@ -109,11 +110,7 @@ export const PortfolioDetailView: FC<Props> = (
         hx-swap="outerHTML"
       />
       <main id="portfolio-detail-root" class="detail-view portfolio-detail">
-        <div class="portfolio-detail__back">
-          <a href="/portfolio" class="btn btn--secondary">
-            Back to portfolio
-          </a>
-        </div>
+        <BackButton href="/portfolio" label="Back to portfolio" />
 
         <header class="detail-section portfolio-detail__header">
           <div class="detail-title-row portfolio-detail__title-row">

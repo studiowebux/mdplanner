@@ -9,6 +9,7 @@ import { dueIn, formatDate } from "../utils/time.ts";
 import { markdownToHtml } from "../utils/markdown.ts";
 import { KpiGauge } from "../components/ui/kpi-gauge.tsx";
 import { toKebab } from "../utils/slug.ts";
+import { BackButton } from "./components/back-button.tsx";
 
 // ---------------------------------------------------------------------------
 // Helper — renders a label/value pair inside an info-row
@@ -91,9 +92,7 @@ export const GoalDetailView: FC<
         hx-swap="outerHTML"
       />
       <main id="goal-detail-root" class="detail-view goal-detail">
-        <div class="goal-detail__back">
-          <a href="/goals" class="btn btn--secondary">Back to Goals</a>
-        </div>
+        <BackButton href="/goals" label="Back to Goals" />
 
         {/* ── Header ─────────────────────────────────────────────── */}
         <header class="detail-section goal-detail__header">

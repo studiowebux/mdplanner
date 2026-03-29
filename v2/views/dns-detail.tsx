@@ -1,5 +1,6 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
+import { BackButton } from "./components/back-button.tsx";
 import { FormBuilder } from "../components/ui/form-builder.tsx";
 import type { DnsDomain } from "../types/dns.types.ts";
 import type { ViewProps } from "../types/app.ts";
@@ -143,9 +144,7 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
       hx-swap="outerHTML"
     />
     <main id="dns-detail-root" class="detail-view dns-detail">
-      <div class="dns-detail__back">
-        <a href="/dns" class="btn btn--secondary">Back to DNS</a>
-      </div>
+      <BackButton href="/dns" label="Back to DNS" />
 
       <header class="detail-section dns-detail__header">
         <div class="detail-title-row dns-detail__title-row">

@@ -3,6 +3,7 @@ import { MainLayout } from "../components/layout/main.tsx";
 import type { Person } from "../types/person.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate, timeAgo } from "../utils/time.ts";
+import { BackButton } from "./components/back-button.tsx";
 
 type Props = ViewProps & {
   person: Person;
@@ -27,11 +28,7 @@ export const PersonDetailView: FC<Props> = (
       styles={["/css/views/people.css"]}
     >
       <main class="detail-view person-detail">
-        <div class="person-detail__back">
-          <a href="/people" class="btn btn--secondary">
-            Back to people
-          </a>
-        </div>
+        <BackButton href="/people" label="Back to people" />
 
         <header class="person-detail__header">
           <div class="person-detail__identity">

@@ -1,5 +1,6 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
+import { BackButton } from "./components/back-button.tsx";
 import type { MarketingPlan } from "../types/marketing-plan.types.ts";
 import type { Goal } from "../types/goal.types.ts";
 import type { ViewProps } from "../types/app.ts";
@@ -63,11 +64,7 @@ export const MarketingPlanDetailView: FC<
         hx-swap="outerHTML"
       />
       <main id="mktplan-detail-root" class="detail-view mktplan-detail">
-        <div class="mktplan-detail__back">
-          <a href="/marketing-plans" class="btn btn--secondary">
-            Back to Marketing Plans
-          </a>
-        </div>
+        <BackButton href="/marketing-plans" label="Back to Marketing Plans" />
 
         {/* -- Header ---------------------------------------------------- */}
         <header class="detail-section mktplan-detail__header">

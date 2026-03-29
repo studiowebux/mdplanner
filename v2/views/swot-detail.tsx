@@ -1,5 +1,6 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
+import { BackButton } from "./components/back-button.tsx";
 import type { Swot } from "../types/swot.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
@@ -45,9 +46,7 @@ export const SwotDetailView: FC<
           editing ? " swot-detail--editing" : ""
         }`}
       >
-        <div class="swot-detail__back">
-          <a href="/swot" class="btn btn--secondary">Back to SWOT Analyses</a>
-        </div>
+        <BackButton href="/swot" label="Back to SWOT Analyses" />
 
         {/* -- Header ---------------------------------------------------- */}
         <header class="detail-section swot-detail__header">

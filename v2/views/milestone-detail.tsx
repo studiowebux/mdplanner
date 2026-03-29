@@ -5,6 +5,7 @@ import type { Milestone } from "../types/milestone.types.ts";
 import type { Task } from "../types/task.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { toKebab } from "../utils/slug.ts";
+import { BackButton } from "./components/back-button.tsx";
 
 type Props = ViewProps & {
   milestone: Milestone;
@@ -23,11 +24,7 @@ export const MilestoneDetailView: FC<Props> = (
       styles={["/css/views/milestones.css"]}
     >
       <main class="detail-view milestone-detail">
-        <div class="milestone-detail__back">
-          <a href="/milestones" class="btn btn--secondary">
-            Back to milestones
-          </a>
-        </div>
+        <BackButton href="/milestones" label="Back to milestones" />
         <header class="milestone-detail__header">
           <div class="detail-title-row milestone-detail__title-row">
             <h1 class="detail-title milestone-detail__title">

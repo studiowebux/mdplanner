@@ -16,6 +16,7 @@ import {
   getPeopleService,
   getTaskService,
 } from "../singletons/services.ts";
+import { BackButton } from "./components/back-button.tsx";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -220,10 +221,8 @@ export const TaskDetailView: FC<Props> = (
         hx-swap="outerHTML"
       />
       <main id="task-detail-root" class="detail-view task-detail">
-        {/* Back link — matches person-detail / milestone-detail pattern */}
-        <div class="task-detail__back">
-          <a href="/tasks" class="btn btn--secondary">Back to tasks</a>
-        </div>
+        {/* Back link */}
+        <BackButton href="/tasks" label="Back to tasks" />
 
         {/* Quick actions bar — move, assign, then mark complete last */}
         <div class="task-detail__quick-actions">

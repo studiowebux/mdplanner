@@ -1,5 +1,6 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
+import { BackButton } from "./components/back-button.tsx";
 import type { Idea } from "../types/idea.types.ts";
 import { IDEA_COMPLETED_STATUSES } from "../types/idea.types.ts";
 import type { ViewProps } from "../types/app.ts";
@@ -65,9 +66,7 @@ export const IdeaDetailView: FC<
         hx-swap="outerHTML"
       />
       <main id="idea-detail-root" class="detail-view idea-detail">
-        <div class="idea-detail__back">
-          <a href="/ideas" class="btn btn--secondary">Back to Ideas</a>
-        </div>
+        <BackButton href="/ideas" label="Back to Ideas" />
 
         {/* -- Header ---------------------------------------------------- */}
         <header class="detail-section idea-detail__header">
