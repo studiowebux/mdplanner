@@ -134,7 +134,7 @@ export const MarketingPlanDetailView: FC<
             <h2 class="section-heading">
               Target Audiences ({(plan.targetAudiences ?? []).length})
             </h2>
-            <table class="data-table mktplan-detail__table">
+            <table class="data-table data-table--compact data-table--uppercase">
               <thead>
                 <tr>
                   <th>Name</th>
@@ -161,7 +161,7 @@ export const MarketingPlanDetailView: FC<
             <h2 class="section-heading">
               Channels ({(plan.channels ?? []).length})
             </h2>
-            <table class="data-table mktplan-detail__table">
+            <table class="data-table data-table--compact data-table--uppercase">
               <thead>
                 <tr>
                   <th>Name</th>
@@ -205,7 +205,7 @@ export const MarketingPlanDetailView: FC<
             <h2 class="section-heading">
               Campaigns ({(plan.campaigns ?? []).length})
             </h2>
-            <table class="data-table mktplan-detail__table">
+            <table class="data-table data-table--compact data-table--uppercase">
               <thead>
                 <tr>
                   <th>Name</th>

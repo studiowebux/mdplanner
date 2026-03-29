@@ -130,7 +130,7 @@ const TimeEntriesSection: FC<{ entries: Task["time_entries"] }> = (
         Time entries
         <span class="task-detail__count">({entries.length})</span>
       </h2>
-      <table class="task-detail__table">
+      <table class="data-table data-table--compact">
         <thead>
           <tr>
             <th>Date</th>

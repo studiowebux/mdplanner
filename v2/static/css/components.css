@@ -443,7 +443,8 @@ a.badge:hover {
   font-size: var(--font-size-sm);
 }
 
-.data-table__th {
+.data-table__th,
+.data-table th {
   text-align: left;
   padding: var(--space-sm) var(--space-md);
   font-weight: var(--font-weight-semibold);
@@ -474,14 +475,16 @@ a.badge:hover {
   font-size: var(--font-size-xs);
 }
 
-.data-table__td {
+.data-table__td,
+.data-table td {
   padding: var(--space-sm) var(--space-md);
   color: var(--color-text-primary);
   border-bottom: var(--border-width) var(--border-style)
     var(--color-border-default);
 }
 
-.data-table__td a:not(.btn) {
+.data-table__td a:not(.btn),
+.data-table td a:not(.btn) {
   color: var(--color-text-primary);
   text-decoration: none;
   font-weight: var(--font-weight-semibold);
@@ -1209,7 +1212,8 @@ a.badge:hover {
   background: var(--color-bg-secondary);
 }
 
-.data-table__row:hover {
+.data-table__row:hover,
+.data-table tbody tr:hover {
   background: var(--color-bg-hover);
 }
 
@@ -1274,12 +1278,14 @@ a.badge:hover {
    Data table compact mode — tighter padding, hover detail row
    ------------------------------------------------------------------------- */
 
-.data-table--compact .data-table__th {
+.data-table--compact .data-table__th,
+.data-table--compact th {
   padding: var(--space-xs) var(--space-sm);
   font-size: var(--font-size-xs);
 }
 
-.data-table--compact .data-table__td {
+.data-table--compact .data-table__td,
+.data-table--compact td {
   padding: var(--space-xs) var(--space-sm);
   font-size: var(--font-size-sm);
   white-space: nowrap;
@@ -1288,8 +1294,40 @@ a.badge:hover {
   max-width: var(--table-compact-cell-max-width);
 }
 
-.data-table--compact .data-table__row {
+.data-table--compact .data-table__row,
+.data-table--compact tbody tr {
   transition: background var(--transition-fast);
+}
+
+/* Uppercase header modifier — GitHub + marketing plan table style */
+
+.data-table--uppercase .data-table__th,
+.data-table--uppercase th {
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  font-size: var(--font-size-xs);
+}
+
+/* Header background modifier — used on detail kpi/data tables */
+
+.data-table--header-bg .data-table__th,
+.data-table--header-bg th {
+  background: var(--color-bg-secondary);
+}
+
+/* No last border modifier — removes bottom border on last row */
+
+.data-table--no-last-border tbody tr:last-child td,
+.data-table--no-last-border .data-table__row:last-child .data-table__td {
+  border-bottom: none;
+}
+
+/* Tfoot emphasis — bold primary-color text, no bottom border */
+
+.data-table tfoot td {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  border-bottom: none;
 }
 
 /* Swap animations — works in all browsers via htmx CSS classes */

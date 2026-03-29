@@ -29,35 +29,7 @@
   margin: 0;
 }
 
-/* ---------------------------------------------------------------------------
-   Detail tables — audiences, channels, campaigns
---------------------------------------------------------------------------- */
-
-.mktplan-detail__table {
-  width: 100%;
-  font-size: var(--font-size-sm);
-}
-
-.mktplan-detail__table th {
-  text-align: left;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wide);
-  padding: var(--space-xs) var(--space-sm);
-  border-bottom: var(--border-width) solid var(--color-border);
-}
-
-.mktplan-detail__table td {
-  padding: var(--space-xs) var(--space-sm);
-  border-bottom: var(--border-width) solid var(--color-border);
-  color: var(--color-text-primary);
-}
-
-.mktplan-detail__table tbody tr:hover td {
-  background: var(--color-bg-secondary);
-}
+/* Detail tables use shared .data-table --compact --uppercase from components.css */
 
 /* ---------------------------------------------------------------------------
    KPI progress

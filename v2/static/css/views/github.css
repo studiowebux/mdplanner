@@ -114,32 +114,7 @@
   margin-top: var(--space-md);
 }
 
-.github-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--font-size-sm);
-}
-
-.github-table th {
-  text-align: left;
-  padding: var(--space-sm) var(--space-md);
-  border-bottom: var(--card-border);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-xs);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wide);
-}
-
-.github-table td {
-  padding: var(--space-sm) var(--space-md);
-  border-bottom: var(--card-border);
-  vertical-align: middle;
-}
-
-.github-table tr:last-child td {
-  border-bottom: none;
-}
+/* Table uses shared .data-table --uppercase --no-last-border from components.css */
 
 .github-table__num {
   color: var(--color-text-muted);

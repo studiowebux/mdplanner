@@ -99,7 +99,7 @@ export const GitHubIssuesTable: FC<{
     {issues.length === 0
       ? <p class="github-empty">No issues found</p>
       : (
-        <table class="github-table">
+        <table class="data-table data-table--uppercase data-table--no-last-border">
           <thead>
             <tr>
               <th>#</th>
@@ -168,7 +168,7 @@ export const GitHubPRsTable: FC<{
     {prs.length === 0
       ? <p class="github-empty">No pull requests found</p>
       : (
-        <table class="github-table">
+        <table class="data-table data-table--uppercase data-table--no-last-border">
           <thead>
             <tr>
               <th>#</th>
@@ -372,7 +372,7 @@ export const GitHubPipelineResults: FC<{
     {runs.length === 0
       ? <p class="github-empty">No workflow runs match filters</p>
       : (
-        <table class="github-table">
+        <table class="data-table data-table--uppercase data-table--no-last-border">
           <thead>
             <tr>
               <th>Status</th>

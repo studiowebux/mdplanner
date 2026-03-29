@@ -213,7 +213,7 @@ export const PortfolioDetailView: FC<Props> = (
         {item.kpis && item.kpis.length > 0 && (
           <section class="portfolio-detail__kpis">
             <h2 class="section-heading">KPIs</h2>
-            <table class="portfolio-detail__kpi-table">
+            <table class="data-table data-table--header-bg">
               <thead>
                 <tr>
                   <th>Name</th>
@@ -296,7 +296,7 @@ export const PortfolioDetailView: FC<Props> = (
         {goals.length > 0 && (
           <section class="detail-section portfolio-detail__section">
             <h2 class="section-heading">Linked Goals</h2>
-            <table class="portfolio-detail__kpi-table">
+            <table class="data-table data-table--header-bg">
               <thead>
                 <tr>
                   <th>Goal</th>

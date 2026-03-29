@@ -945,35 +945,7 @@ a.task-board__card-avatar:hover {
   color: var(--color-text-secondary);
 }
 
-/* Time entries table */
-
-.task-detail__table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--font-size-sm);
-}
-
-.task-detail__table th {
-  text-align: left;
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-muted);
-  padding: var(--space-xs) var(--space-sm);
-  border-bottom: var(--border-width) var(--border-style)
-    var(--color-border-default);
-}
-
-.task-detail__table td {
-  padding: var(--space-xs) var(--space-sm);
-  border-bottom: var(--border-width) var(--border-style)
-    var(--color-border-default);
-  color: var(--color-text-secondary);
-}
-
-.task-detail__table tfoot td {
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  border-bottom: none;
-}
+/* Time entries table uses shared .data-table .data-table--compact from components.css */
 
 /* Comments */
 
