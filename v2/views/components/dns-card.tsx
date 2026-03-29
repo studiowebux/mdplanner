@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import type { DnsDomain } from "../../types/dns.types.ts";
 import { DomainCard } from "../../components/ui/domain-card.tsx";
+import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 import { formatDate } from "../../utils/time.ts";
 
 type Props = { item: DnsDomain; q?: string };
@@ -20,29 +21,23 @@ export const DnsCard: FC<Props> = ({ item, q }) => (
       )
       : undefined}
   >
-    <dl class="domain-card__meta">
+    <CardMeta>
       {item.provider && (
-        <>
-          <dt class="domain-card__meta-label">Provider</dt>
-          <dd class="domain-card__meta-value">{item.provider}</dd>
-        </>
+        <CardMetaItem label="Provider">{item.provider}</CardMetaItem>
       )}
       {item.expiryDate && (
-        <>
-          <dt class="domain-card__meta-label">Expires</dt>
-          <dd class="domain-card__meta-value">{formatDate(item.expiryDate)}</dd>
-        </>
+        <CardMetaItem label="Expires">
+          {formatDate(item.expiryDate)}
+        </CardMetaItem>
       )}
-      <dt class="domain-card__meta-label">Records</dt>
-      <dd class="domain-card__meta-value">{(item.dnsRecords ?? []).length}</dd>
+      <CardMetaItem label="Records">
+        {(item.dnsRecords ?? []).length}
+      </CardMetaItem>
       {item.autoRenew !== undefined && (
-        <>
-          <dt class="domain-card__meta-label">Auto-renew</dt>
-          <dd class="domain-card__meta-value">
-            {item.autoRenew ? "Yes" : "No"}
-          </dd>
-        </>
+        <CardMetaItem label="Auto-renew">
+          {item.autoRenew ? "Yes" : "No"}
+        </CardMetaItem>
       )}
-    </dl>
+    </CardMeta>
   </DomainCard>
 );

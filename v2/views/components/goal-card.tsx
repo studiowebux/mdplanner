@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import type { Goal } from "../../types/goal.types.ts";
 import { DomainCard } from "../../components/ui/domain-card.tsx";
+import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 import { KpiGauge } from "../../components/ui/kpi-gauge.tsx";
 import { PRIORITY_LABELS } from "../../constants/mod.ts";
 import { goalPersonByName } from "../../domains/goal/config.tsx";
@@ -58,42 +59,33 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
       }
     >
       {/* Compact meta — owner + KPI only */}
-      <dl class="domain-card__meta">
+      <CardMeta>
         {item.project && (
-          <>
-            <dt class="domain-card__meta-label">Project</dt>
-            <dd class="domain-card__meta-value">
-              <a href={`/portfolio/${toKebab(item.project)}`}>
-                {item.project}
-              </a>
-            </dd>
-          </>
+          <CardMetaItem label="Project">
+            <a href={`/portfolio/${toKebab(item.project)}`}>
+              {item.project}
+            </a>
+          </CardMetaItem>
         )}
         {item.owner && (
-          <>
-            <dt class="domain-card__meta-label">Owner</dt>
-            <dd class="domain-card__meta-value">
-              <a
-                href={goalPersonByName[item.owner!]
-                  ? `/people/${goalPersonByName[item.owner!]}`
-                  : `/people?q=${encodeURIComponent(item.owner!)}`}
-              >
-                {item.owner}
-              </a>
-            </dd>
-          </>
+          <CardMetaItem label="Owner">
+            <a
+              href={goalPersonByName[item.owner!]
+                ? `/people/${goalPersonByName[item.owner!]}`
+                : `/people?q=${encodeURIComponent(item.owner!)}`}
+            >
+              {item.owner}
+            </a>
+          </CardMetaItem>
         )}
         {item.kpi && (
-          <>
-            <dt class="domain-card__meta-label">KPI</dt>
-            <dd class="domain-card__meta-value">
-              {item.kpiValue != null && item.kpiTarget != null
-                ? <KpiGauge value={item.kpiValue} target={item.kpiTarget} />
-                : item.kpi}
-            </dd>
-          </>
+          <CardMetaItem label="KPI">
+            {item.kpiValue != null && item.kpiTarget != null
+              ? <KpiGauge value={item.kpiValue} target={item.kpiTarget} />
+              : item.kpi}
+          </CardMetaItem>
         )}
-      </dl>
+      </CardMeta>
 
       {/* Progress bar — manual or time-elapsed */}
       {(hasManualProgress || (start > 0 && end > 0)) && (

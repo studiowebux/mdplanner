@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import type { Note } from "../../types/note.types.ts";
 import { DomainCard } from "../../components/ui/domain-card.tsx";
+import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 import { Highlight, highlightHtml } from "../../utils/highlight.tsx";
 import { markdownToHtml } from "../../utils/markdown.ts";
 import { timeAgo } from "../../utils/time.ts";
@@ -47,30 +48,23 @@ export const NoteCard: FC<Props> = ({ note, q }) => {
         </div>
       }
     >
-      <dl class="domain-card__meta">
+      <CardMeta>
         {note.project && (
-          <>
-            <dt class="domain-card__meta-label">Project</dt>
-            <dd class="domain-card__meta-value">
-              <a href={`/portfolio/${toKebab(note.project)}`}>
-                <Highlight text={note.project} q={q} />
-              </a>
-            </dd>
-          </>
+          <CardMetaItem label="Project">
+            <a href={`/portfolio/${toKebab(note.project)}`}>
+              <Highlight text={note.project} q={q} />
+            </a>
+          </CardMetaItem>
         )}
-        <dt class="domain-card__meta-label">Updated</dt>
-        <dd class="domain-card__meta-value">{timeAgo(note.updatedAt)}</dd>
+        <CardMetaItem label="Updated">{timeAgo(note.updatedAt)}</CardMetaItem>
         {(paragraphCount > 0 || sectionCount > 0) && (
-          <>
-            <dt class="domain-card__meta-label">Content</dt>
-            <dd class="domain-card__meta-value">
-              {paragraphCount} block{paragraphCount !== 1 ? "s" : ""}
-              {sectionCount > 0 &&
-                `, ${sectionCount} section${sectionCount !== 1 ? "s" : ""}`}
-            </dd>
-          </>
+          <CardMetaItem label="Content">
+            {paragraphCount} block{paragraphCount !== 1 ? "s" : ""}
+            {sectionCount > 0 &&
+              `, ${sectionCount} section${sectionCount !== 1 ? "s" : ""}`}
+          </CardMetaItem>
         )}
-      </dl>
+      </CardMeta>
 
       {contentHtml && (
         <div

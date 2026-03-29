@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import type { Person } from "../../types/person.types.ts";
 import { DomainCard } from "../../components/ui/domain-card.tsx";
+import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 
 type Props = { person: Person; q?: string };
 
@@ -39,30 +40,19 @@ export const PersonCard: FC<Props> = ({ person, q }) => {
         )
         : undefined}
     >
-      <dl class="domain-card__meta">
-        {person.role && (
-          <>
-            <dt class="domain-card__meta-label">Role</dt>
-            <dd class="domain-card__meta-value">{person.role}</dd>
-          </>
-        )}
+      <CardMeta>
+        {person.role && <CardMetaItem label="Role">{person.role}</CardMetaItem>}
         {person.departments && person.departments.length > 0 && (
-          <>
-            <dt class="domain-card__meta-label">Department</dt>
-            <dd class="domain-card__meta-value">
-              {person.departments.join(", ")}
-            </dd>
-          </>
+          <CardMetaItem label="Department">
+            {person.departments.join(", ")}
+          </CardMetaItem>
         )}
         {person.email && (
-          <>
-            <dt class="domain-card__meta-label">Email</dt>
-            <dd class="domain-card__meta-value">
-              <a href={`mailto:${person.email}`}>{person.email}</a>
-            </dd>
-          </>
+          <CardMetaItem label="Email">
+            <a href={`mailto:${person.email}`}>{person.email}</a>
+          </CardMetaItem>
         )}
-      </dl>
+      </CardMeta>
 
       {person.skills && person.skills.length > 0 && (
         <div class="person-card__skills">

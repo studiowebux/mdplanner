@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import type { Milestone } from "../../types/milestone.types.ts";
 import { DomainCard } from "../../components/ui/domain-card.tsx";
+import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 import {
   dueIn,
   duration,
@@ -36,62 +37,48 @@ export const MilestoneCard: FC<Props> = ({ milestone, q }) => {
         </span>
       }
     >
-      <dl class="domain-card__meta">
+      <CardMeta>
         {milestone.project && (
-          <>
-            <dt class="domain-card__meta-label">Project</dt>
-            <dd class="domain-card__meta-value">
-              <a href={`/portfolio/${toKebab(milestone.project)}`}>
-                <Highlight text={milestone.project} q={q} />
-              </a>
-            </dd>
-          </>
+          <CardMetaItem label="Project">
+            <a href={`/portfolio/${toKebab(milestone.project)}`}>
+              <Highlight text={milestone.project} q={q} />
+            </a>
+          </CardMetaItem>
         )}
         {milestone.target && (
-          <>
-            <dt class="domain-card__meta-label">Target</dt>
-            <dd class="domain-card__meta-value">
-              {formatDate(milestone.target)}
-            </dd>
-          </>
+          <CardMetaItem label="Target">
+            {formatDate(milestone.target)}
+          </CardMetaItem>
         )}
         {milestone.status !== "completed" && milestone.createdAt && (
-          <>
-            <dt class="domain-card__meta-label">Created</dt>
-            <dd class="domain-card__meta-value">
-              {timeAgo(milestone.createdAt)}
-            </dd>
-          </>
+          <CardMetaItem label="Created">
+            {timeAgo(milestone.createdAt)}
+          </CardMetaItem>
         )}
         {milestone.status !== "completed" && milestone.target && (
-          <>
-            <dt class="domain-card__meta-label">Due</dt>
-            <dd
-              class={`domain-card__meta-value${
-                dueIn(milestone.target).includes("overdue") ? " text-error" : ""
-              }`}
+          <CardMetaItem label="Due">
+            <span
+              class={dueIn(milestone.target).includes("overdue")
+                ? "text-error"
+                : undefined}
             >
               {dueIn(milestone.target)}
-            </dd>
-          </>
+            </span>
+          </CardMetaItem>
         )}
         {milestone.status === "completed" && milestone.completedAt && (
-          <>
-            <dt class="domain-card__meta-label">Completed</dt>
-            <dd class="domain-card__meta-value">
-              {formatDate(milestone.completedAt)}
-              {duration(milestone.createdAt, milestone.completedAt) &&
-                ` (${duration(milestone.createdAt, milestone.completedAt)})`}
-            </dd>
-          </>
+          <CardMetaItem label="Completed">
+            {formatDate(milestone.completedAt)}
+            {duration(milestone.createdAt, milestone.completedAt) &&
+              ` (${duration(milestone.createdAt, milestone.completedAt)})`}
+          </CardMetaItem>
         )}
         {v && (
-          <>
-            <dt class="domain-card__meta-label">Variance</dt>
-            <dd class={`domain-card__meta-value ${vClass}`}>{v}</dd>
-          </>
+          <CardMetaItem label="Variance">
+            <span class={vClass}>{v}</span>
+          </CardMetaItem>
         )}
-      </dl>
+      </CardMeta>
 
       <div class="milestone-card__progress">
         <progress

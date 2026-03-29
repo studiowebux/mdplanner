@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import type { MarketingPlan } from "../../types/marketing-plan.types.ts";
 import { MARKETING_PLAN_COMPLETED_STATUSES } from "../../types/marketing-plan.types.ts";
 import { DomainCard } from "../../components/ui/domain-card.tsx";
+import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 import { toKebab } from "../../utils/slug.ts";
 
 type Props = { item: MarketingPlan; q?: string };
@@ -31,57 +32,33 @@ export const MarketingPlanCard: FC<Props> = ({ item, q }) => {
         </span>
       }
     >
-      <dl class="domain-card__meta">
+      <CardMeta>
         {item.project && (
-          <>
-            <dt class="domain-card__meta-label">Project</dt>
-            <dd class="domain-card__meta-value">
-              <a href={`/portfolio/${toKebab(item.project)}`}>
-                {item.project}
-              </a>
-            </dd>
-          </>
+          <CardMetaItem label="Project">
+            <a href={`/portfolio/${toKebab(item.project)}`}>
+              {item.project}
+            </a>
+          </CardMetaItem>
         )}
-        {budget && (
-          <>
-            <dt class="domain-card__meta-label">Budget</dt>
-            <dd class="domain-card__meta-value">{budget}</dd>
-          </>
-        )}
+        {budget && <CardMetaItem label="Budget">{budget}</CardMetaItem>}
         {item.startDate && (
-          <>
-            <dt class="domain-card__meta-label">Period</dt>
-            <dd class="domain-card__meta-value">
-              {item.startDate}
-              {item.endDate ? ` — ${item.endDate}` : ""}
-            </dd>
-          </>
+          <CardMetaItem label="Period">
+            {item.startDate}
+            {item.endDate ? ` — ${item.endDate}` : ""}
+          </CardMetaItem>
         )}
         {audienceCount > 0 && (
-          <>
-            <dt class="domain-card__meta-label">Audiences</dt>
-            <dd class="domain-card__meta-value">{audienceCount}</dd>
-          </>
+          <CardMetaItem label="Audiences">{audienceCount}</CardMetaItem>
         )}
         {channelCount > 0 && (
-          <>
-            <dt class="domain-card__meta-label">Channels</dt>
-            <dd class="domain-card__meta-value">{channelCount}</dd>
-          </>
+          <CardMetaItem label="Channels">{channelCount}</CardMetaItem>
         )}
         {campaignCount > 0 && (
-          <>
-            <dt class="domain-card__meta-label">Campaigns</dt>
-            <dd class="domain-card__meta-value">{campaignCount}</dd>
-          </>
+          <CardMetaItem label="Campaigns">{campaignCount}</CardMetaItem>
         )}
-        {goalCount > 0 && (
-          <>
-            <dt class="domain-card__meta-label">Goals</dt>
-            <dd class="domain-card__meta-value">{goalCount}</dd>
-          </>
-        )}
-      </dl>
+        {goalCount > 0 && <CardMetaItem label="Goals">{goalCount}
+        </CardMetaItem>}
+      </CardMeta>
     </DomainCard>
   );
 };

@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import type { Swot } from "../../types/swot.types.ts";
 import { DomainCard } from "../../components/ui/domain-card.tsx";
+import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 import { toKebab } from "../../utils/slug.ts";
 import { formatDate } from "../../utils/time.ts";
 
@@ -16,18 +17,15 @@ export const SwotCard: FC<Props> = ({ item, q }) => {
       id={item.id}
       badge={<span class="badge swot-date-badge">{formatDate(item.date)}</span>}
     >
-      <dl class="domain-card__meta">
+      <CardMeta>
         {item.project && (
-          <>
-            <dt class="domain-card__meta-label">Project</dt>
-            <dd class="domain-card__meta-value">
-              <a href={`/portfolio/${toKebab(item.project)}`}>
-                {item.project}
-              </a>
-            </dd>
-          </>
+          <CardMetaItem label="Project">
+            <a href={`/portfolio/${toKebab(item.project)}`}>
+              {item.project}
+            </a>
+          </CardMetaItem>
         )}
-      </dl>
+      </CardMeta>
       <div class="swot-card__counts">
         <span class="badge swot-card__count--s">
           S {item.strengths.length}

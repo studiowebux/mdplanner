@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import type { PortfolioItem } from "../../types/portfolio.types.ts";
 import { DomainCard } from "../../components/ui/domain-card.tsx";
+import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 import { formatCurrency } from "../../utils/format.ts";
 import { Highlight } from "../../utils/highlight.tsx";
 
@@ -24,39 +25,29 @@ export const PortfolioCard: FC<Props> = ({ item, q }) => {
         </span>
       }
     >
-      <dl class="domain-card__meta">
-        <dt class="domain-card__meta-label">Category</dt>
-        <dd class="domain-card__meta-value">
+      <CardMeta>
+        <CardMetaItem label="Category">
           <Highlight text={item.category} q={q} />
-        </dd>
+        </CardMetaItem>
 
         {item.client && (
-          <>
-            <dt class="domain-card__meta-label">Client</dt>
-            <dd class="domain-card__meta-value">
-              <Highlight text={item.client} q={q} />
-            </dd>
-          </>
+          <CardMetaItem label="Client">
+            <Highlight text={item.client} q={q} />
+          </CardMetaItem>
         )}
 
         {(item.revenue != null || item.expenses != null) && (
-          <>
-            <dt class="domain-card__meta-label">Financials</dt>
-            <dd class="domain-card__meta-value">
-              {formatCurrency(item.revenue)}
-              {item.revenue && item.expenses ? " / " : ""}
-              {item.expenses ? formatCurrency(item.expenses) : ""}
-            </dd>
-          </>
+          <CardMetaItem label="Financials">
+            {formatCurrency(item.revenue)}
+            {item.revenue && item.expenses ? " / " : ""}
+            {item.expenses ? formatCurrency(item.expenses) : ""}
+          </CardMetaItem>
         )}
 
         {item.startDate && (
-          <>
-            <dt class="domain-card__meta-label">Start</dt>
-            <dd class="domain-card__meta-value">{item.startDate}</dd>
-          </>
+          <CardMetaItem label="Start">{item.startDate}</CardMetaItem>
         )}
-      </dl>
+      </CardMeta>
 
       <div class="portfolio-card__progress">
         <div class="portfolio-progress">
