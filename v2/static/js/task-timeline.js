@@ -129,8 +129,9 @@ function drawDependencyLines(root, withHover) {
   if (withHover) bindDepHover(inner);
 }
 
-// Expose for use by export script
-window.drawDependencyLines = drawDependencyLines;
+// Expose for use by export script (namespaced to avoid global pollution)
+window.__mdp = window.__mdp || {};
+window.__mdp.drawDependencyLines = drawDependencyLines;
 
 // ---------------------------------------------------------------------------
 // Hover highlight — bold connected lines on row mouseenter

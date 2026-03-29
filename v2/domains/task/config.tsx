@@ -104,7 +104,6 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
   styles: ["/css/views/tasks.css"],
   scripts: [
     "/js/task-list.js",
-    "/js/task-board.js",
     "/js/task-timeline.js",
     "/js/task-timeline-export.js",
   ],

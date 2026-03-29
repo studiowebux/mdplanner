@@ -1,9 +1,13 @@
 // Sidebar toggle — desktop collapse + mobile overlay.
 // Desktop: toggles .sidebar-collapsed on <html>, persisted in localStorage.
-// Mobile (<=768px): toggles .sidebar-open on <html>, overlay closes on tap.
+// Mobile (<=breakpoint): toggles .sidebar-open on <html>, overlay closes on tap.
 
 (function () {
-  var MOBILE_BP = 768;
+  var MOBILE_BP = parseInt(
+    getComputedStyle(document.documentElement)
+      .getPropertyValue("--breakpoint-mobile"),
+    10,
+  ) || 768;
   var COLLAPSED_KEY = "sidebarCollapsed";
   var html = document.documentElement;
   var btn = document.getElementById("sidebar-toggle");

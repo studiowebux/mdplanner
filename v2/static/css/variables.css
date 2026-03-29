@@ -17,6 +17,11 @@
    -------------------------------------------------------------------------- */
 
 :root {
+  /* Breakpoints — CSS vars can't be used in @media queries (spec limitation),
+     so 768px is hardcoded in @media rules. This var exists so JS can read
+     it via getComputedStyle instead of duplicating the magic number. */
+  --breakpoint-mobile: 768px;
+
   /* Typography - shared across all themes */
   --font-sans: "Roboto", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", monospace;

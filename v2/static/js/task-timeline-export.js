@@ -216,8 +216,8 @@
     }
 
     // Draw dependency lines in the print context
-    if (window.drawDependencyLines) {
-      window.drawDependencyLines(idoc, false);
+    if (window.__mdp && window.__mdp.drawDependencyLines) {
+      window.__mdp.drawDependencyLines(idoc, false);
     }
 
     iframe.contentWindow.focus();
