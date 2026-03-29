@@ -10,6 +10,7 @@ import type {
 } from "../../types/person.types.ts";
 import { AGENT_TYPE_OPTIONS } from "../../types/person.types.ts";
 import { getPeopleService } from "../../singletons/services.ts";
+import { createSearchPredicate } from "../../utils/string.ts";
 import { PersonCard } from "../../views/components/person-card.tsx";
 import { PEOPLE_TABLE_COLUMNS, personToRow } from "./constants.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
@@ -151,13 +152,14 @@ export const peopleConfig: DomainConfig<
     ].sort(),
   }),
 
-  searchPredicate: (item, q) =>
-    item.name.toLowerCase().includes(q) ||
-    (item.title ?? "").toLowerCase().includes(q) ||
-    (item.role ?? "").toLowerCase().includes(q) ||
-    (item.email ?? "").toLowerCase().includes(q) ||
-    (item.departments ?? []).some((d) => d.toLowerCase().includes(q)) ||
-    (item.skills ?? []).some((s) => s.toLowerCase().includes(q)),
+  searchPredicate: createSearchPredicate<Person>([
+    { type: "string", get: (i) => i.name },
+    { type: "string", get: (i) => i.title },
+    { type: "string", get: (i) => i.role },
+    { type: "string", get: (i) => i.email },
+    { type: "array", get: (i) => i.departments },
+    { type: "array", get: (i) => i.skills },
+  ]),
 
   extraViewModes: [{ key: "org", label: "Org" }],
 

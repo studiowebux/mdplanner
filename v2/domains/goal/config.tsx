@@ -3,11 +3,9 @@
 import type { DomainConfig } from "../../factories/domain.types.ts";
 import type { CreateGoal, Goal, UpdateGoal } from "../../types/goal.types.ts";
 import { GOAL_STATUSES, GOAL_TYPES } from "../../types/goal.types.ts";
-import {
-  getGoalService,
-  getPeopleService,
-  getPortfolioService,
-} from "../../singletons/services.ts";
+import { getGoalService, getPeopleService } from "../../singletons/services.ts";
+import { createSearchPredicate } from "../../utils/string.ts";
+import { extractProjectNames } from "../../utils/filter-helpers.ts";
 import {
   GOAL_FORM_FIELDS,
   GOAL_TABLE_COLUMNS,
@@ -83,8 +81,8 @@ export const goalConfig: DomainConfig<Goal, CreateGoal, UpdateGoal> = {
   getService: () => getGoalService(),
 
   extractFilterOptions: async () => {
-    const [portfolio, goals, people] = await Promise.all([
-      getPortfolioService().list(),
+    const [projectNames, goals, people] = await Promise.all([
+      extractProjectNames(),
       getGoalService().list(),
       getPeopleService().list(),
     ]);
@@ -100,16 +98,17 @@ export const goalConfig: DomainConfig<Goal, CreateGoal, UpdateGoal> = {
     goalPersonByName = lookup;
 
     return {
-      project: portfolio.map((p) => p.name).sort(),
+      project: projectNames,
       owner: owners,
     };
   },
 
-  searchPredicate: (item, q) =>
-    item.title.toLowerCase().includes(q) ||
-    (item.description ?? "").toLowerCase().includes(q) ||
-    (item.kpi ?? "").toLowerCase().includes(q) ||
-    (item.project ?? "").toLowerCase().includes(q),
+  searchPredicate: createSearchPredicate<Goal>([
+    { type: "string", get: (i) => i.title },
+    { type: "string", get: (i) => i.description },
+    { type: "string", get: (i) => i.kpi },
+    { type: "string", get: (i) => i.project },
+  ]),
 
   extraViewModes: [{ key: "tree", label: "Tree" }],
 

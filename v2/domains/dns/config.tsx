@@ -8,6 +8,7 @@ import type {
 } from "../../types/dns.types.ts";
 import { DNS_PROVIDERS } from "../../types/dns.types.ts";
 import { getDnsService } from "../../singletons/services.ts";
+import { createSearchPredicate } from "../../utils/string.ts";
 import { DNS_TABLE_COLUMNS, dnsToRow } from "./constants.tsx";
 import { DnsDetailView } from "../../views/dns-detail.tsx";
 import { DnsCard } from "../../views/components/dns-card.tsx";
@@ -102,11 +103,12 @@ export const dnsConfig: DomainConfig<
 
   getService: () => getDnsService(),
 
-  searchPredicate: (item, q) =>
-    item.domain.toLowerCase().includes(q) ||
-    (item.provider ?? "").toLowerCase().includes(q) ||
-    (item.notes ?? "").toLowerCase().includes(q) ||
-    (item.project ?? "").toLowerCase().includes(q),
+  searchPredicate: createSearchPredicate<DnsDomain>([
+    { type: "string", get: (i) => i.domain },
+    { type: "string", get: (i) => i.provider },
+    { type: "string", get: (i) => i.notes },
+    { type: "string", get: (i) => i.project },
+  ]),
 
   toolbarActions: () => (
     <button

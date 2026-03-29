@@ -7,10 +7,9 @@ import type {
   UpdateMilestone,
 } from "../../types/milestone.types.ts";
 import { MILESTONE_STATUS_OPTIONS } from "../../types/milestone.types.ts";
-import {
-  getMilestoneService,
-  getPortfolioService,
-} from "../../singletons/services.ts";
+import { getMilestoneService } from "../../singletons/services.ts";
+import { createSearchPredicate } from "../../utils/string.ts";
+import { extractProjectNames } from "../../utils/filter-helpers.ts";
 import { MilestoneCard } from "../../views/components/milestone-card.tsx";
 import { MILESTONE_TABLE_COLUMNS, milestoneToRow } from "./constants.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
@@ -93,15 +92,13 @@ export const milestoneConfig: DomainConfig<
 
   getService: () => getMilestoneService(),
 
-  extractFilterOptions: async () => {
-    const portfolio = await getPortfolioService().list();
-    return {
-      project: portfolio.map((p) => p.name).sort(),
-    };
-  },
+  extractFilterOptions: async () => ({
+    project: await extractProjectNames(),
+  }),
 
-  searchPredicate: (item, q) =>
-    item.name.toLowerCase().includes(q) ||
-    (item.description ?? "").toLowerCase().includes(q) ||
-    (item.project ?? "").toLowerCase().includes(q),
+  searchPredicate: createSearchPredicate<Milestone>([
+    { type: "string", get: (i) => i.name },
+    { type: "string", get: (i) => i.description },
+    { type: "string", get: (i) => i.project },
+  ]),
 };

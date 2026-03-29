@@ -8,6 +8,7 @@ import type {
 } from "../../types/portfolio.types.ts";
 import { PORTFOLIO_STATUS_OPTIONS } from "../../types/portfolio.types.ts";
 import { getPortfolioService } from "../../singletons/services.ts";
+import { createSearchPredicate } from "../../utils/string.ts";
 import { PortfolioCard } from "../../views/components/portfolio-card.tsx";
 import { PORTFOLIO_TABLE_COLUMNS, portfolioToRow } from "./constants.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
@@ -134,10 +135,11 @@ export const portfolioConfig: DomainConfig<
     category: [...new Set(items.map((p) => p.category))].sort(),
   }),
 
-  searchPredicate: (item, q) =>
-    item.name.toLowerCase().includes(q) ||
-    item.category.toLowerCase().includes(q) ||
-    (item.client ?? "").toLowerCase().includes(q) ||
-    (item.description ?? "").toLowerCase().includes(q) ||
-    (item.techStack ?? []).some((t) => t.toLowerCase().includes(q)),
+  searchPredicate: createSearchPredicate<PortfolioItem>([
+    { type: "string", get: (i) => i.name },
+    { type: "string", get: (i) => i.category },
+    { type: "string", get: (i) => i.client },
+    { type: "string", get: (i) => i.description },
+    { type: "array", get: (i) => i.techStack },
+  ]),
 };

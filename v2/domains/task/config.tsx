@@ -7,9 +7,10 @@ import type { CreateTask, Task, UpdateTask } from "../../types/task.types.ts";
 import {
   getMilestoneService,
   getPeopleService,
-  getPortfolioService,
   getTaskService,
 } from "../../singletons/services.ts";
+import { createSearchPredicate } from "../../utils/string.ts";
+import { extractProjectNames } from "../../utils/filter-helpers.ts";
 import { getSectionOrder } from "../../constants/mod.ts";
 import { TaskListView } from "../../views/components/task-list.tsx";
 import { TaskBoardView } from "../../views/components/task-board.tsx";
@@ -176,8 +177,8 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
     const assigneeIds = [
       ...new Set(items.map((t) => t.assignee).filter(Boolean) as string[]),
     ];
-    const [portfolio, milestones, people] = await Promise.all([
-      getPortfolioService().list(),
+    const [projectNames, milestones, people] = await Promise.all([
+      extractProjectNames(),
       getMilestoneService().list(),
       getPeopleService().list(),
     ]);
@@ -191,7 +192,7 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
     taskMilestoneByName = mLookup;
     return {
       section: sections.map((s) => s.value),
-      project: portfolio.map((p) => p.name).sort(),
+      project: projectNames,
       milestone: [...new Set(milestones.map((m) => m.name))].sort(),
       assignee: [
         { value: "__unassigned__", label: "Unassigned" },
@@ -206,13 +207,14 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
     };
   },
 
-  searchPredicate: (item, q) =>
-    item.title.toLowerCase().includes(q) ||
-    (item.description ?? []).some((d) => d.toLowerCase().includes(q)) ||
-    (item.tags ?? []).some((t) => t.toLowerCase().includes(q)) ||
-    (item.assignee ?? "").toLowerCase().includes(q) ||
-    (item.milestone ?? "").toLowerCase().includes(q) ||
-    (item.project ?? "").toLowerCase().includes(q),
+  searchPredicate: createSearchPredicate<Task>([
+    { type: "string", get: (i) => i.title },
+    { type: "array", get: (i) => i.description },
+    { type: "array", get: (i) => i.tags },
+    { type: "string", get: (i) => i.assignee },
+    { type: "string", get: (i) => i.milestone },
+    { type: "string", get: (i) => i.project },
+  ]),
 
   extraViewModes: [
     { key: "list", label: "List" },

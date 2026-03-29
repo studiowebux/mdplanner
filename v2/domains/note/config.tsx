@@ -2,10 +2,9 @@
 
 import type { DomainConfig } from "../../factories/domain.types.ts";
 import type { CreateNote, Note, UpdateNote } from "../../types/note.types.ts";
-import {
-  getNoteService,
-  getPortfolioService,
-} from "../../singletons/services.ts";
+import { getNoteService } from "../../singletons/services.ts";
+import { createSearchPredicate } from "../../utils/string.ts";
+import { extractProjectNames } from "../../utils/filter-helpers.ts";
 import { NOTE_TABLE_COLUMNS, noteToRow } from "./constants.tsx";
 import { NoteCard } from "../../views/components/note-card.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
@@ -76,15 +75,13 @@ export const noteConfig: DomainConfig<Note, CreateNote, UpdateNote> = {
 
   getService: () => getNoteService(),
 
-  extractFilterOptions: async () => {
-    const portfolio = await getPortfolioService().list();
-    return {
-      project: portfolio.map((p) => p.name).sort(),
-    };
-  },
+  extractFilterOptions: async () => ({
+    project: await extractProjectNames(),
+  }),
 
-  searchPredicate: (item, q) =>
-    item.title.toLowerCase().includes(q) ||
-    (item.content ?? "").toLowerCase().includes(q) ||
-    (item.project ?? "").toLowerCase().includes(q),
+  searchPredicate: createSearchPredicate<Note>([
+    { type: "string", get: (i) => i.title },
+    { type: "string", get: (i) => i.content },
+    { type: "string", get: (i) => i.project },
+  ]),
 };

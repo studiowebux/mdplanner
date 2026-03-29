@@ -12,6 +12,7 @@ import {
   getMarketingPlanService,
   getPeopleService,
 } from "../../singletons/services.ts";
+import { createSearchPredicate } from "../../utils/string.ts";
 import {
   marketingPlanToRow,
   MKTPLAN_FORM_FIELDS,
@@ -101,8 +102,9 @@ export const marketingPlanConfig: DomainConfig<
     return resolved;
   },
 
-  searchPredicate: (item, q) =>
-    item.name.toLowerCase().includes(q) ||
-    (item.description ?? "").toLowerCase().includes(q) ||
-    (item.notes ?? "").toLowerCase().includes(q),
+  searchPredicate: createSearchPredicate<MarketingPlan>([
+    { type: "string", get: (i) => i.name },
+    { type: "string", get: (i) => i.description },
+    { type: "string", get: (i) => i.notes },
+  ]),
 };

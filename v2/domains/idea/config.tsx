@@ -8,6 +8,7 @@ import {
   IDEA_STATUSES,
 } from "../../types/idea.types.ts";
 import { getIdeaService } from "../../singletons/services.ts";
+import { createSearchPredicate } from "../../utils/string.ts";
 import {
   IDEA_FORM_FIELDS,
   IDEA_PRIORITY_OPTIONS,
@@ -89,9 +90,10 @@ export const ideaConfig: DomainConfig<Idea, CreateIdea, UpdateIdea> = {
     };
   },
 
-  searchPredicate: (item, q) =>
-    item.title.toLowerCase().includes(q) ||
-    (item.description ?? "").toLowerCase().includes(q) ||
-    (item.category ?? "").toLowerCase().includes(q) ||
-    (item.resources ?? "").toLowerCase().includes(q),
+  searchPredicate: createSearchPredicate<Idea>([
+    { type: "string", get: (i) => i.title },
+    { type: "string", get: (i) => i.description },
+    { type: "string", get: (i) => i.category },
+    { type: "string", get: (i) => i.resources },
+  ]),
 };

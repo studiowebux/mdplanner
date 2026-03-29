@@ -3,6 +3,7 @@
 import type { DomainConfig } from "../../factories/domain.types.ts";
 import type { CreateSwot, Swot, UpdateSwot } from "../../types/swot.types.ts";
 import { getSwotService } from "../../singletons/services.ts";
+import { createSearchPredicate } from "../../utils/string.ts";
 import {
   SWOT_FORM_FIELDS,
   SWOT_TABLE_COLUMNS,
@@ -62,11 +63,12 @@ export const swotConfig: DomainConfig<Swot, CreateSwot, UpdateSwot> = {
     return { project: projects };
   },
 
-  searchPredicate: (item, q) =>
-    item.title.toLowerCase().includes(q) ||
-    item.strengths.some((i) => i.toLowerCase().includes(q)) ||
-    item.weaknesses.some((i) => i.toLowerCase().includes(q)) ||
-    item.opportunities.some((i) => i.toLowerCase().includes(q)) ||
-    item.threats.some((i) => i.toLowerCase().includes(q)) ||
-    (item.notes ?? "").toLowerCase().includes(q),
+  searchPredicate: createSearchPredicate<Swot>([
+    { type: "string", get: (i) => i.title },
+    { type: "array", get: (i) => i.strengths },
+    { type: "array", get: (i) => i.weaknesses },
+    { type: "array", get: (i) => i.opportunities },
+    { type: "array", get: (i) => i.threats },
+    { type: "string", get: (i) => i.notes },
+  ]),
 };
