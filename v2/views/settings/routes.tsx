@@ -1,7 +1,7 @@
 // Settings view routes — SSR page + form handlers for each tab.
 
 import { Hono } from "hono";
-import { renderToString } from "hono/jsx/server";
+import { renderToString } from "hono/jsx/dom/server";
 import { SettingsView } from "../settings.tsx";
 import {
   getCacheSync,
