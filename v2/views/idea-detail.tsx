@@ -8,6 +8,7 @@ import { formatDate } from "../utils/time.ts";
 import { markdownToHtml } from "../utils/markdown.ts";
 import { toKebab } from "../utils/slug.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { SseRefresh } from "./components/sse-refresh.tsx";
 
 // ---------------------------------------------------------------------------
 // Helper — renders a label/value pair inside an info-row
@@ -57,14 +58,10 @@ export const IdeaDetailView: FC<
       {...viewProps}
       styles={["/css/views/ideas.css"]}
     >
-      <div
-        hx-ext="sse"
-        sse-connect="/sse"
-        hx-get={`/ideas/${idea.id}`}
-        hx-trigger="sse:idea.updated"
-        hx-target="#idea-detail-root"
-        hx-select="#idea-detail-root"
-        hx-swap="outerHTML"
+      <SseRefresh
+        getUrl={"/ideas/" + idea.id}
+        trigger="sse:idea.updated"
+        targetId="idea-detail-root"
       />
       <main id="idea-detail-root" class="detail-view idea-detail">
         <BackButton href="/ideas" label="Back to Ideas" />

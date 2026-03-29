@@ -10,6 +10,7 @@ import { GitHubSection } from "./github.tsx";
 import { KpiGauge } from "../components/ui/kpi-gauge.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { SseRefresh } from "./components/sse-refresh.tsx";
 
 import type { PortfolioStatusUpdate } from "../types/portfolio.types.ts";
 
@@ -101,14 +102,10 @@ export const PortfolioDetailView: FC<Props> = (
         ...(goals.length || item.githubRepo ? ["/js/kpi-gauge.js"] : []),
       ]}
     >
-      <div
-        hx-ext="sse"
-        sse-connect="/sse"
-        hx-get={`/portfolio/${item.id}`}
-        hx-trigger="sse:portfolio.updated, sse:portfolio.deleted"
-        hx-target="#portfolio-detail-root"
-        hx-select="#portfolio-detail-root"
-        hx-swap="outerHTML"
+      <SseRefresh
+        getUrl={"/portfolio/" + item.id}
+        trigger="sse:portfolio.updated, sse:portfolio.deleted"
+        targetId="portfolio-detail-root"
       />
       <main id="portfolio-detail-root" class="detail-view portfolio-detail">
         <BackButton href="/portfolio" label="Back to portfolio" />

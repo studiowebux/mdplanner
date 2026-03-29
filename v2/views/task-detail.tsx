@@ -17,6 +17,7 @@ import {
   getTaskService,
 } from "../singletons/services.ts";
 import { BackButton } from "./components/back-button.tsx";
+import { SseRefresh } from "./components/sse-refresh.tsx";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -211,14 +212,10 @@ export const TaskDetailView: FC<Props> = (
       styles={["/css/views/tasks.css", "/css/views/github.css"]}
       scripts={[]}
     >
-      <div
-        hx-ext="sse"
-        sse-connect="/sse"
-        hx-get={`/tasks/${task.id}`}
-        hx-trigger="sse:task.updated, sse:task.deleted"
-        hx-target="#task-detail-root"
-        hx-select="#task-detail-root"
-        hx-swap="outerHTML"
+      <SseRefresh
+        getUrl={"/tasks/" + task.id}
+        trigger="sse:task.updated, sse:task.deleted"
+        targetId="task-detail-root"
       />
       <main id="task-detail-root" class="detail-view task-detail">
         {/* Back link */}

@@ -8,6 +8,7 @@ import { formatDate } from "../utils/time.ts";
 import { DNS_RECORD_FORM_FIELDS } from "../domains/dns/constants.tsx";
 import { toKebab } from "../utils/slug.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { SseRefresh } from "./components/sse-refresh.tsx";
 
 // ---------------------------------------------------------------------------
 // DNS records table — standalone fragment for htmx swaps
@@ -135,14 +136,10 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
     {...viewProps}
     styles={["/css/views/dns.css"]}
   >
-    <div
-      hx-ext="sse"
-      sse-connect="/sse"
-      hx-get={`/dns/${domain.id}`}
-      hx-trigger="sse:dns.updated, sse:dns.synced"
-      hx-target="#dns-detail-root"
-      hx-select="#dns-detail-root"
-      hx-swap="outerHTML"
+    <SseRefresh
+      getUrl={"/dns/" + domain.id}
+      trigger="sse:dns.updated, sse:dns.synced"
+      targetId="dns-detail-root"
     />
     <main id="dns-detail-root" class="detail-view dns-detail">
       <BackButton href="/dns" label="Back to DNS" />

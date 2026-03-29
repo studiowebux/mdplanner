@@ -12,6 +12,7 @@ import {
   SWOT_QUADRANTS,
   type SwotQuadrantKey,
 } from "../domains/swot/constants.tsx";
+import { SseRefresh } from "./components/sse-refresh.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -32,14 +33,10 @@ export const SwotDetailView: FC<
       styles={["/css/views/swot.css"]}
       scripts={["/js/quadrant-edit.js"]}
     >
-      <div
-        hx-ext="sse"
-        sse-connect="/sse"
-        hx-get={`/swot/${swot.id}${editSuffix}`}
-        hx-trigger="sse:swot.updated"
-        hx-target="#swot-detail-root"
-        hx-select="#swot-detail-root"
-        hx-swap="outerHTML"
+      <SseRefresh
+        getUrl={"/swot/" + swot.id + editSuffix}
+        trigger="sse:swot.updated"
+        targetId="swot-detail-root"
       />
       <main
         id="swot-detail-root"

@@ -8,6 +8,7 @@ import { formatDate } from "../utils/time.ts";
 import { markdownToHtml } from "../utils/markdown.ts";
 import { toKebab } from "../utils/slug.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { SseRefresh } from "./components/sse-refresh.tsx";
 
 // ---------------------------------------------------------------------------
 // Helper — label/value pair
@@ -55,14 +56,10 @@ export const MarketingPlanDetailView: FC<
       styles={["/css/views/marketing-plans.css", "/css/views/goals.css"]}
       scripts={["/js/kpi-gauge.js"]}
     >
-      <div
-        hx-ext="sse"
-        sse-connect="/sse"
-        hx-get={`/marketing-plans/${plan.id}`}
-        hx-trigger="sse:marketing-plan.updated"
-        hx-target="#mktplan-detail-root"
-        hx-select="#mktplan-detail-root"
-        hx-swap="outerHTML"
+      <SseRefresh
+        getUrl={"/marketing-plans/" + plan.id}
+        trigger="sse:marketing-plan.updated"
+        targetId="mktplan-detail-root"
       />
       <main id="mktplan-detail-root" class="detail-view mktplan-detail">
         <BackButton href="/marketing-plans" label="Back to Marketing Plans" />

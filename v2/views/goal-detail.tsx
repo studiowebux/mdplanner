@@ -11,6 +11,7 @@ import { KpiGauge } from "../components/ui/kpi-gauge.tsx";
 import { toKebab } from "../utils/slug.ts";
 import { BackButton } from "./components/back-button.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { SseRefresh } from "./components/sse-refresh.tsx";
 
 // ---------------------------------------------------------------------------
 // Helper — renders a label/value pair inside an info-row
@@ -83,14 +84,10 @@ export const GoalDetailView: FC<
       styles={["/css/views/goals.css"]}
       scripts={["/js/kpi-gauge.js"]}
     >
-      <div
-        hx-ext="sse"
-        sse-connect="/sse"
-        hx-get={`/goals/${goal.id}`}
-        hx-trigger="sse:goal.updated"
-        hx-target="#goal-detail-root"
-        hx-select="#goal-detail-root"
-        hx-swap="outerHTML"
+      <SseRefresh
+        getUrl={"/goals/" + goal.id}
+        trigger="sse:goal.updated"
+        targetId="goal-detail-root"
       />
       <main id="goal-detail-root" class="detail-view goal-detail">
         <BackButton href="/goals" label="Back to Goals" />
