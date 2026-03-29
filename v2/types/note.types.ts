@@ -139,6 +139,12 @@ export const NoteSchema = z.object({
     description: "Project scope",
     example: "MD Planner",
   }),
+  createdBy: z.string().nullable().optional().openapi({
+    description: "Person ID of the creator",
+  }),
+  updatedBy: z.string().nullable().optional().openapi({
+    description: "Person ID of the last updater",
+  }),
 }).openapi("Note");
 
 export type Note = z.infer<typeof NoteSchema>;

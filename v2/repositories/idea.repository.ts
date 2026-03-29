@@ -12,6 +12,7 @@ import {
   mergeFields,
   readMarkdownDir,
 } from "../utils/repo-helpers.ts";
+import { mapKeysToFm } from "../utils/frontmatter-mapper.ts";
 import type {
   CreateIdea,
   Idea,
@@ -77,8 +78,8 @@ export class IdeaRepository {
       ...data,
       id,
       status: data.status ?? "new",
-      created: now,
-      updated: now,
+      createdAt: now,
+      updatedAt: now,
     };
 
     const filePath = join(this.dir, `${id}.md`);
@@ -97,15 +98,15 @@ export class IdeaRepository {
       { ...existing },
       data as Record<string, unknown>,
     );
-    updated.updated = new Date().toISOString();
+    updated.updatedAt = new Date().toISOString();
 
     // Auto-set lifecycle timestamps on status transitions
     if (data.status && data.status !== existing.status) {
       if (data.status === "implemented" && !updated.implementedAt) {
-        updated.implementedAt = updated.updated;
+        updated.implementedAt = updated.updatedAt;
       }
       if (data.status === "cancelled" && !updated.cancelledAt) {
-        updated.cancelledAt = updated.updated;
+        updated.cancelledAt = updated.updatedAt;
       }
     }
 
@@ -198,13 +199,8 @@ export class IdeaRepository {
         ? String(fm.priority) as Idea["priority"]
         : undefined,
       project: fm.project != null ? String(fm.project) : undefined,
-      // v1 compat: start/end aliases
-      startDate: fm.startDate != null || fm.start != null
-        ? String(fm.startDate ?? fm.start)
-        : undefined,
-      endDate: fm.endDate != null || fm.end != null
-        ? String(fm.endDate ?? fm.end)
-        : undefined,
+      startDate: fm.start_date != null ? String(fm.start_date) : undefined,
+      endDate: fm.end_date != null ? String(fm.end_date) : undefined,
       resources: fm.resources != null ? String(fm.resources) : undefined,
       subtasks: Array.isArray(fm.subtasks)
         ? (fm.subtasks as unknown[]).map(String)
@@ -213,21 +209,27 @@ export class IdeaRepository {
       links: Array.isArray(fm.links)
         ? (fm.links as unknown[]).map(String)
         : undefined,
-      implementedAt: fm.implementedAt != null
-        ? String(fm.implementedAt)
+      implementedAt: fm.implemented_at != null
+        ? String(fm.implemented_at)
         : undefined,
-      cancelledAt: fm.cancelledAt != null ? String(fm.cancelledAt) : undefined,
-      created: fm.created ? String(fm.created) : new Date().toISOString(),
-      updated: fm.updated ? String(fm.updated) : new Date().toISOString(),
+      cancelledAt: fm.cancelled_at != null
+        ? String(fm.cancelled_at)
+        : undefined,
+      createdAt: fm.created_at
+        ? String(fm.created_at)
+        : new Date().toISOString(),
+      updatedAt: fm.updated_at
+        ? String(fm.updated_at)
+        : new Date().toISOString(),
+      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
+      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
     };
   }
 
   private serialize(item: Idea): string {
-    const fm = buildFrontmatter(
-      item as unknown as Record<string, unknown>,
-      BODY_KEYS,
+    const fm = mapKeysToFm(
+      buildFrontmatter(item as unknown as Record<string, unknown>, BODY_KEYS),
     );
-    // Include title in frontmatter (v2 style)
     fm.title = item.title;
     return serializeFrontmatter(fm, item.description ?? "");
   }

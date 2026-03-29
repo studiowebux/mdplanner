@@ -190,6 +190,12 @@ export const TaskSchema = z.object({
   files: z.array(z.string()).nullable().optional().openapi({
     description: "Relevant source file paths (relative to codebase root)",
   }),
+  createdBy: z.string().nullable().optional().openapi({
+    description: "Person ID of the creator",
+  }),
+  updatedBy: z.string().nullable().optional().openapi({
+    description: "Person ID of the last updater",
+  }),
 }).openapi("Task");
 
 export type Task = {
@@ -225,6 +231,8 @@ export type Task = {
   claimedAt?: string;
   approvalRequest?: ApprovalRequest;
   files?: string[];
+  createdBy?: string;
+  updatedBy?: string;
 };
 
 // ---------------------------------------------------------------------------

@@ -17,7 +17,7 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
     ? Math.max(
       0,
       Math.round(
-        (new Date(item.updated).getTime() -
+        (new Date(item.updatedAt).getTime() -
           new Date(item.startDate).getTime()) / 86400000,
       ),
     )

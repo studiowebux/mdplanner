@@ -107,8 +107,8 @@ export class MarketingPlanRepository {
       ...data,
       id,
       status: data.status ?? "draft",
-      created: now,
-      updated: now,
+      createdAt: now,
+      updatedAt: now,
     };
 
     const filePath = join(this.dir, `${id}.md`);
@@ -130,7 +130,7 @@ export class MarketingPlanRepository {
       { ...existing },
       data as Record<string, unknown>,
     );
-    updated.updated = new Date().toISOString();
+    updated.updatedAt = new Date().toISOString();
 
     await this.writer.write(
       id,
@@ -166,20 +166,16 @@ export class MarketingPlanRepository {
       name: fm.name ? String(fm.name) : "",
       description: fm.description != null ? String(fm.description) : undefined,
       status: (fm.status as MarketingPlan["status"]) ?? "draft",
-      budgetTotal: fm.budget_total != null || fm.budgetTotal != null
-        ? Number(fm.budget_total ?? fm.budgetTotal)
+      budgetTotal: fm.budget_total != null
+        ? Number(fm.budget_total)
         : undefined,
-      budgetCurrency: fm.budget_currency != null || fm.budgetCurrency != null
-        ? String(fm.budget_currency ?? fm.budgetCurrency)
+      budgetCurrency: fm.budget_currency != null
+        ? String(fm.budget_currency)
         : undefined,
-      startDate: fm.start_date != null || fm.startDate != null
-        ? String(fm.start_date ?? fm.startDate)
-        : undefined,
-      endDate: fm.end_date != null || fm.endDate != null
-        ? String(fm.end_date ?? fm.endDate)
-        : undefined,
+      startDate: fm.start_date != null ? String(fm.start_date) : undefined,
+      endDate: fm.end_date != null ? String(fm.end_date) : undefined,
       targetAudiences: this.parseArray<MarketingTargetAudience>(
-        fm.target_audiences ?? fm.targetAudiences,
+        fm.target_audiences,
         (raw) => ({
           name: String(raw.name ?? ""),
           description: raw.description != null
@@ -203,8 +199,8 @@ export class MarketingPlanRepository {
         fm.campaigns,
         parseCampaign,
       ),
-      linkedGoals: Array.isArray(fm.linked_goals ?? fm.linkedGoals)
-        ? ((fm.linked_goals ?? fm.linkedGoals) as unknown[]).map(String)
+      linkedGoals: Array.isArray(fm.linked_goals)
+        ? (fm.linked_goals as unknown[]).map(String)
         : undefined,
       project: fm.project != null ? String(fm.project) : undefined,
       responsible: fm.responsible != null ? String(fm.responsible) : undefined,
@@ -223,8 +219,14 @@ export class MarketingPlanRepository {
         (raw) => ({ text: String(raw.text ?? raw) }),
       ),
       notes: body.trim() || undefined,
-      created: fm.created ? String(fm.created) : new Date().toISOString(),
-      updated: fm.updated ? String(fm.updated) : new Date().toISOString(),
+      createdAt: fm.created_at
+        ? String(fm.created_at)
+        : new Date().toISOString(),
+      updatedAt: fm.updated_at
+        ? String(fm.updated_at)
+        : new Date().toISOString(),
+      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
+      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
     };
   }
 
@@ -259,8 +261,10 @@ export class MarketingPlanRepository {
     if (item.team?.length) fm.team = item.team;
     if (item.hypothesis?.length) fm.hypothesis = item.hypothesis;
     if (item.learnings?.length) fm.learnings = item.learnings;
-    fm.created = item.created;
-    fm.updated = item.updated;
+    fm.created_at = item.createdAt;
+    fm.updated_at = item.updatedAt;
+    if (item.createdBy) fm.created_by = item.createdBy;
+    if (item.updatedBy) fm.updated_by = item.updatedBy;
 
     return serializeFrontmatter(fm, item.notes ?? "");
   }

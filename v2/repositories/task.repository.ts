@@ -9,6 +9,7 @@ import {
 import { generateId } from "../utils/id.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
 import { buildFrontmatter, mergeFields } from "../utils/repo-helpers.ts";
+import { mapKeysFromFm, mapKeysToFm } from "../utils/frontmatter-mapper.ts";
 import { TaskBuilder } from "../builders/task.builder.ts";
 import type { CreateTask, Task, UpdateTask } from "../types/task.types.ts";
 import type { CacheDatabase } from "../database/sqlite/mod.ts";
@@ -131,14 +132,14 @@ export class TaskRepository {
     const now = new Date().toISOString();
 
     const { title, section: _sec, description, ...rest } = data;
-    const fm = {
+    const fm = mapKeysToFm({
       id,
       completed: false,
       createdAt: now,
       updatedAt: now,
       revision: 1,
       ...buildFrontmatter(rest as Record<string, unknown>, []),
-    };
+    });
 
     const descBody = description?.join("\n") ?? "";
     const body = `# ${title}\n\n${descBody}`.trimEnd();
@@ -195,9 +196,11 @@ export class TaskRepository {
       targetFile = join(newSectionPath, `${id}.md`);
     }
 
-    const fm = buildFrontmatter(
-      updated as unknown as Record<string, unknown>,
-      TASK_BODY_KEYS,
+    const fm = mapKeysToFm(
+      buildFrontmatter(
+        updated as unknown as Record<string, unknown>,
+        TASK_BODY_KEYS,
+      ),
     );
     const body = this.toBody(updated);
     await this.writer.write(
@@ -253,7 +256,8 @@ export class TaskRepository {
 
   private parse(content: string, section: string): Task | null {
     const { frontmatter, body } = parseFrontmatter(content);
-    return TaskBuilder.from(frontmatter, body, section).build();
+    const fm = mapKeysFromFm(frontmatter);
+    return TaskBuilder.from(fm, body, section).build();
   }
 
   private toBody(t: Task): string {

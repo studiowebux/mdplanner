@@ -23,8 +23,10 @@ const IDEA_SCHEMA = `CREATE TABLE IF NOT EXISTS ${IDEA_TABLE} (
   links TEXT,
   implemented_at TEXT,
   cancelled_at TEXT,
-  created TEXT,
-  updated TEXT,
+  created_at TEXT,
+  updated_at TEXT,
+  created_by TEXT,
+  updated_by TEXT,
   synced_at TEXT
 )`;
 
@@ -37,8 +39,8 @@ function insertIdeaRow(
     `INSERT OR REPLACE INTO ${IDEA_TABLE} (id, title, description, status,
        category, priority, project, start_date, end_date, resources,
        subtasks, links, implemented_at, cancelled_at,
-       created, updated, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       created_at, updated_at, created_by, updated_by, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(i.id),
       val(i.title),
@@ -54,8 +56,10 @@ function insertIdeaRow(
       i.links ? JSON.stringify(i.links) : null,
       val(i.implementedAt),
       val(i.cancelledAt),
-      val(i.created),
-      val(i.updated),
+      val(i.createdAt),
+      val(i.updatedAt),
+      val(i.createdBy),
+      val(i.updatedBy),
       syncedAt ?? new Date().toISOString(),
     ],
   );

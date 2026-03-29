@@ -12,6 +12,7 @@ import {
   mergeFields,
   readMarkdownDir,
 } from "../utils/repo-helpers.ts";
+import { mapKeysToFm } from "../utils/frontmatter-mapper.ts";
 import type { CreateGoal, Goal, UpdateGoal } from "../types/goal.types.ts";
 
 const BODY_KEYS = ["id", "description"] as const;
@@ -63,8 +64,8 @@ export class GoalRepository {
       startDate: data.startDate ?? "",
       endDate: data.endDate ?? "",
       status: data.status ?? "planning",
-      created: now,
-      updated: now,
+      createdAt: now,
+      updatedAt: now,
     };
 
     const filePath = join(this.dir, `${id}.md`);
@@ -83,7 +84,7 @@ export class GoalRepository {
       { ...existing },
       data as Record<string, unknown>,
     );
-    updated.updated = new Date().toISOString();
+    updated.updatedAt = new Date().toISOString();
 
     await this.writer.write(
       id,
@@ -133,32 +134,18 @@ export class GoalRepository {
       description,
       type: (fm.type as Goal["type"]) ?? "project",
       kpi: fm.kpi != null ? String(fm.kpi) : "",
-      kpiMetric: fm.kpi_metric != null || fm.kpiMetric != null
-        ? String(fm.kpi_metric ?? fm.kpiMetric)
-        : undefined,
-      kpiTarget: fm.kpi_target != null || fm.kpiTarget != null
-        ? Number(fm.kpi_target ?? fm.kpiTarget)
-        : undefined,
-      kpiValue: fm.kpi_value != null || fm.kpiValue != null
-        ? Number(fm.kpi_value ?? fm.kpiValue)
-        : undefined,
-      // v1 uses start/end, v2 uses startDate/endDate
-      startDate: String(fm.startDate ?? fm.start ?? ""),
-      endDate: String(fm.endDate ?? fm.end ?? ""),
+      kpiMetric: fm.kpi_metric != null ? String(fm.kpi_metric) : undefined,
+      kpiTarget: fm.kpi_target != null ? Number(fm.kpi_target) : undefined,
+      kpiValue: fm.kpi_value != null ? Number(fm.kpi_value) : undefined,
+      startDate: String(fm.start_date ?? ""),
+      endDate: String(fm.end_date ?? ""),
       status: (fm.status as Goal["status"]) ?? "planning",
-      githubRepo: fm.githubRepo != null || fm.github_repo != null
-        ? String(fm.githubRepo ?? fm.github_repo)
+      githubRepo: fm.github_repo != null ? String(fm.github_repo) : undefined,
+      githubMilestone: fm.github_milestone != null
+        ? Number(fm.github_milestone)
         : undefined,
-      githubMilestone: fm.githubMilestone != null ||
-          fm.github_milestone != null
-        ? Number(fm.githubMilestone ?? fm.github_milestone)
-        : undefined,
-      linkedPortfolioItems: Array.isArray(
-          fm.linkedPortfolioItems ?? fm.linked_portfolio_items,
-        )
-        ? (
-          (fm.linkedPortfolioItems ?? fm.linked_portfolio_items) as unknown[]
-        ).map(String)
+      linkedPortfolioItems: Array.isArray(fm.linked_portfolio_items)
+        ? (fm.linked_portfolio_items as unknown[]).map(String)
         : undefined,
       project: fm.project != null ? String(fm.project) : undefined,
       owner: fm.owner != null ? String(fm.owner) : undefined,
@@ -167,29 +154,28 @@ export class GoalRepository {
         : undefined,
       priority: fm.priority != null ? Number(fm.priority) : undefined,
       progress: fm.progress != null ? Number(fm.progress) : undefined,
-      parentGoal: fm.parentGoal != null || fm.parent_goal != null
-        ? String(fm.parentGoal ?? fm.parent_goal)
-        : undefined,
-      linkedMilestones: Array.isArray(
-          fm.linkedMilestones ?? fm.linked_milestones,
-        )
-        ? (
-          (fm.linkedMilestones ?? fm.linked_milestones) as unknown[]
-        ).map(String)
+      parentGoal: fm.parent_goal != null ? String(fm.parent_goal) : undefined,
+      linkedMilestones: Array.isArray(fm.linked_milestones)
+        ? (fm.linked_milestones as unknown[]).map(String)
         : undefined,
       tags: Array.isArray(fm.tags)
         ? (fm.tags as unknown[]).map(String)
         : undefined,
       notes: fm.notes != null ? String(fm.notes) : undefined,
-      created: fm.created ? String(fm.created) : new Date().toISOString(),
-      updated: fm.updated ? String(fm.updated) : new Date().toISOString(),
+      createdAt: fm.created_at
+        ? String(fm.created_at)
+        : new Date().toISOString(),
+      updatedAt: fm.updated_at
+        ? String(fm.updated_at)
+        : new Date().toISOString(),
+      createdBy: fm.created_by ? String(fm.created_by) : undefined,
+      updatedBy: fm.updated_by ? String(fm.updated_by) : undefined,
     };
   }
 
   private serialize(item: Goal): string {
-    const fm = buildFrontmatter(
-      item as unknown as Record<string, unknown>,
-      BODY_KEYS,
+    const fm = mapKeysToFm(
+      buildFrontmatter(item as unknown as Record<string, unknown>, BODY_KEYS),
     );
     return serializeFrontmatter(fm, item.description ?? "");
   }

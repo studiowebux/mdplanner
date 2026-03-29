@@ -78,8 +78,14 @@ export const IdeaSchema = z.object({
   cancelledAt: z.string().nullable().optional().openapi({
     description: "ISO timestamp when status changed to cancelled",
   }),
-  created: z.string().openapi({ description: "ISO creation timestamp" }),
-  updated: z.string().openapi({ description: "ISO last-updated timestamp" }),
+  createdAt: z.string().openapi({ description: "ISO creation timestamp" }),
+  updatedAt: z.string().openapi({ description: "ISO last-updated timestamp" }),
+  createdBy: z.string().nullable().optional().openapi({
+    description: "Person ID of the creator",
+  }),
+  updatedBy: z.string().nullable().optional().openapi({
+    description: "Person ID of the last updater",
+  }),
 }).openapi("Idea");
 
 export type Idea = z.infer<typeof IdeaSchema>;

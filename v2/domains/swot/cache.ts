@@ -18,8 +18,10 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${TABLE} (
   threats TEXT,
   project TEXT,
   notes TEXT,
-  created TEXT,
-  updated TEXT,
+  created_at TEXT,
+  updated_at TEXT,
+  created_by TEXT,
+  updated_by TEXT,
   synced_at TEXT
 )`;
 
@@ -31,8 +33,8 @@ function insertRow(
   db.execute(
     `INSERT OR REPLACE INTO ${TABLE} (id, title, date,
        strengths, weaknesses, opportunities, threats,
-       project, notes, created, updated, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       project, notes, created_at, updated_at, created_by, updated_by, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(s.id),
       val(s.title),
@@ -43,8 +45,10 @@ function insertRow(
       JSON.stringify(s.threats),
       val(s.project),
       val(s.notes),
-      val(s.created),
-      val(s.updated),
+      val(s.createdAt),
+      val(s.updatedAt),
+      val(s.createdBy),
+      val(s.updatedBy),
       syncedAt ?? new Date().toISOString(),
     ],
   );

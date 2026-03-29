@@ -23,8 +23,10 @@ const GOAL_SCHEMA = `CREATE TABLE IF NOT EXISTS ${GOAL_TABLE} (
   github_milestone INTEGER,
   linked_portfolio_items TEXT,
   project TEXT,
-  created TEXT,
-  updated TEXT,
+  created_at TEXT,
+  updated_at TEXT,
+  created_by TEXT,
+  updated_by TEXT,
   synced_at TEXT
 )`;
 
@@ -37,8 +39,8 @@ function insertGoalRow(
     `INSERT OR REPLACE INTO ${GOAL_TABLE} (id, title, description, type,
        kpi, kpi_metric, kpi_target, start_date, end_date, status,
        github_repo, github_milestone, linked_portfolio_items,
-       project, created, updated, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       project, created_at, updated_at, created_by, updated_by, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(g.id),
       val(g.title),
@@ -54,8 +56,10 @@ function insertGoalRow(
       g.githubMilestone ?? null,
       g.linkedPortfolioItems ? JSON.stringify(g.linkedPortfolioItems) : null,
       val(g.project),
-      val(g.created),
-      val(g.updated),
+      val(g.createdAt),
+      val(g.updatedAt),
+      val(g.createdBy),
+      val(g.updatedBy),
       syncedAt ?? new Date().toISOString(),
     ],
   );

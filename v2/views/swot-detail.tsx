@@ -197,9 +197,9 @@ export const SwotDetailView: FC<
 
         {/* -- Meta ------------------------------------------------------ */}
         <div class="detail-section swot-detail__meta">
-          <span>Created {formatDate(swot.created)}</span>
-          {swot.updated && swot.updated !== swot.created && (
-            <span>&middot; Updated {formatDate(swot.updated)}</span>
+          <span>Created {formatDate(swot.createdAt)}</span>
+          {swot.updatedAt && swot.updatedAt !== swot.createdAt && (
+            <span>&middot; Updated {formatDate(swot.updatedAt)}</span>
           )}
         </div>
       </main>

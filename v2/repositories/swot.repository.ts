@@ -64,8 +64,8 @@ export class SwotRepository {
       weaknesses: data.weaknesses ?? [],
       opportunities: data.opportunities ?? [],
       threats: data.threats ?? [],
-      created: now,
-      updated: now,
+      createdAt: now,
+      updatedAt: now,
     };
 
     const filePath = join(this.dir, `${id}.md`);
@@ -84,7 +84,7 @@ export class SwotRepository {
       { ...existing },
       data as Record<string, unknown>,
     );
-    updated.updated = new Date().toISOString();
+    updated.updatedAt = new Date().toISOString();
 
     await this.writer.write(
       id,
@@ -197,8 +197,14 @@ export class SwotRepository {
       threats: quadrants.threats,
       project: fm.project != null ? String(fm.project) : undefined,
       notes,
-      created: fm.created ? String(fm.created) : new Date().toISOString(),
-      updated: fm.updated ? String(fm.updated) : new Date().toISOString(),
+      createdAt: fm.created_at
+        ? String(fm.created_at)
+        : new Date().toISOString(),
+      updatedAt: fm.updated_at
+        ? String(fm.updated_at)
+        : new Date().toISOString(),
+      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
+      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
     };
   }
 
@@ -211,8 +217,10 @@ export class SwotRepository {
     fm.title = item.title;
     fm.date = item.date;
     if (item.project) fm.project = item.project;
-    fm.created = item.created;
-    fm.updated = item.updated;
+    fm.created_at = item.createdAt;
+    fm.updated_at = item.updatedAt;
+    if (item.createdBy) fm.created_by = item.createdBy;
+    if (item.updatedBy) fm.updated_by = item.updatedBy;
 
     const sections: string[] = [];
 

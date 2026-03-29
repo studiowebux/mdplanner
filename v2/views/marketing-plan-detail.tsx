@@ -378,9 +378,9 @@ export const MarketingPlanDetailView: FC<
 
         {/* -- Meta ------------------------------------------------------ */}
         <div class="detail-section mktplan-detail__meta">
-          <span>Created {formatDate(plan.created)}</span>
-          {plan.updated && plan.updated !== plan.created && (
-            <span>&middot; Updated {formatDate(plan.updated)}</span>
+          <span>Created {formatDate(plan.createdAt)}</span>
+          {plan.updatedAt && plan.updatedAt !== plan.createdAt && (
+            <span>&middot; Updated {formatDate(plan.updatedAt)}</span>
           )}
         </div>
       </main>

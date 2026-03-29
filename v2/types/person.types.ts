@@ -111,6 +111,18 @@ export const PersonSchema = z.object({
   currentTaskId: z.string().nullable().optional().openapi({
     description: "Task ID the agent is actively working on",
   }),
+  createdAt: z.string().nullable().optional().openapi({
+    description: "ISO creation timestamp",
+  }),
+  updatedAt: z.string().nullable().optional().openapi({
+    description: "ISO last-updated timestamp",
+  }),
+  createdBy: z.string().nullable().optional().openapi({
+    description: "Person ID of the creator",
+  }),
+  updatedBy: z.string().nullable().optional().openapi({
+    description: "Person ID of the last updater",
+  }),
 }).openapi("Person");
 
 export type Person = z.infer<typeof PersonSchema>;

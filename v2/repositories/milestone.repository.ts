@@ -12,6 +12,7 @@ import {
   findFileById,
   mergeFields,
 } from "../utils/repo-helpers.ts";
+import { mapKeysToFm } from "../utils/frontmatter-mapper.ts";
 import type {
   CreateMilestone,
   MilestoneBase,
@@ -108,12 +109,12 @@ export class MilestoneRepository {
     const status = data.status ?? "open";
 
     const { name, description, ...rest } = data;
-    const fm = {
+    const fm = mapKeysToFm({
       id,
       ...buildFrontmatter(rest as Record<string, unknown>, []),
       status,
       createdAt,
-    };
+    });
 
     const body = `# ${name}\n\n${description ?? ""}`.trimEnd();
     const filePath = join(this.milestonesDir, `${id}.md`);
@@ -158,9 +159,11 @@ export class MilestoneRepository {
       }
     }
 
-    const fm = buildFrontmatter(
-      updated as Record<string, unknown>,
-      MILESTONE_BODY_KEYS,
+    const fm = mapKeysToFm(
+      buildFrontmatter(
+        updated as Record<string, unknown>,
+        MILESTONE_BODY_KEYS,
+      ),
     );
     const body = `# ${updated.name}\n\n${updated.description ?? ""}`.trimEnd();
     await this.writer.write(

@@ -51,6 +51,15 @@ export const MilestoneBaseSchema = z.object({
     description: "ISO timestamp of creation",
     example: "2026-03-16T03:22:47.963Z",
   }),
+  updatedAt: z.string().nullable().optional().openapi({
+    description: "ISO timestamp of last update",
+  }),
+  createdBy: z.string().nullable().optional().openapi({
+    description: "Person ID of the creator",
+  }),
+  updatedBy: z.string().nullable().optional().openapi({
+    description: "Person ID of the last updater",
+  }),
 });
 
 export type MilestoneBase = z.infer<typeof MilestoneBaseSchema>;

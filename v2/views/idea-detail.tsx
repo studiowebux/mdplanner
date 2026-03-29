@@ -205,9 +205,9 @@ export const IdeaDetailView: FC<
 
         {/* -- Meta ------------------------------------------------------ */}
         <div class="detail-section idea-detail__meta">
-          <span>Created {formatDate(idea.created)}</span>
-          {idea.updated && idea.updated !== idea.created && (
-            <span>&middot; Updated {formatDate(idea.updated)}</span>
+          <span>Created {formatDate(idea.createdAt)}</span>
+          {idea.updatedAt && idea.updatedAt !== idea.createdAt && (
+            <span>&middot; Updated {formatDate(idea.updatedAt)}</span>
           )}
         </div>
       </main>

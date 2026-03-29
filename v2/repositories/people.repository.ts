@@ -12,6 +12,7 @@ import {
   findFileById,
   mergeFields,
 } from "../utils/repo-helpers.ts";
+import { mapKeysToFm } from "../utils/frontmatter-mapper.ts";
 import type {
   CreatePerson,
   Person,
@@ -100,7 +101,10 @@ export class PeopleRepository {
     const id = generateId("person");
 
     const { name, notes, ...rest } = data;
-    const fm = { id, ...buildFrontmatter(rest as Record<string, unknown>, []) };
+    const fm = mapKeysToFm({
+      id,
+      ...buildFrontmatter(rest as Record<string, unknown>, []),
+    });
 
     const body = `# ${name}\n\n${notes ?? ""}`.trimEnd();
     const filePath = join(this.dir, `${id}.md`);
@@ -125,9 +129,8 @@ export class PeopleRepository {
       data as Record<string, unknown>,
     );
 
-    const fm = buildFrontmatter(
-      updated as Record<string, unknown>,
-      PEOPLE_BODY_KEYS,
+    const fm = mapKeysToFm(
+      buildFrontmatter(updated as Record<string, unknown>, PEOPLE_BODY_KEYS),
     );
     const body = `# ${updated.name}\n\n${updated.notes ?? ""}`.trimEnd();
     await this.writer.write(

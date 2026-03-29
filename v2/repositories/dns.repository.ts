@@ -12,6 +12,7 @@ import {
   mergeFields,
   readMarkdownDir,
 } from "../utils/repo-helpers.ts";
+import { mapKeysToFm } from "../utils/frontmatter-mapper.ts";
 import type {
   CreateDnsDomain,
   DnsDomain,
@@ -62,8 +63,8 @@ export class DnsRepository {
     const item: DnsDomain = {
       ...data,
       id,
-      created: now,
-      updated: now,
+      createdAt: now,
+      updatedAt: now,
     };
 
     const filePath = join(this.dir, `${id}.md`);
@@ -82,7 +83,7 @@ export class DnsRepository {
       { ...existing },
       data as Record<string, unknown>,
     );
-    updated.updated = new Date().toISOString();
+    updated.updatedAt = new Date().toISOString();
 
     await this.writer.write(
       id,
@@ -194,15 +195,20 @@ export class DnsRepository {
         : undefined,
       project: fm.project != null ? String(fm.project) : undefined,
       notes: body.trim() || undefined,
-      created: fm.created ? String(fm.created) : new Date().toISOString(),
-      updated: fm.updated ? String(fm.updated) : new Date().toISOString(),
+      createdAt: fm.created_at
+        ? String(fm.created_at)
+        : new Date().toISOString(),
+      updatedAt: fm.updated_at
+        ? String(fm.updated_at)
+        : new Date().toISOString(),
+      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
+      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
     };
   }
 
   private serialize(item: DnsDomain): string {
-    const fm = buildFrontmatter(
-      item as unknown as Record<string, unknown>,
-      BODY_KEYS,
+    const fm = mapKeysToFm(
+      buildFrontmatter(item as unknown as Record<string, unknown>, BODY_KEYS),
     );
     return serializeFrontmatter(fm, item.notes ?? "");
   }

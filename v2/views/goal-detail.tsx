@@ -58,7 +58,7 @@ export const GoalDetailView: FC<
     ? Math.max(
       0,
       Math.round(
-        (new Date(goal.updated).getTime() -
+        (new Date(goal.updatedAt).getTime() -
           new Date(goal.startDate).getTime()) / 86400000,
       ),
     )
