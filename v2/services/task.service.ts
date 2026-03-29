@@ -18,6 +18,7 @@ import type { CacheSync } from "../database/sqlite/mod.ts";
 import { insertTaskRow } from "../domains/task/cache.ts";
 import { TASK_TABLE } from "../domains/task/constants.ts";
 import { generateId } from "../utils/id.ts";
+import { ciEquals } from "../utils/string.ts";
 
 // ---------------------------------------------------------------------------
 // Error types
@@ -81,16 +82,13 @@ export class TaskService {
     let tasks = await this.taskRepo.findAll();
 
     if (options?.section) {
-      const s = options.section.toLowerCase();
-      tasks = tasks.filter((t) => t.section.toLowerCase() === s);
+      tasks = tasks.filter((t) => ciEquals(t.section, options.section));
     }
     if (options?.project) {
-      const p = options.project.toLowerCase();
-      tasks = tasks.filter((t) => (t.project ?? "").toLowerCase() === p);
+      tasks = tasks.filter((t) => ciEquals(t.project, options.project));
     }
     if (options?.milestone) {
-      const m = options.milestone.toLowerCase();
-      tasks = tasks.filter((t) => (t.milestone ?? "").toLowerCase() === m);
+      tasks = tasks.filter((t) => ciEquals(t.milestone, options.milestone));
     }
     if (options?.assignee) {
       tasks = tasks.filter((t) => t.assignee === options.assignee);
@@ -121,8 +119,7 @@ export class TaskService {
 
   async getByName(name: string): Promise<Task | null> {
     const all = await this.taskRepo.findAll();
-    const lower = name.toLowerCase();
-    return all.find((t) => t.title.toLowerCase() === lower) ?? null;
+    return all.find((t) => ciEquals(t.title, name)) ?? null;
   }
 
   async getSlim(id: string): Promise<Task | null> {

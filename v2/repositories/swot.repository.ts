@@ -10,6 +10,7 @@ import { generateId } from "../utils/id.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
 import { mergeFields, readMarkdownDir } from "../utils/repo-helpers.ts";
 import type { CreateSwot, Swot, UpdateSwot } from "../types/swot.types.ts";
+import { ciEquals } from "../utils/string.ts";
 import {
   SWOT_QUADRANTS,
   SWOT_SECTION_MAP,
@@ -47,8 +48,7 @@ export class SwotRepository {
 
   async findByName(name: string): Promise<Swot | null> {
     const all = await this.findAll();
-    const lower = name.toLowerCase();
-    return all.find((s) => s.title.toLowerCase() === lower) ?? null;
+    return all.find((s) => ciEquals(s.title, name)) ?? null;
   }
 
   async create(data: CreateSwot): Promise<Swot> {

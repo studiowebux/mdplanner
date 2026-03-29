@@ -13,6 +13,7 @@ import type {
 import type { Task } from "../types/task.types.ts";
 import type { CacheSync } from "../database/sqlite/mod.ts";
 import { markdownToHtml } from "../utils/markdown.ts";
+import { ciEquals } from "../utils/string.ts";
 import { insertMilestoneRow } from "../domains/milestone/cache.ts";
 import { MILESTONE_TABLE } from "../domains/milestone/constants.ts";
 import { DONE_SECTION, getSectionOrder } from "../constants/mod.ts";
@@ -132,10 +133,7 @@ export class MilestoneService {
       result = result.filter((m) => m.status === options.status);
     }
     if (options?.project) {
-      const proj = options.project.toLowerCase();
-      result = result.filter(
-        (m) => (m.project ?? "").toLowerCase() === proj,
-      );
+      result = result.filter((m) => ciEquals(m.project, options.project));
     }
     return result;
   }
@@ -196,9 +194,7 @@ export class MilestoneService {
 
   async getTasksForMilestone(milestoneName: string): Promise<Task[]> {
     const tasks = await this.taskRepo.findAll();
-    return tasks.filter(
-      (t) => (t.milestone ?? "").toLowerCase() === milestoneName.toLowerCase(),
-    );
+    return tasks.filter((t) => ciEquals(t.milestone, milestoneName));
   }
 
   async getSummary(
@@ -210,10 +206,7 @@ export class MilestoneService {
 
     let tasks = await this.getTasksForMilestone(milestoneName);
     if (project) {
-      const proj = project.toLowerCase();
-      tasks = tasks.filter(
-        (t) => (t.project ?? "").toLowerCase() === proj,
-      );
+      tasks = tasks.filter((t) => ciEquals(t.project, project));
     }
 
     // Seed known sections in display order, then append any extras from data

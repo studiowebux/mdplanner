@@ -7,6 +7,7 @@ import type {
   Swot,
   UpdateSwot,
 } from "../types/swot.types.ts";
+import { ciEquals, ciIncludes } from "../utils/string.ts";
 
 export class SwotService {
   constructor(private repo: SwotRepository) {}
@@ -14,18 +15,17 @@ export class SwotService {
   async list(options?: ListSwotOptions): Promise<Swot[]> {
     let items = await this.repo.findAll();
     if (options?.project) {
-      const p = options.project.toLowerCase();
-      items = items.filter((s) => s.project?.toLowerCase() === p);
+      items = items.filter((s) => ciEquals(s.project, options.project));
     }
     if (options?.q) {
-      const q = options.q.toLowerCase();
+      const q = options.q!;
       items = items.filter((s) =>
-        s.title.toLowerCase().includes(q) ||
-        s.strengths.some((i) => i.toLowerCase().includes(q)) ||
-        s.weaknesses.some((i) => i.toLowerCase().includes(q)) ||
-        s.opportunities.some((i) => i.toLowerCase().includes(q)) ||
-        s.threats.some((i) => i.toLowerCase().includes(q)) ||
-        (s.notes ?? "").toLowerCase().includes(q)
+        ciIncludes(s.title, q) ||
+        s.strengths.some((i) => ciIncludes(i, q)) ||
+        s.weaknesses.some((i) => ciIncludes(i, q)) ||
+        s.opportunities.some((i) => ciIncludes(i, q)) ||
+        s.threats.some((i) => ciIncludes(i, q)) ||
+        ciIncludes(s.notes, q)
       );
     }
     return items;

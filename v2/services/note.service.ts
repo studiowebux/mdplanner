@@ -8,6 +8,7 @@ import type {
   Note,
   UpdateNote,
 } from "../types/note.types.ts";
+import { ciEquals, ciIncludes } from "../utils/string.ts";
 
 export class NoteService {
   constructor(private noteRepo: NoteRepository) {}
@@ -16,12 +17,10 @@ export class NoteService {
     let notes = await this.noteRepo.findAll();
 
     if (options?.project) {
-      const p = options.project.toLowerCase();
-      notes = notes.filter((n) => (n.project ?? "").toLowerCase() === p);
+      notes = notes.filter((n) => ciEquals(n.project, options.project));
     }
     if (options?.search) {
-      const s = options.search.toLowerCase();
-      notes = notes.filter((n) => n.title.toLowerCase().includes(s));
+      notes = notes.filter((n) => ciIncludes(n.title, options.search!));
     }
 
     return notes;
@@ -33,8 +32,7 @@ export class NoteService {
 
   async getByName(name: string): Promise<Note | null> {
     const all = await this.noteRepo.findAll();
-    const lower = name.toLowerCase();
-    return all.find((n) => n.title.toLowerCase() === lower) ?? null;
+    return all.find((n) => ciEquals(n.title, name)) ?? null;
   }
 
   async getBatch(ids: string[]): Promise<Note[]> {

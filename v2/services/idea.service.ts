@@ -8,6 +8,7 @@ import type {
   ListIdeaOptions,
   UpdateIdea,
 } from "../types/idea.types.ts";
+import { ciEquals, ciIncludes } from "../utils/string.ts";
 
 export class IdeaService {
   constructor(private repo: IdeaRepository) {}
@@ -18,18 +19,15 @@ export class IdeaService {
       ideas = ideas.filter((i) => i.status === options.status);
     }
     if (options?.category) {
-      ideas = ideas.filter((i) =>
-        i.category?.toLowerCase() === options.category?.toLowerCase()
-      );
+      ideas = ideas.filter((i) => ciEquals(i.category, options.category));
     }
     if (options?.priority) {
       ideas = ideas.filter((i) => i.priority === options.priority);
     }
     if (options?.q) {
-      const q = options.q.toLowerCase();
       ideas = ideas.filter((i) =>
-        i.title.toLowerCase().includes(q) ||
-        i.description?.toLowerCase().includes(q)
+        ciIncludes(i.title, options.q!) ||
+        ciIncludes(i.description, options.q!)
       );
     }
     return ideas;

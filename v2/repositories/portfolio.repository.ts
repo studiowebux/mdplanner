@@ -14,6 +14,7 @@ import type {
   PortfolioStatusUpdate,
   UpdatePortfolioItem,
 } from "../types/portfolio.types.ts";
+import { ciEquals, ciIncludes } from "../utils/string.ts";
 import type { CacheDatabase } from "../database/sqlite/mod.ts";
 import { rowToPortfolioItem } from "../domains/portfolio/cache.ts";
 import { PORTFOLIO_TABLE } from "../domains/portfolio/constants.ts";
@@ -107,13 +108,12 @@ export class PortfolioRepository {
     const fast = await this.findById(slug);
     if (fast) return fast;
     const all = await this.findAllFromDisk();
-    return all.find((i) => i.name.toLowerCase() === name.toLowerCase()) ?? null;
+    return all.find((i) => ciEquals(i.name, name)) ?? null;
   }
 
   async search(query: string): Promise<PortfolioItem[]> {
     const all = await this.findAll();
-    const q = query.toLowerCase();
-    return all.filter((item) => item.name.toLowerCase().includes(q));
+    return all.filter((item) => ciIncludes(item.name, query));
   }
 
   async create(data: CreatePortfolioItem): Promise<PortfolioItem> {

@@ -19,6 +19,7 @@ import type {
   IdeaWithBacklinks,
   UpdateIdea,
 } from "../types/idea.types.ts";
+import { ciEquals } from "../utils/string.ts";
 
 const BODY_KEYS = ["id", "description"] as const;
 
@@ -55,8 +56,7 @@ export class IdeaRepository {
 
   async findByName(name: string): Promise<Idea | null> {
     const all = await this.findAll();
-    const lower = name.toLowerCase();
-    return all.find((i) => i.title.toLowerCase() === lower) ?? null;
+    return all.find((i) => ciEquals(i.title, name)) ?? null;
   }
 
   async findAllWithBacklinks(): Promise<IdeaWithBacklinks[]> {

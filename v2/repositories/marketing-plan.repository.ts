@@ -20,6 +20,7 @@ import type {
   MarketingTargetAudience,
   UpdateMarketingPlan,
 } from "../types/marketing-plan.types.ts";
+import { ciEquals } from "../utils/string.ts";
 
 // "notes" stored in markdown body, "id" excluded from frontmatter.
 const BODY_KEYS = ["id", "notes"] as const;
@@ -94,8 +95,7 @@ export class MarketingPlanRepository {
 
   async findByName(name: string): Promise<MarketingPlan | null> {
     const all = await this.findAll();
-    const lower = name.toLowerCase();
-    return all.find((p) => p.name.toLowerCase() === lower) ?? null;
+    return all.find((p) => ciEquals(p.name, name)) ?? null;
   }
 
   async create(data: CreateMarketingPlan): Promise<MarketingPlan> {

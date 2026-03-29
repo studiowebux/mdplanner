@@ -18,6 +18,7 @@ import type {
   Person,
   UpdatePerson,
 } from "../types/person.types.ts";
+import { ciEquals } from "../utils/string.ts";
 import { AgentModelSchema } from "../types/person.types.ts";
 import { WEEKDAYS } from "../constants/mod.ts";
 import type { CacheDatabase } from "../database/sqlite/mod.ts";
@@ -92,8 +93,7 @@ export class PeopleRepository {
       } catch { /* fall through to disk */ }
     }
     const all = await this.findAllFromDisk();
-    const lower = name.toLowerCase();
-    return all.find((p) => p.name.toLowerCase() === lower) ?? null;
+    return all.find((p) => ciEquals(p.name, name)) ?? null;
   }
 
   async create(data: CreatePerson): Promise<Person> {

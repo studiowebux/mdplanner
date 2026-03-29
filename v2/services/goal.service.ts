@@ -2,6 +2,7 @@
 
 import type { GoalRepository } from "../repositories/goal.repository.ts";
 import type { CreateGoal, Goal, UpdateGoal } from "../types/goal.types.ts";
+import { ciEquals } from "../utils/string.ts";
 
 export class GoalService {
   constructor(private repo: GoalRepository) {}
@@ -19,9 +20,7 @@ export class GoalService {
       goals = goals.filter((g) => g.type === options.type);
     }
     if (options?.project) {
-      goals = goals.filter((g) =>
-        g.project?.toLowerCase() === options.project?.toLowerCase()
-      );
+      goals = goals.filter((g) => ciEquals(g.project, options.project));
     }
     return goals;
   }

@@ -14,6 +14,7 @@ import {
 } from "../utils/repo-helpers.ts";
 import { mapKeysToFm } from "../utils/frontmatter-mapper.ts";
 import type { CreateGoal, Goal, UpdateGoal } from "../types/goal.types.ts";
+import { ciEquals } from "../utils/string.ts";
 
 const BODY_KEYS = ["id", "description"] as const;
 
@@ -46,8 +47,7 @@ export class GoalRepository {
 
   async findByName(name: string): Promise<Goal | null> {
     const all = await this.findAll();
-    const lower = name.toLowerCase();
-    return all.find((g) => g.title.toLowerCase() === lower) ?? null;
+    return all.find((g) => ciEquals(g.title, name)) ?? null;
   }
 
   async create(data: CreateGoal): Promise<Goal> {

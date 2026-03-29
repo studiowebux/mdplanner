@@ -7,6 +7,7 @@ import type {
   MarketingPlan,
   UpdateMarketingPlan,
 } from "../types/marketing-plan.types.ts";
+import { ciIncludes } from "../utils/string.ts";
 
 export class MarketingPlanService {
   constructor(private repo: MarketingPlanRepository) {}
@@ -17,11 +18,10 @@ export class MarketingPlanService {
       plans = plans.filter((p) => p.status === options.status);
     }
     if (options?.q) {
-      const q = options.q.toLowerCase();
       plans = plans.filter((p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.description?.toLowerCase().includes(q) ||
-        p.notes?.toLowerCase().includes(q)
+        ciIncludes(p.name, options.q!) ||
+        ciIncludes(p.description, options.q!) ||
+        ciIncludes(p.notes, options.q!)
       );
     }
     return plans;

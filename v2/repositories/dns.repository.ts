@@ -19,6 +19,7 @@ import type {
   DnsRecord,
   UpdateDnsDomain,
 } from "../types/dns.types.ts";
+import { ciEquals } from "../utils/string.ts";
 
 const BODY_KEYS = ["id", "notes"] as const;
 
@@ -51,8 +52,7 @@ export class DnsRepository {
 
   async findByDomain(domain: string): Promise<DnsDomain | null> {
     const all = await this.findAll();
-    return all.find((d) => d.domain.toLowerCase() === domain.toLowerCase()) ??
-      null;
+    return all.find((d) => ciEquals(d.domain, domain)) ?? null;
   }
 
   async create(data: CreateDnsDomain): Promise<DnsDomain> {

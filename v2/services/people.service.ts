@@ -11,6 +11,7 @@ import type {
   PersonWorkload,
   UpdatePerson,
 } from "../types/person.types.ts";
+import { ciEquals } from "../utils/string.ts";
 import type { CacheSync } from "../database/sqlite/mod.ts";
 import { insertPersonRow } from "../domains/people/cache.ts";
 import { PEOPLE_TABLE } from "../domains/people/constants.ts";
@@ -33,9 +34,8 @@ export class PeopleService {
   async list(department?: string): Promise<Person[]> {
     let people = await this.repo.findAll();
     if (department) {
-      const lower = department.toLowerCase();
       people = people.filter(
-        (p) => p.departments?.some((d) => d.toLowerCase() === lower),
+        (p) => p.departments?.some((d) => ciEquals(d, department)),
       );
     }
     return people;
@@ -142,9 +142,8 @@ export class PeopleService {
   /** Filter people by skill (case-insensitive). */
   async listBySkill(skill: string): Promise<Person[]> {
     const all = await this.repo.findAll();
-    const lower = skill.toLowerCase();
     return all.filter(
-      (p) => p.skills?.some((s) => s.toLowerCase() === lower),
+      (p) => p.skills?.some((s) => ciEquals(s, skill)),
     );
   }
 
