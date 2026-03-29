@@ -169,12 +169,14 @@ export class PeopleRepository {
     if (fm.role != null) person.role = String(fm.role);
     const depts = this.toStringArray(fm.departments);
     if (depts) person.departments = depts;
-    if (fm.reportsTo != null) person.reportsTo = String(fm.reportsTo);
+    if (fm.reports_to != null) person.reportsTo = String(fm.reports_to);
     if (fm.email != null) person.email = String(fm.email);
     if (fm.phone != null) person.phone = String(fm.phone);
-    if (fm.startDate != null) person.startDate = String(fm.startDate);
-    if (typeof fm.hoursPerDay === "number") person.hoursPerDay = fm.hoursPerDay;
-    const wd = this.toStringArray(fm.workingDays);
+    if (fm.start_date != null) person.startDate = String(fm.start_date);
+    if (typeof fm.hours_per_day === "number") {
+      person.hoursPerDay = fm.hours_per_day;
+    }
+    const wd = this.toStringArray(fm.working_days);
     if (wd) {
       person.workingDays = wd.filter(
         (d): d is typeof WEEKDAYS[number] =>
@@ -183,10 +185,10 @@ export class PeopleRepository {
     }
     if (notes) person.notes = notes;
     if (
-      fm.agentType === "human" || fm.agentType === "ai" ||
-      fm.agentType === "hybrid"
+      fm.agent_type === "human" || fm.agent_type === "ai" ||
+      fm.agent_type === "hybrid"
     ) {
-      person.agentType = fm.agentType;
+      person.agentType = fm.agent_type;
     }
     const skills = this.toStringArray(fm.skills);
     if (skills) person.skills = skills;
@@ -196,17 +198,23 @@ export class PeopleRepository {
         person.models = parsed.data;
       }
     }
-    if (fm.systemPrompt != null) person.systemPrompt = String(fm.systemPrompt);
+    if (fm.system_prompt != null) {
+      person.systemPrompt = String(fm.system_prompt);
+    }
     if (
       fm.status === "idle" || fm.status === "working" ||
       fm.status === "offline"
     ) {
       person.status = fm.status;
     }
-    if (fm.lastSeen != null) person.lastSeen = String(fm.lastSeen);
-    if (fm.currentTaskId != null) {
-      person.currentTaskId = String(fm.currentTaskId);
+    if (fm.last_seen != null) person.lastSeen = String(fm.last_seen);
+    if (fm.current_task_id != null) {
+      person.currentTaskId = String(fm.current_task_id);
     }
+    if (fm.created_at != null) person.createdAt = String(fm.created_at);
+    if (fm.updated_at != null) person.updatedAt = String(fm.updated_at);
+    if (fm.created_by != null) person.createdBy = String(fm.created_by);
+    if (fm.updated_by != null) person.updatedBy = String(fm.updated_by);
 
     return person;
   }

@@ -15,6 +15,8 @@ const NOTE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${NOTE_TABLE} (
   project TEXT,
   created_at TEXT,
   updated_at TEXT,
+  created_by TEXT,
+  updated_by TEXT,
   synced_at TEXT
 )`;
 
@@ -25,8 +27,8 @@ function insertNoteRow(
 ): void {
   db.execute(
     `INSERT OR REPLACE INTO ${NOTE_TABLE} (id, title, content, project,
-       created_at, updated_at, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+       created_at, updated_at, created_by, updated_by, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(n.id),
       val(n.title),
@@ -34,6 +36,8 @@ function insertNoteRow(
       val(n.project),
       val(n.createdAt),
       val(n.updatedAt),
+      val(n.createdBy),
+      val(n.updatedBy),
       syncedAt ?? new Date().toISOString(),
     ],
   );

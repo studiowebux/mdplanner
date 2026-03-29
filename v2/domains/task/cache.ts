@@ -57,6 +57,8 @@ export function rowToTask(row: Record<string, unknown>): Task {
   if (files) task.files = files;
   const children = parseJson<Task["children"]>(row.children);
   if (children) task.children = children;
+  if (row.created_by != null) task.createdBy = row.created_by as string;
+  if (row.updated_by != null) task.updatedBy = row.updated_by as string;
   return task;
 }
 
@@ -72,8 +74,8 @@ export function insertTaskRow(
        due_date, assignee, priority, effort, blocked_by, milestone,
        planned_start, planned_end, time_entries, sort_order, attachments,
        project, github_issue, github_repo, github_pr, comments, claimed_by,
-       claimed_at, approval_request, files, children, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       claimed_at, approval_request, files, children, created_by, updated_by, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(t.id),
       val(t.title),
@@ -107,6 +109,8 @@ export function insertTaskRow(
       json(t.approvalRequest ? [t.approvalRequest] : null),
       json(t.files),
       json(t.children),
+      val(t.createdBy),
+      val(t.updatedBy),
       syncedAt ?? new Date().toISOString(),
     ],
   );

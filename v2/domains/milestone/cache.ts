@@ -19,6 +19,9 @@ export function rowToMilestone(row: Record<string, unknown>): MilestoneBase {
   if (row.project != null) m.project = row.project as string;
   if (row.completed_at != null) m.completedAt = row.completed_at as string;
   if (row.created_at != null) m.createdAt = row.created_at as string;
+  if (row.updated_at != null) m.updatedAt = row.updated_at as string;
+  if (row.created_by != null) m.createdBy = row.created_by as string;
+  if (row.updated_by != null) m.updatedBy = row.updated_by as string;
   return m;
 }
 
@@ -29,8 +32,8 @@ export function insertMilestoneRow(
   syncedAt?: string,
 ): void {
   db.execute(
-    `INSERT OR REPLACE INTO ${MILESTONE_TABLE} (id, name, status, target, description, project, completed_at, created_at, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT OR REPLACE INTO ${MILESTONE_TABLE} (id, name, status, target, description, project, completed_at, created_at, updated_at, created_by, updated_by, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(m.id),
       val(m.name),
@@ -40,6 +43,9 @@ export function insertMilestoneRow(
       val(m.project),
       val(m.completedAt),
       val(m.createdAt),
+      val(m.updatedAt),
+      val(m.createdBy),
+      val(m.updatedBy),
       syncedAt ?? new Date().toISOString(),
     ],
   );

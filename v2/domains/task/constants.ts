@@ -43,5 +43,7 @@ export const TASK_SCHEMA = `CREATE TABLE IF NOT EXISTS ${TASK_TABLE} (
   approval_request TEXT,
   files TEXT,
   children TEXT,
+  created_by TEXT,
+  updated_by TEXT,
   synced_at TEXT
 )`;

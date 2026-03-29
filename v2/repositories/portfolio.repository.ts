@@ -6,6 +6,7 @@ import {
 import { toKebab } from "../utils/slug.ts";
 import { generateId } from "../utils/id.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
+import { mapKeysToFm } from "../utils/frontmatter-mapper.ts";
 import type {
   CreatePortfolioItem,
   PortfolioItem,
@@ -246,56 +247,65 @@ export class PortfolioRepository {
       revenue: typeof fm.revenue === "number" ? fm.revenue : undefined,
       expenses: typeof fm.expenses === "number" ? fm.expenses : undefined,
       progress: typeof fm.progress === "number" ? fm.progress : 0,
-      startDate: fm.startDate != null ? String(fm.startDate) : undefined,
-      endDate: fm.endDate != null ? String(fm.endDate) : undefined,
+      startDate: fm.start_date != null ? String(fm.start_date) : undefined,
+      endDate: fm.end_date != null ? String(fm.end_date) : undefined,
       team: Array.isArray(fm.team) ? fm.team.map(String) : undefined,
-      techStack: Array.isArray(fm.techStack)
-        ? fm.techStack.map(String)
+      techStack: Array.isArray(fm.tech_stack)
+        ? fm.tech_stack.map(String)
         : undefined,
       logo: fm.logo != null ? String(fm.logo) : undefined,
       license: fm.license != null ? String(fm.license) : undefined,
-      githubRepo: fm.githubRepo != null ? String(fm.githubRepo) : undefined,
-      billingCustomerId: fm.billingCustomerId != null
-        ? String(fm.billingCustomerId)
+      githubRepo: fm.github_repo != null ? String(fm.github_repo) : undefined,
+      billingCustomerId: fm.billing_customer_id != null
+        ? String(fm.billing_customer_id)
         : undefined,
-      brainManaged: typeof fm.brainManaged === "boolean"
-        ? fm.brainManaged
+      brainManaged: typeof fm.brain_managed === "boolean"
+        ? fm.brain_managed
         : undefined,
-      linkedGoals: Array.isArray(fm.linkedGoals)
-        ? fm.linkedGoals.map(String)
+      linkedGoals: Array.isArray(fm.linked_goals)
+        ? fm.linked_goals.map(String)
         : undefined,
       kpis: Array.isArray(fm.kpis) ? fm.kpis : undefined,
       urls: Array.isArray(fm.urls) ? fm.urls : undefined,
-      statusUpdates: Array.isArray(fm.statusUpdates)
-        ? fm.statusUpdates
+      statusUpdates: Array.isArray(fm.status_updates)
+        ? fm.status_updates
         : undefined,
+      createdAt: fm.created_at != null ? String(fm.created_at) : undefined,
+      updatedAt: fm.updated_at != null ? String(fm.updated_at) : undefined,
+      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
+      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
     };
   }
 
   private serialize(item: PortfolioItem): string {
-    const fm: Record<string, unknown> = {
+    const raw: Record<string, unknown> = {
       name: item.name,
       category: item.category,
       status: item.status,
     };
-    if (item.client) fm.client = item.client;
-    if (item.revenue != null) fm.revenue = item.revenue;
-    if (item.expenses != null) fm.expenses = item.expenses;
-    if (item.progress != null) fm.progress = item.progress;
-    if (item.startDate) fm.startDate = item.startDate;
-    if (item.endDate) fm.endDate = item.endDate;
-    if (item.team?.length) fm.team = item.team;
-    if (item.techStack?.length) fm.techStack = item.techStack;
-    if (item.logo) fm.logo = item.logo;
-    if (item.license) fm.license = item.license;
-    if (item.githubRepo) fm.githubRepo = item.githubRepo;
-    if (item.billingCustomerId) fm.billingCustomerId = item.billingCustomerId;
-    if (item.brainManaged != null) fm.brainManaged = item.brainManaged;
-    if (item.linkedGoals?.length) fm.linkedGoals = item.linkedGoals;
-    if (item.kpis?.length) fm.kpis = item.kpis;
-    if (item.urls?.length) fm.urls = item.urls;
-    if (item.statusUpdates?.length) fm.statusUpdates = item.statusUpdates;
+    if (item.client) raw.client = item.client;
+    if (item.revenue != null) raw.revenue = item.revenue;
+    if (item.expenses != null) raw.expenses = item.expenses;
+    if (item.progress != null) raw.progress = item.progress;
+    if (item.startDate) raw.startDate = item.startDate;
+    if (item.endDate) raw.endDate = item.endDate;
+    if (item.team?.length) raw.team = item.team;
+    if (item.techStack?.length) raw.techStack = item.techStack;
+    if (item.logo) raw.logo = item.logo;
+    if (item.license) raw.license = item.license;
+    if (item.githubRepo) raw.githubRepo = item.githubRepo;
+    if (item.billingCustomerId) raw.billingCustomerId = item.billingCustomerId;
+    if (item.brainManaged != null) raw.brainManaged = item.brainManaged;
+    if (item.linkedGoals?.length) raw.linkedGoals = item.linkedGoals;
+    if (item.kpis?.length) raw.kpis = item.kpis;
+    if (item.urls?.length) raw.urls = item.urls;
+    if (item.statusUpdates?.length) raw.statusUpdates = item.statusUpdates;
+    if (item.createdAt) raw.createdAt = item.createdAt;
+    if (item.updatedAt) raw.updatedAt = item.updatedAt;
+    if (item.createdBy) raw.createdBy = item.createdBy;
+    if (item.updatedBy) raw.updatedBy = item.updatedBy;
 
+    const fm = mapKeysToFm(raw);
     const body = `# ${item.name}\n\n${item.description ?? ""}`.trimEnd();
     return serializeFrontmatter(fm, body);
   }

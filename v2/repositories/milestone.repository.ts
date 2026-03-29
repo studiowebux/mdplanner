@@ -207,8 +207,13 @@ export class MilestoneRepository {
       target: fm.target != null ? String(fm.target) : undefined,
       description: desc || undefined,
       project: fm.project != null ? String(fm.project) : undefined,
-      completedAt: fm.completedAt != null ? String(fm.completedAt) : undefined,
-      createdAt: fm.createdAt != null ? String(fm.createdAt) : undefined,
+      completedAt: fm.completed_at != null
+        ? String(fm.completed_at)
+        : undefined,
+      createdAt: fm.created_at != null ? String(fm.created_at) : undefined,
+      updatedAt: fm.updated_at != null ? String(fm.updated_at) : undefined,
+      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
+      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
     };
   }
 }

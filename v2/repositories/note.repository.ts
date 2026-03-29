@@ -8,9 +8,9 @@ import {
   serializeFrontmatter,
 } from "../utils/frontmatter.ts";
 import { generateId } from "../utils/id.ts";
-import { findFileById } from "../utils/repo-helpers.ts";
+import { findFileById, mergeFields } from "../utils/repo-helpers.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
-import { mergeFields } from "../utils/repo-helpers.ts";
+import { mapKeysToFm } from "../utils/frontmatter-mapper.ts";
 import type {
   CreateNote,
   CustomSection,
@@ -142,10 +142,12 @@ export class NoteRepository {
       content: bodyContent,
       paragraphs,
       customSections,
-      createdAt: String(fm.created ?? fm.createdAt ?? ""),
-      updatedAt: String(fm.updated ?? fm.updatedAt ?? ""),
+      createdAt: String(fm.created_at ?? ""),
+      updatedAt: String(fm.updated_at ?? ""),
       revision: Number(fm.revision ?? 1),
       project: fm.project != null ? String(fm.project) : undefined,
+      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
+      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
     };
   }
 
@@ -154,14 +156,16 @@ export class NoteRepository {
   // -------------------------------------------------------------------------
 
   private serialize(note: Note): string {
-    const fm: Record<string, unknown> = {
+    const fm: Record<string, unknown> = mapKeysToFm({
       id: note.id,
-      created: note.createdAt,
-      updated: note.updatedAt,
+      createdAt: note.createdAt,
+      updatedAt: note.updatedAt,
       revision: note.revision,
       mode: "enhanced",
       ...(note.project ? { project: note.project } : {}),
-    };
+      ...(note.createdBy ? { createdBy: note.createdBy } : {}),
+      ...(note.updatedBy ? { updatedBy: note.updatedBy } : {}),
+    });
 
     let body = `# ${note.title}\n\n`;
 

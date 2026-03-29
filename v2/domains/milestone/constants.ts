@@ -14,5 +14,8 @@ export const MILESTONE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${MILESTONE_TABLE} (
   project TEXT,
   completed_at TEXT,
   created_at TEXT,
+  updated_at TEXT,
+  created_by TEXT,
+  updated_by TEXT,
   synced_at TEXT
 )`;
