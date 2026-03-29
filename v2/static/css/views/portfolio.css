@@ -75,20 +75,6 @@
   gap: var(--space-xs);
 }
 
-.portfolio-pill {
-  font-size: var(--font-size-xs);
-  padding: var(--badge-padding);
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-secondary);
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-}
-
-.portfolio-pill--overflow {
-  background: var(--color-accent-subtle);
-  color: var(--color-text-muted);
-}
-
 /* Detail view */
 
 .portfolio-detail__header {

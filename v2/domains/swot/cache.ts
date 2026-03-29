@@ -34,7 +34,7 @@ function insertRow(
     `INSERT OR REPLACE INTO ${TABLE} (id, title, date,
        strengths, weaknesses, opportunities, threats,
        project, notes, created_at, updated_at, created_by, updated_by, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(s.id),
       val(s.title),

@@ -179,7 +179,7 @@ export const PortfolioDetailView: FC<Props> = (
             <h2 class="section-heading">Tech Stack</h2>
             <div class="portfolio-card__tech-stack">
               {item.techStack.map((t) => (
-                <span key={t} class="portfolio-pill">{t}</span>
+                <span key={t} class="badge">{t}</span>
               ))}
             </div>
           </section>

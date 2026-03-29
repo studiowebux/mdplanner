@@ -7,15 +7,6 @@
 
 /* Priority badge colors moved to components.css (.priority--N) */
 
-.task-list__tag {
-  font-size: var(--font-size-xs);
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius-full);
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-}
-
 .task-list__meta {
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);

@@ -88,6 +88,11 @@
   color: var(--color-text-secondary);
 }
 
+.badge--overflow {
+  background: var(--color-accent-subtle);
+  color: var(--color-text-muted);
+}
+
 a.badge:hover {
   background: var(--color-accent);
   color: var(--color-text-on-accent);

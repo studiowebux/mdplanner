@@ -63,10 +63,10 @@ export const PortfolioCard: FC<Props> = ({ item, q }) => {
       {item.techStack && item.techStack.length > 0 && (
         <div class="portfolio-card__tech-stack">
           {item.techStack.slice(0, 4).map((t) => (
-            <span key={t} class="portfolio-pill">{t}</span>
+            <span key={t} class="badge">{t}</span>
           ))}
           {item.techStack.length > 4 && (
-            <span class="portfolio-pill portfolio-pill--overflow">
+            <span class="badge badge--overflow">
               +{item.techStack.length - 4}
             </span>
           )}
@@ -75,7 +75,7 @@ export const PortfolioCard: FC<Props> = ({ item, q }) => {
 
       {item.linkedGoals && item.linkedGoals.length > 0 && (
         <div class="portfolio-card__tech-stack">
-          <span class="portfolio-pill">
+          <span class="badge">
             {item.linkedGoals.length}{" "}
             goal{item.linkedGoals.length !== 1 ? "s" : ""}
           </span>
