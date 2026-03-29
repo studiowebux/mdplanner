@@ -178,7 +178,32 @@
 --------------------------------------------------------------------------- */
 
 /* ---------------------------------------------------------------------------
-   OKR tree view
+   OKR tree view — project groups
+--------------------------------------------------------------------------- */
+
+.goal-tree-groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.goal-tree-group {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+}
+
+.goal-tree-group__heading {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+/* ---------------------------------------------------------------------------
+   OKR tree view — list + nodes
 --------------------------------------------------------------------------- */
 
 .goal-tree {
@@ -190,12 +215,45 @@
 .goal-tree__children {
   list-style: none;
   padding-left: var(--space-xl);
-  margin: 0;
-  border-left: var(--border-width) solid var(--color-border);
+  margin: var(--space-xs) 0 0;
+  position: relative;
+}
+
+/* Vertical connector line */
+.goal-tree__children::before {
+  content: "";
+  position: absolute;
+  left: var(--space-sm);
+  top: 0;
+  bottom: var(--space-md);
+  width: var(--border-width);
+  background: var(--color-border);
 }
 
 .goal-tree__item {
   padding: var(--space-sm) 0;
+  position: relative;
+}
+
+/* Horizontal branch connector for child items */
+.goal-tree__children > .goal-tree__item::before {
+  content: "";
+  position: absolute;
+  left: calc(-1 * var(--space-xl) + var(--space-sm));
+  top: calc(var(--space-sm) + var(--font-size-sm));
+  width: calc(var(--space-xl) - var(--space-md));
+  height: var(--border-width);
+  background: var(--color-border);
+}
+
+/* Root items get extra bottom spacing */
+.goal-tree__item--root {
+  padding: var(--space-sm) 0 var(--space-md);
+}
+
+.goal-tree__item--root + .goal-tree__item--root {
+  border-top: var(--border-width) solid var(--color-border);
+  padding-top: var(--space-md);
 }
 
 .goal-tree__node {
@@ -205,10 +263,17 @@
   flex-wrap: wrap;
 }
 
+/* Root-level titles are larger */
 .goal-tree__title {
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
   text-decoration: none;
+  font-size: var(--font-size-sm);
+}
+
+.goal-tree__title--root {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
 }
 
 .goal-tree__title:hover {

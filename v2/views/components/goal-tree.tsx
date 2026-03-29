@@ -24,37 +24,74 @@ export function buildGoalTree(goals: Goal[]): GoalNode[] {
   return roots;
 }
 
-const GoalTreeNode: FC<{ node: GoalNode }> = ({ node }) => (
-  <li class="goal-tree__item">
-    <div class="goal-tree__node">
-      <a href={`/goals/${node.id}`} class="goal-tree__title">
-        {node.title}
-      </a>
-      <span class={`badge goal-status goal-status--${node.status}`}>
-        {node.status}
-      </span>
-      {node.priority && (
-        <span class={`badge priority--${node.priority}`}>
-          {PRIORITY_LABELS[String(node.priority)] ?? `P${node.priority}`}
+/** Group root nodes by project, preserving order within each group. */
+function groupByProject(
+  roots: GoalNode[],
+): { project: string; goals: GoalNode[] }[] {
+  const map = new Map<string, GoalNode[]>();
+  for (const node of roots) {
+    const key = node.project || "";
+    const arr = map.get(key) ?? [];
+    arr.push(node);
+    map.set(key, arr);
+  }
+  const groups: { project: string; goals: GoalNode[] }[] = [];
+  for (const [project, goals] of map) {
+    groups.push({ project, goals });
+  }
+  return groups;
+}
+
+// ---------------------------------------------------------------------------
+// Tree node — recursive
+// ---------------------------------------------------------------------------
+
+const GoalTreeNode: FC<{ node: GoalNode; depth: number }> = (
+  { node, depth },
+) => {
+  const isRoot = depth === 0;
+  return (
+    <li class={`goal-tree__item${isRoot ? " goal-tree__item--root" : ""}`}>
+      <div class="goal-tree__node">
+        <a
+          href={`/goals/${node.id}`}
+          class={`goal-tree__title${isRoot ? " goal-tree__title--root" : ""}`}
+        >
+          {node.title}
+        </a>
+        <span class={`badge goal-status goal-status--${node.status}`}>
+          {node.status}
         </span>
-      )}
-      {node.progress != null && (
-        <span class="goal-tree__progress">
-          <progress class="progress-bar" value={node.progress} max={100} />
-          {node.progress}%
+        <span class={`badge goal-badge goal-badge--${node.type}`}>
+          {node.type}
         </span>
+        {node.priority && (
+          <span class={`badge priority--${node.priority}`}>
+            {PRIORITY_LABELS[String(node.priority)] ?? `P${node.priority}`}
+          </span>
+        )}
+        {node.progress != null && (
+          <span class="goal-tree__progress">
+            <progress class="progress-bar" value={node.progress} max={100} />
+            {node.progress}%
+          </span>
+        )}
+        {node.owner && <span class="goal-tree__owner">{node.owner}</span>}
+      </div>
+      {node.children.length > 0 && (
+        <ul class="goal-tree__children">
+          {node.children.map((child) => (
+            <GoalTreeNode key={child.id} node={child} depth={depth + 1} />
+          ))}
+        </ul>
       )}
-      {node.owner && <span class="goal-tree__owner">{node.owner}</span>}
-    </div>
-    {node.children.length > 0 && (
-      <ul class="goal-tree__children">
-        {node.children.map((child) => (
-          <GoalTreeNode key={child.id} node={child} />
-        ))}
-      </ul>
-    )}
-  </li>
-);
+    </li>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Main tree view
+// ---------------------------------------------------------------------------
 
 export const GoalTree: FC<{ goals: Goal[] }> = ({ goals }) => {
   const tree = buildGoalTree(goals);
@@ -63,9 +100,34 @@ export const GoalTree: FC<{ goals: Goal[] }> = ({ goals }) => {
     return <p class="empty-state">No goals to display.</p>;
   }
 
+  const groups = groupByProject(tree);
+  const hasMultipleGroups = groups.length > 1 ||
+    (groups.length === 1 && groups[0].project !== "");
+
+  if (!hasMultipleGroups) {
+    return (
+      <ul class="goal-tree">
+        {tree.map((node) => (
+          <GoalTreeNode key={node.id} node={node} depth={0} />
+        ))}
+      </ul>
+    );
+  }
+
   return (
-    <ul class="goal-tree">
-      {tree.map((node) => <GoalTreeNode key={node.id} node={node} />)}
-    </ul>
+    <div class="goal-tree-groups">
+      {groups.map(({ project, goals: nodes }) => (
+        <section key={project} class="goal-tree-group">
+          <h3 class="goal-tree-group__heading">
+            {project || "Ungrouped"}
+          </h3>
+          <ul class="goal-tree">
+            {nodes.map((node) => (
+              <GoalTreeNode key={node.id} node={node} depth={0} />
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
   );
 };
