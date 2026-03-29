@@ -1,8 +1,8 @@
 ---
 id: task_cicd
 completed: true
-completedAt: "2026-02-28T09:00:00.000Z"
-updatedAt: "2026-02-28T09:00:00.000Z"
+completed_at: "2026-02-28T09:00:00.000Z"
+updated_at: "2026-02-28T09:00:00.000Z"
 revision: 2
 due_date: 2026-03-01
 assignee: diana

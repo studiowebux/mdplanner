@@ -6,7 +6,7 @@ lastName: Chen
 email: mike@devagency.com
 title: Operations Manager
 isPrimary: true
-created: 2026-02-01
+created_at: 2026-02-01
 ---
 
 # Mike Chen

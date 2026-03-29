@@ -1,7 +1,7 @@
 ---
 id: task_reporting
 completed: false
-updatedAt: "2026-03-15T18:43:55.768Z"
+updated_at: "2026-03-15T18:43:55.768Z"
 revision: 2
 due_date: 2026-04-15
 assignee: alice

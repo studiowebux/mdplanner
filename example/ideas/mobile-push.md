@@ -5,16 +5,16 @@ status: implemented
 category: feature
 priority: high
 project: Mobile App
-startDate: "2026-01-15"
-endDate: "2026-03-01"
+start_date: "2026-01-15"
+end_date: "2026-03-01"
 resources: 1 dev, Firebase account
 subtasks:
   - Set up Firebase Cloud Messaging
   - Build notification preferences UI
   - Implement quiet hours
   - Test on iOS and Android
-created: 2026-01-10
-implementedAt: 2026-03-01T14:30:00.000Z
+created_at: 2026-01-10
+implemented_at: 2026-03-01T14:30:00.000Z
 links: [idea_integrations]
 ---
 

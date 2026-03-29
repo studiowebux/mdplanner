@@ -5,15 +5,15 @@ status: considering
 category: infrastructure
 priority: high
 project: API Gateway
-startDate: "2026-04-01"
-endDate: "2026-05-15"
+start_date: "2026-04-01"
+end_date: "2026-05-15"
 resources: 1 dev, Redis instance
 subtasks:
   - Design sliding window algorithm
   - Implement per-key and per-IP limits
   - Add rate limit headers to responses
   - Build admin override mechanism
-created: 2026-03-20
+created_at: 2026-03-20
 links: [idea_integrations, idea_automation]
 ---
 

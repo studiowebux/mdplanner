@@ -3,15 +3,15 @@ id: idea_sorter_demo
 status: planned
 category: feature
 priority: high
-startDate: "2026-03-01"
-endDate: "2026-03-31"
+start_date: "2026-03-01"
+end_date: "2026-03-31"
 resources: 1 dev, 2 weeks
 subtasks:
   - Design table schema
   - Implement sort logic
   - Add filter bar
   - Write example data
-created: 2026-02-22
+created_at: 2026-02-22
 ---
 
 # Idea Sorter Demo

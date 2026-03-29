@@ -5,13 +5,13 @@ role: Developer
 departments:
   - Engineering
   - Design
-reportsTo: member_frontend_lead
-agentType: human
+reports_to: member_frontend_lead
+agent_type: human
 skills: [typescript, css, react, design-systems, figma]
 email: dev2@example.com
-startDate: "2023-03-01"
-hoursPerDay: 8
-workingDays:
+start_date: "2023-03-01"
+hours_per_day: 8
+working_days:
   - Mon
   - Tue
   - Wed

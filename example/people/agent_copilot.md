@@ -3,8 +3,8 @@ id: agent_copilot
 title: Code Assistant
 role: AI Agent
 departments: [Engineering]
-reportsTo: member_eng_lead
-agentType: ai
+reports_to: member_eng_lead
+agent_type: ai
 skills: [typescript, css, react, frontend]
 models:
   - name: gpt-4o

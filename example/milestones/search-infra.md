@@ -2,7 +2,7 @@
 id: milestone_search_infra
 status: open
 target: 2026-05-01
-createdAt: "2026-01-20T08:00:00.000Z"
+created_at: "2026-01-20T08:00:00.000Z"
 project: Acme Internal
 ---
 

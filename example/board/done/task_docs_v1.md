@@ -1,7 +1,7 @@
 ---
 id: task_docs_v1
 completed: false
-updatedAt: "2026-03-18T14:00:00.000Z"
+updated_at: "2026-03-18T14:00:00.000Z"
 revision: 2
 due_date: 2026-03-25
 assignee: charlie

@@ -3,7 +3,7 @@ id: milestone_alpha
 status: completed
 target: 2026-01-31
 project: TaskFlow Platform
-completedAt: "2026-02-10T14:30:00.000Z"
+completed_at: "2026-02-10T14:30:00.000Z"
 ---
 
 # Alpha Release

@@ -1,8 +1,8 @@
 ---
 id: task_crud
 completed: true
-completedAt: "2026-02-18T16:00:00.000Z"
-updatedAt: "2026-02-18T16:00:00.000Z"
+completed_at: "2026-02-18T16:00:00.000Z"
+updated_at: "2026-02-18T16:00:00.000Z"
 revision: 3
 due_date: 2026-02-20
 assignee: charlie

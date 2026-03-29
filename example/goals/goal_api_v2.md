@@ -2,15 +2,15 @@
 title: API v2 Shipped
 type: project
 kpi: Ship API v2 with OpenAPI spec
-kpiMetric: active_users
-kpiTarget: 42
-kpiValue: 40
-startDate: 2026-01-15
-endDate: 2026-02-28
+kpi_metric: active_users
+kpi_target: 42
+kpi_value: 40
+start_date: 2026-01-15
+end_date: 2026-02-28
 status: success
 project: API Gateway
-created: "2026-03-26T05:59:39.945Z"
-updated: "2026-03-26T05:59:39.945Z"
+created_at: "2026-03-26T05:59:39.945Z"
+updated_at: "2026-03-26T05:59:39.945Z"
 ---
 
 Deliver the redesigned REST API with OpenAPI 3.1 spec, rate limiting, and

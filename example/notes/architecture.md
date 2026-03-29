@@ -1,7 +1,7 @@
 ---
 id: note_architecture
-created: "2026-01-05T10:00:00Z"
-updated: "2026-03-22T00:41:35.820Z"
+created_at: "2026-01-05T10:00:00Z"
+updated_at: "2026-03-22T00:41:35.820Z"
 revision: 13
 mode: enhanced
 project: Client Portal

@@ -6,7 +6,7 @@ client: Acme Corp
 revenue: 45000
 expenses: 18000
 progress: 60
-brainManaged: false
+brain_managed: false
 ---
 
 # Client Portal

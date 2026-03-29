@@ -2,16 +2,16 @@
 title: Mobile App Launch
 type: project
 kpi: Ship iOS + Android apps
-kpiMetric: active_users
-kpiTarget: 500
-startDate: 2026-02-01
-endDate: 2026-06-30
+kpi_metric: active_users
+kpi_target: 500
+start_date: 2026-02-01
+end_date: 2026-06-30
 status: at-risk
 project: Mobile App
 priority: 1
 notes: Test
-created: "2026-03-27T00:55:02.801Z"
-updated: "2026-03-27T00:55:02.801Z"
+created_at: "2026-03-27T00:55:02.801Z"
+updated_at: "2026-03-27T00:55:02.801Z"
 ---
 
 Deliver native mobile apps for iOS and Android with offline sync. Currently

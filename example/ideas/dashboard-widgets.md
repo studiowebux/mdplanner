@@ -9,7 +9,7 @@ subtasks:
   - Define widget API contract
   - Build drag-and-drop grid layout
   - Create 5 default widgets
-created: 2026-03-15
+created_at: 2026-03-15
 links: [idea_ai, idea_integrations]
 ---
 

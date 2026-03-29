@@ -2,7 +2,7 @@
 id: milestone_auth_system
 status: open
 target: 2026-04-15
-createdAt: "2026-02-01T09:00:00.000Z"
+created_at: "2026-02-01T09:00:00.000Z"
 project: TaskFlow Platform
 ---
 

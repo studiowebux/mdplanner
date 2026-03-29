@@ -2,8 +2,8 @@
 id: milestone_data_export
 status: completed
 target: 2026-02-15
-createdAt: "2025-12-15T10:00:00.000Z"
-completedAt: "2026-02-10T11:30:00.000Z"
+created_at: "2025-12-15T10:00:00.000Z"
+completed_at: "2026-02-10T11:30:00.000Z"
 project: TaskFlow Platform
 ---
 

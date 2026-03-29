@@ -4,7 +4,7 @@ name: Startup Labs
 email: billing@startuplabs.co
 phone: +1-555-0200
 company: Startup Labs Inc
-created: 2026-02-01
+created_at: 2026-02-01
 billingAddress:
   street: 456 Innovation Blvd
   city: Austin

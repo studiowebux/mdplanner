@@ -1,7 +1,7 @@
 ---
 id: task_webhook_integration
 completed: false
-updatedAt: "2026-03-19T15:30:00.000Z"
+updated_at: "2026-03-19T15:30:00.000Z"
 revision: 2
 due_date: 2026-03-22
 assignee: agent_claude

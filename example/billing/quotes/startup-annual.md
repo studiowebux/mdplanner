@@ -5,7 +5,7 @@ customerId: customer_startup
 title: Team Plan Annual Subscription
 status: accepted
 validUntil: 2026-03-01
-created: 2026-02-01
+created_at: 2026-02-01
 subtotal: 1152
 total: 1152
 lineItems:

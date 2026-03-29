@@ -6,7 +6,7 @@ category: research
 priority: low
 project: API Gateway
 resources: 2 devs, 3 months
-created: 2026-02-05
+created_at: 2026-02-05
 links: []
 ---
 

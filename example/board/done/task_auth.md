@@ -1,8 +1,8 @@
 ---
 id: task_auth
 completed: true
-completedAt: "2026-02-05T10:30:00.000Z"
-updatedAt: "2026-02-05T10:30:00.000Z"
+completed_at: "2026-02-05T10:30:00.000Z"
+updated_at: "2026-02-05T10:30:00.000Z"
 revision: 4
 due_date: 2026-02-10
 assignee: bob

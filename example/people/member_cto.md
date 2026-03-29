@@ -3,13 +3,13 @@ id: member_cto
 title: Chief Technology Officer
 role: CTO
 departments: [Engineering, Security]
-reportsTo: member_ceo
+reports_to: member_ceo
 email: cto@example.com
 phone: +1-555-0101
-startDate: 2020-03-01
-hoursPerDay: 8
-workingDays: [Mon, Tue, Wed, Thu, Fri]
-agentType: human
+start_date: 2020-03-01
+hours_per_day: 8
+working_days: [Mon, Tue, Wed, Thu, Fri]
+agent_type: human
 skills: [architecture, engineering, cloud, security, technical-strategy]
 ---
 

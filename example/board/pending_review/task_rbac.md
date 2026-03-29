@@ -1,7 +1,7 @@
 ---
 id: task_rbac
 completed: false
-updatedAt: "2026-03-18T11:00:00.000Z"
+updated_at: "2026-03-18T11:00:00.000Z"
 revision: 3
 due_date: 2026-03-20
 assignee: alice

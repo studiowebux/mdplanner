@@ -3,13 +3,13 @@ id: member_cfo
 title: Chief Financial Officer
 role: CFO
 departments: [Finance, Executive]
-reportsTo: member_ceo
+reports_to: member_ceo
 email: cfo@example.com
 phone: +1-555-0102
-startDate: 2020-06-15
-hoursPerDay: 8
-workingDays: [Mon, Tue, Wed, Thu, Fri]
-agentType: human
+start_date: 2020-06-15
+hours_per_day: 8
+working_days: [Mon, Tue, Wed, Thu, Fri]
+agent_type: human
 skills: [financial-planning, budgeting, investor-relations, risk-management, compliance]
 ---
 

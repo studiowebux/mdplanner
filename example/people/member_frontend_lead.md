@@ -5,13 +5,13 @@ role: Frontend Lead
 departments:
   - Engineering
   - Design
-reportsTo: member_cto
-agentType: human
+reports_to: member_cto
+agent_type: human
 skills: [typescript, react, performance, accessibility, design-systems]
 email: frontend.lead@example.com
-startDate: "2021-04-15"
-hoursPerDay: 8
-workingDays:
+start_date: "2021-04-15"
+hours_per_day: 8
+working_days:
   - Mon
   - Tue
   - Wed

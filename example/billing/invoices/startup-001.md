@@ -6,7 +6,7 @@ quoteId: quote_startup
 title: Team Plan Annual - Year 1
 status: paid
 dueDate: 2026-03-01
-created: 2026-02-15
+created_at: 2026-02-15
 sentAt: 2026-02-15
 paidAt: 2026-02-18
 subtotal: 1152

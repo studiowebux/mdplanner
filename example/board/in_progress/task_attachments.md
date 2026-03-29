@@ -1,7 +1,7 @@
 ---
 id: task_attachments
 completed: false
-updatedAt: "2026-03-15T18:42:54.215Z"
+updated_at: "2026-03-15T18:42:54.215Z"
 revision: 2
 due_date: 2026-03-25
 assignee: agent_claude
@@ -13,8 +13,8 @@ order: 1
 planned_start: 2026-03-12
 planned_end: 2026-03-22
 tags: [storage, uploads]
-claimedBy: agent_claude
-claimedAt: "2026-03-12T08:00:00.000Z"
+claimed_by: agent_claude
+claimed_at: "2026-03-12T08:00:00.000Z"
 blocked_by: [task_crud]
 ---
 

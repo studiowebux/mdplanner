@@ -5,15 +5,15 @@ status: cancelled
 category: feature
 priority: medium
 project: Client Portal
-startDate: "2026-02-01"
-endDate: "2026-04-15"
+start_date: "2026-02-01"
+end_date: "2026-04-15"
 resources: 1 dev, SAML library license
 subtasks:
   - Evaluate SAML vs OIDC
   - Build identity provider adapter
   - Test with Okta and Azure AD
-created: 2026-01-30
-cancelledAt: 2026-03-10T09:00:00.000Z
+created_at: 2026-01-30
+cancelled_at: 2026-03-10T09:00:00.000Z
 links: [idea_templates]
 ---
 

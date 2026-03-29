@@ -5,7 +5,7 @@ customerId: customer_agency
 title: Business Plan Q1 Subscription
 status: sent
 validUntil: 2026-03-15
-created: 2026-02-10
+created_at: 2026-02-10
 subtotal: 900
 total: 900
 lineItems:

@@ -1,7 +1,7 @@
 ---
 id: note_markdown_showcase
-created: "2026-03-21T22:30:00Z"
-updated: "2026-03-21T22:30:00Z"
+created_at: "2026-03-21T22:30:00Z"
+updated_at: "2026-03-21T22:30:00Z"
 revision: 1
 mode: enhanced
 ---

@@ -1,7 +1,7 @@
 ---
 id: note_onboarding
-created: 2026-01-20T14:00:00Z
-updated: 2026-01-20T14:00:00Z
+created_at: 2026-01-20T14:00:00Z
+updated_at: 2026-01-20T14:00:00Z
 revision: 1
 mode: simple
 ---

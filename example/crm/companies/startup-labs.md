@@ -4,7 +4,7 @@ name: Startup Labs
 industry: Technology
 website: https://startuplabs.co
 phone: +1-555-0200
-created: 2026-01-20
+created_at: 2026-01-20
 address:
   city: Austin
   state: TX

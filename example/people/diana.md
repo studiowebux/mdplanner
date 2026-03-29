@@ -5,11 +5,11 @@ role: DevOps Engineer
 departments:
   - Engineering
   - Operations
-reportsTo: member_cto
-agentType: human
+reports_to: member_cto
+agent_type: human
 skills: [kubernetes, terraform, ci-cd, monitoring, cloud-infrastructure]
-hoursPerDay: 8
-workingDays:
+hours_per_day: 8
+working_days:
   - Mon
   - Tue
   - Wed

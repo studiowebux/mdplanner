@@ -2,16 +2,16 @@
 title: Sales Cycle Length
 type: project
 kpi: 60 day sales cycle
-kpiMetric: sales_cycle_days
-kpiTarget: 60
-kpiValue: 92
-startDate: 2026-06-01
-endDate: 2026-12-31
+kpi_metric: sales_cycle_days
+kpi_target: 60
+kpi_value: 92
+start_date: 2026-06-01
+end_date: 2026-12-31
 status: planning
 progress: 0
 project: MD Planner
-created: "2026-03-27T08:00:00.000Z"
-updated: "2026-03-27T08:00:00.000Z"
+created_at: "2026-03-27T08:00:00.000Z"
+updated_at: "2026-03-27T08:00:00.000Z"
 ---
 
 Tracks average sales cycle length in days for enterprise deals.

@@ -2,8 +2,8 @@
 title: European Market Entry Analysis
 date: 2026-02-20
 project: Mobile App
-created: "2026-02-20T09:00:00.000Z"
-updated: "2026-03-27T20:54:27.689Z"
+created_at: "2026-02-20T09:00:00.000Z"
+updated_at: "2026-03-27T20:54:27.689Z"
 ---
 
 ## Strengths

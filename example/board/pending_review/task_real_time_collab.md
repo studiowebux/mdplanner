@@ -1,7 +1,7 @@
 ---
 id: task_real_time_collab
 completed: false
-updatedAt: "2026-03-19T12:00:00.000Z"
+updated_at: "2026-03-19T12:00:00.000Z"
 revision: 2
 due_date: 2026-04-01
 assignee: charlie

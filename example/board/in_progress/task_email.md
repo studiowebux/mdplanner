@@ -1,7 +1,7 @@
 ---
 id: task_email
 completed: false
-updatedAt: "2026-03-15T18:42:54.223Z"
+updated_at: "2026-03-15T18:42:54.223Z"
 revision: 2
 due_date: 2026-04-01
 assignee: charlie
@@ -14,8 +14,8 @@ planned_start: 2026-03-10
 planned_end: 2026-03-28
 tags: [notifications, email]
 blocked_by: [task_auth]
-claimedBy: charlie
-claimedAt: "2026-03-10T09:00:00.000Z"
+claimed_by: charlie
+claimed_at: "2026-03-10T09:00:00.000Z"
 ---
 
 # Email Notifications

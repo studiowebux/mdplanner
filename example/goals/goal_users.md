@@ -16,7 +16,7 @@ contributors:
 tags:
   - growth
   - marketing
-linkedMilestones:
+linked_milestones:
   - beta
   - onboarding
 ---

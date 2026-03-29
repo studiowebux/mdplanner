@@ -2,7 +2,7 @@
 id: task_search
 completed: false
 revision: 5
-updatedAt: "2026-03-20T23:03:07.643Z"
+updated_at: "2026-03-20T23:03:07.643Z"
 due_date: 2026-04-05
 assignee: diana
 milestone: Public Beta

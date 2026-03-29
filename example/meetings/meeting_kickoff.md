@@ -1,7 +1,7 @@
 ---
 id: meeting_kickoff_001
 date: 2026-02-20
-created: "2026-02-20T10:00:00.000Z"
+created_at: "2026-02-20T10:00:00.000Z"
 attendees: [alice, bob, charlie, diana]
 agenda: Project kickoff — scope, timeline, and team responsibilities
 actions:

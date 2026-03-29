@@ -2,8 +2,8 @@
 id: onboarding_1708600000001_mari
 employeeName: Maria Garcia
 role: Product Designer
-startDate: "2026-02-17"
-created: "2026-02-22T12:00:00.000Z"
+start_date: "2026-02-17"
+created_at: "2026-02-22T12:00:00.000Z"
 steps:
   -
     id: step_001

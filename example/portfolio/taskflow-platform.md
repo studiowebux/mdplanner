@@ -6,16 +6,16 @@ client: Multiple
 revenue: 125000
 expenses: 45000
 progress: 75
-startDate: 2025-01-15
-endDate: 2026-06-30
+start_date: 2025-01-15
+end_date: 2026-06-30
 team: [alice, bob, charlie, diana]
-techStack: [Deno, Hono, SQLite, htmx, TypeScript]
+tech_stack: [Deno, Hono, SQLite, htmx, TypeScript]
 logo: "https://placehold.co/64x64/e2e8f0/475569?text=TF"
 license: MIT
-githubRepo: studiowebux/mdplanner
-billingCustomerId: cust_tf_001
-brainManaged: true
-linkedGoals: [goal_revenue_q2, goal_user_growth]
+github_repo: studiowebux/mdplanner
+billing_customer_id: cust_tf_001
+brain_managed: true
+linked_goals: [goal_revenue_q2, goal_user_growth]
 kpis:
   - target: 15000
     unit: USD
@@ -36,7 +36,7 @@ urls:
     href: "https://example.com/taskflow"
   - label: GitHub
     href: "https://github.com/example/taskflow"
-statusUpdates:
+status_updates:
   - date: 2026-03-22
     message: Test from curl
     id: statusUpdate_1774154799516_wrj49p

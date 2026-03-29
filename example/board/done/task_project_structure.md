@@ -1,8 +1,8 @@
 ---
 id: task_project_structure
 completed: true
-completedAt: "2026-01-20T14:00:00.000Z"
-updatedAt: "2026-01-20T14:00:00.000Z"
+completed_at: "2026-01-20T14:00:00.000Z"
+updated_at: "2026-01-20T14:00:00.000Z"
 revision: 3
 due_date: 2026-01-25
 assignee: alice

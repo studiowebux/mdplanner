@@ -2,7 +2,7 @@
 id: milestone_onboarding
 status: open
 target: 2025-12-01
-createdAt: "2025-09-15T08:00:00.000Z"
+created_at: "2025-09-15T08:00:00.000Z"
 project: TaskFlow Platform
 ---
 

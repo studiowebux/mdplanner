@@ -7,7 +7,7 @@ value: 3600
 stage: qualified
 probability: 50
 expectedCloseDate: 2026-04-01
-created: 2026-02-05
+created_at: 2026-02-05
 ---
 
 # DevAgency Business Plan

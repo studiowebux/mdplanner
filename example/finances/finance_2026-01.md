@@ -18,7 +18,7 @@ expenses:
     amount: 4500
   - category: Recruiting
     amount: 1800
-created: "2026-02-22T12:00:00.000Z"
+created_at: "2026-02-22T12:00:00.000Z"
 ---
 
 New hire (senior engineer) brought salary costs up by 2k. Marketing ramp for

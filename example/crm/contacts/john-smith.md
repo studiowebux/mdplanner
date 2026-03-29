@@ -7,7 +7,7 @@ email: john.smith@acme.io
 phone: +1-555-0101
 title: CTO
 isPrimary: true
-created: 2026-01-15
+created_at: 2026-01-15
 ---
 
 # John Smith

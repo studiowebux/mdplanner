@@ -2,7 +2,7 @@
 id: milestone_enterprise
 status: open
 target: 2026-09-01
-createdAt: "2026-01-10T08:00:00.000Z"
+created_at: "2026-01-10T08:00:00.000Z"
 project: "TaskFlow Platform"
 ---
 

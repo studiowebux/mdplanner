@@ -27,8 +27,8 @@ campaigns:
     goals: First 12 tutorials published
 linked_goals:
   - goal_youtube_subs_taskflow
-created: "2026-03-27T08:00:00.000Z"
-updated: "2026-03-27T08:00:00.000Z"
+created_at: "2026-03-27T08:00:00.000Z"
+updated_at: "2026-03-27T08:00:00.000Z"
 ---
 
 ## Notes

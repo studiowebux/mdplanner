@@ -2,8 +2,8 @@
 id: milestone_beta
 status: completed
 target: 2026-02-15
-createdAt: "2025-12-01T10:00:00.000Z"
-completedAt: "2026-03-01T16:45:00.000Z"
+created_at: "2025-12-01T10:00:00.000Z"
+completed_at: "2026-03-01T16:45:00.000Z"
 project: "TaskFlow Platform"
 ---
 

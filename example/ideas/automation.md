@@ -4,14 +4,14 @@ title: Workflow Automation
 status: planned
 category: feature
 priority: medium
-startDate: "2026-05-01"
-endDate: "2026-07-31"
+start_date: "2026-05-01"
+end_date: "2026-07-31"
 resources: 1 dev, n8n license
 subtasks:
   - Define trigger events
   - Build rules engine
   - Test with sample workflows
-created: 2026-01-20
+created_at: 2026-01-20
 links: [idea_ai, idea_integrations]
 ---
 

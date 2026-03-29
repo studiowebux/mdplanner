@@ -29,5 +29,5 @@ steps:
     category: intro
   - title: First solo discovery call
     category: intro
-created: "2026-02-22T12:00:00.000Z"
+created_at: "2026-02-22T12:00:00.000Z"
 ---
