@@ -114,10 +114,28 @@ export const GoalTree: FC<{ goals: Goal[] }> = ({ goals }) => {
     );
   }
 
+  const toSlug = (s: string) =>
+    (s || "ungrouped").toLowerCase().replace(/\s+/g, "-");
+
   return (
     <div class="goal-tree-groups">
+      <nav class="goal-tree-groups__nav" aria-label="Jump to project">
+        {groups.map(({ project }) => (
+          <a
+            key={project}
+            class="goal-tree-groups__pill"
+            href={`#goal-group-${toSlug(project)}`}
+          >
+            {project || "Ungrouped"}
+          </a>
+        ))}
+      </nav>
       {groups.map(({ project, goals: nodes }) => (
-        <section key={project} class="goal-tree-group">
+        <section
+          key={project}
+          id={`goal-group-${toSlug(project)}`}
+          class="goal-tree-group"
+        >
           <h3 class="goal-tree-group__heading">
             {project || "Ungrouped"}
           </h3>

@@ -187,10 +187,44 @@
   gap: var(--space-xl);
 }
 
+/* Jump nav — sticky pill bar */
+
+.goal-tree-groups__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: var(--border-width) var(--border-style) var(--color-border);
+  border-radius: var(--radius-md);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-toolbar);
+  background: var(--color-bg-primary);
+}
+
+.goal-tree-groups__pill {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.goal-tree-groups__pill:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+/* Project group section */
+
 .goal-tree-group {
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
+  scroll-margin-top: var(--space-xl);
 }
 
 .goal-tree-group__heading {
@@ -246,14 +280,16 @@
   background: var(--color-border);
 }
 
-/* Root items get extra bottom spacing */
+/* Root items — card-like blocks */
 .goal-tree__item--root {
-  padding: var(--space-sm) 0 var(--space-md);
+  padding: var(--space-md);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
 }
 
 .goal-tree__item--root + .goal-tree__item--root {
-  border-top: var(--border-width) solid var(--color-border);
-  padding-top: var(--space-md);
+  margin-top: var(--space-md);
 }
 
 .goal-tree__node {
