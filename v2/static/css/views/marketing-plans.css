@@ -138,10 +138,6 @@
   text-decoration: none;
 }
 
-.mktplan-kpi__metric a:hover {
-  color: var(--color-accent);
-}
-
 .mktplan-kpi__label {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);

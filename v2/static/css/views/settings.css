@@ -426,10 +426,6 @@ html.sidebar-collapsed .settings-page__form-actions {
   font-size: var(--font-size-sm);
 }
 
-.settings-support__links a:hover {
-  color: var(--color-accent);
-}
-
 .settings-support__license {
   margin-top: var(--space-xl);
   font-size: var(--font-size-xs);

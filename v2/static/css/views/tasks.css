@@ -755,10 +755,6 @@ a.task-board__card-avatar:hover {
   text-decoration: none;
 }
 
-.task-timeline__unscheduled-row a:hover {
-  color: var(--color-accent);
-}
-
 /* Empty */
 
 .task-timeline__empty {

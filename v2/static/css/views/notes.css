@@ -570,10 +570,6 @@
   font-weight: var(--font-weight-medium);
 }
 
-.markdown-body a:hover {
-  color: var(--color-accent);
-}
-
 .markdown-body img {
   max-width: 100%;
   height: auto;

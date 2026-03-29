@@ -23,6 +23,10 @@
   overflow-y: auto;
 }
 
+.app-shell__content a:not(.btn):not(.badge):hover {
+  color: var(--color-accent);
+}
+
 /* -------------------------------------------------------------------------
    Sidebar toggle — desktop collapse
    ------------------------------------------------------------------------- */

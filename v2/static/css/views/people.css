@@ -117,10 +117,6 @@
   text-decoration: none;
 }
 
-.person-detail__meta dd a:hover {
-  color: var(--color-accent);
-}
-
 .person-detail__section {
   display: flex;
   flex-direction: column;
@@ -324,10 +320,6 @@
 .orgchart-node-name a {
   color: var(--color-text-primary);
   text-decoration: none;
-}
-
-.orgchart-node-name a:hover {
-  color: var(--color-accent);
 }
 
 .orgchart-node-title {

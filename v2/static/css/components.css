@@ -205,10 +205,6 @@ a.badge:hover {
   text-decoration: none;
 }
 
-.domain-card__name a:hover {
-  color: var(--color-accent);
-}
-
 .domain-card__meta {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -433,10 +429,6 @@ a.badge:hover {
   color: var(--color-text-primary);
   text-decoration: none;
   font-weight: var(--font-weight-semibold);
-}
-
-.data-table__td a:not(.btn):hover {
-  color: var(--color-accent);
 }
 
 /* -------------------------------------------------------------------------
