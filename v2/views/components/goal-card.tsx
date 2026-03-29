@@ -94,13 +94,13 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
 
       {/* Progress bar — manual or time-elapsed */}
       {(hasManualProgress || (start > 0 && end > 0)) && (
-        <div class="goal-card__progress">
+        <div class="progress-group">
           <progress
-            class="progress-bar goal-card__bar"
+            class="progress-bar"
             value={progress}
             max={100}
           />
-          <span class="goal-card__stats">
+          <span class="progress-label">
             {progress}% {progressLabel}
             {deadline && (
               <span

@@ -83,13 +83,13 @@ export const MilestoneCard: FC<Props> = ({ milestone, q }) => {
         )}
       </CardMeta>
 
-      <div class="milestone-card__progress">
+      <div class="progress-group">
         <progress
-          class="progress-bar milestone-card__bar"
+          class="progress-bar"
           value={milestone.progress}
           max={100}
         />
-        <span class="milestone-card__stats">
+        <span class="progress-label">
           {milestone.completedCount}/{milestone.taskCount} tasks &middot;{" "}
           {milestone.progress}%
         </span>

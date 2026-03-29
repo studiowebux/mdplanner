@@ -343,7 +343,22 @@ a.badge:hover {
   margin: 0 0 var(--space-md) 0;
 }
 
+.progress-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.progress-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
 .progress-bar {
+  display: block;
+  width: 100%;
+  height: var(--progress-bar-height);
+  border: none;
   appearance: none;
   border-radius: var(--radius-full);
   overflow: hidden;

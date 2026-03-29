@@ -61,11 +61,11 @@ export const MilestoneDetailView: FC<Props> = (
 
           <div class="milestone-detail__progress">
             <progress
-              class="progress-bar milestone-card__bar"
+              class="progress-bar"
               value={milestone.progress}
               max={100}
             />
-            <span class="milestone-card__stats">
+            <span class="progress-label">
               {milestone.completedCount}/{milestone.taskCount} tasks &middot;
               {" "}
               {milestone.progress}%

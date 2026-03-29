@@ -13,24 +13,7 @@
 
 /* Status badge colors now use shared .badge--{variant} from components.css */
 
-.milestone-card__progress {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-.milestone-card__bar {
-  display: block;
-  width: 100%;
-  height: var(--progress-bar-height);
-  border: none;
-  background: var(--color-bg-tertiary);
-}
-
-.milestone-card__stats {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-}
+/* Progress uses shared .progress-group, .progress-bar, .progress-label from components.css */
 
 .milestone-card__description {
   position: relative;

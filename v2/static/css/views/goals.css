@@ -41,24 +41,7 @@
   opacity: var(--card-opacity-muted);
 }
 
-.goal-card__progress {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-.goal-card__bar {
-  display: block;
-  width: 100%;
-  height: var(--progress-bar-height);
-  border: none;
-  background: var(--color-bg-tertiary);
-}
-
-.goal-card__stats {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-}
+/* Progress uses shared .progress-group, .progress-bar, .progress-label from components.css */
 
 .goal-card__description {
   position: relative;
