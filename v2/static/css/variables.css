@@ -186,6 +186,7 @@
   /* Page */
   --page-padding: var(--space-lg);
   --page-max-width: 100%;
+  --error-page-min-height: 60vh;
 
   /* Borders */
   --border-width: 1px;

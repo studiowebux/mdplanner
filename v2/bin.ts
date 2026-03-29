@@ -19,6 +19,7 @@ import { getProjectService } from "./singletons/services.ts";
 import { setFormatConfig } from "./utils/format.ts";
 import { setTimeLocale } from "./utils/time.ts";
 import type { AppVariables } from "./types/app.ts";
+import { errorHandler, notFoundHandler } from "./middleware/error-handlers.tsx";
 
 const __dirname = dirname(fromFileUrl(import.meta.url));
 
@@ -49,13 +50,9 @@ app.use("*", logger((msg: string) => log.info(msg)));
 
 app.use("*", contextMiddleware);
 
-app.onError((err, c) => {
-  log.error(err.message, err);
-  return c.json(
-    { error: "INTERNAL_ERROR", message: "An unexpected error occurred" },
-    500,
-  );
-});
+app.notFound(notFoundHandler);
+
+app.onError(errorHandler);
 
 // SSE — domain-agnostic broadcast stream. Named events only, no payload.
 app.get("/sse", () => {

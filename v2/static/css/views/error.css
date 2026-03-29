@@ -1,0 +1,45 @@
+/* Error page (404, 500) */
+
+.error-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--error-page-min-height);
+  padding: var(--page-padding);
+  text-align: center;
+  gap: var(--space-sm);
+}
+
+.error-page__status {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+  line-height: 1;
+}
+
+.error-page__title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.error-page__message {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: var(--body-line-height);
+  max-width: 40ch;
+}
+
+.error-page__link {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-accent);
+  text-decoration: none;
+  margin-top: var(--space-md);
+}
+
+.error-page__link:hover {
+  text-decoration: underline;
+}
