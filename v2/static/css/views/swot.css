@@ -54,18 +54,6 @@
   margin: 0;
 }
 
-.swot-detail__info-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-}
-
-.swot-detail__info-label {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-  font-weight: var(--font-weight-medium);
-}
-
 .swot-detail__section {
   margin-top: var(--space-lg);
 }

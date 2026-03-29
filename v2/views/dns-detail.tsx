@@ -9,6 +9,7 @@ import { DNS_RECORD_FORM_FIELDS } from "../domains/dns/constants.tsx";
 import { toKebab } from "../utils/slug.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
+import { InfoItem } from "./components/info-item.tsx";
 
 // ---------------------------------------------------------------------------
 // DNS records table — standalone fragment for htmx swaps
@@ -164,46 +165,38 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
         />
       </header>
 
-      <div class="detail-section dns-detail__info-grid">
+      <div class="detail-section detail-info-row">
         {domain.expiryDate && (
-          <div class="dns-detail__info-item">
-            <span class="dns-detail__info-label">Expires</span>
-            <span>{formatDate(domain.expiryDate)}</span>
-          </div>
+          <InfoItem label="Expires">{formatDate(domain.expiryDate)}</InfoItem>
         )}
         {domain.autoRenew !== undefined && (
-          <div class="dns-detail__info-item">
-            <span class="dns-detail__info-label">Auto-renew</span>
-            <span>{domain.autoRenew ? "Yes" : "No"}</span>
-          </div>
+          <InfoItem label="Auto-renew">
+            {domain.autoRenew ? "Yes" : "No"}
+          </InfoItem>
         )}
         {domain.renewalCostUsd !== undefined && (
-          <div class="dns-detail__info-item">
-            <span class="dns-detail__info-label">Renewal cost</span>
-            <span>${domain.renewalCostUsd}/yr</span>
-          </div>
+          <InfoItem label="Renewal cost">
+            ${domain.renewalCostUsd}/yr
+          </InfoItem>
         )}
         {domain.lastFetchedAt && (
-          <div class="dns-detail__info-item">
-            <span class="dns-detail__info-label">Last synced</span>
-            <span>{formatDate(domain.lastFetchedAt)}</span>
-          </div>
+          <InfoItem label="Last synced">
+            {formatDate(domain.lastFetchedAt)}
+          </InfoItem>
         )}
         {domain.project && (
-          <div class="dns-detail__info-item">
-            <span class="dns-detail__info-label">Project</span>
+          <InfoItem label="Project">
             <a href={`/portfolio/${toKebab(domain.project)}`}>
               {domain.project}
             </a>
-          </div>
+          </InfoItem>
         )}
         {domain.nameservers && domain.nameservers.length > 0 && (
-          <div class="dns-detail__info-item dns-detail__info-item--full">
-            <span class="dns-detail__info-label">Nameservers</span>
+          <InfoItem label="Nameservers">
             <span class="dns-detail__nameservers">
               {domain.nameservers.join(", ")}
             </span>
-          </div>
+          </InfoItem>
         )}
       </div>
 

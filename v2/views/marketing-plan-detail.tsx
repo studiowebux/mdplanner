@@ -9,19 +9,7 @@ import { toKebab } from "../utils/slug.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
-
-// ---------------------------------------------------------------------------
-// Helper — label/value pair
-// ---------------------------------------------------------------------------
-
-const InfoItem: FC<{ label: string; children: unknown }> = (
-  { label, children },
-) => (
-  <div class="mktplan-detail__info-item">
-    <span class="mktplan-detail__info-label">{label}</span>
-    <span class="mktplan-detail__info-value">{children}</span>
-  </div>
-);
+import { InfoItem } from "./components/info-item.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -83,7 +71,7 @@ export const MarketingPlanDetailView: FC<
 
         {/* -- Overview -------------------------------------------------- */}
         {(hasOverview || hasTimeline) && (
-          <div class="detail-section mktplan-detail__info-row">
+          <div class="detail-section detail-info-row">
             {budget && <InfoItem label="Budget">{budget}</InfoItem>}
             {plan.project && (
               <InfoItem label="Project">

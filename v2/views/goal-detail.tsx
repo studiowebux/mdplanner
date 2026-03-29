@@ -12,19 +12,7 @@ import { toKebab } from "../utils/slug.ts";
 import { BackButton } from "./components/back-button.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
-
-// ---------------------------------------------------------------------------
-// Helper — renders a label/value pair inside an info-row
-// ---------------------------------------------------------------------------
-
-const InfoItem: FC<{ label: string; children: unknown }> = (
-  { label, children },
-) => (
-  <div class="goal-detail__info-item">
-    <span class="goal-detail__info-label">{label}</span>
-    <span class="goal-detail__info-value">{children}</span>
-  </div>
-);
+import { InfoItem } from "./components/info-item.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -125,7 +113,7 @@ export const GoalDetailView: FC<
 
         {/* ── Overview row ───────────────────────────────────────── */}
         {hasOverview && (
-          <div class="detail-section goal-detail__info-row">
+          <div class="detail-section detail-info-row">
             {goal.priority && (
               <InfoItem label="Priority">
                 <span class={`badge priority--${goal.priority}`}>
@@ -162,7 +150,7 @@ export const GoalDetailView: FC<
 
         {/* ── Measurement row ────────────────────────────────────── */}
         {hasKpi && (
-          <div class="detail-section goal-detail__info-row">
+          <div class="detail-section detail-info-row">
             {goal.kpi && <InfoItem label="KPI">{goal.kpi}</InfoItem>}
             {goal.kpiMetric && (
               <InfoItem label="Metric">{goal.kpiMetric}</InfoItem>
@@ -200,7 +188,7 @@ export const GoalDetailView: FC<
 
         {/* ── Timeline row ───────────────────────────────────────── */}
         {hasTimeline && (
-          <div class="detail-section goal-detail__info-row">
+          <div class="detail-section detail-info-row">
             {goal.startDate && (
               <InfoItem label="Start">{formatDate(goal.startDate)}</InfoItem>
             )}
@@ -212,7 +200,7 @@ export const GoalDetailView: FC<
 
         {/* ── Relationships row ──────────────────────────────────── */}
         {hasRelationships && (
-          <div class="detail-section goal-detail__info-row">
+          <div class="detail-section detail-info-row">
             {(goal.contributors?.length ?? 0) > 0 && (
               <InfoItem label="Contributors">
                 <span class="goal-detail__links">

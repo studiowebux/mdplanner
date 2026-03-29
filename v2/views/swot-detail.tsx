@@ -13,6 +13,7 @@ import {
   type SwotQuadrantKey,
 } from "../domains/swot/constants.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
+import { InfoItem } from "./components/info-item.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -79,11 +80,12 @@ export const SwotDetailView: FC<
 
         {/* -- Project --------------------------------------------------- */}
         {swot.project && (
-          <div class="detail-section swot-detail__info-row">
-            <span class="swot-detail__info-label">Project</span>
-            <a href={`/portfolio/${toKebab(swot.project)}`}>
-              {swot.project}
-            </a>
+          <div class="detail-section detail-info-row">
+            <InfoItem label="Project">
+              <a href={`/portfolio/${toKebab(swot.project)}`}>
+                {swot.project}
+              </a>
+            </InfoItem>
           </div>
         )}
 

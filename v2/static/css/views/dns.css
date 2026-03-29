@@ -59,26 +59,6 @@
   gap: var(--space-sm);
 }
 
-.dns-detail__info-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-}
-
-.dns-detail__info-item--full {
-  grid-column: 1 / -1;
-}
-
-.dns-detail__info-label {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wide);
-}
-
 .dns-detail__nameservers {
   font-family: var(--font-mono);
   font-size: var(--font-size-xs);

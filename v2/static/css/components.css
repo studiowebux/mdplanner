@@ -273,6 +273,32 @@ a.badge:hover {
   margin: 0;
 }
 
+.detail-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md) var(--space-xl);
+}
+
+.detail-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.detail-info-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.detail-info-value {
+  color: var(--color-text-primary);
+}
+
 .section-heading {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);

@@ -9,19 +9,7 @@ import { toKebab } from "../utils/slug.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
-
-// ---------------------------------------------------------------------------
-// Helper — renders a label/value pair inside an info-row
-// ---------------------------------------------------------------------------
-
-const InfoItem: FC<{ label: string; children: unknown }> = (
-  { label, children },
-) => (
-  <div class="idea-detail__info-item">
-    <span class="idea-detail__info-label">{label}</span>
-    <span class="idea-detail__info-value">{children}</span>
-  </div>
-);
+import { InfoItem } from "./components/info-item.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -88,7 +76,7 @@ export const IdeaDetailView: FC<
 
         {/* -- Overview row ---------------------------------------------- */}
         {hasOverview && (
-          <div class="detail-section idea-detail__info-row">
+          <div class="detail-section detail-info-row">
             {idea.category && (
               <InfoItem label="Category">{idea.category}</InfoItem>
             )}
@@ -114,7 +102,7 @@ export const IdeaDetailView: FC<
 
         {/* -- Timeline row ---------------------------------------------- */}
         {hasTimeline && (
-          <div class="detail-section idea-detail__info-row">
+          <div class="detail-section detail-info-row">
             {idea.startDate && (
               <InfoItem label="Start">{formatDate(idea.startDate)}</InfoItem>
             )}
