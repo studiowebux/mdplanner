@@ -2,31 +2,31 @@
 id: meeting_kickoff_001
 date: 2026-02-20
 created: "2026-02-20T10:00:00.000Z"
-attendees: [Alice Martin, Bob Chen, Carol Davis, David Kim]
+attendees: [alice, bob, charlie, diana]
 agenda: Project kickoff — scope, timeline, and team responsibilities
 actions:
   -
     id: act_001
     description: Set up project repository and CI pipeline
-    owner: Bob Chen
+    owner: bob
     due: 2026-02-24
     status: done
   -
     id: act_002
     description: Draft initial architecture diagram
-    owner: Alice Martin
+    owner: alice
     due: 2026-02-27
     status: open
   -
     id: act_003
     description: Schedule weekly sync recurring meeting
-    owner: Carol Davis
+    owner: charlie
     due: 2026-02-21
     status: done
   -
     id: act_004
     description: Identify external API dependencies and request access
-    owner: David Kim
+    owner: diana
     due: 2026-03-01
     status: open
   -

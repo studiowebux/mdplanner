@@ -161,9 +161,6 @@
   flex-wrap: wrap;
   gap: var(--space-xs);
   padding: var(--space-sm) var(--space-md);
-  border-bottom: var(--border-width) var(--border-style)
-    var(--color-border-default);
-  border-radius: var(--radius-md);
 }
 
 .task-list__jump-pill {
@@ -200,7 +197,7 @@
   z-index: var(--z-table-head);
   border-bottom: var(--border-width) var(--border-style)
     var(--color-border-default);
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border-radius: 0;
 }
 
 .task-list__section-title {

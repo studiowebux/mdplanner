@@ -1,5 +1,5 @@
 ---
-id: person_1771824850093_s067dw
+id: agent_claude
 title: Engineering
 role: AI Agent
 departments: [Engineering, AI]

@@ -7,7 +7,7 @@ budget_currency: USD
 start_date: 2026-05-01
 end_date: 2026-10-31
 project: TaskFlow Platform
-responsible: Sarah Chen
+responsible: alice
 channels:
   - name: YouTube
     budget: 15000

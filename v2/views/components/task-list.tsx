@@ -254,11 +254,7 @@ export const TaskListView: FC<ListProps> = (
     <div class="task-list" data-column-table="tasks">
       <div class="task-list__sticky-header">
         <div class="task-list__header-controls">
-          {sectionNames.length > 1 && (
-            <SectionJumpBar
-              sections={sectionNames}
-            />
-          )}
+          <SectionJumpBar sections={sectionNames} />
           <details class="column-toggle" data-column-toggle="tasks">
             <summary class="btn btn--secondary btn--sm">Columns</summary>
             <div class="column-toggle__panel">

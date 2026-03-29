@@ -10,6 +10,7 @@ import type { AppVariables, ViewMode } from "../types/app.ts";
 import type {
   DomainConfig,
   DomainFilterState,
+  DynamicFilterOptions,
   Entity,
 } from "./domain.types.ts";
 import { createDomainPage } from "./domain-view.tsx";
@@ -72,7 +73,11 @@ export function createDomainRoutes<T extends Entity, C, U>(
     return state;
   }
 
-  function applyFilters(items: T[], state: DomainFilterState): T[] {
+  function applyFilters(
+    items: T[],
+    state: DomainFilterState,
+    dynamicOpts?: DynamicFilterOptions,
+  ): T[] {
     let result = items;
 
     // Hide completed
@@ -91,10 +96,22 @@ export function createDomainRoutes<T extends Entity, C, U>(
         if (val && typeof val === "string") {
           const field = f.field ?? f.name;
           if (val === "__unassigned__") {
+            // Build set of known valid values (excluding __unassigned__ itself)
+            const opts = dynamicOpts?.[f.name];
+            const validValues = opts
+              ? new Set(
+                opts
+                  .map((o) => typeof o === "string" ? o : o.value)
+                  .filter((v) => v !== "__unassigned__"),
+              )
+              : null;
             result = result.filter((item) => {
               const itemVal = item[field as keyof T];
-              return itemVal === undefined || itemVal === null ||
-                itemVal === "";
+              if (itemVal === undefined || itemVal === null || itemVal === "") {
+                return true;
+              }
+              // Also match values not in the known valid set (orphaned refs)
+              return validValues ? !validValues.has(String(itemVal)) : false;
             });
           } else {
             result = result.filter((item) => {
@@ -172,7 +189,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
     const state = c.get("filterState" as never) as DomainFilterState;
     const all = await cfg.getService().list();
     const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
-    const filtered = applyFilters(all, state);
+    const filtered = applyFilters(all, state, dynamicFilterOptions);
     const customContent = extraKeys.has(state.view) && cfg.customViewRenderer
       ? await cfg.customViewRenderer(
         state.view,
@@ -197,7 +214,8 @@ export function createDomainRoutes<T extends Entity, C, U>(
   router.get("/view", async (c) => {
     const state = c.get("filterState" as never) as DomainFilterState;
     const all = await cfg.getService().list();
-    const filtered = applyFilters(all, state);
+    const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
+    const filtered = applyFilters(all, state, dynamicFilterOptions);
     const customContent = extraKeys.has(state.view) && cfg.customViewRenderer
       ? await cfg.customViewRenderer(
         state.view,

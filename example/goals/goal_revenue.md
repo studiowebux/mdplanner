@@ -7,14 +7,14 @@ kpi_target: 50000
 start: 2026-04-01
 end: 2026-12-31
 status: planning
-owner: Taylor Wong
+owner: charlie
 priority: 1
 tags:
   - revenue
   - business
 contributors:
-  - Sarah Chen
-  - Alex Kim
+  - alice
+  - diana
 notes: "Pricing tiers draft due by April 15. Need competitive analysis first."
 ---
 

@@ -9,8 +9,8 @@ startDate: 2026-01-15
 endDate: 2026-04-15
 status: late
 project: API Gateway
-owner: Chris Martinez
-contributors: [Sarah Chen]
+owner: bob
+contributors: [alice]
 priority: 2
 progress: 40
 parentGoal: goal_mvp
