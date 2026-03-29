@@ -78,7 +78,7 @@ export const MilestoneDetailView: FC<Props> = (
         )}
 
         <section class="milestone-detail__tasks">
-          <h2 class="milestone-detail__section-heading">Tasks</h2>
+          <h2 class="section-heading">Tasks</h2>
           {tasks.length === 0
             ? (
               <p class="milestone-detail__empty">

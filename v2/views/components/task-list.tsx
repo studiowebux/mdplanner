@@ -140,7 +140,7 @@ const SectionHeader: FC<{ name: string; count: number }> = (
     class="task-list__section-header"
     id={`section-${name.toLowerCase().replace(/\s+/g, "-")}`}
   >
-    <h2 class="task-list__section-title">{name}</h2>
+    <h2 class="section-heading">{name}</h2>
     <span class="task-list__section-count">{count}</span>
   </div>
 );

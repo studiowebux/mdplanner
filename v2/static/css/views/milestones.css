@@ -128,13 +128,6 @@
   padding: var(--card-padding);
 }
 
-.milestone-detail__section-heading {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-md);
-}
-
 .milestone-detail__section {
   margin-bottom: var(--space-lg);
 }

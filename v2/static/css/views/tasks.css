@@ -200,12 +200,6 @@
   border-radius: 0;
 }
 
-.task-list__section-title {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-}
-
 .task-list__section-count {
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);

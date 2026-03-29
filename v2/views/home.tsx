@@ -31,7 +31,7 @@ export const HomeView: FC<HomeProps> = ({ config, ...viewProps }) => {
 
         {links.length > 0 && (
           <section class="home-page__links">
-            <h2 class="home-page__section-title">Links</h2>
+            <h2 class="section-heading">Links</h2>
             <ul class="home-page__link-list">
               {links.map((link, i) => (
                 <li key={i}>

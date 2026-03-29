@@ -28,13 +28,6 @@
   margin-top: var(--space-xl);
 }
 
-.home-page__section-title {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-sm);
-}
-
 .home-page__link-list {
   list-style: none;
   padding: 0;
