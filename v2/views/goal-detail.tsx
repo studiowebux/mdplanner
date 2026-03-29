@@ -6,8 +6,8 @@ import type { PortfolioItem } from "../types/portfolio.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { PRIORITY_LABELS } from "../constants/mod.ts";
 import { dueIn, formatDate } from "../utils/time.ts";
-import { markdownToHtml } from "../utils/markdown.ts";
 import { KpiGauge } from "../components/ui/kpi-gauge.tsx";
+import { MarkdownSection } from "./components/markdown-section.tsx";
 import { toKebab } from "../utils/slug.ts";
 import { BackButton } from "./components/back-button.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
@@ -52,8 +52,6 @@ export const GoalDetailView: FC<
 ) => {
   const portfolioByName = portfolioItems.find((p) => p.name === goal.project);
   const portfolioIdByName = portfolioByName?.id;
-  const descHtml = markdownToHtml(goal.description);
-  const notesHtml = goal.notes ? markdownToHtml(goal.notes) : "";
   const isCompleted = goal.status === "success" || goal.status === "failed";
   const deadline = isCompleted ? "" : dueIn(goal.endDate);
   const isOverdue = deadline.includes("overdue");
@@ -254,26 +252,10 @@ export const GoalDetailView: FC<
         )}
 
         {/* ── Description ────────────────────────────────────────── */}
-        {descHtml && (
-          <section class="detail-section goal-detail__section">
-            <h2 class="section-heading">Description</h2>
-            <div
-              class="markdown-body"
-              dangerouslySetInnerHTML={{ __html: descHtml }}
-            />
-          </section>
-        )}
+        <MarkdownSection title="Description" markdown={goal.description} />
 
         {/* ── Notes ──────────────────────────────────────────────── */}
-        {notesHtml && (
-          <section class="detail-section goal-detail__section">
-            <h2 class="section-heading">Notes</h2>
-            <div
-              class="markdown-body"
-              dangerouslySetInnerHTML={{ __html: notesHtml }}
-            />
-          </section>
-        )}
+        <MarkdownSection title="Notes" markdown={goal.notes} />
 
         {/* ── Sub-Goals ──────────────────────────────────────────── */}
         {childGoals.length > 0 && (

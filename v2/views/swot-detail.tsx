@@ -4,8 +4,8 @@ import { BackButton } from "./components/back-button.tsx";
 import type { Swot } from "../types/swot.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
-import { markdownToHtml } from "../utils/markdown.ts";
 import { toKebab } from "../utils/slug.ts";
+import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import {
   SWOT_QUADRANT_META,
@@ -23,7 +23,6 @@ export const SwotDetailView: FC<
 > = (
   { item: swot, editing = false, ...viewProps },
 ) => {
-  const notesHtml = markdownToHtml(swot.notes ?? "");
   const editSuffix = editing ? "?editing=true" : "";
 
   return (
@@ -169,15 +168,7 @@ export const SwotDetailView: FC<
         </div>
 
         {/* -- Notes ----------------------------------------------------- */}
-        {notesHtml && (
-          <section class="detail-section swot-detail__section">
-            <h2 class="section-heading">Notes</h2>
-            <div
-              class="markdown-body"
-              dangerouslySetInnerHTML={{ __html: notesHtml }}
-            />
-          </section>
-        )}
+        <MarkdownSection title="Notes" markdown={swot.notes} />
 
         {/* -- Meta ------------------------------------------------------ */}
         <div class="detail-section swot-detail__meta">

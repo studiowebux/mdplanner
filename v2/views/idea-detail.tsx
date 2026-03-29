@@ -5,8 +5,8 @@ import type { Idea } from "../types/idea.types.ts";
 import { IDEA_COMPLETED_STATUSES } from "../types/idea.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
-import { markdownToHtml } from "../utils/markdown.ts";
 import { toKebab } from "../utils/slug.ts";
+import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 
@@ -41,7 +41,6 @@ export const IdeaDetailView: FC<
     ...viewProps
   },
 ) => {
-  const descHtml = markdownToHtml(idea.description ?? "");
   const isCompleted = IDEA_COMPLETED_STATUSES.has(idea.status);
 
   const hasOverview = idea.category || idea.priority || idea.project ||
@@ -176,15 +175,7 @@ export const IdeaDetailView: FC<
         )}
 
         {/* -- Description ----------------------------------------------- */}
-        {descHtml && (
-          <section class="detail-section idea-detail__section">
-            <h2 class="section-heading">Description</h2>
-            <div
-              class="markdown-body"
-              dangerouslySetInnerHTML={{ __html: descHtml }}
-            />
-          </section>
-        )}
+        <MarkdownSection title="Description" markdown={idea.description} />
 
         {/* -- Meta ------------------------------------------------------ */}
         <div class="detail-section idea-detail__meta">

@@ -5,8 +5,8 @@ import type { MarketingPlan } from "../types/marketing-plan.types.ts";
 import type { Goal } from "../types/goal.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
-import { markdownToHtml } from "../utils/markdown.ts";
 import { toKebab } from "../utils/slug.ts";
+import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 
@@ -32,7 +32,6 @@ export const MarketingPlanDetailView: FC<
 > = (
   { item: plan, goals = [], ...viewProps },
 ) => {
-  const notesHtml = markdownToHtml(plan.notes ?? "");
   const budget = plan.budgetTotal != null
     ? `${plan.budgetCurrency ?? ""} ${plan.budgetTotal.toLocaleString()}`
       .trim()
@@ -347,15 +346,7 @@ export const MarketingPlanDetailView: FC<
         )}
 
         {/* -- Notes ----------------------------------------------------- */}
-        {notesHtml && (
-          <section class="detail-section mktplan-detail__section">
-            <h2 class="section-heading">Notes</h2>
-            <div
-              class="markdown-body"
-              dangerouslySetInnerHTML={{ __html: notesHtml }}
-            />
-          </section>
-        )}
+        <MarkdownSection title="Notes" markdown={plan.notes} />
 
         {/* -- Meta ------------------------------------------------------ */}
         <div class="detail-section mktplan-detail__meta">

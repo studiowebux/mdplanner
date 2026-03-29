@@ -5,8 +5,8 @@ import type { Goal } from "../types/goal.types.ts";
 import type { PersonByName, ViewProps } from "../types/app.ts";
 import { formatCurrency } from "../utils/format.ts";
 import { formatDate } from "../utils/time.ts";
-import { markdownToHtml } from "../utils/markdown.ts";
 import { GitHubSection } from "./github.tsx";
+import { MarkdownSection } from "./components/markdown-section.tsx";
 import { KpiGauge } from "../components/ui/kpi-gauge.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
@@ -84,7 +84,6 @@ export const StatusUpdateEditRow: FC<{
 export const PortfolioDetailView: FC<Props> = (
   { item, goals = [], personByName = {}, ...viewProps },
 ) => {
-  const descHtml = markdownToHtml(item.description);
   const profit = (item.revenue ?? 0) - (item.expenses ?? 0);
   const pct = item.progress ?? 0;
 
@@ -173,15 +172,7 @@ export const PortfolioDetailView: FC<Props> = (
           </div>
         )}
 
-        {descHtml && (
-          <section class="detail-section portfolio-detail__section">
-            <h2 class="section-heading">Description</h2>
-            <div
-              class="markdown-body"
-              dangerouslySetInnerHTML={{ __html: descHtml }}
-            />
-          </section>
-        )}
+        <MarkdownSection title="Description" markdown={item.description} />
 
         {item.techStack && item.techStack.length > 0 && (
           <section class="detail-section portfolio-detail__section">
