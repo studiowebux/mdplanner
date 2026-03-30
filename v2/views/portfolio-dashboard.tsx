@@ -6,6 +6,8 @@ import { MainLayout } from "../components/layout/main.tsx";
 import type { ViewProps } from "../types/app.ts";
 import type { PortfolioDashboardItem } from "../types/portfolio.types.ts";
 import { MS_PER_DAY } from "../constants/mod.ts";
+import { badgeClass } from "../components/ui/status-badge.tsx";
+import { PORTFOLIO_STATUS_VARIANTS } from "../domains/portfolio/constants.tsx";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -173,7 +175,9 @@ const DashboardTable: FC<TableProps> = (
                   <a href={`/portfolio/${item.id}`}>{item.name}</a>
                 </td>
                 <td class="data-table__td" data-col="status">
-                  <span class={`badge badge--${item.status}`}>
+                  <span
+                    class={badgeClass(PORTFOLIO_STATUS_VARIANTS, item.status)}
+                  >
                     {item.status}
                   </span>
                 </td>
