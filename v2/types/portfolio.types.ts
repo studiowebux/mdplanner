@@ -244,3 +244,44 @@ export const AddStatusUpdateSchema = z.object({
     example: "Completed sprint 4. On track for Q2 release.",
   }),
 }).openapi("AddPortfolioStatusUpdate");
+
+// ---------------------------------------------------------------------------
+// Dashboard — per-project health for the portfolio overview
+// ---------------------------------------------------------------------------
+
+export const DashboardTaskCountsSchema = z.record(z.number()).openapi({
+  description:
+    "Task counts keyed by section abbreviation (first letter of each word, e.g. B=Backlog, T=Todo, IP=In Progress)",
+  example: { B: 5, T: 3, IP: 2, PR: 1, D: 10 },
+});
+
+export const DashboardMilestoneSchema = z.object({
+  name: z.string(),
+  completionPct: z.number(),
+}).nullable().openapi("DashboardMilestone");
+
+export const DashboardGitHubSchema = z.object({
+  lastCommitDate: z.string().nullable(),
+  openPrs: z.number(),
+  openIssues: z.number(),
+  ciSuccessRate: z.number().nullable(),
+}).nullable().openapi("DashboardGitHub");
+
+export const PortfolioDashboardItemSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  status: z.enum(PORTFOLIO_STATUSES),
+  category: z.string(),
+  githubRepo: z.string().nullable().optional(),
+  tasks: DashboardTaskCountsSchema,
+  lastActivity: z.string().nullable(),
+  milestone: DashboardMilestoneSchema,
+  github: DashboardGitHubSchema,
+}).openapi("PortfolioDashboardItem");
+
+export type PortfolioDashboardItem = z.infer<
+  typeof PortfolioDashboardItemSchema
+>;
+
+export const PortfolioDashboardSchema = z.array(PortfolioDashboardItemSchema)
+  .openapi("PortfolioDashboard");

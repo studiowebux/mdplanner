@@ -1,11 +1,18 @@
 // Portfolio CRUD routes — OpenAPIHono router consumed by api/mod.ts.
 
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import { getPortfolioService } from "../../../singletons/services.ts";
+import {
+  getGitHubService,
+  getMilestoneService,
+  getPortfolioService,
+  getTaskService,
+} from "../../../singletons/services.ts";
 import { publish } from "../../../singletons/event-bus.ts";
 import {
   AddStatusUpdateSchema,
   CreatePortfolioItemSchema,
+  type PortfolioDashboardItem,
+  PortfolioDashboardSchema,
   PortfolioItemSchema,
   PortfolioStatusUpdateSchema,
   PortfolioSummarySchema,
@@ -18,6 +25,8 @@ import {
   notFound,
 } from "../../../types/api.ts";
 import { githubRouter } from "../github/routes.ts";
+import { ciEquals } from "../../../utils/string.ts";
+import { getSectionOrder } from "../../../constants/mod.ts";
 
 export const portfolioRouter = new OpenAPIHono();
 
@@ -113,6 +122,142 @@ portfolioRouter.openapi(summaryRoute, async (c) => {
   } catch (err) {
     throw err;
   }
+});
+
+// GET /dashboard
+const dashboardRoute = createRoute({
+  method: "get",
+  path: "/dashboard",
+  tags: ["Portfolio"],
+  summary:
+    "Portfolio dashboard — per-project health with tasks, milestones, GitHub",
+  operationId: "getPortfolioDashboard",
+  responses: {
+    200: {
+      content: { "application/json": { schema: PortfolioDashboardSchema } },
+      description: "Dashboard data for all portfolio items",
+    },
+  },
+});
+
+portfolioRouter.openapi(dashboardRoute, async (c) => {
+  const [items, allTasks, allMilestones] = await Promise.all([
+    getPortfolioService().list(),
+    getTaskService().list(),
+    getMilestoneService().list(),
+  ]);
+
+  const githubSvc = getGitHubService();
+
+  // Group tasks by project name (case-insensitive)
+  const tasksByProject = new Map<string, typeof allTasks>();
+  for (const t of allTasks) {
+    const key = (t.project ?? "").toLowerCase();
+    const arr = tasksByProject.get(key);
+    if (arr) arr.push(t);
+    else tasksByProject.set(key, [t]);
+  }
+
+  // Group milestones by project name
+  const milestonesByProject = new Map<string, typeof allMilestones>();
+  for (const m of allMilestones) {
+    const key = (m.project ?? "").toLowerCase();
+    const arr = milestonesByProject.get(key);
+    if (arr) arr.push(m);
+    else milestonesByProject.set(key, [m]);
+  }
+
+  // Build section abbreviation map from project config
+  // e.g. "Backlog" → "B", "In Progress" → "IP", "Pending Review" → "PR"
+  const sections = getSectionOrder();
+  const sectionAbbrev = (name: string) =>
+    name.split(/\s+/).map((w) => w[0].toUpperCase()).join("");
+
+  const dashboard: PortfolioDashboardItem[] = await Promise.all(
+    items.map(async (item) => {
+      const projectTasks = tasksByProject.get(item.name.toLowerCase()) ?? [];
+      const projectMilestones = milestonesByProject.get(
+        item.name.toLowerCase(),
+      ) ?? [];
+
+      // Task counts keyed by section abbreviation
+      const tasks: Record<string, number> = {};
+      for (const section of sections) {
+        const abbrev = sectionAbbrev(section);
+        tasks[abbrev] = projectTasks.filter((t) =>
+          ciEquals(t.section, section)
+        ).length;
+      }
+
+      // Last activity: most recent updatedAt across tasks + status updates
+      let lastActivity: string | null = null;
+      for (const t of projectTasks) {
+        if (t.updatedAt && (!lastActivity || t.updatedAt > lastActivity)) {
+          lastActivity = t.updatedAt;
+        }
+      }
+      if (item.updatedAt && (!lastActivity || item.updatedAt > lastActivity)) {
+        lastActivity = item.updatedAt;
+      }
+      for (const su of item.statusUpdates ?? []) {
+        if (su.date && (!lastActivity || su.date > lastActivity)) {
+          lastActivity = su.date;
+        }
+      }
+
+      // Active milestone: first open milestone, with completion %
+      const activeMilestone = projectMilestones.find(
+        (m) => m.status === "open",
+      );
+      const milestone = activeMilestone
+        ? {
+          name: activeMilestone.name,
+          completionPct: activeMilestone.progress ?? 0,
+        }
+        : null;
+
+      // GitHub data — fetched in parallel, null on error
+      let github: PortfolioDashboardItem["github"] = null;
+      if (item.githubRepo) {
+        try {
+          const [repo, { runs }] = await Promise.all([
+            githubSvc.getRepo(item.githubRepo),
+            githubSvc.listWorkflowRuns(item.githubRepo, {
+              perPage: 10,
+            }),
+          ]);
+          const completed = runs.filter((r) => r.status === "completed");
+          const successes = completed.filter(
+            (r) => r.conclusion === "success",
+          );
+          github = {
+            lastCommitDate: repo.lastCommitAt,
+            openPrs: repo.openPRs,
+            openIssues: repo.openIssues,
+            ciSuccessRate: completed.length > 0
+              ? Math.round((successes.length / completed.length) * 100)
+              : null,
+          };
+        } catch {
+          // GitHub unavailable — leave as null
+        }
+      }
+
+      return {
+        id: item.id,
+        name: item.name,
+        status: item.status,
+        category: item.category,
+        githubRepo: item.githubRepo,
+        tasks,
+        lastActivity,
+        milestone,
+        github,
+      };
+    }),
+  );
+
+  return c.json(dashboard, 200);
 });
 
 // GET /:id
