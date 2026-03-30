@@ -1,105 +1,87 @@
 // People repository — reads and writes person markdown files from disk or SQLite cache.
 
 import { join } from "@std/path";
-import {
-  parseFrontmatter,
-  serializeFrontmatter,
-} from "../utils/frontmatter.ts";
+import { serializeFrontmatter } from "../utils/frontmatter.ts";
 import { generateId } from "../utils/id.ts";
-import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
-import {
-  buildFrontmatter,
-  findFileById,
-  mergeFields,
-} from "../utils/repo-helpers.ts";
+import { atomicWrite } from "../utils/safe-io.ts";
+import { buildFrontmatter, mergeFields } from "../utils/repo-helpers.ts";
 import { mapKeysToFm } from "../utils/frontmatter-mapper.ts";
 import type {
   CreatePerson,
   Person,
   UpdatePerson,
 } from "../types/person.types.ts";
-import { ciEquals } from "../utils/string.ts";
 import { AgentModelSchema } from "../types/person.types.ts";
 import { WEEKDAYS } from "../constants/mod.ts";
-import type { CacheDatabase } from "../database/sqlite/mod.ts";
 import { rowToPerson } from "../domains/people/cache.ts";
 import { PEOPLE_BODY_KEYS, PEOPLE_TABLE } from "../domains/people/constants.ts";
+import { CachedMarkdownRepository } from "./cached.repository.ts";
 
-export class PeopleRepository {
-  private dir: string;
-  private writer = new SafeWriter();
-  private cacheDb: CacheDatabase | null = null;
+export class PeopleRepository extends CachedMarkdownRepository<
+  Person,
+  CreatePerson,
+  UpdatePerson
+> {
+  protected readonly tableName = PEOPLE_TABLE;
 
   constructor(projectDir: string) {
-    this.dir = join(projectDir, "people");
+    super(projectDir, {
+      directory: "people",
+      idPrefix: "person",
+      nameField: "name",
+    });
   }
 
-  setCacheDb(db: CacheDatabase): void {
-    this.cacheDb = db;
+  protected rowToEntity(row: Record<string, unknown>): Person {
+    return rowToPerson(row);
   }
 
-  async findAll(): Promise<Person[]> {
-    if (this.cacheDb) {
-      try {
-        const count = this.cacheDb.count(PEOPLE_TABLE);
-        if (count > 0) {
-          return this.cacheDb.query<Record<string, unknown>>(
-            `SELECT * FROM "${PEOPLE_TABLE}"`,
-          ).map(rowToPerson);
-        }
-      } catch { /* fall through to disk */ }
-    }
-    return this.findAllFromDisk();
-  }
-
-  /** Always read from disk — used by cache sync. */
-  async findAllFromDisk(): Promise<Person[]> {
-    const people: Person[] = [];
-    try {
-      for await (const entry of Deno.readDir(this.dir)) {
-        if (!entry.isFile || !entry.name.endsWith(".md")) continue;
-        const content = await Deno.readTextFile(join(this.dir, entry.name));
-        const person = this.parse(content);
-        if (person) people.push(person);
-      }
-    } catch (err) {
-      if (!(err instanceof Deno.errors.NotFound)) throw err;
-    }
-    return people;
-  }
-
-  async findById(id: string): Promise<Person | null> {
+  // Person files may not match id — use fallback scan.
+  override async findById(id: string): Promise<Person | null> {
     if (this.cacheDb) {
       try {
         const row = this.cacheDb.queryOne<Record<string, unknown>>(
-          `SELECT * FROM "${PEOPLE_TABLE}" WHERE id = ?`,
+          `SELECT * FROM "${this.tableName}" WHERE id = ?`,
           [id],
         );
-        if (row) return rowToPerson(row);
+        if (row) return this.rowToEntity(row);
       } catch { /* fall through to disk */ }
     }
-    const { entity } = await findFileById(this.dir, (c) => this.parse(c), id);
-    return entity;
+    return this.findByIdWithFallback(id);
   }
 
-  async findByName(name: string): Promise<Person | null> {
+  override async findByName(name: string): Promise<Person | null> {
     if (this.cacheDb) {
       try {
         const row = this.cacheDb.queryOne<Record<string, unknown>>(
           `SELECT * FROM "${PEOPLE_TABLE}" WHERE LOWER(name) = LOWER(?)`,
           [name],
         );
-        if (row) return rowToPerson(row);
+        if (row) return this.rowToEntity(row);
       } catch { /* fall through to disk */ }
     }
     const all = await this.findAllFromDisk();
-    return all.find((p) => ciEquals(p.name, name)) ?? null;
+    const lower = name.toLowerCase();
+    return all.find((p) => p.name.toLowerCase() === lower) ?? null;
   }
 
-  async create(data: CreatePerson): Promise<Person> {
-    await Deno.mkdir(this.dir, { recursive: true });
-    const id = generateId("person");
+  // ---------------------------------------------------------------------------
+  // Parse / Serialize
+  // ---------------------------------------------------------------------------
 
+  protected fromCreateInput(
+    data: CreatePerson,
+    id: string,
+    _now: string,
+  ): Person {
+    const { name, notes, ...rest } = data;
+    return { id, name, ...rest, ...(notes ? { notes } : {}) } as Person;
+  }
+
+  // Custom create: milestone-style body (# Name + notes), fm via buildFrontmatter.
+  override async create(data: CreatePerson): Promise<Person> {
+    await Deno.mkdir(this.dir, { recursive: true });
+    const id = generateId(this.config.idPrefix);
     const { name, notes, ...rest } = data;
     const fm = mapKeysToFm({
       id,
@@ -110,22 +92,26 @@ export class PeopleRepository {
     const filePath = join(this.dir, `${id}.md`);
     await this.writer.write(
       id,
-      () => atomicWrite(filePath, serializeFrontmatter(fm, body)),
+      () =>
+        atomicWrite(
+          filePath,
+          serializeFrontmatter(fm, body),
+        ),
     );
 
     return { id, name, ...rest } as Person;
   }
 
-  async update(id: string, data: UpdatePerson): Promise<Person | null> {
-    const { file, entity: person } = await findFileById(
-      this.dir,
-      (c) => this.parse(c),
-      id,
-    );
-    if (!file || !person) return null;
+  // Custom update: milestone-style body rebuild.
+  override async update(
+    id: string,
+    data: UpdatePerson,
+  ): Promise<Person | null> {
+    const existing = await this.findById(id);
+    if (!existing) return null;
 
     const updated = mergeFields(
-      { ...person },
+      { ...existing },
       data as Record<string, unknown>,
     );
 
@@ -133,23 +119,21 @@ export class PeopleRepository {
       buildFrontmatter(updated as Record<string, unknown>, PEOPLE_BODY_KEYS),
     );
     const body = `# ${updated.name}\n\n${updated.notes ?? ""}`.trimEnd();
+
+    const filePath = join(this.dir, `${id}.md`);
     await this.writer.write(
       id,
-      () => atomicWrite(file, serializeFrontmatter(fm, body)),
+      () => atomicWrite(filePath, serializeFrontmatter(fm, body)),
     );
 
     return updated as Person;
   }
 
-  async delete(id: string): Promise<boolean> {
-    const { file } = await findFileById(this.dir, (c) => this.parse(c), id);
-    if (!file) return false;
-    await Deno.remove(file);
-    return true;
-  }
-
-  private parse(content: string): Person | null {
-    const { frontmatter: fm, body } = parseFrontmatter(content);
+  protected parse(
+    _filename: string,
+    fm: Record<string, unknown>,
+    body: string,
+  ): Person | null {
     if (!fm.id) return null;
 
     const titleMatch = body.match(/^#\s+(.+)/m);
@@ -217,6 +201,17 @@ export class PeopleRepository {
     if (fm.updated_by != null) person.updatedBy = String(fm.updated_by);
 
     return person;
+  }
+
+  protected serialize(item: Person): string {
+    const fm = mapKeysToFm(
+      buildFrontmatter(
+        item as unknown as Record<string, unknown>,
+        PEOPLE_BODY_KEYS,
+      ),
+    );
+    const body = `# ${item.name}\n\n${item.notes ?? ""}`.trimEnd();
+    return serializeFrontmatter(fm, body);
   }
 
   /** Normalize a YAML value to string[] — handles both scalars and arrays. */
