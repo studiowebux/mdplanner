@@ -1,17 +1,6 @@
 // Marketing Plan repository — markdown file CRUD under marketing-plans/.
 
-import { join } from "@std/path";
-import {
-  parseFrontmatter,
-  serializeFrontmatter,
-} from "../utils/frontmatter.ts";
-import { generateId } from "../utils/id.ts";
-import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
-import {
-  buildFrontmatter,
-  mergeFields,
-  readMarkdownDir,
-} from "../utils/repo-helpers.ts";
+import { serializeFrontmatter } from "../utils/frontmatter.ts";
 import type {
   CreateMarketingPlan,
   MarketingCampaign,
@@ -20,10 +9,7 @@ import type {
   MarketingTargetAudience,
   UpdateMarketingPlan,
 } from "../types/marketing-plan.types.ts";
-import { ciEquals } from "../utils/string.ts";
-
-// "notes" stored in markdown body, "id" excluded from frontmatter.
-const BODY_KEYS = ["id", "notes"] as const;
+import { BaseMarkdownRepository } from "./base.repository.ts";
 
 // ---------------------------------------------------------------------------
 // snake_case ↔ camelCase helpers for nested array fields in frontmatter
@@ -64,96 +50,43 @@ function serializeCampaign(
 // Repository
 // ---------------------------------------------------------------------------
 
-export class MarketingPlanRepository {
-  private dir: string;
-  private writer = new SafeWriter();
-
+export class MarketingPlanRepository extends BaseMarkdownRepository<
+  MarketingPlan,
+  CreateMarketingPlan,
+  UpdateMarketingPlan
+> {
   constructor(projectDir: string) {
-    this.dir = join(projectDir, "marketing-plans");
+    super(projectDir, {
+      directory: "marketing-plans",
+      idPrefix: "mktplan",
+      nameField: "name",
+    });
   }
 
-  async findAll(): Promise<MarketingPlan[]> {
-    const items = await readMarkdownDir(
-      this.dir,
-      (filename, fm, body) => this.parse(filename, fm, body),
-    );
-    return items.sort((a, b) => a.name.localeCompare(b.name));
+  // v1 files may use different filename than id.
+  override async findById(id: string): Promise<MarketingPlan | null> {
+    return this.findByIdWithFallback(id);
   }
 
-  async findById(id: string): Promise<MarketingPlan | null> {
-    try {
-      const content = await Deno.readTextFile(join(this.dir, `${id}.md`));
-      const { frontmatter, body } = parseFrontmatter(content);
-      return this.parse(`${id}.md`, frontmatter, body);
-    } catch (err) {
-      if (!(err instanceof Deno.errors.NotFound)) throw err;
-    }
-    // Fallback: v1 files may use different filename than id.
-    const all = await this.findAll();
-    return all.find((p) => p.id === id) ?? null;
-  }
-
-  async findByName(name: string): Promise<MarketingPlan | null> {
-    const all = await this.findAll();
-    return all.find((p) => ciEquals(p.name, name)) ?? null;
-  }
-
-  async create(data: CreateMarketingPlan): Promise<MarketingPlan> {
-    await Deno.mkdir(this.dir, { recursive: true });
-    const now = new Date().toISOString();
-    const id = generateId("mktplan");
-
-    const item: MarketingPlan = {
+  protected fromCreateInput(
+    data: CreateMarketingPlan,
+    id: string,
+    now: string,
+  ): MarketingPlan {
+    return {
       ...data,
       id,
       status: data.status ?? "draft",
       createdAt: now,
       updatedAt: now,
     };
-
-    const filePath = join(this.dir, `${id}.md`);
-    await this.writer.write(
-      id,
-      () => atomicWrite(filePath, this.serialize(item)),
-    );
-    return item;
   }
 
-  async update(
-    id: string,
-    data: UpdateMarketingPlan,
-  ): Promise<MarketingPlan | null> {
-    const existing = await this.findById(id);
-    if (!existing) return null;
+  // ---------------------------------------------------------------------------
+  // Parse
+  // ---------------------------------------------------------------------------
 
-    const updated = mergeFields(
-      { ...existing },
-      data as Record<string, unknown>,
-    );
-    updated.updatedAt = new Date().toISOString();
-
-    await this.writer.write(
-      id,
-      () => atomicWrite(join(this.dir, `${id}.md`), this.serialize(updated)),
-    );
-    return updated;
-  }
-
-  async delete(id: string): Promise<boolean> {
-    try {
-      await Deno.remove(join(this.dir, `${id}.md`));
-      return true;
-    } catch (err) {
-      if (err instanceof Deno.errors.NotFound) return false;
-      throw err;
-    }
-  }
-
-  // -------------------------------------------------------------------------
-  // Parse / Serialize
-  // -------------------------------------------------------------------------
-
-  private parse(
+  protected parse(
     filename: string,
     fm: Record<string, unknown>,
     body: string,
@@ -238,8 +171,11 @@ export class MarketingPlanRepository {
     return raw.map((item) => transform(item as Record<string, unknown>));
   }
 
-  private serialize(item: MarketingPlan): string {
-    // Build frontmatter with snake_case keys for v1 compatibility.
+  // ---------------------------------------------------------------------------
+  // Serialize — custom frontmatter (snake_case nested arrays)
+  // ---------------------------------------------------------------------------
+
+  protected serialize(item: MarketingPlan): string {
     const fm: Record<string, unknown> = {};
     fm.name = item.name;
     if (item.description) fm.description = item.description;

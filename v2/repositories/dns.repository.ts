@@ -1,110 +1,31 @@
 // DNS domain repository — markdown file CRUD under dns/.
 
-import { join } from "@std/path";
-import {
-  parseFrontmatter,
-  serializeFrontmatter,
-} from "../utils/frontmatter.ts";
-import { generateId } from "../utils/id.ts";
-import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
-import {
-  buildFrontmatter,
-  mergeFields,
-  readMarkdownDir,
-} from "../utils/repo-helpers.ts";
-import { mapKeysToFm } from "../utils/frontmatter-mapper.ts";
 import type {
   CreateDnsDomain,
   DnsDomain,
   DnsRecord,
   UpdateDnsDomain,
 } from "../types/dns.types.ts";
-import { ciEquals } from "../utils/string.ts";
+import { BaseMarkdownRepository } from "./base.repository.ts";
 
 const BODY_KEYS = ["id", "notes"] as const;
 
-export class DnsRepository {
-  private dir: string;
-  private writer = new SafeWriter();
-
+export class DnsRepository extends BaseMarkdownRepository<
+  DnsDomain,
+  CreateDnsDomain,
+  UpdateDnsDomain
+> {
   constructor(projectDir: string) {
-    this.dir = join(projectDir, "dns");
+    super(projectDir, {
+      directory: "dns",
+      idPrefix: "dns",
+      nameField: "domain",
+    });
   }
 
-  async findAll(): Promise<DnsDomain[]> {
-    const items = await readMarkdownDir(
-      this.dir,
-      (filename, fm, body) => this.parse(filename, fm, body),
-    );
-    return items.sort((a, b) => a.domain.localeCompare(b.domain));
-  }
-
-  async findById(id: string): Promise<DnsDomain | null> {
-    try {
-      const content = await Deno.readTextFile(join(this.dir, `${id}.md`));
-      const { frontmatter, body } = parseFrontmatter(content);
-      return this.parse(`${id}.md`, frontmatter, body);
-    } catch (err) {
-      if (err instanceof Deno.errors.NotFound) return null;
-      throw err;
-    }
-  }
-
-  async findByName(domain: string): Promise<DnsDomain | null> {
-    const all = await this.findAll();
-    return all.find((d) => ciEquals(d.domain, domain)) ?? null;
-  }
-
-  async create(data: CreateDnsDomain): Promise<DnsDomain> {
-    await Deno.mkdir(this.dir, { recursive: true });
-    const now = new Date().toISOString();
-    const id = generateId("dns");
-
-    const item: DnsDomain = {
-      ...data,
-      id,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    const filePath = join(this.dir, `${id}.md`);
-    await this.writer.write(
-      id,
-      () => atomicWrite(filePath, this.serialize(item)),
-    );
-    return item;
-  }
-
-  async update(id: string, data: UpdateDnsDomain): Promise<DnsDomain | null> {
-    const existing = await this.findById(id);
-    if (!existing) return null;
-
-    const updated = mergeFields(
-      { ...existing },
-      data as Record<string, unknown>,
-    );
-    updated.updatedAt = new Date().toISOString();
-
-    await this.writer.write(
-      id,
-      () => atomicWrite(join(this.dir, `${id}.md`), this.serialize(updated)),
-    );
-    return updated;
-  }
-
-  async delete(id: string): Promise<boolean> {
-    try {
-      await Deno.remove(join(this.dir, `${id}.md`));
-      return true;
-    } catch (err) {
-      if (err instanceof Deno.errors.NotFound) return false;
-      throw err;
-    }
-  }
-
-  // -------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
   // DNS record operations (index-based, inline in domain frontmatter)
-  // -------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
 
   async addRecord(id: string, record: DnsRecord): Promise<DnsDomain | null> {
     const domain = await this.findById(id);
@@ -135,9 +56,9 @@ export class DnsRepository {
     return this.update(id, { dnsRecords: records } as UpdateDnsDomain);
   }
 
-  // -------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
   // Sync helpers — used by DnsService for Cloudflare upsert
-  // -------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
 
   async upsertByDomain(
     domainName: string,
@@ -156,11 +77,24 @@ export class DnsRepository {
     return { item, created: true };
   }
 
-  // -------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
   // Parse / Serialize
-  // -------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
 
-  private parse(
+  protected fromCreateInput(
+    data: CreateDnsDomain,
+    id: string,
+    now: string,
+  ): DnsDomain {
+    return {
+      ...data,
+      id,
+      createdAt: now,
+      updatedAt: now,
+    };
+  }
+
+  protected parse(
     filename: string,
     fm: Record<string, unknown>,
     body: string,
@@ -206,10 +140,7 @@ export class DnsRepository {
     };
   }
 
-  private serialize(item: DnsDomain): string {
-    const fm = mapKeysToFm(
-      buildFrontmatter(item as unknown as Record<string, unknown>, BODY_KEYS),
-    );
-    return serializeFrontmatter(fm, item.notes ?? "");
+  protected serialize(item: DnsDomain): string {
+    return this.serializeStandard(item, BODY_KEYS, item.notes ?? "");
   }
 }

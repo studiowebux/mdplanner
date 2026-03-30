@@ -1,62 +1,52 @@
 // Idea repository — markdown file CRUD under ideas/.
 
-import { join } from "@std/path";
-import {
-  parseFrontmatter,
-  serializeFrontmatter,
-} from "../utils/frontmatter.ts";
-import { generateId } from "../utils/id.ts";
-import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
-import {
-  buildFrontmatter,
-  mergeFields,
-  readMarkdownDir,
-} from "../utils/repo-helpers.ts";
-import { mapKeysToFm } from "../utils/frontmatter-mapper.ts";
 import type {
   CreateIdea,
   Idea,
   IdeaWithBacklinks,
   UpdateIdea,
 } from "../types/idea.types.ts";
-import { ciEquals } from "../utils/string.ts";
+import { BaseMarkdownRepository } from "./base.repository.ts";
 
 const BODY_KEYS = ["id", "description"] as const;
 
-export class IdeaRepository {
-  private dir: string;
-  private writer = new SafeWriter();
-
+export class IdeaRepository extends BaseMarkdownRepository<
+  Idea,
+  CreateIdea,
+  UpdateIdea
+> {
   constructor(projectDir: string) {
-    this.dir = join(projectDir, "ideas");
+    super(projectDir, {
+      directory: "ideas",
+      idPrefix: "idea",
+      nameField: "title",
+    });
   }
 
-  async findAll(): Promise<Idea[]> {
-    const items = await readMarkdownDir(
-      this.dir,
-      (filename, fm, body) => this.parse(filename, fm, body),
-    );
-    return items.sort((a, b) => a.title.localeCompare(b.title));
+  // v1 files use slug filenames with different frontmatter IDs — need full scan fallback.
+  override async findById(id: string): Promise<Idea | null> {
+    return this.findByIdWithFallback(id);
   }
 
-  async findById(id: string): Promise<Idea | null> {
-    // Try direct file lookup first (filename = id)
-    try {
-      const content = await Deno.readTextFile(join(this.dir, `${id}.md`));
-      const { frontmatter, body } = parseFrontmatter(content);
-      return this.parse(`${id}.md`, frontmatter, body);
-    } catch (err) {
-      if (!(err instanceof Deno.errors.NotFound)) throw err;
+  // Auto-set lifecycle timestamps on status transitions.
+  override async update(id: string, data: UpdateIdea): Promise<Idea | null> {
+    const existing = await super.findById(id) ??
+      (await this.findAll()).find((i) => i.id === id) ?? null;
+    if (!existing) return null;
+
+    const result = await super.update(existing.id, data);
+    if (!result) return null;
+
+    if (data.status && data.status !== existing.status) {
+      if (data.status === "implemented" && !result.implementedAt) {
+        result.implementedAt = result.updatedAt;
+      }
+      if (data.status === "cancelled" && !result.cancelledAt) {
+        result.cancelledAt = result.updatedAt;
+      }
     }
-    // Fallback: v1 files use slug filenames (e.g. ai-assistant.md) with a
-    // different id in frontmatter (e.g. idea_ai). Scan all files.
-    const all = await this.findAll();
-    return all.find((i) => i.id === id) ?? null;
-  }
 
-  async findByName(name: string): Promise<Idea | null> {
-    const all = await this.findAll();
-    return all.find((i) => ciEquals(i.title, name)) ?? null;
+    return result;
   }
 
   async findAllWithBacklinks(): Promise<IdeaWithBacklinks[]> {
@@ -69,64 +59,6 @@ export class IdeaRepository {
     }));
   }
 
-  async create(data: CreateIdea): Promise<Idea> {
-    await Deno.mkdir(this.dir, { recursive: true });
-    const now = new Date().toISOString();
-    const id = generateId("idea");
-
-    const item: Idea = {
-      ...data,
-      id,
-      status: data.status ?? "new",
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    const filePath = join(this.dir, `${id}.md`);
-    await this.writer.write(
-      id,
-      () => atomicWrite(filePath, this.serialize(item)),
-    );
-    return item;
-  }
-
-  async update(id: string, data: UpdateIdea): Promise<Idea | null> {
-    const existing = await this.findById(id);
-    if (!existing) return null;
-
-    const updated = mergeFields(
-      { ...existing },
-      data as Record<string, unknown>,
-    );
-    updated.updatedAt = new Date().toISOString();
-
-    // Auto-set lifecycle timestamps on status transitions
-    if (data.status && data.status !== existing.status) {
-      if (data.status === "implemented" && !updated.implementedAt) {
-        updated.implementedAt = updated.updatedAt;
-      }
-      if (data.status === "cancelled" && !updated.cancelledAt) {
-        updated.cancelledAt = updated.updatedAt;
-      }
-    }
-
-    await this.writer.write(
-      id,
-      () => atomicWrite(join(this.dir, `${id}.md`), this.serialize(updated)),
-    );
-    return updated;
-  }
-
-  async delete(id: string): Promise<boolean> {
-    try {
-      await Deno.remove(join(this.dir, `${id}.md`));
-      return true;
-    } catch (err) {
-      if (err instanceof Deno.errors.NotFound) return false;
-      throw err;
-    }
-  }
-
   async linkIdeas(id1: string, id2: string): Promise<boolean> {
     const idea1 = await this.findById(id1);
     const idea2 = await this.findById(id2);
@@ -137,10 +69,10 @@ export class IdeaRepository {
 
     const writes: Promise<Idea | null>[] = [];
     if (!links1.includes(id2)) {
-      writes.push(this.update(id1, { links: [...links1, id2] }));
+      writes.push(super.update(id1, { links: [...links1, id2] } as UpdateIdea));
     }
     if (!links2.includes(id1)) {
-      writes.push(this.update(id2, { links: [...links2, id1] }));
+      writes.push(super.update(id2, { links: [...links2, id1] } as UpdateIdea));
     }
     await Promise.all(writes);
     return true;
@@ -154,23 +86,35 @@ export class IdeaRepository {
     const writes: Promise<Idea | null>[] = [];
     if (idea1.links?.includes(id2)) {
       writes.push(
-        this.update(id1, { links: idea1.links.filter((l) => l !== id2) }),
+        super.update(
+          id1,
+          { links: idea1.links.filter((l) => l !== id2) } as UpdateIdea,
+        ),
       );
     }
     if (idea2.links?.includes(id1)) {
       writes.push(
-        this.update(id2, { links: idea2.links.filter((l) => l !== id1) }),
+        super.update(
+          id2,
+          { links: idea2.links.filter((l) => l !== id1) } as UpdateIdea,
+        ),
       );
     }
     await Promise.all(writes);
     return true;
   }
 
-  // -------------------------------------------------------------------------
-  // Parse / Serialize
-  // -------------------------------------------------------------------------
+  protected fromCreateInput(data: CreateIdea, id: string, now: string): Idea {
+    return {
+      ...data,
+      id,
+      status: data.status ?? "new",
+      createdAt: now,
+      updatedAt: now,
+    };
+  }
 
-  private parse(
+  protected parse(
     filename: string,
     fm: Record<string, unknown>,
     body: string,
@@ -178,7 +122,6 @@ export class IdeaRepository {
     if (!fm.id && !fm.title) return null;
     const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
 
-    // v1: title may be in frontmatter or first # heading in body
     const bodyText = body.trim();
     const headingMatch = bodyText.match(/^#\s+(.+)$/m);
     const title = fm.title
@@ -226,11 +169,7 @@ export class IdeaRepository {
     };
   }
 
-  private serialize(item: Idea): string {
-    const fm = mapKeysToFm(
-      buildFrontmatter(item as unknown as Record<string, unknown>, BODY_KEYS),
-    );
-    fm.title = item.title;
-    return serializeFrontmatter(fm, item.description ?? "");
+  protected serialize(item: Idea): string {
+    return this.serializeStandard(item, BODY_KEYS, item.description ?? "");
   }
 }

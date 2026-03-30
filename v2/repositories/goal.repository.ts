@@ -1,61 +1,25 @@
 // Goal repository — markdown file CRUD under goals/.
 
-import { join } from "@std/path";
-import {
-  parseFrontmatter,
-  serializeFrontmatter,
-} from "../utils/frontmatter.ts";
-import { generateId } from "../utils/id.ts";
-import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
-import {
-  buildFrontmatter,
-  mergeFields,
-  readMarkdownDir,
-} from "../utils/repo-helpers.ts";
-import { mapKeysToFm } from "../utils/frontmatter-mapper.ts";
 import type { CreateGoal, Goal, UpdateGoal } from "../types/goal.types.ts";
-import { ciEquals } from "../utils/string.ts";
+import { BaseMarkdownRepository } from "./base.repository.ts";
 
 const BODY_KEYS = ["id", "description"] as const;
 
-export class GoalRepository {
-  private dir: string;
-  private writer = new SafeWriter();
-
+export class GoalRepository extends BaseMarkdownRepository<
+  Goal,
+  CreateGoal,
+  UpdateGoal
+> {
   constructor(projectDir: string) {
-    this.dir = join(projectDir, "goals");
+    super(projectDir, {
+      directory: "goals",
+      idPrefix: "goal",
+      nameField: "title",
+    });
   }
 
-  async findAll(): Promise<Goal[]> {
-    const items = await readMarkdownDir(
-      this.dir,
-      (filename, fm, body) => this.parse(filename, fm, body),
-    );
-    return items.sort((a, b) => a.title.localeCompare(b.title));
-  }
-
-  async findById(id: string): Promise<Goal | null> {
-    try {
-      const content = await Deno.readTextFile(join(this.dir, `${id}.md`));
-      const { frontmatter, body } = parseFrontmatter(content);
-      return this.parse(`${id}.md`, frontmatter, body);
-    } catch (err) {
-      if (err instanceof Deno.errors.NotFound) return null;
-      throw err;
-    }
-  }
-
-  async findByName(name: string): Promise<Goal | null> {
-    const all = await this.findAll();
-    return all.find((g) => ciEquals(g.title, name)) ?? null;
-  }
-
-  async create(data: CreateGoal): Promise<Goal> {
-    await Deno.mkdir(this.dir, { recursive: true });
-    const now = new Date().toISOString();
-    const id = generateId("goal");
-
-    const item: Goal = {
+  protected fromCreateInput(data: CreateGoal, id: string, now: string): Goal {
+    return {
       ...data,
       id,
       description: data.description ?? "",
@@ -67,47 +31,9 @@ export class GoalRepository {
       createdAt: now,
       updatedAt: now,
     };
-
-    const filePath = join(this.dir, `${id}.md`);
-    await this.writer.write(
-      id,
-      () => atomicWrite(filePath, this.serialize(item)),
-    );
-    return item;
   }
 
-  async update(id: string, data: UpdateGoal): Promise<Goal | null> {
-    const existing = await this.findById(id);
-    if (!existing) return null;
-
-    const updated = mergeFields(
-      { ...existing },
-      data as Record<string, unknown>,
-    );
-    updated.updatedAt = new Date().toISOString();
-
-    await this.writer.write(
-      id,
-      () => atomicWrite(join(this.dir, `${id}.md`), this.serialize(updated)),
-    );
-    return updated;
-  }
-
-  async delete(id: string): Promise<boolean> {
-    try {
-      await Deno.remove(join(this.dir, `${id}.md`));
-      return true;
-    } catch (err) {
-      if (err instanceof Deno.errors.NotFound) return false;
-      throw err;
-    }
-  }
-
-  // -------------------------------------------------------------------------
-  // Parse / Serialize
-  // -------------------------------------------------------------------------
-
-  private parse(
+  protected parse(
     filename: string,
     fm: Record<string, unknown>,
     body: string,
@@ -115,7 +41,6 @@ export class GoalRepository {
     if (!fm.id && !fm.title) return null;
     const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
 
-    // v1: title is the first # heading in the body, not in frontmatter
     const bodyText = body.trim();
     const headingMatch = bodyText.match(/^#\s+(.+)$/m);
     const title = fm.title
@@ -123,7 +48,6 @@ export class GoalRepository {
       : headingMatch
       ? headingMatch[1]
       : "";
-    // Description is body without the title heading line
     const description = headingMatch
       ? bodyText.replace(/^#\s+.+\n?/, "").trim()
       : bodyText;
@@ -173,10 +97,7 @@ export class GoalRepository {
     };
   }
 
-  private serialize(item: Goal): string {
-    const fm = mapKeysToFm(
-      buildFrontmatter(item as unknown as Record<string, unknown>, BODY_KEYS),
-    );
-    return serializeFrontmatter(fm, item.description ?? "");
+  protected serialize(item: Goal): string {
+    return this.serializeStandard(item, BODY_KEYS, item.description ?? "");
   }
 }
