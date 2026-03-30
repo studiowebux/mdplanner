@@ -515,14 +515,7 @@
   transform: translateX(-50%) scale(var(--orgchart-unlink-scale));
 }
 
-/* ── Empty state ──────────────────────────────────────────────────── */
-
-.orgchart-empty {
-  padding: var(--space-xl);
-  text-align: center;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-base);
-}
+/* Empty state uses shared EmptyState component (.empty-state) */
 
 /* ── Responsive ───────────────────────────────────────────────────── */
 

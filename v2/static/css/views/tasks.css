@@ -294,14 +294,7 @@
   opacity: 1;
 }
 
-/* Empty */
-
-.task-list__empty {
-  padding: var(--space-xl);
-  text-align: center;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-base);
-}
+/* Empty states use shared EmptyState component (.empty-state) */
 
 /* =========================================================================
    Board view
@@ -355,13 +348,6 @@
   gap: var(--space-sm);
   padding: var(--space-sm);
   flex: 1;
-}
-
-.task-board__column-empty {
-  padding: var(--space-md);
-  text-align: center;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
 }
 
 /* Board card — 3 rows: title, meta, footer */
@@ -479,15 +465,6 @@ a.task-board__card-avatar:hover {
 .task-board__card-unassigned {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-}
-
-/* Board empty */
-
-.task-board__empty {
-  padding: var(--space-xl);
-  text-align: center;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-base);
 }
 
 /* =========================================================================
@@ -738,15 +715,6 @@ a.task-board__card-avatar:hover {
   color: var(--color-text-primary);
   font-weight: var(--font-weight-medium);
   text-decoration: none;
-}
-
-/* Empty */
-
-.task-timeline__empty {
-  padding: var(--space-xl);
-  text-align: center;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-base);
 }
 
 /* =========================================================================

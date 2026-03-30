@@ -5,6 +5,7 @@
 import type { FC } from "hono/jsx";
 import type { PersonWithChildren } from "../../types/person.types.ts";
 import { collectFieldValues } from "../../utils/tree.ts";
+import { EmptyState } from "../../components/ui/empty-state.tsx";
 import { PERSON_TYPE_VARIANTS } from "../../domains/people/constants.tsx";
 
 // ---------------------------------------------------------------------------
@@ -103,10 +104,7 @@ type Props = {
 export const OrgTree: FC<Props> = ({ tree }) => {
   if (tree.length === 0) {
     return (
-      <div class="orgchart-empty">
-        No reporting structure defined. Set the "Reports To" field on people to
-        build the org chart.
-      </div>
+      <EmptyState message="No reporting structure defined. Set the &quot;Reports To&quot; field on people to build the org chart." />
     );
   }
 

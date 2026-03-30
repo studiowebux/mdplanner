@@ -4,6 +4,7 @@ import type { FC } from "hono/jsx";
 import type { Task, TaskViewProps } from "../../types/task.types.ts";
 import { getSectionOrder } from "../../constants/mod.ts";
 import { groupBy } from "../../utils/group.ts";
+import { EmptyState } from "../../components/ui/empty-state.tsx";
 import {
   sortTasks,
   TASK_PRIORITY_LABELS,
@@ -129,11 +130,7 @@ const BoardColumn: FC<{ name: string; tasks: Task[] }> = ({ name, tasks }) => (
 
 export const TaskBoardView: FC<TaskViewProps> = ({ tasks }) => {
   if (tasks.length === 0) {
-    return (
-      <div class="task-board__empty">
-        No tasks match the current filters.
-      </div>
-    );
+    return <EmptyState message="No tasks match the current filters." />;
   }
 
   const grouped = groupBy(tasks, (t) => t.section, [...getSectionOrder()]);

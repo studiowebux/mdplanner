@@ -6,6 +6,7 @@ import type { Task, TaskViewProps } from "../../types/task.types.ts";
 import { getSectionOrder } from "../../constants/mod.ts";
 import { groupBy } from "../../utils/group.ts";
 import { formatDate } from "../../utils/time.ts";
+import { EmptyState } from "../../components/ui/empty-state.tsx";
 import {
   sortTasksInSection,
   TASK_PRIORITY_LABELS,
@@ -240,11 +241,7 @@ export const TaskListView: FC<ListProps> = (
   { tasks, sort, order, peopleOptions },
 ) => {
   if (tasks.length === 0) {
-    return (
-      <div class="task-list__empty">
-        No tasks match the current filters.
-      </div>
-    );
+    return <EmptyState message="No tasks match the current filters." />;
   }
 
   const grouped = groupBy(tasks, (t) => t.section, [...getSectionOrder()]);

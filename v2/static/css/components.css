@@ -948,6 +948,12 @@ a.badge:hover {
   color: var(--color-text-muted);
 }
 
+/* Inline empty text — shared base for detail-page "no items" messages */
+.empty-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
 /* -------------------------------------------------------------------------
    Loading spinner
    ------------------------------------------------------------------------- */

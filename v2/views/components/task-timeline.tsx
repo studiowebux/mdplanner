@@ -10,6 +10,7 @@ import type {
 } from "../../types/task.types.ts";
 import { getSectionOrder } from "../../constants/mod.ts";
 import { TASK_PRIORITY_LABELS } from "../../domains/task/constants.tsx";
+import { EmptyState } from "../../components/ui/empty-state.tsx";
 import { getLocale } from "../../utils/format.ts";
 
 // ---------------------------------------------------------------------------
@@ -169,11 +170,7 @@ const ZoomControls: FC<{ current: number }> = ({ current }) => (
 
 export const TaskTimelineView: FC<TaskViewProps> = ({ tasks, zoom = 1 }) => {
   if (tasks.length === 0) {
-    return (
-      <div class="task-timeline__empty">
-        No tasks match the current filters.
-      </div>
-    );
+    return <EmptyState message="No tasks match the current filters." />;
   }
 
   const scheduled: ScheduledTask[] = [];
