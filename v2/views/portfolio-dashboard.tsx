@@ -1,21 +1,35 @@
 // Portfolio Dashboard — one row per project, all key signals visible.
+// Uses shared domain-page, domain-toolbar, data-table patterns.
 
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { ViewProps } from "../types/app.ts";
 import type { PortfolioDashboardItem } from "../types/portfolio.types.ts";
-import { SseRefresh } from "./components/sse-refresh.tsx";
-import { DEFAULT_STALE_DAYS, MS_PER_DAY } from "../constants/mod.ts";
+import { MS_PER_DAY } from "../constants/mod.ts";
 
-type Props = ViewProps & {
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+type SectionEntry = { abbrev: string; full: string };
+
+type ColumnDef = { key: string; label: string };
+
+type TableProps = {
   items: PortfolioDashboardItem[];
-  sectionMap: { abbrev: string; full: string }[];
+  sectionMap: SectionEntry[];
   staleDays: number;
-  q?: string;
   sort?: string;
   order?: string;
+  q?: string;
   filter?: string;
 };
+
+type Props = ViewProps & TableProps;
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
 function isStale(lastActivity: string | null, staleDays: number): boolean {
   if (!lastActivity) return true;
@@ -34,15 +48,53 @@ function relativeTime(iso: string | null): string {
   return `${months}mo ago`;
 }
 
-const DashboardTable: FC<{
-  items: PortfolioDashboardItem[];
-  sectionMap: { abbrev: string; full: string }[];
-  staleDays: number;
-  sort?: string;
-  order?: string;
-  q?: string;
-  filter?: string;
-}> = ({ items, sectionMap, staleDays, sort, order, q, filter }) => {
+function buildColumns(sectionMap: SectionEntry[]): ColumnDef[] {
+  return [
+    { key: "name", label: "Project" },
+    { key: "status", label: "Status" },
+    ...sectionMap.map((s) => ({ key: `section_${s.abbrev}`, label: s.full })),
+    { key: "activity", label: "Activity" },
+    { key: "milestone", label: "Milestone" },
+    { key: "commit", label: "Commit" },
+    { key: "prs", label: "PRs" },
+    { key: "issues", label: "Issues" },
+    { key: "ci", label: "CI" },
+  ];
+}
+
+// ---------------------------------------------------------------------------
+// Column toggle — inline (same pattern as domain-view.tsx)
+// ---------------------------------------------------------------------------
+
+const DashboardColumnToggle: FC<{ columns: ColumnDef[] }> = ({ columns }) => {
+  const toggleable = columns.filter((c) => c.key !== "name");
+  return (
+    <details
+      id="dashboard-column-toggle"
+      class="column-toggle"
+      data-column-toggle="dashboard"
+    >
+      <summary class="btn btn--secondary btn--sm">Columns</summary>
+      <div class="column-toggle__panel">
+        {toggleable.map((col) => (
+          <label key={col.key} class="column-toggle__item">
+            <input type="checkbox" checked data-column-key={col.key} />
+            {col.label}
+          </label>
+        ))}
+      </div>
+    </details>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Table
+// ---------------------------------------------------------------------------
+
+const DashboardTable: FC<TableProps> = (
+  { items, sectionMap, staleDays, sort, order, q, filter },
+) => {
+  const columns = buildColumns(sectionMap);
   const nextOrder = (col: string) =>
     sort === col && order === "asc" ? "desc" : "asc";
 
@@ -64,33 +116,37 @@ const DashboardTable: FC<{
     return (
       <th
         class={cls}
+        data-col={col}
         hx-get={`/portfolio/dashboard/view?${params}`}
         hx-target="#dashboard-view"
         hx-swap="outerHTML swap:100ms"
+        hx-include="#dashboard-toolbar"
       >
         {label}
       </th>
     );
   };
 
+  const staticHeader = (col: string, label: string) => (
+    <th class="data-table__th" data-col={col}>{label}</th>
+  );
+
   return (
     <div id="dashboard-view" class="data-table-wrapper">
-      <table class="data-table data-table--compact">
+      <table class="data-table" data-column-table="dashboard">
         <thead class="data-table__head">
           <tr>
             {sortHeader("name", "Project")}
             {sortHeader("status", "Status")}
-            {sectionMap.map(({ abbrev, full }) => (
-              <th class="data-table__th dashboard__th--count" title={full}>
-                {abbrev}
-              </th>
-            ))}
-            {sortHeader("lastActivity", "Activity")}
-            <th class="data-table__th">Milestone</th>
-            <th class="data-table__th">Commit</th>
-            <th class="data-table__th dashboard__th--count">PRs</th>
-            <th class="data-table__th dashboard__th--count">Issues</th>
-            <th class="data-table__th dashboard__th--count">CI</th>
+            {sectionMap.map(({ abbrev, full }) =>
+              staticHeader(`section_${abbrev}`, abbrev)
+            )}
+            {sortHeader("activity", "Activity")}
+            {staticHeader("milestone", "Milestone")}
+            {staticHeader("commit", "Commit")}
+            {staticHeader("prs", "PRs")}
+            {staticHeader("issues", "Issues")}
+            {staticHeader("ci", "CI")}
           </tr>
         </thead>
         <tbody class="data-table__body">
@@ -99,7 +155,7 @@ const DashboardTable: FC<{
               <tr>
                 <td
                   class="data-table__td empty-text"
-                  colspan={6 + sectionMap.length + 4}
+                  colspan={columns.length}
                 >
                   No portfolio items
                 </td>
@@ -113,48 +169,49 @@ const DashboardTable: FC<{
                     : ""
                 }`}
               >
-                <td class="data-table__td">
-                  <a href={`/portfolio/${item.id}`} class="dashboard__link">
-                    {item.name}
-                  </a>
+                <td class="data-table__td" data-col="name">
+                  <a href={`/portfolio/${item.id}`}>{item.name}</a>
                 </td>
-                <td class="data-table__td">
+                <td class="data-table__td" data-col="status">
                   <span class={`badge badge--${item.status}`}>
                     {item.status}
                   </span>
                 </td>
                 {sectionMap.map(({ abbrev }) => (
-                  <td class="data-table__td dashboard__td--count">
+                  <td
+                    class="data-table__td"
+                    data-col={`section_${abbrev}`}
+                  >
                     {item.tasks[abbrev] ?? 0}
                   </td>
                 ))}
-                <td class="data-table__td dashboard__td--activity">
+                <td class="data-table__td" data-col="activity">
                   {relativeTime(item.lastActivity)}
                 </td>
-                <td class="data-table__td">
+                <td class="data-table__td" data-col="milestone">
                   {item.milestone
                     ? (
-                      <span class="dashboard__milestone">
-                        {item.milestone.name}
-                        <span class="dashboard__milestone-pct">
+                      <span>
+                        {item.milestone.name}{" "}
+                        <span class="text-muted">
                           {item.milestone.completionPct}%
                         </span>
                       </span>
                     )
                     : <span class="text-muted">&mdash;</span>}
                 </td>
-                <td class="data-table__td dashboard__td--activity">
+                <td class="data-table__td" data-col="commit">
                   {item.github
                     ? relativeTime(item.github.lastCommitDate)
                     : <span class="text-muted">&mdash;</span>}
                 </td>
-                <td class="data-table__td dashboard__td--count">
+                <td class="data-table__td" data-col="prs">
                   {item.github?.openPrs ?? "\u2014"}
                 </td>
-                <td class="data-table__td dashboard__td--count">
+                <td class="data-table__td" data-col="issues">
                   {item.github?.openIssues ?? "\u2014"}
                 </td>
-                <td class="data-table__td dashboard__td--count">
+                <td class="data-table__td" data-col="ci">
                   {item.github?.ciSuccessRate != null
                     ? `${item.github.ciSuccessRate}%`
                     : "\u2014"}
@@ -167,57 +224,87 @@ const DashboardTable: FC<{
   );
 };
 
+// ---------------------------------------------------------------------------
+// Page
+// ---------------------------------------------------------------------------
+
 export const PortfolioDashboardView: FC<Props> = (
   { items, sectionMap, staleDays, q, sort, order, filter, ...props },
-) => (
-  <MainLayout
-    title="Portfolio Dashboard"
-    {...props}
-    styles={["/css/views/dashboard.css"]}
-  >
-    <SseRefresh
-      getUrl="/portfolio/dashboard"
-      trigger="sse:portfolio.created, sse:portfolio.updated, sse:portfolio.deleted"
-      targetId="dashboard-root"
-    />
-    <main id="dashboard-root" class="dashboard">
-      <div class="dashboard__toolbar">
-        <input
-          type="search"
-          name="q"
-          class="input input--sm dashboard__search"
-          placeholder="Search projects..."
-          value={q ?? ""}
-          hx-get="/portfolio/dashboard/view"
-          hx-target="#dashboard-view"
-          hx-swap="outerHTML swap:100ms"
-          hx-trigger="input changed delay:300ms, search"
-          hx-include=".dashboard__filter"
+) => {
+  const columns = buildColumns(sectionMap);
+  return (
+    <MainLayout
+      title="Portfolio Dashboard"
+      {...props}
+      styles={["/css/views/dashboard.css"]}
+    >
+      <main
+        class="domain-page"
+        data-domain="dashboard"
+        hx-ext="sse"
+        sse-connect="/sse"
+        hx-get="/portfolio/dashboard/view"
+        hx-trigger="sse:portfolio.created, sse:portfolio.updated, sse:portfolio.deleted"
+        hx-target="#dashboard-view"
+        hx-swap="outerHTML"
+        hx-include="#dashboard-toolbar"
+      >
+        <header class="domain-page__header">
+          <h1 class="domain-page__title">Dashboard</h1>
+          <span class="domain-page__count">{items.length} projects</span>
+        </header>
+
+        <div id="dashboard-toolbar" class="domain-toolbar">
+          <div class="domain-toolbar__left">
+            <input
+              type="search"
+              class="domain-toolbar__search"
+              name="q"
+              value={q ?? ""}
+              placeholder="Search projects..."
+              aria-label="Search"
+              hx-get="/portfolio/dashboard/view"
+              hx-trigger="input changed delay:300ms, search"
+              hx-target="#dashboard-view"
+              hx-swap="outerHTML swap:100ms"
+              hx-include="#dashboard-toolbar"
+            />
+            <select
+              class="filter-bar__select"
+              name="filter"
+              hx-get="/portfolio/dashboard/view"
+              hx-trigger="change"
+              hx-target="#dashboard-view"
+              hx-swap="outerHTML swap:100ms"
+              hx-include="#dashboard-toolbar"
+            >
+              <option value="" selected={!filter}>All projects</option>
+              <option value="active" selected={filter === "active"}>
+                Active
+              </option>
+              <option value="stale" selected={filter === "stale"}>
+                Stale
+              </option>
+            </select>
+          </div>
+          <div class="domain-toolbar__right">
+            <DashboardColumnToggle columns={columns} />
+          </div>
+        </div>
+
+        <DashboardTable
+          items={items}
+          sectionMap={sectionMap}
+          staleDays={staleDays}
+          sort={sort}
+          order={order}
+          q={q}
+          filter={filter}
         />
-        <select
-          name="filter"
-          class="input input--sm dashboard__filter"
-          hx-get="/portfolio/dashboard/view"
-          hx-target="#dashboard-view"
-          hx-swap="outerHTML swap:100ms"
-          hx-include=".dashboard__search"
-        >
-          <option value="" selected={!filter}>All</option>
-          <option value="active" selected={filter === "active"}>Active</option>
-          <option value="stale" selected={filter === "stale"}>Stale</option>
-        </select>
-      </div>
-      <DashboardTable
-        items={items}
-        sectionMap={sectionMap}
-        staleDays={staleDays}
-        sort={sort}
-        order={order}
-        q={q}
-        filter={filter}
-      />
-    </main>
-  </MainLayout>
-);
+      </main>
+      <div id="dashboard-form-container" />
+    </MainLayout>
+  );
+};
 
 export { DashboardTable };
