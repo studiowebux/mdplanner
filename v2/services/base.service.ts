@@ -5,7 +5,7 @@
 export interface ReadWriteRepository<T, C, U> {
   findAll(): Promise<T[]>;
   findById(id: string): Promise<T | null>;
-  findByName?(name: string): Promise<T | null>;
+  findByName(name: string): Promise<T | null>;
   create(data: C): Promise<T>;
   update(id: string, data: U): Promise<T | null>;
   delete(id: string): Promise<boolean>;
@@ -35,10 +35,7 @@ export abstract class BaseService<
   }
 
   async getByName(name: string): Promise<T | null> {
-    if (this.repo.findByName) {
-      return this.repo.findByName(name);
-    }
-    return null;
+    return this.repo.findByName(name);
   }
 
   async create(data: C): Promise<T> {

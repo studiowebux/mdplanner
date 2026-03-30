@@ -29,24 +29,25 @@ export class IdeaRepository extends BaseMarkdownRepository<
   }
 
   // Auto-set lifecycle timestamps on status transitions.
+  // Builds a new data object with extra fields — never mutates the input.
   override async update(id: string, data: UpdateIdea): Promise<Idea | null> {
-    const existing = await super.findById(id) ??
-      (await this.findAll()).find((i) => i.id === id) ?? null;
+    if (!data.status) return super.update(id, data);
+
+    const existing = await this.findById(id);
     if (!existing) return null;
 
-    const result = await super.update(existing.id, data);
-    if (!result) return null;
-
-    if (data.status && data.status !== existing.status) {
-      if (data.status === "implemented" && !result.implementedAt) {
-        result.implementedAt = result.updatedAt;
+    const extra: Record<string, unknown> = {};
+    if (data.status !== existing.status) {
+      const now = new Date().toISOString();
+      if (data.status === "implemented" && !existing.implementedAt) {
+        extra.implementedAt = now;
       }
-      if (data.status === "cancelled" && !result.cancelledAt) {
-        result.cancelledAt = result.updatedAt;
+      if (data.status === "cancelled" && !existing.cancelledAt) {
+        extra.cancelledAt = now;
       }
     }
 
-    return result;
+    return super.update(id, { ...data, ...extra } as UpdateIdea);
   }
 
   async findAllWithBacklinks(): Promise<IdeaWithBacklinks[]> {

@@ -11,6 +11,7 @@ import { generateId } from "../utils/id.ts";
 import { findFileById, mergeFields } from "../utils/repo-helpers.ts";
 import { atomicWrite, SafeWriter } from "../utils/safe-io.ts";
 import { mapKeysToFm } from "../utils/frontmatter-mapper.ts";
+import { ciEquals } from "../utils/string.ts";
 import type {
   CreateNote,
   CustomSection,
@@ -55,6 +56,11 @@ export class NoteRepository {
       id,
     );
     return entity;
+  }
+
+  async findByName(name: string): Promise<Note | null> {
+    const all = await this.findAll();
+    return all.find((n) => ciEquals(n.title, name)) ?? null;
   }
 
   async create(data: CreateNote): Promise<Note> {

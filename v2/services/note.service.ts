@@ -31,12 +31,6 @@ export class NoteService extends BaseService<
     return notes;
   }
 
-  // Custom: manual findAll + match instead of repo.findByName.
-  override async getByName(name: string): Promise<Note | null> {
-    const all = await this.noteRepo.findAll();
-    return all.find((n) => ciEquals(n.title, name)) ?? null;
-  }
-
   async getBatch(ids: string[]): Promise<Note[]> {
     const results = await Promise.all(
       ids.map((id) => this.noteRepo.findById(id)),
