@@ -367,9 +367,12 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: content }),
       }).then(function (res) {
+        if (!res.ok) throw new Error("Preview failed (" + res.status + ")");
         return res.text();
       }).then(function (html) {
         previewDiv.innerHTML = html;
+      }).catch(function () {
+        previewDiv.textContent = "Preview unavailable";
       });
     }
 
@@ -590,7 +593,14 @@
       if (res.ok) {
         dirty = false; // prevent beforeunload warning
         window.location.reload();
+      } else {
+        throw new Error("Save failed (" + res.status + ")");
       }
+    }).catch(function (err) {
+      if (window.toast) {
+        window.toast({ type: "error", message: "Failed to save note." });
+      }
+      console.debug("[note-editor] save failed:", err);
     });
   }
 

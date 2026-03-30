@@ -211,6 +211,15 @@
             : "Manager removed",
         });
       }
+      if (!res.ok) throw new Error("Update failed (" + res.status + ")");
+    }).catch(function (err) {
+      if (window.toast) {
+        window.toast({
+          type: "error",
+          message: "Failed to update reporting structure.",
+        });
+      }
+      console.debug("[org-tree] update failed:", err);
     });
   }
 

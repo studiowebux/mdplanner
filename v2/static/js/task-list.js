@@ -120,12 +120,16 @@
     var body = new FormData();
     body.append("section", section);
     fetch("/tasks/" + taskId + "/move", { method: "POST", body: body })
-      .then(function () {
+      .then(function (res) {
+        if (!res.ok) throw new Error("Move failed (" + res.status + ")");
         // Trigger htmx refresh of the task view
         var view = document.getElementById("tasks-view");
         if (view) htmx.trigger(view, "refresh");
       })
       .catch(function (err) {
+        if (window.toast) {
+          window.toast({ type: "error", message: "Failed to move task." });
+        }
         console.debug("[task-list] move failed:", err);
       });
   }
