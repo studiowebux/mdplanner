@@ -8,16 +8,26 @@ import type {
   UpdateMarketingPlan,
 } from "../types/marketing-plan.types.ts";
 import { ciIncludes } from "../utils/string.ts";
+import { BaseService } from "./base.service.ts";
 
-export class MarketingPlanService {
-  constructor(private repo: MarketingPlanRepository) {}
+export class MarketingPlanService extends BaseService<
+  MarketingPlan,
+  CreateMarketingPlan,
+  UpdateMarketingPlan,
+  ListMarketingPlanOptions
+> {
+  constructor(repo: MarketingPlanRepository) {
+    super(repo);
+  }
 
-  async list(options?: ListMarketingPlanOptions): Promise<MarketingPlan[]> {
-    let plans = await this.repo.findAll();
-    if (options?.status) {
+  protected applyFilters(
+    plans: MarketingPlan[],
+    options: ListMarketingPlanOptions,
+  ): MarketingPlan[] {
+    if (options.status) {
       plans = plans.filter((p) => p.status === options.status);
     }
-    if (options?.q) {
+    if (options.q) {
       plans = plans.filter((p) =>
         ciIncludes(p.name, options.q!) ||
         ciIncludes(p.description, options.q!) ||
@@ -25,28 +35,5 @@ export class MarketingPlanService {
       );
     }
     return plans;
-  }
-
-  async getById(id: string): Promise<MarketingPlan | null> {
-    return this.repo.findById(id);
-  }
-
-  async getByName(name: string): Promise<MarketingPlan | null> {
-    return this.repo.findByName(name);
-  }
-
-  async create(data: CreateMarketingPlan): Promise<MarketingPlan> {
-    return this.repo.create(data);
-  }
-
-  async update(
-    id: string,
-    data: UpdateMarketingPlan,
-  ): Promise<MarketingPlan | null> {
-    return this.repo.update(id, data);
-  }
-
-  async delete(id: string): Promise<boolean> {
-    return this.repo.delete(id);
   }
 }

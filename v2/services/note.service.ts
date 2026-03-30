@@ -9,28 +9,30 @@ import type {
   UpdateNote,
 } from "../types/note.types.ts";
 import { ciEquals, ciIncludes } from "../utils/string.ts";
+import { BaseService } from "./base.service.ts";
 
-export class NoteService {
-  constructor(private noteRepo: NoteRepository) {}
+export class NoteService extends BaseService<
+  Note,
+  CreateNote,
+  UpdateNote,
+  ListNoteOptions
+> {
+  constructor(private noteRepo: NoteRepository) {
+    super(noteRepo);
+  }
 
-  async list(options?: ListNoteOptions): Promise<Note[]> {
-    let notes = await this.noteRepo.findAll();
-
-    if (options?.project) {
+  protected applyFilters(notes: Note[], options: ListNoteOptions): Note[] {
+    if (options.project) {
       notes = notes.filter((n) => ciEquals(n.project, options.project));
     }
-    if (options?.search) {
+    if (options.search) {
       notes = notes.filter((n) => ciIncludes(n.title, options.search!));
     }
-
     return notes;
   }
 
-  async getById(id: string): Promise<Note | null> {
-    return this.noteRepo.findById(id);
-  }
-
-  async getByName(name: string): Promise<Note | null> {
+  // Custom: manual findAll + match instead of repo.findByName.
+  override async getByName(name: string): Promise<Note | null> {
     const all = await this.noteRepo.findAll();
     return all.find((n) => ciEquals(n.title, name)) ?? null;
   }
@@ -40,17 +42,5 @@ export class NoteService {
       ids.map((id) => this.noteRepo.findById(id)),
     );
     return results.filter((n): n is Note => n !== null);
-  }
-
-  async create(data: CreateNote): Promise<Note> {
-    return this.noteRepo.create(data);
-  }
-
-  async update(id: string, data: UpdateNote): Promise<Note | null> {
-    return this.noteRepo.update(id, data);
-  }
-
-  async delete(id: string): Promise<boolean> {
-    return this.noteRepo.delete(id);
   }
 }
