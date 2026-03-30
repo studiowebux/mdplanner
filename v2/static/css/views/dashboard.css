@@ -1,0 +1,76 @@
+/* Portfolio Dashboard — compact table overview */
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.dashboard__toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.dashboard__search {
+  flex: 1;
+  min-width: var(--sidebar-width);
+}
+
+.dashboard__filter {
+  width: auto;
+}
+
+/* Count columns — centered, narrow */
+.dashboard__th--count,
+.dashboard__td--count {
+  text-align: center;
+}
+
+/* Activity column — muted when old */
+.dashboard__td--activity {
+  white-space: nowrap;
+  color: var(--color-text-secondary);
+}
+
+/* Stale row highlight */
+.dashboard__row--stale {
+  background: var(--color-bg-warning);
+}
+
+/* Project link */
+.dashboard__link {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.dashboard__link:hover {
+  color: var(--color-accent);
+}
+
+/* Milestone inline */
+.dashboard__milestone {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.dashboard__milestone-pct {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Responsive: stack on mobile */
+@media (max-width: 768px) {
+  .dashboard__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard__search,
+  .dashboard__filter {
+    width: 100%;
+  }
+}

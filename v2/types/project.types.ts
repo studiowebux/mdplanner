@@ -100,6 +100,11 @@ export const ProjectConfigSchema = z.object({
       "Configurable KPI metric keys shown in goal form (e.g. mrr, arr, active_users)",
     example: ["mrr", "arr", "churn_rate"],
   }),
+  staleDays: z.number().optional().openapi({
+    description:
+      "Number of days without activity before a portfolio project is considered stale. Defaults to 14.",
+    example: 14,
+  }),
 }).openapi("ProjectConfig");
 
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
@@ -151,6 +156,7 @@ export const FrontmatterProjectSchema = z.object({
   cloudflare_token: z.string().optional(),
   pipelines_per_page: z.number().optional(),
   kpi_metrics: z.array(z.unknown()).optional(),
+  stale_days: z.number().optional(),
   last_updated: z.string().optional(),
 }).transform(
   async (fm): Promise<Omit<ProjectConfig, "name" | "description">> => {
@@ -194,6 +200,7 @@ export const FrontmatterProjectSchema = z.object({
       kpiMetrics: Array.isArray(fm.kpi_metrics)
         ? (fm.kpi_metrics as unknown[]).map(String)
         : undefined,
+      staleDays: fm.stale_days,
       lastUpdated: fm.last_updated,
     };
   },

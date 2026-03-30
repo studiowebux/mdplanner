@@ -89,6 +89,24 @@ export const ProjectTab: FC<ProjectTabProps> = ({ config }) => (
       </div>
 
       <div class="settings-field">
+        <label class="settings-field__label" for="cfg-stale-days">
+          Stale days (dashboard)
+        </label>
+        <input
+          type="number"
+          id="cfg-stale-days"
+          name="staleDays"
+          value={config.staleDays ?? 14}
+          min={1}
+          class="settings-field__input settings-field__input--narrow"
+        />
+        <span class="settings-field__hint">
+          Days without activity before a portfolio project is highlighted as
+          stale.
+        </span>
+      </div>
+
+      <div class="settings-field">
         <label class="settings-field__label" for="cfg-github-token">
           GitHub token (PAT)
         </label>

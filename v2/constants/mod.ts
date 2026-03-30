@@ -68,6 +68,12 @@ export const PRIORITY_LABELS: Record<string, string> = {
   "5": "P5",
 };
 
+/** Milliseconds in one day. */
+export const MS_PER_DAY = 86_400_000;
+
+/** Default stale threshold when project config has no staleDays. */
+export const DEFAULT_STALE_DAYS = 14;
+
 export const ENTITY_TYPE_LABELS: Record<string, string> = {
   task: "Task",
   note: "Note",
@@ -120,6 +126,7 @@ export const ENTITY_TYPE_LABELS: Record<string, string> = {
   analytics: "Analytics",
   github: "GitHub",
   upload: "Uploads",
+  dashboard: "Dashboard",
 };
 
 /**
@@ -171,7 +178,7 @@ export const DEFAULT_NAV_CATEGORIES: Record<string, string[]> = {
   ],
   Notes: ["note", "journal", "habit"],
   Diagrams: ["sticky_note", "mindmap", "c4_component"],
-  Portfolio: ["portfolio"],
+  Portfolio: ["portfolio", "dashboard"],
   Infrastructure: ["dns_domain", "github"],
   AI: ["ai_chat"],
   Tools: ["analytics", "upload"],
@@ -283,4 +290,5 @@ export const ENTITY_TYPE_ROUTES: Record<string, string> = {
   analytics: "/analytics",
   github: "/github",
   upload: "/uploads",
+  dashboard: "/portfolio/dashboard",
 };
