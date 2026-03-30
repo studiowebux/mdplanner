@@ -39,7 +39,9 @@ const listPeopleRoute = createRoute({
 peopleRouter.openapi(listPeopleRoute, async (c) => {
   try {
     const { department } = c.req.valid("query");
-    const people = await getPeopleService().list(department);
+    const people = await getPeopleService().list(
+      department ? { department } : undefined,
+    );
     return c.json(people, 200);
   } catch (err) {
     throw err;

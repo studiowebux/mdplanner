@@ -27,7 +27,9 @@ export function registerPeopleTools(server: McpServer): void {
       inputSchema: ListPeopleOptionsSchema.shape,
     },
     async ({ department }) => {
-      const people = await service.list(department);
+      const people = await service.list(
+        department ? { department } : undefined,
+      );
       return ok(people);
     },
   );
