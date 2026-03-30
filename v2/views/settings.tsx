@@ -43,6 +43,11 @@ export const SettingsView: FC<SettingsProps> = ({
     a.localeCompare(b)
   );
   const featureToCategory: Record<string, string> = {};
+  // Seed from defaults so new features get their intended category,
+  // then overlay with user's saved config (takes precedence).
+  for (const [cat, keys] of Object.entries(DEFAULT_NAV_CATEGORIES)) {
+    for (const key of keys) featureToCategory[key] = cat;
+  }
   for (const [cat, keys] of Object.entries(navCategories)) {
     for (const key of keys) featureToCategory[key] = cat;
   }

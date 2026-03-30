@@ -207,6 +207,13 @@ export function groupByCategory(
   categories: Record<string, string[]> = DEFAULT_NAV_CATEGORIES,
 ): CategoryGroup[] {
   const keyToCategory: Record<string, string> = {};
+  // Seed from defaults so new features land in their intended category
+  // even when the user has a saved custom config.
+  for (const [category, keys] of Object.entries(DEFAULT_NAV_CATEGORIES)) {
+    for (const key of keys) {
+      keyToCategory[key] = category;
+    }
+  }
   for (const [category, keys] of Object.entries(categories)) {
     for (const key of keys) {
       keyToCategory[key] = category;
