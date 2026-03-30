@@ -6,23 +6,24 @@
  * only a new entry in entities.ts — no changes here.
  */
 
+import { log } from "../../singletons/logger.ts";
 import type { CacheDatabase } from "./database.ts";
 import { dropSchema, initSchema } from "./schema.ts";
 import { ENTITIES } from "./entities.ts";
 
-export interface SyncResult {
+export type SyncResult = {
   tables: number;
   items: number;
   duration: number;
   errors: string[];
-}
+};
 
-export interface SyncOptions {
+export type SyncOptions = {
   /** Specific tables to sync, or all if empty */
   tables?: string[];
   /** Force rebuild even if cache exists */
   force?: boolean;
-}
+};
 
 export function getAllTables(): string[] {
   return ENTITIES.map((e) => e.table);
@@ -54,7 +55,8 @@ export class CacheSync {
         this.db.query(
           `SELECT synced_at FROM "${entity.table}" LIMIT 0`,
         );
-      } catch {
+      } catch (err) {
+        log.warn(`[cache] schema check failed for ${entity.table}:`, err);
         return true;
       }
     }
@@ -208,8 +210,8 @@ export class CacheSync {
           this.db.exec(
             `INSERT INTO ${entity.table}_fts(${entity.table}_fts) VALUES('rebuild')`,
           );
-        } catch {
-          // FTS table may not exist yet on first run
+        } catch (err) {
+          log.warn(`[cache] FTS rebuild failed for ${entity.table}:`, err);
         }
       }
     }

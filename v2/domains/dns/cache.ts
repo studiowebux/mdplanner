@@ -1,12 +1,34 @@
 // DNS entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, json, val } from "../../database/sqlite/mod.ts";
+import { ENTITIES, json, parseJson, val } from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { DnsRepository } from "../../repositories/dns.repository.ts";
 import type { DnsDomain } from "../../types/dns.types.ts";
 
-const DNS_TABLE = "dns_domains";
+export const DNS_TABLE = "dns_domains";
+
+/** Deserialize a SQLite row to a DnsDomain. */
+export function rowToDnsDomain(row: Record<string, unknown>): DnsDomain {
+  return {
+    id: row.id as string,
+    domain: (row.domain as string) ?? "",
+    provider: row.provider as string | undefined,
+    status: (row.status as DnsDomain["status"]) ?? "active",
+    expiryDate: row.expiry_date as string | undefined,
+    autoRenew: row.auto_renew != null ? Boolean(row.auto_renew) : undefined,
+    renewalCostUsd: row.renewal_cost_usd != null
+      ? Number(row.renewal_cost_usd)
+      : undefined,
+    nameservers: parseJson<string[]>(row.nameservers),
+    dnsRecords: parseJson(row.dns_records),
+    notes: row.notes as string | undefined,
+    lastFetchedAt: row.last_fetched_at as string | undefined,
+    project: row.project as string | undefined,
+    createdAt: (row.created_at as string) ?? new Date().toISOString(),
+    updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
+  };
+}
 
 const DNS_SCHEMA = `CREATE TABLE IF NOT EXISTS ${DNS_TABLE} (
   id TEXT PRIMARY KEY,

@@ -1,6 +1,7 @@
 // Milestone repository — reads and writes milestone markdown files from disk or SQLite cache.
 
 import { join } from "@std/path";
+import { log } from "../singletons/logger.ts";
 import { serializeFrontmatter } from "../utils/frontmatter.ts";
 import { atomicWrite } from "../utils/safe-io.ts";
 import { buildFrontmatter, mergeFields } from "../utils/repo-helpers.ts";
@@ -36,18 +37,12 @@ export class MilestoneRepository extends CachedMarkdownRepository<
     return rowToMilestone(row);
   }
 
-  // Milestone files may not match id — use fallback scan.
+  // Filename may not match frontmatter id — try direct lookup, then full scan.
   override async findById(id: string): Promise<MilestoneBase | null> {
-    if (this.cacheDb) {
-      try {
-        const row = this.cacheDb.queryOne<Record<string, unknown>>(
-          `SELECT * FROM "${this.tableName}" WHERE id = ?`,
-          [id],
-        );
-        if (row) return this.rowToEntity(row);
-      } catch { /* fall through to disk */ }
-    }
-    return this.findByIdWithFallback(id);
+    const direct = await super.findById(id);
+    if (direct) return direct;
+    const all = await this.findAll();
+    return all.find((item) => item.id === id) ?? null;
   }
 
   override async findByName(name: string): Promise<MilestoneBase | null> {
@@ -58,7 +53,9 @@ export class MilestoneRepository extends CachedMarkdownRepository<
           [name],
         );
         if (row) return this.rowToEntity(row);
-      } catch { /* fall through to disk */ }
+      } catch (err) {
+        log.warn("[cache] milestone read failed, falling back to disk:", err);
+      }
     }
     const all = await this.findAllFromDisk();
     return all.find((m) => m.name === name) ?? null;

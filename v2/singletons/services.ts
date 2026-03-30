@@ -39,6 +39,9 @@ import { MarketingPlanRepository } from "../repositories/marketing-plan.reposito
 import { SwotRepository } from "../repositories/swot.repository.ts";
 import { NoteRepository } from "../repositories/note.repository.ts";
 import { PeopleRepository } from "../repositories/people.repository.ts";
+import { CustomerRepository } from "../repositories/customer.repository.ts";
+import { CustomerService } from "../services/customer.service.ts";
+import { registerCustomerEntity } from "../domains/customer/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -56,6 +59,7 @@ let goalService: GoalService | null = null;
 let ideaService: IdeaService | null = null;
 let marketingPlanService: MarketingPlanService | null = null;
 let swotService: SwotService | null = null;
+let customerService: CustomerService | null = null;
 let dnsService: DnsService | null = null;
 let githubService: GitHubService | null = null;
 let cacheDb: CacheDatabase | null = null;
@@ -89,6 +93,8 @@ export function initServices(
   marketingPlanService = new MarketingPlanService(marketingPlanRepo);
   const swotRepo = new SwotRepository(projectDir);
   swotService = new SwotService(swotRepo);
+  const customerRepo = new CustomerRepository(projectDir);
+  customerService = new CustomerService(customerRepo);
   const dnsRepo = new DnsRepository(projectDir);
   dnsService = new DnsService(dnsRepo, projectService);
   githubService = new GitHubService(projectService);
@@ -107,12 +113,19 @@ export function initServices(
     registerIdeaEntity(ideaRepo);
     registerMarketingPlanEntity(marketingPlanRepo);
     registerSwotEntity(swotRepo);
+    registerCustomerEntity(customerRepo);
 
     // Pass cacheDb to repos for read-path caching
     milestoneRepo.setCacheDb(cacheDb);
     taskRepo.setCacheDb(cacheDb);
     portfolioRepo.setCacheDb(cacheDb);
     peopleRepo.setCacheDb(cacheDb);
+    goalRepo.setCacheDb(cacheDb);
+    ideaRepo.setCacheDb(cacheDb);
+    dnsRepo.setCacheDb(cacheDb);
+    swotRepo.setCacheDb(cacheDb);
+    marketingPlanRepo.setCacheDb(cacheDb);
+    customerRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -211,6 +224,13 @@ export function getSwotService(): SwotService {
     throw new Error("Services not initialized — call initServices() first");
   }
   return swotService;
+}
+
+export function getCustomerService(): CustomerService {
+  if (!customerService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return customerService;
 }
 
 export function getDnsService(): DnsService {

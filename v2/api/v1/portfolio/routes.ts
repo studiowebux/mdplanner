@@ -1,5 +1,6 @@
 // Portfolio CRUD routes — OpenAPIHono router consumed by api/mod.ts.
 
+import { log } from "../../../singletons/logger.ts";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   getGitHubService,
@@ -238,8 +239,11 @@ portfolioRouter.openapi(dashboardRoute, async (c) => {
               ? Math.round((successes.length / completed.length) * 100)
               : null,
           };
-        } catch {
-          // GitHub unavailable — leave as null
+        } catch (err) {
+          log.warn(
+            `[portfolio-api] GitHub data fetch failed for ${item.githubRepo}:`,
+            err,
+          );
         }
       }
 

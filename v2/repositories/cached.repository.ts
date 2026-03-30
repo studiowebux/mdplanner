@@ -5,6 +5,7 @@
 import type { CacheDatabase } from "../database/sqlite/mod.ts";
 import type { RepositoryConfig } from "./base.repository.ts";
 import { BaseMarkdownRepository } from "./base.repository.ts";
+import { log } from "../singletons/logger.ts";
 
 export abstract class CachedMarkdownRepository<
   T extends { id: string },
@@ -41,7 +42,12 @@ export abstract class CachedMarkdownRepository<
             `SELECT * FROM "${this.tableName}"`,
           ).map((row) => this.rowToEntity(row));
         }
-      } catch { /* fall through to disk */ }
+      } catch (err) {
+        log.warn(
+          `[cache] ${this.tableName} read failed, falling back to disk:`,
+          err,
+        );
+      }
     }
     return this.findAllFromDisk();
   }
@@ -54,8 +60,43 @@ export abstract class CachedMarkdownRepository<
           [id],
         );
         if (row) return this.rowToEntity(row);
-      } catch { /* fall through to disk */ }
+      } catch (err) {
+        log.warn(
+          `[cache] ${this.tableName} read failed, falling back to disk:`,
+          err,
+        );
+      }
     }
     return super.findById(id);
+  }
+
+  override async create(data: C): Promise<T> {
+    const item = await super.create(data);
+    this.cacheRemove(item.id);
+    return item;
+  }
+
+  override async update(id: string, data: U): Promise<T | null> {
+    const updated = await super.update(id, data);
+    if (updated) this.cacheRemove(updated.id);
+    return updated;
+  }
+
+  override async delete(id: string): Promise<boolean> {
+    const deleted = await super.delete(id);
+    if (deleted) this.cacheRemove(id);
+    return deleted;
+  }
+
+  private cacheRemove(id: string): void {
+    if (!this.cacheDb) return;
+    try {
+      this.cacheDb.execute(
+        `DELETE FROM "${this.tableName}" WHERE id = ?`,
+        [id],
+      );
+    } catch (err) {
+      log.error(`[cache] failed to remove ${this.tableName}/${id}:`, err);
+    }
   }
 }

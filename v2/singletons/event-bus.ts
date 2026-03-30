@@ -23,7 +23,8 @@ export function publish(type: string): void {
   for (const ctrl of subscribers) {
     try {
       ctrl.enqueue(message);
-    } catch {
+    } catch (_) {
+      // Client disconnected — remove subscriber
       subscribers.delete(ctrl);
     }
   }

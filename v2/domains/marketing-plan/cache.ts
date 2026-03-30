@@ -1,14 +1,46 @@
 // Marketing Plan entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, val } from "../../database/sqlite/mod.ts";
+import { ENTITIES, parseJson, val } from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { MarketingPlanRepository } from "../../repositories/marketing-plan.repository.ts";
 import type { MarketingPlan } from "../../types/marketing-plan.types.ts";
 
-const TABLE = "marketing_plans";
+export const MARKETING_PLAN_TABLE = "marketing_plans";
 
-const SCHEMA = `CREATE TABLE IF NOT EXISTS ${TABLE} (
+/** Deserialize a SQLite row to a MarketingPlan. */
+export function rowToMarketingPlan(
+  row: Record<string, unknown>,
+): MarketingPlan {
+  return {
+    id: row.id as string,
+    name: (row.name as string) ?? "",
+    description: row.description as string | undefined,
+    status: (row.status as MarketingPlan["status"]) ?? "draft",
+    budgetTotal: row.budget_total != null
+      ? Number(row.budget_total)
+      : undefined,
+    budgetCurrency: row.budget_currency as string | undefined,
+    startDate: row.start_date as string | undefined,
+    endDate: row.end_date as string | undefined,
+    targetAudiences: parseJson(row.target_audiences),
+    channels: parseJson(row.channels),
+    campaigns: parseJson(row.campaigns),
+    linkedGoals: parseJson<string[]>(row.linked_goals),
+    project: row.project as string | undefined,
+    responsible: row.responsible as string | undefined,
+    team: parseJson<string[]>(row.team),
+    hypothesis: parseJson(row.hypothesis),
+    learnings: parseJson(row.learnings),
+    notes: row.notes as string | undefined,
+    createdAt: (row.created_at as string) ?? new Date().toISOString(),
+    updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
+    createdBy: row.created_by as string | undefined,
+    updatedBy: row.updated_by as string | undefined,
+  };
+}
+
+const SCHEMA = `CREATE TABLE IF NOT EXISTS ${MARKETING_PLAN_TABLE} (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT,
@@ -40,7 +72,7 @@ function insertRow(
   syncedAt?: string,
 ): void {
   db.execute(
-    `INSERT OR REPLACE INTO ${TABLE} (id, name, description, status,
+    `INSERT OR REPLACE INTO ${MARKETING_PLAN_TABLE} (id, name, description, status,
        budget_total, budget_currency, start_date, end_date,
        target_audiences, channels, campaigns, linked_goals,
        project, responsible, team,
@@ -79,7 +111,7 @@ export function registerMarketingPlanEntity(
   repo: MarketingPlanRepository,
 ): void {
   const entity: EntityDef = {
-    table: TABLE,
+    table: MARKETING_PLAN_TABLE,
     schema: SCHEMA,
     fts: {
       type: "marketing_plan",

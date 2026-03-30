@@ -1,12 +1,36 @@
 // Idea entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, val } from "../../database/sqlite/mod.ts";
+import { ENTITIES, parseJson, val } from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { IdeaRepository } from "../../repositories/idea.repository.ts";
 import type { Idea } from "../../types/idea.types.ts";
 
-const IDEA_TABLE = "ideas";
+export const IDEA_TABLE = "ideas";
+
+/** Deserialize a SQLite row to an Idea. */
+export function rowToIdea(row: Record<string, unknown>): Idea {
+  return {
+    id: row.id as string,
+    title: (row.title as string) ?? "",
+    status: (row.status as Idea["status"]) ?? "new",
+    category: row.category as string | undefined,
+    priority: row.priority as Idea["priority"] | undefined,
+    project: row.project as string | undefined,
+    startDate: row.start_date as string | undefined,
+    endDate: row.end_date as string | undefined,
+    resources: row.resources as string | undefined,
+    subtasks: parseJson<string[]>(row.subtasks),
+    description: row.description as string | undefined,
+    links: parseJson<string[]>(row.links),
+    implementedAt: row.implemented_at as string | undefined,
+    cancelledAt: row.cancelled_at as string | undefined,
+    createdAt: (row.created_at as string) ?? new Date().toISOString(),
+    updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
+    createdBy: row.created_by as string | undefined,
+    updatedBy: row.updated_by as string | undefined,
+  };
+}
 
 const IDEA_SCHEMA = `CREATE TABLE IF NOT EXISTS ${IDEA_TABLE} (
   id TEXT PRIMARY KEY,

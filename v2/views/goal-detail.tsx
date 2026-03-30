@@ -5,7 +5,7 @@ import type { MilestoneBase } from "../types/milestone.types.ts";
 import type { PortfolioItem } from "../types/portfolio.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { PRIORITY_LABELS } from "../constants/mod.ts";
-import { dueIn, formatDate } from "../utils/time.ts";
+import { dueIn, formatDate, parseDate } from "../utils/time.ts";
 import { KpiGauge } from "../components/ui/kpi-gauge.tsx";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { toKebab } from "../utils/slug.ts";
@@ -51,8 +51,8 @@ export const GoalDetailView: FC<
     ? Math.max(
       0,
       Math.round(
-        (new Date(goal.updatedAt).getTime() -
-          new Date(goal.startDate).getTime()) / 86400000,
+        (parseDate(goal.updatedAt).getTime() -
+          parseDate(goal.startDate).getTime()) / 86400000,
       ),
     )
     : null;

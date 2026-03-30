@@ -1,4 +1,5 @@
 import type { FC } from "hono/jsx";
+import { parseJson } from "../../database/sqlite/mod.ts";
 import { Sidenav } from "./sidenav.tsx";
 
 type Option = { value: string; label: string };
@@ -368,15 +369,8 @@ const Field: FC<
         );
       })()}
       {def.type === "array-table" && (() => {
-        const items: Record<string, unknown>[] = (() => {
-          if (!value) return [];
-          try {
-            const parsed = JSON.parse(value);
-            return Array.isArray(parsed) ? parsed : [];
-          } catch {
-            return [];
-          }
-        })();
+        const items: Record<string, unknown>[] =
+          parseJson<Record<string, unknown>[]>(value) ?? [];
         const rowsId = `${id}-rows`;
         return (
           <div class="array-table" data-array-table={def.section}>

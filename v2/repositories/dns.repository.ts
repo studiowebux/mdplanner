@@ -6,21 +6,28 @@ import type {
   DnsRecord,
   UpdateDnsDomain,
 } from "../types/dns.types.ts";
-import { BaseMarkdownRepository } from "./base.repository.ts";
+import { CachedMarkdownRepository } from "./cached.repository.ts";
+import { DNS_TABLE, rowToDnsDomain } from "../domains/dns/cache.ts";
 
 const BODY_KEYS = ["id", "notes"] as const;
 
-export class DnsRepository extends BaseMarkdownRepository<
+export class DnsRepository extends CachedMarkdownRepository<
   DnsDomain,
   CreateDnsDomain,
   UpdateDnsDomain
 > {
+  protected readonly tableName = DNS_TABLE;
+
   constructor(projectDir: string) {
     super(projectDir, {
       directory: "dns",
       idPrefix: "dns",
       nameField: "domain",
     });
+  }
+
+  protected rowToEntity(row: Record<string, unknown>): DnsDomain {
+    return rowToDnsDomain(row);
   }
 
   // ---------------------------------------------------------------------------

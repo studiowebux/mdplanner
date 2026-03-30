@@ -8,13 +8,16 @@ import {
   SWOT_SECTION_MAP,
   type SwotQuadrantKey,
 } from "../domains/swot/constants.tsx";
-import { BaseMarkdownRepository } from "./base.repository.ts";
+import { CachedMarkdownRepository } from "./cached.repository.ts";
+import { rowToSwot, SWOT_TABLE } from "../domains/swot/cache.ts";
 
-export class SwotRepository extends BaseMarkdownRepository<
+export class SwotRepository extends CachedMarkdownRepository<
   Swot,
   CreateSwot,
   UpdateSwot
 > {
+  protected readonly tableName = SWOT_TABLE;
+
   constructor(projectDir: string) {
     super(projectDir, {
       directory: "swot",
@@ -23,9 +26,16 @@ export class SwotRepository extends BaseMarkdownRepository<
     });
   }
 
-  // v1 files may use different filename than id.
+  protected rowToEntity(row: Record<string, unknown>): Swot {
+    return rowToSwot(row);
+  }
+
+  // Filename may not match frontmatter id — try direct lookup, then full scan.
   override async findById(id: string): Promise<Swot | null> {
-    return this.findByIdWithFallback(id);
+    const direct = await super.findById(id);
+    if (direct) return direct;
+    const all = await this.findAll();
+    return all.find((item) => item.id === id) ?? null;
   }
 
   protected fromCreateInput(data: CreateSwot, id: string, now: string): Swot {

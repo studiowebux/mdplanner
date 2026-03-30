@@ -141,14 +141,6 @@ export abstract class BaseMarkdownRepository<
   // Protected helpers — available to subclasses
   // ---------------------------------------------------------------------------
 
-  /** Find by ID with v1 fallback: try direct file, then full scan. */
-  protected async findByIdWithFallback(id: string): Promise<T | null> {
-    const direct = await this.findById(id);
-    if (direct) return direct;
-    const all = await this.findAll();
-    return all.find((item) => item.id === id) ?? null;
-  }
-
   /** Standard serialize: buildFrontmatter excluding bodyKeys, mapKeysToFm, body text. */
   protected serializeStandard(
     item: T,

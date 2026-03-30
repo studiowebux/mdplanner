@@ -9,7 +9,11 @@ import type {
   MarketingTargetAudience,
   UpdateMarketingPlan,
 } from "../types/marketing-plan.types.ts";
-import { BaseMarkdownRepository } from "./base.repository.ts";
+import { CachedMarkdownRepository } from "./cached.repository.ts";
+import {
+  MARKETING_PLAN_TABLE,
+  rowToMarketingPlan,
+} from "../domains/marketing-plan/cache.ts";
 
 // ---------------------------------------------------------------------------
 // snake_case ↔ camelCase helpers for nested array fields in frontmatter
@@ -50,11 +54,13 @@ function serializeCampaign(
 // Repository
 // ---------------------------------------------------------------------------
 
-export class MarketingPlanRepository extends BaseMarkdownRepository<
+export class MarketingPlanRepository extends CachedMarkdownRepository<
   MarketingPlan,
   CreateMarketingPlan,
   UpdateMarketingPlan
 > {
+  protected readonly tableName = MARKETING_PLAN_TABLE;
+
   constructor(projectDir: string) {
     super(projectDir, {
       directory: "marketing-plans",
@@ -63,9 +69,16 @@ export class MarketingPlanRepository extends BaseMarkdownRepository<
     });
   }
 
-  // v1 files may use different filename than id.
+  protected rowToEntity(row: Record<string, unknown>): MarketingPlan {
+    return rowToMarketingPlan(row);
+  }
+
+  // Filename may not match frontmatter id — try direct lookup, then full scan.
   override async findById(id: string): Promise<MarketingPlan | null> {
-    return this.findByIdWithFallback(id);
+    const direct = await super.findById(id);
+    if (direct) return direct;
+    const all = await this.findAll();
+    return all.find((item) => item.id === id) ?? null;
   }
 
   protected fromCreateInput(

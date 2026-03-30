@@ -1,21 +1,28 @@
 // Goal repository — markdown file CRUD under goals/.
 
 import type { CreateGoal, Goal, UpdateGoal } from "../types/goal.types.ts";
-import { BaseMarkdownRepository } from "./base.repository.ts";
+import { CachedMarkdownRepository } from "./cached.repository.ts";
+import { GOAL_TABLE, rowToGoal } from "../domains/goal/cache.ts";
 
 const BODY_KEYS = ["id", "description"] as const;
 
-export class GoalRepository extends BaseMarkdownRepository<
+export class GoalRepository extends CachedMarkdownRepository<
   Goal,
   CreateGoal,
   UpdateGoal
 > {
+  protected readonly tableName = GOAL_TABLE;
+
   constructor(projectDir: string) {
     super(projectDir, {
       directory: "goals",
       idPrefix: "goal",
       nameField: "title",
     });
+  }
+
+  protected rowToEntity(row: Record<string, unknown>): Goal {
+    return rowToGoal(row);
   }
 
   protected fromCreateInput(data: CreateGoal, id: string, now: string): Goal {

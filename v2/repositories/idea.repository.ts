@@ -6,15 +6,18 @@ import type {
   IdeaWithBacklinks,
   UpdateIdea,
 } from "../types/idea.types.ts";
-import { BaseMarkdownRepository } from "./base.repository.ts";
+import { CachedMarkdownRepository } from "./cached.repository.ts";
+import { IDEA_TABLE, rowToIdea } from "../domains/idea/cache.ts";
 
 const BODY_KEYS = ["id", "description"] as const;
 
-export class IdeaRepository extends BaseMarkdownRepository<
+export class IdeaRepository extends CachedMarkdownRepository<
   Idea,
   CreateIdea,
   UpdateIdea
 > {
+  protected readonly tableName = IDEA_TABLE;
+
   constructor(projectDir: string) {
     super(projectDir, {
       directory: "ideas",
@@ -23,9 +26,16 @@ export class IdeaRepository extends BaseMarkdownRepository<
     });
   }
 
-  // v1 files use slug filenames with different frontmatter IDs — need full scan fallback.
+  protected rowToEntity(row: Record<string, unknown>): Idea {
+    return rowToIdea(row);
+  }
+
+  // Filename may not match frontmatter id — try direct lookup, then full scan.
   override async findById(id: string): Promise<Idea | null> {
-    return this.findByIdWithFallback(id);
+    const direct = await super.findById(id);
+    if (direct) return direct;
+    const all = await this.findAll();
+    return all.find((item) => item.id === id) ?? null;
   }
 
   // Auto-set lifecycle timestamps on status transitions.

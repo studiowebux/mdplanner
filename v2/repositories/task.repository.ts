@@ -2,6 +2,7 @@
 // Discovers board sections dynamically. Uses TaskBuilder for parsing.
 
 import { join } from "@std/path";
+import { log } from "../singletons/logger.ts";
 import {
   parseFrontmatter,
   serializeFrontmatter,
@@ -79,7 +80,9 @@ export class TaskRepository {
             `SELECT * FROM "${TASK_TABLE}"`,
           ).map(rowToTask);
         }
-      } catch { /* fall through to disk */ }
+      } catch (err) {
+        log.warn("[cache] tasks read failed, falling back to disk:", err);
+      }
     }
     return this.findAllFromDisk();
   }
@@ -116,7 +119,9 @@ export class TaskRepository {
           [id],
         );
         if (row) return rowToTask(row);
-      } catch { /* fall through to disk */ }
+      } catch (err) {
+        log.warn("[cache] tasks read failed, falling back to disk:", err);
+      }
     }
     const { task } = await this.findFileById(id);
     return task;

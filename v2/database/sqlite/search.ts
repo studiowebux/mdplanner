@@ -6,6 +6,7 @@
  * Iterates ENTITIES registry for FTS-enabled types — no hardcoded methods.
  */
 
+import { log } from "../../singletons/logger.ts";
 import { type BindValue, type CacheDatabase } from "./database.ts";
 import { ENTITIES, type EntityDef } from "./entities.ts";
 import type { SearchOptions, SearchResult } from "../../types/search.types.ts";
@@ -72,7 +73,8 @@ export class SearchEngine {
         const count = this.db.count(entity.table);
         stats[entity.table] = count;
         total += count;
-      } catch {
+      } catch (err) {
+        log.warn(`[search] count failed for ${entity.table}:`, err);
         stats[entity.table] = 0;
       }
     }
@@ -113,7 +115,8 @@ export class SearchEngine {
             };
           }
         }
-      } catch {
+      } catch (err) {
+        log.warn(`[search] ID lookup failed for ${table}:`, err);
         continue;
       }
     }
@@ -155,7 +158,8 @@ export class SearchEngine {
             });
           }
         }
-      } catch {
+      } catch (err) {
+        log.warn(`[search] suffix lookup failed for ${table}:`, err);
         continue;
       }
     }
@@ -204,7 +208,8 @@ export class SearchEngine {
             type,
           });
         }
-      } catch {
+      } catch (err) {
+        log.warn(`[search] type-name lookup failed for ${type}:`, err);
         continue;
       }
     }
@@ -250,7 +255,8 @@ export class SearchEngine {
         score: r.score as number,
         type: fts.type,
       }));
-    } catch {
+    } catch (err) {
+      log.warn(`[search] FTS query failed for ${table}:`, err);
       return [];
     }
   }

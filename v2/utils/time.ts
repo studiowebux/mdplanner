@@ -6,14 +6,27 @@ export function setTimeLocale(locale: string): void {
 }
 
 /**
- * Format an ISO date string to local timezone (e.g., "2026-03-15 10:30 PM").
+ * Parse a date string safely. Date-only strings (YYYY-MM-DD) are parsed as
+ * local midnight instead of UTC midnight to avoid timezone shift that moves
+ * the displayed date back by a day in negative-UTC timezones.
+ */
+export function parseDate(dateStr: string): Date {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  }
+  return new Date(dateStr);
+}
+
+/**
+ * Format a date string for display (e.g., "2026-03-15" or "2026-03-15 10:30 PM").
  */
 export function formatDate(
   dateStr: string | undefined | null,
   includeTime = false,
 ): string {
   if (!dateStr) return "";
-  const d = new Date(dateStr);
+  const d = parseDate(dateStr);
   if (isNaN(d.getTime())) return "";
   const date = d.toLocaleDateString("en-CA"); // YYYY-MM-DD
   if (!includeTime) return date;
@@ -29,7 +42,7 @@ export function formatDate(
  */
 export function dueIn(dateStr: string | undefined | null): string {
   if (!dateStr) return "";
-  const ms = new Date(dateStr).getTime() - Date.now();
+  const ms = parseDate(dateStr).getTime() - Date.now();
   const days = Math.round(ms / 86400000);
   if (days === 0) return "today";
   if (days === 1) return "tomorrow";
@@ -50,7 +63,7 @@ export function dueIn(dateStr: string | undefined | null): string {
  */
 export function timeAgo(dateStr: string | undefined | null): string {
   if (!dateStr) return "";
-  const ms = Date.now() - new Date(dateStr).getTime();
+  const ms = Date.now() - parseDate(dateStr).getTime();
   const days = Math.floor(ms / 86400000);
   if (days < 1) return "today";
   if (days === 1) return "1 day ago";
@@ -71,7 +84,8 @@ export function variance(
   actualStr: string | undefined | null,
 ): string {
   if (!plannedStr || !actualStr) return "";
-  const diffMs = new Date(actualStr).getTime() - new Date(plannedStr).getTime();
+  const diffMs = parseDate(actualStr).getTime() -
+    parseDate(plannedStr).getTime();
   const days = Math.round(diffMs / 86400000);
   if (days === 0) return "on time";
   const abs = Math.abs(days);
@@ -100,7 +114,7 @@ export function duration(
   endStr: string | undefined | null,
 ): string {
   if (!startStr || !endStr) return "";
-  const ms = new Date(endStr).getTime() - new Date(startStr).getTime();
+  const ms = parseDate(endStr).getTime() - parseDate(startStr).getTime();
   const days = Math.floor(ms / 86400000);
   if (days < 1) return "same day";
   if (days === 1) return "1 day";

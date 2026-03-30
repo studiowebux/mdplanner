@@ -1,5 +1,5 @@
 import { getCookie, setCookie } from "hono/cookie";
-import { log } from "../singletons/logger.ts";
+import { parseJson } from "../database/sqlite/mod.ts";
 import type { AppContext } from "../types/app.ts";
 
 const COOKIE_NAME = "ui_state";
@@ -8,17 +8,9 @@ function parseUiCookie(
   raw: string | undefined,
 ): Record<string, Record<string, unknown>> {
   if (!raw) return {};
-  try {
-    const parsed = JSON.parse(raw);
-    if (typeof parsed !== "object" || parsed === null) {
-      log.warn("UI state cookie is not an object, resetting");
-      return {};
-    }
-    return parsed as Record<string, Record<string, unknown>>;
-  } catch (err) {
-    log.warn(`UI state cookie corrupted, resetting: ${err}`);
-    return {};
-  }
+  const parsed = parseJson<Record<string, Record<string, unknown>>>(raw);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+  return parsed;
 }
 
 // Read a domain's saved UI state from the shared cookie.

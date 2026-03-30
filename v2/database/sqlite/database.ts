@@ -7,11 +7,12 @@
  * Uses Deno's built-in node:sqlite module.
  */
 
+import { log } from "../../singletons/logger.ts";
 import { DatabaseSync } from "node:sqlite";
 
-export interface QueryResult {
+export type QueryResult = {
   [key: string]: unknown;
-}
+};
 
 export type BindValue = string | number | bigint | null | Uint8Array;
 export type BindParams = BindValue[];
@@ -40,10 +41,14 @@ export class CacheDatabase {
     globalThis.addEventListener("unload", cleanup);
     try {
       Deno.addSignalListener("SIGINT", cleanup);
-    } catch { /* workers */ }
+    } catch (err) {
+      log.warn("[db] SIGINT listener not available:", err);
+    }
     try {
       Deno.addSignalListener("SIGTERM", cleanup);
-    } catch { /* workers */ }
+    } catch (err) {
+      log.warn("[db] SIGTERM listener not available:", err);
+    }
   }
 
   query<T = QueryResult>(sql: string, params: BindParams = []): T[] {

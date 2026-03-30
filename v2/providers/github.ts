@@ -10,6 +10,7 @@
  *   X-GitHub-Api-Version: 2022-11-28
  */
 
+import { log } from "../singletons/logger.ts";
 import type {
   GhJson,
   GitHubCreatedIssue,
@@ -299,8 +300,8 @@ export class GitHubProvider implements IGitProvider {
         publishedAt: data.published_at ? String(data.published_at) : null,
         htmlUrl: String(data.html_url ?? ""),
       };
-    } catch {
-      // 404 means no releases exist
+    } catch (err) {
+      log.warn("[github] latest release fetch failed:", err);
       return null;
     }
   }

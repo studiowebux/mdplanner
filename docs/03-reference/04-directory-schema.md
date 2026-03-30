@@ -271,6 +271,37 @@ body in their respective directories:
 | Brief           | `brief/`           |
 | Strategic Levels| `strategiclevels/` |
 | Billing         | `billing/`         |
+
+## Customers
+
+Directory: `billing/customers/`
+
+```yaml
+---
+id: customer_agency
+name: DevAgency Inc
+email: accounts@devagency.com
+phone: "+1-555-0300"
+company: DevAgency Inc
+billingAddress:
+  street: 789 Agency Way
+  city: New York
+  state: NY
+  postalCode: "10001"
+  country: USA
+created_at: 2026-02-10
+---
+
+# DevAgency Inc
+
+## Notes
+
+Quarterly invoicing, NET 30 terms.
+```
+
+Fields: `id`, `name`, `email`, `phone`, `company`, `billingAddress` (nested
+object with `street`, `city`, `state`, `postalCode`, `country`),
+`created_at`, `updated_at`.
 | CRM             | `crm/`             |
 | Time Tracking   | `timetracking/`    |
 | Meetings        | `meetings/`        |

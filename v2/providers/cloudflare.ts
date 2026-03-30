@@ -15,6 +15,7 @@
  * through Cloudflare Registrar. DNS-only zones will not have these fields.
  */
 
+import { log } from "../singletons/logger.ts";
 import type {
   CfAccount,
   CfDnsRecord,
@@ -104,7 +105,8 @@ export class CloudflareDnsProvider implements IDnsProvider {
         ttl: r.ttl,
         proxied: r.proxied,
       }));
-    } catch {
+    } catch (err) {
+      log.warn("[cloudflare] DNS records fetch failed:", err);
       return [];
     }
   }
@@ -121,7 +123,8 @@ export class CloudflareDnsProvider implements IDnsProvider {
       return result && typeof result === "object" && "name" in result
         ? result as CfRegistrarDomain
         : null;
-    } catch {
+    } catch (err) {
+      log.warn("[cloudflare] registrar domain fetch failed:", err);
       return null;
     }
   }

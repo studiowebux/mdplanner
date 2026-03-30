@@ -40,7 +40,8 @@
     var saved = {};
     try {
       saved = JSON.parse(localStorage.getItem(COLLAPSE_KEY) || "{}");
-    } catch {
+    } catch (err) {
+      console.warn("[sidebar] failed to parse collapse state:", err);
       saved = {};
     }
 

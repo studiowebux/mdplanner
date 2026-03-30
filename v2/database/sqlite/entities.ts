@@ -10,13 +10,14 @@
  * No other files need to change.
  */
 
+import { log } from "../../singletons/logger.ts";
 import type { BindValue, CacheDatabase } from "./database.ts";
 
 // ============================================================
 // Types
 // ============================================================
 
-export interface FTSConfig {
+export type FTSConfig = {
   /** SearchResult.type value (e.g. "task", "note") */
   type: string;
   /** Columns in the FTS virtual table; must match base table columns */
@@ -25,7 +26,7 @@ export interface FTSConfig {
   titleCol: string;
   /** Which column is used for snippet() */
   contentCol: string;
-}
+};
 
 /**
  * Sync function signature for v2. Each entity provides a function that
@@ -37,14 +38,14 @@ export type TableSyncer = (
   syncedAt: string,
 ) => Promise<number>;
 
-export interface EntityDef {
+export type EntityDef = {
   table: string;
   /** Full CREATE TABLE IF NOT EXISTS ... SQL */
   schema: string;
   /** Present = FTS enabled; absent = cached only */
   fts?: FTSConfig;
   sync: TableSyncer;
-}
+};
 
 // ============================================================
 // Helpers (exported so schema.ts / sync.ts can reuse them)
@@ -72,7 +73,8 @@ export function parseJson<T>(v: unknown): T | undefined {
   try {
     const parsed = JSON.parse(v as string);
     return Array.isArray(parsed) && parsed.length === 0 ? undefined : parsed;
-  } catch {
+  } catch (err) {
+    log.warn("[cache] JSON parse failed:", err);
     return undefined;
   }
 }

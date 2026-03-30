@@ -1,14 +1,33 @@
 // SWOT entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, val } from "../../database/sqlite/mod.ts";
+import { ENTITIES, parseJson, val } from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { SwotRepository } from "../../repositories/swot.repository.ts";
 import type { Swot } from "../../types/swot.types.ts";
 
-const TABLE = "swot";
+export const SWOT_TABLE = "swot";
 
-const SCHEMA = `CREATE TABLE IF NOT EXISTS ${TABLE} (
+/** Deserialize a SQLite row to a Swot. */
+export function rowToSwot(row: Record<string, unknown>): Swot {
+  return {
+    id: row.id as string,
+    title: (row.title as string) ?? "",
+    date: (row.date as string) ?? "",
+    strengths: parseJson<string[]>(row.strengths) ?? [],
+    weaknesses: parseJson<string[]>(row.weaknesses) ?? [],
+    opportunities: parseJson<string[]>(row.opportunities) ?? [],
+    threats: parseJson<string[]>(row.threats) ?? [],
+    project: row.project as string | undefined,
+    notes: row.notes as string | undefined,
+    createdAt: (row.created_at as string) ?? new Date().toISOString(),
+    updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
+    createdBy: row.created_by as string | undefined,
+    updatedBy: row.updated_by as string | undefined,
+  };
+}
+
+const SCHEMA = `CREATE TABLE IF NOT EXISTS ${SWOT_TABLE} (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
   date TEXT,
@@ -31,7 +50,7 @@ function insertRow(
   syncedAt?: string,
 ): void {
   db.execute(
-    `INSERT OR REPLACE INTO ${TABLE} (id, title, date,
+    `INSERT OR REPLACE INTO ${SWOT_TABLE} (id, title, date,
        strengths, weaknesses, opportunities, threats,
        project, notes, created_at, updated_at, created_by, updated_by, synced_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -57,7 +76,7 @@ function insertRow(
 /** Register the SWOT cache entity. Call from initServices(). */
 export function registerSwotEntity(repo: SwotRepository): void {
   const entity: EntityDef = {
-    table: TABLE,
+    table: SWOT_TABLE,
     schema: SCHEMA,
     fts: {
       type: "swot",

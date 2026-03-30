@@ -6,7 +6,7 @@ import { KpiGauge } from "../../components/ui/kpi-gauge.tsx";
 import { PRIORITY_LABELS } from "../../constants/mod.ts";
 import { goalPersonByName } from "../../domains/goal/config.tsx";
 import { GOAL_STATUS_VARIANTS } from "../../domains/goal/constants.tsx";
-import { dueIn } from "../../utils/time.ts";
+import { dueIn, parseDate } from "../../utils/time.ts";
 import { toKebab } from "../../utils/slug.ts";
 
 type Props = { item: Goal; q?: string };
@@ -19,14 +19,14 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
     ? Math.max(
       0,
       Math.round(
-        (new Date(item.updatedAt).getTime() -
-          new Date(item.startDate).getTime()) / 86400000,
+        (parseDate(item.updatedAt).getTime() -
+          parseDate(item.startDate).getTime()) / 86400000,
       ),
     )
     : null;
   const now = Date.now();
-  const start = item.startDate ? new Date(item.startDate).getTime() : 0;
-  const end = item.endDate ? new Date(item.endDate).getTime() : 0;
+  const start = item.startDate ? parseDate(item.startDate).getTime() : 0;
+  const end = item.endDate ? parseDate(item.endDate).getTime() : 0;
   const hasManualProgress = item.progress !== undefined &&
     item.progress !== null;
   const timeProgress = start && end && end > start

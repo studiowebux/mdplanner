@@ -1,4 +1,5 @@
 import { join } from "@std/path";
+import { log } from "../singletons/logger.ts";
 import {
   parseFrontmatter,
   serializeFrontmatter,
@@ -41,7 +42,9 @@ export class PortfolioRepository {
             `SELECT * FROM "${PORTFOLIO_TABLE}" ORDER BY category, name`,
           ).map(rowToPortfolioItem);
         }
-      } catch { /* fall through to disk */ }
+      } catch (err) {
+        log.warn("[cache] portfolio read failed, falling back to disk:", err);
+      }
     }
     return this.findAllFromDisk();
   }
@@ -83,7 +86,9 @@ export class PortfolioRepository {
           [id],
         );
         if (row) return rowToPortfolioItem(row);
-      } catch { /* fall through to disk */ }
+      } catch (err) {
+        log.warn("[cache] portfolio read failed, falling back to disk:", err);
+      }
     }
     try {
       const content = await Deno.readTextFile(join(this.dir, `${id}.md`));
@@ -102,7 +107,9 @@ export class PortfolioRepository {
           [name],
         );
         if (row) return rowToPortfolioItem(row);
-      } catch { /* fall through to disk */ }
+      } catch (err) {
+        log.warn("[cache] portfolio read failed, falling back to disk:", err);
+      }
     }
     const slug = toKebab(name);
     const fast = await this.findById(slug);
@@ -220,8 +227,9 @@ export class PortfolioRepository {
     try {
       await Deno.stat(path);
       return true;
-    } catch {
-      return false;
+    } catch (err) {
+      if (err instanceof Deno.errors.NotFound) return false;
+      throw err;
     }
   }
 

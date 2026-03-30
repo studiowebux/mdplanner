@@ -12,6 +12,7 @@ import { getSectionOrder } from "../../constants/mod.ts";
 import { TASK_PRIORITY_LABELS } from "../../domains/task/constants.tsx";
 import { EmptyState } from "../../components/ui/empty-state.tsx";
 import { getLocale } from "../../utils/format.ts";
+import { parseDate } from "../../utils/time.ts";
 
 // ---------------------------------------------------------------------------
 // Date helpers
@@ -19,10 +20,6 @@ import { getLocale } from "../../utils/format.ts";
 
 function daysBetween(a: Date, b: Date): number {
   return Math.round((b.getTime() - a.getTime()) / 86400000);
-}
-
-function parseDate(s: string): Date {
-  return new Date(s + "T00:00:00");
 }
 
 function formatShortDate(d: Date): string {

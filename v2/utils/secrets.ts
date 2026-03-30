@@ -1,3 +1,5 @@
+import { log } from "../singletons/logger.ts";
+
 /**
  * Symmetric AES-256-GCM secret encryption for integration tokens.
  * Pattern: Utility module (pure functions, no state).
@@ -122,7 +124,10 @@ export async function decryptSecret(stored: string): Promise<string | null> {
       ) as ArrayBuffer,
     );
     return new TextDecoder().decode(plain);
-  } catch {
+  } catch (err) {
+    // Decryption failed — likely wrong key or corrupted ciphertext.
+    // Return null to trigger transparent plaintext fallback.
+    log.warn("[secrets] decryption failed:", err);
     return null;
   }
 }

@@ -1,5 +1,6 @@
 // Portfolio routes — factory-generated + custom detail and status update routes.
 
+import { log } from "../../singletons/logger.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { portfolioConfig } from "../../domains/portfolio/config.tsx";
 import {
@@ -133,8 +134,11 @@ async function fetchDashboardItems(): Promise<PortfolioDashboardItem[]> {
               ? Math.round((successes.length / completed.length) * 100)
               : null,
           };
-        } catch {
-          // GitHub unavailable
+        } catch (err) {
+          log.warn(
+            `[portfolio] GitHub data fetch failed for ${item.githubRepo}:`,
+            err,
+          );
         }
       }
 
@@ -436,7 +440,9 @@ portfolioRouter.post("/:id/github/pipelines/cancel/:runId", async (c) => {
   if (!item?.githubRepo) return c.notFound();
   try {
     await getGitHubService().cancelRun(item.githubRepo, Number(runId));
-  } catch { /* run may already be done */ }
+  } catch (err) {
+    log.warn(`[portfolio] pipeline cancel failed for run ${runId}:`, err);
+  }
   const { runs, totalCount } = await getGitHubService().listWorkflowRuns(
     item.githubRepo,
     {},
@@ -462,7 +468,9 @@ portfolioRouter.post("/:id/github/pipelines/rerun/:runId", async (c) => {
   if (!item?.githubRepo) return c.notFound();
   try {
     await getGitHubService().rerunRun(item.githubRepo, Number(runId));
-  } catch { /* may fail if run is too old */ }
+  } catch (err) {
+    log.warn(`[portfolio] pipeline rerun failed for run ${runId}:`, err);
+  }
   const { runs, totalCount } = await getGitHubService().listWorkflowRuns(
     item.githubRepo,
     {},
@@ -493,7 +501,12 @@ portfolioRouter.post(
         item.githubRepo,
         Number(runId),
       );
-    } catch { /* may fail if run is too old */ }
+    } catch (err) {
+      log.warn(
+        `[portfolio] pipeline rerun-failed failed for run ${runId}:`,
+        err,
+      );
+    }
     const { runs, totalCount } = await getGitHubService().listWorkflowRuns(
       item.githubRepo,
     );

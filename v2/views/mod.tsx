@@ -19,6 +19,7 @@ import {
   autocompleteRouter,
   registerAutocompleteSource,
 } from "./autocomplete/routes.ts";
+import { customersRouter } from "./customers/routes.tsx";
 import { marketingPlansRouter } from "./marketing-plans/routes.tsx";
 import { swotRouter } from "./swot/routes.tsx";
 import {
@@ -29,6 +30,7 @@ import { ArrayTableRow } from "../components/ui/form-builder.tsx";
 import { MKTPLAN_FORM_FIELDS } from "../domains/marketing-plan/constants.tsx";
 import type { FieldDef } from "../components/ui/form-builder.tsx";
 import {
+  getCustomerService,
   getGoalService,
   getIdeaService,
   getMilestoneService,
@@ -39,6 +41,7 @@ import {
 } from "../singletons/services.ts";
 import { DEFAULT_KPI_METRICS } from "../constants/mod.ts";
 import type { AppVariables } from "../types/app.ts";
+import { ciIncludes } from "../utils/string.ts";
 
 // Register autocomplete sources — add new ones here as domains grow.
 registerAutocompleteSource("portfolio", {
@@ -52,8 +55,7 @@ registerAutocompleteSource("people", {
   list: () => getPeopleService().list(),
   search: async (q) => {
     const all = await getPeopleService().list();
-    const lower = q.toLowerCase();
-    return all.filter((p) => p.name.toLowerCase().includes(lower));
+    return all.filter((p) => ciIncludes(p.name, q));
   },
   displayKey: "name",
   valueKey: "id",
@@ -74,9 +76,8 @@ registerAutocompleteSource("people-skills", {
     for (const p of all) {
       for (const s of p.skills ?? []) skills.add(s);
     }
-    const lower = q.toLowerCase();
     return [...skills]
-      .filter((s) => s.toLowerCase().includes(lower))
+      .filter((s) => ciIncludes(s, q))
       .sort()
       .map((s) => ({ name: s }));
   },
@@ -88,8 +89,7 @@ registerAutocompleteSource("tasks", {
   list: () => getTaskService().list(),
   search: async (q) => {
     const all = await getTaskService().list();
-    const lower = q.toLowerCase();
-    return all.filter((t) => t.title.toLowerCase().includes(lower));
+    return all.filter((t) => ciIncludes(t.title, q));
   },
   displayKey: "title",
   valueKey: "id",
@@ -99,8 +99,7 @@ registerAutocompleteSource("milestones", {
   list: () => getMilestoneService().list(),
   search: async (q) => {
     const all = await getMilestoneService().list();
-    const lower = q.toLowerCase();
-    return all.filter((m) => m.name.toLowerCase().includes(lower));
+    return all.filter((m) => ciIncludes(m.name, q));
   },
   displayKey: "name",
   valueKey: "name",
@@ -121,9 +120,8 @@ registerAutocompleteSource("project-tags", {
     for (const t of all) {
       for (const tag of t.tags ?? []) tags.add(tag);
     }
-    const lower = q.toLowerCase();
     return [...tags]
-      .filter((t) => t.toLowerCase().includes(lower))
+      .filter((t) => ciIncludes(t, q))
       .sort()
       .map((t) => ({ name: t }));
   },
@@ -146,9 +144,8 @@ registerAutocompleteSource("portfolio-tech-stack", {
     for (const p of all) {
       for (const t of p.techStack ?? []) techs.add(t);
     }
-    const lower = q.toLowerCase();
     return [...techs]
-      .filter((t) => t.toLowerCase().includes(lower))
+      .filter((t) => ciIncludes(t, q))
       .sort()
       .map((t) => ({ name: t }));
   },
@@ -167,9 +164,8 @@ registerAutocompleteSource("portfolio-categories", {
     const all = await getPortfolioService().list();
     const cats = new Set<string>();
     for (const p of all) cats.add(p.category);
-    const lower = q.toLowerCase();
     return [...cats]
-      .filter((c) => c.toLowerCase().includes(lower))
+      .filter((c) => ciIncludes(c, q))
       .sort()
       .map((c) => ({ name: c }));
   },
@@ -184,9 +180,8 @@ registerAutocompleteSource("people-departments", {
   },
   search: async (q) => {
     const depts = await getPeopleService().getDepartments();
-    const lower = q.toLowerCase();
     return depts
-      .filter((d) => d.toLowerCase().includes(lower))
+      .filter((d) => ciIncludes(d, q))
       .map((d) => ({ name: d }));
   },
   displayKey: "name",
@@ -197,8 +192,17 @@ registerAutocompleteSource("portfolio-by-id", {
   list: () => getPortfolioService().list(),
   search: async (q) => {
     const all = await getPortfolioService().list();
-    const lower = q.toLowerCase();
-    return all.filter((p) => p.name.toLowerCase().includes(lower));
+    return all.filter((p) => ciIncludes(p.name, q));
+  },
+  displayKey: "name",
+  valueKey: "id",
+});
+
+registerAutocompleteSource("customers", {
+  list: () => getCustomerService().list(),
+  search: async (q) => {
+    const all = await getCustomerService().list();
+    return all.filter((c) => ciIncludes(c.name, q));
   },
   displayKey: "name",
   valueKey: "id",
@@ -208,8 +212,7 @@ registerAutocompleteSource("goals-by-id", {
   list: () => getGoalService().list(),
   search: async (q) => {
     const all = await getGoalService().list();
-    const lower = q.toLowerCase();
-    return all.filter((g) => g.title.toLowerCase().includes(lower));
+    return all.filter((g) => ciIncludes(g.title, q));
   },
   displayKey: "title",
   valueKey: "id",
@@ -219,8 +222,7 @@ registerAutocompleteSource("ideas-by-id", {
   list: () => getIdeaService().list(),
   search: async (q) => {
     const all = await getIdeaService().list();
-    const lower = q.toLowerCase();
-    return all.filter((i) => i.title.toLowerCase().includes(lower));
+    return all.filter((i) => ciIncludes(i.title, q));
   },
   displayKey: "title",
   valueKey: "id",
@@ -239,9 +241,8 @@ registerAutocompleteSource("kpi-metrics", {
     const metrics = config.kpiMetrics?.length
       ? config.kpiMetrics
       : DEFAULT_KPI_METRICS;
-    const lower = q.toLowerCase();
     return metrics
-      .filter((m) => m.toLowerCase().includes(lower))
+      .filter((m) => ciIncludes(m, q))
       .map((m) => ({ name: m }));
   },
   displayKey: "name",
@@ -251,6 +252,7 @@ registerAutocompleteSource("kpi-metrics", {
 export const views = new Hono<{ Variables: AppVariables }>();
 
 views.route("/", homeViewRouter);
+views.route("/customers", customersRouter);
 views.route("/dns", dnsRouter);
 views.route("/goals", goalsViewRouter);
 views.route("/ideas", ideasRouter);
