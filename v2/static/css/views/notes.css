@@ -364,6 +364,7 @@
 
 .note-detail__body--editing {
   gap: var(--space-md);
+  padding-bottom: var(--save-bar-h);
 }
 
 .note-editor__toolbar {
