@@ -417,6 +417,13 @@ export function createDomainForm<T extends Entity>(cfg: {
         }
       }
     }
+    // Merge resolved values into form values — covers nested fields
+    // (e.g. billingAddress.street → street) that don't exist on the entity root.
+    if (displayValues) {
+      for (const [k, v] of Object.entries(displayValues)) {
+        if (!values[k]) values[k] = v;
+      }
+    }
     return (
       <FormBuilder
         id={`${cfg.domain}-form`}
