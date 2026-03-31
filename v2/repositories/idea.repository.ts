@@ -30,14 +30,6 @@ export class IdeaRepository extends CachedMarkdownRepository<
     return rowToIdea(row);
   }
 
-  // Filename may not match frontmatter id — try direct lookup, then full scan.
-  override async findById(id: string): Promise<Idea | null> {
-    const direct = await super.findById(id);
-    if (direct) return direct;
-    const all = await this.findAll();
-    return all.find((item) => item.id === id) ?? null;
-  }
-
   // Auto-set lifecycle timestamps on status transitions.
   // Builds a new data object with extra fields — never mutates the input.
   override async update(id: string, data: UpdateIdea): Promise<Idea | null> {

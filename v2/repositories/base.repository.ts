@@ -79,15 +79,44 @@ export abstract class BaseMarkdownRepository<
     return items.sort((a, b) => this.compare(a, b));
   }
 
-  async findById(id: string): Promise<T | null> {
+  /**
+   * Locate a file for the given id: try `{id}.md` directly first, then scan
+   * all files in the directory for a frontmatter id match (handles v1 slug
+   * filenames like `dev-agency.md` whose frontmatter id is `customer_agency`).
+   * Returns the parsed entity and the actual file path, or null if not found.
+   */
+  protected async resolveFile(
+    id: string,
+  ): Promise<{ item: T; filePath: string } | null> {
+    const directPath = join(this.dir, `${id}.md`);
     try {
-      const content = await Deno.readTextFile(join(this.dir, `${id}.md`));
+      const content = await Deno.readTextFile(directPath);
       const { frontmatter, body } = parseFrontmatter(content);
-      return this.parse(`${id}.md`, frontmatter, body);
+      const item = this.parse(`${id}.md`, frontmatter, body);
+      if (item) return { item, filePath: directPath };
     } catch (err) {
-      if (err instanceof Deno.errors.NotFound) return null;
-      throw err;
+      if (!(err instanceof Deno.errors.NotFound)) throw err;
     }
+    // Filename doesn't match id — scan for the file with matching frontmatter id.
+    try {
+      for await (const entry of Deno.readDir(this.dir)) {
+        if (!entry.isFile || !entry.name.endsWith(".md")) continue;
+        if (entry.name === `${id}.md`) continue; // already tried above
+        const filePath = join(this.dir, entry.name);
+        const content = await Deno.readTextFile(filePath);
+        const { frontmatter, body } = parseFrontmatter(content);
+        const item = this.parse(entry.name, frontmatter, body);
+        if (item && item.id === id) return { item, filePath };
+      }
+    } catch (err) {
+      if (!(err instanceof Deno.errors.NotFound)) throw err;
+    }
+    return null;
+  }
+
+  async findById(id: string): Promise<T | null> {
+    const resolved = await this.resolveFile(id);
+    return resolved?.item ?? null;
   }
 
   async findByName(name: string): Promise<T | null> {
@@ -111,25 +140,38 @@ export abstract class BaseMarkdownRepository<
   }
 
   async update(id: string, data: U): Promise<T | null> {
-    const existing = await this.findById(id);
-    if (!existing) return null;
+    const resolved = await this.resolveFile(id);
+    if (!resolved) return null;
 
     const updated = mergeFields(
-      { ...existing },
+      { ...resolved.item },
       data as Record<string, unknown>,
     );
     (updated as Record<string, unknown>).updatedAt = new Date().toISOString();
 
+    const expectedPath = join(this.dir, `${id}.md`);
     await this.writer.write(
       id,
-      () => atomicWrite(join(this.dir, `${id}.md`), this.serialize(updated)),
+      () => atomicWrite(expectedPath, this.serialize(updated)),
     );
+
+    // Remove orphan file when the entity had a mismatched filename.
+    if (resolved.filePath !== expectedPath) {
+      try {
+        await Deno.remove(resolved.filePath);
+      } catch (err) {
+        if (!(err instanceof Deno.errors.NotFound)) throw err;
+      }
+    }
+
     return updated;
   }
 
   async delete(id: string): Promise<boolean> {
+    const resolved = await this.resolveFile(id);
+    if (!resolved) return false;
     try {
-      await Deno.remove(join(this.dir, `${id}.md`));
+      await Deno.remove(resolved.filePath);
       return true;
     } catch (err) {
       if (err instanceof Deno.errors.NotFound) return false;

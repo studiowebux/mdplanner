@@ -73,14 +73,6 @@ export class MarketingPlanRepository extends CachedMarkdownRepository<
     return rowToMarketingPlan(row);
   }
 
-  // Filename may not match frontmatter id — try direct lookup, then full scan.
-  override async findById(id: string): Promise<MarketingPlan | null> {
-    const direct = await super.findById(id);
-    if (direct) return direct;
-    const all = await this.findAll();
-    return all.find((item) => item.id === id) ?? null;
-  }
-
   protected fromCreateInput(
     data: CreateMarketingPlan,
     id: string,

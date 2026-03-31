@@ -1,10 +1,8 @@
 // Milestone repository — reads and writes milestone markdown files from disk or SQLite cache.
 
-import { join } from "@std/path";
 import { log } from "../singletons/logger.ts";
 import { serializeFrontmatter } from "../utils/frontmatter.ts";
-import { atomicWrite } from "../utils/safe-io.ts";
-import { buildFrontmatter, mergeFields } from "../utils/repo-helpers.ts";
+import { buildFrontmatter } from "../utils/repo-helpers.ts";
 import { mapKeysToFm } from "../utils/frontmatter-mapper.ts";
 import type {
   CreateMilestone,
@@ -37,14 +35,6 @@ export class MilestoneRepository extends CachedMarkdownRepository<
     return rowToMilestone(row);
   }
 
-  // Filename may not match frontmatter id — try direct lookup, then full scan.
-  override async findById(id: string): Promise<MilestoneBase | null> {
-    const direct = await super.findById(id);
-    if (direct) return direct;
-    const all = await this.findAll();
-    return all.find((item) => item.id === id) ?? null;
-  }
-
   override async findByName(name: string): Promise<MilestoneBase | null> {
     if (this.cacheDb) {
       try {
@@ -61,41 +51,25 @@ export class MilestoneRepository extends CachedMarkdownRepository<
     return all.find((m) => m.name === name) ?? null;
   }
 
-  // Special case: status change triggers completedAt.
+  // Special case: status change triggers completedAt. All file I/O delegated
+  // to super.update() so orphan cleanup is handled in one place.
   override async update(
     id: string,
     data: UpdateMilestone,
   ): Promise<MilestoneBase | null> {
+    if (data.status === undefined) return super.update(id, data);
+
     const existing = await this.findById(id);
     if (!existing) return null;
 
-    const updated = mergeFields(
-      { ...existing },
-      data as Record<string, unknown>,
-    );
-
-    if (data.status !== undefined) {
-      if (data.status === "completed" && existing.status !== "completed") {
-        updated.completedAt = new Date().toISOString();
-      } else if (data.status === "open") {
-        updated.completedAt = undefined;
-      }
+    const extra: Record<string, unknown> = {};
+    if (data.status === "completed" && existing.status !== "completed") {
+      extra.completedAt = new Date().toISOString();
+    } else if (data.status === "open") {
+      extra.completedAt = null; // null → mergeFields clears the field
     }
 
-    const fm = mapKeysToFm(
-      buildFrontmatter(
-        updated as Record<string, unknown>,
-        MILESTONE_BODY_KEYS,
-      ),
-    );
-    const body = `# ${updated.name}\n\n${updated.description ?? ""}`.trimEnd();
-    const filePath = join(this.dir, `${id}.md`);
-    await this.writer.write(
-      id,
-      () => atomicWrite(filePath, serializeFrontmatter(fm, body)),
-    );
-
-    return updated as MilestoneBase;
+    return super.update(id, { ...data, ...extra } as UpdateMilestone);
   }
 
   // ---------------------------------------------------------------------------

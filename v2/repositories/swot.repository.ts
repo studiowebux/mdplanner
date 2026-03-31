@@ -30,14 +30,6 @@ export class SwotRepository extends CachedMarkdownRepository<
     return rowToSwot(row);
   }
 
-  // Filename may not match frontmatter id — try direct lookup, then full scan.
-  override async findById(id: string): Promise<Swot | null> {
-    const direct = await super.findById(id);
-    if (direct) return direct;
-    const all = await this.findAll();
-    return all.find((item) => item.id === id) ?? null;
-  }
-
   protected fromCreateInput(data: CreateSwot, id: string, now: string): Swot {
     return {
       ...data,

@@ -30,14 +30,6 @@ export class CustomerRepository extends CachedMarkdownRepository<
     return rowToCustomer(row);
   }
 
-  // Filename may not match frontmatter id — try direct lookup, then full scan.
-  override async findById(id: string): Promise<Customer | null> {
-    const direct = await super.findById(id);
-    if (direct) return direct;
-    const all = await this.findAll();
-    return all.find((item) => item.id === id) ?? null;
-  }
-
   protected fromCreateInput(
     data: CreateCustomer,
     id: string,

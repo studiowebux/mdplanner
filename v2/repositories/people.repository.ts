@@ -5,7 +5,7 @@ import { log } from "../singletons/logger.ts";
 import { serializeFrontmatter } from "../utils/frontmatter.ts";
 import { generateId } from "../utils/id.ts";
 import { atomicWrite } from "../utils/safe-io.ts";
-import { buildFrontmatter, mergeFields } from "../utils/repo-helpers.ts";
+import { buildFrontmatter } from "../utils/repo-helpers.ts";
 import { mapKeysToFm } from "../utils/frontmatter-mapper.ts";
 import type {
   CreatePerson,
@@ -35,14 +35,6 @@ export class PeopleRepository extends CachedMarkdownRepository<
 
   protected rowToEntity(row: Record<string, unknown>): Person {
     return rowToPerson(row);
-  }
-
-  // Filename may not match frontmatter id — try direct lookup, then full scan.
-  override async findById(id: string): Promise<Person | null> {
-    const direct = await super.findById(id);
-    if (direct) return direct;
-    const all = await this.findAll();
-    return all.find((item) => item.id === id) ?? null;
   }
 
   override async findByName(name: string): Promise<Person | null> {
@@ -97,33 +89,6 @@ export class PeopleRepository extends CachedMarkdownRepository<
     );
 
     return { id, name, ...rest } as Person;
-  }
-
-  // Custom update: milestone-style body rebuild.
-  override async update(
-    id: string,
-    data: UpdatePerson,
-  ): Promise<Person | null> {
-    const existing = await this.findById(id);
-    if (!existing) return null;
-
-    const updated = mergeFields(
-      { ...existing },
-      data as Record<string, unknown>,
-    );
-
-    const fm = mapKeysToFm(
-      buildFrontmatter(updated as Record<string, unknown>, PEOPLE_BODY_KEYS),
-    );
-    const body = `# ${updated.name}\n\n${updated.notes ?? ""}`.trimEnd();
-
-    const filePath = join(this.dir, `${id}.md`);
-    await this.writer.write(
-      id,
-      () => atomicWrite(filePath, serializeFrontmatter(fm, body)),
-    );
-
-    return updated as Person;
   }
 
   protected parse(
