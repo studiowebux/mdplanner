@@ -140,15 +140,15 @@ const DashboardTable: FC<TableProps> = (
           <tr>
             {sortHeader("name", "Project")}
             {sortHeader("status", "Status")}
-            {sectionMap.map(({ abbrev, full }) =>
-              staticHeader(`section_${abbrev}`, abbrev)
+            {sectionMap.map(({ abbrev }) =>
+              sortHeader(`section_${abbrev}`, abbrev)
             )}
             {sortHeader("activity", "Activity")}
-            {staticHeader("milestone", "Milestone")}
-            {staticHeader("commit", "Commit")}
-            {staticHeader("prs", "PRs")}
-            {staticHeader("issues", "Issues")}
-            {staticHeader("ci", "CI")}
+            {sortHeader("milestone", "Milestone")}
+            {sortHeader("commit", "Commit")}
+            {sortHeader("prs", "PRs")}
+            {sortHeader("issues", "Issues")}
+            {sortHeader("ci", "CI")}
           </tr>
         </thead>
         <tbody class="data-table__body">

@@ -176,6 +176,25 @@ function sortItems(
     } else if (sort === "activity") {
       va = a.lastActivity ?? "";
       vb = b.lastActivity ?? "";
+    } else if (sort === "milestone") {
+      va = a.milestone?.name ?? "";
+      vb = b.milestone?.name ?? "";
+    } else if (sort === "commit") {
+      va = a.github?.lastCommitDate ?? "";
+      vb = b.github?.lastCommitDate ?? "";
+    } else if (sort === "prs") {
+      va = a.github?.openPrs ?? 0;
+      vb = b.github?.openPrs ?? 0;
+    } else if (sort === "issues") {
+      va = a.github?.openIssues ?? 0;
+      vb = b.github?.openIssues ?? 0;
+    } else if (sort === "ci") {
+      va = a.github?.ciSuccessRate ?? -1;
+      vb = b.github?.ciSuccessRate ?? -1;
+    } else if (sort.startsWith("section_")) {
+      const abbrev = sort.slice("section_".length);
+      va = a.tasks[abbrev] ?? 0;
+      vb = b.tasks[abbrev] ?? 0;
     }
     if (va === null || vb === null) return 0;
     return va < vb ? -dir : va > vb ? dir : 0;
