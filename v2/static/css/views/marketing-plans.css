@@ -140,6 +140,38 @@
   color: var(--color-text-muted);
 }
 
+/* ---------------------------------------------------------------------------
+   Detail tables — borders for markdown-rendered tables
+--------------------------------------------------------------------------- */
+
+.mktplan-detail table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+  margin: var(--space-sm) 0;
+}
+
+.mktplan-detail th {
+  text-align: left;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: calc(var(--border-width) * 2) var(--border-style)
+    var(--color-border-strong);
+  background: var(--color-bg-secondary);
+}
+
+.mktplan-detail td {
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-border-default);
+  color: var(--color-text-secondary);
+}
+
+.mktplan-detail tr:hover td {
+  background: var(--color-bg-hover);
+}
+
 @media (max-width: 768px) {
   .mktplan-detail__table {
     display: block;
