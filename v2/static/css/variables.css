@@ -347,6 +347,22 @@ html.font-mono {
   --color-info-bg: #e3f2fd;
   --color-info-border: #90caf9;
   --color-info-text: #0057b8;
+
+  /* Purple */
+  --color-purple-bg: #f3e8fd;
+  --color-purple-text: #6b21a8;
+
+  /* Teal */
+  --color-teal-bg: #e0f7fa;
+  --color-teal-text: #00695c;
+
+  /* Orange */
+  --color-orange-bg: #fff0e0;
+  --color-orange-text: #c25400;
+
+  /* Pink */
+  --color-pink-bg: #fce4ec;
+  --color-pink-text: #ad1457;
 }
 
 /* --------------------------------------------------------------------------
@@ -405,6 +421,22 @@ html.font-mono {
   --color-info-bg: #152a45;
   --color-info-border: #003d82;
   --color-info-text: #90caf9;
+
+  /* Purple */
+  --color-purple-bg: #2d1a45;
+  --color-purple-text: #c084fc;
+
+  /* Teal */
+  --color-teal-bg: #0d3838;
+  --color-teal-text: #5eead4;
+
+  /* Orange */
+  --color-orange-bg: #3d2800;
+  --color-orange-text: #ffb74d;
+
+  /* Pink */
+  --color-pink-bg: #3d1028;
+  --color-pink-text: #f48fb1;
 
   /* Shadows — deeper for dark theme */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);

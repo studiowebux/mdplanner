@@ -11,13 +11,15 @@ import { formatDate } from "../../utils/time.ts";
 export const PORTFOLIO_STATUS_VARIANTS: Record<string, BadgeVariant> = {
   active: "accent",
   completed: "success",
-  production: "success",
+  production: "teal",
   planning: "info",
+  scoping: "purple",
+  discovery: "pink",
   paused: "warning",
-  "on-hold": "warning",
-  maintenance: "warning",
+  "on-hold": "orange",
+  maintenance: "teal",
   archived: "neutral",
-  cancelled: "neutral",
+  cancelled: "error",
 };
 
 const actionBtns = (_value: unknown, row: Record<string, unknown>) => (

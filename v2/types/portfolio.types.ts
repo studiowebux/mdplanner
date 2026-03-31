@@ -14,6 +14,8 @@ export const PORTFOLIO_STATUSES = [
   "paused",
   "archived",
   "cancelled",
+  "scoping",
+  "discovery",
 ] as const;
 
 export type PortfolioStatus = (typeof PORTFOLIO_STATUSES)[number];

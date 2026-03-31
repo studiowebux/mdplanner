@@ -7,7 +7,11 @@ export type BadgeVariant =
   | "warning"
   | "success"
   | "error"
-  | "error-solid";
+  | "error-solid"
+  | "purple"
+  | "teal"
+  | "orange"
+  | "pink";
 
 type Props = {
   status: string;
@@ -19,7 +23,7 @@ export function badgeClass(
   variants: Record<string, BadgeVariant>,
   status: string,
 ): string {
-  return `badge badge--${variants[status] ?? "neutral"}`;
+  return `badge badge--${variants[status.toLowerCase()] ?? "neutral"}`;
 }
 
 // Reusable status badge — renders a pill colored by semantic variant.
@@ -34,7 +38,7 @@ export const StatusBadge: FC<Props> = ({ status, variant = "neutral" }) => (
 export const statusBadgeRenderer =
   (variants: Record<string, BadgeVariant>) => (value: unknown) => {
     const status = String(value);
-    const variant = variants[status] ?? "neutral";
+    const variant = variants[status.toLowerCase()] ?? "neutral";
     return (
       <span class={`badge badge--${variant}`}>
         {status}
