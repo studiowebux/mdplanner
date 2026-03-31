@@ -44,14 +44,20 @@ const BoardCard: FC<{ task: Task }> = ({ task }) => {
       </a>
 
       <div class="task-board__card-meta">
-        {task.project && (
-          <a
-            class="task-board__card-project"
-            href={`/portfolio/${toKebab(task.project)}`}
-          >
-            {task.project}
-          </a>
-        )}
+        {task.project
+          ? (
+            <a
+              class="task-board__card-project"
+              href={`/portfolio/${toKebab(task.project)}`}
+            >
+              {task.project}
+            </a>
+          )
+          : (
+            <span class="task-board__card-project badge--neutral">
+              No Project
+            </span>
+          )}
         <span
           class={`task-board__card-due${
             isOverdue ? " task-board__card-due--overdue" : ""
