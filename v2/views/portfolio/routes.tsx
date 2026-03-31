@@ -173,7 +173,7 @@ function sortItems(
     } else if (sort === "status") {
       va = a.status;
       vb = b.status;
-    } else if (sort === "lastActivity") {
+    } else if (sort === "activity") {
       va = a.lastActivity ?? "";
       vb = b.lastActivity ?? "";
     }
