@@ -4,7 +4,10 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { ViewProps } from "../types/app.ts";
-import type { PortfolioDashboardItem } from "../types/portfolio.types.ts";
+import {
+  PORTFOLIO_STATUSES,
+  type PortfolioDashboardItem,
+} from "../types/portfolio.types.ts";
 import { MS_PER_DAY } from "../constants/mod.ts";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { PORTFOLIO_STATUS_VARIANTS } from "../domains/portfolio/constants.tsx";
@@ -283,12 +286,14 @@ export const PortfolioDashboardView: FC<Props> = (
               hx-include="#dashboard-toolbar"
             >
               <option value="" selected={!filter}>All projects</option>
-              <option value="active" selected={filter === "active"}>
-                Active
-              </option>
               <option value="stale" selected={filter === "stale"}>
                 Stale
               </option>
+              {PORTFOLIO_STATUSES.map((s) => (
+                <option value={s} selected={filter === s}>
+                  {s.charAt(0).toUpperCase() + s.slice(1).replace("-", " ")}
+                </option>
+              ))}
             </select>
           </div>
           <div class="domain-toolbar__right">

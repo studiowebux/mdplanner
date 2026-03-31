@@ -211,13 +211,13 @@ function filterItems(
   if (q) {
     result = result.filter((i) => ciIncludes(i.name, q));
   }
-  if (filter === "active") {
-    result = result.filter((i) => i.status === "active");
-  } else if (filter === "stale") {
+  if (filter === "stale") {
     const cutoff = Date.now() - staleDays * 86_400_000;
     result = result.filter(
       (i) => !i.lastActivity || new Date(i.lastActivity).getTime() < cutoff,
     );
+  } else if (filter) {
+    result = result.filter((i) => i.status === filter);
   }
   return result;
 }
