@@ -45,6 +45,9 @@ import { registerCustomerEntity } from "../domains/customer/cache.ts";
 import { BillingRateRepository } from "../repositories/billing-rate.repository.ts";
 import { BillingRateService } from "../services/billing-rate.service.ts";
 import { registerBillingRateEntity } from "../domains/billing-rate/cache.ts";
+import { QuoteRepository } from "../repositories/quote.repository.ts";
+import { QuoteService } from "../services/quote.service.ts";
+import { registerQuoteEntity } from "../domains/quote/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -64,6 +67,7 @@ let marketingPlanService: MarketingPlanService | null = null;
 let swotService: SwotService | null = null;
 let customerService: CustomerService | null = null;
 let billingRateService: BillingRateService | null = null;
+let quoteService: QuoteService | null = null;
 let dnsService: DnsService | null = null;
 let githubService: GitHubService | null = null;
 let cacheDb: CacheDatabase | null = null;
@@ -101,6 +105,8 @@ export function initServices(
   customerService = new CustomerService(customerRepo);
   const billingRateRepo = new BillingRateRepository(projectDir);
   billingRateService = new BillingRateService(billingRateRepo);
+  const quoteRepo = new QuoteRepository(projectDir);
+  quoteService = new QuoteService(quoteRepo);
   const dnsRepo = new DnsRepository(projectDir);
   dnsService = new DnsService(dnsRepo, projectService);
   githubService = new GitHubService(projectService);
@@ -121,6 +127,7 @@ export function initServices(
     registerSwotEntity(swotRepo);
     registerCustomerEntity(customerRepo);
     registerBillingRateEntity(billingRateRepo);
+    registerQuoteEntity(quoteRepo);
 
     // Pass cacheDb to repos for read-path caching
     milestoneRepo.setCacheDb(cacheDb);
@@ -134,6 +141,7 @@ export function initServices(
     marketingPlanRepo.setCacheDb(cacheDb);
     customerRepo.setCacheDb(cacheDb);
     billingRateRepo.setCacheDb(cacheDb);
+    quoteRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -246,6 +254,13 @@ export function getBillingRateService(): BillingRateService {
     throw new Error("Services not initialized — call initServices() first");
   }
   return billingRateService;
+}
+
+export function getQuoteService(): QuoteService {
+  if (!quoteService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return quoteService;
 }
 
 export function getDnsService(): DnsService {

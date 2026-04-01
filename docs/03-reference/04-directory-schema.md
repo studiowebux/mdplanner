@@ -329,6 +329,56 @@ Fields: `id`, `name`, `unit` (`h`, `d`, `unit`, `mo`, `fixed`), `rate`
 (number), `currency` (ISO 4217, optional), `assignee` (person ID, optional),
 `isDefault` (boolean), `created_at`, `updated_at`.
 
+## Quotes
+
+Directory: `billing/quotes/`
+
+```yaml
+---
+id: quote_startup
+number: Q-2026-001
+customerId: customer_startup
+title: Team Plan Annual Subscription
+status: accepted
+expiresAt: 2026-03-01
+taxRate: 15
+subtotal: 1152
+tax: 172.8
+total: 1324.8
+revision: 1
+created_at: 2026-02-01
+lineItems:
+  - id: li_1
+    type: service
+    description: Team Plan (12 users) - Annual
+    quantity: 12
+    unit: unit
+    unitRate: 96
+    amount: 1152
+paymentSchedule:
+  - description: 50% deposit
+    percent: 50
+    dueDate: 2026-02-15
+  - description: Balance on delivery
+    percent: 50
+    dueDate: 2026-03-01
+---
+
+# Quote: Team Plan Annual
+
+Annual subscription with 20% discount.
+
+## Terms
+
+12 month commitment, annual billing upfront.
+```
+
+Fields: `id`, `number` (Q-YYYY-NNN), `customerId`, `title`, `status`
+(`draft`, `sent`, `accepted`, `rejected`), `currency`, `expiresAt`,
+`lineItems` (array of LineItem), `paymentSchedule` (optional array),
+`subtotal`, `tax`, `taxRate`, `total`, `notes`, `footer`, `revision`,
+`convertedToInvoice`, `sentAt`, `acceptedAt`, `created_at`, `updated_at`.
+
 | CRM             | `crm/`             |
 | Time Tracking   | `timetracking/`    |
 | Meetings        | `meetings/`        |
