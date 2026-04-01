@@ -42,6 +42,9 @@ import { PeopleRepository } from "../repositories/people.repository.ts";
 import { CustomerRepository } from "../repositories/customer.repository.ts";
 import { CustomerService } from "../services/customer.service.ts";
 import { registerCustomerEntity } from "../domains/customer/cache.ts";
+import { BillingRateRepository } from "../repositories/billing-rate.repository.ts";
+import { BillingRateService } from "../services/billing-rate.service.ts";
+import { registerBillingRateEntity } from "../domains/billing-rate/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -60,6 +63,7 @@ let ideaService: IdeaService | null = null;
 let marketingPlanService: MarketingPlanService | null = null;
 let swotService: SwotService | null = null;
 let customerService: CustomerService | null = null;
+let billingRateService: BillingRateService | null = null;
 let dnsService: DnsService | null = null;
 let githubService: GitHubService | null = null;
 let cacheDb: CacheDatabase | null = null;
@@ -95,6 +99,8 @@ export function initServices(
   swotService = new SwotService(swotRepo);
   const customerRepo = new CustomerRepository(projectDir);
   customerService = new CustomerService(customerRepo);
+  const billingRateRepo = new BillingRateRepository(projectDir);
+  billingRateService = new BillingRateService(billingRateRepo);
   const dnsRepo = new DnsRepository(projectDir);
   dnsService = new DnsService(dnsRepo, projectService);
   githubService = new GitHubService(projectService);
@@ -114,6 +120,7 @@ export function initServices(
     registerMarketingPlanEntity(marketingPlanRepo);
     registerSwotEntity(swotRepo);
     registerCustomerEntity(customerRepo);
+    registerBillingRateEntity(billingRateRepo);
 
     // Pass cacheDb to repos for read-path caching
     milestoneRepo.setCacheDb(cacheDb);
@@ -126,6 +133,7 @@ export function initServices(
     swotRepo.setCacheDb(cacheDb);
     marketingPlanRepo.setCacheDb(cacheDb);
     customerRepo.setCacheDb(cacheDb);
+    billingRateRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -231,6 +239,13 @@ export function getCustomerService(): CustomerService {
     throw new Error("Services not initialized — call initServices() first");
   }
   return customerService;
+}
+
+export function getBillingRateService(): BillingRateService {
+  if (!billingRateService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return billingRateService;
 }
 
 export function getDnsService(): DnsService {

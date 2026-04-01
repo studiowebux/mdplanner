@@ -19,6 +19,7 @@ import {
   autocompleteRouter,
   registerAutocompleteSource,
 } from "./autocomplete/routes.ts";
+import { billingRatesRouter } from "./billing-rates/routes.tsx";
 import { customersRouter } from "./customers/routes.tsx";
 import { marketingPlansRouter } from "./marketing-plans/routes.tsx";
 import { swotRouter } from "./swot/routes.tsx";
@@ -252,6 +253,7 @@ registerAutocompleteSource("kpi-metrics", {
 export const views = new Hono<{ Variables: AppVariables }>();
 
 views.route("/", homeViewRouter);
+views.route("/billing-rates", billingRatesRouter);
 views.route("/customers", customersRouter);
 views.route("/dns", dnsRouter);
 views.route("/goals", goalsViewRouter);

@@ -302,6 +302,33 @@ Quarterly invoicing, NET 30 terms.
 Fields: `id`, `name`, `email`, `phone`, `company`, `billingAddress` (nested
 object with `street`, `city`, `state`, `postalCode`, `country`),
 `created_at`, `updated_at`.
+
+## Billing Rates
+
+Directory: `billing/rates/`
+
+```yaml
+---
+id: rate_standard
+name: Standard Rate
+unit: h
+rate: 150
+currency: CAD
+isDefault: true
+created_at: 2026-02-10
+---
+
+# Standard Rate
+
+## Notes
+
+Default consulting/support rate.
+```
+
+Fields: `id`, `name`, `unit` (`h`, `d`, `unit`, `mo`, `fixed`), `rate`
+(number), `currency` (ISO 4217, optional), `assignee` (person ID, optional),
+`isDefault` (boolean), `created_at`, `updated_at`.
+
 | CRM             | `crm/`             |
 | Time Tracking   | `timetracking/`    |
 | Meetings        | `meetings/`        |
