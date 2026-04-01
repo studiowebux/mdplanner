@@ -420,6 +420,32 @@ Fields: `id`, `number` (INV-YYYY-NNN), `customerId`, `quoteId` (optional),
 `subtotal`, `tax`, `taxRate`, `total`, `paidAmount`, `notes`, `footer`,
 `sentAt`, `paidAt`, `created_at`, `updated_at`.
 
+## Payments
+
+Directory: `billing/payments/`
+
+```yaml
+---
+id: payment_001
+invoiceId: invoice_startup1
+amount: 1152
+date: 2026-02-18
+method: card
+reference: ch_1234567890
+created_at: 2026-02-18
+---
+
+# Payment ch_1234567890
+
+## Notes
+
+Paid via Stripe.
+```
+
+Fields: `id`, `invoiceId`, `amount` (number), `date` (YYYY-MM-DD),
+`method` (`bank`, `card`, `cash`, `cheque`, `other`), `reference`,
+`notes`, `created_at`, `updated_at`.
+
 | CRM             | `crm/`             |
 | Time Tracking   | `timetracking/`    |
 | Meetings        | `meetings/`        |

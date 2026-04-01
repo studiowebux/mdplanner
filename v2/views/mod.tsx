@@ -22,6 +22,7 @@ import {
 import { billingRatesRouter } from "./billing-rates/routes.tsx";
 import { customersRouter } from "./customers/routes.tsx";
 import { invoicesRouter } from "./invoices/routes.tsx";
+import { paymentsRouter } from "./payments/routes.tsx";
 import { quotesRouter } from "./quotes/routes.tsx";
 import { marketingPlansRouter } from "./marketing-plans/routes.tsx";
 import { swotRouter } from "./swot/routes.tsx";
@@ -258,6 +259,7 @@ views.route("/", homeViewRouter);
 views.route("/billing-rates", billingRatesRouter);
 views.route("/customers", customersRouter);
 views.route("/invoices", invoicesRouter);
+views.route("/payments", paymentsRouter);
 views.route("/quotes", quotesRouter);
 views.route("/dns", dnsRouter);
 views.route("/goals", goalsViewRouter);
