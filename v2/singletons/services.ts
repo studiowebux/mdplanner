@@ -48,6 +48,9 @@ import { registerBillingRateEntity } from "../domains/billing-rate/cache.ts";
 import { QuoteRepository } from "../repositories/quote.repository.ts";
 import { QuoteService } from "../services/quote.service.ts";
 import { registerQuoteEntity } from "../domains/quote/cache.ts";
+import { InvoiceRepository } from "../repositories/invoice.repository.ts";
+import { InvoiceService } from "../services/invoice.service.ts";
+import { registerInvoiceEntity } from "../domains/invoice/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -68,6 +71,7 @@ let swotService: SwotService | null = null;
 let customerService: CustomerService | null = null;
 let billingRateService: BillingRateService | null = null;
 let quoteService: QuoteService | null = null;
+let invoiceService: InvoiceService | null = null;
 let dnsService: DnsService | null = null;
 let githubService: GitHubService | null = null;
 let cacheDb: CacheDatabase | null = null;
@@ -107,6 +111,8 @@ export function initServices(
   billingRateService = new BillingRateService(billingRateRepo);
   const quoteRepo = new QuoteRepository(projectDir);
   quoteService = new QuoteService(quoteRepo);
+  const invoiceRepo = new InvoiceRepository(projectDir);
+  invoiceService = new InvoiceService(invoiceRepo);
   const dnsRepo = new DnsRepository(projectDir);
   dnsService = new DnsService(dnsRepo, projectService);
   githubService = new GitHubService(projectService);
@@ -128,6 +134,7 @@ export function initServices(
     registerCustomerEntity(customerRepo);
     registerBillingRateEntity(billingRateRepo);
     registerQuoteEntity(quoteRepo);
+    registerInvoiceEntity(invoiceRepo);
 
     // Pass cacheDb to repos for read-path caching
     milestoneRepo.setCacheDb(cacheDb);
@@ -142,6 +149,7 @@ export function initServices(
     customerRepo.setCacheDb(cacheDb);
     billingRateRepo.setCacheDb(cacheDb);
     quoteRepo.setCacheDb(cacheDb);
+    invoiceRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -261,6 +269,13 @@ export function getQuoteService(): QuoteService {
     throw new Error("Services not initialized — call initServices() first");
   }
   return quoteService;
+}
+
+export function getInvoiceService(): InvoiceService {
+  if (!invoiceService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return invoiceService;
 }
 
 export function getDnsService(): DnsService {

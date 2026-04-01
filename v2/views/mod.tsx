@@ -21,6 +21,7 @@ import {
 } from "./autocomplete/routes.ts";
 import { billingRatesRouter } from "./billing-rates/routes.tsx";
 import { customersRouter } from "./customers/routes.tsx";
+import { invoicesRouter } from "./invoices/routes.tsx";
 import { quotesRouter } from "./quotes/routes.tsx";
 import { marketingPlansRouter } from "./marketing-plans/routes.tsx";
 import { swotRouter } from "./swot/routes.tsx";
@@ -256,6 +257,7 @@ export const views = new Hono<{ Variables: AppVariables }>();
 views.route("/", homeViewRouter);
 views.route("/billing-rates", billingRatesRouter);
 views.route("/customers", customersRouter);
+views.route("/invoices", invoicesRouter);
 views.route("/quotes", quotesRouter);
 views.route("/dns", dnsRouter);
 views.route("/goals", goalsViewRouter);
