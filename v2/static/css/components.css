@@ -43,6 +43,30 @@
   border-color: var(--color-border-focus);
 }
 
+.btn--success {
+  color: var(--color-static-white);
+  background: var(--color-success);
+  border: var(--border-width) var(--border-style) var(--color-success);
+}
+
+.btn--success:hover {
+  background: var(--color-success-text);
+  color: var(--color-static-white);
+  border-color: var(--color-success-text);
+}
+
+.btn--warning {
+  color: var(--color-static-white);
+  background: var(--color-warning);
+  border: var(--border-width) var(--border-style) var(--color-warning);
+}
+
+.btn--warning:hover {
+  background: var(--color-warning-hover);
+  color: var(--color-static-white);
+  border-color: var(--color-warning-hover);
+}
+
 .btn--danger {
   color: var(--color-static-white);
   background: var(--color-error);
@@ -1312,7 +1336,7 @@ a.badge:hover {
 
 .data-table--compact .data-table__td,
 .data-table--compact td {
-  padding: var(--space-xs) var(--space-sm);
+  padding: var(--space-sm) var(--space-sm);
   font-size: var(--font-size-sm);
   white-space: nowrap;
   overflow: hidden;

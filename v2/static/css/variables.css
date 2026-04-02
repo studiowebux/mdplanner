@@ -332,6 +332,7 @@ html.font-mono {
 
   /* Warning */
   --color-warning: #ff9900;
+  --color-warning-hover: #e68a00;
   --color-warning-bg: #fff3e0;
   --color-warning-border: #ffcc80;
   --color-warning-text: #000000;
@@ -406,6 +407,7 @@ html.font-mono {
 
   /* Warning */
   --color-warning: #ff9900;
+  --color-warning-hover: #cc7a00;
   --color-warning-bg: #3d2e10;
   --color-warning-border: #b36b00;
   --color-warning-text: #ffcc80;

@@ -4,6 +4,7 @@ import { BackButton } from "./components/back-button.tsx";
 import type { Quote } from "../types/quote.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
+import { formatCurrency } from "../utils/format.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
@@ -80,7 +81,7 @@ export const QuoteDetailView: FC<
                   Accept
                 </button>
                 <button
-                  class="btn btn--danger btn--sm"
+                  class="btn btn--warning btn--sm"
                   type="button"
                   hx-post={`/api/v1/quotes/${quote.id}/reject`}
                   hx-confirm="Reject this quote?"
@@ -135,14 +136,20 @@ export const QuoteDetailView: FC<
                 </tr>
               </thead>
               <tbody>
-                {quote.paymentSchedule!.map((ps) => (
-                  <tr>
-                    <td>{ps.description}</td>
-                    <td>{ps.percent != null ? `${ps.percent}%` : ""}</td>
-                    <td>{ps.amount != null ? String(ps.amount) : ""}</td>
-                    <td>{ps.dueDate ?? ""}</td>
-                  </tr>
-                ))}
+                {quote.paymentSchedule!.map((ps) => {
+                  const amt = ps.amount ??
+                    (ps.percent != null
+                      ? Math.round(quote.total * ps.percent / 100 * 100) / 100
+                      : null);
+                  return (
+                    <tr>
+                      <td>{ps.description}</td>
+                      <td>{ps.percent != null ? `${ps.percent}%` : ""}</td>
+                      <td>{amt != null ? formatCurrency(amt) : ""}</td>
+                      <td>{ps.dueDate ?? ""}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </section>
