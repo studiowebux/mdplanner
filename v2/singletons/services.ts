@@ -54,6 +54,9 @@ import { registerInvoiceEntity } from "../domains/invoice/cache.ts";
 import { PaymentRepository } from "../repositories/payment.repository.ts";
 import { PaymentService } from "../services/payment.service.ts";
 import { registerPaymentEntity } from "../domains/payment/cache.ts";
+import { BrainstormRepository } from "../repositories/brainstorm.repository.ts";
+import { BrainstormService } from "../services/brainstorm.service.ts";
+import { registerBrainstormEntity } from "../domains/brainstorm/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -76,6 +79,7 @@ let billingRateService: BillingRateService | null = null;
 let quoteService: QuoteService | null = null;
 let invoiceService: InvoiceService | null = null;
 let paymentService: PaymentService | null = null;
+let brainstormService: BrainstormService | null = null;
 let dnsService: DnsService | null = null;
 let githubService: GitHubService | null = null;
 let cacheDb: CacheDatabase | null = null;
@@ -119,6 +123,8 @@ export function initServices(
   invoiceService = new InvoiceService(invoiceRepo);
   const paymentRepo = new PaymentRepository(projectDir);
   paymentService = new PaymentService(paymentRepo);
+  const brainstormRepo = new BrainstormRepository(projectDir);
+  brainstormService = new BrainstormService(brainstormRepo);
   const dnsRepo = new DnsRepository(projectDir);
   dnsService = new DnsService(dnsRepo, projectService);
   githubService = new GitHubService(projectService);
@@ -142,6 +148,7 @@ export function initServices(
     registerQuoteEntity(quoteRepo);
     registerInvoiceEntity(invoiceRepo);
     registerPaymentEntity(paymentRepo);
+    registerBrainstormEntity(brainstormRepo);
 
     // Pass cacheDb to repos for read-path caching
     milestoneRepo.setCacheDb(cacheDb);
@@ -291,6 +298,13 @@ export function getPaymentService(): PaymentService {
     throw new Error("Services not initialized — call initServices() first");
   }
   return paymentService;
+}
+
+export function getBrainstormService(): BrainstormService {
+  if (!brainstormService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return brainstormService;
 }
 
 export function getDnsService(): DnsService {

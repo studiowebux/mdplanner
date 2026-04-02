@@ -26,11 +26,13 @@ import { paymentsRouter } from "./payments/routes.tsx";
 import { quotesRouter } from "./quotes/routes.tsx";
 import { marketingPlansRouter } from "./marketing-plans/routes.tsx";
 import { swotRouter } from "./swot/routes.tsx";
+import { brainstormsRouter } from "./brainstorms/routes.tsx";
 import {
   getArrayTableSection,
   registerArrayTableSection,
 } from "../components/ui/array-table-registry.ts";
 import { ArrayTableRow } from "../components/ui/form-builder.tsx";
+import { BRAINSTORM_FORM_FIELDS } from "../domains/brainstorm/constants.tsx";
 import { INVOICE_FORM_FIELDS } from "../domains/invoice/constants.tsx";
 import { MKTPLAN_FORM_FIELDS } from "../domains/marketing-plan/constants.tsx";
 import { QUOTE_FORM_FIELDS } from "../domains/quote/constants.tsx";
@@ -288,12 +290,18 @@ views.route("/settings", settingsViewRouter);
 views.route("/search", searchRouter);
 views.route("/marketing-plans", marketingPlansRouter);
 views.route("/swot", swotRouter);
+views.route("/brainstorms", brainstormsRouter);
 views.route("/autocomplete", autocompleteRouter);
 views.route("/sidebar", sidebarRouter);
 
 // Register array-table sections for server-rendered row fragments.
 for (
-  const fields of [MKTPLAN_FORM_FIELDS, QUOTE_FORM_FIELDS, INVOICE_FORM_FIELDS]
+  const fields of [
+    MKTPLAN_FORM_FIELDS,
+    QUOTE_FORM_FIELDS,
+    INVOICE_FORM_FIELDS,
+    BRAINSTORM_FORM_FIELDS,
+  ]
 ) {
   for (const field of fields) {
     if ((field as FieldDef & { type: string }).type === "array-table") {
