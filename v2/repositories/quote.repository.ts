@@ -10,8 +10,7 @@ import type { LineItem } from "../types/billing.types.ts";
 import { mapArrayFromFm } from "../utils/frontmatter-mapper.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { QUOTE_TABLE, rowToQuote } from "../domains/quote/cache.ts";
-
-const BODY_KEYS = ["id", "notes"] as const;
+import { QUOTE_BODY_KEYS } from "../domains/quote/constants.ts";
 
 export class QuoteRepository extends CachedMarkdownRepository<
   Quote,
@@ -137,7 +136,7 @@ export class QuoteRepository extends CachedMarkdownRepository<
   }
 
   protected serialize(item: Quote): string {
-    return this.serializeStandard(item, BODY_KEYS, this.buildBody(item));
+    return this.serializeStandard(item, QUOTE_BODY_KEYS, this.buildBody(item));
   }
 
   private buildBody(item: Quote): string {

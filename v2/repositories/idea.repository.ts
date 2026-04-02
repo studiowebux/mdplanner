@@ -8,8 +8,7 @@ import type {
 } from "../types/idea.types.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { IDEA_TABLE, rowToIdea } from "../domains/idea/cache.ts";
-
-const BODY_KEYS = ["id", "description"] as const;
+import { IDEA_BODY_KEYS } from "../domains/idea/constants.ts";
 
 export class IdeaRepository extends CachedMarkdownRepository<
   Idea,
@@ -173,6 +172,6 @@ export class IdeaRepository extends CachedMarkdownRepository<
   }
 
   protected serialize(item: Idea): string {
-    return this.serializeStandard(item, BODY_KEYS, item.description ?? "");
+    return this.serializeStandard(item, IDEA_BODY_KEYS, item.description ?? "");
   }
 }

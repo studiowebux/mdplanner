@@ -12,8 +12,7 @@ import {
   BRAINSTORM_TABLE,
   rowToBrainstorm,
 } from "../domains/brainstorm/cache.ts";
-
-const BODY_KEYS = ["id", "title", "questions"] as const;
+import { BRAINSTORM_BODY_KEYS } from "../domains/brainstorm/constants.ts";
 
 export class BrainstormRepository extends CachedMarkdownRepository<
   Brainstorm,
@@ -115,7 +114,11 @@ export class BrainstormRepository extends CachedMarkdownRepository<
   }
 
   protected serialize(item: Brainstorm): string {
-    return this.serializeStandard(item, BODY_KEYS, this.buildBody(item));
+    return this.serializeStandard(
+      item,
+      BRAINSTORM_BODY_KEYS,
+      this.buildBody(item),
+    );
   }
 
   private buildBody(item: Brainstorm): string {

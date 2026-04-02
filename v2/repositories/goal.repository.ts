@@ -3,8 +3,7 @@
 import type { CreateGoal, Goal, UpdateGoal } from "../types/goal.types.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { GOAL_TABLE, rowToGoal } from "../domains/goal/cache.ts";
-
-const BODY_KEYS = ["id", "description"] as const;
+import { GOAL_BODY_KEYS } from "../domains/goal/constants.ts";
 
 export class GoalRepository extends CachedMarkdownRepository<
   Goal,
@@ -105,6 +104,6 @@ export class GoalRepository extends CachedMarkdownRepository<
   }
 
   protected serialize(item: Goal): string {
-    return this.serializeStandard(item, BODY_KEYS, item.description ?? "");
+    return this.serializeStandard(item, GOAL_BODY_KEYS, item.description ?? "");
   }
 }

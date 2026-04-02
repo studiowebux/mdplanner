@@ -9,8 +9,7 @@ import type { LineItem } from "../types/billing.types.ts";
 import { mapArrayFromFm } from "../utils/frontmatter-mapper.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { INVOICE_TABLE, rowToInvoice } from "../domains/invoice/cache.ts";
-
-const BODY_KEYS = ["id", "notes"] as const;
+import { INVOICE_BODY_KEYS } from "../domains/invoice/constants.ts";
 
 export class InvoiceRepository extends CachedMarkdownRepository<
   Invoice,
@@ -125,7 +124,11 @@ export class InvoiceRepository extends CachedMarkdownRepository<
   }
 
   protected serialize(item: Invoice): string {
-    return this.serializeStandard(item, BODY_KEYS, this.buildBody(item));
+    return this.serializeStandard(
+      item,
+      INVOICE_BODY_KEYS,
+      this.buildBody(item),
+    );
   }
 
   private buildBody(item: Invoice): string {

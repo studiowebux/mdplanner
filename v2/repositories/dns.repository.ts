@@ -8,8 +8,7 @@ import type {
 } from "../types/dns.types.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { DNS_TABLE, rowToDnsDomain } from "../domains/dns/cache.ts";
-
-const BODY_KEYS = ["id", "notes"] as const;
+import { DNS_BODY_KEYS } from "../domains/dns/constants.ts";
 
 export class DnsRepository extends CachedMarkdownRepository<
   DnsDomain,
@@ -148,6 +147,6 @@ export class DnsRepository extends CachedMarkdownRepository<
   }
 
   protected serialize(item: DnsDomain): string {
-    return this.serializeStandard(item, BODY_KEYS, item.notes ?? "");
+    return this.serializeStandard(item, DNS_BODY_KEYS, item.notes ?? "");
   }
 }

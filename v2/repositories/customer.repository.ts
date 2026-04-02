@@ -8,8 +8,7 @@ import type {
 } from "../types/customer.types.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { CUSTOMER_TABLE, rowToCustomer } from "../domains/customer/cache.ts";
-
-const BODY_KEYS = ["id", "notes"] as const;
+import { CUSTOMER_BODY_KEYS } from "../domains/customer/constants.ts";
 
 export class CustomerRepository extends CachedMarkdownRepository<
   Customer,
@@ -96,7 +95,11 @@ export class CustomerRepository extends CachedMarkdownRepository<
   }
 
   protected serialize(item: Customer): string {
-    return this.serializeStandard(item, BODY_KEYS, this.buildBody(item));
+    return this.serializeStandard(
+      item,
+      CUSTOMER_BODY_KEYS,
+      this.buildBody(item),
+    );
   }
 
   private buildBody(item: Customer): string {

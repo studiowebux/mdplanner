@@ -7,8 +7,7 @@ import type {
 } from "../types/payment.types.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { PAYMENT_TABLE, rowToPayment } from "../domains/payment/cache.ts";
-
-const BODY_KEYS = ["id", "notes"] as const;
+import { PAYMENT_BODY_KEYS } from "../domains/payment/constants.ts";
 
 export class PaymentRepository extends CachedMarkdownRepository<
   Payment,
@@ -79,7 +78,11 @@ export class PaymentRepository extends CachedMarkdownRepository<
   }
 
   protected serialize(item: Payment): string {
-    return this.serializeStandard(item, BODY_KEYS, this.buildBody(item));
+    return this.serializeStandard(
+      item,
+      PAYMENT_BODY_KEYS,
+      this.buildBody(item),
+    );
   }
 
   private buildBody(item: Payment): string {

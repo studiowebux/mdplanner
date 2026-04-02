@@ -10,8 +10,7 @@ import {
   BILLING_RATE_TABLE,
   rowToBillingRate,
 } from "../domains/billing-rate/cache.ts";
-
-const BODY_KEYS = ["id", "notes"] as const;
+import { BILLING_RATE_BODY_KEYS } from "../domains/billing-rate/constants.ts";
 
 export class BillingRateRepository extends CachedMarkdownRepository<
   BillingRate,
@@ -87,7 +86,11 @@ export class BillingRateRepository extends CachedMarkdownRepository<
   }
 
   protected serialize(item: BillingRate): string {
-    return this.serializeStandard(item, BODY_KEYS, this.buildBody(item));
+    return this.serializeStandard(
+      item,
+      BILLING_RATE_BODY_KEYS,
+      this.buildBody(item),
+    );
   }
 
   private buildBody(item: BillingRate): string {
