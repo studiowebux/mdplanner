@@ -18,7 +18,9 @@ export const QuoteCard: FC<Props> = ({ item, q }) => {
       id={item.id}
     >
       <CardMeta>
-        <CardMetaItem label="Customer">{item.customerId}</CardMetaItem>
+        <CardMetaItem label="Customer">
+          <a href={`/customers/${item.customerId}`}>{item.customerId}</a>
+        </CardMetaItem>
         <CardMetaItem label="Status">
           <span class={badgeClass(QUOTE_STATUS_VARIANTS, item.status)}>
             {item.status}

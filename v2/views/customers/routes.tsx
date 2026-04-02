@@ -2,7 +2,11 @@
 
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { customerConfig } from "../../domains/customer/config.tsx";
-import { getCustomerService } from "../../singletons/services.ts";
+import {
+  getCustomerService,
+  getInvoiceService,
+  getQuoteService,
+} from "../../singletons/services.ts";
 import { CustomerDetailView } from "../customer-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 
@@ -13,10 +17,23 @@ customersRouter.get("/:id", async (c) => {
   const customer = await getCustomerService().getById(id);
   if (!customer) return c.notFound();
 
+  const invoiceService = getInvoiceService();
+  const [quotes, invoices] = await Promise.all([
+    getQuoteService().list({ customerId: id }),
+    invoiceService.list({ customerId: id }),
+  ]);
+
+  const invoicesWithStatus = invoices.map((inv) => ({
+    ...inv,
+    displayStatus: invoiceService.displayStatus(inv),
+  }));
+
   return c.html(
     <CustomerDetailView
       {...viewProps(c, "/customers")}
       item={customer}
+      quotes={quotes}
+      invoices={invoicesWithStatus}
     />,
   );
 });

@@ -20,7 +20,11 @@ export const CustomerCard: FC<Props> = ({ item, q }) => {
         {item.company && (
           <CardMetaItem label="Company">{item.company}</CardMetaItem>
         )}
-        {item.email && <CardMetaItem label="Email">{item.email}</CardMetaItem>}
+        {item.email && (
+          <CardMetaItem label="Email">
+            <a href={`mailto:${item.email}`}>{item.email}</a>
+          </CardMetaItem>
+        )}
         {city && <CardMetaItem label="City">{city}</CardMetaItem>}
       </CardMeta>
     </DomainCard>

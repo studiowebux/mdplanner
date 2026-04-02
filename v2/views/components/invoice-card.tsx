@@ -22,7 +22,9 @@ export const InvoiceCard: FC<Props> = ({ item, q }) => {
       id={item.id}
     >
       <CardMeta>
-        <CardMetaItem label="Customer">{item.customerId}</CardMetaItem>
+        <CardMetaItem label="Customer">
+          <a href={`/customers/${item.customerId}`}>{item.customerId}</a>
+        </CardMetaItem>
         <CardMetaItem label="Status">
           <span class={badgeClass(INVOICE_STATUS_VARIANTS, displayStatus)}>
             {displayStatus}

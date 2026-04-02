@@ -26,3 +26,67 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
+
+/* ---------------------------------------------------------------------------
+   Billing section
+--------------------------------------------------------------------------- */
+
+.customer-detail__billing-stats {
+  display: flex;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-lg);
+}
+
+.customer-detail__stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+}
+
+.customer-detail__stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.customer-detail__stat-value {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.customer-detail__stat-value--paid {
+  color: var(--color-success);
+}
+
+.customer-detail__stat-value--due {
+  color: var(--color-error);
+}
+
+.customer-detail__billing-empty {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.customer-detail__billing-group {
+  margin-bottom: var(--space-lg);
+}
+
+.customer-detail__billing-subtitle {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-sm);
+}
+
+.customer-detail__billing-count {
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-muted);
+}
+
+.customer-detail__view-all {
+  display: inline-block;
+  margin-top: var(--space-sm);
+  font-size: var(--font-size-sm);
+}

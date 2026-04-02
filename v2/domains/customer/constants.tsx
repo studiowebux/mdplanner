@@ -1,3 +1,6 @@
+/** Max recent quotes/invoices shown in customer detail billing section. */
+export const CUSTOMER_BILLING_MAX_ROWS = 10;
+
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import type { Customer } from "../../types/customer.types.ts";

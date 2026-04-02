@@ -1,7 +1,10 @@
 // Quote CRUD + status transition routes — OpenAPIHono router consumed by api/mod.ts.
 
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import { getQuoteService } from "../../../singletons/services.ts";
+import {
+  getInvoiceService,
+  getQuoteService,
+} from "../../../singletons/services.ts";
 import { publish } from "../../../singletons/event-bus.ts";
 import {
   CreateQuoteSchema,
@@ -242,9 +245,25 @@ quotesRouter.post("/:id/to-invoice", async (c) => {
   if (quote.convertedToInvoice) {
     return c.json({ error: "Quote already converted to invoice" }, 400);
   }
-  // Invoice creation will be wired in the Invoice domain task
-  return c.json(
-    { error: "Invoice domain not yet available" },
-    501,
-  );
+
+  const nonOptionalItems = quote.lineItems
+    .filter((li) => !li.optional)
+    .map(({ optional: _, ...rest }) => rest);
+
+  const invoice = await getInvoiceService().create({
+    customerId: quote.customerId,
+    quoteId: quote.id,
+    title: quote.title,
+    lineItems: nonOptionalItems,
+    currency: quote.currency,
+    taxRate: quote.taxRate,
+  });
+
+  await service.update(id, {
+    convertedToInvoice: invoice.id,
+  } as Record<string, unknown>);
+
+  publish("quote.updated");
+  publish("invoice.created");
+  return c.json(invoice, 201);
 });
