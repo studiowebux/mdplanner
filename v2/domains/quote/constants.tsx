@@ -1,6 +1,7 @@
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import type { Quote } from "../../types/quote.types.ts";
+import { QUOTE_STATUSES } from "../../types/quote.types.ts";
 import type { BadgeVariant } from "../../components/ui/status-badge.tsx";
 import { statusBadgeRenderer } from "../../components/ui/status-badge.tsx";
 import { formatCurrency } from "../../utils/format.ts";
@@ -9,6 +10,11 @@ import { Highlight } from "../../utils/highlight.tsx";
 // ---------------------------------------------------------------------------
 // Status badges
 // ---------------------------------------------------------------------------
+
+export const QUOTE_STATUS_OPTIONS = QUOTE_STATUSES.map((s) => ({
+  value: s,
+  label: s.charAt(0).toUpperCase() + s.slice(1),
+}));
 
 export const QUOTE_STATUS_VARIANTS: Record<string, BadgeVariant> = {
   draft: "neutral",
@@ -115,12 +121,7 @@ export const QUOTE_FORM_FIELDS: FieldDef[] = [
     type: "select",
     name: "status",
     label: "Status",
-    options: [
-      { value: "draft", label: "Draft" },
-      { value: "sent", label: "Sent" },
-      { value: "accepted", label: "Accepted" },
-      { value: "rejected", label: "Rejected" },
-    ],
+    options: QUOTE_STATUS_OPTIONS,
   },
   {
     type: "text",
@@ -142,9 +143,17 @@ export const QUOTE_FORM_FIELDS: FieldDef[] = [
     type: "array-table",
     name: "lineItems",
     label: "Line Item",
-    section: "line_items",
+    section: "quote_line_items",
     addLabel: "Add line item",
     itemFields: [
+      {
+        type: "autocomplete",
+        name: "rateId",
+        label: "Rate",
+        source: "billing-rates",
+        placeholder: "Search rates...",
+        autofill: { unit: "unit", rate: "unitRate" },
+      },
       {
         type: "select",
         name: "type",

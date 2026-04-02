@@ -137,21 +137,3 @@ export type UpdateLineItem = z.infer<typeof UpdateLineItemSchema>;
 export type LineItemType = (typeof LINE_ITEM_TYPES)[number];
 export type DiscountType = (typeof DISCOUNT_TYPES)[number];
 export type UnitType = (typeof UNIT_TYPES)[number];
-
-// ---------------------------------------------------------------------------
-// Shared billing component props
-// ---------------------------------------------------------------------------
-
-export type BillingTotalsProps = {
-  subtotal: number;
-  discount?: number | null;
-  tax?: number | null;
-  taxRate?: number | null;
-  total: number;
-  paidAmount?: number | null;
-};
-
-export type LineItemsTableProps = {
-  items: LineItem[];
-  showOptional?: boolean;
-};

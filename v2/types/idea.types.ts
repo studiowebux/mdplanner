@@ -18,9 +18,11 @@ export const IDEA_STATUSES = [
   "cancelled",
 ] as const;
 
+export type IdeaStatus = (typeof IDEA_STATUSES)[number];
+
 export const IDEA_PRIORITIES = ["high", "medium", "low"] as const;
 
-export const IDEA_COMPLETED_STATUSES = new Set([
+export const IDEA_COMPLETED_STATUSES = new Set<IdeaStatus>([
   "implemented",
   "cancelled",
   "rejected",

@@ -2,8 +2,16 @@
 // Renders subtotal, discount, tax, total, paid, and balance due.
 
 import type { FC } from "hono/jsx";
-import type { BillingTotalsProps } from "../../types/billing.types.ts";
 import { formatCurrency } from "../../utils/format.ts";
+
+type BillingTotalsProps = {
+  subtotal: number;
+  discount?: number | null;
+  tax?: number | null;
+  taxRate?: number | null;
+  total: number;
+  paidAmount?: number | null;
+};
 
 export const BillingTotals: FC<BillingTotalsProps> = ({
   subtotal,

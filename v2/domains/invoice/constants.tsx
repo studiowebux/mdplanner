@@ -177,9 +177,17 @@ export const INVOICE_FORM_FIELDS: FieldDef[] = [
     type: "array-table",
     name: "lineItems",
     label: "Line Item",
-    section: "line_items",
+    section: "invoice_line_items",
     addLabel: "Add line item",
     itemFields: [
+      {
+        type: "autocomplete",
+        name: "rateId",
+        label: "Rate",
+        source: "billing-rates",
+        placeholder: "Search rates...",
+        autofill: { unit: "unit", rate: "unitRate" },
+      },
       {
         type: "select",
         name: "type",

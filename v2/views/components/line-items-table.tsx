@@ -2,11 +2,13 @@
 // Groups items by group field, handles all line types (service/product/expense/text).
 
 import type { FC } from "hono/jsx";
-import type {
-  LineItem,
-  LineItemsTableProps,
-} from "../../types/billing.types.ts";
+import type { LineItem } from "../../types/billing.types.ts";
 import { formatCurrency } from "../../utils/format.ts";
+
+type LineItemsTableProps = {
+  items: LineItem[];
+  showOptional?: boolean;
+};
 
 const TYPE_LABELS: Record<string, string> = {
   service: "Service",

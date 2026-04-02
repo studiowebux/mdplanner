@@ -31,9 +31,12 @@ import {
   registerArrayTableSection,
 } from "../components/ui/array-table-registry.ts";
 import { ArrayTableRow } from "../components/ui/form-builder.tsx";
+import { INVOICE_FORM_FIELDS } from "../domains/invoice/constants.tsx";
 import { MKTPLAN_FORM_FIELDS } from "../domains/marketing-plan/constants.tsx";
+import { QUOTE_FORM_FIELDS } from "../domains/quote/constants.tsx";
 import type { FieldDef } from "../components/ui/form-builder.tsx";
 import {
+  getBillingRateService,
   getCustomerService,
   getGoalService,
   getIdeaService,
@@ -253,6 +256,17 @@ registerAutocompleteSource("kpi-metrics", {
   valueKey: "name",
 });
 
+registerAutocompleteSource("billing-rates", {
+  list: () => getBillingRateService().list(),
+  search: async (q) => {
+    const all = await getBillingRateService().list();
+    return all.filter((r) => ciIncludes(r.name, q));
+  },
+  displayKey: "name",
+  valueKey: "id",
+  extraKeys: ["unit", "rate"],
+});
+
 export const views = new Hono<{ Variables: AppVariables }>();
 
 views.route("/", homeViewRouter);
@@ -278,10 +292,14 @@ views.route("/autocomplete", autocompleteRouter);
 views.route("/sidebar", sidebarRouter);
 
 // Register array-table sections for server-rendered row fragments.
-for (const field of MKTPLAN_FORM_FIELDS) {
-  if ((field as FieldDef & { type: string }).type === "array-table") {
-    const f = field as Extract<FieldDef, { type: "array-table" }>;
-    registerArrayTableSection(f.section, f.itemFields);
+for (
+  const fields of [MKTPLAN_FORM_FIELDS, QUOTE_FORM_FIELDS, INVOICE_FORM_FIELDS]
+) {
+  for (const field of fields) {
+    if ((field as FieldDef & { type: string }).type === "array-table") {
+      const f = field as Extract<FieldDef, { type: "array-table" }>;
+      registerArrayTableSection(f.section, f.itemFields);
+    }
   }
 }
 

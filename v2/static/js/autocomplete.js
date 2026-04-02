@@ -20,8 +20,38 @@
       hidden.dispatchEvent(new Event("input", { bubbles: true }));
     }
     if (search) search.value = item.textContent || "";
+    // Autofill sibling fields in an array-table row
+    if (search) autofillSiblings(search, item);
     var list = item.closest(".form__autocomplete-list");
     if (list) list.innerHTML = "";
+  }
+
+  /** Fill sibling inputs in the same array-table row using data-autofill-map. */
+  function autofillSiblings(search, item) {
+    var mapJson = search.getAttribute("data-autofill-map");
+    if (!mapJson) return;
+    var row = search.closest(".array-table__row");
+    if (!row) return;
+    var map;
+    try {
+      map = JSON.parse(mapJson);
+    } catch (_) {
+      return;
+    }
+    var keys = Object.keys(map);
+    for (var i = 0; i < keys.length; i++) {
+      var dataKey = keys[i];
+      var fieldName = map[dataKey];
+      var val = item.getAttribute("data-" + dataKey) || "";
+      // Find input whose name ends with .fieldName in this row
+      var input = row.querySelector(
+        '[name$=".' + fieldName + '"]',
+      );
+      if (input) {
+        input.value = val;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    }
   }
 
   function getActiveList(input) {

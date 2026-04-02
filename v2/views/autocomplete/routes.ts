@@ -11,6 +11,8 @@ type AutocompleteSource = {
   list: () => Promise<Record<string, unknown>[]>;
   displayKey: string;
   valueKey: string;
+  /** Extra item keys to include as data-* attributes on <li> (for autofill). */
+  extraKeys?: string[];
 };
 
 const sources: Record<string, AutocompleteSource> = {};
@@ -32,7 +34,9 @@ autocompleteRouter.get("/:source", async (c) => {
 
   const q = c.req.query("q")?.trim().toLowerCase() ?? "";
   const items = q ? await src.search(q) : await src.list();
-  return c.html(renderItems(items, src.displayKey, src.valueKey, q));
+  return c.html(
+    renderItems(items, src.displayKey, src.valueKey, q, src.extraKeys),
+  );
 });
 
 function renderItems(
@@ -40,6 +44,7 @@ function renderItems(
   displayKey: string,
   valueKey: string,
   q: string,
+  extraKeys?: string[],
 ): string {
   if (items.length === 0) {
     return `<li class="form__autocomplete-empty">No results</li>`;
@@ -48,9 +53,12 @@ function renderItems(
     const text = String(item[displayKey] ?? "");
     const value = String(item[valueKey] ?? "");
     const highlighted = q ? highlightMatch(text, q) : escapeHtml(text);
+    const extras = (extraKeys ?? [])
+      .map((k) => ` data-${k}="${escapeAttr(String(item[k] ?? ""))}"`)
+      .join("");
     return `<li class="form__autocomplete-item" data-value="${
       escapeAttr(value)
-    }">${highlighted}</li>`;
+    }"${extras}>${highlighted}</li>`;
   }).join("");
 }
 

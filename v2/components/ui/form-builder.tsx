@@ -1,5 +1,6 @@
 import type { FC } from "hono/jsx";
 import { parseJson } from "../../database/sqlite/mod.ts";
+import { AutocompleteWidget } from "./autocomplete-widget.tsx";
 import { Sidenav } from "./sidenav.tsx";
 
 type Option = { value: string; label: string };
@@ -16,6 +17,20 @@ export type ArrayTableItemField =
     label: string;
     rows?: number;
     placeholder?: string;
+  }
+  | {
+    type: "autocomplete";
+    name: string;
+    label: string;
+    source: string;
+    placeholder?: string;
+    /**
+     * Map from data-autofill attribute keys (returned on <li> items)
+     * to sibling field names within the same array-table row.
+     * Example: `{ unit: "unit", rate: "unitRate" }` fills the row's
+     * unit and unitRate fields when a rate is selected.
+     */
+    autofill?: Record<string, string>;
   };
 
 export type FieldDef =
@@ -159,6 +174,16 @@ const ArrayTableRowField: FC<
           {value ?? ""}
         </textarea>
       )}
+      {field.type === "autocomplete" && (
+        <AutocompleteWidget
+          id={`at-${section}-${idx}-${field.name}`}
+          name={name}
+          source={field.source}
+          value={value}
+          placeholder={field.placeholder}
+          autofillMap={field.autofill}
+        />
+      )}
     </div>
   );
 };
@@ -292,31 +317,16 @@ const Field: FC<
         </label>
       )}
       {def.type === "autocomplete" && (
-        <div class="form__autocomplete">
-          <input
-            type="text"
-            id={`${id}-search`}
-            class="form__input"
-            placeholder={def.placeholder ?? "Search..."}
-            value={displayValue ?? value ?? ""}
-            autocomplete="off"
-            name="q"
-            data-autocomplete-target={id}
-            {...(def.freetext ? { "data-freetext": "true" } : {})}
-            hx-get={`/autocomplete/${def.source}`}
-            hx-trigger="input changed delay:150ms, focus"
-            hx-target={`#${id}-results`}
-            hx-swap="innerHTML"
-          />
-          <input
-            type="hidden"
-            id={id}
-            name={def.name}
-            value={value ?? ""}
-            required={def.required}
-          />
-          <ul class="form__autocomplete-list" id={`${id}-results`} />
-        </div>
+        <AutocompleteWidget
+          id={id}
+          name={def.name}
+          source={def.source}
+          value={value}
+          displayValue={displayValue}
+          placeholder={def.placeholder}
+          required={def.required}
+          freetext={def.freetext}
+        />
       )}
       {def.type === "tags" && (() => {
         const tags = (value ?? "").split(",").map((s) => s.trim()).filter(

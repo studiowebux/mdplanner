@@ -15,6 +15,8 @@ export const MARKETING_PLAN_STATUSES = [
   "archived",
 ] as const;
 
+export type MarketingPlanStatus = (typeof MARKETING_PLAN_STATUSES)[number];
+
 export const MARKETING_ITEM_STATUSES = [
   "planned",
   "active",
@@ -22,7 +24,7 @@ export const MARKETING_ITEM_STATUSES = [
   "completed",
 ] as const;
 
-export const MARKETING_PLAN_COMPLETED_STATUSES = new Set([
+export const MARKETING_PLAN_COMPLETED_STATUSES = new Set<MarketingPlanStatus>([
   "completed",
   "archived",
 ]);
