@@ -68,18 +68,14 @@ export class CustomerRepository extends CachedMarkdownRepository<
       notes = bodyText || undefined;
     }
 
-    // Parse nested billingAddress — handle both camelCase and snake_case keys
     let billingAddress: BillingAddress | undefined;
-    const addr = fm.billingAddress ?? fm.billing_address;
-    if (addr && typeof addr === "object") {
-      const a = addr as Record<string, unknown>;
+    if (fm.billingAddress && typeof fm.billingAddress === "object") {
+      const a = fm.billingAddress as Record<string, unknown>;
       billingAddress = {
         street: a.street != null ? String(a.street) : undefined,
         city: a.city != null ? String(a.city) : undefined,
         state: a.state != null ? String(a.state) : undefined,
-        postalCode: a.postalCode != null || a.postal_code != null
-          ? String(a.postalCode ?? a.postal_code)
-          : undefined,
+        postalCode: a.postalCode != null ? String(a.postalCode) : undefined,
         country: a.country != null ? String(a.country) : undefined,
       };
     }
@@ -92,14 +88,10 @@ export class CustomerRepository extends CachedMarkdownRepository<
       company: fm.company != null ? String(fm.company) : undefined,
       billingAddress,
       notes,
-      createdAt: fm.created_at
-        ? String(fm.created_at)
-        : new Date().toISOString(),
-      updatedAt: fm.updated_at
-        ? String(fm.updated_at)
-        : new Date().toISOString(),
-      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
-      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
+      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
+      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
+      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
+      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
     };
   }
 

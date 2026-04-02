@@ -14,7 +14,7 @@ import {
   mergeFields,
   readMarkdownDir,
 } from "../utils/repo-helpers.ts";
-import { mapKeysToFm } from "../utils/frontmatter-mapper.ts";
+import { mapKeysFromFm, mapKeysToFm } from "../utils/frontmatter-mapper.ts";
 import { ciEquals } from "../utils/string.ts";
 
 export interface RepositoryConfig {
@@ -74,7 +74,7 @@ export abstract class BaseMarkdownRepository<
   async findAll(): Promise<T[]> {
     const items = await readMarkdownDir(
       this.dir,
-      (filename, fm, body) => this.parse(filename, fm, body),
+      (filename, fm, body) => this.parse(filename, mapKeysFromFm(fm), body),
     );
     return items.sort((a, b) => this.compare(a, b));
   }
@@ -92,7 +92,7 @@ export abstract class BaseMarkdownRepository<
     try {
       const content = await Deno.readTextFile(directPath);
       const { frontmatter, body } = parseFrontmatter(content);
-      const item = this.parse(`${id}.md`, frontmatter, body);
+      const item = this.parse(`${id}.md`, mapKeysFromFm(frontmatter), body);
       if (item) return { item, filePath: directPath };
     } catch (err) {
       if (!(err instanceof Deno.errors.NotFound)) throw err;
@@ -105,7 +105,7 @@ export abstract class BaseMarkdownRepository<
         const filePath = join(this.dir, entry.name);
         const content = await Deno.readTextFile(filePath);
         const { frontmatter, body } = parseFrontmatter(content);
-        const item = this.parse(entry.name, frontmatter, body);
+        const item = this.parse(entry.name, mapKeysFromFm(frontmatter), body);
         if (item && item.id === id) return { item, filePath };
       }
     } catch (err) {

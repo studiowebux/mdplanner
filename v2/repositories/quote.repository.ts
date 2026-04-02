@@ -7,6 +7,7 @@ import type {
   UpdateQuote,
 } from "../types/quote.types.ts";
 import type { LineItem } from "../types/billing.types.ts";
+import { mapArrayFromFm } from "../utils/frontmatter-mapper.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { QUOTE_TABLE, rowToQuote } from "../domains/quote/cache.ts";
 
@@ -66,7 +67,6 @@ export class QuoteRepository extends CachedMarkdownRepository<
       ? headingMatch[1]
       : "";
 
-    // Extract notes from body after heading
     let notes: string | undefined;
     if (headingMatch) {
       const afterHeading = bodyText.replace(/^#\s+.+\n?/, "").trim();
@@ -75,9 +75,8 @@ export class QuoteRepository extends CachedMarkdownRepository<
       notes = bodyText || undefined;
     }
 
-    // Parse line items — handle v1 format (rate → unitRate, no type)
-    const rawItems = Array.isArray(fm.lineItems ?? fm.line_items)
-      ? (fm.lineItems ?? fm.line_items) as Record<string, unknown>[]
+    const rawItems = Array.isArray(fm.lineItems)
+      ? mapArrayFromFm(fm.lineItems as unknown[])
       : [];
     const lineItems: LineItem[] = rawItems.map((li) => ({
       id: String(li.id ?? ""),
@@ -86,99 +85,54 @@ export class QuoteRepository extends CachedMarkdownRepository<
       group: li.group != null ? String(li.group) : undefined,
       quantity: li.quantity != null ? Number(li.quantity) : undefined,
       unit: li.unit != null ? String(li.unit) as LineItem["unit"] : undefined,
-      unitRate: li.unitRate != null
-        ? Number(li.unitRate)
-        : li.unit_rate != null
-        ? Number(li.unit_rate)
-        : li.rate != null
-        ? Number(li.rate)
-        : undefined,
+      unitRate: li.unitRate != null ? Number(li.unitRate) : undefined,
       discount: li.discount != null ? Number(li.discount) : undefined,
-      discountType: li.discountType as LineItem["discountType"] ??
-        li.discount_type as LineItem["discountType"] ?? undefined,
+      discountType: li.discountType as LineItem["discountType"] ?? undefined,
       taxable: li.taxable != null ? Boolean(li.taxable) : undefined,
       optional: li.optional != null ? Boolean(li.optional) : undefined,
-      rateId: li.rateId != null || li.rate_id != null
-        ? String(li.rateId ?? li.rate_id)
-        : undefined,
-      taskId: li.taskId != null || li.task_id != null
-        ? String(li.taskId ?? li.task_id)
-        : undefined,
+      rateId: li.rateId != null ? String(li.rateId) : undefined,
+      taskId: li.taskId != null ? String(li.taskId) : undefined,
       notes: li.notes != null ? String(li.notes) : undefined,
       amount: Number(li.amount ?? 0),
     }));
 
-    // Parse payment schedule
-    const rawSchedule = Array.isArray(
-        fm.paymentSchedule ?? fm.payment_schedule,
-      )
-      ? (fm.paymentSchedule ?? fm.payment_schedule) as Record<
-        string,
-        unknown
-      >[]
+    const rawSchedule = Array.isArray(fm.paymentSchedule)
+      ? mapArrayFromFm(fm.paymentSchedule as unknown[])
       : undefined;
     const paymentSchedule: PaymentScheduleItem[] | undefined = rawSchedule
       ?.map((ps) => ({
         description: String(ps.description ?? ""),
         percent: ps.percent != null ? Number(ps.percent) : undefined,
         amount: ps.amount != null ? Number(ps.amount) : undefined,
-        dueDate: ps.dueDate != null || ps.due_date != null
-          ? String(ps.dueDate ?? ps.due_date)
-          : undefined,
+        dueDate: ps.dueDate != null ? String(ps.dueDate) : undefined,
       }));
 
     return {
       id,
       number: String(fm.number ?? ""),
-      customerId: String(fm.customerId ?? fm.customer_id ?? ""),
+      customerId: String(fm.customerId ?? ""),
       title,
       status: (fm.status as Quote["status"]) ?? "draft",
       currency: fm.currency != null ? String(fm.currency) : undefined,
-      expiresAt: fm.expiresAt != null
-        ? String(fm.expiresAt)
-        : fm.expires_at != null
-        ? String(fm.expires_at)
-        : fm.validUntil != null
-        ? String(fm.validUntil)
-        : fm.valid_until != null
-        ? String(fm.valid_until)
-        : undefined,
+      expiresAt: fm.expiresAt != null ? String(fm.expiresAt) : undefined,
       lineItems,
       paymentSchedule: paymentSchedule?.length ? paymentSchedule : undefined,
       subtotal: Number(fm.subtotal ?? 0),
       tax: fm.tax != null ? Number(fm.tax) : undefined,
-      taxRate: fm.taxRate != null
-        ? Number(fm.taxRate)
-        : fm.tax_rate != null
-        ? Number(fm.tax_rate)
-        : undefined,
+      taxRate: fm.taxRate != null ? Number(fm.taxRate) : undefined,
       total: Number(fm.total ?? 0),
       notes,
       footer: fm.footer != null ? String(fm.footer) : undefined,
       revision: fm.revision != null ? Number(fm.revision) : undefined,
       convertedToInvoice: fm.convertedToInvoice != null
         ? String(fm.convertedToInvoice)
-        : fm.converted_to_invoice != null
-        ? String(fm.converted_to_invoice)
         : undefined,
-      createdAt: fm.created_at
-        ? String(fm.created_at)
-        : new Date().toISOString(),
-      updatedAt: fm.updated_at
-        ? String(fm.updated_at)
-        : new Date().toISOString(),
-      sentAt: fm.sent_at != null
-        ? String(fm.sent_at)
-        : fm.sentAt != null
-        ? String(fm.sentAt)
-        : undefined,
-      acceptedAt: fm.accepted_at != null
-        ? String(fm.accepted_at)
-        : fm.acceptedAt != null
-        ? String(fm.acceptedAt)
-        : undefined,
-      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
-      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
+      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
+      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
+      sentAt: fm.sentAt != null ? String(fm.sentAt) : undefined,
+      acceptedAt: fm.acceptedAt != null ? String(fm.acceptedAt) : undefined,
+      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
+      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
     };
   }
 
