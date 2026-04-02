@@ -1330,7 +1330,7 @@ a.badge:hover {
 
 .data-table--compact .data-table__th,
 .data-table--compact th {
-  padding: var(--space-xs) var(--space-sm);
+  padding: var(--space-sm) var(--space-sm);
   font-size: var(--font-size-xs);
 }
 
@@ -1347,6 +1347,24 @@ a.badge:hover {
 .data-table--compact .data-table__row,
 .data-table--compact tbody tr {
   transition: background var(--transition-fast);
+}
+
+.data-table--compact .data-table__row:hover,
+.data-table--compact tbody tr:hover {
+  background: var(--color-bg-secondary);
+}
+
+/* Right-aligned columns (currency, numbers) */
+
+.data-table__th--right,
+.data-table th.data-table__th--right {
+  text-align: right;
+}
+
+.data-table__td--right,
+.data-table td.data-table__td--right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Uppercase header modifier — GitHub + marketing plan table style */
