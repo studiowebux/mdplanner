@@ -1,5 +1,6 @@
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
+import { BASE_LINE_ITEM_FIELDS } from "../billing/constants.ts";
 import type { Invoice } from "../../types/invoice.types.ts";
 import { INVOICE_STATUSES } from "../../types/invoice.types.ts";
 import type { BadgeVariant } from "../../components/ui/status-badge.tsx";
@@ -179,58 +180,7 @@ export const INVOICE_FORM_FIELDS: FieldDef[] = [
     label: "Line Item",
     section: "invoice_line_items",
     addLabel: "Add line item",
-    itemFields: [
-      {
-        type: "autocomplete",
-        name: "rateId",
-        label: "Rate",
-        source: "billing-rates",
-        placeholder: "Search rates...",
-        autofill: { unit: "unit", rate: "unitRate" },
-      },
-      {
-        type: "select",
-        name: "type",
-        label: "Type",
-        options: [
-          { value: "service", label: "Service" },
-          { value: "product", label: "Product" },
-          { value: "expense", label: "Expense" },
-          { value: "text", label: "Text" },
-        ],
-      },
-      {
-        type: "text",
-        name: "description",
-        label: "Description",
-        placeholder: "Line item description",
-      },
-      { type: "text", name: "group", label: "Group", placeholder: "Section" },
-      { type: "number", name: "quantity", label: "Qty" },
-      {
-        type: "select",
-        name: "unit",
-        label: "Unit",
-        options: [
-          { value: "h", label: "h" },
-          { value: "d", label: "d" },
-          { value: "unit", label: "unit" },
-          { value: "mo", label: "mo" },
-          { value: "fixed", label: "fixed" },
-        ],
-      },
-      { type: "number", name: "unitRate", label: "Rate" },
-      { type: "number", name: "discount", label: "Discount" },
-      {
-        type: "select",
-        name: "discountType",
-        label: "Disc. Type",
-        options: [
-          { value: "percent", label: "%" },
-          { value: "fixed", label: "$" },
-        ],
-      },
-    ],
+    itemFields: BASE_LINE_ITEM_FIELDS,
   },
   { type: "textarea", name: "notes", label: "Notes", rows: 4 },
   { type: "textarea", name: "footer", label: "Footer", rows: 3 },
