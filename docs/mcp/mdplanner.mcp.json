@@ -3598,10 +3598,21 @@
     },
     {
       "name": "list_retrospectives",
-      "description": "List all retrospectives in the project.",
+      "description": "List all retrospectives. Optionally filter by search query or status.",
       "inputSchema": {
         "type": "object",
-        "properties": {},
+        "properties": {
+          "q": {
+            "type": "string",
+            "description": "Search query (matches title, continue, stop, start items)"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["open", "closed"],
+            "description": "Filter by status"
+          }
+        },
+        "additionalProperties": false,
         "$schema": "http://json-schema.org/draft-07/schema#"
       },
       "execution": {
@@ -3619,9 +3630,26 @@
             "description": "Retrospective ID"
           }
         },
-        "required": [
-          "id"
-        ],
+        "required": ["id"],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "get_retrospective_by_name",
+      "description": "Get a retrospective by its title (case-insensitive). Prefer this over list_retrospectives when the title is known.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Retrospective title"
+          }
+        },
+        "required": ["name"],
         "additionalProperties": false,
         "$schema": "http://json-schema.org/draft-07/schema#"
       },
@@ -3645,15 +3673,25 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "open",
-              "closed"
-            ]
+            "enum": ["open", "closed"]
+          },
+          "continue": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Things to continue doing (went well)"
+          },
+          "stop": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Things to stop doing (needs improvement)"
+          },
+          "start": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Things to start doing (actions)"
           }
         },
-        "required": [
-          "title"
-        ],
+        "required": ["title"],
         "additionalProperties": false,
         "$schema": "http://json-schema.org/draft-07/schema#"
       },
@@ -3663,7 +3701,7 @@
     },
     {
       "name": "update_retrospective",
-      "description": "Update a retrospective's fields.",
+      "description": "Update an existing retrospective.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -3671,44 +3709,29 @@
             "type": "string",
             "description": "Retrospective ID"
           },
-          "title": {
-            "type": "string"
-          },
-          "date": {
-            "type": "string"
-          },
+          "title": { "type": "string" },
+          "date": { "type": "string" },
           "status": {
             "type": "string",
-            "enum": [
-              "open",
-              "closed"
-            ]
+            "enum": ["open", "closed"]
           },
           "continue": {
             "type": "array",
-            "items": {
-              "type": "string"
-            },
+            "items": { "type": "string" },
             "description": "Things to continue doing"
           },
           "stop": {
             "type": "array",
-            "items": {
-              "type": "string"
-            },
+            "items": { "type": "string" },
             "description": "Things to stop doing"
           },
           "start": {
             "type": "array",
-            "items": {
-              "type": "string"
-            },
+            "items": { "type": "string" },
             "description": "Things to start doing"
           }
         },
-        "required": [
-          "id"
-        ],
+        "required": ["id"],
         "additionalProperties": false,
         "$schema": "http://json-schema.org/draft-07/schema#"
       },
@@ -3718,7 +3741,7 @@
     },
     {
       "name": "delete_retrospective",
-      "description": "Delete a retrospective by its ID.",
+      "description": "Delete a retrospective by ID.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -3727,9 +3750,7 @@
             "description": "Retrospective ID"
           }
         },
-        "required": [
-          "id"
-        ],
+        "required": ["id"],
         "additionalProperties": false,
         "$schema": "http://json-schema.org/draft-07/schema#"
       },

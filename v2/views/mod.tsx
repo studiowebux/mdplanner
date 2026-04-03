@@ -28,6 +28,7 @@ import { marketingPlansRouter } from "./marketing-plans/routes.tsx";
 import { swotRouter } from "./swot/routes.tsx";
 import { brainstormsRouter } from "./brainstorms/routes.tsx";
 import { briefsRouter } from "./briefs/routes.tsx";
+import { retrospectivesRouter } from "./retrospectives/routes.tsx";
 import {
   getArrayTableSection,
   registerArrayTableSection,
@@ -293,6 +294,7 @@ views.route("/marketing-plans", marketingPlansRouter);
 views.route("/swot", swotRouter);
 views.route("/brainstorms", brainstormsRouter);
 views.route("/briefs", briefsRouter);
+views.route("/retrospectives", retrospectivesRouter);
 views.route("/autocomplete", autocompleteRouter);
 views.route("/sidebar", sidebarRouter);
 

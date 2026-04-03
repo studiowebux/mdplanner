@@ -7,6 +7,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { APP_VERSION } from "../constants/mod.ts";
 import { registerBrainstormTools } from "./tools/brainstorms.ts";
 import { registerBriefTools } from "./tools/briefs.ts";
+import { registerRetrospectiveTools } from "./tools/retrospectives.ts";
 import { registerBillingRateTools } from "./tools/billing-rates.ts";
 import { registerCustomerTools } from "./tools/customers.ts";
 import { registerInvoiceTools } from "./tools/invoices.ts";
@@ -32,6 +33,7 @@ export function createMcpServer(): McpServer {
 
   registerBrainstormTools(server);
   registerBriefTools(server);
+  registerRetrospectiveTools(server);
   registerBillingRateTools(server);
   registerCustomerTools(server);
   registerInvoiceTools(server);

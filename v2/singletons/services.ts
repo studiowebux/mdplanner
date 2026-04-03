@@ -60,6 +60,9 @@ import { registerBrainstormEntity } from "../domains/brainstorm/cache.ts";
 import { BriefRepository } from "../repositories/brief.repository.ts";
 import { BriefService } from "../services/brief.service.ts";
 import { registerBriefEntity } from "../domains/brief/cache.ts";
+import { RetrospectiveRepository } from "../repositories/retrospective.repository.ts";
+import { RetrospectiveService } from "../services/retrospective.service.ts";
+import { registerRetrospectiveEntity } from "../domains/retrospective/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -84,6 +87,7 @@ let invoiceService: InvoiceService | null = null;
 let paymentService: PaymentService | null = null;
 let brainstormService: BrainstormService | null = null;
 let briefService: BriefService | null = null;
+let retrospectiveService: RetrospectiveService | null = null;
 let dnsService: DnsService | null = null;
 let githubService: GitHubService | null = null;
 let cacheDb: CacheDatabase | null = null;
@@ -131,6 +135,8 @@ export function initServices(
   brainstormService = new BrainstormService(brainstormRepo);
   const briefRepo = new BriefRepository(projectDir);
   briefService = new BriefService(briefRepo);
+  const retrospectiveRepo = new RetrospectiveRepository(projectDir);
+  retrospectiveService = new RetrospectiveService(retrospectiveRepo);
   const dnsRepo = new DnsRepository(projectDir);
   dnsService = new DnsService(dnsRepo, projectService);
   githubService = new GitHubService(projectService);
@@ -156,6 +162,7 @@ export function initServices(
     registerPaymentEntity(paymentRepo);
     registerBrainstormEntity(brainstormRepo);
     registerBriefEntity(briefRepo);
+    registerRetrospectiveEntity(retrospectiveRepo);
 
     // Pass cacheDb to repos for read-path caching
     milestoneRepo.setCacheDb(cacheDb);
@@ -174,6 +181,7 @@ export function initServices(
     paymentRepo.setCacheDb(cacheDb);
     brainstormRepo.setCacheDb(cacheDb);
     briefRepo.setCacheDb(cacheDb);
+    retrospectiveRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -321,6 +329,13 @@ export function getBriefService(): BriefService {
     throw new Error("Services not initialized — call initServices() first");
   }
   return briefService;
+}
+
+export function getRetrospectiveService(): RetrospectiveService {
+  if (!retrospectiveService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return retrospectiveService;
 }
 
 export function getDnsService(): DnsService {
