@@ -195,6 +195,7 @@
 
   /* Borders */
   --border-width: 1px;
+  --border-width-thick: 3px;
   --border-style: solid;
 
   /* Nav / Shell */
@@ -339,6 +340,7 @@ html.font-mono {
 
   /* Error */
   --color-error: #a6192e;
+  --color-danger: #a6192e;
   --color-error-bg: #fbe9ec;
   --color-error-border: #f1b8bf;
   --color-error-text: #a6192e;
@@ -414,6 +416,7 @@ html.font-mono {
 
   /* Error */
   --color-error: #a6192e;
+  --color-danger: #a6192e;
   --color-error-bg: #3d1520;
   --color-error-border: #7a1222;
   --color-error-text: #dc3545;
