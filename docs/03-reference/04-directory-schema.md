@@ -254,6 +254,94 @@ allocations:
 ---
 ```
 
+## Briefs
+
+Directory: `briefs/`
+
+Planning documents with a RACI matrix and structured sections. Each H2
+heading is keyword-matched to a named field; unrecognised headings are ignored.
+
+```yaml
+---
+id: brief_beta
+title: Beta Launch Brief
+date: 2026-02-01
+createdAt: "2026-02-01T00:00:00.000Z"
+updatedAt: "2026-02-01T00:00:00.000Z"
+---
+
+# Beta Launch Brief
+
+## Summary
+
+Launch public beta to validate product-market fit with small tech teams.
+
+## Mission
+
+Deliver a reliable, feature-complete beta that generates actionable feedback.
+
+## Responsible (R)
+
+- Alice: Technical lead
+- Bob: Backend development
+
+## Accountable (A)
+
+- Alice: Overall beta success
+
+## Consulted (C)
+
+- External beta testers
+
+## Informed (I)
+
+- Investors
+- Advisory board
+
+## High-Level Budget
+
+- Infrastructure: $3,000
+- Marketing: $2,000
+
+## High-Level Timeline
+
+- Feb 1–14: Feature completion
+- Feb 15–28: Testing and polish
+
+## Culture
+
+- Ship fast, iterate faster
+
+## Change Capacity
+
+Team can handle scope changes until Feb 10.
+
+## Guiding Principles
+
+- Simple over feature-rich
+- Accessibility first
+```
+
+Keyword-matched section headings (case-insensitive):
+
+| Field               | Matched keywords                                    |
+| ------------------- | --------------------------------------------------- |
+| `summary`           | summary, executive summary, overview                |
+| `mission`           | mission                                             |
+| `responsible`       | responsible                                         |
+| `accountable`       | accountable                                         |
+| `consulted`         | consulted                                           |
+| `informed`          | informed                                            |
+| `highLevelBudget`   | budget, high level budget, high-level budget        |
+| `highLevelTimeline` | timeline, high level timeline, high-level timeline  |
+| `culture`           | culture                                             |
+| `changeCapacity`    | change capacity, capacity for change                |
+| `guidingPrinciples` | guiding principle, guiding principles, principles   |
+
+RACI labels `(R)`, `(A)`, `(C)`, `(I)` in headings are stripped before matching.
+Section content may be bullet lists or prose paragraphs — both are stored as
+`string[]`.
+
 ## Other Entities
 
 The following entities follow the same pattern of YAML frontmatter + markdown
@@ -268,7 +356,7 @@ body in their respective directories:
 | Lean Canvas     | `leancanvas/`      |
 | Business Model  | `businessmodel/`   |
 | Project Value   | `projectvalue/`    |
-| Brief           | `brief/`           |
+| Brief           | `briefs/`          |
 | Strategic Levels| `strategiclevels/` |
 | Billing         | `billing/`         |
 

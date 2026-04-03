@@ -4029,6 +4029,27 @@
       }
     },
     {
+      "name": "get_brief_by_name",
+      "description": "Get a brief by its title (case-insensitive). Prefer this over list_briefs when the title is known.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Brief title"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
       "name": "create_brief",
       "description": "Create a new project brief (RACI + summary + principles).",
       "inputSchema": {
