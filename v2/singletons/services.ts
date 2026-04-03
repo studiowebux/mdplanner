@@ -57,6 +57,9 @@ import { registerPaymentEntity } from "../domains/payment/cache.ts";
 import { BrainstormRepository } from "../repositories/brainstorm.repository.ts";
 import { BrainstormService } from "../services/brainstorm.service.ts";
 import { registerBrainstormEntity } from "../domains/brainstorm/cache.ts";
+import { BriefRepository } from "../repositories/brief.repository.ts";
+import { BriefService } from "../services/brief.service.ts";
+import { registerBriefEntity } from "../domains/brief/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -80,6 +83,7 @@ let quoteService: QuoteService | null = null;
 let invoiceService: InvoiceService | null = null;
 let paymentService: PaymentService | null = null;
 let brainstormService: BrainstormService | null = null;
+let briefService: BriefService | null = null;
 let dnsService: DnsService | null = null;
 let githubService: GitHubService | null = null;
 let cacheDb: CacheDatabase | null = null;
@@ -125,6 +129,8 @@ export function initServices(
   paymentService = new PaymentService(paymentRepo);
   const brainstormRepo = new BrainstormRepository(projectDir);
   brainstormService = new BrainstormService(brainstormRepo);
+  const briefRepo = new BriefRepository(projectDir);
+  briefService = new BriefService(briefRepo);
   const dnsRepo = new DnsRepository(projectDir);
   dnsService = new DnsService(dnsRepo, projectService);
   githubService = new GitHubService(projectService);
@@ -149,6 +155,7 @@ export function initServices(
     registerInvoiceEntity(invoiceRepo);
     registerPaymentEntity(paymentRepo);
     registerBrainstormEntity(brainstormRepo);
+    registerBriefEntity(briefRepo);
 
     // Pass cacheDb to repos for read-path caching
     milestoneRepo.setCacheDb(cacheDb);
@@ -165,6 +172,8 @@ export function initServices(
     quoteRepo.setCacheDb(cacheDb);
     invoiceRepo.setCacheDb(cacheDb);
     paymentRepo.setCacheDb(cacheDb);
+    brainstormRepo.setCacheDb(cacheDb);
+    briefRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -305,6 +314,13 @@ export function getBrainstormService(): BrainstormService {
     throw new Error("Services not initialized — call initServices() first");
   }
   return brainstormService;
+}
+
+export function getBriefService(): BriefService {
+  if (!briefService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return briefService;
 }
 
 export function getDnsService(): DnsService {
