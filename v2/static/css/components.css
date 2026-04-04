@@ -1791,3 +1791,43 @@ a.badge:hover {
   outline: none;
   border-color: var(--color-accent);
 }
+
+/* -------------------------------------------------------------------------
+   Mentions — task IDs, person IDs, commit hashes
+   ------------------------------------------------------------------------- */
+
+.mention {
+  display: inline;
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-xs);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.mention--task {
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.mention--task:hover {
+  text-decoration: underline;
+}
+
+.mention--person {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border: var(--border-width) var(--border-style) var(--color-border);
+}
+
+.mention--commit {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-size: var(--font-size-xs);
+}
+
+.mention--commit:hover {
+  color: var(--color-text-primary);
+}

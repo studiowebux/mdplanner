@@ -22,6 +22,8 @@ import {
 import { BackButton } from "./components/back-button.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { type MentionOpts, renderMentions } from "../utils/mentions.ts";
+import { escapeHtml } from "../utils/html.ts";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -32,6 +34,7 @@ export type TaskDetailProps = {
   assigneePerson: Person | null;
   milestonEntity: Milestone | null;
   blockedByTasks: Task[];
+  mentionOpts: MentionOpts;
 };
 
 type Props = ViewProps & TaskDetailProps;
@@ -44,22 +47,33 @@ export async function resolveTaskDetailProps(task: Task): Promise<{
   assigneePerson: Person | null;
   milestonEntity: Milestone | null;
   blockedByTasks: Task[];
+  mentionOpts: MentionOpts;
 }> {
   const taskSvc = getTaskService();
   const peopleSvc = getPeopleService();
   const milestoneSvc = getMilestoneService();
 
-  const [assigneePerson, milestonEntity, blockedByTasks] = await Promise.all([
-    task.assignee ? peopleSvc.getById(task.assignee) : null,
-    task.milestone ? milestoneSvc.getByName(task.milestone) : null,
-    task.blocked_by?.length
-      ? Promise.all(
-        task.blocked_by.map((id) => taskSvc.getById(id)),
-      ).then((results) => results.filter(Boolean) as Task[])
-      : [],
-  ]);
+  const [assigneePerson, milestonEntity, blockedByTasks, allPeople] =
+    await Promise.all([
+      task.assignee ? peopleSvc.getById(task.assignee) : null,
+      task.milestone ? milestoneSvc.getByName(task.milestone) : null,
+      task.blocked_by?.length
+        ? Promise.all(
+          task.blocked_by.map((id) => taskSvc.getById(id)),
+        ).then((results) => results.filter(Boolean) as Task[])
+        : [],
+      peopleSvc.list(),
+    ]);
 
-  return { assigneePerson, milestonEntity, blockedByTasks };
+  const personMap = new Map<string, string>(
+    allPeople.map((p) => [p.id, p.name]),
+  );
+  const mentionOpts: MentionOpts = {
+    personMap,
+    githubRepo: task.githubRepo ?? undefined,
+  };
+
+  return { assigneePerson, milestonEntity, blockedByTasks, mentionOpts };
 }
 
 // ---------------------------------------------------------------------------
@@ -87,7 +101,10 @@ const MetaField: FC<{ label: string; children: unknown }> = (
   </>
 );
 
-const CommentsSection: FC<{ comments: Task["comments"] }> = ({ comments }) => {
+const CommentsSection: FC<{
+  comments: Task["comments"];
+  mentionOpts: MentionOpts;
+}> = ({ comments, mentionOpts }) => {
   if (!comments?.length) return null;
   return (
     <section class="detail-section task-detail__section">
@@ -106,7 +123,12 @@ const CommentsSection: FC<{ comments: Task["comments"] }> = ({ comments }) => {
                 {timeAgo(c.timestamp)}
               </time>
             </div>
-            <div class="task-detail__comment-body">{c.body}</div>
+            <div
+              class="task-detail__comment-body"
+              dangerouslySetInnerHTML={{
+                __html: renderMentions(escapeHtml(c.body), mentionOpts),
+              }}
+            />
             {c.metadata && Object.keys(c.metadata).length > 0 && (
               <details class="task-detail__comment-meta">
                 <summary>Metadata</summary>
@@ -204,7 +226,14 @@ const ApprovalSection: FC<{ approval: Task["approvalRequest"] }> = (
 // ---------------------------------------------------------------------------
 
 export const TaskDetailView: FC<Props> = (
-  { task, assigneePerson, milestonEntity, blockedByTasks, ...rest },
+  {
+    task,
+    assigneePerson,
+    milestonEntity,
+    blockedByTasks,
+    mentionOpts,
+    ...rest
+  },
 ) => {
   const sections = getSectionOrder();
   const assigneeDisplayName = assigneePerson?.name ?? "";
@@ -515,7 +544,14 @@ export const TaskDetailView: FC<Props> = (
               <section class="detail-section task-detail__section">
                 <h2>Description</h2>
                 <div class="task-detail__description">
-                  {task.description.map((p, i) => <p key={i}>{p}</p>)}
+                  {task.description.map((p, i) => (
+                    <p
+                      key={i}
+                      dangerouslySetInnerHTML={{
+                        __html: renderMentions(escapeHtml(p), mentionOpts),
+                      }}
+                    />
+                  ))}
                 </div>
               </section>
             )}
@@ -568,7 +604,7 @@ export const TaskDetailView: FC<Props> = (
         {/* Full-width sections below columns */}
         <TimeEntriesSection entries={task.time_entries} />
         <ApprovalSection approval={task.approvalRequest} />
-        <CommentsSection comments={task.comments} />
+        <CommentsSection comments={task.comments} mentionOpts={mentionOpts} />
 
         {/* Edit + Delete at bottom — matches person-detail pattern */}
         <AuditMeta
