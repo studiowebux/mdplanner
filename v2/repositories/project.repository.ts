@@ -60,6 +60,9 @@ export class ProjectRepository {
     if (config.kpiMetrics && config.kpiMetrics.length > 0) {
       fm.kpi_metrics = config.kpiMetrics;
     }
+    if (config.milestoneStatuses && config.milestoneStatuses.length > 0) {
+      fm.milestone_statuses = config.milestoneStatuses;
+    }
     if (config.githubToken) {
       fm.github_token = await encryptSecret(config.githubToken);
     }
