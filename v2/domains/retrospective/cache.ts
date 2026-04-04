@@ -1,7 +1,12 @@
 // Retrospective entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, parseJson, val } from "../../database/sqlite/mod.ts";
+import {
+  ENTITIES,
+  jsonVal,
+  parseJson,
+  val,
+} from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { RetrospectiveRepository } from "../../repositories/retrospective.repository.ts";
 import type { Retrospective } from "../../types/retrospective.types.ts";
@@ -68,9 +73,9 @@ function insertRetrospectiveRow(
       val(r.title),
       val(r.date),
       val(r.status),
-      r.continue.length > 0 ? JSON.stringify(r.continue) : null,
-      r.stop.length > 0 ? JSON.stringify(r.stop) : null,
-      r.start.length > 0 ? JSON.stringify(r.start) : null,
+      jsonVal(r.continue),
+      jsonVal(r.stop),
+      jsonVal(r.start),
       sectionsToText(r),
       val(r.createdAt),
       val(r.updatedAt),

@@ -1,7 +1,12 @@
 // Goal entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, parseJson, val } from "../../database/sqlite/mod.ts";
+import {
+  ENTITIES,
+  jsonVal,
+  parseJson,
+  val,
+} from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { GoalRepository } from "../../repositories/goal.repository.ts";
 import type { Goal } from "../../types/goal.types.ts";
@@ -80,7 +85,7 @@ function insertGoalRow(
       val(g.status),
       val(g.githubRepo),
       g.githubMilestone ?? null,
-      g.linkedPortfolioItems ? JSON.stringify(g.linkedPortfolioItems) : null,
+      jsonVal(g.linkedPortfolioItems),
       val(g.project),
       val(g.createdAt),
       val(g.updatedAt),

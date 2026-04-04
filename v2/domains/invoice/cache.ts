@@ -1,7 +1,12 @@
 // Invoice entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, parseJson, val } from "../../database/sqlite/mod.ts";
+import {
+  ENTITIES,
+  jsonVal,
+  parseJson,
+  val,
+} from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { InvoiceRepository } from "../../repositories/invoice.repository.ts";
 import type { Invoice } from "../../types/invoice.types.ts";
@@ -87,7 +92,7 @@ function insertInvoiceRow(
       val(inv.currency),
       val(inv.dueDate),
       val(inv.paymentTerms),
-      inv.lineItems ? JSON.stringify(inv.lineItems) : null,
+      jsonVal(inv.lineItems),
       inv.subtotal,
       inv.tax ?? null,
       inv.taxRate ?? null,

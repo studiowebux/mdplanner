@@ -1,7 +1,13 @@
 // Brainstorm entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, parseJson, val } from "../../database/sqlite/mod.ts";
+import {
+  ENTITIES,
+  json,
+  jsonVal,
+  parseJson,
+  val,
+} from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { BrainstormRepository } from "../../repositories/brainstorm.repository.ts";
 import type {
@@ -65,11 +71,11 @@ function insertBrainstormRow(
     [
       val(b.id),
       val(b.title),
-      b.tags ? JSON.stringify(b.tags) : null,
-      b.linkedProjects ? JSON.stringify(b.linkedProjects) : null,
-      b.linkedTasks ? JSON.stringify(b.linkedTasks) : null,
-      b.linkedGoals ? JSON.stringify(b.linkedGoals) : null,
-      JSON.stringify(b.questions),
+      jsonVal(b.tags),
+      jsonVal(b.linkedProjects),
+      jsonVal(b.linkedTasks),
+      jsonVal(b.linkedGoals),
+      json(b.questions),
       questionsToText(b.questions),
       val(b.createdAt),
       val(b.updatedAt),

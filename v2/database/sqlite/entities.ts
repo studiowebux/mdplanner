@@ -67,6 +67,17 @@ export function json(v: any): string {
   return JSON.stringify(v ?? []);
 }
 
+/**
+ * Serialize a nullable array or object to JSON, returning null when absent.
+ * Use in cache INSERT functions for optional columns.
+ * `parseJson` treats both null and "[]" as undefined on read, so empty
+ * arrays stored as null vs "[]" are semantically equivalent.
+ */
+export function jsonVal(v: unknown): string | null {
+  if (v == null) return null;
+  return JSON.stringify(v);
+}
+
 /** Parse a JSON string from a cache column back to a typed value. */
 export function parseJson<T>(v: unknown): T | undefined {
   if (v == null || v === "[]" || v === "null") return undefined;

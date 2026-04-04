@@ -7,6 +7,7 @@ export {
   FILES_INDEX,
   FILES_SCHEMA,
   json,
+  jsonVal,
   parseJson,
   val,
 } from "./entities.ts";

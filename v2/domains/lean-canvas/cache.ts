@@ -1,7 +1,12 @@
 // Lean Canvas entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, parseJson, val } from "../../database/sqlite/mod.ts";
+import {
+  ENTITIES,
+  jsonVal,
+  parseJson,
+  val,
+} from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { LeanCanvasRepository } from "../../repositories/lean-canvas.repository.ts";
 import type { LeanCanvas } from "../../types/lean-canvas.types.ts";
@@ -93,24 +98,18 @@ export function insertLeanCanvasRow(
       val(lc.title),
       val(lc.project),
       val(lc.date),
-      lc.problem.length > 0 ? JSON.stringify(lc.problem) : null,
-      lc.solution.length > 0 ? JSON.stringify(lc.solution) : null,
-      lc.uniqueValueProp.length > 0 ? JSON.stringify(lc.uniqueValueProp) : null,
-      lc.unfairAdvantage.length > 0 ? JSON.stringify(lc.unfairAdvantage) : null,
-      lc.customerSegments.length > 0
-        ? JSON.stringify(lc.customerSegments)
-        : null,
-      lc.existingAlternatives.length > 0
-        ? JSON.stringify(lc.existingAlternatives)
-        : null,
-      lc.keyMetrics.length > 0 ? JSON.stringify(lc.keyMetrics) : null,
-      lc.highLevelConcept.length > 0
-        ? JSON.stringify(lc.highLevelConcept)
-        : null,
-      lc.channels.length > 0 ? JSON.stringify(lc.channels) : null,
-      lc.earlyAdopters.length > 0 ? JSON.stringify(lc.earlyAdopters) : null,
-      lc.costStructure.length > 0 ? JSON.stringify(lc.costStructure) : null,
-      lc.revenueStreams.length > 0 ? JSON.stringify(lc.revenueStreams) : null,
+      jsonVal(lc.problem),
+      jsonVal(lc.solution),
+      jsonVal(lc.uniqueValueProp),
+      jsonVal(lc.unfairAdvantage),
+      jsonVal(lc.customerSegments),
+      jsonVal(lc.existingAlternatives),
+      jsonVal(lc.keyMetrics),
+      jsonVal(lc.highLevelConcept),
+      jsonVal(lc.channels),
+      jsonVal(lc.earlyAdopters),
+      jsonVal(lc.costStructure),
+      jsonVal(lc.revenueStreams),
       sectionsToText(lc),
       lc.completedSections,
       lc.sectionCount,

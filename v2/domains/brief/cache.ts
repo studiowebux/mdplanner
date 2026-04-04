@@ -1,7 +1,12 @@
 // Brief entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, parseJson, val } from "../../database/sqlite/mod.ts";
+import {
+  ENTITIES,
+  jsonVal,
+  parseJson,
+  val,
+} from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { BriefRepository } from "../../repositories/brief.repository.ts";
 import type { Brief } from "../../types/brief.types.ts";
@@ -81,17 +86,17 @@ function insertBriefRow(
       val(b.id),
       val(b.title),
       val(b.date),
-      b.summary ? JSON.stringify(b.summary) : null,
-      b.mission ? JSON.stringify(b.mission) : null,
-      b.responsible ? JSON.stringify(b.responsible) : null,
-      b.accountable ? JSON.stringify(b.accountable) : null,
-      b.consulted ? JSON.stringify(b.consulted) : null,
-      b.informed ? JSON.stringify(b.informed) : null,
-      b.highLevelBudget ? JSON.stringify(b.highLevelBudget) : null,
-      b.highLevelTimeline ? JSON.stringify(b.highLevelTimeline) : null,
-      b.culture ? JSON.stringify(b.culture) : null,
-      b.changeCapacity ? JSON.stringify(b.changeCapacity) : null,
-      b.guidingPrinciples ? JSON.stringify(b.guidingPrinciples) : null,
+      jsonVal(b.summary),
+      jsonVal(b.mission),
+      jsonVal(b.responsible),
+      jsonVal(b.accountable),
+      jsonVal(b.consulted),
+      jsonVal(b.informed),
+      jsonVal(b.highLevelBudget),
+      jsonVal(b.highLevelTimeline),
+      jsonVal(b.culture),
+      jsonVal(b.changeCapacity),
+      jsonVal(b.guidingPrinciples),
       sectionsToText(b),
       val(b.createdAt),
       val(b.updatedAt),

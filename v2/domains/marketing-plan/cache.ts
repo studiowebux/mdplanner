@@ -1,7 +1,12 @@
 // Marketing Plan entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, parseJson, val } from "../../database/sqlite/mod.ts";
+import {
+  ENTITIES,
+  jsonVal,
+  parseJson,
+  val,
+} from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { MarketingPlanRepository } from "../../repositories/marketing-plan.repository.ts";
 import type { MarketingPlan } from "../../types/marketing-plan.types.ts";
@@ -87,13 +92,13 @@ function insertRow(
       val(p.budgetCurrency),
       val(p.startDate),
       val(p.endDate),
-      p.targetAudiences ? JSON.stringify(p.targetAudiences) : null,
-      p.channels ? JSON.stringify(p.channels) : null,
-      p.campaigns ? JSON.stringify(p.campaigns) : null,
-      p.linkedGoals ? JSON.stringify(p.linkedGoals) : null,
+      jsonVal(p.targetAudiences),
+      jsonVal(p.channels),
+      jsonVal(p.campaigns),
+      jsonVal(p.linkedGoals),
       val(p.project),
       val(p.responsible),
-      p.team ? JSON.stringify(p.team) : null,
+      jsonVal(p.team),
       val(p.hypothesis),
       val(p.learnings),
       val(p.notes),

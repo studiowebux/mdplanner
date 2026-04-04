@@ -1,7 +1,12 @@
 // Quote entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, parseJson, val } from "../../database/sqlite/mod.ts";
+import {
+  ENTITIES,
+  jsonVal,
+  parseJson,
+  val,
+} from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { QuoteRepository } from "../../repositories/quote.repository.ts";
 import type { Quote } from "../../types/quote.types.ts";
@@ -86,8 +91,8 @@ function insertQuoteRow(
       val(q.status),
       val(q.currency),
       val(q.expiresAt),
-      q.lineItems ? JSON.stringify(q.lineItems) : null,
-      q.paymentSchedule ? JSON.stringify(q.paymentSchedule) : null,
+      jsonVal(q.lineItems),
+      jsonVal(q.paymentSchedule),
       q.subtotal,
       q.tax ?? null,
       q.taxRate ?? null,

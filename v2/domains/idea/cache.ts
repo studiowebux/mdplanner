@@ -1,7 +1,12 @@
 // Idea entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, parseJson, val } from "../../database/sqlite/mod.ts";
+import {
+  ENTITIES,
+  jsonVal,
+  parseJson,
+  val,
+} from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { IdeaRepository } from "../../repositories/idea.repository.ts";
 import type { Idea } from "../../types/idea.types.ts";
@@ -76,8 +81,8 @@ function insertIdeaRow(
       val(i.startDate),
       val(i.endDate),
       val(i.resources),
-      i.subtasks ? JSON.stringify(i.subtasks) : null,
-      i.links ? JSON.stringify(i.links) : null,
+      jsonVal(i.subtasks),
+      jsonVal(i.links),
       val(i.implementedAt),
       val(i.cancelledAt),
       val(i.createdAt),

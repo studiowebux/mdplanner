@@ -1,7 +1,7 @@
 // SWOT entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, parseJson, val } from "../../database/sqlite/mod.ts";
+import { ENTITIES, json, parseJson, val } from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { SwotRepository } from "../../repositories/swot.repository.ts";
 import type { Swot } from "../../types/swot.types.ts";
@@ -58,10 +58,10 @@ function insertRow(
       val(s.id),
       val(s.title),
       val(s.date),
-      JSON.stringify(s.strengths),
-      JSON.stringify(s.weaknesses),
-      JSON.stringify(s.opportunities),
-      JSON.stringify(s.threats),
+      json(s.strengths),
+      json(s.weaknesses),
+      json(s.opportunities),
+      json(s.threats),
       val(s.project),
       val(s.notes),
       val(s.createdAt),
