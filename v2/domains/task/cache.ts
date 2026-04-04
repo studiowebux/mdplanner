@@ -1,7 +1,14 @@
 // Task entity registration for SQLite cache.
 // Called by initServices() after repos are created — no side-effect imports.
 
-import { ENTITIES, json, parseJson, val } from "../../database/sqlite/mod.ts";
+import {
+  auditCols,
+  auditVals,
+  ENTITIES,
+  json,
+  parseJson,
+  val,
+} from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { TaskRepository } from "../../repositories/task.repository.ts";
 import type { Task } from "../../types/task.types.ts";
@@ -70,19 +77,18 @@ export function insertTaskRow(
 ): void {
   db.execute(
     `INSERT OR REPLACE INTO ${TASK_TABLE} (id, title, completed, completed_at,
-       created_at, updated_at, revision, section, description, parent_id, tags,
+       ${auditCols()}, revision, section, description, parent_id, tags,
        due_date, assignee, priority, effort, blocked_by, milestone,
        planned_start, planned_end, time_entries, sort_order, attachments,
        project, github_issue, github_repo, github_pr, comments, claimed_by,
-       claimed_at, approval_request, files, children, created_by, updated_by, synced_at)
+       claimed_at, approval_request, files, children, synced_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(t.id),
       val(t.title),
       t.completed ? 1 : 0,
       val(t.completedAt),
-      val(t.createdAt),
-      val(t.updatedAt),
+      ...auditVals(t),
       t.revision,
       val(t.section),
       val(t.description?.join("\n")),
@@ -109,8 +115,6 @@ export function insertTaskRow(
       json(t.approvalRequest ? [t.approvalRequest] : null),
       json(t.files),
       json(t.children),
-      val(t.createdBy),
-      val(t.updatedBy),
       syncedAt ?? new Date().toISOString(),
     ],
   );

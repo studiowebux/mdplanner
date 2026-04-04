@@ -1,6 +1,8 @@
 export { CacheDatabase } from "./database.ts";
 export type { BindParams, BindValue, QueryResult } from "./database.ts";
 export {
+  auditCols,
+  auditVals,
   buildFtsDropSql,
   buildFtsSql,
   ENTITIES,

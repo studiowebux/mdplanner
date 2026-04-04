@@ -78,6 +78,26 @@ export function jsonVal(v: unknown): string | null {
   return JSON.stringify(v);
 }
 
+/** Column fragment for the four standard audit fields. */
+export function auditCols(): string {
+  return "created_at, updated_at, created_by, updated_by";
+}
+
+/** Values for the four standard audit fields, matching auditCols() order. */
+export function auditVals(e: {
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+}): BindValue[] {
+  return [
+    val(e.createdAt),
+    val(e.updatedAt),
+    val(e.createdBy),
+    val(e.updatedBy),
+  ];
+}
+
 /** Parse a JSON string from a cache column back to a typed value. */
 export function parseJson<T>(v: unknown): T | undefined {
   if (v == null || v === "[]" || v === "null") return undefined;

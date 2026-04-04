@@ -1,7 +1,14 @@
 // DNS entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, json, parseJson, val } from "../../database/sqlite/mod.ts";
+import {
+  auditCols,
+  auditVals,
+  ENTITIES,
+  json,
+  parseJson,
+  val,
+} from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { DnsRepository } from "../../repositories/dns.repository.ts";
 import type { DnsDomain } from "../../types/dns.types.ts";
@@ -27,6 +34,8 @@ export function rowToDnsDomain(row: Record<string, unknown>): DnsDomain {
     project: row.project as string | undefined,
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
+    createdBy: row.created_by != null ? row.created_by as string : undefined,
+    updatedBy: row.updated_by != null ? row.updated_by as string : undefined,
   };
 }
 
@@ -43,6 +52,10 @@ const DNS_SCHEMA = `CREATE TABLE IF NOT EXISTS ${DNS_TABLE} (
   notes TEXT,
   last_fetched_at TEXT,
   project TEXT,
+  created_at TEXT,
+  updated_at TEXT,
+  created_by TEXT,
+  updated_by TEXT,
   synced_at TEXT
 )`;
 
@@ -54,8 +67,8 @@ function insertDnsRow(
   db.execute(
     `INSERT OR REPLACE INTO ${DNS_TABLE} (id, domain, provider, status,
        expiry_date, auto_renew, renewal_cost_usd, nameservers, dns_records,
-       notes, last_fetched_at, project, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       notes, last_fetched_at, project, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(d.id),
       val(d.domain),
@@ -69,6 +82,7 @@ function insertDnsRow(
       val(d.notes),
       val(d.lastFetchedAt),
       val(d.project),
+      ...auditVals(d),
       syncedAt ?? new Date().toISOString(),
     ],
   );

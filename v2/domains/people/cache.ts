@@ -1,7 +1,14 @@
 // People entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, json, parseJson, val } from "../../database/sqlite/mod.ts";
+import {
+  auditCols,
+  auditVals,
+  ENTITIES,
+  json,
+  parseJson,
+  val,
+} from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { PeopleRepository } from "../../repositories/people.repository.ts";
 import type { Person } from "../../types/person.types.ts";
@@ -42,6 +49,10 @@ export function rowToPerson(row: Record<string, unknown>): Person {
   if (row.current_task_id != null) {
     person.currentTaskId = row.current_task_id as string;
   }
+  if (row.created_at != null) person.createdAt = row.created_at as string;
+  if (row.updated_at != null) person.updatedAt = row.updated_at as string;
+  if (row.created_by != null) person.createdBy = row.created_by as string;
+  if (row.updated_by != null) person.updatedBy = row.updated_by as string;
   return person;
 }
 
@@ -55,8 +66,8 @@ export function insertPersonRow(
     `INSERT OR REPLACE INTO ${PEOPLE_TABLE} (id, name, title, role,
        departments, reports_to, email, phone, start_date, hours_per_day,
        working_days, notes, agent_type, skills, models, system_prompt,
-       status, last_seen, current_task_id, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       status, last_seen, current_task_id, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(p.id),
       val(p.name),
@@ -77,6 +88,7 @@ export function insertPersonRow(
       val(p.status),
       val(p.lastSeen),
       val(p.currentTaskId),
+      ...auditVals(p),
       syncedAt ?? new Date().toISOString(),
     ],
   );
