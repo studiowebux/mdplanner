@@ -4,7 +4,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
@@ -27,13 +27,13 @@ export const RetrospectiveSchema = z.object({
     description: "Retrospective status",
     example: "closed",
   }),
-  continue: z.array(z.string()).openapi({
+  continue: stringArray.openapi({
     description: "Things to continue doing (went well)",
   }),
-  stop: z.array(z.string()).openapi({
+  stop: stringArray.openapi({
     description: "Things to stop doing (needs improvement)",
   }),
-  start: z.array(z.string()).openapi({
+  start: stringArray.openapi({
     description: "Things to start doing (actions)",
   }),
 }).merge(AuditFieldsSchema).openapi("Retrospective");

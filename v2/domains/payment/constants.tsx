@@ -73,10 +73,13 @@ export const PAYMENT_TABLE_COLUMNS: ColumnDef[] = [
     ),
   },
   {
-    key: "invoiceId",
+    key: "invoiceName",
     label: "Invoice",
     sortable: true,
-    render: (v) => v ? <a href={`/invoices/${v}`}>{String(v)}</a> : "",
+    render: (v, row) =>
+      row.invoiceId
+        ? <a href={`/invoices/${row.invoiceId}`}>{String(v)}</a>
+        : "",
   },
   {
     key: "amountFormatted",
@@ -146,11 +149,15 @@ export const PAYMENT_FORM_FIELDS: FieldDef[] = [
 // Row mapper
 // ---------------------------------------------------------------------------
 
-export function paymentToRow(p: Payment): Record<string, unknown> {
+export function paymentToRow(
+  p: Payment,
+  invoiceNames?: Map<string, string>,
+): Record<string, unknown> {
   return {
     id: p.id,
     date: p.date,
     invoiceId: p.invoiceId,
+    invoiceName: invoiceNames?.get(p.invoiceId) ?? p.invoiceId,
     amountFormatted: formatCurrency(p.amount) || "$0",
     method: p.method ?? "",
     reference: p.reference ?? "",

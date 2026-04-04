@@ -4,7 +4,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
@@ -23,37 +23,37 @@ export const BriefSchema = z.object({
     description: "Brief date (YYYY-MM-DD)",
     example: "2026-02-01",
   }),
-  summary: z.array(z.string()).nullable().optional().openapi({
+  summary: stringArray.nullable().optional().openapi({
     description: "Executive summary items",
   }),
-  mission: z.array(z.string()).nullable().optional().openapi({
+  mission: stringArray.nullable().optional().openapi({
     description: "Mission statement items",
   }),
-  responsible: z.array(z.string()).nullable().optional().openapi({
+  responsible: stringArray.nullable().optional().openapi({
     description: "RACI — Responsible parties",
   }),
-  accountable: z.array(z.string()).nullable().optional().openapi({
+  accountable: stringArray.nullable().optional().openapi({
     description: "RACI — Accountable parties",
   }),
-  consulted: z.array(z.string()).nullable().optional().openapi({
+  consulted: stringArray.nullable().optional().openapi({
     description: "RACI — Consulted parties",
   }),
-  informed: z.array(z.string()).nullable().optional().openapi({
+  informed: stringArray.nullable().optional().openapi({
     description: "RACI — Informed parties",
   }),
-  highLevelBudget: z.array(z.string()).nullable().optional().openapi({
+  highLevelBudget: stringArray.nullable().optional().openapi({
     description: "High-level budget items",
   }),
-  highLevelTimeline: z.array(z.string()).nullable().optional().openapi({
+  highLevelTimeline: stringArray.nullable().optional().openapi({
     description: "High-level timeline items",
   }),
-  culture: z.array(z.string()).nullable().optional().openapi({
+  culture: stringArray.nullable().optional().openapi({
     description: "Culture and values",
   }),
-  changeCapacity: z.array(z.string()).nullable().optional().openapi({
+  changeCapacity: stringArray.nullable().optional().openapi({
     description: "Change capacity assessment",
   }),
-  guidingPrinciples: z.array(z.string()).nullable().optional().openapi({
+  guidingPrinciples: stringArray.nullable().optional().openapi({
     description: "Guiding principles",
   }),
 }).merge(AuditFieldsSchema).openapi("Brief");

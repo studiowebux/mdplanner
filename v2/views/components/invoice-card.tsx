@@ -5,13 +5,17 @@ import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 import { INVOICE_STATUS_VARIANTS } from "../../domains/invoice/constants.tsx";
 import { badgeClass } from "../../components/ui/status-badge.tsx";
 import { formatCurrency } from "../../utils/format.ts";
-import { getInvoiceService } from "../../singletons/services.ts";
+import {
+  getCustomerService,
+  getInvoiceService,
+} from "../../singletons/services.ts";
 
 type Props = { item: Invoice; q?: string };
 
-export const InvoiceCard: FC<Props> = ({ item, q }) => {
+export const InvoiceCard: FC<Props> = async ({ item, q }) => {
   const displayStatus = getInvoiceService().displayStatus(item);
   const balance = item.total - item.paidAmount;
+  const customer = await getCustomerService().getById(item.customerId);
 
   return (
     <DomainCard
@@ -23,7 +27,9 @@ export const InvoiceCard: FC<Props> = ({ item, q }) => {
     >
       <CardMeta>
         <CardMetaItem label="Customer">
-          <a href={`/customers/${item.customerId}`}>{item.customerId}</a>
+          <a href={`/customers/${item.customerId}`}>
+            {customer?.name ?? item.customerId}
+          </a>
         </CardMetaItem>
         <CardMetaItem label="Status">
           <span class={badgeClass(INVOICE_STATUS_VARIANTS, displayStatus)}>

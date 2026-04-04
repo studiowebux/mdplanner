@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Paragraph types — text blocks and code fences
@@ -30,7 +30,7 @@ export const NoteParagraphSchema = z.object({
     readonly: z.boolean().optional().openapi({
       description: "Whether the block is read-only",
     }),
-    tags: z.array(z.string()).optional().openapi({
+    tags: stringArray.optional().openapi({
       description: "Block-level tags for filtering or categorization",
     }),
   }).optional().openapi({ description: "Optional block metadata" }),

@@ -11,6 +11,7 @@ import {
   UpdatePersonSchema,
 } from "../../../types/person.types.ts";
 import { ErrorSchema, IdParam } from "../../../types/api.ts";
+import { stringArray } from "../../../types/shared.types.ts";
 
 export const peopleRouter = new OpenAPIHono();
 
@@ -109,7 +110,7 @@ const getDepartmentsRoute = createRoute({
   operationId: "getPeopleDepartments",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.string()) } },
+      content: { "application/json": { schema: stringArray } },
       description: "Department names",
     },
   },

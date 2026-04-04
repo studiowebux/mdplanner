@@ -17,6 +17,8 @@ import {
   QUOTE_TABLE_COLUMNS,
   quoteToRow,
 } from "./constants.tsx";
+
+let _customerNames: Map<string, string> = new Map();
 import { QuoteCard } from "../../views/components/quote-card.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
 
@@ -56,7 +58,7 @@ export const quoteConfig: DomainConfig<Quote, CreateQuote, UpdateQuote> = {
 
   hideCompleted: { field: "status", value: ["accepted", "rejected"] },
 
-  toRow: quoteToRow,
+  toRow: (q) => quoteToRow(q, _customerNames),
 
   Card: ({ item, q }) => <QuoteCard item={item} q={q} />,
 
@@ -78,6 +80,7 @@ export const quoteConfig: DomainConfig<Quote, CreateQuote, UpdateQuote> = {
 
   extractFilterOptions: async () => {
     const customers = await getCustomerService().list();
+    _customerNames = new Map(customers.map((c) => [c.id, c.name]));
     return {
       customerId: customers.map((c) => ({ value: c.id, label: c.name })),
     };

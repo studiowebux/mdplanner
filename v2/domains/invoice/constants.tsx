@@ -96,6 +96,8 @@ export const INVOICE_TABLE_COLUMNS: ColumnDef[] = [
     key: "customerName",
     label: "Customer",
     sortable: true,
+    render: (v, row) => <a href={`/customers/${row.customerId}`}>{String(v)}
+    </a>,
   },
   {
     key: "status",
@@ -193,12 +195,14 @@ export const INVOICE_FORM_FIELDS: FieldDef[] = [
 export function invoiceToRow(
   inv: Invoice,
   displayStatus?: string,
+  customerNames?: Map<string, string>,
 ): Record<string, unknown> {
   return {
     id: inv.id,
     number: inv.number,
     title: inv.title,
-    customerName: inv.customerId,
+    customerId: inv.customerId,
+    customerName: customerNames?.get(inv.customerId) ?? inv.customerId,
     status: displayStatus ?? inv.status,
     totalFormatted: formatCurrency(inv.total) || "$0",
     paidFormatted: formatCurrency(inv.paidAmount) || "$0",

@@ -1,5 +1,6 @@
 import { z } from "@hono/zod-openapi";
 import { WEEKDAYS } from "../constants/mod.ts";
+import { stringArray } from "./shared.types.ts";
 import type { ViewMode } from "./app.ts";
 
 // ---------------------------------------------------------------------------
@@ -58,7 +59,7 @@ export const PersonSchema = z.object({
     description: "Role within team",
     example: "developer",
   }),
-  departments: z.array(z.string()).nullable().optional().openapi({
+  departments: stringArray.nullable().optional().openapi({
     description: "Department names",
     example: ["Engineering", "Platform"],
   }),
@@ -91,7 +92,7 @@ export const PersonSchema = z.object({
     description: "Agent classification",
     example: "human",
   }),
-  skills: z.array(z.string()).nullable().optional().openapi({
+  skills: stringArray.nullable().optional().openapi({
     description: "Capabilities",
     example: ["typescript", "go", "code-review"],
   }),
@@ -188,7 +189,7 @@ export const PeopleSummarySchema = z.object({
   totalDepartments: z.number().openapi({
     description: "Unique department count",
   }),
-  departments: z.array(z.string()).openapi({
+  departments: stringArray.openapi({
     description: "List of all unique departments",
   }),
 }).openapi("PeopleSummary");
@@ -247,7 +248,7 @@ export const GetPeopleAvailabilitySchema = z.object({
 // ---------------------------------------------------------------------------
 
 export const FindPersonForSkillsSchema = z.object({
-  skills: z.array(z.string()).openapi({
+  skills: stringArray.openapi({
     description: "Required skills to match against people",
     example: ["typescript", "testing"],
   }),
@@ -255,7 +256,7 @@ export const FindPersonForSkillsSchema = z.object({
 
 export const PersonSkillMatchSchema = z.object({
   person: PersonSchema,
-  matchedSkills: z.array(z.string()).openapi({
+  matchedSkills: stringArray.openapi({
     description: "Skills that matched",
   }),
   score: z.number().openapi({

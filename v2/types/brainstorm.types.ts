@@ -4,7 +4,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Sub-schemas
@@ -36,16 +36,16 @@ export const BrainstormSchema = z.object({
     description: "Brainstorm title",
     example: "Product Roadmap Q2 2026",
   }),
-  tags: z.array(z.string()).nullable().optional().openapi({
+  tags: stringArray.nullable().optional().openapi({
     description: "Tags for filtering",
   }),
-  linkedProjects: z.array(z.string()).nullable().optional().openapi({
+  linkedProjects: stringArray.nullable().optional().openapi({
     description: "Linked project names",
   }),
-  linkedTasks: z.array(z.string()).nullable().optional().openapi({
+  linkedTasks: stringArray.nullable().optional().openapi({
     description: "Linked task IDs",
   }),
-  linkedGoals: z.array(z.string()).nullable().optional().openapi({
+  linkedGoals: stringArray.nullable().optional().openapi({
     description: "Linked goal IDs",
   }),
   questions: z.array(BrainstormQuestionSchema).openapi({

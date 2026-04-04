@@ -17,6 +17,8 @@ import {
   INVOICE_TABLE_COLUMNS,
   invoiceToRow,
 } from "./constants.tsx";
+
+let _customerNames: Map<string, string> = new Map();
 import { InvoiceCard } from "../../views/components/invoice-card.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
 
@@ -65,7 +67,7 @@ export const invoiceConfig: DomainConfig<
 
   toRow: (inv) => {
     const service = getInvoiceService();
-    return invoiceToRow(inv, service.displayStatus(inv));
+    return invoiceToRow(inv, service.displayStatus(inv), _customerNames);
   },
 
   Card: ({ item, q }) => <InvoiceCard item={item} q={q} />,
@@ -88,6 +90,7 @@ export const invoiceConfig: DomainConfig<
 
   extractFilterOptions: async () => {
     const customers = await getCustomerService().list();
+    _customerNames = new Map(customers.map((c) => [c.id, c.name]));
     return {
       customerId: customers.map((c) => ({ value: c.id, label: c.name })),
     };

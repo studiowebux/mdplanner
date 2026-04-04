@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+import { stringArray } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Status enum — shared across all portfolio schemas
@@ -115,11 +116,11 @@ export const PortfolioItemSchema = z.object({
     description: "Project end or target date (YYYY-MM-DD)",
     example: "2026-12-31",
   }),
-  team: z.array(z.string()).nullable().optional().openapi({
+  team: stringArray.nullable().optional().openapi({
     description: "Team member names or person IDs",
     example: ["alice", "bob"],
   }),
-  techStack: z.array(z.string()).nullable().optional().openapi({
+  techStack: stringArray.nullable().optional().openapi({
     description: "Technologies used in this project",
     example: ["Deno", "Hono", "SQLite"],
   }),
@@ -141,7 +142,7 @@ export const PortfolioItemSchema = z.object({
     description: "Whether this project is managed by a Cerveau brain",
     example: true,
   }),
-  linkedGoals: z.array(z.string()).nullable().optional().openapi({
+  linkedGoals: stringArray.nullable().optional().openapi({
     description: "Goal IDs linked to this portfolio item",
   }),
   kpis: z.array(PortfolioKpiSchema).nullable().optional().openapi({

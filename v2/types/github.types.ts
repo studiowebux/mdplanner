@@ -4,6 +4,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
+import { stringArray } from "./shared.types.ts";
 
 export const GITHUB_ISSUE_STATES = ["open", "closed"] as const;
 export type GitHubIssueState = typeof GITHUB_ISSUE_STATES[number];
@@ -181,7 +182,7 @@ export const GitHubIssueSchema = z.object({
   number: z.number(),
   title: z.string(),
   state: z.enum(GITHUB_ISSUE_STATES),
-  labels: z.array(z.string()),
+  labels: stringArray,
   assignee: z.string().nullable(),
   createdAt: z.string(),
   htmlUrl: z.string(),

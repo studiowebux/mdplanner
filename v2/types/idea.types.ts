@@ -3,7 +3,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -66,13 +66,13 @@ export const IdeaSchema = z.object({
     description: "Resource requirements (free-text)",
     example: "2 devs, API budget",
   }),
-  subtasks: z.array(z.string()).nullable().optional().openapi({
+  subtasks: stringArray.nullable().optional().openapi({
     description: "Subtask descriptions",
   }),
   description: z.string().nullable().optional().openapi({
     description: "Idea description (markdown)",
   }),
-  links: z.array(z.string()).nullable().optional().openapi({
+  links: stringArray.nullable().optional().openapi({
     description: "Linked idea IDs (Zettelkasten-style)",
   }),
   implementedAt: z.string().nullable().optional().openapi({

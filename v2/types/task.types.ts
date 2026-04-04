@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+import { stringArray } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Rejection types for approval workflow
@@ -73,7 +74,7 @@ export const ApprovalRequestSchema = z.object({
   commitHash: z.string().optional().openapi({
     description: "Git commit hash",
   }),
-  artifactUrls: z.array(z.string()).optional().openapi({
+  artifactUrls: stringArray.optional().openapi({
     description: "URLs to build artifacts or deployments",
   }),
   verdict: ApprovalVerdictSchema.optional().openapi({
@@ -118,7 +119,7 @@ export const TaskSchema = z.object({
   section: z.string().openapi({
     description: "Board section (Todo, In Progress, Done, etc.)",
   }),
-  description: z.array(z.string()).nullable().optional().openapi({
+  description: stringArray.nullable().optional().openapi({
     description: "Task description paragraphs (markdown)",
   }),
   children: z.array(TaskChildSchema).optional().openapi({
@@ -127,7 +128,7 @@ export const TaskSchema = z.object({
   parentId: z.string().nullable().optional().openapi({
     description: "Parent task ID (if subtask)",
   }),
-  tags: z.array(z.string()).nullable().optional().openapi({
+  tags: stringArray.nullable().optional().openapi({
     description: "Task labels/tags",
   }),
   due_date: z.string().nullable().optional().openapi({
@@ -142,7 +143,7 @@ export const TaskSchema = z.object({
   effort: z.number().nullable().optional().openapi({
     description: "Effort estimate (story points or hours)",
   }),
-  blocked_by: z.array(z.string()).nullable().optional().openapi({
+  blocked_by: stringArray.nullable().optional().openapi({
     description: "Task IDs this task is blocked by",
   }),
   milestone: z.string().nullable().optional().openapi({
@@ -160,7 +161,7 @@ export const TaskSchema = z.object({
   order: z.number().nullable().optional().openapi({
     description: "Sort order within section",
   }),
-  attachments: z.array(z.string()).nullable().optional().openapi({
+  attachments: stringArray.nullable().optional().openapi({
     description: "Attachment file paths",
   }),
   project: z.string().nullable().optional().openapi({
@@ -187,7 +188,7 @@ export const TaskSchema = z.object({
   approvalRequest: ApprovalRequestSchema.nullable().optional().openapi({
     description: "Pending approval request",
   }),
-  files: z.array(z.string()).nullable().optional().openapi({
+  files: stringArray.nullable().optional().openapi({
     description: "Relevant source file paths (relative to codebase root)",
   }),
   createdBy: z.string().nullable().optional().openapi({
@@ -304,7 +305,7 @@ export const UpdateTaskSchema = CreateTaskSchema
     comments: z.array(TaskCommentSchema).nullable().optional().openapi({
       description: "Task comment thread. Set to null to clear.",
     }),
-    attachments: z.array(z.string()).nullable().optional().openapi({
+    attachments: stringArray.nullable().optional().openapi({
       description: "Attachment file paths. Set to null to clear.",
     }),
     time_entries: z.array(TimeEntrySchema).nullable().optional().openapi({
@@ -335,7 +336,7 @@ export const ListTaskOptionsSchema = z.object({
   assignee: z.string().optional().openapi({
     description: "Filter by assignee person ID",
   }),
-  tags: z.array(z.string()).optional().openapi({
+  tags: stringArray.optional().openapi({
     description: "Filter by tags (all must match)",
   }),
   ready: z.boolean().optional().openapi({
@@ -402,7 +403,7 @@ export const SweepStaleClaimsInputSchema = z.object({
 }).openapi("SweepStaleClaimsInput");
 
 export const SweepStaleClaimsResultSchema = z.object({
-  swept: z.array(z.string()).openapi({
+  swept: stringArray.openapi({
     description: "IDs of tasks whose claims were released",
   }),
 }).openapi("SweepStaleClaimsResult");
@@ -435,7 +436,7 @@ export const UpdateCommentInputSchema = z.object({
 // ---------------------------------------------------------------------------
 
 export const AddAttachmentsInputSchema = z.object({
-  paths: z.array(z.string()).min(1).openapi({
+  paths: stringArray.min(1).openapi({
     description: "File paths to attach",
   }),
 }).openapi("AddAttachmentsInput");
@@ -450,7 +451,7 @@ export const RequestApprovalInputSchema = z.object({
     description: "Summary of work done (markdown)",
   }),
   commitHash: z.string().optional().openapi({ description: "Git commit hash" }),
-  artifactUrls: z.array(z.string()).optional().openapi({
+  artifactUrls: stringArray.optional().openapi({
     description: "Build artifact or deployment URLs",
   }),
 }).openapi("RequestApprovalInput");

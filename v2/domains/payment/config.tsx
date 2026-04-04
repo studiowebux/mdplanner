@@ -7,13 +7,18 @@ import type {
   UpdatePayment,
 } from "../../types/payment.types.ts";
 import { PAYMENT_METHODS } from "../../types/payment.types.ts";
-import { getPaymentService } from "../../singletons/services.ts";
+import {
+  getInvoiceService,
+  getPaymentService,
+} from "../../singletons/services.ts";
 import { createSearchPredicate } from "../../utils/string.ts";
 import {
   PAYMENT_FORM_FIELDS,
   PAYMENT_TABLE_COLUMNS,
   paymentToRow,
 } from "./constants.tsx";
+
+let _invoiceNames: Map<string, string> = new Map();
 import { PaymentCard } from "../../views/components/payment-card.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
 
@@ -52,7 +57,7 @@ export const paymentConfig: DomainConfig<
     },
   ],
 
-  toRow: paymentToRow,
+  toRow: (p) => paymentToRow(p, _invoiceNames),
 
   Card: ({ item, q }) => <PaymentCard item={item} q={q} />,
 
@@ -68,6 +73,14 @@ export const paymentConfig: DomainConfig<
     });
     if (data.amount != null) data.amount = Number(data.amount);
     return data as Partial<UpdatePayment>;
+  },
+
+  extractFilterOptions: async () => {
+    const invoices = await getInvoiceService().list();
+    _invoiceNames = new Map(
+      invoices.map((inv) => [inv.id, `${inv.number} — ${inv.title}`]),
+    );
+    return {};
   },
 
   getService: () => getPaymentService(),

@@ -3,7 +3,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -152,7 +152,7 @@ export const MarketingPlanSchema = z.object({
   campaigns: z.array(MarketingCampaignSchema).nullable().optional().openapi({
     description: "Marketing campaigns",
   }),
-  linkedGoals: z.array(z.string()).nullable().optional().openapi({
+  linkedGoals: stringArray.nullable().optional().openapi({
     description: "Linked goal IDs — KPI tracking lives in the goals module",
   }),
   project: z.string().nullable().optional().openapi({
@@ -161,7 +161,7 @@ export const MarketingPlanSchema = z.object({
   responsible: z.string().nullable().optional().openapi({
     description: "Person ID of the plan owner",
   }),
-  team: z.array(z.string()).nullable().optional().openapi({
+  team: stringArray.nullable().optional().openapi({
     description: "Person IDs of team members",
   }),
   hypothesis: z.array(z.object({

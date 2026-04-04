@@ -2,6 +2,7 @@
 
 import { z } from "@hono/zod-openapi";
 import { WEEKDAYS } from "../constants/mod.ts";
+import { stringArray } from "./shared.types.ts";
 import { decryptSecret } from "../utils/secrets.ts";
 
 export const ProjectLinkSchema = z.object({
@@ -38,19 +39,19 @@ export const ProjectConfigSchema = z.object({
     description: "Working day names for scheduling",
     example: ["Mon", "Tue", "Wed", "Thu", "Fri"],
   }),
-  tags: z.array(z.string()).optional().openapi({
+  tags: stringArray.optional().openapi({
     description: "Available task tags for this project",
     example: ["feature", "bug", "enhancement", "docs"],
   }),
   links: z.array(ProjectLinkSchema).optional().openapi({
     description: "External links (repo, docs, Discord, etc.)",
   }),
-  features: z.array(z.string()).optional().openapi({
+  features: stringArray.optional().openapi({
     description:
       "Enabled feature/domain keys — controls which views appear in the sidebar",
     example: ["milestones", "tasks", "notes", "goals"],
   }),
-  navCategories: z.record(z.array(z.string())).optional().openapi({
+  navCategories: z.record(stringArray).optional().openapi({
     description:
       "Sidebar navigation categories. Keys are category names, values are arrays of entity keys. " +
       "Uncategorized enabled features go to 'Other'. When absent, built-in defaults are used.",
@@ -64,7 +65,7 @@ export const ProjectConfigSchema = z.object({
       "HTTP server port. Overridden by PORT env var. Defaults to 8003.",
     example: 8003,
   }),
-  sectionOrder: z.array(z.string()).optional().openapi({
+  sectionOrder: stringArray.optional().openapi({
     description:
       "Display order for task board sections. Sections not listed appear at the end. " +
       "Defaults to: Backlog, Todo, In Progress, Pending Review, Done.",
@@ -95,7 +96,7 @@ export const ProjectConfigSchema = z.object({
     description: "Number of pipeline runs per page (default: 10)",
     example: 10,
   }),
-  kpiMetrics: z.array(z.string()).optional().openapi({
+  kpiMetrics: stringArray.optional().openapi({
     description:
       "Configurable KPI metric keys shown in goal form (e.g. mrr, arr, active_users)",
     example: ["mrr", "arr", "churn_rate"],
@@ -119,7 +120,7 @@ export type UpdateProjectConfig = z.infer<typeof UpdateProjectConfigSchema>;
 // Features list — used by GET/PUT /features endpoints
 // ---------------------------------------------------------------------------
 
-export const FeaturesListSchema = z.array(z.string()).openapi(
+export const FeaturesListSchema = stringArray.openapi(
   "FeaturesList",
 );
 

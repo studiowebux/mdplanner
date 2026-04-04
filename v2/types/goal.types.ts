@@ -3,7 +3,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -69,7 +69,7 @@ export const GoalSchema = z.object({
   githubMilestone: z.number().nullable().optional().openapi({
     description: "Linked GitHub milestone number",
   }),
-  linkedPortfolioItems: z.array(z.string()).nullable().optional().openapi({
+  linkedPortfolioItems: stringArray.nullable().optional().openapi({
     description: "Linked portfolio item IDs",
   }),
   project: z.string().nullable().optional().openapi({
@@ -78,7 +78,7 @@ export const GoalSchema = z.object({
   owner: z.string().nullable().optional().openapi({
     description: "Goal owner (person name)",
   }),
-  contributors: z.array(z.string()).nullable().optional().openapi({
+  contributors: stringArray.nullable().optional().openapi({
     description: "Contributing people (names)",
   }),
   priority: z.number().min(1).max(5).nullable().optional().openapi({
@@ -90,10 +90,10 @@ export const GoalSchema = z.object({
   parentGoal: z.string().nullable().optional().openapi({
     description: "Parent goal ID (for OKR hierarchy)",
   }),
-  linkedMilestones: z.array(z.string()).nullable().optional().openapi({
+  linkedMilestones: stringArray.nullable().optional().openapi({
     description: "Linked milestone IDs",
   }),
-  tags: z.array(z.string()).nullable().optional().openapi({
+  tags: stringArray.nullable().optional().openapi({
     description: "Goal labels/tags",
   }),
   notes: z.string().nullable().optional().openapi({

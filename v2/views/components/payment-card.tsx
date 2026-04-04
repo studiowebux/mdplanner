@@ -4,13 +4,18 @@ import { DomainCard } from "../../components/ui/domain-card.tsx";
 import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 import { PAYMENT_METHOD_VARIANTS } from "../../domains/payment/constants.tsx";
 import { formatCurrency } from "../../utils/format.ts";
+import { getInvoiceService } from "../../singletons/services.ts";
 
 type Props = { item: Payment; q?: string };
 
-export const PaymentCard: FC<Props> = ({ item, q }) => {
+export const PaymentCard: FC<Props> = async ({ item, q }) => {
   const methodVariant = item.method
     ? PAYMENT_METHOD_VARIANTS[item.method] ?? "neutral"
     : null;
+  const invoice = await getInvoiceService().getById(item.invoiceId);
+  const invoiceLabel = invoice
+    ? `${invoice.number} — ${invoice.title}`
+    : item.invoiceId;
 
   return (
     <DomainCard
@@ -30,7 +35,9 @@ export const PaymentCard: FC<Props> = ({ item, q }) => {
             <span class={`badge badge--${methodVariant}`}>{item.method}</span>
           </CardMetaItem>
         )}
-        <CardMetaItem label="Invoice">{item.invoiceId}</CardMetaItem>
+        <CardMetaItem label="Invoice">
+          <a href={`/invoices/${item.invoiceId}`}>{invoiceLabel}</a>
+        </CardMetaItem>
       </CardMeta>
     </DomainCard>
   );

@@ -79,6 +79,8 @@ export const QUOTE_TABLE_COLUMNS: ColumnDef[] = [
     key: "customerName",
     label: "Customer",
     sortable: true,
+    render: (v, row) => <a href={`/customers/${row.customerId}`}>{String(v)}
+    </a>,
   },
   {
     key: "status",
@@ -185,12 +187,16 @@ export const QUOTE_FORM_FIELDS: FieldDef[] = [
 // Row mapper
 // ---------------------------------------------------------------------------
 
-export function quoteToRow(q: Quote): Record<string, unknown> {
+export function quoteToRow(
+  q: Quote,
+  customerNames?: Map<string, string>,
+): Record<string, unknown> {
   return {
     id: q.id,
     number: q.number,
     title: q.title,
-    customerName: q.customerId,
+    customerId: q.customerId,
+    customerName: customerNames?.get(q.customerId) ?? q.customerId,
     status: q.status,
     totalFormatted: formatCurrency(q.total) || "$0",
     expiresAt: q.expiresAt ?? "",

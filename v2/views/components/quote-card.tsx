@@ -5,10 +5,13 @@ import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 import { QUOTE_STATUS_VARIANTS } from "../../domains/quote/constants.tsx";
 import { badgeClass } from "../../components/ui/status-badge.tsx";
 import { formatCurrency } from "../../utils/format.ts";
+import { getCustomerService } from "../../singletons/services.ts";
 
 type Props = { item: Quote; q?: string };
 
-export const QuoteCard: FC<Props> = ({ item, q }) => {
+export const QuoteCard: FC<Props> = async ({ item, q }) => {
+  const customer = await getCustomerService().getById(item.customerId);
+
   return (
     <DomainCard
       href={`/quotes/${item.id}`}
@@ -19,7 +22,9 @@ export const QuoteCard: FC<Props> = ({ item, q }) => {
     >
       <CardMeta>
         <CardMetaItem label="Customer">
-          <a href={`/customers/${item.customerId}`}>{item.customerId}</a>
+          <a href={`/customers/${item.customerId}`}>
+            {customer?.name ?? item.customerId}
+          </a>
         </CardMetaItem>
         <CardMetaItem label="Status">
           <span class={badgeClass(QUOTE_STATUS_VARIANTS, item.status)}>

@@ -4,7 +4,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -74,7 +74,7 @@ export const DnsDomainSchema = z.object({
     description: "DNS provider (cloudflare, manual, etc.)",
     example: "cloudflare",
   }),
-  nameservers: z.array(z.string()).optional().openapi({
+  nameservers: stringArray.optional().openapi({
     description: "Nameservers for the domain",
   }),
   dnsRecords: z.array(DnsRecordSchema).optional().openapi({

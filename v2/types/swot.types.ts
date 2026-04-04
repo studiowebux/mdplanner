@@ -3,7 +3,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
@@ -19,16 +19,16 @@ export const SwotSchema = z.object({
     description: "Analysis date (YYYY-MM-DD)",
     example: "2026-01-15",
   }),
-  strengths: z.array(z.string()).openapi({
+  strengths: stringArray.openapi({
     description: "Strength items",
   }),
-  weaknesses: z.array(z.string()).openapi({
+  weaknesses: stringArray.openapi({
     description: "Weakness items",
   }),
-  opportunities: z.array(z.string()).openapi({
+  opportunities: stringArray.openapi({
     description: "Opportunity items",
   }),
-  threats: z.array(z.string()).openapi({
+  threats: stringArray.openapi({
     description: "Threat items",
   }),
   project: z.string().nullable().optional().openapi({
