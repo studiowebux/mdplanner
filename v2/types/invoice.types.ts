@@ -5,6 +5,7 @@
 
 import { z } from "@hono/zod-openapi";
 import { LineItemSchema } from "./billing.types.ts";
+import { AuditFieldsSchema } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -93,23 +94,13 @@ export const InvoiceSchema = z.object({
   footer: z.string().nullable().optional().openapi({
     description: "Client-facing footer text",
   }),
-  createdAt: z.string().openapi({ description: "ISO creation timestamp" }),
-  updatedAt: z.string().openapi({
-    description: "ISO last-updated timestamp",
-  }),
   sentAt: z.string().nullable().optional().openapi({
     description: "ISO timestamp when invoice was sent",
   }),
   paidAt: z.string().nullable().optional().openapi({
     description: "ISO timestamp when invoice was fully paid",
   }),
-  createdBy: z.string().nullable().optional().openapi({
-    description: "Person ID of the creator",
-  }),
-  updatedBy: z.string().nullable().optional().openapi({
-    description: "Person ID of the last updater",
-  }),
-}).openapi("Invoice");
+}).merge(AuditFieldsSchema).openapi("Invoice");
 
 export type Invoice = z.infer<typeof InvoiceSchema>;
 

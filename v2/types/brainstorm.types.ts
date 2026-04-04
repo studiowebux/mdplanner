@@ -4,6 +4,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
+import { AuditFieldsSchema } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Sub-schemas
@@ -50,17 +51,7 @@ export const BrainstormSchema = z.object({
   questions: z.array(BrainstormQuestionSchema).openapi({
     description: "Ordered Q&A pairs",
   }),
-  createdAt: z.string().openapi({ description: "ISO creation timestamp" }),
-  updatedAt: z.string().openapi({
-    description: "ISO last-updated timestamp",
-  }),
-  createdBy: z.string().nullable().optional().openapi({
-    description: "Person ID of the creator",
-  }),
-  updatedBy: z.string().nullable().optional().openapi({
-    description: "Person ID of the last updater",
-  }),
-}).openapi("Brainstorm");
+}).merge(AuditFieldsSchema).openapi("Brainstorm");
 
 export type Brainstorm = z.infer<typeof BrainstormSchema>;
 

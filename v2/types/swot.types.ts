@@ -3,6 +3,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
+import { AuditFieldsSchema } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
@@ -36,15 +37,7 @@ export const SwotSchema = z.object({
   notes: z.string().nullable().optional().openapi({
     description: "Additional notes (markdown)",
   }),
-  createdAt: z.string().openapi({ description: "ISO creation timestamp" }),
-  updatedAt: z.string().openapi({ description: "ISO last-updated timestamp" }),
-  createdBy: z.string().nullable().optional().openapi({
-    description: "Person ID of the creator",
-  }),
-  updatedBy: z.string().nullable().optional().openapi({
-    description: "Person ID of the last updater",
-  }),
-}).openapi("Swot");
+}).merge(AuditFieldsSchema).openapi("Swot");
 
 export type Swot = z.infer<typeof SwotSchema>;
 

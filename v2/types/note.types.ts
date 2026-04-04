@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+import { AuditFieldsSchema } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Paragraph types — text blocks and code fences
@@ -126,12 +127,6 @@ export const NoteSchema = z.object({
   customSections: z.array(CustomSectionSchema).nullable().optional().openapi({
     description: "Custom layout sections — tabs, timeline, split-view",
   }),
-  createdAt: z.string().openapi({
-    description: "ISO timestamp of creation",
-  }),
-  updatedAt: z.string().openapi({
-    description: "ISO timestamp of last update",
-  }),
   revision: z.number().openapi({
     description: "Monotonic counter for optimistic locking",
   }),
@@ -139,13 +134,7 @@ export const NoteSchema = z.object({
     description: "Project scope",
     example: "MD Planner",
   }),
-  createdBy: z.string().nullable().optional().openapi({
-    description: "Person ID of the creator",
-  }),
-  updatedBy: z.string().nullable().optional().openapi({
-    description: "Person ID of the last updater",
-  }),
-}).openapi("Note");
+}).merge(AuditFieldsSchema).openapi("Note");
 
 export type Note = z.infer<typeof NoteSchema>;
 

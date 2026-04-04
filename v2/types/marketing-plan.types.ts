@@ -3,6 +3,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
+import { AuditFieldsSchema } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -180,15 +181,7 @@ export const MarketingPlanSchema = z.object({
   notes: z.string().nullable().optional().openapi({
     description: "Plan notes (markdown)",
   }),
-  createdAt: z.string().openapi({ description: "ISO creation timestamp" }),
-  updatedAt: z.string().openapi({ description: "ISO last-updated timestamp" }),
-  createdBy: z.string().nullable().optional().openapi({
-    description: "Person ID of the creator",
-  }),
-  updatedBy: z.string().nullable().optional().openapi({
-    description: "Person ID of the last updater",
-  }),
-}).openapi("MarketingPlan");
+}).merge(AuditFieldsSchema).openapi("MarketingPlan");
 
 export type MarketingPlan = z.infer<typeof MarketingPlanSchema>;
 
