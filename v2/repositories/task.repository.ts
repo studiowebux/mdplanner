@@ -15,7 +15,11 @@ import { TaskBuilder } from "../builders/task.builder.ts";
 import type { CreateTask, Task, UpdateTask } from "../types/task.types.ts";
 import type { CacheDatabase } from "../database/sqlite/mod.ts";
 import { rowToTask } from "../domains/task/cache.ts";
-import { TASK_BODY_KEYS, TASK_TABLE } from "../domains/task/constants.ts";
+import {
+  TASK_BODY_KEYS,
+  TASK_FM_OVERRIDES,
+  TASK_TABLE,
+} from "../domains/task/constants.ts";
 
 /**
  * Convert a directory name to a display section name.
@@ -261,7 +265,7 @@ export class TaskRepository {
 
   private parse(content: string, section: string): Task | null {
     const { frontmatter, body } = parseFrontmatter(content);
-    const fm = mapKeysFromFm(frontmatter);
+    const fm = mapKeysFromFm(frontmatter, TASK_FM_OVERRIDES);
     return TaskBuilder.from(fm, body, section).build();
   }
 

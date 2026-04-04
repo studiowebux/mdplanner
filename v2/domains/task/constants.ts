@@ -1,5 +1,18 @@
 // Task domain constants.
 
+/**
+ * Frontmatter key overrides for task markdown files.
+ * Task domain fields use snake_case in both frontmatter and TypeScript types,
+ * so they must NOT be converted to camelCase by mapKeysFromFm.
+ */
+export const TASK_FM_OVERRIDES: Readonly<Record<string, string>> = {
+  due_date: "due_date",
+  planned_start: "planned_start",
+  planned_end: "planned_end",
+  blocked_by: "blocked_by",
+  time_entries: "time_entries",
+};
+
 /** Keys stored in the markdown body, not in frontmatter. */
 export const TASK_BODY_KEYS = [
   "title",
