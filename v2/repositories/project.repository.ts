@@ -54,6 +54,9 @@ export class ProjectRepository {
     if (config.staleDays !== undefined) {
       fm.stale_days = config.staleDays;
     }
+    if (config.stableVersion !== undefined) {
+      fm.stable_version = config.stableVersion;
+    }
     if (config.kpiMetrics && config.kpiMetrics.length > 0) {
       fm.kpi_metrics = config.kpiMetrics;
     }

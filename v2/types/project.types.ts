@@ -106,6 +106,11 @@ export const ProjectConfigSchema = z.object({
       "Number of days without activity before a portfolio project is considered stale. Defaults to 14.",
     example: 14,
   }),
+  stableVersion: z.string().optional().openapi({
+    description:
+      "Last known stable/tested version deployed to production. Separate from the latest tagged version.",
+    example: "v0.33.3",
+  }),
 }).openapi("ProjectConfig");
 
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
@@ -158,6 +163,7 @@ export const FrontmatterProjectSchema = z.object({
   pipelines_per_page: z.number().optional(),
   kpi_metrics: z.array(z.unknown()).optional(),
   stale_days: z.number().optional(),
+  stable_version: z.string().optional(),
   last_updated: z.string().optional(),
 }).transform(
   async (fm): Promise<Omit<ProjectConfig, "name" | "description">> => {
@@ -202,6 +208,7 @@ export const FrontmatterProjectSchema = z.object({
         ? (fm.kpi_metrics as unknown[]).map(String)
         : undefined,
       staleDays: fm.stale_days,
+      stableVersion: fm.stable_version,
       lastUpdated: fm.last_updated,
     };
   },
