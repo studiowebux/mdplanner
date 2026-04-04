@@ -4,7 +4,7 @@ title: MCP Integration
 
 # MCP Integration
 
-MD Planner ships a built-in MCP server with 244 tools. Two transport modes are
+MD Planner ships a built-in MCP server with 157 tools. Two transport modes are
 available.
 
 ## stdio (local binary)

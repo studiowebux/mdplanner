@@ -79,6 +79,9 @@
   --color-level-initiative: #f97316;
   --color-level-project: #ef4444;
 
+  /* Lean Canvas tokens */
+  --lc-section-min-height: 8rem;
+
   /* Org chart tokens */
   --orgchart-min-height: 25rem;
   --orgchart-node-min-w: 11.25rem;

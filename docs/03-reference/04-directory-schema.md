@@ -342,6 +342,112 @@ RACI labels `(R)`, `(A)`, `(C)`, `(I)` in headings are stripped before matching.
 Section content may be bullet lists or prose paragraphs — both are stored as
 `string[]`.
 
+## Lean Canvas
+
+Directory: `leancanvas/`
+
+Business model canvas with 12 sections. Frontmatter stores identity fields;
+each section is an H2 heading followed by a bullet list. Section headings are
+keyword-matched (case-insensitive) to their field names.
+
+```yaml
+---
+id: lean_canvas_1234567890_abcd
+title: TaskFlow Lean Canvas
+project: TaskFlow
+date: 2026-01-05
+createdAt: "2026-01-05T00:00:00.000Z"
+updatedAt: "2026-01-05T00:00:00.000Z"
+---
+
+# TaskFlow Lean Canvas
+
+## Problem
+
+- Existing tools are bloated and complex
+- Poor UX leads to low adoption
+
+## Solution
+
+- Clean, focused interface
+- Quick onboarding (< 5 minutes)
+
+## Unique Value Proposition
+
+Project management that gets out of your way.
+
+## Unfair Advantage
+
+- Deep developer experience focus
+- Modern architecture
+
+## Customer Segments
+
+- Small tech teams (5–20 people)
+- Freelancers and agencies
+
+## Existing Alternatives
+
+- Asana (complex, expensive)
+- Trello (too simple)
+
+## Key Metrics
+
+- Monthly active users
+- Paid conversion rate
+
+## High-Level Concept
+
+"Notion meets Linear for project management"
+
+## Channels
+
+- Product Hunt launch
+- Developer communities
+
+## Early Adopters
+
+- Developer teams at startups
+- Indie hackers
+
+## Cost Structure
+
+- Cloud infrastructure
+- Team salaries
+
+## Revenue Streams
+
+- Freemium SaaS subscriptions
+- Team plan: $8/user/month
+```
+
+Fields: `id` (prefix `lean_canvas`), `title`, `project` (optional),
+`date` (YYYY-MM-DD, optional), `createdAt`, `updatedAt`, `createdBy`,
+`updatedBy`.
+
+Computed (not stored on disk): `completedSections` (0–12), `sectionCount`
+(total bullet items), `completionPct` (0–100).
+
+Section content may be bullet lists (`- item`) or plain prose paragraphs —
+both are stored as `string[]`.
+
+Keyword-matched section headings (case-insensitive):
+
+| Field                  | Matched keywords                                      |
+| ---------------------- | ----------------------------------------------------- |
+| `problem`              | problem, problems                                     |
+| `solution`             | solution, solutions                                   |
+| `uniqueValueProp`      | unique value proposition, uvp, value proposition      |
+| `unfairAdvantage`      | unfair advantage                                      |
+| `customerSegments`     | customer segments, customers                          |
+| `existingAlternatives` | existing alternatives, alternatives                   |
+| `keyMetrics`           | key metrics, metrics                                  |
+| `highLevelConcept`     | high-level concept, concept                           |
+| `channels`             | channels                                              |
+| `earlyAdopters`        | early adopters, adopters                              |
+| `costStructure`        | cost structure, costs                                 |
+| `revenueStreams`       | revenue streams, revenue                              |
+
 ## Other Entities
 
 The following entities follow the same pattern of YAML frontmatter + markdown
@@ -353,7 +459,6 @@ body in their respective directories:
 | C4 Architecture | `c4/`              |
 | SWOT            | `swot/`            |
 | Risk Analysis   | `risk/`            |
-| Lean Canvas     | `leancanvas/`      |
 | Business Model  | `businessmodel/`   |
 | Project Value   | `projectvalue/`    |
 | Brief           | `briefs/`          |

@@ -63,6 +63,9 @@ import { registerBriefEntity } from "../domains/brief/cache.ts";
 import { RetrospectiveRepository } from "../repositories/retrospective.repository.ts";
 import { RetrospectiveService } from "../services/retrospective.service.ts";
 import { registerRetrospectiveEntity } from "../domains/retrospective/cache.ts";
+import { LeanCanvasRepository } from "../repositories/lean-canvas.repository.ts";
+import { LeanCanvasService } from "../services/lean-canvas.service.ts";
+import { registerLeanCanvasEntity } from "../domains/lean-canvas/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -88,6 +91,7 @@ let paymentService: PaymentService | null = null;
 let brainstormService: BrainstormService | null = null;
 let briefService: BriefService | null = null;
 let retrospectiveService: RetrospectiveService | null = null;
+let leanCanvasService: LeanCanvasService | null = null;
 let dnsService: DnsService | null = null;
 let githubService: GitHubService | null = null;
 let cacheDb: CacheDatabase | null = null;
@@ -137,6 +141,8 @@ export function initServices(
   briefService = new BriefService(briefRepo);
   const retrospectiveRepo = new RetrospectiveRepository(projectDir);
   retrospectiveService = new RetrospectiveService(retrospectiveRepo);
+  const leanCanvasRepo = new LeanCanvasRepository(projectDir);
+  leanCanvasService = new LeanCanvasService(leanCanvasRepo);
   const dnsRepo = new DnsRepository(projectDir);
   dnsService = new DnsService(dnsRepo, projectService);
   githubService = new GitHubService(projectService);
@@ -163,6 +169,7 @@ export function initServices(
     registerBrainstormEntity(brainstormRepo);
     registerBriefEntity(briefRepo);
     registerRetrospectiveEntity(retrospectiveRepo);
+    registerLeanCanvasEntity(leanCanvasRepo);
 
     // Pass cacheDb to repos for read-path caching
     milestoneRepo.setCacheDb(cacheDb);
@@ -182,6 +189,7 @@ export function initServices(
     brainstormRepo.setCacheDb(cacheDb);
     briefRepo.setCacheDb(cacheDb);
     retrospectiveRepo.setCacheDb(cacheDb);
+    leanCanvasRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -336,6 +344,13 @@ export function getRetrospectiveService(): RetrospectiveService {
     throw new Error("Services not initialized — call initServices() first");
   }
   return retrospectiveService;
+}
+
+export function getLeanCanvasService(): LeanCanvasService {
+  if (!leanCanvasService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return leanCanvasService;
 }
 
 export function getDnsService(): DnsService {

@@ -9,6 +9,17 @@ import { z } from "@hono/zod-openapi";
 // Audit fields — present on every persisted domain entity
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Reusable field helpers
+// ---------------------------------------------------------------------------
+
+/** Reusable string array field — use instead of z.array(z.string()) everywhere */
+export const stringArray = z.array(z.string());
+
+// ---------------------------------------------------------------------------
+// Audit fields — present on every persisted domain entity
+// ---------------------------------------------------------------------------
+
 export const AuditFieldsSchema = z.object({
   createdAt: z.string().openapi({ description: "ISO creation timestamp" }),
   updatedAt: z.string().openapi({
