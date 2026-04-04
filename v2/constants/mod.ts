@@ -43,13 +43,20 @@ export const DONE_SECTION = "Done" as const;
 export const DEFAULT_KPI_METRICS: string[] = [
   "mrr",
   "arr",
+  "revenue",
   "churn_rate",
+  "retention_rate",
+  "conversion_rate",
   "ltv",
   "cac",
+  "arpu",
+  "burn_rate",
   "growth_rate",
   "active_users",
   "nrr",
   "gross_margin",
+  "nps",
+  "uptime",
 ];
 
 export const PRIORITY_OPTIONS = [
