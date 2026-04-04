@@ -1,0 +1,88 @@
+/**
+ * SWOT Analysis types — Zod schemas (single source), inferred types.
+ */
+
+import { z } from "@hono/zod-openapi";
+import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
+
+// ---------------------------------------------------------------------------
+// Zod schemas — single source of truth
+// ---------------------------------------------------------------------------
+
+export const SwotSchema = z.object({
+  id: z.string().openapi({ description: "SWOT ID", example: "swot_q1" }),
+  title: z.string().openapi({
+    description: "SWOT analysis title",
+    example: "Q1 2026 SWOT Analysis",
+  }),
+  date: z.string().openapi({
+    description: "Analysis date (YYYY-MM-DD)",
+    example: "2026-01-15",
+  }),
+  strengths: stringArray.openapi({
+    description: "Strength items",
+  }),
+  weaknesses: stringArray.openapi({
+    description: "Weakness items",
+  }),
+  opportunities: stringArray.openapi({
+    description: "Opportunity items",
+  }),
+  threats: stringArray.openapi({
+    description: "Threat items",
+  }),
+  project: z.string().nullable().optional().openapi({
+    description: "Linked project name",
+  }),
+  notes: z.string().nullable().optional().openapi({
+    description: "Additional notes (markdown)",
+  }),
+}).merge(AuditFieldsSchema).openapi("Swot");
+
+export type Swot = z.infer<typeof SwotSchema>;
+
+// ---------------------------------------------------------------------------
+// Create / Update — derived from SwotSchema
+// ---------------------------------------------------------------------------
+
+export const CreateSwotSchema = SwotSchema.pick({
+  title: true,
+  date: true,
+  strengths: true,
+  weaknesses: true,
+  opportunities: true,
+  threats: true,
+  project: true,
+  notes: true,
+}).partial({
+  date: true,
+  strengths: true,
+  weaknesses: true,
+  opportunities: true,
+  threats: true,
+}).openapi("CreateSwot");
+
+export type CreateSwot = z.infer<typeof CreateSwotSchema>;
+
+export const UpdateSwotSchema = CreateSwotSchema.partial().openapi(
+  "UpdateSwot",
+);
+
+export type UpdateSwot = z.infer<typeof UpdateSwotSchema>;
+
+// ---------------------------------------------------------------------------
+// Query options
+// ---------------------------------------------------------------------------
+
+export const ListSwotOptionsSchema = z.object({
+  project: z.string().optional().openapi({
+    param: { name: "project", in: "query" },
+    description: "Filter by project name",
+  }),
+  q: z.string().optional().openapi({
+    param: { name: "q", in: "query" },
+    description: "Search query (matches title and quadrant items)",
+  }),
+});
+
+export type ListSwotOptions = z.infer<typeof ListSwotOptionsSchema>;

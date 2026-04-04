@@ -1,0 +1,87 @@
+/* Brainstorms view — domain-specific styles only.
+   Card base uses shared .domain-card from components.css. */
+
+/* ---------------------------------------------------------------------------
+   Detail view
+--------------------------------------------------------------------------- */
+
+.brainstorm-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.brainstorm-detail__tags {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.brainstorm-detail__links {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.brainstorm-detail__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+a.brainstorm-detail__link:hover {
+  color: var(--color-accent);
+}
+
+.brainstorm-detail__link-type {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+/* -- Questions ----------------------------------------------------------- */
+
+.brainstorm-detail__question {
+  padding: var(--space-md) 0;
+  border-bottom: var(--border-width) solid var(--color-border-default);
+}
+
+.brainstorm-detail__question:last-child {
+  border-bottom: none;
+}
+
+.brainstorm-detail__question-text {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.brainstorm-detail__answer {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  white-space: pre-wrap;
+}
+
+.brainstorm-detail__no-answer {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.brainstorm-detail__empty {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.brainstorm-detail__meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}

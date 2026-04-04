@@ -1,0 +1,14 @@
+/* Portfolio Dashboard */
+
+/* Numeric columns — centered */
+[data-domain="dashboard"] [data-col^="section_"],
+[data-domain="dashboard"] [data-col="prs"],
+[data-domain="dashboard"] [data-col="issues"],
+[data-domain="dashboard"] [data-col="ci"] {
+  text-align: center;
+}
+
+/* Stale row highlight */
+.dashboard__row--stale {
+  background: var(--color-bg-warning);
+}

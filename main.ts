@@ -426,6 +426,35 @@ app.get("/uploads/*", async (c) => {
   }
 });
 
+// View partials — HTML fragments loaded lazily by the frontend view-loader.
+// Route: GET /views/:name → serves src/static/views/<name>.html
+// Input sanitized: only lowercase alphanumeric + hyphens allowed.
+app.get("/views/:name", async (c) => {
+  const name = c.req.param("name");
+  if (!/^[a-z][a-z0-9-]*$/.test(name) || name.length > 64) {
+    return c.notFound();
+  }
+  const viewsDir = resolve(join(__dirname, "src", "static", "views"));
+  const filePath = resolve(join(viewsDir, `${name}.html`));
+  if (!filePath.startsWith(viewsDir + "/")) {
+    return c.notFound();
+  }
+  try {
+    const content = await Deno.readTextFile(filePath);
+    return c.html(content, 200, {
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0",
+    });
+  } catch (err) {
+    if (err instanceof Deno.errors.NotFound) {
+      return c.notFound();
+    }
+    log.error(`[views] Failed to read ${name}.html: ${err}`);
+    return c.notFound();
+  }
+});
+
 // Static files with no-cache headers
 const staticRoot = join(__dirname, "src", "static");
 app.use(

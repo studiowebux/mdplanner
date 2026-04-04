@@ -1,0 +1,113 @@
+/* DNS view — domain-specific styles only.
+   Page layout uses shared .domain-page from components.css. */
+
+/* Status + provider badge colors now use shared .badge--{variant} from components.css */
+
+/* ---------------------------------------------------------------------------
+   Detail view
+--------------------------------------------------------------------------- */
+
+.dns-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.dns-detail__title {
+  word-break: break-all;
+}
+
+/* ---------------------------------------------------------------------------
+   Info grid
+--------------------------------------------------------------------------- */
+
+.dns-detail__info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr));
+  gap: var(--space-sm);
+}
+
+.dns-detail__nameservers {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  word-break: break-all;
+}
+
+/* ---------------------------------------------------------------------------
+   Sections
+--------------------------------------------------------------------------- */
+
+.dns-detail__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.dns-detail__notes {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--body-line-height);
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.dns-detail__empty {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Records table
+--------------------------------------------------------------------------- */
+
+.dns-detail__records-wrap {
+  overflow-x: auto;
+}
+
+.dns-detail__records-table {
+  width: 100%;
+}
+
+.dns-record-type {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+.dns-record-type--a,
+.dns-record-type--aaaa {
+  background: var(--color-accent-subtle);
+}
+
+.dns-record-type--cname {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.dns-record-type--mx,
+.dns-record-type--txt {
+  background: var(--color-bg-secondary);
+}
+
+.dns-record__name,
+.dns-record__value {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  word-break: break-all;
+}
+
+.dns-record__actions {
+  display: flex;
+  gap: var(--space-xs);
+  justify-content: flex-end;
+}

@@ -4,7 +4,7 @@ name: Acme Corporation
 industry: Technology
 website: https://acme.io
 phone: +1-555-0100
-created: 2026-01-15
+created_at: 2026-01-15
 address:
   street: 123 Tech Lane
   city: San Francisco

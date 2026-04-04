@@ -27,5 +27,5 @@ steps:
     category: intro
   - title: 1:1 with manager
     category: intro
-created: "2026-02-22T12:00:00.000Z"
+created_at: "2026-02-22T12:00:00.000Z"
 ---

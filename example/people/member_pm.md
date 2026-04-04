@@ -5,11 +5,13 @@ role: Product Manager
 departments:
   - Product
   - Engineering
-reportsTo: member_ceo
+reports_to: member_ceo
+agent_type: human
+skills: [product-strategy, roadmapping, user-research, agile, stakeholder-management]
 email: pm@example.com
-startDate: "2021-08-01"
-hoursPerDay: 8
-workingDays:
+start_date: "2021-08-01"
+hours_per_day: 8
+working_days:
   - Mon
   - Tue
   - Wed

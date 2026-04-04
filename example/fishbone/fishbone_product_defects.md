@@ -2,8 +2,8 @@
 id: fishbone_1740700000000_ex1a2b
 title: High Product Defect Rate
 description: Root cause analysis for Q1 quality issues
-created: 2026-02-28T00:00:00.000Z
-updated: 2026-02-28T00:00:00.000Z
+created_at: 2026-02-28T00:00:00.000Z
+updated_at: 2026-02-28T00:00:00.000Z
 ---
 
 ## People

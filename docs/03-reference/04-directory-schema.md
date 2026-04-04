@@ -254,6 +254,200 @@ allocations:
 ---
 ```
 
+## Briefs
+
+Directory: `briefs/`
+
+Planning documents with a RACI matrix and structured sections. Each H2
+heading is keyword-matched to a named field; unrecognised headings are ignored.
+
+```yaml
+---
+id: brief_beta
+title: Beta Launch Brief
+date: 2026-02-01
+createdAt: "2026-02-01T00:00:00.000Z"
+updatedAt: "2026-02-01T00:00:00.000Z"
+---
+
+# Beta Launch Brief
+
+## Summary
+
+Launch public beta to validate product-market fit with small tech teams.
+
+## Mission
+
+Deliver a reliable, feature-complete beta that generates actionable feedback.
+
+## Responsible (R)
+
+- Alice: Technical lead
+- Bob: Backend development
+
+## Accountable (A)
+
+- Alice: Overall beta success
+
+## Consulted (C)
+
+- External beta testers
+
+## Informed (I)
+
+- Investors
+- Advisory board
+
+## High-Level Budget
+
+- Infrastructure: $3,000
+- Marketing: $2,000
+
+## High-Level Timeline
+
+- Feb 1–14: Feature completion
+- Feb 15–28: Testing and polish
+
+## Culture
+
+- Ship fast, iterate faster
+
+## Change Capacity
+
+Team can handle scope changes until Feb 10.
+
+## Guiding Principles
+
+- Simple over feature-rich
+- Accessibility first
+```
+
+Keyword-matched section headings (case-insensitive):
+
+| Field               | Matched keywords                                    |
+| ------------------- | --------------------------------------------------- |
+| `summary`           | summary, executive summary, overview                |
+| `mission`           | mission                                             |
+| `responsible`       | responsible                                         |
+| `accountable`       | accountable                                         |
+| `consulted`         | consulted                                           |
+| `informed`          | informed                                            |
+| `highLevelBudget`   | budget, high level budget, high-level budget        |
+| `highLevelTimeline` | timeline, high level timeline, high-level timeline  |
+| `culture`           | culture                                             |
+| `changeCapacity`    | change capacity, capacity for change                |
+| `guidingPrinciples` | guiding principle, guiding principles, principles   |
+
+RACI labels `(R)`, `(A)`, `(C)`, `(I)` in headings are stripped before matching.
+Section content may be bullet lists or prose paragraphs — both are stored as
+`string[]`.
+
+## Lean Canvas
+
+Directory: `leancanvas/`
+
+Business model canvas with 12 sections. Frontmatter stores identity fields;
+each section is an H2 heading followed by a bullet list. Section headings are
+keyword-matched (case-insensitive) to their field names.
+
+```yaml
+---
+id: lean_canvas_1234567890_abcd
+title: TaskFlow Lean Canvas
+project: TaskFlow
+date: 2026-01-05
+createdAt: "2026-01-05T00:00:00.000Z"
+updatedAt: "2026-01-05T00:00:00.000Z"
+---
+
+# TaskFlow Lean Canvas
+
+## Problem
+
+- Existing tools are bloated and complex
+- Poor UX leads to low adoption
+
+## Solution
+
+- Clean, focused interface
+- Quick onboarding (< 5 minutes)
+
+## Unique Value Proposition
+
+Project management that gets out of your way.
+
+## Unfair Advantage
+
+- Deep developer experience focus
+- Modern architecture
+
+## Customer Segments
+
+- Small tech teams (5–20 people)
+- Freelancers and agencies
+
+## Existing Alternatives
+
+- Asana (complex, expensive)
+- Trello (too simple)
+
+## Key Metrics
+
+- Monthly active users
+- Paid conversion rate
+
+## High-Level Concept
+
+"Notion meets Linear for project management"
+
+## Channels
+
+- Product Hunt launch
+- Developer communities
+
+## Early Adopters
+
+- Developer teams at startups
+- Indie hackers
+
+## Cost Structure
+
+- Cloud infrastructure
+- Team salaries
+
+## Revenue Streams
+
+- Freemium SaaS subscriptions
+- Team plan: $8/user/month
+```
+
+Fields: `id` (prefix `lean_canvas`), `title`, `project` (optional),
+`date` (YYYY-MM-DD, optional), `createdAt`, `updatedAt`, `createdBy`,
+`updatedBy`.
+
+Computed (not stored on disk): `completedSections` (0–12), `sectionCount`
+(total bullet items), `completionPct` (0–100).
+
+Section content may be bullet lists (`- item`) or plain prose paragraphs —
+both are stored as `string[]`.
+
+Keyword-matched section headings (case-insensitive):
+
+| Field                  | Matched keywords                                      |
+| ---------------------- | ----------------------------------------------------- |
+| `problem`              | problem, problems                                     |
+| `solution`             | solution, solutions                                   |
+| `uniqueValueProp`      | unique value proposition, uvp, value proposition      |
+| `unfairAdvantage`      | unfair advantage                                      |
+| `customerSegments`     | customer segments, customers                          |
+| `existingAlternatives` | existing alternatives, alternatives                   |
+| `keyMetrics`           | key metrics, metrics                                  |
+| `highLevelConcept`     | high-level concept, concept                           |
+| `channels`             | channels                                              |
+| `earlyAdopters`        | early adopters, adopters                              |
+| `costStructure`        | cost structure, costs                                 |
+| `revenueStreams`       | revenue streams, revenue                              |
+
 ## Other Entities
 
 The following entities follow the same pattern of YAML frontmatter + markdown
@@ -265,12 +459,187 @@ body in their respective directories:
 | C4 Architecture | `c4/`              |
 | SWOT            | `swot/`            |
 | Risk Analysis   | `risk/`            |
-| Lean Canvas     | `leancanvas/`      |
 | Business Model  | `businessmodel/`   |
 | Project Value   | `projectvalue/`    |
-| Brief           | `brief/`           |
+| Brief           | `briefs/`          |
+| Retrospective   | `retrospectives/`  |
 | Strategic Levels| `strategiclevels/` |
 | Billing         | `billing/`         |
+
+## Customers
+
+Directory: `billing/customers/`
+
+```yaml
+---
+id: customer_agency
+name: DevAgency Inc
+email: accounts@devagency.com
+phone: "+1-555-0300"
+company: DevAgency Inc
+billingAddress:
+  street: 789 Agency Way
+  city: New York
+  state: NY
+  postalCode: "10001"
+  country: USA
+created_at: 2026-02-10
+---
+
+# DevAgency Inc
+
+## Notes
+
+Quarterly invoicing, NET 30 terms.
+```
+
+Fields: `id`, `name`, `email`, `phone`, `company`, `billingAddress` (nested
+object with `street`, `city`, `state`, `postalCode`, `country`),
+`created_at`, `updated_at`.
+
+## Billing Rates
+
+Directory: `billing/rates/`
+
+```yaml
+---
+id: rate_standard
+name: Standard Rate
+unit: h
+rate: 150
+currency: CAD
+isDefault: true
+created_at: 2026-02-10
+---
+
+# Standard Rate
+
+## Notes
+
+Default consulting/support rate.
+```
+
+Fields: `id`, `name`, `unit` (`h`, `d`, `unit`, `mo`, `fixed`), `rate`
+(number), `currency` (ISO 4217, optional), `assignee` (person ID, optional),
+`isDefault` (boolean), `created_at`, `updated_at`.
+
+## Quotes
+
+Directory: `billing/quotes/`
+
+```yaml
+---
+id: quote_startup
+number: Q-2026-001
+customerId: customer_startup
+title: Team Plan Annual Subscription
+status: accepted
+expiresAt: 2026-03-01
+taxRate: 15
+subtotal: 1152
+tax: 172.8
+total: 1324.8
+revision: 1
+created_at: 2026-02-01
+lineItems:
+  - id: li_1
+    type: service
+    description: Team Plan (12 users) - Annual
+    quantity: 12
+    unit: unit
+    unitRate: 96
+    amount: 1152
+paymentSchedule:
+  - description: 50% deposit
+    percent: 50
+    dueDate: 2026-02-15
+  - description: Balance on delivery
+    percent: 50
+    dueDate: 2026-03-01
+---
+
+# Quote: Team Plan Annual
+
+Annual subscription with 20% discount.
+
+## Terms
+
+12 month commitment, annual billing upfront.
+```
+
+Fields: `id`, `number` (Q-YYYY-NNN), `customerId`, `title`, `status`
+(`draft`, `sent`, `accepted`, `rejected`), `currency`, `expiresAt`,
+`lineItems` (array of LineItem), `paymentSchedule` (optional array),
+`subtotal`, `tax`, `taxRate`, `total`, `notes`, `footer`, `revision`,
+`convertedToInvoice`, `sentAt`, `acceptedAt`, `created_at`, `updated_at`.
+
+## Invoices
+
+Directory: `billing/invoices/`
+
+```yaml
+---
+id: invoice_startup1
+number: INV-2026-001
+customerId: customer_startup
+quoteId: quote_startup
+title: Team Plan Annual - Year 1
+status: paid
+dueDate: 2026-03-01
+paymentTerms: NET 30
+created_at: 2026-02-15
+sent_at: 2026-02-15
+paid_at: 2026-02-18
+subtotal: 1152
+total: 1152
+paidAmount: 1152
+lineItems:
+  - id: li_1
+    type: service
+    description: Team Plan (12 users) - Annual Subscription
+    quantity: 12
+    unit: unit
+    unitRate: 96
+    amount: 1152
+---
+
+# Invoice: Startup Labs - Year 1
+
+Paid in full via Stripe.
+```
+
+Fields: `id`, `number` (INV-YYYY-NNN), `customerId`, `quoteId` (optional),
+`title`, `status` (`draft`, `sent`, `paid`, `overdue`, `cancelled`),
+`currency`, `dueDate`, `paymentTerms`, `lineItems` (array of LineItem),
+`subtotal`, `tax`, `taxRate`, `total`, `paidAmount`, `notes`, `footer`,
+`sentAt`, `paidAt`, `created_at`, `updated_at`.
+
+## Payments
+
+Directory: `billing/payments/`
+
+```yaml
+---
+id: payment_001
+invoiceId: invoice_startup1
+amount: 1152
+date: 2026-02-18
+method: card
+reference: ch_1234567890
+created_at: 2026-02-18
+---
+
+# Payment ch_1234567890
+
+## Notes
+
+Paid via Stripe.
+```
+
+Fields: `id`, `invoiceId`, `amount` (number), `date` (YYYY-MM-DD),
+`method` (`bank`, `card`, `cash`, `cheque`, `other`), `reference`,
+`notes`, `created_at`, `updated_at`.
+
 | CRM             | `crm/`             |
 | Time Tracking   | `timetracking/`    |
 | Meetings        | `meetings/`        |

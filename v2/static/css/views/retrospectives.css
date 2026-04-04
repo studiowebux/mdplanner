@@ -1,0 +1,86 @@
+/* Retrospectives view — domain-specific styles only.
+   Card base uses shared .domain-card from components.css. */
+
+/* ---------------------------------------------------------------------------
+   Detail view
+--------------------------------------------------------------------------- */
+
+.retro-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+/* -- Sections grid -------------------------------------------------------- */
+
+.retro-detail__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+  margin: var(--space-md) 0;
+}
+
+.retro-detail__section {
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) solid var(--color-border-default);
+}
+
+.retro-detail__section-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  margin-bottom: var(--space-sm);
+}
+
+.retro-detail__list {
+  list-style: disc;
+  padding-left: var(--space-lg);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-relaxed);
+}
+
+.retro-detail__list li {
+  margin-bottom: var(--space-xs);
+}
+
+.retro-detail__empty {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* -- Section accent borders ----------------------------------------------- */
+
+.retro-detail__section:nth-child(1) {
+  border-top: var(--border-width-thick) solid var(--color-success);
+}
+
+.retro-detail__section:nth-child(2) {
+  border-top: var(--border-width-thick) solid var(--color-danger);
+}
+
+.retro-detail__section:nth-child(3) {
+  border-top: var(--border-width-thick) solid var(--color-accent);
+}
+
+/* -- Meta ---------------------------------------------------------------- */
+
+.retro-detail__meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* -- Responsive ---------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .retro-detail__grid {
+    grid-template-columns: 1fr;
+  }
+}

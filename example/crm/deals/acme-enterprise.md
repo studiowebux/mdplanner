@@ -7,7 +7,7 @@ value: 50000
 stage: negotiation
 probability: 60
 expectedCloseDate: 2026-06-01
-created: 2026-01-20
+created_at: 2026-01-20
 ---
 
 # Acme Enterprise Deal

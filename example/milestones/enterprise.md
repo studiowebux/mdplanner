@@ -1,8 +1,9 @@
 ---
 id: milestone_enterprise
-name: Enterprise Features
-target: 2026-09-01
 status: open
+target: 2026-09-01
+created_at: "2026-01-10T08:00:00.000Z"
+project: "TaskFlow Platform"
 ---
 
 # Enterprise Features

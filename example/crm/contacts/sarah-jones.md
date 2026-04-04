@@ -6,7 +6,7 @@ lastName: Jones
 email: sarah@startuplabs.co
 title: CEO
 isPrimary: true
-created: 2026-01-20
+created_at: 2026-01-20
 ---
 
 # Sarah Jones

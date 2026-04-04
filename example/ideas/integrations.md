@@ -3,7 +3,7 @@ id: idea_integrations
 title: Third-Party Integrations
 status: considering
 category: feature
-created: 2026-01-28
+created_at: 2026-01-28
 links: [idea_automation]
 ---
 

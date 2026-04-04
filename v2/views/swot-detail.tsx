@@ -1,0 +1,194 @@
+import type { FC } from "hono/jsx";
+import { MainLayout } from "../components/layout/main.tsx";
+import { BackButton } from "./components/back-button.tsx";
+import type { Swot } from "../types/swot.types.ts";
+import type { ViewProps } from "../types/app.ts";
+import { formatDate } from "../utils/time.ts";
+import { toKebab } from "../utils/slug.ts";
+import { MarkdownSection } from "./components/markdown-section.tsx";
+import { DetailActions } from "./components/detail-actions.tsx";
+import {
+  SWOT_QUADRANT_META,
+  SWOT_QUADRANTS,
+  type SwotQuadrantKey,
+} from "../domains/swot/constants.tsx";
+import { SseRefresh } from "./components/sse-refresh.tsx";
+import { InfoItem } from "./components/info-item.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
+
+// ---------------------------------------------------------------------------
+// Main view
+// ---------------------------------------------------------------------------
+
+export const SwotDetailView: FC<
+  ViewProps & { item: Swot; editing?: boolean }
+> = (
+  { item: swot, editing = false, ...viewProps },
+) => {
+  const editSuffix = editing ? "?editing=true" : "";
+
+  return (
+    <MainLayout
+      title={swot.title}
+      {...viewProps}
+      styles={["/css/views/swot.css"]}
+      scripts={["/js/quadrant-edit.js"]}
+    >
+      <SseRefresh
+        getUrl={"/swot/" + swot.id + editSuffix}
+        trigger="sse:swot.updated"
+        targetId="swot-detail-root"
+      />
+      <main
+        id="swot-detail-root"
+        class={`detail-view swot-detail${
+          editing ? " swot-detail--editing" : ""
+        }`}
+      >
+        <BackButton href="/swot" label="Back to SWOT Analyses" />
+
+        {/* -- Header ---------------------------------------------------- */}
+        <header class="detail-section swot-detail__header">
+          <div class="detail-title-row swot-detail__title-row">
+            <h1 class="detail-title swot-detail__title">{swot.title}</h1>
+            <span class="badge swot-date-badge">{formatDate(swot.date)}</span>
+          </div>
+          <DetailActions
+            entity="swot"
+            id={swot.id}
+            title={swot.title}
+            formContainerId="swot-form-container"
+          >
+            {editing
+              ? (
+                <a
+                  class="btn btn--secondary btn--sm"
+                  href={`/swot/${swot.id}`}
+                >
+                  Done Editing
+                </a>
+              )
+              : (
+                <a
+                  class="btn btn--secondary btn--sm"
+                  href={`/swot/${swot.id}?editing=true`}
+                >
+                  Edit Items
+                </a>
+              )}
+          </DetailActions>
+        </header>
+
+        {/* -- Project --------------------------------------------------- */}
+        {swot.project && (
+          <div class="detail-section detail-info-row">
+            <InfoItem label="Project">
+              <a href={`/portfolio/${toKebab(swot.project)}`}>
+                {swot.project}
+              </a>
+            </InfoItem>
+          </div>
+        )}
+
+        {/* -- Quadrant Grid --------------------------------------------- */}
+        <div class="quadrant-grid">
+          {SWOT_QUADRANTS.map((name) => {
+            const key = name.toLowerCase() as SwotQuadrantKey;
+            const meta = SWOT_QUADRANT_META[key];
+            const items = swot[key];
+            return (
+              <div
+                key={key}
+                class="quadrant-card"
+                data-quadrant={meta.modifier}
+              >
+                <div class="quadrant-card__header">
+                  <h2 class="quadrant-card__title">{meta.label}</h2>
+                  <span class="badge">{items.length}</span>
+                </div>
+                {items.length > 0
+                  ? (
+                    <ul class="quadrant-card__list">
+                      {items.map((item, idx) => (
+                        <li key={idx} class="quadrant-card__item">
+                          {editing
+                            ? (
+                              <input
+                                type="text"
+                                class="quadrant-card__inline-edit"
+                                name="text"
+                                value={item}
+                                data-quadrant-edit={`/swot/${swot.id}/${key}/${idx}${editSuffix}`}
+                                hx-put={`/swot/${swot.id}/${key}/${idx}${editSuffix}`}
+                                hx-trigger="quadrant-save"
+                                hx-target="#swot-detail-root"
+                                hx-select="#swot-detail-root"
+                                hx-swap="outerHTML"
+                                hx-include="this"
+                              />
+                            )
+                            : <span>{item}</span>}
+                          {editing && (
+                            <button
+                              type="button"
+                              class="quadrant-card__remove"
+                              hx-delete={`/swot/${swot.id}/${key}/${idx}${editSuffix}`}
+                              hx-confirm={`Remove "${item}"?`}
+                              hx-target="#swot-detail-root"
+                              hx-select="#swot-detail-root"
+                              hx-swap="outerHTML"
+                              aria-label={`Remove "${item}"`}
+                            >
+                              &times;
+                            </button>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )
+                  : <p class="quadrant-card__empty">No items yet</p>}
+                {editing && (
+                  <div class="quadrant-card__add">
+                    <input
+                      type="text"
+                      class="quadrant-card__input"
+                      name="text"
+                      placeholder={`Add ${meta.singular}...`}
+                      data-quadrant-add={`/swot/${swot.id}/${key}${editSuffix}`}
+                      hx-post={`/swot/${swot.id}/${key}${editSuffix}`}
+                      hx-trigger="quadrant-submit"
+                      hx-target="#swot-detail-root"
+                      hx-select="#swot-detail-root"
+                      hx-swap="outerHTML"
+                      hx-include="this"
+                      autocomplete="off"
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* -- Notes ----------------------------------------------------- */}
+        <MarkdownSection title="Notes" markdown={swot.notes} />
+
+        {/* -- Meta ------------------------------------------------------ */}
+        <div class="detail-section swot-detail__meta">
+          <span>Created {formatDate(swot.createdAt)}</span>
+          {swot.updatedAt && swot.updatedAt !== swot.createdAt && (
+            <span>&middot; Updated {formatDate(swot.updatedAt)}</span>
+          )}
+        </div>
+        <AuditMeta
+          createdAt={swot.createdAt}
+          updatedAt={swot.updatedAt}
+          createdBy={swot.createdBy}
+          updatedBy={swot.updatedBy}
+        />
+      </main>
+
+      <div id="swot-form-container" />
+    </MainLayout>
+  );
+};

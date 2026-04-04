@@ -1,0 +1,147 @@
+/* Shared billing styles — line items table + totals summary.
+   Loaded by Quote and Invoice domain configs via styles array. */
+
+/* ---------------------------------------------------------------------------
+   Line items table
+--------------------------------------------------------------------------- */
+
+.line-items-table__wrapper {
+  overflow-x: auto;
+}
+
+.line-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.line-items-table__th {
+  padding: var(--space-xs) var(--space-sm);
+  text-align: left;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  border-bottom: var(--border-width) solid var(--color-border-default);
+  white-space: nowrap;
+}
+
+.line-items-table__th--right {
+  text-align: right;
+}
+
+.line-items-table__row td {
+  padding: var(--space-sm) var(--space-sm);
+  border-bottom: var(--border-width) solid var(--color-border-default);
+  vertical-align: top;
+}
+
+/* Group header row */
+.line-items-table__group-header td {
+  padding: var(--space-sm) var(--space-sm) var(--space-xs);
+  border-bottom: none;
+}
+
+.line-items-table__group-label {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+/* Text-only row (description spans full width) */
+.line-items-table__row--text td {
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+/* Optional line styling */
+.line-items-table__row--optional td {
+  opacity: var(--opacity-muted);
+}
+
+.line-items-table__optional-tag {
+  display: inline-block;
+  margin-left: var(--space-xs);
+  padding: 0 var(--space-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  border: var(--border-width) solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+}
+
+/* Column alignment */
+.line-items-table__type {
+  white-space: nowrap;
+}
+
+.line-items-table__description {
+  min-width: var(--space-xl);
+}
+
+.line-items-table__qty,
+.line-items-table__rate,
+.line-items-table__discount,
+.line-items-table__amount {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------
+   Billing totals summary
+--------------------------------------------------------------------------- */
+
+.billing-totals {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-xs);
+  padding: var(--space-md) 0;
+  font-size: var(--font-size-sm);
+}
+
+.billing-totals__row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-xl);
+  min-width: var(--space-xl);
+}
+
+.billing-totals__label {
+  color: var(--color-text-secondary);
+}
+
+.billing-totals__value {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.billing-totals__value--discount {
+  color: var(--color-error);
+}
+
+.billing-totals__value--paid {
+  color: var(--color-success);
+}
+
+/* Total row — bold emphasis */
+.billing-totals__row--total {
+  border-top: var(--border-width) solid var(--color-border-default);
+  padding-top: var(--space-xs);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+}
+
+.billing-totals__row--total .billing-totals__label,
+.billing-totals__row--total .billing-totals__value {
+  color: var(--color-text-primary);
+}
+
+/* Balance due — highlighted */
+.billing-totals__row--balance {
+  font-weight: var(--font-weight-semibold);
+}
+
+.billing-totals__row--balance .billing-totals__value {
+  color: var(--color-warning);
+}

@@ -1,0 +1,392 @@
+// Service singletons — instantiated once at startup with the project path.
+
+import { log } from "./logger.ts";
+import { MilestoneRepository } from "../repositories/milestone.repository.ts";
+import { TaskRepository } from "../repositories/task.repository.ts";
+import { PortfolioRepository } from "../repositories/portfolio.repository.ts";
+import { ProjectRepository } from "../repositories/project.repository.ts";
+import { MilestoneService } from "../services/milestone.service.ts";
+import { NoteService } from "../services/note.service.ts";
+import { PeopleService } from "../services/people.service.ts";
+import { PortfolioService } from "../services/portfolio.service.ts";
+import { DnsService } from "../services/dns.service.ts";
+import { GoalService } from "../services/goal.service.ts";
+import { IdeaService } from "../services/idea.service.ts";
+import { MarketingPlanService } from "../services/marketing-plan.service.ts";
+import { SwotService } from "../services/swot.service.ts";
+import { GitHubService } from "../services/github.service.ts";
+import { ProjectService } from "../services/project.service.ts";
+import { TaskService } from "../services/task.service.ts";
+import {
+  CacheDatabase,
+  CacheSync,
+  SearchEngine,
+} from "../database/sqlite/mod.ts";
+import { registerMilestoneEntity } from "../domains/milestone/cache.ts";
+import { registerTaskEntity } from "../domains/task/cache.ts";
+import { registerPortfolioEntity } from "../domains/portfolio/cache.ts";
+import { registerPeopleEntity } from "../domains/people/cache.ts";
+import { registerDnsEntity } from "../domains/dns/cache.ts";
+import { registerNoteEntity } from "../domains/note/cache.ts";
+import { registerGoalEntity } from "../domains/goal/cache.ts";
+import { registerIdeaEntity } from "../domains/idea/cache.ts";
+import { registerMarketingPlanEntity } from "../domains/marketing-plan/cache.ts";
+import { registerSwotEntity } from "../domains/swot/cache.ts";
+import { DnsRepository } from "../repositories/dns.repository.ts";
+import { GoalRepository } from "../repositories/goal.repository.ts";
+import { IdeaRepository } from "../repositories/idea.repository.ts";
+import { MarketingPlanRepository } from "../repositories/marketing-plan.repository.ts";
+import { SwotRepository } from "../repositories/swot.repository.ts";
+import { NoteRepository } from "../repositories/note.repository.ts";
+import { PeopleRepository } from "../repositories/people.repository.ts";
+import { CustomerRepository } from "../repositories/customer.repository.ts";
+import { CustomerService } from "../services/customer.service.ts";
+import { registerCustomerEntity } from "../domains/customer/cache.ts";
+import { BillingRateRepository } from "../repositories/billing-rate.repository.ts";
+import { BillingRateService } from "../services/billing-rate.service.ts";
+import { registerBillingRateEntity } from "../domains/billing-rate/cache.ts";
+import { QuoteRepository } from "../repositories/quote.repository.ts";
+import { QuoteService } from "../services/quote.service.ts";
+import { registerQuoteEntity } from "../domains/quote/cache.ts";
+import { InvoiceRepository } from "../repositories/invoice.repository.ts";
+import { InvoiceService } from "../services/invoice.service.ts";
+import { registerInvoiceEntity } from "../domains/invoice/cache.ts";
+import { PaymentRepository } from "../repositories/payment.repository.ts";
+import { PaymentService } from "../services/payment.service.ts";
+import { registerPaymentEntity } from "../domains/payment/cache.ts";
+import { BrainstormRepository } from "../repositories/brainstorm.repository.ts";
+import { BrainstormService } from "../services/brainstorm.service.ts";
+import { registerBrainstormEntity } from "../domains/brainstorm/cache.ts";
+import { BriefRepository } from "../repositories/brief.repository.ts";
+import { BriefService } from "../services/brief.service.ts";
+import { registerBriefEntity } from "../domains/brief/cache.ts";
+import { RetrospectiveRepository } from "../repositories/retrospective.repository.ts";
+import { RetrospectiveService } from "../services/retrospective.service.ts";
+import { registerRetrospectiveEntity } from "../domains/retrospective/cache.ts";
+import { LeanCanvasRepository } from "../repositories/lean-canvas.repository.ts";
+import { LeanCanvasService } from "../services/lean-canvas.service.ts";
+import { registerLeanCanvasEntity } from "../domains/lean-canvas/cache.ts";
+
+export interface InitOptions {
+  cache?: boolean;
+}
+
+let taskRepo: TaskRepository | null = null;
+let peopleRepo: PeopleRepository | null = null;
+let milestoneService: MilestoneService | null = null;
+let taskService: TaskService | null = null;
+let peopleService: PeopleService | null = null;
+let noteService: NoteService | null = null;
+let portfolioService: PortfolioService | null = null;
+let projectService: ProjectService | null = null;
+let goalService: GoalService | null = null;
+let ideaService: IdeaService | null = null;
+let marketingPlanService: MarketingPlanService | null = null;
+let swotService: SwotService | null = null;
+let customerService: CustomerService | null = null;
+let billingRateService: BillingRateService | null = null;
+let quoteService: QuoteService | null = null;
+let invoiceService: InvoiceService | null = null;
+let paymentService: PaymentService | null = null;
+let brainstormService: BrainstormService | null = null;
+let briefService: BriefService | null = null;
+let retrospectiveService: RetrospectiveService | null = null;
+let leanCanvasService: LeanCanvasService | null = null;
+let dnsService: DnsService | null = null;
+let githubService: GitHubService | null = null;
+let cacheDb: CacheDatabase | null = null;
+let cacheSync: CacheSync | null = null;
+let searchEngine: SearchEngine | null = null;
+let cacheEnabled = false;
+
+export function initServices(
+  projectDir: string,
+  options: InitOptions = {},
+): void {
+  const useCache = options.cache ?? true;
+
+  const milestoneRepo = new MilestoneRepository(projectDir);
+  taskRepo = new TaskRepository(projectDir);
+  const noteRepo = new NoteRepository(projectDir);
+  const portfolioRepo = new PortfolioRepository(projectDir);
+  const projectRepo = new ProjectRepository(projectDir);
+  peopleRepo = new PeopleRepository(projectDir);
+  milestoneService = new MilestoneService(milestoneRepo, taskRepo);
+  taskService = new TaskService(taskRepo, peopleRepo);
+  peopleService = new PeopleService(peopleRepo);
+  noteService = new NoteService(noteRepo);
+  portfolioService = new PortfolioService(portfolioRepo);
+  projectService = new ProjectService(projectRepo);
+  const goalRepo = new GoalRepository(projectDir);
+  goalService = new GoalService(goalRepo);
+  const ideaRepo = new IdeaRepository(projectDir);
+  ideaService = new IdeaService(ideaRepo);
+  const marketingPlanRepo = new MarketingPlanRepository(projectDir);
+  marketingPlanService = new MarketingPlanService(marketingPlanRepo);
+  const swotRepo = new SwotRepository(projectDir);
+  swotService = new SwotService(swotRepo);
+  const customerRepo = new CustomerRepository(projectDir);
+  customerService = new CustomerService(customerRepo);
+  const billingRateRepo = new BillingRateRepository(projectDir);
+  billingRateService = new BillingRateService(billingRateRepo);
+  const quoteRepo = new QuoteRepository(projectDir);
+  quoteService = new QuoteService(quoteRepo);
+  const invoiceRepo = new InvoiceRepository(projectDir);
+  invoiceService = new InvoiceService(invoiceRepo);
+  const paymentRepo = new PaymentRepository(projectDir);
+  paymentService = new PaymentService(paymentRepo);
+  const brainstormRepo = new BrainstormRepository(projectDir);
+  brainstormService = new BrainstormService(brainstormRepo);
+  const briefRepo = new BriefRepository(projectDir);
+  briefService = new BriefService(briefRepo);
+  const retrospectiveRepo = new RetrospectiveRepository(projectDir);
+  retrospectiveService = new RetrospectiveService(retrospectiveRepo);
+  const leanCanvasRepo = new LeanCanvasRepository(projectDir);
+  leanCanvasService = new LeanCanvasService(leanCanvasRepo);
+  const dnsRepo = new DnsRepository(projectDir);
+  dnsService = new DnsService(dnsRepo, projectService);
+  githubService = new GitHubService(projectService);
+
+  if (useCache) {
+    cacheDb = new CacheDatabase(`${projectDir}/.mdplanner-cache.db`);
+
+    // Register cache entities with repo references for sync
+    registerMilestoneEntity(milestoneRepo);
+    registerTaskEntity(taskRepo);
+    registerPortfolioEntity(portfolioRepo);
+    registerPeopleEntity(peopleRepo);
+    registerDnsEntity(dnsRepo);
+    registerNoteEntity(noteRepo);
+    registerGoalEntity(goalRepo);
+    registerIdeaEntity(ideaRepo);
+    registerMarketingPlanEntity(marketingPlanRepo);
+    registerSwotEntity(swotRepo);
+    registerCustomerEntity(customerRepo);
+    registerBillingRateEntity(billingRateRepo);
+    registerQuoteEntity(quoteRepo);
+    registerInvoiceEntity(invoiceRepo);
+    registerPaymentEntity(paymentRepo);
+    registerBrainstormEntity(brainstormRepo);
+    registerBriefEntity(briefRepo);
+    registerRetrospectiveEntity(retrospectiveRepo);
+    registerLeanCanvasEntity(leanCanvasRepo);
+
+    // Pass cacheDb to repos for read-path caching
+    milestoneRepo.setCacheDb(cacheDb);
+    taskRepo.setCacheDb(cacheDb);
+    portfolioRepo.setCacheDb(cacheDb);
+    peopleRepo.setCacheDb(cacheDb);
+    goalRepo.setCacheDb(cacheDb);
+    ideaRepo.setCacheDb(cacheDb);
+    dnsRepo.setCacheDb(cacheDb);
+    swotRepo.setCacheDb(cacheDb);
+    marketingPlanRepo.setCacheDb(cacheDb);
+    customerRepo.setCacheDb(cacheDb);
+    billingRateRepo.setCacheDb(cacheDb);
+    quoteRepo.setCacheDb(cacheDb);
+    invoiceRepo.setCacheDb(cacheDb);
+    paymentRepo.setCacheDb(cacheDb);
+    brainstormRepo.setCacheDb(cacheDb);
+    briefRepo.setCacheDb(cacheDb);
+    retrospectiveRepo.setCacheDb(cacheDb);
+    leanCanvasRepo.setCacheDb(cacheDb);
+
+    cacheSync = new CacheSync(cacheDb);
+    cacheSync.init();
+    searchEngine = new SearchEngine(cacheDb);
+    milestoneService.setCache(cacheSync);
+    taskService.setCache(cacheSync);
+    peopleService.setCache(cacheSync);
+    portfolioService.setCache(cacheSync);
+    cacheEnabled = true;
+  }
+}
+
+export function isCacheEnabled(): boolean {
+  return cacheEnabled;
+}
+
+export function getTaskRepository(): TaskRepository {
+  if (!taskRepo) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return taskRepo;
+}
+
+export function getTaskService(): TaskService {
+  if (!taskService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return taskService;
+}
+
+export function getPeopleRepository(): PeopleRepository {
+  if (!peopleRepo) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return peopleRepo;
+}
+
+export function getPeopleService(): PeopleService {
+  if (!peopleService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return peopleService;
+}
+
+export function getMilestoneService(): MilestoneService {
+  if (!milestoneService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return milestoneService;
+}
+
+export function getNoteService(): NoteService {
+  if (!noteService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return noteService;
+}
+
+export function getPortfolioService(): PortfolioService {
+  if (!portfolioService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return portfolioService;
+}
+
+export function getProjectService(): ProjectService {
+  if (!projectService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return projectService;
+}
+
+export function getGoalService(): GoalService {
+  if (!goalService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return goalService;
+}
+
+export function getIdeaService(): IdeaService {
+  if (!ideaService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return ideaService;
+}
+
+export function getMarketingPlanService(): MarketingPlanService {
+  if (!marketingPlanService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return marketingPlanService;
+}
+
+export function getSwotService(): SwotService {
+  if (!swotService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return swotService;
+}
+
+export function getCustomerService(): CustomerService {
+  if (!customerService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return customerService;
+}
+
+export function getBillingRateService(): BillingRateService {
+  if (!billingRateService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return billingRateService;
+}
+
+export function getQuoteService(): QuoteService {
+  if (!quoteService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return quoteService;
+}
+
+export function getInvoiceService(): InvoiceService {
+  if (!invoiceService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return invoiceService;
+}
+
+export function getPaymentService(): PaymentService {
+  if (!paymentService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return paymentService;
+}
+
+export function getBrainstormService(): BrainstormService {
+  if (!brainstormService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return brainstormService;
+}
+
+export function getBriefService(): BriefService {
+  if (!briefService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return briefService;
+}
+
+export function getRetrospectiveService(): RetrospectiveService {
+  if (!retrospectiveService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return retrospectiveService;
+}
+
+export function getLeanCanvasService(): LeanCanvasService {
+  if (!leanCanvasService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return leanCanvasService;
+}
+
+export function getDnsService(): DnsService {
+  if (!dnsService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return dnsService;
+}
+
+export function getGitHubService(): GitHubService {
+  if (!githubService) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return githubService;
+}
+
+export function getCacheSync(): CacheSync | null {
+  return cacheSync;
+}
+
+export function getSearchEngine(): SearchEngine | null {
+  return searchEngine;
+}
+
+/**
+ * Run full cache sync. Call after initServices().
+ * No-op if cache is disabled.
+ */
+export async function bootCacheSync(): Promise<void> {
+  if (!cacheSync) return;
+  const result = await cacheSync.fullSync();
+  if (result.errors.length > 0) {
+    log.error("[cache] sync errors:", result.errors);
+  } else {
+    log.info(
+      `[cache] synced ${result.items} items across ${result.tables} tables in ${result.duration}ms`,
+    );
+  }
+}

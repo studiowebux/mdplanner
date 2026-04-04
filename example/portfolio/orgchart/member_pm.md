@@ -2,10 +2,10 @@
 id: member_pm
 title: Product Manager
 department: Product
-reportsTo: member_cpo
+reports_to: member_cpo
 email: frank.taylor@taskflow.io
 phone: "+1-555-0120"
-startDate: "2021-08-01"
+start_date: "2021-08-01"
 ---
 
 # Frank Taylor

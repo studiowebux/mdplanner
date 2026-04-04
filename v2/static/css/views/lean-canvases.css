@@ -1,0 +1,191 @@
+/* Lean Canvases view — domain-specific styles only.
+   Card base uses shared .domain-card from components.css. */
+
+/* ---------------------------------------------------------------------------
+   Detail view — header
+--------------------------------------------------------------------------- */
+
+.lc-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+/* ---------------------------------------------------------------------------
+   Canvas grid — classic lean canvas layout
+   5 columns, 3 rows using named template areas
+--------------------------------------------------------------------------- */
+
+.lc-canvas {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr 1fr 1fr;
+  grid-template-rows: auto auto auto;
+  grid-template-areas:
+    "problem    solution   uvp        unfair    customer"
+    "problem    metrics    uvp        channels  customer"
+    "cost       cost       revenue    revenue   revenue";
+  gap: var(--space-sm);
+  margin: var(--space-md) 0;
+}
+
+.lc-canvas__cell--problem {
+  grid-area: problem;
+}
+.lc-canvas__cell--solution {
+  grid-area: solution;
+}
+.lc-canvas__cell--uniqueValueProp {
+  grid-area: uvp;
+}
+.lc-canvas__cell--unfairAdvantage {
+  grid-area: unfair;
+}
+.lc-canvas__cell--customerSegments {
+  grid-area: customer;
+}
+.lc-canvas__cell--existingAlternatives {
+  grid-area: problem;
+}
+.lc-canvas__cell--keyMetrics {
+  grid-area: metrics;
+}
+.lc-canvas__cell--highLevelConcept {
+  grid-area: channels;
+}
+.lc-canvas__cell--channels {
+  grid-area: channels;
+}
+.lc-canvas__cell--earlyAdopters {
+  grid-area: customer;
+}
+.lc-canvas__cell--costStructure {
+  grid-area: cost;
+}
+.lc-canvas__cell--revenueStreams {
+  grid-area: revenue;
+}
+
+/* ---------------------------------------------------------------------------
+   Section block
+--------------------------------------------------------------------------- */
+
+.lc-section {
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) solid var(--color-border-default);
+  height: 100%;
+  min-height: var(--lc-section-min-height);
+}
+
+.lc-section__title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  margin-bottom: var(--space-sm);
+}
+
+.lc-section__list {
+  list-style: disc;
+  padding-left: var(--space-lg);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-relaxed);
+}
+
+.lc-section__list li {
+  margin-bottom: var(--space-xs);
+}
+
+.lc-section__empty {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* -- Section accent colours ------------------------------------------------ */
+
+.lc-canvas__cell--problem .lc-section {
+  border-top: var(--border-width-thick) solid var(--color-danger);
+}
+.lc-canvas__cell--solution .lc-section {
+  border-top: var(--border-width-thick) solid var(--color-success);
+}
+.lc-canvas__cell--uniqueValueProp .lc-section {
+  border-top: var(--border-width-thick) solid var(--color-accent);
+}
+.lc-canvas__cell--unfairAdvantage .lc-section {
+  border-top: var(--border-width-thick) solid var(--color-warning);
+}
+.lc-canvas__cell--customerSegments .lc-section {
+  border-top: var(--border-width-thick) solid var(--color-info);
+}
+.lc-canvas__cell--keyMetrics .lc-section {
+  border-top: var(--border-width-thick) solid var(--color-success);
+}
+.lc-canvas__cell--channels .lc-section {
+  border-top: var(--border-width-thick) solid var(--color-warning);
+}
+.lc-canvas__cell--costStructure .lc-section {
+  border-top: var(--border-width-thick) solid var(--color-danger);
+}
+.lc-canvas__cell--revenueStreams .lc-section {
+  border-top: var(--border-width-thick) solid var(--color-success);
+}
+
+/* -- Meta ------------------------------------------------------------------ */
+
+.lc-detail__meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* -- Responsive ------------------------------------------------------------ */
+
+@media (max-width: 1100px) {
+  .lc-canvas {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-areas:
+      "problem    solution   uvp"
+      "unfair     customer   uvp"
+      "metrics    channels   earlyAdopters"
+      "cost       cost       revenue";
+  }
+
+  .lc-canvas__cell--existingAlternatives {
+    display: none;
+  }
+  .lc-canvas__cell--highLevelConcept {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .lc-canvas {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "problem"
+      "solution"
+      "uvp"
+      "unfair"
+      "customer"
+      "metrics"
+      "channels"
+      "cost"
+      "revenue";
+  }
+
+  .lc-canvas__cell--existingAlternatives {
+    display: none;
+  }
+  .lc-canvas__cell--highLevelConcept {
+    display: none;
+  }
+  .lc-canvas__cell--earlyAdopters {
+    display: none;
+  }
+}
