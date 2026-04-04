@@ -13,6 +13,7 @@ import { LineItemsTable } from "./components/line-items-table.tsx";
 import { BillingTotals } from "./components/billing-totals.tsx";
 import { QUOTE_STATUS_VARIANTS } from "../domains/quote/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -178,6 +179,12 @@ export const QuoteDetailView: FC<
             <span>&middot; Updated {formatDate(quote.updatedAt)}</span>
           )}
         </div>
+        <AuditMeta
+          createdAt={quote.createdAt}
+          updatedAt={quote.updatedAt}
+          createdBy={quote.createdBy}
+          updatedBy={quote.updatedBy}
+        />
       </main>
 
       <div id="quotes-form-container" />

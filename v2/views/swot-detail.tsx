@@ -14,6 +14,7 @@ import {
 } from "../domains/swot/constants.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -179,6 +180,12 @@ export const SwotDetailView: FC<
             <span>&middot; Updated {formatDate(swot.updatedAt)}</span>
           )}
         </div>
+        <AuditMeta
+          createdAt={swot.createdAt}
+          updatedAt={swot.updatedAt}
+          createdBy={swot.createdBy}
+          updatedBy={swot.updatedBy}
+        />
       </main>
 
       <div id="swot-form-container" />

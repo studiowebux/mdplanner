@@ -8,6 +8,7 @@ import { toKebab } from "../utils/slug.ts";
 import { BackButton } from "./components/back-button.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { MILESTONE_STATUS_VARIANTS } from "../domains/milestone/constants.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
 
 type Props = ViewProps & {
   milestone: Milestone;
@@ -126,6 +127,12 @@ export const MilestoneDetailView: FC<Props> = (
               </div>
             )}
         </section>
+        <AuditMeta
+          createdAt={milestone.createdAt}
+          updatedAt={milestone.updatedAt}
+          createdBy={milestone.createdBy}
+          updatedBy={milestone.updatedBy}
+        />
       </main>
     </MainLayout>
   );

@@ -10,6 +10,7 @@ import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { PAYMENT_METHOD_VARIANTS } from "../domains/payment/constants.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -90,6 +91,12 @@ export const PaymentDetailView: FC<
             <span>&middot; Updated {formatDate(payment.updatedAt)}</span>
           )}
         </div>
+        <AuditMeta
+          createdAt={payment.createdAt}
+          updatedAt={payment.updatedAt}
+          createdBy={payment.createdBy}
+          updatedBy={payment.updatedBy}
+        />
       </main>
 
       <div id="payments-form-container" />

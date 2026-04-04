@@ -16,6 +16,7 @@ import {
   MKTPLAN_VERDICT_VARIANTS,
 } from "../domains/marketing-plan/constants.tsx";
 import { GOAL_STATUS_VARIANTS } from "../domains/goal/constants.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -361,6 +362,12 @@ export const MarketingPlanDetailView: FC<
             <span>&middot; Updated {formatDate(plan.updatedAt)}</span>
           )}
         </div>
+        <AuditMeta
+          createdAt={plan.createdAt}
+          updatedAt={plan.updatedAt}
+          createdBy={plan.createdBy}
+          updatedBy={plan.updatedBy}
+        />
       </main>
 
       <div id="marketing-plans-form-container" />

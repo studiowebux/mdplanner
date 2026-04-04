@@ -7,6 +7,7 @@ import type { Note } from "../types/note.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { timeAgo } from "../utils/time.ts";
 import { NoteBlocks } from "./components/note-blocks.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -129,6 +130,12 @@ export const NoteDetailView: FC<Props> = (props) => {
         </header>
 
         <NoteBlocks note={note} />
+        <AuditMeta
+          createdAt={note.createdAt}
+          updatedAt={note.updatedAt}
+          createdBy={note.createdBy}
+          updatedBy={note.updatedBy}
+        />
       </main>
     </MainLayout>
   );

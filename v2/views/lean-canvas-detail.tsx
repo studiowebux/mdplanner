@@ -8,6 +8,7 @@ import { formatDate } from "../utils/time.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
 
 // ---------------------------------------------------------------------------
 // Section block
@@ -95,6 +96,12 @@ export const LeanCanvasDetailView: FC<ViewProps & { item: LeanCanvas }> = (
             <span>&middot; Updated {formatDate(lc.updatedAt)}</span>
           )}
         </div>
+        <AuditMeta
+          createdAt={lc.createdAt}
+          updatedAt={lc.updatedAt}
+          createdBy={lc.createdBy}
+          updatedBy={lc.updatedBy}
+        />
       </main>
 
       <div id="lean-canvases-form-container" />

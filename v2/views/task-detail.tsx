@@ -21,6 +21,7 @@ import {
 } from "../singletons/services.ts";
 import { BackButton } from "./components/back-button.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -570,6 +571,12 @@ export const TaskDetailView: FC<Props> = (
         <CommentsSection comments={task.comments} />
 
         {/* Edit + Delete at bottom — matches person-detail pattern */}
+        <AuditMeta
+          createdAt={task.createdAt}
+          updatedAt={task.updatedAt}
+          createdBy={task.createdBy}
+          updatedBy={task.updatedBy}
+        />
       </main>
       <div id="tasks-form-container" />
     </MainLayout>

@@ -10,6 +10,7 @@ import { formatCurrency } from "../utils/format.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { QUOTE_STATUS_VARIANTS } from "../domains/quote/constants.tsx";
@@ -281,6 +282,12 @@ export const CustomerDetailView: FC<
             <span>&middot; Updated {formatDate(customer.updatedAt)}</span>
           )}
         </div>
+        <AuditMeta
+          createdAt={customer.createdAt}
+          updatedAt={customer.updatedAt}
+          createdBy={customer.createdBy}
+          updatedBy={customer.updatedBy}
+        />
       </main>
 
       <div id="customers-form-container" />

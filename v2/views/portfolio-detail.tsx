@@ -13,6 +13,7 @@ import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { PORTFOLIO_STATUS_VARIANTS } from "../domains/portfolio/constants.tsx";
 import { GOAL_STATUS_VARIANTS } from "../domains/goal/constants.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
 
 import type { PortfolioStatusUpdate } from "../types/portfolio.types.ts";
 
@@ -338,6 +339,12 @@ export const PortfolioDetailView: FC<Props> = (
         )}
 
         {item.githubRepo && <GitHubSection itemId={item.id} />}
+        <AuditMeta
+          createdAt={item.createdAt}
+          updatedAt={item.updatedAt}
+          createdBy={item.createdBy}
+          updatedBy={item.updatedBy}
+        />
       </main>
       <div id="portfolio-form-container" />
     </MainLayout>

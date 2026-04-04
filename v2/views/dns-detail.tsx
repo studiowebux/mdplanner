@@ -13,6 +13,7 @@ import { toKebab } from "../utils/slug.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
 
 // ---------------------------------------------------------------------------
 // DNS records table — standalone fragment for htmx swaps
@@ -215,6 +216,12 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
       )}
 
       <DnsRecordsTable domain={domain} />
+      <AuditMeta
+        createdAt={domain.createdAt}
+        updatedAt={domain.updatedAt}
+        createdBy={domain.createdBy}
+        updatedBy={domain.updatedBy}
+      />
     </main>
 
     <div id="dns-form-container" />

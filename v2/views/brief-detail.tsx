@@ -9,6 +9,7 @@ import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { BRIEF_RACI_KEYS } from "../domains/brief/constants.ts";
+import { AuditMeta } from "./components/audit-meta.tsx";
 
 // ---------------------------------------------------------------------------
 // Section renderer
@@ -124,6 +125,12 @@ export const BriefDetailView: FC<
             <span>&middot; Updated {formatDate(brief.updatedAt)}</span>
           )}
         </div>
+        <AuditMeta
+          createdAt={brief.createdAt}
+          updatedAt={brief.updatedAt}
+          createdBy={brief.createdBy}
+          updatedBy={brief.updatedBy}
+        />
       </main>
 
       <div id="briefs-form-container" />

@@ -9,6 +9,7 @@ import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { formatRate, UNIT_LABELS } from "../domains/billing-rate/constants.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -78,6 +79,12 @@ export const BillingRateDetailView: FC<
             <span>&middot; Updated {formatDate(rate.updatedAt)}</span>
           )}
         </div>
+        <AuditMeta
+          createdAt={rate.createdAt}
+          updatedAt={rate.updatedAt}
+          createdBy={rate.createdBy}
+          updatedBy={rate.updatedBy}
+        />
       </main>
 
       <div id="billing-rates-form-container" />

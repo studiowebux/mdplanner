@@ -14,6 +14,7 @@ import {
   IDEA_PRIORITY_VARIANTS,
   IDEA_STATUS_VARIANTS,
 } from "../domains/idea/constants.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -188,6 +189,12 @@ export const IdeaDetailView: FC<
             <span>&middot; Updated {formatDate(idea.updatedAt)}</span>
           )}
         </div>
+        <AuditMeta
+          createdAt={idea.createdAt}
+          updatedAt={idea.updatedAt}
+          createdBy={idea.createdBy}
+          updatedBy={idea.updatedBy}
+        />
       </main>
 
       <div id="ideas-form-container" />

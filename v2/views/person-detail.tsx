@@ -9,6 +9,7 @@ import {
   PERSON_STATUS_VARIANTS,
   PERSON_TYPE_VARIANTS,
 } from "../domains/people/constants.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
 
 type Props = ViewProps & {
   person: Person;
@@ -210,6 +211,12 @@ export const PersonDetailView: FC<Props> = (
             </ul>
           </section>
         )}
+        <AuditMeta
+          createdAt={person.createdAt}
+          updatedAt={person.updatedAt}
+          createdBy={person.createdBy}
+          updatedBy={person.updatedBy}
+        />
       </main>
       <div id="people-form-container" />
     </MainLayout>

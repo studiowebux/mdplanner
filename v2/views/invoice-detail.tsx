@@ -13,6 +13,7 @@ import { LineItemsTable } from "./components/line-items-table.tsx";
 import { BillingTotals } from "./components/billing-totals.tsx";
 import { INVOICE_STATUS_VARIANTS } from "../domains/invoice/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -155,6 +156,12 @@ export const InvoiceDetailView: FC<
             <span>&middot; Updated {formatDate(invoice.updatedAt)}</span>
           )}
         </div>
+        <AuditMeta
+          createdAt={invoice.createdAt}
+          updatedAt={invoice.updatedAt}
+          createdBy={invoice.createdBy}
+          updatedBy={invoice.updatedBy}
+        />
       </main>
 
       <div id="invoices-form-container" />

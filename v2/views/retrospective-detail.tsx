@@ -8,6 +8,7 @@ import { formatDate } from "../utils/time.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
 
 // ---------------------------------------------------------------------------
 // Section renderer
@@ -94,6 +95,12 @@ export const RetrospectiveDetailView: FC<
             <span>&middot; Updated {formatDate(retro.updatedAt)}</span>
           )}
         </div>
+        <AuditMeta
+          createdAt={retro.createdAt}
+          updatedAt={retro.updatedAt}
+          createdBy={retro.createdBy}
+          updatedBy={retro.updatedBy}
+        />
       </main>
 
       <div id="retrospectives-form-container" />

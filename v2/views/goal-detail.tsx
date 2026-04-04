@@ -13,6 +13,7 @@ import { BackButton } from "./components/back-button.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
 import {
   GOAL_STATUS_VARIANTS,
   GOAL_TYPE_VARIANTS,
@@ -306,6 +307,12 @@ export const GoalDetailView: FC<
             </table>
           </section>
         )}
+        <AuditMeta
+          createdAt={goal.createdAt}
+          updatedAt={goal.updatedAt}
+          createdBy={goal.createdBy}
+          updatedBy={goal.updatedBy}
+        />
       </main>
 
       <div id="goals-form-container" />

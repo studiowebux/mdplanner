@@ -6,6 +6,7 @@ import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -115,6 +116,12 @@ export const BrainstormDetailView: FC<
             <span>&middot; Updated {formatDate(brainstorm.updatedAt)}</span>
           )}
         </div>
+        <AuditMeta
+          createdAt={brainstorm.createdAt}
+          updatedAt={brainstorm.updatedAt}
+          createdBy={brainstorm.createdBy}
+          updatedBy={brainstorm.updatedBy}
+        />
       </main>
 
       <div id="brainstorms-form-container" />
