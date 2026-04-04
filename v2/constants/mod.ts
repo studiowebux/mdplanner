@@ -39,6 +39,9 @@ export const WEEKDAYS = [
 /** The section name that represents completed tasks. */
 export const DONE_SECTION = "Done" as const;
 
+/** Default milestone status values — used when project has none configured. */
+export const DEFAULT_MILESTONE_STATUSES: string[] = ["open", "completed"];
+
 /** Default KPI metric keys — shown in goal form when project has none configured. */
 export const DEFAULT_KPI_METRICS: string[] = [
   "mrr",

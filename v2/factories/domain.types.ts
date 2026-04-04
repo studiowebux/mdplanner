@@ -91,6 +91,12 @@ export type DomainConfig<T extends Entity, C, U> = {
     items: T[],
   ) => DynamicFilterOptions | Promise<DynamicFilterOptions>;
 
+  // Optional: provide dynamic select options for form fields (e.g. config-driven status values).
+  // Keys are field names; values are { value, label } pairs that override the static FieldDef options.
+  extractFormOptions?: () => Promise<
+    Record<string, { value: string; label: string }[]>
+  >;
+
   // Optional: custom text search predicate (defaults to searching all string fields).
   searchPredicate?: (item: T, q: string) => boolean;
 

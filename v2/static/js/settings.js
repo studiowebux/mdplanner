@@ -121,6 +121,7 @@
     "sections-form": "tab-sections",
     "nav-categories-form": "tab-navigation",
     "kpi-metrics-form": "tab-goals",
+    "milestone-statuses-form": "tab-milestones",
   };
 
   function updateTabIndicator(formId, dirty) {
@@ -173,6 +174,7 @@
     "sections-form",
     "nav-categories-form",
     "kpi-metrics-form",
+    "milestone-statuses-form",
   ].forEach(trackForm);
 
   // -----------------------------------------------------------------------
@@ -552,6 +554,37 @@
       if (btn) {
         btn.closest(".settings-tag-row").remove();
         checkDirty("kpi-metrics-form");
+      }
+    });
+  }
+
+  // -----------------------------------------------------------------------
+  // Milestone Statuses: add / remove rows
+  // -----------------------------------------------------------------------
+  var milestoneStatusesList = document.getElementById(
+    "milestone-statuses-list",
+  );
+  var addMilestoneStatusBtn = document.querySelector(
+    "[data-add-milestone-status]",
+  );
+
+  if (milestoneStatusesList && addMilestoneStatusBtn) {
+    addMilestoneStatusBtn.addEventListener("click", function () {
+      var row = document.createElement("div");
+      row.className = "settings-tag-row";
+      row.innerHTML =
+        '<input type="text" name="milestoneStatuses" placeholder="e.g. archived" class="settings-field__input" />' +
+        '<button type="button" class="btn btn--danger btn--sm" data-remove-milestone-status>Remove</button>';
+      milestoneStatusesList.appendChild(row);
+      row.querySelector("input").focus();
+      checkDirty("milestone-statuses-form");
+    });
+
+    milestoneStatusesList.addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-remove-milestone-status]");
+      if (btn) {
+        btn.closest(".settings-tag-row").remove();
+        checkDirty("milestone-statuses-form");
       }
     });
   }

@@ -154,6 +154,20 @@ settingsViewRouter.post("/sections", async (c) => {
   });
 });
 
+// -- Milestones tab: status values --
+settingsViewRouter.post("/milestone-statuses", async (c) => {
+  const body = await c.req.parseBody({ all: true });
+  const raw = body.milestoneStatuses;
+  const statuses = (Array.isArray(raw) ? raw : raw ? [raw] : [])
+    .map((s) => String(s).trim())
+    .filter(Boolean);
+  await getProjectService().updateMilestoneStatuses(statuses);
+  return new Response(null, {
+    status: 204,
+    headers: { "HX-Trigger": hxTrigger("success", "Milestone statuses saved") },
+  });
+});
+
 // -- Goals tab: KPI metric keys --
 settingsViewRouter.post("/kpi-metrics", async (c) => {
   const body = await c.req.parseBody({ all: true });

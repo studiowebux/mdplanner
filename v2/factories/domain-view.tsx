@@ -397,8 +397,12 @@ export function createDomainForm<T extends Entity>(cfg: {
   fields: FieldDef[];
   idField?: string;
 }) {
-  const DomainForm: FC<{ item?: T; displayValues?: Record<string, string> }> = (
-    { item, displayValues },
+  const DomainForm: FC<{
+    item?: T;
+    displayValues?: Record<string, string>;
+    dynamicOptions?: Record<string, { value: string; label: string }[]>;
+  }> = (
+    { item, displayValues, dynamicOptions },
   ) => {
     const isEdit = !!item;
     const id = isEdit ? item[cfg.idField ?? "id"] : undefined;
@@ -424,11 +428,19 @@ export function createDomainForm<T extends Entity>(cfg: {
         if (!values[k]) values[k] = v;
       }
     }
+    // Override select options with config-driven values when provided.
+    const fields = dynamicOptions
+      ? cfg.fields.map((f) =>
+        f.type === "select" && dynamicOptions[f.name]
+          ? { ...f, options: dynamicOptions[f.name] }
+          : f
+      )
+      : cfg.fields;
     return (
       <FormBuilder
         id={`${cfg.domain}-form`}
         title={isEdit ? `Edit ${cfg.singular}` : `Create ${cfg.singular}`}
-        fields={cfg.fields}
+        fields={fields}
         values={isEdit ? values : undefined}
         displayValues={displayValues}
         action={isEdit ? `/${cfg.domain}/${id}/edit` : `/${cfg.domain}/new`}

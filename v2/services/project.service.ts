@@ -104,4 +104,10 @@ export class ProjectService {
     current.kpiMetrics = metrics;
     await this.repo.write(current);
   }
+
+  async updateMilestoneStatuses(statuses: string[]): Promise<void> {
+    const current = await this.repo.read();
+    current.milestoneStatuses = statuses;
+    await this.repo.write(current);
+  }
 }

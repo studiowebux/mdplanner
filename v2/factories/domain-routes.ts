@@ -242,8 +242,9 @@ export function createDomainRoutes<T extends Entity, C, U>(
   // ---------------------------------------------------------------------------
 
   // Empty create form
-  router.get("/new", (c) => {
-    return c.html(DomainForm({}) as unknown as string);
+  router.get("/new", async (c) => {
+    const dynamicOptions = await cfg.extractFormOptions?.();
+    return c.html(DomainForm({ dynamicOptions }) as unknown as string);
   });
 
   // Create submission
@@ -283,8 +284,9 @@ export function createDomainRoutes<T extends Entity, C, U>(
       }
       displayValues = await cfg.resolveFormValues(raw);
     }
+    const dynamicOptions = await cfg.extractFormOptions?.();
     return c.html(
-      DomainForm({ item, displayValues }) as unknown as string,
+      DomainForm({ item, displayValues, dynamicOptions }) as unknown as string,
     );
   });
 

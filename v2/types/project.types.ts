@@ -111,6 +111,11 @@ export const ProjectConfigSchema = z.object({
       "Last known stable/tested version deployed to production. Separate from the latest tagged version.",
     example: "v0.33.3",
   }),
+  milestoneStatuses: stringArray.optional().openapi({
+    description:
+      "Configurable milestone status values shown in milestone form and filters (e.g. open, completed, archived)",
+    example: ["open", "completed"],
+  }),
 }).openapi("ProjectConfig");
 
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
@@ -164,6 +169,7 @@ export const FrontmatterProjectSchema = z.object({
   kpi_metrics: z.array(z.unknown()).optional(),
   stale_days: z.number().optional(),
   stable_version: z.string().optional(),
+  milestone_statuses: z.array(z.unknown()).optional(),
   last_updated: z.string().optional(),
 }).transform(
   async (fm): Promise<Omit<ProjectConfig, "name" | "description">> => {
@@ -209,6 +215,9 @@ export const FrontmatterProjectSchema = z.object({
         : undefined,
       staleDays: fm.stale_days,
       stableVersion: fm.stable_version,
+      milestoneStatuses: Array.isArray(fm.milestone_statuses)
+        ? (fm.milestone_statuses as unknown[]).map(String)
+        : undefined,
       lastUpdated: fm.last_updated,
     };
   },
