@@ -1,7 +1,12 @@
 // Milestone entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, val } from "../../database/sqlite/mod.ts";
+import {
+  auditCols,
+  auditVals,
+  ENTITIES,
+  val,
+} from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { MilestoneRepository } from "../../repositories/milestone.repository.ts";
 import type { MilestoneBase } from "../../types/milestone.types.ts";
@@ -32,7 +37,7 @@ export function insertMilestoneRow(
   syncedAt?: string,
 ): void {
   db.execute(
-    `INSERT OR REPLACE INTO ${MILESTONE_TABLE} (id, name, status, target, description, project, completed_at, created_at, updated_at, created_by, updated_by, synced_at)
+    `INSERT OR REPLACE INTO ${MILESTONE_TABLE} (id, name, status, target, description, project, completed_at, ${auditCols()}, synced_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(m.id),
@@ -42,10 +47,7 @@ export function insertMilestoneRow(
       val(m.description),
       val(m.project),
       val(m.completedAt),
-      val(m.createdAt),
-      val(m.updatedAt),
-      val(m.createdBy),
-      val(m.updatedBy),
+      ...auditVals(m),
       syncedAt ?? new Date().toISOString(),
     ],
   );

@@ -1,6 +1,7 @@
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import type { Brainstorm } from "../../types/brainstorm.types.ts";
+import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
 
@@ -8,30 +9,9 @@ import { formatDate } from "../../utils/time.ts";
 // Action buttons
 // ---------------------------------------------------------------------------
 
-const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
-  <div class="domain-card__actions">
-    <a class="btn btn--secondary btn--sm" href={`/brainstorms/${row.id}`}>
-      View
-    </a>
-    <button
-      class="btn btn--secondary btn--sm"
-      type="button"
-      hx-get={`/brainstorms/${row.id}/edit`}
-      hx-target="#brainstorms-form-container"
-      hx-swap="innerHTML"
-    >
-      Edit
-    </button>
-    <button
-      class="btn btn--danger btn--sm"
-      type="button"
-      hx-delete={`/brainstorms/${row.id}`}
-      hx-confirm={`Delete "${row.title}"? This cannot be undone.`}
-      hx-swap="none"
-    >
-      Delete
-    </button>
-  </div>
+const actionBtns = createActionBtns(
+  "brainstorms",
+  "brainstorms-form-container",
 );
 
 // ---------------------------------------------------------------------------

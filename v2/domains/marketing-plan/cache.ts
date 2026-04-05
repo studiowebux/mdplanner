@@ -2,6 +2,8 @@
 // Called by initServices() after repos are created.
 
 import {
+  auditCols,
+  auditVals,
   ENTITIES,
   jsonVal,
   parseJson,
@@ -81,7 +83,7 @@ function insertRow(
        budget_total, budget_currency, start_date, end_date,
        target_audiences, channels, campaigns, linked_goals,
        project, responsible, team,
-       hypothesis, learnings, notes, created_at, updated_at, created_by, updated_by, synced_at)
+       hypothesis, learnings, notes, ${auditCols()}, synced_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(p.id),
@@ -102,10 +104,7 @@ function insertRow(
       val(p.hypothesis),
       val(p.learnings),
       val(p.notes),
-      val(p.createdAt),
-      val(p.updatedAt),
-      val(p.createdBy),
-      val(p.updatedBy),
+      ...auditVals(p),
       syncedAt ?? new Date().toISOString(),
     ],
   );

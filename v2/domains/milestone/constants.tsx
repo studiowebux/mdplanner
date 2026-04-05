@@ -4,6 +4,7 @@ import {
   type BadgeVariant,
   statusBadgeRenderer,
 } from "../../components/ui/status-badge.tsx";
+import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { toKebab } from "../../utils/slug.ts";
 import {
@@ -20,32 +21,10 @@ export const MILESTONE_STATUS_VARIANTS: Record<string, BadgeVariant> = {
   completed: "success",
 };
 
-// Action buttons render function for table rows.
-const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
-  <div class="milestone-card__actions">
-    <a class="btn btn--secondary btn--sm" href={`/milestones/${row.id}`}>
-      View
-    </a>
-    <button
-      class="btn btn--secondary btn--sm"
-      type="button"
-      hx-get={`/milestones/${row.id}/edit`}
-      hx-target="#milestones-form-container"
-      hx-swap="innerHTML"
-    >
-      Edit
-    </button>
-    <button
-      class="btn btn--danger btn--sm"
-      type="button"
-      hx-delete={`/milestones/${row.id}`}
-      hx-confirm={`Delete "${row.name}"? This cannot be undone.`}
-      hx-swap="none"
-    >
-      Delete
-    </button>
-  </div>
-);
+const actionBtns = createActionBtns("milestones", "milestones-form-container", {
+  nameField: "name",
+  actionsClass: "milestone-card__actions",
+});
 
 export const MILESTONE_TABLE_COLUMNS: ColumnDef[] = [
   {

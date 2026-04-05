@@ -1,6 +1,7 @@
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import type { Retrospective } from "../../types/retrospective.types.ts";
+import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
 
@@ -8,30 +9,9 @@ import { formatDate } from "../../utils/time.ts";
 // Action buttons
 // ---------------------------------------------------------------------------
 
-const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
-  <div class="domain-card__actions">
-    <a class="btn btn--secondary btn--sm" href={`/retrospectives/${row.id}`}>
-      View
-    </a>
-    <button
-      class="btn btn--secondary btn--sm"
-      type="button"
-      hx-get={`/retrospectives/${row.id}/edit`}
-      hx-target="#retrospectives-form-container"
-      hx-swap="innerHTML"
-    >
-      Edit
-    </button>
-    <button
-      class="btn btn--danger btn--sm"
-      type="button"
-      hx-delete={`/retrospectives/${row.id}`}
-      hx-confirm={`Delete "${row.title}"? This cannot be undone.`}
-      hx-swap="none"
-    >
-      Delete
-    </button>
-  </div>
+const actionBtns = createActionBtns(
+  "retrospectives",
+  "retrospectives-form-container",
 );
 
 // ---------------------------------------------------------------------------

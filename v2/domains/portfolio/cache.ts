@@ -1,7 +1,14 @@
 // Portfolio entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, json, parseJson, val } from "../../database/sqlite/mod.ts";
+import {
+  auditCols,
+  auditVals,
+  ENTITIES,
+  json,
+  parseJson,
+  val,
+} from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { PortfolioRepository } from "../../repositories/portfolio.repository.ts";
 import type {
@@ -48,6 +55,10 @@ export function rowToPortfolioItem(
     row.status_updates,
   );
   if (statusUpdates) item.statusUpdates = statusUpdates;
+  if (row.created_at != null) item.createdAt = row.created_at as string;
+  if (row.updated_at != null) item.updatedAt = row.updated_at as string;
+  if (row.created_by != null) item.createdBy = row.created_by as string;
+  if (row.updated_by != null) item.updatedBy = row.updated_by as string;
   return item;
 }
 
@@ -61,8 +72,9 @@ export function insertPortfolioRow(
     `INSERT OR REPLACE INTO ${PORTFOLIO_TABLE} (id, name, category, status,
        description, client, revenue, expenses, progress, start_date, end_date,
        team, tech_stack, logo, license, github_repo, billing_customer_id,
-       brain_managed, linked_goals, kpis, urls, status_updates, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       brain_managed, linked_goals, kpis, urls, status_updates,
+       ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(p.id),
       val(p.name),
@@ -86,6 +98,7 @@ export function insertPortfolioRow(
       json(p.kpis),
       json(p.urls),
       json(p.statusUpdates),
+      ...auditVals(p),
       syncedAt ?? new Date().toISOString(),
     ],
   );

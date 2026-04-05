@@ -1,7 +1,12 @@
 // Customer entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, val } from "../../database/sqlite/mod.ts";
+import {
+  auditCols,
+  auditVals,
+  ENTITIES,
+  val,
+} from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { CustomerRepository } from "../../repositories/customer.repository.ts";
 import type { Customer } from "../../types/customer.types.ts";
@@ -62,7 +67,7 @@ export function insertCustomerRow(
   db.execute(
     `INSERT OR REPLACE INTO ${CUSTOMER_TABLE} (id, name, email, phone,
        company, street, city, state, postal_code, country, notes,
-       created_at, updated_at, created_by, updated_by, synced_at)
+       ${auditCols()}, synced_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(c.id),
@@ -76,10 +81,7 @@ export function insertCustomerRow(
       val(c.billingAddress?.postalCode),
       val(c.billingAddress?.country),
       val(c.notes),
-      val(c.createdAt),
-      val(c.updatedAt),
-      val(c.createdBy),
-      val(c.updatedBy),
+      ...auditVals(c),
       syncedAt ?? new Date().toISOString(),
     ],
   );

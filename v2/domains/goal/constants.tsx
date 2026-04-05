@@ -7,6 +7,7 @@ import {
   type BadgeVariant,
   statusBadgeRenderer,
 } from "../../components/ui/status-badge.tsx";
+import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
 
@@ -26,31 +27,7 @@ export const GOAL_TYPE_VARIANTS: Record<string, BadgeVariant> = {
   project: "neutral",
 };
 
-const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
-  <div class="domain-card__actions">
-    <a class="btn btn--secondary btn--sm" href={`/goals/${row.id}`}>
-      View
-    </a>
-    <button
-      class="btn btn--secondary btn--sm"
-      type="button"
-      hx-get={`/goals/${row.id}/edit`}
-      hx-target="#goals-form-container"
-      hx-swap="innerHTML"
-    >
-      Edit
-    </button>
-    <button
-      class="btn btn--danger btn--sm"
-      type="button"
-      hx-delete={`/goals/${row.id}`}
-      hx-confirm={`Delete "${row.title}"? This cannot be undone.`}
-      hx-swap="none"
-    >
-      Delete
-    </button>
-  </div>
-);
+const actionBtns = createActionBtns("goals", "goals-form-container");
 
 export const GOAL_TABLE_COLUMNS: ColumnDef[] = [
   {

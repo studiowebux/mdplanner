@@ -4,33 +4,12 @@ export const CUSTOMER_BILLING_MAX_ROWS = 10;
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import type { Customer } from "../../types/customer.types.ts";
+import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 
-const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
-  <div class="domain-card__actions">
-    <a class="btn btn--secondary btn--sm" href={`/customers/${row.id}`}>
-      View
-    </a>
-    <button
-      class="btn btn--secondary btn--sm"
-      type="button"
-      hx-get={`/customers/${row.id}/edit`}
-      hx-target="#customers-form-container"
-      hx-swap="innerHTML"
-    >
-      Edit
-    </button>
-    <button
-      class="btn btn--danger btn--sm"
-      type="button"
-      hx-delete={`/customers/${row.id}`}
-      hx-confirm={`Delete "${row.name}"? This cannot be undone.`}
-      hx-swap="none"
-    >
-      Delete
-    </button>
-  </div>
-);
+const actionBtns = createActionBtns("customers", "customers-form-container", {
+  nameField: "name",
+});
 
 export const CUSTOMER_TABLE_COLUMNS: ColumnDef[] = [
   {

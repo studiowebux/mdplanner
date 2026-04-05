@@ -1,6 +1,7 @@
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import type { BillingRate } from "../../types/billing-rate.types.ts";
+import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { formatCurrency } from "../../utils/format.ts";
 import { Highlight } from "../../utils/highlight.tsx";
 
@@ -18,30 +19,10 @@ export function formatRate(rate: number, unit: string): string {
   return unit === "fixed" ? formatted : `${formatted}/${unit}`;
 }
 
-const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
-  <div class="domain-card__actions">
-    <a class="btn btn--secondary btn--sm" href={`/billing-rates/${row.id}`}>
-      View
-    </a>
-    <button
-      class="btn btn--secondary btn--sm"
-      type="button"
-      hx-get={`/billing-rates/${row.id}/edit`}
-      hx-target="#billing-rates-form-container"
-      hx-swap="innerHTML"
-    >
-      Edit
-    </button>
-    <button
-      class="btn btn--danger btn--sm"
-      type="button"
-      hx-delete={`/billing-rates/${row.id}`}
-      hx-confirm={`Delete "${row.name}"? This cannot be undone.`}
-      hx-swap="none"
-    >
-      Delete
-    </button>
-  </div>
+const actionBtns = createActionBtns(
+  "billing-rates",
+  "billing-rates-form-container",
+  { nameField: "name" },
 );
 
 export const BILLING_RATE_TABLE_COLUMNS: ColumnDef[] = [

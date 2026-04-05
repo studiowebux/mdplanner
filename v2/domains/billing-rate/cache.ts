@@ -1,7 +1,12 @@
 // BillingRate entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, val } from "../../database/sqlite/mod.ts";
+import {
+  auditCols,
+  auditVals,
+  ENTITIES,
+  val,
+} from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { BillingRateRepository } from "../../repositories/billing-rate.repository.ts";
 import type { BillingRate } from "../../types/billing-rate.types.ts";
@@ -50,7 +55,7 @@ function insertBillingRateRow(
   db.execute(
     `INSERT OR REPLACE INTO ${BILLING_RATE_TABLE} (id, name, unit, rate,
        currency, assignee, is_default, notes,
-       created_at, updated_at, created_by, updated_by, synced_at)
+       ${auditCols()}, synced_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(r.id),
@@ -61,10 +66,7 @@ function insertBillingRateRow(
       val(r.assignee),
       r.isDefault ? 1 : 0,
       val(r.notes),
-      val(r.createdAt),
-      val(r.updatedAt),
-      val(r.createdBy),
-      val(r.updatedBy),
+      ...auditVals(r),
       syncedAt ?? new Date().toISOString(),
     ],
   );

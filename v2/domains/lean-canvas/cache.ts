@@ -2,6 +2,8 @@
 // Called by initServices() after repos are created.
 
 import {
+  auditCols,
+  auditVals,
   ENTITIES,
   jsonVal,
   parseJson,
@@ -91,7 +93,7 @@ export function insertLeanCanvasRow(
        customer_segments, existing_alternatives, key_metrics, high_level_concept,
        channels, early_adopters, cost_structure, revenue_streams,
        sections_text, completed_sections, section_count, completion_pct,
-       created_at, updated_at, created_by, updated_by, synced_at
+       ${auditCols()}, synced_at
      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(lc.id),
@@ -114,10 +116,7 @@ export function insertLeanCanvasRow(
       lc.completedSections,
       lc.sectionCount,
       lc.completionPct,
-      val(lc.createdAt),
-      val(lc.updatedAt),
-      val(lc.createdBy),
-      val(lc.updatedBy),
+      ...auditVals(lc),
       syncedAt ?? new Date().toISOString(),
     ],
   );

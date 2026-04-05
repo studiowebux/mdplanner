@@ -5,6 +5,7 @@ import type { Invoice } from "../../types/invoice.types.ts";
 import { INVOICE_STATUSES } from "../../types/invoice.types.ts";
 import type { BadgeVariant } from "../../components/ui/status-badge.tsx";
 import { statusBadgeRenderer } from "../../components/ui/status-badge.tsx";
+import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { formatCurrency } from "../../utils/format.ts";
 import { Highlight } from "../../utils/highlight.tsx";
 
@@ -45,31 +46,7 @@ export const PAYMENT_TERMS_OPTIONS = [
 // Action buttons
 // ---------------------------------------------------------------------------
 
-const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
-  <div class="domain-card__actions">
-    <a class="btn btn--secondary btn--sm" href={`/invoices/${row.id}`}>
-      View
-    </a>
-    <button
-      class="btn btn--secondary btn--sm"
-      type="button"
-      hx-get={`/invoices/${row.id}/edit`}
-      hx-target="#invoices-form-container"
-      hx-swap="innerHTML"
-    >
-      Edit
-    </button>
-    <button
-      class="btn btn--danger btn--sm"
-      type="button"
-      hx-delete={`/invoices/${row.id}`}
-      hx-confirm={`Delete "${row.title}"? This cannot be undone.`}
-      hx-swap="none"
-    >
-      Delete
-    </button>
-  </div>
-);
+const actionBtns = createActionBtns("invoices", "invoices-form-container");
 
 // ---------------------------------------------------------------------------
 // Table columns

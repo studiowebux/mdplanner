@@ -9,6 +9,7 @@ import {
   type BadgeVariant,
   statusBadgeRenderer,
 } from "../../components/ui/status-badge.tsx";
+import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
 
@@ -57,33 +58,10 @@ export const MKTPLAN_ITEM_STATUS_OPTIONS = MARKETING_ITEM_STATUSES.map((
 // Table columns
 // ---------------------------------------------------------------------------
 
-const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
-  <div class="domain-card__actions">
-    <a
-      class="btn btn--secondary btn--sm"
-      href={`/marketing-plans/${row.id}`}
-    >
-      View
-    </a>
-    <button
-      class="btn btn--secondary btn--sm"
-      type="button"
-      hx-get={`/marketing-plans/${row.id}/edit`}
-      hx-target="#marketing-plans-form-container"
-      hx-swap="innerHTML"
-    >
-      Edit
-    </button>
-    <button
-      class="btn btn--danger btn--sm"
-      type="button"
-      hx-delete={`/marketing-plans/${row.id}`}
-      hx-confirm={`Delete "${row.name}"? This cannot be undone.`}
-      hx-swap="none"
-    >
-      Delete
-    </button>
-  </div>
+const actionBtns = createActionBtns(
+  "marketing-plans",
+  "marketing-plans-form-container",
+  { nameField: "name" },
 );
 
 export const MKTPLAN_TABLE_COLUMNS: ColumnDef[] = [

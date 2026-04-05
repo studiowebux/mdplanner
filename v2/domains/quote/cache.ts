@@ -2,6 +2,8 @@
 // Called by initServices() after repos are created.
 
 import {
+  auditCols,
+  auditVals,
   ENTITIES,
   jsonVal,
   parseJson,
@@ -80,8 +82,8 @@ function insertQuoteRow(
     `INSERT OR REPLACE INTO ${QUOTE_TABLE} (id, number, customer_id, title,
        status, currency, expires_at, line_items, payment_schedule,
        subtotal, tax, tax_rate, total, notes, footer, revision,
-       converted_to_invoice, created_at, updated_at, sent_at, accepted_at,
-       created_by, updated_by, synced_at)
+       converted_to_invoice, sent_at, accepted_at,
+       ${auditCols()}, synced_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(q.id),
@@ -101,12 +103,9 @@ function insertQuoteRow(
       val(q.footer),
       q.revision ?? null,
       val(q.convertedToInvoice),
-      val(q.createdAt),
-      val(q.updatedAt),
       val(q.sentAt),
       val(q.acceptedAt),
-      val(q.createdBy),
-      val(q.updatedBy),
+      ...auditVals(q),
       syncedAt ?? new Date().toISOString(),
     ],
   );

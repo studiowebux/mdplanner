@@ -25,5 +25,9 @@ export const PORTFOLIO_SCHEMA = `CREATE TABLE IF NOT EXISTS ${PORTFOLIO_TABLE} (
   kpis TEXT,
   urls TEXT,
   status_updates TEXT,
+  created_at TEXT,
+  updated_at TEXT,
+  created_by TEXT,
+  updated_by TEXT,
   synced_at TEXT
 )`;

@@ -4,6 +4,7 @@ import {
   type BadgeVariant,
   statusBadgeRenderer,
 } from "../../components/ui/status-badge.tsx";
+import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 
 export const PERSON_TYPE_VARIANTS: Record<string, BadgeVariant> = {
@@ -18,31 +19,10 @@ export const PERSON_STATUS_VARIANTS: Record<string, BadgeVariant> = {
   offline: "error-solid",
 };
 
-const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
-  <div class="person-card__actions">
-    <a class="btn btn--secondary btn--sm" href={`/people/${row.id}`}>
-      View
-    </a>
-    <button
-      class="btn btn--secondary btn--sm"
-      type="button"
-      hx-get={`/people/${row.id}/edit`}
-      hx-target="#people-form-container"
-      hx-swap="innerHTML"
-    >
-      Edit
-    </button>
-    <button
-      class="btn btn--danger btn--sm"
-      type="button"
-      hx-delete={`/people/${row.id}`}
-      hx-confirm={`Delete "${row.name}"? This cannot be undone.`}
-      hx-swap="none"
-    >
-      Delete
-    </button>
-  </div>
-);
+const actionBtns = createActionBtns("people", "people-form-container", {
+  nameField: "name",
+  actionsClass: "person-card__actions",
+});
 
 export const PEOPLE_TABLE_COLUMNS: ColumnDef[] = [
   {

@@ -1,6 +1,7 @@
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import type { Swot } from "../../types/swot.types.ts";
+import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
 
@@ -56,31 +57,7 @@ export const SWOT_SECTION_MAP: Record<string, SwotQuadrantKey> = {
 // Table columns
 // ---------------------------------------------------------------------------
 
-const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
-  <div class="domain-card__actions">
-    <a class="btn btn--secondary btn--sm" href={`/swot/${row.id}`}>
-      View
-    </a>
-    <button
-      class="btn btn--secondary btn--sm"
-      type="button"
-      hx-get={`/swot/${row.id}/edit`}
-      hx-target="#swot-form-container"
-      hx-swap="innerHTML"
-    >
-      Edit
-    </button>
-    <button
-      class="btn btn--danger btn--sm"
-      type="button"
-      hx-delete={`/swot/${row.id}`}
-      hx-confirm={`Delete "${row.title}"? This cannot be undone.`}
-      hx-swap="none"
-    >
-      Delete
-    </button>
-  </div>
-);
+const actionBtns = createActionBtns("swot", "swot-form-container");
 
 export const SWOT_TABLE_COLUMNS: ColumnDef[] = [
   {

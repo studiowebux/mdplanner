@@ -2,6 +2,8 @@
 // Called by initServices() after repos are created.
 
 import {
+  auditCols,
+  auditVals,
   ENTITIES,
   json,
   jsonVal,
@@ -66,7 +68,7 @@ function insertBrainstormRow(
     `INSERT OR REPLACE INTO ${BRAINSTORM_TABLE} (id, title, tags,
        linked_projects, linked_tasks, linked_goals,
        questions, questions_text,
-       created_at, updated_at, created_by, updated_by, synced_at)
+       ${auditCols()}, synced_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(b.id),
@@ -77,10 +79,7 @@ function insertBrainstormRow(
       jsonVal(b.linkedGoals),
       json(b.questions),
       questionsToText(b.questions),
-      val(b.createdAt),
-      val(b.updatedAt),
-      val(b.createdBy),
-      val(b.updatedBy),
+      ...auditVals(b),
       syncedAt ?? new Date().toISOString(),
     ],
   );

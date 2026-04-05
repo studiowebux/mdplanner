@@ -5,6 +5,7 @@ import type { Quote } from "../../types/quote.types.ts";
 import { QUOTE_STATUSES } from "../../types/quote.types.ts";
 import type { BadgeVariant } from "../../components/ui/status-badge.tsx";
 import { statusBadgeRenderer } from "../../components/ui/status-badge.tsx";
+import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { formatCurrency } from "../../utils/format.ts";
 import { Highlight } from "../../utils/highlight.tsx";
 
@@ -28,31 +29,7 @@ export const QUOTE_STATUS_VARIANTS: Record<string, BadgeVariant> = {
 // Action buttons
 // ---------------------------------------------------------------------------
 
-const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
-  <div class="domain-card__actions">
-    <a class="btn btn--secondary btn--sm" href={`/quotes/${row.id}`}>
-      View
-    </a>
-    <button
-      class="btn btn--secondary btn--sm"
-      type="button"
-      hx-get={`/quotes/${row.id}/edit`}
-      hx-target="#quotes-form-container"
-      hx-swap="innerHTML"
-    >
-      Edit
-    </button>
-    <button
-      class="btn btn--danger btn--sm"
-      type="button"
-      hx-delete={`/quotes/${row.id}`}
-      hx-confirm={`Delete "${row.title}"? This cannot be undone.`}
-      hx-swap="none"
-    >
-      Delete
-    </button>
-  </div>
-);
+const actionBtns = createActionBtns("quotes", "quotes-form-container");
 
 // ---------------------------------------------------------------------------
 // Table columns

@@ -1,7 +1,12 @@
 // Note entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, val } from "../../database/sqlite/mod.ts";
+import {
+  auditCols,
+  auditVals,
+  ENTITIES,
+  val,
+} from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { NoteRepository } from "../../repositories/note.repository.ts";
 import type { Note } from "../../types/note.types.ts";
@@ -27,17 +32,14 @@ function insertNoteRow(
 ): void {
   db.execute(
     `INSERT OR REPLACE INTO ${NOTE_TABLE} (id, title, content, project,
-       created_at, updated_at, created_by, updated_by, synced_at)
+       ${auditCols()}, synced_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(n.id),
       val(n.title),
       val(n.content),
       val(n.project),
-      val(n.createdAt),
-      val(n.updatedAt),
-      val(n.createdBy),
-      val(n.updatedBy),
+      ...auditVals(n),
       syncedAt ?? new Date().toISOString(),
     ],
   );

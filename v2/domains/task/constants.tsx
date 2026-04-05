@@ -6,6 +6,7 @@ import {
   type BadgeVariant,
   statusBadgeRenderer,
 } from "../../components/ui/status-badge.tsx";
+import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
 import { toKebab } from "../../utils/slug.ts";
@@ -23,31 +24,9 @@ export const TASK_SECTION_VARIANTS: Record<string, BadgeVariant> = {
   "done": "success",
 };
 
-const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
-  <div class="task-card__actions">
-    <a class="btn btn--secondary btn--sm" href={`/tasks/${row.id}`}>
-      View
-    </a>
-    <button
-      class="btn btn--secondary btn--sm"
-      type="button"
-      hx-get={`/tasks/${row.id}/edit`}
-      hx-target="#tasks-form-container"
-      hx-swap="innerHTML"
-    >
-      Edit
-    </button>
-    <button
-      class="btn btn--danger btn--sm"
-      type="button"
-      hx-delete={`/tasks/${row.id}`}
-      hx-confirm={`Delete "${row.title}"? This cannot be undone.`}
-      hx-swap="none"
-    >
-      Delete
-    </button>
-  </div>
-);
+const actionBtns = createActionBtns("tasks", "tasks-form-container", {
+  actionsClass: "task-card__actions",
+});
 
 export const TASK_TABLE_COLUMNS: ColumnDef[] = [
   {

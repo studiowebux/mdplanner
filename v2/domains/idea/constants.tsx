@@ -8,6 +8,7 @@ import {
 } from "../../components/ui/status-badge.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
+import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { toKebab } from "../../utils/slug.ts";
 
 export const IDEA_STATUS_VARIANTS: Record<string, BadgeVariant> = {
@@ -32,31 +33,7 @@ const IDEA_PRIORITY_LABELS: Record<string, string> = {
   low: "Low",
 };
 
-const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
-  <div class="domain-card__actions">
-    <a class="btn btn--secondary btn--sm" href={`/ideas/${row.id}`}>
-      View
-    </a>
-    <button
-      class="btn btn--secondary btn--sm"
-      type="button"
-      hx-get={`/ideas/${row.id}/edit`}
-      hx-target="#ideas-form-container"
-      hx-swap="innerHTML"
-    >
-      Edit
-    </button>
-    <button
-      class="btn btn--danger btn--sm"
-      type="button"
-      hx-delete={`/ideas/${row.id}`}
-      hx-confirm={`Delete "${row.title}"? This cannot be undone.`}
-      hx-swap="none"
-    >
-      Delete
-    </button>
-  </div>
-);
+const actionBtns = createActionBtns("ideas", "ideas-form-container");
 
 export const IDEA_TABLE_COLUMNS: ColumnDef[] = [
   {

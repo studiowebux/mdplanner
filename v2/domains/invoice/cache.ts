@@ -2,6 +2,8 @@
 // Called by initServices() after repos are created.
 
 import {
+  auditCols,
+  auditVals,
   ENTITIES,
   jsonVal,
   parseJson,
@@ -79,8 +81,8 @@ function insertInvoiceRow(
     `INSERT OR REPLACE INTO ${INVOICE_TABLE} (id, number, customer_id, quote_id,
        title, status, currency, due_date, payment_terms, line_items,
        subtotal, tax, tax_rate, total, paid_amount, notes, footer,
-       created_at, updated_at, sent_at, paid_at,
-       created_by, updated_by, synced_at)
+       sent_at, paid_at,
+       ${auditCols()}, synced_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(inv.id),
@@ -100,12 +102,9 @@ function insertInvoiceRow(
       inv.paidAmount,
       val(inv.notes),
       val(inv.footer),
-      val(inv.createdAt),
-      val(inv.updatedAt),
       val(inv.sentAt),
       val(inv.paidAt),
-      val(inv.createdBy),
-      val(inv.updatedBy),
+      ...auditVals(inv),
       syncedAt ?? new Date().toISOString(),
     ],
   );

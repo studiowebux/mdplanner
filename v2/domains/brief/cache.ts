@@ -2,6 +2,8 @@
 // Called by initServices() after repos are created.
 
 import {
+  auditCols,
+  auditVals,
   ENTITIES,
   jsonVal,
   parseJson,
@@ -80,7 +82,7 @@ function insertBriefRow(
        summary, mission, responsible, accountable, consulted, informed,
        high_level_budget, high_level_timeline, culture, change_capacity,
        guiding_principles, sections_text,
-       created_at, updated_at, created_by, updated_by, synced_at)
+       ${auditCols()}, synced_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(b.id),
@@ -98,10 +100,7 @@ function insertBriefRow(
       jsonVal(b.changeCapacity),
       jsonVal(b.guidingPrinciples),
       sectionsToText(b),
-      val(b.createdAt),
-      val(b.updatedAt),
-      val(b.createdBy),
-      val(b.updatedBy),
+      ...auditVals(b),
       syncedAt ?? new Date().toISOString(),
     ],
   );

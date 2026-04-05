@@ -4,6 +4,7 @@ import {
   type BadgeVariant,
   statusBadgeRenderer,
 } from "../../components/ui/status-badge.tsx";
+import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatCurrency } from "../../utils/format.ts";
 import { formatDate } from "../../utils/time.ts";
@@ -22,31 +23,10 @@ export const PORTFOLIO_STATUS_VARIANTS: Record<string, BadgeVariant> = {
   cancelled: "error",
 };
 
-const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
-  <div class="portfolio-card__actions">
-    <a class="btn btn--secondary btn--sm" href={`/portfolio/${row.id}`}>
-      View
-    </a>
-    <button
-      class="btn btn--secondary btn--sm"
-      type="button"
-      hx-get={`/portfolio/${row.id}/edit`}
-      hx-target="#portfolio-form-container"
-      hx-swap="innerHTML"
-    >
-      Edit
-    </button>
-    <button
-      class="btn btn--danger btn--sm"
-      type="button"
-      hx-delete={`/portfolio/${row.id}`}
-      hx-confirm={`Delete "${row.name}"? This cannot be undone.`}
-      hx-swap="none"
-    >
-      Delete
-    </button>
-  </div>
-);
+const actionBtns = createActionBtns("portfolio", "portfolio-form-container", {
+  nameField: "name",
+  actionsClass: "portfolio-card__actions",
+});
 
 const progressRenderer = (v: unknown) => {
   const pct = Number(v) || 0;

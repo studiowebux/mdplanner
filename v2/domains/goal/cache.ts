@@ -2,6 +2,8 @@
 // Called by initServices() after repos are created.
 
 import {
+  auditCols,
+  auditVals,
   ENTITIES,
   jsonVal,
   parseJson,
@@ -70,7 +72,7 @@ function insertGoalRow(
     `INSERT OR REPLACE INTO ${GOAL_TABLE} (id, title, description, type,
        kpi, kpi_metric, kpi_target, start_date, end_date, status,
        github_repo, github_milestone, linked_portfolio_items,
-       project, created_at, updated_at, created_by, updated_by, synced_at)
+       project, ${auditCols()}, synced_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(g.id),
@@ -87,10 +89,7 @@ function insertGoalRow(
       g.githubMilestone ?? null,
       jsonVal(g.linkedPortfolioItems),
       val(g.project),
-      val(g.createdAt),
-      val(g.updatedAt),
-      val(g.createdBy),
-      val(g.updatedBy),
+      ...auditVals(g),
       syncedAt ?? new Date().toISOString(),
     ],
   );

@@ -6,6 +6,7 @@ import {
   type BadgeVariant,
   statusBadgeRenderer,
 } from "../../components/ui/status-badge.tsx";
+import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
 
@@ -47,31 +48,9 @@ export const DNS_RECORD_FORM_FIELDS: FieldDef[] = [
   },
 ];
 
-const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
-  <div class="domain-card__actions">
-    <a class="btn btn--secondary btn--sm" href={`/dns/${row.id}`}>
-      View
-    </a>
-    <button
-      class="btn btn--secondary btn--sm"
-      type="button"
-      hx-get={`/dns/${row.id}/edit`}
-      hx-target="#dns-form-container"
-      hx-swap="innerHTML"
-    >
-      Edit
-    </button>
-    <button
-      class="btn btn--danger btn--sm"
-      type="button"
-      hx-delete={`/dns/${row.id}`}
-      hx-confirm={`Delete "${row.domain}"? This cannot be undone.`}
-      hx-swap="none"
-    >
-      Delete
-    </button>
-  </div>
-);
+const actionBtns = createActionBtns("dns", "dns-form-container", {
+  nameField: "domain",
+});
 
 const autoRenewRenderer = (v: unknown) =>
   v === true || v === "true"

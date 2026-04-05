@@ -3,6 +3,7 @@ import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import type { Payment } from "../../types/payment.types.ts";
 import { PAYMENT_METHODS } from "../../types/payment.types.ts";
 import type { BadgeVariant } from "../../components/ui/status-badge.tsx";
+import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { formatCurrency } from "../../utils/format.ts";
 import { Highlight } from "../../utils/highlight.tsx";
 
@@ -31,31 +32,9 @@ export const PAYMENT_METHOD_OPTIONS = PAYMENT_METHODS.map((m) => ({
 // Action buttons
 // ---------------------------------------------------------------------------
 
-const actionBtns = (_value: unknown, row: Record<string, unknown>) => (
-  <div class="domain-card__actions">
-    <a class="btn btn--secondary btn--sm" href={`/payments/${row.id}`}>
-      View
-    </a>
-    <button
-      class="btn btn--secondary btn--sm"
-      type="button"
-      hx-get={`/payments/${row.id}/edit`}
-      hx-target="#payments-form-container"
-      hx-swap="innerHTML"
-    >
-      Edit
-    </button>
-    <button
-      class="btn btn--danger btn--sm"
-      type="button"
-      hx-delete={`/payments/${row.id}`}
-      hx-confirm="Delete this payment? This cannot be undone."
-      hx-swap="none"
-    >
-      Delete
-    </button>
-  </div>
-);
+const actionBtns = createActionBtns("payments", "payments-form-container", {
+  nameField: "date",
+});
 
 // ---------------------------------------------------------------------------
 // Table columns

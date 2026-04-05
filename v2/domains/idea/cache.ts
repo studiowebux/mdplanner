@@ -2,6 +2,8 @@
 // Called by initServices() after repos are created.
 
 import {
+  auditCols,
+  auditVals,
   ENTITIES,
   jsonVal,
   parseJson,
@@ -68,7 +70,7 @@ function insertIdeaRow(
     `INSERT OR REPLACE INTO ${IDEA_TABLE} (id, title, description, status,
        category, priority, project, start_date, end_date, resources,
        subtasks, links, implemented_at, cancelled_at,
-       created_at, updated_at, created_by, updated_by, synced_at)
+       ${auditCols()}, synced_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(i.id),
@@ -85,10 +87,7 @@ function insertIdeaRow(
       jsonVal(i.links),
       val(i.implementedAt),
       val(i.cancelledAt),
-      val(i.createdAt),
-      val(i.updatedAt),
-      val(i.createdBy),
-      val(i.updatedBy),
+      ...auditVals(i),
       syncedAt ?? new Date().toISOString(),
     ],
   );

@@ -1,7 +1,12 @@
 // Payment entity registration for SQLite cache.
 // Called by initServices() after repos are created.
 
-import { ENTITIES, val } from "../../database/sqlite/mod.ts";
+import {
+  auditCols,
+  auditVals,
+  ENTITIES,
+  val,
+} from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { PaymentRepository } from "../../repositories/payment.repository.ts";
 import type { Payment } from "../../types/payment.types.ts";
@@ -48,7 +53,7 @@ function insertPaymentRow(
   db.execute(
     `INSERT OR REPLACE INTO ${PAYMENT_TABLE} (id, invoice_id, amount, date,
        method, reference, notes,
-       created_at, updated_at, created_by, updated_by, synced_at)
+       ${auditCols()}, synced_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(p.id),
@@ -58,10 +63,7 @@ function insertPaymentRow(
       val(p.method),
       val(p.reference),
       val(p.notes),
-      val(p.createdAt),
-      val(p.updatedAt),
-      val(p.createdBy),
-      val(p.updatedBy),
+      ...auditVals(p),
       syncedAt ?? new Date().toISOString(),
     ],
   );
