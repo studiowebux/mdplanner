@@ -31,6 +31,7 @@ export const InvoiceDetailView: FC<
       title={`${invoice.number} — ${invoice.title}`}
       {...viewProps}
       styles={["/css/views/invoices.css", "/css/views/billing.css"]}
+      scripts={["/js/invoice-print.js"]}
     >
       <SseRefresh
         getUrl={"/invoices/" + invoice.id}
@@ -73,7 +74,7 @@ export const InvoiceDetailView: FC<
             <button
               class="btn btn--secondary btn--sm invoice-detail__print-btn"
               type="button"
-              onclick="window.print()"
+              data-action="print"
             >
               Print / Save as PDF
             </button>
