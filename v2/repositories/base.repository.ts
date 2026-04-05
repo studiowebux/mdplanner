@@ -168,15 +168,17 @@ export abstract class BaseMarkdownRepository<
   }
 
   async delete(id: string): Promise<boolean> {
-    const resolved = await this.resolveFile(id);
-    if (!resolved) return false;
-    try {
-      await Deno.remove(resolved.filePath);
-      return true;
-    } catch (err) {
-      if (err instanceof Deno.errors.NotFound) return false;
-      throw err;
-    }
+    return this.writer.write(id, async () => {
+      const resolved = await this.resolveFile(id);
+      if (!resolved) return false;
+      try {
+        await Deno.remove(resolved.filePath);
+        return true;
+      } catch (err) {
+        if (err instanceof Deno.errors.NotFound) return false;
+        throw err;
+      }
+    });
   }
 
   // ---------------------------------------------------------------------------

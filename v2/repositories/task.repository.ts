@@ -230,10 +230,12 @@ export class TaskRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    const { file } = await this.findFileById(id);
-    if (!file) return false;
-    await Deno.remove(file);
-    return true;
+    return this.writer.write(id, async () => {
+      const { file } = await this.findFileById(id);
+      if (!file) return false;
+      await Deno.remove(file);
+      return true;
+    });
   }
 
   async moveToSection(id: string, newSection: string): Promise<Task | null> {
