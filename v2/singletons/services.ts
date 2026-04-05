@@ -71,29 +71,24 @@ export interface InitOptions {
   cache?: boolean;
 }
 
-let taskRepo: TaskRepository | null = null;
-let peopleRepo: PeopleRepository | null = null;
-let milestoneService: MilestoneService | null = null;
-let taskService: TaskService | null = null;
-let peopleService: PeopleService | null = null;
-let noteService: NoteService | null = null;
-let portfolioService: PortfolioService | null = null;
-let projectService: ProjectService | null = null;
-let goalService: GoalService | null = null;
-let ideaService: IdeaService | null = null;
-let marketingPlanService: MarketingPlanService | null = null;
-let swotService: SwotService | null = null;
-let customerService: CustomerService | null = null;
-let billingRateService: BillingRateService | null = null;
-let quoteService: QuoteService | null = null;
-let invoiceService: InvoiceService | null = null;
-let paymentService: PaymentService | null = null;
-let brainstormService: BrainstormService | null = null;
-let briefService: BriefService | null = null;
-let retrospectiveService: RetrospectiveService | null = null;
-let leanCanvasService: LeanCanvasService | null = null;
-let dnsService: DnsService | null = null;
-let githubService: GitHubService | null = null;
+// deno-lint-ignore no-explicit-any
+const _svc = new Map<string, any>();
+// deno-lint-ignore no-explicit-any
+const _repo = new Map<string, any>();
+
+function _set<T>(map: Map<string, unknown>, key: string, value: T): T {
+  map.set(key, value);
+  return value;
+}
+
+function _get<T>(map: Map<string, unknown>, key: string): T {
+  const v = map.get(key);
+  if (v === undefined) {
+    throw new Error("Services not initialized — call initServices() first");
+  }
+  return v as T;
+}
+
 let cacheDb: CacheDatabase | null = null;
 let cacheSync: CacheSync | null = null;
 let searchEngine: SearchEngine | null = null;
@@ -106,46 +101,52 @@ export function initServices(
   const useCache = options.cache ?? true;
 
   const milestoneRepo = new MilestoneRepository(projectDir);
-  taskRepo = new TaskRepository(projectDir);
+  const taskRepo = _set(_repo, "task", new TaskRepository(projectDir));
   const noteRepo = new NoteRepository(projectDir);
   const portfolioRepo = new PortfolioRepository(projectDir);
   const projectRepo = new ProjectRepository(projectDir);
-  peopleRepo = new PeopleRepository(projectDir);
-  milestoneService = new MilestoneService(milestoneRepo, taskRepo);
-  taskService = new TaskService(taskRepo, peopleRepo);
-  peopleService = new PeopleService(peopleRepo);
-  noteService = new NoteService(noteRepo);
-  portfolioService = new PortfolioService(portfolioRepo);
-  projectService = new ProjectService(projectRepo);
+  const peopleRepo = _set(_repo, "people", new PeopleRepository(projectDir));
+
+  const milestoneService = _set(
+    _svc,
+    "milestone",
+    new MilestoneService(milestoneRepo, taskRepo),
+  );
+  const taskService = _set(_svc, "task", new TaskService(taskRepo, peopleRepo));
+  const peopleService = _set(_svc, "people", new PeopleService(peopleRepo));
+  _set(_svc, "note", new NoteService(noteRepo));
+  _set(_svc, "portfolio", new PortfolioService(portfolioRepo));
+  const projectService = _set(_svc, "project", new ProjectService(projectRepo));
+
   const goalRepo = new GoalRepository(projectDir);
-  goalService = new GoalService(goalRepo);
+  _set(_svc, "goal", new GoalService(goalRepo));
   const ideaRepo = new IdeaRepository(projectDir);
-  ideaService = new IdeaService(ideaRepo);
+  _set(_svc, "idea", new IdeaService(ideaRepo));
   const marketingPlanRepo = new MarketingPlanRepository(projectDir);
-  marketingPlanService = new MarketingPlanService(marketingPlanRepo);
+  _set(_svc, "marketingPlan", new MarketingPlanService(marketingPlanRepo));
   const swotRepo = new SwotRepository(projectDir);
-  swotService = new SwotService(swotRepo);
+  _set(_svc, "swot", new SwotService(swotRepo));
   const customerRepo = new CustomerRepository(projectDir);
-  customerService = new CustomerService(customerRepo);
+  _set(_svc, "customer", new CustomerService(customerRepo));
   const billingRateRepo = new BillingRateRepository(projectDir);
-  billingRateService = new BillingRateService(billingRateRepo);
+  _set(_svc, "billingRate", new BillingRateService(billingRateRepo));
   const quoteRepo = new QuoteRepository(projectDir);
-  quoteService = new QuoteService(quoteRepo);
+  _set(_svc, "quote", new QuoteService(quoteRepo));
   const invoiceRepo = new InvoiceRepository(projectDir);
-  invoiceService = new InvoiceService(invoiceRepo);
+  _set(_svc, "invoice", new InvoiceService(invoiceRepo));
   const paymentRepo = new PaymentRepository(projectDir);
-  paymentService = new PaymentService(paymentRepo);
+  _set(_svc, "payment", new PaymentService(paymentRepo));
   const brainstormRepo = new BrainstormRepository(projectDir);
-  brainstormService = new BrainstormService(brainstormRepo);
+  _set(_svc, "brainstorm", new BrainstormService(brainstormRepo));
   const briefRepo = new BriefRepository(projectDir);
-  briefService = new BriefService(briefRepo);
+  _set(_svc, "brief", new BriefService(briefRepo));
   const retrospectiveRepo = new RetrospectiveRepository(projectDir);
-  retrospectiveService = new RetrospectiveService(retrospectiveRepo);
+  _set(_svc, "retrospective", new RetrospectiveService(retrospectiveRepo));
   const leanCanvasRepo = new LeanCanvasRepository(projectDir);
-  leanCanvasService = new LeanCanvasService(leanCanvasRepo);
+  _set(_svc, "leanCanvas", new LeanCanvasService(leanCanvasRepo));
   const dnsRepo = new DnsRepository(projectDir);
-  dnsService = new DnsService(dnsRepo, projectService);
-  githubService = new GitHubService(projectService);
+  _set(_svc, "dns", new DnsService(dnsRepo, projectService));
+  _set(_svc, "github", new GitHubService(projectService));
 
   if (useCache) {
     cacheDb = new CacheDatabase(`${projectDir}/.mdplanner-cache.db`);
@@ -197,7 +198,7 @@ export function initServices(
     milestoneService.setCache(cacheSync);
     taskService.setCache(cacheSync);
     peopleService.setCache(cacheSync);
-    portfolioService.setCache(cacheSync);
+    _get<PortfolioService>(_svc, "portfolio").setCache(cacheSync);
     cacheEnabled = true;
   }
 }
@@ -207,164 +208,95 @@ export function isCacheEnabled(): boolean {
 }
 
 export function getTaskRepository(): TaskRepository {
-  if (!taskRepo) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return taskRepo;
+  return _get<TaskRepository>(_repo, "task");
 }
 
 export function getTaskService(): TaskService {
-  if (!taskService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return taskService;
+  return _get<TaskService>(_svc, "task");
 }
 
 export function getPeopleRepository(): PeopleRepository {
-  if (!peopleRepo) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return peopleRepo;
+  return _get<PeopleRepository>(_repo, "people");
 }
 
 export function getPeopleService(): PeopleService {
-  if (!peopleService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return peopleService;
+  return _get<PeopleService>(_svc, "people");
 }
 
 export function getMilestoneService(): MilestoneService {
-  if (!milestoneService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return milestoneService;
+  return _get<MilestoneService>(_svc, "milestone");
 }
 
 export function getNoteService(): NoteService {
-  if (!noteService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return noteService;
+  return _get<NoteService>(_svc, "note");
 }
 
 export function getPortfolioService(): PortfolioService {
-  if (!portfolioService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return portfolioService;
+  return _get<PortfolioService>(_svc, "portfolio");
 }
 
 export function getProjectService(): ProjectService {
-  if (!projectService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return projectService;
+  return _get<ProjectService>(_svc, "project");
 }
 
 export function getGoalService(): GoalService {
-  if (!goalService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return goalService;
+  return _get<GoalService>(_svc, "goal");
 }
 
 export function getIdeaService(): IdeaService {
-  if (!ideaService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return ideaService;
+  return _get<IdeaService>(_svc, "idea");
 }
 
 export function getMarketingPlanService(): MarketingPlanService {
-  if (!marketingPlanService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return marketingPlanService;
+  return _get<MarketingPlanService>(_svc, "marketingPlan");
 }
 
 export function getSwotService(): SwotService {
-  if (!swotService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return swotService;
+  return _get<SwotService>(_svc, "swot");
 }
 
 export function getCustomerService(): CustomerService {
-  if (!customerService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return customerService;
+  return _get<CustomerService>(_svc, "customer");
 }
 
 export function getBillingRateService(): BillingRateService {
-  if (!billingRateService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return billingRateService;
+  return _get<BillingRateService>(_svc, "billingRate");
 }
 
 export function getQuoteService(): QuoteService {
-  if (!quoteService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return quoteService;
+  return _get<QuoteService>(_svc, "quote");
 }
 
 export function getInvoiceService(): InvoiceService {
-  if (!invoiceService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return invoiceService;
+  return _get<InvoiceService>(_svc, "invoice");
 }
 
 export function getPaymentService(): PaymentService {
-  if (!paymentService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return paymentService;
+  return _get<PaymentService>(_svc, "payment");
 }
 
 export function getBrainstormService(): BrainstormService {
-  if (!brainstormService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return brainstormService;
+  return _get<BrainstormService>(_svc, "brainstorm");
 }
 
 export function getBriefService(): BriefService {
-  if (!briefService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return briefService;
+  return _get<BriefService>(_svc, "brief");
 }
 
 export function getRetrospectiveService(): RetrospectiveService {
-  if (!retrospectiveService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return retrospectiveService;
+  return _get<RetrospectiveService>(_svc, "retrospective");
 }
 
 export function getLeanCanvasService(): LeanCanvasService {
-  if (!leanCanvasService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return leanCanvasService;
+  return _get<LeanCanvasService>(_svc, "leanCanvas");
 }
 
 export function getDnsService(): DnsService {
-  if (!dnsService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return dnsService;
+  return _get<DnsService>(_svc, "dns");
 }
 
 export function getGitHubService(): GitHubService {
-  if (!githubService) {
-    throw new Error("Services not initialized — call initServices() first");
-  }
-  return githubService;
+  return _get<GitHubService>(_svc, "github");
 }
 
 export function getCacheSync(): CacheSync | null {
