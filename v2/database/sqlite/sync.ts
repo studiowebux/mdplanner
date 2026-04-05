@@ -9,7 +9,7 @@
 import { log } from "../../singletons/logger.ts";
 import type { CacheDatabase } from "./database.ts";
 import { dropSchema, initSchema } from "./schema.ts";
-import { ENTITIES } from "./entities.ts";
+import { ENTITIES, json } from "./entities.ts";
 
 export type SyncResult = {
   tables: number;
@@ -48,12 +48,12 @@ export class CacheSync {
     this.setMeta("initialized", new Date().toISOString());
   }
 
-  /** Detect schema mismatch by checking for synced_at column on entity tables. */
+  /** Detect schema mismatch by checking for known columns on entity tables. */
   private schemaNeedsRebuild(): boolean {
     for (const entity of ENTITIES) {
       try {
         this.db.query(
-          `SELECT synced_at FROM "${entity.table}" LIMIT 0`,
+          `SELECT synced_at, created_by FROM "${entity.table}" LIMIT 0`,
         );
       } catch (err) {
         log.warn(`[cache] schema check failed for ${entity.table}:`, err);
@@ -143,7 +143,7 @@ export class CacheSync {
         typeof v === "bigint"
       ) return v as string | number | bigint;
       if (v instanceof Uint8Array) return v;
-      return String(v);
+      return json(v);
     });
     this.db.execute(
       `INSERT OR REPLACE INTO "${table}" (${
