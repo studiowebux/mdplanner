@@ -26,6 +26,8 @@ export class TaskBuilder {
     this.str(fm, "completedAt");
     this.str(fm, "createdAt");
     this.str(fm, "updatedAt");
+    this.str(fm, "createdBy");
+    this.str(fm, "updatedBy");
     this.str(fm, "due_date");
     this.str(fm, "assignee");
     this.str(fm, "milestone");
@@ -62,8 +64,10 @@ export class TaskBuilder {
       });
     }
 
-    if (fm.approvalRequest != null && typeof fm.approvalRequest === "object") {
-      const ar = fm.approvalRequest as Record<string, unknown>;
+    if (
+      fm.approval_request != null && typeof fm.approval_request === "object"
+    ) {
+      const ar = fm.approval_request as Record<string, unknown>;
       this.task.approvalRequest = {
         id: String(ar.id ?? ""),
         requestedAt: String(ar.requestedAt ?? ""),

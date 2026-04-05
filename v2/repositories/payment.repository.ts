@@ -62,7 +62,7 @@ export class PaymentRepository extends CachedMarkdownRepository<
 
     return {
       id,
-      invoiceId: String(fm.invoiceId ?? ""),
+      invoiceId: String(fm.invoice_id ?? ""),
       amount: Number(fm.amount ?? 0),
       date: String(fm.date ?? ""),
       method: fm.method != null
@@ -70,10 +70,14 @@ export class PaymentRepository extends CachedMarkdownRepository<
         : undefined,
       reference: fm.reference != null ? String(fm.reference) : undefined,
       notes,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fm.created_at
+        ? String(fm.created_at)
+        : new Date().toISOString(),
+      updatedAt: fm.updated_at
+        ? String(fm.updated_at)
+        : new Date().toISOString(),
+      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
+      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
     };
   }
 

@@ -3,6 +3,7 @@ id: retro_sprint2
 title: Sprint 2 Retrospective
 date: 2026-02-14
 status: closed
+participants: [Alice Martin, Bob Chen, Carol Singh, Dave Kim]
 ---
 
 # Sprint 2 Retrospective

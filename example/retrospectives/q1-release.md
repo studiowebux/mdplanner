@@ -3,8 +3,9 @@ id: retro_q1_release
 title: Q1 Release Retrospective
 date: 2026-03-31
 status: closed
-createdAt: "2026-03-31T10:00:00.000Z"
-updatedAt: "2026-03-31T10:00:00.000Z"
+participants: [Alice Martin, Bob Chen, Carol Singh, Dave Kim, Eve Torres]
+created_at: "2026-03-31T10:00:00.000Z"
+updated_at: "2026-03-31T10:00:00.000Z"
 ---
 
 # Q1 Release Retrospective

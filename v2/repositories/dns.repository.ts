@@ -111,17 +111,17 @@ export class DnsRepository extends CachedMarkdownRepository<
     return {
       id,
       domain: String(fm.domain),
-      expiryDate: fm.expiryDate != null ? String(fm.expiryDate) : undefined,
-      autoRenew: typeof fm.autoRenew === "boolean" ? fm.autoRenew : undefined,
-      renewalCostUsd: typeof fm.renewalCostUsd === "number"
-        ? fm.renewalCostUsd
+      expiryDate: fm.expiry_date != null ? String(fm.expiry_date) : undefined,
+      autoRenew: typeof fm.auto_renew === "boolean" ? fm.auto_renew : undefined,
+      renewalCostUsd: typeof fm.renewal_costUsd === "number"
+        ? fm.renewal_costUsd
         : undefined,
       provider: fm.provider != null ? String(fm.provider) : undefined,
       nameservers: Array.isArray(fm.nameservers)
         ? fm.nameservers.map(String)
         : undefined,
-      dnsRecords: Array.isArray(fm.dnsRecords)
-        ? (fm.dnsRecords as Record<string, unknown>[]).map((r) => ({
+      dnsRecords: Array.isArray(fm.dns_records)
+        ? (fm.dns_records as Record<string, unknown>[]).map((r) => ({
           type: String(r.type),
           name: String(r.name),
           value: String(r.value),
@@ -130,8 +130,8 @@ export class DnsRepository extends CachedMarkdownRepository<
         }))
         : undefined,
       status: fm.status != null ? String(fm.status) : undefined,
-      lastFetchedAt: fm.lastFetchedAt != null
-        ? String(fm.lastFetchedAt)
+      lastFetchedAt: fm.last_fetchedAt != null
+        ? String(fm.last_fetchedAt)
         : undefined,
       project: fm.project != null ? String(fm.project) : undefined,
       notes: body.trim() || undefined,

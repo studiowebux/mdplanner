@@ -73,8 +73,8 @@ export class InvoiceRepository extends CachedMarkdownRepository<
       notes = bodyText || undefined;
     }
 
-    const rawItems = Array.isArray(fm.lineItems)
-      ? mapArrayFromFm(fm.lineItems as unknown[])
+    const rawItems = Array.isArray(fm.line_items)
+      ? mapArrayFromFm(fm.line_items as unknown[])
       : [];
     const lineItems: LineItem[] = rawItems.map((li) => ({
       id: String(li.id ?? ""),
@@ -97,29 +97,33 @@ export class InvoiceRepository extends CachedMarkdownRepository<
     return {
       id,
       number: String(fm.number ?? ""),
-      customerId: String(fm.customerId ?? ""),
-      quoteId: fm.quoteId != null ? String(fm.quoteId) : undefined,
+      customerId: String(fm.customer_id ?? ""),
+      quoteId: fm.quote_id != null ? String(fm.quote_id) : undefined,
       title,
       status: (fm.status as Invoice["status"]) ?? "draft",
       currency: fm.currency != null ? String(fm.currency) : undefined,
-      dueDate: fm.dueDate != null ? String(fm.dueDate) : undefined,
-      paymentTerms: fm.paymentTerms != null
-        ? String(fm.paymentTerms)
+      dueDate: fm.due_date != null ? String(fm.due_date) : undefined,
+      paymentTerms: fm.payment_terms != null
+        ? String(fm.payment_terms)
         : undefined,
       lineItems,
       subtotal: Number(fm.subtotal ?? 0),
       tax: fm.tax != null ? Number(fm.tax) : undefined,
-      taxRate: fm.taxRate != null ? Number(fm.taxRate) : undefined,
+      taxRate: fm.tax_rate != null ? Number(fm.tax_rate) : undefined,
       total: Number(fm.total ?? 0),
-      paidAmount: Number(fm.paidAmount ?? 0),
+      paidAmount: Number(fm.paid_amount ?? 0),
       notes,
       footer: fm.footer != null ? String(fm.footer) : undefined,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      sentAt: fm.sentAt != null ? String(fm.sentAt) : undefined,
-      paidAt: fm.paidAt != null ? String(fm.paidAt) : undefined,
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fm.created_at
+        ? String(fm.created_at)
+        : new Date().toISOString(),
+      updatedAt: fm.updated_at
+        ? String(fm.updated_at)
+        : new Date().toISOString(),
+      sentAt: fm.sent_at != null ? String(fm.sent_at) : undefined,
+      paidAt: fm.paid_at != null ? String(fm.paid_at) : undefined,
+      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
+      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
     };
   }
 

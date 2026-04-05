@@ -68,8 +68,8 @@ export class CustomerRepository extends CachedMarkdownRepository<
     }
 
     let billingAddress: BillingAddress | undefined;
-    if (fm.billingAddress && typeof fm.billingAddress === "object") {
-      const a = fm.billingAddress as Record<string, unknown>;
+    if (fm.billing_address && typeof fm.billing_address === "object") {
+      const a = fm.billing_address as Record<string, unknown>;
       billingAddress = {
         street: a.street != null ? String(a.street) : undefined,
         city: a.city != null ? String(a.city) : undefined,
@@ -87,10 +87,14 @@ export class CustomerRepository extends CachedMarkdownRepository<
       company: fm.company != null ? String(fm.company) : undefined,
       billingAddress,
       notes,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fm.created_at
+        ? String(fm.created_at)
+        : new Date().toISOString(),
+      updatedAt: fm.updated_at
+        ? String(fm.updated_at)
+        : new Date().toISOString(),
+      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
+      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
     };
   }
 

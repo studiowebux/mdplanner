@@ -2,6 +2,8 @@
 // Called by initServices() after repos are created.
 
 import {
+  auditCols,
+  auditVals,
   ENTITIES,
   jsonVal,
   parseJson,
@@ -25,6 +27,7 @@ export function rowToRetrospective(
     continue: parseJson<string[]>(row.continue_items) ?? [],
     stop: parseJson<string[]>(row.stop_items) ?? [],
     start: parseJson<string[]>(row.start_items) ?? [],
+    participants: parseJson<string[]>(row.participants_json) ?? [],
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -38,6 +41,7 @@ function sectionsToText(r: Retrospective): string {
     ...r.continue,
     ...r.stop,
     ...r.start,
+    ...r.participants,
   ].join(" ");
 }
 
@@ -50,6 +54,7 @@ const RETROSPECTIVE_SCHEMA =
   continue_items TEXT,
   stop_items TEXT,
   start_items TEXT,
+  participants_json TEXT,
   sections_text TEXT,
   created_at TEXT,
   updated_at TEXT,
@@ -65,9 +70,9 @@ function insertRetrospectiveRow(
 ): void {
   db.execute(
     `INSERT OR REPLACE INTO ${RETROSPECTIVE_TABLE} (id, title, date, status,
-       continue_items, stop_items, start_items, sections_text,
-       created_at, updated_at, created_by, updated_by, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       continue_items, stop_items, start_items, participants_json, sections_text,
+       ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(r.id),
       val(r.title),
@@ -76,11 +81,9 @@ function insertRetrospectiveRow(
       jsonVal(r.continue),
       jsonVal(r.stop),
       jsonVal(r.start),
+      jsonVal(r.participants),
       sectionsToText(r),
-      val(r.createdAt),
-      val(r.updatedAt),
-      val(r.createdBy),
-      val(r.updatedBy),
+      ...auditVals(r),
       syncedAt ?? new Date().toISOString(),
     ],
   );

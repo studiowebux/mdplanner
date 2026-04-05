@@ -71,20 +71,24 @@ export class BrainstormRepository extends CachedMarkdownRepository<
       tags: Array.isArray(fm.tags)
         ? (fm.tags as unknown[]).map(String)
         : undefined,
-      linkedProjects: Array.isArray(fm.linkedProjects)
-        ? (fm.linkedProjects as unknown[]).map(String)
+      linkedProjects: Array.isArray(fm.linked_projects)
+        ? (fm.linked_projects as unknown[]).map(String)
         : undefined,
-      linkedTasks: Array.isArray(fm.linkedTasks)
-        ? (fm.linkedTasks as unknown[]).map(String)
+      linkedTasks: Array.isArray(fm.linked_tasks)
+        ? (fm.linked_tasks as unknown[]).map(String)
         : undefined,
-      linkedGoals: Array.isArray(fm.linkedGoals)
-        ? (fm.linkedGoals as unknown[]).map(String)
+      linkedGoals: Array.isArray(fm.linked_goals)
+        ? (fm.linked_goals as unknown[]).map(String)
         : undefined,
       questions,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fm.created_at
+        ? String(fm.created_at)
+        : new Date().toISOString(),
+      updatedAt: fm.updated_at
+        ? String(fm.updated_at)
+        : new Date().toISOString(),
+      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
+      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
     };
   }
 

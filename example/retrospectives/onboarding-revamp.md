@@ -3,8 +3,9 @@ id: retro_onboarding_revamp
 title: Onboarding Revamp Retrospective
 date: 2026-02-28
 status: closed
-createdAt: "2026-02-28T14:00:00.000Z"
-updatedAt: "2026-02-28T14:00:00.000Z"
+participants: [Alice Martin, Bob Chen, Carol Singh, Dave Kim]
+created_at: "2026-02-28T14:00:00.000Z"
+updated_at: "2026-02-28T14:00:00.000Z"
 ---
 
 # Onboarding Revamp Retrospective

@@ -36,6 +36,9 @@ export const RetrospectiveSchema = z.object({
   start: stringArray.openapi({
     description: "Things to start doing (actions)",
   }),
+  participants: stringArray.openapi({
+    description: "People who attended the retrospective",
+  }),
 }).merge(AuditFieldsSchema).openapi("Retrospective");
 
 export type Retrospective = z.infer<typeof RetrospectiveSchema>;
@@ -76,13 +79,15 @@ export const CreateRetrospectiveSchema = RetrospectiveSchema.pick({
   continue: true,
   stop: true,
   start: true,
+  participants: true,
 }).partial({
   date: true,
   status: true,
   continue: true,
   stop: true,
   start: true,
-}).openapi("CreateRetrospective");
+  participants: true,
+}).merge(AuditFieldsSchema.partial()).openapi("CreateRetrospective");
 
 export type CreateRetrospective = z.infer<typeof CreateRetrospectiveSchema>;
 

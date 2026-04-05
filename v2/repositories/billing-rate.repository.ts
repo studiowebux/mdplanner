@@ -76,12 +76,16 @@ export class BillingRateRepository extends CachedMarkdownRepository<
       rate: fm.rate != null ? Number(fm.rate) : 0,
       currency: fm.currency != null ? String(fm.currency) : undefined,
       assignee: fm.assignee != null ? String(fm.assignee) : undefined,
-      isDefault: fm.isDefault != null ? Boolean(fm.isDefault) : undefined,
+      isDefault: fm.is_default != null ? Boolean(fm.is_default) : undefined,
       notes,
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      createdAt: fm.created_at
+        ? String(fm.created_at)
+        : new Date().toISOString(),
+      updatedAt: fm.updated_at
+        ? String(fm.updated_at)
+        : new Date().toISOString(),
+      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
+      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
     };
   }
 

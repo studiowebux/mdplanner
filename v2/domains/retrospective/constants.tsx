@@ -121,6 +121,12 @@ export const RETROSPECTIVE_FORM_FIELDS: FieldDef[] = [
     label: "Start (Actions)",
     rows: 4,
   },
+  {
+    type: "textarea",
+    name: "participants",
+    label: "Participants (one per line)",
+    rows: 3,
+  },
 ];
 
 // ---------------------------------------------------------------------------

@@ -77,6 +77,16 @@ export const RetrospectiveDetailView: FC<
           </div>
         )}
 
+        {/* -- Participants --------------------------------------------- */}
+        {retro.participants.length > 0 && (
+          <div class="detail-section retro-detail__participants">
+            <h3 class="retro-detail__participants-label">Participants</h3>
+            <ul class="retro-detail__participants-list">
+              {retro.participants.map((p, i) => <li key={i}>{p}</li>)}
+            </ul>
+          </div>
+        )}
+
         {/* -- Sections -------------------------------------------------- */}
         <div class="retro-detail__grid">
           {RETROSPECTIVE_SECTIONS.map((s) => (

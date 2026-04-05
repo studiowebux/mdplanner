@@ -3,6 +3,7 @@ id: retro_sprint1
 title: Sprint 1 Retrospective
 date: 2026-01-31
 status: closed
+participants: [Alice Martin, Bob Chen, Carol Singh]
 ---
 
 # Sprint 1 Retrospective

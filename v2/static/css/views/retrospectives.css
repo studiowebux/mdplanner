@@ -13,6 +13,41 @@
   flex-wrap: wrap;
 }
 
+/* -- Participants --------------------------------------------------------- */
+
+.retro-detail__participants {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.retro-detail__participants-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  white-space: nowrap;
+}
+
+.retro-detail__participants-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.retro-detail__participants-list li {
+  font-size: var(--font-size-sm);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  padding: var(--space-2xs) var(--space-sm);
+  color: var(--color-text-primary);
+}
+
 /* -- Sections grid -------------------------------------------------------- */
 
 .retro-detail__grid {

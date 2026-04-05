@@ -46,6 +46,7 @@ export class RetrospectiveRepository extends CachedMarkdownRepository<
       continue: data.continue ?? [],
       stop: data.stop ?? [],
       start: data.start ?? [],
+      participants: data.participants ?? [],
       createdAt: now,
       updatedAt: now,
     };
@@ -79,10 +80,17 @@ export class RetrospectiveRepository extends CachedMarkdownRepository<
       continue: sections.continue ?? [],
       stop: sections.stop ?? [],
       start: sections.start ?? [],
-      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
-      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
-      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
-      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      participants: Array.isArray(fm.participants)
+        ? fm.participants.map(String).filter(Boolean)
+        : [],
+      createdAt: fm.created_at
+        ? String(fm.created_at)
+        : new Date().toISOString(),
+      updatedAt: fm.updated_at
+        ? String(fm.updated_at)
+        : new Date().toISOString(),
+      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
+      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
     };
   }
 
