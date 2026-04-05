@@ -70,6 +70,13 @@ export const InvoiceDetailView: FC<
                 Send
               </button>
             )}
+            <button
+              class="btn btn--secondary btn--sm invoice-detail__print-btn"
+              type="button"
+              onclick="window.print()"
+            >
+              Print / Save as PDF
+            </button>
           </div>
         </header>
 
