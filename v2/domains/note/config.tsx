@@ -44,6 +44,7 @@ export const noteConfig: DomainConfig<Note, CreateNote, UpdateNote> = {
     "/js/note-tabs.js",
   ],
   defaultView: "table",
+  pageSize: 50,
   emptyMessage: "No notes yet. Create one to get started.",
 
   stateKeys: ["view", "project", "q", "sort", "order"],

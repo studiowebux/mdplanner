@@ -23,10 +23,12 @@ type Props = {
   rows: Record<string, unknown>[];
   rowId?: string;
   sort?: SortConfig;
+  /** Extra content appended inside <tbody> — used for load-more sentinels. */
+  tbodyFooter?: unknown;
 };
 
 export const DataTable: FC<Props> = (
-  { id, domain, compact, columns, rows, rowId = "id", sort },
+  { id, domain, compact, columns, rows, rowId = "id", sort, tbodyFooter },
 ) => (
   <div class="data-table-wrapper">
     <table
@@ -88,6 +90,7 @@ export const DataTable: FC<Props> = (
             ))}
           </tr>
         ))}
+        {tbodyFooter}
       </tbody>
     </table>
   </div>

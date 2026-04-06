@@ -13,8 +13,11 @@ import type {
   DynamicFilterOptions,
   Entity,
 } from "./domain.types.ts";
-import { createDomainPage } from "./domain-view.tsx";
-import { createDomainForm } from "./domain-view.tsx";
+import {
+  createDomainForm,
+  createDomainPage,
+  createMoreFragment,
+} from "./domain-view.tsx";
 
 export function createDomainRoutes<T extends Entity, C, U>(
   cfg: DomainConfig<T, C, U>,
@@ -190,19 +193,26 @@ export function createDomainRoutes<T extends Entity, C, U>(
     const all = await cfg.getService().list();
     const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
     const filtered = applyFilters(all, state, dynamicFilterOptions);
+    const pageSize = cfg.pageSize;
+    const items = pageSize ? filtered.slice(0, pageSize) : filtered;
+    const hasMore = !!pageSize && filtered.length > pageSize;
+    const nextOffset = pageSize ?? 0;
     const customContent = extraKeys.has(state.view) && cfg.customViewRenderer
       ? await cfg.customViewRenderer(
         state.view,
         state,
-        filtered,
+        items,
         c.get("nonce"),
       )
       : undefined;
     return c.html(
       DomainPage({
         ...viewProps(c, cfg.path),
-        items: filtered,
+        items,
         totalCount: all.length,
+        filteredCount: filtered.length,
+        hasMore,
+        nextOffset,
         state,
         dynamicFilterOptions,
         customContent,
@@ -216,18 +226,25 @@ export function createDomainRoutes<T extends Entity, C, U>(
     const all = await cfg.getService().list();
     const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
     const filtered = applyFilters(all, state, dynamicFilterOptions);
+    const pageSize = cfg.pageSize;
+    const items = pageSize ? filtered.slice(0, pageSize) : filtered;
+    const hasMore = !!pageSize && filtered.length > pageSize;
+    const nextOffset = pageSize ?? 0;
     const customContent = extraKeys.has(state.view) && cfg.customViewRenderer
       ? await cfg.customViewRenderer(
         state.view,
         state,
-        filtered,
+        items,
         c.get("nonce"),
       )
       : undefined;
     return c.html(
       DomainViewContainer({
-        items: filtered,
+        items,
         totalCount: all.length,
+        filteredCount: filtered.length,
+        hasMore,
+        nextOffset,
         state,
         fragment: true,
         customContent,
@@ -236,6 +253,37 @@ export function createDomainRoutes<T extends Entity, C, U>(
       { "HX-Replace-Url": buildCanonicalUrl(state) },
     );
   });
+
+  // ---------------------------------------------------------------------------
+  // Pagination — load next page of items (table rows or grid cards)
+  // ---------------------------------------------------------------------------
+
+  if (cfg.pageSize) {
+    const MoreFragment = createMoreFragment(cfg);
+
+    router.get("/more", async (c) => {
+      const pageSize = cfg.pageSize!;
+      const offset = parseInt(c.req.query("offset") ?? "0", 10);
+      const state = c.get("filterState" as never) as DomainFilterState;
+      const all = await cfg.getService().list();
+      const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
+      const filtered = applyFilters(all, state, dynamicFilterOptions);
+      const slice = filtered.slice(offset, offset + pageSize);
+      const hasMore = filtered.length > offset + pageSize;
+      const nextOffset = offset + pageSize;
+      const view = state.view === "table" ? "table" : "grid";
+
+      return c.html(
+        MoreFragment({
+          items: slice,
+          state,
+          hasMore,
+          nextOffset,
+          view,
+        }) as unknown as string,
+      );
+    });
+  }
 
   // ---------------------------------------------------------------------------
   // Form routes

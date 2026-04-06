@@ -1831,3 +1831,32 @@ a.badge:hover {
 .mention--commit:hover {
   color: var(--color-text-primary);
 }
+
+/* =========================================================================
+   Load more sentinel — infinite scroll trigger (htmx revealed)
+   ========================================================================= */
+
+/* <tr> sentinel inside <tbody> */
+tr.load-more-sentinel {
+  background: transparent;
+}
+
+.load-more-sentinel__cell {
+  text-align: center;
+  padding: var(--space-md);
+  color: var(--color-text-muted);
+}
+
+.load-more-sentinel__text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* <div> sentinel below card grid */
+div.load-more-sentinel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-md);
+  width: 100%;
+}
