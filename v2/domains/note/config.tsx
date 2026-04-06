@@ -45,9 +45,10 @@ export const noteConfig: DomainConfig<Note, CreateNote, UpdateNote> = {
   ],
   defaultView: "table",
   pageSize: 50,
+  pageSizeOptions: [5, 10, 20, 50, 100],
   emptyMessage: "No notes yet. Create one to get started.",
 
-  stateKeys: ["view", "project", "q", "sort", "order"],
+  stateKeys: ["view", "project", "q", "sort", "order", "limit"],
   columns: NOTE_TABLE_COLUMNS,
   formFields: FORM_FIELDS,
 

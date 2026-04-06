@@ -551,6 +551,28 @@ export function createDomainPage<T extends Entity>(
           </div>
           <div class="domain-toolbar__right">
             {cfg.toolbarActions && <cfg.toolbarActions />}
+            {cfg.pageSizeOptions && (
+              <select
+                class="filter-bar__select"
+                name="limit"
+                hx-get={`/${cfg.name}/view`}
+                hx-trigger="change"
+                hx-target={`#${cfg.name}-view`}
+                hx-swap="outerHTML"
+                hx-include={`#${cfg.name}-toolbar`}
+              >
+                {cfg.pageSizeOptions.map((n) => (
+                  <option
+                    key={String(n)}
+                    value={String(n)}
+                    selected={String(state[`limit`] ?? cfg.pageSize) ===
+                      String(n)}
+                  >
+                    {n} / page
+                  </option>
+                ))}
+              </select>
+            )}
             <div id={`${cfg.name}-column-toggle-wrapper`}>
               <ColumnToggle
                 domain={cfg.name}

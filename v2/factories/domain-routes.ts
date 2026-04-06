@@ -193,7 +193,9 @@ export function createDomainRoutes<T extends Entity, C, U>(
     const all = await cfg.getService().list();
     const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
     const filtered = applyFilters(all, state, dynamicFilterOptions);
-    const pageSize = cfg.pageSize;
+    const pageSize = state.limit
+      ? parseInt(String(state.limit), 10)
+      : cfg.pageSize;
     const items = pageSize ? filtered.slice(0, pageSize) : filtered;
     const hasMore = !!pageSize && filtered.length > pageSize;
     const nextOffset = pageSize ?? 0;
@@ -226,7 +228,9 @@ export function createDomainRoutes<T extends Entity, C, U>(
     const all = await cfg.getService().list();
     const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
     const filtered = applyFilters(all, state, dynamicFilterOptions);
-    const pageSize = cfg.pageSize;
+    const pageSize = state.limit
+      ? parseInt(String(state.limit), 10)
+      : cfg.pageSize;
     const items = pageSize ? filtered.slice(0, pageSize) : filtered;
     const hasMore = !!pageSize && filtered.length > pageSize;
     const nextOffset = pageSize ?? 0;
@@ -262,9 +266,11 @@ export function createDomainRoutes<T extends Entity, C, U>(
     const MoreFragment = createMoreFragment(cfg);
 
     router.get("/more", async (c) => {
-      const pageSize = cfg.pageSize!;
       const offset = parseInt(c.req.query("offset") ?? "0", 10);
       const state = c.get("filterState" as never) as DomainFilterState;
+      const pageSize = state.limit
+        ? parseInt(String(state.limit), 10)
+        : cfg.pageSize!;
       const all = await cfg.getService().list();
       const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
       const filtered = applyFilters(all, state, dynamicFilterOptions);

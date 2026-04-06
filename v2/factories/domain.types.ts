@@ -112,6 +112,10 @@ export type DomainConfig<T extends Entity, C, U> = {
    *  scrolling past the sentinel loads the next page via /more?offset=N. */
   pageSize?: number;
 
+  /** When set, renders a per-page <select> in the toolbar with these options.
+   *  The user-selected value is stored in the `limit` state key and overrides pageSize. */
+  pageSizeOptions?: number[];
+
   // Optional: extra view modes beyond grid/table (e.g. "org" for org chart).
   // Rendered as additional toggle buttons. The factory calls customViewRenderer
   // when the view mode matches an extra key.
