@@ -66,6 +66,9 @@ import { registerRetrospectiveEntity } from "../domains/retrospective/cache.ts";
 import { LeanCanvasRepository } from "../repositories/lean-canvas.repository.ts";
 import { LeanCanvasService } from "../services/lean-canvas.service.ts";
 import { registerLeanCanvasEntity } from "../domains/lean-canvas/cache.ts";
+import { StickyNoteRepository } from "../repositories/sticky-note.repository.ts";
+import { StickyNoteService } from "../services/sticky-note.service.ts";
+import { registerStickyNoteEntity } from "../domains/sticky-note/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -144,6 +147,8 @@ export function initServices(
   _set(_svc, "retrospective", new RetrospectiveService(retrospectiveRepo));
   const leanCanvasRepo = new LeanCanvasRepository(projectDir);
   _set(_svc, "leanCanvas", new LeanCanvasService(leanCanvasRepo));
+  const stickyNoteRepo = new StickyNoteRepository(projectDir);
+  _set(_svc, "stickyNote", new StickyNoteService(stickyNoteRepo));
   const dnsRepo = new DnsRepository(projectDir);
   _set(_svc, "dns", new DnsService(dnsRepo, projectService));
   _set(_svc, "github", new GitHubService(projectService));
@@ -171,6 +176,7 @@ export function initServices(
     registerBriefEntity(briefRepo);
     registerRetrospectiveEntity(retrospectiveRepo);
     registerLeanCanvasEntity(leanCanvasRepo);
+    registerStickyNoteEntity(stickyNoteRepo);
 
     // Pass cacheDb to repos for read-path caching
     milestoneRepo.setCacheDb(cacheDb);
@@ -191,6 +197,7 @@ export function initServices(
     briefRepo.setCacheDb(cacheDb);
     retrospectiveRepo.setCacheDb(cacheDb);
     leanCanvasRepo.setCacheDb(cacheDb);
+    stickyNoteRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -289,6 +296,10 @@ export function getRetrospectiveService(): RetrospectiveService {
 
 export function getLeanCanvasService(): LeanCanvasService {
   return _get<LeanCanvasService>(_svc, "leanCanvas");
+}
+
+export function getStickyNoteService(): StickyNoteService {
+  return _get<StickyNoteService>(_svc, "stickyNote");
 }
 
 export function getDnsService(): DnsService {

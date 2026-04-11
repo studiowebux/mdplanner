@@ -20,6 +20,7 @@ import { peopleRouter } from "./v1/people/routes.ts";
 import { portfolioRouter } from "./v1/portfolio/routes.ts";
 import { settingsRouter } from "./v1/settings/routes.ts";
 import { tasksRouter } from "./v1/tasks/routes.ts";
+import { stickyNotesRouter } from "./v1/sticky-notes/routes.ts";
 import { APP_NAME, APP_VERSION } from "../constants/mod.ts";
 
 const v1 = new OpenAPIHono();
@@ -43,6 +44,7 @@ v1.route("/people", peopleRouter);
 v1.route("/portfolio", portfolioRouter);
 v1.route("/settings", settingsRouter);
 v1.route("/tasks", tasksRouter);
+v1.route("/sticky-notes", stickyNotesRouter);
 
 v1.doc("/doc", {
   openapi: "3.1.0",

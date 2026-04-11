@@ -45,6 +45,8 @@ export type EntityDef = {
   /** Present = FTS enabled; absent = cached only */
   fts?: FTSConfig;
   sync: TableSyncer;
+  /** Called after a successful sync for this table — repos use this to clear their listDirty flag. */
+  onSyncComplete?: () => void;
 };
 
 // ============================================================
