@@ -628,6 +628,17 @@
       else if (isPanning) panEnd();
     });
 
+    // If the mouse leaves the window mid-gesture (e.g. moved to another browser),
+    // mouseup never fires here — force-end any active gesture so isInteracting
+    // doesn't stay permanently true and block all future SSE swaps.
+    function forceEndGesture() {
+      if (isDragging) dragEnd();
+      else if (isResizing) resizeEnd();
+      else if (isPanning) panEnd();
+    }
+    document.addEventListener("mouseleave", forceEndGesture);
+    window.addEventListener("blur", forceEndGesture);
+
     // ── Ctrl/Cmd+scroll to zoom ─────────────────────────────────────────
 
     document.addEventListener("wheel", function (e) {
