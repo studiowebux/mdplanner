@@ -712,9 +712,10 @@
     // on the element with sse-connect (<main>). Parse the JSON data payload
     // and move/resize the matching note directly — no flash, no full refresh.
 
-    document.addEventListener("sticky_note.moved", function (e) {
+    document.addEventListener("htmx:sseMessage", function (e) {
       if (!isOnCanvas()) return;
-      var raw = e.detail && e.detail.data;
+      if (!e.detail || e.detail.type !== "sticky_note.moved") return;
+      var raw = e.detail.data;
       if (!raw) return;
       var data;
       try {
