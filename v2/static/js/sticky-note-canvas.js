@@ -503,6 +503,15 @@
         fitToScreen();
         return;
       }
+      if (e.target.closest("[data-canvas-add]")) {
+        var viewport = vp();
+        if (!viewport) return;
+        var rect = viewport.getBoundingClientRect();
+        var cx = (rect.width / 2 - panX) / zoom - NOTE_DEFAULT_W / 2;
+        var cy = (rect.height / 2 - panY) / zoom - NOTE_DEFAULT_H / 2;
+        createNoteAt(cx, cy);
+        return;
+      }
 
       var dot = e.target.closest("[data-sticky-color]");
       if (dot) {

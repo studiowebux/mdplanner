@@ -105,7 +105,7 @@ export const StickyNoteCanvas: FC<Props> = ({ notes }) => {
         <button
           type="button"
           class="btn btn--sm btn--primary"
-          data-sidenav-open="sticky-notes-form-container"
+          data-canvas-add
           title="Add sticky note"
         >
           + Add note
