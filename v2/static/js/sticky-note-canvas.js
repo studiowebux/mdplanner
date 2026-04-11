@@ -707,6 +707,47 @@
       pinchStartDist = 0;
     });
 
+    // ── sticky_note.moved — apply geometry in-place, no DOM swap ────────
+    // htmx SSE ext dispatches a CustomEvent named after the SSE event type
+    // on the element with sse-connect (<main>). Parse the JSON data payload
+    // and move/resize the matching note directly — no flash, no full refresh.
+
+    document.addEventListener("sticky_note.moved", function (e) {
+      if (!isOnCanvas()) return;
+      var raw = e.detail && e.detail.data;
+      if (!raw) return;
+      var data;
+      try {
+        data = JSON.parse(raw);
+      } catch (_) {
+        return;
+      }
+      var noteEl = document.querySelector(
+        "[data-canvas-note][data-sticky-id='" + data.id + "']",
+      );
+      if (!noteEl) return;
+      // Skip if this is the note currently being dragged/resized locally
+      if (noteEl === dragNote || noteEl === resizeNote) return;
+      if (data.x !== undefined && data.y !== undefined) {
+        noteEl.style.setProperty("left", data.x + "px");
+        noteEl.style.setProperty("top", data.y + "px");
+        noteEl.setAttribute("data-sticky-x", String(data.x));
+        noteEl.setAttribute("data-sticky-y", String(data.y));
+        noteGeometry[data.id] = noteGeometry[data.id] || {};
+        noteGeometry[data.id].x = data.x;
+        noteGeometry[data.id].y = data.y;
+      }
+      if (data.width !== undefined && data.height !== undefined) {
+        noteEl.style.setProperty("width", data.width + "px");
+        noteEl.style.setProperty("height", data.height + "px");
+        noteEl.setAttribute("data-sticky-w", String(data.width));
+        noteEl.setAttribute("data-sticky-h", String(data.height));
+        noteGeometry[data.id] = noteGeometry[data.id] || {};
+        noteGeometry[data.id].w = data.width;
+        noteGeometry[data.id].h = data.height;
+      }
+    });
+
     // ── Block htmx SSE swap during active gesture ───────────────────────
 
     document.addEventListener("htmx:beforeSwap", function (e) {

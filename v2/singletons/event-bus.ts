@@ -18,8 +18,9 @@ export function subscribe(): ReadableStream<string> {
   });
 }
 
-export function publish(type: string): void {
-  const message = `event: ${type}\ndata: \n\n`;
+export function publish(type: string, data?: unknown): void {
+  const payload = data !== undefined ? JSON.stringify(data) : "";
+  const message = `event: ${type}\ndata: ${payload}\n\n`;
   for (const ctrl of subscribers) {
     try {
       ctrl.enqueue(message);
