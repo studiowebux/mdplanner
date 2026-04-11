@@ -1,7 +1,6 @@
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import type { StickyNote } from "../../types/sticky-note.types.ts";
-import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { formatDate } from "../../utils/time.ts";
 
 // ---------------------------------------------------------------------------
@@ -28,10 +27,30 @@ export const STICKY_NOTE_COLOR_OPTIONS = STICKY_NOTE_COLORS.map((c) => ({
 // Table
 // ---------------------------------------------------------------------------
 
-const actionBtns = createActionBtns(
-  "sticky-notes",
-  "sticky-notes-form-container",
-);
+function actionBtns(_value: unknown, row: Record<string, unknown>) {
+  return (
+    <div class="domain-card__actions">
+      <button
+        class="btn btn--secondary btn--sm"
+        type="button"
+        hx-get={`/sticky-notes/${row.id}/edit`}
+        hx-target="#sticky-notes-form-container"
+        hx-swap="innerHTML"
+      >
+        Edit
+      </button>
+      <button
+        class="btn btn--danger btn--sm"
+        type="button"
+        hx-delete={`/sticky-notes/${row.id}`}
+        hx-confirm={`Delete this note? This cannot be undone.`}
+        hx-swap="none"
+      >
+        Delete
+      </button>
+    </div>
+  );
+}
 
 export const STICKY_NOTE_TABLE_COLUMNS: ColumnDef[] = [
   {
