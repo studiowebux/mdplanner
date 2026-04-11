@@ -158,7 +158,7 @@ stickyNotesRouter.openapi(updatePositionRoute, async (c) => {
   const position = c.req.valid("json");
   const note = await getStickyNoteService().updatePosition(id, position);
   if (!note) return c.json(notFound("STICKY_NOTE", id), 404);
-  // No SSE — JS owns canvas layout; position updates are optimistic client-side
+  publish("sticky_note.updated");
   return c.json(note, 200);
 });
 
@@ -193,7 +193,7 @@ stickyNotesRouter.openapi(updateSizeRoute, async (c) => {
   const size = c.req.valid("json");
   const note = await getStickyNoteService().updateSize(id, size);
   if (!note) return c.json(notFound("STICKY_NOTE", id), 404);
-  // No SSE — JS owns canvas layout; size updates are optimistic client-side
+  publish("sticky_note.updated");
   return c.json(note, 200);
 });
 
