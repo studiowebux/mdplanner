@@ -14,6 +14,11 @@ export abstract class CachedMarkdownRepository<
 > extends BaseMarkdownRepository<T, C, U> {
   protected cacheDb: CacheDatabase | null = null;
 
+  // Set after any mutation; cleared after a successful fullSync.
+  // findAll skips the SQLite cache while dirty so mutations are immediately
+  // visible on the next read without wiping the table (findById still hits cache).
+  private listDirty = false;
+
   /** SQLite table name for this entity. */
   protected abstract readonly tableName: string;
 
@@ -33,8 +38,13 @@ export abstract class CachedMarkdownRepository<
     return super.findAll();
   }
 
+  /** Called by fullSync after repopulating the table — re-enables list cache. */
+  markClean(): void {
+    this.listDirty = false;
+  }
+
   override async findAll(): Promise<T[]> {
-    if (this.cacheDb) {
+    if (this.cacheDb && !this.listDirty) {
       try {
         const count = this.cacheDb.count(this.tableName);
         if (count > 0) {
@@ -72,23 +82,28 @@ export abstract class CachedMarkdownRepository<
 
   override async create(data: C): Promise<T> {
     const item = await super.create(data);
-    this.cacheRemove(item.id);
+    this.listDirty = true;
     return item;
   }
 
   override async update(id: string, data: U): Promise<T | null> {
     const updated = await super.update(id, data);
-    if (updated) this.cacheRemove(updated.id);
+    if (updated) this.listDirty = true;
     return updated;
   }
 
   override async delete(id: string): Promise<boolean> {
     const deleted = await super.delete(id);
-    if (deleted) this.cacheRemove(id);
+    if (deleted) {
+      this.listDirty = true;
+      this.cacheRemoveRow(id);
+    }
     return deleted;
   }
 
-  private cacheRemove(id: string): void {
+  // Remove a single row after delete — the row is genuinely gone, so this
+  // is safe. findById will fall through to disk for the deleted id.
+  private cacheRemoveRow(id: string): void {
     if (!this.cacheDb) return;
     try {
       this.cacheDb.execute(

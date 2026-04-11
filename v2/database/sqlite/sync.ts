@@ -128,7 +128,9 @@ export class CacheSync {
     if (!entity) {
       throw new Error(`Unknown table: ${table}`);
     }
-    return entity.sync(this.db, syncedAt);
+    const count = await entity.sync(this.db, syncedAt);
+    entity.onSyncComplete?.();
+    return count;
   }
 
   upsert(table: string, record: Record<string, unknown>): void {

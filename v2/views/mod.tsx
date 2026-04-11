@@ -30,6 +30,7 @@ import { brainstormsRouter } from "./brainstorms/routes.tsx";
 import { briefsRouter } from "./briefs/routes.tsx";
 import { retrospectivesRouter } from "./retrospectives/routes.tsx";
 import { leanCanvasesRouter } from "./lean-canvases/routes.tsx";
+import { stickyNotesRouter } from "./sticky-notes/routes.tsx";
 import {
   getArrayTableSection,
   registerArrayTableSection,
@@ -297,6 +298,7 @@ views.route("/brainstorms", brainstormsRouter);
 views.route("/briefs", briefsRouter);
 views.route("/retrospectives", retrospectivesRouter);
 views.route("/lean-canvases", leanCanvasesRouter);
+views.route("/sticky-notes", stickyNotesRouter);
 views.route("/autocomplete", autocompleteRouter);
 views.route("/sidebar", sidebarRouter);
 
