@@ -764,6 +764,7 @@
     restoreState();
     checkEmpty();
     wire();
+    window.addEventListener("resize", sizeCanvas);
   }
 
   if (document.readyState === "loading") {
