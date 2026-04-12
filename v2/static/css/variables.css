@@ -312,6 +312,11 @@
   /* Meeting detail — action items */
   --meeting-action-input-basis: 12rem;
   --meeting-action-input-sm-basis: 8rem;
+
+  /* Meeting detail — carry-over section */
+  --meeting-carryover-gap: var(--space-xs);
+  --meeting-carryover-item-gap: var(--space-sm);
+  --meeting-carryover-source-gap: var(--space-xs);
 }
 
 html.font-mono {

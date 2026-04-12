@@ -49,6 +49,81 @@
   opacity: var(--opacity-visible);
 }
 
+/* -- Carry-over open actions --------------------------------------------- */
+
+.meeting-detail__carryover {
+  cursor: default;
+}
+
+.meeting-detail__carryover-summary {
+  cursor: pointer;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: var(--meeting-carryover-gap);
+  padding: var(--space-xs) 0;
+}
+
+.meeting-detail__carryover-summary::-webkit-details-marker {
+  display: none;
+}
+
+.meeting-detail__carryover-summary::before {
+  content: "▶";
+  font-size: var(--font-size-xs);
+  transition: transform var(--transition-fast);
+}
+
+.meeting-detail__carryover[open] .meeting-detail__carryover-summary::before {
+  transform: rotate(90deg);
+}
+
+.meeting-detail__carryover-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-sm) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--meeting-carryover-item-gap);
+}
+
+.meeting-detail__carryover-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--meeting-carryover-item-gap);
+  flex-wrap: wrap;
+}
+
+.meeting-detail__carryover-source {
+  display: flex;
+  align-items: baseline;
+  gap: var(--meeting-carryover-source-gap);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.meeting-detail__carryover-date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-normal);
+}
+
+.meeting-detail__carryover-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  flex: 1;
+}
+
+.meeting-detail__carryover-loading {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  padding: var(--space-xs) 0;
+}
+
 /* -- Inline add-action form ---------------------------------------------- */
 
 .meeting-detail__add-action-form {

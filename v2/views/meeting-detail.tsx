@@ -2,7 +2,11 @@ import type { FC } from "hono/jsx";
 import { renderToString } from "hono/jsx/dom/server";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
-import type { Meeting, MeetingAction } from "../types/meeting.types.ts";
+import type {
+  Meeting,
+  MeetingAction,
+  OpenActionEntry,
+} from "../types/meeting.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
@@ -133,6 +137,66 @@ export function renderActionsTable(meeting: Meeting): string {
 }
 
 // ---------------------------------------------------------------------------
+// Carry-over section — open actions from prior meetings
+// ---------------------------------------------------------------------------
+
+const CarryoverSectionContent: FC<{ entries: OpenActionEntry[] }> = (
+  { entries },
+) => (
+  <div id="meeting-carryover-content">
+    {entries.length === 0
+      ? <p class="empty-state__text">No open actions from previous meetings.</p>
+      : (
+        <ul class="meeting-detail__carryover-list">
+          {entries.map((e) => (
+            <li key={e.action.id} class="meeting-detail__carryover-item">
+              <a
+                href={`/meetings/${e.meetingId}`}
+                class="meeting-detail__carryover-source"
+              >
+                {e.meetingTitle}
+                <span class="meeting-detail__carryover-date">
+                  {e.meetingDate}
+                </span>
+              </a>
+              <span class="meeting-detail__carryover-desc">
+                {e.action.description}
+              </span>
+              {e.action.owner && (
+                <span class="badge badge--neutral">
+                  {e.action.owner}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+  </div>
+);
+
+/** Render the carry-over section content as an HTML string for fragment responses. */
+export function renderCarryoverSection(entries: OpenActionEntry[]): string {
+  return renderToString(<CarryoverSectionContent entries={entries} />);
+}
+
+const CarryoverSection: FC<{ meetingId: string }> = ({ meetingId }) => (
+  <details
+    class="detail-section meeting-detail__carryover"
+    hx-get={`/api/v1/meetings/${meetingId}/open-actions`}
+    hx-target="#meeting-carryover-content"
+    hx-swap="outerHTML"
+    hx-trigger="toggle once"
+  >
+    <summary class="meeting-detail__carryover-summary">
+      Open actions from previous meetings
+    </summary>
+    <div id="meeting-carryover-content">
+      <p class="meeting-detail__carryover-loading">Loading…</p>
+    </div>
+  </details>
+);
+
+// ---------------------------------------------------------------------------
 // Main view
 // ---------------------------------------------------------------------------
 
@@ -193,6 +257,9 @@ export const MeetingDetailView: FC<ViewProps & { item: Meeting }> = (
 
         {/* -- Action items ----------------------------------------------- */}
         <ActionsTableComponent meeting={meeting} />
+
+        {/* -- Carry-over open actions from prior meetings ---------------- */}
+        <CarryoverSection meetingId={meeting.id} />
 
         {/* -- Meta ------------------------------------------------------- */}
         <AuditMeta

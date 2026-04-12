@@ -12,7 +12,10 @@ import {
   UpdateMeetingSchema,
 } from "../../../types/meeting.types.ts";
 import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
-import { renderActionsTable } from "../../../views/meeting-detail.tsx";
+import {
+  renderActionsTable,
+  renderCarryoverSection,
+} from "../../../views/meeting-detail.tsx";
 
 export const meetingsRouter = new OpenAPIHono();
 
@@ -159,6 +162,39 @@ meetingsRouter.openapi(deleteRoute, async (c) => {
   publish("meeting.deleted");
   return new Response(null, { status: 204 });
 });
+
+// ---------------------------------------------------------------------------
+// Carry-over open actions
+// ---------------------------------------------------------------------------
+
+// GET /{id}/open-actions — open actions from all meetings before this one
+meetingsRouter.openapi(
+  createRoute({
+    method: "get",
+    path: "/{id}/open-actions",
+    tags: ["Meetings"],
+    summary: "Get open actions from meetings before this one",
+    operationId: "getMeetingOpenActions",
+    request: { params: IdParam },
+    responses: {
+      200: {
+        description: "Carry-over section fragment",
+        content: { "text/html": { schema: z.string() } },
+      },
+      404: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: "Not found",
+      },
+    },
+  }),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const meeting = await getMeetingService().getById(id);
+    if (!meeting) return c.json(notFound("MEETING", id), 404);
+    const entries = await getMeetingService().getOpenActions(meeting.date);
+    return c.html(renderCarryoverSection(entries), 200);
+  },
+);
 
 // ---------------------------------------------------------------------------
 // Action item sub-resource routes

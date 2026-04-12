@@ -6,6 +6,7 @@ import type {
   ListMeetingOptions,
   Meeting,
   MeetingAction,
+  OpenActionEntry,
   UpdateMeeting,
 } from "../types/meeting.types.ts";
 import { generateId } from "../utils/id.ts";
@@ -74,6 +75,34 @@ export class MeetingService extends BaseService<
     if (!meeting) return null;
     const actions = meeting.actions.filter((a) => a.id !== actionId);
     return this.repo.update(id, { actions });
+  }
+
+  // -------------------------------------------------------------------------
+  // Cross-meeting open actions
+  // -------------------------------------------------------------------------
+
+  async getOpenActions(beforeDate?: string): Promise<OpenActionEntry[]> {
+    const all = await this.repo.findAll();
+    const results: Array<{
+      meetingId: string;
+      meetingTitle: string;
+      meetingDate: string;
+      action: MeetingAction;
+    }> = [];
+    for (const m of all) {
+      if (beforeDate && m.date >= beforeDate) continue;
+      for (const a of m.actions) {
+        if (a.status === "open") {
+          results.push({
+            meetingId: m.id,
+            meetingTitle: m.title,
+            meetingDate: m.date,
+            action: a,
+          });
+        }
+      }
+    }
+    return results.sort((a, b) => b.meetingDate.localeCompare(a.meetingDate));
   }
 
   protected applyFilters(

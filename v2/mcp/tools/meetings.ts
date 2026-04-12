@@ -108,6 +108,33 @@ export function registerMeetingTools(server: McpServer): void {
   );
 
   server.registerTool(
+    "get_open_meeting_actions",
+    {
+      description:
+        "Return all open (incomplete) action items across all meetings, optionally filtered to only meetings before a given date. Useful for planning follow-ups and identifying unresolved items.",
+      inputSchema: {
+        before_date: z.string().optional().describe(
+          "Only include meetings on or before this date (YYYY-MM-DD)",
+        ),
+      },
+    },
+    async ({ before_date }) => {
+      const entries = await service.getOpenActions(before_date);
+      return ok(
+        entries.map((e) => ({
+          meetingId: e.meetingId,
+          meetingTitle: e.meetingTitle,
+          meetingDate: e.meetingDate,
+          actionId: e.action.id,
+          description: e.action.description,
+          owner: e.action.owner,
+          due: e.action.due,
+        })),
+      );
+    },
+  );
+
+  server.registerTool(
     "delete_meeting",
     {
       description: "Delete a meeting by its ID.",

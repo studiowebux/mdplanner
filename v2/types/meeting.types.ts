@@ -99,6 +99,13 @@ export type UpdateMeeting = z.infer<typeof UpdateMeetingSchema>;
 // Query options
 // ---------------------------------------------------------------------------
 
+export type OpenActionEntry = {
+  meetingId: string;
+  meetingTitle: string;
+  meetingDate: string;
+  action: MeetingAction;
+};
+
 export const AddMeetingActionSchema = z.object({
   description: z.string().min(1).openapi({
     description: "Action item description",
