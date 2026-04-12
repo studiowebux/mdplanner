@@ -4,12 +4,15 @@ import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getMeetingService } from "../../../singletons/services.ts";
 import { publish } from "../../../singletons/event-bus.ts";
 import {
+  ActionIdParam,
+  AddMeetingActionSchema,
   CreateMeetingSchema,
   ListMeetingOptionsSchema,
   MeetingSchema,
   UpdateMeetingSchema,
 } from "../../../types/meeting.types.ts";
 import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import { renderActionsTable } from "../../../views/meeting-detail.tsx";
 
 export const meetingsRouter = new OpenAPIHono();
 
@@ -156,3 +159,106 @@ meetingsRouter.openapi(deleteRoute, async (c) => {
   publish("meeting.deleted");
   return new Response(null, { status: 204 });
 });
+
+// ---------------------------------------------------------------------------
+// Action item sub-resource routes
+// ---------------------------------------------------------------------------
+
+// POST /{id}/actions
+meetingsRouter.openapi(
+  createRoute({
+    method: "post",
+    path: "/{id}/actions",
+    tags: ["Meetings"],
+    summary: "Add an action item to a meeting",
+    operationId: "addMeetingAction",
+    request: {
+      params: IdParam,
+      body: {
+        content: { "application/json": { schema: AddMeetingActionSchema } },
+        required: true,
+      },
+    },
+    responses: {
+      200: {
+        description: "Updated actions table fragment",
+        content: { "text/html": { schema: z.string() } },
+      },
+      404: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: "Not found",
+      },
+    },
+  }),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const data = c.req.valid("json");
+    const meeting = await getMeetingService().addAction(id, data);
+    if (!meeting) return c.json(notFound("MEETING", id), 404);
+    publish("meeting.updated");
+    return c.html(renderActionsTable(meeting), 200);
+  },
+);
+
+// PUT /{id}/actions/{actionId}/toggle
+meetingsRouter.openapi(
+  createRoute({
+    method: "put",
+    path: "/{id}/actions/{actionId}/toggle",
+    tags: ["Meetings"],
+    summary: "Toggle action item status open↔done",
+    operationId: "toggleMeetingAction",
+    request: { params: ActionIdParam },
+    responses: {
+      200: {
+        description: "Updated actions table fragment",
+        content: { "text/html": { schema: z.string() } },
+      },
+      404: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: "Not found",
+      },
+    },
+  }),
+  async (c) => {
+    const { id, actionId } = c.req.valid("param");
+    const meeting = await getMeetingService().toggleAction(id, actionId);
+    if (!meeting) return c.json(notFound("MEETING", id), 404);
+    publish("meeting.updated");
+    return c.html(renderActionsTable(meeting), 200);
+  },
+);
+
+// DELETE /{id}/actions/{actionId}
+meetingsRouter.openapi(
+  createRoute({
+    method: "delete",
+    path: "/{id}/actions/{actionId}",
+    tags: ["Meetings"],
+    summary: "Delete an action item from a meeting",
+    operationId: "deleteMeetingAction",
+    request: { params: ActionIdParam },
+    responses: {
+      200: {
+        description: "Updated actions table fragment",
+        content: { "text/html": { schema: z.string() } },
+      },
+      404: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: "Not found",
+      },
+    },
+  }),
+  async (c) => {
+    const { id, actionId } = c.req.valid("param");
+    const meeting = await getMeetingService().deleteAction(id, actionId);
+    if (!meeting) return c.json(notFound("MEETING", id), 404);
+    publish("meeting.updated");
+    const res = c.html(renderActionsTable(meeting), 200);
+    res.headers.set(
+      "HX-Trigger",
+      JSON.stringify({ showToast: "Action deleted" }),
+    );
+    return res;
+  },
+);

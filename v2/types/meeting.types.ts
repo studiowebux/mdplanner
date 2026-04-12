@@ -99,6 +99,22 @@ export type UpdateMeeting = z.infer<typeof UpdateMeetingSchema>;
 // Query options
 // ---------------------------------------------------------------------------
 
+export const AddMeetingActionSchema = z.object({
+  description: z.string().min(1).openapi({
+    description: "Action item description",
+    example: "Follow up with the team on deliverables",
+  }),
+  owner: z.string().optional().openapi({ description: "Person responsible" }),
+  due: z.string().optional().openapi({ description: "Due date (YYYY-MM-DD)" }),
+}).openapi("AddMeetingAction");
+
+export type AddMeetingAction = z.infer<typeof AddMeetingActionSchema>;
+
+export const ActionIdParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+  actionId: z.string().openapi({ param: { name: "actionId", in: "path" } }),
+});
+
 export const ListMeetingOptionsSchema = z.object({
   q: z.string().optional().openapi({
     param: { name: "q", in: "query" },

@@ -20,3 +20,50 @@
   width: 100%;
   margin-top: var(--space-sm);
 }
+
+.meeting-detail__actions-count {
+  margin-left: var(--space-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  vertical-align: middle;
+}
+
+.action-badge {
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: var(--space-xs) var(--space-sm);
+  transition: opacity var(--transition-fast);
+}
+
+.action-badge:hover {
+  opacity: var(--opacity-muted);
+}
+
+.action-delete {
+  opacity: var(--opacity-muted);
+  transition: opacity var(--transition-fast);
+}
+
+.action-delete:hover {
+  opacity: var(--opacity-visible);
+}
+
+/* -- Inline add-action form ---------------------------------------------- */
+
+.meeting-detail__add-action-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+  margin-top: var(--space-md);
+}
+
+.meeting-detail__add-action-input {
+  flex: 1 1 var(--meeting-action-input-basis);
+  min-width: 0;
+}
+
+.meeting-detail__add-action-input--sm {
+  flex: 0 1 var(--meeting-action-input-sm-basis);
+}

@@ -308,6 +308,10 @@
   --color-badge-bg: var(--color-bg-secondary);
   --color-badge-text: var(--color-text-secondary);
   --color-highlight: var(--color-warning-bg);
+
+  /* Meeting detail — action items */
+  --meeting-action-input-basis: 12rem;
+  --meeting-action-input-sm-basis: 8rem;
 }
 
 html.font-mono {
