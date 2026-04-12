@@ -17,6 +17,6 @@
 /* -- Action items --------------------------------------------------------- */
 
 .meeting-detail__actions-table {
-  width: var(--size-full);
+  width: 100%;
   margin-top: var(--space-sm);
 }
