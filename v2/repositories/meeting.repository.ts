@@ -99,6 +99,7 @@ export class MeetingRepository extends CachedMarkdownRepository<
       updatedAt: fm.updated_at
         ? String(fm.updated_at)
         : new Date().toISOString(),
+      project: fm.project != null ? String(fm.project) : undefined,
       createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
       updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
     };

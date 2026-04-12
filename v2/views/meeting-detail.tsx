@@ -9,6 +9,7 @@ import type {
 } from "../types/meeting.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate } from "../utils/time.ts";
+import { toKebab } from "../utils/slug.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
@@ -235,6 +236,13 @@ export const MeetingDetailView: FC<ViewProps & { item: Meeting }> = (
         {/* -- Info -------------------------------------------------------- */}
         <div class="detail-section detail-info-row">
           <InfoItem label="Date">{meeting.date}</InfoItem>
+          {meeting.project && (
+            <InfoItem label="Project">
+              <a href={`/portfolio/${toKebab(meeting.project)}`}>
+                {meeting.project}
+              </a>
+            </InfoItem>
+          )}
         </div>
 
         {/* -- Attendees -------------------------------------------------- */}

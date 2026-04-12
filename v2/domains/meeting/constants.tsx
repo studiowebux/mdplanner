@@ -4,6 +4,7 @@ import type { Meeting } from "../../types/meeting.types.ts";
 import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
+import { toKebab } from "../../utils/slug.ts";
 
 // ---------------------------------------------------------------------------
 // Action buttons
@@ -57,6 +58,19 @@ export const MEETING_TABLE_COLUMNS: ColumnDef[] = [
     label: "Created",
     sortable: true,
   },
+  {
+    key: "project",
+    label: "Project",
+    sortable: true,
+    render: (v, row) =>
+      v
+        ? (
+          <a href={`/portfolio/${toKebab(String(v))}`}>
+            <Highlight text={String(v)} q={row._q as string} />
+          </a>
+        )
+        : "",
+  },
   { key: "_actions", label: "", render: actionBtns },
 ];
 
@@ -95,6 +109,13 @@ export const MEETING_FORM_FIELDS: FieldDef[] = [
     name: "notes",
     label: "Notes",
     rows: 6,
+  },
+  {
+    type: "autocomplete",
+    name: "project",
+    label: "Project",
+    source: "portfolio",
+    placeholder: "Search projects...",
   },
   {
     type: "array-table",
@@ -151,5 +172,6 @@ export function meetingToRow(m: Meeting): Record<string, unknown> {
     actionCount: m.actions.length,
     openActions: m.actions.filter((a) => a.status === "open").length,
     createdAtDisplay: formatDate(m.createdAt),
+    project: m.project ?? "",
   };
 }

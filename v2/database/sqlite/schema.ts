@@ -21,6 +21,13 @@ export function initSchema(db: CacheDatabase): void {
   db.exec(META_SQL);
   for (const entity of ENTITIES) {
     db.exec(entity.schema);
+    for (const sql of entity.migrations ?? []) {
+      try {
+        db.exec(sql);
+      } catch {
+        // Column already exists — safe to ignore
+      }
+    }
   }
   for (const entity of ENTITIES) {
     if (entity.fts) {

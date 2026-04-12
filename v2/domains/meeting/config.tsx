@@ -8,6 +8,7 @@ import type {
 } from "../../types/meeting.types.ts";
 import { getMeetingService } from "../../singletons/services.ts";
 import { createSearchPredicate } from "../../utils/string.ts";
+import { extractProjectNames } from "../../utils/filter-helpers.ts";
 import {
   MEETING_FORM_FIELDS,
   MEETING_TABLE_COLUMNS,
@@ -37,11 +38,17 @@ export const meetingConfig: DomainConfig<
     "date_from",
     "date_to",
     "open_actions_only",
+    "project",
   ],
   columns: MEETING_TABLE_COLUMNS,
   formFields: MEETING_FORM_FIELDS,
 
   filters: [
+    {
+      name: "project",
+      label: "All projects",
+      options: [],
+    },
     {
       name: "open_actions_only",
       label: "Open actions only",
@@ -50,6 +57,11 @@ export const meetingConfig: DomainConfig<
       ],
     },
   ],
+
+  extractFilterOptions: async () => {
+    const projectNames = await extractProjectNames();
+    return { project: projectNames };
+  },
 
   toRow: meetingToRow,
 

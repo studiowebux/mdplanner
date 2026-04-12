@@ -47,6 +47,8 @@ export type EntityDef = {
   sync: TableSyncer;
   /** Called after a successful sync for this table — repos use this to clear their listDirty flag. */
   onSyncComplete?: () => void;
+  /** SQL statements run after schema creation for idempotent column migrations. Errors are silently ignored (column may already exist). */
+  migrations?: string[];
 };
 
 // ============================================================

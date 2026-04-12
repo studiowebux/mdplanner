@@ -65,6 +65,9 @@ export const MeetingSchema = z.object({
   actions: z.array(MeetingActionSchema).openapi({
     description: "Action items from this meeting",
   }),
+  project: z.string().nullable().optional().openapi({
+    description: "Linked project name (portfolio item title)",
+  }),
 }).merge(AuditFieldsSchema).openapi("Meeting");
 
 export type Meeting = z.infer<typeof MeetingSchema>;
@@ -80,11 +83,13 @@ export const CreateMeetingSchema = MeetingSchema.pick({
   agenda: true,
   notes: true,
   actions: true,
+  project: true,
 }).partial({
   attendees: true,
   agenda: true,
   notes: true,
   actions: true,
+  project: true,
 }).merge(AuditFieldsSchema.partial()).openapi("CreateMeeting");
 
 export type CreateMeeting = z.infer<typeof CreateMeetingSchema>;
@@ -138,6 +143,10 @@ export const ListMeetingOptionsSchema = z.object({
   open_actions_only: z.string().optional().openapi({
     param: { name: "open_actions_only", in: "query" },
     description: "Only include meetings with at least one open action item",
+  }),
+  project: z.string().optional().openapi({
+    param: { name: "project", in: "query" },
+    description: "Filter by linked project name",
   }),
 });
 

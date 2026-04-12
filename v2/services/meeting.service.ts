@@ -118,6 +118,9 @@ export class MeetingService extends BaseService<
     if (options.open_actions_only === "true") {
       items = items.filter((m) => m.actions.some((a) => a.status === "open"));
     }
+    if (options.project) {
+      items = items.filter((m) => m.project === options.project);
+    }
     if (options.q) {
       items = items.filter((m) =>
         ciIncludes(m.title, options.q!) ||
