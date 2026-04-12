@@ -121,7 +121,11 @@
       var el = noteBy(id);
       if (!el) return;
       var content = el.querySelector("[data-sticky-content]");
-      if (content) api("PUT", "/" + id, { content: content.textContent || "" });
+      if (content) {
+        api("PATCH", "/" + id + "/content", {
+          content: content.textContent || "",
+        });
+      }
     });
   }
 
@@ -297,7 +301,7 @@
     clearTimeout(contentSaveTimers[id]);
     noteEl.classList.add("is-dirty");
     contentSaveTimers[id] = setTimeout(function () {
-      api("PUT", "/" + id, { content: el.textContent || "" })
+      api("PATCH", "/" + id + "/content", { content: el.textContent || "" })
         .then(function () {
           noteEl.classList.remove("is-dirty");
         })
@@ -400,13 +404,57 @@
     return el;
   }
 
+  // ── Find a free position that does not overlap existing notes ─────────────
+
+  function findFreePosition(x, y) {
+    var notes = allNotes();
+    var GAP = 16; // minimum gap between notes
+    var w = NOTE_DEFAULT_W;
+    var h = NOTE_DEFAULT_H;
+
+    function overlaps(cx, cy) {
+      for (var i = 0; i < notes.length; i++) {
+        var n = notes[i];
+        var nx = parseFloat(n.style.left) || 0;
+        var ny = parseFloat(n.style.top) || 0;
+        var nw = parseFloat(n.style.width) || NOTE_DEFAULT_W;
+        var nh = parseFloat(n.style.height) || NOTE_DEFAULT_H;
+        if (
+          cx < nx + nw + GAP &&
+          cx + w + GAP > nx &&
+          cy < ny + nh + GAP &&
+          cy + h + GAP > ny
+        ) return true;
+      }
+      return false;
+    }
+
+    // Spiral outward in a grid pattern until a free slot is found
+    var step = w + GAP;
+    for (var ring = 0; ring <= 8; ring++) {
+      for (var dx = -ring; dx <= ring; dx++) {
+        for (var dy = -ring; dy <= ring; dy++) {
+          if (Math.abs(dx) !== ring && Math.abs(dy) !== ring) continue;
+          var cx = snap(x + dx * step);
+          var cy = snap(y + dy * step);
+          if (!overlaps(cx, cy)) return { x: cx, y: cy };
+        }
+      }
+    }
+    // Fallback: cascade diagonally
+    return {
+      x: snap(x + notes.length * (w + GAP)),
+      y: snap(y + notes.length * (h + GAP)),
+    };
+  }
+
   // ── Create note at canvas position ────────────────────────────────────────
 
   function createNoteAt(boardX, boardY) {
     api("POST", "", {
       content: "",
       color: "yellow",
-      position: { x: snap(boardX), y: snap(boardY) },
+      position: findFreePosition(boardX, boardY),
     })
       .then(function (res) {
         return res.json();
@@ -418,6 +466,16 @@
         if (empty) empty.remove();
         var el = buildNoteEl(note);
         b.appendChild(el);
+        // Pan viewport so the new note is centered
+        var v = vp();
+        if (v) {
+          var nx = note.position.x;
+          var ny = note.position.y;
+          panX = v.clientWidth / 2 - (nx + NOTE_DEFAULT_W / 2) * zoom;
+          panY = v.clientHeight / 2 - (ny + NOTE_DEFAULT_H / 2) * zoom;
+          applyTransform();
+          saveState();
+        }
         // Auto-focus and place cursor ready for typing
         var content = el.querySelector("[data-sticky-content]");
         if (content) {
@@ -473,8 +531,8 @@
       1.0,
     );
     zoom = newZoom;
-    panX = FIT_PADDING * zoom - minX * zoom;
-    panY = FIT_PADDING * zoom - minY * zoom;
+    panX = (v.clientWidth - (maxX - minX) * zoom) / 2 - minX * zoom;
+    panY = (v.clientHeight - (maxY - minY) * zoom) / 2 - minY * zoom;
     applyTransform();
     refreshZoomLabel();
     saveState();
@@ -522,7 +580,18 @@
 
       if (e.target.closest("[data-sticky-delete]")) {
         var noteEl = e.target.closest("[data-canvas-note]");
-        if (noteEl) removeNote(noteEl);
+        if (!noteEl) return;
+        var preview = (noteEl.querySelector("[data-sticky-content]") || {})
+          .textContent || "";
+        var label = preview.trim().slice(0, 40) || "this note";
+        confirmAction({
+          title: "Delete note",
+          message: 'Delete "' + label + (preview.length > 40 ? "…" : "") +
+            '"? This cannot be undone.',
+          confirmLabel: "Delete",
+        }).then(function (ok) {
+          if (ok) removeNote(noteEl);
+        });
         return;
       }
     });
@@ -605,7 +674,9 @@
         if (note) dragStart(note, e.clientX, e.clientY);
         return;
       }
-      if (e.target.closest("[data-canvas-viewport]") && !note) {
+      // Text selection inside a note — let the browser handle it, no pan
+      if (e.target.closest("[data-sticky-content]")) return;
+      if (e.target.closest("[data-canvas-viewport]")) {
         panStart(e.clientX, e.clientY);
       }
     });
@@ -714,7 +785,31 @@
 
     document.addEventListener("htmx:sseMessage", function (e) {
       if (!isOnCanvas()) return;
-      if (!e.detail || e.detail.type !== "sticky_note.moved") return;
+      if (!e.detail) return;
+
+      // ── sticky_note.content — update text in-place, skip if focused ──
+      if (e.detail.type === "sticky_note.content") {
+        var raw = e.detail.data;
+        if (!raw) return;
+        var cd;
+        try {
+          cd = JSON.parse(raw);
+        } catch (_) {
+          return;
+        }
+        var cNoteEl = document.querySelector(
+          "[data-canvas-note][data-sticky-id='" + cd.id + "']",
+        );
+        if (!cNoteEl) return;
+        var cContent = cNoteEl.querySelector("[data-sticky-content]");
+        if (!cContent) return;
+        // Skip if this note's editor is currently focused — user is typing
+        if (document.activeElement === cContent) return;
+        cContent.textContent = cd.content;
+        return;
+      }
+
+      if (e.detail.type !== "sticky_note.moved") return;
       var raw = e.detail.data;
       if (!raw) return;
       var data;
@@ -818,6 +913,12 @@
     checkEmpty();
     wire();
     window.addEventListener("resize", sizeCanvas);
+    // Re-size after fullscreen toggle — header hides/shows, changing available height
+    document.addEventListener("click", function (e) {
+      if (e.target.closest("[data-fullscreen-toggle]")) {
+        requestAnimationFrame(sizeCanvas);
+      }
+    });
   }
 
   if (document.readyState === "loading") {
