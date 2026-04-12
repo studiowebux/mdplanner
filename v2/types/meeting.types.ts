@@ -68,6 +68,9 @@ export const MeetingSchema = z.object({
   project: z.string().nullable().optional().openapi({
     description: "Linked project name (portfolio item title)",
   }),
+  relatedMeetings: z.array(z.string()).optional().openapi({
+    description: "IDs of related meetings (undirected graph)",
+  }),
 }).merge(AuditFieldsSchema).openapi("Meeting");
 
 export type Meeting = z.infer<typeof MeetingSchema>;
@@ -84,12 +87,14 @@ export const CreateMeetingSchema = MeetingSchema.pick({
   notes: true,
   actions: true,
   project: true,
+  relatedMeetings: true,
 }).partial({
   attendees: true,
   agenda: true,
   notes: true,
   actions: true,
   project: true,
+  relatedMeetings: true,
 }).merge(AuditFieldsSchema.partial()).openapi("CreateMeeting");
 
 export type CreateMeeting = z.infer<typeof CreateMeetingSchema>;
@@ -125,6 +130,20 @@ export type AddMeetingAction = z.infer<typeof AddMeetingActionSchema>;
 export const ActionIdParam = z.object({
   id: z.string().openapi({ param: { name: "id", in: "path" } }),
   actionId: z.string().openapi({ param: { name: "actionId", in: "path" } }),
+});
+
+export const LinkMeetingSchema = z.object({
+  linkedId: z.string().min(1).openapi({
+    description: "ID of the meeting to link",
+    example: "meeting_1771000000001_abc",
+  }),
+}).openapi("LinkMeeting");
+
+export type LinkMeeting = z.infer<typeof LinkMeetingSchema>;
+
+export const LinkedIdParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+  linkedId: z.string().openapi({ param: { name: "linkedId", in: "path" } }),
 });
 
 export const ListMeetingOptionsSchema = z.object({

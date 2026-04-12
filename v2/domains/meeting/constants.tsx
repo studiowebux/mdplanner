@@ -117,6 +117,7 @@ export const MEETING_FORM_FIELDS: FieldDef[] = [
     source: "portfolio",
     placeholder: "Search projects...",
   },
+  { type: "hidden", name: "relatedMeetings" },
   {
     type: "array-table",
     name: "actions",

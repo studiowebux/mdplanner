@@ -5,6 +5,7 @@ import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { createDomainForm } from "../../factories/domain-view.tsx";
 import { meetingConfig } from "../../domains/meeting/config.tsx";
 import { MEETING_FORM_FIELDS } from "../../domains/meeting/constants.tsx";
+import type { Meeting } from "../../types/meeting.types.ts";
 import { getMeetingService } from "../../singletons/services.ts";
 import { generateId } from "../../utils/id.ts";
 import { MeetingDetailView } from "../meeting-detail.tsx";
@@ -26,10 +27,16 @@ domainRouter.get("/:id", async (c) => {
   const item = await getMeetingService().getById(id);
   if (!item) return c.notFound();
 
+  const resolved = await Promise.all(
+    (item.relatedMeetings ?? []).map((rid) => getMeetingService().getById(rid)),
+  );
+  const relatedItems = resolved.filter((m): m is Meeting => m !== null);
+
   return c.html(
     <MeetingDetailView
       {...viewProps(c, "/meetings")}
       item={item}
+      relatedItems={relatedItems}
     />,
   );
 });
@@ -45,21 +52,20 @@ meetingsRouter.get("/new", async (c) => {
   if (relatedId) {
     const related = await getMeetingService().getById(relatedId);
     if (related) {
+      prefillValues = { relatedMeetings: relatedId };
       const openActions = await getMeetingService().getOpenActions(
         related.date,
       );
       if (openActions.length > 0) {
-        prefillValues = {
-          actions: JSON.stringify(
-            openActions.map((e) => ({
-              id: generateId("action"),
-              description: e.action.description,
-              owner: e.action.owner ?? "",
-              due: e.action.due ?? "",
-              status: "open",
-            })),
-          ),
-        };
+        prefillValues.actions = JSON.stringify(
+          openActions.map((e) => ({
+            id: generateId("action"),
+            description: e.action.description,
+            owner: e.action.owner ?? "",
+            due: e.action.due ?? "",
+            status: "open",
+          })),
+        );
       }
     }
   }

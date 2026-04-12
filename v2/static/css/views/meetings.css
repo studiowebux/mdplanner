@@ -142,3 +142,65 @@
 .meeting-detail__add-action-input--sm {
   flex: 0 1 var(--meeting-action-input-sm-basis);
 }
+
+/* -- Related meetings ------------------------------------------------------- */
+
+.meeting-detail__related-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-sm) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.meeting-detail__related-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.meeting-detail__related-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  flex: 1;
+  min-width: 0;
+}
+
+.meeting-detail__related-date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.meeting-detail__related-actions {
+  font-size: var(--font-size-xs);
+}
+
+.meeting-detail__related-remove {
+  opacity: var(--opacity-muted);
+  transition: opacity var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.meeting-detail__related-remove:hover {
+  opacity: var(--opacity-visible);
+}
+
+.meeting-detail__link-form {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.meeting-detail__link-form .form__autocomplete {
+  flex: 1;
+  min-width: 0;
+}
+
+.meeting-detail__related-footer {
+  margin-top: var(--space-md);
+}

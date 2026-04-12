@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import { renderToString } from "hono/jsx/dom/server";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
+import { AutocompleteWidget } from "../components/ui/autocomplete-widget.tsx";
 import type {
   Meeting,
   MeetingAction,
@@ -198,11 +199,110 @@ const CarryoverSection: FC<{ meetingId: string }> = ({ meetingId }) => (
 );
 
 // ---------------------------------------------------------------------------
+// Related meetings section — exported for API fragment responses
+// ---------------------------------------------------------------------------
+
+const RelatedMeetingsSectionComponent: FC<
+  { meeting: Meeting; relatedItems: Meeting[] }
+> = ({ meeting, relatedItems }) => {
+  const sorted = [...relatedItems].sort((a, b) => a.date.localeCompare(b.date));
+  return (
+    <section id="meeting-related-section" class="detail-section">
+      <h2 class="section-heading">Related Meetings</h2>
+
+      {sorted.length > 0 && (
+        <ul class="meeting-detail__related-list">
+          {sorted.map((r) => {
+            const open = r.actions.filter((a) => a.status === "open").length;
+            return (
+              <li key={r.id} class="meeting-detail__related-item">
+                <a
+                  href={`/meetings/${r.id}`}
+                  class="meeting-detail__related-title"
+                >
+                  {r.title}
+                </a>
+                <span class="meeting-detail__related-date">{r.date}</span>
+                {open > 0 && (
+                  <span class="badge badge--warning meeting-detail__related-actions">
+                    {open} open
+                  </span>
+                )}
+                <button
+                  type="button"
+                  class="btn btn--icon btn--danger-ghost meeting-detail__related-remove"
+                  hx-delete={`/api/v1/meetings/${meeting.id}/links/${r.id}`}
+                  hx-target="#meeting-related-section"
+                  hx-swap="outerHTML"
+                  hx-confirm="Remove this link?"
+                  title="Remove link"
+                  aria-label="Remove link"
+                >
+                  &times;
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {/* Inline link form */}
+      <form
+        class="meeting-detail__link-form"
+        hx-post={`/api/v1/meetings/${meeting.id}/links`}
+        hx-target="#meeting-related-section"
+        hx-swap="outerHTML"
+        hx-ext="json-enc"
+        hx-on--htmx:after-request="this.reset()"
+      >
+        <AutocompleteWidget
+          id={`meeting-link-${meeting.id}`}
+          name="linkedId"
+          source="meetings-by-id"
+          placeholder="Search meetings…"
+          required
+        />
+        <button class="btn btn--secondary" type="submit">Link</button>
+      </form>
+
+      {/* Schedule follow-up */}
+      <div class="meeting-detail__related-footer">
+        <button
+          type="button"
+          class="btn btn--ghost"
+          hx-get={`/meetings/new?related=${meeting.id}`}
+          hx-target="#meetings-form-container"
+          hx-swap="innerHTML"
+          data-sidenav-open="meetings-form-container"
+        >
+          Schedule follow-up
+        </button>
+      </div>
+    </section>
+  );
+};
+
+/** Render the related meetings section as an HTML string for fragment responses. */
+export function renderRelatedSection(
+  meeting: Meeting,
+  relatedItems: Meeting[],
+): string {
+  return renderToString(
+    <RelatedMeetingsSectionComponent
+      meeting={meeting}
+      relatedItems={relatedItems}
+    />,
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main view
 // ---------------------------------------------------------------------------
 
-export const MeetingDetailView: FC<ViewProps & { item: Meeting }> = (
-  { item: meeting, ...viewProps },
+export const MeetingDetailView: FC<
+  ViewProps & { item: Meeting; relatedItems: Meeting[] }
+> = (
+  { item: meeting, relatedItems, ...viewProps },
 ) => {
   const attendees = meeting.attendees ?? [];
 
@@ -265,6 +365,12 @@ export const MeetingDetailView: FC<ViewProps & { item: Meeting }> = (
 
         {/* -- Action items ----------------------------------------------- */}
         <ActionsTableComponent meeting={meeting} />
+
+        {/* -- Related meetings ------------------------------------------- */}
+        <RelatedMeetingsSectionComponent
+          meeting={meeting}
+          relatedItems={relatedItems}
+        />
 
         {/* -- Carry-over open actions from prior meetings ---------------- */}
         <CarryoverSection meetingId={meeting.id} />

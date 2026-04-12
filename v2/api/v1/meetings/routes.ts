@@ -3,10 +3,13 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getMeetingService } from "../../../singletons/services.ts";
 import { publish } from "../../../singletons/event-bus.ts";
+import type { Meeting } from "../../../types/meeting.types.ts";
 import {
   ActionIdParam,
   AddMeetingActionSchema,
   CreateMeetingSchema,
+  LinkedIdParam,
+  LinkMeetingSchema,
   ListMeetingOptionsSchema,
   MeetingSchema,
   UpdateMeetingSchema,
@@ -15,6 +18,7 @@ import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
 import {
   renderActionsTable,
   renderCarryoverSection,
+  renderRelatedSection,
 } from "../../../views/meeting-detail.tsx";
 
 export const meetingsRouter = new OpenAPIHono();
@@ -38,12 +42,15 @@ const listRoute = createRoute({
 });
 
 meetingsRouter.openapi(listRoute, async (c) => {
-  const { q, date_from, date_to, open_actions_only } = c.req.valid("query");
+  const { q, date_from, date_to, open_actions_only, project } = c.req.valid(
+    "query",
+  );
   const items = await getMeetingService().list({
     q,
     date_from,
     date_to,
     open_actions_only,
+    project,
   });
   return c.json(items, 200);
 });
@@ -296,5 +303,86 @@ meetingsRouter.openapi(
       JSON.stringify({ showToast: "Action deleted" }),
     );
     return res;
+  },
+);
+
+// ---------------------------------------------------------------------------
+// Related meeting links (undirected graph)
+// ---------------------------------------------------------------------------
+
+// POST /{id}/links
+meetingsRouter.openapi(
+  createRoute({
+    method: "post",
+    path: "/{id}/links",
+    tags: ["Meetings"],
+    summary: "Link two meetings (undirected)",
+    operationId: "linkMeeting",
+    request: {
+      params: IdParam,
+      body: {
+        content: { "application/json": { schema: LinkMeetingSchema } },
+        required: true,
+      },
+    },
+    responses: {
+      200: {
+        description: "Updated related meetings section fragment",
+        content: { "text/html": { schema: z.string() } },
+      },
+      404: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: "Not found",
+      },
+    },
+  }),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const { linkedId } = c.req.valid("json");
+    const result = await getMeetingService().linkMeetings(id, linkedId);
+    if (!result) return c.json(notFound("MEETING", id), 404);
+    publish("meeting.updated");
+    const resolved = await Promise.all(
+      (result.a.relatedMeetings ?? []).map((rid) =>
+        getMeetingService().getById(rid)
+      ),
+    );
+    const relatedItems = resolved.filter((m): m is Meeting => m !== null);
+    return c.html(renderRelatedSection(result.a, relatedItems), 200);
+  },
+);
+
+// DELETE /{id}/links/{linkedId}
+meetingsRouter.openapi(
+  createRoute({
+    method: "delete",
+    path: "/{id}/links/{linkedId}",
+    tags: ["Meetings"],
+    summary: "Unlink two meetings",
+    operationId: "unlinkMeeting",
+    request: { params: LinkedIdParam },
+    responses: {
+      200: {
+        description: "Updated related meetings section fragment",
+        content: { "text/html": { schema: z.string() } },
+      },
+      404: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: "Not found",
+      },
+    },
+  }),
+  async (c) => {
+    const { id, linkedId } = c.req.valid("param");
+    const result = await getMeetingService().unlinkMeetings(id, linkedId);
+    if (!result) return c.json(notFound("MEETING", id), 404);
+    publish("meeting.updated");
+    const resolved = await Promise.all(
+      (result.a.relatedMeetings ?? []).map((rid) =>
+        getMeetingService().getById(rid)
+      ),
+    );
+    const relatedItems = resolved.filter((m): m is Meeting => m !== null);
+    return c.html(renderRelatedSection(result.a, relatedItems), 200);
   },
 );

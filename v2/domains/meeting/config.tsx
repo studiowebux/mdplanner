@@ -67,8 +67,16 @@ export const meetingConfig: DomainConfig<
 
   Card: ({ item, q }) => <MeetingCard item={item} q={q} />,
 
-  parseCreate: (body) =>
-    parseFormBody(MEETING_FORM_FIELDS, body) as CreateMeeting,
+  parseCreate: (body) => {
+    const parsed = parseFormBody(MEETING_FORM_FIELDS, body);
+    // hidden field submits as a single string — wrap as array for the service
+    if (typeof parsed.relatedMeetings === "string") {
+      parsed.relatedMeetings = parsed.relatedMeetings
+        ? [parsed.relatedMeetings]
+        : [];
+    }
+    return parsed as CreateMeeting;
+  },
 
   parseUpdate: (body) =>
     parseFormBody(MEETING_FORM_FIELDS, body, {

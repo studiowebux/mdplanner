@@ -48,6 +48,7 @@ import {
   getCustomerService,
   getGoalService,
   getIdeaService,
+  getMeetingService,
   getMilestoneService,
   getPeopleService,
   getPortfolioService,
@@ -238,6 +239,16 @@ registerAutocompleteSource("ideas-by-id", {
   search: async (q) => {
     const all = await getIdeaService().list();
     return all.filter((i) => ciIncludes(i.title, q));
+  },
+  displayKey: "title",
+  valueKey: "id",
+});
+
+registerAutocompleteSource("meetings-by-id", {
+  list: () => getMeetingService().list(),
+  search: async (q) => {
+    const all = await getMeetingService().list();
+    return all.filter((m) => ciIncludes(m.title, q));
   },
   displayKey: "title",
   valueKey: "id",

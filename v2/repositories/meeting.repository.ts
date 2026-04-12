@@ -44,6 +44,7 @@ export class MeetingRepository extends CachedMarkdownRepository<
       date: data.date ?? new Date().toISOString().split("T")[0],
       attendees: data.attendees ?? [],
       actions: data.actions ?? [],
+      relatedMeetings: data.relatedMeetings ?? [],
       createdAt: now,
       updatedAt: now,
     };
@@ -100,6 +101,9 @@ export class MeetingRepository extends CachedMarkdownRepository<
         ? String(fm.updated_at)
         : new Date().toISOString(),
       project: fm.project != null ? String(fm.project) : undefined,
+      relatedMeetings: Array.isArray(fm.related_meetings)
+        ? [...new Set(fm.related_meetings.map(String).filter(Boolean))]
+        : [],
       createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
       updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
     };

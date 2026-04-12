@@ -26,6 +26,7 @@ export function rowToMeeting(row: Record<string, unknown>): Meeting {
     notes: row.notes as string | undefined,
     actions: parseJson<MeetingAction[]>(row.actions_json) ?? [],
     project: row.project as string | undefined,
+    relatedMeetings: parseJson<string[]>(row.related_meetings_json) ?? [],
     createdAt: (row.created_at as string) ?? new Date().toISOString(),
     updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
     createdBy: row.created_by as string | undefined,
@@ -52,6 +53,7 @@ const MEETING_SCHEMA = `CREATE TABLE IF NOT EXISTS ${MEETING_TABLE} (
   notes TEXT,
   actions_json TEXT,
   project TEXT,
+  related_meetings_json TEXT,
   search_text TEXT,
   created_at TEXT,
   updated_at TEXT,
@@ -67,9 +69,10 @@ function insertMeetingRow(
 ): void {
   db.execute(
     `INSERT OR REPLACE INTO ${MEETING_TABLE} (id, title, date,
-       attendees_json, agenda, notes, actions_json, project, search_text,
+       attendees_json, agenda, notes, actions_json, project,
+       related_meetings_json, search_text,
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(m.id),
       val(m.title),
@@ -79,6 +82,7 @@ function insertMeetingRow(
       val(m.notes),
       jsonVal(m.actions),
       val(m.project),
+      jsonVal(m.relatedMeetings ?? []),
       meetingToText(m),
       ...auditVals(m),
       syncedAt ?? new Date().toISOString(),
@@ -93,6 +97,7 @@ export function registerMeetingEntity(repo: MeetingRepository): void {
     schema: MEETING_SCHEMA,
     migrations: [
       `ALTER TABLE ${MEETING_TABLE} ADD COLUMN project TEXT`,
+      `ALTER TABLE ${MEETING_TABLE} ADD COLUMN related_meetings_json TEXT`,
     ],
     fts: {
       type: "meeting",

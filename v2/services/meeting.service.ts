@@ -105,6 +105,48 @@ export class MeetingService extends BaseService<
     return results.sort((a, b) => b.meetingDate.localeCompare(a.meetingDate));
   }
 
+  // -------------------------------------------------------------------------
+  // Related meeting links (undirected graph)
+  // -------------------------------------------------------------------------
+
+  async linkMeetings(
+    idA: string,
+    idB: string,
+  ): Promise<{ a: Meeting; b: Meeting } | null> {
+    const [a, b] = await Promise.all([
+      this.repo.findById(idA),
+      this.repo.findById(idB),
+    ]);
+    if (!a || !b) return null;
+    const aRelated = [...new Set([...(a.relatedMeetings ?? []), idB])];
+    const bRelated = [...new Set([...(b.relatedMeetings ?? []), idA])];
+    const [updatedA, updatedB] = await Promise.all([
+      this.repo.update(idA, { relatedMeetings: aRelated }),
+      this.repo.update(idB, { relatedMeetings: bRelated }),
+    ]);
+    if (!updatedA || !updatedB) return null;
+    return { a: updatedA, b: updatedB };
+  }
+
+  async unlinkMeetings(
+    idA: string,
+    idB: string,
+  ): Promise<{ a: Meeting; b: Meeting } | null> {
+    const [a, b] = await Promise.all([
+      this.repo.findById(idA),
+      this.repo.findById(idB),
+    ]);
+    if (!a || !b) return null;
+    const aRelated = (a.relatedMeetings ?? []).filter((id) => id !== idB);
+    const bRelated = (b.relatedMeetings ?? []).filter((id) => id !== idA);
+    const [updatedA, updatedB] = await Promise.all([
+      this.repo.update(idA, { relatedMeetings: aRelated }),
+      this.repo.update(idB, { relatedMeetings: bRelated }),
+    ]);
+    if (!updatedA || !updatedB) return null;
+    return { a: updatedA, b: updatedB };
+  }
+
   protected applyFilters(
     items: Meeting[],
     options: ListMeetingOptions,
