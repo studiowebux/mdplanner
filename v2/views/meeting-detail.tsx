@@ -81,11 +81,13 @@ export const MeetingDetailView: FC<ViewProps & { item: Meeting }> = (
 
         {/* -- Attendees -------------------------------------------------- */}
         {attendees.length > 0 && (
-          <div class="detail-section meeting-detail__attendees">
-            <h3 class="meeting-detail__attendees-label">Attendees</h3>
-            <ul class="meeting-detail__attendees-list">
-              {attendees.map((a, i) => <li key={i}>{a}</li>)}
-            </ul>
+          <div class="detail-section">
+            <h2 class="section-heading">Attendees</h2>
+            <div class="form__tags-pills">
+              {attendees.map((a, i) => (
+                <span key={i} class="form__tags-pill">{a}</span>
+              ))}
+            </div>
           </div>
         )}
 

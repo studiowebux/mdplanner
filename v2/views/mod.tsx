@@ -40,6 +40,7 @@ import { ArrayTableRow } from "../components/ui/form-builder.tsx";
 import { BRAINSTORM_FORM_FIELDS } from "../domains/brainstorm/constants.tsx";
 import { INVOICE_FORM_FIELDS } from "../domains/invoice/constants.tsx";
 import { MKTPLAN_FORM_FIELDS } from "../domains/marketing-plan/constants.tsx";
+import { MEETING_FORM_FIELDS } from "../domains/meeting/constants.tsx";
 import { QUOTE_FORM_FIELDS } from "../domains/quote/constants.tsx";
 import type { FieldDef } from "../components/ui/form-builder.tsx";
 import {
@@ -308,6 +309,7 @@ views.route("/sidebar", sidebarRouter);
 for (
   const fields of [
     MKTPLAN_FORM_FIELDS,
+    MEETING_FORM_FIELDS,
     QUOTE_FORM_FIELDS,
     INVOICE_FORM_FIELDS,
     BRAINSTORM_FORM_FIELDS,

@@ -96,6 +96,41 @@ export const MEETING_FORM_FIELDS: FieldDef[] = [
     label: "Notes",
     rows: 6,
   },
+  {
+    type: "array-table",
+    name: "actions",
+    label: "Action Item",
+    section: "meeting_actions",
+    addLabel: "Add action item",
+    itemFields: [
+      {
+        type: "text",
+        name: "description",
+        label: "Description",
+        placeholder: "What needs to be done?",
+      },
+      {
+        type: "text",
+        name: "owner",
+        label: "Owner",
+        placeholder: "Person responsible",
+      },
+      {
+        type: "date",
+        name: "due",
+        label: "Due date",
+      },
+      {
+        type: "select",
+        name: "status",
+        label: "Status",
+        options: [
+          { value: "open", label: "Open" },
+          { value: "done", label: "Done" },
+        ],
+      },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
