@@ -26,7 +26,7 @@
       message: msg,
       confirmLabel: "Delete",
     }).then(function (ok) {
-      if (ok) e.detail.issueRequest();
+      if (ok) e.detail.issueRequest(true);
     });
   });
 })();
