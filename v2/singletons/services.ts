@@ -63,6 +63,9 @@ import { registerBriefEntity } from "../domains/brief/cache.ts";
 import { RetrospectiveRepository } from "../repositories/retrospective.repository.ts";
 import { RetrospectiveService } from "../services/retrospective.service.ts";
 import { registerRetrospectiveEntity } from "../domains/retrospective/cache.ts";
+import { MeetingRepository } from "../repositories/meeting.repository.ts";
+import { MeetingService } from "../services/meeting.service.ts";
+import { registerMeetingEntity } from "../domains/meeting/cache.ts";
 import { LeanCanvasRepository } from "../repositories/lean-canvas.repository.ts";
 import { LeanCanvasService } from "../services/lean-canvas.service.ts";
 import { registerLeanCanvasEntity } from "../domains/lean-canvas/cache.ts";
@@ -145,6 +148,8 @@ export function initServices(
   _set(_svc, "brief", new BriefService(briefRepo));
   const retrospectiveRepo = new RetrospectiveRepository(projectDir);
   _set(_svc, "retrospective", new RetrospectiveService(retrospectiveRepo));
+  const meetingRepo = new MeetingRepository(projectDir);
+  _set(_svc, "meeting", new MeetingService(meetingRepo));
   const leanCanvasRepo = new LeanCanvasRepository(projectDir);
   _set(_svc, "leanCanvas", new LeanCanvasService(leanCanvasRepo));
   const stickyNoteRepo = new StickyNoteRepository(projectDir);
@@ -175,6 +180,7 @@ export function initServices(
     registerBrainstormEntity(brainstormRepo);
     registerBriefEntity(briefRepo);
     registerRetrospectiveEntity(retrospectiveRepo);
+    registerMeetingEntity(meetingRepo);
     registerLeanCanvasEntity(leanCanvasRepo);
     registerStickyNoteEntity(stickyNoteRepo);
 
@@ -196,6 +202,7 @@ export function initServices(
     brainstormRepo.setCacheDb(cacheDb);
     briefRepo.setCacheDb(cacheDb);
     retrospectiveRepo.setCacheDb(cacheDb);
+    meetingRepo.setCacheDb(cacheDb);
     leanCanvasRepo.setCacheDb(cacheDb);
     stickyNoteRepo.setCacheDb(cacheDb);
 
@@ -292,6 +299,10 @@ export function getBriefService(): BriefService {
 
 export function getRetrospectiveService(): RetrospectiveService {
   return _get<RetrospectiveService>(_svc, "retrospective");
+}
+
+export function getMeetingService(): MeetingService {
+  return _get<MeetingService>(_svc, "meeting");
 }
 
 export function getLeanCanvasService(): LeanCanvasService {
