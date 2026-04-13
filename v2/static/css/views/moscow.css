@@ -1,0 +1,109 @@
+/* MoSCoW-specific styles — builds on .quadrant-grid in components.css */
+
+/* -- Date badge ----------------------------------------------------------- */
+
+.moscow-date-badge {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+/* -- Card counts ---------------------------------------------------------- */
+
+.moscow-card__counts {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.moscow-card__count--m {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.moscow-card__count--s {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.moscow-card__count--c {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.moscow-card__count--w {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+/* -- Quadrant color overrides (data-quadrant attr) ----------------------- */
+
+.quadrant-card[data-quadrant="must"] {
+  border-top-color: var(--color-error);
+}
+
+.quadrant-card[data-quadrant="must"] .quadrant-card__title {
+  color: var(--color-error-text);
+}
+
+.quadrant-card[data-quadrant="should"] {
+  border-top-color: var(--color-warning);
+}
+
+.quadrant-card[data-quadrant="should"] .quadrant-card__title {
+  color: var(--color-warning-text);
+}
+
+.quadrant-card[data-quadrant="could"] {
+  border-top-color: var(--color-success);
+}
+
+.quadrant-card[data-quadrant="could"] .quadrant-card__title {
+  color: var(--color-success-text);
+}
+
+.quadrant-card[data-quadrant="wont"] {
+  border-top-color: var(--color-border);
+}
+
+.quadrant-card[data-quadrant="wont"] .quadrant-card__title {
+  color: var(--color-text-secondary);
+}
+
+/* -- Detail page ---------------------------------------------------------- */
+
+.moscow-detail__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.moscow-detail__title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.moscow-detail__title {
+  margin: 0;
+}
+
+.moscow-detail__section {
+  margin-top: var(--space-lg);
+}
+
+.moscow-detail__meta {
+  display: flex;
+  gap: var(--space-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+/* -- Edit mode ------------------------------------------------------------ */
+
+.moscow-detail--editing .quadrant-card__item:hover {
+  background: var(--color-bg-tertiary);
+}

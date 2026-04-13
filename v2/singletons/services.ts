@@ -72,6 +72,9 @@ import { registerLeanCanvasEntity } from "../domains/lean-canvas/cache.ts";
 import { StickyNoteRepository } from "../repositories/sticky-note.repository.ts";
 import { StickyNoteService } from "../services/sticky-note.service.ts";
 import { registerStickyNoteEntity } from "../domains/sticky-note/cache.ts";
+import { MoscowRepository } from "../repositories/moscow.repository.ts";
+import { MoscowService } from "../services/moscow.service.ts";
+import { registerMoscowEntity } from "../domains/moscow/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -154,6 +157,8 @@ export function initServices(
   _set(_svc, "leanCanvas", new LeanCanvasService(leanCanvasRepo));
   const stickyNoteRepo = new StickyNoteRepository(projectDir);
   _set(_svc, "stickyNote", new StickyNoteService(stickyNoteRepo));
+  const moscowRepo = new MoscowRepository(projectDir);
+  _set(_svc, "moscow", new MoscowService(moscowRepo));
   const dnsRepo = new DnsRepository(projectDir);
   _set(_svc, "dns", new DnsService(dnsRepo, projectService));
   _set(_svc, "github", new GitHubService(projectService));
@@ -183,6 +188,7 @@ export function initServices(
     registerMeetingEntity(meetingRepo);
     registerLeanCanvasEntity(leanCanvasRepo);
     registerStickyNoteEntity(stickyNoteRepo);
+    registerMoscowEntity(moscowRepo);
 
     // Pass cacheDb to repos for read-path caching
     milestoneRepo.setCacheDb(cacheDb);
@@ -205,6 +211,7 @@ export function initServices(
     meetingRepo.setCacheDb(cacheDb);
     leanCanvasRepo.setCacheDb(cacheDb);
     stickyNoteRepo.setCacheDb(cacheDb);
+    moscowRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -267,6 +274,10 @@ export function getMarketingPlanService(): MarketingPlanService {
 
 export function getSwotService(): SwotService {
   return _get<SwotService>(_svc, "swot");
+}
+
+export function getMoscowService(): MoscowService {
+  return _get<MoscowService>(_svc, "moscow");
 }
 
 export function getCustomerService(): CustomerService {
