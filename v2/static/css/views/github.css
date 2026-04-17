@@ -1,0 +1,349 @@
+/* GitHub section — embedded in portfolio detail page */
+
+:root {
+  --github-table-num-w: 3rem;
+  --github-milestone-bar-h: var(--space-sm);
+  --github-tab-border-w: 2px;
+  --github-summary-card-min-w: 20rem;
+}
+
+/* ---- Repo card ---- */
+
+.github-card {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.github-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.github-card__name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.github-card__license {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  background: var(--color-bg-secondary);
+  padding: var(--badge-padding);
+  border-radius: var(--radius-sm);
+}
+
+.github-card__stats {
+  display: flex;
+  gap: var(--space-lg);
+}
+
+.github-card__stat {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.github-card__stat-value {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.github-card__footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.github-card__release {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  padding: var(--badge-padding);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ---- Tabs ---- */
+
+.github-tabs {
+  display: flex;
+  gap: var(--space-xs);
+  margin-top: var(--space-md);
+  border-bottom: var(--card-border);
+  padding-bottom: var(--space-xs);
+}
+
+.github-tabs__btn {
+  background: none;
+  border: none;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-bottom: var(--github-tab-border-w) solid transparent;
+  margin-bottom: calc(-1 * var(--space-xs));
+}
+
+.github-tabs__btn:hover {
+  color: var(--color-text-primary);
+}
+
+.github-tabs__btn--active {
+  color: var(--color-text-primary);
+  border-bottom-color: var(--color-accent);
+  font-weight: var(--font-weight-semibold);
+}
+
+.github-tabs__refresh {
+  margin-left: auto;
+  border-bottom: none;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+/* ---- Table ---- */
+
+.github-table-wrap {
+  margin-top: var(--space-md);
+}
+
+/* Table uses shared .data-table --uppercase --no-last-border from components.css */
+
+.github-table__num {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  width: var(--github-table-num-w);
+}
+
+.github-table__date {
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* ---- Labels ---- */
+
+.github-label {
+  display: inline-block;
+  font-size: var(--font-size-xs);
+  padding: var(--badge-padding);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  margin-right: var(--space-xs);
+}
+
+/* ---- Branch ---- */
+
+.github-branch {
+  font-size: var(--font-size-xs);
+  background: var(--color-bg-secondary);
+  padding: var(--badge-padding);
+  border-radius: var(--radius-sm);
+}
+
+/* Badge colors now use shared .badge--{variant} from components.css */
+
+/* ---- Milestones ---- */
+
+.github-milestones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.github-milestone {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+}
+
+.github-milestone__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+}
+
+.github-milestone__title {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+}
+
+.github-milestone__count {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.github-milestone__bar {
+  height: var(--github-milestone-bar-h);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.github-milestone__fill {
+  height: 100%;
+  background: var(--color-success);
+  border-radius: var(--radius-full);
+}
+
+/* ---- Empty / Error ---- */
+
+.github-empty {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  padding: var(--space-lg) 0;
+}
+
+.github-error {
+  color: var(--color-error-text);
+  background: var(--color-error-bg);
+  border: var(--card-border);
+  border-color: var(--color-error-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  font-size: var(--font-size-sm);
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* ---- Pipeline filters ---- */
+
+.github-pipeline__filters {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+}
+
+.github-pipeline__search {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  border: var(--card-border);
+  border-radius: var(--radius-sm);
+  background: var(--card-bg);
+  color: var(--color-text-primary);
+  min-width: var(--space-xl);
+}
+
+.github-pipeline__search--branch {
+  max-width: calc(var(--space-xl) * 4);
+}
+
+.github-pipeline__select {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  border: var(--card-border);
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.github-pipeline__select:focus {
+  border-color: var(--color-border-focus);
+}
+
+.github-pipeline__count {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.github-pipeline__actions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+/* ---- Pipeline pagination ---- */
+
+.github-pipeline__pagination {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: center;
+  margin-top: var(--space-md);
+}
+
+/* ---- htmx indicator ---- */
+
+.htmx-indicator {
+  display: none;
+}
+
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+  display: inline-block;
+}
+
+/* ---- Task GitHub section ---- */
+
+.task-github {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.task-github__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.task-github__item-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.task-github__link-form {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.task-github__input {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  border: var(--card-border);
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.task-github__input:focus {
+  border-color: var(--color-border-focus);
+}
+
+.task-github__labels {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.task-github__hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* ---- Section spacing ---- */
+
+.github-section {
+  margin-top: var(--space-lg);
+}

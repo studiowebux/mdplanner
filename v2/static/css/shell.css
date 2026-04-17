@@ -1,0 +1,419 @@
+/* App shell — sidebar + topbar + content layout.
+   Mobile breakpoint: 768px (CSS vars can't be used in @media conditions). */
+
+/* -------------------------------------------------------------------------
+   Shell grid
+   ------------------------------------------------------------------------- */
+
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  height: 100vh;
+}
+
+.app-shell__main {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.app-shell__content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.app-shell__content a:not(.btn):not(.badge):hover {
+  color: var(--color-accent);
+}
+
+/* -------------------------------------------------------------------------
+   Sidebar toggle — desktop collapse
+   ------------------------------------------------------------------------- */
+
+html.sidebar-collapsed .sidebar {
+  width: 0;
+  overflow: hidden;
+}
+
+html.sidebar-collapsed .app-shell {
+  grid-template-columns: 0 1fr;
+}
+
+/* -------------------------------------------------------------------------
+   Fullscreen reading mode — hides sidebar + topbar
+   ------------------------------------------------------------------------- */
+
+html.fullscreen-reading .sidebar {
+  display: none;
+}
+
+html.fullscreen-reading .app-shell {
+  grid-template-columns: 1fr;
+}
+
+html.fullscreen-reading .topbar {
+  display: none;
+}
+
+/* -------------------------------------------------------------------------
+   Sidebar overlay
+   ------------------------------------------------------------------------- */
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-bg);
+  z-index: var(--z-overlay);
+}
+
+/* -------------------------------------------------------------------------
+   Sidebar
+   ------------------------------------------------------------------------- */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-width);
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  border-right: var(--border-width) var(--border-style)
+    var(--color-border-default);
+  background: var(--color-bg-secondary);
+  overflow-y: auto;
+  transition: width var(--transition-base);
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  height: var(--nav-height);
+  padding: 0 var(--space-lg);
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-border-default);
+  flex-shrink: 0;
+}
+
+.sidebar__brand-link {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+/* -------------------------------------------------------------------------
+   Sidebar filter
+   ------------------------------------------------------------------------- */
+
+.sidebar__filter {
+  padding: var(--space-sm) var(--space-sm);
+  flex-shrink: 0;
+}
+
+.sidebar__filter-input {
+  display: block;
+  width: 100%;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-xs);
+  font-family: inherit;
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.sidebar__filter-input:focus {
+  border-color: var(--color-border-focus);
+}
+
+/* -------------------------------------------------------------------------
+   Sidebar nav + links
+   ------------------------------------------------------------------------- */
+
+.sidebar__nav {
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-sm) 0;
+  overflow-y: auto;
+}
+
+.sidebar__links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar__item {
+  display: flex;
+  align-items: center;
+}
+
+.sidebar__link {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-sm) var(--space-sm) var(--space-lg);
+  padding-left: calc(var(--space-lg) - var(--sidebar-active-border-width));
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-left: var(--sidebar-active-border-width) var(--border-style)
+    transparent;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.sidebar__link-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar__link:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.sidebar__link--active {
+  background: var(--color-bg-active);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+  border-left-color: var(--color-accent);
+}
+
+/* -------------------------------------------------------------------------
+   Sidebar pin button
+   ------------------------------------------------------------------------- */
+
+.sidebar__pin-btn {
+  flex-shrink: 0;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-sans);
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: none;
+}
+
+.sidebar__item:hover .sidebar__pin-btn {
+  display: inline-flex;
+}
+
+.sidebar__pin-btn--active {
+  display: inline-flex;
+  color: var(--color-accent);
+}
+
+.sidebar__pin-btn:hover {
+  color: var(--color-text-primary);
+}
+
+/* -------------------------------------------------------------------------
+   Sidebar category groups
+   ------------------------------------------------------------------------- */
+
+.sidebar__group {
+  margin-bottom: var(--space-xs);
+}
+
+.sidebar__group-title {
+  display: flex;
+  align-items: center;
+  padding: var(--space-xs) var(--space-lg);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+
+.sidebar__group-title::-webkit-details-marker {
+  display: none;
+}
+
+.sidebar__group-title::after {
+  content: "+";
+  margin-left: auto;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.sidebar__group[open] > .sidebar__group-title::after {
+  content: "\2212";
+}
+
+.sidebar__group-title:hover {
+  color: var(--color-text-primary);
+}
+
+/* -------------------------------------------------------------------------
+   Sidebar pinned section
+   ------------------------------------------------------------------------- */
+
+.sidebar__pinned {
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-border-default);
+  padding-bottom: var(--space-xs);
+  margin-bottom: var(--space-xs);
+}
+
+/* -------------------------------------------------------------------------
+   Topbar
+   ------------------------------------------------------------------------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  min-height: var(--nav-height);
+  padding: var(--space-sm) var(--page-padding);
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-border-default);
+  background: var(--color-bg-primary);
+  flex-shrink: 0;
+}
+
+.topbar__search {
+  flex: 1;
+  position: relative;
+  max-width: var(--topbar-search-max-width);
+  margin: 0 auto;
+}
+
+.topbar__search-kbd {
+  position: absolute;
+  right: var(--space-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-sans);
+  color: var(--color-text-muted);
+  background: var(--color-bg-primary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.topbar__search-input {
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.topbar__search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.topbar__search-input::-webkit-search-decoration,
+.topbar__search-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+.topbar__search-input:focus {
+  border-color: var(--color-border-focus);
+  background: var(--color-bg-primary);
+}
+
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.topbar__action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: var(--border-width) var(--border-style) transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.topbar__action-btn:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-default);
+}
+
+/* -------------------------------------------------------------------------
+   Mobile — must come AFTER all base styles (same specificity, source order)
+   ------------------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .app-shell {
+    display: block;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  html.sidebar-open .sidebar {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    z-index: var(--z-sidebar);
+  }
+
+  html.sidebar-open .sidebar-overlay {
+    display: block;
+  }
+
+  .topbar {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  /* Hide secondary controls — accessible via Settings page */
+  .topbar__actions {
+    display: none;
+  }
+
+  /* No keyboard shortcut on touch devices */
+  .topbar__search-kbd {
+    display: none;
+  }
+}

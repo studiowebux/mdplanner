@@ -1,9 +1,10 @@
 ---
 id: note_architecture
-created: "2026-01-05T10:00:00Z"
-updated: "2026-02-22T18:22:16.528Z"
-revision: 9
+created_at: "2026-01-05T10:00:00Z"
+updated_at: "2026-03-30T00:44:33.805Z"
+revision: 14
 mode: enhanced
+project: Client Portal
 ---
 
 # Architecture Overview
@@ -22,16 +23,10 @@ Primary entities: Users, Workspaces, Projects, Tasks, Comments, TimeEntries
 
 See C4 diagrams for detailed architecture views.
 
-```javascript
-Hello
-```
-
 <!-- Custom Section: Tech Stack -->
 <!-- section-id: section_stack, type: tabs -->
 
 ### Tab: Frontend
-<!-- tab-id: tab_1771784034588_a3a0 -->
-
 <!-- tab-id: tab_frontend -->
 
 - React 18 with TypeScript
@@ -40,8 +35,6 @@ Hello
 - React Query for server state
 
 ### Tab: Backend
-<!-- tab-id: tab_1771784034588_74xf -->
-
 <!-- tab-id: tab_backend -->
 
 - Deno with Hono framework
@@ -50,8 +43,6 @@ Hello
 - S3 for file storage
 
 ### Tab: Infrastructure
-<!-- tab-id: tab_1771784034588_707u -->
-
 <!-- tab-id: tab_infra -->
 
 - AWS ECS for containers
@@ -59,11 +50,16 @@ Hello
 - Route53 DNS
 - Terraform for IaC
 
-### Tab: Hello
-<!-- tab-id: tab_1771784034588_w1h2 -->
+### Tab: Database
+<!-- tab-id: tab_database -->
 
-<!-- tab-id: tab_1771209579776_zg0vszck1 -->
+Primary storage: PostgreSQL with connection pooling.
+Cache layer: Redis with 15-minute TTL.
+File storage: S3 with presigned URLs.
 
-Hello World !
+### Tab: Tab 9
+<!-- tab-id: tab_1774831462562_ymwva9 -->
+
+Testing editing
 
 <!-- End Custom Section -->

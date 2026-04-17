@@ -16,7 +16,7 @@ expenses:
     amount: 620
   - category: Marketing
     amount: 2000
-created: "2026-02-22T12:00:00.000Z"
+created_at: "2026-02-22T12:00:00.000Z"
 ---
 
 First month of Q4. Consulting revenue from a one-off engagement with a design

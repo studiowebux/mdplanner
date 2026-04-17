@@ -2,10 +2,10 @@
 id: member_cpo
 title: Chief Product Officer
 department: Executive
-reportsTo: member_ceo
+reports_to: member_ceo
 email: cpo@taskflow.io
 phone: "+1-555-0102"
-startDate: "2020-06-15"
+start_date: "2020-06-15"
 ---
 
 # Emily Rodriguez

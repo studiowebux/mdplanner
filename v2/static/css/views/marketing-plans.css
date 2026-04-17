@@ -1,0 +1,180 @@
+/* Marketing Plans view — domain-specific styles only.
+   Card base uses shared .domain-card from components.css. */
+
+/* Status + item status badge colors now use shared .badge--{variant} from components.css */
+
+/* ---------------------------------------------------------------------------
+   Card — extends .domain-card
+--------------------------------------------------------------------------- */
+
+.mktplan-card--completed {
+  opacity: var(--card-opacity-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Detail view
+--------------------------------------------------------------------------- */
+
+.mktplan-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.mktplan-detail__description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Detail tables use shared .data-table --compact --uppercase from components.css */
+
+/* ---------------------------------------------------------------------------
+   KPI progress
+--------------------------------------------------------------------------- */
+
+.mktplan-detail__kpis {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.mktplan-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+}
+
+.mktplan-kpi__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: var(--font-size-sm);
+}
+
+.mktplan-kpi__metric {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.mktplan-kpi__metric a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.mktplan-kpi__label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.mktplan-kpi__values {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.mktplan-kpi__bar {
+  height: var(--space-sm);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.mktplan-kpi__fill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: var(--radius-sm);
+  transition: width var(--transition-fast);
+}
+
+.mktplan-kpi__pct {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  align-self: flex-end;
+}
+
+/* ---------------------------------------------------------------------------
+   Hypothesis
+--------------------------------------------------------------------------- */
+
+.mktplan-detail__hypothesis-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.mktplan-detail__hypothesis-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.mktplan-detail__hypothesis-text {
+  flex: 1;
+}
+
+/* Verdict badge colors now use shared .badge--{variant} from components.css */
+
+/* ---------------------------------------------------------------------------
+   Team
+--------------------------------------------------------------------------- */
+
+.mktplan-detail__team {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+/* ---------------------------------------------------------------------------
+   Meta
+--------------------------------------------------------------------------- */
+
+.mktplan-detail__meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Detail tables — borders for markdown-rendered tables
+--------------------------------------------------------------------------- */
+
+.mktplan-detail table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+  margin: var(--space-sm) 0;
+}
+
+.mktplan-detail th {
+  text-align: left;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: calc(var(--border-width) * 2) var(--border-style)
+    var(--color-border-strong);
+  background: var(--color-bg-secondary);
+}
+
+.mktplan-detail td {
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-border-default);
+  color: var(--color-text-secondary);
+}
+
+.mktplan-detail tr:hover td {
+  background: var(--color-bg-hover);
+}
+
+@media (max-width: 768px) {
+  .mktplan-detail__table {
+    display: block;
+    overflow-x: auto;
+  }
+}

@@ -9,8 +9,8 @@ nameservers:
   - "ns1.cloudflare.com"
   - "ns2.cloudflare.com"
 last_fetched_at: "2026-02-27T10:00:00.000Z"
-created: "2025-01-10T08:00:00.000Z"
-updated: "2026-02-27T10:00:00.000Z"
+created_at: "2025-01-10T08:00:00.000Z"
+updated_at: "2026-02-27T10:00:00.000Z"
 ---
 
 Primary domain for the main product. Managed via Cloudflare Registrar.

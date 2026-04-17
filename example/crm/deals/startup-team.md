@@ -7,7 +7,7 @@ value: 1200
 stage: proposal
 probability: 80
 expectedCloseDate: 2026-03-15
-created: 2026-01-25
+created_at: 2026-01-25
 ---
 
 # Startup Labs Team Plan

@@ -20,8 +20,8 @@ completions:
   - "2026-02-13"
 streak_count: 12
 longest_streak: 12
-created: "2026-02-13T08:00:00.000Z"
-updated: "2026-02-27T08:15:00.000Z"
+created_at: "2026-02-13T08:00:00.000Z"
+updated_at: "2026-02-27T08:15:00.000Z"
 ---
 
 Daily habit: 20 minutes of any physical activity in the morning. Can be a walk,

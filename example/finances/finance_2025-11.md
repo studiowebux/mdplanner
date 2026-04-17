@@ -18,7 +18,7 @@ expenses:
     amount: 3200
   - category: Legal
     amount: 1800
-created: "2026-02-22T12:00:00.000Z"
+created_at: "2026-02-22T12:00:00.000Z"
 ---
 
 MRR grew 19% from October. Legal fees related to customer contract review.

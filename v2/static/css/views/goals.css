@@ -1,0 +1,311 @@
+/* Goals view — domain-specific styles only.
+   Card base uses shared .domain-card from components.css. */
+
+/* Status + type + priority badge colors now use shared .badge--{variant} from components.css */
+
+/* ---------------------------------------------------------------------------
+   Progress cell (table)
+--------------------------------------------------------------------------- */
+
+.goal-progress-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.goal-progress-cell .progress-bar {
+  width: var(--progress-bar-inline-width);
+  height: var(--progress-bar-height);
+}
+
+/* ---------------------------------------------------------------------------
+   Deadline indicator
+--------------------------------------------------------------------------- */
+
+.goal-deadline {
+  font-size: var(--font-size-sm);
+  color: var(--color-success-text);
+}
+
+.goal-deadline--overdue {
+  color: var(--color-error-text);
+}
+
+/* ---------------------------------------------------------------------------
+   Card — extends .domain-card
+--------------------------------------------------------------------------- */
+
+.goal-card--completed {
+  opacity: var(--card-opacity-muted);
+}
+
+/* Progress uses shared .progress-group, .progress-bar, .progress-label from components.css */
+
+.goal-card__description {
+  position: relative;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--body-line-height);
+  max-height: var(--card-description-max-height);
+  overflow-y: auto;
+  padding-bottom: var(--card-description-fade);
+  flex: 1;
+  mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - var(--card-description-fade)),
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - var(--card-description-fade)),
+    transparent
+  );
+}
+
+/* ---------------------------------------------------------------------------
+   Detail view
+--------------------------------------------------------------------------- */
+
+.goal-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.goal-detail__links {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+/* ---------------------------------------------------------------------------
+   SMART criteria hints (progressive enhancement via goal-smart.js)
+--------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   OKR tree view — project groups
+--------------------------------------------------------------------------- */
+
+.goal-tree-groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+/* Jump nav — sticky pill bar */
+
+.goal-tree-groups__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-md);
+  border-bottom: var(--border-width) solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-toolbar);
+  background: var(--color-bg-primary);
+}
+
+/* Project group section */
+
+.goal-tree-group {
+  scroll-margin-top: calc(var(--nav-height) + var(--space-xl));
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: visible;
+}
+
+.goal-tree-group + .goal-tree-group {
+  margin-top: var(--space-md);
+}
+
+.goal-tree-group__heading {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  margin: 0;
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.goal-tree-group > .goal-tree {
+  padding: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   OKR tree view — list + nodes
+--------------------------------------------------------------------------- */
+
+.goal-tree {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.goal-tree__children {
+  list-style: none;
+  padding-left: var(--space-xl);
+  margin: var(--space-xs) 0 0;
+  position: relative;
+}
+
+/* Vertical connector line */
+.goal-tree__children::before {
+  content: "";
+  position: absolute;
+  left: var(--space-sm);
+  top: 0;
+  bottom: var(--space-md);
+  width: var(--border-width);
+  background: var(--color-border);
+}
+
+.goal-tree__item {
+  padding: var(--space-sm) 0;
+  position: relative;
+}
+
+/* Horizontal branch connector for child items */
+.goal-tree__children > .goal-tree__item::before {
+  content: "";
+  position: absolute;
+  left: calc(-1 * var(--space-xl) + var(--space-sm));
+  top: calc(var(--space-sm) + var(--font-size-sm));
+  width: calc(var(--space-xl) - var(--space-md));
+  height: var(--border-width);
+  background: var(--color-border);
+}
+
+/* Root items — card nodes */
+.goal-tree__item--root {
+  padding: 0;
+}
+
+.goal-tree__item--root + .goal-tree__item--root {
+  margin-top: var(--space-md);
+}
+
+.goal-tree__node {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--space-sm) var(--space-md);
+  transition: box-shadow var(--transition-fast);
+}
+
+.goal-tree__node:hover {
+  box-shadow: var(--card-shadow-hover);
+}
+
+/* Root-level titles are larger */
+.goal-tree__title {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+}
+
+.goal-tree__title--root {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+.goal-tree__title:hover {
+  color: var(--color-accent);
+}
+
+.goal-tree__progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.goal-tree__progress .progress-bar {
+  width: var(--progress-bar-inline-width);
+  height: var(--progress-bar-height);
+}
+
+.goal-tree__owner {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   SMART criteria hints (progressive enhancement via goal-smart.js)
+--------------------------------------------------------------------------- */
+
+.smart-hints {
+  padding: var(--space-md);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.smart-hints__title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  margin-bottom: var(--space-sm);
+}
+
+.smart-hints__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.smart-hints__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.smart-hints__icon {
+  display: inline-block;
+  width: var(--font-size-base);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.smart-hints__item--pass .smart-hints__icon::before {
+  content: "\2713";
+  color: var(--color-success-text);
+}
+
+.smart-hints__item--fail .smart-hints__icon::before {
+  content: "\2717";
+  color: var(--color-text-muted);
+}
+
+.smart-hints__item--neutral .smart-hints__icon::before {
+  content: "\2014";
+  color: var(--color-text-muted);
+}
+
+.smart-hints__item--pass .smart-hints__label {
+  color: var(--color-success-text);
+}
+
+.smart-hints__hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+}

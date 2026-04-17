@@ -2,8 +2,8 @@
 id: onboarding_1708600000002_drek
 employeeName: Derek Osei
 role: Account Executive
-startDate: 2026-02-25
-created: "2026-02-22T12:00:00.000Z"
+start_date: 2026-02-25
+created_at: "2026-02-22T12:00:00.000Z"
 steps:
   -
     id: step_001

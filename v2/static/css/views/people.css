@@ -1,0 +1,544 @@
+/* People view — domain-specific styles only.
+   Page layout uses shared .domain-page from components.css. */
+
+/* Person card — uses shared DomainCard, only domain-specific styles here */
+
+.person-card__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  border-radius: var(--radius-full);
+  font-size: var(--avatar-font-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-inverse);
+  flex-shrink: 0;
+}
+
+.person-card__avatar--human {
+  background: var(--color-success);
+}
+
+.person-card__avatar--ai {
+  background: var(--color-accent);
+}
+
+.person-card__avatar--hybrid {
+  background: var(--color-warning);
+}
+
+/* Agent type + status badge colors now use shared .badge--{variant} from components.css */
+
+/* Skills tags */
+
+.person-card__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+/* -------------------------------------------------------------------------
+   Detail view
+   ------------------------------------------------------------------------- */
+
+.person-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.person-detail__identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.person-detail__name {
+  font-weight: var(--font-weight-bold);
+}
+
+.person-detail__title {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+}
+
+.person-detail__meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-xs) var(--space-lg);
+  font-size: var(--font-size-base);
+}
+
+.person-detail__meta dt {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.person-detail__meta dd {
+  color: var(--color-text-primary);
+}
+
+.person-detail__meta dd a {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.person-detail__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.person-detail__count {
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-base);
+}
+
+.person-detail__prompt {
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--space-md);
+}
+
+.person-detail__prompt summary {
+  cursor: pointer;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.person-detail__prompt pre {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.person-detail__notes {
+  font-size: var(--font-size-base);
+  line-height: var(--body-line-height);
+  color: var(--color-text-secondary);
+}
+
+.person-detail__reports {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.person-detail__reports li {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.person-detail__reports a {
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+}
+
+.person-detail__reports a:hover {
+  text-decoration: underline;
+}
+
+.person-detail__report-title {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* =========================================================================
+   Org Chart — tree view with connector lines
+   ========================================================================= */
+
+/* ── Controls bar — zoom slider, fit button ──────────────────────── */
+
+.orgchart-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: var(--orgchart-connector-width) solid
+    var(--color-border-default);
+}
+
+.orgchart-controls__slider {
+  width: var(--orgchart-controls-slider-w);
+  accent-color: var(--color-accent);
+}
+
+.orgchart-controls__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  min-width: var(--orgchart-controls-label-min-w);
+}
+
+.orgchart-controls__sep {
+  width: var(--orgchart-connector-width);
+  height: var(--space-md);
+  background: var(--color-border-default);
+  flex-shrink: 0;
+}
+
+/* ── Container + viewport ─────────────────────────────────────────── */
+
+/* Lock parent to prevent page scroll when org canvas is visible */
+.app-shell__content:has(.orgchart-container) {
+  overflow: hidden;
+}
+
+.orgchart-container {
+  position: relative;
+  overflow: hidden;
+  height: var(--orgchart-canvas-height);
+  cursor: grab;
+  border: var(--orgchart-connector-width) solid var(--color-border-default);
+  border-radius: var(--card-radius);
+}
+
+.orgchart-container:active {
+  cursor: grabbing;
+}
+
+.orgchart-viewport {
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* ── Tree layout — centered column ────────────────────────────────── */
+
+.orgchart-tree {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-xl);
+  gap: var(--space-xl);
+}
+
+/* Root separator */
+
+.orgchart-tree > .orgchart-node-wrapper {
+  padding-top: var(--space-lg);
+  border-top: var(--orgchart-connector-width) dashed
+    var(--color-border-default);
+}
+
+.orgchart-tree > .orgchart-node-wrapper:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+/* ── Node wrapper ─────────────────────────────────────────────────── */
+
+.orgchart-node-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── Node card ────────────────────────────────────────────────────── */
+
+.orgchart-node {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--space-sm) var(--space-md);
+  min-width: var(--orgchart-node-min-w);
+  max-width: var(--orgchart-node-max-w);
+  cursor: pointer;
+  transition:
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.orgchart-node:hover {
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--color-text-muted);
+}
+
+/* ── Node header ──────────────────────────────────────────────────── */
+
+.orgchart-node-header {
+  padding-left: var(--space-sm);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.orgchart-node-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.orgchart-node-name {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+}
+
+.orgchart-node-name a {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.orgchart-node-title {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.orgchart-node-dept {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--orgchart-dept-spacing);
+}
+
+/* ── Department color classes (border-left on node header) ────────── */
+/* Base: any orgchart-dept-* class gets a fallback border.
+   Extend by adding --orgchart-dept-color-N in variables.css + a class here. */
+
+[class*="orgchart-dept-"] {
+  border-left: var(--orgchart-dept-border-width) solid var(--color-text-muted);
+}
+
+.orgchart-dept-0 {
+  border-left: var(--orgchart-dept-border-width) solid
+    var(--orgchart-dept-color-0);
+}
+.orgchart-dept-1 {
+  border-left: var(--orgchart-dept-border-width) solid
+    var(--orgchart-dept-color-1);
+}
+.orgchart-dept-2 {
+  border-left: var(--orgchart-dept-border-width) solid
+    var(--orgchart-dept-color-2);
+}
+.orgchart-dept-3 {
+  border-left: var(--orgchart-dept-border-width) solid
+    var(--orgchart-dept-color-3);
+}
+.orgchart-dept-4 {
+  border-left: var(--orgchart-dept-border-width) solid
+    var(--orgchart-dept-color-4);
+}
+.orgchart-dept-5 {
+  border-left: var(--orgchart-dept-border-width) solid
+    var(--orgchart-dept-color-5);
+}
+.orgchart-dept-6 {
+  border-left: var(--orgchart-dept-border-width) solid
+    var(--orgchart-dept-color-6);
+}
+.orgchart-dept-7 {
+  border-left: var(--orgchart-dept-border-width) solid
+    var(--orgchart-dept-color-7);
+}
+.orgchart-dept-none {
+  border-left: var(--orgchart-dept-border-width) solid var(--color-text-muted);
+}
+
+/* ── Connector lines ──────────────────────────────────────────────── */
+
+.orgchart-children {
+  display: flex;
+  gap: var(--space-lg);
+  padding-top: var(--space-xl);
+  position: relative;
+}
+
+/* Vertical line from parent down to horizontal bar */
+
+.orgchart-children::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--orgchart-connector-width);
+  height: var(--space-md);
+  background: var(--orgchart-connector-color);
+}
+
+/* Horizontal line across siblings */
+
+.orgchart-children::after {
+  content: "";
+  position: absolute;
+  top: var(--space-md);
+  left: 0;
+  right: 0;
+  height: var(--orgchart-connector-width);
+  background: var(--orgchart-connector-color);
+}
+
+/* Single child — no horizontal line */
+
+.orgchart-children:has(> .orgchart-node-wrapper:only-child)::after {
+  display: none;
+}
+
+/* Vertical line from horizontal bar down to each child */
+
+.orgchart-children > .orgchart-node-wrapper {
+  position: relative;
+}
+
+.orgchart-children > .orgchart-node-wrapper::before {
+  content: "";
+  position: absolute;
+  top: calc(-1 * var(--space-md));
+  left: 50%;
+  width: var(--orgchart-connector-width);
+  height: var(--space-md);
+  background: var(--orgchart-connector-color);
+}
+
+/* ── Hover highlight — dim non-hovered branches, keep subtree ────── */
+/* Disabled during drag (container gets .orgchart-is-dragging via JS) */
+/* All rules share the .orgchart-tree:not(.orgchart-is-dragging) prefix for equal specificity */
+
+.orgchart-tree:not(.orgchart-is-dragging):has(.orgchart-node:hover)
+  .orgchart-node {
+  opacity: var(--orgchart-drag-opacity);
+  transition: opacity var(--transition-fast);
+}
+
+.orgchart-tree:not(.orgchart-is-dragging) .orgchart-node:hover {
+  opacity: 1;
+}
+
+.orgchart-tree:not(.orgchart-is-dragging)
+  .orgchart-node-wrapper:has(.orgchart-node:hover)
+  > .orgchart-node {
+  opacity: 1;
+}
+
+.orgchart-tree:not(.orgchart-is-dragging)
+  .orgchart-node:hover
+  + .orgchart-children
+  .orgchart-node {
+  opacity: 1;
+}
+
+/* ── Drag handle ──────────────────────────────────────────────────── */
+
+.orgchart-drag-handle {
+  position: absolute;
+  top: var(--space-xs);
+  right: var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  cursor: grab;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  letter-spacing: var(--orgchart-handle-spacing);
+}
+
+.orgchart-node:hover .orgchart-drag-handle {
+  opacity: var(--orgchart-handle-opacity);
+}
+
+.orgchart-node .orgchart-drag-handle:hover {
+  opacity: 1;
+}
+
+/* ── Drag states ──────────────────────────────────────────────────── */
+
+.orgchart-node[draggable="true"] {
+  cursor: grab;
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+.orgchart-drag-ghost {
+  position: absolute;
+  top: -9999px;
+  transform: scale(var(--orgchart-current-zoom));
+  transform-origin: 0 0;
+}
+
+.orgchart-node.orgchart-dragging {
+  opacity: var(--orgchart-drag-opacity);
+  cursor: grabbing;
+}
+
+.orgchart-node.orgchart-drop-target {
+  outline: var(--orgchart-dept-border-width) solid var(--color-accent);
+  outline-offset: var(--orgchart-drop-ring-size);
+  box-shadow: 0 0 0 var(--orgchart-drop-ring-size) var(--color-accent-subtle);
+}
+
+.orgchart-node.orgchart-drop-invalid {
+  outline: var(--orgchart-dept-border-width) solid var(--color-error);
+  outline-offset: var(--orgchart-drop-ring-size);
+  box-shadow: 0 0 0 var(--orgchart-drop-ring-size) var(--color-error-bg);
+  cursor: not-allowed;
+}
+
+/* ── Unlink drop zone ─────────────────────────────────────────────── */
+
+.orgchart-unlink-zone {
+  display: none;
+  position: fixed;
+  bottom: var(--space-lg);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--card-bg);
+  border: var(--orgchart-dept-border-width) dashed var(--color-border-default);
+  border-radius: var(--card-radius);
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  z-index: var(--orgchart-z-unlink);
+  transition: all var(--transition-fast);
+}
+
+.orgchart-unlink-zone.active {
+  display: block;
+}
+
+.orgchart-unlink-zone.drag-over {
+  border-color: var(--color-accent);
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
+  transform: translateX(-50%) scale(var(--orgchart-unlink-scale));
+}
+
+/* Empty state uses shared EmptyState component (.empty-state) */
+
+/* ── Responsive ───────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .orgchart-tree {
+    padding: var(--space-md);
+    overflow-x: auto;
+    align-items: flex-start;
+  }
+
+  .orgchart-children {
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .orgchart-children::after {
+    display: none;
+  }
+
+  .orgchart-node {
+    min-width: var(--orgchart-node-min-w-mobile);
+    max-width: var(--orgchart-node-max-w-mobile);
+    padding: var(--space-xs) var(--space-sm);
+  }
+}

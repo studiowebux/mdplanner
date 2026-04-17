@@ -2,9 +2,9 @@
 id: member_designer
 title: Senior UX Designer
 department: Product
-reportsTo: member_cpo
+reports_to: member_cpo
 email: grace.lee@taskflow.io
-startDate: "2022-03-15"
+start_date: "2022-03-15"
 ---
 
 # Grace Lee

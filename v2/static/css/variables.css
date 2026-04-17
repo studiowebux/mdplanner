@@ -1,0 +1,525 @@
+/* ==========================================================================
+   Theme System
+
+   To create a new theme:
+   1. Copy the .theme-light block
+   2. Rename to .theme-{name}
+   3. Adjust color values
+   4. Add theme class to <html> element
+
+   Available themes:
+   - light (default)
+   - dark (toggle via .dark class)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Base: Semantic variable names (do not change these names)
+   -------------------------------------------------------------------------- */
+
+:root {
+  /* Breakpoints — CSS vars can't be used in @media queries (spec limitation),
+     so 768px is hardcoded in @media rules. This var exists so JS can read
+     it via getComputedStyle instead of duplicating the magic number. */
+  --breakpoint-mobile: 768px;
+
+  /* Typography - shared across all themes */
+  --font-sans: "Roboto", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Font size scale */
+  --font-size-xs: 0.75rem; /* 12px — minimum floor: badges, micro labels */
+  --font-size-sm: 0.875rem; /* 14px — captions, secondary info */
+  --font-size-base: 1rem; /* 16px — body text, interactive elements */
+  --font-size-lg: 1.125rem; /* 18px — subheadings, section titles */
+  --font-size-lg-plus: 1.25rem; /* 20px — section headers, sidenav titles */
+  --font-size-xl: 1.5rem; /* 24px — headings */
+  --font-size-xxl: 2rem; /* 32px — display numbers, hero values */
+
+  /* Spacing scale */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+
+  /* Letter spacing */
+  --letter-spacing-tight: 0.01em;
+  --letter-spacing-wide: 0.03em;
+  --letter-spacing-task-badge: 0.04em;
+
+  /* Border radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
+
+  /* Opacity */
+  --opacity-hidden: 0;
+  --opacity-visible: 1;
+  --opacity-muted: 0.6;
+  --opacity-disabled: 0.4;
+
+  /* Shadows - light theme defaults */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+  /* Static colors — never change across themes */
+  --color-static-white: #ffffff;
+  --color-static-black: #000000;
+
+  /* Strategic level accent colors — semantic constants, not theme-dependent */
+  --color-level-vision: #8b5cf6;
+  --color-level-mission: #3b82f6;
+  --color-level-objective: #22c55e;
+  --color-level-key-result: #eab308;
+  --color-level-initiative: #f97316;
+  --color-level-project: #ef4444;
+
+  /* Lean Canvas tokens */
+  --lc-section-min-height: 8rem;
+
+  /* Org chart tokens */
+  --orgchart-min-height: 25rem;
+  --orgchart-node-min-w: 11.25rem;
+  --orgchart-node-max-w: 15rem;
+  --orgchart-node-min-w-mobile: 9.375rem;
+  --orgchart-node-max-w-mobile: 11.25rem;
+  --orgchart-connector-width: 1px;
+  --orgchart-connector-color: var(--color-text-secondary);
+  --orgchart-dept-border-width: 4px;
+  --orgchart-drag-opacity: 0.4;
+  --orgchart-drag-scale-down: 0.98;
+  --orgchart-drop-scale-up: 1.02;
+  --orgchart-drop-ring-size: 4px;
+  --orgchart-unlink-scale: 1.05;
+  --orgchart-handle-opacity: 0.6;
+  --orgchart-handle-spacing: -0.1em;
+  --orgchart-dept-spacing: 0.05em;
+  --orgchart-z-unlink: 100;
+
+  --orgchart-controls-slider-w: 8rem;
+  --orgchart-controls-label-min-w: 3rem;
+
+  /* ── Sticky note canvas ─────────────────────────────────────────────── */
+  --sticky-note-z-drag: 50;
+  --sticky-note-drag-scale: 1.02;
+  --sticky-note-drag-rotate: 1deg;
+  --sticky-note-enter-scale: 0.85;
+  --sticky-note-remove-scale: 0.90;
+  --sticky-note-dot-hover-scale: 1.2;
+  --sticky-note-dot-active-scale: 1.15;
+  --sticky-note-resize-opacity: 0.2;
+  --sticky-note-resize-opacity-hover: 0.45;
+  --sticky-note-toolbar-opacity-off: 0.25;
+  --sticky-note-zoom-display-w: 3rem;
+  --sticky-note-handle-h: 0.375rem;
+  --sticky-note-delete-hover-bg: var(--color-bg-tertiary);
+  --sticky-note-delete-line-height: 1;
+  --sticky-canvas-height: 600px; /* fallback; overridden by JS on init */
+
+  /* ── Category color palette ─────────────────────────────────────────
+     Reusable across domains: org chart departments, tags, status badges.
+     Each category has light/base/dark variants. */
+
+  /* Orange */
+  --color-cat-orange-light: #ed8b00;
+  --color-cat-orange: #e57200;
+  --color-cat-orange-dark: #dc4405;
+
+  /* Yellow */
+  --color-cat-yellow-light: #fedb00;
+  --color-cat-yellow: #ffc600;
+  --color-cat-yellow-dark: #f2a900;
+
+  /* Green */
+  --color-cat-green-light: #78be20;
+  --color-cat-green: #4c8c2b;
+  --color-cat-green-dark: #44693d;
+
+  /* Blue */
+  --color-cat-blue-light: #00a3e0;
+  --color-cat-blue: #0085ad;
+  --color-cat-blue-dark: #005670;
+
+  /* Dark Blue */
+  --color-cat-navy-light: #006298;
+  --color-cat-navy: #003865;
+  --color-cat-navy-dark: #041e42;
+
+  /* Purple */
+  --color-cat-purple-light: #93328e;
+  --color-cat-purple: #642f6c;
+  --color-cat-purple-dark: #3c1053;
+
+  /* Pink */
+  --color-cat-pink-light: #ce0f69;
+  --color-cat-pink: #ac145a;
+  --color-cat-pink-dark: #6c1d45;
+
+  /* Org chart department palette — references category base colors */
+  --orgchart-dept-color-0: var(--color-cat-orange);
+  --orgchart-dept-color-1: var(--color-cat-green);
+  --orgchart-dept-color-2: var(--color-cat-blue);
+  --orgchart-dept-color-3: var(--color-cat-navy);
+  --orgchart-dept-color-4: var(--color-cat-purple);
+  --orgchart-dept-color-5: var(--color-cat-pink);
+  --orgchart-dept-color-6: var(--color-cat-yellow-dark);
+  --orgchart-dept-color-7: var(--color-cat-green-dark);
+
+  /* ── Component tokens ────────────────────────────────────────────────── */
+
+  /* Typography weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --body-line-height: 1.6;
+
+  /* Card */
+  --card-bg: var(--color-bg-primary);
+  --card-border: 1px solid var(--color-border-default);
+  --card-radius: var(--radius-lg);
+  --card-padding: var(--space-lg);
+  --card-gap: var(--space-md);
+  --card-shadow: var(--shadow-sm);
+  --card-shadow-hover: var(--shadow-md);
+  --card-opacity-muted: 0.5;
+  --card-opacity-completed: 0.55;
+  --card-description-max-height: 16rem;
+  --card-min-width: 10rem;
+  --card-description-fade: 2rem;
+
+  /* Avatar */
+  --avatar-size: var(--space-xl);
+  --avatar-font-size: var(--font-size-sm);
+
+  /* Badge */
+  --badge-padding: var(--space-xs) var(--space-sm);
+  --badge-font-weight: 500;
+
+  /* Progress bar */
+  --progress-bar-height: 6px;
+
+  /* Grid */
+  --grid-col-min: 320px;
+  --grid-gap: var(--space-lg);
+
+  /* Page */
+  --page-padding: var(--space-lg);
+  --page-max-width: 100%;
+  --error-page-min-height: 60vh;
+
+  /* Borders */
+  --border-width: 1px;
+  --border-width-thick: 3px;
+  --border-style: solid;
+
+  /* Nav / Shell */
+  --nav-height: 3rem;
+  --sidebar-width: 14rem;
+  --save-bar-h: 3.5rem;
+  --topbar-search-max-width: 28rem;
+  --sidebar-active-border-width: 2px;
+
+  /* Z-index scale — single source of truth, ascending order */
+  --z-table-head: 2;
+  --z-table-sticky: 3;
+  --z-toolbar: 10;
+  --z-dropdown: 250;
+  --z-overlay: 199;
+  --z-sidebar: 200;
+  --z-sidenav: 300;
+  --z-toast: 400;
+
+  /* Overlay */
+  --overlay-bg: rgba(0, 0, 0, 0.4);
+
+  /* Sidenav */
+  --sidenav-width: 24rem;
+  --sidenav-resize-width: 4px;
+
+  /* Dialog */
+  --dialog-max-width: 28rem;
+
+  /* Search dialog */
+  --search-dialog-max-width: 40rem;
+  --search-dialog-max-height: 28rem;
+  --search-badge-min-width: 5rem;
+
+  /* Spinner */
+  --spinner-size: 1.5rem;
+  --spinner-border-width: 2px;
+
+  /* Autocomplete */
+  --autocomplete-max-height: 12rem;
+
+  /* Table */
+  --progress-col-min-width: 6rem;
+  --progress-bar-inline-width: 5rem;
+  --table-compact-cell-max-width: 16rem;
+
+  /* Toolbar */
+  --toolbar-search-min-width: 12rem;
+  --toolbar-search-max-width: 20rem;
+
+  /* Column toggle */
+  --column-toggle-min-width: 10rem;
+
+  /* Swap animation */
+  --swap-transition-duration: 0.05s;
+
+  /* Task views */
+  --task-board-col-min-w: 22rem;
+  --task-board-col-max-w: none;
+  --task-board-card-min-h: 8rem;
+  --task-timeline-label-w: 20rem;
+  --task-timeline-label-w-mobile: 12rem;
+  --task-dep-stroke-w: 1.5;
+  --task-dep-stroke-w-active: 2.5;
+  --task-dep-dash: 4 3;
+  --task-dep-arrow-size: 5;
+  --task-meta-assignee-w: 8rem;
+  --task-meta-milestone-w: 10rem;
+  --task-meta-due-w: 6rem;
+  --task-meta-effort-w: 3rem;
+  --task-actions-w: 18rem;
+  --task-detail-input-w: 14rem;
+
+  /* Note views */
+  --note-tab-indicator-w: 2px;
+  --note-timeline-dot-size: 0.75rem;
+  --note-split-col-min-w: 15rem;
+
+  /* Settings */
+  --settings-input-narrow-max: var(--toolbar-search-min-width);
+  --settings-textarea-min-height: var(--autocomplete-max-height);
+  --settings-tab-indicator: var(--sidebar-active-border-width);
+
+  /* Org chart — initial value overridden by JS at runtime */
+  --orgchart-current-zoom: 1;
+
+  /* Semantic color aliases — reference theme vars, resolve per active theme */
+  --color-badge-bg: var(--color-bg-secondary);
+  --color-badge-text: var(--color-text-secondary);
+  --color-highlight: var(--color-warning-bg);
+
+  /* Meeting detail — action items */
+  --meeting-action-input-basis: 12rem;
+  --meeting-action-input-sm-basis: 8rem;
+
+  /* Meeting detail — carry-over section */
+  --meeting-carryover-gap: var(--space-xs);
+  --meeting-carryover-item-gap: var(--space-sm);
+  --meeting-carryover-source-gap: var(--space-xs);
+}
+
+html.font-mono {
+  --font-sans: "JetBrains Mono", monospace;
+}
+
+/* --------------------------------------------------------------------------
+   Theme: Light (default)
+   -------------------------------------------------------------------------- */
+
+:root:not(.dark) {
+  color-scheme: light;
+
+  /* Backgrounds */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f5f5f5;
+  --color-bg-tertiary: #ebebeb;
+  --color-bg-inverse: #000000;
+  --color-bg-hover: #f5f5f5;
+  --color-bg-active: #e0e0e0;
+
+  /* Text */
+  --color-text-primary: #000000;
+  --color-text-secondary: #2c2c2c;
+  --color-text-muted: #6b6b6b;
+  --color-text-inverse: #ffffff;
+
+  /* Borders */
+  --color-border-default: #e0e0e0;
+  --color-border-strong: #c0c0c0;
+  --color-border-focus: #8e8e8e;
+
+  /* Accent — amber/gold */
+  --color-accent: #ffab00;
+  --color-accent-hover: #e69a00;
+  --color-accent-subtle: #fff3d0;
+  --color-text-on-accent: #000;
+  --color-accent-muted: #ffd666;
+
+  /* Success */
+  --color-success: #04b34f;
+  --color-success-bg: #e8f5e9;
+  --color-success-border: #a5d6a7;
+  --color-success-text: #2e7d32;
+
+  /* Warning */
+  --color-warning: #ff9900;
+  --color-warning-hover: #e68a00;
+  --color-warning-bg: #fff3e0;
+  --color-warning-border: #ffcc80;
+  --color-warning-text: #000000;
+
+  /* Error */
+  --color-error: #a6192e;
+  --color-danger: #a6192e;
+  --color-error-bg: #fbe9ec;
+  --color-error-border: #f1b8bf;
+  --color-error-text: #a6192e;
+
+  /* Info */
+  --color-info: #0057b8;
+  --color-info-bg: #e3f2fd;
+  --color-info-border: #90caf9;
+  --color-info-text: #0057b8;
+
+  /* Purple */
+  --color-purple-bg: #f3e8fd;
+  --color-purple-text: #6b21a8;
+
+  /* Teal */
+  --color-teal-bg: #e0f7fa;
+  --color-teal-text: #00695c;
+
+  /* Orange */
+  --color-orange-bg: #fff0e0;
+  --color-orange-text: #c25400;
+
+  /* Pink */
+  --color-pink-bg: #fce4ec;
+  --color-pink-text: #ad1457;
+
+  /* Shadows */
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
+
+  /* Sticky note colors — light theme (warm paper-like tones) */
+  --sticky-yellow-bg: #fff9c4;
+  --sticky-yellow-border: #f9a825;
+  --sticky-yellow-text: #33291a;
+  --sticky-pink-bg: #fce4ec;
+  --sticky-pink-border: #e91e63;
+  --sticky-pink-text: #33001a;
+  --sticky-blue-bg: #e3f2fd;
+  --sticky-blue-border: #1565c0;
+  --sticky-blue-text: #0a1929;
+  --sticky-green-bg: #e8f5e9;
+  --sticky-green-border: #2e7d32;
+  --sticky-green-text: #1a2e1a;
+  --sticky-purple-bg: #f3e5f5;
+  --sticky-purple-border: #7b1fa2;
+  --sticky-purple-text: #2d0038;
+  --sticky-orange-bg: #fff3e0;
+  --sticky-orange-border: #e65100;
+  --sticky-orange-text: #33190a;
+}
+
+/* --------------------------------------------------------------------------
+   Theme: Dark
+   -------------------------------------------------------------------------- */
+
+.dark {
+  color-scheme: dark;
+
+  /* Backgrounds — warm dark */
+  --color-bg-primary: #343434;
+  --color-bg-secondary: #3e3e3e;
+  --color-bg-tertiary: #4a4a4a;
+  --color-bg-inverse: #f3f3f3;
+  --color-bg-hover: #4a4a4a;
+  --color-bg-active: #555555;
+
+  /* Text — warm cream/beige */
+  --color-text-primary: #f3f3f3;
+  --color-text-secondary: #e9dcbe;
+  --color-text-muted: #8e8b82;
+  --color-text-inverse: #343434;
+
+  /* Borders — warm gray */
+  --color-border-default: #4a4a4a;
+  --color-border-strong: #5e5e5e;
+  --color-border-focus: #8e8b82;
+
+  /* Accent — cream/beige */
+  --color-accent: #e9dcbe;
+  --color-accent-hover: #f3f3f3;
+  --color-text-on-accent: #000;
+  --color-accent-subtle: #4a4540;
+  --color-accent-muted: #b3a78e;
+
+  /* Success */
+  --color-success: #04b34f;
+  --color-success-bg: #1a3a2a;
+  --color-success-border: #2e7d32;
+  --color-success-text: #a5d6a7;
+
+  /* Warning */
+  --color-warning: #ff9900;
+  --color-warning-hover: #cc7a00;
+  --color-warning-bg: #3d2e10;
+  --color-warning-border: #b36b00;
+  --color-warning-text: #ffcc80;
+
+  /* Error */
+  --color-error: #a6192e;
+  --color-danger: #a6192e;
+  --color-error-bg: #3d1520;
+  --color-error-border: #7a1222;
+  --color-error-text: #dc3545;
+
+  /* Info */
+  --color-info: #0057b8;
+  --color-info-bg: #152a45;
+  --color-info-border: #003d82;
+  --color-info-text: #90caf9;
+
+  /* Purple */
+  --color-purple-bg: #2d1a45;
+  --color-purple-text: #c084fc;
+
+  /* Teal */
+  --color-teal-bg: #0d3838;
+  --color-teal-text: #5eead4;
+
+  /* Orange */
+  --color-orange-bg: #3d2800;
+  --color-orange-text: #ffb74d;
+
+  /* Pink */
+  --color-pink-bg: #3d1028;
+  --color-pink-text: #f48fb1;
+
+  /* Shadows — deeper for dark theme */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.7);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.8);
+
+  /* Sticky note colors — dark theme (muted, readable) */
+  --sticky-yellow-bg: #3d3510;
+  --sticky-yellow-border: #a07a00;
+  --sticky-yellow-text: #f5e49c;
+  --sticky-pink-bg: #3d1028;
+  --sticky-pink-border: #c2185b;
+  --sticky-pink-text: #f8bbd0;
+  --sticky-blue-bg: #0d1f3c;
+  --sticky-blue-border: #1565c0;
+  --sticky-blue-text: #bbdefb;
+  --sticky-green-bg: #0d2e14;
+  --sticky-green-border: #2e7d32;
+  --sticky-green-text: #c8e6c9;
+  --sticky-purple-bg: #2d1a45;
+  --sticky-purple-border: #7b1fa2;
+  --sticky-purple-text: #e1bee7;
+  --sticky-orange-bg: #3d1e08;
+  --sticky-orange-border: #e65100;
+  --sticky-orange-text: #ffe0b2;
+}

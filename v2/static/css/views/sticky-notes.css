@@ -1,0 +1,414 @@
+/* Sticky Notes — board list + canvas view.
+   All values from variables.css — zero hardcoded px/color/opacity/scale. */
+
+/* ---------------------------------------------------------------------------
+   Board list
+--------------------------------------------------------------------------- */
+
+.board-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  background: var(--color-bg-primary);
+  border: var(--border-width) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: var(--color-text-primary);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.board-card:hover {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.board-card__title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.board-card__description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.board-card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: auto;
+  padding-top: var(--space-xs);
+}
+
+.board-card__count {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* ---------------------------------------------------------------------------
+   Canvas container
+--------------------------------------------------------------------------- */
+
+.sticky-canvas {
+  display: flex;
+  flex-direction: column;
+  height: var(--sticky-canvas-height);
+  overflow: hidden;
+  background: var(--color-bg-secondary);
+}
+
+/* ---------------------------------------------------------------------------
+   Canvas toolbar
+--------------------------------------------------------------------------- */
+
+.sticky-canvas__toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: var(--border-width) solid var(--color-border-default);
+  background: var(--color-bg-primary);
+  flex-shrink: 0;
+  z-index: var(--z-toolbar);
+}
+
+.sticky-canvas__zoom-display {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  min-width: var(--sticky-note-zoom-display-w);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------
+   Viewport — overflow hidden, cursor toggled via JS CSSOM
+--------------------------------------------------------------------------- */
+
+.sticky-canvas__viewport {
+  flex: 1;
+  overflow: hidden;
+  cursor: grab;
+  position: relative;
+  user-select: none;
+}
+
+.sticky-canvas__viewport:active {
+  cursor: grabbing;
+}
+
+/* ---------------------------------------------------------------------------
+   Board — infinite workspace, transform applied by JS via CSSOM
+--------------------------------------------------------------------------- */
+
+.sticky-canvas__board {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  transform-origin: top left;
+}
+
+/* ---------------------------------------------------------------------------
+   Empty state
+--------------------------------------------------------------------------- */
+
+.sticky-canvas__empty {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-base);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+   Sticky note card
+--------------------------------------------------------------------------- */
+
+.sticky-note {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  cursor: default;
+  transition:
+    box-shadow var(--transition-fast),
+    opacity var(--transition-base),
+    transform var(--transition-base);
+}
+
+/* Toolbar hidden until hover/focus */
+.sticky-note .sticky-note__toolbar {
+  opacity: var(--opacity-hidden);
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+}
+
+.sticky-note:hover .sticky-note__toolbar,
+.sticky-note:focus-within .sticky-note__toolbar {
+  opacity: var(--opacity-visible);
+  pointer-events: auto;
+}
+
+/* ---------------------------------------------------------------------------
+   Color variants — bg / border / text from variables.css --sticky-* tokens
+--------------------------------------------------------------------------- */
+
+.sticky-note--yellow {
+  background: var(--sticky-yellow-bg);
+  border: var(--border-width) solid var(--sticky-yellow-border);
+  color: var(--sticky-yellow-text);
+}
+
+.sticky-note--pink {
+  background: var(--sticky-pink-bg);
+  border: var(--border-width) solid var(--sticky-pink-border);
+  color: var(--sticky-pink-text);
+}
+
+.sticky-note--blue {
+  background: var(--sticky-blue-bg);
+  border: var(--border-width) solid var(--sticky-blue-border);
+  color: var(--sticky-blue-text);
+}
+
+.sticky-note--green {
+  background: var(--sticky-green-bg);
+  border: var(--border-width) solid var(--sticky-green-border);
+  color: var(--sticky-green-text);
+}
+
+.sticky-note--purple {
+  background: var(--sticky-purple-bg);
+  border: var(--border-width) solid var(--sticky-purple-border);
+  color: var(--sticky-purple-text);
+}
+
+.sticky-note--orange {
+  background: var(--sticky-orange-bg);
+  border: var(--border-width) solid var(--sticky-orange-border);
+  color: var(--sticky-orange-text);
+}
+
+/* ---------------------------------------------------------------------------
+   Drag handle — thin bar at top, grab cursor
+--------------------------------------------------------------------------- */
+
+.sticky-note__handle {
+  height: var(--sticky-note-handle-h);
+  cursor: grab;
+  flex-shrink: 0;
+  opacity: var(--sticky-note-resize-opacity);
+  background: currentColor;
+  transition: opacity var(--transition-fast);
+}
+
+.sticky-note:hover .sticky-note__handle {
+  opacity: var(--sticky-note-resize-opacity-hover);
+}
+
+.sticky-note.is-dragging .sticky-note__handle {
+  cursor: grabbing;
+}
+
+/* ---------------------------------------------------------------------------
+   Content area (contenteditable)
+--------------------------------------------------------------------------- */
+
+.sticky-note__content {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-sm);
+  line-height: var(--body-line-height);
+  word-break: break-word;
+  overflow-y: auto;
+  outline: none;
+  cursor: text;
+  white-space: pre-wrap;
+}
+
+.sticky-note__content:empty::before {
+  content: attr(placeholder);
+  color: inherit;
+  opacity: var(--opacity-muted);
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Toolbar strip (color picker + delete)
+--------------------------------------------------------------------------- */
+
+.sticky-note__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-xs) var(--space-sm);
+  gap: var(--space-xs);
+  border-top: var(--border-width) solid currentColor;
+  opacity: var(--sticky-note-toolbar-opacity-off);
+  flex-shrink: 0;
+}
+
+/* Full opacity when the note is hovered/focused (overrides base opacity) */
+.sticky-note:hover .sticky-note__toolbar,
+.sticky-note:focus-within .sticky-note__toolbar {
+  opacity: var(--opacity-visible);
+}
+
+.sticky-note__colors {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* ---------------------------------------------------------------------------
+   Color dot buttons
+--------------------------------------------------------------------------- */
+
+.sticky-note__color-dot {
+  width: var(--space-md);
+  height: var(--space-md);
+  border-radius: var(--radius-full);
+  border: var(--border-width) solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.sticky-note__color-dot:hover {
+  transform: scale(var(--sticky-note-dot-hover-scale));
+}
+
+.sticky-note__color-dot.is-active {
+  border-color: var(--color-text-primary);
+  transform: scale(var(--sticky-note-dot-active-scale));
+}
+
+.sticky-note__color-dot--yellow {
+  background: var(--sticky-yellow-bg);
+  border-color: var(--sticky-yellow-border);
+}
+.sticky-note__color-dot--pink {
+  background: var(--sticky-pink-bg);
+  border-color: var(--sticky-pink-border);
+}
+.sticky-note__color-dot--blue {
+  background: var(--sticky-blue-bg);
+  border-color: var(--sticky-blue-border);
+}
+.sticky-note__color-dot--green {
+  background: var(--sticky-green-bg);
+  border-color: var(--sticky-green-border);
+}
+.sticky-note__color-dot--purple {
+  background: var(--sticky-purple-bg);
+  border-color: var(--sticky-purple-border);
+}
+.sticky-note__color-dot--orange {
+  background: var(--sticky-orange-bg);
+  border-color: var(--sticky-orange-border);
+}
+
+/* ---------------------------------------------------------------------------
+   Delete button
+--------------------------------------------------------------------------- */
+
+.sticky-note__delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: var(--opacity-muted);
+  font-size: var(--font-size-sm);
+  padding: var(--space-xs);
+  line-height: var(--sticky-note-delete-line-height);
+  border-radius: var(--radius-sm);
+  transition: opacity var(--transition-fast), background var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.sticky-note__delete:hover {
+  opacity: var(--opacity-visible);
+  background: var(--sticky-note-delete-hover-bg);
+}
+
+/* ---------------------------------------------------------------------------
+   Resize handle — bottom-right corner triangle
+--------------------------------------------------------------------------- */
+
+.sticky-note__resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: var(--space-md);
+  height: var(--space-md);
+  cursor: se-resize;
+  background: currentColor;
+  opacity: var(--sticky-note-resize-opacity);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  border-radius: 0 0 var(--radius-md) 0;
+  transition: opacity var(--transition-fast);
+}
+
+.sticky-note:hover .sticky-note__resize-handle {
+  opacity: var(--sticky-note-resize-opacity-hover);
+}
+
+/* ---------------------------------------------------------------------------
+   Interaction states
+--------------------------------------------------------------------------- */
+
+.sticky-note.is-dragging {
+  box-shadow: var(--shadow-lg);
+  transform: scale(var(--sticky-note-drag-scale))
+    rotate(var(--sticky-note-drag-rotate));
+  cursor: grabbing;
+  z-index: var(--sticky-note-z-drag);
+}
+
+.sticky-note.is-resizing {
+  box-shadow: var(--shadow-lg);
+  cursor: se-resize;
+}
+
+/* Unsaved content — accent stripe at top */
+.sticky-note.is-dirty::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--border-width-thick);
+  background: var(--color-accent);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+/* Save error — error outline */
+.sticky-note.is-save-error {
+  outline: var(--border-width-thick) solid var(--color-error-text);
+}
+
+/* Entering — fade + scale in (JS removes .is-entering on next frame) */
+.sticky-note.is-entering {
+  opacity: var(--opacity-hidden);
+  transform: scale(var(--sticky-note-enter-scale));
+}
+
+/* Removing — fade + scale out */
+.sticky-note.is-removing {
+  opacity: var(--opacity-hidden);
+  transform: scale(var(--sticky-note-remove-scale));
+  pointer-events: none;
+}
