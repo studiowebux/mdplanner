@@ -71,7 +71,12 @@ import { LeanCanvasService } from "../services/lean-canvas.service.ts";
 import { registerLeanCanvasEntity } from "../domains/lean-canvas/cache.ts";
 import { StickyNoteRepository } from "../repositories/sticky-note.repository.ts";
 import { StickyNoteService } from "../services/sticky-note.service.ts";
-import { registerStickyNoteEntity } from "../domains/sticky-note/cache.ts";
+import { StickyBoardRepository } from "../repositories/sticky-board.repository.ts";
+import { StickyBoardService } from "../services/sticky-board.service.ts";
+import {
+  registerStickyBoardEntity,
+  registerStickyNoteEntity,
+} from "../domains/sticky-note/cache.ts";
 import { MoscowRepository } from "../repositories/moscow.repository.ts";
 import { MoscowService } from "../services/moscow.service.ts";
 import { registerMoscowEntity } from "../domains/moscow/cache.ts";
@@ -98,6 +103,7 @@ function _get<T>(map: Map<string, unknown>, key: string): T {
   return v as T;
 }
 
+let _projectDir = "";
 let cacheDb: CacheDatabase | null = null;
 let cacheSync: CacheSync | null = null;
 let searchEngine: SearchEngine | null = null;
@@ -107,6 +113,7 @@ export function initServices(
   projectDir: string,
   options: InitOptions = {},
 ): void {
+  _projectDir = projectDir;
   const useCache = options.cache ?? true;
 
   const milestoneRepo = new MilestoneRepository(projectDir);
@@ -155,8 +162,10 @@ export function initServices(
   _set(_svc, "meeting", new MeetingService(meetingRepo));
   const leanCanvasRepo = new LeanCanvasRepository(projectDir);
   _set(_svc, "leanCanvas", new LeanCanvasService(leanCanvasRepo));
-  const stickyNoteRepo = new StickyNoteRepository(projectDir);
+  const stickyNoteRepo = new StickyNoteRepository(projectDir, "default");
   _set(_svc, "stickyNote", new StickyNoteService(stickyNoteRepo));
+  const stickyBoardRepo = new StickyBoardRepository(projectDir);
+  _set(_svc, "stickyBoard", new StickyBoardService(stickyBoardRepo));
   const moscowRepo = new MoscowRepository(projectDir);
   _set(_svc, "moscow", new MoscowService(moscowRepo));
   const dnsRepo = new DnsRepository(projectDir);
@@ -188,6 +197,7 @@ export function initServices(
     registerMeetingEntity(meetingRepo);
     registerLeanCanvasEntity(leanCanvasRepo);
     registerStickyNoteEntity(stickyNoteRepo);
+    registerStickyBoardEntity(() => stickyBoardRepo.findAll());
     registerMoscowEntity(moscowRepo);
 
     // Pass cacheDb to repos for read-path caching
@@ -211,6 +221,7 @@ export function initServices(
     meetingRepo.setCacheDb(cacheDb);
     leanCanvasRepo.setCacheDb(cacheDb);
     stickyNoteRepo.setCacheDb(cacheDb);
+    stickyBoardRepo.setCacheDb(cacheDb);
     moscowRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
@@ -322,6 +333,16 @@ export function getLeanCanvasService(): LeanCanvasService {
 
 export function getStickyNoteService(): StickyNoteService {
   return _get<StickyNoteService>(_svc, "stickyNote");
+}
+
+export function getStickyNoteServiceForBoard(
+  boardId: string,
+): StickyNoteService {
+  return new StickyNoteService(new StickyNoteRepository(_projectDir, boardId));
+}
+
+export function getStickyBoardService(): StickyBoardService {
+  return _get<StickyBoardService>(_svc, "stickyBoard");
 }
 
 export function getDnsService(): DnsService {

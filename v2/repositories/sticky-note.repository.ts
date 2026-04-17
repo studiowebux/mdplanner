@@ -20,13 +20,15 @@ export class StickyNoteRepository extends CachedMarkdownRepository<
   UpdateStickyNote
 > {
   protected readonly tableName = STICKY_NOTE_TABLE;
+  private readonly boardId: string;
 
-  constructor(projectDir: string) {
+  constructor(projectDir: string, boardId = "default") {
     super(projectDir, {
-      directory: "sticky-notes",
+      directory: `sticky-notes/${boardId}`,
       idPrefix: "sticky",
       nameField: "content",
     });
+    this.boardId = boardId;
   }
 
   protected rowToEntity(row: Record<string, unknown>): StickyNote {
@@ -54,6 +56,7 @@ export class StickyNoteRepository extends CachedMarkdownRepository<
       id,
       color: data.color ?? "yellow",
       position: data.position ?? { x: 100, y: 100 },
+      boardId: this.boardId,
       createdAt: now,
       updatedAt: now,
     };
@@ -75,6 +78,7 @@ export class StickyNoteRepository extends CachedMarkdownRepository<
       color: String(fm.color),
       position: pos ?? { x: 100, y: 100 },
       size: sz ?? undefined,
+      boardId: this.boardId,
       createdAt: fm.created_at
         ? String(fm.created_at)
         : new Date().toISOString(),

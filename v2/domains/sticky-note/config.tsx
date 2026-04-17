@@ -64,7 +64,14 @@ export const stickyNoteConfig: DomainConfig<
 
   customViewRenderer: async (view, _state, items, nonce) => {
     if (view !== "canvas") return undefined;
-    return <StickyNoteCanvas notes={items} nonce={nonce} />;
+    return (
+      <StickyNoteCanvas
+        notes={items}
+        boardId="default"
+        boardTitle="Default"
+        nonce={nonce}
+      />
+    );
   },
 
   searchPredicate: createSearchPredicate<StickyNote>([

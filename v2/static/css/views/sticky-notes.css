@@ -1,5 +1,53 @@
-/* Sticky Notes — canvas view.
+/* Sticky Notes — board list + canvas view.
    All values from variables.css — zero hardcoded px/color/opacity/scale. */
+
+/* ---------------------------------------------------------------------------
+   Board list
+--------------------------------------------------------------------------- */
+
+.board-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  background: var(--color-bg-primary);
+  border: var(--border-width) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: var(--color-text-primary);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.board-card:hover {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.board-card__title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.board-card__description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.board-card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: auto;
+  padding-top: var(--space-xs);
+}
+
+.board-card__count {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
 
 /* ---------------------------------------------------------------------------
    Canvas container

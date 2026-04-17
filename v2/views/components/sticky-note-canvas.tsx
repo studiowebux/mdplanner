@@ -7,6 +7,8 @@ import type { StickyNote } from "../../types/sticky-note.types.ts";
 
 type Props = {
   notes: StickyNote[];
+  boardId: string;
+  boardTitle: string;
   nonce?: string;
 };
 
@@ -71,10 +73,14 @@ const StickyNoteCard: FC<NoteProps> = ({ note }) => {
   );
 };
 
-export const StickyNoteCanvas: FC<Props> = ({ notes }) => {
+export const StickyNoteCanvas: FC<Props> = ({ notes, boardId, boardTitle }) => {
   return (
-    <div class="sticky-canvas" data-canvas>
+    <div class="sticky-canvas" data-canvas data-board-id={boardId}>
       <div class="sticky-canvas__toolbar">
+        <a href="/sticky-notes" class="btn btn--sm" title="All boards">
+          &#8592; Boards
+        </a>
+        <span class="sticky-canvas__board-title">{boardTitle}</span>
         <button
           type="button"
           class="btn btn--sm"

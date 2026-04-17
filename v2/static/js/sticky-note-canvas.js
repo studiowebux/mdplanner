@@ -7,8 +7,11 @@
 
   // ── Constants ─────────────────────────────────────────────────────────────
 
-  var API_BASE = "/api/v1/sticky-notes";
-  var STORAGE_KEY = "sticky-canvas-state";
+  var canvasRoot = document.querySelector("[data-canvas]");
+  var boardId = (canvasRoot && canvasRoot.getAttribute("data-board-id")) ||
+    "default";
+  var API_BASE = "/api/v1/sticky-notes/" + boardId + "/notes";
+  var STORAGE_KEY = "sticky-canvas-state-" + boardId;
   var ZOOM_MIN = 0.25;
   var ZOOM_MAX = 2.0;
   var ZOOM_STEP = 0.1;

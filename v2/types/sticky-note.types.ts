@@ -3,7 +3,7 @@
  */
 
 import { z } from "@hono/zod-openapi";
-import { AuditFieldsSchema } from "./shared.types.ts";
+import { AuditFieldsSchema, stringArray } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Zod schemas — single source of truth
@@ -47,6 +47,10 @@ export const StickyNoteSchema = z.object({
   size: UpdateSizeSchema.nullable().optional().openapi({
     description: "Note dimensions (pixels); null uses default 200×160",
   }),
+  boardId: z.string().default("default").openapi({
+    description: "Board this note belongs to (default: 'default')",
+    example: "default",
+  }),
 }).merge(AuditFieldsSchema).openapi("StickyNote");
 
 export type StickyNote = z.infer<typeof StickyNoteSchema>;
@@ -60,10 +64,12 @@ export const CreateStickyNoteSchema = StickyNoteSchema.pick({
   color: true,
   position: true,
   size: true,
+  boardId: true,
 }).partial({
   color: true,
   position: true,
   size: true,
+  boardId: true,
 }).merge(AuditFieldsSchema.partial()).openapi("CreateStickyNote");
 
 export type CreateStickyNote = z.infer<typeof CreateStickyNoteSchema>;
@@ -93,3 +99,56 @@ export const ListStickyNoteOptionsSchema = z.object({
 });
 
 export type ListStickyNoteOptions = z.infer<typeof ListStickyNoteOptionsSchema>;
+
+// ---------------------------------------------------------------------------
+// Sticky Board — multi-canvas support
+// ---------------------------------------------------------------------------
+
+export const StickyBoardSchema = z.object({
+  id: z.string().openapi({
+    description: "Board ID",
+    example: "sboard_1234567890_abcd",
+  }),
+  title: z.string().openapi({
+    description: "Board title",
+    example: "Work",
+  }),
+  description: z.string().optional().openapi({
+    description: "Optional board description",
+    example: "Work-related sticky notes",
+  }),
+  projects: stringArray.openapi({
+    description: "Linked portfolio item IDs",
+  }),
+}).merge(AuditFieldsSchema).openapi("StickyBoard");
+
+export type StickyBoard = z.infer<typeof StickyBoardSchema>;
+
+export const CreateStickyBoardSchema = StickyBoardSchema.pick({
+  title: true,
+  description: true,
+  projects: true,
+}).partial({
+  description: true,
+  projects: true,
+}).merge(AuditFieldsSchema.partial()).openapi("CreateStickyBoard");
+
+export type CreateStickyBoard = z.infer<typeof CreateStickyBoardSchema>;
+
+export const UpdateStickyBoardSchema = CreateStickyBoardSchema.partial()
+  .openapi(
+    "UpdateStickyBoard",
+  );
+
+export type UpdateStickyBoard = z.infer<typeof UpdateStickyBoardSchema>;
+
+export const ListStickyBoardOptionsSchema = z.object({
+  q: z.string().optional().openapi({
+    param: { name: "q", in: "query" },
+    description: "Search query (matches title)",
+  }),
+});
+
+export type ListStickyBoardOptions = z.infer<
+  typeof ListStickyBoardOptionsSchema
+>;
