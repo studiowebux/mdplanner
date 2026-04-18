@@ -80,6 +80,9 @@ import {
 import { MoscowRepository } from "../repositories/moscow.repository.ts";
 import { MoscowService } from "../services/moscow.service.ts";
 import { registerMoscowEntity } from "../domains/moscow/cache.ts";
+import { C4Repository } from "../repositories/c4.repository.ts";
+import { C4Service } from "../services/c4.service.ts";
+import { registerC4Entity } from "../domains/c4/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -168,6 +171,8 @@ export function initServices(
   _set(_svc, "stickyBoard", new StickyBoardService(stickyBoardRepo));
   const moscowRepo = new MoscowRepository(projectDir);
   _set(_svc, "moscow", new MoscowService(moscowRepo));
+  const c4Repo = new C4Repository(projectDir);
+  _set(_svc, "c4", new C4Service(c4Repo));
   const dnsRepo = new DnsRepository(projectDir);
   _set(_svc, "dns", new DnsService(dnsRepo, projectService));
   _set(_svc, "github", new GitHubService(projectService));
@@ -199,6 +204,7 @@ export function initServices(
     registerStickyNoteEntity(stickyNoteRepo);
     registerStickyBoardEntity(() => stickyBoardRepo.findAll());
     registerMoscowEntity(moscowRepo);
+    registerC4Entity(c4Repo);
 
     // Pass cacheDb to repos for read-path caching
     milestoneRepo.setCacheDb(cacheDb);
@@ -223,6 +229,7 @@ export function initServices(
     stickyNoteRepo.setCacheDb(cacheDb);
     stickyBoardRepo.setCacheDb(cacheDb);
     moscowRepo.setCacheDb(cacheDb);
+    c4Repo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -289,6 +296,10 @@ export function getSwotService(): SwotService {
 
 export function getMoscowService(): MoscowService {
   return _get<MoscowService>(_svc, "moscow");
+}
+
+export function getC4Service(): C4Service {
+  return _get<C4Service>(_svc, "c4");
 }
 
 export function getCustomerService(): CustomerService {
