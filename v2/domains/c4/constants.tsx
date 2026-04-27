@@ -30,9 +30,16 @@ export const C4_TABLE_COLUMNS: ColumnDef[] = [
     label: "Name",
     sortable: true,
     render: (v, row) => (
-      <a href={`/c4/${row.id}`}>
+      <button
+        type="button"
+        class="btn-link"
+        data-sidenav-open="c4-form-container"
+        hx-get={`/c4/${row.id}/edit`}
+        hx-target="#c4-form-container"
+        hx-swap="innerHTML"
+      >
         <Highlight text={String(v)} q={row._q as string} />
-      </a>
+      </button>
     ),
   },
   { key: "level", label: "Level", sortable: true },

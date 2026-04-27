@@ -204,3 +204,20 @@
 .meeting-detail__related-footer {
   margin-top: var(--space-md);
 }
+
+/* -- Attendee pills (list/grid view) --------------------------------------- */
+
+.meeting-attendees-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  align-items: center;
+}
+
+.meeting-attendees-pills .badge {
+  text-decoration: none;
+}
+
+.meeting-attendees-overflow {
+  cursor: default;
+}

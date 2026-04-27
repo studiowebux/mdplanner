@@ -53,8 +53,9 @@ export function TableSentinelRow(
       id={`${domain}-load-more`}
       class="load-more-sentinel"
       hx-get={buildMoreUrl(domain, stateKeys, state, nextOffset)}
-      hx-trigger="revealed"
+      hx-trigger="revealed once"
       hx-swap="outerHTML"
+      hx-sync="closest [sse-connect]:drop"
     >
       <td class="load-more-sentinel__cell" colspan={columnCount}>
         <span class="load-more-sentinel__text">Loading more…</span>
@@ -63,7 +64,7 @@ export function TableSentinelRow(
   );
 }
 
-/** Sentinel <div> rendered after the card grid — triggers load-more on reveal. */
+/** Sentinel <div> rendered as the last grid item — triggers load-more on reveal. */
 export function GridSentinelDiv(
   { domain, stateKeys, state, nextOffset }: {
     domain: string;
@@ -77,8 +78,9 @@ export function GridSentinelDiv(
       id={`${domain}-load-more`}
       class="load-more-sentinel"
       hx-get={buildMoreUrl(domain, stateKeys, state, nextOffset)}
-      hx-trigger="revealed"
+      hx-trigger="revealed once"
       hx-swap="outerHTML"
+      hx-sync="closest [sse-connect]:drop"
     >
       <span class="load-more-sentinel__text">Loading more…</span>
     </div>
@@ -126,13 +128,27 @@ export function createMoreFragment<T extends Entity>(cfg: {
             </tr>
           ))}
           {hasMore && (
-            <TableSentinelRow
-              domain={cfg.name}
-              stateKeys={cfg.stateKeys}
-              state={state}
-              nextOffset={nextOffset}
-              columnCount={cfg.columns.length}
-            />
+            // No id — prevents htmx settle from ID-matching this against the
+            // existing sentinel that was just swapped out, avoiding targetError.
+            <tr
+              class="load-more-sentinel"
+              hx-get={buildMoreUrl(
+                cfg.name,
+                cfg.stateKeys,
+                state,
+                nextOffset,
+              )}
+              hx-trigger="revealed once"
+              hx-swap="outerHTML"
+              hx-sync="closest [sse-connect]:drop"
+            >
+              <td
+                class="load-more-sentinel__cell"
+                colspan={cfg.columns.length}
+              >
+                <span class="load-more-sentinel__text">Loading more…</span>
+              </td>
+            </tr>
           )}
         </>
       );
@@ -151,12 +167,21 @@ export function createMoreFragment<T extends Entity>(cfg: {
             );
           })}
           {hasMore && (
-            <GridSentinelDiv
-              domain={cfg.name}
-              stateKeys={cfg.stateKeys}
-              state={state}
-              nextOffset={nextOffset}
-            />
+            // No id — prevents htmx settle ID-matching against removed sentinel.
+            <div
+              class="load-more-sentinel"
+              hx-get={buildMoreUrl(
+                cfg.name,
+                cfg.stateKeys,
+                state,
+                nextOffset,
+              )}
+              hx-trigger="revealed once"
+              hx-swap="outerHTML"
+              hx-sync="closest [sse-connect]:drop"
+            >
+              <span class="load-more-sentinel__text">Loading more…</span>
+            </div>
           )}
         </>
       );
@@ -271,12 +296,13 @@ function ColumnToggle(
 // ---------------------------------------------------------------------------
 
 function GridView<T extends Entity>(
-  { Card, items, toRow, name, q }: {
+  { Card, items, toRow, name, q, sentinel }: {
     Card: FC<{ item: T; q?: string }>;
     items: T[];
     toRow: (item: T) => Record<string, unknown>;
     name: string;
     q?: string;
+    sentinel?: unknown;
   },
 ) {
   return (
@@ -289,6 +315,7 @@ function GridView<T extends Entity>(
           </div>
         );
       })}
+      {sentinel}
     </CardGrid>
   );
 }
@@ -323,8 +350,7 @@ export function createDomainViewContainer<T extends Entity>(
       nextOffset,
     },
   ) => (
-    <div id={`${cfg.name}-view`} class="view-container">
-      <input type="hidden" name="view" value={state.view} />
+    <>
       {fragment && (
         <span
           id={`${cfg.name}-count`}
@@ -358,60 +384,63 @@ export function createDomainViewContainer<T extends Entity>(
           />
         </div>
       )}
-      {customContent
-        ? customContent
-        : items.length === 0
-        ? <EmptyState message={cfg.emptyMessage} />
-        : state.view === "table"
-        ? (
-          <DataTable
-            id={`${cfg.name}-table`}
-            domain={cfg.name}
-            compact
-            columns={cfg.columns}
-            rows={items.map((item) => ({ ...cfg.toRow(item), _q: state.q }))}
-            sort={{
-              url: `/${cfg.name}/view`,
-              target: `#${cfg.name}-view`,
-              include: `#${cfg.name}-toolbar`,
-              current: state.sort,
-              order: state.order,
-            }}
-            tbodyFooter={hasMore && nextOffset !== undefined
-              ? (
-                <TableSentinelRow
-                  domain={cfg.name}
-                  stateKeys={cfg.stateKeys}
-                  state={state}
-                  nextOffset={nextOffset}
-                  columnCount={cfg.columns.length}
-                />
-              )
-              : undefined}
-          />
-        )
-        : cfg.Card
-        ? (
-          <>
+      <div id={`${cfg.name}-view`} class="view-container">
+        <input type="hidden" name="view" value={state.view} />
+        {customContent
+          ? customContent
+          : items.length === 0
+          ? <EmptyState message={cfg.emptyMessage} />
+          : state.view === "table"
+          ? (
+            <DataTable
+              id={`${cfg.name}-table`}
+              domain={cfg.name}
+              compact
+              columns={cfg.columns}
+              rows={items.map((item) => ({ ...cfg.toRow(item), _q: state.q }))}
+              sort={{
+                url: `/${cfg.name}/view`,
+                target: `#${cfg.name}-view`,
+                include: `#${cfg.name}-toolbar`,
+                current: state.sort,
+                order: state.order,
+              }}
+              tbodyFooter={hasMore && nextOffset !== undefined
+                ? (
+                  <TableSentinelRow
+                    domain={cfg.name}
+                    stateKeys={cfg.stateKeys}
+                    state={state}
+                    nextOffset={nextOffset}
+                    columnCount={cfg.columns.length}
+                  />
+                )
+                : undefined}
+            />
+          )
+          : cfg.Card
+          ? (
             <GridView
               Card={cfg.Card}
               items={items}
               toRow={cfg.toRow}
               name={cfg.name}
               q={state.q}
+              sentinel={hasMore && nextOffset !== undefined
+                ? (
+                  <GridSentinelDiv
+                    domain={cfg.name}
+                    stateKeys={cfg.stateKeys}
+                    state={state}
+                    nextOffset={nextOffset}
+                  />
+                )
+                : undefined}
             />
-            {hasMore && nextOffset !== undefined && (
-              <GridSentinelDiv
-                domain={cfg.name}
-                stateKeys={cfg.stateKeys}
-                state={state}
-                nextOffset={nextOffset}
-              />
-            )}
-          </>
-        )
-        : <EmptyState message={cfg.emptyMessage} />}
-    </div>
+          )
+          : <EmptyState message={cfg.emptyMessage} />}
+      </div>
+    </>
   );
 
   return DomainViewContainer;

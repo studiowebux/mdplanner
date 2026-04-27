@@ -36,6 +36,33 @@ export const MEETING_TABLE_COLUMNS: ColumnDef[] = [
     key: "attendeesDisplay",
     label: "Attendees",
     sortable: false,
+    render: (_v, row) => {
+      const all = (row.attendees as string[]) ?? [];
+      if (all.length === 0) return <span class="text-muted">—</span>;
+      const visible = all.slice(0, 3);
+      const hidden = all.slice(3);
+      return (
+        <span class="meeting-attendees-pills">
+          {visible.map((name) => (
+            <a
+              key={name}
+              href={`/people?q=${encodeURIComponent(name)}`}
+              class="badge badge--neutral"
+            >
+              {name}
+            </a>
+          ))}
+          {hidden.length > 0 && (
+            <span
+              class="badge badge--neutral meeting-attendees-overflow"
+              title={hidden.join(", ")}
+            >
+              +{hidden.length}
+            </span>
+          )}
+        </span>
+      );
+    },
   },
   {
     key: "actionCount",
@@ -46,10 +73,17 @@ export const MEETING_TABLE_COLUMNS: ColumnDef[] = [
     key: "openActions",
     label: "Open",
     sortable: true,
-    render: (v) => {
+    render: (v, row) => {
       const count = Number(v);
       return count > 0
-        ? <span class="badge badge--warning">{count}</span>
+        ? (
+          <a
+            href={`/meetings/${row.id}#meeting-actions-table`}
+            class="badge badge--warning"
+          >
+            {count} open
+          </a>
+        )
         : <span class="badge badge--success">0</span>;
     },
   },
@@ -170,6 +204,7 @@ export function meetingToRow(m: Meeting): Record<string, unknown> {
     title: m.title,
     date: m.date,
     attendeesDisplay,
+    attendees,
     actionCount: m.actions.length,
     openActions: m.actions.filter((a) => a.status === "open").length,
     createdAtDisplay: formatDate(m.createdAt),

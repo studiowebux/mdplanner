@@ -3,6 +3,11 @@
 
 /* Person card — uses shared DomainCard, only domain-specific styles here */
 
+.person-card__actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
 .person-card__avatar {
   display: flex;
   align-items: center;
@@ -189,15 +194,34 @@
 
 /* ── Container + viewport ─────────────────────────────────────────── */
 
-/* Lock parent to prevent page scroll when org canvas is visible */
+/* Lock parent + flex chain so org canvas fills available viewport height */
 .app-shell__content:has(.orgchart-container) {
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-shell__content:has(.orgchart-container) > main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  max-width: none;
+  width: 100%;
+}
+
+.app-shell__content:has(.orgchart-container) .view-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .orgchart-container {
   position: relative;
   overflow: hidden;
-  height: var(--orgchart-canvas-height);
+  flex: 1;
+  min-height: 0;
   cursor: grab;
   border: var(--orgchart-connector-width) solid var(--color-border-default);
   border-radius: var(--card-radius);
@@ -241,6 +265,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
 }
 
 /* ── Node card ────────────────────────────────────────────────────── */

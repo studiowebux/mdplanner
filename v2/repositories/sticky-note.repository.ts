@@ -79,14 +79,10 @@ export class StickyNoteRepository extends CachedMarkdownRepository<
       position: pos ?? { x: 100, y: 100 },
       size: sz ?? undefined,
       boardId: this.boardId,
-      createdAt: fm.created_at
-        ? String(fm.created_at)
-        : new Date().toISOString(),
-      updatedAt: fm.updated_at
-        ? String(fm.updated_at)
-        : new Date().toISOString(),
-      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
-      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
+      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
+      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
+      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
+      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
     };
   }
 

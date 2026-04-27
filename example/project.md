@@ -4,15 +4,15 @@ working_days_per_week: 5
 working_days: [Mon, Tue, Wed, Thu, Fri]
 tags: [feature, bug, enhancement, docs, infra, security, qa]
 links:
-  - title: Repository
-    url: "https://github.com/taskflow/app"
-  - title: Documentation
-    url: "https://docs.taskflow.io"
-  - title: Discord
-    url: "https://discord.gg/taskflow"
-  - title: Figma Designs
-    url: "https://figma.com/file/taskflow"
-features: [brainstorm, brief, dashboard, dns_domain, github, goal, idea, marketing_plan, milestone, note, person, portfolio, retrospective, swot, task, customer, rate, quote, invoice, payment]
+  - url: "https://github.com/taskflow/app"
+    title: Repository
+  - url: "https://docs.taskflow.io"
+    title: Documentation
+  - url: "https://discord.gg/taskflow"
+    title: Discord
+  - url: "https://figma.com/file/taskflow"
+    title: Figma Designs
+features: [rate, brainstorm, brief, c4_component, customer, dashboard, dns_domain, github, goal, idea, invoice, marketing_plan, meeting, milestone, moscow, note, payment, person, portfolio, quote, retrospective, sticky_note, swot, task, lean_canvas]
 nav_categories:
   Admin: [upload, analytics]
   CRM: [company, contact, deal, interaction]
@@ -27,7 +27,7 @@ nav_categories:
   Strategy: [business_model, fishbone, lean_canvas, marketing_plan, project_value, risk, strategic_builder, swot]
   Team: [ai_chat, capacity_plan, meeting, org_member, person, time_entry]
   Work: [goal, milestone, task]
-last_updated: "2026-03-30T05:23:29.580Z"
+last_updated: "2026-04-18T15:00:41.660Z"
 ---
 
 # MD Planner Demo

@@ -64,18 +64,18 @@ export class GoalRepository extends CachedMarkdownRepository<
       description,
       type: (fm.type as Goal["type"]) ?? "project",
       kpi: fm.kpi != null ? String(fm.kpi) : "",
-      kpiMetric: fm.kpi_metric != null ? String(fm.kpi_metric) : undefined,
-      kpiTarget: fm.kpi_target != null ? Number(fm.kpi_target) : undefined,
-      kpiValue: fm.kpi_value != null ? Number(fm.kpi_value) : undefined,
+      kpiMetric: fm.kpiMetric != null ? String(fm.kpiMetric) : undefined,
+      kpiTarget: fm.kpiTarget != null ? Number(fm.kpiTarget) : undefined,
+      kpiValue: fm.kpiValue != null ? Number(fm.kpiValue) : undefined,
       startDate: String(fm.start_date ?? ""),
-      endDate: String(fm.end_date ?? ""),
+      endDate: String(fm.endDate ?? ""),
       status: (fm.status as Goal["status"]) ?? "planning",
-      githubRepo: fm.github_repo != null ? String(fm.github_repo) : undefined,
-      githubMilestone: fm.github_milestone != null
-        ? Number(fm.github_milestone)
+      githubRepo: fm.githubRepo != null ? String(fm.githubRepo) : undefined,
+      githubMilestone: fm.githubMilestone != null
+        ? Number(fm.githubMilestone)
         : undefined,
-      linkedPortfolioItems: Array.isArray(fm.linked_portfolio_items)
-        ? (fm.linked_portfolio_items as unknown[]).map(String)
+      linkedPortfolioItems: Array.isArray(fm.linkedPortfolioItems)
+        ? (fm.linkedPortfolioItems as unknown[]).map(String)
         : undefined,
       project: fm.project != null ? String(fm.project) : undefined,
       owner: fm.owner != null ? String(fm.owner) : undefined,
@@ -84,22 +84,18 @@ export class GoalRepository extends CachedMarkdownRepository<
         : undefined,
       priority: fm.priority != null ? Number(fm.priority) : undefined,
       progress: fm.progress != null ? Number(fm.progress) : undefined,
-      parentGoal: fm.parent_goal != null ? String(fm.parent_goal) : undefined,
-      linkedMilestones: Array.isArray(fm.linked_milestones)
-        ? (fm.linked_milestones as unknown[]).map(String)
+      parentGoal: fm.parentGoal != null ? String(fm.parentGoal) : undefined,
+      linkedMilestones: Array.isArray(fm.linkedMilestones)
+        ? (fm.linkedMilestones as unknown[]).map(String)
         : undefined,
       tags: Array.isArray(fm.tags)
         ? (fm.tags as unknown[]).map(String)
         : undefined,
       notes: fm.notes != null ? String(fm.notes) : undefined,
-      createdAt: fm.created_at
-        ? String(fm.created_at)
-        : new Date().toISOString(),
-      updatedAt: fm.updated_at
-        ? String(fm.updated_at)
-        : new Date().toISOString(),
-      createdBy: fm.created_by ? String(fm.created_by) : undefined,
-      updatedBy: fm.updated_by ? String(fm.updated_by) : undefined,
+      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
+      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
+      createdBy: fm.createdBy ? String(fm.createdBy) : undefined,
+      updatedBy: fm.updatedBy ? String(fm.updatedBy) : undefined,
     };
   }
 

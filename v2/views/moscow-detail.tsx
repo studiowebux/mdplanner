@@ -174,12 +174,6 @@ export const MoscowDetailView: FC<
         <MarkdownSection title="Notes" markdown={moscow.notes} />
 
         {/* -- Meta ------------------------------------------------------ */}
-        <div class="detail-section moscow-detail__meta">
-          <span>Created {formatDate(moscow.createdAt)}</span>
-          {moscow.updatedAt && moscow.updatedAt !== moscow.createdAt && (
-            <span>&middot; Updated {formatDate(moscow.updatedAt)}</span>
-          )}
-        </div>
         <AuditMeta
           createdAt={moscow.createdAt}
           updatedAt={moscow.updatedAt}

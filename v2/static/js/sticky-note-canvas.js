@@ -29,6 +29,7 @@
 
   // ── State ─────────────────────────────────────────────────────────────────
 
+  var wired = false;
   var zoom = 1;
   var panX = 0;
   var panY = 0;
@@ -544,9 +545,11 @@
   // ── Event wiring ──────────────────────────────────────────────────────────
 
   function wire() {
+    if (wired) return;
     var v = vp();
     var b = board();
     if (!v || !b) return;
+    wired = true;
 
     // ── Click delegation ────────────────────────────────────────────────
 
@@ -929,4 +932,8 @@
   } else {
     init();
   }
+
+  document.addEventListener("htmx:afterSettle", function () {
+    if (isOnCanvas()) init();
+  });
 })();

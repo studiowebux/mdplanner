@@ -4,7 +4,6 @@ import { BackButton } from "./components/back-button.tsx";
 import type { LeanCanvas } from "../types/lean-canvas.types.ts";
 import { LEAN_CANVAS_SECTIONS } from "../types/lean-canvas.types.ts";
 import type { ViewProps } from "../types/app.ts";
-import { formatDate } from "../utils/time.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
@@ -90,12 +89,6 @@ export const LeanCanvasDetailView: FC<ViewProps & { item: LeanCanvas }> = (
         </div>
 
         {/* -- Meta --------------------------------------------------------- */}
-        <div class="detail-section lc-detail__meta">
-          <span>Created {formatDate(lc.createdAt)}</span>
-          {lc.updatedAt && lc.updatedAt !== lc.createdAt && (
-            <span>&middot; Updated {formatDate(lc.updatedAt)}</span>
-          )}
-        </div>
         <AuditMeta
           createdAt={lc.createdAt}
           updatedAt={lc.updatedAt}

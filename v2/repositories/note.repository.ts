@@ -148,12 +148,12 @@ export class NoteRepository {
       content: bodyContent,
       paragraphs,
       customSections,
-      createdAt: String(fm.created_at ?? ""),
-      updatedAt: String(fm.updated_at ?? ""),
+      createdAt: String(fm.createdAt ?? ""),
+      updatedAt: String(fm.updatedAt ?? ""),
       revision: Number(fm.revision ?? 1),
       project: fm.project != null ? String(fm.project) : undefined,
-      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
-      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
+      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
+      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
     };
   }
 

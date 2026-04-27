@@ -2,7 +2,9 @@
 id: user
 level: context
 type: Person
-position: {x: 100, y: 300}
+position:
+  x: 100
+  y: 200
 connections:
   -
     target: taskflow

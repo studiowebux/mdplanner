@@ -111,17 +111,17 @@ export class DnsRepository extends CachedMarkdownRepository<
     return {
       id,
       domain: String(fm.domain),
-      expiryDate: fm.expiry_date != null ? String(fm.expiry_date) : undefined,
-      autoRenew: typeof fm.auto_renew === "boolean" ? fm.auto_renew : undefined,
-      renewalCostUsd: typeof fm.renewal_costUsd === "number"
-        ? fm.renewal_costUsd
+      expiryDate: fm.expiryDate != null ? String(fm.expiryDate) : undefined,
+      autoRenew: typeof fm.autoRenew === "boolean" ? fm.autoRenew : undefined,
+      renewalCostUsd: typeof fm.renewalCostUsd === "number"
+        ? fm.renewalCostUsd
         : undefined,
       provider: fm.provider != null ? String(fm.provider) : undefined,
       nameservers: Array.isArray(fm.nameservers)
         ? fm.nameservers.map(String)
         : undefined,
-      dnsRecords: Array.isArray(fm.dns_records)
-        ? (fm.dns_records as Record<string, unknown>[]).map((r) => ({
+      dnsRecords: Array.isArray(fm.dnsRecords)
+        ? (fm.dnsRecords as Record<string, unknown>[]).map((r) => ({
           type: String(r.type),
           name: String(r.name),
           value: String(r.value),
@@ -130,19 +130,15 @@ export class DnsRepository extends CachedMarkdownRepository<
         }))
         : undefined,
       status: fm.status != null ? String(fm.status) : undefined,
-      lastFetchedAt: fm.last_fetchedAt != null
-        ? String(fm.last_fetchedAt)
+      lastFetchedAt: fm.lastFetchedAt != null
+        ? String(fm.lastFetchedAt)
         : undefined,
       project: fm.project != null ? String(fm.project) : undefined,
       notes: body.trim() || undefined,
-      createdAt: fm.created_at
-        ? String(fm.created_at)
-        : new Date().toISOString(),
-      updatedAt: fm.updated_at
-        ? String(fm.updated_at)
-        : new Date().toISOString(),
-      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
-      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
+      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
+      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
+      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
+      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
     };
   }
 

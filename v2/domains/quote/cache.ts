@@ -116,6 +116,10 @@ export function registerQuoteEntity(repo: QuoteRepository): void {
   const entity: EntityDef = {
     table: QUOTE_TABLE,
     schema: QUOTE_SCHEMA,
+    migrations: [
+      "ALTER TABLE quotes ADD COLUMN line_items TEXT",
+      "ALTER TABLE quotes ADD COLUMN payment_schedule TEXT",
+    ],
     fts: {
       type: "quote",
       columns: ["id", "number", "title", "notes"],

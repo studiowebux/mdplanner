@@ -85,6 +85,7 @@
   --lc-section-min-height: 8rem;
 
   /* Org chart tokens */
+  --orgchart-canvas-height: 70vh;
   --orgchart-min-height: 25rem;
   --orgchart-node-min-w: 11.25rem;
   --orgchart-node-max-w: 15rem;
@@ -122,6 +123,50 @@
   --sticky-note-delete-hover-bg: var(--color-bg-tertiary);
   --sticky-note-delete-line-height: 1;
   --sticky-canvas-height: 600px; /* fallback; overridden by JS on init */
+
+  /* ── C4 Architecture canvas ─────────────────────────────────────────── */
+  --c4-canvas-height: 600px; /* fallback; overridden by JS on init */
+  --c4-box-w: 14rem; /* 224px — must match BOX_W constant in c4-canvas.tsx */
+  --c4-box-h: 8rem; /* 128px — must match BOX_H constant in c4-canvas.tsx */
+  --c4-box-gap: 3rem;
+  --c4-box-radius: var(--radius-md);
+  --c4-port-size: 0.625rem;
+  --c4-port-offset: -0.3125rem;
+  --c4-arrow-stroke-w: 1.5px;
+  --c4-minimap-w: 11rem;
+  --c4-minimap-h: 7rem;
+  --c4-minimap-opacity: 0.85;
+  --c4-toolbar-gap: var(--space-sm);
+  --c4-breadcrumb-gap: var(--space-xs);
+  --c4-z-box: 10;
+  --c4-z-connections: 1;
+  --c4-z-toolbar: var(--z-toolbar);
+  --c4-z-minimap: 20;
+  --c4-box-desc-clamp: 3;
+
+  /* C4 level badge colours */
+  --c4-level-context-bg: var(--color-cat-blue-light);
+  --c4-level-context-text: #fff;
+  --c4-level-container-bg: var(--color-cat-green);
+  --c4-level-container-text: #fff;
+  --c4-level-component-bg: var(--color-cat-orange);
+  --c4-level-component-text: #fff;
+  --c4-level-code-bg: var(--color-cat-purple);
+  --c4-level-code-text: #fff;
+
+  /* C4 box colours per level */
+  --c4-box-context-bg: #e3f2fd;
+  --c4-box-context-border: var(--color-cat-blue-light);
+  --c4-box-context-text: #0a1929;
+  --c4-box-container-bg: #e8f5e9;
+  --c4-box-container-border: var(--color-cat-green);
+  --c4-box-container-text: #1a2e1a;
+  --c4-box-component-bg: #fff3e0;
+  --c4-box-component-border: var(--color-cat-orange);
+  --c4-box-component-text: #33190a;
+  --c4-box-code-bg: #f3e5f5;
+  --c4-box-code-border: var(--color-cat-purple);
+  --c4-box-code-text: #2d0038;
 
   /* ── Category color palette ─────────────────────────────────────────
      Reusable across domains: org chart departments, tags, status badges.

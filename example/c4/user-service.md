@@ -2,7 +2,9 @@
 id: user-service
 level: component
 type: Service
-position: {x: 350, y: 100}
+position:
+  x: 400
+  y: 100
 technology: TypeScript
 connections:
   -

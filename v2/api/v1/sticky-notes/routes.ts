@@ -16,6 +16,7 @@ import {
   ListStickyNoteOptionsSchema,
   StickyBoardSchema,
   StickyNoteSchema,
+  UpdateContentSchema,
   UpdatePositionSchema,
   UpdateSizeSchema,
   UpdateStickyBoardSchema,
@@ -342,6 +343,42 @@ stickyNotesRouter.openapi(updatePositionRoute, async (c) => {
   );
   if (!note) return c.json(notFound("STICKY_NOTE", id), 404);
   publish("sticky_note.moved", { id, x: note.position.x, y: note.position.y });
+  return c.json(note, 200);
+});
+
+const updateContentRoute = createRoute({
+  method: "patch",
+  path: "/{boardId}/notes/{id}/content",
+  tags: ["Sticky Notes"],
+  summary: "Update sticky note text content",
+  operationId: "updateStickyNoteContent",
+  request: {
+    params: BoardNoteIdParam,
+    body: {
+      content: { "application/json": { schema: UpdateContentSchema } },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: StickyNoteSchema } },
+      description: "Updated sticky note",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+stickyNotesRouter.openapi(updateContentRoute, async (c) => {
+  const { boardId, id } = c.req.valid("param");
+  const { content } = c.req.valid("json");
+  const note = await getStickyNoteServiceForBoard(boardId).update(id, {
+    content,
+  });
+  if (!note) return c.json(notFound("STICKY_NOTE", id), 404);
+  publish("sticky_note.content", { id, content });
   return c.json(note, 200);
 });
 

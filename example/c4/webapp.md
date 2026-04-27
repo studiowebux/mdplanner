@@ -2,10 +2,13 @@
 id: webapp
 level: container
 type: Single Page Application
-position: {x: 291, y: 36}
+position:
+  x: 456
+  y: 68
 technology: React, TypeScript
 parent: taskflow
-tags: [mdplanner/c4]
+created_at: "2026-04-25T16:12:17.266Z"
+updated_at: "2026-04-25T16:12:17.267Z"
 ---
 
 # Web App

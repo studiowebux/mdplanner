@@ -256,32 +256,32 @@ export class PortfolioRepository {
       expenses: typeof fm.expenses === "number" ? fm.expenses : undefined,
       progress: typeof fm.progress === "number" ? fm.progress : 0,
       startDate: fm.start_date != null ? String(fm.start_date) : undefined,
-      endDate: fm.end_date != null ? String(fm.end_date) : undefined,
+      endDate: fm.endDate != null ? String(fm.endDate) : undefined,
       team: Array.isArray(fm.team) ? fm.team.map(String) : undefined,
-      techStack: Array.isArray(fm.tech_stack)
-        ? fm.tech_stack.map(String)
+      techStack: Array.isArray(fm.techStack)
+        ? fm.techStack.map(String)
         : undefined,
       logo: fm.logo != null ? String(fm.logo) : undefined,
       license: fm.license != null ? String(fm.license) : undefined,
-      githubRepo: fm.github_repo != null ? String(fm.github_repo) : undefined,
-      billingCustomerId: fm.billing_customer_id != null
-        ? String(fm.billing_customer_id)
+      githubRepo: fm.githubRepo != null ? String(fm.githubRepo) : undefined,
+      billingCustomerId: fm.billingCustomerId != null
+        ? String(fm.billingCustomerId)
         : undefined,
-      brainManaged: typeof fm.brain_managed === "boolean"
-        ? fm.brain_managed
+      brainManaged: typeof fm.brainManaged === "boolean"
+        ? fm.brainManaged
         : undefined,
-      linkedGoals: Array.isArray(fm.linked_goals)
-        ? fm.linked_goals.map(String)
+      linkedGoals: Array.isArray(fm.linkedGoals)
+        ? fm.linkedGoals.map(String)
         : undefined,
       kpis: Array.isArray(fm.kpis) ? fm.kpis : undefined,
       urls: Array.isArray(fm.urls) ? fm.urls : undefined,
-      statusUpdates: Array.isArray(fm.status_updates)
-        ? fm.status_updates
+      statusUpdates: Array.isArray(fm.statusUpdates)
+        ? fm.statusUpdates
         : undefined,
-      createdAt: fm.created_at != null ? String(fm.created_at) : undefined,
-      updatedAt: fm.updated_at != null ? String(fm.updated_at) : undefined,
-      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
-      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
+      createdAt: fm.createdAt != null ? String(fm.createdAt) : undefined,
+      updatedAt: fm.updatedAt != null ? String(fm.updatedAt) : undefined,
+      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
+      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
     };
   }
 

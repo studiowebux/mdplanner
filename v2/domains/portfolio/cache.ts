@@ -109,6 +109,10 @@ export function registerPortfolioEntity(repo: PortfolioRepository): void {
   const entity: EntityDef = {
     table: PORTFOLIO_TABLE,
     schema: PORTFOLIO_SCHEMA,
+    migrations: [
+      "ALTER TABLE portfolio ADD COLUMN github_repo TEXT",
+      "ALTER TABLE portfolio ADD COLUMN billing_customer_id TEXT",
+    ],
     fts: {
       type: "portfolio",
       columns: ["id", "name", "description"],

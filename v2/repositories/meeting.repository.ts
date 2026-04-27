@@ -94,18 +94,14 @@ export class MeetingRepository extends CachedMarkdownRepository<
       agenda: fm.agenda != null ? String(fm.agenda) : undefined,
       notes,
       actions,
-      createdAt: fm.created_at
-        ? String(fm.created_at)
-        : new Date().toISOString(),
-      updatedAt: fm.updated_at
-        ? String(fm.updated_at)
-        : new Date().toISOString(),
+      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
+      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
       project: fm.project != null ? String(fm.project) : undefined,
-      relatedMeetings: Array.isArray(fm.related_meetings)
-        ? [...new Set(fm.related_meetings.map(String).filter(Boolean))]
+      relatedMeetings: Array.isArray(fm.relatedMeetings)
+        ? [...new Set(fm.relatedMeetings.map(String).filter(Boolean))]
         : [],
-      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
-      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
+      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
+      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
     };
   }
 

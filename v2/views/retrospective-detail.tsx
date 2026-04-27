@@ -4,7 +4,6 @@ import { BackButton } from "./components/back-button.tsx";
 import type { Retrospective } from "../types/retrospective.types.ts";
 import { RETROSPECTIVE_SECTIONS } from "../types/retrospective.types.ts";
 import type { ViewProps } from "../types/app.ts";
-import { formatDate } from "../utils/time.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
@@ -82,7 +81,9 @@ export const RetrospectiveDetailView: FC<
           <div class="detail-section retro-detail__participants">
             <h3 class="retro-detail__participants-label">Participants</h3>
             <ul class="retro-detail__participants-list">
-              {retro.participants.map((p, i) => <li key={i}>{p}</li>)}
+              {retro.participants.map((p, i) => (
+                <li key={i} class="badge">{p}</li>
+              ))}
             </ul>
           </div>
         )}
@@ -99,12 +100,6 @@ export const RetrospectiveDetailView: FC<
         </div>
 
         {/* -- Meta ------------------------------------------------------- */}
-        <div class="detail-section retro-detail__meta">
-          <span>Created {formatDate(retro.createdAt)}</span>
-          {retro.updatedAt && retro.updatedAt !== retro.createdAt && (
-            <span>&middot; Updated {formatDate(retro.updatedAt)}</span>
-          )}
-        </div>
         <AuditMeta
           createdAt={retro.createdAt}
           updatedAt={retro.updatedAt}

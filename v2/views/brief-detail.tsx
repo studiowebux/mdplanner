@@ -4,7 +4,6 @@ import { BackButton } from "./components/back-button.tsx";
 import type { Brief } from "../types/brief.types.ts";
 import { BRIEF_SECTIONS } from "../types/brief.types.ts";
 import type { ViewProps } from "../types/app.ts";
-import { formatDate } from "../utils/time.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
@@ -18,8 +17,8 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 const SectionBlock: FC<{ label: string; items: string[] }> = (
   { label, items },
 ) => (
-  <div class="brief-detail__section">
-    <h3 class="brief-detail__section-title">{label}</h3>
+  <section class="detail-section">
+    <h2 class="section-heading">{label}</h2>
     {items.length === 1
       ? <p class="brief-detail__prose">{items[0]}</p>
       : (
@@ -27,7 +26,7 @@ const SectionBlock: FC<{ label: string; items: string[] }> = (
           {items.map((item, i) => <li key={i}>{item}</li>)}
         </ul>
       )}
-  </div>
+  </section>
 );
 
 // ---------------------------------------------------------------------------
@@ -119,12 +118,6 @@ export const BriefDetailView: FC<
         )}
 
         {/* -- Meta ------------------------------------------------------- */}
-        <div class="detail-section brief-detail__meta">
-          <span>Created {formatDate(brief.createdAt)}</span>
-          {brief.updatedAt && brief.updatedAt !== brief.createdAt && (
-            <span>&middot; Updated {formatDate(brief.updatedAt)}</span>
-          )}
-        </div>
         <AuditMeta
           createdAt={brief.createdAt}
           updatedAt={brief.updatedAt}

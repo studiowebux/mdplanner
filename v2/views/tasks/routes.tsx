@@ -1,7 +1,8 @@
 // Task view routes — factory-generated + custom detail + quick actions.
 
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
-import { taskConfig } from "../../domains/task/config.tsx";
+import { createDomainForm } from "../../factories/domain-view.tsx";
+import { TASK_FORM_FIELDS, taskConfig } from "../../domains/task/config.tsx";
 import type { AppContext } from "../../types/app.ts";
 import {
   getGitHubService,
@@ -19,6 +20,26 @@ import { viewProps } from "../../middleware/view-props.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 
 export const tasksRouter = createDomainRoutes(taskConfig);
+
+const TaskForm = createDomainForm({
+  domain: "tasks",
+  singular: "Task",
+  fields: TASK_FORM_FIELDS,
+});
+
+// ---------------------------------------------------------------------------
+// GET /prefill-new — create-task form with query-param prefill
+// Used by meeting action items to seed the title field.
+// ---------------------------------------------------------------------------
+
+tasksRouter.get("/prefill-new", (c) => {
+  const title = c.req.query("title") ?? "";
+  const description = c.req.query("description") ?? "";
+  const prefillValues: Record<string, string> = {};
+  if (title) prefillValues.title = title;
+  if (description) prefillValues.description = description;
+  return c.html(TaskForm({ prefillValues }) as unknown as string);
+});
 
 // ---------------------------------------------------------------------------
 // Shared — fetch task + resolve props + render

@@ -183,12 +183,6 @@ export const IdeaDetailView: FC<
         <MarkdownSection title="Description" markdown={idea.description} />
 
         {/* -- Meta ------------------------------------------------------ */}
-        <div class="detail-section idea-detail__meta">
-          <span>Created {formatDate(idea.createdAt)}</span>
-          {idea.updatedAt && idea.updatedAt !== idea.createdAt && (
-            <span>&middot; Updated {formatDate(idea.updatedAt)}</span>
-          )}
-        </div>
         <AuditMeta
           createdAt={idea.createdAt}
           updatedAt={idea.updatedAt}

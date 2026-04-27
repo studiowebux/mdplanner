@@ -115,14 +115,15 @@ export class PeopleRepository extends CachedMarkdownRepository<
     if (fm.role != null) person.role = String(fm.role);
     const depts = this.toStringArray(fm.departments);
     if (depts) person.departments = depts;
-    if (fm.reports_to != null) person.reportsTo = String(fm.reports_to);
+    // Note: fm keys are already camelCase (mapKeysFromFm applied by base repo).
+    if (fm.reportsTo != null) person.reportsTo = String(fm.reportsTo);
     if (fm.email != null) person.email = String(fm.email);
     if (fm.phone != null) person.phone = String(fm.phone);
-    if (fm.start_date != null) person.startDate = String(fm.start_date);
-    if (typeof fm.hours_per_day === "number") {
-      person.hoursPerDay = fm.hours_per_day;
+    if (fm.startDate != null) person.startDate = String(fm.startDate);
+    if (typeof fm.hoursPerDay === "number") {
+      person.hoursPerDay = fm.hoursPerDay;
     }
-    const wd = this.toStringArray(fm.working_days);
+    const wd = this.toStringArray(fm.workingDays);
     if (wd) {
       person.workingDays = wd.filter(
         (d): d is typeof WEEKDAYS[number] =>
@@ -131,10 +132,10 @@ export class PeopleRepository extends CachedMarkdownRepository<
     }
     if (notes) person.notes = notes;
     if (
-      fm.agent_type === "human" || fm.agent_type === "ai" ||
-      fm.agent_type === "hybrid"
+      fm.agentType === "human" || fm.agentType === "ai" ||
+      fm.agentType === "hybrid"
     ) {
-      person.agentType = fm.agent_type;
+      person.agentType = fm.agentType;
     }
     const skills = this.toStringArray(fm.skills);
     if (skills) person.skills = skills;
@@ -144,8 +145,8 @@ export class PeopleRepository extends CachedMarkdownRepository<
         person.models = parsed.data;
       }
     }
-    if (fm.system_prompt != null) {
-      person.systemPrompt = String(fm.system_prompt);
+    if (fm.systemPrompt != null) {
+      person.systemPrompt = String(fm.systemPrompt);
     }
     if (
       fm.status === "idle" || fm.status === "working" ||
@@ -153,14 +154,14 @@ export class PeopleRepository extends CachedMarkdownRepository<
     ) {
       person.status = fm.status;
     }
-    if (fm.last_seen != null) person.lastSeen = String(fm.last_seen);
-    if (fm.current_task_id != null) {
-      person.currentTaskId = String(fm.current_task_id);
+    if (fm.lastSeen != null) person.lastSeen = String(fm.lastSeen);
+    if (fm.currentTaskId != null) {
+      person.currentTaskId = String(fm.currentTaskId);
     }
-    if (fm.created_at != null) person.createdAt = String(fm.created_at);
-    if (fm.updated_at != null) person.updatedAt = String(fm.updated_at);
-    if (fm.created_by != null) person.createdBy = String(fm.created_by);
-    if (fm.updated_by != null) person.updatedBy = String(fm.updated_by);
+    if (fm.createdAt != null) person.createdAt = String(fm.createdAt);
+    if (fm.updatedAt != null) person.updatedAt = String(fm.updatedAt);
+    if (fm.createdBy != null) person.createdBy = String(fm.createdBy);
+    if (fm.updatedBy != null) person.updatedBy = String(fm.updatedBy);
 
     return person;
   }

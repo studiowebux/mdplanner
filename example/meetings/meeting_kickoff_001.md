@@ -1,40 +1,37 @@
 ---
 id: meeting_kickoff_001
 date: 2026-02-20
-created_at: "2026-02-20T10:00:00.000Z"
 attendees: [alice, bob, charlie, diana]
 agenda: Project kickoff — scope, timeline, and team responsibilities
 actions:
-  -
-    id: act_001
+  - id: act_001
     description: Set up project repository and CI pipeline
     owner: bob
     due: 2026-02-24
     status: done
-  -
-    id: act_002
+  - id: act_002
     description: Draft initial architecture diagram
     owner: alice
     due: 2026-02-27
-    status: open
-  -
-    id: act_003
+    status: done
+  - id: act_003
     description: Schedule weekly sync recurring meeting
     owner: charlie
     due: 2026-02-21
     status: done
-  -
-    id: act_004
+  - id: act_004
     description: Identify external API dependencies and request access
     owner: diana
     due: 2026-03-01
     status: open
-  -
-    id: act_1771796140243_zsw6
+  - id: act_1771796140243_zsw6
     description: Do Work
     owner: Ping
     due: 2026-02-27
     status: open
+created_at: "2026-04-18T15:06:21.073Z"
+updated_at: "2026-04-18T15:06:21.073Z"
+related_meetings: []
 ---
 
 # Project Kickoff

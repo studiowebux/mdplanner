@@ -31,6 +31,15 @@ export const UpdateSizeSchema = z.object({
 
 export type UpdateSize = z.infer<typeof UpdateSizeSchema>;
 
+export const UpdateContentSchema = z.object({
+  content: z.string().openapi({
+    description: "Note content (plain text)",
+    example: "Remember to follow up with the client",
+  }),
+}).openapi("UpdateContent");
+
+export type UpdateContent = z.infer<typeof UpdateContentSchema>;
+
 export const StickyNoteSchema = z.object({
   id: z.string().openapi({
     description: "Sticky note ID",

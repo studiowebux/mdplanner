@@ -15,24 +15,6 @@
 
 /* -- Sections ------------------------------------------------------------ */
 
-.brief-detail__section {
-  padding: var(--space-md) 0;
-  border-bottom: var(--border-width) solid var(--color-border-default);
-}
-
-.brief-detail__section:last-of-type {
-  border-bottom: none;
-}
-
-.brief-detail__section-title {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wide);
-  margin-bottom: var(--space-sm);
-}
-
 .brief-detail__prose {
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);

@@ -152,18 +152,12 @@ export const InvoiceDetailView: FC<
         <MarkdownSection title="Notes" markdown={invoice.notes} />
 
         {/* -- Meta ------------------------------------------------------- */}
-        <div class="detail-section invoice-detail__meta">
-          <span>Created {formatDate(invoice.createdAt)}</span>
-          {invoice.sentAt && (
-            <span>&middot; Sent {formatDate(invoice.sentAt)}</span>
-          )}
-          {invoice.paidAt && (
-            <span>&middot; Paid {formatDate(invoice.paidAt)}</span>
-          )}
-          {invoice.updatedAt && invoice.updatedAt !== invoice.createdAt && (
-            <span>&middot; Updated {formatDate(invoice.updatedAt)}</span>
-          )}
-        </div>
+        {(invoice.sentAt || invoice.paidAt) && (
+          <div class="detail-section invoice-detail__meta">
+            {invoice.sentAt && <span>Sent {formatDate(invoice.sentAt)}</span>}
+            {invoice.paidAt && <span>Paid {formatDate(invoice.paidAt)}</span>}
+          </div>
+        )}
         <AuditMeta
           createdAt={invoice.createdAt}
           updatedAt={invoice.updatedAt}

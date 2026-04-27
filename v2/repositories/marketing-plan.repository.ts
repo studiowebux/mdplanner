@@ -104,16 +104,14 @@ export class MarketingPlanRepository extends CachedMarkdownRepository<
       name: fm.name ? String(fm.name) : "",
       description: fm.description != null ? String(fm.description) : undefined,
       status: (fm.status as MarketingPlan["status"]) ?? "draft",
-      budgetTotal: fm.budget_total != null
-        ? Number(fm.budget_total)
-        : undefined,
-      budgetCurrency: fm.budget_currency != null
-        ? String(fm.budget_currency)
+      budgetTotal: fm.budgetTotal != null ? Number(fm.budgetTotal) : undefined,
+      budgetCurrency: fm.budgetCurrency != null
+        ? String(fm.budgetCurrency)
         : undefined,
       startDate: fm.start_date != null ? String(fm.start_date) : undefined,
-      endDate: fm.end_date != null ? String(fm.end_date) : undefined,
+      endDate: fm.endDate != null ? String(fm.endDate) : undefined,
       targetAudiences: this.parseArray<MarketingTargetAudience>(
-        fm.target_audiences,
+        fm.targetAudiences,
         (raw) => ({
           name: String(raw.name ?? ""),
           description: raw.description != null
@@ -137,8 +135,8 @@ export class MarketingPlanRepository extends CachedMarkdownRepository<
         fm.campaigns,
         parseCampaign,
       ),
-      linkedGoals: Array.isArray(fm.linked_goals)
-        ? (fm.linked_goals as unknown[]).map(String)
+      linkedGoals: Array.isArray(fm.linkedGoals)
+        ? (fm.linkedGoals as unknown[]).map(String)
         : undefined,
       project: fm.project != null ? String(fm.project) : undefined,
       responsible: fm.responsible != null ? String(fm.responsible) : undefined,
@@ -157,14 +155,10 @@ export class MarketingPlanRepository extends CachedMarkdownRepository<
         (raw) => ({ text: String(raw.text ?? raw) }),
       ),
       notes: body.trim() || undefined,
-      createdAt: fm.created_at
-        ? String(fm.created_at)
-        : new Date().toISOString(),
-      updatedAt: fm.updated_at
-        ? String(fm.updated_at)
-        : new Date().toISOString(),
-      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
-      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
+      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
+      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
+      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
+      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
     };
   }
 

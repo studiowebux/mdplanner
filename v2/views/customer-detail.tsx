@@ -5,7 +5,6 @@ import type { Customer } from "../types/customer.types.ts";
 import type { Quote } from "../types/quote.types.ts";
 import type { Invoice } from "../types/invoice.types.ts";
 import type { ViewProps } from "../types/app.ts";
-import { formatDate } from "../utils/time.ts";
 import { formatCurrency } from "../utils/format.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
@@ -238,13 +237,23 @@ export const CustomerDetailView: FC<
         {hasContact && (
           <div class="detail-section detail-info-row">
             {customer.email && (
-              <InfoItem label="Email">{customer.email}</InfoItem>
+              <InfoItem label="Email">
+                <a href={`mailto:${customer.email}`}>{customer.email}</a>
+              </InfoItem>
             )}
             {customer.phone && (
-              <InfoItem label="Phone">{customer.phone}</InfoItem>
+              <InfoItem label="Phone">
+                <a href={`tel:${customer.phone}`}>{customer.phone}</a>
+              </InfoItem>
             )}
             {customer.company && (
-              <InfoItem label="Company">{customer.company}</InfoItem>
+              <InfoItem label="Company">
+                <a
+                  href={`/companies?q=${encodeURIComponent(customer.company)}`}
+                >
+                  {customer.company}
+                </a>
+              </InfoItem>
             )}
           </div>
         )}
@@ -276,12 +285,6 @@ export const CustomerDetailView: FC<
         />
 
         {/* -- Meta ------------------------------------------------------- */}
-        <div class="detail-section customer-detail__meta">
-          <span>Created {formatDate(customer.createdAt)}</span>
-          {customer.updatedAt && customer.updatedAt !== customer.createdAt && (
-            <span>&middot; Updated {formatDate(customer.updatedAt)}</span>
-          )}
-        </div>
         <AuditMeta
           createdAt={customer.createdAt}
           updatedAt={customer.updatedAt}

@@ -53,6 +53,7 @@ export const meetingConfig: DomainConfig<
       name: "open_actions_only",
       label: "Open actions only",
       options: [
+        { value: "", label: "All" },
         { value: "true", label: "Yes" },
       ],
     },

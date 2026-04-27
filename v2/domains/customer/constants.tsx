@@ -26,18 +26,26 @@ export const CUSTOMER_TABLE_COLUMNS: ColumnDef[] = [
     key: "email",
     label: "Email",
     sortable: true,
+    render: (v) => v ? <a href={`mailto:${v}`}>{String(v)}</a> : "",
   },
   {
     key: "phone",
     label: "Phone",
     sortable: true,
+    render: (v) => v ? <a href={`tel:${v}`}>{String(v)}</a> : "",
   },
   {
     key: "company",
     label: "Company",
     sortable: true,
     render: (v, row) =>
-      v ? <Highlight text={String(v)} q={row._q as string} /> : "",
+      v
+        ? (
+          <a href={`/companies?q=${encodeURIComponent(String(v))}`}>
+            <Highlight text={String(v)} q={row._q as string} />
+          </a>
+        )
+        : "",
   },
   {
     key: "city",

@@ -115,6 +115,9 @@ export function registerInvoiceEntity(repo: InvoiceRepository): void {
   const entity: EntityDef = {
     table: INVOICE_TABLE,
     schema: INVOICE_SCHEMA,
+    migrations: [
+      "ALTER TABLE invoices ADD COLUMN line_items TEXT",
+    ],
     fts: {
       type: "invoice",
       columns: ["id", "number", "title", "notes"],

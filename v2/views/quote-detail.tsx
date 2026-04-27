@@ -168,17 +168,14 @@ export const QuoteDetailView: FC<
         <MarkdownSection title="Notes" markdown={quote.notes} />
 
         {/* -- Meta ------------------------------------------------------- */}
-        <div class="detail-section quote-detail__meta">
-          <span>Created {formatDate(quote.createdAt)}</span>
-          {quote.sentAt && <span>&middot; Sent {formatDate(quote.sentAt)}
-          </span>}
-          {quote.acceptedAt && (
-            <span>&middot; Accepted {formatDate(quote.acceptedAt)}</span>
-          )}
-          {quote.updatedAt && quote.updatedAt !== quote.createdAt && (
-            <span>&middot; Updated {formatDate(quote.updatedAt)}</span>
-          )}
-        </div>
+        {(quote.sentAt || quote.acceptedAt) && (
+          <div class="detail-section quote-detail__meta">
+            {quote.sentAt && <span>Sent {formatDate(quote.sentAt)}</span>}
+            {quote.acceptedAt && (
+              <span>Accepted {formatDate(quote.acceptedAt)}</span>
+            )}
+          </div>
+        )}
         <AuditMeta
           createdAt={quote.createdAt}
           updatedAt={quote.updatedAt}

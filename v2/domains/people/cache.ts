@@ -99,6 +99,9 @@ export function registerPeopleEntity(repo: PeopleRepository): void {
   const entity: EntityDef = {
     table: PEOPLE_TABLE,
     schema: PEOPLE_SCHEMA,
+    migrations: [
+      "ALTER TABLE people ADD COLUMN reports_to TEXT",
+    ],
     fts: {
       type: "person",
       columns: ["id", "name", "notes"],

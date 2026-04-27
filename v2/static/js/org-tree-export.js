@@ -38,7 +38,6 @@
   function getExportStyles() {
     return [
       ".orgchart-export-root {",
-      "  padding: 20px;",
       "  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;",
       "}",
       ".orgchart-tree {",
@@ -66,8 +65,8 @@
       "  border: 1px solid " + C.border + ";",
       "  border-radius: 0.5rem;",
       "  padding: 0.75rem 1rem;",
-      "  min-width: 180px;",
-      "  max-width: 220px;",
+      "  min-width: 11.25rem;",
+      "  max-width: 15rem;",
       "}",
       ".orgchart-node-header {",
       "  padding-left: 0.5rem;",
@@ -211,6 +210,39 @@
   }
 
   /**
+   * Inject real <div> connector elements into .orgchart-children so they
+   * render in SVG foreignObject and print contexts where CSS pseudo-elements
+   * are unreliable. Returns the modified HTML string.
+   */
+  function injectConnectors(html) {
+    var temp = document.createElement("div");
+    temp.innerHTML = html;
+    temp.querySelectorAll(".orgchart-children").forEach(function (el) {
+      var wrappers = el.querySelectorAll(":scope > .orgchart-node-wrapper");
+
+      // Vertical line from parent card down to horizontal bar
+      var vDown = document.createElement("div");
+      vDown.className = "connector-v-down";
+      el.insertBefore(vDown, el.firstChild);
+
+      // Horizontal bar across siblings — skip for single child
+      if (wrappers.length > 1) {
+        var hBar = document.createElement("div");
+        hBar.className = "connector-h";
+        el.insertBefore(hBar, el.firstChild);
+      }
+
+      // Vertical line from horizontal bar down to each child wrapper
+      wrappers.forEach(function (w) {
+        var vUp = document.createElement("div");
+        vUp.className = "connector-v-up";
+        w.insertBefore(vUp, w.firstChild);
+      });
+    });
+    return temp.innerHTML;
+  }
+
+  /**
    * Temporarily remove all layout constraints (overflow, fixed height,
    * zoom/pan transform, parent width), measure the tree's natural size,
    * capture its outerHTML, then restore everything.
@@ -222,61 +254,84 @@
     var tree = vp.querySelector(".orgchart-tree");
     if (!tree || tree.children.length === 0) return null;
 
-    // Save current state
-    var savedTransform = vp.style.transform;
-    var savedContainerCss = container.style.cssText;
-
-    // Remove ALL constraints: position off-screen, unlimited width/height,
-    // no overflow clipping, so the tree can expand to its natural size.
-    vp.style.transform = "translate(0px, 0px) scale(1)";
-    container.style.cssText = "position: fixed; left: -99999px; top: 0; " +
-      "width: max-content; height: max-content; " +
-      "overflow: visible; border: none;";
+    // Measure in the LIVE layout — offsetLeft/offsetTop are layout-tree values
+    // unaffected by the viewport's CSS transform. We set position:relative on
+    // vp so it becomes the offsetParent reference for all child nodes.
+    vp.style.position = "relative";
     void vp.offsetHeight;
 
-    // Measure the true bounding box across all descendant nodes
-    // (the tree element may not contain all children in its own box)
     var nodes = vp.querySelectorAll(".orgchart-node");
     var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    nodes.forEach(function (n) {
-      var r = n.getBoundingClientRect();
-      if (r.left < minX) minX = r.left;
-      if (r.top < minY) minY = r.top;
-      if (r.right > maxX) maxX = r.right;
-      if (r.bottom > maxY) maxY = r.bottom;
+    nodes.forEach(function (node) {
+      var el = node;
+      var x = 0, y = 0;
+      while (el && el !== vp) {
+        x += el.offsetLeft;
+        y += el.offsetTop;
+        el = el.offsetParent;
+      }
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x + node.offsetWidth > maxX) maxX = x + node.offsetWidth;
+      if (y + node.offsetHeight > maxY) maxY = y + node.offsetHeight;
     });
 
-    var pad = 60;
-    var result = {
-      html: tree.outerHTML,
-      width: Math.ceil(maxX - minX + pad * 2),
-      height: Math.ceil(maxY - minY + pad * 2),
+    var html = tree.outerHTML;
+    // Read the live container width before restoring — foreignObject will use
+    // this exact width so the tree lays out identically to the live page.
+    var containerW = container.clientWidth;
+    var containerH = Math.ceil(maxY + 60);
+    vp.style.position = "";
+
+    if (maxX <= minX) return null;
+
+    return {
+      html: html,
+      minX: minX,
+      minY: minY,
+      nodeSpanW: Math.ceil(maxX - minX),
+      nodeSpanH: Math.ceil(maxY - minY),
+      containerW: containerW,
+      containerH: containerH,
     };
-
-    // Restore
-    vp.style.transform = savedTransform;
-    container.style.cssText = savedContainerCss;
-
-    return result;
   }
 
   function exportSVG() {
     var data = captureTree();
     if (!data) return;
 
+    var pad = 200;
+    // shift: push content right so the leftmost node lands at x=pad in SVG space.
+    // margin-left on the inner div moves it in normal flow (unlike position:relative
+    // which only affects visual rendering but not foreignObject clipping bounds).
+    // foreignObject width covers shift + full content width + right padding so
+    // neither left nor right nodes are clipped.
+    var shift = Math.max(0, pad - data.minX);
+    var foW = data.containerW;
+    var foFW = shift + data.minX + data.nodeSpanW + pad;
+    var foH = data.minY + data.nodeSpanH + pad;
+    var cropX = data.minX + shift - pad;
+    var cropY = data.minY - pad;
+    var svgW = data.nodeSpanW + pad * 2;
+    var svgH = data.nodeSpanH + pad * 2;
     var styles = getExportStyles();
+    var connectedHtml = injectConnectors(data.html);
     var svg = [
       '<?xml version="1.0" encoding="UTF-8"?>',
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + data.width +
-      " " + data.height + '" width="' + data.width + '" height="' +
-      data.height + '">',
+      '<svg xmlns="http://www.w3.org/2000/svg"',
+      '     viewBox="' + cropX + " " + cropY + " " + svgW + " " + svgH + '"',
+      '     width="' + svgW + '" height="' + svgH + '">',
       "  <style>",
       styles,
       "  </style>",
-      '  <rect width="100%" height="100%" fill="white"/>',
-      '  <foreignObject width="100%" height="100%">',
-      '    <div xmlns="http://www.w3.org/1999/xhtml" class="orgchart-export-root">',
-      data.html,
+      '  <rect x="' + cropX + '" y="' + cropY + '" width="' + svgW +
+      '" height="' + svgH + '" fill="white"/>',
+      '  <foreignObject x="0" y="0" width="' + foFW + '" height="' + foH + '">',
+      '    <div xmlns="http://www.w3.org/1999/xhtml" style="margin-left:' +
+      shift + "px;width:" + foW + 'px;">',
+      '      <div class="orgchart-export-root">',
+      connectedHtml,
+      "      </div>",
       "    </div>",
       "  </foreignObject>",
       "</svg>",
@@ -298,16 +353,41 @@
 
     var styles = getExportStyles();
 
+    // A4 landscape printable area at 96 dpi with 1 cm margins ≈ 1046 × 756 px.
+    // Scale down if the tree is wider/taller than the printable area.
+    var PAGE_W = 1046;
+    var PAGE_H = 756;
+    // Use the same 200px buffer as SVG export. The export CSS renders nodes at
+    // hardcoded rem values that differ from live CSS variables, so nodeSpanW from
+    // live measurements can underestimate the export layout width. The 400px total
+    // buffer (200 each side) absorbs that discrepancy and lets the flex tree center
+    // naturally within bodyW without any overflow or clipping.
+    var padBuf = 200;
+    var bodyW = data.nodeSpanW + padBuf * 2;
+    var bodyH = data.nodeSpanH + padBuf * 2;
+    var printScale = Math.min(1, PAGE_W / bodyW, PAGE_H / bodyH);
+    var scalePercent = Math.round(printScale * 100);
+
+    // @page size must match bodyW so the browser lays out at our width instead
+    // of reflowing to A4 width (which causes left-side nodes to overflow and clip).
+    // margin: 1cm keeps content off the physical printer edge so the top node isn't cut.
     var pageStyles = [
       "* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }",
-      "@page { size: A4 landscape; margin: 1cm; }",
-      "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: white; margin: 0; padding: 0; min-width: " +
-      data.width + "px; }",
+      "@page { size: " + bodyW + "px " + bodyH + "px; margin: 1cm; }",
+      "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: white; margin: 0; padding: 0; width: " +
+      bodyW + "px; }",
     ].join("\n");
+
+    // Inject real connectors before serialising to HTML — avoids duplicate injection
+    var connectedHtml = injectConnectors(data.html);
 
     var html = "<!DOCTYPE html><html><head><title>Org Chart</title>" +
       "<style>" + styles + "\n" + pageStyles + "</style>" +
-      "</head><body>" + data.html + "</body></html>";
+      "</head><body>" +
+      '<div class="orgchart-export-root">' +
+      connectedHtml +
+      "</div>" +
+      "</body></html>";
 
     // Read the page nonce so the iframe's <style> passes CSP
     var nonceEl = document.querySelector("script[nonce]");
@@ -316,41 +396,17 @@
       html = html.replace("<style>", '<style nonce="' + nonce + '">');
     }
 
-    // Hidden iframe — avoids popup blockers and document.write quirks
+    // Hidden iframe sized to the natural content width so layout matches print width.
     var iframe = document.createElement("iframe");
     iframe.setAttribute("aria-hidden", "true");
-    iframe.style.cssText =
-      "position:fixed;left:-99999px;width:0;height:0;border:none;";
+    iframe.style.cssText = "position:fixed;left:-99999px;width:" + bodyW +
+      "px;height:1px;border:none;";
     document.body.appendChild(iframe);
 
     var idoc = iframe.contentDocument || iframe.contentWindow.document;
     idoc.open();
     idoc.write(html);
     idoc.close();
-
-    // Inject real connector elements to replace pseudo-elements (unreliable in print)
-    var children = idoc.querySelectorAll(".orgchart-children");
-    children.forEach(function (el) {
-      // Vertical line from parent down (replaces ::before)
-      var vLine = idoc.createElement("div");
-      vLine.className = "connector-v-down";
-      el.insertBefore(vLine, el.firstChild);
-
-      // Horizontal line across siblings (replaces ::after) — skip if single child
-      var wrappers = el.querySelectorAll(":scope > .orgchart-node-wrapper");
-      if (wrappers.length > 1) {
-        var hLine = idoc.createElement("div");
-        hLine.className = "connector-h";
-        el.insertBefore(hLine, el.firstChild);
-      }
-
-      // Vertical line from horizontal bar down to each child (replaces wrapper::before)
-      wrappers.forEach(function (w) {
-        var vUp = idoc.createElement("div");
-        vUp.className = "connector-v-up";
-        w.insertBefore(vUp, w.firstChild);
-      });
-    });
 
     // Wait for content to render, then print
     iframe.contentWindow.focus();

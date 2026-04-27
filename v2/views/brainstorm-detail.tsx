@@ -3,7 +3,6 @@ import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import type { Brainstorm } from "../types/brainstorm.types.ts";
 import type { ViewProps } from "../types/app.ts";
-import { formatDate } from "../utils/time.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
@@ -109,13 +108,6 @@ export const BrainstormDetailView: FC<
         </section>
 
         {/* -- Meta ------------------------------------------------------- */}
-        <div class="detail-section brainstorm-detail__meta">
-          <span>Created {formatDate(brainstorm.createdAt)}</span>
-          {brainstorm.updatedAt &&
-            brainstorm.updatedAt !== brainstorm.createdAt && (
-            <span>&middot; Updated {formatDate(brainstorm.updatedAt)}</span>
-          )}
-        </div>
         <AuditMeta
           createdAt={brainstorm.createdAt}
           updatedAt={brainstorm.updatedAt}

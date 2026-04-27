@@ -76,6 +76,13 @@
   z-index: var(--z-toolbar);
 }
 
+.sticky-canvas__board-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-right: auto;
+}
+
 .sticky-canvas__zoom-display {
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);

@@ -3,7 +3,6 @@ import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import type { Payment } from "../types/payment.types.ts";
 import type { ViewProps } from "../types/app.ts";
-import { formatDate } from "../utils/time.ts";
 import { formatCurrency } from "../utils/format.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
@@ -85,12 +84,6 @@ export const PaymentDetailView: FC<
         <MarkdownSection title="Notes" markdown={payment.notes} />
 
         {/* -- Meta ------------------------------------------------------- */}
-        <div class="detail-section payment-detail__meta">
-          <span>Created {formatDate(payment.createdAt)}</span>
-          {payment.updatedAt && payment.updatedAt !== payment.createdAt && (
-            <span>&middot; Updated {formatDate(payment.updatedAt)}</span>
-          )}
-        </div>
         <AuditMeta
           createdAt={payment.createdAt}
           updatedAt={payment.updatedAt}

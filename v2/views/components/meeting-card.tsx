@@ -7,6 +7,9 @@ type Props = { item: Meeting; q?: string };
 
 export const MeetingCard: FC<Props> = ({ item, q }) => {
   const openActions = item.actions.filter((a) => a.status === "open").length;
+  const attendees = item.attendees ?? [];
+  const visible = attendees.slice(0, 3);
+  const hidden = attendees.slice(3);
   return (
     <DomainCard
       href={`/meetings/${item.id}`}
@@ -17,14 +20,37 @@ export const MeetingCard: FC<Props> = ({ item, q }) => {
     >
       <CardMeta>
         <CardMetaItem label="Date">{item.date}</CardMetaItem>
-        {(item.attendees ?? []).length > 0 && (
+        {attendees.length > 0 && (
           <CardMetaItem label="Attendees">
-            {(item.attendees ?? []).length}
+            <span class="meeting-attendees-pills">
+              {visible.map((name) => (
+                <a
+                  key={name}
+                  href={`/people?q=${encodeURIComponent(name)}`}
+                  class="badge badge--neutral"
+                >
+                  {name}
+                </a>
+              ))}
+              {hidden.length > 0 && (
+                <span
+                  class="badge badge--neutral meeting-attendees-overflow"
+                  title={hidden.join(", ")}
+                >
+                  +{hidden.length}
+                </span>
+              )}
+            </span>
           </CardMetaItem>
         )}
         {openActions > 0 && (
           <CardMetaItem label="Open actions">
-            <span class="badge badge--warning">{openActions}</span>
+            <a
+              href={`/meetings/${item.id}#meeting-actions-table`}
+              class="badge badge--warning"
+            >
+              {openActions} open
+            </a>
           </CardMetaItem>
         )}
       </CardMeta>

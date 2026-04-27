@@ -39,55 +39,58 @@
     var vp = document.getElementById("orgchartViewport");
     if (!container || !vp) return;
 
-    // Reset transform to measure natural positions
-    vp.style.transform = "translate(0px, 0px) scale(1)";
-    void vp.offsetHeight; // force reflow
-
-    // Compute true bounding box from all rendered nodes
-    var nodes = vp.querySelectorAll(".orgchart-node");
-    if (nodes.length === 0) return;
-
-    var vpRect = vp.getBoundingClientRect();
-    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    nodes.forEach(function (node) {
-      var r = node.getBoundingClientRect();
-      var left = r.left - vpRect.left;
-      var top = r.top - vpRect.top;
-      if (left < minX) minX = left;
-      if (top < minY) minY = top;
-      if (left + r.width > maxX) maxX = left + r.width;
-      if (top + r.height > maxY) maxY = top + r.height;
-    });
-
-    // Add padding around content (tree has internal padding + connectors need space)
-    var pad = parseFloat(
-          getComputedStyle(document.documentElement).getPropertyValue(
-            "--space-xl",
-          ),
-        ) * 16 || 32;
-    var contentW = maxX - minX + pad * 2;
-    var contentH = maxY - minY + pad * 2;
-    minX -= pad;
-    minY -= pad;
-    if (contentW === 0 || contentH === 0) return;
-
-    // Available space — use container's actual dimensions
     var controls = container.querySelector(".orgchart-controls");
     var controlsH = controls ? controls.offsetHeight : 0;
     var availW = container.clientWidth;
     var availH = container.clientHeight - controlsH;
+    if (availW === 0 || availH === 0) return;
 
-    // Scale to fit — cap at 1
+    // Reset transform. Temporarily set position:relative on the viewport so
+    // it becomes an offsetParent — offsetLeft/offsetTop are layout-tree values
+    // and are never stale, unlike getBoundingClientRect() which reads from the
+    // GPU compositing layer and can return old values after a transform reset
+    // on a will-change:transform element even after a forced reflow.
+    vp.style.transform = "translate(0px, 0px) scale(1)";
+    vp.style.position = "relative";
+    void vp.offsetHeight;
+
+    var nodes = vp.querySelectorAll(".orgchart-node");
+    if (nodes.length === 0) {
+      vp.style.position = "";
+      return;
+    }
+
+    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    nodes.forEach(function (node) {
+      var el = node;
+      var x = 0, y = 0;
+      while (el && el !== vp) {
+        x += el.offsetLeft;
+        y += el.offsetTop;
+        el = el.offsetParent;
+      }
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x + node.offsetWidth > maxX) maxX = x + node.offsetWidth;
+      if (y + node.offsetHeight > maxY) maxY = y + node.offsetHeight;
+    });
+
+    vp.style.position = "";
+
+    var pad = 32;
+    var contentW = maxX - minX + pad * 2;
+    var contentH = maxY - minY + pad * 2;
+    var startX = minX - pad;
+    var startY = minY - pad;
+    if (contentW <= 0 || contentH <= 0) return;
+
     var scaleX = availW / contentW;
     var scaleY = availH / contentH;
     zoom = Math.min(scaleX, scaleY, 1);
     zoom = Math.max(zoom, 0.1);
 
-    // Center: offset so the content bounding box is centered
-    var scaledW = contentW * zoom;
-    var scaledH = contentH * zoom;
-    panX = (availW - scaledW) / 2 - minX * zoom;
-    panY = (availH - scaledH) / 2 - minY * zoom;
+    panX = (availW - contentW * zoom) / 2 - startX * zoom;
+    panY = (availH - contentH * zoom) / 2 - startY * zoom;
 
     applyTransform();
     updateZoomLabel();
@@ -351,48 +354,29 @@
   // ── Canvas lifecycle — single entry point ───────────────────────
 
   var isOrgActive = false;
-  var canvasSized = false;
 
-  /**
-   * Single function handles all org chart states:
-   * - First entry: calculate canvas height, set CSS var on :root, fit content
-   * - Already active (filter/SSE): refit content (height persists via :root var)
-   * - No org container: clean up
-   */
+  // Height is provided by CSS flex chain (people.css) — no JS calculation needed.
   function syncOrgView() {
     var container = document.getElementById("orgchartContainer");
 
     if (!container) {
-      if (isOrgActive) {
-        isOrgActive = false;
-        canvasSized = false;
-        document.documentElement.style.removeProperty(
-          "--orgchart-canvas-height",
-        );
-      }
+      isOrgActive = false;
       return;
-    }
-
-    // Calculate and set canvas height once on :root — survives htmx swaps
-    if (!canvasSized) {
-      var top = container.getBoundingClientRect().top;
-      var cs = getComputedStyle(container);
-      var borderV = parseFloat(cs.borderTopWidth) +
-        parseFloat(cs.borderBottomWidth);
-      var page = container.closest(".domain-page");
-      var padB = page ? parseFloat(getComputedStyle(page).paddingBottom) : 0;
-      var h = window.innerHeight - top - borderV - padB;
-      document.documentElement.style.setProperty(
-        "--orgchart-canvas-height",
-        h + "px",
-      );
-      canvasSized = true;
     }
 
     isOrgActive = true;
     fitToViewport();
   }
 
-  document.addEventListener("DOMContentLoaded", syncOrgView);
-  document.addEventListener("htmx:afterSettle", syncOrgView);
+  function syncOrgViewDeferred() {
+    // Double-rAF: first rAF queues after current paint, second fires after
+    // the browser has committed layout — ensures fitToViewport reads stable
+    // dimensions on the initial load and after htmx swaps.
+    requestAnimationFrame(function () {
+      requestAnimationFrame(syncOrgView);
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", syncOrgViewDeferred);
+  document.addEventListener("htmx:afterSettle", syncOrgViewDeferred);
 })();

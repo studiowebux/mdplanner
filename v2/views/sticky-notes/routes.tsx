@@ -37,9 +37,9 @@ stickyNotesRouter.get("/", async (c) => {
       styles={stickyNoteConfig.styles}
       scripts={stickyNoteConfig.scripts}
     >
-      <main id="sticky-notes-board-list" class="content-area">
-        <div class="content-area__header">
-          <h1 class="content-area__title">Sticky Notes</h1>
+      <main id="sticky-notes-board-list" class="domain-page">
+        <header class="domain-page__header">
+          <h1 class="domain-page__title">Sticky Notes</h1>
           <button
             type="button"
             class="btn btn--primary"
@@ -50,7 +50,7 @@ stickyNotesRouter.get("/", async (c) => {
           >
             + New Board
           </button>
-        </div>
+        </header>
 
         {boardsWithCounts.length === 0
           ? (

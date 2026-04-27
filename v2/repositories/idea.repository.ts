@@ -145,7 +145,7 @@ export class IdeaRepository extends CachedMarkdownRepository<
         : undefined,
       project: fm.project != null ? String(fm.project) : undefined,
       startDate: fm.start_date != null ? String(fm.start_date) : undefined,
-      endDate: fm.end_date != null ? String(fm.end_date) : undefined,
+      endDate: fm.endDate != null ? String(fm.endDate) : undefined,
       resources: fm.resources != null ? String(fm.resources) : undefined,
       subtasks: Array.isArray(fm.subtasks)
         ? (fm.subtasks as unknown[]).map(String)
@@ -154,20 +154,14 @@ export class IdeaRepository extends CachedMarkdownRepository<
       links: Array.isArray(fm.links)
         ? (fm.links as unknown[]).map(String)
         : undefined,
-      implementedAt: fm.implemented_at != null
-        ? String(fm.implemented_at)
+      implementedAt: fm.implementedAt != null
+        ? String(fm.implementedAt)
         : undefined,
-      cancelledAt: fm.cancelled_at != null
-        ? String(fm.cancelled_at)
-        : undefined,
-      createdAt: fm.created_at
-        ? String(fm.created_at)
-        : new Date().toISOString(),
-      updatedAt: fm.updated_at
-        ? String(fm.updated_at)
-        : new Date().toISOString(),
-      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
-      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
+      cancelledAt: fm.cancelledAt != null ? String(fm.cancelledAt) : undefined,
+      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
+      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
+      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
+      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
     };
   }
 

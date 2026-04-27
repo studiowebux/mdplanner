@@ -74,8 +74,10 @@ export class QuoteRepository extends CachedMarkdownRepository<
       notes = bodyText || undefined;
     }
 
-    const rawItems = Array.isArray(fm.line_items)
-      ? mapArrayFromFm(fm.line_items as unknown[])
+    // Note: fm keys are already camelCase (mapKeysFromFm applied by base repo).
+    // Nested array item keys are still snake_case — mapArrayFromFm handles those.
+    const rawItems = Array.isArray(fm.lineItems)
+      ? mapArrayFromFm(fm.lineItems as unknown[])
       : [];
     const lineItems: LineItem[] = rawItems.map((li) => ({
       id: String(li.id ?? ""),
@@ -95,8 +97,8 @@ export class QuoteRepository extends CachedMarkdownRepository<
       amount: Number(li.amount ?? 0),
     }));
 
-    const rawSchedule = Array.isArray(fm.payment_schedule)
-      ? mapArrayFromFm(fm.payment_schedule as unknown[])
+    const rawSchedule = Array.isArray(fm.paymentSchedule)
+      ? mapArrayFromFm(fm.paymentSchedule as unknown[])
       : undefined;
     const paymentSchedule: PaymentScheduleItem[] | undefined = rawSchedule
       ?.map((ps) => ({
@@ -109,33 +111,29 @@ export class QuoteRepository extends CachedMarkdownRepository<
     return {
       id,
       number: String(fm.number ?? ""),
-      customerId: String(fm.customer_id ?? ""),
+      customerId: String(fm.customerId ?? ""),
       title,
       status: (fm.status as Quote["status"]) ?? "draft",
       currency: fm.currency != null ? String(fm.currency) : undefined,
-      expiresAt: fm.expires_at != null ? String(fm.expires_at) : undefined,
+      expiresAt: fm.expiresAt != null ? String(fm.expiresAt) : undefined,
       lineItems,
       paymentSchedule: paymentSchedule?.length ? paymentSchedule : undefined,
       subtotal: Number(fm.subtotal ?? 0),
       tax: fm.tax != null ? Number(fm.tax) : undefined,
-      taxRate: fm.tax_rate != null ? Number(fm.tax_rate) : undefined,
+      taxRate: fm.taxRate != null ? Number(fm.taxRate) : undefined,
       total: Number(fm.total ?? 0),
       notes,
       footer: fm.footer != null ? String(fm.footer) : undefined,
       revision: fm.revision != null ? Number(fm.revision) : undefined,
-      convertedToInvoice: fm.converted_toInvoice != null
-        ? String(fm.converted_toInvoice)
+      convertedToInvoice: fm.convertedToInvoice != null
+        ? String(fm.convertedToInvoice)
         : undefined,
-      createdAt: fm.created_at
-        ? String(fm.created_at)
-        : new Date().toISOString(),
-      updatedAt: fm.updated_at
-        ? String(fm.updated_at)
-        : new Date().toISOString(),
-      sentAt: fm.sent_at != null ? String(fm.sent_at) : undefined,
-      acceptedAt: fm.accepted_at != null ? String(fm.accepted_at) : undefined,
-      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
-      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
+      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
+      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
+      sentAt: fm.sentAt != null ? String(fm.sentAt) : undefined,
+      acceptedAt: fm.acceptedAt != null ? String(fm.acceptedAt) : undefined,
+      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
+      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
     };
   }
 

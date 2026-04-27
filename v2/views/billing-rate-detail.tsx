@@ -3,7 +3,6 @@ import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import type { BillingRate } from "../types/billing-rate.types.ts";
 import type { ViewProps } from "../types/app.ts";
-import { formatDate } from "../utils/time.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
@@ -73,12 +72,6 @@ export const BillingRateDetailView: FC<
         <MarkdownSection title="Notes" markdown={rate.notes} />
 
         {/* -- Meta ------------------------------------------------------- */}
-        <div class="detail-section billing-rate-detail__meta">
-          <span>Created {formatDate(rate.createdAt)}</span>
-          {rate.updatedAt && rate.updatedAt !== rate.createdAt && (
-            <span>&middot; Updated {formatDate(rate.updatedAt)}</span>
-          )}
-        </div>
         <AuditMeta
           createdAt={rate.createdAt}
           updatedAt={rate.updatedAt}

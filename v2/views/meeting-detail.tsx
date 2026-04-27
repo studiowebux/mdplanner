@@ -26,7 +26,15 @@ const ActionRow: FC<{ action: MeetingAction; meetingId: string }> = (
 ) => (
   <tr class="data-table__row">
     <td class="data-table__td">{action.description}</td>
-    <td class="data-table__td">{action.owner ?? "—"}</td>
+    <td class="data-table__td">
+      {action.owner
+        ? (
+          <a href={`/people?q=${encodeURIComponent(action.owner)}`}>
+            {action.owner}
+          </a>
+        )
+        : "—"}
+    </td>
     <td class="data-table__td">{action.due ?? "—"}</td>
     <td class="data-table__td">
       <button
@@ -350,8 +358,14 @@ export const MeetingDetailView: FC<
           <div class="detail-section">
             <h2 class="section-heading">Attendees</h2>
             <div class="form__tags-pills">
-              {attendees.map((a, i) => (
-                <span key={i} class="form__tags-pill">{a}</span>
+              {attendees.map((a) => (
+                <a
+                  key={a}
+                  href={`/people?q=${encodeURIComponent(a)}`}
+                  class="form__tags-pill"
+                >
+                  {a}
+                </a>
               ))}
             </div>
           </div>

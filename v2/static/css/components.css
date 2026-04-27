@@ -95,6 +95,37 @@
   font-size: var(--font-size-xs);
 }
 
+.btn--ghost {
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: var(--border-width) var(--border-style) transparent;
+}
+
+.btn--ghost:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-default);
+}
+
+.btn--danger-ghost {
+  color: var(--color-danger);
+  background: transparent;
+  border: var(--border-width) var(--border-style) transparent;
+}
+
+.btn--danger-ghost:hover {
+  background: var(--color-error-bg);
+  border-color: var(--color-error-border);
+}
+
+.btn--icon {
+  padding: var(--space-xs);
+  min-width: var(--space-xl);
+  min-height: var(--space-xl);
+  font-size: var(--font-size-base);
+  line-height: 1;
+}
+
 /* -------------------------------------------------------------------------
    Badge — shared base for all domain badges (status, priority, type).
    Semantic color variants: badge--neutral, badge--accent, badge--info,
@@ -528,10 +559,22 @@ a.badge:hover {
 }
 
 .data-table__td a:not(.btn),
-.data-table td a:not(.btn) {
+.data-table td a:not(.btn),
+.data-table__td .btn-link,
+.data-table td .btn-link {
   color: var(--color-text-primary);
   text-decoration: none;
   font-weight: var(--font-weight-semibold);
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  text-align: left;
 }
 
 /* -------------------------------------------------------------------------
@@ -1401,6 +1444,8 @@ a.badge:hover {
 /* Swap animations — works in all browsers via htmx CSS classes */
 
 .view-container {
+  display: block;
+  width: 100%;
   opacity: 1;
   transition: opacity var(--transition-fast) ease;
 }

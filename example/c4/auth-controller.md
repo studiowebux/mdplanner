@@ -2,14 +2,17 @@
 id: auth-controller
 level: component
 type: Controller
-position: {x: 100, y: 100}
+position:
+  x: -78
+  y: 64
 technology: TypeScript
+parent: api
 connections:
-  -
+  - id: c4conn_1777061043381_aju4c1
     target: user-service
     label: Delegates to
-parent: api
-tags: [mdplanner/c4]
+created_at: "2026-04-24T20:04:03.381Z"
+updated_at: "2026-04-24T20:04:03.381Z"
 ---
 
 # Auth Controller

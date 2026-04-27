@@ -30,7 +30,7 @@ export let taskPersonById: Record<string, string> = {};
 /** Milestone name → ID lookup, refreshed on every list render. */
 export let taskMilestoneByName: Record<string, string> = {};
 
-const FORM_FIELDS: FieldDef[] = [
+export const TASK_FORM_FIELDS: FieldDef[] = [
   {
     type: "text",
     name: "title",
@@ -111,7 +111,7 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
 
   stateKeys: TASK_STATE_KEYS,
   columns: TASK_TABLE_COLUMNS,
-  formFields: FORM_FIELDS,
+  formFields: TASK_FORM_FIELDS,
 
   filters: [
     {
@@ -152,10 +152,12 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
   toRow: taskToRow,
 
   parseCreate: (body) =>
-    parseFormBody(FORM_FIELDS, body, { splitTextarea: true }) as CreateTask,
+    parseFormBody(TASK_FORM_FIELDS, body, {
+      splitTextarea: true,
+    }) as CreateTask,
 
   parseUpdate: (body) =>
-    parseFormBody(FORM_FIELDS, body, {
+    parseFormBody(TASK_FORM_FIELDS, body, {
       clearEmpty: true,
       splitTextarea: true,
     }) as Partial<UpdateTask>,
