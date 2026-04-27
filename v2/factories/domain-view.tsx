@@ -53,7 +53,8 @@ export function TableSentinelRow(
       id={`${domain}-load-more`}
       class="load-more-sentinel"
       hx-get={buildMoreUrl(domain, stateKeys, state, nextOffset)}
-      hx-trigger="revealed once"
+      hx-trigger="intersect once root:.app-shell__content"
+      hx-target="this"
       hx-swap="outerHTML"
       hx-sync="closest [sse-connect]:drop"
     >
@@ -78,7 +79,8 @@ export function GridSentinelDiv(
       id={`${domain}-load-more`}
       class="load-more-sentinel"
       hx-get={buildMoreUrl(domain, stateKeys, state, nextOffset)}
-      hx-trigger="revealed once"
+      hx-trigger="intersect once root:.app-shell__content"
+      hx-target="this"
       hx-swap="outerHTML"
       hx-sync="closest [sse-connect]:drop"
     >
@@ -138,7 +140,8 @@ export function createMoreFragment<T extends Entity>(cfg: {
                 state,
                 nextOffset,
               )}
-              hx-trigger="revealed once"
+              hx-trigger="intersect once root:.app-shell__content"
+              hx-target="this"
               hx-swap="outerHTML"
               hx-sync="closest [sse-connect]:drop"
             >
@@ -176,7 +179,8 @@ export function createMoreFragment<T extends Entity>(cfg: {
                 state,
                 nextOffset,
               )}
-              hx-trigger="revealed once"
+              hx-trigger="intersect once root:.app-shell__content"
+              hx-target="this"
               hx-swap="outerHTML"
               hx-sync="closest [sse-connect]:drop"
             >

@@ -15,6 +15,13 @@
   color: var(--color-accent);
 }
 
+.note-card__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: auto;
+}
+
 /* Card view — uses shared DomainCard, only domain-specific styles here */
 
 .note-card__excerpt {
