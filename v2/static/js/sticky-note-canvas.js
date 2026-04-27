@@ -308,9 +308,15 @@
       api("PATCH", "/" + id + "/content", { content: el.textContent || "" })
         .then(function () {
           noteEl.classList.remove("is-dirty");
+          if (window.toast) {
+            window.toast({ type: "success", message: "Note saved" });
+          }
         })
         .catch(function () {
           noteEl.classList.add("is-save-error");
+          if (window.toast) {
+            window.toast({ type: "error", message: "Failed to save note" });
+          }
         });
       delete contentSaveTimers[id];
     }, CONTENT_SAVE_DELAY_MS);
@@ -628,7 +634,12 @@
       if (!isOnCanvas()) return;
       if (!e.target.hasAttribute("data-sticky-content")) return;
       var noteEl = e.target.closest("[data-canvas-note]");
-      if (noteEl) scheduleSave(noteEl);
+      // Only flush on blur if there is a pending debounced save — prevents
+      // a second save (and second toast) when the input timer already fired.
+      if (noteEl) {
+        var id = noteEl.getAttribute("data-sticky-id");
+        if (contentSaveTimers[id]) scheduleSave(noteEl);
+      }
     }, true);
 
     // ── Keyboard ────────────────────────────────────────────────────────
