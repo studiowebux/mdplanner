@@ -9,6 +9,7 @@ type Props = {
   notes: StickyNote[];
   boardId: string;
   boardTitle: string;
+  boardDescription?: string;
   nonce?: string;
 };
 
@@ -73,14 +74,31 @@ const StickyNoteCard: FC<NoteProps> = ({ note }) => {
   );
 };
 
-export const StickyNoteCanvas: FC<Props> = ({ notes, boardId, boardTitle }) => {
+export const StickyNoteCanvas: FC<Props> = (
+  { notes, boardId, boardTitle, boardDescription },
+) => {
   return (
     <div class="sticky-canvas" data-canvas data-board-id={boardId}>
       <div class="sticky-canvas__toolbar">
         <a href="/sticky-notes" class="btn btn--sm" title="All boards">
           &#8592; Boards
         </a>
-        <span class="sticky-canvas__board-title">{boardTitle}</span>
+        <span
+          class="sticky-canvas__board-title"
+          data-board-title
+          title="Double-click to rename"
+        >
+          {boardTitle}
+        </span>
+        <span
+          class={`sticky-canvas__board-description${
+            boardDescription ? "" : " is-placeholder"
+          }`}
+          data-board-description
+          title="Double-click to edit description"
+        >
+          {boardDescription || "Add description…"}
+        </span>
         <button
           type="button"
           class="btn btn--sm"

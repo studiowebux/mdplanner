@@ -608,6 +608,119 @@
       }
     });
 
+    // ── Double-click board title / description → inline edit ────────────
+
+    document.addEventListener("dblclick", function (e) {
+      if (!isOnCanvas()) return;
+      var el = e.target.closest("[data-board-title]") ||
+        e.target.closest("[data-board-description]");
+      if (!el) return;
+      e.stopPropagation();
+
+      var isTitle = el.hasAttribute("data-board-title");
+      var isPlaceholder = el.classList.contains("is-placeholder");
+      // Store original value — empty string for placeholder state
+      var original = isPlaceholder ? "" : el.textContent.trim();
+
+      el.classList.remove("is-placeholder");
+      el.setAttribute("contenteditable", "true");
+      if (isPlaceholder) el.textContent = "";
+      el.focus();
+      var range = document.createRange();
+      range.selectNodeContents(el);
+      var sel = window.getSelection();
+      if (sel) {
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+
+      var bid = (document.querySelector("[data-canvas]") || {})
+          .getAttribute
+        ? document.querySelector("[data-canvas]").getAttribute("data-board-id")
+        : null;
+
+      function revert() {
+        el.removeAttribute("contenteditable");
+        if (original) {
+          el.textContent = original;
+        } else {
+          el.textContent = isTitle ? "" : "Add description…";
+          el.classList.add("is-placeholder");
+        }
+      }
+
+      function commit() {
+        var newVal = el.textContent.trim();
+        el.removeAttribute("contenteditable");
+        // No change
+        if (newVal === original) {
+          if (!newVal && !isTitle) {
+            el.textContent = "Add description…";
+            el.classList.add("is-placeholder");
+          }
+          return;
+        }
+        // Title must not be empty
+        if (isTitle && !newVal) {
+          revert();
+          return;
+        }
+        if (!bid) {
+          revert();
+          return;
+        }
+
+        var body = isTitle ? { title: newVal } : { description: newVal };
+        if (!newVal && !isTitle) body = { description: "" };
+
+        // Update placeholder state immediately
+        if (!newVal && !isTitle) {
+          el.textContent = "Add description…";
+          el.classList.add("is-placeholder");
+        }
+
+        fetch("/api/v1/sticky-notes/boards/" + bid, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }).then(function (res) {
+          if (res.ok) {
+            var label = isTitle ? "Board renamed" : "Description updated";
+            if (window.toast) window.toast({ type: "success", message: label });
+          } else {
+            revert();
+            if (window.toast) {
+              window.toast({ type: "error", message: "Failed to save" });
+            }
+          }
+        }).catch(function () {
+          revert();
+          if (window.toast) {
+            window.toast({ type: "error", message: "Failed to save" });
+          }
+        });
+      }
+
+      function onKey(ev) {
+        if (ev.key === "Enter") {
+          ev.preventDefault();
+          el.blur();
+        }
+        if (ev.key === "Escape") {
+          revert();
+          el.removeEventListener("keydown", onKey);
+          el.removeEventListener("blur", onBlur);
+        }
+      }
+      function onBlur() {
+        commit();
+        el.removeEventListener("keydown", onKey);
+        el.removeEventListener("blur", onBlur);
+      }
+      el.addEventListener("keydown", onKey);
+      el.addEventListener("blur", onBlur);
+    });
+
     // ── Double-click on empty canvas → create note ──────────────────────
 
     document.addEventListener("dblclick", function (e) {
