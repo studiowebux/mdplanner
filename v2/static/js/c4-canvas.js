@@ -48,11 +48,8 @@
     dragging: null, // { node, startMouseX, startMouseY, startNodeX, startNodeY }
     panning: false,
     panStart: null, // { mx, my, tx, ty }
-    lastDragAt: 0, // timestamp of last local drag — suppresses SSE position reset
     initialized: false, // true after init() has run — prevents double-init
   };
-
-  var DRAG_SUPPRESS_MS = 2000; // ms to ignore server positions after a local drag
 
   // ── DOM helpers ─────────────────────────────────────────────────────────────
 
@@ -371,8 +368,6 @@
     }
     if (!node) return;
     box.classList.add("is-dragging");
-    // Mark drag start immediately so any SSE refresh during drag preserves positions
-    state.lastDragAt = Date.now();
     state.dragging = {
       node: node,
       startMouseX: e.clientX,
@@ -408,7 +403,6 @@
   // ── PATCH position ───────────────────────────────────────────────────────────
 
   function patchPosition(id, x, y) {
-    state.lastDragAt = Date.now(); // suppress SSE position reset on this client
     fetch("/api/v1/c4/" + encodeURIComponent(id) + "/position", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -682,8 +676,9 @@
     // mid-drag, making state.dragging.node stale and causing position flashing.
     if (state.dragging) return;
 
-    // SSE data refresh — rebuild graph but preserve positions if we just dragged
-    var preservePositions = (Date.now() - state.lastDragAt) < DRAG_SUPPRESS_MS;
+    // SSE data refresh — rebuild graph, always preserve in-memory positions for
+    // existing nodes (position changes are not broadcast via SSE). Only new nodes
+    // get server positions.
     var prevById = {};
     state.nodes.forEach(function (n) {
       prevById[n.id] = n;
@@ -693,18 +688,15 @@
     buildGraph();
     wireBoxDrag();
 
-    if (preservePositions) {
-      // Keep in-memory positions for existing nodes; only reset new ones
-      state.nodes.forEach(function (node) {
-        var prev = prevById[node.id];
-        if (prev) {
-          node.x = prev.x;
-          node.y = prev.y;
-        }
-      });
-    }
+    state.nodes.forEach(function (node) {
+      var prev = prevById[node.id];
+      if (prev) {
+        node.x = prev.x;
+        node.y = prev.y;
+      }
+    });
 
-    if (state.nodes.length !== prevCount && !preservePositions) {
+    if (state.nodes.length !== prevCount) {
       runSimulation();
       fitToScreen();
     }

@@ -191,7 +191,7 @@ c4ApiRouter.openapi(
     const { x, y } = c.req.valid("json");
     const item = await getC4Service().patchPosition(id, x, y);
     if (!item) return c.json(notFound("C4 component", id), 404);
-    publish("c4.updated");
+    // Position changes are canvas-local — no SSE needed (avoids resetting other nodes)
     return c.json(item, 200);
   },
 );
