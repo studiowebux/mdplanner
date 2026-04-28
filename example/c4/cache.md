@@ -1,6 +1,7 @@
 ---
 id: cache
 level: container
+diagram: default
 type: Cache
 position:
   x: 1195

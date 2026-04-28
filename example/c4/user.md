@@ -1,6 +1,7 @@
 ---
 id: user
 level: context
+diagram: default
 type: Person
 position:
   x: 100

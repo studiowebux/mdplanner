@@ -1,6 +1,7 @@
 ---
 id: webapp
 level: container
+diagram: default
 type: Single Page Application
 position:
   x: 456

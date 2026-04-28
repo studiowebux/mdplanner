@@ -81,6 +81,10 @@ export const C4ComponentSchema = z.object({
     description: "Canvas position in pixels",
     example: { x: 200, y: 300 },
   }),
+  diagram: z.string().optional().openapi({
+    description: 'Named diagram this component belongs to (default: "default")',
+    example: "default",
+  }),
   parent: z.string().nullable().optional().openapi({
     description: "Parent component ID for level drill-down",
   }),
@@ -106,6 +110,7 @@ export const CreateC4ComponentSchema = C4ComponentSchema.pick({
   technology: true,
   position: true,
   parent: true,
+  diagram: true,
 }).partial({
   description: true,
   technology: true,
@@ -162,6 +167,10 @@ export const ListC4OptionsSchema = z.object({
   level: z.enum(C4_LEVELS).optional().openapi({
     param: { name: "level", in: "query" },
     description: "Filter by C4 level",
+  }),
+  diagram: z.string().optional().openapi({
+    param: { name: "diagram", in: "query" },
+    description: "Filter by diagram name",
   }),
   parent: z.string().optional().openapi({
     param: { name: "parent", in: "query" },

@@ -27,6 +27,9 @@ export class C4Service extends BaseService<
     items: C4Component[],
     options: ListC4Options,
   ): C4Component[] {
+    if (options.diagram !== undefined) {
+      items = items.filter((c) => (c.diagram ?? "default") === options.diagram);
+    }
     if (options.level) {
       items = items.filter((c) => c.level === options.level);
     }

@@ -623,6 +623,38 @@
     });
   }
 
+  // ── Diagram switcher ───────────────────────────────────────────────────────────
+
+  function wireDiagramSwitcher() {
+    var btn = elId("c4NewDiagram");
+    var input = elId("c4NewDiagramInput");
+    if (!btn || !input) return;
+
+    btn.addEventListener("click", function () {
+      input.classList.toggle("is-hidden");
+      if (!input.classList.contains("is-hidden")) {
+        input.value = "";
+        input.focus();
+      }
+    });
+
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        input.classList.add("is-hidden");
+        return;
+      }
+      if (e.key !== "Enter") return;
+      var name = input.value.trim();
+      if (!name) return;
+      var url = new URL(window.location.href);
+      url.searchParams.set("diagram", name);
+      url.searchParams.set("view", "canvas");
+      url.searchParams.delete("level");
+      url.searchParams.delete("parent");
+      window.location.href = url.toString();
+    });
+  }
+
   // ── SSE refresh ────────────────────────────────────────────────────────────────
 
   // ── Init ───────────────────────────────────────────────────────────────────────
@@ -640,6 +672,7 @@
 
     wireBoxDrag();
     wireEditToggle();
+    wireDiagramSwitcher();
     wireZoomButtons();
     wireMinimapClick();
     drawMinimap();

@@ -1,6 +1,7 @@
 ---
 id: user-repo
 level: component
+diagram: default
 type: Repository
 position:
   x: 400

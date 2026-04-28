@@ -39,6 +39,7 @@ export class C4Repository extends CachedMarkdownRepository<
     return {
       ...data,
       id,
+      diagram: data.diagram ?? "default",
       position: data.position ?? { x: 0, y: 0 },
       connections: [],
       children: [],
@@ -94,6 +95,7 @@ export class C4Repository extends CachedMarkdownRepository<
       description,
       technology: fm.technology != null ? String(fm.technology) : undefined,
       position,
+      diagram: fm.diagram != null ? String(fm.diagram) : "default",
       parent: fm.parent != null ? String(fm.parent) : undefined,
       children: Array.isArray(fm.children)
         ? (fm.children as string[]).map(String)
@@ -121,6 +123,7 @@ export class C4Repository extends CachedMarkdownRepository<
       },
     };
     if (item.technology) fm.technology = item.technology;
+    fm.diagram = item.diagram ?? "default";
     if (item.parent) fm.parent = item.parent;
     if (item.children?.length) fm.children = item.children;
     if (item.connections?.length) {

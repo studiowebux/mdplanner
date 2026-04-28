@@ -35,8 +35,8 @@ c4ApiRouter.openapi(
     },
   }),
   async (c) => {
-    const { level, parent, q } = c.req.valid("query");
-    const items = await getC4Service().list({ level, parent, q });
+    const { level, parent, diagram, q } = c.req.valid("query");
+    const items = await getC4Service().list({ level, parent, diagram, q });
     return c.json(items, 200);
   },
 );

@@ -34,12 +34,26 @@ export const c4Config: DomainConfig<
   emptyMessage: "No C4 components yet. Switch to edit mode to add components.",
   defaultView: "canvas",
 
-  stateKeys: ["view", "level", "parent", "q", "sort", "order", "mode"],
+  stateKeys: [
+    "view",
+    "diagram",
+    "level",
+    "parent",
+    "q",
+    "sort",
+    "order",
+    "mode",
+  ],
 
   columns: C4_TABLE_COLUMNS,
   formFields: C4_FORM_FIELDS,
 
   filters: [
+    {
+      name: "diagram",
+      label: "All diagrams",
+      options: [],
+    },
     {
       name: "level",
       label: "All levels",
@@ -63,7 +77,13 @@ export const c4Config: DomainConfig<
   extractFilterOptions: async () => {
     const items = await getC4Service().list();
     const levels = [...new Set(items.map((c) => c.level))].sort();
-    return { level: levels };
+    const diagrams = [
+      "default",
+      ...[...new Set(items.map((c) => c.diagram ?? "default"))].filter((d) =>
+        d !== "default"
+      ).sort(),
+    ];
+    return { level: levels, diagram: diagrams };
   },
 
   searchPredicate: createSearchPredicate<C4Component>([
@@ -76,6 +96,7 @@ export const c4Config: DomainConfig<
   extraViewModes: [{ key: "canvas", label: "Canvas" }],
 
   customViewRenderer: async (_view, state, items, _nonce) => {
+    const diagram = (state.diagram as string) ?? "default";
     const level = (state.level as string) ?? "context";
     const parentId = (state.parent as string) ?? undefined;
     const editMode = (state.mode as string) === "edit";
@@ -89,6 +110,7 @@ export const c4Config: DomainConfig<
     return (
       <C4Canvas
         components={items}
+        diagram={diagram}
         level={level}
         parentId={parentId}
         parentName={parentName}

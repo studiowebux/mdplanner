@@ -1,6 +1,7 @@
 ---
 id: hash-password
 level: code
+diagram: default
 type: Function
 position:
   x: 100

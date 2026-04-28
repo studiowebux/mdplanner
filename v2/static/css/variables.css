@@ -137,6 +137,7 @@
   --c4-minimap-h: 7rem;
   --c4-minimap-opacity: 0.85;
   --c4-toolbar-gap: var(--space-sm);
+  --c4-diagram-input-w: 12rem;
   --c4-breadcrumb-gap: var(--space-xs);
   --c4-z-box: 10;
   --c4-z-connections: 1;

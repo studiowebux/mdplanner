@@ -1,6 +1,7 @@
 ---
 id: user-service
 level: component
+diagram: default
 type: Service
 position:
   x: 400

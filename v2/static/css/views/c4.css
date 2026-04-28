@@ -67,6 +67,34 @@
   border-color: var(--color-accent);
 }
 
+.c4-toolbar__sep {
+  width: var(--border-width);
+  height: var(--space-lg);
+  background: var(--color-border-default);
+  flex-shrink: 0;
+}
+
+.c4-toolbar__diagram-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.c4-toolbar__diagram-current {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.c4-toolbar__diagram-input {
+  font-size: var(--font-size-sm);
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--border-width) solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  width: var(--c4-diagram-input-w);
+}
+
 /* ---------------------------------------------------------------------------
    Canvas wrapper — scrollable viewport
 --------------------------------------------------------------------------- */

@@ -24,6 +24,7 @@ export function rowToC4(row: Record<string, unknown>): C4Component {
     technology: row.technology as string | undefined,
     position: parseJson<{ x: number; y: number }>(row.position) ??
       { x: 0, y: 0 },
+    diagram: row.diagram ? String(row.diagram) : "default",
     parent: row.parent as string | undefined,
     children: parseJson<string[]>(row.children) ?? [],
     connections: parseJson<C4Connection[]>(row.connections) ?? [],
@@ -42,6 +43,7 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${C4_TABLE} (
   description TEXT,
   technology TEXT,
   position TEXT,
+  diagram TEXT DEFAULT 'default',
   parent TEXT,
   children TEXT,
   connections TEXT,
@@ -52,11 +54,15 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS ${C4_TABLE} (
   synced_at TEXT
 )`;
 
+const MIGRATIONS = [
+  `ALTER TABLE ${C4_TABLE} ADD COLUMN diagram TEXT DEFAULT 'default'`,
+];
+
 function insertRow(db: CacheDatabase, c: C4Component, syncedAt?: string): void {
   db.execute(
     `INSERT OR REPLACE INTO ${C4_TABLE} (id, name, level, type, description, technology,
-       position, parent, children, connections, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       position, diagram, parent, children, connections, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(c.id),
       val(c.name),
@@ -65,6 +71,7 @@ function insertRow(db: CacheDatabase, c: C4Component, syncedAt?: string): void {
       val(c.description),
       val(c.technology),
       json(c.position),
+      val(c.diagram ?? "default"),
       val(c.parent),
       json(c.children ?? []),
       json(c.connections ?? []),
@@ -78,6 +85,7 @@ export function registerC4Entity(repo: C4Repository): void {
   const entity: EntityDef = {
     table: C4_TABLE,
     schema: SCHEMA,
+    migrations: MIGRATIONS,
     fts: {
       type: "c4_components",
       columns: ["id", "name", "type", "description", "technology"],

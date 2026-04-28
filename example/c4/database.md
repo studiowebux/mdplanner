@@ -1,6 +1,7 @@
 ---
 id: database
 level: container
+diagram: default
 type: Database
 position:
   x: 132

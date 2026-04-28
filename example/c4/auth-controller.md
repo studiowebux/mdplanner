@@ -1,6 +1,7 @@
 ---
 id: auth-controller
 level: component
+diagram: default
 type: Controller
 position:
   x: -78

@@ -1,6 +1,7 @@
 ---
 id: validate-token
 level: code
+diagram: default
 type: Function
 position:
   x: 450

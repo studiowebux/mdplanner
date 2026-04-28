@@ -1,6 +1,7 @@
 ---
 id: api
 level: container
+diagram: default
 type: API Application
 position:
   x: 900

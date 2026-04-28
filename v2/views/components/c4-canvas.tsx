@@ -206,7 +206,9 @@ const C4Arrows: FC<ArrowsProps> = ({ components, ids }) => {
 // Toolbar
 // ---------------------------------------------------------------------------
 
-const C4Toolbar: FC<{ editMode: boolean }> = ({ editMode }) => (
+type C4ToolbarProps = { editMode: boolean; diagram: string };
+
+const C4Toolbar: FC<C4ToolbarProps> = ({ editMode, diagram }) => (
   <div class="c4-toolbar" role="toolbar" aria-label="Canvas controls">
     <button
       id="c4ToggleEdit"
@@ -241,6 +243,25 @@ const C4Toolbar: FC<{ editMode: boolean }> = ({ editMode }) => (
     >
       ⤢
     </button>
+    <span class="c4-toolbar__sep" aria-hidden="true" />
+    <span class="c4-toolbar__diagram-label">Diagram:</span>
+    <span class="c4-toolbar__diagram-current">{diagram}</span>
+    <button
+      id="c4NewDiagram"
+      class="btn btn--sm c4-toolbar__btn"
+      type="button"
+      title="Switch to a different diagram or create a new one"
+    >
+      Switch
+    </button>
+    <input
+      id="c4NewDiagramInput"
+      class="c4-toolbar__diagram-input is-hidden"
+      type="text"
+      placeholder="Diagram name…"
+      aria-label="Diagram name"
+      maxlength={64}
+    />
   </div>
 );
 
@@ -260,6 +281,7 @@ const C4Minimap: FC = () => (
 
 export type C4CanvasProps = {
   components: C4Component[];
+  diagram: string;
   level: string;
   parentId?: string;
   parentName?: string;
@@ -268,6 +290,7 @@ export type C4CanvasProps = {
 
 export const C4Canvas: FC<C4CanvasProps> = ({
   components,
+  diagram,
   level,
   parentId,
   parentName,
@@ -303,10 +326,14 @@ export const C4Canvas: FC<C4CanvasProps> = ({
   }
 
   return (
-    <div class={`c4-canvas-root${editMode ? " c4-edit-mode" : ""}`} id="c4Root">
+    <div
+      class={`c4-canvas-root${editMode ? " c4-edit-mode" : ""}`}
+      id="c4Root"
+      data-diagram={diagram}
+    >
       <C4Breadcrumb entries={breadcrumb} />
 
-      <C4Toolbar editMode={editMode} />
+      <C4Toolbar editMode={editMode} diagram={diagram} />
 
       <div class="c4-canvas-wrapper" id="c4Wrapper">
         <div class="c4-canvas" id="c4Canvas">
@@ -328,7 +355,7 @@ export const C4Canvas: FC<C4CanvasProps> = ({
         hx-ext="sse"
         sse-connect="/sse"
         hx-trigger="sse:c4.created, sse:c4.updated, sse:c4.deleted"
-        hx-get={`/c4?level=${level}${
+        hx-get={`/c4?diagram=${diagram}&level=${level}${
           parentId ? `&parent=${parentId}` : ""
         }&_partial=canvas`}
         hx-target="#c4Canvas"
