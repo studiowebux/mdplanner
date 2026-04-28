@@ -27,6 +27,7 @@ import { registerPeopleTools } from "./tools/people.ts";
 import { registerPortfolioTools } from "./tools/portfolio.ts";
 import { registerTaskTools } from "./tools/tasks.ts";
 import { registerStickyNoteTools } from "./tools/sticky-notes.ts";
+import { registerC4Tools } from "./tools/c4.ts";
 
 export function createMcpServer(): McpServer {
   const server = new McpServer({
@@ -56,6 +57,7 @@ export function createMcpServer(): McpServer {
   registerPortfolioTools(server);
   registerTaskTools(server);
   registerStickyNoteTools(server);
+  registerC4Tools(server);
 
   return server;
 }
