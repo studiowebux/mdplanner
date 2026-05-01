@@ -182,6 +182,23 @@ settingsViewRouter.post("/kpi-metrics", async (c) => {
   });
 });
 
+// -- Billing tab: company, address, logo, default footer --
+settingsViewRouter.post("/billing", async (c) => {
+  const body = await c.req.parseBody();
+  await getProjectService().updateConfig({
+    billingCompany: body.billingCompany ? String(body.billingCompany) : "",
+    billingAddress: body.billingAddress ? String(body.billingAddress) : "",
+    billingLogoUrl: body.billingLogoUrl ? String(body.billingLogoUrl) : "",
+    billingDefaultFooter: body.billingDefaultFooter
+      ? String(body.billingDefaultFooter)
+      : "",
+  });
+  return new Response(null, {
+    status: 204,
+    headers: { "HX-Trigger": hxTrigger("success", "Billing settings saved") },
+  });
+});
+
 // -- Navigation tab: nav categories --
 settingsViewRouter.post("/nav-categories", async (c) => {
   const body = await c.req.parseBody({ all: true });

@@ -735,6 +735,7 @@
     }
 
     applyPositions();
+    applyTransform();
     updateArrows();
     drawMinimap();
   });

@@ -191,7 +191,7 @@ quotesRouter.post("/:id/send", async (c) => {
     status: "sent",
     sentAt: now,
     revision: (quote.revision ?? 0) + 1,
-  } as Record<string, unknown>);
+  });
   if (!updated) return c.json(notFound("QUOTE", id), 404);
   publish("quote.updated");
   return c.json(updated, 200);
@@ -209,7 +209,7 @@ quotesRouter.post("/:id/accept", async (c) => {
   const updated = await service.update(id, {
     status: "accepted",
     acceptedAt: new Date().toISOString(),
-  } as Record<string, unknown>);
+  });
   if (!updated) return c.json(notFound("QUOTE", id), 404);
   publish("quote.updated");
   return c.json(updated, 200);
@@ -226,7 +226,7 @@ quotesRouter.post("/:id/reject", async (c) => {
   }
   const updated = await service.update(id, {
     status: "rejected",
-  } as Record<string, unknown>);
+  });
   if (!updated) return c.json(notFound("QUOTE", id), 404);
   publish("quote.updated");
   return c.json(updated, 200);
@@ -261,7 +261,7 @@ quotesRouter.post("/:id/to-invoice", async (c) => {
 
   await service.update(id, {
     convertedToInvoice: invoice.id,
-  } as Record<string, unknown>);
+  });
 
   publish("quote.updated");
   publish("invoice.created");

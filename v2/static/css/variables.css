@@ -568,4 +568,14 @@ html.font-mono {
   --sticky-orange-bg: #3d1e08;
   --sticky-orange-border: #e65100;
   --sticky-orange-text: #ffe0b2;
+
+  /* Billing document header */
+  --billing-doc-header-gap: var(--space-3);
+  --billing-doc-header-logo-h: 3rem;
+  --billing-doc-header-company-size: var(--text-lg);
+  --billing-doc-header-address-size: var(--text-sm);
+  --billing-doc-header-address-color: var(--color-text-secondary);
+  --billing-doc-header-border: 1px solid var(--color-border);
+  --billing-doc-header-pb: var(--space-4);
+  --billing-doc-header-mb: var(--space-4);
 }

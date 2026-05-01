@@ -155,9 +155,14 @@ export const CreateQuoteSchema = QuoteSchema.pick({
 
 export type CreateQuote = z.infer<typeof CreateQuoteSchema>;
 
-export const UpdateQuoteSchema = CreateQuoteSchema.partial().openapi(
-  "UpdateQuote",
-);
+export const UpdateQuoteSchema = CreateQuoteSchema.partial().merge(
+  z.object({
+    sentAt: z.string().nullable().optional(),
+    acceptedAt: z.string().nullable().optional(),
+    convertedToInvoice: z.string().nullable().optional(),
+    revision: z.number().nullable().optional(),
+  }),
+).openapi("UpdateQuote");
 
 export type UpdateQuote = z.infer<typeof UpdateQuoteSchema>;
 

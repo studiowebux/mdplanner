@@ -53,7 +53,13 @@ const FORM_FIELDS: FieldDef[] = [
   { type: "text", name: "logo", label: "Logo URL" },
   { type: "text", name: "license", label: "License" },
   { type: "text", name: "githubRepo", label: "GitHub repo (owner/repo)" },
-  { type: "text", name: "billingCustomerId", label: "Billing customer ID" },
+  {
+    type: "autocomplete",
+    name: "billingCustomerId",
+    label: "Billing customer",
+    source: "customers",
+    placeholder: "Search customers...",
+  },
   {
     type: "boolean",
     name: "brainManaged",

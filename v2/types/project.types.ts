@@ -116,6 +116,23 @@ export const ProjectConfigSchema = z.object({
       "Configurable milestone status values shown in milestone form and filters (e.g. open, completed, archived)",
     example: ["open", "completed"],
   }),
+  billingCompany: z.string().optional().openapi({
+    description: "Company name shown on quotes and invoices",
+    example: "Acme Corp",
+  }),
+  billingAddress: z.string().optional().openapi({
+    description: "Company address shown on quotes and invoices (multiline)",
+    example: "123 Main St\nMontréal, QC H1A 1A1",
+  }),
+  billingLogoUrl: z.string().optional().openapi({
+    description: "Logo URL shown on quotes and invoices",
+    example: "https://example.com/logo.png",
+  }),
+  billingDefaultFooter: z.string().optional().openapi({
+    description:
+      "Default footer text for quotes and invoices (overridden per-document)",
+    example: "Thank you for your business.",
+  }),
 }).openapi("ProjectConfig");
 
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
@@ -171,6 +188,10 @@ export const FrontmatterProjectSchema = z.object({
   stable_version: z.string().optional(),
   milestone_statuses: z.array(z.unknown()).optional(),
   last_updated: z.string().optional(),
+  billing_company: z.string().optional(),
+  billing_address: z.string().optional(),
+  billing_logo_url: z.string().optional(),
+  billing_default_footer: z.string().optional(),
 }).transform(
   async (fm): Promise<Omit<ProjectConfig, "name" | "description">> => {
     const githubToken = fm.github_token
@@ -219,6 +240,10 @@ export const FrontmatterProjectSchema = z.object({
         ? (fm.milestone_statuses as unknown[]).map(String)
         : undefined,
       lastUpdated: fm.last_updated,
+      billingCompany: fm.billing_company,
+      billingAddress: fm.billing_address,
+      billingLogoUrl: fm.billing_logo_url,
+      billingDefaultFooter: fm.billing_default_footer,
     };
   },
 );

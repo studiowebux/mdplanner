@@ -145,3 +145,42 @@
 .billing-totals__row--balance .billing-totals__value {
   color: var(--color-warning);
 }
+
+/* ---------------------------------------------------------------------------
+   Billing document header (company info shown on quotes + invoices)
+--------------------------------------------------------------------------- */
+
+.billing-document-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--billing-doc-header-gap);
+  padding-bottom: var(--billing-doc-header-pb);
+  margin-bottom: var(--billing-doc-header-mb);
+  border-bottom: var(--billing-doc-header-border);
+}
+
+.billing-document-header__logo {
+  height: var(--billing-doc-header-logo-h);
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.billing-document-header__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.billing-document-header__company {
+  font-size: var(--billing-doc-header-company-size);
+  font-weight: var(--font-weight-semibold);
+}
+
+.billing-document-header__address {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--billing-doc-header-address-size);
+  color: var(--billing-doc-header-address-color);
+  font-style: normal;
+}

@@ -3,6 +3,7 @@ import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import type { Quote } from "../types/quote.types.ts";
 import type { ViewProps } from "../types/app.ts";
+import type { ProjectConfig } from "../types/project.types.ts";
 import { formatDate } from "../utils/time.ts";
 import { formatCurrency } from "../utils/format.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
@@ -14,15 +15,16 @@ import { BillingTotals } from "./components/billing-totals.tsx";
 import { QUOTE_STATUS_VARIANTS } from "../domains/quote/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { BillingDocumentHeader } from "./components/billing-document-header.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
 // ---------------------------------------------------------------------------
 
 export const QuoteDetailView: FC<
-  ViewProps & { item: Quote }
+  ViewProps & { item: Quote; billingConfig: ProjectConfig }
 > = (
-  { item: quote, ...viewProps },
+  { item: quote, billingConfig, ...viewProps },
 ) => {
   const hasSchedule = quote.paymentSchedule && quote.paymentSchedule.length > 0;
 
@@ -39,6 +41,8 @@ export const QuoteDetailView: FC<
       />
       <main id="quote-detail-root" class="detail-view quote-detail">
         <BackButton href="/quotes" label="Back to Quotes" />
+
+        <BillingDocumentHeader config={billingConfig} />
 
         {/* -- Header ---------------------------------------------------- */}
         <header class="detail-section quote-detail__header">
@@ -157,10 +161,10 @@ export const QuoteDetailView: FC<
         )}
 
         {/* -- Footer ---------------------------------------------------- */}
-        {quote.footer && (
+        {(quote.footer || billingConfig.billingDefaultFooter) && (
           <section class="detail-section quote-detail__footer">
             <h2 class="section-heading">Terms</h2>
-            <p>{quote.footer}</p>
+            <p>{quote.footer || billingConfig.billingDefaultFooter}</p>
           </section>
         )}
 

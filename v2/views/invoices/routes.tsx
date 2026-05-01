@@ -2,7 +2,10 @@
 
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { invoiceConfig } from "../../domains/invoice/config.tsx";
-import { getInvoiceService } from "../../singletons/services.ts";
+import {
+  getInvoiceService,
+  getProjectService,
+} from "../../singletons/services.ts";
 import { InvoiceDetailView } from "../invoice-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 
@@ -11,7 +14,10 @@ export const invoicesRouter = createDomainRoutes(invoiceConfig);
 invoicesRouter.get("/:id", async (c) => {
   const id = c.req.param("id");
   const service = getInvoiceService();
-  const invoice = await service.getById(id);
+  const [invoice, billingConfig] = await Promise.all([
+    service.getById(id),
+    getProjectService().getConfig(),
+  ]);
   if (!invoice) return c.notFound();
 
   return c.html(
@@ -19,6 +25,7 @@ invoicesRouter.get("/:id", async (c) => {
       {...viewProps(c, "/invoices")}
       item={invoice}
       displayStatus={service.displayStatus(invoice)}
+      billingConfig={billingConfig}
     />,
   );
 });

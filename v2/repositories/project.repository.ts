@@ -69,6 +69,18 @@ export class ProjectRepository {
     if (config.cloudflareToken) {
       fm.cloudflare_token = await encryptSecret(config.cloudflareToken);
     }
+    if (config.billingCompany !== undefined) {
+      fm.billing_company = config.billingCompany || undefined;
+    }
+    if (config.billingAddress !== undefined) {
+      fm.billing_address = config.billingAddress || undefined;
+    }
+    if (config.billingLogoUrl !== undefined) {
+      fm.billing_logo_url = config.billingLogoUrl || undefined;
+    }
+    if (config.billingDefaultFooter !== undefined) {
+      fm.billing_default_footer = config.billingDefaultFooter || undefined;
+    }
     fm.last_updated = new Date().toISOString();
 
     let body = `# ${config.name}`;

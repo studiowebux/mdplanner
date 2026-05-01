@@ -3,6 +3,7 @@ import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import type { Invoice } from "../types/invoice.types.ts";
 import type { ViewProps } from "../types/app.ts";
+import type { ProjectConfig } from "../types/project.types.ts";
 import { formatDate } from "../utils/time.ts";
 import { formatCurrency } from "../utils/format.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
@@ -14,15 +15,20 @@ import { BillingTotals } from "./components/billing-totals.tsx";
 import { INVOICE_STATUS_VARIANTS } from "../domains/invoice/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { BillingDocumentHeader } from "./components/billing-document-header.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
 // ---------------------------------------------------------------------------
 
 export const InvoiceDetailView: FC<
-  ViewProps & { item: Invoice; displayStatus: string }
+  ViewProps & {
+    item: Invoice;
+    displayStatus: string;
+    billingConfig: ProjectConfig;
+  }
 > = (
-  { item: invoice, displayStatus, ...viewProps },
+  { item: invoice, displayStatus, billingConfig, ...viewProps },
 ) => {
   const balance = invoice.total - invoice.paidAmount;
 
@@ -40,6 +46,8 @@ export const InvoiceDetailView: FC<
       />
       <main id="invoice-detail-root" class="detail-view invoice-detail">
         <BackButton href="/invoices" label="Back to Invoices" />
+
+        <BillingDocumentHeader config={billingConfig} />
 
         {/* -- Header ---------------------------------------------------- */}
         <header class="detail-section invoice-detail__header">
@@ -141,10 +149,10 @@ export const InvoiceDetailView: FC<
         </section>
 
         {/* -- Footer ---------------------------------------------------- */}
-        {invoice.footer && (
+        {(invoice.footer || billingConfig.billingDefaultFooter) && (
           <section class="detail-section invoice-detail__footer">
             <h2 class="section-heading">Terms</h2>
-            <p>{invoice.footer}</p>
+            <p>{invoice.footer || billingConfig.billingDefaultFooter}</p>
           </section>
         )}
 

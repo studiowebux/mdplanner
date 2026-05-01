@@ -21,6 +21,7 @@ import { SupportTab } from "./settings/tabs/support-tab.tsx";
 import { NavigationTab } from "./settings/tabs/navigation-tab.tsx";
 import { SectionsTab } from "./settings/tabs/sections-tab.tsx";
 import { LinksTab } from "./settings/tabs/links-tab.tsx";
+import { BillingTab } from "./settings/tabs/billing-tab.tsx";
 
 type SettingsProps = ViewProps & {
   config: ProjectConfig;
@@ -166,6 +167,14 @@ export const SettingsView: FC<SettingsProps> = ({
           <input
             type="radio"
             name="settings-tab"
+            id="tab-billing"
+            class="settings-tabs__radio"
+          />
+          <label for="tab-billing" class="settings-tabs__label">Billing</label>
+
+          <input
+            type="radio"
+            name="settings-tab"
             id="tab-caching"
             class="settings-tabs__radio"
           />
@@ -194,6 +203,7 @@ export const SettingsView: FC<SettingsProps> = ({
           <SectionsTab />
           <GoalsTab config={config} />
           <MilestonesTab config={config} />
+          <BillingTab config={config} />
           <CachingTab />
           <SupportTab />
         </div>
