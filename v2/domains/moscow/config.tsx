@@ -57,6 +57,7 @@ export const moscowConfig: DomainConfig<Moscow, CreateMoscow, UpdateMoscow> = {
     >,
 
   getService: () => getMoscowService(),
+  projectField: "project",
 
   extractFilterOptions: async () => {
     const items = await getMoscowService().list();

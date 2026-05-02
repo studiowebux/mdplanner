@@ -53,6 +53,16 @@ export function isEncryptionEnabled(): boolean {
 }
 
 /**
+ * Returns the raw secret key string for HMAC cookie signing.
+ * Empty string when MDPLANNER_SECRET_KEY is not set — callers fall back
+ * to unsigned cookies in that case (same transparent-fallback pattern
+ * as encryptSecret/decryptSecret).
+ */
+export function getCookieSecret(): string {
+  return Deno.env.get(KEY_ENV) ?? "";
+}
+
+/**
  * Generate a new random 32-byte hex key.
  */
 export function generateSecretKey(): string {

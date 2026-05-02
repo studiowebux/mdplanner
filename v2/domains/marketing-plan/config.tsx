@@ -74,6 +74,7 @@ export const marketingPlanConfig: DomainConfig<
     }) as Partial<UpdateMarketingPlan>,
 
   getService: () => getMarketingPlanService(),
+  projectField: "project",
 
   resolveFormValues: async (values) => {
     const resolved = { ...values };

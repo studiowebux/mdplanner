@@ -42,6 +42,30 @@ export function getViewMode<T extends string = string>(
   return (saved.view as T) ?? fallback;
 }
 
+type GlobalUiState = { globalProjects?: string[]; globalAssignees?: string[] };
+
+const GLOBAL_KEY = "_global";
+
+export function readGlobalProjects(c: AppContext): string[] {
+  const g = readUiState<GlobalUiState>(c, GLOBAL_KEY);
+  return g.globalProjects ?? [];
+}
+
+export function writeGlobalProjects(c: AppContext, names: string[]): void {
+  const g = readUiState<GlobalUiState>(c, GLOBAL_KEY);
+  writeUiState(c, GLOBAL_KEY, { ...g, globalProjects: names });
+}
+
+export function readGlobalAssignees(c: AppContext): string[] {
+  const g = readUiState<GlobalUiState>(c, GLOBAL_KEY);
+  return g.globalAssignees ?? [];
+}
+
+export function writeGlobalAssignees(c: AppContext, names: string[]): void {
+  const g = readUiState<GlobalUiState>(c, GLOBAL_KEY);
+  writeUiState(c, GLOBAL_KEY, { ...g, globalAssignees: names });
+}
+
 // Merge query params over saved state. Params take precedence when present.
 export function mergeParams(
   params: Record<string, string | undefined>,

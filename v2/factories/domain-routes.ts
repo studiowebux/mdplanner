@@ -3,10 +3,16 @@
 
 import { Hono } from "hono";
 import { publish } from "../singletons/event-bus.ts";
-import { mergeParams, readUiState, writeUiState } from "../utils/ui-state.ts";
+import {
+  mergeParams,
+  readGlobalAssignees,
+  readGlobalProjects,
+  readUiState,
+  writeUiState,
+} from "../utils/ui-state.ts";
 import { hxTrigger } from "../utils/hx-trigger.ts";
 import { viewProps } from "../middleware/view-props.ts";
-import type { AppVariables, ViewMode } from "../types/app.ts";
+import type { AppContext, AppVariables, ViewMode } from "../types/app.ts";
 import type {
   DomainConfig,
   DomainFilterState,
@@ -161,6 +167,29 @@ export function createDomainRoutes<T extends Entity, C, U>(
     return result;
   }
 
+  function applyGlobalFilters(items: T[], c: AppContext): T[] {
+    let result = items;
+    const globalProjects = readGlobalProjects(c as never);
+    if (globalProjects.length > 0 && cfg.projectField) {
+      const field = cfg.projectField;
+      result = result.filter((item) =>
+        globalProjects.includes(
+          String((item as Record<string, unknown>)[field] ?? ""),
+        )
+      );
+    }
+    const globalAssignees = readGlobalAssignees(c as never);
+    if (globalAssignees.length > 0 && cfg.assigneeField) {
+      const field = cfg.assigneeField;
+      result = result.filter((item) =>
+        globalAssignees.includes(
+          String((item as Record<string, unknown>)[field] ?? ""),
+        )
+      );
+    }
+    return result;
+  }
+
   // ---------------------------------------------------------------------------
   // Middleware — UI state from cookie + query params
   // ---------------------------------------------------------------------------
@@ -192,7 +221,10 @@ export function createDomainRoutes<T extends Entity, C, U>(
     const state = c.get("filterState" as never) as DomainFilterState;
     const all = await cfg.getService().list();
     const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
-    const filtered = applyFilters(all, state, dynamicFilterOptions);
+    const filtered = applyGlobalFilters(
+      applyFilters(all, state, dynamicFilterOptions),
+      c,
+    );
     const pageSize = state.limit
       ? parseInt(String(state.limit), 10)
       : cfg.pageSize;
@@ -227,7 +259,10 @@ export function createDomainRoutes<T extends Entity, C, U>(
     const state = c.get("filterState" as never) as DomainFilterState;
     const all = await cfg.getService().list();
     const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
-    const filtered = applyFilters(all, state, dynamicFilterOptions);
+    const filtered = applyGlobalFilters(
+      applyFilters(all, state, dynamicFilterOptions),
+      c,
+    );
     const pageSize = state.limit
       ? parseInt(String(state.limit), 10)
       : cfg.pageSize;
@@ -273,7 +308,10 @@ export function createDomainRoutes<T extends Entity, C, U>(
         : cfg.pageSize!;
       const all = await cfg.getService().list();
       const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
-      const filtered = applyFilters(all, state, dynamicFilterOptions);
+      const filtered = applyGlobalFilters(
+        applyFilters(all, state, dynamicFilterOptions),
+        c,
+      );
       const slice = filtered.slice(offset, offset + pageSize);
       const hasMore = filtered.length > offset + pageSize;
       const nextOffset = offset + pageSize;
@@ -306,6 +344,11 @@ export function createDomainRoutes<T extends Entity, C, U>(
     const body = await c.req.parseBody();
     try {
       const data = cfg.parseCreate(body as Record<string, string | File>);
+      const actor = c.get("actor");
+      if (actor && actor.source !== "anonymous") {
+        (data as Record<string, unknown>).createdBy = actor.name;
+        (data as Record<string, unknown>).updatedBy = actor.name;
+      }
       await cfg.getService().create(data);
       publish(`${cfg.ssePrefix}.created`);
       return new Response(null, {
@@ -350,6 +393,10 @@ export function createDomainRoutes<T extends Entity, C, U>(
     const body = await c.req.parseBody();
     try {
       const data = cfg.parseUpdate(body as Record<string, string | File>);
+      const actor = c.get("actor");
+      if (actor && actor.source !== "anonymous") {
+        (data as Record<string, unknown>).updatedBy = actor.name;
+      }
       const updated = await cfg.getService().update(id, data as U);
       if (!updated) {
         return new Response(null, {

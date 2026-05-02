@@ -1,56 +1,168 @@
-import type { FC } from "hono/jsx";
+import {
+  getPeopleService,
+  getPortfolioService,
+} from "../../singletons/services.ts";
+import type { Actor } from "../../types/actor.ts";
 
-export const Topbar: FC = () => (
-  <header class="topbar">
-    <button
-      id="sidebar-toggle"
-      class="topbar__action-btn topbar__sidebar-toggle"
-      type="button"
-      aria-label="Toggle sidebar"
-      aria-expanded="true"
-      aria-controls="app-sidebar"
-    >
-      Menu
-    </button>
-    <div class="topbar__search">
-      <input
-        type="search"
-        class="topbar__search-input"
-        placeholder="Search..."
-        autocomplete="off"
-        aria-label="Search"
-        readonly
-      />
-      <kbd class="topbar__search-kbd">&#8984;K</kbd>
-    </div>
-    <div class="topbar__actions">
+type Props = {
+  actor?: Actor;
+};
+
+export async function Topbar({ actor }: Props) {
+  const [people, portfolioItems] = await Promise.all([
+    getPeopleService().list(),
+    getPortfolioService().list(),
+  ]);
+
+  return (
+    <header class="topbar">
       <button
-        id="animations-toggle"
-        class="topbar__action-btn"
+        id="sidebar-toggle"
+        class="topbar__action-btn topbar__sidebar-toggle"
         type="button"
-        aria-label="Toggle animations"
+        aria-label="Toggle sidebar"
+        aria-expanded="true"
+        aria-controls="app-sidebar"
       >
-        Motion
+        Menu
       </button>
-      <button
-        id="font-toggle"
-        class="topbar__action-btn"
-        type="button"
-        aria-label="Toggle font"
-      >
-        Font
-      </button>
-      <button
-        id="theme-toggle"
-        class="topbar__action-btn"
-        type="button"
-        aria-label="Toggle theme"
-      >
-        Theme
-      </button>
-      <a href="/settings" class="topbar__action-btn" aria-label="Settings">
-        Settings
-      </a>
-    </div>
-  </header>
-);
+      <div class="topbar__search">
+        <input
+          type="search"
+          class="topbar__search-input"
+          placeholder="Search..."
+          autocomplete="off"
+          aria-label="Search"
+          readonly
+        />
+        <kbd class="topbar__search-kbd">&#8984;K</kbd>
+      </div>
+      <div class="topbar__actions">
+        {/* Identity selector */}
+        <form
+          hx-post="/api/v1/settings/identity"
+          hx-trigger="change"
+          hx-swap="none"
+          hx-ext="json-enc"
+        >
+          <select
+            id="identity-select"
+            name="name"
+            class="topbar__identity-select"
+            aria-label="Active identity"
+          >
+            <option value="">— Anonymous —</option>
+            {people.map((p) => (
+              <option
+                key={p.id}
+                value={p.name}
+                selected={actor?.source !== "anonymous" &&
+                  actor?.name === p.name}
+              >
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </form>
+
+        {/* Project filter */}
+        {portfolioItems.length > 0 && (
+          <div class="topbar__filter-wrap">
+            <button
+              type="button"
+              class="topbar__filter-btn"
+              data-global-filter="projects"
+              aria-label="Filter by project"
+            >
+              Project
+              <span
+                data-global-filter-badge="projects"
+                class="topbar__filter-badge is-hidden"
+              >
+                0
+              </span>
+            </button>
+            <div
+              data-global-filter-panel="projects"
+              class="topbar__filter-panel is-hidden"
+            >
+              {portfolioItems.map((p) => (
+                <label
+                  key={p.id}
+                  data-global-filter-item="projects"
+                  class="topbar__filter-option"
+                >
+                  <input type="checkbox" value={p.name} />
+                  {p.name}
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Assignee filter */}
+        {people.length > 0 && (
+          <div class="topbar__filter-wrap">
+            <button
+              type="button"
+              class="topbar__filter-btn"
+              data-global-filter="assignees"
+              aria-label="Filter by assignee"
+            >
+              Assignee
+              <span
+                data-global-filter-badge="assignees"
+                class="topbar__filter-badge is-hidden"
+              >
+                0
+              </span>
+            </button>
+            <div
+              data-global-filter-panel="assignees"
+              class="topbar__filter-panel is-hidden"
+            >
+              {people.map((p) => (
+                <label
+                  key={p.id}
+                  data-global-filter-item="assignees"
+                  class="topbar__filter-option"
+                >
+                  <input type="checkbox" value={p.name} />
+                  {p.name}
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <button
+          id="animations-toggle"
+          class="topbar__action-btn"
+          type="button"
+          aria-label="Toggle animations"
+        >
+          Motion
+        </button>
+        <button
+          id="font-toggle"
+          class="topbar__action-btn"
+          type="button"
+          aria-label="Toggle font"
+        >
+          Font
+        </button>
+        <button
+          id="theme-toggle"
+          class="topbar__action-btn"
+          type="button"
+          aria-label="Toggle theme"
+        >
+          Theme
+        </button>
+        <a href="/settings" class="topbar__action-btn" aria-label="Settings">
+          Settings
+        </a>
+      </div>
+    </header>
+  );
+}

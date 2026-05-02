@@ -76,6 +76,7 @@ export const ideaConfig: DomainConfig<Idea, CreateIdea, UpdateIdea> = {
     }) as Partial<UpdateIdea>,
 
   getService: () => getIdeaService(),
+  projectField: "project",
 
   extractFilterOptions: async () => {
     const ideas = await getIdeaService().list();

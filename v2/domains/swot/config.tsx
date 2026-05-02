@@ -52,6 +52,7 @@ export const swotConfig: DomainConfig<Swot, CreateSwot, UpdateSwot> = {
     >,
 
   getService: () => getSwotService(),
+  projectField: "project",
 
   extractFilterOptions: async () => {
     const items = await getSwotService().list();

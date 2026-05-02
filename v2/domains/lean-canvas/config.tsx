@@ -54,6 +54,7 @@ export const leanCanvasConfig: DomainConfig<
     }) as Partial<UpdateLeanCanvas>,
 
   getService: () => getLeanCanvasService(),
+  projectField: "project",
 
   searchPredicate: createSearchPredicate<LeanCanvas>([
     { type: "string", get: (lc) => lc.title },

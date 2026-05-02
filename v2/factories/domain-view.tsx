@@ -495,7 +495,7 @@ export function createDomainPage<T extends Entity>(
         hx-ext="sse"
         sse-connect="/sse"
         hx-get={`/${cfg.name}/view`}
-        hx-trigger={`sse:${cfg.ssePrefix}.created, sse:${cfg.ssePrefix}.updated, sse:${cfg.ssePrefix}.deleted`}
+        hx-trigger={`sse:${cfg.ssePrefix}.created, sse:${cfg.ssePrefix}.updated, sse:${cfg.ssePrefix}.deleted, global-filter:changed from:body`}
         hx-target={`#${cfg.name}-view`}
         hx-swap="outerHTML"
         hx-include={`#${cfg.name}-toolbar`}

@@ -3,12 +3,14 @@ import { Sidebar } from "./sidebar.tsx";
 import { Topbar } from "./topbar.tsx";
 import { ConfirmDialog } from "../ui/confirm-dialog.tsx";
 import { SearchDialog } from "../ui/search-dialog.tsx";
+import type { Actor } from "../../types/actor.ts";
 
 type Props = {
   activePath?: string;
   enabledFeatures?: string[];
   pinnedKeys?: string[];
   navCategories?: Record<string, string[]>;
+  actor?: Actor;
   children?: unknown;
 };
 
@@ -18,6 +20,7 @@ export const AppShell: FC<Props> = (
     enabledFeatures = [],
     pinnedKeys = [],
     navCategories,
+    actor,
     children,
   },
 ) => (
@@ -30,7 +33,7 @@ export const AppShell: FC<Props> = (
       navCategories={navCategories}
     />
     <div class="app-shell__main">
-      <Topbar />
+      <Topbar actor={actor} />
       <div class="app-shell__content">
         {children}
       </div>

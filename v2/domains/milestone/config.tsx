@@ -105,6 +105,7 @@ export const milestoneConfig: DomainConfig<
     }) as Partial<UpdateMilestone>,
 
   getService: () => getMilestoneService(),
+  projectField: "project",
 
   extractFormOptions: async () => {
     const config = await getProjectService().getConfig();

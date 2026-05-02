@@ -18,6 +18,19 @@ export const ProjectLinkSchema = z.object({
 
 export type ProjectLink = z.infer<typeof ProjectLinkSchema>;
 
+export const ApiKeySchema = z.object({
+  name: z.string().openapi({
+    description: "Human-readable label for this key",
+    example: "CI Bot",
+  }),
+  key: z.string().openapi({
+    description: "Raw API key value (stored encrypted in project.md)",
+    example: "sk-abc123",
+  }),
+}).openapi("ApiKey");
+
+export type ApiKey = z.infer<typeof ApiKeySchema>;
+
 export const ProjectConfigSchema = z.object({
   name: z.string().openapi({
     description: "Project display name",
@@ -133,6 +146,11 @@ export const ProjectConfigSchema = z.object({
       "Default footer text for quotes and invoices (overridden per-document)",
     example: "Thank you for your business.",
   }),
+  apiKeys: z.array(ApiKeySchema).optional().openapi({
+    description:
+      "API keys for programmatic access (MCP, CI, CLI). Stored encrypted in project.md.",
+    example: [{ name: "CI Bot", key: "sk-abc123" }],
+  }),
 }).openapi("ProjectConfig");
 
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
@@ -192,6 +210,7 @@ export const FrontmatterProjectSchema = z.object({
   billing_address: z.string().optional(),
   billing_logo_url: z.string().optional(),
   billing_default_footer: z.string().optional(),
+  api_keys: z.array(z.unknown()).optional(),
 }).transform(
   async (fm): Promise<Omit<ProjectConfig, "name" | "description">> => {
     const githubToken = fm.github_token
@@ -244,6 +263,18 @@ export const FrontmatterProjectSchema = z.object({
       billingAddress: fm.billing_address,
       billingLogoUrl: fm.billing_logo_url,
       billingDefaultFooter: fm.billing_default_footer,
+      apiKeys: Array.isArray(fm.api_keys)
+        ? await Promise.all(
+          (fm.api_keys as { name?: unknown; key?: unknown }[])
+            .filter((e) =>
+              typeof e.name === "string" && typeof e.key === "string"
+            )
+            .map(async (e) => ({
+              name: e.name as string,
+              key: (await decryptSecret(e.key as string)) ?? (e.key as string),
+            })),
+        )
+        : undefined,
     };
   },
 );

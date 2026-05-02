@@ -4,6 +4,8 @@
 import type { MiddlewareHandler } from "hono";
 import { getProjectService } from "../singletons/services.ts";
 import { readUiState } from "../utils/ui-state.ts";
+import { getCookieSecret } from "../utils/secrets.ts";
+import { resolveActor } from "./identity.ts";
 import type { AppVariables } from "../types/app.ts";
 
 export const contextMiddleware: MiddlewareHandler<{
@@ -16,6 +18,10 @@ export const contextMiddleware: MiddlewareHandler<{
   const config = await getProjectService().getConfig();
   c.set("enabledFeatures", config.features ?? []);
   c.set("navCategories", config.navCategories);
+  c.set(
+    "actor",
+    await resolveActor(c, config.apiKeys ?? [], getCookieSecret()),
+  );
 
   const sidebarState = readUiState<{ pinned?: string[] }>(c, "sidebar");
   c.set(

@@ -85,6 +85,7 @@ export const meetingConfig: DomainConfig<
     }) as Partial<UpdateMeeting>,
 
   getService: () => getMeetingService(),
+  projectField: "project",
 
   searchPredicate: createSearchPredicate<Meeting>([
     { type: "string", get: (m) => m.title },

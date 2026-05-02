@@ -72,6 +72,7 @@ export const noteConfig: DomainConfig<Note, CreateNote, UpdateNote> = {
     >,
 
   getService: () => getNoteService(),
+  projectField: "project",
 
   extractFilterOptions: async () => ({
     project: await extractProjectNames(),

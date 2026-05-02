@@ -163,6 +163,8 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
     }) as Partial<UpdateTask>,
 
   getService: () => getTaskService(),
+  projectField: "project",
+  assigneeField: "assignee",
 
   resolveFormValues: async (values) => {
     const resolved = { ...values };

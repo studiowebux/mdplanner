@@ -79,6 +79,8 @@ export const goalConfig: DomainConfig<Goal, CreateGoal, UpdateGoal> = {
     }) as Partial<UpdateGoal>,
 
   getService: () => getGoalService(),
+  projectField: "project",
+  assigneeField: "owner",
 
   extractFilterOptions: async () => {
     const [projectNames, goals, people] = await Promise.all([

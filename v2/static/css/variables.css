@@ -245,9 +245,13 @@
   --avatar-size: var(--space-xl);
   --avatar-font-size: var(--font-size-sm);
 
+  /* Form controls */
+  --input-height-sm: 1.75rem;
+
   /* Badge */
   --badge-padding: var(--space-xs) var(--space-sm);
   --badge-font-weight: 500;
+  --filter-badge-size: 1.25rem;
 
   /* Progress bar */
   --progress-bar-height: 6px;

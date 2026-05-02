@@ -69,6 +69,14 @@ export class ProjectRepository {
     if (config.cloudflareToken) {
       fm.cloudflare_token = await encryptSecret(config.cloudflareToken);
     }
+    if (config.apiKeys && config.apiKeys.length > 0) {
+      fm.api_keys = await Promise.all(
+        config.apiKeys.map(async (k) => ({
+          name: k.name,
+          key: await encryptSecret(k.key),
+        })),
+      );
+    }
     if (config.billingCompany !== undefined) {
       fm.billing_company = config.billingCompany || undefined;
     }

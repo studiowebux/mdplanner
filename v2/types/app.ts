@@ -1,12 +1,14 @@
 // Shared Hono context variable types — imported by bin.ts and all routers.
 
 import type { Context } from "hono";
+import type { Actor } from "./actor.ts";
 
 export type AppVariables = {
   nonce: string;
   enabledFeatures: string[];
   pinnedKeys: string[];
   navCategories?: Record<string, string[]>;
+  actor: Actor;
 };
 
 // Base props for all SSR views — every view receives nonce + activePath + sidebar state.
@@ -16,6 +18,7 @@ export type ViewProps = {
   enabledFeatures?: string[];
   pinnedKeys?: string[];
   navCategories?: Record<string, string[]>;
+  actor?: Actor;
 };
 
 /** Typed Hono context with AppVariables. Use in route handlers. */

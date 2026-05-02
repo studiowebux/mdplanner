@@ -131,6 +131,12 @@ export type DomainConfig<T extends Entity, C, U> = {
     nonce?: string,
   ) => Promise<ReturnType<FC> | undefined>;
 
+  // Optional: field name on T that holds the project name string (e.g. "project").
+  projectField?: keyof T & string;
+
+  // Optional: field name on T that holds the assignee/owner name string (e.g. "assignee", "owner").
+  assigneeField?: keyof T & string;
+
   // Optional: detail page renderer (if the domain has a detail view).
   DetailView?: FC<ViewProps & { item: T }>;
 
