@@ -7,7 +7,11 @@
  */
 
 import { log } from "../../singletons/logger.ts";
-import { type BindValue, type CacheDatabase } from "./database.ts";
+import {
+  type BindValue,
+  type CacheDatabase,
+  type QueryResult,
+} from "./database.ts";
 import { ENTITIES, type EntityDef } from "./entities.ts";
 import type { SearchOptions, SearchResult } from "../../types/search.types.ts";
 
@@ -87,7 +91,7 @@ export class SearchEngine {
       const { fts, table } = entity;
       try {
         if (fts) {
-          const row = this.db.queryOne<Record<string, unknown>>(
+          const row = this.db.queryOne<QueryResult>(
             `SELECT id, "${fts.titleCol}" FROM "${table}" WHERE id = ?`,
             [id],
           );
@@ -101,7 +105,7 @@ export class SearchEngine {
             };
           }
         } else {
-          const row = this.db.queryOne<Record<string, unknown>>(
+          const row = this.db.queryOne<QueryResult>(
             `SELECT * FROM "${table}" WHERE id = ?`,
             [id],
           );
@@ -130,7 +134,7 @@ export class SearchEngine {
       const { fts, table } = entity;
       try {
         if (fts) {
-          const rows = this.db.query<Record<string, unknown>>(
+          const rows = this.db.query<QueryResult>(
             `SELECT id, "${fts.titleCol}" FROM "${table}" WHERE id LIKE ? LIMIT 5`,
             [pattern],
           );
@@ -144,7 +148,7 @@ export class SearchEngine {
             });
           }
         } else {
-          const rows = this.db.query<Record<string, unknown>>(
+          const rows = this.db.query<QueryResult>(
             `SELECT * FROM "${table}" WHERE id LIKE ? LIMIT 5`,
             [pattern],
           );
@@ -198,7 +202,7 @@ export class SearchEngine {
         sql += ` LIMIT ?`;
         params.push(limit);
 
-        const rows = this.db.query<Record<string, unknown>>(sql, params);
+        const rows = this.db.query<QueryResult>(sql, params);
         for (const row of rows) {
           results.push({
             id: row.id as string,
@@ -247,7 +251,7 @@ export class SearchEngine {
       sql += ` ORDER BY score LIMIT ?`;
       params.push(limit);
 
-      const rows = this.db.query<Record<string, unknown>>(sql, params);
+      const rows = this.db.query<QueryResult>(sql, params);
       return rows.map((r) => ({
         id: r.id as string,
         title: r[fts.titleCol] as string,

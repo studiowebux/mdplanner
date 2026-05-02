@@ -28,7 +28,7 @@ export class MeetingRepository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): Meeting {
+  protected rowToEntity(row: Record<string, string | number | null>): Meeting {
     return rowToMeeting(row);
   }
 

@@ -14,7 +14,9 @@ import type { BillingRate } from "../../types/billing-rate.types.ts";
 export const BILLING_RATE_TABLE = "billing_rates";
 
 /** Deserialize a SQLite row to a BillingRate. */
-export function rowToBillingRate(row: Record<string, unknown>): BillingRate {
+export function rowToBillingRate(
+  row: Record<string, string | number | null>,
+): BillingRate {
   return {
     id: row.id as string,
     name: (row.name as string) ?? "",

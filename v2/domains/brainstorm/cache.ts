@@ -20,7 +20,9 @@ import type {
 export const BRAINSTORM_TABLE = "brainstorms";
 
 /** Deserialize a SQLite row to a Brainstorm. */
-export function rowToBrainstorm(row: Record<string, unknown>): Brainstorm {
+export function rowToBrainstorm(
+  row: Record<string, string | number | null>,
+): Brainstorm {
   return {
     id: row.id as string,
     title: (row.title as string) ?? "",

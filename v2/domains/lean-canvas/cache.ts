@@ -17,7 +17,9 @@ import { LEAN_CANVAS_SECTIONS } from "../../types/lean-canvas.types.ts";
 export const LEAN_CANVAS_TABLE = "lean_canvases";
 
 /** Deserialize a SQLite row to a LeanCanvas. */
-export function rowToLeanCanvas(row: Record<string, unknown>): LeanCanvas {
+export function rowToLeanCanvas(
+  row: Record<string, string | number | null>,
+): LeanCanvas {
   return {
     id: row.id as string,
     title: (row.title as string) ?? "",

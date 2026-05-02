@@ -17,7 +17,9 @@ import type { LineItem } from "../../types/billing.types.ts";
 export const INVOICE_TABLE = "invoices";
 
 /** Deserialize a SQLite row to an Invoice. */
-export function rowToInvoice(row: Record<string, unknown>): Invoice {
+export function rowToInvoice(
+  row: Record<string, string | number | null>,
+): Invoice {
   return {
     id: row.id as string,
     number: (row.number as string) ?? "",

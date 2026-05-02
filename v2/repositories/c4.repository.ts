@@ -27,7 +27,9 @@ export class C4Repository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): C4Component {
+  protected rowToEntity(
+    row: Record<string, string | number | null>,
+  ): C4Component {
     return rowToC4(row);
   }
 

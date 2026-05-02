@@ -20,7 +20,7 @@ export class GoalRepository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): Goal {
+  protected rowToEntity(row: Record<string, string | number | null>): Goal {
     return rowToGoal(row);
   }
 

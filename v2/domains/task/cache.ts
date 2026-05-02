@@ -15,7 +15,7 @@ import type { Task } from "../../types/task.types.ts";
 import { TASK_SCHEMA, TASK_TABLE } from "./constants.ts";
 
 /** Deserialize a SQLite row to a Task. */
-export function rowToTask(row: Record<string, unknown>): Task {
+export function rowToTask(row: Record<string, string | number | null>): Task {
   const approvalArr = parseJson<unknown[]>(row.approval_request);
   const task: Task = {
     id: row.id as string,

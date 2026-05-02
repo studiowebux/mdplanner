@@ -14,6 +14,7 @@ import {
   MILESTONE_BODY_KEYS,
   MILESTONE_TABLE,
 } from "../domains/milestone/constants.ts";
+import type { QueryResult } from "../database/sqlite/mod.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 
 export class MilestoneRepository extends CachedMarkdownRepository<
@@ -31,14 +32,16 @@ export class MilestoneRepository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): MilestoneBase {
+  protected rowToEntity(
+    row: Record<string, string | number | null>,
+  ): MilestoneBase {
     return rowToMilestone(row);
   }
 
   override async findByName(name: string): Promise<MilestoneBase | null> {
     if (this.cacheDb) {
       try {
-        const row = this.cacheDb.queryOne<Record<string, unknown>>(
+        const row = this.cacheDb.queryOne<QueryResult>(
           `SELECT * FROM "${MILESTONE_TABLE}" WHERE name = ?`,
           [name],
         );

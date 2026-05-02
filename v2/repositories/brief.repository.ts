@@ -27,7 +27,7 @@ export class BriefRepository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): Brief {
+  protected rowToEntity(row: Record<string, string | number | null>): Brief {
     return rowToBrief(row);
   }
 

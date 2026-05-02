@@ -16,7 +16,7 @@ import type { Idea } from "../../types/idea.types.ts";
 export const IDEA_TABLE = "ideas";
 
 /** Deserialize a SQLite row to an Idea. */
-export function rowToIdea(row: Record<string, unknown>): Idea {
+export function rowToIdea(row: Record<string, string | number | null>): Idea {
   return {
     id: row.id as string,
     title: (row.title as string) ?? "",

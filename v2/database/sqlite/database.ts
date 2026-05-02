@@ -10,8 +10,9 @@
 import { log } from "../../singletons/logger.ts";
 import { DatabaseSync } from "node:sqlite";
 
+/** A row returned from SQLite. Values are the primitives node:sqlite actually produces. */
 export type QueryResult = {
-  [key: string]: unknown;
+  [key: string]: string | number | null;
 };
 
 export type BindValue = string | number | bigint | null | Uint8Array;

@@ -27,7 +27,9 @@ export class BillingRateRepository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): BillingRate {
+  protected rowToEntity(
+    row: Record<string, string | number | null>,
+  ): BillingRate {
     return rowToBillingRate(row);
   }
 

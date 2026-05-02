@@ -14,7 +14,9 @@ import type { Payment } from "../../types/payment.types.ts";
 export const PAYMENT_TABLE = "payments";
 
 /** Deserialize a SQLite row to a Payment. */
-export function rowToPayment(row: Record<string, unknown>): Payment {
+export function rowToPayment(
+  row: Record<string, string | number | null>,
+): Payment {
   return {
     id: row.id as string,
     invoiceId: (row.invoice_id as string) ?? "",

@@ -26,7 +26,7 @@ export class SwotRepository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): Swot {
+  protected rowToEntity(row: Record<string, string | number | null>): Swot {
     return rowToSwot(row);
   }
 

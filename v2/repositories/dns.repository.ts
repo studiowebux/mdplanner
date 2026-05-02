@@ -25,7 +25,9 @@ export class DnsRepository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): DnsDomain {
+  protected rowToEntity(
+    row: Record<string, string | number | null>,
+  ): DnsDomain {
     return rowToDnsDomain(row);
   }
 

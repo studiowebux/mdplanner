@@ -31,7 +31,7 @@ export class MoscowRepository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): Moscow {
+  protected rowToEntity(row: Record<string, string | number | null>): Moscow {
     return rowToMoscow(row);
   }
 

@@ -16,7 +16,9 @@ import type { DnsDomain } from "../../types/dns.types.ts";
 export const DNS_TABLE = "dns_domains";
 
 /** Deserialize a SQLite row to a DnsDomain. */
-export function rowToDnsDomain(row: Record<string, unknown>): DnsDomain {
+export function rowToDnsDomain(
+  row: Record<string, string | number | null>,
+): DnsDomain {
   return {
     id: row.id as string,
     domain: (row.domain as string) ?? "",

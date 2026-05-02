@@ -17,7 +17,9 @@ export const STICKY_NOTE_TABLE = "sticky_notes";
 export const STICKY_BOARD_TABLE = "sticky_boards";
 
 /** Deserialize a SQLite row to a StickyNote. */
-export function rowToStickyNote(row: Record<string, unknown>): StickyNote {
+export function rowToStickyNote(
+  row: Record<string, string | number | null>,
+): StickyNote {
   return {
     id: row.id as string,
     content: (row.content as string) ?? "",
@@ -41,7 +43,9 @@ export function rowToStickyNote(row: Record<string, unknown>): StickyNote {
 }
 
 /** Deserialize a SQLite row to a StickyBoard. */
-export function rowToStickyBoard(row: Record<string, unknown>): StickyBoard {
+export function rowToStickyBoard(
+  row: Record<string, string | number | null>,
+): StickyBoard {
   return {
     id: row.id as string,
     title: (row.title as string) ?? "",

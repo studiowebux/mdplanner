@@ -27,7 +27,9 @@ export class StickyBoardRepository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): StickyBoard {
+  protected rowToEntity(
+    row: Record<string, string | number | null>,
+  ): StickyBoard {
     return rowToStickyBoard(row);
   }
 

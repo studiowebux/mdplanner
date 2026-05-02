@@ -26,7 +26,7 @@ export class InvoiceRepository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): Invoice {
+  protected rowToEntity(row: Record<string, string | number | null>): Invoice {
     return rowToInvoice(row);
   }
 

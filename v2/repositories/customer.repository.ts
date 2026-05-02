@@ -25,7 +25,7 @@ export class CustomerRepository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): Customer {
+  protected rowToEntity(row: Record<string, string | number | null>): Customer {
     return rowToCustomer(row);
   }
 

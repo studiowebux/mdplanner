@@ -30,7 +30,9 @@ export class LeanCanvasRepository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): LeanCanvas {
+  protected rowToEntity(
+    row: Record<string, string | number | null>,
+  ): LeanCanvas {
     return rowToLeanCanvas(row);
   }
 

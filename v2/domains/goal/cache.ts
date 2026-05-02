@@ -16,7 +16,7 @@ import type { Goal } from "../../types/goal.types.ts";
 export const GOAL_TABLE = "goals";
 
 /** Deserialize a SQLite row to a Goal. */
-export function rowToGoal(row: Record<string, unknown>): Goal {
+export function rowToGoal(row: Record<string, string | number | null>): Goal {
   return {
     id: row.id as string,
     title: (row.title as string) ?? "",

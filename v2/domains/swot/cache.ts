@@ -16,7 +16,7 @@ import type { Swot } from "../../types/swot.types.ts";
 export const SWOT_TABLE = "swot";
 
 /** Deserialize a SQLite row to a Swot. */
-export function rowToSwot(row: Record<string, unknown>): Swot {
+export function rowToSwot(row: Record<string, string | number | null>): Swot {
   return {
     id: row.id as string,
     title: (row.title as string) ?? "",

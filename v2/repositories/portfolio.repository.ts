@@ -16,7 +16,7 @@ import type {
   UpdatePortfolioItem,
 } from "../types/portfolio.types.ts";
 import { ciEquals, ciIncludes } from "../utils/string.ts";
-import type { CacheDatabase } from "../database/sqlite/mod.ts";
+import type { CacheDatabase, QueryResult } from "../database/sqlite/mod.ts";
 import { rowToPortfolioItem } from "../domains/portfolio/cache.ts";
 import { PORTFOLIO_TABLE } from "../domains/portfolio/constants.ts";
 
@@ -38,7 +38,7 @@ export class PortfolioRepository {
       try {
         const count = this.cacheDb.count(PORTFOLIO_TABLE);
         if (count > 0) {
-          return this.cacheDb.query<Record<string, unknown>>(
+          return this.cacheDb.query<QueryResult>(
             `SELECT * FROM "${PORTFOLIO_TABLE}" ORDER BY category, name`,
           ).map(rowToPortfolioItem);
         }
@@ -81,7 +81,7 @@ export class PortfolioRepository {
   async findById(id: string): Promise<PortfolioItem | null> {
     if (this.cacheDb) {
       try {
-        const row = this.cacheDb.queryOne<Record<string, unknown>>(
+        const row = this.cacheDb.queryOne<QueryResult>(
           `SELECT * FROM "${PORTFOLIO_TABLE}" WHERE id = ?`,
           [id],
         );
@@ -102,7 +102,7 @@ export class PortfolioRepository {
   async findByName(name: string): Promise<PortfolioItem | null> {
     if (this.cacheDb) {
       try {
-        const row = this.cacheDb.queryOne<Record<string, unknown>>(
+        const row = this.cacheDb.queryOne<QueryResult>(
           `SELECT * FROM "${PORTFOLIO_TABLE}" WHERE LOWER(name) = LOWER(?)`,
           [name],
         );

@@ -14,7 +14,9 @@ import type { C4Component, C4Connection } from "../../types/c4.types.ts";
 
 export const C4_TABLE = "c4_components";
 
-export function rowToC4(row: Record<string, unknown>): C4Component {
+export function rowToC4(
+  row: Record<string, string | number | null>,
+): C4Component {
   return {
     id: row.id as string,
     name: (row.name as string) ?? "",

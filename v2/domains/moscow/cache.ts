@@ -16,7 +16,9 @@ import type { Moscow } from "../../types/moscow.types.ts";
 export const MOSCOW_TABLE = "moscow";
 
 /** Deserialize a SQLite row to a Moscow. */
-export function rowToMoscow(row: Record<string, unknown>): Moscow {
+export function rowToMoscow(
+  row: Record<string, string | number | null>,
+): Moscow {
   return {
     id: row.id as string,
     title: (row.title as string) ?? "",

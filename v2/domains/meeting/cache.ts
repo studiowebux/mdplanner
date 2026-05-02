@@ -16,7 +16,9 @@ import type { Meeting, MeetingAction } from "../../types/meeting.types.ts";
 export const MEETING_TABLE = "meetings";
 
 /** Deserialize a SQLite row to a Meeting. */
-export function rowToMeeting(row: Record<string, unknown>): Meeting {
+export function rowToMeeting(
+  row: Record<string, string | number | null>,
+): Meeting {
   return {
     id: row.id as string,
     title: (row.title as string) ?? "",

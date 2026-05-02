@@ -24,7 +24,7 @@ export class PaymentRepository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): Payment {
+  protected rowToEntity(row: Record<string, string | number | null>): Payment {
     return rowToPayment(row);
   }
 

@@ -13,7 +13,7 @@ import { buildFrontmatter, mergeFields } from "../utils/repo-helpers.ts";
 import { mapKeysFromFm, mapKeysToFm } from "../utils/frontmatter-mapper.ts";
 import { TaskBuilder } from "../builders/task.builder.ts";
 import type { CreateTask, Task, UpdateTask } from "../types/task.types.ts";
-import type { CacheDatabase } from "../database/sqlite/mod.ts";
+import type { CacheDatabase, QueryResult } from "../database/sqlite/mod.ts";
 import { rowToTask } from "../domains/task/cache.ts";
 import {
   TASK_BODY_KEYS,
@@ -80,7 +80,7 @@ export class TaskRepository {
       try {
         const count = this.cacheDb.count(TASK_TABLE);
         if (count > 0) {
-          return this.cacheDb.query<Record<string, unknown>>(
+          return this.cacheDb.query<QueryResult>(
             `SELECT * FROM "${TASK_TABLE}"`,
           ).map(rowToTask);
         }
@@ -118,7 +118,7 @@ export class TaskRepository {
   async findById(id: string): Promise<Task | null> {
     if (this.cacheDb) {
       try {
-        const row = this.cacheDb.queryOne<Record<string, unknown>>(
+        const row = this.cacheDb.queryOne<QueryResult>(
           `SELECT * FROM "${TASK_TABLE}" WHERE id = ?`,
           [id],
         );

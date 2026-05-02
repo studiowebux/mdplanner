@@ -13,7 +13,9 @@ import type { MilestoneBase } from "../../types/milestone.types.ts";
 import { MILESTONE_SCHEMA, MILESTONE_TABLE } from "./constants.ts";
 
 /** Deserialize a SQLite row to a MilestoneBase. */
-export function rowToMilestone(row: Record<string, unknown>): MilestoneBase {
+export function rowToMilestone(
+  row: Record<string, string | number | null>,
+): MilestoneBase {
   const m: MilestoneBase = {
     id: row.id as string,
     name: row.name as string,

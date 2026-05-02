@@ -2,7 +2,7 @@
 // BaseMarkdownRepository disk operations. Subclasses provide table name and
 // row-to-entity conversion.
 
-import type { CacheDatabase } from "../database/sqlite/mod.ts";
+import type { CacheDatabase, QueryResult } from "../database/sqlite/mod.ts";
 import type { RepositoryConfig } from "./base.repository.ts";
 import { BaseMarkdownRepository } from "./base.repository.ts";
 import { log } from "../singletons/logger.ts";
@@ -23,7 +23,9 @@ export abstract class CachedMarkdownRepository<
   protected abstract readonly tableName: string;
 
   /** Convert a SQLite row to a domain entity. */
-  protected abstract rowToEntity(row: Record<string, unknown>): T;
+  protected abstract rowToEntity(
+    row: Record<string, string | number | null>,
+  ): T;
 
   constructor(projectDir: string, config: RepositoryConfig) {
     super(projectDir, config);
@@ -48,7 +50,7 @@ export abstract class CachedMarkdownRepository<
       try {
         const count = this.cacheDb.count(this.tableName);
         if (count > 0) {
-          return this.cacheDb.query<Record<string, unknown>>(
+          return this.cacheDb.query<QueryResult>(
             `SELECT * FROM "${this.tableName}"`,
           ).map((row) => this.rowToEntity(row));
         }
@@ -65,7 +67,7 @@ export abstract class CachedMarkdownRepository<
   override async findById(id: string): Promise<T | null> {
     if (this.cacheDb) {
       try {
-        const row = this.cacheDb.queryOne<Record<string, unknown>>(
+        const row = this.cacheDb.queryOne<QueryResult>(
           `SELECT * FROM "${this.tableName}" WHERE id = ?`,
           [id],
         );

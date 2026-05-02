@@ -14,7 +14,9 @@ import type { Customer } from "../../types/customer.types.ts";
 export const CUSTOMER_TABLE = "customers";
 
 /** Deserialize a SQLite row to a Customer. */
-export function rowToCustomer(row: Record<string, unknown>): Customer {
+export function rowToCustomer(
+  row: Record<string, string | number | null>,
+): Customer {
   const hasAddress = row.street || row.city || row.state || row.postal_code ||
     row.country;
   return {

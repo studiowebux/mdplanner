@@ -16,7 +16,7 @@ import type { Brief } from "../../types/brief.types.ts";
 export const BRIEF_TABLE = "briefs";
 
 /** Deserialize a SQLite row to a Brief. */
-export function rowToBrief(row: Record<string, unknown>): Brief {
+export function rowToBrief(row: Record<string, string | number | null>): Brief {
   return {
     id: row.id as string,
     title: (row.title as string) ?? "",

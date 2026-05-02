@@ -27,7 +27,7 @@ export class QuoteRepository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): Quote {
+  protected rowToEntity(row: Record<string, string | number | null>): Quote {
     return rowToQuote(row);
   }
 

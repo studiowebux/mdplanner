@@ -16,6 +16,7 @@ import { AgentModelSchema } from "../types/person.types.ts";
 import { WEEKDAYS } from "../constants/mod.ts";
 import { rowToPerson } from "../domains/people/cache.ts";
 import { PEOPLE_BODY_KEYS, PEOPLE_TABLE } from "../domains/people/constants.ts";
+import type { QueryResult } from "../database/sqlite/mod.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 
 export class PeopleRepository extends CachedMarkdownRepository<
@@ -33,14 +34,14 @@ export class PeopleRepository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): Person {
+  protected rowToEntity(row: Record<string, string | number | null>): Person {
     return rowToPerson(row);
   }
 
   override async findByName(name: string): Promise<Person | null> {
     if (this.cacheDb) {
       try {
-        const row = this.cacheDb.queryOne<Record<string, unknown>>(
+        const row = this.cacheDb.queryOne<QueryResult>(
           `SELECT * FROM "${PEOPLE_TABLE}" WHERE LOWER(name) = LOWER(?)`,
           [name],
         );

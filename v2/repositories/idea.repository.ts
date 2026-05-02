@@ -25,7 +25,7 @@ export class IdeaRepository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): Idea {
+  protected rowToEntity(row: Record<string, string | number | null>): Idea {
     return rowToIdea(row);
   }
 

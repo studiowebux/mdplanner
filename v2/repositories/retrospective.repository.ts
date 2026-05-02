@@ -30,7 +30,9 @@ export class RetrospectiveRepository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): Retrospective {
+  protected rowToEntity(
+    row: Record<string, string | number | null>,
+  ): Retrospective {
     return rowToRetrospective(row);
   }
 

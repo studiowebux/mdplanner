@@ -15,7 +15,9 @@ import type { Person } from "../../types/person.types.ts";
 import { PEOPLE_SCHEMA, PEOPLE_TABLE } from "./constants.ts";
 
 /** Deserialize a SQLite row to a Person. */
-export function rowToPerson(row: Record<string, unknown>): Person {
+export function rowToPerson(
+  row: Record<string, string | number | null>,
+): Person {
   const person: Person = {
     id: row.id as string,
     name: row.name as string,

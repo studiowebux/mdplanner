@@ -29,7 +29,9 @@ export class BrainstormRepository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): Brainstorm {
+  protected rowToEntity(
+    row: Record<string, string | number | null>,
+  ): Brainstorm {
     return rowToBrainstorm(row);
   }
 

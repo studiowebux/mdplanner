@@ -18,7 +18,7 @@ import type { PaymentScheduleItem } from "../../types/quote.types.ts";
 export const QUOTE_TABLE = "quotes";
 
 /** Deserialize a SQLite row to a Quote. */
-export function rowToQuote(row: Record<string, unknown>): Quote {
+export function rowToQuote(row: Record<string, string | number | null>): Quote {
   return {
     id: row.id as string,
     number: (row.number as string) ?? "",

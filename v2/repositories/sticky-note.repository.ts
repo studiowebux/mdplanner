@@ -31,7 +31,9 @@ export class StickyNoteRepository extends CachedMarkdownRepository<
     this.boardId = boardId;
   }
 
-  protected rowToEntity(row: Record<string, unknown>): StickyNote {
+  protected rowToEntity(
+    row: Record<string, string | number | null>,
+  ): StickyNote {
     return rowToStickyNote(row);
   }
 

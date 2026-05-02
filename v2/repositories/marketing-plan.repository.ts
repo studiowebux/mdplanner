@@ -69,7 +69,9 @@ export class MarketingPlanRepository extends CachedMarkdownRepository<
     });
   }
 
-  protected rowToEntity(row: Record<string, unknown>): MarketingPlan {
+  protected rowToEntity(
+    row: Record<string, string | number | null>,
+  ): MarketingPlan {
     return rowToMarketingPlan(row);
   }
 
