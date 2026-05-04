@@ -565,6 +565,44 @@ export function createDomainPage<T extends Entity>(
                 </select>
               );
             })}
+            {cfg.dateRangeFilter && (() => {
+              const fromKey = cfg.dateRangeFilter.fromKey ?? "date_from";
+              const toKey = cfg.dateRangeFilter.toKey ?? "date_to";
+              const fromLabel = cfg.dateRangeFilter.fromLabel ?? "From";
+              const toLabel = cfg.dateRangeFilter.toLabel ?? "To";
+              return (
+                <div class="domain-toolbar__date-range">
+                  <label class="domain-toolbar__date-label">
+                    {fromLabel}
+                    <input
+                      type="date"
+                      class="domain-toolbar__date"
+                      name={fromKey}
+                      value={String(state[fromKey] ?? "")}
+                      hx-get={`/${cfg.name}/view`}
+                      hx-trigger="change"
+                      hx-target={`#${cfg.name}-view`}
+                      hx-swap="outerHTML"
+                      hx-include={`#${cfg.name}-toolbar`}
+                    />
+                  </label>
+                  <label class="domain-toolbar__date-label">
+                    {toLabel}
+                    <input
+                      type="date"
+                      class="domain-toolbar__date"
+                      name={toKey}
+                      value={String(state[toKey] ?? "")}
+                      hx-get={`/${cfg.name}/view`}
+                      hx-trigger="change"
+                      hx-target={`#${cfg.name}-view`}
+                      hx-swap="outerHTML"
+                      hx-include={`#${cfg.name}-toolbar`}
+                    />
+                  </label>
+                </div>
+              );
+            })()}
             {cfg.hideCompleted && (
               <label class="domain-toolbar__toggle">
                 <input

@@ -142,4 +142,17 @@ export type DomainConfig<T extends Entity, C, U> = {
 
   // Optional: extra buttons rendered in the toolbar right area (before view toggles).
   toolbarActions?: FC;
+
+  // Optional: date range filter. When set, renders two date inputs (from/to) in the
+  // toolbar and applies server-side filtering against the specified entity field.
+  // field: entity property holding an ISO YYYY-MM-DD string.
+  // fromKey/toKey: query param + stateKey names (default: "date_from" / "date_to").
+  // The domain's stateKeys array must include these keys.
+  dateRangeFilter?: {
+    field: string;
+    fromKey?: string;
+    toKey?: string;
+    fromLabel?: string;
+    toLabel?: string;
+  };
 };

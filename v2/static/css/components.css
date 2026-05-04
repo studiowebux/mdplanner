@@ -1218,6 +1218,43 @@ a.badge:hover {
 }
 
 /* -------------------------------------------------------------------------
+   Date range filter
+   ------------------------------------------------------------------------- */
+
+.domain-toolbar__date-range {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.domain-toolbar__date-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.domain-toolbar__date {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.domain-toolbar__date:focus {
+  border-color: var(--color-border-focus);
+  background: var(--color-bg-primary);
+}
+
+/* -------------------------------------------------------------------------
    Column toggle
    ------------------------------------------------------------------------- */
 

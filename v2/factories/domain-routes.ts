@@ -135,6 +135,26 @@ export function createDomainRoutes<T extends Entity, C, U>(
       }
     }
 
+    // Date range filter
+    if (cfg.dateRangeFilter) {
+      const { field, fromKey = "date_from", toKey = "date_to" } =
+        cfg.dateRangeFilter;
+      const from = state[fromKey] as string | undefined;
+      const to = state[toKey] as string | undefined;
+      if (from) {
+        result = result.filter(
+          (item) =>
+            String((item as Record<string, unknown>)[field] ?? "") >= from,
+        );
+      }
+      if (to) {
+        result = result.filter(
+          (item) =>
+            String((item as Record<string, unknown>)[field] ?? "") <= to,
+        );
+      }
+    }
+
     // Text search
     if (state.q) {
       const q = (state.q as string).toLowerCase();

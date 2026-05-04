@@ -84,6 +84,8 @@ export const meetingConfig: DomainConfig<
       clearEmpty: true,
     }) as Partial<UpdateMeeting>,
 
+  dateRangeFilter: { field: "date" },
+
   getService: () => getMeetingService(),
   projectField: "project",
 
