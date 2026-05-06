@@ -349,6 +349,29 @@
 }
 
 /* ---------------------------------------------------------------------------
+   Loading state — boxes hidden until JS applies positions (prevents flash)
+--------------------------------------------------------------------------- */
+
+#c4Canvas[data-loading] .c4-box {
+  opacity: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Connecting mode — port click initiates a connection draw
+--------------------------------------------------------------------------- */
+
+.c4-canvas-root.c4-connecting,
+.c4-connecting .c4-box {
+  cursor: crosshair;
+}
+
+.c4-box--connecting-source {
+  outline: var(--sidebar-active-border-width) var(--border-style)
+    var(--color-accent);
+  outline-offset: var(--space-xs);
+}
+
+/* ---------------------------------------------------------------------------
    SVG arrows
 --------------------------------------------------------------------------- */
 

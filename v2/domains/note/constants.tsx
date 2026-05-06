@@ -66,7 +66,8 @@ export const NOTE_TABLE_COLUMNS: ColumnDef[] = [
   },
   {
     key: "age",
-    label: "Age",
+    label: "Created",
+    sortable: true,
     render: (_, row) => timeAgo(row.createdAt as string),
   },
   { key: "_actions", label: "", render: actionBtns },
@@ -78,6 +79,7 @@ export function noteToRow(n: Note): Record<string, unknown> {
     title: n.title,
     project: n.project ?? "",
     createdAt: n.createdAt,
-    updatedAt: n.updatedAt,
+    // Fall back to createdAt for older notes that pre-date updatedAt tracking.
+    updatedAt: n.updatedAt || n.createdAt,
   };
 }

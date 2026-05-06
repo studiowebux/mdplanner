@@ -49,6 +49,7 @@
     panning: false,
     panStart: null, // { mx, my, tx, ty }
     initialized: false, // true after init() has run — prevents double-init
+    connecting: null, // { fromId } — set while drawing a connection
   };
 
   // ── DOM helpers ─────────────────────────────────────────────────────────────
@@ -352,7 +353,81 @@
 
   // ── Box drag ─────────────────────────────────────────────────────────────────
 
+  // ── Port click — connection drawing ─────────────────────────────────────────
+
+  function cancelConnecting() {
+    state.connecting = null;
+    var r = root();
+    if (r) r.classList.remove("c4-connecting");
+    document.querySelectorAll(".c4-box--connecting-source").forEach(
+      function (b) {
+        b.classList.remove("c4-box--connecting-source");
+      },
+    );
+  }
+
+  function createConnection(sourceId, targetId) {
+    fetch("/api/v1/c4/connections", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sourceId: sourceId, targetId: targetId }),
+    }).catch(function () {});
+    // SSE c4.updated will refresh the canvas automatically
+  }
+
+  function onPortClick(e) {
+    e.stopPropagation();
+    var box = e.currentTarget.closest(".c4-box");
+    if (!box) return;
+    var fromId = box.getAttribute("data-id");
+    // Clicking own port again cancels
+    if (state.connecting && state.connecting.fromId === fromId) {
+      cancelConnecting();
+      return;
+    }
+    cancelConnecting();
+    state.connecting = { fromId: fromId };
+    var r = root();
+    if (r) r.classList.add("c4-connecting");
+    box.classList.add("c4-box--connecting-source");
+  }
+
+  function onBoxClickForConnect(e) {
+    if (!state.connecting) return;
+    var box = e.target.closest(".c4-box");
+    if (!box) {
+      cancelConnecting();
+      return;
+    }
+    var targetId = box.getAttribute("data-id");
+    if (!targetId || targetId === state.connecting.fromId) {
+      cancelConnecting();
+      return;
+    }
+    var fromId = state.connecting.fromId;
+    cancelConnecting();
+    createConnection(fromId, targetId);
+  }
+
+  function wirePortClick() {
+    document.querySelectorAll(".c4-port").forEach(function (port) {
+      port.removeEventListener("click", onPortClick);
+      port.addEventListener("click", onPortClick);
+    });
+  }
+
+  function wireBoxClickForConnect() {
+    document.querySelectorAll(".c4-box").forEach(function (box) {
+      box.removeEventListener("click", onBoxClickForConnect);
+      box.addEventListener("click", onBoxClickForConnect);
+    });
+  }
+
+  // ── Box drag ─────────────────────────────────────────────────────────────────
+
   function onBoxMousedown(e) {
+    // Bail if in connection-drawing mode — click handler handles it
+    if (state.connecting) return;
     // Allow buttons (sidenav open) and links to handle their own click
     if (e.target.tagName === "BUTTON" || e.target.tagName === "A") return;
     e.preventDefault();
@@ -667,10 +742,14 @@
     buildGraph();
     runSimulation();
     applyPositions();
+    var c = canvas();
+    if (c) c.removeAttribute("data-loading");
     fitToScreen();
     updateArrows();
 
     wireBoxDrag();
+    wirePortClick();
+    wireBoxClickForConnect();
     wireEditToggle();
     wireDiagramSwitcher();
     wireZoomButtons();
@@ -682,6 +761,9 @@
     document.addEventListener("mousemove", onMousemove);
     document.addEventListener("mouseup", onMouseup);
     document.addEventListener("wheel", onWheel, { passive: false });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && state.connecting) cancelConnecting();
+    });
     window.addEventListener("resize", function () {
       sizeCanvas();
       fitToScreen();
@@ -720,6 +802,8 @@
     var prevCount = state.nodes.length;
     buildGraph();
     wireBoxDrag();
+    wirePortClick();
+    wireBoxClickForConnect();
 
     state.nodes.forEach(function (node) {
       var prev = prevById[node.id];
@@ -735,6 +819,8 @@
     }
 
     applyPositions();
+    var c = canvas();
+    if (c) c.removeAttribute("data-loading");
     applyTransform();
     updateArrows();
     drawMinimap();

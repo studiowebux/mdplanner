@@ -336,7 +336,7 @@ export const C4Canvas: FC<C4CanvasProps> = ({
       <C4Toolbar editMode={editMode} diagram={diagram} />
 
       <div class="c4-canvas-wrapper" id="c4Wrapper">
-        <div class="c4-canvas" id="c4Canvas">
+        <div class="c4-canvas" id="c4Canvas" data-loading>
           <C4Arrows components={components} ids={ids} />
           {components.map((comp) => <C4Box key={comp.id} component={comp} />)}
         </div>

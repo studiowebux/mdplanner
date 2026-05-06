@@ -42,6 +42,24 @@
   }
 
   // -------------------------------------------------------------------------
+  // In-memory filter state — source of truth after page load.
+  // Reading from cookie on every htmx:afterSettle caused a race: an SSE-
+  // triggered view reload could fire syncCheckboxes before the POST response
+  // had updated the cookie, unchecking boxes the user had just checked.
+  // -------------------------------------------------------------------------
+
+  var memState = null; // null = not yet initialised
+
+  function getMemState() {
+    if (memState === null) memState = readGlobalState();
+    return memState;
+  }
+
+  function setMemState(projects, assignees) {
+    memState = { globalProjects: projects, globalAssignees: assignees };
+  }
+
+  // -------------------------------------------------------------------------
   // Panel state
   // -------------------------------------------------------------------------
 
@@ -94,7 +112,7 @@
   // -------------------------------------------------------------------------
 
   function syncCheckboxes() {
-    var state = readGlobalState();
+    var state = getMemState();
     syncType("projects", state.globalProjects);
     syncType("assignees", state.globalAssignees);
   }
@@ -132,6 +150,9 @@
     var assignees = getCheckedValues("assignees");
     updateBadge("projects", projects.length);
     updateBadge("assignees", assignees.length);
+    // Update in-memory state immediately so syncCheckboxes called by any
+    // concurrent htmx:afterSettle does not revert the user's selection.
+    setMemState(projects, assignees);
     fetch(ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

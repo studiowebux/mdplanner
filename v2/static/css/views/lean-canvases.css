@@ -21,7 +21,10 @@
 .lc-canvas {
   display: grid;
   grid-template-columns: 1fr 1fr 2fr 1fr 1fr;
-  grid-template-rows: auto auto auto;
+  grid-template-rows:
+    minmax(var(--lc-section-min-height), 1fr)
+    minmax(var(--lc-section-min-height), 1fr)
+    minmax(var(--lc-section-min-height), auto);
   grid-template-areas:
     "problem    solution   uvp        unfair    customer"
     "problem    metrics    uvp        channels  customer"
@@ -76,8 +79,11 @@
   border-radius: var(--radius-md);
   background: var(--color-bg-secondary);
   border: var(--border-width) solid var(--color-border-default);
-  height: 100%;
   min-height: var(--lc-section-min-height);
+  max-height: var(--lc-section-max-height);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .lc-section__title {

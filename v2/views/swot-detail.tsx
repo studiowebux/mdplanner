@@ -173,13 +173,6 @@ export const SwotDetailView: FC<
         {/* -- Notes ----------------------------------------------------- */}
         <MarkdownSection title="Notes" markdown={swot.notes} />
 
-        {/* -- Meta ------------------------------------------------------ */}
-        <div class="detail-section swot-detail__meta">
-          <span>Created {formatDate(swot.createdAt)}</span>
-          {swot.updatedAt && swot.updatedAt !== swot.createdAt && (
-            <span>&middot; Updated {formatDate(swot.updatedAt)}</span>
-          )}
-        </div>
         <AuditMeta
           createdAt={swot.createdAt}
           updatedAt={swot.updatedAt}

@@ -196,6 +196,54 @@ export function createMoreFragment<T extends Entity>(cfg: {
 }
 
 // ---------------------------------------------------------------------------
+// Date range filter inputs
+// ---------------------------------------------------------------------------
+
+function DateRangeFilter(
+  { domain, fromKey, toKey, fromLabel, toLabel, state }: {
+    domain: string;
+    fromKey: string;
+    toKey: string;
+    fromLabel: string;
+    toLabel: string;
+    state: DomainFilterState;
+  },
+) {
+  return (
+    <div class="domain-toolbar__date-range">
+      <label class="domain-toolbar__date-label">
+        {fromLabel}
+        <input
+          type="date"
+          class="domain-toolbar__date"
+          name={fromKey}
+          value={String(state[fromKey] ?? "")}
+          hx-get={`/${domain}/view`}
+          hx-trigger="change"
+          hx-target={`#${domain}-view`}
+          hx-swap="outerHTML"
+          hx-include={`#${domain}-toolbar`}
+        />
+      </label>
+      <label class="domain-toolbar__date-label">
+        {toLabel}
+        <input
+          type="date"
+          class="domain-toolbar__date"
+          name={toKey}
+          value={String(state[toKey] ?? "")}
+          hx-get={`/${domain}/view`}
+          hx-trigger="change"
+          hx-target={`#${domain}-view`}
+          hx-swap="outerHTML"
+          hx-include={`#${domain}-toolbar`}
+        />
+      </label>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // View toggle buttons
 // ---------------------------------------------------------------------------
 
@@ -565,44 +613,16 @@ export function createDomainPage<T extends Entity>(
                 </select>
               );
             })}
-            {cfg.dateRangeFilter && (() => {
-              const fromKey = cfg.dateRangeFilter.fromKey ?? "date_from";
-              const toKey = cfg.dateRangeFilter.toKey ?? "date_to";
-              const fromLabel = cfg.dateRangeFilter.fromLabel ?? "From";
-              const toLabel = cfg.dateRangeFilter.toLabel ?? "To";
-              return (
-                <div class="domain-toolbar__date-range">
-                  <label class="domain-toolbar__date-label">
-                    {fromLabel}
-                    <input
-                      type="date"
-                      class="domain-toolbar__date"
-                      name={fromKey}
-                      value={String(state[fromKey] ?? "")}
-                      hx-get={`/${cfg.name}/view`}
-                      hx-trigger="change"
-                      hx-target={`#${cfg.name}-view`}
-                      hx-swap="outerHTML"
-                      hx-include={`#${cfg.name}-toolbar`}
-                    />
-                  </label>
-                  <label class="domain-toolbar__date-label">
-                    {toLabel}
-                    <input
-                      type="date"
-                      class="domain-toolbar__date"
-                      name={toKey}
-                      value={String(state[toKey] ?? "")}
-                      hx-get={`/${cfg.name}/view`}
-                      hx-trigger="change"
-                      hx-target={`#${cfg.name}-view`}
-                      hx-swap="outerHTML"
-                      hx-include={`#${cfg.name}-toolbar`}
-                    />
-                  </label>
-                </div>
-              );
-            })()}
+            {cfg.dateRangeFilter && (
+              <DateRangeFilter
+                domain={cfg.name}
+                fromKey={cfg.dateRangeFilter.fromKey ?? "date_from"}
+                toKey={cfg.dateRangeFilter.toKey ?? "date_to"}
+                fromLabel={cfg.dateRangeFilter.fromLabel ?? "From"}
+                toLabel={cfg.dateRangeFilter.toLabel ?? "To"}
+                state={state}
+              />
+            )}
             {cfg.hideCompleted && (
               <label class="domain-toolbar__toggle">
                 <input

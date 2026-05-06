@@ -810,6 +810,23 @@ a.badge:hover {
   font-weight: var(--font-weight-bold);
 }
 
+.form__checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.form__checkbox {
+  width: var(--space-md);
+  height: var(--space-md);
+  accent-color: var(--color-accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 /* Field-level validation — red border after user interaction */
 .form__input:user-invalid,
 .form__select:user-invalid,

@@ -96,8 +96,8 @@ export const c4Config: DomainConfig<
   extraViewModes: [{ key: "canvas", label: "Canvas" }],
 
   customViewRenderer: async (_view, state, items, _nonce) => {
-    const diagram = (state.diagram as string) ?? "default";
-    const level = (state.level as string) ?? "context";
+    const diagram = (state.diagram as string) || "default";
+    const level = (state.level as string) || "context";
     const parentId = (state.parent as string) ?? undefined;
     const editMode = (state.mode as string) === "edit";
 

@@ -58,16 +58,6 @@
   margin-top: var(--space-lg);
 }
 
-.swot-detail__meta {
-  display: flex;
-  gap: var(--space-sm);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  margin-top: var(--space-lg);
-  padding-top: var(--space-md);
-  border-top: var(--border-width) solid var(--color-border);
-}
-
 /* -- Edit mode ------------------------------------------------------------ */
 
 .swot-detail--editing .quadrant-card__item:hover {

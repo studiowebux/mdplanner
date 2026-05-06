@@ -401,7 +401,7 @@ html.fullscreen-reading .topbar {
   right: 0;
   z-index: var(--z-dropdown);
   min-width: 200px;
-  background: var(--color-surface-2);
+  background: var(--color-bg-primary);
   border: var(--border-width) var(--border-style) var(--color-border-default);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
@@ -428,13 +428,18 @@ html.fullscreen-reading .topbar {
   cursor: pointer;
 }
 
+.topbar__actions > form {
+  display: flex;
+  align-items: center;
+}
+
 .topbar__identity-select {
   height: var(--input-height-sm);
   padding: 0 var(--space-sm);
   font-size: var(--font-size-sm);
   font-family: var(--font-sans);
   color: var(--color-text);
-  background: var(--color-surface-2);
+  background: var(--color-bg-secondary);
   border: var(--border-width) var(--border-style) var(--color-border-default);
   border-radius: var(--radius-sm);
   cursor: pointer;

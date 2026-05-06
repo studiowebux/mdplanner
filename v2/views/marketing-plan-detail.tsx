@@ -355,13 +355,6 @@ export const MarketingPlanDetailView: FC<
         {/* -- Notes ----------------------------------------------------- */}
         <MarkdownSection title="Notes" markdown={plan.notes} />
 
-        {/* -- Meta ------------------------------------------------------ */}
-        <div class="detail-section mktplan-detail__meta">
-          <span>Created {formatDate(plan.createdAt)}</span>
-          {plan.updatedAt && plan.updatedAt !== plan.createdAt && (
-            <span>&middot; Updated {formatDate(plan.updatedAt)}</span>
-          )}
-        </div>
         <AuditMeta
           createdAt={plan.createdAt}
           updatedAt={plan.updatedAt}

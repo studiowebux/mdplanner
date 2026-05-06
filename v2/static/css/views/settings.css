@@ -19,7 +19,8 @@
 
 .settings-tabs {
   display: grid;
-  grid-template-columns: repeat(10, auto) 1fr;
+  grid-auto-columns: auto;
+  grid-auto-flow: column;
   grid-template-rows: auto 1fr;
 }
 
@@ -67,11 +68,13 @@
 #tab-schedule:checked ~ .settings-tabs__panel--schedule,
 #tab-tags:checked ~ .settings-tabs__panel--tags,
 #tab-links:checked ~ .settings-tabs__panel--links,
-#tab-caching:checked ~ .settings-tabs__panel--caching,
-#tab-support:checked ~ .settings-tabs__panel--support,
 #tab-navigation:checked ~ .settings-tabs__panel--navigation,
 #tab-sections:checked ~ .settings-tabs__panel--sections,
-#tab-goals:checked ~ .settings-tabs__panel--goals {
+#tab-goals:checked ~ .settings-tabs__panel--goals,
+#tab-milestones:checked ~ .settings-tabs__panel--milestones,
+#tab-billing:checked ~ .settings-tabs__panel--billing,
+#tab-caching:checked ~ .settings-tabs__panel--caching,
+#tab-support:checked ~ .settings-tabs__panel--support {
   display: block;
 }
 
