@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+import { stringArray } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
 // Status enum — shared across all milestone schemas
@@ -59,6 +60,10 @@ export const MilestoneBaseSchema = z.object({
   }),
   updatedBy: z.string().nullable().optional().openapi({
     description: "Person ID of the last updater",
+  }),
+  links: stringArray.nullable().optional().openapi({
+    description: "External resource URLs related to this milestone",
+    example: ["https://github.com/org/repo/milestone/1"],
   }),
 });
 

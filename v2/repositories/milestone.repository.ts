@@ -91,6 +91,7 @@ export class MilestoneRepository extends CachedMarkdownRepository<
       target: data.target,
       description: data.description,
       project: data.project,
+      links: data.links,
       createdAt: now,
     };
   }
@@ -123,6 +124,9 @@ export class MilestoneRepository extends CachedMarkdownRepository<
       updatedAt: fm.updatedAt != null ? String(fm.updatedAt) : undefined,
       createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
       updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+      links: Array.isArray(fm.links)
+        ? fm.links.map(String).filter(Boolean)
+        : undefined,
     };
   }
 

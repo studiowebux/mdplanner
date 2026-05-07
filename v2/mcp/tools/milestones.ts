@@ -90,7 +90,7 @@ export function registerMilestoneTools(server: McpServer): void {
         ),
       },
     },
-    async ({ name, project, description, target, status }) => {
+    async ({ name, project, description, target, status, links }) => {
       try {
         const m = await service.create({
           name,
@@ -98,6 +98,7 @@ export function registerMilestoneTools(server: McpServer): void {
           ...(description && { description }),
           ...(target && { target }),
           status: status ?? "open",
+          ...(links && { links }),
         });
         return ok({ id: m.id });
       } catch (e) {

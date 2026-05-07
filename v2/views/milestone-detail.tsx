@@ -81,6 +81,26 @@ export const MilestoneDetailView: FC<Props> = (
           />
         )}
 
+        {milestone.links && milestone.links.length > 0 && (
+          <section class="detail-section milestone-detail__links">
+            <h2 class="section-heading">Links</h2>
+            <ul class="milestone-detail__links-list">
+              {milestone.links.map((url) => (
+                <li key={url}>
+                  <a
+                    href={url}
+                    class="milestone-detail__link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {url}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         <section class="milestone-detail__tasks">
           <h2 class="section-heading">Tasks</h2>
           {tasks.length === 0

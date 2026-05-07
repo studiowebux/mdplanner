@@ -17,5 +17,10 @@ export const MILESTONE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${MILESTONE_TABLE} (
   updated_at TEXT,
   created_by TEXT,
   updated_by TEXT,
+  links TEXT,
   synced_at TEXT
 )`;
+
+export const MILESTONE_MIGRATIONS = [
+  `ALTER TABLE ${MILESTONE_TABLE} ADD COLUMN links TEXT`,
+];

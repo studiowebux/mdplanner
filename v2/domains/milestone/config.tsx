@@ -51,6 +51,12 @@ const FORM_FIELDS: FieldDef[] = [
     source: "portfolio",
     placeholder: "Search projects...",
   },
+  {
+    type: "tags",
+    name: "links",
+    label: "Links",
+    placeholder: "Paste a URL and press Enter",
+  },
 ];
 
 export const milestoneConfig: DomainConfig<

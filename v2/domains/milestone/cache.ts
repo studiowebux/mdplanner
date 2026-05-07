@@ -5,12 +5,18 @@ import {
   auditCols,
   auditVals,
   ENTITIES,
+  json,
+  parseJson,
   val,
 } from "../../database/sqlite/mod.ts";
 import type { CacheDatabase, EntityDef } from "../../database/sqlite/mod.ts";
 import type { MilestoneRepository } from "../../repositories/milestone.repository.ts";
 import type { MilestoneBase } from "../../types/milestone.types.ts";
-import { MILESTONE_SCHEMA, MILESTONE_TABLE } from "./constants.ts";
+import {
+  MILESTONE_MIGRATIONS,
+  MILESTONE_SCHEMA,
+  MILESTONE_TABLE,
+} from "./constants.ts";
 
 /** Deserialize a SQLite row to a MilestoneBase. */
 export function rowToMilestone(
@@ -29,6 +35,8 @@ export function rowToMilestone(
   if (row.updated_at != null) m.updatedAt = row.updated_at as string;
   if (row.created_by != null) m.createdBy = row.created_by as string;
   if (row.updated_by != null) m.updatedBy = row.updated_by as string;
+  const links = parseJson<string[]>(row.links);
+  if (links) m.links = links;
   return m;
 }
 
@@ -39,8 +47,8 @@ export function insertMilestoneRow(
   syncedAt?: string,
 ): void {
   db.execute(
-    `INSERT OR REPLACE INTO ${MILESTONE_TABLE} (id, name, status, target, description, project, completed_at, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT OR REPLACE INTO ${MILESTONE_TABLE} (id, name, status, target, description, project, completed_at, ${auditCols()}, links, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(m.id),
       val(m.name),
@@ -50,6 +58,7 @@ export function insertMilestoneRow(
       val(m.project),
       val(m.completedAt),
       ...auditVals(m),
+      json(m.links ?? []),
       syncedAt ?? new Date().toISOString(),
     ],
   );
@@ -60,6 +69,7 @@ export function registerMilestoneEntity(repo: MilestoneRepository): void {
   const entity: EntityDef = {
     table: MILESTONE_TABLE,
     schema: MILESTONE_SCHEMA,
+    migrations: MILESTONE_MIGRATIONS,
     fts: {
       type: "milestone",
       columns: ["id", "name", "description"],
