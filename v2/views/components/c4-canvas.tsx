@@ -13,16 +13,16 @@ import { Sidenav } from "../../components/ui/sidenav.tsx";
 // Breadcrumb
 // ---------------------------------------------------------------------------
 
-type BreadcrumbEntry = { label: string; href: string };
+type BreadcrumbEntry = { label: string; href?: string };
 
 type BreadcrumbProps = { entries: BreadcrumbEntry[] };
 
 const C4Breadcrumb: FC<BreadcrumbProps> = ({ entries }) => (
   <nav class="c4-breadcrumb" aria-label="C4 level navigation">
     {entries.map((entry, i) => (
-      <span key={entry.href}>
+      <span key={entry.label}>
         {i > 0 && <span class="c4-breadcrumb__sep" aria-hidden="true">›</span>}
-        {i < entries.length - 1
+        {entry.href
           ? <a href={entry.href} class="c4-breadcrumb__link">{entry.label}</a>
           : <span class="c4-breadcrumb__current">{entry.label}</span>}
       </span>
@@ -304,25 +304,23 @@ export const C4Canvas: FC<C4CanvasProps> = ({
 
   const ids = new Set(components.map((c) => c.id));
 
-  const breadcrumb: BreadcrumbEntry[] = [
-    { label: "All", href: "/c4?level=context" },
-  ];
-  if (level !== "context") {
-    breadcrumb.push({
-      label: C4_LEVEL_LABELS["context"],
-      href: "/c4?level=context",
-    });
-  }
+  // "All" always links to /c4 (no level = show all components).
+  // Current level is always the trailing no-href entry so "All" is never non-clickable.
+  const breadcrumb: BreadcrumbEntry[] = [{ label: "All", href: "/c4" }];
   if (parentId && parentName) {
     breadcrumb.push({
-      label: parentName,
-      href: `/c4?level=${level}&parent=${parentId}`,
+      label: C4_LEVEL_LABELS["context"] ?? "Context",
+      href: "/c4?level=context",
     });
-  } else if (level !== "context") {
+    breadcrumb.push({ label: parentName });
+  } else if (level === "context") {
+    breadcrumb.push({ label: C4_LEVEL_LABELS["context"] ?? "Context" });
+  } else {
     breadcrumb.push({
-      label: C4_LEVEL_LABELS[level] ?? level,
-      href: `/c4?level=${level}`,
+      label: C4_LEVEL_LABELS["context"] ?? "Context",
+      href: "/c4?level=context",
     });
+    breadcrumb.push({ label: C4_LEVEL_LABELS[level] ?? level });
   }
 
   return (

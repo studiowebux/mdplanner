@@ -76,15 +76,18 @@
     var boxes = document.querySelectorAll(".c4-box[data-id]");
     var nodes = [];
     var idxById = {};
+    var savedPositionCount = 0;
 
     boxes.forEach(function (box, i) {
       var x = parseFloat(box.getAttribute("data-x")) || 0;
       var y = parseFloat(box.getAttribute("data-y")) || 0;
+      var hasSaved = x !== 0 || y !== 0;
+      if (hasSaved) savedPositionCount++;
       // Scatter boxes that share the same position so simulation can separate them
       var duplicate = nodes.some(function (n) {
         return Math.abs(n.x - x) < 10 && Math.abs(n.y - y) < 10;
       });
-      if (duplicate || (x === 0 && y === 0)) {
+      if (!hasSaved && duplicate) {
         var angle = (i / Math.max(boxes.length, 1)) * 2 * Math.PI;
         var r = 200 + i * 40;
         x = 600 + Math.cos(angle) * r;
@@ -116,6 +119,8 @@
 
     state.nodes = nodes;
     state.edges = edges;
+    // All nodes have server-saved positions — skip force simulation to preserve layout.
+    state.allSaved = boxes.length > 0 && savedPositionCount === boxes.length;
   }
 
   function simulateTick(alpha) {
@@ -379,14 +384,23 @@
     e.stopPropagation();
     var box = e.currentTarget.closest(".c4-box");
     if (!box) return;
-    var fromId = box.getAttribute("data-id");
-    // Clicking own port again cancels
-    if (state.connecting && state.connecting.fromId === fromId) {
-      cancelConnecting();
+    var boxId = box.getAttribute("data-id");
+
+    if (state.connecting) {
+      if (state.connecting.fromId === boxId) {
+        // Clicking own port again cancels
+        cancelConnecting();
+      } else {
+        // Clicking a different box's port completes the connection
+        var fromId = state.connecting.fromId;
+        cancelConnecting();
+        createConnection(fromId, boxId);
+      }
       return;
     }
-    cancelConnecting();
-    state.connecting = { fromId: fromId };
+
+    // No active connection — start one from this box
+    state.connecting = { fromId: boxId };
     var r = root();
     if (r) r.classList.add("c4-connecting");
     box.classList.add("c4-box--connecting-source");
@@ -740,7 +754,7 @@
 
     sizeCanvas();
     buildGraph();
-    runSimulation();
+    if (!state.allSaved) runSimulation();
     applyPositions();
     var c = canvas();
     if (c) c.removeAttribute("data-loading");
