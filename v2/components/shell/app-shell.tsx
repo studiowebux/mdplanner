@@ -3,6 +3,7 @@ import { Sidebar } from "./sidebar.tsx";
 import { Topbar } from "./topbar.tsx";
 import { ConfirmDialog } from "../ui/confirm-dialog.tsx";
 import { SearchDialog } from "../ui/search-dialog.tsx";
+import { ShortcutsDialog } from "../ui/shortcuts-dialog.tsx";
 import type { Actor } from "../../types/actor.ts";
 
 type Props = {
@@ -40,5 +41,6 @@ export const AppShell: FC<Props> = (
     </div>
     <ConfirmDialog />
     <SearchDialog />
+    <ShortcutsDialog />
   </div>
 );

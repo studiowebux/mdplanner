@@ -1983,3 +1983,117 @@ div.load-more-sentinel {
   padding: var(--space-md);
   width: 100%;
 }
+
+/* ===================== Shortcuts Dialog ===================== */
+
+.shortcuts-dialog {
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 0;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-lg);
+  max-width: var(--shortcuts-dialog-max-width);
+  width: 90%;
+  margin-top: var(--space-xl);
+}
+
+.shortcuts-dialog::backdrop {
+  background: var(--overlay-bg);
+}
+
+.shortcuts-dialog__content {
+  display: flex;
+  flex-direction: column;
+}
+
+.shortcuts-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-border-default);
+}
+
+.shortcuts-dialog__title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.shortcuts-dialog__kbd-esc {
+  font-size: var(--font-size-xs);
+  font-family: var(--font-sans);
+  color: var(--color-text-muted);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  line-height: 1;
+}
+
+.shortcuts-dialog__body {
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.shortcuts-dialog__group-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  margin-bottom: var(--space-sm);
+}
+
+.shortcuts-dialog__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.shortcuts-dialog__row {
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-border-subtle);
+}
+
+.shortcuts-dialog__row:last-child {
+  border-bottom: none;
+}
+
+.shortcuts-dialog__cell-keys {
+  padding: var(--space-xs) var(--space-sm) var(--space-xs) 0;
+  white-space: nowrap;
+  width: 1%;
+}
+
+.shortcuts-dialog__cell-action {
+  padding: var(--space-xs) 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.shortcuts-dialog__keys {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.shortcuts-dialog__plus {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.shortcuts-dialog__kbd {
+  font-size: var(--font-size-xs);
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  line-height: 1;
+  white-space: nowrap;
+}

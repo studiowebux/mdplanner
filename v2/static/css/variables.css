@@ -307,6 +307,9 @@
   --search-dialog-max-height: 28rem;
   --search-badge-min-width: 5rem;
 
+  /* Shortcuts dialog */
+  --shortcuts-dialog-max-width: 28rem;
+
   /* Spinner */
   --spinner-size: 1.5rem;
   --spinner-border-width: 2px;

@@ -1,0 +1,80 @@
+import type { FC } from "hono/jsx";
+
+type ShortcutRow = { keys: string[]; action: string };
+type ShortcutGroup = { label: string; rows: ShortcutRow[] };
+
+const GROUPS: ShortcutGroup[] = [
+  {
+    label: "Global",
+    rows: [
+      { keys: ["Cmd", "K"], action: "Open search" },
+      { keys: ["?"], action: "Show keyboard shortcuts" },
+      { keys: ["T"], action: "Toggle theme" },
+    ],
+  },
+  {
+    label: "Task List",
+    rows: [
+      { keys: ["j"], action: "Move selection down" },
+      { keys: ["k"], action: "Move selection up" },
+      { keys: ["g"], action: "Jump to top" },
+      { keys: ["G"], action: "Jump to bottom" },
+      { keys: ["x"], action: "Toggle select task" },
+      { keys: ["Cmd", "A"], action: "Select all tasks" },
+      { keys: ["Enter"], action: "Open selected task" },
+    ],
+  },
+  {
+    label: "Search",
+    rows: [
+      { keys: ["↑", "↓"], action: "Navigate results" },
+      { keys: ["Enter"], action: "Open result" },
+      { keys: ["Esc"], action: "Close search" },
+    ],
+  },
+];
+
+const Kbd: FC<{ keys: string[] }> = ({ keys }) => (
+  <span class="shortcuts-dialog__keys">
+    {keys.map((k, i) => (
+      <span key={i}>
+        {i > 0 && <span class="shortcuts-dialog__plus">+</span>}
+        <kbd class="shortcuts-dialog__kbd">{k}</kbd>
+      </span>
+    ))}
+  </span>
+);
+
+export const ShortcutsDialog: FC = () => (
+  <dialog
+    class="shortcuts-dialog"
+    id="shortcuts-dialog"
+    aria-label="Keyboard shortcuts"
+  >
+    <div class="shortcuts-dialog__content">
+      <div class="shortcuts-dialog__header">
+        <span class="shortcuts-dialog__title">Keyboard Shortcuts</span>
+        <kbd class="shortcuts-dialog__kbd-esc">ESC</kbd>
+      </div>
+      <div class="shortcuts-dialog__body">
+        {GROUPS.map((group) => (
+          <div key={group.label} class="shortcuts-dialog__group">
+            <div class="shortcuts-dialog__group-label">{group.label}</div>
+            <table class="shortcuts-dialog__table">
+              <tbody>
+                {group.rows.map((row) => (
+                  <tr key={row.action} class="shortcuts-dialog__row">
+                    <td class="shortcuts-dialog__cell-keys">
+                      <Kbd keys={row.keys} />
+                    </td>
+                    <td class="shortcuts-dialog__cell-action">{row.action}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
+      </div>
+    </div>
+  </dialog>
+);
