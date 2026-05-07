@@ -17,6 +17,9 @@
 }
 
 .task-list__meta--assignee {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   width: var(--task-meta-assignee-w);
 }
 
@@ -292,6 +295,7 @@
 
 .task-list__row-actions {
   display: flex;
+  align-items: center;
   gap: var(--space-xs);
   flex-shrink: 0;
   width: var(--task-actions-w);
