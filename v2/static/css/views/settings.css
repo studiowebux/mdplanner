@@ -19,8 +19,9 @@
 
 .settings-tabs {
   display: grid;
-  grid-auto-columns: auto;
-  grid-auto-flow: column;
+  /* 12 explicit columns — one per tab label — so grid-column: 1 / -1 on panels spans correctly.
+     Update this count when tabs are added or removed. */
+  grid-template-columns: repeat(12, auto);
   grid-template-rows: auto 1fr;
 }
 
