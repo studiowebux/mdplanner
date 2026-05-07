@@ -1,7 +1,11 @@
 import { Hono } from "hono";
 import { SearchView } from "../search.tsx";
 import { getSearchEngine } from "../../singletons/services.ts";
-import { ENTITY_TYPE_LABELS, ENTITY_TYPE_ROUTES } from "../../constants/mod.ts";
+import {
+  buildNavLinks,
+  ENTITY_TYPE_LABELS,
+  ENTITY_TYPE_ROUTES,
+} from "../../constants/mod.ts";
 import { escapeHtml, escapeSnippetHtml } from "../../utils/html.ts";
 import { viewProps } from "../../middleware/view-props.ts";
 import type { AppVariables } from "../../types/app.ts";
@@ -22,7 +26,27 @@ searchRouter.get("/", (c) => {
 searchRouter.get("/results", (c) => {
   const query = c.req.query("q")?.trim() ?? "";
   if (!query) {
-    return c.html(`<li class="search-dialog__empty">Type to search...</li>`);
+    const enabledFeatures = c.get("enabledFeatures") ?? [];
+    const navLinks = buildNavLinks(enabledFeatures);
+    if (navLinks.length === 0) {
+      return c.html(`<li class="search-dialog__empty">Type to search...</li>`);
+    }
+    const items = navLinks.map((link) =>
+      `<li class="search-dialog__result search-dialog__result--nav" data-href="${
+        escapeHtml(link.href)
+      }">` +
+      `<span class="search-dialog__badge search-dialog__badge--nav">Go</span>` +
+      `<span class="search-dialog__result-title">${
+        escapeHtml(link.label)
+      }</span>` +
+      `<span class="search-dialog__result-nav-hint">${
+        escapeHtml(link.href)
+      }</span>` +
+      `</li>`
+    ).join("");
+    return c.html(
+      `<li class="search-dialog__section-label">Navigate to</li>${items}`,
+    );
   }
   const engine = getSearchEngine();
   const results = engine ? engine.search(query, { limit: 10 }) : [];

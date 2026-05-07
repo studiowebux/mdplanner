@@ -13,10 +13,11 @@
   function open() {
     input.value = "";
     activeIndex = -1;
-    resultsList.innerHTML =
-      '<li class="search-dialog__empty">Type to search...</li>';
+    resultsList.innerHTML = "";
     dialog.showModal();
     input.focus();
+    // Load nav links immediately (empty query returns navigation list)
+    htmx.trigger(input, "input");
   }
 
   function close() {

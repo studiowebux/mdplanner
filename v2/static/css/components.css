@@ -1704,6 +1704,30 @@ a.badge:hover {
   text-align: center;
 }
 
+.search-dialog__section-label {
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-border-default);
+  margin-bottom: var(--space-xs);
+}
+
+.search-dialog__badge--nav {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+
+.search-dialog__result-nav-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
 /* -------------------------------------------------------------------------
    Hash scroll highlight
    ------------------------------------------------------------------------- */
