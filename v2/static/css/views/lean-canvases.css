@@ -22,9 +22,9 @@
   display: grid;
   grid-template-columns: 1fr 1fr 2fr 1fr 1fr;
   grid-template-rows:
-    minmax(var(--lc-section-min-height), 1fr)
-    minmax(var(--lc-section-min-height), 1fr)
-    minmax(var(--lc-section-min-height), auto);
+    var(--lc-row-height)
+    var(--lc-row-height)
+    var(--lc-row-height-bottom);
   grid-template-areas:
     "problem    solution   uvp        unfair    customer"
     "problem    metrics    uvp        channels  customer"
@@ -74,13 +74,18 @@
    Section block
 --------------------------------------------------------------------------- */
 
+.lc-canvas__cell {
+  display: flex;
+  flex-direction: column;
+}
+
 .lc-section {
+  flex: 1;
+  min-height: 0;
   padding: var(--space-md);
   border-radius: var(--radius-md);
   background: var(--color-bg-secondary);
   border: var(--border-width) solid var(--color-border-default);
-  min-height: var(--lc-section-min-height);
-  max-height: var(--lc-section-max-height);
   overflow-y: auto;
   display: flex;
   flex-direction: column;

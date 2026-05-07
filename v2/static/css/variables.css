@@ -84,6 +84,8 @@
   /* Lean Canvas tokens */
   --lc-section-min-height: 8rem;
   --lc-section-max-height: 18rem;
+  --lc-row-height: 12rem;
+  --lc-row-height-bottom: 8rem;
 
   /* Org chart tokens */
   --orgchart-canvas-height: 70vh;
