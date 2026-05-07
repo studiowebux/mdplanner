@@ -106,8 +106,17 @@
 .task-list__header-controls {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+}
+
+/* Column toggle occupies the same fixed width as .task-list__row-actions so
+   the jump-bar pill area aligns with the column header's row-main area. */
+.task-list__header-controls > details {
+  min-width: var(--task-actions-w);
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .task-list__column-header {
@@ -150,8 +159,8 @@
 .task-list__jump-bar {
   display: flex;
   flex-wrap: wrap;
+  flex: 1;
   gap: var(--space-xs);
-  padding: var(--space-sm) var(--space-md);
 }
 
 .task-list__jump-pill {
