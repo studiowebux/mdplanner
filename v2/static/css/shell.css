@@ -475,6 +475,26 @@ html.fullscreen-reading .topbar {
   border-color: var(--color-border-default);
 }
 
+.topbar__pomodoro {
+  min-width: var(--topbar-pomodoro-min-width);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.topbar__pomodoro[data-phase="work"] {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.topbar__pomodoro[data-phase="work"][data-running="false"] {
+  opacity: var(--opacity-muted);
+}
+
+.topbar__pomodoro[data-phase="break"] {
+  color: var(--color-success);
+  border-color: var(--color-success);
+}
+
 /* -------------------------------------------------------------------------
    Mobile — must come AFTER all base styles (same specificity, source order)
    ------------------------------------------------------------------------- */

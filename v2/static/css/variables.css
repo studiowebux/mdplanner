@@ -278,6 +278,7 @@
   --sidebar-width: 14rem;
   --save-bar-h: 3.5rem;
   --topbar-search-max-width: 28rem;
+  --topbar-pomodoro-min-width: 6.5rem;
   --sidebar-active-border-width: 2px;
 
   /* Z-index scale — single source of truth, ascending order */

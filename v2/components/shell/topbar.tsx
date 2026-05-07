@@ -136,6 +136,15 @@ export async function Topbar({ actor }: Props) {
         )}
 
         <button
+          id="pomodoro-btn"
+          class="topbar__action-btn topbar__pomodoro"
+          type="button"
+          aria-label="Start Pomodoro"
+          title="Click to start/pause · Hold or right-click to reset"
+        >
+          Pomodoro
+        </button>
+        <button
           id="animations-toggle"
           class="topbar__action-btn"
           type="button"
