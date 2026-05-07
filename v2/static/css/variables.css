@@ -287,6 +287,7 @@
   --z-toolbar: 10;
   --z-dropdown: 250;
   --z-overlay: 199;
+  --z-sticky: 20;
   --z-sidebar: 200;
   --z-sidenav: 300;
   --z-toast: 400;
@@ -343,6 +344,7 @@
   --task-meta-due-w: 6rem;
   --task-meta-effort-w: 3rem;
   --task-actions-w: 18rem;
+  --task-select-w: 1rem;
   --task-detail-input-w: 14rem;
 
   /* Note views */
@@ -391,6 +393,7 @@ html.font-mono {
   --color-bg-inverse: #000000;
   --color-bg-hover: #f5f5f5;
   --color-bg-active: #e0e0e0;
+  --color-bg-selected: #fff8e1;
 
   /* Text */
   --color-text-primary: #000000;
@@ -490,6 +493,7 @@ html.font-mono {
   --color-bg-inverse: #f3f3f3;
   --color-bg-hover: #4a4a4a;
   --color-bg-active: #555555;
+  --color-bg-selected: #3a3520;
 
   /* Text — warm cream/beige */
   --color-text-primary: #f3f3f3;

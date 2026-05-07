@@ -160,3 +160,194 @@
     }
   }
 })();
+
+// ---------------------------------------------------------------------------
+// Bulk task selection
+// ---------------------------------------------------------------------------
+
+(function () {
+  var selected = new Set();
+
+  var bar = document.getElementById("task-bulk-bar");
+  var countEl = document.getElementById("task-bulk-count");
+  var sectionSelect = document.getElementById("task-bulk-section");
+  var moveBtn = document.getElementById("task-bulk-move");
+  var deleteBtn = document.getElementById("task-bulk-delete");
+  var clearBtn = document.getElementById("task-bulk-clear");
+
+  if (
+    !bar || !countEl || !sectionSelect || !moveBtn || !deleteBtn || !clearBtn
+  ) {
+    return;
+  }
+
+  // -- Render -----------------------------------------------------------------
+
+  function updateBar() {
+    var n = selected.size;
+    countEl.textContent = n + " selected";
+    if (n > 0) {
+      bar.classList.remove("is-hidden");
+    } else {
+      bar.classList.add("is-hidden");
+    }
+    // Sync select-all checkbox state
+    var allBoxes = document.querySelectorAll(
+      ".task-list__select:not(.task-list__select-all)",
+    );
+    var selectAll = document.querySelector(".task-list__select-all");
+    if (selectAll) {
+      if (n === 0) {
+        selectAll.checked = false;
+        selectAll.indeterminate = false;
+      } else if (n === allBoxes.length) {
+        selectAll.checked = true;
+        selectAll.indeterminate = false;
+      } else {
+        selectAll.checked = false;
+        selectAll.indeterminate = true;
+      }
+    }
+  }
+
+  function setRowSelected(taskId, on) {
+    var row = document.querySelector(
+      ".task-list__row[data-task-id='" + taskId + "']",
+    );
+    if (!row) return;
+    var cb = row.querySelector(".task-list__select");
+    if (on) {
+      selected.add(taskId);
+      row.classList.add("task-list__row--selected");
+      if (cb) cb.checked = true;
+    } else {
+      selected.delete(taskId);
+      row.classList.remove("task-list__row--selected");
+      if (cb) cb.checked = false;
+    }
+  }
+
+  function clearSelection() {
+    var ids = Array.from(selected);
+    for (var i = 0; i < ids.length; i++) {
+      setRowSelected(ids[i], false);
+    }
+    updateBar();
+  }
+
+  // -- Checkbox events --------------------------------------------------------
+
+  document.addEventListener("change", function (e) {
+    var cb = e.target.closest(".task-list__select");
+    if (!cb) return;
+
+    if (cb.classList.contains("task-list__select-all")) {
+      var allBoxes = document.querySelectorAll(
+        ".task-list__select:not(.task-list__select-all)",
+      );
+      for (var i = 0; i < allBoxes.length; i++) {
+        var tid = allBoxes[i].getAttribute("data-task-id");
+        if (tid) setRowSelected(tid, cb.checked);
+      }
+    } else {
+      var taskId = cb.getAttribute("data-task-id");
+      if (taskId) setRowSelected(taskId, cb.checked);
+    }
+    updateBar();
+  });
+
+  // Prevent drag triggering when clicking checkbox
+  document.addEventListener("mousedown", function (e) {
+    if (e.target.closest(".task-list__select")) {
+      var row = e.target.closest(".task-list__row");
+      if (row) row.setAttribute("draggable", "false");
+    }
+  });
+  document.addEventListener("mouseup", function (e) {
+    var row = e.target.closest(".task-list__row");
+    if (row) row.setAttribute("draggable", "true");
+  });
+
+  // -- Actions ----------------------------------------------------------------
+
+  function refreshView() {
+    var view = document.getElementById("tasks-view");
+    if (view) htmx.trigger(view, "refresh");
+  }
+
+  moveBtn.addEventListener("click", function () {
+    var section = sectionSelect.value;
+    if (!section || selected.size === 0) return;
+
+    var updates = Array.from(selected).map(function (id) {
+      return { id: id, updates: { section: section } };
+    });
+
+    fetch("/api/v1/tasks/batch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error("Batch move failed (" + res.status + ")");
+        clearSelection();
+        sectionSelect.value = "";
+        refreshView();
+      })
+      .catch(function (err) {
+        if (window.toast) {
+          window.toast({ type: "error", message: "Failed to move tasks." });
+        }
+        console.debug("[task-list] batch move failed:", err);
+      });
+  });
+
+  deleteBtn.addEventListener("click", function () {
+    if (selected.size === 0) return;
+    var n = selected.size;
+    if (
+      !confirm(
+        "Delete " + n + " task" + (n === 1 ? "" : "s") +
+          "? This cannot be undone.",
+      )
+    ) return;
+
+    var ids = Array.from(selected);
+    var chain = Promise.resolve();
+    ids.forEach(function (id) {
+      chain = chain.then(function () {
+        return fetch("/api/v1/tasks/" + id, { method: "DELETE" });
+      });
+    });
+
+    chain
+      .then(function () {
+        clearSelection();
+        refreshView();
+      })
+      .catch(function (err) {
+        if (window.toast) {
+          window.toast({ type: "error", message: "Failed to delete tasks." });
+        }
+        console.debug("[task-list] batch delete failed:", err);
+      });
+  });
+
+  clearBtn.addEventListener("click", function () {
+    clearSelection();
+  });
+
+  // Re-init after htmx swaps (tasks-view re-renders)
+  document.addEventListener("htmx:afterSettle", function (e) {
+    if (e.detail && e.detail.target && e.detail.target.id === "tasks-view") {
+      selected.clear();
+      bar = document.getElementById("task-bulk-bar");
+      countEl = document.getElementById("task-bulk-count");
+      sectionSelect = document.getElementById("task-bulk-section");
+      moveBtn = document.getElementById("task-bulk-move");
+      deleteBtn = document.getElementById("task-bulk-delete");
+      clearBtn = document.getElementById("task-bulk-clear");
+      if (bar) bar.classList.add("is-hidden");
+    }
+  });
+})();

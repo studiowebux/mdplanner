@@ -29,6 +29,12 @@ const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = (
     data-task-id={task.id}
     draggable="true"
   >
+    <input
+      type="checkbox"
+      class="task-list__select"
+      aria-label={`Select ${task.title}`}
+      data-task-id={task.id}
+    />
     <div class="task-list__row-main">
       <div class="task-list__row-left">
         {task.priority && (
@@ -165,6 +171,11 @@ const ColumnHeader: FC<{ sort?: string; order?: string }> = (
   { sort, order },
 ) => (
   <div class="task-list__row task-list__column-header" aria-hidden="true">
+    <input
+      type="checkbox"
+      class="task-list__select task-list__select-all"
+      aria-label="Select all tasks"
+    />
     <div class="task-list__row-main">
       <div class="task-list__row-left">
         <span
@@ -284,6 +295,47 @@ export const TaskListView: FC<ListProps> = (
           </div>
         );
       })}
+      <div
+        id="task-bulk-bar"
+        class="task-list__bulk-bar is-hidden"
+        aria-live="polite"
+      >
+        <span class="task-list__bulk-count" id="task-bulk-count">
+          0 selected
+        </span>
+        <select
+          class="form__select form__select--sm"
+          id="task-bulk-section"
+          aria-label="Move selected to section"
+        >
+          <option value="">Move to…</option>
+          {(getSectionOrder() as readonly string[]).map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+        <button
+          type="button"
+          class="btn btn--secondary btn--sm"
+          id="task-bulk-move"
+        >
+          Move
+        </button>
+        <button
+          type="button"
+          class="btn btn--danger btn--sm"
+          id="task-bulk-delete"
+        >
+          Delete
+        </button>
+        <button
+          type="button"
+          class="btn btn--ghost btn--sm"
+          id="task-bulk-clear"
+          aria-label="Clear selection"
+        >
+          ✕
+        </button>
+      </div>
       <div class="task-list__drop-strip" aria-hidden="true">
         {(getSectionOrder() as readonly string[]).map((s) => (
           <div key={s} class="task-list__drop-zone" data-drop-section={s}>

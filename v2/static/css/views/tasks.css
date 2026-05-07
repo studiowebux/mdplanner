@@ -48,6 +48,41 @@
   gap: var(--space-md);
 }
 
+/* Bulk selection */
+
+.task-list__select {
+  flex-shrink: 0;
+  width: var(--task-select-w);
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.task-list__row--selected {
+  background: var(--color-bg-selected);
+}
+
+.task-list__bulk-bar {
+  position: sticky;
+  bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-primary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-sticky);
+  flex-wrap: wrap;
+}
+
+.task-list__bulk-count {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin-right: var(--space-xs);
+}
+
 /* Drag-and-drop — row states, drop strip, section highlights */
 
 .task-list__row--dragging {
