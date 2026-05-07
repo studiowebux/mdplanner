@@ -61,6 +61,11 @@
   background: var(--color-bg-selected);
 }
 
+.task-list__row--focused {
+  outline: var(--border-width-thick) solid var(--color-accent);
+  outline-offset: var(--space-xs);
+}
+
 .task-list__bulk-bar {
   position: sticky;
   bottom: var(--space-md);

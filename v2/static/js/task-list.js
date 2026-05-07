@@ -351,3 +351,107 @@
     }
   });
 })();
+
+// ---------------------------------------------------------------------------
+// Vim-style keyboard navigation — j/k/g/G/Enter/x/Esc
+// ---------------------------------------------------------------------------
+
+(function () {
+  var FOCUSED = "task-list__row--focused";
+  var focusedIndex = -1;
+
+  function getRows() {
+    return Array.from(
+      document.querySelectorAll(".task-list__row[data-task-id]"),
+    );
+  }
+
+  function clearFocus(rows) {
+    rows = rows || getRows();
+    for (var i = 0; i < rows.length; i++) {
+      rows[i].classList.remove(FOCUSED);
+    }
+  }
+
+  function setFocus(index) {
+    var rows = getRows();
+    if (rows.length === 0) return;
+    if (index < 0) index = 0;
+    if (index >= rows.length) index = rows.length - 1;
+    clearFocus(rows);
+    focusedIndex = index;
+    rows[focusedIndex].classList.add(FOCUSED);
+    rows[focusedIndex].scrollIntoView({ block: "nearest" });
+  }
+
+  function inputFocused() {
+    var el = document.activeElement;
+    if (!el) return false;
+    var tag = el.tagName;
+    return (
+      tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA" ||
+      el.isContentEditable
+    );
+  }
+
+  document.addEventListener("keydown", function (e) {
+    if (inputFocused()) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+    var rows = getRows();
+    if (rows.length === 0) return;
+
+    switch (e.key) {
+      case "j":
+        e.preventDefault();
+        setFocus(focusedIndex < 0 ? 0 : focusedIndex + 1);
+        break;
+
+      case "k":
+        e.preventDefault();
+        setFocus(focusedIndex < 0 ? rows.length - 1 : focusedIndex - 1);
+        break;
+
+      case "g":
+        e.preventDefault();
+        setFocus(0);
+        break;
+
+      case "G":
+        e.preventDefault();
+        setFocus(rows.length - 1);
+        break;
+
+      case "Enter":
+        if (focusedIndex >= 0 && rows[focusedIndex]) {
+          e.preventDefault();
+          var taskId = rows[focusedIndex].getAttribute("data-task-id");
+          if (taskId) window.location.href = "/tasks/" + taskId;
+        }
+        break;
+
+      case "x":
+        if (focusedIndex >= 0 && rows[focusedIndex]) {
+          e.preventDefault();
+          var cb = rows[focusedIndex].querySelector(".task-list__select");
+          if (cb) {
+            cb.checked = !cb.checked;
+            cb.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        }
+        break;
+
+      case "Escape":
+        clearFocus();
+        focusedIndex = -1;
+        break;
+    }
+  });
+
+  // Reset on view swap
+  document.addEventListener("htmx:afterSettle", function (e) {
+    if (e.detail && e.detail.target && e.detail.target.id === "tasks-view") {
+      focusedIndex = -1;
+    }
+  });
+})();
