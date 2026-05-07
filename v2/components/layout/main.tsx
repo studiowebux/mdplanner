@@ -101,6 +101,7 @@ export const MainLayout: FC<Props> = (
         <script src="/js/column-toggle.js" />
         <script src="/js/search-modal.js" />
         <script src="/js/shortcuts-help.js" />
+        <script src="/js/copy-btn.js" />
         <script src="/js/hash-scroll.js" />
         <script src="/js/pomodoro.js" />
         {scripts.map((src) => <script key={src} src={src} />)}

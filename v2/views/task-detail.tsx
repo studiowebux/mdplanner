@@ -383,6 +383,25 @@ export const TaskDetailView: FC<Props> = (
                       `P${task.priority}`}
                   </span>
                 )}
+                <div class="task-detail__copy-btns">
+                  <button
+                    class="btn btn--ghost btn--sm task-detail__copy-btn"
+                    type="button"
+                    data-copy
+                    data-copy-value={task.id}
+                    title="Copy task ID"
+                  >
+                    Copy ID
+                  </button>
+                  <button
+                    class="btn btn--ghost btn--sm task-detail__copy-btn"
+                    type="button"
+                    data-copy="url"
+                    title="Copy permalink"
+                  >
+                    Copy URL
+                  </button>
+                </div>
               </div>
 
               <dl class="task-detail__meta">
