@@ -168,22 +168,27 @@
 (function () {
   var selected = new Set();
 
-  var bar = document.getElementById("task-bulk-bar");
-  var countEl = document.getElementById("task-bulk-count");
-  var sectionSelect = document.getElementById("task-bulk-section");
-  var moveBtn = document.getElementById("task-bulk-move");
-  var deleteBtn = document.getElementById("task-bulk-delete");
-  var clearBtn = document.getElementById("task-bulk-clear");
+  // -- Helpers (always read elements from DOM — survives htmx swaps) ----------
 
-  if (
-    !bar || !countEl || !sectionSelect || !moveBtn || !deleteBtn || !clearBtn
-  ) {
-    return;
+  function getBar() {
+    return document.getElementById("task-bulk-bar");
+  }
+  function getCountEl() {
+    return document.getElementById("task-bulk-count");
+  }
+  function getSectionSelect() {
+    return document.getElementById("task-bulk-section");
+  }
+  function getTagInput() {
+    return document.getElementById("task-bulk-tag");
   }
 
   // -- Render -----------------------------------------------------------------
 
   function updateBar() {
+    var bar = getBar();
+    var countEl = getCountEl();
+    if (!bar || !countEl) return;
     var n = selected.size;
     countEl.textContent = n + " selected";
     if (n > 0) {
@@ -191,7 +196,6 @@
     } else {
       bar.classList.add("is-hidden");
     }
-    // Sync select-all checkbox state
     var allBoxes = document.querySelectorAll(
       ".task-list__select:not(.task-list__select-all)",
     );
@@ -268,15 +272,11 @@
     if (row) row.setAttribute("draggable", "true");
   });
 
-  // -- Actions ----------------------------------------------------------------
+  // -- Actions (event delegation — survives htmx swaps) ----------------------
 
-  function refreshView() {
-    var view = document.getElementById("tasks-view");
-    if (view) htmx.trigger(view, "refresh");
-  }
-
-  moveBtn.addEventListener("click", function () {
-    var section = sectionSelect.value;
+  function bulkMove() {
+    var sectionSelect = getSectionSelect();
+    var section = sectionSelect ? sectionSelect.value : "";
     if (!section || selected.size === 0) return;
 
     var updates = Array.from(selected).map(function (id) {
@@ -291,8 +291,7 @@
       .then(function (res) {
         if (!res.ok) throw new Error("Batch move failed (" + res.status + ")");
         clearSelection();
-        sectionSelect.value = "";
-        refreshView();
+        if (sectionSelect) sectionSelect.value = "";
       })
       .catch(function (err) {
         if (window.toast) {
@@ -300,9 +299,9 @@
         }
         console.debug("[task-list] batch move failed:", err);
       });
-  });
+  }
 
-  deleteBtn.addEventListener("click", function () {
+  function bulkDelete() {
     if (selected.size === 0) return;
     var n = selected.size;
     if (
@@ -323,7 +322,6 @@
     chain
       .then(function () {
         clearSelection();
-        refreshView();
       })
       .catch(function (err) {
         if (window.toast) {
@@ -331,23 +329,92 @@
         }
         console.debug("[task-list] batch delete failed:", err);
       });
+  }
+
+  function bulkTagAction(mode) {
+    var tagInput = getTagInput();
+    var tag = tagInput ? tagInput.value.trim() : "";
+    if (!tag || selected.size === 0) return;
+
+    var updates = Array.from(selected).map(function (id) {
+      var row = document.querySelector(
+        ".task-list__row[data-task-id='" + id + "']",
+      );
+      var current = [];
+      if (row) {
+        try {
+          current = JSON.parse(row.getAttribute("data-tags") || "[]");
+        } catch (_) {
+          current = [];
+        }
+      }
+      var next;
+      if (mode === "add") {
+        next = current.indexOf(tag) === -1 ? current.concat(tag) : current;
+      } else {
+        next = current.filter(function (t) {
+          return t !== tag;
+        });
+      }
+      return { id: id, updates: { tags: next } };
+    });
+
+    fetch("/api/v1/tasks/batch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error("Batch tag failed (" + res.status + ")");
+        if (tagInput) tagInput.value = "";
+        clearSelection();
+      })
+      .catch(function (err) {
+        if (window.toast) {
+          window.toast({ type: "error", message: "Failed to update tags." });
+        }
+        console.debug("[task-list] batch tag failed:", err);
+      });
+  }
+
+  // Single delegated click handler for all bulk bar buttons
+  document.addEventListener("click", function (e) {
+    var id = e.target.id;
+    if (id === "task-bulk-move") {
+      bulkMove();
+      return;
+    }
+    if (id === "task-bulk-delete") {
+      bulkDelete();
+      return;
+    }
+    if (id === "task-bulk-clear") {
+      clearSelection();
+      return;
+    }
+    if (id === "task-bulk-tag-add") {
+      bulkTagAction("add");
+      return;
+    }
+    if (id === "task-bulk-tag-remove") {
+      bulkTagAction("remove");
+      return;
+    }
   });
 
-  clearBtn.addEventListener("click", function () {
-    clearSelection();
+  // Tag input Enter key — also delegated
+  document.addEventListener("keydown", function (e) {
+    if (e.target.id === "task-bulk-tag" && e.key === "Enter") {
+      e.preventDefault();
+      bulkTagAction("add");
+    }
   });
 
-  // Re-init after htmx swaps (tasks-view re-renders)
+  // Clear selection state when view re-renders (bar hides automatically via updateBar)
   document.addEventListener("htmx:afterSettle", function (e) {
     if (e.detail && e.detail.target && e.detail.target.id === "tasks-view") {
       selected.clear();
-      bar = document.getElementById("task-bulk-bar");
-      countEl = document.getElementById("task-bulk-count");
-      sectionSelect = document.getElementById("task-bulk-section");
-      moveBtn = document.getElementById("task-bulk-move");
-      deleteBtn = document.getElementById("task-bulk-delete");
-      clearBtn = document.getElementById("task-bulk-clear");
-      if (bar) bar.classList.add("is-hidden");
+      updateBar();
     }
   });
 })();
@@ -381,7 +448,26 @@
     clearFocus(rows);
     focusedIndex = index;
     rows[focusedIndex].classList.add(FOCUSED);
-    rows[focusedIndex].scrollIntoView({ block: "nearest" });
+    var scrollEl = document.querySelector(".app-shell__content");
+    var stickyHeader = document.querySelector(".task-list__sticky-header");
+    if (!scrollEl) {
+      rows[focusedIndex].scrollIntoView({ block: "nearest" });
+      return;
+    }
+    var headerH = stickyHeader
+      ? stickyHeader.getBoundingClientRect().height
+      : 0;
+    var scrollRect = scrollEl.getBoundingClientRect();
+    var rowRect = rows[focusedIndex].getBoundingClientRect();
+    var rowOffsetTop = rowRect.top - scrollRect.top + scrollEl.scrollTop;
+    var rowBottom = rowOffsetTop + rowRect.height;
+    var visibleTop = scrollEl.scrollTop + headerH;
+    var visibleBottom = scrollEl.scrollTop + scrollEl.clientHeight;
+    if (rowOffsetTop < visibleTop) {
+      scrollEl.scrollTop = rowOffsetTop - headerH - 4;
+    } else if (rowBottom > visibleBottom) {
+      scrollEl.scrollTop = rowBottom - scrollEl.clientHeight + 4;
+    }
   }
 
   function inputFocused() {
@@ -439,6 +525,25 @@
             cb.dispatchEvent(new Event("change", { bubbles: true }));
           }
         }
+        break;
+
+      case "a":
+        e.preventDefault();
+        (function () {
+          var allCbs = Array.from(
+            document.querySelectorAll(
+              ".task-list__select:not(.task-list__select-all)",
+            ),
+          );
+          var allChecked = allCbs.length > 0 &&
+            allCbs.every(function (c) {
+              return c.checked;
+            });
+          allCbs.forEach(function (c) {
+            c.checked = !allChecked;
+            c.dispatchEvent(new Event("change", { bubbles: true }));
+          });
+        })();
         break;
 
       case "Escape":

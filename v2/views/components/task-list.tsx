@@ -27,6 +27,7 @@ const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = (
       task.completed ? " task-list__row--completed" : ""
     }`}
     data-task-id={task.id}
+    data-tags={JSON.stringify(task.tags ?? [])}
     draggable="true"
   >
     <input
@@ -327,6 +328,30 @@ export const TaskListView: FC<ListProps> = (
         >
           Delete
         </button>
+        <div class="task-list__bulk-tag-group">
+          <input
+            type="text"
+            class="form__input form__input--sm"
+            id="task-bulk-tag"
+            placeholder="Tag…"
+            aria-label="Tag to add or remove"
+            autocomplete="off"
+          />
+          <button
+            type="button"
+            class="btn btn--secondary btn--sm"
+            id="task-bulk-tag-add"
+          >
+            Add tag
+          </button>
+          <button
+            type="button"
+            class="btn btn--secondary btn--sm"
+            id="task-bulk-tag-remove"
+          >
+            Remove tag
+          </button>
+        </div>
         <button
           type="button"
           class="btn btn--ghost btn--sm"

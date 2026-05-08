@@ -296,30 +296,49 @@ export const C4Canvas: FC<C4CanvasProps> = ({
   parentName,
   editMode,
 }) => {
-  if (components.length === 0) {
-    return (
-      <EmptyState message="No components at this level. Switch to edit mode to add components." />
-    );
-  }
-
   const ids = new Set(components.map((c) => c.id));
 
   // "All" always links to /c4 (no level = show all components).
   // Current level is always the trailing no-href entry so "All" is never non-clickable.
-  const breadcrumb: BreadcrumbEntry[] = [{ label: "All", href: "/c4" }];
+  const diagramParam = diagram !== "default"
+    ? `&diagram=${encodeURIComponent(diagram)}`
+    : "";
+  const LEVEL_ORDER = ["context", "container", "component", "code"];
+  const breadcrumb: BreadcrumbEntry[] = [
+    { label: "All", href: `/c4?view=canvas${diagramParam}` },
+  ];
   if (parentId && parentName) {
-    breadcrumb.push({
-      label: C4_LEVEL_LABELS["context"] ?? "Context",
-      href: "/c4?level=context",
-    });
+    // level is the children's level; parent sits one level above it.
+    const currentIdx = LEVEL_ORDER.indexOf(level);
+    // Add intermediate level links from context up to (but not including) parent's level.
+    for (let i = 0; i < currentIdx - 1; i++) {
+      const l = LEVEL_ORDER[i];
+      breadcrumb.push({
+        label: C4_LEVEL_LABELS[l] ?? l,
+        href: `/c4?view=canvas&level=${l}${diagramParam}`,
+      });
+    }
+    // Parent's level — all items at that level (without drilling in).
+    const parentLevel = LEVEL_ORDER[currentIdx - 1];
+    if (parentLevel) {
+      breadcrumb.push({
+        label: C4_LEVEL_LABELS[parentLevel] ?? parentLevel,
+        href: `/c4?view=canvas&level=${parentLevel}${diagramParam}`,
+      });
+    }
     breadcrumb.push({ label: parentName });
   } else if (level === "context") {
     breadcrumb.push({ label: C4_LEVEL_LABELS["context"] ?? "Context" });
   } else {
-    breadcrumb.push({
-      label: C4_LEVEL_LABELS["context"] ?? "Context",
-      href: "/c4?level=context",
-    });
+    // No parent drill-down: show each level from context to current as links/labels.
+    const currentIdx = LEVEL_ORDER.indexOf(level);
+    for (let i = 0; i < currentIdx; i++) {
+      const l = LEVEL_ORDER[i];
+      breadcrumb.push({
+        label: C4_LEVEL_LABELS[l] ?? l,
+        href: `/c4?view=canvas&level=${l}${diagramParam}`,
+      });
+    }
     breadcrumb.push({ label: C4_LEVEL_LABELS[level] ?? level });
   }
 
@@ -335,8 +354,18 @@ export const C4Canvas: FC<C4CanvasProps> = ({
 
       <div class="c4-canvas-wrapper" id="c4Wrapper">
         <div class="c4-canvas" id="c4Canvas" data-loading>
-          <C4Arrows components={components} ids={ids} />
-          {components.map((comp) => <C4Box key={comp.id} component={comp} />)}
+          {components.length === 0
+            ? (
+              <EmptyState message="No components in this diagram. Switch to edit mode to add components." />
+            )
+            : (
+              <>
+                <C4Arrows components={components} ids={ids} />
+                {components.map((comp) => (
+                  <C4Box key={comp.id} component={comp} />
+                ))}
+              </>
+            )}
         </div>
       </div>
 

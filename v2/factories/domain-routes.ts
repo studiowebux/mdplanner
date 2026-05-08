@@ -3,6 +3,7 @@
 
 import { Hono } from "hono";
 import { publish } from "../singletons/event-bus.ts";
+import { getPeopleService } from "../singletons/services.ts";
 import {
   mergeParams,
   readGlobalAssignees,
@@ -187,7 +188,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
     return result;
   }
 
-  function applyGlobalFilters(items: T[], c: AppContext): T[] {
+  async function applyGlobalFilters(items: T[], c: AppContext): Promise<T[]> {
     let result = items;
     const globalProjects = readGlobalProjects(c as never);
     if (globalProjects.length > 0 && cfg.projectField) {
@@ -201,11 +202,23 @@ export function createDomainRoutes<T extends Entity, C, U>(
     const globalAssignees = readGlobalAssignees(c as never);
     if (globalAssignees.length > 0 && cfg.assigneeField) {
       const field = cfg.assigneeField;
-      result = result.filter((item) =>
-        globalAssignees.includes(
-          String((item as Record<string, unknown>)[field] ?? ""),
-        )
-      );
+      // When the domain stores person IDs (not names), resolve to names for comparison.
+      const matchValues = globalAssignees;
+      if (cfg.assigneeIsId) {
+        const people = await getPeopleService().list();
+        const idToName = new Map(people.map((p) => [p.id, p.name]));
+        result = result.filter((item) => {
+          const id = String((item as Record<string, unknown>)[field] ?? "");
+          const name = idToName.get(id) ?? id;
+          return matchValues.includes(name);
+        });
+      } else {
+        result = result.filter((item) =>
+          matchValues.includes(
+            String((item as Record<string, unknown>)[field] ?? ""),
+          )
+        );
+      }
     }
     return result;
   }
@@ -241,7 +254,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
     const state = c.get("filterState" as never) as DomainFilterState;
     const all = await cfg.getService().list();
     const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
-    const filtered = applyGlobalFilters(
+    const filtered = await applyGlobalFilters(
       applyFilters(all, state, dynamicFilterOptions),
       c,
     );
@@ -279,7 +292,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
     const state = c.get("filterState" as never) as DomainFilterState;
     const all = await cfg.getService().list();
     const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
-    const filtered = applyGlobalFilters(
+    const filtered = await applyGlobalFilters(
       applyFilters(all, state, dynamicFilterOptions),
       c,
     );
@@ -328,7 +341,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
         : cfg.pageSize!;
       const all = await cfg.getService().list();
       const dynamicFilterOptions = await cfg.extractFilterOptions?.(all);
-      const filtered = applyGlobalFilters(
+      const filtered = await applyGlobalFilters(
         applyFilters(all, state, dynamicFilterOptions),
         c,
       );
