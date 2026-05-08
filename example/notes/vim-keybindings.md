@@ -1,10 +1,9 @@
 ---
 id: note_vim_keybindings
-created_at: "2025-06-01T09:00:00Z"
-updated_at: "2026-01-10T11:00:00Z"
-revision: 7
-mode: simple
-tags: [mdplanner/notes]
+created_at: 
+updated_at: "2026-05-08T19:41:00.428Z"
+revision: 8
+mode: enhanced
 ---
 
 # Vim / Helix Keybindings Reference
@@ -24,3 +23,25 @@ tags: [mdplanner/notes]
 ## Macros
 Record with `q<letter>`, replay with `@<letter>`.
 Apply to visual selection with `:norm @<letter>`.
+
+<!-- Custom Section: New Tabs -->
+<!-- section-id: section_1778269248956_2n8yw1, type: tabs -->
+
+### Tab: Tab 1
+<!-- tab-id: tab_1778269248956_1tjvgt -->
+
+### Tab: Tab 2
+<!-- tab-id: tab_1778269251463_aboi8x -->
+
+<!-- End Custom Section -->
+
+<!-- Custom Section: New Timeline -->
+<!-- section-id: section_1778269254303_h147yy, type: timeline -->
+
+## Timeline 1 (pending)
+<!-- item-id: timeline_1778269254303_ydaxo6, status: pending -->
+
+## Timeline 2 (pending)
+<!-- item-id: timeline_1778269255805_bui4hs, status: pending -->
+
+<!-- End Custom Section -->

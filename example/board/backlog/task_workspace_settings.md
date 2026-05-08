@@ -1,16 +1,17 @@
 ---
 id: task_workspace_settings
 completed: false
-revision: 1
+revision: 3
+updated_at: "2026-05-07T03:58:43.718Z"
 due_date: 2026-05-15
 assignee: bob
-priority: 2
-effort: 6
 milestone: Version 1.0
-project: TaskFlow Platform
-order: 0
 planned_start: 2026-04-20
 planned_end: 2026-05-02
+project: TaskFlow Platform
+priority: 2
+effort: 6
+order: 0
 tags: [settings, workspace]
 ---
 

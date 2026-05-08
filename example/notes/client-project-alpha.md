@@ -1,11 +1,10 @@
 ---
 id: note_client_project_alpha
-created_at: "2026-02-10T09:00:00Z"
-updated_at: "2026-03-15T14:00:00Z"
-revision: 4
-mode: simple
-project: Website
-tags: [mdplanner/notes]
+created_at: 
+updated_at: "2026-05-05T03:26:57.385Z"
+revision: 5
+mode: enhanced
+project: Client Portal
 ---
 
 # Client Project Alpha — Notes

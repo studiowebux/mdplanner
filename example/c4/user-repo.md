@@ -1,19 +1,19 @@
 ---
 id: user-repo
 level: component
-diagram: default
 type: Repository
 position:
-  x: 400
-  y: 350
+  x: 890
+  y: 331
 technology: TypeScript
+diagram: default
 parent: api
 connections:
   - id: c4conn_1777060998933_b8ec1j
     target: database
     label: Queries
 created_at: "2026-04-24T20:03:18.933Z"
-updated_at: "2026-04-24T20:03:18.933Z"
+updated_at: "2026-05-08T19:35:22.624Z"
 ---
 
 # User Repository

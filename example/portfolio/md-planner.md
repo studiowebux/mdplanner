@@ -1,12 +1,10 @@
 ---
-id: md-planner
 name: MD Planner
+category: Uncategorized
 status: active
-description: Markdown-based project planning and management tool
-tags: [saas, productivity, planning]
-created_at: 2026-01-15T00:00:00.000Z
-updated_at: 2026-03-01T00:00:00.000Z
-revision: 1
+progress: 0
+github_repo: studiowebux/mdplanner
+brain_managed: true
 ---
 
 # MD Planner

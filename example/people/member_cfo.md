@@ -3,7 +3,7 @@ id: member_cfo
 title: Chief Financial Officer
 role: CFO
 departments: [Finance, Executive]
-reports_to: member_ceo
+reports_to: agent_copilot
 email: cfo@example.com
 phone: +1-555-0102
 start_date: 2020-06-15
@@ -11,6 +11,7 @@ hours_per_day: 8
 working_days: [Mon, Tue, Wed, Thu, Fri]
 agent_type: human
 skills: [financial-planning, budgeting, investor-relations, risk-management, compliance]
+updated_at: "2026-05-08T19:51:21.179Z"
 ---
 
 # Emily Rodriguez
