@@ -1769,6 +1769,7 @@ a.badge:hover {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  max-height: var(--quadrant-card-max-h);
 }
 
 .quadrant-card[data-quadrant="strengths"] {
@@ -1793,6 +1794,7 @@ a.badge:hover {
   justify-content: space-between;
   padding: var(--space-sm) var(--space-md);
   border-bottom: var(--border-width) solid var(--color-border);
+  flex-shrink: 0;
 }
 
 .quadrant-card__title {
@@ -1804,6 +1806,7 @@ a.badge:hover {
 
 .quadrant-card__list {
   flex: 1;
+  overflow-y: auto;
   list-style: disc;
   padding: var(--space-sm) var(--space-md) var(--space-sm) var(--space-xl);
   margin: 0;

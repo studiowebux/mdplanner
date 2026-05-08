@@ -530,11 +530,11 @@ html.font-mono {
   --color-warning-text: #ffcc80;
 
   /* Error */
-  --color-error: #a6192e;
-  --color-danger: #a6192e;
+  --color-error: #dc3545;
+  --color-danger: #dc3545;
   --color-error-bg: #3d1520;
   --color-error-border: #7a1222;
-  --color-error-text: #dc3545;
+  --color-error-text: #ff8a95;
 
   /* Info */
   --color-info: #0057b8;
@@ -593,4 +593,5 @@ html.font-mono {
   --billing-doc-header-border: 1px solid var(--color-border);
   --billing-doc-header-pb: var(--space-4);
   --billing-doc-header-mb: var(--space-4);
+  --quadrant-card-max-h: 40vh;
 }

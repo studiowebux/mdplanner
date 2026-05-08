@@ -431,10 +431,12 @@ html.fullscreen-reading .topbar {
 .topbar__actions > form {
   display: flex;
   align-items: center;
+  align-self: center;
 }
 
 .topbar__identity-select {
   height: var(--input-height-sm);
+  align-self: center;
   padding: 0 var(--space-sm);
   font-size: var(--font-size-sm);
   font-family: var(--font-sans);
@@ -493,6 +495,17 @@ html.fullscreen-reading .topbar {
 .topbar__pomodoro[data-phase="break"] {
   color: var(--color-success);
   border-color: var(--color-success);
+}
+
+/* Dark mode: base success/danger colors are too low-contrast on dark bg — use text variants */
+.dark .topbar__pomodoro[data-phase="work"] {
+  color: var(--color-error-text);
+  border-color: var(--color-error-text);
+}
+
+.dark .topbar__pomodoro[data-phase="break"] {
+  color: var(--color-success-text);
+  border-color: var(--color-success-text);
 }
 
 /* -------------------------------------------------------------------------

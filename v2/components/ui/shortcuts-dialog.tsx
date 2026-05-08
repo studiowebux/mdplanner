@@ -9,7 +9,7 @@ const GROUPS: ShortcutGroup[] = [
     rows: [
       { keys: ["Cmd", "K"], action: "Open search" },
       { keys: ["?"], action: "Show keyboard shortcuts" },
-      { keys: ["T"], action: "Toggle theme" },
+      { keys: ["t"], action: "Toggle theme" },
     ],
   },
   {
@@ -20,7 +20,7 @@ const GROUPS: ShortcutGroup[] = [
       { keys: ["g"], action: "Jump to top" },
       { keys: ["G"], action: "Jump to bottom" },
       { keys: ["x"], action: "Toggle select task" },
-      { keys: ["Cmd", "A"], action: "Select all tasks" },
+      { keys: ["a"], action: "Select / deselect all tasks" },
       { keys: ["Enter"], action: "Open selected task" },
     ],
   },

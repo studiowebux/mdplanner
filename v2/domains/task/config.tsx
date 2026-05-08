@@ -165,6 +165,7 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
   getService: () => getTaskService(),
   projectField: "project",
   assigneeField: "assignee",
+  assigneeIsId: true,
 
   resolveFormValues: async (values) => {
     const resolved = { ...values };

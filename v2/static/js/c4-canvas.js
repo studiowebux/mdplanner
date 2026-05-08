@@ -735,12 +735,24 @@
       if (e.key !== "Enter") return;
       var name = input.value.trim();
       if (!name) return;
-      var url = new URL(window.location.href);
-      url.searchParams.set("diagram", name);
-      url.searchParams.set("view", "canvas");
-      url.searchParams.delete("level");
-      url.searchParams.delete("parent");
-      window.location.href = url.toString();
+      var params = new URLSearchParams(window.location.search);
+      params.set("diagram", name);
+      params.set("view", "canvas");
+      params.delete("level");
+      params.delete("parent");
+      var viewUrl = "/c4/view?" + params.toString();
+      var pageUrl = "/c4?" + params.toString();
+      input.classList.add("is-hidden");
+      input.value = "";
+      if (typeof htmx !== "undefined") {
+        htmx.ajax("GET", viewUrl, {
+          target: "#c4-view",
+          swap: "outerHTML",
+        });
+        history.pushState({}, "", pageUrl);
+      } else {
+        window.location.href = pageUrl;
+      }
     });
   }
 
