@@ -101,7 +101,7 @@ export function registerCustomerEntity(repo: CustomerRepository): void {
       contentCol: "notes",
     },
     sync: async (db, syncedAt) => {
-      const items = await repo.findAll();
+      const items = await repo.findAllFromDisk();
       for (const c of items) insertCustomerRow(db, c, syncedAt);
       return items.length;
     },

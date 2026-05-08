@@ -103,7 +103,7 @@ export function registerRetrospectiveEntity(
       contentCol: "sections_text",
     },
     sync: async (db, syncedAt) => {
-      const items = await repo.findAll();
+      const items = await repo.findAllFromDisk();
       for (const r of items) insertRetrospectiveRow(db, r, syncedAt);
       return items.length;
     },

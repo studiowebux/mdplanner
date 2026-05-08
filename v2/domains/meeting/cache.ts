@@ -108,7 +108,7 @@ export function registerMeetingEntity(repo: MeetingRepository): void {
       contentCol: "search_text",
     },
     sync: async (db, syncedAt) => {
-      const items = await repo.findAll();
+      const items = await repo.findAllFromDisk();
       for (const m of items) insertMeetingRow(db, m, syncedAt);
       return items.length;
     },

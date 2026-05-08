@@ -97,7 +97,7 @@ export function registerSwotEntity(repo: SwotRepository): void {
       contentCol: "notes",
     },
     sync: async (db, syncedAt) => {
-      const items = await repo.findAll();
+      const items = await repo.findAllFromDisk();
       for (const s of items) insertRow(db, s, syncedAt);
       return items.length;
     },

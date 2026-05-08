@@ -99,7 +99,7 @@ export function registerBrainstormEntity(repo: BrainstormRepository): void {
       contentCol: "questions_text",
     },
     sync: async (db, syncedAt) => {
-      const items = await repo.findAll();
+      const items = await repo.findAllFromDisk();
       for (const b of items) insertBrainstormRow(db, b, syncedAt);
       return items.length;
     },

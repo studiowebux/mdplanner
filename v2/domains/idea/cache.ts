@@ -105,7 +105,7 @@ export function registerIdeaEntity(repo: IdeaRepository): void {
       contentCol: "description",
     },
     sync: async (db, syncedAt) => {
-      const items = await repo.findAll();
+      const items = await repo.findAllFromDisk();
       for (const i of items) insertIdeaRow(db, i, syncedAt);
       return items.length;
     },

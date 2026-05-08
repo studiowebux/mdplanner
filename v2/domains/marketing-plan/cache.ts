@@ -124,7 +124,7 @@ export function registerMarketingPlanEntity(
       contentCol: "notes",
     },
     sync: async (db, syncedAt) => {
-      const items = await repo.findAll();
+      const items = await repo.findAllFromDisk();
       for (const p of items) insertRow(db, p, syncedAt);
       return items.length;
     },

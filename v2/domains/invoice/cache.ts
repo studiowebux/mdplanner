@@ -127,7 +127,7 @@ export function registerInvoiceEntity(repo: InvoiceRepository): void {
       contentCol: "notes",
     },
     sync: async (db, syncedAt) => {
-      const items = await repo.findAll();
+      const items = await repo.findAllFromDisk();
       for (const inv of items) insertInvoiceRow(db, inv, syncedAt);
       return items.length;
     },

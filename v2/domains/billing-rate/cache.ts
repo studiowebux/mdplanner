@@ -88,7 +88,7 @@ export function registerBillingRateEntity(
       contentCol: "notes",
     },
     sync: async (db, syncedAt) => {
-      const items = await repo.findAll();
+      const items = await repo.findAllFromDisk();
       for (const r of items) insertBillingRateRow(db, r, syncedAt);
       return items.length;
     },

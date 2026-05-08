@@ -99,7 +99,7 @@ export function registerMoscowEntity(repo: MoscowRepository): void {
       contentCol: "notes",
     },
     sync: async (db, syncedAt) => {
-      const items = await repo.findAll();
+      const items = await repo.findAllFromDisk();
       for (const m of items) insertRow(db, m, syncedAt);
       return items.length;
     },

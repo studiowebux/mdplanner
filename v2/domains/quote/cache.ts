@@ -127,7 +127,7 @@ export function registerQuoteEntity(repo: QuoteRepository): void {
       contentCol: "notes",
     },
     sync: async (db, syncedAt) => {
-      const items = await repo.findAll();
+      const items = await repo.findAllFromDisk();
       for (const q of items) insertQuoteRow(db, q, syncedAt);
       return items.length;
     },

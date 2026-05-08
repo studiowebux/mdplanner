@@ -118,7 +118,7 @@ export function registerBriefEntity(repo: BriefRepository): void {
       contentCol: "sections_text",
     },
     sync: async (db, syncedAt) => {
-      const items = await repo.findAll();
+      const items = await repo.findAllFromDisk();
       for (const b of items) insertBriefRow(db, b, syncedAt);
       return items.length;
     },

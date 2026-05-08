@@ -102,7 +102,7 @@ export function registerDnsEntity(repo: DnsRepository): void {
       contentCol: "notes",
     },
     sync: async (db, syncedAt) => {
-      const items = await repo.findAll();
+      const items = await repo.findAllFromDisk();
       for (const d of items) insertDnsRow(db, d, syncedAt);
       return items.length;
     },

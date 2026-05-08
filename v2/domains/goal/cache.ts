@@ -107,7 +107,7 @@ export function registerGoalEntity(repo: GoalRepository): void {
       contentCol: "description",
     },
     sync: async (db, syncedAt) => {
-      const items = await repo.findAll();
+      const items = await repo.findAllFromDisk();
       for (const g of items) insertGoalRow(db, g, syncedAt);
       return items.length;
     },

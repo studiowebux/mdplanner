@@ -83,7 +83,7 @@ export function registerPaymentEntity(repo: PaymentRepository): void {
       contentCol: "notes",
     },
     sync: async (db, syncedAt) => {
-      const items = await repo.findAll();
+      const items = await repo.findAllFromDisk();
       for (const p of items) insertPaymentRow(db, p, syncedAt);
       return items.length;
     },

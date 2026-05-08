@@ -95,7 +95,7 @@ export function registerC4Entity(repo: C4Repository): void {
       contentCol: "description",
     },
     sync: async (db, syncedAt) => {
-      const items = await repo.findAll();
+      const items = await repo.findAllFromDisk();
       for (const c of items) insertRow(db, c, syncedAt);
       return items.length;
     },

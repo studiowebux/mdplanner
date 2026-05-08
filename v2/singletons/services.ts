@@ -202,7 +202,7 @@ export function initServices(
     registerMeetingEntity(meetingRepo);
     registerLeanCanvasEntity(leanCanvasRepo);
     registerStickyNoteEntity(stickyNoteRepo);
-    registerStickyBoardEntity(() => stickyBoardRepo.findAll());
+    registerStickyBoardEntity(() => stickyBoardRepo.findAllFromDisk());
     registerMoscowEntity(moscowRepo);
     registerC4Entity(c4Repo);
 
