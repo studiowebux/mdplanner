@@ -733,6 +733,7 @@
         return;
       }
       if (e.key !== "Enter") return;
+      e.preventDefault();
       var name = input.value.trim();
       if (!name) return;
       var params = new URLSearchParams(window.location.search);
@@ -830,6 +831,10 @@
     wireBoxDrag();
     wirePortClick();
     wireBoxClickForConnect();
+    wireEditToggle();
+    wireDiagramSwitcher();
+    wireZoomButtons();
+    wireMinimapClick();
 
     state.nodes.forEach(function (node) {
       var prev = prevById[node.id];
