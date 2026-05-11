@@ -489,7 +489,7 @@ html.fullscreen-reading .topbar {
 }
 
 .topbar__pomodoro[data-phase="work"][data-running="false"] {
-  opacity: var(--opacity-muted);
+  opacity: var(--pomodoro-paused-opacity);
 }
 
 .topbar__pomodoro[data-phase="break"] {

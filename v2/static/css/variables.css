@@ -329,6 +329,9 @@
   /* Bulk bar */
   --bulk-tag-input-width: 7rem;
 
+  /* Pomodoro */
+  --pomodoro-paused-opacity: 0.6;
+
   /* Column toggle */
   --column-toggle-min-width: 10rem;
 
@@ -560,6 +563,9 @@ html.font-mono {
   /* Pink */
   --color-pink-bg: #3d1028;
   --color-pink-text: #f48fb1;
+
+  /* Pomodoro */
+  --pomodoro-paused-opacity: 0.85;
 
   /* Shadows — deeper for dark theme */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
