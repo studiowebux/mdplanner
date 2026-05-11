@@ -12,7 +12,7 @@ links:
     title: Discord
   - url: "https://figma.com/file/taskflow"
     title: Figma Designs
-features: [brief, c4_component, customer, dashboard, dns_domain, github, goal, idea, invoice, lean_canvas, marketing_plan, meeting, milestone, moscow, note, payment, person, portfolio, quote, retrospective, sticky_note, swot, task]
+features: [brief, c4_component, customer, dashboard, dns_domain, github, goal, idea, invoice, lean_canvas, marketing_plan, meeting, milestone, moscow, note, payment, person, portfolio, quote, retrospective, sticky_note, swot, task, rate, brainstorm]
 nav_categories:
   Admin: [upload, analytics]
   CRM: [company, contact, deal, interaction]
@@ -27,7 +27,7 @@ nav_categories:
   Strategy: [business_model, fishbone, lean_canvas, marketing_plan, project_value, risk, strategic_builder, swot]
   Team: [ai_chat, capacity_plan, meeting, org_member, person, time_entry]
   Work: [goal, milestone, task]
-last_updated: "2026-05-08T20:01:17.150Z"
+last_updated: "2026-05-08T21:53:38.060Z"
 ---
 
 # MD Planner Demo

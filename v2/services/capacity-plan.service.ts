@@ -1,0 +1,121 @@
+// Capacity plan service — CRUD + member and allocation mutation helpers.
+
+import type { CapacityPlanRepository } from "../repositories/capacity-plan.repository.ts";
+import type {
+  CapacityPlan,
+  CreateCapacityPlan,
+  TeamMemberRef,
+  UpdateCapacityPlan,
+  WeeklyAllocation,
+} from "../types/capacity-plan.types.ts";
+import { generateId } from "../utils/id.ts";
+import { BaseService } from "./base.service.ts";
+
+export class CapacityPlanService extends BaseService<
+  CapacityPlan,
+  CreateCapacityPlan,
+  UpdateCapacityPlan
+> {
+  constructor(repo: CapacityPlanRepository) {
+    super(repo);
+  }
+
+  protected applyFilters(plans: CapacityPlan[]): CapacityPlan[] {
+    return plans;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Team member helpers
+  // ---------------------------------------------------------------------------
+
+  async addMember(
+    planId: string,
+    member: Omit<TeamMemberRef, "id">,
+  ): Promise<CapacityPlan | null> {
+    const plan = await this.repo.findById(planId);
+    if (!plan) return null;
+
+    const newMember: TeamMemberRef = { ...member, id: generateId("member") };
+    return this.repo.update(planId, {
+      teamMembers: [...plan.teamMembers, newMember],
+    });
+  }
+
+  async updateMember(
+    planId: string,
+    memberId: string,
+    updates: Partial<Omit<TeamMemberRef, "id">>,
+  ): Promise<CapacityPlan | null> {
+    const plan = await this.repo.findById(planId);
+    if (!plan) return null;
+
+    const idx = plan.teamMembers.findIndex((m) => m.id === memberId);
+    if (idx === -1) return null;
+
+    const teamMembers = [...plan.teamMembers];
+    teamMembers[idx] = { ...teamMembers[idx], ...updates, id: memberId };
+    return this.repo.update(planId, { teamMembers });
+  }
+
+  async removeMember(
+    planId: string,
+    memberId: string,
+  ): Promise<CapacityPlan | null> {
+    const plan = await this.repo.findById(planId);
+    if (!plan) return null;
+
+    return this.repo.update(planId, {
+      teamMembers: plan.teamMembers.filter((m) => m.id !== memberId),
+      // Remove all allocations belonging to this member.
+      allocations: plan.allocations.filter((a) => a.memberId !== memberId),
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Allocation helpers
+  // ---------------------------------------------------------------------------
+
+  async addAllocation(
+    planId: string,
+    allocation: Omit<WeeklyAllocation, "id">,
+  ): Promise<CapacityPlan | null> {
+    const plan = await this.repo.findById(planId);
+    if (!plan) return null;
+
+    const newAllocation: WeeklyAllocation = {
+      ...allocation,
+      id: generateId("alloc"),
+    };
+    return this.repo.update(planId, {
+      allocations: [...plan.allocations, newAllocation],
+    });
+  }
+
+  async updateAllocation(
+    planId: string,
+    allocId: string,
+    updates: Partial<Omit<WeeklyAllocation, "id">>,
+  ): Promise<CapacityPlan | null> {
+    const plan = await this.repo.findById(planId);
+    if (!plan) return null;
+
+    const idx = plan.allocations.findIndex((a) => a.id === allocId);
+    if (idx === -1) return null;
+
+    const allocations = [...plan.allocations];
+    allocations[idx] = { ...allocations[idx], ...updates, id: allocId };
+    return this.repo.update(planId, { allocations });
+  }
+
+  async removeAllocation(
+    planId: string,
+    allocId: string,
+  ): Promise<CapacityPlan | null> {
+    const plan = await this.repo.findById(planId);
+    if (!plan) return null;
+
+    return this.repo.update(planId, {
+      allocations: plan.allocations.filter((a) => a.id !== allocId),
+    });
+  }
+}

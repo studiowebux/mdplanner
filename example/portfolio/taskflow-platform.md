@@ -8,7 +8,15 @@ expenses: 45000
 progress: 75
 start_date: 2025-01-15
 end_date: 2026-06-30
-team: [alice, bob, charlie, diana]
+team:
+  - personId: alice
+    role: Tech Lead
+  - personId: bob
+    role: Backend
+  - personId: charlie
+    role: Frontend
+  - personId: diana
+    role: QA
 tech_stack: [Deno, Hono, SQLite, htmx, TypeScript]
 logo: "https://placehold.co/64x64/e2e8f0/475569?text=TF"
 license: MIT

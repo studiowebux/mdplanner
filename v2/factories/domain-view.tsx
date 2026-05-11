@@ -639,6 +639,23 @@ export function createDomainPage<T extends Entity>(
                 <span class="domain-toolbar__toggle-label">Hide completed</span>
               </label>
             )}
+            {cfg.showHiddenToggle && (
+              <label class="domain-toolbar__toggle">
+                <input
+                  type="checkbox"
+                  name="showHidden"
+                  value="true"
+                  checked={state.showHidden === true ||
+                    state.showHidden === "true"}
+                  hx-get={`/${cfg.name}/view`}
+                  hx-trigger="change"
+                  hx-target={`#${cfg.name}-view`}
+                  hx-swap="outerHTML"
+                  hx-include={`#${cfg.name}-toolbar`}
+                />
+                <span class="domain-toolbar__toggle-label">Show hidden</span>
+              </label>
+            )}
           </div>
           <div class="domain-toolbar__right">
             {cfg.toolbarActions && <cfg.toolbarActions />}

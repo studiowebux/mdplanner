@@ -34,6 +34,7 @@ import { retrospectivesRouter } from "./retrospectives/routes.tsx";
 import { meetingsRouter as meetingsViewRouter } from "./meetings/routes.tsx";
 import { leanCanvasesRouter } from "./lean-canvases/routes.tsx";
 import { stickyNotesRouter } from "./sticky-notes/routes.tsx";
+import { capacityPlansViewRouter } from "./capacity-plans/routes.tsx";
 import {
   getArrayTableSection,
   registerArrayTableSection,
@@ -317,6 +318,7 @@ views.route("/retrospectives", retrospectivesRouter);
 views.route("/meetings", meetingsViewRouter);
 views.route("/lean-canvases", leanCanvasesRouter);
 views.route("/sticky-notes", stickyNotesRouter);
+views.route("/capacity-plans", capacityPlansViewRouter);
 views.route("/autocomplete", autocompleteRouter);
 views.route("/sidebar", sidebarRouter);
 

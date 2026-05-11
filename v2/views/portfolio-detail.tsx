@@ -2,7 +2,7 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { PortfolioItem } from "../types/portfolio.types.ts";
 import type { Goal } from "../types/goal.types.ts";
-import type { PersonByName, ViewProps } from "../types/app.ts";
+import type { ViewProps } from "../types/app.ts";
 import { formatCurrency } from "../utils/format.ts";
 import { formatDate } from "../utils/time.ts";
 import { GitHubSection } from "./github.tsx";
@@ -20,7 +20,7 @@ import type { PortfolioStatusUpdate } from "../types/portfolio.types.ts";
 type Props = ViewProps & {
   item: PortfolioItem;
   goals?: Goal[];
-  personByName?: PersonByName;
+  personById?: Record<string, string>;
 };
 
 /** Single status update row — reused by detail page and fragment routes. */
@@ -85,7 +85,7 @@ export const StatusUpdateEditRow: FC<{
 );
 
 export const PortfolioDetailView: FC<Props> = (
-  { item, goals = [], personByName = {}, ...viewProps },
+  { item, goals = [], personById = {}, ...viewProps },
 ) => {
   const profit = (item.revenue ?? 0) - (item.expenses ?? 0);
   const pct = item.progress ?? 0;
@@ -194,19 +194,22 @@ export const PortfolioDetailView: FC<Props> = (
           <section class="detail-section portfolio-detail__section">
             <h2 class="section-heading">Team</h2>
             <div class="portfolio-detail__team">
-              {item.team.map((m) => (
-                personByName[m]
-                  ? (
+              {item.team.map((m) => {
+                const name = personById[m.personId] ?? m.personId;
+                return (
+                  <div key={m.personId} class="portfolio-detail__team-member">
                     <a
-                      key={m}
-                      href={`/people/${personByName[m]}`}
+                      href={`/people/${m.personId}`}
                       class="portfolio-detail__team-chip"
                     >
-                      {m}
+                      {name}
                     </a>
-                  )
-                  : <span key={m} class="portfolio-detail__team-chip">{m}</span>
-              ))}
+                    {m.role && (
+                      <span class="portfolio-detail__team-role">{m.role}</span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </section>
         )}

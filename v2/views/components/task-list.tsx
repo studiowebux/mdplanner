@@ -125,6 +125,15 @@ const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = (
         Edit
       </button>
       <button
+        class="btn btn--ghost btn--sm"
+        type="button"
+        data-copy
+        data-copy-value={`/tasks/${task.id}`}
+        aria-label="Copy link to task"
+      >
+        Link
+      </button>
+      <button
         class="btn btn--danger btn--sm"
         type="button"
         hx-delete={`/tasks/${task.id}`}
@@ -148,6 +157,12 @@ const SectionHeader: FC<{ name: string; count: number }> = (
     class="task-list__section-header"
     id={`section-${name.toLowerCase().replace(/\s+/g, "-")}`}
   >
+    <input
+      type="checkbox"
+      class="task-list__select-all-section"
+      data-section={name}
+      aria-label={`Select all ${name} tasks`}
+    />
     <h2 class="section-heading">{name}</h2>
     <span class="task-list__section-count">{count}</span>
   </div>

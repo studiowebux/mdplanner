@@ -12,6 +12,7 @@
       ? window.location.href
       : btn.getAttribute("data-copy-value");
     if (!value) return;
+    if (value.charAt(0) === "/") value = window.location.origin + value;
     navigator.clipboard.writeText(value).then(function () {
       var original = btn.textContent;
       btn.textContent = "Copied!";

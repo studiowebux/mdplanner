@@ -227,6 +227,30 @@
         selectAll.indeterminate = true;
       }
     }
+    // Update per-section select-all checkboxes
+    var sectionCbs = document.querySelectorAll(
+      ".task-list__select-all-section",
+    );
+    for (var i = 0; i < sectionCbs.length; i++) {
+      var scb = sectionCbs[i];
+      var section = scb.closest(".task-list__section");
+      if (!section) continue;
+      var sectionBoxes = section.querySelectorAll(".task-list__select");
+      var checkedCount = 0;
+      for (var j = 0; j < sectionBoxes.length; j++) {
+        if (sectionBoxes[j].checked) checkedCount++;
+      }
+      if (checkedCount === 0) {
+        scb.checked = false;
+        scb.indeterminate = false;
+      } else if (checkedCount === sectionBoxes.length) {
+        scb.checked = true;
+        scb.indeterminate = false;
+      } else {
+        scb.checked = false;
+        scb.indeterminate = true;
+      }
+    }
   }
 
   function setRowSelected(taskId, on) {
@@ -257,6 +281,21 @@
   // -- Checkbox events --------------------------------------------------------
 
   document.addEventListener("change", function (e) {
+    // Per-section select-all
+    var scb = e.target.closest(".task-list__select-all-section");
+    if (scb) {
+      var section = scb.closest(".task-list__section");
+      if (section) {
+        var sectionBoxes = section.querySelectorAll(".task-list__select");
+        for (var i = 0; i < sectionBoxes.length; i++) {
+          var tid = sectionBoxes[i].getAttribute("data-task-id");
+          if (tid) setRowSelected(tid, scb.checked);
+        }
+      }
+      updateBar();
+      return;
+    }
+
     var cb = e.target.closest(".task-list__select");
     if (!cb) return;
 
@@ -392,6 +431,19 @@
       });
   }
 
+  // Row click-to-select: clicking any non-interactive part of a row toggles its checkbox
+  document.addEventListener("click", function (e) {
+    var row = e.target.closest(".task-list__row[data-task-id]");
+    if (!row) return;
+    if (e.target.closest("a, button, select, input, label")) return;
+    var taskId = row.getAttribute("data-task-id");
+    if (!taskId) return;
+    var cb = row.querySelector(".task-list__select");
+    if (!cb) return;
+    setRowSelected(taskId, !selected.has(taskId));
+    updateBar();
+  });
+
   // Single delegated click handler for all bulk bar buttons
   document.addEventListener("click", function (e) {
     var id = e.target.id;
@@ -435,56 +487,11 @@
 })();
 
 // ---------------------------------------------------------------------------
-// Vim-style keyboard navigation — j/k/g/G/Enter/x/Esc
+// Task-list-specific shortcuts — x (toggle select), a (select all), Escape.
+// j/k/g/G/Enter are handled by table-keyboard-nav.js (shared with all domains).
 // ---------------------------------------------------------------------------
 
 (function () {
-  var FOCUSED = "task-list__row--focused";
-  var focusedIndex = -1;
-
-  function getRows() {
-    return Array.from(
-      document.querySelectorAll(".task-list__row[data-task-id]"),
-    );
-  }
-
-  function clearFocus(rows) {
-    rows = rows || getRows();
-    for (var i = 0; i < rows.length; i++) {
-      rows[i].classList.remove(FOCUSED);
-    }
-  }
-
-  function setFocus(index) {
-    var rows = getRows();
-    if (rows.length === 0) return;
-    if (index < 0) index = 0;
-    if (index >= rows.length) index = rows.length - 1;
-    clearFocus(rows);
-    focusedIndex = index;
-    rows[focusedIndex].classList.add(FOCUSED);
-    var scrollEl = document.querySelector(".app-shell__content");
-    var stickyHeader = document.querySelector(".task-list__sticky-header");
-    if (!scrollEl) {
-      rows[focusedIndex].scrollIntoView({ block: "nearest" });
-      return;
-    }
-    var headerH = stickyHeader
-      ? stickyHeader.getBoundingClientRect().height
-      : 0;
-    var scrollRect = scrollEl.getBoundingClientRect();
-    var rowRect = rows[focusedIndex].getBoundingClientRect();
-    var rowOffsetTop = rowRect.top - scrollRect.top + scrollEl.scrollTop;
-    var rowBottom = rowOffsetTop + rowRect.height;
-    var visibleTop = scrollEl.scrollTop + headerH;
-    var visibleBottom = scrollEl.scrollTop + scrollEl.clientHeight;
-    if (rowOffsetTop < visibleTop) {
-      scrollEl.scrollTop = rowOffsetTop - headerH - 4;
-    } else if (rowBottom > visibleBottom) {
-      scrollEl.scrollTop = rowBottom - scrollEl.clientHeight + 4;
-    }
-  }
-
   function inputFocused() {
     var el = document.activeElement;
     if (!el) return false;
@@ -498,80 +505,74 @@
   document.addEventListener("keydown", function (e) {
     if (inputFocused()) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
-
-    var rows = getRows();
-    if (rows.length === 0) return;
+    if (!document.querySelector(".task-list__row[data-task-id]")) return;
 
     switch (e.key) {
-      case "j":
+      case "x": {
         e.preventDefault();
-        setFocus(focusedIndex < 0 ? 0 : focusedIndex + 1);
-        break;
-
-      case "k":
-        e.preventDefault();
-        setFocus(focusedIndex < 0 ? rows.length - 1 : focusedIndex - 1);
-        break;
-
-      case "g":
-        e.preventDefault();
-        setFocus(0);
-        break;
-
-      case "G":
-        e.preventDefault();
-        setFocus(rows.length - 1);
-        break;
-
-      case "Enter":
-        if (focusedIndex >= 0 && rows[focusedIndex]) {
-          e.preventDefault();
-          var taskId = rows[focusedIndex].getAttribute("data-task-id");
-          if (taskId) window.location.href = "/tasks/" + taskId;
-        }
-        break;
-
-      case "x":
-        if (focusedIndex >= 0 && rows[focusedIndex]) {
-          e.preventDefault();
-          var cb = rows[focusedIndex].querySelector(".task-list__select");
+        var focused = document.querySelector(".task-list__row--focused");
+        if (focused) {
+          var cb = focused.querySelector(".task-list__select");
           if (cb) {
             cb.checked = !cb.checked;
             cb.dispatchEvent(new Event("change", { bubbles: true }));
           }
         }
         break;
+      }
 
-      case "a":
+      case "a": {
         e.preventDefault();
-        (function () {
-          var allCbs = Array.from(
-            document.querySelectorAll(
-              ".task-list__select:not(.task-list__select-all)",
-            ),
-          );
-          var allChecked = allCbs.length > 0 &&
-            allCbs.every(function (c) {
-              return c.checked;
-            });
-          allCbs.forEach(function (c) {
-            c.checked = !allChecked;
-            c.dispatchEvent(new Event("change", { bubbles: true }));
+        var allCbs = Array.from(
+          document.querySelectorAll(
+            ".task-list__select:not(.task-list__select-all)",
+          ),
+        );
+        var allChecked = allCbs.length > 0 &&
+          allCbs.every(function (c) {
+            return c.checked;
           });
-        })();
+        allCbs.forEach(function (c) {
+          c.checked = !allChecked;
+          c.dispatchEvent(new Event("change", { bubbles: true }));
+        });
         break;
+      }
 
-      case "Escape":
-        clearFocus();
-        focusedIndex = -1;
+      case "Escape": {
+        var focusedRow = document.querySelector(".task-list__row--focused");
+        if (focusedRow) focusedRow.classList.remove("task-list__row--focused");
         break;
+      }
     }
   });
 
-  // Reset on view swap
-  document.addEventListener("htmx:afterSettle", function (e) {
-    if (e.detail && e.detail.target && e.detail.target.id === "tasks-view") {
-      focusedIndex = -1;
+  // Jump pill — scroll the section into view below the sticky header.
+  // The target (#section-xxx) is position:sticky itself, so getBoundingClientRect
+  // and offsetTop both return the stuck position when scrolled past it. Use the
+  // parent .task-list__section (non-sticky) as the reference element instead.
+  document.addEventListener("click", function (e) {
+    var pill = e.target.closest(".task-list__jump-pill");
+    if (!pill) return;
+    var href = pill.getAttribute("href");
+    if (!href || href.charAt(0) !== "#") return;
+    var target = document.getElementById(href.slice(1));
+    if (!target) return;
+    e.preventDefault();
+    var stickyHeader = document.querySelector(".task-list__sticky-header");
+    var stickyH = stickyHeader
+      ? stickyHeader.getBoundingClientRect().height
+      : 0;
+    var scrollEl = document.querySelector(".app-shell__content");
+    if (!scrollEl) {
+      target.scrollIntoView();
+      return;
     }
+    var ref = target.closest(".task-list__section") || target;
+    var scrollRect = scrollEl.getBoundingClientRect();
+    var naturalTop = ref.getBoundingClientRect().top - scrollRect.top +
+      scrollEl.scrollTop;
+    scrollEl.scrollTo({ top: naturalTop - stickyH, behavior: "smooth" });
+    history.replaceState(null, "", href);
   });
 })();

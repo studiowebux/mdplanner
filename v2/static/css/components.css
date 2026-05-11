@@ -1364,6 +1364,10 @@ a.badge:hover {
   background: var(--color-bg-hover);
 }
 
+.data-table__row--focused {
+  box-shadow: inset 0 0 0 var(--border-width-thick) var(--color-accent);
+}
+
 .data-table__td--progress {
   min-width: var(--progress-col-min-width);
 }

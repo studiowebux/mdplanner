@@ -1,17 +1,40 @@
 // Pomodoro timer — topbar widget. State persisted in localStorage.
-// Phases: idle → work (25min) → break (5min) → idle (or loop).
-// No inline styles. Uses data-phase attr + CSS classes for theming.
+// Phases: idle → work → break → idle (or loop).
+// Right-click opens config popover (duration presets + custom). No inline styles.
 
 (function () {
-  var WORK_SECS = 25 * 60;
-  var BREAK_SECS = 5 * 60;
   var STORAGE_KEY = "pomodoro";
+  var DURATION_KEY = "pomoDuration";
+  var BREAK_SECS = 5 * 60;
+  var DURATION_PRESETS = [25, 20, 15, 10, 5];
 
   var btn = document.getElementById("pomodoro-btn");
   if (!btn) return;
 
   var interval = null;
   var state = load();
+  var popover = null;
+
+  // ---------------------------------------------------------------------------
+  // Duration helpers
+  // ---------------------------------------------------------------------------
+
+  function getWorkSecs() {
+    try {
+      var stored = localStorage.getItem(DURATION_KEY);
+      if (stored) {
+        var mins = parseInt(stored, 10);
+        if (!isNaN(mins) && mins > 0) return mins * 60;
+      }
+    } catch (_) { /* ignore */ }
+    return 25 * 60;
+  }
+
+  function setWorkMins(mins) {
+    try {
+      localStorage.setItem(DURATION_KEY, String(mins));
+    } catch (_) { /* ignore */ }
+  }
 
   // ---------------------------------------------------------------------------
   // Persistence
@@ -22,7 +45,7 @@
       var raw = localStorage.getItem(STORAGE_KEY);
       if (raw) return JSON.parse(raw);
     } catch (_) { /* ignore */ }
-    return { phase: "idle", remaining: WORK_SECS, running: false };
+    return { phase: "idle", remaining: getWorkSecs(), running: false };
   }
 
   function save() {
@@ -53,8 +76,6 @@
         ? "Start Pomodoro"
         : (state.running ? "Pause" : "Resume") + " — " + fmt(state.remaining),
     );
-
-    // Update document title only while a session is active
     if (state.phase !== "idle" && state.running) {
       document.title = "[" + fmt(state.remaining) + "] " +
         document.title.replace(/^\[.*?\]\s*/, "");
@@ -81,6 +102,7 @@
   function phaseEnd() {
     clearInterval(interval);
     interval = null;
+    playBeep();
     notify();
 
     if (state.phase === "work") {
@@ -88,19 +110,38 @@
       state.remaining = BREAK_SECS;
     } else {
       state.phase = "idle";
-      state.remaining = WORK_SECS;
+      state.remaining = getWorkSecs();
       state.running = false;
     }
     save();
     render();
 
-    // Auto-start break, stop after break
     if (state.phase === "break") {
       state.running = true;
       save();
       render();
       interval = setInterval(tick, 1000);
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Sound — Web Audio API beep, no external file
+  // ---------------------------------------------------------------------------
+
+  function playBeep() {
+    try {
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      gain.gain.setValueAtTime(0.4, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.6);
+    } catch (_) { /* AudioContext unavailable */ }
   }
 
   // ---------------------------------------------------------------------------
@@ -131,7 +172,7 @@
     requestNotificationPermission();
     if (state.phase === "idle") {
       state.phase = "work";
-      state.remaining = WORK_SECS;
+      state.remaining = getWorkSecs();
     }
     state.running = true;
     save();
@@ -150,14 +191,115 @@
   function reset() {
     clearInterval(interval);
     interval = null;
-    state = { phase: "idle", remaining: WORK_SECS, running: false };
+    state = { phase: "idle", remaining: getWorkSecs(), running: false };
     save();
     render();
     document.title = document.title.replace(/^\[.*?\]\s*/, "");
   }
 
   // ---------------------------------------------------------------------------
-  // Click — left click: start/pause. Right click / long press: reset.
+  // Config popover
+  // ---------------------------------------------------------------------------
+
+  function buildPopover() {
+    var el = document.createElement("div");
+    el.id = "pomodoro-popover";
+    el.className = "pomo-popover";
+    el.setAttribute("role", "dialog");
+    el.setAttribute("aria-label", "Pomodoro duration");
+
+    var header = document.createElement("div");
+    header.className = "pomo-popover__header";
+    header.textContent = "Duration";
+
+    var presets = document.createElement("div");
+    presets.className = "pomo-popover__presets";
+    DURATION_PRESETS.forEach(function (mins) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "pomo-popover__preset";
+      b.textContent = mins + "m";
+      b.addEventListener("click", function () {
+        setWorkMins(mins);
+        if (state.phase === "idle") state.remaining = mins * 60;
+        save();
+        render();
+        hidePopover();
+      });
+      presets.appendChild(b);
+    });
+
+    var customRow = document.createElement("div");
+    customRow.className = "pomo-popover__custom";
+
+    var input = document.createElement("input");
+    input.type = "number";
+    input.min = "1";
+    input.max = "120";
+    input.placeholder = "min";
+    input.className = "pomo-popover__input";
+
+    var setBtn = document.createElement("button");
+    setBtn.type = "button";
+    setBtn.className = "pomo-popover__set";
+    setBtn.textContent = "Set";
+    setBtn.addEventListener("click", function () {
+      var mins = parseInt(input.value, 10);
+      if (!isNaN(mins) && mins > 0) {
+        setWorkMins(mins);
+        if (state.phase === "idle") state.remaining = mins * 60;
+        save();
+        render();
+        hidePopover();
+      }
+    });
+
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") setBtn.click();
+      if (e.key === "Escape") hidePopover();
+    });
+
+    var resetBtn = document.createElement("button");
+    resetBtn.type = "button";
+    resetBtn.className = "pomo-popover__reset";
+    resetBtn.textContent = "Reset timer";
+    resetBtn.addEventListener("click", function () {
+      reset();
+      hidePopover();
+    });
+
+    customRow.appendChild(input);
+    customRow.appendChild(setBtn);
+    el.appendChild(header);
+    el.appendChild(presets);
+    el.appendChild(customRow);
+    el.appendChild(resetBtn);
+    document.body.appendChild(el);
+    return el;
+  }
+
+  function getPopover() {
+    if (!popover) popover = buildPopover();
+    return popover;
+  }
+
+  function showPopover() {
+    var el = getPopover();
+    var rect = btn.getBoundingClientRect();
+    el.style.setProperty("--pomo-top", (rect.bottom + 8) + "px");
+    el.style.setProperty(
+      "--pomo-right",
+      (window.innerWidth - rect.right) + "px",
+    );
+    el.classList.add("pomo-popover--open");
+  }
+
+  function hidePopover() {
+    if (popover) popover.classList.remove("pomo-popover--open");
+  }
+
+  // ---------------------------------------------------------------------------
+  // Events — left click: start/pause. Right click: config popover.
   // ---------------------------------------------------------------------------
 
   var pressTimer = null;
@@ -166,20 +308,16 @@
     if (e.button !== 0) return;
     pressTimer = setTimeout(function () {
       pressTimer = null;
-      reset();
     }, 800);
   });
 
   btn.addEventListener("mouseup", function (e) {
     if (e.button !== 0) return;
-    if (!pressTimer) return; // was a long press, already handled
+    if (!pressTimer) return;
     clearTimeout(pressTimer);
     pressTimer = null;
-    if (state.running) {
-      pause();
-    } else {
-      start();
-    }
+    if (state.running) pause();
+    else start();
   });
 
   btn.addEventListener("mouseleave", function () {
@@ -191,15 +329,26 @@
 
   btn.addEventListener("contextmenu", function (e) {
     e.preventDefault();
-    reset();
+    showPopover();
   });
 
-  // Resume tick if tab was reopened mid-session
-  if (state.running) {
-    interval = setInterval(tick, 1000);
-  }
+  document.addEventListener("click", function (e) {
+    if (popover && popover.classList.contains("pomo-popover--open")) {
+      if (!popover.contains(e.target) && e.target !== btn) hidePopover();
+    }
+  });
 
-  // Restore document title prefix after htmx page swaps
+  document.addEventListener("keydown", function (e) {
+    if (
+      e.key === "Escape" && popover &&
+      popover.classList.contains("pomo-popover--open")
+    ) {
+      hidePopover();
+    }
+  });
+
+  if (state.running) interval = setInterval(tick, 1000);
+
   document.addEventListener("htmx:afterSettle", function () {
     if (state.phase !== "idle" && state.running) {
       document.title = "[" + fmt(state.remaining) + "] " +

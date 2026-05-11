@@ -3,7 +3,7 @@
 import type { FC } from "hono/jsx";
 import type { FieldDef } from "../components/ui/form-builder.tsx";
 import type { ColumnDef } from "../components/ui/data-table.tsx";
-import type { ViewMode, ViewProps } from "../types/app.ts";
+import type { AppContext, ViewMode, ViewProps } from "../types/app.ts";
 
 /** Base constraint for all domain entity types. */
 export type Entity = Record<string, unknown>;
@@ -159,4 +159,12 @@ export type DomainConfig<T extends Entity, C, U> = {
     fromLabel?: string;
     toLabel?: string;
   };
+
+  // Optional: async post-filter applied after global filters. Receives filtered
+  // items and the request context. Use for config-driven filters (e.g. hideCompletedAfterDays).
+  customFilter?: (items: T[], c: AppContext) => Promise<T[]>;
+
+  // When true, renders a "Show hidden" checkbox in the toolbar (name="showHidden").
+  // Pair with customFilter to let users temporarily reveal hidden items.
+  showHiddenToggle?: boolean;
 };

@@ -429,17 +429,17 @@ html.fullscreen-reading .topbar {
 }
 
 .topbar__actions > form {
-  display: flex;
-  align-items: center;
-  align-self: center;
+  display: contents;
 }
 
 .topbar__identity-select {
-  height: var(--input-height-sm);
-  align-self: center;
-  padding: 0 var(--space-sm);
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  padding: var(--space-xs) var(--space-sm);
   font-size: var(--font-size-sm);
   font-family: var(--font-sans);
+  line-height: var(--line-height-tight);
   color: var(--color-text);
   background: var(--color-bg-secondary);
   border: var(--border-width) var(--border-style) var(--color-border-default);
@@ -506,6 +506,106 @@ html.fullscreen-reading .topbar {
 .dark .topbar__pomodoro[data-phase="break"] {
   color: var(--color-success-text);
   border-color: var(--color-success-text);
+}
+
+/* -------------------------------------------------------------------------
+   Pomodoro config popover
+   ------------------------------------------------------------------------- */
+
+.pomo-popover {
+  display: none;
+  position: fixed;
+  top: var(--pomo-top);
+  right: var(--pomo-right);
+  z-index: var(--z-overlay);
+  background: var(--color-bg-primary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-md);
+  min-width: var(--pomo-popover-min-w);
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.pomo-popover--open {
+  display: flex;
+}
+
+.pomo-popover__header {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.pomo-popover__presets {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.pomo-popover__preset {
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.pomo-popover__preset:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-strong);
+}
+
+.pomo-popover__custom {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: center;
+}
+
+.pomo-popover__input {
+  width: var(--pomo-popover-input-w);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.pomo-popover__set {
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.pomo-popover__set:hover {
+  background: var(--color-bg-hover);
+}
+
+.pomo-popover__reset {
+  margin-top: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  text-align: left;
+}
+
+.pomo-popover__reset:hover {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
 }
 
 /* -------------------------------------------------------------------------

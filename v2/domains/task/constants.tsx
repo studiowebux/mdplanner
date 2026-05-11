@@ -100,6 +100,7 @@ export const TASK_STATE_KEYS = [
   "tags",
   "q",
   "hideCompleted",
+  "showHidden",
   "sort",
   "order",
   "zoom",

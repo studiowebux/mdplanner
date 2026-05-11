@@ -1,0 +1,43 @@
+/* Capacity plans view — list and detail styles. */
+/* All values from variables.css — zero hardcoded px/rem/color. */
+
+/* ---------------------------------------------------------------------------
+   Detail layout
+   --------------------------------------------------------------------------- */
+
+.capacity-plan-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.capacity-plan-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.capacity-plan-detail__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.capacity-plan-detail__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.capacity-plan-detail__table {
+  width: var(--size-full);
+}
+
+.capacity-plan-detail__empty {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+}

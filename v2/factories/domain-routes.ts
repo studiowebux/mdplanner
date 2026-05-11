@@ -220,6 +220,9 @@ export function createDomainRoutes<T extends Entity, C, U>(
         );
       }
     }
+    if (cfg.customFilter) {
+      result = await cfg.customFilter(result, c);
+    }
     return result;
   }
 

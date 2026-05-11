@@ -550,20 +550,18 @@ portfolioRouter.get("/:id", async (c) => {
   const item = await getPortfolioService().getById(id);
   if (!item) return c.notFound();
 
-  const teamNames = new Set(item.team ?? []);
+  const teamIds = new Set((item.team ?? []).map((m) => m.personId));
   const [allGoals, allPeople] = await Promise.all([
     getGoalService().list(),
-    teamNames.size > 0 ? getPeopleService().list() : Promise.resolve([]),
+    teamIds.size > 0 ? getPeopleService().list() : Promise.resolve([]),
   ]);
   const linkedById = new Set(item.linkedGoals ?? []);
   const goals = allGoals.filter((g) =>
     linkedById.has(g.id) || g.project === item.name
   );
-  const personByName: Record<string, string> = {};
-  const teamLower = new Map([...teamNames].map((n) => [n.toLowerCase(), n]));
+  const personById: Record<string, string> = {};
   for (const p of allPeople) {
-    const orig = teamLower.get(p.name.toLowerCase());
-    if (orig) personByName[orig] = p.id;
+    if (teamIds.has(p.id)) personById[p.id] = p.name;
   }
 
   return c.html(
@@ -571,7 +569,7 @@ portfolioRouter.get("/:id", async (c) => {
       {...viewProps(c, "/portfolio")}
       item={item}
       goals={goals}
-      personByName={personByName}
+      personById={personById}
     />,
   );
 });

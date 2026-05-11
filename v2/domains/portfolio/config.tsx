@@ -37,11 +37,26 @@ const FORM_FIELDS: FieldDef[] = [
   { type: "date", name: "startDate", label: "Start date" },
   { type: "date", name: "endDate", label: "End date" },
   {
-    type: "tags",
+    type: "array-table",
     name: "team",
-    label: "Team",
-    source: "people",
-    placeholder: "Search people...",
+    label: "Team Member",
+    section: "portfolio_team",
+    addLabel: "Add member",
+    itemFields: [
+      {
+        type: "autocomplete",
+        name: "personId",
+        label: "Person",
+        source: "people",
+        placeholder: "Search people...",
+      },
+      {
+        type: "text",
+        name: "role",
+        label: "Role",
+        placeholder: "e.g. Tech Lead",
+      },
+    ],
   },
   {
     type: "tags",

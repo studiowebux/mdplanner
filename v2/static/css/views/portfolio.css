@@ -197,12 +197,26 @@
   gap: var(--space-xs);
 }
 
+.portfolio-detail__team-member {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
 .portfolio-detail__team-chip {
   font-size: var(--font-size-xs);
   padding: var(--badge-padding);
   background: var(--color-bg-tertiary);
   color: var(--color-text-secondary);
   border-radius: var(--radius-full);
+}
+
+.portfolio-detail__team-role {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  padding: var(--badge-padding);
+  background: var(--color-badge-bg);
+  border-radius: var(--radius-sm);
 }
 
 /* Responsive */

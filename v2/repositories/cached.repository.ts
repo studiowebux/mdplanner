@@ -90,7 +90,10 @@ export abstract class CachedMarkdownRepository<
 
   override async update(id: string, data: U): Promise<T | null> {
     const updated = await super.update(id, data);
-    if (updated) this.listDirty = true;
+    if (updated) {
+      this.listDirty = true;
+      this.cacheRemoveRow(id);
+    }
     return updated;
   }
 

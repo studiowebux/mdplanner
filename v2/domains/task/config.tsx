@@ -7,6 +7,7 @@ import type { CreateTask, Task, UpdateTask } from "../../types/task.types.ts";
 import {
   getMilestoneService,
   getPeopleService,
+  getProjectService,
   getTaskService,
 } from "../../singletons/services.ts";
 import { createSearchPredicate } from "../../utils/string.ts";
@@ -148,6 +149,26 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
   ],
 
   hideCompleted: { field: "completed", value: "true" },
+
+  showHiddenToggle: true,
+
+  customFilter: async (items, c) => {
+    const config = await getProjectService().getConfig();
+    const days = config.hideCompletedAfterDays;
+    if (days === undefined || days === null) return items;
+    const state = c.get("filterState" as never) as Record<string, unknown>;
+    if (state?.showHidden === "true" || state?.showHidden === true) {
+      return items;
+    }
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+    return items.filter((t) => {
+      if (t.section !== "Done") return true;
+      const updated = t.updatedAt
+        ? new Date(t.updatedAt as string).getTime()
+        : 0;
+      return updated >= cutoff;
+    });
+  },
 
   toRow: taskToRow,
 

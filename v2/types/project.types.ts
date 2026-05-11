@@ -119,6 +119,11 @@ export const ProjectConfigSchema = z.object({
       "Number of days without activity before a portfolio project is considered stale. Defaults to 14.",
     example: 14,
   }),
+  hideCompletedAfterDays: z.number().optional().openapi({
+    description:
+      "Automatically hide Done tasks completed more than this many days ago. 0 = hide immediately. Unset = never hide.",
+    example: 7,
+  }),
   stableVersion: z.string().optional().openapi({
     description:
       "Last known stable/tested version deployed to production. Separate from the latest tagged version.",
@@ -203,6 +208,7 @@ export const FrontmatterProjectSchema = z.object({
   pipelines_per_page: z.number().optional(),
   kpi_metrics: z.array(z.unknown()).optional(),
   stale_days: z.number().optional(),
+  hide_completed_after_days: z.number().optional(),
   stable_version: z.string().optional(),
   milestone_statuses: z.array(z.unknown()).optional(),
   last_updated: z.string().optional(),
@@ -254,6 +260,9 @@ export const FrontmatterProjectSchema = z.object({
         ? (fm.kpi_metrics as unknown[]).map(String)
         : undefined,
       staleDays: fm.stale_days,
+      hideCompletedAfterDays: typeof fm.hide_completed_after_days === "number"
+        ? fm.hide_completed_after_days
+        : undefined,
       stableVersion: fm.stable_version,
       milestoneStatuses: Array.isArray(fm.milestone_statuses)
         ? (fm.milestone_statuses as unknown[]).map(String)

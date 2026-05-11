@@ -107,6 +107,29 @@ export const ProjectTab: FC<ProjectTabProps> = ({ config }) => (
       </div>
 
       <div class="settings-field">
+        <label
+          class="settings-field__label"
+          for="cfg-hide-completed-after-days"
+        >
+          Hide completed tasks after (days)
+        </label>
+        <input
+          type="number"
+          id="cfg-hide-completed-after-days"
+          name="hideCompletedAfterDays"
+          value={config.hideCompletedAfterDays ?? ""}
+          min={0}
+          placeholder="Never"
+          class="settings-field__input settings-field__input--narrow"
+        />
+        <span class="settings-field__hint">
+          Automatically hide Done tasks older than this many days. Leave blank
+          to always show. Use the "Show hidden" toggle in the task list to
+          reveal them.
+        </span>
+      </div>
+
+      <div class="settings-field">
         <label class="settings-field__label" for="cfg-github-token">
           GitHub token (PAT)
         </label>

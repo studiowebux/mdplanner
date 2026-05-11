@@ -154,6 +154,8 @@ export const MilestoneDetailView: FC<Props> = (
           updatedBy={milestone.updatedBy}
         />
       </main>
+
+      <div id="milestones-form-container" />
     </MainLayout>
   );
 };

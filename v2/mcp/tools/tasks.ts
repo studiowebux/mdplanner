@@ -39,7 +39,8 @@ export function registerTaskTools(server: McpServer): void {
     "list_tasks",
     {
       description:
-        "List all tasks in the project. Filter by section, project, or milestone.",
+        "List all tasks in the project. Filter by section, project, or milestone. " +
+        "Pass slim: true when browsing to pick the next task — returns id, title, section, priority, tags, milestone, assignee only, cutting token usage by ~90%.",
       inputSchema: {
         ...ListTaskOptionsSchema.shape,
         priority: z.number().int().min(1).max(5).optional().describe(
@@ -48,15 +49,29 @@ export function registerTaskTools(server: McpServer): void {
         completed: z.boolean().optional().describe(
           "Filter by completion state (false = open only, true = completed only)",
         ),
+        slim: z.boolean().optional().describe(
+          "Return minimal fields only: id, title, section, priority, tags, milestone, assignee. Use when browsing tasks to pick the next one.",
+        ),
       },
     },
-    async ({ priority, completed, ...options }) => {
+    async ({ priority, completed, slim, ...options }) => {
       let tasks = await service.list(options);
       if (priority !== undefined) {
         tasks = tasks.filter((t) => t.priority === priority);
       }
       if (completed !== undefined) {
         tasks = tasks.filter((t) => t.completed === completed);
+      }
+      if (slim) {
+        return ok(tasks.map((t) => ({
+          id: t.id,
+          title: t.title,
+          section: t.section,
+          priority: t.priority,
+          tags: t.tags,
+          milestone: t.milestone,
+          assignee: t.assignee,
+        })));
       }
       return ok(tasks);
     },

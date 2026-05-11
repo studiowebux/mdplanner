@@ -64,6 +64,10 @@ settingsViewRouter.post("/project", async (c) => {
   const body = await c.req.parseBody();
   const portRaw = body.port ? Number(body.port) : undefined;
   const staleDaysRaw = body.staleDays ? Number(body.staleDays) : undefined;
+  const hideCompletedAfterDaysRaw = body.hideCompletedAfterDays !== undefined &&
+      body.hideCompletedAfterDays !== ""
+    ? Number(body.hideCompletedAfterDays)
+    : undefined;
   await getProjectService().updateConfig({
     name: String(body.name ?? ""),
     description: body.description ? String(body.description) : undefined,
@@ -71,6 +75,10 @@ settingsViewRouter.post("/project", async (c) => {
     currency: body.currency ? String(body.currency).trim() : undefined,
     port: portRaw && !isNaN(portRaw) ? portRaw : undefined,
     staleDays: staleDaysRaw && !isNaN(staleDaysRaw) ? staleDaysRaw : undefined,
+    hideCompletedAfterDays: hideCompletedAfterDaysRaw !== undefined &&
+        !isNaN(hideCompletedAfterDaysRaw)
+      ? hideCompletedAfterDaysRaw
+      : undefined,
     githubToken: body.githubToken ? String(body.githubToken) : undefined,
   });
   return new Response(null, {

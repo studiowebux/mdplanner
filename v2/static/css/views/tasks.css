@@ -90,6 +90,10 @@
   flex-shrink: 0;
 }
 
+.task-list__bulk-bar .form__select {
+  width: auto;
+}
+
 .task-list__bulk-count {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
@@ -300,6 +304,10 @@
 .task-list__row:last-child {
   border-bottom: none;
   border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.task-list__row {
+  cursor: pointer;
 }
 
 .task-list__row:hover {

@@ -95,6 +95,8 @@
       e.preventDefault();
       if (activeIndex >= 0 && items[activeIndex]) {
         navigateToResult(items[activeIndex]);
+      } else if (items.length > 0) {
+        navigateToResult(items[0]);
       } else if (input.value.trim()) {
         close();
         window.location.href = "/search?q=" + encodeURIComponent(input.value);

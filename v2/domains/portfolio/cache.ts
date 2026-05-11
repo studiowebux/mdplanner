@@ -14,6 +14,7 @@ import type { PortfolioRepository } from "../../repositories/portfolio.repositor
 import type {
   PortfolioItem,
   PortfolioStatus,
+  TeamMember,
 } from "../../types/portfolio.types.ts";
 import { PORTFOLIO_SCHEMA, PORTFOLIO_TABLE } from "./constants.ts";
 
@@ -34,8 +35,12 @@ export function rowToPortfolioItem(
   if (row.progress != null) item.progress = row.progress as number;
   if (row.start_date != null) item.startDate = row.start_date as string;
   if (row.end_date != null) item.endDate = row.end_date as string;
-  const team = parseJson<string[]>(row.team);
-  if (team) item.team = team;
+  const teamRaw = parseJson<unknown[]>(row.team);
+  if (teamRaw) {
+    item.team = teamRaw.map((m): TeamMember =>
+      typeof m === "string" ? { personId: m } : m as TeamMember
+    );
+  }
   const techStack = parseJson<string[]>(row.tech_stack);
   if (techStack) item.techStack = techStack;
   if (row.logo != null) item.logo = row.logo as string;

@@ -13,6 +13,7 @@ import type {
   PortfolioItem,
   PortfolioStatus,
   PortfolioStatusUpdate,
+  TeamMember,
   UpdatePortfolioItem,
 } from "../types/portfolio.types.ts";
 import { ciEquals, ciIncludes } from "../utils/string.ts";
@@ -257,7 +258,16 @@ export class PortfolioRepository {
       progress: typeof fm.progress === "number" ? fm.progress : 0,
       startDate: fm.start_date != null ? String(fm.start_date) : undefined,
       endDate: fm.endDate != null ? String(fm.endDate) : undefined,
-      team: Array.isArray(fm.team) ? fm.team.map(String) : undefined,
+      team: Array.isArray(fm.team)
+        ? fm.team.map((m): TeamMember =>
+          typeof m === "string" ? { personId: m } : {
+            personId: String((m as Record<string, unknown>).personId ?? ""),
+            role: (m as Record<string, unknown>).role != null
+              ? String((m as Record<string, unknown>).role)
+              : undefined,
+          }
+        )
+        : undefined,
       techStack: Array.isArray(fm.techStack)
         ? fm.techStack.map(String)
         : undefined,

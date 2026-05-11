@@ -2,6 +2,17 @@ import { z } from "@hono/zod-openapi";
 import { stringArray } from "./shared.types.ts";
 
 // ---------------------------------------------------------------------------
+// TeamMember — structured team entry with optional role label
+// ---------------------------------------------------------------------------
+
+export const TeamMemberSchema = z.object({
+  personId: z.string(),
+  role: z.string().optional(),
+});
+
+export type TeamMember = z.infer<typeof TeamMemberSchema>;
+
+// ---------------------------------------------------------------------------
 // Status enum — shared across all portfolio schemas
 // ---------------------------------------------------------------------------
 
@@ -116,9 +127,9 @@ export const PortfolioItemSchema = z.object({
     description: "Project end or target date (YYYY-MM-DD)",
     example: "2026-12-31",
   }),
-  team: stringArray.nullable().optional().openapi({
-    description: "Team member names or person IDs",
-    example: ["alice", "bob"],
+  team: z.array(TeamMemberSchema).nullable().optional().openapi({
+    description: "Team members with optional role labels",
+    example: [{ personId: "person_123", role: "Tech Lead" }],
   }),
   techStack: stringArray.nullable().optional().openapi({
     description: "Technologies used in this project",

@@ -60,6 +60,9 @@ import { registerBrainstormEntity } from "../domains/brainstorm/cache.ts";
 import { BriefRepository } from "../repositories/brief.repository.ts";
 import { BriefService } from "../services/brief.service.ts";
 import { registerBriefEntity } from "../domains/brief/cache.ts";
+import { CapacityPlanRepository } from "../repositories/capacity-plan.repository.ts";
+import { CapacityPlanService } from "../services/capacity-plan.service.ts";
+import { registerCapacityPlanEntity } from "../domains/capacity-plan/cache.ts";
 import { RetrospectiveRepository } from "../repositories/retrospective.repository.ts";
 import { RetrospectiveService } from "../services/retrospective.service.ts";
 import { registerRetrospectiveEntity } from "../domains/retrospective/cache.ts";
@@ -159,6 +162,8 @@ export function initServices(
   _set(_svc, "brainstorm", new BrainstormService(brainstormRepo));
   const briefRepo = new BriefRepository(projectDir);
   _set(_svc, "brief", new BriefService(briefRepo));
+  const capacityPlanRepo = new CapacityPlanRepository(projectDir);
+  _set(_svc, "capacityPlan", new CapacityPlanService(capacityPlanRepo));
   const retrospectiveRepo = new RetrospectiveRepository(projectDir);
   _set(_svc, "retrospective", new RetrospectiveService(retrospectiveRepo));
   const meetingRepo = new MeetingRepository(projectDir);
@@ -198,6 +203,7 @@ export function initServices(
     registerPaymentEntity(paymentRepo);
     registerBrainstormEntity(brainstormRepo);
     registerBriefEntity(briefRepo);
+    registerCapacityPlanEntity(capacityPlanRepo);
     registerRetrospectiveEntity(retrospectiveRepo);
     registerMeetingEntity(meetingRepo);
     registerLeanCanvasEntity(leanCanvasRepo);
@@ -223,6 +229,7 @@ export function initServices(
     paymentRepo.setCacheDb(cacheDb);
     brainstormRepo.setCacheDb(cacheDb);
     briefRepo.setCacheDb(cacheDb);
+    capacityPlanRepo.setCacheDb(cacheDb);
     retrospectiveRepo.setCacheDb(cacheDb);
     meetingRepo.setCacheDb(cacheDb);
     leanCanvasRepo.setCacheDb(cacheDb);
@@ -328,6 +335,10 @@ export function getBrainstormService(): BrainstormService {
 
 export function getBriefService(): BriefService {
   return _get<BriefService>(_svc, "brief");
+}
+
+export function getCapacityPlanService(): CapacityPlanService {
+  return _get<CapacityPlanService>(_svc, "capacityPlan");
 }
 
 export function getRetrospectiveService(): RetrospectiveService {
