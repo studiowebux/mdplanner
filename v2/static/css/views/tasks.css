@@ -284,7 +284,6 @@
   border: var(--border-width) var(--border-style) var(--color-border-default);
   border-top: none;
   border-radius: 0 0 var(--radius-md) var(--radius-md);
-  overflow: hidden;
 }
 
 .task-list__row {
@@ -300,6 +299,7 @@
 
 .task-list__row:last-child {
   border-bottom: none;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
 }
 
 .task-list__row:hover {
