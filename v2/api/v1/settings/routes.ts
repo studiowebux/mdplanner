@@ -162,10 +162,8 @@ settingsRouter.openapi(setIdentityRoute, async (c) => {
   }
 
   const label = name.trim() ? `Identity: ${name.trim()}` : "Identity cleared";
-  return new Response(null, {
-    status: 204,
-    headers: { "HX-Trigger": hxTrigger("success", label) },
-  });
+  c.header("HX-Trigger", hxTrigger("success", label));
+  return c.body(null, 204);
 });
 
 // POST /global-filters — write globalProjects + globalAssignees into ui_state cookie
@@ -212,5 +210,5 @@ settingsRouter.openapi(setGlobalFiltersRoute, (c) => {
     sameSite: "Lax",
   });
 
-  return new Response(null, { status: 204 });
+  return c.body(null, 204);
 });
