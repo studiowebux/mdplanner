@@ -73,6 +73,7 @@
   position: sticky;
   bottom: var(--space-md);
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   gap: var(--space-sm);
   padding: var(--space-sm) var(--space-md);
@@ -82,6 +83,11 @@
   box-shadow: var(--shadow-lg);
   z-index: var(--z-sticky);
   overflow-x: auto;
+}
+
+.task-list__bulk-bar .btn,
+.task-list__bulk-bar .form__select {
+  flex-shrink: 0;
 }
 
 .task-list__bulk-count {
@@ -94,6 +100,7 @@
 
 .task-list__bulk-tag-group {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   gap: var(--space-xs);
   flex-shrink: 0;
@@ -101,6 +108,11 @@
     var(--color-border-default);
   padding-left: var(--space-sm);
   margin-left: var(--space-xs);
+}
+
+.task-list__bulk-tag-group .form__input {
+  width: var(--bulk-tag-input-width);
+  min-width: 0;
 }
 
 /* Drag-and-drop — row states, drop strip, section highlights */

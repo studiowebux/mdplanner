@@ -326,6 +326,9 @@
   --toolbar-search-min-width: 12rem;
   --toolbar-search-max-width: 20rem;
 
+  /* Bulk bar */
+  --bulk-tag-input-width: 7rem;
+
   /* Column toggle */
   --column-toggle-min-width: 10rem;
 
