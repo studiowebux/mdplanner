@@ -46,6 +46,21 @@
     dragTaskId = null;
   });
 
+  // --- Re-apply dragging class after htmx swaps #tasks-view mid-drag ---
+  // SSE can trigger a view swap while a drag is in progress, which replaces
+  // .task-list and removes task-list--dragging, hiding the drop strip.
+  document.addEventListener("htmx:afterSwap", function (e) {
+    if (
+      dragTaskId &&
+      e.detail &&
+      e.detail.target &&
+      e.detail.target.id === "tasks-view"
+    ) {
+      var list = document.querySelector(".task-list");
+      if (list) list.classList.add(DRAG_CLASS);
+    }
+  });
+
   // --- Drag over (allow drop + auto-scroll) ---
   document.addEventListener("dragover", function (e) {
     if (!dragTaskId) return;
@@ -106,7 +121,7 @@
     } else {
       var header = e.target.closest(".task-list__section-header");
       if (header) {
-        var title = header.querySelector(".task-list__section-title");
+        var title = header.querySelector(".section-heading");
         section = title ? title.textContent.trim() : null;
       }
     }
