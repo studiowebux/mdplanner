@@ -496,7 +496,7 @@ export const TaskDetailView: FC<Props> = (
                 )}
                 <div class="task-detail__copy-btns">
                   <button
-                    class="btn btn--ghost btn--sm task-detail__copy-btn"
+                    class="btn btn--tertiary btn--sm"
                     type="button"
                     data-copy
                     data-copy-value={task.id}
@@ -505,7 +505,7 @@ export const TaskDetailView: FC<Props> = (
                     Copy ID
                   </button>
                   <button
-                    class="btn btn--ghost btn--sm task-detail__copy-btn"
+                    class="btn btn--tertiary btn--sm"
                     type="button"
                     data-copy="url"
                     title="Copy permalink"

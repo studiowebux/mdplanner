@@ -278,6 +278,7 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-tight);
 }
 
 /* Task rows */
@@ -308,10 +309,26 @@
 
 .task-list__row {
   cursor: pointer;
+  position: relative;
 }
 
 .task-list__row:hover {
   background: var(--color-bg-hover);
+}
+
+/* Card-link pattern — title anchor covers the full row; checkbox + actions sit above it */
+.task-list__row-title::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-table-head);
+}
+
+.task-list__select,
+.task-list__select-all-section,
+.task-list__row-actions {
+  position: relative;
+  z-index: var(--z-table-sticky);
 }
 
 .task-list__row--completed .task-list__row-title {

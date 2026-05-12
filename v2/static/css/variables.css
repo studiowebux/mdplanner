@@ -229,6 +229,7 @@
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
   --body-line-height: 1.6;
+  --line-height-tight: 1;
 
   /* Card */
   --card-bg: var(--color-bg-primary);

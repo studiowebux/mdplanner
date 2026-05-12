@@ -125,7 +125,7 @@ const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = (
         Edit
       </button>
       <button
-        class="btn btn--ghost btn--sm"
+        class="btn btn--secondary btn--sm"
         type="button"
         data-copy
         data-copy-value={`/tasks/${task.id}`}
