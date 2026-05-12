@@ -75,7 +75,7 @@ export const TASK_FORM_FIELDS: FieldDef[] = [
   { type: "date", name: "due_date", label: "Due date" },
   { type: "date", name: "planned_start", label: "Planned start" },
   { type: "date", name: "planned_end", label: "Planned end" },
-  { type: "number", name: "effort", label: "Effort (days)" },
+  { type: "number", name: "effort", label: "Effort (hours)" },
   { type: "number", name: "order", label: "Sort order" },
   {
     type: "tags",

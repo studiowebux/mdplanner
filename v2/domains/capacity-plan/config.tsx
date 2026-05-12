@@ -26,7 +26,7 @@ export const capacityPlanConfig: DomainConfig<
   path: "/capacity-plans",
   ssePrefix: "capacity-plan",
   styles: ["/css/views/capacity-plans.css"],
-  scripts: [],
+  scripts: ["/js/capacity-plan-bandwidth.js"],
   emptyMessage: "No capacity plans yet. Create one to get started.",
   defaultView: "table",
 

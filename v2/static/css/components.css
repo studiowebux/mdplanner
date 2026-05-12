@@ -1468,6 +1468,12 @@ a.badge:hover {
   font-variant-numeric: tabular-nums;
 }
 
+.data-table__td--actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 /* Uppercase header modifier — GitHub + marketing plan table style */
 
 .data-table--uppercase .data-table__th,

@@ -8,7 +8,8 @@
 .capacity-plan-detail {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-8);
+  width: var(--size-full);
 }
 
 .capacity-plan-detail__header {
@@ -22,7 +23,8 @@
 .capacity-plan-detail__section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-4);
+  width: var(--size-full);
 }
 
 .capacity-plan-detail__section-header {
@@ -159,4 +161,94 @@
 .capacity-plan-detail__cell-empty {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
+}
+
+/* ---------------------------------------------------------------------------
+   Bandwidth summary
+   --------------------------------------------------------------------------- */
+
+.capacity-plan-detail__bandwidth-legend {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.capacity-plan-detail__bandwidth-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.capacity-plan-detail__bw-row {
+  display: grid;
+  grid-template-columns: var(--size-40) 1fr var(--size-12) auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.capacity-plan-detail__bw-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.capacity-plan-detail__bw-bar-wrap {
+  position: relative;
+  height: var(--space-3);
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.capacity-plan-detail__bw-bar {
+  height: var(--size-full);
+  border-radius: var(--radius-full);
+  transition: width var(--transition-base);
+}
+
+.capacity-plan-detail__bw-bar--ok {
+  background: var(--color-success);
+}
+
+.capacity-plan-detail__bw-bar--warn {
+  background: var(--color-warning);
+}
+
+.capacity-plan-detail__bw-bar--over {
+  background: var(--color-warning);
+}
+
+.capacity-plan-detail__bw-bar-over {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: var(--size-full);
+  background: var(--color-danger);
+  border-radius: var(--radius-full);
+}
+
+.capacity-plan-detail__bw-pct {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.capacity-plan-detail__bw--ok {
+  color: var(--color-success);
+}
+
+.capacity-plan-detail__bw--warn {
+  color: var(--color-warning);
+}
+
+.capacity-plan-detail__bw--over {
+  color: var(--color-danger);
+}
+
+.capacity-plan-detail__bw-detail {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
 }
