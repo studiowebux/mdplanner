@@ -6,9 +6,9 @@ import { publish } from "../../../singletons/event-bus.ts";
 import {
   CapacityPlanSchema,
   CreateCapacityPlanSchema,
+  ProjectAllocationSchema,
   TeamMemberRefSchema,
   UpdateCapacityPlanSchema,
-  WeeklyAllocationSchema,
 } from "../../../types/capacity-plan.types.ts";
 import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
 
@@ -276,7 +276,7 @@ capacityPlansRouter.openapi(
 // Allocation sub-routes
 // ---------------------------------------------------------------------------
 
-const AddAllocationSchema = WeeklyAllocationSchema.omit({ id: true });
+const AddAllocationSchema = ProjectAllocationSchema.omit({ id: true });
 
 // POST /:id/allocations
 capacityPlansRouter.openapi(

@@ -4,9 +4,9 @@ import type { CapacityPlanRepository } from "../repositories/capacity-plan.repos
 import type {
   CapacityPlan,
   CreateCapacityPlan,
+  ProjectAllocation,
   TeamMemberRef,
   UpdateCapacityPlan,
-  WeeklyAllocation,
 } from "../types/capacity-plan.types.ts";
 import { generateId } from "../utils/id.ts";
 import { BaseService } from "./base.service.ts";
@@ -64,10 +64,13 @@ export class CapacityPlanService extends BaseService<
     const plan = await this.repo.findById(planId);
     if (!plan) return null;
 
+    const member = plan.teamMembers.find((m) => m.id === memberId);
     return this.repo.update(planId, {
       teamMembers: plan.teamMembers.filter((m) => m.id !== memberId),
-      // Remove all allocations belonging to this member.
-      allocations: plan.allocations.filter((a) => a.memberId !== memberId),
+      // Remove allocations belonging to this person.
+      allocations: member
+        ? plan.allocations.filter((a) => a.personId !== member.personId)
+        : plan.allocations,
     });
   }
 
@@ -77,12 +80,12 @@ export class CapacityPlanService extends BaseService<
 
   async addAllocation(
     planId: string,
-    allocation: Omit<WeeklyAllocation, "id">,
+    allocation: Omit<ProjectAllocation, "id">,
   ): Promise<CapacityPlan | null> {
     const plan = await this.repo.findById(planId);
     if (!plan) return null;
 
-    const newAllocation: WeeklyAllocation = {
+    const newAllocation: ProjectAllocation = {
       ...allocation,
       id: generateId("alloc"),
     };
@@ -94,7 +97,7 @@ export class CapacityPlanService extends BaseService<
   async updateAllocation(
     planId: string,
     allocId: string,
-    updates: Partial<Omit<WeeklyAllocation, "id">>,
+    updates: Partial<Omit<ProjectAllocation, "id">>,
   ): Promise<CapacityPlan | null> {
     const plan = await this.repo.findById(planId);
     if (!plan) return null;

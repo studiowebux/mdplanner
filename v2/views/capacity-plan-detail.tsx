@@ -8,17 +8,48 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 import type {
   CapacityPlan,
   TeamMemberRef,
-  WeeklyAllocation,
 } from "../types/capacity-plan.types.ts";
 import type { ViewProps } from "../types/app.ts";
 
 // ---------------------------------------------------------------------------
-// Sub-components
+// Exported grid types — consumed by routes.tsx to build and pass grid data
 // ---------------------------------------------------------------------------
 
-const MembersTable: FC<{ planId: string; members: TeamMemberRef[] }> = (
-  { planId, members },
-) => (
+export type WeekCol = { label: string; monday: string };
+
+export type GridRow = {
+  personId: string;
+  personName: string;
+  cells: Record<string, {
+    plannedHours: number;
+    taskHours: number;
+    tasks: { id: string; title: string; hours: number }[];
+  }>;
+  totalPlanned: number;
+  totalTask: number;
+};
+
+export type AllocationSummary = {
+  id: string;
+  planId: string;
+  personName: string;
+  targetTitle: string;
+  targetHref?: string;
+  targetType: "project" | "milestone";
+  percentage?: number;
+  hoursPerWeek?: number;
+  notes?: string;
+};
+
+// ---------------------------------------------------------------------------
+// Members table
+// ---------------------------------------------------------------------------
+
+const MembersTable: FC<{
+  planId: string;
+  members: TeamMemberRef[];
+  personById: Record<string, string>;
+}> = ({ planId, members, personById }) => (
   <section class="detail-section capacity-plan-detail__section">
     <div class="capacity-plan-detail__section-header">
       <h2 class="section-heading">Team Members</h2>
@@ -38,7 +69,7 @@ const MembersTable: FC<{ planId: string; members: TeamMemberRef[] }> = (
         <table class="data-table capacity-plan-detail__table">
           <thead>
             <tr class="data-table__head-row">
-              <th class="data-table__th">Person ID</th>
+              <th class="data-table__th">Person</th>
               <th class="data-table__th">Hours/Day</th>
               <th class="data-table__th">Working Days</th>
               <th class="data-table__th"></th>
@@ -47,19 +78,25 @@ const MembersTable: FC<{ planId: string; members: TeamMemberRef[] }> = (
           <tbody>
             {members.map((m) => (
               <tr key={m.id} class="data-table__row">
-                <td class="data-table__td">{m.personId}</td>
-                <td class="data-table__td">{m.hoursPerDay ?? "—"}</td>
                 <td class="data-table__td">
-                  {m.workingDays?.join(", ") ?? "—"}
+                  <a href={`/people/${m.personId}`}>
+                    {personById[m.personId] ?? m.personId}
+                  </a>
+                </td>
+                <td class="data-table__td">{m.hoursPerDay ?? 8}</td>
+                <td class="data-table__td">
+                  {m.workingDays?.join(", ") ?? "Mon–Fri"}
                 </td>
                 <td class="data-table__td data-table__td--actions">
                   <button
                     class="btn btn--danger btn--xs"
                     type="button"
                     hx-delete={`/api/v1/capacity-plans/${planId}/members/${m.id}`}
-                    hx-confirm={`Remove member ${m.personId}? Their allocations will also be removed.`}
+                    hx-confirm={`Remove ${
+                      personById[m.personId] ?? m.personId
+                    }? Their allocations will also be removed.`}
                     hx-swap="none"
-                    hx-on--after-request={`if(event.detail.successful) window.location.reload()`}
+                    hx-on--after-request="if(event.detail.successful) window.location.reload()"
                   >
                     Remove
                   </button>
@@ -72,55 +109,70 @@ const MembersTable: FC<{ planId: string; members: TeamMemberRef[] }> = (
   </section>
 );
 
-const AllocationsTable: FC<{
-  planId: string;
-  allocations: WeeklyAllocation[];
-}> = ({ planId, allocations }) => (
+// ---------------------------------------------------------------------------
+// Allocation config table (person → project → % or h/week)
+// ---------------------------------------------------------------------------
+
+const AllocationsConfig: FC<{
+  allocs: AllocationSummary[];
+}> = ({ allocs }) => (
   <section class="detail-section capacity-plan-detail__section">
     <div class="capacity-plan-detail__section-header">
       <h2 class="section-heading">Allocations</h2>
       <button
         class="btn btn--primary btn--sm"
         type="button"
-        hx-get={`/capacity-plans/${planId}/allocations/new`}
+        hx-get={`/capacity-plans/${allocs[0]?.planId ?? ""}/allocations/new`}
         hx-target="#capacity-plans-form-container"
         hx-swap="innerHTML"
       >
         Add Allocation
       </button>
     </div>
-    {allocations.length === 0
-      ? <p class="capacity-plan-detail__empty">No allocations yet.</p>
+    {allocs.length === 0
+      ? (
+        <p class="capacity-plan-detail__empty">
+          No allocations yet. Add one to start planning capacity.
+        </p>
+      )
       : (
         <table class="data-table capacity-plan-detail__table">
           <thead>
             <tr class="data-table__head-row">
-              <th class="data-table__th">Member</th>
-              <th class="data-table__th">Week Start</th>
-              <th class="data-table__th">Hours</th>
+              <th class="data-table__th">Person</th>
               <th class="data-table__th">Target</th>
-              <th class="data-table__th">Target ID</th>
+              <th class="data-table__th">Type</th>
+              <th class="data-table__th">Allocation</th>
               <th class="data-table__th">Notes</th>
               <th class="data-table__th"></th>
             </tr>
           </thead>
           <tbody>
-            {allocations.map((a) => (
+            {allocs.map((a) => (
               <tr key={a.id} class="data-table__row">
-                <td class="data-table__td">{a.memberId}</td>
-                <td class="data-table__td">{a.weekStart}</td>
-                <td class="data-table__td">{a.allocatedHours}h</td>
-                <td class="data-table__td">{a.targetType}</td>
-                <td class="data-table__td">{a.targetId ?? "—"}</td>
+                <td class="data-table__td">{a.personName}</td>
+                <td class="data-table__td">
+                  {a.targetHref
+                    ? <a href={a.targetHref}>{a.targetTitle}</a>
+                    : a.targetTitle}
+                </td>
+                <td class="data-table__td">
+                  <span class="badge">{a.targetType}</span>
+                </td>
+                <td class="data-table__td capacity-plan-detail__alloc-qty">
+                  {a.percentage != null
+                    ? `${a.percentage}%`
+                    : `${a.hoursPerWeek ?? 0}h/week`}
+                </td>
                 <td class="data-table__td">{a.notes ?? "—"}</td>
                 <td class="data-table__td data-table__td--actions">
                   <button
                     class="btn btn--danger btn--xs"
                     type="button"
-                    hx-delete={`/api/v1/capacity-plans/${planId}/allocations/${a.id}`}
+                    hx-delete={`/api/v1/capacity-plans/${a.planId}/allocations/${a.id}`}
                     hx-confirm="Remove this allocation?"
                     hx-swap="none"
-                    hx-on--after-request={`if(event.detail.successful) window.location.reload()`}
+                    hx-on--after-request="if(event.detail.successful) window.location.reload()"
                   >
                     Remove
                   </button>
@@ -134,12 +186,141 @@ const AllocationsTable: FC<{
 );
 
 // ---------------------------------------------------------------------------
+// Computed capacity grid
+// ---------------------------------------------------------------------------
+
+const CapacityGrid: FC<{ weeks: WeekCol[]; rows: GridRow[] }> = (
+  { weeks, rows },
+) => {
+  if (rows.length === 0) {
+    return (
+      <section class="detail-section capacity-plan-detail__section">
+        <h2 class="section-heading">Capacity Grid</h2>
+        <p class="capacity-plan-detail__empty">
+          Add team members and allocations to see the capacity grid.
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section class="detail-section capacity-plan-detail__section">
+      <h2 class="section-heading">Capacity Grid</h2>
+      <p class="capacity-plan-detail__grid-legend">
+        <span class="capacity-plan-detail__legend-planned">Planned</span>
+        {" / "}
+        <span class="capacity-plan-detail__legend-tasks">Tasks</span>
+        {" (hours)"}
+      </p>
+      <div class="capacity-plan-detail__grid-scroll">
+        <table class="data-table capacity-plan-detail__grid">
+          <thead>
+            <tr class="data-table__head-row">
+              <th class="data-table__th capacity-plan-detail__grid-person-col">
+                Person
+              </th>
+              {weeks.map((w) => (
+                <th
+                  key={w.monday}
+                  class="data-table__th capacity-plan-detail__grid-week-col"
+                >
+                  {w.label}
+                </th>
+              ))}
+              <th class="data-table__th capacity-plan-detail__grid-total-col">
+                Total
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.personId} class="data-table__row">
+                <td class="data-table__td capacity-plan-detail__grid-person-col">
+                  <a href={`/people/${row.personId}`}>{row.personName}</a>
+                </td>
+                {weeks.map((w) => {
+                  const cell = row.cells[w.monday] ?? {
+                    plannedHours: 0,
+                    taskHours: 0,
+                    tasks: [],
+                  };
+                  const over = cell.taskHours > cell.plannedHours &&
+                    cell.plannedHours > 0;
+                  return (
+                    <td
+                      key={w.monday}
+                      class={`data-table__td capacity-plan-detail__grid-cell${
+                        over ? " capacity-plan-detail__grid-cell--over" : ""
+                      }`}
+                    >
+                      {cell.plannedHours > 0 || cell.taskHours > 0
+                        ? (
+                          <details class="capacity-plan-detail__cell-details">
+                            <summary class="capacity-plan-detail__cell-summary">
+                              <span class="capacity-plan-detail__legend-planned">
+                                {Math.round(cell.plannedHours)}h
+                              </span>
+                              {" / "}
+                              <span class="capacity-plan-detail__legend-tasks">
+                                {Math.round(cell.taskHours)}h
+                              </span>
+                            </summary>
+                            {cell.tasks.length > 0 && (
+                              <ul class="capacity-plan-detail__cell-tasks">
+                                {cell.tasks.map((t) => (
+                                  <li key={t.id}>
+                                    <a href={`/tasks/${t.id}`}>{t.title}</a>
+                                    {" "}
+                                    <span class="capacity-plan-detail__cell-task-h">
+                                      {Math.round(t.hours)}h
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </details>
+                        )
+                        : (
+                          <span class="capacity-plan-detail__cell-empty">
+                            —
+                          </span>
+                        )}
+                    </td>
+                  );
+                })}
+                <td class="data-table__td capacity-plan-detail__grid-total-col">
+                  <span class="capacity-plan-detail__legend-planned">
+                    {Math.round(row.totalPlanned)}h
+                  </span>
+                  {" / "}
+                  <span class="capacity-plan-detail__legend-tasks">
+                    {Math.round(row.totalTask)}h
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // Main view
 // ---------------------------------------------------------------------------
 
 export const CapacityPlanDetailView: FC<
-  ViewProps & { item: CapacityPlan }
-> = ({ item: plan, ...props }) => (
+  ViewProps & {
+    item: CapacityPlan;
+    personById: Record<string, string>;
+    allocationSummaries: AllocationSummary[];
+    weeks: WeekCol[];
+    gridRows: GridRow[];
+  }
+> = (
+  { item: plan, personById, allocationSummaries, weeks, gridRows, ...props },
+) => (
   <MainLayout
     title={plan.title}
     {...props}
@@ -170,20 +351,35 @@ export const CapacityPlanDetailView: FC<
       </header>
 
       <div class="detail-section detail-info-row">
-        {plan.date && <InfoItem label="Date">{plan.date}</InfoItem>}
+        {plan.startDate && <InfoItem label="Start">{plan.startDate}</InfoItem>}
+        {plan.endDate && <InfoItem label="End">{plan.endDate}</InfoItem>}
         {plan.budgetHours != null && (
           <InfoItem label="Budget">{plan.budgetHours}h</InfoItem>
         )}
-        <InfoItem label="Members">
-          {(plan.teamMembers ?? []).length}
-        </InfoItem>
+        <InfoItem label="Members">{(plan.teamMembers ?? []).length}</InfoItem>
         <InfoItem label="Allocations">
           {(plan.allocations ?? []).length}
         </InfoItem>
       </div>
 
-      <MembersTable planId={plan.id} members={plan.teamMembers ?? []} />
-      <AllocationsTable planId={plan.id} allocations={plan.allocations ?? []} />
+      {(!plan.startDate || !plan.endDate) && (
+        <div class="detail-section capacity-plan-detail__no-range">
+          <p>
+            Set a <strong>Start</strong> and <strong>End</strong>{" "}
+            date on this plan to see the capacity grid. Use <em>Edit</em> above.
+          </p>
+        </div>
+      )}
+
+      <MembersTable
+        planId={plan.id}
+        members={plan.teamMembers ?? []}
+        personById={personById}
+      />
+
+      <AllocationsConfig allocs={allocationSummaries} />
+
+      {weeks.length > 0 && <CapacityGrid weeks={weeks} rows={gridRows} />}
 
       <AuditMeta
         createdAt={plan.createdAt}

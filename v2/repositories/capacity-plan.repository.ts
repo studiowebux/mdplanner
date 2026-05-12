@@ -1,13 +1,18 @@
 // Capacity plan repository — markdown CRUD under capacity-plans/.
-// Frontmatter: id, date, budgetHours, createdAt, updatedAt.
-// Body: # Title, ## Team Members, ## Allocations (pipe-delimited, v1 format).
+// Frontmatter: id, startDate, endDate, budgetHours, createdAt, updatedAt.
+// Body: # Title, ## Team Members, ## Allocations (pipe-delimited).
+//
+// Allocation line format:
+//   - (id) personId | targetType | targetId | 50%        (percentage)
+//   - (id) personId | targetType | targetId | 20h/week   (fixed hours)
+//   - (id) personId | targetType | targetId | 20h/week | optional notes
 
 import type {
   CapacityPlan,
   CreateCapacityPlan,
+  ProjectAllocation,
   TeamMemberRef,
   UpdateCapacityPlan,
-  WeeklyAllocation,
 } from "../types/capacity-plan.types.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import {
@@ -15,7 +20,6 @@ import {
   rowToCapacityPlan,
 } from "../domains/capacity-plan/cache.ts";
 
-// Fields that live in the body — excluded from frontmatter block.
 const CAPACITY_PLAN_BODY_KEYS = [
   "title",
   "teamMembers",
@@ -51,7 +55,6 @@ export class CapacityPlanRepository extends CachedMarkdownRepository<
     return {
       ...data,
       id,
-      date: data.date ?? new Date().toISOString().split("T")[0],
       teamMembers: data.teamMembers ?? [],
       allocations: data.allocations ?? [],
       createdAt: now,
@@ -78,9 +81,8 @@ export class CapacityPlanRepository extends CachedMarkdownRepository<
     return {
       id,
       title,
-      date: fm.date != null
-        ? String(fm.date)
-        : new Date().toISOString().split("T")[0],
+      startDate: fm.startDate != null ? String(fm.startDate) : undefined,
+      endDate: fm.endDate != null ? String(fm.endDate) : undefined,
       budgetHours: fm.budgetHours != null ? Number(fm.budgetHours) : undefined,
       teamMembers: parseMembers(bodyText),
       allocations: parseAllocations(bodyText),
@@ -101,7 +103,7 @@ export class CapacityPlanRepository extends CachedMarkdownRepository<
 }
 
 // ---------------------------------------------------------------------------
-// Body parsing — mirrors v1 CapacityDirectoryParser logic
+// Body parsing
 // ---------------------------------------------------------------------------
 
 function parseMembers(body: string): TeamMemberRef[] {
@@ -146,35 +148,38 @@ function parseMembers(body: string): TeamMemberRef[] {
   return members;
 }
 
-function parseAllocations(body: string): WeeklyAllocation[] {
+function parseAllocations(body: string): ProjectAllocation[] {
   const section = extractSection(body, /^##\s+allocation/im, /^##\s+/im);
   if (!section) return [];
 
-  const allocations: WeeklyAllocation[] = [];
+  const allocations: ProjectAllocation[] = [];
   for (const line of section.split("\n")) {
-    // - (id) memberId | weekStart | Nh | targetType | targetId | notes
+    // - (id) personId | targetType | targetId | 50% [| notes]
+    // - (id) personId | targetType | targetId | 20h/week [| notes]
     const m = line.match(
-      /^[-*]\s+\((\w+)\)\s+(\S+)\s*\|\s*(\S+)\s*\|\s*(\d+)h\s*\|\s*(\w+)\s*\|\s*(\S*)\s*(?:\|\s*(.*))?$/,
+      /^[-*]\s+\((\w+)\)\s+(\S+)\s*\|\s*(\w+)\s*\|\s*(\S+)\s*\|\s*([^|]+?)\s*(?:\|\s*(.*))?$/,
     );
-    if (m) {
-      allocations.push({
-        id: m[1],
-        memberId: m[2],
-        weekStart: m[3],
-        allocatedHours: parseInt(m[4], 10),
-        targetType: m[5] as WeeklyAllocation["targetType"],
-        targetId: m[6] || undefined,
-        notes: m[7]?.trim() || undefined,
-      });
-    }
+    if (!m) continue;
+
+    const [, id, personId, targetType, targetId, quantifier, notes] = m;
+    if (targetType !== "project" && targetType !== "milestone") continue;
+
+    const pctMatch = quantifier.match(/^(\d+(?:\.\d+)?)%$/);
+    const hpwMatch = quantifier.match(/^(\d+(?:\.\d+)?)h\/week$/);
+
+    allocations.push({
+      id,
+      personId,
+      targetType: targetType as ProjectAllocation["targetType"],
+      targetId,
+      percentage: pctMatch ? parseFloat(pctMatch[1]) : undefined,
+      hoursPerWeek: hpwMatch ? parseFloat(hpwMatch[1]) : undefined,
+      notes: notes?.trim() || undefined,
+    });
   }
   return allocations;
 }
 
-/**
- * Extract the text between a section heading and the next H2 (or end of body).
- * Returns the content lines after the heading, or null if the heading is absent.
- */
 function extractSection(
   body: string,
   headingPattern: RegExp,
@@ -199,7 +204,7 @@ function extractSection(
 }
 
 // ---------------------------------------------------------------------------
-// Body serialization — mirrors v1 CapacityDirectoryParser.serializeItem()
+// Body serialization
 // ---------------------------------------------------------------------------
 
 function buildBody(item: CapacityPlan): string {
@@ -217,11 +222,12 @@ function buildBody(item: CapacityPlan): string {
   parts.push("", "## Allocations", "");
 
   for (const a of item.allocations) {
-    const notes = a.notes ? ` | ${a.notes}` : "";
+    const quantifier = a.percentage != null
+      ? `${a.percentage}%`
+      : `${a.hoursPerWeek ?? 0}h/week`;
+    const notePart = a.notes ? ` | ${a.notes}` : "";
     parts.push(
-      `- (${a.id}) ${a.memberId} | ${a.weekStart} | ${a.allocatedHours}h | ${a.targetType} | ${
-        a.targetId ?? ""
-      }${notes}`,
+      `- (${a.id}) ${a.personId} | ${a.targetType} | ${a.targetId} | ${quantifier}${notePart}`,
     );
   }
 

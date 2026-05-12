@@ -1,5 +1,9 @@
 /**
  * Capacity plan types — Zod schemas (single source), inferred types.
+ *
+ * ProjectAllocation replaces WeeklyAllocation: one row per person-project pair
+ * with a percentage or hours/week. The weekly grid is computed from the plan
+ * period + member availability, not stored manually.
  */
 
 import { z } from "@hono/zod-openapi";
@@ -19,45 +23,50 @@ export const TeamMemberRefSchema = z.object({
     example: "person_123",
   }),
   hoursPerDay: z.number().nullable().optional().openapi({
-    description: "Override: available hours per day",
+    description: "Override: available hours per day (default 8)",
     example: 6,
   }),
   workingDays: z.array(z.string()).nullable().optional().openapi({
-    description: "Override: working days e.g. ['Mon','Tue','Wed']",
+    description: "Override: working days e.g. ['Mon','Tue','Wed'] (default 5)",
   }),
 }).openapi("TeamMemberRef");
 
 export type TeamMemberRef = z.infer<typeof TeamMemberRefSchema>;
 
-export const WeeklyAllocationSchema = z.object({
+export const ProjectAllocationSchema = z.object({
   id: z.string().openapi({
     description: "Allocation ID",
     example: "alloc_abc",
   }),
-  memberId: z.string().openapi({ description: "TeamMemberRef ID" }),
-  weekStart: z.string().openapi({
-    description: "Week start date (YYYY-MM-DD)",
-    example: "2026-05-11",
+  personId: z.string().openapi({
+    description: "Person ID (matches TeamMemberRef.personId)",
+    example: "person_123",
   }),
-  allocatedHours: z.number().openapi({
-    description: "Hours allocated for this week",
+  targetType: z.enum(["project", "milestone"]).openapi({
+    description: "What the allocation targets",
+    example: "project",
+  }),
+  targetId: z.string().openapi({
+    description: "Portfolio item ID (project) or milestone ID",
+    example: "portfolio_456",
+  }),
+  percentage: z.number().min(0).max(100).nullable().optional().openapi({
+    description: "Percentage of available weekly hours (0–100)",
+    example: 50,
+  }),
+  hoursPerWeek: z.number().nullable().optional().openapi({
+    description: "Fixed hours per week (alternative to percentage)",
     example: 20,
-  }),
-  targetType: z.enum(["project", "task", "milestone"]).openapi({
-    description: "What the allocation is targeting",
-  }),
-  targetId: z.string().nullable().optional().openapi({
-    description: "ID of the target entity",
   }),
   notes: z.string().nullable().optional().openapi({
     description: "Free-form notes",
   }),
-}).openapi("WeeklyAllocation");
+}).openapi("ProjectAllocation");
 
-export type WeeklyAllocation = z.infer<typeof WeeklyAllocationSchema>;
+export type ProjectAllocation = z.infer<typeof ProjectAllocationSchema>;
 
 // ---------------------------------------------------------------------------
-// Zod schemas — single source of truth
+// Capacity plan schema
 // ---------------------------------------------------------------------------
 
 export const CapacityPlanSchema = z.object({
@@ -69,36 +78,42 @@ export const CapacityPlanSchema = z.object({
     description: "Plan title",
     example: "Q2 2026 Capacity Plan",
   }),
-  date: z.string().openapi({
-    description: "Plan date (YYYY-MM-DD)",
-    example: "2026-05-01",
+  startDate: z.string().nullable().optional().openapi({
+    description: "Plan start date (YYYY-MM-DD)",
+    example: "2026-04-01",
+  }),
+  endDate: z.string().nullable().optional().openapi({
+    description: "Plan end date (YYYY-MM-DD)",
+    example: "2026-06-30",
   }),
   budgetHours: z.number().nullable().optional().openapi({
     description: "Total budget hours for the plan period",
     example: 160,
   }),
   teamMembers: z.array(TeamMemberRefSchema).openapi({
-    description: "Team member references with optional overrides",
+    description: "Team members with optional capacity overrides",
   }),
-  allocations: z.array(WeeklyAllocationSchema).openapi({
-    description: "Weekly allocation entries",
+  allocations: z.array(ProjectAllocationSchema).openapi({
+    description: "Per-person-per-project allocations (% or h/week)",
   }),
 }).merge(AuditFieldsSchema).openapi("CapacityPlan");
 
 export type CapacityPlan = z.infer<typeof CapacityPlanSchema>;
 
 // ---------------------------------------------------------------------------
-// Create / Update — derived from CapacityPlanSchema
+// Create / Update
 // ---------------------------------------------------------------------------
 
 export const CreateCapacityPlanSchema = CapacityPlanSchema.pick({
   title: true,
-  date: true,
+  startDate: true,
+  endDate: true,
   budgetHours: true,
   teamMembers: true,
   allocations: true,
 }).partial({
-  date: true,
+  startDate: true,
+  endDate: true,
   budgetHours: true,
   teamMembers: true,
   allocations: true,
@@ -107,8 +122,6 @@ export const CreateCapacityPlanSchema = CapacityPlanSchema.pick({
 export type CreateCapacityPlan = z.infer<typeof CreateCapacityPlanSchema>;
 
 export const UpdateCapacityPlanSchema = CreateCapacityPlanSchema.partial()
-  .openapi(
-    "UpdateCapacityPlan",
-  );
+  .openapi("UpdateCapacityPlan");
 
 export type UpdateCapacityPlan = z.infer<typeof UpdateCapacityPlanSchema>;

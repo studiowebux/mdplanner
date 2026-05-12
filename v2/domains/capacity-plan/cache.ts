@@ -22,7 +22,8 @@ export function rowToCapacityPlan(
   return {
     id: row.id as string,
     title: (row.title as string) ?? "",
-    date: (row.date as string) ?? "",
+    startDate: (row.start_date as string) ?? undefined,
+    endDate: (row.end_date as string) ?? undefined,
     budgetHours: row.budget_hours != null
       ? Number(row.budget_hours)
       : undefined,
@@ -39,7 +40,8 @@ const CAPACITY_PLAN_SCHEMA =
   `CREATE TABLE IF NOT EXISTS ${CAPACITY_PLAN_TABLE} (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
-  date TEXT,
+  start_date TEXT,
+  end_date TEXT,
   budget_hours REAL,
   team_members TEXT,
   allocations TEXT,
@@ -50,20 +52,26 @@ const CAPACITY_PLAN_SCHEMA =
   synced_at TEXT
 )`;
 
+const CAPACITY_PLAN_MIGRATIONS = [
+  `ALTER TABLE ${CAPACITY_PLAN_TABLE} ADD COLUMN start_date TEXT`,
+  `ALTER TABLE ${CAPACITY_PLAN_TABLE} ADD COLUMN end_date TEXT`,
+];
+
 function insertCapacityPlanRow(
   db: CacheDatabase,
   p: CapacityPlan,
   syncedAt?: string,
 ): void {
   db.execute(
-    `INSERT OR REPLACE INTO ${CAPACITY_PLAN_TABLE} (id, title, date,
+    `INSERT OR REPLACE INTO ${CAPACITY_PLAN_TABLE} (id, title, start_date, end_date,
        budget_hours, team_members, allocations,
        ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(p.id),
       val(p.title),
-      val(p.date),
+      val(p.startDate),
+      val(p.endDate),
       p.budgetHours ?? null,
       jsonVal(p.teamMembers),
       jsonVal(p.allocations),
@@ -78,6 +86,7 @@ export function registerCapacityPlanEntity(repo: CapacityPlanRepository): void {
   const entity: EntityDef = {
     table: CAPACITY_PLAN_TABLE,
     schema: CAPACITY_PLAN_SCHEMA,
+    migrations: CAPACITY_PLAN_MIGRATIONS,
     fts: {
       type: "capacity_plan",
       columns: ["id", "title"],

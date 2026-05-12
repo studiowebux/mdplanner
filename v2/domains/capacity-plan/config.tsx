@@ -51,6 +51,6 @@ export const capacityPlanConfig: DomainConfig<
 
   searchPredicate: createSearchPredicate<CapacityPlan>([
     { type: "string", get: (p) => p.title },
-    { type: "string", get: (p) => p.date },
+    { type: "string", get: (p) => p.startDate ?? "" },
   ]),
 };

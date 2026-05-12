@@ -15,7 +15,11 @@ export const CapacityPlanCard: FC<Props> = ({ item, q }) => {
       id={item.id}
     >
       <CardMeta>
-        {item.date && <CardMetaItem label="Date">{item.date}</CardMetaItem>}
+        {item.startDate && (
+          <CardMetaItem label="Start">{item.startDate}</CardMetaItem>
+        )}
+        {item.endDate && <CardMetaItem label="End">{item.endDate}
+        </CardMetaItem>}
         {item.budgetHours != null && (
           <CardMetaItem label="Budget">{item.budgetHours}h</CardMetaItem>
         )}

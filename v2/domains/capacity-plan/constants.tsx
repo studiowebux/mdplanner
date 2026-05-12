@@ -32,7 +32,8 @@ export const CAPACITY_PLAN_TABLE_COLUMNS: ColumnDef[] = [
       </a>
     ),
   },
-  { key: "date", label: "Date", sortable: true },
+  { key: "startDate", label: "Start", sortable: true },
+  { key: "endDate", label: "End", sortable: true },
   { key: "budgetHours", label: "Budget (h)", sortable: true },
   { key: "memberCount", label: "Members", sortable: true },
   { key: "allocationCount", label: "Allocations", sortable: true },
@@ -54,8 +55,13 @@ export const CAPACITY_PLAN_FORM_FIELDS: FieldDef[] = [
   },
   {
     type: "date",
-    name: "date",
-    label: "Date",
+    name: "startDate",
+    label: "Start Date",
+  },
+  {
+    type: "date",
+    name: "endDate",
+    label: "End Date",
   },
   {
     type: "number",
@@ -72,7 +78,8 @@ export function capacityPlanToRow(p: CapacityPlan): Record<string, unknown> {
   return {
     id: p.id,
     title: p.title,
-    date: p.date ?? "",
+    startDate: p.startDate ?? "",
+    endDate: p.endDate ?? "",
     budgetHours: p.budgetHours ?? "",
     memberCount: (p.teamMembers ?? []).length,
     allocationCount: (p.allocations ?? []).length,

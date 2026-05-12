@@ -41,3 +41,122 @@
   font-size: var(--font-size-sm);
   font-style: italic;
 }
+
+.capacity-plan-detail__alloc-qty {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-medium);
+}
+
+.capacity-plan-detail__no-range {
+  background: var(--color-bg-subtle);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Capacity grid
+   --------------------------------------------------------------------------- */
+
+.capacity-plan-detail__grid-legend {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.capacity-plan-detail__legend-planned {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+}
+
+.capacity-plan-detail__legend-tasks {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.capacity-plan-detail__grid-scroll {
+  overflow-x: auto;
+  width: var(--size-full);
+}
+
+.capacity-plan-detail__grid {
+  width: max-content;
+  min-width: var(--size-full);
+  border-collapse: collapse;
+}
+
+.capacity-plan-detail__grid-person-col {
+  min-width: var(--size-36);
+  position: sticky;
+  left: 0;
+  background: var(--color-bg-surface);
+  z-index: var(--z-raised);
+  border-right: var(--border-width) solid var(--color-border);
+}
+
+.capacity-plan-detail__grid-week-col {
+  min-width: var(--size-24);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.capacity-plan-detail__grid-total-col {
+  min-width: var(--size-24);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  border-left: var(--border-width) solid var(--color-border);
+  background: var(--color-bg-subtle);
+}
+
+.capacity-plan-detail__grid-cell {
+  text-align: center;
+  vertical-align: top;
+  padding: var(--space-2);
+}
+
+.capacity-plan-detail__grid-cell--over {
+  background: var(--color-danger-subtle);
+}
+
+.capacity-plan-detail__cell-details {
+  display: inline-block;
+  text-align: left;
+}
+
+.capacity-plan-detail__cell-summary {
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+  list-style: none;
+  user-select: none;
+}
+
+.capacity-plan-detail__cell-summary::-webkit-details-marker {
+  display: none;
+}
+
+.capacity-plan-detail__cell-tasks {
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  min-width: var(--size-40);
+  background: var(--color-bg-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+}
+
+.capacity-plan-detail__cell-task-h {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.capacity-plan-detail__cell-empty {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}

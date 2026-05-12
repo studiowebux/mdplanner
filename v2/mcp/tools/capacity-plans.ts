@@ -5,9 +5,9 @@ import { getCapacityPlanService } from "../../singletons/services.ts";
 import {
   CapacityPlanSchema,
   CreateCapacityPlanSchema,
+  ProjectAllocationSchema,
   TeamMemberRefSchema,
   UpdateCapacityPlanSchema,
-  WeeklyAllocationSchema,
 } from "../../types/capacity-plan.types.ts";
 import { err, ok } from "../utils.ts";
 
@@ -135,12 +135,14 @@ export function registerCapacityPlanTools(server: McpServer): void {
   // Allocation helpers
   // ---------------------------------------------------------------------------
 
-  const AddAllocationSchema = WeeklyAllocationSchema.omit({ id: true });
+  const AddAllocationSchema = ProjectAllocationSchema.omit({ id: true });
 
   server.registerTool(
     "add_capacity_allocation",
     {
-      description: "Add a weekly allocation to a capacity plan.",
+      description:
+        "Add a per-person-per-project allocation to a capacity plan. " +
+        "Specify either percentage (0–100) or hoursPerWeek — not both.",
       inputSchema: {
         planId: CapacityPlanSchema.shape.id.describe("Plan ID"),
         ...AddAllocationSchema.shape,
@@ -156,10 +158,10 @@ export function registerCapacityPlanTools(server: McpServer): void {
   server.registerTool(
     "remove_capacity_allocation",
     {
-      description: "Remove a weekly allocation from a capacity plan.",
+      description: "Remove an allocation from a capacity plan.",
       inputSchema: {
         planId: CapacityPlanSchema.shape.id.describe("Plan ID"),
-        allocId: WeeklyAllocationSchema.shape.id.describe("Allocation ID"),
+        allocId: ProjectAllocationSchema.shape.id.describe("Allocation ID"),
       },
     },
     async ({ planId, allocId }) => {
