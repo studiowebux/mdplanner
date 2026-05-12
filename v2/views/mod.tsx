@@ -36,6 +36,7 @@ import { leanCanvasesRouter } from "./lean-canvases/routes.tsx";
 import { stickyNotesRouter } from "./sticky-notes/routes.tsx";
 import { capacityPlansViewRouter } from "./capacity-plans/routes.tsx";
 import { timeEntriesRouter } from "./time-entries/routes.tsx";
+import { analyticsViewRouter } from "./analytics/routes.tsx";
 import {
   getArrayTableSection,
   registerArrayTableSection,
@@ -366,6 +367,7 @@ views.route("/lean-canvases", leanCanvasesRouter);
 views.route("/sticky-notes", stickyNotesRouter);
 views.route("/capacity-plans", capacityPlansViewRouter);
 views.route("/time-entries", timeEntriesRouter);
+views.route("/analytics", analyticsViewRouter);
 views.route("/autocomplete", autocompleteRouter);
 views.route("/sidebar", sidebarRouter);
 
