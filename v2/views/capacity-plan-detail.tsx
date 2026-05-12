@@ -68,7 +68,9 @@ const DEFAULT_WORKING_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 export const MemberForm: FC<{
   planId: string;
   personOptions: { value: string; label: string }[];
-}> = ({ planId, personOptions: _personOptions }) => (
+  actorName?: string;
+  actorId?: string;
+}> = ({ planId, personOptions: _personOptions, actorName, actorId }) => (
   <Sidenav id="capacity-plan-member-form" title="Add Team Member" open>
     <form
       class="form"
@@ -92,12 +94,13 @@ export const MemberForm: FC<{
               hx-target="#member-person-results"
               hx-include="this"
               hx-swap="innerHTML"
+              value={actorName ?? ""}
             />
             <input
               type="hidden"
               id="member-personId"
               name="personId"
-              value=""
+              value={actorId ?? ""}
             />
             <ul class="form__autocomplete-list" id="member-person-results" />
           </div>

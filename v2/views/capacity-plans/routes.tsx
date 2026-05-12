@@ -237,9 +237,19 @@ capacityPlansViewRouter.get("/:id", async (c) => {
 
 capacityPlansViewRouter.get("/:id/members/new", async (c) => {
   const id = c.req.param("id");
+  const actor = c.get("actor");
   const [people] = await Promise.all([getPeopleService().list()]);
   const personOptions = people.map((p) => ({ value: p.id, label: p.name }));
-  return c.html(<MemberForm planId={id} personOptions={personOptions} />);
+  const actorName = actor?.source !== "anonymous" ? actor?.name : undefined;
+  const actorId = actor?.source !== "anonymous" ? actor?.id : undefined;
+  return c.html(
+    <MemberForm
+      planId={id}
+      personOptions={personOptions}
+      actorName={actorName}
+      actorId={actorId}
+    />,
+  );
 });
 
 capacityPlansViewRouter.post("/:id/members", async (c) => {
@@ -283,6 +293,7 @@ async function buildTargetOptions(): Promise<TargetOption[]> {
 
 capacityPlansViewRouter.get("/:id/allocations/new", async (c) => {
   const id = c.req.param("id");
+  const actor = c.get("actor");
   const plan = await getCapacityPlanService().getById(id);
   if (!plan) return c.notFound();
   const [people, targetOptions] = await Promise.all([
@@ -295,11 +306,14 @@ capacityPlansViewRouter.get("/:id/allocations/new", async (c) => {
     value: m.personId,
     label: personById[m.personId] ?? m.personId,
   }));
+  const actorName = actor?.source !== "anonymous" ? actor?.name : undefined;
+  const actorId = actor?.source !== "anonymous" ? actor?.id : undefined;
   return c.html(
     <AllocationForm
       planId={id}
       memberOptions={memberOptions}
       targetOptions={targetOptions}
+      values={{ personName: actorName, personId: actorId }}
     />,
   );
 });
