@@ -143,7 +143,11 @@ const CommentsSection: FC<{
   );
 };
 
-export const LogTimeForm: FC<{ taskId: string }> = ({ taskId }) => {
+export const LogTimeForm: FC<{
+  taskId: string;
+  actorName?: string;
+  actorId?: string;
+}> = ({ taskId, actorName, actorId }) => {
   const today = new Date().toISOString().slice(0, 10);
   return (
     <Sidenav id="task-log-time-form" title="Log Time" open>
@@ -189,6 +193,7 @@ export const LogTimeForm: FC<{ taskId: string }> = ({ taskId }) => {
                 placeholder="Search people..."
                 autocomplete="off"
                 name="q"
+                value={actorName ?? ""}
                 data-autocomplete-target="te-person"
                 hx-get="/autocomplete/people"
                 hx-trigger="input changed delay:150ms, focus"
@@ -200,7 +205,7 @@ export const LogTimeForm: FC<{ taskId: string }> = ({ taskId }) => {
                 type="hidden"
                 id="te-person"
                 name="person"
-                value=""
+                value={actorId ?? ""}
               />
               <ul class="form__autocomplete-list" id="te-person-results" />
             </div>

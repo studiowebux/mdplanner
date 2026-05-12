@@ -239,5 +239,13 @@ tasksRouter.get("/:id/time-entries/new", async (c) => {
   const id = c.req.param("id");
   const task = await getTaskService().getById(id);
   if (!task) return c.notFound();
-  return c.html(<LogTimeForm taskId={id} />);
+  const actor = c.get("actor");
+  const isAnon = !actor || actor.source === "anonymous";
+  return c.html(
+    <LogTimeForm
+      taskId={id}
+      actorName={isAnon ? undefined : actor.name}
+      actorId={isAnon ? undefined : actor.id}
+    />,
+  );
 });
