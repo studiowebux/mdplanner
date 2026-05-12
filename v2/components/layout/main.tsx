@@ -106,6 +106,7 @@ export const MainLayout: FC<Props> = (
         <script src="/js/copy-btn.js" />
         <script src="/js/hash-scroll.js" />
         <script src="/js/pomodoro.js" />
+        <script src="/js/topbar-overflow.js" />
         {scripts.map((src) => <script key={src} src={src} />)}
       </body>
     </html>

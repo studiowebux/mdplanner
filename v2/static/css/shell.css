@@ -292,6 +292,7 @@ html.fullscreen-reading .topbar {
 .topbar__search {
   flex: 1;
   position: relative;
+  min-width: var(--topbar-search-min-width);
   max-width: var(--topbar-search-max-width);
   margin: 0 auto;
 }
@@ -477,6 +478,13 @@ html.fullscreen-reading .topbar {
   border-color: var(--color-border-default);
 }
 
+/* Overflow toggle — hidden on desktop, shown on mobile */
+.topbar__overflow-btn {
+  display: none;
+  font-size: var(--font-size-lg);
+  line-height: 1;
+}
+
 .topbar__pomodoro {
   min-width: var(--topbar-pomodoro-min-width);
   font-variant-numeric: tabular-nums;
@@ -609,6 +617,67 @@ html.fullscreen-reading .topbar {
 }
 
 /* -------------------------------------------------------------------------
+   Narrow desktop — hide lowest-priority topbar buttons (1100px, pixel value
+   required — CSS vars cannot be used in @media conditions)
+   ------------------------------------------------------------------------- */
+
+/* At ≤1100px: hide secondary buttons, show ⋮, open panel on toggle. */
+@media (max-width: 1100px) {
+  #pomodoro-btn,
+  #animations-toggle,
+  #font-toggle,
+  .topbar__filter-wrap {
+    display: none;
+  }
+
+  .topbar__overflow-btn {
+    display: flex;
+  }
+
+  /* Panel — fixed sheet beneath topbar, hidden until toggled */
+  .topbar__actions {
+    display: none;
+    position: fixed;
+    top: var(--nav-height);
+    right: 0;
+    left: 0;
+    z-index: var(--z-dropdown);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    background: var(--color-bg-primary);
+    border-bottom: var(--border-width) var(--border-style)
+      var(--color-border-default);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-sm);
+  }
+
+  html.topbar-overflow-open .topbar__actions {
+    display: flex;
+  }
+
+  .topbar__actions .topbar__action-btn,
+  .topbar__actions .topbar__filter-wrap,
+  .topbar__actions > form {
+    width: 100%;
+  }
+
+  .topbar__actions .topbar__action-btn {
+    justify-content: flex-start;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+  }
+
+  /* Restore all hidden items inside the panel */
+  .topbar__actions #pomodoro-btn,
+  .topbar__actions #animations-toggle,
+  .topbar__actions #font-toggle,
+  .topbar__actions .topbar__filter-wrap {
+    display: flex;
+  }
+}
+
+/* -------------------------------------------------------------------------
    Mobile — must come AFTER all base styles (same specificity, source order)
    ------------------------------------------------------------------------- */
 
@@ -637,11 +706,6 @@ html.fullscreen-reading .topbar {
 
   .topbar {
     padding: var(--space-sm) var(--space-md);
-  }
-
-  /* Hide secondary controls — accessible via Settings page */
-  .topbar__actions {
-    display: none;
   }
 
   /* No keyboard shortcut on touch devices */

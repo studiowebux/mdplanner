@@ -37,7 +37,17 @@ export async function Topbar({ actor }: Props) {
         />
         <kbd class="topbar__search-kbd">&#8984;K</kbd>
       </div>
-      <div class="topbar__actions">
+      <button
+        id="topbar-overflow-btn"
+        class="topbar__action-btn topbar__overflow-btn"
+        type="button"
+        aria-label="More options"
+        aria-expanded="false"
+        aria-controls="topbar-actions"
+      >
+        &#8942;
+      </button>
+      <div id="topbar-actions" class="topbar__actions">
         {/* Identity selector */}
         <form
           hx-post="/api/v1/settings/identity"
