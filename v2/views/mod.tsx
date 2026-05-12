@@ -37,6 +37,7 @@ import { stickyNotesRouter } from "./sticky-notes/routes.tsx";
 import { capacityPlansViewRouter } from "./capacity-plans/routes.tsx";
 import { timeEntriesRouter } from "./time-entries/routes.tsx";
 import { analyticsViewRouter } from "./analytics/routes.tsx";
+import { uploadsRouter } from "./uploads/routes.tsx";
 import {
   getArrayTableSection,
   registerArrayTableSection,
@@ -368,6 +369,7 @@ views.route("/sticky-notes", stickyNotesRouter);
 views.route("/capacity-plans", capacityPlansViewRouter);
 views.route("/time-entries", timeEntriesRouter);
 views.route("/analytics", analyticsViewRouter);
+views.route("/uploads", uploadsRouter);
 views.route("/autocomplete", autocompleteRouter);
 views.route("/sidebar", sidebarRouter);
 
