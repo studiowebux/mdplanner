@@ -15,7 +15,11 @@ import {
   TaskGitHubError,
   TaskGitHubSection,
 } from "../task-github.tsx";
-import { resolveTaskDetailProps, TaskDetailView } from "../task-detail.tsx";
+import {
+  LogTimeForm,
+  resolveTaskDetailProps,
+  TaskDetailView,
+} from "../task-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
 
@@ -228,4 +232,12 @@ tasksRouter.post("/:id/github/unlink-pr", async (c) => {
   await getTaskService().update(id, { githubPR: undefined });
   publish("task.updated");
   return renderGitHubFragment(c, id);
+});
+
+// GET /:id/time-entries/new — log time sidenav form
+tasksRouter.get("/:id/time-entries/new", async (c) => {
+  const id = c.req.param("id");
+  const task = await getTaskService().getById(id);
+  if (!task) return c.notFound();
+  return c.html(<LogTimeForm taskId={id} />);
 });

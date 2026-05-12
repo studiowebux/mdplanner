@@ -12,6 +12,7 @@ import type {
   RejectionType,
   Task,
   TaskComment,
+  TimeEntry,
   UpdateTask,
 } from "../types/task.types.ts";
 import type { CacheSync } from "../database/sqlite/mod.ts";
@@ -323,6 +324,37 @@ export class TaskService {
     const updated = await this.taskRepo.update(id, { comments });
     if (updated) this.cacheUpsert(updated);
     return comment;
+  }
+
+  // -------------------------------------------------------------------------
+  // Time entries
+  // -------------------------------------------------------------------------
+
+  async addTimeEntry(
+    id: string,
+    data: Omit<TimeEntry, "id">,
+  ): Promise<TimeEntry | null> {
+    const task = await this.taskRepo.findById(id);
+    if (!task) return null;
+
+    const entry: TimeEntry = { id: generateId("te"), ...data };
+    const time_entries = [...(task.time_entries ?? []), entry];
+    const updated = await this.taskRepo.update(id, { time_entries });
+    if (updated) this.cacheUpsert(updated);
+    return entry;
+  }
+
+  async deleteTimeEntry(id: string, entryId: string): Promise<boolean> {
+    const task = await this.taskRepo.findById(id);
+    if (!task) return false;
+    if (!task.time_entries?.find((e) => e.id === entryId)) return false;
+
+    const time_entries = (task.time_entries ?? []).filter((e) =>
+      e.id !== entryId
+    );
+    const updated = await this.taskRepo.update(id, { time_entries });
+    if (updated) this.cacheUpsert(updated);
+    return true;
   }
 
   // -------------------------------------------------------------------------

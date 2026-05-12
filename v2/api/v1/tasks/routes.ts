@@ -13,6 +13,7 @@ import {
   CreateTaskSchema,
   GetNextTaskQuerySchema,
   IdAndCommentIdParam,
+  IdAndEntryIdParam,
   ListTaskOptionsSchema,
   MoveTaskInputSchema,
   RejectTaskInputSchema,
@@ -21,6 +22,7 @@ import {
   SweepStaleClaimsResultSchema,
   TaskCommentSchema,
   TaskSchema,
+  TimeEntrySchema,
   UpdateCommentInputSchema,
   UpdateTaskSchema,
 } from "../../../types/task.types.ts";
@@ -705,5 +707,83 @@ tasksRouter.openapi(
     }
     publish("task.updated");
     return c.json(task, 200);
+  },
+);
+
+// ---------------------------------------------------------------------------
+// Time entries
+// ---------------------------------------------------------------------------
+
+const AddTimeEntryInputSchema = TimeEntrySchema.omit({ id: true });
+
+// POST /:id/time-entries
+tasksRouter.openapi(
+  createRoute({
+    method: "post",
+    path: "/{id}/time-entries",
+    tags: ["Tasks"],
+    summary: "Log time on a task",
+    operationId: "addTaskTimeEntry",
+    request: {
+      params: IdParam,
+      body: {
+        content: { "application/json": { schema: AddTimeEntryInputSchema } },
+        required: true,
+      },
+    },
+    responses: {
+      201: {
+        content: { "application/json": { schema: TimeEntrySchema } },
+        description: "Created time entry",
+      },
+      404: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: "Not found",
+      },
+    },
+  }),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const data = c.req.valid("json");
+    const entry = await getTaskService().addTimeEntry(id, data);
+    if (!entry) {
+      return c.json({
+        error: "TASK_NOT_FOUND",
+        message: `Task ${id} not found`,
+      }, 404);
+    }
+    publish("task.updated");
+    return c.json(entry, 201);
+  },
+);
+
+// DELETE /:id/time-entries/:entryId
+tasksRouter.openapi(
+  createRoute({
+    method: "delete",
+    path: "/{id}/time-entries/{entryId}",
+    tags: ["Tasks"],
+    summary: "Delete a time entry from a task",
+    operationId: "deleteTaskTimeEntry",
+    request: { params: IdAndEntryIdParam },
+    responses: {
+      204: { description: "Deleted" },
+      404: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: "Not found",
+      },
+    },
+  }),
+  async (c) => {
+    const { id, entryId } = c.req.valid("param");
+    const ok = await getTaskService().deleteTimeEntry(id, entryId);
+    if (!ok) {
+      return c.json({
+        error: "NOT_FOUND",
+        message: `Entry ${entryId} not found on task ${id}`,
+      }, 404);
+    }
+    publish("task.updated");
+    return new Response(null, { status: 204 });
   },
 );

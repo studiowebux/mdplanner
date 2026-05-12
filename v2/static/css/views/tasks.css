@@ -943,6 +943,19 @@ a.task-board__card-avatar:hover {
   font-size: var(--font-size-base);
 }
 
+.task-detail__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.task-detail__time-hours {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
 /* Description */
 
 .task-detail__description {

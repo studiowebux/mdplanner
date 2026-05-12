@@ -381,6 +381,11 @@ export const IdAndCommentIdParam = z.object({
   commentId: z.string().openapi({ param: { name: "commentId", in: "path" } }),
 });
 
+export const IdAndEntryIdParam = z.object({
+  id: z.string().openapi({ param: { name: "id", in: "path" } }),
+  entryId: z.string().openapi({ param: { name: "entryId", in: "path" } }),
+});
+
 // ---------------------------------------------------------------------------
 // Workflow input schemas
 // ---------------------------------------------------------------------------

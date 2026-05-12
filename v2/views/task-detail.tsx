@@ -24,6 +24,7 @@ import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { type MentionOpts, renderMentions } from "../utils/mentions.ts";
 import { escapeHtml } from "../utils/html.ts";
+import { Sidenav } from "../components/ui/sidenav.tsx";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -142,45 +143,134 @@ const CommentsSection: FC<{
   );
 };
 
-const TimeEntriesSection: FC<{ entries: Task["time_entries"] }> = (
-  { entries },
-) => {
-  if (!entries?.length) return null;
-  const total = entries.reduce((sum, e) => sum + e.hours, 0);
+export const LogTimeForm: FC<{ taskId: string }> = ({ taskId }) => {
+  const today = new Date().toISOString().slice(0, 10);
+  return (
+    <Sidenav id="task-log-time-form" title="Log Time" open>
+      <form
+        class="form"
+        hx-post={`/api/v1/tasks/${taskId}/time-entries`}
+        hx-swap="none"
+        hx-on--after-request="if(event.detail.successful){ window.location.reload(); }"
+      >
+        <div class="form__body">
+          <div class="form__field">
+            <label class="form__label" for="te-date">Date</label>
+            <input
+              id="te-date"
+              name="date"
+              type="date"
+              class="form__input"
+              value={today}
+              required
+            />
+          </div>
+          <div class="form__field">
+            <label class="form__label" for="te-hours">Hours</label>
+            <input
+              id="te-hours"
+              name="hours"
+              type="number"
+              min="0.25"
+              max="24"
+              step="0.25"
+              class="form__input"
+              placeholder="e.g. 2.5"
+              required
+            />
+          </div>
+          <div class="form__field">
+            <label class="form__label" for="te-person">Person</label>
+            <input
+              id="te-person"
+              name="person"
+              type="text"
+              class="form__input"
+              placeholder="Optional"
+            />
+          </div>
+          <div class="form__field">
+            <label class="form__label" for="te-description">Description</label>
+            <input
+              id="te-description"
+              name="description"
+              type="text"
+              class="form__input"
+              placeholder="Optional"
+            />
+          </div>
+        </div>
+        <div class="form__footer">
+          <button type="submit" class="btn btn--primary">Log time</button>
+          <button type="button" class="btn" data-sidenav-close>Cancel</button>
+        </div>
+      </form>
+    </Sidenav>
+  );
+};
+
+const TimeEntriesSection: FC<{
+  taskId: string;
+  entries: Task["time_entries"];
+}> = ({ taskId, entries }) => {
+  const list = entries ?? [];
+  const total = list.reduce((sum, e) => sum + e.hours, 0);
   return (
     <section class="detail-section task-detail__section">
-      <h2>
-        Time entries
-        <span class="task-detail__count">({entries.length})</span>
-      </h2>
-      <table class="data-table data-table--compact">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Hours</th>
-            <th>Person</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          {entries.map((e) => (
-            <tr key={e.id}>
-              <td>{formatDate(e.date)}</td>
-              <td>{e.hours}</td>
-              <td>{e.person ?? ""}</td>
-              <td>{e.description ?? ""}</td>
+      <div class="task-detail__section-header">
+        <h2>
+          Time entries
+          {list.length > 0 && (
+            <span class="task-detail__count">
+              ({list.length} · {total}h)
+            </span>
+          )}
+        </h2>
+        <button
+          class="btn btn--secondary btn--sm"
+          type="button"
+          hx-get={`/tasks/${taskId}/time-entries/new`}
+          hx-target="#tasks-form-container"
+          hx-swap="innerHTML"
+        >
+          Log time
+        </button>
+      </div>
+      {list.length > 0 && (
+        <table class="data-table data-table--compact">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Hours</th>
+              <th>Person</th>
+              <th>Description</th>
+              <th />
             </tr>
-          ))}
-        </tbody>
-        <tfoot>
-          <tr>
-            <td>Total</td>
-            <td>{total}</td>
-            <td />
-            <td />
-          </tr>
-        </tfoot>
-      </table>
+          </thead>
+          <tbody>
+            {list.map((e) => (
+              <tr key={e.id}>
+                <td>{formatDate(e.date)}</td>
+                <td class="task-detail__time-hours">{e.hours}h</td>
+                <td>{e.person ?? "—"}</td>
+                <td>{e.description ?? "—"}</td>
+                <td class="data-table__td--actions">
+                  <button
+                    class="btn btn--danger btn--xs"
+                    type="button"
+                    hx-delete={`/api/v1/tasks/${taskId}/time-entries/${e.id}`}
+                    hx-confirm="Delete this time entry?"
+                    hx-swap="none"
+                    hx-on--after-request="if(event.detail.successful) window.location.reload()"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </section>
   );
 };
@@ -621,7 +711,7 @@ export const TaskDetailView: FC<Props> = (
         </div>
 
         {/* Full-width sections below columns */}
-        <TimeEntriesSection entries={task.time_entries} />
+        <TimeEntriesSection taskId={task.id} entries={task.time_entries} />
         <ApprovalSection approval={task.approvalRequest} />
         <CommentsSection comments={task.comments} mentionOpts={mentionOpts} />
 

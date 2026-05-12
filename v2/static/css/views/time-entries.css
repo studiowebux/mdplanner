@@ -1,0 +1,38 @@
+/* Time entries list view. */
+/* All values from variables.css — zero hardcoded values. */
+
+.time-entries {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  width: 100%;
+}
+
+.time-entries__header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-md);
+}
+
+.time-entries__title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.time-entries__total {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.time-entries__empty {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+}
+
+.time-entries__hours {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
