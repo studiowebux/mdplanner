@@ -86,6 +86,9 @@ import { registerMoscowEntity } from "../domains/moscow/cache.ts";
 import { C4Repository } from "../repositories/c4.repository.ts";
 import { C4Service } from "../services/c4.service.ts";
 import { registerC4Entity } from "../domains/c4/cache.ts";
+import { EisenhowerRepository } from "../repositories/eisenhower.repository.ts";
+import { EisenhowerService } from "../services/eisenhower.service.ts";
+import { registerEisenhowerEntity } from "../domains/eisenhower/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -178,6 +181,8 @@ export function initServices(
   _set(_svc, "moscow", new MoscowService(moscowRepo));
   const c4Repo = new C4Repository(projectDir);
   _set(_svc, "c4", new C4Service(c4Repo));
+  const eisenhowerRepo = new EisenhowerRepository(projectDir);
+  _set(_svc, "eisenhower", new EisenhowerService(eisenhowerRepo));
   const dnsRepo = new DnsRepository(projectDir);
   _set(_svc, "dns", new DnsService(dnsRepo, projectService));
   _set(_svc, "github", new GitHubService(projectService));
@@ -211,6 +216,7 @@ export function initServices(
     registerStickyBoardEntity(() => stickyBoardRepo.findAllFromDisk());
     registerMoscowEntity(moscowRepo);
     registerC4Entity(c4Repo);
+    registerEisenhowerEntity(eisenhowerRepo);
 
     // Pass cacheDb to repos for read-path caching
     milestoneRepo.setCacheDb(cacheDb);
@@ -237,6 +243,7 @@ export function initServices(
     stickyBoardRepo.setCacheDb(cacheDb);
     moscowRepo.setCacheDb(cacheDb);
     c4Repo.setCacheDb(cacheDb);
+    eisenhowerRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -311,6 +318,10 @@ export function getMoscowService(): MoscowService {
 
 export function getC4Service(): C4Service {
   return _get<C4Service>(_svc, "c4");
+}
+
+export function getEisenhowerService(): EisenhowerService {
+  return _get<EisenhowerService>(_svc, "eisenhower");
 }
 
 export function getCustomerService(): CustomerService {

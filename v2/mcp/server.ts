@@ -20,6 +20,7 @@ import { registerGoalTools } from "./tools/goals.ts";
 import { registerIdeaTools } from "./tools/ideas.ts";
 import { registerMarketingPlanTools } from "./tools/marketing-plans.ts";
 import { registerSwotTools } from "./tools/swot.ts";
+import { registerEisenhowerTools } from "./tools/eisenhower.ts";
 import { registerLeanCanvasTools } from "./tools/lean-canvases.ts";
 import { registerMilestoneTools } from "./tools/milestones.ts";
 import { registerNoteTools } from "./tools/notes.ts";
@@ -51,6 +52,7 @@ export function createMcpServer(): McpServer {
   registerIdeaTools(server);
   registerMarketingPlanTools(server);
   registerSwotTools(server);
+  registerEisenhowerTools(server);
   registerLeanCanvasTools(server);
   registerMilestoneTools(server);
   registerNoteTools(server);

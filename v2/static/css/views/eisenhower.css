@@ -1,0 +1,70 @@
+/* Eisenhower-specific styles — builds on .quadrant-grid in components.css */
+
+/* -- Date badge ----------------------------------------------------------- */
+
+.eisenhower-date-badge {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+/* -- Card counts ---------------------------------------------------------- */
+
+.eisenhower-card__counts {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.eisenhower-card__count--q1 {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.eisenhower-card__count--q2 {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.eisenhower-card__count--q3 {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.eisenhower-card__count--q4 {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+/* -- Detail page ---------------------------------------------------------- */
+
+.eisenhower-detail__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.eisenhower-detail__title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.eisenhower-detail__title {
+  margin: 0;
+}
+
+/* -- Quadrant subtitle ---------------------------------------------------- */
+
+.eisenhower-quadrant__subtitle {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  display: block;
+  margin-top: var(--space-xxs);
+}
+
+/* -- Edit mode ------------------------------------------------------------ */
+
+.eisenhower-detail--editing .quadrant-card__item:hover {
+  background: var(--color-bg-tertiary);
+}
