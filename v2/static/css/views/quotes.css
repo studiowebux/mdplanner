@@ -39,3 +39,10 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
+
+.quote-detail__approval-notes {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: var(--space-sm) 0 0;
+  font-style: italic;
+}

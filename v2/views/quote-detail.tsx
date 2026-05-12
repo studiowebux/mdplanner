@@ -67,8 +67,41 @@ export const QuoteDetailView: FC<
               <button
                 class="btn btn--primary btn--sm"
                 type="button"
+                hx-post={`/api/v1/quotes/${quote.id}/submit-approval`}
+                hx-confirm="Submit this quote for internal approval?"
+                hx-swap="none"
+              >
+                Submit for Approval
+              </button>
+            )}
+            {quote.status === "pending_approval" && (
+              <>
+                <button
+                  class="btn btn--success btn--sm"
+                  type="button"
+                  hx-post={`/api/v1/quotes/${quote.id}/approve`}
+                  hx-confirm="Approve this quote?"
+                  hx-swap="none"
+                >
+                  Approve
+                </button>
+                <button
+                  class="btn btn--warning btn--sm"
+                  type="button"
+                  hx-post={`/api/v1/quotes/${quote.id}/reject-approval`}
+                  hx-confirm="Reject and return to draft?"
+                  hx-swap="none"
+                >
+                  Reject
+                </button>
+              </>
+            )}
+            {quote.status === "approved" && (
+              <button
+                class="btn btn--primary btn--sm"
+                type="button"
                 hx-post={`/api/v1/quotes/${quote.id}/send`}
-                hx-confirm="Send this quote?"
+                hx-confirm="Send this quote to the customer?"
                 hx-swap="none"
               >
                 Send
@@ -170,6 +203,32 @@ export const QuoteDetailView: FC<
 
         {/* -- Notes ------------------------------------------------------ */}
         <MarkdownSection title="Notes" markdown={quote.notes} />
+
+        {/* -- Approval info --------------------------------------------- */}
+        {(quote.submittedForApprovalAt || quote.approvedBy ||
+          quote.approvalNotes) && (
+          <section class="detail-section quote-detail__approval">
+            <h2 class="section-heading">Approval</h2>
+            <div class="detail-info-row">
+              {quote.submittedForApprovalAt && (
+                <InfoItem label="Submitted">
+                  {formatDate(quote.submittedForApprovalAt)}
+                </InfoItem>
+              )}
+              {quote.approvedBy && (
+                <InfoItem label="Approved by">{quote.approvedBy}</InfoItem>
+              )}
+              {quote.approvedAt && (
+                <InfoItem label="Approved">
+                  {formatDate(quote.approvedAt)}
+                </InfoItem>
+              )}
+            </div>
+            {quote.approvalNotes && (
+              <p class="quote-detail__approval-notes">{quote.approvalNotes}</p>
+            )}
+          </section>
+        )}
 
         {/* -- Meta ------------------------------------------------------- */}
         {(quote.sentAt || quote.acceptedAt) && (

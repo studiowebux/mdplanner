@@ -177,14 +177,86 @@ quotesRouter.openapi(deleteQuoteRoute, async (c) => {
 // Status transitions
 // ---------------------------------------------------------------------------
 
+// POST /{id}/submit-approval — draft → pending_approval
+quotesRouter.post("/:id/submit-approval", async (c) => {
+  const id = c.req.param("id");
+  const service = getQuoteService();
+  const quote = await service.getById(id);
+  if (!quote) return c.json(notFound("QUOTE", id), 404);
+  if (quote.status !== "draft") {
+    return c.json(
+      { error: "Only draft quotes can be submitted for approval" },
+      400,
+    );
+  }
+  const updated = await service.update(id, {
+    status: "pending_approval",
+    submittedForApprovalAt: new Date().toISOString(),
+  });
+  if (!updated) return c.json(notFound("QUOTE", id), 404);
+  publish("quote.updated");
+  return c.json(updated, 200);
+});
+
+// POST /{id}/approve — pending_approval → approved
+quotesRouter.post("/:id/approve", async (c) => {
+  const id = c.req.param("id");
+  const service = getQuoteService();
+  const quote = await service.getById(id);
+  if (!quote) return c.json(notFound("QUOTE", id), 404);
+  if (quote.status !== "pending_approval") {
+    return c.json(
+      { error: "Only quotes pending approval can be approved" },
+      400,
+    );
+  }
+  const body = await c.req.json().catch(() => ({})) as {
+    notes?: string;
+    approver?: string;
+  };
+  const actor = c.get("actor" as never) as { name?: string } | undefined;
+  const updated = await service.update(id, {
+    status: "approved",
+    approvedBy: body.approver ?? actor?.name ?? "Unknown",
+    approvedAt: new Date().toISOString(),
+    approvalNotes: body.notes ?? null,
+  });
+  if (!updated) return c.json(notFound("QUOTE", id), 404);
+  publish("quote.updated");
+  return c.json(updated, 200);
+});
+
+// POST /{id}/reject-approval — pending_approval → draft
+quotesRouter.post("/:id/reject-approval", async (c) => {
+  const id = c.req.param("id");
+  const service = getQuoteService();
+  const quote = await service.getById(id);
+  if (!quote) return c.json(notFound("QUOTE", id), 404);
+  if (quote.status !== "pending_approval") {
+    return c.json(
+      { error: "Only quotes pending approval can be rejected" },
+      400,
+    );
+  }
+  const body = await c.req.json().catch(() => ({})) as { notes?: string };
+  const updated = await service.update(id, {
+    status: "draft",
+    approvalNotes: body.notes ?? null,
+    submittedForApprovalAt: null,
+  });
+  if (!updated) return c.json(notFound("QUOTE", id), 404);
+  publish("quote.updated");
+  return c.json(updated, 200);
+});
+
 // POST /{id}/send
 quotesRouter.post("/:id/send", async (c) => {
   const id = c.req.param("id");
   const service = getQuoteService();
   const quote = await service.getById(id);
   if (!quote) return c.json(notFound("QUOTE", id), 404);
-  if (quote.status !== "draft") {
-    return c.json({ error: "Only draft quotes can be sent" }, 400);
+  if (quote.status !== "approved") {
+    return c.json({ error: "Only approved quotes can be sent" }, 400);
   }
   const now = new Date().toISOString();
   const updated = await service.update(id, {

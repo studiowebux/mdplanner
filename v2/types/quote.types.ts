@@ -13,6 +13,8 @@ import { AuditFieldsSchema } from "./shared.types.ts";
 
 export const QUOTE_STATUSES = [
   "draft",
+  "pending_approval",
+  "approved",
   "sent",
   "accepted",
   "rejected",
@@ -124,6 +126,19 @@ export const QuoteSchema = z.object({
   acceptedAt: z.string().nullable().optional().openapi({
     description: "ISO timestamp when quote was accepted",
   }),
+  submittedForApprovalAt: z.string().nullable().optional().openapi({
+    description: "ISO timestamp when quote was submitted for internal approval",
+  }),
+  approvedBy: z.string().nullable().optional().openapi({
+    description: "Name of the person who approved this quote",
+    example: "Tommy Gingras",
+  }),
+  approvedAt: z.string().nullable().optional().openapi({
+    description: "ISO timestamp when quote was internally approved",
+  }),
+  approvalNotes: z.string().nullable().optional().openapi({
+    description: "Notes from the approver (visible internally)",
+  }),
 }).merge(AuditFieldsSchema).openapi("Quote");
 
 export type Quote = z.infer<typeof QuoteSchema>;
@@ -161,6 +176,10 @@ export const UpdateQuoteSchema = CreateQuoteSchema.partial().merge(
     acceptedAt: z.string().nullable().optional(),
     convertedToInvoice: z.string().nullable().optional(),
     revision: z.number().nullable().optional(),
+    submittedForApprovalAt: z.string().nullable().optional(),
+    approvedBy: z.string().nullable().optional(),
+    approvedAt: z.string().nullable().optional(),
+    approvalNotes: z.string().nullable().optional(),
   }),
 ).openapi("UpdateQuote");
 

@@ -20,6 +20,8 @@ export const QUOTE_STATUS_OPTIONS = QUOTE_STATUSES.map((s) => ({
 
 export const QUOTE_STATUS_VARIANTS: Record<string, BadgeVariant> = {
   draft: "neutral",
+  pending_approval: "warning",
+  approved: "info",
   sent: "info",
   accepted: "success",
   rejected: "error",
