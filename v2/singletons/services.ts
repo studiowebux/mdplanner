@@ -253,6 +253,10 @@ export function isCacheEnabled(): boolean {
   return cacheEnabled;
 }
 
+export function getProjectDir(): string {
+  return _projectDir;
+}
+
 export function getTaskRepository(): TaskRepository {
   return _get<TaskRepository>(_repo, "task");
 }

@@ -687,18 +687,52 @@ export const TaskDetailView: FC<Props> = (
             )}
 
             {/* Attachments */}
-            {task.attachments && task.attachments.length > 0 && (
-              <section class="detail-section task-detail__section">
-                <h2>Attachments</h2>
+            <section class="detail-section task-detail__section">
+              <h2>Attachments</h2>
+              {task.attachments && task.attachments.length > 0 && (
                 <ul class="task-detail__files">
-                  {task.attachments.map((a) => (
-                    <li key={a}>
-                      <code>{a}</code>
-                    </li>
-                  ))}
+                  {task.attachments.map((a) => {
+                    const filename = a.split("/").pop() ?? a;
+                    return (
+                      <li key={a} class="task-detail__file-row">
+                        <a
+                          href={`/api/v1/tasks/${task.id}/upload/${filename}`}
+                          class="task-detail__file-link"
+                          download
+                        >
+                          {filename}
+                        </a>
+                        <button
+                          type="button"
+                          class="btn btn--ghost btn--sm task-detail__file-delete"
+                          hx-delete={`/api/v1/tasks/${task.id}/upload/${filename}`}
+                          hx-confirm={`Delete ${filename}?`}
+                          hx-swap="none"
+                        >
+                          &times;
+                        </button>
+                      </li>
+                    );
+                  })}
                 </ul>
-              </section>
-            )}
+              )}
+              <form
+                class="task-detail__upload-form"
+                hx-encoding="multipart/form-data"
+                hx-post={`/api/v1/tasks/${task.id}/upload`}
+                hx-swap="none"
+              >
+                <input
+                  type="file"
+                  name="file"
+                  class="task-detail__upload-input"
+                  required
+                />
+                <button type="submit" class="btn btn--sm btn--secondary">
+                  Upload
+                </button>
+              </form>
+            </section>
 
             {/* Files */}
             {task.files && task.files.length > 0 && (

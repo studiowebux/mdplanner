@@ -1048,6 +1048,44 @@ a.task-board__card-avatar:hover {
   color: var(--color-text-secondary);
 }
 
+.task-detail__file-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.task-detail__file-link {
+  font-size: var(--font-size-sm);
+  color: var(--color-accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-detail__file-delete {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  padding: 0 var(--space-xs);
+}
+
+.task-detail__file-delete:hover {
+  color: var(--color-error);
+}
+
+.task-detail__upload-form {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.task-detail__upload-input {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  flex: 1;
+}
+
 /* Time entries table uses shared .data-table .data-table--compact from components.css */
 
 /* Comments */
