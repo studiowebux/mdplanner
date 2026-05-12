@@ -180,14 +180,30 @@ export const LogTimeForm: FC<{ taskId: string }> = ({ taskId }) => {
             />
           </div>
           <div class="form__field">
-            <label class="form__label" for="te-person">Person</label>
-            <input
-              id="te-person"
-              name="person"
-              type="text"
-              class="form__input"
-              placeholder="Optional"
-            />
+            <label class="form__label" for="te-person-search">Person</label>
+            <div class="form__autocomplete">
+              <input
+                type="text"
+                id="te-person-search"
+                class="form__input"
+                placeholder="Search people..."
+                autocomplete="off"
+                name="q"
+                data-autocomplete-target="te-person"
+                hx-get="/autocomplete/people"
+                hx-trigger="input changed delay:150ms, focus"
+                hx-target="#te-person-results"
+                hx-include="this"
+                hx-swap="innerHTML"
+              />
+              <input
+                type="hidden"
+                id="te-person"
+                name="person"
+                value=""
+              />
+              <ul class="form__autocomplete-list" id="te-person-results" />
+            </div>
           </div>
           <div class="form__field">
             <label class="form__label" for="te-description">Description</label>
