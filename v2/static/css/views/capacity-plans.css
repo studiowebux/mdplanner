@@ -8,8 +8,8 @@
 .capacity-plan-detail {
   display: flex;
   flex-direction: column;
-  gap: var(--space-8);
-  width: var(--size-full);
+  gap: var(--cp-detail-gap);
+  width: 100%;
 }
 
 .capacity-plan-detail__header {
@@ -17,25 +17,26 @@
   align-items: flex-start;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: var(--space-3);
+  gap: var(--cp-section-header-gap);
 }
 
 .capacity-plan-detail__section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
-  width: var(--size-full);
+  gap: var(--cp-section-inner-gap);
+  width: 100%;
 }
 
 .capacity-plan-detail__section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--cp-section-header-gap);
+  width: 100%;
 }
 
 .capacity-plan-detail__table {
-  width: var(--size-full);
+  width: 100%;
 }
 
 .capacity-plan-detail__empty {
@@ -49,11 +50,17 @@
   font-weight: var(--font-weight-medium);
 }
 
+.capacity-plan-detail__alloc-project {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
 .capacity-plan-detail__no-range {
-  background: var(--color-bg-subtle);
-  border: var(--border-width) solid var(--color-border);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) solid var(--color-border-default);
   border-radius: var(--radius-md);
-  padding: var(--space-4);
+  padding: var(--cp-section-inner-gap);
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
 }
@@ -68,8 +75,8 @@
 }
 
 .capacity-plan-detail__legend-planned {
-  color: var(--color-accent);
-  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
 }
 
 .capacity-plan-detail__legend-tasks {
@@ -79,78 +86,100 @@
 
 .capacity-plan-detail__grid-scroll {
   overflow-x: auto;
-  width: var(--size-full);
+  width: 100%;
 }
 
 .capacity-plan-detail__grid {
   width: max-content;
-  min-width: var(--size-full);
+  min-width: 100%;
   border-collapse: collapse;
 }
 
 .capacity-plan-detail__grid-person-col {
-  min-width: var(--size-36);
+  min-width: var(--cp-grid-person-col-w);
   position: sticky;
   left: 0;
-  background: var(--color-bg-surface);
-  z-index: var(--z-raised);
-  border-right: var(--border-width) solid var(--color-border);
+  background: var(--color-bg-primary);
+  z-index: var(--cp-grid-sticky-z);
+  border-right: var(--border-width) solid var(--color-border-default);
 }
 
 .capacity-plan-detail__grid-week-col {
-  min-width: var(--size-24);
+  min-width: var(--cp-grid-week-col-w);
   text-align: center;
   white-space: nowrap;
 }
 
 .capacity-plan-detail__grid-total-col {
-  min-width: var(--size-24);
+  min-width: var(--cp-grid-total-col-w);
   text-align: right;
   font-variant-numeric: tabular-nums;
-  border-left: var(--border-width) solid var(--color-border);
-  background: var(--color-bg-subtle);
+  white-space: nowrap;
+  border-left: var(--border-width) solid var(--color-border-default);
+  background: var(--color-bg-secondary);
 }
 
 .capacity-plan-detail__grid-cell {
   text-align: center;
-  vertical-align: top;
-  padding: var(--space-2);
+  vertical-align: middle;
+  padding: var(--space-xs);
+}
+
+.capacity-plan-detail__grid-cell--free {
+  background: var(--cp-grid-cell-free-bg);
 }
 
 .capacity-plan-detail__grid-cell--over {
-  background: var(--color-danger-subtle);
+  background: var(--cp-grid-cell-over-bg);
 }
 
-.capacity-plan-detail__cell-details {
-  display: inline-block;
-  text-align: left;
+/* Cell wrap: inline, no layout side-effects */
+
+.capacity-plan-detail__cell-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .capacity-plan-detail__cell-summary {
-  cursor: pointer;
   font-size: var(--font-size-sm);
   font-variant-numeric: tabular-nums;
-  list-style: none;
-  user-select: none;
+  white-space: nowrap;
 }
 
-.capacity-plan-detail__cell-summary::-webkit-details-marker {
-  display: none;
+/* Dashed underline hint when tasks exist */
+.capacity-plan-detail__cell-wrap--has-tasks
+  .capacity-plan-detail__cell-summary {
+  cursor: default;
+  border-bottom: var(--border-width) dashed var(--color-border-default);
 }
 
-.capacity-plan-detail__cell-tasks {
-  margin: var(--space-1) 0 0;
-  padding: 0;
+/* Popup — position:fixed, positioned by JS to escape overflow containers */
+.capacity-plan-detail__cell-popup {
+  position: fixed;
+  z-index: var(--cp-grid-popup-z);
   list-style: none;
+  padding: var(--space-sm);
+  margin: 0;
+  background: var(--color-bg-primary);
+  border: var(--border-width) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  min-width: var(--cp-cell-tasks-min-w);
+  max-height: var(--cp-cell-popup-max-h);
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-xs);
   font-size: var(--font-size-xs);
-  min-width: var(--size-40);
-  background: var(--color-bg-surface);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: var(--space-2);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.capacity-plan-detail__cell-popup.is-visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .capacity-plan-detail__cell-task-h {
@@ -175,14 +204,16 @@
 .capacity-plan-detail__bandwidth-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--cp-bw-list-gap);
 }
 
 .capacity-plan-detail__bw-row {
   display: grid;
-  grid-template-columns: var(--size-40) 1fr var(--size-12) auto;
+  grid-template-columns: var(--cp-bw-name-col-w) 1fr var(--cp-bw-pct-col-w);
+  grid-template-rows: auto auto;
   align-items: center;
-  gap: var(--space-3);
+  column-gap: var(--cp-bw-row-gap-x);
+  row-gap: var(--cp-bw-row-gap-y);
 }
 
 .capacity-plan-detail__bw-name {
@@ -191,18 +222,22 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  grid-column: 1;
+  grid-row: 1;
 }
 
 .capacity-plan-detail__bw-bar-wrap {
   position: relative;
-  height: var(--space-3);
-  background: var(--color-bg-subtle);
+  height: var(--cp-bw-bar-h);
+  background: var(--color-bg-secondary);
   border-radius: var(--radius-full);
   overflow: hidden;
+  grid-column: 2;
+  grid-row: 1;
 }
 
 .capacity-plan-detail__bw-bar {
-  height: var(--size-full);
+  height: 100%;
   border-radius: var(--radius-full);
   transition: width var(--transition-base);
 }
@@ -215,15 +250,19 @@
   background: var(--color-warning);
 }
 
+.capacity-plan-detail__bw-bar--under {
+  background: var(--color-danger);
+}
+
 .capacity-plan-detail__bw-bar--over {
-  background: var(--color-warning);
+  background: var(--color-danger);
 }
 
 .capacity-plan-detail__bw-bar-over {
   position: absolute;
   top: 0;
   left: 0;
-  height: var(--size-full);
+  height: 100%;
   background: var(--color-danger);
   border-radius: var(--radius-full);
 }
@@ -233,6 +272,12 @@
   font-weight: var(--font-weight-semibold);
   font-variant-numeric: tabular-nums;
   text-align: right;
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.capacity-plan-detail__bw--under {
+  color: var(--color-danger);
 }
 
 .capacity-plan-detail__bw--ok {
@@ -251,4 +296,6 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   white-space: nowrap;
+  grid-column: 2 / 4;
+  grid-row: 2;
 }

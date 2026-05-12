@@ -960,6 +960,49 @@ a.badge:hover {
 }
 
 /* -------------------------------------------------------------------------
+   Day-chips — weekday toggle buttons for working-days selection
+   ------------------------------------------------------------------------- */
+
+.form__day-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.form__day-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-full);
+  border: var(--border-width) solid var(--color-border-default);
+  background: var(--color-bg-primary);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background var(--transition-base),
+    color var(--transition-base),
+    border-color var(--transition-base);
+}
+
+.form__day-chip input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+.form__day-chip:has(input:checked) {
+  background: var(--color-accent);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent);
+}
+
+/* -------------------------------------------------------------------------
    Array-table — inline editable rows for structured object arrays
    ------------------------------------------------------------------------- */
 
@@ -1471,7 +1514,7 @@ a.badge:hover {
 .data-table__td--actions {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-xs);
 }
 
 /* Uppercase header modifier — GitHub + marketing plan table style */

@@ -289,6 +289,51 @@ registerAutocompleteSource("billing-rates", {
   extraKeys: ["unit", "rate"],
 });
 
+// Returns milestones + portfolio items for capacity plan allocation targeting.
+// value = ID, targetType extra key used to autofill the hidden targetType input.
+registerAutocompleteSource("capacity-targets", {
+  list: async () => {
+    const [milestones, portfolio] = await Promise.all([
+      getMilestoneService().list(),
+      getPortfolioService().list(),
+    ]);
+    return [
+      ...milestones.map((m) => ({
+        id: m.id,
+        name: m.name,
+        targetType: "milestone",
+      })),
+      ...portfolio.map((p) => ({
+        id: p.id,
+        name: p.name,
+        targetType: "project",
+      })),
+    ];
+  },
+  search: async (q) => {
+    const [milestones, portfolio] = await Promise.all([
+      getMilestoneService().list(),
+      getPortfolioService().list(),
+    ]);
+    const items = [
+      ...milestones.map((m) => ({
+        id: m.id,
+        name: m.name,
+        targetType: "milestone",
+      })),
+      ...portfolio.map((p) => ({
+        id: p.id,
+        name: p.name,
+        targetType: "project",
+      })),
+    ];
+    return items.filter((i) => ciIncludes(i.name, q));
+  },
+  displayKey: "name",
+  valueKey: "id",
+  extraKeys: ["targetType"],
+});
+
 export const views = new Hono<{ Variables: AppVariables }>();
 
 views.route("/", homeViewRouter);

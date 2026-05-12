@@ -108,8 +108,10 @@ capacityPlansViewRouter.get("/:id", async (c) => {
   for (const p of portfolio) {
     targetById[p.id] = { title: p.name, href: `/portfolio/${p.id}` };
   }
+  const milestoneProjectById: Record<string, string | undefined> = {};
   for (const m of milestones) {
     targetById[m.id] = { title: m.name, href: `/milestones/${m.id}` };
+    milestoneProjectById[m.id] = m.project ?? undefined;
   }
 
   // Allocation summary rows for the config table
@@ -122,6 +124,9 @@ capacityPlansViewRouter.get("/:id", async (c) => {
       targetTitle: targetById[a.targetId]?.title ?? a.targetId,
       targetHref: targetById[a.targetId]?.href,
       targetType: a.targetType,
+      projectName: a.targetType === "milestone"
+        ? milestoneProjectById[a.targetId]
+        : undefined,
       percentage: a.percentage ?? undefined,
       hoursPerWeek: a.hoursPerWeek ?? undefined,
       notes: a.notes ?? undefined,
@@ -315,10 +320,13 @@ capacityPlansViewRouter.get("/:id/allocations/:allocId/edit", async (c) => {
     value: m.personId,
     label: personById[m.personId] ?? m.personId,
   }));
+  const targetItem = targetOptions.find((t) => t.value === alloc.targetId);
   const values = {
     personId: alloc.personId,
+    personName: personById[alloc.personId] ?? "",
     targetType: alloc.targetType,
     targetId: alloc.targetId,
+    targetName: targetItem?.label ?? alloc.targetId,
     percentage: alloc.percentage != null ? String(alloc.percentage) : "",
     hoursPerWeek: alloc.hoursPerWeek != null ? String(alloc.hoursPerWeek) : "",
     notes: alloc.notes ?? "",

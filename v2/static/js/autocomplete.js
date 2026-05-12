@@ -22,8 +22,33 @@
     if (search) search.value = item.textContent || "";
     // Autofill sibling fields in an array-table row
     if (search) autofillSiblings(search, item);
+    // Autofill arbitrary inputs by ID using data-autofill-ids={"dataKey":"inputId"}
+    if (search) autofillById(search, item);
     var list = item.closest(".form__autocomplete-list");
     if (list) list.innerHTML = "";
+  }
+
+  /** Fill arbitrary inputs by element ID using data-autofill-ids={"dataKey":"inputId"}. */
+  function autofillById(search, item) {
+    var mapJson = search.getAttribute("data-autofill-ids");
+    if (!mapJson) return;
+    var map;
+    try {
+      map = JSON.parse(mapJson);
+    } catch (_) {
+      return;
+    }
+    var keys = Object.keys(map);
+    for (var i = 0; i < keys.length; i++) {
+      var dataKey = keys[i];
+      var inputId = map[dataKey];
+      var val = item.getAttribute("data-" + dataKey) || "";
+      var input = document.getElementById(inputId);
+      if (input) {
+        input.value = val;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    }
   }
 
   /** Fill sibling inputs in the same array-table row using data-autofill-map. */

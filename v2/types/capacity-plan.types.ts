@@ -63,6 +63,19 @@ export const ProjectAllocationSchema = z.object({
   }),
 }).openapi("ProjectAllocation");
 
+export const allocationMutexRefine = (
+  val: { percentage?: number | null; hoursPerWeek?: number | null },
+  ctx: z.RefinementCtx,
+) => {
+  if (val.percentage != null && val.hoursPerWeek != null) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Provide either percentage or hoursPerWeek, not both",
+      path: ["hoursPerWeek"],
+    });
+  }
+};
+
 export type ProjectAllocation = z.infer<typeof ProjectAllocationSchema>;
 
 // ---------------------------------------------------------------------------

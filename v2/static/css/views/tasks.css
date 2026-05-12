@@ -382,6 +382,15 @@
   opacity: 1;
 }
 
+.task-list__row:hover .task-list__row-title {
+  text-decoration: underline;
+}
+
+/* Section heading inside the sticky header has no bottom margin */
+.task-list__section-header .section-heading {
+  margin: 0;
+}
+
 /* Empty states use shared EmptyState component (.empty-state) */
 
 /* =========================================================================
@@ -859,6 +868,14 @@ a.task-board__card-avatar:hover {
   font-family: var(--font-mono);
   color: var(--color-success);
   margin-right: var(--space-xs);
+}
+
+/* Copy ID / Copy URL buttons */
+
+.task-detail__copy-btns {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
 }
 
 /* Section badge colors now use shared .badge--{variant} from components.css */

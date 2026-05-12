@@ -384,6 +384,26 @@
   --meeting-carryover-gap: var(--space-xs);
   --meeting-carryover-item-gap: var(--space-sm);
   --meeting-carryover-source-gap: var(--space-xs);
+
+  /* Capacity plan detail */
+  --cp-detail-gap: var(--space-xl);
+  --cp-section-inner-gap: var(--space-md);
+  --cp-section-header-gap: var(--space-sm);
+  --cp-bw-list-gap: var(--space-md);
+  --cp-bw-row-gap-x: var(--space-sm);
+  --cp-bw-row-gap-y: var(--space-xs);
+  --cp-bw-name-col-w: 10rem;
+  --cp-bw-pct-col-w: 3rem;
+  --cp-bw-bar-h: 0.5rem;
+  --cp-grid-cell-free-bg: #edf7ee;
+  --cp-grid-cell-over-bg: #fde8eb;
+  --cp-grid-person-col-w: 10rem;
+  --cp-grid-week-col-w: 9rem;
+  --cp-grid-total-col-w: 9rem;
+  --cp-grid-sticky-z: 10;
+  --cp-grid-popup-z: 350;
+  --cp-cell-tasks-min-w: 14rem;
+  --cp-cell-popup-max-h: 16rem;
 }
 
 html.font-mono {
@@ -440,6 +460,7 @@ html.font-mono {
   /* Error */
   --color-error: #a6192e;
   --color-danger: #a6192e;
+  --color-danger-subtle: #fbe9ec;
   --color-error-bg: #fbe9ec;
   --color-error-border: #f1b8bf;
   --color-error-text: #a6192e;
@@ -540,6 +561,7 @@ html.font-mono {
   /* Error */
   --color-error: #dc3545;
   --color-danger: #dc3545;
+  --color-danger-subtle: #3d1520;
   --color-error-bg: #3d1520;
   --color-error-border: #7a1222;
   --color-error-text: #ff8a95;
@@ -605,4 +627,8 @@ html.font-mono {
   --billing-doc-header-pb: var(--space-4);
   --billing-doc-header-mb: var(--space-4);
   --quadrant-card-max-h: 40vh;
+
+  /* Capacity grid cell tints — softer than alert bg in dark mode */
+  --cp-grid-cell-free-bg: rgba(74, 222, 128, 0.08);
+  --cp-grid-cell-over-bg: rgba(248, 113, 113, 0.12);
 }

@@ -4,6 +4,7 @@ import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getCapacityPlanService } from "../../../singletons/services.ts";
 import { publish } from "../../../singletons/event-bus.ts";
 import {
+  allocationMutexRefine,
   CapacityPlanSchema,
   CreateCapacityPlanSchema,
   ProjectAllocationSchema,
@@ -276,7 +277,12 @@ capacityPlansRouter.openapi(
 // Allocation sub-routes
 // ---------------------------------------------------------------------------
 
-const AddAllocationSchema = ProjectAllocationSchema.omit({ id: true });
+const AddAllocationBase = ProjectAllocationSchema.omit({ id: true });
+const AddAllocationSchema = AddAllocationBase.superRefine(
+  allocationMutexRefine,
+);
+const UpdateAllocationSchema = AddAllocationBase.partial()
+  .superRefine(allocationMutexRefine);
 
 // POST /:id/allocations
 capacityPlansRouter.openapi(
@@ -326,7 +332,7 @@ capacityPlansRouter.openapi(
       params: IdAndSubIdParam,
       body: {
         content: {
-          "application/json": { schema: AddAllocationSchema.partial() },
+          "application/json": { schema: UpdateAllocationSchema },
         },
         required: true,
       },

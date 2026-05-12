@@ -11,6 +11,7 @@ import type {
 } from "../types/capacity-plan.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { Sidenav } from "../components/ui/sidenav.tsx";
+import { WEEKDAYS } from "../constants/mod.ts";
 
 // ---------------------------------------------------------------------------
 // Exported types — consumed by routes.tsx
@@ -38,6 +39,7 @@ export type AllocationSummary = {
   targetTitle: string;
   targetHref?: string;
   targetType: "project" | "milestone";
+  projectName?: string;
   percentage?: number;
   hoursPerWeek?: number;
   notes?: string;
@@ -61,10 +63,12 @@ export type TargetOption = {
 // Member form (new)
 // ---------------------------------------------------------------------------
 
+const DEFAULT_WORKING_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+
 export const MemberForm: FC<{
   planId: string;
   personOptions: { value: string; label: string }[];
-}> = ({ planId, personOptions }) => (
+}> = ({ planId, personOptions: _personOptions }) => (
   <Sidenav id="capacity-plan-member-form" title="Add Team Member" open>
     <form
       class="form"
@@ -73,18 +77,30 @@ export const MemberForm: FC<{
     >
       <div class="form__body">
         <div class="form__field">
-          <label class="form__label" for="member-personId">Person</label>
-          <select
-            id="member-personId"
-            name="personId"
-            class="form__select"
-            required
-          >
-            <option value="">— select person —</option>
-            {personOptions.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
+          <label class="form__label" for="member-person-search">Person</label>
+          <div class="form__autocomplete">
+            <input
+              type="text"
+              id="member-person-search"
+              class="form__input"
+              placeholder="Search people..."
+              autocomplete="off"
+              name="q"
+              data-autocomplete-target="member-personId"
+              hx-get="/autocomplete/people"
+              hx-trigger="input changed delay:150ms, focus"
+              hx-target="#member-person-results"
+              hx-include="this"
+              hx-swap="innerHTML"
+            />
+            <input
+              type="hidden"
+              id="member-personId"
+              name="personId"
+              value=""
+            />
+            <ul class="form__autocomplete-list" id="member-person-results" />
+          </div>
         </div>
         <div class="form__field">
           <label class="form__label" for="member-hoursPerDay">
@@ -101,16 +117,25 @@ export const MemberForm: FC<{
           />
         </div>
         <div class="form__field">
-          <label class="form__label" for="member-workingDays">
-            Working days (comma-separated)
-          </label>
+          <label class="form__label">Working days</label>
+          <div class="form__day-chips" id="member-day-chips">
+            {WEEKDAYS.map((day) => (
+              <label key={day} class="form__day-chip">
+                <input
+                  type="checkbox"
+                  value={day}
+                  checked={DEFAULT_WORKING_DAYS.includes(day)}
+                  data-day-chip="member-workingDays"
+                />
+                {day}
+              </label>
+            ))}
+          </div>
           <input
-            id="member-workingDays"
+            type="hidden"
             name="workingDays"
-            type="text"
-            value="Mon,Tue,Wed,Thu,Fri"
-            class="form__input"
-            placeholder="Mon,Tue,Wed,Thu,Fri"
+            id="member-workingDays"
+            value={DEFAULT_WORKING_DAYS.join(",")}
           />
         </div>
       </div>
@@ -133,20 +158,27 @@ export const AllocationForm: FC<{
   allocId?: string;
   values?: {
     personId?: string;
+    personName?: string;
     targetType?: string;
     targetId?: string;
+    targetName?: string;
     percentage?: string;
     hoursPerWeek?: string;
     notes?: string;
   };
-}> = ({ planId, memberOptions, targetOptions, allocId, values }) => {
+}> = (
+  {
+    planId,
+    memberOptions: _memberOptions,
+    targetOptions: _targetOptions,
+    allocId,
+    values,
+  },
+) => {
   const isEdit = !!allocId;
   const action = isEdit
     ? `/capacity-plans/${planId}/allocations/${allocId}`
     : `/capacity-plans/${planId}/allocations`;
-
-  const milestoneOptions = targetOptions.filter((t) => t.type === "milestone");
-  const projectOptions = targetOptions.filter((t) => t.type === "project");
 
   return (
     <Sidenav
@@ -157,86 +189,69 @@ export const AllocationForm: FC<{
       <form class="form" hx-post={action} hx-swap="none">
         <div class="form__body">
           <div class="form__field">
-            <label class="form__label" for="alloc-personId">Person</label>
-            <select
-              id="alloc-personId"
-              name="personId"
-              class="form__select"
-              required
-            >
-              <option value="">— select person —</option>
-              {memberOptions.map((o) => (
-                <option
-                  key={o.value}
-                  value={o.value}
-                  selected={values?.personId === o.value}
-                >
-                  {o.label}
-                </option>
-              ))}
-            </select>
+            <label class="form__label" for="alloc-person-search">Person</label>
+            <div class="form__autocomplete">
+              <input
+                type="text"
+                id="alloc-person-search"
+                class="form__input"
+                placeholder="Search team members..."
+                autocomplete="off"
+                name="q"
+                data-autocomplete-target="alloc-personId"
+                hx-get="/autocomplete/people"
+                hx-trigger="input changed delay:150ms, focus"
+                hx-target="#alloc-person-results"
+                hx-include="this"
+                hx-swap="innerHTML"
+                value={values?.personName ?? ""}
+              />
+              <input
+                type="hidden"
+                id="alloc-personId"
+                name="personId"
+                value={values?.personId ?? ""}
+              />
+              <ul class="form__autocomplete-list" id="alloc-person-results" />
+            </div>
           </div>
           <div class="form__field">
-            <label class="form__label" for="alloc-targetType">
-              Target type
+            <label class="form__label" for="alloc-target-search">
+              Target (milestone or project)
             </label>
-            <select
-              id="alloc-targetType"
-              name="targetType"
-              class="form__select"
-              required
-            >
-              <option
-                value="milestone"
-                selected={!values?.targetType ||
-                  values?.targetType === "milestone"}
-              >
-                Milestone
-              </option>
-              <option
-                value="project"
-                selected={values?.targetType === "project"}
-              >
-                Project
-              </option>
-            </select>
-          </div>
-          <div class="form__field">
-            <label class="form__label" for="alloc-targetId">Target</label>
-            <select
-              id="alloc-targetId"
-              name="targetId"
-              class="form__select"
-              required
-            >
-              <option value="">— select target —</option>
-              {milestoneOptions.length > 0 && (
-                <optgroup label="Milestones">
-                  {milestoneOptions.map((o) => (
-                    <option
-                      key={o.value}
-                      value={o.value}
-                      selected={values?.targetId === o.value}
-                    >
-                      {o.label}
-                    </option>
-                  ))}
-                </optgroup>
-              )}
-              {projectOptions.length > 0 && (
-                <optgroup label="Projects">
-                  {projectOptions.map((o) => (
-                    <option
-                      key={o.value}
-                      value={o.value}
-                      selected={values?.targetId === o.value}
-                    >
-                      {o.label}
-                    </option>
-                  ))}
-                </optgroup>
-              )}
-            </select>
+            <div class="form__autocomplete">
+              <input
+                type="text"
+                id="alloc-target-search"
+                class="form__input"
+                placeholder="Search milestones & projects..."
+                autocomplete="off"
+                name="q"
+                data-autocomplete-target="alloc-targetId"
+                data-autofill-ids={JSON.stringify({
+                  targettype: "alloc-targetType",
+                })}
+                hx-get="/autocomplete/capacity-targets"
+                hx-trigger="input changed delay:150ms, focus"
+                hx-target="#alloc-target-results"
+                hx-include="this"
+                hx-swap="innerHTML"
+                value={values?.targetName ?? ""}
+              />
+              <input
+                type="hidden"
+                id="alloc-targetId"
+                name="targetId"
+                value={values?.targetId ?? ""}
+              />
+              <input
+                type="hidden"
+                id="alloc-targetType"
+                name="targetType"
+                value={values?.targetType ?? "milestone"}
+              />
+              <ul class="form__autocomplete-list" id="alloc-target-results" />
+            </div>
           </div>
           <div class="form__field">
             <label class="form__label" for="alloc-percentage">
@@ -371,11 +386,11 @@ const BandwidthSummary: FC<{ rows: BandwidthRow[] }> = ({ rows }) => {
     <section class="detail-section capacity-plan-detail__section">
       <h2 class="section-heading">Bandwidth</h2>
       <p class="capacity-plan-detail__bandwidth-legend">
-        Total allocation vs available capacity.{" "}
-        <span class="capacity-plan-detail__bw--ok">Green</span> = under 80%,
+        <span class="capacity-plan-detail__bw--under">Red</span>{" "}
+        = under 60% (underassigned),{" "}
+        <span class="capacity-plan-detail__bw--warn">yellow</span> = 60–80%,
         {" "}
-        <span class="capacity-plan-detail__bw--warn">yellow</span> = 80–100%,
-        {" "}
+        <span class="capacity-plan-detail__bw--ok">green</span> = 80–100%,{" "}
         <span class="capacity-plan-detail__bw--over">red</span> = overallocated.
       </p>
       <div class="capacity-plan-detail__bandwidth-list">
@@ -384,8 +399,10 @@ const BandwidthSummary: FC<{ rows: BandwidthRow[] }> = ({ rows }) => {
           const state = row.totalPct > 100
             ? "over"
             : row.totalPct >= 80
+            ? "ok"
+            : row.totalPct >= 60
             ? "warn"
-            : "ok";
+            : "under";
           return (
             <div key={row.personId} class="capacity-plan-detail__bw-row">
               <a
@@ -472,6 +489,11 @@ const AllocationsConfig: FC<{
                   {a.targetHref
                     ? <a href={a.targetHref}>{a.targetTitle}</a>
                     : a.targetTitle}
+                  {a.projectName && (
+                    <span class="capacity-plan-detail__alloc-project">
+                      {a.projectName}
+                    </span>
+                  )}
                 </td>
                 <td class="data-table__td">
                   <span class="badge">{a.targetType}</span>
@@ -535,7 +557,7 @@ const CapacityGrid: FC<{ weeks: WeekCol[]; rows: GridRow[] }> = (
       <p class="capacity-plan-detail__grid-legend">
         <span class="capacity-plan-detail__legend-planned">Planned</span>
         {" / "}
-        <span class="capacity-plan-detail__legend-tasks">Tasks</span>
+        <span class="capacity-plan-detail__legend-tasks">Assigned Tasks</span>
         {" (hours)"}
       </p>
       <div class="capacity-plan-detail__grid-scroll">
@@ -572,27 +594,47 @@ const CapacityGrid: FC<{ weeks: WeekCol[]; rows: GridRow[] }> = (
                   };
                   const over = cell.taskHours > cell.plannedHours &&
                     cell.plannedHours > 0;
+                  const free = cell.plannedHours > 0 && cell.taskHours === 0;
+                  const hasData = cell.plannedHours > 0 || cell.taskHours > 0;
                   return (
                     <td
                       key={w.monday}
                       class={`data-table__td capacity-plan-detail__grid-cell${
-                        over ? " capacity-plan-detail__grid-cell--over" : ""
+                        over
+                          ? " capacity-plan-detail__grid-cell--over"
+                          : free
+                          ? " capacity-plan-detail__grid-cell--free"
+                          : ""
                       }`}
                     >
-                      {cell.plannedHours > 0 || cell.taskHours > 0
+                      {hasData
                         ? (
-                          <details class="capacity-plan-detail__cell-details">
-                            <summary class="capacity-plan-detail__cell-summary">
+                          <div
+                            class={`capacity-plan-detail__cell-wrap${
+                              cell.tasks.length > 0
+                                ? " capacity-plan-detail__cell-wrap--has-tasks"
+                                : ""
+                            }`}
+                          >
+                            <span class="capacity-plan-detail__cell-summary">
                               <span class="capacity-plan-detail__legend-planned">
                                 {Math.round(cell.plannedHours)}h
                               </span>
                               {" / "}
-                              <span class="capacity-plan-detail__legend-tasks">
-                                {Math.round(cell.taskHours)}h
-                              </span>
-                            </summary>
+                              {cell.taskHours > 0
+                                ? (
+                                  <span class="capacity-plan-detail__legend-tasks">
+                                    {Math.round(cell.taskHours)}h
+                                  </span>
+                                )
+                                : (
+                                  <span class="capacity-plan-detail__cell-empty">
+                                    —
+                                  </span>
+                                )}
+                            </span>
                             {cell.tasks.length > 0 && (
-                              <ul class="capacity-plan-detail__cell-tasks">
+                              <ul class="capacity-plan-detail__cell-popup">
                                 {cell.tasks.map((t) => (
                                   <li key={t.id}>
                                     <a href={`/tasks/${t.id}`}>{t.title}</a>
@@ -604,7 +646,7 @@ const CapacityGrid: FC<{ weeks: WeekCol[]; rows: GridRow[] }> = (
                                 ))}
                               </ul>
                             )}
-                          </details>
+                          </div>
                         )
                         : (
                           <span class="capacity-plan-detail__cell-empty">
@@ -618,10 +660,14 @@ const CapacityGrid: FC<{ weeks: WeekCol[]; rows: GridRow[] }> = (
                   <span class="capacity-plan-detail__legend-planned">
                     {Math.round(row.totalPlanned)}h
                   </span>
-                  {" / "}
-                  <span class="capacity-plan-detail__legend-tasks">
-                    {Math.round(row.totalTask)}h
-                  </span>
+                  {row.totalTask > 0 && (
+                    <>
+                      {" / "}
+                      <span class="capacity-plan-detail__legend-tasks">
+                        {Math.round(row.totalTask)}h
+                      </span>
+                    </>
+                  )}
                 </td>
               </tr>
             ))}
