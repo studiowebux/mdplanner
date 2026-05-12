@@ -12,6 +12,7 @@
   display: flex;
   align-items: baseline;
   gap: var(--space-md);
+  flex-wrap: wrap;
 }
 
 .time-entries__title {
@@ -25,6 +26,10 @@
   color: var(--color-text-muted);
 }
 
+.time-entries__controls {
+  margin-left: auto;
+}
+
 .time-entries__empty {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
@@ -35,4 +40,68 @@
   font-variant-numeric: tabular-nums;
   font-weight: var(--font-weight-medium);
   white-space: nowrap;
+}
+
+/* ── recap view ─────────────────────────────────────────────────────────── */
+
+.time-entries__recap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.time-entries__recap-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.time-entries__recap-heading {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.time-entries__recap-table {
+  width: 100%;
+}
+
+.time-entries__recap-period {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  min-width: var(--space-3xl);
+}
+
+.time-entries__recap-cell {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.time-entries__recap-total {
+  text-align: right;
+}
+
+.time-entries__recap-total-cell {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+
+.time-entries__recap-footer td {
+  border-top: var(--border-width-md) solid var(--color-border-default);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.time-entries__recap-footer-label {
+  color: var(--color-text-muted);
+}
+
+.time-entries__recap-footer-cell {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
