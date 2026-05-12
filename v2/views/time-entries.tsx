@@ -104,7 +104,7 @@ const RecapTable: FC<{
       <table class="data-table time-entries__recap-table">
         <thead>
           <tr class="data-table__head-row">
-            <th class="data-table__th">
+            <th class="data-table__th time-entries__recap-label">
               {label === "By Project" ? "Project" : "Person"}
             </th>
             {periods.map((p) => (
@@ -123,7 +123,7 @@ const RecapTable: FC<{
             );
             return (
               <tr key={key} class="data-table__row">
-                <td class="data-table__td">{key}</td>
+                <td class="data-table__td time-entries__recap-label">{key}</td>
                 {periods.map((p) => (
                   <td key={p} class="data-table__td time-entries__recap-cell">
                     {byPeriod.has(p) ? `${round2(byPeriod.get(p)!)}h` : "—"}
@@ -138,7 +138,7 @@ const RecapTable: FC<{
         </tbody>
         <tfoot>
           <tr class="time-entries__recap-footer">
-            <td class="data-table__td time-entries__recap-footer-label">
+            <td class="data-table__td time-entries__recap-label time-entries__recap-footer-label">
               Total
             </td>
             {periods.map((p) => {
