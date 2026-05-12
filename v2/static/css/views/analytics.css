@@ -8,8 +8,9 @@
   --analytics-stat-value-line-height: var(--line-height-tight, 1.1);
   --analytics-col-min-w: 14rem;
   --analytics-filter-min-w: 10rem;
-  --analytics-util-bar-h: var(--progress-bar-height, 0.5rem);
+  --analytics-util-bar-h: var(--progress-bar-height);
   --analytics-by-value-min-w: 8rem;
+  --analytics-customize-panel-min-w: var(--analytics-col-min-w);
   --analytics-details-content-pad: var(--space-md);
 }
 
@@ -282,6 +283,71 @@
 
 .analytics__details > *:not(summary) {
   padding: var(--analytics-details-content-pad);
+}
+
+/* ── customize panel ────────────────────────────────────────────────────── */
+
+.analytics__customize {
+  position: relative;
+  margin-left: auto;
+}
+
+.analytics__customize-toggle {
+  list-style: none;
+  cursor: pointer;
+}
+
+.analytics__customize-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.analytics__customize-panel {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  right: 0;
+  z-index: var(--z-dropdown);
+  background: var(--color-bg-primary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  min-width: var(--analytics-customize-panel-min-w);
+  padding: var(--space-md);
+}
+
+.analytics__customize-fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.analytics__customize-legend {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  margin-bottom: var(--space-sm);
+}
+
+.analytics__customize-checks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.analytics__customize-check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.analytics__customize-actions {
+  margin-top: var(--space-md);
+  display: flex;
+  justify-content: flex-end;
 }
 
 /* ── empty ──────────────────────────────────────────────────────────────── */

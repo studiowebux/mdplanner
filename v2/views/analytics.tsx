@@ -21,6 +21,21 @@ export type AnalyticsViewProps = ViewProps & {
   hiddenSections: string[];
 };
 
+// ── section registry ──────────────────────────────────────────────────────────
+
+export const ALL_SECTIONS: { key: string; label: string }[] = [
+  { key: "tasks", label: "Tasks" },
+  { key: "goals", label: "Goals" },
+  { key: "milestones", label: "Milestones" },
+  { key: "timeEntries", label: "Time Tracking" },
+  { key: "capacity", label: "Capacity Plans" },
+  { key: "invoices", label: "Invoices" },
+  { key: "quotes", label: "Quotes" },
+  { key: "meetings", label: "Meetings" },
+  { key: "customers", label: "Customers" },
+  { key: "notes", label: "Notes" },
+];
+
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 function formatCurrency(n: number): string {
@@ -51,6 +66,43 @@ function pct(n: number | null): string {
 }
 
 // ── sub-components ─────────────────────────────────────────────────────────────
+
+const CustomizePanel: FC<{ hiddenSections: string[] }> = (
+  { hiddenSections },
+) => (
+  <details class="analytics__customize">
+    <summary class="analytics__customize-toggle btn btn--sm btn--ghost">
+      Customize
+    </summary>
+    <div class="analytics__customize-panel">
+      <form
+        hx-post="/analytics/customize"
+        hx-target="#analytics-content"
+        hx-swap="outerHTML"
+      >
+        <fieldset class="analytics__customize-fieldset">
+          <legend class="analytics__customize-legend">Visible sections</legend>
+          <div class="analytics__customize-checks">
+            {ALL_SECTIONS.map(({ key, label }) => (
+              <label key={key} class="analytics__customize-check">
+                <input
+                  type="checkbox"
+                  name="sections"
+                  value={key}
+                  checked={!hiddenSections.includes(key)}
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <div class="analytics__customize-actions">
+          <button type="submit" class="btn btn--sm btn--primary">Apply</button>
+        </div>
+      </form>
+    </div>
+  </details>
+);
 
 const SectionHeader: FC<{
   title: string;
@@ -220,6 +272,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
         <span class="analytics__generated">
           As of {new Date(data.generatedAt).toLocaleString()}
         </span>
+        <CustomizePanel hiddenSections={hiddenSections} />
       </div>
 
       <FilterBar
