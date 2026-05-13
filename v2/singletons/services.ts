@@ -95,6 +95,9 @@ import { registerEisenhowerEntity } from "../domains/eisenhower/cache.ts";
 import { MindmapRepository } from "../repositories/mindmap.repository.ts";
 import { MindmapService } from "../services/mindmap.service.ts";
 import { registerMindmapEntity } from "../domains/mindmap/cache.ts";
+import { FishboneRepository } from "../repositories/fishbone.repository.ts";
+import { FishboneService } from "../services/fishbone.service.ts";
+import { registerFishboneEntity } from "../domains/fishbone/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -157,6 +160,8 @@ export function initServices(
   _set(_svc, "marketingPlan", new MarketingPlanService(marketingPlanRepo));
   const swotRepo = new SwotRepository(projectDir);
   _set(_svc, "swot", new SwotService(swotRepo));
+  const fishboneRepo = new FishboneRepository(projectDir);
+  _set(_svc, "fishbone", new FishboneService(fishboneRepo));
   const customerRepo = new CustomerRepository(projectDir);
   _set(_svc, "customer", new CustomerService(customerRepo));
   const contactRepo = new ContactRepository(projectDir);
@@ -215,6 +220,7 @@ export function initServices(
     registerIdeaEntity(ideaRepo);
     registerMarketingPlanEntity(marketingPlanRepo);
     registerSwotEntity(swotRepo);
+    registerFishboneEntity(fishboneRepo);
     registerCustomerEntity(customerRepo);
     registerContactEntity(contactRepo);
     registerBillingRateEntity(billingRateRepo);
@@ -262,6 +268,7 @@ export function initServices(
     c4Repo.setCacheDb(cacheDb);
     eisenhowerRepo.setCacheDb(cacheDb);
     mindmapRepo.setCacheDb(cacheDb);
+    fishboneRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -344,6 +351,10 @@ export function getEisenhowerService(): EisenhowerService {
 
 export function getMindmapService(): MindmapService {
   return _get<MindmapService>(_svc, "mindmap");
+}
+
+export function getFishboneService(): FishboneService {
+  return _get<FishboneService>(_svc, "fishbone");
 }
 
 export function getCustomerService(): CustomerService {

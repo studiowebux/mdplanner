@@ -1,0 +1,23 @@
+/* Fishbone-specific styles — builds on .quadrant-grid in components.css */
+
+/* -- Detail header -------------------------------------------------------- */
+
+.fishbone-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.fishbone-detail__problem {
+  margin: var(--space-xs) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* -- Cause sections grid -------------------------------------------------- */
+
+.fishbone-detail__causes {
+  margin-top: var(--space-md);
+}
