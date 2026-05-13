@@ -50,15 +50,7 @@
     ta.dispatchEvent(new Event("input", { bubbles: true }));
   }
 
-  function handleTab(e, ta) {
-    const start = ta.selectionStart;
-    const end = ta.selectionEnd;
-    // Empty selection on a single caret: insert 2 spaces at the caret.
-    if (start === end) {
-      ta.setRangeText(INDENT, start, end, "end");
-      ta.dispatchEvent(new Event("input", { bubbles: true }));
-      return;
-    }
+  function handleTab(_e, ta) {
     applyLineEdit(ta, indentBlock);
   }
 
