@@ -9,6 +9,7 @@ import { BackButton } from "./components/back-button.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { MILESTONE_STATUS_VARIANTS } from "../domains/milestone/constants.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
+import { SseRefresh } from "./components/sse-refresh.tsx";
 
 type Props = ViewProps & {
   milestone: Milestone;
@@ -26,7 +27,12 @@ export const MilestoneDetailView: FC<Props> = (
       {...viewProps}
       styles={["/css/views/milestones.css"]}
     >
-      <main class="detail-view milestone-detail">
+      <SseRefresh
+        getUrl={`/milestones/${milestone.id}`}
+        trigger="sse:milestone.updated"
+        targetId="milestone-detail-root"
+      />
+      <main id="milestone-detail-root" class="detail-view milestone-detail">
         <BackButton href="/milestones" label="Back to milestones" />
         <header class="milestone-detail__header">
           <div class="detail-title-row milestone-detail__title-row">

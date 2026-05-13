@@ -47,7 +47,7 @@ export function parseFormBody(
     const val = String(raw).trim();
 
     if (!val) {
-      if (clearEmpty) result[field.name] = undefined;
+      if (clearEmpty) result[field.name] = null;
       continue;
     }
 
