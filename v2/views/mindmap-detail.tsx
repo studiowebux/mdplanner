@@ -23,7 +23,9 @@ export const MindmapDetailView: FC<
       title={item.title}
       {...viewProps}
       styles={["/css/views/mindmaps.css"]}
-      scripts={editing ? [] : ["/js/mindmap.js", "/js/fullscreen-reading.js"]}
+      scripts={editing
+        ? ["/js/mindmap.js", "/js/mindmap-editor.js"]
+        : ["/js/mindmap.js", "/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={`/mindmaps/${item.id}${editSuffix}`}

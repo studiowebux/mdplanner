@@ -348,9 +348,14 @@
   }
 
   // ── Init ────────────────────────────────────────────────────────────────────
+  // Dedupe via dataset flag — htmx:afterSettle fires on every swap and a stale
+  // re-entry on the same DOM node would double-render. New nodes (outerHTML
+  // swap) arrive without the flag and init runs cleanly.
   async function init() {
     const container = document.getElementById("mindmap-container");
     if (!container) return;
+    if (container.dataset.mindmapInitialized === "true") return;
+    container.dataset.mindmapInitialized = "true";
     const id = container.dataset.mindmapId;
     if (!id) return;
 
@@ -541,4 +546,7 @@
   } else {
     init();
   }
+  // htmx swaps (POST save response, SSE refresh) replace #mindmap-container
+  // with a fresh DOM node — re-init when that happens.
+  document.addEventListener("htmx:afterSettle", init);
 })();
