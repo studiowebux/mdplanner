@@ -98,6 +98,9 @@ import { registerMindmapEntity } from "../domains/mindmap/cache.ts";
 import { FishboneRepository } from "../repositories/fishbone.repository.ts";
 import { FishboneService } from "../services/fishbone.service.ts";
 import { registerFishboneEntity } from "../domains/fishbone/cache.ts";
+import { BusinessModelRepository } from "../repositories/business-model.repository.ts";
+import { BusinessModelService } from "../services/business-model.service.ts";
+import { registerBusinessModelEntity } from "../domains/business-model/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -162,6 +165,8 @@ export function initServices(
   _set(_svc, "swot", new SwotService(swotRepo));
   const fishboneRepo = new FishboneRepository(projectDir);
   _set(_svc, "fishbone", new FishboneService(fishboneRepo));
+  const businessModelRepo = new BusinessModelRepository(projectDir);
+  _set(_svc, "businessModel", new BusinessModelService(businessModelRepo));
   const customerRepo = new CustomerRepository(projectDir);
   _set(_svc, "customer", new CustomerService(customerRepo));
   const contactRepo = new ContactRepository(projectDir);
@@ -221,6 +226,7 @@ export function initServices(
     registerMarketingPlanEntity(marketingPlanRepo);
     registerSwotEntity(swotRepo);
     registerFishboneEntity(fishboneRepo);
+    registerBusinessModelEntity(businessModelRepo);
     registerCustomerEntity(customerRepo);
     registerContactEntity(contactRepo);
     registerBillingRateEntity(billingRateRepo);
@@ -269,6 +275,7 @@ export function initServices(
     eisenhowerRepo.setCacheDb(cacheDb);
     mindmapRepo.setCacheDb(cacheDb);
     fishboneRepo.setCacheDb(cacheDb);
+    businessModelRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -355,6 +362,10 @@ export function getMindmapService(): MindmapService {
 
 export function getFishboneService(): FishboneService {
   return _get<FishboneService>(_svc, "fishbone");
+}
+
+export function getBusinessModelService(): BusinessModelService {
+  return _get<BusinessModelService>(_svc, "businessModel");
 }
 
 export function getCustomerService(): CustomerService {

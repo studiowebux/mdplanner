@@ -1,12 +1,13 @@
 // Pomodoro timer — topbar widget. State persisted in localStorage.
 // Phases: idle → work → break → idle (or loop).
-// Right-click opens config popover (duration presets + custom). No inline styles.
+// Left-click when idle: open settings. Left-click when running/paused: pause/resume.
+// Right-click always opens settings. No inline styles.
 
 (function () {
   var STORAGE_KEY = "pomodoro";
   var DURATION_KEY = "pomoDuration";
   var BREAK_SECS = 5 * 60;
-  var DURATION_PRESETS = [25, 20, 15, 10, 5];
+  var DURATION_PRESETS = [5, 10, 15, 20, 25];
 
   var btn = document.getElementById("pomodoro-btn");
   if (!btn) return;
@@ -19,15 +20,19 @@
   // Duration helpers
   // ---------------------------------------------------------------------------
 
-  function getWorkSecs() {
+  function getWorkMins() {
     try {
       var stored = localStorage.getItem(DURATION_KEY);
       if (stored) {
         var mins = parseInt(stored, 10);
-        if (!isNaN(mins) && mins > 0) return mins * 60;
+        if (!isNaN(mins) && mins > 0) return mins;
       }
     } catch (_) { /* ignore */ }
-    return 25 * 60;
+    return 25;
+  }
+
+  function getWorkSecs() {
+    return getWorkMins() * 60;
   }
 
   function setWorkMins(mins) {
@@ -206,76 +211,153 @@
     el.id = "pomodoro-popover";
     el.className = "pomo-popover";
     el.setAttribute("role", "dialog");
-    el.setAttribute("aria-label", "Pomodoro duration");
+    el.setAttribute("aria-label", "Pomodoro settings");
 
+    // Header
     var header = document.createElement("div");
     header.className = "pomo-popover__header";
-    header.textContent = "Duration";
+    header.textContent = "Session duration";
 
+    // Preset pills
     var presets = document.createElement("div");
     presets.className = "pomo-popover__presets";
     DURATION_PRESETS.forEach(function (mins) {
       var b = document.createElement("button");
       b.type = "button";
       b.className = "pomo-popover__preset";
-      b.textContent = mins + "m";
+      b.dataset.mins = String(mins);
+      b.textContent = mins + " min";
       b.addEventListener("click", function () {
         setWorkMins(mins);
         if (state.phase === "idle") state.remaining = mins * 60;
         save();
         render();
-        hidePopover();
+        syncActivePreset();
       });
       presets.appendChild(b);
     });
 
+    // Custom duration row
+    var customLabel = document.createElement("div");
+    customLabel.className = "pomo-popover__custom-label";
+    customLabel.textContent = "Custom";
+
     var customRow = document.createElement("div");
     customRow.className = "pomo-popover__custom";
+
+    var minusBtn = document.createElement("button");
+    minusBtn.type = "button";
+    minusBtn.className = "pomo-popover__stepper";
+    minusBtn.textContent = "−";
 
     var input = document.createElement("input");
     input.type = "number";
     input.min = "1";
     input.max = "120";
-    input.placeholder = "min";
     input.className = "pomo-popover__input";
 
-    var setBtn = document.createElement("button");
-    setBtn.type = "button";
-    setBtn.className = "pomo-popover__set";
-    setBtn.textContent = "Set";
-    setBtn.addEventListener("click", function () {
+    var plusBtn = document.createElement("button");
+    plusBtn.type = "button";
+    plusBtn.className = "pomo-popover__stepper";
+    plusBtn.textContent = "+";
+
+    var minLabel = document.createElement("span");
+    minLabel.className = "pomo-popover__unit";
+    minLabel.textContent = "min";
+
+    function applyCustom() {
       var mins = parseInt(input.value, 10);
-      if (!isNaN(mins) && mins > 0) {
+      if (!isNaN(mins) && mins >= 1 && mins <= 120) {
         setWorkMins(mins);
         if (state.phase === "idle") state.remaining = mins * 60;
         save();
         render();
-        hidePopover();
+        syncActivePreset();
+      }
+    }
+
+    minusBtn.addEventListener("click", function () {
+      var cur = parseInt(input.value, 10) || getWorkMins();
+      if (cur > 1) {
+        input.value = String(cur - 1);
+        applyCustom();
       }
     });
 
+    plusBtn.addEventListener("click", function () {
+      var cur = parseInt(input.value, 10) || getWorkMins();
+      if (cur < 120) {
+        input.value = String(cur + 1);
+        applyCustom();
+      }
+    });
+
+    input.addEventListener("change", applyCustom);
     input.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") setBtn.click();
+      if (e.key === "Enter") {
+        applyCustom();
+        e.preventDefault();
+      }
       if (e.key === "Escape") hidePopover();
+    });
+
+    customRow.appendChild(minusBtn);
+    customRow.appendChild(input);
+    customRow.appendChild(plusBtn);
+    customRow.appendChild(minLabel);
+
+    // Start / Reset actions
+    var actions = document.createElement("div");
+    actions.className = "pomo-popover__actions";
+
+    var startBtn = document.createElement("button");
+    startBtn.type = "button";
+    startBtn.className = "pomo-popover__start";
+    startBtn.id = "pomo-start-btn";
+    startBtn.textContent = "Start";
+    startBtn.addEventListener("click", function () {
+      reset();
+      start();
+      hidePopover();
     });
 
     var resetBtn = document.createElement("button");
     resetBtn.type = "button";
     resetBtn.className = "pomo-popover__reset";
-    resetBtn.textContent = "Reset timer";
+    resetBtn.textContent = "Reset";
     resetBtn.addEventListener("click", function () {
       reset();
       hidePopover();
     });
 
-    customRow.appendChild(input);
-    customRow.appendChild(setBtn);
+    actions.appendChild(startBtn);
+    actions.appendChild(resetBtn);
+
     el.appendChild(header);
     el.appendChild(presets);
+    el.appendChild(customLabel);
     el.appendChild(customRow);
-    el.appendChild(resetBtn);
+    el.appendChild(actions);
     document.body.appendChild(el);
+
+    // Expose input ref for showPopover
+    el._customInput = input;
+
     return el;
+  }
+
+  function syncActivePreset() {
+    if (!popover) return;
+    var currentMins = getWorkMins();
+    popover.querySelectorAll(".pomo-popover__preset").forEach(function (b) {
+      var mins = parseInt(b.dataset.mins, 10);
+      b.classList.toggle("pomo-popover__preset--active", mins === currentMins);
+    });
+    // Update start button label based on current state
+    var startBtn = popover.querySelector(".pomo-popover__start");
+    if (startBtn) {
+      startBtn.textContent = state.phase !== "idle" ? "Restart" : "Start";
+    }
   }
 
   function getPopover() {
@@ -291,6 +373,9 @@
       "--pomo-right",
       (window.innerWidth - rect.right) + "px",
     );
+    // Populate custom input with current duration
+    if (el._customInput) el._customInput.value = String(getWorkMins());
+    syncActivePreset();
     el.classList.add("pomo-popover--open");
   }
 
@@ -299,31 +384,16 @@
   }
 
   // ---------------------------------------------------------------------------
-  // Events — left click: start/pause. Right click: config popover.
+  // Events — idle left-click: open settings. running/paused: pause/resume.
+  // Right-click always opens settings.
   // ---------------------------------------------------------------------------
 
-  var pressTimer = null;
-
-  btn.addEventListener("mousedown", function (e) {
-    if (e.button !== 0) return;
-    pressTimer = setTimeout(function () {
-      pressTimer = null;
-    }, 800);
-  });
-
-  btn.addEventListener("mouseup", function (e) {
-    if (e.button !== 0) return;
-    if (!pressTimer) return;
-    clearTimeout(pressTimer);
-    pressTimer = null;
-    if (state.running) pause();
-    else start();
-  });
-
-  btn.addEventListener("mouseleave", function () {
-    if (pressTimer) {
-      clearTimeout(pressTimer);
-      pressTimer = null;
+  btn.addEventListener("click", function (e) {
+    if (state.phase === "idle") {
+      showPopover();
+    } else {
+      if (state.running) pause();
+      else start();
     }
   });
 

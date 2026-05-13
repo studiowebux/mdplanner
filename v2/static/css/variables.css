@@ -82,10 +82,7 @@
   --color-level-project: #ef4444;
 
   /* Lean Canvas tokens */
-  --lc-section-min-height: 8rem;
-  --lc-section-max-height: 18rem;
-  --lc-row-height: 12rem;
-  --lc-row-height-bottom: 8rem;
+  --lc-section-min-h: 10rem;
 
   /* Org chart tokens */
   --orgchart-canvas-height: 70vh;
@@ -306,8 +303,8 @@
   --topbar-search-max-width: 28rem;
   --topbar-search-min-width: 8rem;
   --topbar-pomodoro-min-width: 6.5rem;
-  --pomo-popover-min-w: 10rem;
-  --pomo-popover-input-w: 4rem;
+  --pomo-popover-min-w: 15rem;
+  --pomo-popover-input-w: 3.5rem;
   --sidebar-active-border-width: 2px;
 
   /* Z-index scale — single source of truth, ascending order */

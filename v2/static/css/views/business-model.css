@@ -1,0 +1,149 @@
+/* Business Model Canvas — detail view styles */
+
+.bmc-detail__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+/* ---------------------------------------------------------------------------
+   Canvas grid — 6-column named-area layout, mirrors lean canvas pattern.
+   VP gets 2 cols (wider centre); CO/RE split 50/50 on the bottom row.
+--------------------------------------------------------------------------- */
+
+.bmc-canvas {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-areas:
+    "kp ka vp vp cr cs"
+    "kp kr vp vp ch cs"
+    "co co co re re re";
+  gap: var(--space-sm);
+  margin: var(--space-md) 0;
+}
+
+.bmc-canvas__cell--kp {
+  grid-area: kp;
+}
+.bmc-canvas__cell--ka {
+  grid-area: ka;
+}
+.bmc-canvas__cell--kr {
+  grid-area: kr;
+}
+.bmc-canvas__cell--vp {
+  grid-area: vp;
+}
+.bmc-canvas__cell--cr {
+  grid-area: cr;
+}
+.bmc-canvas__cell--ch {
+  grid-area: ch;
+}
+.bmc-canvas__cell--cs {
+  grid-area: cs;
+}
+.bmc-canvas__cell--co {
+  grid-area: co;
+}
+.bmc-canvas__cell--re {
+  grid-area: re;
+}
+
+/* Fill the full grid cell height; default flex-start keeps title+list at top. */
+.bmc-canvas .lc-section {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: var(--space-sm);
+}
+
+/* List grows to fill available space, pinning the add form to the bottom. */
+.bmc-canvas .lc-section__list,
+.bmc-canvas .lc-section__empty {
+  flex: 1;
+}
+
+.bmc-canvas .lc-section__title {
+  margin-bottom: var(--space-xs);
+}
+
+/* ---------------------------------------------------------------------------
+   Edit mode
+--------------------------------------------------------------------------- */
+
+.bmc-detail--editing .quadrant-card__item:hover {
+  background: var(--color-bg-tertiary);
+}
+
+/* Strip quadrant-card__add double-padding; lc-section already pads the card. */
+.bmc-canvas .quadrant-card__add {
+  padding: var(--space-xs) 0 0;
+  border-top: none;
+}
+
+/* Ghost input — bottom underline only, matches inline-edit style. */
+.bmc-canvas .quadrant-card__input {
+  border: none;
+  border-bottom: var(--border-width) solid var(--color-border-default);
+  border-radius: 0;
+  background: transparent;
+  padding: var(--space-xs) 0;
+  transition: border-color var(--transition-fast);
+}
+
+.bmc-canvas .quadrant-card__input:focus {
+  outline: none;
+  border-bottom-color: var(--color-accent);
+}
+
+/* Textarea inline-edit: auto-size to content, no resize handle. */
+.bmc-inline-edit {
+  field-sizing: content;
+  resize: none;
+  min-height: var(--space-lg);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Flex items need min-width: 0 to shrink within constrained grid cells. */
+.bmc-canvas .quadrant-card__item {
+  min-width: 0;
+}
+
+.bmc-canvas .quadrant-card__inline-edit {
+  min-width: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Responsive
+--------------------------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  .bmc-canvas {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-areas:
+      "kp ka  vp"
+      "kp kr  vp"
+      "cs cr  ch"
+      "co co  re";
+  }
+}
+
+@media (max-width: 700px) {
+  .bmc-canvas {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "kp"
+      "ka"
+      "kr"
+      "vp"
+      "cr"
+      "ch"
+      "cs"
+      "co"
+      "re";
+  }
+}

@@ -569,60 +569,118 @@ html.fullscreen-reading .topbar {
   border-color: var(--color-border-strong);
 }
 
+.pomo-popover__preset--active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-text-on-accent);
+}
+
+.pomo-popover__preset--active:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  filter: brightness(1.1);
+}
+
+.pomo-popover__custom-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
 .pomo-popover__custom {
   display: flex;
   gap: var(--space-xs);
   align-items: center;
 }
 
-.pomo-popover__input {
-  width: var(--pomo-popover-input-w);
-  padding: var(--space-xs) var(--space-sm);
+.pomo-popover__stepper {
+  width: var(--space-xl);
+  height: var(--space-xl);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: var(--radius-sm);
   border: var(--border-width) var(--border-style) var(--color-border-default);
-  background: var(--color-bg-primary);
+  background: var(--color-bg-secondary);
   color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
-.pomo-popover__set {
-  padding: var(--space-xs) var(--space-sm);
+.pomo-popover__stepper:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-strong);
+}
+
+.pomo-popover__input {
+  width: var(--pomo-popover-input-w);
+  padding: var(--space-xs) var(--space-xs);
   border-radius: var(--radius-sm);
   border: var(--border-width) var(--border-style) var(--color-border-default);
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+.pomo-popover__input:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+}
+
+.pomo-popover__unit {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.pomo-popover__actions {
+  display: flex;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+  border-top: var(--border-width) var(--border-style) var(--color-border);
+  padding-top: var(--space-sm);
+}
+
+.pomo-popover__start {
+  flex: 1;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--color-accent);
+  color: var(--color-text-on-accent);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
 }
 
-.pomo-popover__set:hover {
-  background: var(--color-bg-hover);
+.pomo-popover__start:hover {
+  filter: brightness(1.1);
 }
 
 .pomo-popover__reset {
-  margin-top: var(--space-xs);
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-sm);
-  border: var(--border-width) var(--border-style) var(--color-border-default);
-  background: transparent;
-  color: var(--color-text-muted);
+  border: var(--border-width) var(--border-style) var(--color-error);
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  text-align: left;
 }
 
 .pomo-popover__reset:hover {
-  color: var(--color-danger);
-  border-color: var(--color-danger);
+  background: var(--color-error);
+  color: var(--color-text-on-accent);
 }
 
 /* -------------------------------------------------------------------------
-   Narrow desktop — hide lowest-priority topbar buttons (1100px, pixel value
+   Narrow desktop — hide lowest-priority topbar buttons (1170px, pixel value
    required — CSS vars cannot be used in @media conditions)
    ------------------------------------------------------------------------- */
 
-/* At ≤1100px: hide secondary buttons, show ⋮, open panel on toggle. */
-@media (max-width: 1100px) {
+/* At ≤1170px: hide secondary buttons, show ⋮, open panel on toggle. */
+@media (max-width: 1170px) {
   #pomodoro-btn,
   #animations-toggle,
   #font-toggle,

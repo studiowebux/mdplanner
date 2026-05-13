@@ -21,10 +21,6 @@
 .lc-canvas {
   display: grid;
   grid-template-columns: 1fr 1fr 2fr 1fr 1fr;
-  grid-template-rows:
-    var(--lc-row-height)
-    var(--lc-row-height)
-    var(--lc-row-height-bottom);
   grid-template-areas:
     "problem    solution   uvp        unfair    customer"
     "problem    metrics    uvp        channels  customer"
@@ -80,13 +76,11 @@
 }
 
 .lc-section {
-  flex: 1;
-  min-height: 0;
+  min-height: var(--lc-section-min-h);
   padding: var(--space-md);
   border-radius: var(--radius-md);
   background: var(--color-bg-secondary);
   border: var(--border-width) solid var(--color-border-default);
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
@@ -110,6 +104,8 @@
 
 .lc-section__list li {
   margin-bottom: var(--space-xs);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .lc-section__empty {
