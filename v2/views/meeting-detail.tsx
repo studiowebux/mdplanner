@@ -319,6 +319,7 @@ export const MeetingDetailView: FC<
       title={meeting.title}
       {...viewProps}
       styles={["/css/views/meetings.css"]}
+      scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={"/meetings/" + meeting.id}
@@ -338,7 +339,15 @@ export const MeetingDetailView: FC<
             id={meeting.id}
             title={meeting.title}
             formContainerId="meetings-form-container"
-          />
+          >
+            <button
+              type="button"
+              class="btn btn--secondary btn--sm"
+              data-fullscreen-toggle
+            >
+              Focus
+            </button>
+          </DetailActions>
         </header>
 
         {/* -- Info -------------------------------------------------------- */}

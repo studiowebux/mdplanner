@@ -48,6 +48,7 @@ export const BriefDetailView: FC<
       title={brief.title}
       {...viewProps}
       styles={["/css/views/briefs.css"]}
+      scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={"/briefs/" + brief.id}
@@ -67,7 +68,15 @@ export const BriefDetailView: FC<
             id={brief.id}
             title={brief.title}
             formContainerId="briefs-form-container"
-          />
+          >
+            <button
+              type="button"
+              class="btn btn--secondary btn--sm"
+              data-fullscreen-toggle
+            >
+              Focus
+            </button>
+          </DetailActions>
         </header>
 
         {/* -- Info ------------------------------------------------------- */}

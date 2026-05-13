@@ -32,6 +32,7 @@ export const PersonDetailView: FC<Props> = (
       title={person.name}
       {...viewProps}
       styles={["/css/views/people.css"]}
+      scripts={["/js/fullscreen-reading.js"]}
     >
       <main class="detail-view person-detail">
         <BackButton href="/people" label="Back to people" />
@@ -67,7 +68,15 @@ export const PersonDetailView: FC<Props> = (
             title={person.name}
             formContainerId="people-form-container"
             onDeleteRedirect="/people"
-          />
+          >
+            <button
+              type="button"
+              class="btn btn--secondary btn--sm"
+              data-fullscreen-toggle
+            >
+              Focus
+            </button>
+          </DetailActions>
         </header>
 
         <dl class="person-detail__meta">

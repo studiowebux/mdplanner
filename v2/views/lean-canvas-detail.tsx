@@ -40,6 +40,7 @@ export const LeanCanvasDetailView: FC<ViewProps & { item: LeanCanvas }> = (
       title={lc.title}
       {...viewProps}
       styles={["/css/views/lean-canvases.css"]}
+      scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={"/lean-canvases/" + lc.id}
@@ -62,7 +63,15 @@ export const LeanCanvasDetailView: FC<ViewProps & { item: LeanCanvas }> = (
             id={lc.id}
             title={lc.title}
             formContainerId="lean-canvases-form-container"
-          />
+          >
+            <button
+              type="button"
+              class="btn btn--secondary btn--sm"
+              data-fullscreen-toggle
+            >
+              Focus
+            </button>
+          </DetailActions>
         </header>
 
         {/* -- Info --------------------------------------------------------- */}

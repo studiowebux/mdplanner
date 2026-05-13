@@ -40,6 +40,7 @@ export const RetrospectiveDetailView: FC<
       title={retro.title}
       {...viewProps}
       styles={["/css/views/retrospectives.css"]}
+      scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={"/retrospectives/" + retro.id}
@@ -66,7 +67,15 @@ export const RetrospectiveDetailView: FC<
             id={retro.id}
             title={retro.title}
             formContainerId="retrospectives-form-container"
-          />
+          >
+            <button
+              type="button"
+              class="btn btn--secondary btn--sm"
+              data-fullscreen-toggle
+            >
+              Focus
+            </button>
+          </DetailActions>
         </header>
 
         {/* -- Info ------------------------------------------------------- */}

@@ -49,6 +49,7 @@ export const IdeaDetailView: FC<
       title={idea.title}
       {...viewProps}
       styles={["/css/views/ideas.css"]}
+      scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={"/ideas/" + idea.id}
@@ -84,7 +85,15 @@ export const IdeaDetailView: FC<
             id={idea.id}
             title={idea.title}
             formContainerId="ideas-form-container"
-          />
+          >
+            <button
+              type="button"
+              class="btn btn--secondary btn--sm"
+              data-fullscreen-toggle
+            >
+              Focus
+            </button>
+          </DetailActions>
         </header>
 
         {/* -- Overview row ---------------------------------------------- */}

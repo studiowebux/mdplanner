@@ -709,7 +709,7 @@ export const CapacityPlanDetailView: FC<
     title={plan.title}
     {...props}
     styles={["/css/views/capacity-plans.css"]}
-    scripts={["/js/capacity-plan-bandwidth.js"]}
+    scripts={["/js/capacity-plan-bandwidth.js", "/js/fullscreen-reading.js"]}
   >
     <SseRefresh
       getUrl={`/capacity-plans/${plan.id}`}
@@ -732,7 +732,15 @@ export const CapacityPlanDetailView: FC<
           title={plan.title}
           formContainerId="capacity-plans-form-container"
           onDeleteRedirect="/capacity-plans"
-        />
+        >
+          <button
+            type="button"
+            class="btn btn--secondary btn--sm"
+            data-fullscreen-toggle
+          >
+            Focus
+          </button>
+        </DetailActions>
       </header>
 
       <div class="detail-section detail-info-row">

@@ -354,7 +354,7 @@ export const TaskDetailView: FC<Props> = (
       title={task.title}
       {...rest}
       styles={["/css/views/tasks.css", "/css/views/github.css"]}
-      scripts={[]}
+      scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={"/tasks/" + task.id}
@@ -470,6 +470,13 @@ export const TaskDetailView: FC<Props> = (
             hx-swap="none"
           >
             Delete
+          </button>
+          <button
+            type="button"
+            class="btn btn--secondary"
+            data-fullscreen-toggle
+          >
+            Focus
           </button>
         </div>
 

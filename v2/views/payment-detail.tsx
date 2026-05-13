@@ -29,6 +29,7 @@ export const PaymentDetailView: FC<
       title={`Payment — ${payment.reference ?? payment.id}`}
       {...viewProps}
       styles={["/css/views/payments.css"]}
+      scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={"/payments/" + payment.id}
@@ -50,7 +51,15 @@ export const PaymentDetailView: FC<
             id={payment.id}
             title={payment.reference ?? payment.id}
             formContainerId="payments-form-container"
-          />
+          >
+            <button
+              type="button"
+              class="btn btn--secondary btn--sm"
+              data-fullscreen-toggle
+            >
+              Focus
+            </button>
+          </DetailActions>
         </header>
 
         {/* -- Amount ---------------------------------------------------- */}

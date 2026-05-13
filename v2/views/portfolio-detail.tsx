@@ -102,6 +102,7 @@ export const PortfolioDetailView: FC<Props> = (
       scripts={[
         ...(item.githubRepo ? ["/js/github-tabs.js"] : []),
         ...(goals.length || item.githubRepo ? ["/js/kpi-gauge.js"] : []),
+        "/js/fullscreen-reading.js",
       ]}
     >
       <SseRefresh
@@ -128,7 +129,15 @@ export const PortfolioDetailView: FC<Props> = (
             id={item.id}
             title={item.name}
             formContainerId="portfolio-form-container"
-          />
+          >
+            <button
+              type="button"
+              class="btn btn--secondary btn--sm"
+              data-fullscreen-toggle
+            >
+              Focus
+            </button>
+          </DetailActions>
           <p class="portfolio-detail__meta">
             {item.category}
             {item.client && <>{" "}&middot; {item.client}</>}

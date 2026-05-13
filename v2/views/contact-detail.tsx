@@ -23,6 +23,7 @@ export const ContactDetailView: FC<ViewProps & { item: Contact }> = (
       title={contact.name}
       {...viewProps}
       styles={["/css/views/contacts.css"]}
+      scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={`/contacts/${contact.id}`}
@@ -46,7 +47,15 @@ export const ContactDetailView: FC<ViewProps & { item: Contact }> = (
             id={contact.id}
             title={contact.name}
             formContainerId="contacts-form-container"
-          />
+          >
+            <button
+              type="button"
+              class="btn btn--secondary btn--sm"
+              data-fullscreen-toggle
+            >
+              Focus
+            </button>
+          </DetailActions>
         </header>
 
         {hasContact && (
