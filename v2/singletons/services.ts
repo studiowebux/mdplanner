@@ -42,6 +42,9 @@ import { PeopleRepository } from "../repositories/people.repository.ts";
 import { CustomerRepository } from "../repositories/customer.repository.ts";
 import { CustomerService } from "../services/customer.service.ts";
 import { registerCustomerEntity } from "../domains/customer/cache.ts";
+import { ContactRepository } from "../repositories/contact.repository.ts";
+import { ContactService } from "../services/contact.service.ts";
+import { registerContactEntity } from "../domains/contact/cache.ts";
 import { BillingRateRepository } from "../repositories/billing-rate.repository.ts";
 import { BillingRateService } from "../services/billing-rate.service.ts";
 import { registerBillingRateEntity } from "../domains/billing-rate/cache.ts";
@@ -89,6 +92,9 @@ import { registerC4Entity } from "../domains/c4/cache.ts";
 import { EisenhowerRepository } from "../repositories/eisenhower.repository.ts";
 import { EisenhowerService } from "../services/eisenhower.service.ts";
 import { registerEisenhowerEntity } from "../domains/eisenhower/cache.ts";
+import { MindmapRepository } from "../repositories/mindmap.repository.ts";
+import { MindmapService } from "../services/mindmap.service.ts";
+import { registerMindmapEntity } from "../domains/mindmap/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -153,6 +159,8 @@ export function initServices(
   _set(_svc, "swot", new SwotService(swotRepo));
   const customerRepo = new CustomerRepository(projectDir);
   _set(_svc, "customer", new CustomerService(customerRepo));
+  const contactRepo = new ContactRepository(projectDir);
+  _set(_svc, "contact", new ContactService(contactRepo));
   const billingRateRepo = new BillingRateRepository(projectDir);
   _set(_svc, "billingRate", new BillingRateService(billingRateRepo));
   const quoteRepo = new QuoteRepository(projectDir);
@@ -183,6 +191,12 @@ export function initServices(
   _set(_svc, "c4", new C4Service(c4Repo));
   const eisenhowerRepo = new EisenhowerRepository(projectDir);
   _set(_svc, "eisenhower", new EisenhowerService(eisenhowerRepo));
+  const mindmapRepo = _set(
+    _repo,
+    "mindmap",
+    new MindmapRepository(projectDir),
+  );
+  _set(_svc, "mindmap", new MindmapService(mindmapRepo));
   const dnsRepo = new DnsRepository(projectDir);
   _set(_svc, "dns", new DnsService(dnsRepo, projectService));
   _set(_svc, "github", new GitHubService(projectService));
@@ -202,6 +216,7 @@ export function initServices(
     registerMarketingPlanEntity(marketingPlanRepo);
     registerSwotEntity(swotRepo);
     registerCustomerEntity(customerRepo);
+    registerContactEntity(contactRepo);
     registerBillingRateEntity(billingRateRepo);
     registerQuoteEntity(quoteRepo);
     registerInvoiceEntity(invoiceRepo);
@@ -217,6 +232,7 @@ export function initServices(
     registerMoscowEntity(moscowRepo);
     registerC4Entity(c4Repo);
     registerEisenhowerEntity(eisenhowerRepo);
+    registerMindmapEntity(mindmapRepo);
 
     // Pass cacheDb to repos for read-path caching
     milestoneRepo.setCacheDb(cacheDb);
@@ -229,6 +245,7 @@ export function initServices(
     swotRepo.setCacheDb(cacheDb);
     marketingPlanRepo.setCacheDb(cacheDb);
     customerRepo.setCacheDb(cacheDb);
+    contactRepo.setCacheDb(cacheDb);
     billingRateRepo.setCacheDb(cacheDb);
     quoteRepo.setCacheDb(cacheDb);
     invoiceRepo.setCacheDb(cacheDb);
@@ -244,6 +261,7 @@ export function initServices(
     moscowRepo.setCacheDb(cacheDb);
     c4Repo.setCacheDb(cacheDb);
     eisenhowerRepo.setCacheDb(cacheDb);
+    mindmapRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -324,8 +342,16 @@ export function getEisenhowerService(): EisenhowerService {
   return _get<EisenhowerService>(_svc, "eisenhower");
 }
 
+export function getMindmapService(): MindmapService {
+  return _get<MindmapService>(_svc, "mindmap");
+}
+
 export function getCustomerService(): CustomerService {
   return _get<CustomerService>(_svc, "customer");
+}
+
+export function getContactService(): ContactService {
+  return _get<ContactService>(_svc, "contact");
 }
 
 export function getBillingRateService(): BillingRateService {

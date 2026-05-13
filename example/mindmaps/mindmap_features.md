@@ -1,5 +1,9 @@
 ---
-id: mindmap_features
+title: Product Feature Map
+project: TaskFlow Platform
+notes: 
+created_at: "2026-05-12T14:48:37.128Z"
+updated_at: "2026-05-12T23:12:33.004Z"
 ---
 
 # Product Feature Map

@@ -1,18 +1,19 @@
 ---
 id: task_real_time_collab
 completed: false
-updated_at: "2026-03-19T12:00:00.000Z"
-revision: 2
+revision: 3
+updated_at: "2026-05-12T05:59:52.219Z"
 due_date: 2026-04-01
 assignee: charlie
-priority: 1
-effort: 15
 milestone: Public Beta
-project: TaskFlow Platform
-order: 2
 planned_start: 2026-03-01
 planned_end: 2026-03-19
+project: TaskFlow Platform
+priority: 1
+effort: 15
+order: 2
 tags: [real-time, websocket]
+attachments: [uploads/task_real_time_collab/README.md]
 ---
 
 # Real-Time Collaboration

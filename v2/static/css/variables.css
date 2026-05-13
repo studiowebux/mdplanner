@@ -129,6 +129,21 @@
 
   /* ── C4 Architecture canvas ─────────────────────────────────────────── */
   --c4-canvas-height: 600px; /* fallback; overridden by JS on init */
+
+  /* ── Mindmap detail ─────────────────────────────────────────────────── */
+  --mindmap-canvas-height: 75vh;
+  --mindmap-min-height: 25rem;
+  --mindmap-fullscreen-offset: 12rem;
+  --mindmap-edit-textarea-min-height: 30rem;
+  /* Font sizes mirror ROOT_FONT/BRANCH_FONT/CHILD_FONT in mindmap.js */
+  --mm-font-root: 20px;
+  --mm-font-branch: 14px;
+  --mm-font-leaf: 13px;
+  --mm-badge-font: 11px;
+  --mm-halo-width: 6px;
+  --mm-line-root-width: 2px;
+  --mm-line-child-width: 1.5px;
+  --mm-badge-disc-opacity: 0.15;
   --c4-box-w: 14rem; /* 224px — must match BOX_W constant in c4-canvas.tsx */
   --c4-box-h: 8rem; /* 128px — must match BOX_H constant in c4-canvas.tsx */
   --c4-box-gap: 3rem;
@@ -220,6 +235,16 @@
   --orgchart-dept-color-5: var(--color-cat-pink);
   --orgchart-dept-color-6: var(--color-cat-yellow-dark);
   --orgchart-dept-color-7: var(--color-cat-green-dark);
+
+  /* Mindmap branch palette — mirrors orgchart pattern */
+  --mm-branch-0: var(--color-cat-orange);
+  --mm-branch-1: var(--color-cat-green);
+  --mm-branch-2: var(--color-cat-blue);
+  --mm-branch-3: var(--color-cat-navy);
+  --mm-branch-4: var(--color-cat-purple);
+  --mm-branch-5: var(--color-cat-pink);
+  --mm-branch-6: var(--color-cat-yellow-dark);
+  --mm-branch-7: var(--color-cat-green-dark);
 
   /* ── Component tokens ────────────────────────────────────────────────── */
 
@@ -633,4 +658,14 @@ html.font-mono {
   /* Capacity grid cell tints — softer than alert bg in dark mode */
   --cp-grid-cell-free-bg: rgba(74, 222, 128, 0.08);
   --cp-grid-cell-over-bg: rgba(248, 113, 113, 0.12);
+
+  /* Mindmap branch palette — light variants pop on dark bg */
+  --mm-branch-0: var(--color-cat-orange-light);
+  --mm-branch-1: var(--color-cat-green-light);
+  --mm-branch-2: var(--color-cat-blue-light);
+  --mm-branch-3: var(--color-cat-navy-light);
+  --mm-branch-4: var(--color-cat-purple-light);
+  --mm-branch-5: var(--color-cat-pink-light);
+  --mm-branch-6: var(--color-cat-yellow-light);
+  --mm-branch-7: var(--color-cat-green-light);
 }

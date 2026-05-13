@@ -20,6 +20,7 @@ import {
   registerAutocompleteSource,
 } from "./autocomplete/routes.ts";
 import { billingRatesRouter } from "./billing-rates/routes.tsx";
+import { contactsRouter } from "./contacts/routes.tsx";
 import { customersRouter } from "./customers/routes.tsx";
 import { invoicesRouter } from "./invoices/routes.tsx";
 import { paymentsRouter } from "./payments/routes.tsx";
@@ -28,6 +29,7 @@ import { marketingPlansRouter } from "./marketing-plans/routes.tsx";
 import { swotRouter } from "./swot/routes.tsx";
 import { moscowRouter } from "./moscow/routes.tsx";
 import { eisenhowerRouter } from "./eisenhower/routes.tsx";
+import { mindmapRouter } from "./mindmaps/routes.tsx";
 import { c4Router } from "./c4/routes.tsx";
 import { brainstormsRouter } from "./brainstorms/routes.tsx";
 import { briefsRouter } from "./briefs/routes.tsx";
@@ -342,6 +344,7 @@ export const views = new Hono<{ Variables: AppVariables }>();
 
 views.route("/", homeViewRouter);
 views.route("/billing-rates", billingRatesRouter);
+views.route("/contacts", contactsRouter);
 views.route("/customers", customersRouter);
 views.route("/invoices", invoicesRouter);
 views.route("/payments", paymentsRouter);
@@ -361,6 +364,7 @@ views.route("/marketing-plans", marketingPlansRouter);
 views.route("/swot", swotRouter);
 views.route("/moscow", moscowRouter);
 views.route("/eisenhower", eisenhowerRouter);
+views.route("/mindmaps", mindmapRouter);
 views.route("/c4", c4Router);
 views.route("/brainstorms", brainstormsRouter);
 views.route("/briefs", briefsRouter);
