@@ -8,7 +8,7 @@ import { Highlight } from "../../utils/highlight.tsx";
 // Table columns
 // ---------------------------------------------------------------------------
 
-const actionBtns = createActionBtns("fishbone", "fishbone-form-container");
+const actionBtns = createActionBtns("fishbones", "fishbone-form-container");
 
 export const FISHBONE_TABLE_COLUMNS: ColumnDef[] = [
   {
