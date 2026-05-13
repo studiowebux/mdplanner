@@ -14,7 +14,7 @@ import { PORTFOLIO_TABLE_COLUMNS, portfolioToRow } from "./constants.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
 
-const FORM_FIELDS: FieldDef[] = [
+export const PORTFOLIO_FORM_FIELDS: FieldDef[] = [
   { type: "text", name: "name", label: "Name", required: true, maxLength: 200 },
   {
     type: "autocomplete",
@@ -111,7 +111,7 @@ export const portfolioConfig: DomainConfig<
     "order",
   ],
   columns: PORTFOLIO_TABLE_COLUMNS,
-  formFields: FORM_FIELDS,
+  formFields: PORTFOLIO_FORM_FIELDS,
 
   filters: [
     {
@@ -131,10 +131,10 @@ export const portfolioConfig: DomainConfig<
   Card: ({ item, q }) => <PortfolioCard item={item} q={q} />,
 
   parseCreate: (body) =>
-    parseFormBody(FORM_FIELDS, body) as CreatePortfolioItem,
+    parseFormBody(PORTFOLIO_FORM_FIELDS, body) as CreatePortfolioItem,
 
   parseUpdate: (body) =>
-    parseFormBody(FORM_FIELDS, body, { clearEmpty: true }) as Partial<
+    parseFormBody(PORTFOLIO_FORM_FIELDS, body, { clearEmpty: true }) as Partial<
       UpdatePortfolioItem
     >,
 

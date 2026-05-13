@@ -431,6 +431,17 @@
   --cp-grid-popup-z: 350;
   --cp-cell-tasks-min-w: 14rem;
   --cp-cell-popup-max-h: 16rem;
+
+  /* Print — @page size/margin are literals (Safari ignores var() there) */
+  --print-color-fg: #000;
+  --print-color-bg: #fff;
+  --print-font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  --print-font-size-base: 10pt;
+  --print-section-gap: var(--space-xs);
+  --print-table-cell-padding: var(--space-xs) var(--space-sm);
+  --print-badge-padding: 0.05rem var(--space-xs);
 }
 
 html.font-mono {

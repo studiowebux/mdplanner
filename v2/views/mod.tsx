@@ -50,6 +50,7 @@ import { BRAINSTORM_FORM_FIELDS } from "../domains/brainstorm/constants.tsx";
 import { INVOICE_FORM_FIELDS } from "../domains/invoice/constants.tsx";
 import { MKTPLAN_FORM_FIELDS } from "../domains/marketing-plan/constants.tsx";
 import { MEETING_FORM_FIELDS } from "../domains/meeting/constants.tsx";
+import { PORTFOLIO_FORM_FIELDS } from "../domains/portfolio/config.tsx";
 import { QUOTE_FORM_FIELDS } from "../domains/quote/constants.tsx";
 import type { FieldDef } from "../components/ui/form-builder.tsx";
 import {
@@ -387,6 +388,7 @@ for (
     QUOTE_FORM_FIELDS,
     INVOICE_FORM_FIELDS,
     BRAINSTORM_FORM_FIELDS,
+    PORTFOLIO_FORM_FIELDS,
   ]
 ) {
   for (const field of fields) {
