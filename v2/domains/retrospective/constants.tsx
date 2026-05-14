@@ -1,9 +1,16 @@
 import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import type { Retrospective } from "../../types/retrospective.types.ts";
+import type { BadgeVariant } from "../../components/ui/status-badge.tsx";
 import { createActionBtns } from "../../components/ui/action-btns.tsx";
+import { badgeClass } from "../../components/ui/status-badge.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
+
+export const RETROSPECTIVE_STATUS_VARIANTS: Record<string, BadgeVariant> = {
+  open: "warning",
+  closed: "success",
+};
 
 // ---------------------------------------------------------------------------
 // Action buttons
@@ -39,7 +46,7 @@ export const RETROSPECTIVE_TABLE_COLUMNS: ColumnDef[] = [
     label: "Status",
     sortable: true,
     render: (v) => (
-      <span class={`badge badge--${v === "closed" ? "success" : "warning"}`}>
+      <span class={badgeClass(RETROSPECTIVE_STATUS_VARIANTS, String(v))}>
         {String(v)}
       </span>
     ),

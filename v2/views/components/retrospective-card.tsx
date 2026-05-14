@@ -1,6 +1,8 @@
 import type { FC } from "hono/jsx";
 import type { Retrospective } from "../../types/retrospective.types.ts";
 import { DomainCard } from "../../components/ui/domain-card.tsx";
+import { badgeClass } from "../../components/ui/status-badge.tsx";
+import { RETROSPECTIVE_STATUS_VARIANTS } from "../../domains/retrospective/constants.tsx";
 import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 
 type Props = { item: Retrospective; q?: string };
@@ -21,11 +23,7 @@ export const RetrospectiveCard: FC<Props> = ({ item, q }) => {
       <CardMeta>
         {item.date && <CardMetaItem label="Date">{item.date}</CardMetaItem>}
         <CardMetaItem label="Status">
-          <span
-            class={`badge badge--${
-              item.status === "closed" ? "success" : "warning"
-            }`}
-          >
+          <span class={badgeClass(RETROSPECTIVE_STATUS_VARIANTS, item.status)}>
             {item.status}
           </span>
         </CardMetaItem>
