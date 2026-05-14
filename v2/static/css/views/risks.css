@@ -36,6 +36,40 @@
   gap: var(--space-xs);
 }
 
+/* -- Risk preview sidenav ------------------------------------------------- */
+
+.risk-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.risk-preview__badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.risk-preview .detail-meta {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-sm) var(--space-md);
+  margin: 0;
+}
+
+.risk-preview__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.risk-preview__footer {
+  padding-top: var(--space-sm);
+  border-top: var(--border-width) var(--border-style)
+    var(--color-border-default);
+}
+
 /* -- Risk matrix view ----------------------------------------------------- */
 
 .risk-matrix {

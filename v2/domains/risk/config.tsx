@@ -133,8 +133,11 @@ export const riskConfig: DomainConfig<Risk, CreateRisk, UpdateRisk> = {
           >
             {matching.map((r) => (
               <a
-                href={`/risks/${r.id}`}
-                class={`risk-matrix__chip`}
+                hx-get={`/risks/${r.id}/preview`}
+                hx-target="#risks-form-container"
+                hx-swap="outerHTML"
+                data-sidenav-open="risks-form-container"
+                class="risk-matrix__chip"
                 title={r.title}
               >
                 <span class="risk-matrix__chip-title">{r.title}</span>
