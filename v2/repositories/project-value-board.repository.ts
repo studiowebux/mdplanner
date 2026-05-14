@@ -1,0 +1,199 @@
+// Project Value Board repository — markdown file CRUD under projectvalue/.
+// Body uses ## Section headings with bullet lists for each of the 4 sections.
+
+import { serializeFrontmatter } from "../utils/frontmatter.ts";
+import type {
+  CreateProjectValueBoard,
+  ProjectValueBoard,
+  ProjectValueBoardSectionKey,
+  UpdateProjectValueBoard,
+} from "../types/project-value-board.types.ts";
+import { PROJECT_VALUE_BOARD_SECTION_KEYS } from "../types/project-value-board.types.ts";
+import { CachedMarkdownRepository } from "./cached.repository.ts";
+import {
+  PROJECT_VALUE_BOARD_TABLE,
+  rowToProjectValueBoard,
+} from "../domains/project-value-board/cache.ts";
+
+const SECTION_HEADER_MAP: Array<{
+  prefixes: string[];
+  key: ProjectValueBoardSectionKey;
+}> = [
+  {
+    prefixes: ["customer segment", "target customer", "who"],
+    key: "customerSegments",
+  },
+  { prefixes: ["problem", "pain point"], key: "problem" },
+  { prefixes: ["solution", "how we solve"], key: "solution" },
+  { prefixes: ["benefit", "value", "outcome"], key: "benefit" },
+];
+
+const SECTION_HEADERS: Record<ProjectValueBoardSectionKey, string> = {
+  customerSegments: "Customer Segments",
+  problem: "Problem",
+  solution: "Solution",
+  benefit: "Benefit",
+};
+
+function matchSection(heading: string): ProjectValueBoardSectionKey | null {
+  const lower = heading.toLowerCase();
+  for (const { prefixes, key } of SECTION_HEADER_MAP) {
+    if (prefixes.some((p) => lower.startsWith(p))) return key;
+  }
+  return null;
+}
+
+export class ProjectValueBoardRepository extends CachedMarkdownRepository<
+  ProjectValueBoard,
+  CreateProjectValueBoard,
+  UpdateProjectValueBoard
+> {
+  protected readonly tableName = PROJECT_VALUE_BOARD_TABLE;
+
+  constructor(projectDir: string) {
+    super(projectDir, {
+      directory: "projectvalue",
+      idPrefix: "value",
+      nameField: "title",
+    });
+  }
+
+  protected rowToEntity(
+    row: Record<string, string | number | null>,
+  ): ProjectValueBoard {
+    return rowToProjectValueBoard(row);
+  }
+
+  protected fromCreateInput(
+    data: CreateProjectValueBoard,
+    id: string,
+    now: string,
+  ): ProjectValueBoard {
+    return {
+      ...data,
+      id,
+      date: data.date ?? new Date().toISOString().split("T")[0],
+      customerSegments: data.customerSegments ?? [],
+      problem: data.problem ?? [],
+      solution: data.solution ?? [],
+      benefit: data.benefit ?? [],
+      createdAt: now,
+      updatedAt: now,
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Parse — frontmatter + body sections
+  // ---------------------------------------------------------------------------
+
+  protected parse(
+    filename: string,
+    fm: Record<string, unknown>,
+    body: string,
+  ): ProjectValueBoard | null {
+    if (!fm.id && !fm.title) return null;
+    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+
+    const lines = body.split("\n");
+    let title = fm.title ? String(fm.title) : "";
+    const sections: Record<ProjectValueBoardSectionKey, string[]> = {
+      customerSegments: [],
+      problem: [],
+      solution: [],
+      benefit: [],
+    };
+    let currentSection: ProjectValueBoardSectionKey | null = null;
+    const extraLines: string[] = [];
+    let pastSections = false;
+
+    for (const line of lines) {
+      if (line.startsWith("# ")) {
+        if (!title) title = line.slice(2).trim();
+        continue;
+      }
+
+      const h2Match = line.match(/^##\s+(.+)$/);
+      if (h2Match) {
+        const key = matchSection(h2Match[1]);
+        if (key) {
+          currentSection = key;
+          pastSections = false;
+        } else {
+          currentSection = null;
+          pastSections = true;
+          extraLines.push(line);
+        }
+        continue;
+      }
+
+      const listMatch = line.match(/^[-*]\s+(.+)$/);
+      if (listMatch && currentSection && !pastSections) {
+        sections[currentSection].push(listMatch[1].trim());
+        continue;
+      }
+
+      if (pastSections) {
+        extraLines.push(line);
+      }
+    }
+
+    const bodyNotes = extraLines.join("\n").trim();
+    const fmNotes = fm.notes != null ? String(fm.notes) : "";
+    const notes = bodyNotes || fmNotes || undefined;
+
+    return {
+      id,
+      title: title || "Untitled Value Board",
+      date: fm.date ? String(fm.date) : new Date().toISOString().split("T")[0],
+      ...sections,
+      project: fm.project != null ? String(fm.project) : undefined,
+      notes,
+      createdAt: fm.createdAt
+        ? String(fm.createdAt)
+        : fm.created_at
+        ? String(fm.created_at)
+        : new Date().toISOString(),
+      updatedAt: fm.updatedAt
+        ? String(fm.updatedAt)
+        : fm.updated_at
+        ? String(fm.updated_at)
+        : new Date().toISOString(),
+      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
+      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Serialize — frontmatter + body sections
+  // ---------------------------------------------------------------------------
+
+  protected serialize(item: ProjectValueBoard): string {
+    const fm: Record<string, unknown> = {};
+    fm.id = item.id;
+    fm.title = item.title;
+    fm.date = item.date;
+    if (item.project) fm.project = item.project;
+    fm.created_at = item.createdAt;
+    fm.updated_at = item.updatedAt;
+    if (item.createdBy) fm.created_by = item.createdBy;
+    if (item.updatedBy) fm.updated_by = item.updatedBy;
+
+    const bodyLines: string[] = [`# ${item.title}`];
+
+    for (const key of PROJECT_VALUE_BOARD_SECTION_KEYS) {
+      bodyLines.push("");
+      bodyLines.push(`## ${SECTION_HEADERS[key]}`);
+      bodyLines.push("");
+      for (const entry of item[key]) {
+        bodyLines.push(`- ${entry}`);
+      }
+    }
+
+    if (item.notes) {
+      bodyLines.push("");
+      bodyLines.push(item.notes);
+    }
+
+    return serializeFrontmatter(fm, bodyLines.join("\n").trimEnd());
+  }
+}

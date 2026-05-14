@@ -110,6 +110,9 @@ import { registerStrategicLevelsEntity } from "../domains/strategic-levels/cache
 import { SafeRepository } from "../repositories/safe.repository.ts";
 import { SafeService } from "../services/safe.service.ts";
 import { registerSafeEntity } from "../domains/safe/cache.ts";
+import { ProjectValueBoardRepository } from "../repositories/project-value-board.repository.ts";
+import { ProjectValueBoardService } from "../services/project-value-board.service.ts";
+import { registerProjectValueBoardEntity } from "../domains/project-value-board/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -186,6 +189,12 @@ export function initServices(
   );
   const safeRepo = new SafeRepository(projectDir);
   _set(_svc, "safe", new SafeService(safeRepo));
+  const projectValueBoardRepo = new ProjectValueBoardRepository(projectDir);
+  _set(
+    _svc,
+    "projectValueBoard",
+    new ProjectValueBoardService(projectValueBoardRepo),
+  );
   const customerRepo = new CustomerRepository(projectDir);
   _set(_svc, "customer", new CustomerService(customerRepo));
   const contactRepo = new ContactRepository(projectDir);
@@ -249,6 +258,7 @@ export function initServices(
     registerRiskEntity(riskRepo);
     registerStrategicLevelsEntity(strategicLevelsRepo);
     registerSafeEntity(safeRepo);
+    registerProjectValueBoardEntity(projectValueBoardRepo);
     registerCustomerEntity(customerRepo);
     registerContactEntity(contactRepo);
     registerBillingRateEntity(billingRateRepo);
@@ -301,6 +311,7 @@ export function initServices(
     riskRepo.setCacheDb(cacheDb);
     strategicLevelsRepo.setCacheDb(cacheDb);
     safeRepo.setCacheDb(cacheDb);
+    projectValueBoardRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -403,6 +414,10 @@ export function getStrategicLevelsService(): StrategicLevelsService {
 
 export function getSafeService(): SafeService {
   return _get<SafeService>(_svc, "safe");
+}
+
+export function getProjectValueBoardService(): ProjectValueBoardService {
+  return _get<ProjectValueBoardService>(_svc, "projectValueBoard");
 }
 
 export function getCustomerService(): CustomerService {

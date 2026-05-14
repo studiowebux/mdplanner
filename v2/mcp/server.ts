@@ -34,6 +34,7 @@ import { registerC4Tools } from "./tools/c4.ts";
 import { registerCapacityPlanTools } from "./tools/capacity-plans.ts";
 import { registerStrategicLevelsTools } from "./tools/strategic-levels.ts";
 import { registerSafeTools } from "./tools/safe.ts";
+import { registerProjectValueBoardTools } from "./tools/project-value-board.ts";
 
 export function createMcpServer(): McpServer {
   const server = new McpServer({
@@ -70,6 +71,7 @@ export function createMcpServer(): McpServer {
   registerCapacityPlanTools(server);
   registerStrategicLevelsTools(server);
   registerSafeTools(server);
+  registerProjectValueBoardTools(server);
 
   return server;
 }
