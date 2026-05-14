@@ -403,6 +403,28 @@
     showPopover();
   });
 
+  // Long-press fallback for mobile (no contextmenu on touch devices).
+  var longPressTimer = null;
+  btn.addEventListener("touchstart", function (e) {
+    longPressTimer = setTimeout(function () {
+      longPressTimer = null;
+      e.preventDefault();
+      showPopover();
+    }, 500);
+  }, { passive: true });
+  btn.addEventListener("touchend", function () {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+  });
+  btn.addEventListener("touchmove", function () {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+  });
+
   document.addEventListener("click", function (e) {
     if (popover && popover.classList.contains("pomo-popover--open")) {
       if (!popover.contains(e.target) && e.target !== btn) hidePopover();

@@ -257,7 +257,9 @@ export class PortfolioRepository {
       expenses: typeof fm.expenses === "number" ? fm.expenses : undefined,
       progress: typeof fm.progress === "number" ? fm.progress : 0,
       startDate: fm.start_date != null ? String(fm.start_date) : undefined,
-      endDate: fm.endDate != null ? String(fm.endDate) : undefined,
+      endDate: (fm.end_date ?? fm.endDate) != null
+        ? String(fm.end_date ?? fm.endDate)
+        : undefined,
       team: Array.isArray(fm.team)
         ? fm.team.map((m): TeamMember =>
           typeof m === "string" ? { personId: m } : {
@@ -268,20 +270,23 @@ export class PortfolioRepository {
           }
         )
         : undefined,
-      techStack: Array.isArray(fm.techStack)
-        ? fm.techStack.map(String)
+      techStack: Array.isArray(fm.tech_stack ?? fm.techStack)
+        ? ((fm.tech_stack ?? fm.techStack) as unknown[]).map(String)
         : undefined,
       logo: fm.logo != null ? String(fm.logo) : undefined,
       license: fm.license != null ? String(fm.license) : undefined,
-      githubRepo: fm.githubRepo != null ? String(fm.githubRepo) : undefined,
-      billingCustomerId: fm.billingCustomerId != null
-        ? String(fm.billingCustomerId)
+      githubRepo: (fm.github_repo ?? fm.githubRepo) != null
+        ? String(fm.github_repo ?? fm.githubRepo)
         : undefined,
-      brainManaged: typeof fm.brainManaged === "boolean"
-        ? fm.brainManaged
+      billingCustomerId:
+        (fm.billing_customer_id ?? fm.billingCustomerId) != null
+          ? String(fm.billing_customer_id ?? fm.billingCustomerId)
+          : undefined,
+      brainManaged: typeof (fm.brain_managed ?? fm.brainManaged) === "boolean"
+        ? (fm.brain_managed ?? fm.brainManaged) as boolean
         : undefined,
-      linkedGoals: Array.isArray(fm.linkedGoals)
-        ? fm.linkedGoals.map(String)
+      linkedGoals: Array.isArray(fm.linked_goals ?? fm.linkedGoals)
+        ? ((fm.linked_goals ?? fm.linkedGoals) as unknown[]).map(String)
         : undefined,
       kpis: Array.isArray(fm.kpis) ? fm.kpis : undefined,
       urls: Array.isArray(fm.urls) ? fm.urls : undefined,
