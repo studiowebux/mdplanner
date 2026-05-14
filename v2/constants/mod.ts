@@ -99,6 +99,7 @@ export const ENTITY_TYPE_LABELS: Record<string, string> = {
   c4_component: "C4 Component",
   swot: "SWOT",
   risk: "Risk",
+  safe: "SAFE",
   lean_canvas: "Lean Canvas",
   business_model: "Business Model",
   project_value: "Project Value",
@@ -158,6 +159,7 @@ export const DEFAULT_NAV_CATEGORIES: Record<string, string[]> = {
   Strategy: [
     "swot",
     "risk",
+    "safe",
     "lean_canvas",
     "business_model",
     "project_value",
@@ -270,6 +272,7 @@ export const ENTITY_TYPE_ROUTES: Record<string, string> = {
   c4_component: "/c4",
   swot: "/swot",
   risk: "/risks",
+  safe: "/safe",
   lean_canvas: "/lean-canvases",
   business_model: "/business-models",
   project_value: "/project-value",

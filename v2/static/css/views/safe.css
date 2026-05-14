@@ -1,0 +1,28 @@
+/* SAFe Agreement styles */
+
+/* -- Detail header -------------------------------------------------------- */
+
+.safe-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.safe-detail__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+}
+
+/* -- Notes ---------------------------------------------------------------- */
+
+.safe-detail__notes {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  white-space: pre-wrap;
+  margin: 0;
+}

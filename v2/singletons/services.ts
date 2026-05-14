@@ -107,6 +107,9 @@ import { registerRiskEntity } from "../domains/risk/cache.ts";
 import { StrategicLevelsRepository } from "../repositories/strategic-levels.repository.ts";
 import { StrategicLevelsService } from "../services/strategic-levels.service.ts";
 import { registerStrategicLevelsEntity } from "../domains/strategic-levels/cache.ts";
+import { SafeRepository } from "../repositories/safe.repository.ts";
+import { SafeService } from "../services/safe.service.ts";
+import { registerSafeEntity } from "../domains/safe/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -181,6 +184,8 @@ export function initServices(
     "strategicLevels",
     new StrategicLevelsService(strategicLevelsRepo),
   );
+  const safeRepo = new SafeRepository(projectDir);
+  _set(_svc, "safe", new SafeService(safeRepo));
   const customerRepo = new CustomerRepository(projectDir);
   _set(_svc, "customer", new CustomerService(customerRepo));
   const contactRepo = new ContactRepository(projectDir);
@@ -243,6 +248,7 @@ export function initServices(
     registerBusinessModelEntity(businessModelRepo);
     registerRiskEntity(riskRepo);
     registerStrategicLevelsEntity(strategicLevelsRepo);
+    registerSafeEntity(safeRepo);
     registerCustomerEntity(customerRepo);
     registerContactEntity(contactRepo);
     registerBillingRateEntity(billingRateRepo);
@@ -294,6 +300,7 @@ export function initServices(
     businessModelRepo.setCacheDb(cacheDb);
     riskRepo.setCacheDb(cacheDb);
     strategicLevelsRepo.setCacheDb(cacheDb);
+    safeRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -392,6 +399,10 @@ export function getRiskService(): RiskService {
 
 export function getStrategicLevelsService(): StrategicLevelsService {
   return _get<StrategicLevelsService>(_svc, "strategicLevels");
+}
+
+export function getSafeService(): SafeService {
+  return _get<SafeService>(_svc, "safe");
 }
 
 export function getCustomerService(): CustomerService {
