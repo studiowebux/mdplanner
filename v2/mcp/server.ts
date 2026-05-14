@@ -32,6 +32,7 @@ import { registerTaskTools } from "./tools/tasks.ts";
 import { registerStickyNoteTools } from "./tools/sticky-notes.ts";
 import { registerC4Tools } from "./tools/c4.ts";
 import { registerCapacityPlanTools } from "./tools/capacity-plans.ts";
+import { registerStrategicLevelsTools } from "./tools/strategic-levels.ts";
 
 export function createMcpServer(): McpServer {
   const server = new McpServer({
@@ -66,6 +67,7 @@ export function createMcpServer(): McpServer {
   registerStickyNoteTools(server);
   registerC4Tools(server);
   registerCapacityPlanTools(server);
+  registerStrategicLevelsTools(server);
 
   return server;
 }

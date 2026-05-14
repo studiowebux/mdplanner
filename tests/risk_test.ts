@@ -36,7 +36,10 @@ Deno.test("RiskRepository - create stores file and returns entity", async () => 
     assertEquals(item.impact, 5);
     assertEquals(item.status, "open");
     assertEquals(item.description, "Database could go down during peak hours.");
-    assertEquals(item.mitigation, "Set up read replicas and automated failover.");
+    assertEquals(
+      item.mitigation,
+      "Set up read replicas and automated failover.",
+    );
   });
 });
 
@@ -115,9 +118,27 @@ Deno.test("RiskRepository - delete removes entity", async () => {
 Deno.test("RiskRepository - findAll returns all entities", async () => {
   await withTmpDir(async (dir) => {
     const repo = new RiskRepository(dir);
-    await repo.create({ title: "Risk A", category: "technical", likelihood: 1, impact: 1, status: "open" });
-    await repo.create({ title: "Risk B", category: "financial", likelihood: 2, impact: 2, status: "open" });
-    await repo.create({ title: "Risk C", category: "strategic", likelihood: 3, impact: 3, status: "closed" });
+    await repo.create({
+      title: "Risk A",
+      category: "technical",
+      likelihood: 1,
+      impact: 1,
+      status: "open",
+    });
+    await repo.create({
+      title: "Risk B",
+      category: "financial",
+      likelihood: 2,
+      impact: 2,
+      status: "open",
+    });
+    await repo.create({
+      title: "Risk C",
+      category: "strategic",
+      likelihood: 3,
+      impact: 3,
+      status: "closed",
+    });
 
     const all = await repo.findAll();
     assertEquals(all.length, 3);
@@ -162,7 +183,13 @@ Document all deployment steps and cross-train two other engineers.
     assertEquals(item!.owner, "Jane Doe");
     assertEquals(item!.project, "My Project");
     assertEquals(item!.tags, ["staffing", "continuity"]);
-    assertEquals(item!.description, "Only one engineer knows the deployment process.");
-    assertEquals(item!.mitigation, "Document all deployment steps and cross-train two other engineers.");
+    assertEquals(
+      item!.description,
+      "Only one engineer knows the deployment process.",
+    );
+    assertEquals(
+      item!.mitigation,
+      "Document all deployment steps and cross-train two other engineers.",
+    );
   });
 });

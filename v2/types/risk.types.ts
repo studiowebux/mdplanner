@@ -98,7 +98,9 @@ export const CreateRiskSchema = RiskSchema.pick({
 
 export type CreateRisk = z.infer<typeof CreateRiskSchema>;
 
-export const UpdateRiskSchema = CreateRiskSchema.partial().openapi("UpdateRisk");
+export const UpdateRiskSchema = CreateRiskSchema.partial().openapi(
+  "UpdateRisk",
+);
 
 export type UpdateRisk = z.infer<typeof UpdateRiskSchema>;
 

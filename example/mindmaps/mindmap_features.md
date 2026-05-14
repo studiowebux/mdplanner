@@ -1,9 +1,7 @@
 ---
-title: Product Feature Map
 project: TaskFlow Platform
-notes: 
 created_at: "2026-05-12T14:48:37.128Z"
-updated_at: "2026-05-12T23:12:33.004Z"
+updated_at: "2026-05-13T02:43:01.283Z"
 ---
 
 # Product Feature Map
@@ -15,12 +13,12 @@ updated_at: "2026-05-12T23:12:33.004Z"
       - Due dates
       - Priority levels
     - Task Organization
-      - Kanban boards
       - List view
-      - Filters
     - Subtasks
       - Nested tasks
+      - Kanban boards
       - Progress tracking
+      - Filters
   - Time Tracking
     - Timer
       - Start/stop

@@ -104,6 +104,9 @@ import { registerBusinessModelEntity } from "../domains/business-model/cache.ts"
 import { RiskRepository } from "../repositories/risk.repository.ts";
 import { RiskService } from "../services/risk.service.ts";
 import { registerRiskEntity } from "../domains/risk/cache.ts";
+import { StrategicLevelsRepository } from "../repositories/strategic-levels.repository.ts";
+import { StrategicLevelsService } from "../services/strategic-levels.service.ts";
+import { registerStrategicLevelsEntity } from "../domains/strategic-levels/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -172,6 +175,12 @@ export function initServices(
   _set(_svc, "businessModel", new BusinessModelService(businessModelRepo));
   const riskRepo = new RiskRepository(projectDir);
   _set(_svc, "risk", new RiskService(riskRepo));
+  const strategicLevelsRepo = new StrategicLevelsRepository(projectDir);
+  _set(
+    _svc,
+    "strategicLevels",
+    new StrategicLevelsService(strategicLevelsRepo),
+  );
   const customerRepo = new CustomerRepository(projectDir);
   _set(_svc, "customer", new CustomerService(customerRepo));
   const contactRepo = new ContactRepository(projectDir);
@@ -233,6 +242,7 @@ export function initServices(
     registerFishboneEntity(fishboneRepo);
     registerBusinessModelEntity(businessModelRepo);
     registerRiskEntity(riskRepo);
+    registerStrategicLevelsEntity(strategicLevelsRepo);
     registerCustomerEntity(customerRepo);
     registerContactEntity(contactRepo);
     registerBillingRateEntity(billingRateRepo);
@@ -283,6 +293,7 @@ export function initServices(
     fishboneRepo.setCacheDb(cacheDb);
     businessModelRepo.setCacheDb(cacheDb);
     riskRepo.setCacheDb(cacheDb);
+    strategicLevelsRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -377,6 +388,10 @@ export function getBusinessModelService(): BusinessModelService {
 
 export function getRiskService(): RiskService {
   return _get<RiskService>(_svc, "risk");
+}
+
+export function getStrategicLevelsService(): StrategicLevelsService {
+  return _get<StrategicLevelsService>(_svc, "strategicLevels");
 }
 
 export function getCustomerService(): CustomerService {

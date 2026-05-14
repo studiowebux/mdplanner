@@ -80,6 +80,17 @@
   --color-level-key-result: #eab308;
   --color-level-initiative: #f97316;
   --color-level-project: #ef4444;
+  /* Strategic Levels builder hierarchy colors */
+  --color-sl-vision: #8b5cf6;
+  --color-sl-mission: #3b82f6;
+  --color-sl-goals: #22c55e;
+  --color-sl-objectives: #eab308;
+  --color-sl-strategies: #f97316;
+  --color-sl-tactics: #ef4444;
+  /* Strategic Levels layout tokens */
+  --sl-tier-label-w: 7rem;
+  --sl-border-accent-w: 3px;
+  --sl-pyramid-max-w: 56rem;
 
   /* Lean Canvas tokens */
   --lc-section-min-h: 10rem;

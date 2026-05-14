@@ -41,7 +41,10 @@ export const RiskDetailView: FC<ViewProps & { item: Risk }> = (
                 {risk.status}
               </span>
               <span class="badge badge--accent">{risk.category}</span>
-              <span class="badge risk-score-badge" title="Risk score (likelihood × impact)">
+              <span
+                class="badge risk-score-badge"
+                title="Risk score (likelihood × impact)"
+              >
                 Score: {score}
               </span>
             </div>

@@ -17,7 +17,9 @@ export const RiskCard: FC<Props> = ({ item, q }) => {
       domain="risks"
       id={item.id}
       badge={
-        <span class={badgeClass(RISK_STATUS_VARIANTS, item.status)}>{item.status}</span>
+        <span class={badgeClass(RISK_STATUS_VARIANTS, item.status)}>
+          {item.status}
+        </span>
       }
     >
       <CardMeta>

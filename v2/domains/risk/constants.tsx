@@ -81,14 +81,20 @@ export const RISK_FORM_FIELDS: FieldDef[] = [
     name: "likelihood",
     label: "Likelihood (1–5)",
     required: true,
-    options: [1, 2, 3, 4, 5].map((n) => ({ value: String(n), label: String(n) })),
+    options: [1, 2, 3, 4, 5].map((n) => ({
+      value: String(n),
+      label: String(n),
+    })),
   },
   {
     type: "select",
     name: "impact",
     label: "Impact (1–5)",
     required: true,
-    options: [1, 2, 3, 4, 5].map((n) => ({ value: String(n), label: String(n) })),
+    options: [1, 2, 3, 4, 5].map((n) => ({
+      value: String(n),
+      label: String(n),
+    })),
   },
   {
     type: "select",
