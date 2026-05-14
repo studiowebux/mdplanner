@@ -77,21 +77,33 @@
 
 .lc-section {
   min-height: var(--lc-section-min-h);
-  padding: var(--space-md);
+  max-height: var(--lc-section-max-h, 20rem);
+  padding: 0;
   border-radius: var(--radius-md);
   background: var(--color-bg-secondary);
   border: var(--border-width) solid var(--color-border-default);
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .lc-section__title {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  background: var(--color-bg-secondary);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wide);
-  margin-bottom: var(--space-sm);
+  padding: var(--space-md) var(--space-md) var(--space-sm);
+  margin-bottom: 0;
+}
+
+.lc-section__body {
+  padding: 0 var(--space-md) var(--space-md);
+  flex: 1;
 }
 
 .lc-section__list {

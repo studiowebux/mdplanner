@@ -229,7 +229,7 @@
       b.textContent = mins + " min";
       b.addEventListener("click", function () {
         setWorkMins(mins);
-        if (state.phase === "idle") state.remaining = mins * 60;
+        if (state.phase !== "break") state.remaining = mins * 60;
         save();
         render();
         syncActivePreset();
@@ -269,7 +269,8 @@
       var mins = parseInt(input.value, 10);
       if (!isNaN(mins) && mins >= 1 && mins <= 120) {
         setWorkMins(mins);
-        if (state.phase === "idle") state.remaining = mins * 60;
+        // Apply immediately unless in break phase — break has its own fixed duration.
+        if (state.phase !== "break") state.remaining = mins * 60;
         save();
         render();
         syncActivePreset();

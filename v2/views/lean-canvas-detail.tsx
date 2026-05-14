@@ -18,13 +18,15 @@ const SectionBlock: FC<{ label: string; items: string[] }> = (
 ) => (
   <div class="lc-section">
     <h3 class="lc-section__title">{label}</h3>
-    {items.length === 0
-      ? <p class="lc-section__empty">Add items…</p>
-      : (
-        <ul class="lc-section__list">
-          {items.map((item, i) => <li key={i}>{item}</li>)}
-        </ul>
-      )}
+    <div class="lc-section__body">
+      {items.length === 0
+        ? <p class="lc-section__empty">Add items…</p>
+        : (
+          <ul class="lc-section__list">
+            {items.map((item, i) => <li key={i}>{item}</li>)}
+          </ul>
+        )}
+    </div>
   </div>
 );
 

@@ -174,7 +174,7 @@
   position: sticky;
   top: 0;
   background: var(--color-bg-primary);
-  z-index: var(--z-table-sticky);
+  z-index: var(--z-sticky);
 }
 
 .task-list__header-controls {
@@ -268,7 +268,7 @@
   position: sticky;
   top: 0;
   background: var(--color-bg-secondary);
-  z-index: var(--z-table-head);
+  z-index: calc(var(--z-sticky) - 1);
   border-bottom: var(--border-width) var(--border-style)
     var(--color-border-default);
   border-radius: 0;
