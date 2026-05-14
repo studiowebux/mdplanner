@@ -101,6 +101,9 @@ import { registerFishboneEntity } from "../domains/fishbone/cache.ts";
 import { BusinessModelRepository } from "../repositories/business-model.repository.ts";
 import { BusinessModelService } from "../services/business-model.service.ts";
 import { registerBusinessModelEntity } from "../domains/business-model/cache.ts";
+import { RiskRepository } from "../repositories/risk.repository.ts";
+import { RiskService } from "../services/risk.service.ts";
+import { registerRiskEntity } from "../domains/risk/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -167,6 +170,8 @@ export function initServices(
   _set(_svc, "fishbone", new FishboneService(fishboneRepo));
   const businessModelRepo = new BusinessModelRepository(projectDir);
   _set(_svc, "businessModel", new BusinessModelService(businessModelRepo));
+  const riskRepo = new RiskRepository(projectDir);
+  _set(_svc, "risk", new RiskService(riskRepo));
   const customerRepo = new CustomerRepository(projectDir);
   _set(_svc, "customer", new CustomerService(customerRepo));
   const contactRepo = new ContactRepository(projectDir);
@@ -227,6 +232,7 @@ export function initServices(
     registerSwotEntity(swotRepo);
     registerFishboneEntity(fishboneRepo);
     registerBusinessModelEntity(businessModelRepo);
+    registerRiskEntity(riskRepo);
     registerCustomerEntity(customerRepo);
     registerContactEntity(contactRepo);
     registerBillingRateEntity(billingRateRepo);
@@ -276,6 +282,7 @@ export function initServices(
     mindmapRepo.setCacheDb(cacheDb);
     fishboneRepo.setCacheDb(cacheDb);
     businessModelRepo.setCacheDb(cacheDb);
+    riskRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -366,6 +373,10 @@ export function getFishboneService(): FishboneService {
 
 export function getBusinessModelService(): BusinessModelService {
   return _get<BusinessModelService>(_svc, "businessModel");
+}
+
+export function getRiskService(): RiskService {
+  return _get<RiskService>(_svc, "risk");
 }
 
 export function getCustomerService(): CustomerService {

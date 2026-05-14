@@ -21,7 +21,7 @@ export const fishboneConfig: DomainConfig<
   CreateFishbone,
   UpdateFishbone
 > = {
-  name: "fishbone",
+  name: "fishbones",
   singular: "Fishbone Diagram",
   plural: "Fishbone Diagrams",
   path: "/fishbones",

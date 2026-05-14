@@ -36,10 +36,10 @@ export const FishboneDetailView: FC<ViewProps & { item: Fishbone }> = (
             )}
           </div>
           <DetailActions
-            entity="fishbone"
+            entity="fishbones"
             id={fishbone.id}
             title={fishbone.title}
-            formContainerId="fishbone-form-container"
+            formContainerId="fishbones-form-container"
           >
             <button
               type="button"
@@ -105,7 +105,7 @@ export const FishboneDetailView: FC<ViewProps & { item: Fishbone }> = (
         />
       </main>
 
-      <div id="fishbone-form-container" />
+      <div id="fishbones-form-container" />
     </MainLayout>
   );
 };

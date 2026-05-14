@@ -1,0 +1,37 @@
+/* Risk-specific styles */
+
+/* -- Detail header -------------------------------------------------------- */
+
+.risk-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.risk-detail__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+}
+
+/* -- Score badge ---------------------------------------------------------- */
+
+.risk-score-badge {
+  background-color: var(--color-surface-raised);
+  color: var(--color-text-primary);
+}
+
+.risk-score {
+  font-variant-numeric: tabular-nums;
+}
+
+/* -- Tag list ------------------------------------------------------------- */
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}

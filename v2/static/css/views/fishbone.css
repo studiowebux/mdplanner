@@ -21,3 +21,29 @@
 .fishbone-detail__causes {
   margin-top: var(--space-md);
 }
+
+/* -- Section accent colors (6-color cycle) -------------------------------- */
+
+.quadrant-card[data-quadrant="cause-0"] {
+  border-top: var(--space-sm) solid var(--color-info);
+}
+
+.quadrant-card[data-quadrant="cause-1"] {
+  border-top: var(--space-sm) solid var(--color-warning);
+}
+
+.quadrant-card[data-quadrant="cause-2"] {
+  border-top: var(--space-sm) solid var(--color-success);
+}
+
+.quadrant-card[data-quadrant="cause-3"] {
+  border-top: var(--space-sm) solid var(--color-error);
+}
+
+.quadrant-card[data-quadrant="cause-4"] {
+  border-top: var(--space-sm) solid var(--color-accent);
+}
+
+.quadrant-card[data-quadrant="cause-5"] {
+  border-top: var(--space-sm) solid var(--color-info);
+}
