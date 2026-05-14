@@ -421,6 +421,17 @@
   --cp-bw-bar-h: 0.5rem;
   --cp-grid-cell-free-bg: #edf7ee;
   --cp-grid-cell-over-bg: #fde8eb;
+
+  /* Risk matrix zone fills — cat palette at low opacity, light theme */
+  --risk-zone-low-bg: rgba(78, 140, 43, 0.12);
+  --risk-zone-medium-bg: rgba(242, 169, 0, 0.14);
+  --risk-zone-high-bg: rgba(229, 114, 0, 0.16);
+  --risk-zone-critical-bg: rgba(166, 25, 46, 0.14);
+  /* Accent colors for legend dots */
+  --risk-zone-low-accent: var(--color-cat-green);
+  --risk-zone-medium-accent: var(--color-cat-yellow-dark);
+  --risk-zone-high-accent: var(--color-cat-orange);
+  --risk-zone-critical-accent: var(--color-error);
   --cp-grid-person-col-w: 10rem;
   --cp-grid-week-col-w: 9rem;
   --cp-grid-total-col-w: 9rem;
@@ -439,6 +450,14 @@
   --print-section-gap: var(--space-xs);
   --print-table-cell-padding: var(--space-xs) var(--space-sm);
   --print-badge-padding: 0.05rem var(--space-xs);
+
+  /* Risk matrix */
+  --risk-matrix-cell-min-w: 8rem;
+  --risk-matrix-cell-min-h: 6rem;
+  --risk-matrix-cell-max-h: 10rem;
+  --risk-matrix-gap: 2px;
+  --risk-matrix-y-tick-w: 1.5rem;
+  --risk-matrix-legend-dot-size: 0.625rem;
 }
 
 html.font-mono {
@@ -666,6 +685,12 @@ html.font-mono {
   /* Capacity grid cell tints — softer than alert bg in dark mode */
   --cp-grid-cell-free-bg: rgba(74, 222, 128, 0.08);
   --cp-grid-cell-over-bg: rgba(248, 113, 113, 0.12);
+
+  /* Risk matrix zone fills — higher opacity on warm dark bg */
+  --risk-zone-low-bg: rgba(120, 190, 32, 0.15);
+  --risk-zone-medium-bg: rgba(255, 198, 0, 0.16);
+  --risk-zone-high-bg: rgba(229, 114, 0, 0.2);
+  --risk-zone-critical-bg: rgba(166, 25, 46, 0.22);
 
   /* Mindmap branch palette — light variants pop on dark bg */
   --mm-branch-0: var(--color-cat-orange-light);
