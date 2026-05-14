@@ -13,6 +13,7 @@ import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { PORTFOLIO_STATUS_VARIANTS } from "../domains/portfolio/constants.tsx";
 import { GOAL_STATUS_VARIANTS } from "../domains/goal/constants.tsx";
+import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 
 import type { PortfolioStatusUpdate } from "../types/portfolio.types.ts";
@@ -116,11 +117,7 @@ export const PortfolioDetailView: FC<Props> = (
         <header class="detail-section portfolio-detail__header">
           <div class="detail-title-row portfolio-detail__title-row">
             <h1 class="detail-title portfolio-detail__title">{item.name}</h1>
-            <span
-              class={`badge badge--${
-                PORTFOLIO_STATUS_VARIANTS[item.status] ?? "neutral"
-              }`}
-            >
+            <span class={badgeClass(PORTFOLIO_STATUS_VARIANTS, item.status)}>
               {item.status}
             </span>
           </div>
@@ -327,11 +324,7 @@ export const PortfolioDetailView: FC<Props> = (
                       <a href={`/goals/${g.id}`}>{g.title}</a>
                     </td>
                     <td>
-                      <span
-                        class={`badge badge--${
-                          GOAL_STATUS_VARIANTS[g.status] ?? "neutral"
-                        }`}
-                      >
+                      <span class={badgeClass(GOAL_STATUS_VARIANTS, g.status)}>
                         {g.status}
                       </span>
                     </td>

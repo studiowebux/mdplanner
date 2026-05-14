@@ -5,6 +5,7 @@ import type { Task } from "../types/task.types.ts";
 import type { GitHubIssue, GitHubPR } from "../types/github.types.ts";
 import { toKebab } from "../utils/slug.ts";
 import { GITHUB_STATE_VARIANTS } from "./github.tsx";
+import { badgeClass } from "../components/ui/status-badge.tsx";
 
 type Props = {
   task: Task;
@@ -36,11 +37,7 @@ export const TaskGitHubSection: FC<Props> = (
         ? (
           <div class="task-github__item">
             <div class="task-github__item-header">
-              <span
-                class={`badge badge--${
-                  GITHUB_STATE_VARIANTS[issue.state] ?? "neutral"
-                }`}
-              >
+              <span class={badgeClass(GITHUB_STATE_VARIANTS, issue.state)}>
                 {issue.state}
               </span>
               <a
@@ -107,10 +104,10 @@ export const TaskGitHubSection: FC<Props> = (
           <div class="task-github__item">
             <div class="task-github__item-header">
               <span
-                class={`badge badge--${
-                  GITHUB_STATE_VARIANTS[pr.merged ? "merged" : pr.state] ??
-                    "neutral"
-                }`}
+                class={badgeClass(
+                  GITHUB_STATE_VARIANTS,
+                  pr.merged ? "merged" : pr.state,
+                )}
               >
                 {pr.merged ? "merged" : pr.state}
               </span>

@@ -9,6 +9,7 @@ import {
   DNS_RECORD_FORM_FIELDS,
   DNS_STATUS_VARIANTS,
 } from "../domains/dns/constants.tsx";
+import { badgeClass } from "../components/ui/status-badge.tsx";
 import { toKebab } from "../utils/slug.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
@@ -154,11 +155,7 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
         <div class="detail-title-row dns-detail__title-row">
           <h1 class="detail-title dns-detail__title">{domain.domain}</h1>
           {domain.status && (
-            <span
-              class={`badge badge--${
-                DNS_STATUS_VARIANTS[domain.status] ?? "neutral"
-              }`}
-            >
+            <span class={badgeClass(DNS_STATUS_VARIANTS, domain.status)}>
               {domain.status}
             </span>
           )}

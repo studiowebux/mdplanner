@@ -9,6 +9,7 @@ import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { PAYMENT_METHOD_VARIANTS } from "../domains/payment/constants.tsx";
+import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 
 // ---------------------------------------------------------------------------
@@ -20,10 +21,6 @@ export const PaymentDetailView: FC<
 > = (
   { item: payment, ...viewProps },
 ) => {
-  const methodVariant = payment.method
-    ? PAYMENT_METHOD_VARIANTS[payment.method] ?? "neutral"
-    : null;
-
   return (
     <MainLayout
       title={`Payment — ${payment.reference ?? payment.id}`}
@@ -79,7 +76,7 @@ export const PaymentDetailView: FC<
           </InfoItem>
           {payment.method && (
             <InfoItem label="Method">
-              <span class={`badge badge--${methodVariant}`}>
+              <span class={badgeClass(PAYMENT_METHOD_VARIANTS, payment.method)}>
                 {payment.method}
               </span>
             </InfoItem>

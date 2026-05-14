@@ -7,6 +7,7 @@ import type { PersonWithChildren } from "../../types/person.types.ts";
 import { collectFieldValues } from "../../utils/tree.ts";
 import { EmptyState } from "../../components/ui/empty-state.tsx";
 import { PERSON_TYPE_VARIANTS } from "../../domains/people/constants.tsx";
+import { badgeClass } from "../../components/ui/status-badge.tsx";
 
 // ---------------------------------------------------------------------------
 // Tree node
@@ -67,9 +68,10 @@ const OrgNode: FC<NodeProps> = ({ node, level, allDepts }) => {
           </div>
           {node.agentType && (
             <span
-              class={`badge badge--${
-                PERSON_TYPE_VARIANTS[node.agentType ?? "human"] ?? "neutral"
-              }`}
+              class={badgeClass(
+                PERSON_TYPE_VARIANTS,
+                node.agentType ?? "human",
+              )}
             >
               {node.agentType}
             </span>

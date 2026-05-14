@@ -2,7 +2,10 @@ import type { ColumnDef } from "../../components/ui/data-table.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import type { Payment } from "../../types/payment.types.ts";
 import { PAYMENT_METHODS } from "../../types/payment.types.ts";
-import type { BadgeVariant } from "../../components/ui/status-badge.tsx";
+import {
+  badgeClass,
+  type BadgeVariant,
+} from "../../components/ui/status-badge.tsx";
 import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { formatCurrency } from "../../utils/format.ts";
 import { Highlight } from "../../utils/highlight.tsx";
@@ -71,8 +74,11 @@ export const PAYMENT_TABLE_COLUMNS: ColumnDef[] = [
     sortable: true,
     render: (v) => {
       if (!v) return "";
-      const variant = PAYMENT_METHOD_VARIANTS[String(v)] ?? "neutral";
-      return <span class={`badge badge--${variant}`}>{String(v)}</span>;
+      return (
+        <span class={badgeClass(PAYMENT_METHOD_VARIANTS, String(v))}>
+          {String(v)}
+        </span>
+      );
     },
   },
   {

@@ -12,6 +12,7 @@ import {
 } from "../../utils/time.ts";
 import { Highlight, highlightHtml } from "../../utils/highlight.tsx";
 import { MILESTONE_STATUS_VARIANTS } from "../../domains/milestone/constants.tsx";
+import { badgeClass } from "../../components/ui/status-badge.tsx";
 import { toKebab } from "../../utils/slug.ts";
 
 type Props = { milestone: Milestone; q?: string };
@@ -31,11 +32,7 @@ export const MilestoneCard: FC<Props> = ({ milestone, q }) => {
         ? "milestone-card--completed"
         : undefined}
       badge={
-        <span
-          class={`badge badge--${
-            MILESTONE_STATUS_VARIANTS[milestone.status] ?? "neutral"
-          }`}
-        >
+        <span class={badgeClass(MILESTONE_STATUS_VARIANTS, milestone.status)}>
           {milestone.status}
         </span>
       }

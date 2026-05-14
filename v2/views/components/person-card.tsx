@@ -3,6 +3,7 @@ import type { Person } from "../../types/person.types.ts";
 import { DomainCard } from "../../components/ui/domain-card.tsx";
 import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 import { PERSON_TYPE_VARIANTS } from "../../domains/people/constants.tsx";
+import { badgeClass } from "../../components/ui/status-badge.tsx";
 
 type Props = { person: Person; q?: string };
 
@@ -33,11 +34,7 @@ export const PersonCard: FC<Props> = ({ person, q }) => {
       subtitle={person.title ?? undefined}
       badge={person.agentType
         ? (
-          <span
-            class={`badge badge--${
-              PERSON_TYPE_VARIANTS[person.agentType] ?? "neutral"
-            }`}
-          >
+          <span class={badgeClass(PERSON_TYPE_VARIANTS, person.agentType)}>
             {person.agentType}
           </span>
         )

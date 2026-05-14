@@ -13,6 +13,7 @@ import {
   TASK_PRIORITY_LABELS,
   TASK_SECTION_VARIANTS,
 } from "../domains/task/constants.tsx";
+import { badgeClass } from "../components/ui/status-badge.tsx";
 import { getSectionOrder } from "../constants/mod.ts";
 import {
   getMilestoneService,
@@ -86,7 +87,7 @@ const priorityClass = (p: number | undefined): string =>
 
 const sectionBadgeClass = (section: string): string => {
   const key = section.toLowerCase();
-  return `badge badge--${TASK_SECTION_VARIANTS[key] ?? "neutral"}`;
+  return badgeClass(TASK_SECTION_VARIANTS, key);
 };
 
 // ---------------------------------------------------------------------------

@@ -3,6 +3,7 @@ import type { FieldDef } from "../../components/ui/form-builder.tsx";
 import type { Idea } from "../../types/idea.types.ts";
 import { IDEA_PRIORITIES, IDEA_STATUSES } from "../../types/idea.types.ts";
 import {
+  badgeClass,
   type BadgeVariant,
   statusBadgeRenderer,
 } from "../../components/ui/status-badge.tsx";
@@ -64,11 +65,7 @@ export const IDEA_TABLE_COLUMNS: ColumnDef[] = [
     render: (v) => {
       if (!v) return "";
       return (
-        <span
-          class={`badge badge--${
-            IDEA_PRIORITY_VARIANTS[String(v)] ?? "neutral"
-          }`}
-        >
+        <span class={badgeClass(IDEA_PRIORITY_VARIANTS, String(v))}>
           {IDEA_PRIORITY_LABELS[String(v)] ?? String(v)}
         </span>
       );

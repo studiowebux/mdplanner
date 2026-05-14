@@ -1,6 +1,9 @@
 // GitHub fragment components — loaded via htmx into portfolio detail page.
 
-import type { BadgeVariant } from "../components/ui/status-badge.tsx";
+import {
+  badgeClass,
+  type BadgeVariant,
+} from "../components/ui/status-badge.tsx";
 import type { FC } from "hono/jsx";
 import {
   GITHUB_PIPELINE_STATUSES,
@@ -202,11 +205,7 @@ export const GitHubPRsTable: FC<{
                     <code class="github-branch">{pr.headBranch}</code>
                   </td>
                   <td>
-                    <span
-                      class={`badge badge--${
-                        GITHUB_STATE_VARIANTS[status] ?? "neutral"
-                      }`}
-                    >
+                    <span class={badgeClass(GITHUB_STATE_VARIANTS, status)}>
                       {status}
                     </span>
                   </td>
@@ -392,11 +391,7 @@ export const GitHubPipelineResults: FC<{
               return (
                 <tr key={run.id}>
                   <td>
-                    <span
-                      class={`badge badge--${
-                        GITHUB_STATE_VARIANTS[badge] ?? "neutral"
-                      }`}
-                    >
+                    <span class={badgeClass(GITHUB_STATE_VARIANTS, badge)}>
                       {badge}
                     </span>
                   </td>

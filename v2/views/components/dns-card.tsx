@@ -4,6 +4,7 @@ import { DomainCard } from "../../components/ui/domain-card.tsx";
 import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 import { formatDate } from "../../utils/time.ts";
 import { DNS_STATUS_VARIANTS } from "../../domains/dns/constants.tsx";
+import { badgeClass } from "../../components/ui/status-badge.tsx";
 
 type Props = { item: DnsDomain; q?: string };
 
@@ -16,11 +17,7 @@ export const DnsCard: FC<Props> = ({ item, q }) => (
     id={item.id}
     badge={item.status
       ? (
-        <span
-          class={`badge badge--${
-            DNS_STATUS_VARIANTS[item.status] ?? "neutral"
-          }`}
-        >
+        <span class={badgeClass(DNS_STATUS_VARIANTS, item.status)}>
           {item.status}
         </span>
       )

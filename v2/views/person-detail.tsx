@@ -9,6 +9,7 @@ import {
   PERSON_STATUS_VARIANTS,
   PERSON_TYPE_VARIANTS,
 } from "../domains/people/constants.tsx";
+import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 
 type Props = ViewProps & {
@@ -54,11 +55,7 @@ export const PersonDetailView: FC<Props> = (
             </div>
           </div>
           {person.agentType && (
-            <span
-              class={`badge badge--${
-                PERSON_TYPE_VARIANTS[person.agentType] ?? "neutral"
-              }`}
-            >
+            <span class={badgeClass(PERSON_TYPE_VARIANTS, person.agentType)}>
               {person.agentType}
             </span>
           )}
@@ -152,9 +149,7 @@ export const PersonDetailView: FC<Props> = (
                   <dt>Status</dt>
                   <dd>
                     <span
-                      class={`badge badge--${
-                        PERSON_STATUS_VARIANTS[person.status] ?? "neutral"
-                      }`}
+                      class={badgeClass(PERSON_STATUS_VARIANTS, person.status)}
                     >
                       {person.status}
                     </span>

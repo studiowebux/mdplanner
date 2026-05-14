@@ -8,6 +8,7 @@ import {
   IDEA_PRIORITY_VARIANTS,
   IDEA_STATUS_VARIANTS,
 } from "../../domains/idea/constants.tsx";
+import { badgeClass } from "../../components/ui/status-badge.tsx";
 
 type Props = { item: Idea; q?: string };
 
@@ -26,19 +27,11 @@ export const IdeaCard: FC<Props> = ({ item, q }) => {
       className={isCompleted ? "idea-card--completed" : undefined}
       badge={
         <>
-          <span
-            class={`badge badge--${
-              IDEA_STATUS_VARIANTS[item.status] ?? "neutral"
-            }`}
-          >
+          <span class={badgeClass(IDEA_STATUS_VARIANTS, item.status)}>
             {item.status}
           </span>
           {item.priority && (
-            <span
-              class={`badge badge--${
-                IDEA_PRIORITY_VARIANTS[item.priority] ?? "neutral"
-              }`}
-            >
+            <span class={badgeClass(IDEA_PRIORITY_VARIANTS, item.priority)}>
               {item.priority}
             </span>
           )}

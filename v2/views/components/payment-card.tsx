@@ -3,15 +3,13 @@ import type { Payment } from "../../types/payment.types.ts";
 import { DomainCard } from "../../components/ui/domain-card.tsx";
 import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 import { PAYMENT_METHOD_VARIANTS } from "../../domains/payment/constants.tsx";
+import { badgeClass } from "../../components/ui/status-badge.tsx";
 import { formatCurrency } from "../../utils/format.ts";
 import { getInvoiceService } from "../../singletons/services.ts";
 
 type Props = { item: Payment; q?: string };
 
 export const PaymentCard: FC<Props> = async ({ item, q }) => {
-  const methodVariant = item.method
-    ? PAYMENT_METHOD_VARIANTS[item.method] ?? "neutral"
-    : null;
   const invoice = await getInvoiceService().getById(item.invoiceId);
   const invoiceLabel = invoice
     ? `${invoice.number} — ${invoice.title}`
@@ -32,7 +30,9 @@ export const PaymentCard: FC<Props> = async ({ item, q }) => {
         </CardMetaItem>
         {item.method && (
           <CardMetaItem label="Method">
-            <span class={`badge badge--${methodVariant}`}>{item.method}</span>
+            <span class={badgeClass(PAYMENT_METHOD_VARIANTS, item.method)}>
+              {item.method}
+            </span>
           </CardMetaItem>
         )}
         <CardMetaItem label="Invoice">

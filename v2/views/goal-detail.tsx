@@ -18,6 +18,7 @@ import {
   GOAL_STATUS_VARIANTS,
   GOAL_TYPE_VARIANTS,
 } from "../domains/goal/constants.tsx";
+import { badgeClass } from "../components/ui/status-badge.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
@@ -87,18 +88,10 @@ export const GoalDetailView: FC<
         <header class="detail-section goal-detail__header">
           <div class="detail-title-row goal-detail__title-row">
             <h1 class="detail-title goal-detail__title">{goal.title}</h1>
-            <span
-              class={`badge badge--${
-                GOAL_STATUS_VARIANTS[goal.status] ?? "neutral"
-              }`}
-            >
+            <span class={badgeClass(GOAL_STATUS_VARIANTS, goal.status)}>
               {goal.status}
             </span>
-            <span
-              class={`badge badge--${
-                GOAL_TYPE_VARIANTS[goal.type] ?? "neutral"
-              }`}
-            >
+            <span class={badgeClass(GOAL_TYPE_VARIANTS, goal.type)}>
               {goal.type}
             </span>
             {deadline && (
@@ -288,9 +281,7 @@ export const GoalDetailView: FC<
                     </td>
                     <td class="data-table__td">
                       <span
-                        class={`badge badge--${
-                          GOAL_STATUS_VARIANTS[child.status] ?? "neutral"
-                        }`}
+                        class={badgeClass(GOAL_STATUS_VARIANTS, child.status)}
                       >
                         {child.status}
                       </span>

@@ -5,6 +5,7 @@ import { DomainCard } from "../../components/ui/domain-card.tsx";
 import { CardMeta, CardMetaItem } from "./card-meta.tsx";
 import { toKebab } from "../../utils/slug.ts";
 import { MKTPLAN_STATUS_VARIANTS } from "../../domains/marketing-plan/constants.tsx";
+import { badgeClass } from "../../components/ui/status-badge.tsx";
 
 type Props = { item: MarketingPlan; q?: string };
 
@@ -28,11 +29,7 @@ export const MarketingPlanCard: FC<Props> = ({ item, q }) => {
       id={item.id}
       className={isCompleted ? "mktplan-card--completed" : undefined}
       badge={
-        <span
-          class={`badge badge--${
-            MKTPLAN_STATUS_VARIANTS[item.status] ?? "neutral"
-          }`}
-        >
+        <span class={badgeClass(MKTPLAN_STATUS_VARIANTS, item.status)}>
           {item.status}
         </span>
       }

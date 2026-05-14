@@ -8,6 +8,7 @@ import { toKebab } from "../utils/slug.ts";
 import { BackButton } from "./components/back-button.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { MILESTONE_STATUS_VARIANTS } from "../domains/milestone/constants.tsx";
+import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 
@@ -41,9 +42,7 @@ export const MilestoneDetailView: FC<Props> = (
               {milestone.name}
             </h1>
             <span
-              class={`badge badge--${
-                MILESTONE_STATUS_VARIANTS[milestone.status] ?? "neutral"
-              }`}
+              class={badgeClass(MILESTONE_STATUS_VARIANTS, milestone.status)}
             >
               {milestone.status}
             </span>

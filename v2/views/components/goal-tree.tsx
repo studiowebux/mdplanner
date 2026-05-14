@@ -5,6 +5,7 @@ import {
   GOAL_STATUS_VARIANTS,
   GOAL_TYPE_VARIANTS,
 } from "../../domains/goal/constants.tsx";
+import { badgeClass } from "../../components/ui/status-badge.tsx";
 
 type GoalNode = Goal & { children: GoalNode[] };
 
@@ -63,16 +64,10 @@ const GoalTreeNode: FC<{ node: GoalNode; depth: number }> = (
         >
           {node.title}
         </a>
-        <span
-          class={`badge badge--${
-            GOAL_STATUS_VARIANTS[node.status] ?? "neutral"
-          }`}
-        >
+        <span class={badgeClass(GOAL_STATUS_VARIANTS, node.status)}>
           {node.status}
         </span>
-        <span
-          class={`badge badge--${GOAL_TYPE_VARIANTS[node.type] ?? "neutral"}`}
-        >
+        <span class={badgeClass(GOAL_TYPE_VARIANTS, node.type)}>
           {node.type}
         </span>
         {node.priority && (

@@ -14,6 +14,7 @@ import {
   IDEA_PRIORITY_VARIANTS,
   IDEA_STATUS_VARIANTS,
 } from "../domains/idea/constants.tsx";
+import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 
 // ---------------------------------------------------------------------------
@@ -63,19 +64,11 @@ export const IdeaDetailView: FC<
         <header class="detail-section idea-detail__header">
           <div class="detail-title-row idea-detail__title-row">
             <h1 class="detail-title idea-detail__title">{idea.title}</h1>
-            <span
-              class={`badge badge--${
-                IDEA_STATUS_VARIANTS[idea.status] ?? "neutral"
-              }`}
-            >
+            <span class={badgeClass(IDEA_STATUS_VARIANTS, idea.status)}>
               {idea.status}
             </span>
             {idea.priority && (
-              <span
-                class={`badge badge--${
-                  IDEA_PRIORITY_VARIANTS[idea.priority] ?? "neutral"
-                }`}
-              >
+              <span class={badgeClass(IDEA_PRIORITY_VARIANTS, idea.priority)}>
                 {idea.priority}
               </span>
             )}
@@ -104,11 +97,7 @@ export const IdeaDetailView: FC<
             )}
             {idea.priority && (
               <InfoItem label="Priority">
-                <span
-                  class={`badge badge--${
-                    IDEA_PRIORITY_VARIANTS[idea.priority] ?? "neutral"
-                  }`}
-                >
+                <span class={badgeClass(IDEA_PRIORITY_VARIANTS, idea.priority)}>
                   {idea.priority}
                 </span>
               </InfoItem>

@@ -6,6 +6,7 @@ import { KpiGauge } from "../../components/ui/kpi-gauge.tsx";
 import { PRIORITY_LABELS } from "../../constants/mod.ts";
 import { goalPersonByName } from "../../domains/goal/config.tsx";
 import { GOAL_STATUS_VARIANTS } from "../../domains/goal/constants.tsx";
+import { badgeClass } from "../../components/ui/status-badge.tsx";
 import { dueIn, parseDate } from "../../utils/time.ts";
 import { toKebab } from "../../utils/slug.ts";
 
@@ -48,11 +49,7 @@ export const GoalCard: FC<Props> = ({ item, q }) => {
       className={isCompleted ? "goal-card--completed" : undefined}
       badge={
         <>
-          <span
-            class={`badge badge--${
-              GOAL_STATUS_VARIANTS[item.status] ?? "neutral"
-            }`}
-          >
+          <span class={badgeClass(GOAL_STATUS_VARIANTS, item.status)}>
             {item.status}
           </span>
           {item.priority && (
