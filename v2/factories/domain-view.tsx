@@ -562,6 +562,7 @@ export function createDomainPage<T extends Entity>(
             hx-get={`/${cfg.name}/new`}
             hx-target={`#${cfg.name}-form-container`}
             hx-swap="innerHTML"
+            hx-include={`#${cfg.name}-toolbar`}
           >
             New
           </button>

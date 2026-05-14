@@ -53,6 +53,7 @@ export const C4_TABLE_COLUMNS: ColumnDef[] = [
 // ---------------------------------------------------------------------------
 
 export const C4_FORM_FIELDS: FieldDef[] = [
+  { type: "hidden", name: "diagram" },
   { type: "text", name: "name", label: "Name", required: true, maxLength: 200 },
   {
     type: "select",

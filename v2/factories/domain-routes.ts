@@ -369,10 +369,14 @@ export function createDomainRoutes<T extends Entity, C, U>(
   // Form routes
   // ---------------------------------------------------------------------------
 
-  // Empty create form
+  // Empty create form — query params forwarded as prefillValues for hidden fields
   router.get("/new", async (c) => {
     const dynamicOptions = await cfg.extractFormOptions?.();
-    return c.html(DomainForm({ dynamicOptions }) as unknown as string);
+    const query = c.req.query();
+    const prefillValues = Object.keys(query).length > 0 ? query : undefined;
+    return c.html(
+      DomainForm({ dynamicOptions, prefillValues }) as unknown as string,
+    );
   });
 
   // Create submission
