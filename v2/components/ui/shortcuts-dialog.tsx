@@ -10,6 +10,7 @@ const GROUPS: ShortcutGroup[] = [
       { keys: ["Cmd", "K"], action: "Open search" },
       { keys: ["?"], action: "Show keyboard shortcuts" },
       { keys: ["t"], action: "Toggle theme" },
+      { keys: ["f"], action: "Toggle focus mode" },
     ],
   },
   {

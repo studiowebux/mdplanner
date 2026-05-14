@@ -41,11 +41,26 @@
     }
   });
 
+  function inputFocused() {
+    var el = document.activeElement;
+    if (!el) return false;
+    var tag = el.tagName;
+    return (
+      tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA" ||
+      el.isContentEditable
+    );
+  }
+
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && isActive()) {
       e.preventDefault();
       e.stopPropagation();
       exit();
+    } else if (
+      e.key === "f" && !e.ctrlKey && !e.metaKey && !e.altKey && !inputFocused()
+    ) {
+      e.preventDefault();
+      isActive() ? exit() : enter();
     }
   });
 })();
