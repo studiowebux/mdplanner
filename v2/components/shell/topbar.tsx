@@ -181,7 +181,25 @@ export async function Topbar({ actor }: Props) {
         <a href="/settings" class="topbar__action-btn" aria-label="Settings">
           Settings
         </a>
+        <button
+          id="focus-mode-btn"
+          class="topbar__action-btn"
+          type="button"
+          aria-label="Enter focus mode"
+          title="Focus mode — hide sidebar and topbar"
+        >
+          Focus
+        </button>
       </div>
+      <button
+        id="focus-mode-exit"
+        class="btn focus-mode-exit is-hidden"
+        type="button"
+        aria-label="Exit focus mode"
+        title="Exit focus mode (Escape)"
+      >
+        ✕ Exit Focus
+      </button>
     </header>
   );
 }

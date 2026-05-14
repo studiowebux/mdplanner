@@ -6,7 +6,7 @@ import type { Actor } from "../../types/actor.ts";
 // Runs before CSS loads — must stay inline to prevent FOUC.
 // Kept minimal deliberately; nonce is required for CSP compliance.
 const INIT_SCRIPT =
-  `(function(){var d=document.documentElement;var s=localStorage.getItem("darkMode");var p=window.matchMedia("(prefers-color-scheme: dark)").matches;if(s==="true"||(s===null&&p)){d.classList.add("dark");}if(localStorage.getItem("sidebarCollapsed")==="true"){d.classList.add("sidebar-collapsed");}if(localStorage.getItem("noAnimations")==="true"){d.classList.add("no-animations");}if(localStorage.getItem("fontMono")==="true"){d.classList.add("font-mono");}})();`;
+  `(function(){var d=document.documentElement;var s=localStorage.getItem("darkMode");var p=window.matchMedia("(prefers-color-scheme: dark)").matches;if(s==="true"||(s===null&&p)){d.classList.add("dark");}if(localStorage.getItem("sidebarCollapsed")==="true"){d.classList.add("sidebar-collapsed");}if(localStorage.getItem("noAnimations")==="true"){d.classList.add("no-animations");}if(localStorage.getItem("fontMono")==="true"){d.classList.add("font-mono");}if(localStorage.getItem("focusMode")==="true"){d.classList.add("focus-mode");}})();`;
 
 type Props = {
   title?: string;
@@ -107,6 +107,7 @@ export const MainLayout: FC<Props> = (
         <script src="/js/hash-scroll.js" />
         <script src="/js/pomodoro.js" />
         <script src="/js/topbar-overflow.js" />
+        <script src="/js/focus-mode.js" />
         {scripts.map((src) => <script key={src} src={src} />)}
       </body>
     </html>

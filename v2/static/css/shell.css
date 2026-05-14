@@ -57,6 +57,30 @@ html.fullscreen-reading .topbar {
 }
 
 /* -------------------------------------------------------------------------
+   Focus mode — hides sidebar + topbar globally, persisted in localStorage
+   ------------------------------------------------------------------------- */
+
+html.focus-mode .sidebar {
+  display: none;
+}
+
+html.focus-mode .app-shell {
+  grid-template-columns: 1fr;
+}
+
+html.focus-mode .topbar {
+  display: none;
+}
+
+html.focus-mode .focus-mode-exit {
+  display: flex;
+  position: fixed;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  z-index: var(--z-topbar);
+}
+
+/* -------------------------------------------------------------------------
    Sidebar overlay
    ------------------------------------------------------------------------- */
 
