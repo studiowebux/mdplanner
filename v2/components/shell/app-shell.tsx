@@ -39,6 +39,15 @@ export const AppShell: FC<Props> = (
         {children}
       </div>
     </div>
+    <button
+      id="focus-mode-exit"
+      class="btn focus-mode-exit is-hidden"
+      type="button"
+      aria-label="Exit focus mode"
+      title="Exit focus mode (Escape)"
+    >
+      ✕ Exit Focus
+    </button>
     <ConfirmDialog />
     <SearchDialog />
     <ShortcutsDialog />
