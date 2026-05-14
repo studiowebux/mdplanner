@@ -11,6 +11,7 @@ import { registerRetrospectiveTools } from "./tools/retrospectives.ts";
 import { registerMeetingTools } from "./tools/meetings.ts";
 import { registerBillingRateTools } from "./tools/billing-rates.ts";
 import { registerContactTools } from "./tools/contacts.ts";
+import { registerCompanyTools } from "./tools/companies.ts";
 import { registerCustomerTools } from "./tools/customers.ts";
 import { registerInvoiceTools } from "./tools/invoices.ts";
 import { registerPaymentTools } from "./tools/payments.ts";
@@ -48,6 +49,7 @@ export function createMcpServer(): McpServer {
   registerMeetingTools(server);
   registerBillingRateTools(server);
   registerContactTools(server);
+  registerCompanyTools(server);
   registerCustomerTools(server);
   registerInvoiceTools(server);
   registerPaymentTools(server);

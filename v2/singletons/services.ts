@@ -113,6 +113,9 @@ import { registerSafeEntity } from "../domains/safe/cache.ts";
 import { ProjectValueBoardRepository } from "../repositories/project-value-board.repository.ts";
 import { ProjectValueBoardService } from "../services/project-value-board.service.ts";
 import { registerProjectValueBoardEntity } from "../domains/project-value-board/cache.ts";
+import { CompanyRepository } from "../repositories/company.repository.ts";
+import { CompanyService } from "../services/company.service.ts";
+import { registerCompanyEntity } from "../domains/company/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -195,6 +198,8 @@ export function initServices(
     "projectValueBoard",
     new ProjectValueBoardService(projectValueBoardRepo),
   );
+  const companyRepo = new CompanyRepository(projectDir);
+  _set(_svc, "company", new CompanyService(companyRepo));
   const customerRepo = new CustomerRepository(projectDir);
   _set(_svc, "customer", new CustomerService(customerRepo));
   const contactRepo = new ContactRepository(projectDir);
@@ -259,6 +264,7 @@ export function initServices(
     registerStrategicLevelsEntity(strategicLevelsRepo);
     registerSafeEntity(safeRepo);
     registerProjectValueBoardEntity(projectValueBoardRepo);
+    registerCompanyEntity(companyRepo);
     registerCustomerEntity(customerRepo);
     registerContactEntity(contactRepo);
     registerBillingRateEntity(billingRateRepo);
@@ -312,6 +318,7 @@ export function initServices(
     strategicLevelsRepo.setCacheDb(cacheDb);
     safeRepo.setCacheDb(cacheDb);
     projectValueBoardRepo.setCacheDb(cacheDb);
+    companyRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -426,6 +433,10 @@ export function getCustomerService(): CustomerService {
 
 export function getContactService(): ContactService {
   return _get<ContactService>(_svc, "contact");
+}
+
+export function getCompanyService(): CompanyService {
+  return _get<CompanyService>(_svc, "company");
 }
 
 export function getBillingRateService(): BillingRateService {
