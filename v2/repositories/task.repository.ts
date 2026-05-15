@@ -271,6 +271,25 @@ export class TaskRepository {
     return TaskBuilder.from(fm, body, section).build();
   }
 
+  async upsertEntity(task: Task): Promise<Task> {
+    const dir = sectionToDir(task.section ?? "Todo");
+    const sectionPath = join(this.boardDir, dir);
+    await Deno.mkdir(sectionPath, { recursive: true });
+    const fm = mapKeysToFm(
+      buildFrontmatter(
+        task as unknown as Record<string, unknown>,
+        TASK_BODY_KEYS,
+      ),
+    );
+    const body = this.toBody(task);
+    const filePath = join(sectionPath, `${task.id}.md`);
+    await this.writer.write(
+      task.id,
+      () => atomicWrite(filePath, serializeFrontmatter(fm, body)),
+    );
+    return task;
+  }
+
   private toBody(t: Task): string {
     const parts: string[] = [`# ${t.title}`];
     if (t.description?.length) {

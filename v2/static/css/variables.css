@@ -431,6 +431,15 @@
   --settings-input-narrow-max: var(--toolbar-search-min-width);
   --settings-textarea-min-height: var(--autocomplete-max-height);
   --settings-tab-indicator: var(--sidebar-active-border-width);
+  --settings-data-section-gap: var(--space-lg);
+  --settings-data-title-gap: var(--space-xs);
+  --settings-data-desc-gap: var(--space-md);
+  --settings-data-form-gap: var(--space-sm);
+  --settings-data-result-gap: var(--space-md);
+  --settings-data-desc-max-width: 52ch;
+
+  /* Layout */
+  --prose-width: 52ch;
 
   /* Org chart — initial value overridden by JS at runtime */
   --orgchart-current-zoom: 1;

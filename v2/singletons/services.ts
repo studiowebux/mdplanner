@@ -170,7 +170,11 @@ export function initServices(
   _projectDir = projectDir;
   const useCache = options.cache ?? true;
 
-  const milestoneRepo = new MilestoneRepository(projectDir);
+  const milestoneRepo = _set(
+    _repo,
+    "milestone",
+    new MilestoneRepository(projectDir),
+  );
   const taskRepo = _set(_repo, "task", new TaskRepository(projectDir));
   const noteRepo = new NoteRepository(projectDir);
   const portfolioRepo = new PortfolioRepository(projectDir);
@@ -399,6 +403,10 @@ export function getPeopleService(): PeopleService {
 
 export function getMilestoneService(): MilestoneService {
   return _get<MilestoneService>(_svc, "milestone");
+}
+
+export function getMilestoneRepository(): MilestoneRepository {
+  return _get<MilestoneRepository>(_repo, "milestone");
 }
 
 export function getNoteService(): NoteService {

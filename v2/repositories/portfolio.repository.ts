@@ -300,6 +300,16 @@ export class PortfolioRepository {
     };
   }
 
+  async upsertEntity(item: PortfolioItem): Promise<PortfolioItem> {
+    await Deno.mkdir(this.dir, { recursive: true });
+    const filePath = join(this.dir, `${item.id}.md`);
+    await this.writer.write(
+      item.id,
+      () => atomicWrite(filePath, this.serialize(item)),
+    );
+    return item;
+  }
+
   private serialize(item: PortfolioItem): string {
     const raw: Record<string, unknown> = {
       name: item.name,

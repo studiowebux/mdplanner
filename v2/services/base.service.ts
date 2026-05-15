@@ -49,4 +49,35 @@ export abstract class BaseService<
   async delete(id: string): Promise<boolean> {
     return this.repo.delete(id);
   }
+
+  async upsertMany(
+    items: T[],
+  ): Promise<{ count: number; errors: string[] }> {
+    const errors: string[] = [];
+    let count = 0;
+    // deno-lint-ignore no-explicit-any
+    const repo = this.repo as any;
+    const hasUpsert = typeof repo.upsertEntity === "function";
+    for (const item of items) {
+      const id = (item as Record<string, unknown>).id as string ?? "?";
+      try {
+        if (hasUpsert) {
+          await repo.upsertEntity(item);
+        } else {
+          const existing = await this.repo.findById(id);
+          if (existing) {
+            await this.repo.update(id, item as unknown as U);
+          } else {
+            await this.repo.create(item as unknown as C);
+          }
+        }
+        count++;
+      } catch (err) {
+        errors.push(
+          `${id}: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+    }
+    return { count, errors };
+  }
 }

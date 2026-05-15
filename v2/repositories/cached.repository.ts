@@ -106,6 +106,13 @@ export abstract class CachedMarkdownRepository<
     return deleted;
   }
 
+  override async upsertEntity(item: T): Promise<T> {
+    const result = await super.upsertEntity(item);
+    this.listDirty = true;
+    this.cacheRemoveRow(item.id);
+    return result;
+  }
+
   // Remove a single row after delete — the row is genuinely gone, so this
   // is safe. findById will fall through to disk for the deleted id.
   private cacheRemoveRow(id: string): void {

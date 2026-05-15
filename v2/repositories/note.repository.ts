@@ -161,7 +161,17 @@ export class NoteRepository {
   // Serialize — Note → markdown
   // -------------------------------------------------------------------------
 
-  private serialize(note: Note): string {
+  async upsertEntity(note: Note): Promise<Note> {
+    await Deno.mkdir(this.notesDir, { recursive: true });
+    const filePath = join(this.notesDir, `${note.id}.md`);
+    await this.writer.write(
+      note.id,
+      () => atomicWrite(filePath, this.serialize(note)),
+    );
+    return note;
+  }
+
+  protected serialize(note: Note): string {
     const fm: Record<string, unknown> = mapKeysToFm({
       id: note.id,
       createdAt: note.createdAt,

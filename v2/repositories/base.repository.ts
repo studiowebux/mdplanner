@@ -181,6 +181,16 @@ export abstract class BaseMarkdownRepository<
     });
   }
 
+  async upsertEntity(item: T): Promise<T> {
+    await Deno.mkdir(this.dir, { recursive: true });
+    const filePath = join(this.dir, `${item.id}.md`);
+    await this.writer.write(
+      item.id,
+      () => atomicWrite(filePath, this.serialize(item)),
+    );
+    return item;
+  }
+
   // ---------------------------------------------------------------------------
   // Protected helpers — available to subclasses
   // ---------------------------------------------------------------------------

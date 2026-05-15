@@ -1,5 +1,6 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { apiReference } from "@scalar/hono-api-reference";
+import { backupRouter } from "./v1/backup/routes.ts";
 import { brainstormsRouter } from "./v1/brainstorms/routes.ts";
 import { briefsRouter } from "./v1/briefs/routes.ts";
 import { retrospectivesRouter } from "./v1/retrospectives/routes.ts";
@@ -87,6 +88,7 @@ v1.route("/tasks", tasksRouter);
 v1.route("/sticky-notes", stickyNotesRouter);
 v1.route("/capacity-plans", capacityPlansRouter);
 v1.route("/analytics", analyticsRouter);
+v1.route("/backup", backupRouter);
 
 v1.doc("/doc", {
   openapi: "3.1.0",

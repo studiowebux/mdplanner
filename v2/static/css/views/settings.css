@@ -75,6 +75,7 @@
 #tab-milestones:checked ~ .settings-tabs__panel--milestones,
 #tab-billing:checked ~ .settings-tabs__panel--billing,
 #tab-caching:checked ~ .settings-tabs__panel--caching,
+#tab-data:checked ~ .settings-tabs__panel--data,
 #tab-support:checked ~ .settings-tabs__panel--support {
   display: block;
 }
@@ -611,4 +612,52 @@ html.sidebar-collapsed .settings-page__form-actions {
 .settings-cache__empty {
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
+}
+
+/* ── Data tab ─────────────────────────────────────────────────────────────── */
+
+.settings-data__section {
+  margin-bottom: var(--settings-data-section-gap);
+  padding-bottom: var(--settings-data-section-gap);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.settings-data__section:last-child {
+  border-bottom: none;
+}
+
+.settings-data__section-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin-bottom: var(--settings-data-title-gap);
+}
+
+.settings-data__description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--settings-data-desc-gap);
+  max-width: var(--settings-data-desc-max-width);
+}
+
+.settings-data__import-form {
+  display: flex;
+  align-items: center;
+  gap: var(--settings-data-form-gap);
+  flex-wrap: wrap;
+}
+
+.settings-data__file-label {
+  display: inline-flex;
+  align-items: center;
+}
+
+.settings-data__file-input {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.settings-data__result {
+  margin-top: var(--settings-data-result-gap);
+  font-size: var(--font-size-sm);
 }

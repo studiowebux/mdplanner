@@ -17,6 +17,7 @@ import { TagsTab } from "./settings/tabs/tags-tab.tsx";
 import { GoalsTab } from "./settings/tabs/goals-tab.tsx";
 import { MilestonesTab } from "./settings/tabs/milestones-tab.tsx";
 import { CachingTab } from "./settings/tabs/caching-tab.tsx";
+import { DataTab } from "./settings/tabs/data-tab.tsx";
 import { SupportTab } from "./settings/tabs/support-tab.tsx";
 import { NavigationTab } from "./settings/tabs/navigation-tab.tsx";
 import { SectionsTab } from "./settings/tabs/sections-tab.tsx";
@@ -183,6 +184,14 @@ export const SettingsView: FC<SettingsProps> = ({
           <input
             type="radio"
             name="settings-tab"
+            id="tab-data"
+            class="settings-tabs__radio"
+          />
+          <label for="tab-data" class="settings-tabs__label">Data</label>
+
+          <input
+            type="radio"
+            name="settings-tab"
             id="tab-support"
             class="settings-tabs__radio"
           />
@@ -205,6 +214,7 @@ export const SettingsView: FC<SettingsProps> = ({
           <MilestonesTab config={config} />
           <BillingTab config={config} />
           <CachingTab />
+          <DataTab />
           <SupportTab />
         </div>
       </div>
