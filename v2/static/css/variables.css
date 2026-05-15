@@ -331,6 +331,8 @@
   --z-sidebar: 200;
   --z-sidenav: 300;
   --z-toast: 400;
+  --z-drag-ghost: 500;
+  --drag-ghost-opacity: 0.85;
 
   /* Overlay */
   --overlay-bg: rgba(0, 0, 0, 0.4);

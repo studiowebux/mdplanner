@@ -1345,6 +1345,15 @@ a.task-board__card-avatar:hover {
 
 /* Fixed-position clone following the pointer */
 .task-board__card--ghost {
+  position: fixed;
+  left: var(--ghost-x);
+  top: var(--ghost-y);
+  width: var(--ghost-w);
+  pointer-events: none;
+  z-index: var(--z-drag-ghost);
+  opacity: var(--drag-ghost-opacity);
+  transform: rotate(1.5deg);
+  transition: none;
   box-shadow: var(--shadow-lg);
   cursor: grabbing;
 }

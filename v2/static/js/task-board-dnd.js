@@ -62,22 +62,16 @@
     var rect = card.getBoundingClientRect();
     var ghost = card.cloneNode(true);
     ghost.classList.add("task-board__card--ghost");
-    ghost.style.position = "fixed";
-    ghost.style.left = rect.left + "px";
-    ghost.style.top = rect.top + "px";
-    ghost.style.width = rect.width + "px";
-    ghost.style.pointerEvents = "none";
-    ghost.style.zIndex = "9999";
-    ghost.style.opacity = "0.85";
-    ghost.style.transform = "rotate(1.5deg)";
-    ghost.style.transition = "none";
+    ghost.style.setProperty("--ghost-x", rect.left + "px");
+    ghost.style.setProperty("--ghost-y", rect.top + "px");
+    ghost.style.setProperty("--ghost-w", rect.width + "px");
     document.body.appendChild(ghost);
     return ghost;
   }
 
   function moveGhost(ghost, clientX, clientY, offsetX, offsetY) {
-    ghost.style.left = (clientX - offsetX) + "px";
-    ghost.style.top = (clientY - offsetY) + "px";
+    ghost.style.setProperty("--ghost-x", (clientX - offsetX) + "px");
+    ghost.style.setProperty("--ghost-y", (clientY - offsetY) + "px");
   }
 
   /**
@@ -257,9 +251,9 @@
     );
 
     // Hide ghost temporarily so elementFromPoint can see what's underneath
-    dragging.ghost.style.display = "none";
+    dragging.ghost.classList.add("is-hidden");
     var below = document.elementFromPoint(e.clientX, e.clientY);
-    dragging.ghost.style.display = "";
+    dragging.ghost.classList.remove("is-hidden");
 
     var columnBody = getColumnBody(below);
 
@@ -299,7 +293,7 @@
     dragging = null;
 
     // Hide ghost for hit-testing, then remove it.
-    d.ghost.style.display = "none";
+    d.ghost.classList.add("is-hidden");
     var below = document.elementFromPoint(clientX, clientY);
     d.ghost.remove();
 
