@@ -165,9 +165,9 @@ const CommentsSection: FC<{
         : null}
       <form
         class="task-detail__add-comment"
-        hx-post={`/api/v1/tasks/${taskId}/comments`}
+        hx-post={`/tasks/${taskId}/comments`}
         hx-swap="none"
-        hx-on--after-request="if(event.detail.successful){ this.reset(); window.location.reload(); }"
+        hx-on--after-request="if(event.detail.successful){ this.reset(); }"
       >
         <textarea
           class="form__input task-detail__comment-input"

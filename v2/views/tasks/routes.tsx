@@ -129,6 +129,22 @@ tasksRouter.post("/:id/assign", async (c) => {
 });
 
 // ---------------------------------------------------------------------------
+// POST /:id/comments — add a comment (form-urlencoded from inline form)
+// ---------------------------------------------------------------------------
+
+tasksRouter.post("/:id/comments", async (c) => {
+  const id = c.req.param("id");
+  const body = await c.req.parseBody();
+  const text = String(body.body ?? "").trim();
+  if (!text) return c.text("Missing body", 400);
+
+  await getTaskService().addComment(id, text);
+  publish("task.updated");
+  c.header("HX-Trigger", hxTrigger("success", "Comment added"));
+  return renderDetailPage(c, id);
+});
+
+// ---------------------------------------------------------------------------
 // GitHub section fragment + link/unlink actions
 // ---------------------------------------------------------------------------
 

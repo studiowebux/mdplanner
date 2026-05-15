@@ -6,7 +6,7 @@ import {
   getProjectDir,
   getTaskService,
 } from "../../../singletons/services.ts";
-import { parseMentions, resolveMentions } from "../../../utils/mentions.ts";
+import { parseMentions } from "../../../utils/mentions.ts";
 import { publish } from "../../../singletons/event-bus.ts";
 import {
   AddAttachmentsInputSchema,
@@ -532,7 +532,6 @@ tasksRouter.openapi(
     let resolvedMetadata = metadata;
     if (names.length > 0) {
       const people = await getPeopleService().list();
-      const resolved = resolveMentions(body, people);
       const mentionedIds = names
         .map((name) => {
           const lower = name.toLowerCase();
@@ -548,7 +547,6 @@ tasksRouter.openapi(
       if (mentionedIds.length > 0) {
         resolvedMetadata = { ...metadata, mentionedIds };
       }
-      void resolved; // pre-pass stored in metadata; rendering handled client-side
     }
 
     const comment = await getTaskService().addComment(
