@@ -18,26 +18,45 @@ registerBackupDomains();
 
 export const backupRouter = new OpenAPIHono();
 
-// GET /export — streams full JSON backup as a file download
-backupRouter.get("/export", async (c) => {
-  const domains: Record<string, unknown[]> = {};
-  for (const d of getDomains()) {
-    try {
-      domains[d.key] = await d.export();
-    } catch (err) {
-      console.error(`[backup] export failed for ${d.key}:`, err);
-      domains[d.key] = [];
-    }
-  }
-
-  const payload = JSON.stringify(
-    { version: APP_VERSION, exportedAt: new Date().toISOString(), domains },
-    null,
-    2,
-  );
+// GET /export — streams full JSON backup as a file download.
+// Each domain is fetched and serialized incrementally to avoid loading all
+// 39 domains into memory at once before responding.
+backupRouter.get("/export", (c) => {
   const date = new Date().toISOString().split("T")[0];
+  const exportedAt = new Date().toISOString();
+  const allDomains = getDomains();
 
-  return new Response(payload, {
+  const stream = new ReadableStream({
+    async start(ctrl) {
+      const enc = new TextEncoder();
+      const write = (s: string) => ctrl.enqueue(enc.encode(s));
+
+      write(
+        `{\n  "version": ${JSON.stringify(APP_VERSION)},\n  "exportedAt": ${
+          JSON.stringify(exportedAt)
+        },\n  "domains": {\n`,
+      );
+
+      let first = true;
+      for (const d of allDomains) {
+        let items: unknown[];
+        try {
+          items = await d.export();
+        } catch (err) {
+          console.error(`[backup] export failed for ${d.key}:`, err);
+          items = [];
+        }
+        if (!first) write(",\n");
+        write(`    ${JSON.stringify(d.key)}: ${JSON.stringify(items)}`);
+        first = false;
+      }
+
+      write("\n  }\n}\n");
+      ctrl.close();
+    },
+  });
+
+  return new Response(stream, {
     status: 200,
     headers: {
       "Content-Type": "application/json",
