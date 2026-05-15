@@ -23,7 +23,8 @@ function accountsFromRows(
   if (!Array.isArray(rows) || rows.length === 0) return undefined;
   const acc: Record<string, string> = {};
   for (const row of rows) {
-    if (row.key && row.value) acc[row.key] = row.value;
+    // First occurrence wins — duplicates silently dropped (client blocks them too).
+    if (row.key && row.value && !acc[row.key]) acc[row.key] = row.value;
   }
   return Object.keys(acc).length > 0 ? acc : undefined;
 }
@@ -99,7 +100,11 @@ export const peopleConfig: DomainConfig<
   path: "/people",
   ssePrefix: "person",
   styles: ["/css/views/people.css"],
-  scripts: ["/js/org-tree.js", "/js/org-tree-export.js"],
+  scripts: [
+    "/js/org-tree.js",
+    "/js/org-tree-export.js",
+    "/js/accounts-dedup.js",
+  ],
   emptyMessage: "No people yet. Add someone to get started.",
 
   stateKeys: [
