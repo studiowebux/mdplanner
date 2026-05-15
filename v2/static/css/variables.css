@@ -370,6 +370,7 @@
   --progress-col-min-width: 6rem;
   --progress-bar-inline-width: 5rem;
   --table-compact-cell-max-width: 16rem;
+  --table-min-width: 36rem;
 
   /* Toolbar */
   --toolbar-search-min-width: 12rem;

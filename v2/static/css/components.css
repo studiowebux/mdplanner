@@ -514,6 +514,7 @@ a.badge:hover {
 
 .data-table {
   width: 100%;
+  min-width: var(--table-min-width);
   border-collapse: collapse;
   font-size: var(--font-size-sm);
 }
@@ -1637,6 +1638,20 @@ a.badge:hover {
     position: sticky;
     right: 0;
     background: var(--color-bg-primary);
+    border-left: var(--border-width) var(--border-style)
+      var(--color-border-default);
+  }
+
+  /* Reset touch-target override inside sticky actions cell — buttons are
+     already reachable via scroll, full 44px height bloats the column */
+  .data-table [data-col="_actions"] .btn {
+    min-height: var(--input-height-sm);
+  }
+
+  /* Allow action buttons to wrap if multiple are present */
+  .data-table [data-col="_actions"] .domain-card__actions {
+    flex-wrap: wrap;
+    gap: var(--space-xs);
   }
 }
 
