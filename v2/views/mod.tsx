@@ -65,6 +65,7 @@ import { MKTPLAN_FORM_FIELDS } from "../domains/marketing-plan/constants.tsx";
 import { MEETING_FORM_FIELDS } from "../domains/meeting/constants.tsx";
 import { PORTFOLIO_FORM_FIELDS } from "../domains/portfolio/config.tsx";
 import { QUOTE_FORM_FIELDS } from "../domains/quote/constants.tsx";
+import { PEOPLE_FORM_FIELDS } from "../domains/people/config.tsx";
 import type { FieldDef } from "../components/ui/form-builder.tsx";
 import {
   getBillingRateService,
@@ -415,6 +416,7 @@ for (
     INVOICE_FORM_FIELDS,
     BRAINSTORM_FORM_FIELDS,
     PORTFOLIO_FORM_FIELDS,
+    PEOPLE_FORM_FIELDS,
   ]
 ) {
   for (const field of fields) {

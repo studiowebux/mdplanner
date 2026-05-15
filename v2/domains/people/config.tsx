@@ -28,7 +28,7 @@ function accountsFromRows(
   return Object.keys(acc).length > 0 ? acc : undefined;
 }
 
-const FORM_FIELDS: FieldDef[] = [
+export const PEOPLE_FORM_FIELDS: FieldDef[] = [
   { type: "text", name: "name", label: "Name", required: true, maxLength: 200 },
   { type: "text", name: "title", label: "Title" },
   { type: "text", name: "role", label: "Role" },
@@ -111,7 +111,7 @@ export const peopleConfig: DomainConfig<
     "order",
   ],
   columns: PEOPLE_TABLE_COLUMNS,
-  formFields: FORM_FIELDS,
+  formFields: PEOPLE_FORM_FIELDS,
 
   filters: [
     {
@@ -132,7 +132,7 @@ export const peopleConfig: DomainConfig<
   Card: ({ item, q }) => <PersonCard person={item} q={q} />,
 
   parseCreate: (body) => {
-    const parsed = parseFormBody(FORM_FIELDS, body) as CreatePerson;
+    const parsed = parseFormBody(PEOPLE_FORM_FIELDS, body) as CreatePerson;
     parsed.accounts = accountsFromRows(
       parsed.accounts as unknown as { key?: string; value?: string }[],
     );
@@ -140,7 +140,7 @@ export const peopleConfig: DomainConfig<
   },
 
   parseUpdate: (body) => {
-    const parsed = parseFormBody(FORM_FIELDS, body, {
+    const parsed = parseFormBody(PEOPLE_FORM_FIELDS, body, {
       clearEmpty: true,
     }) as Partial<UpdatePerson>;
     if (parsed.accounts !== undefined) {
