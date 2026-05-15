@@ -85,24 +85,24 @@ const JournalEditView: FC<{ entry: JournalEntry }> = ({ entry }) => (
           type="text"
           name="title"
           value={entry.title}
-          class="journal-edit__title form-control"
+          class="journal-edit__title form__input"
           required
         />
       </div>
 
       <div class="detail-section detail-info-row">
-        <div class="form-group">
-          <label class="form-label">Date</label>
+        <div class="form__group">
+          <label class="form__label">Date</label>
           <input
             type="date"
             name="date"
             value={entry.date ?? ""}
-            class="form-control"
+            class="form__input"
           />
         </div>
-        <div class="form-group">
-          <label class="form-label">Mood</label>
-          <select name="mood" class="form-control">
+        <div class="form__group">
+          <label class="form__label">Mood</label>
+          <select name="mood" class="form__select">
             <option value="">— none —</option>
             {JOURNAL_MOODS.map((m) => (
               <option key={m} value={m} selected={entry.mood === m}>
@@ -111,24 +111,51 @@ const JournalEditView: FC<{ entry: JournalEntry }> = ({ entry }) => (
             ))}
           </select>
         </div>
-        <div class="form-group">
-          <label class="form-label">Tags (comma-separated)</label>
-          <input
-            type="text"
-            name="tags"
-            value={(entry.tags ?? []).join(", ")}
-            class="form-control"
-            placeholder="work, personal, ideas"
-          />
+        <div class="form__group">
+          <label class="form__label">Tags</label>
+          <div class="form__tags" data-tags-field="journal-tags">
+            <div class="form__tags-pills" id="journal-tags-pills">
+              {(entry.tags ?? []).map((tag) => (
+                <span key={tag} class="form__tags-pill" data-tag-value={tag}>
+                  {tag}
+                  <button
+                    type="button"
+                    class="form__tags-pill-remove"
+                    data-tag-remove={tag}
+                    aria-label={`Remove ${tag}`}
+                  >
+                    &times;
+                  </button>
+                </span>
+              ))}
+            </div>
+            <input
+              type="text"
+              id="journal-tags-input"
+              class="form__input form__tags-input"
+              placeholder="Type and press Enter..."
+              autocomplete="off"
+              name="q"
+              data-tags-target="journal-tags"
+            />
+            <input
+              type="hidden"
+              id="journal-tags"
+              name="tags"
+              value={(entry.tags ?? []).join(", ")}
+            />
+          </div>
         </div>
       </div>
 
       <div class="detail-section">
-        <label class="form-label">Content</label>
+        <label class="form__label">
+          Content <span class="form__hint">Markdown supported</span>
+        </label>
         <textarea
           name="content"
           rows={20}
-          class="journal-edit__content form-control"
+          class="journal-edit__content form__textarea"
         >
           {entry.content ?? ""}
         </textarea>

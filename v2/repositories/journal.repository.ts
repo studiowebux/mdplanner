@@ -54,18 +54,10 @@ export class JournalRepository extends CachedMarkdownRepository<
     if (!fm.id && !fm.title) return null;
     const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
 
-    let title = fm.title ? String(fm.title) : "";
-    const contentLines: string[] = [];
-
-    for (const line of body.split("\n")) {
-      if (line.startsWith("# ")) {
-        if (!title) title = line.slice(2).trim();
-        continue;
-      }
-      contentLines.push(line);
-    }
-
-    const content = contentLines.join("\n").trim() || undefined;
+    const title = fm.title
+      ? String(fm.title)
+      : body.match(/^# (.+)/m)?.[1]?.trim() ?? "Untitled Entry";
+    const content = body.trim() || undefined;
 
     return {
       id,

@@ -79,13 +79,13 @@ export const JOURNAL_FORM_FIELDS: FieldDef[] = [
   {
     type: "textarea",
     name: "content",
-    label: "Content",
+    label: "Content (Markdown supported)",
     rows: 8,
   },
   {
-    type: "text",
+    type: "tags",
     name: "tags",
-    label: "Tags (comma-separated)",
+    label: "Tags",
   },
 ];
 
