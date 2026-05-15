@@ -2,9 +2,17 @@
 // Domain coverage is driven by the registry in registry.ts + domains.ts.
 
 import { OpenAPIHono } from "@hono/zod-openapi";
+import type { Context } from "hono";
 import { APP_VERSION } from "../../../constants/mod.ts";
 import { registerBackupDomains } from "./domains.ts";
 import { getDomains, type ImportDomainResult } from "./registry.ts";
+
+function errorResponse(c: Context, message: string) {
+  if (c.req.header("HX-Request")) {
+    return c.html(`<p class="settings-data__warning">${message}</p>`, 400);
+  }
+  return c.json({ error: message }, 400);
+}
 
 registerBackupDomains();
 
@@ -48,23 +56,20 @@ backupRouter.post("/import", async (c) => {
     const body = await c.req.parseBody();
     const file = body.file;
     if (!file || !(file instanceof File)) {
-      return c.json({ error: "Missing 'file' field in multipart body" }, 400);
+      return errorResponse(c, "Missing 'file' field in multipart body");
     }
     text = await file.text();
   } else if (contentType.includes("application/json")) {
     text = await c.req.text();
   } else {
-    return c.json(
-      { error: "Expected multipart/form-data or application/json" },
-      400,
-    );
+    return errorResponse(c, "Expected multipart/form-data or application/json");
   }
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(text);
   } catch {
-    return c.json({ error: "Invalid JSON" }, 400);
+    return errorResponse(c, "Invalid JSON in uploaded file");
   }
 
   if (
@@ -73,7 +78,7 @@ backupRouter.post("/import", async (c) => {
     !("domains" in parsed) ||
     typeof (parsed as Record<string, unknown>).domains !== "object"
   ) {
-    return c.json({ error: "Backup must contain a 'domains' object" }, 400);
+    return errorResponse(c, "Backup must contain a 'domains' object");
   }
 
   const backupDomains = (parsed as Record<string, unknown>).domains as Record<
