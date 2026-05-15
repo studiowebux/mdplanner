@@ -14,13 +14,13 @@ type SseRefreshProps = {
 export function SseRefresh({ getUrl, trigger, targetId }: SseRefreshProps) {
   return (
     <div
-      hx-ext="sse"
+      hx-ext="sse morph"
       sse-connect="/sse"
       hx-get={getUrl}
       hx-trigger={trigger}
       hx-target={`#${targetId}`}
       hx-select={`#${targetId}`}
-      hx-swap="outerHTML"
+      hx-swap="morph:outerHTML"
     />
   );
 }

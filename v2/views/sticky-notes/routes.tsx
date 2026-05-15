@@ -87,12 +87,12 @@ stickyNotesRouter.get("/", async (c) => {
       <main
         id="sticky-notes-board-list"
         class="domain-page"
-        hx-ext="sse"
+        hx-ext="sse morph"
         sse-connect="/sse"
         hx-trigger="sse:sticky_note.board.created"
         hx-get="/sticky-notes/boards/list"
         hx-target="#board-card-grid"
-        hx-swap="outerHTML"
+        hx-swap="morph:outerHTML"
       >
         <header class="domain-page__header">
           <h1 class="domain-page__title">Sticky Notes</h1>
