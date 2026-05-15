@@ -136,6 +136,7 @@ export const ENTITY_TYPE_LABELS: Record<string, string> = {
   github: "GitHub",
   upload: "Uploads",
   dashboard: "Dashboard",
+  me: "My Work",
 };
 
 /**
@@ -144,6 +145,7 @@ export const ENTITY_TYPE_LABELS: Record<string, string> = {
  * Keys not listed here fall into "Other".
  */
 export const DEFAULT_NAV_CATEGORIES: Record<string, string[]> = {
+  Personal: ["me"],
   Work: ["task", "milestone", "goal"],
   Planning: [
     "idea",
@@ -305,4 +307,5 @@ export const ENTITY_TYPE_ROUTES: Record<string, string> = {
   github: "/github",
   upload: "/uploads",
   dashboard: "/portfolio/dashboard",
+  me: "/me",
 };
