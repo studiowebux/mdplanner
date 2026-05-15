@@ -661,3 +661,37 @@ html.sidebar-collapsed .settings-page__form-actions {
   margin-top: var(--settings-data-result-gap);
   font-size: var(--font-size-sm);
 }
+
+.settings-data__result-summary {
+  margin-bottom: var(--space-sm);
+  color: var(--color-text-primary);
+}
+
+.settings-data__warning {
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-sm);
+  background: var(--color-bg-warning);
+  border: var(--border-width) var(--border-style) var(--color-warning);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.settings-data__result-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.settings-data__result-table th,
+.settings-data__result-table td {
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-border-default);
+  text-align: left;
+}
+
+.settings-data__result-table th {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}

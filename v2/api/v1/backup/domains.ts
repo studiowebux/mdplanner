@@ -56,12 +56,12 @@ type BackupService = {
   upsertMany(items: any[]): Promise<{ count: number; errors: string[] }>;
 };
 
-function domain(key: string, label: string, service: BackupService) {
+function domain(key: string, label: string, get: () => BackupService) {
   registerDomain({
     key,
     label,
-    export: () => service.list(),
-    import: (items) => service.upsertMany(items),
+    export: () => get().list(),
+    import: (items) => get().upsertMany(items),
   });
 }
 
@@ -93,7 +93,7 @@ export function registerBackupDomains(): void {
     import: (items) => upsertViaRepo<Task>(getTaskRepository(), items),
   });
 
-  domain("people", "People", getPeopleService());
+  domain("people", "People", getPeopleService);
 
   // Milestones — custom service; use repo directly for upsert
   registerDomain({
@@ -104,44 +104,44 @@ export function registerBackupDomains(): void {
       upsertViaRepo<MilestoneBase>(getMilestoneRepository(), items),
   });
 
-  domain("notes", "Notes", getNoteService());
-  domain("portfolio", "Portfolio", getPortfolioService());
-  domain("goals", "Goals", getGoalService());
-  domain("ideas", "Ideas", getIdeaService());
-  domain("marketing-plans", "Marketing Plans", getMarketingPlanService());
-  domain("swot", "SWOT", getSwotService());
-  domain("moscow", "MoSCoW", getMoscowService());
-  domain("c4", "C4 Diagrams", getC4Service());
-  domain("eisenhower", "Eisenhower", getEisenhowerService());
-  domain("mindmaps", "Mind Maps", getMindmapService());
-  domain("fishbone", "Fishbone", getFishboneService());
-  domain("business-models", "Business Models", getBusinessModelService());
-  domain("risks", "Risks", getRiskService());
-  domain("strategic-levels", "Strategic Levels", getStrategicLevelsService());
-  domain("safe", "SAFe", getSafeService());
+  domain("notes", "Notes", getNoteService);
+  domain("portfolio", "Portfolio", getPortfolioService);
+  domain("goals", "Goals", getGoalService);
+  domain("ideas", "Ideas", getIdeaService);
+  domain("marketing-plans", "Marketing Plans", getMarketingPlanService);
+  domain("swot", "SWOT", getSwotService);
+  domain("moscow", "MoSCoW", getMoscowService);
+  domain("c4", "C4 Diagrams", getC4Service);
+  domain("eisenhower", "Eisenhower", getEisenhowerService);
+  domain("mindmaps", "Mind Maps", getMindmapService);
+  domain("fishbone", "Fishbone", getFishboneService);
+  domain("business-models", "Business Models", getBusinessModelService);
+  domain("risks", "Risks", getRiskService);
+  domain("strategic-levels", "Strategic Levels", getStrategicLevelsService);
+  domain("safe", "SAFe", getSafeService);
   domain(
     "project-value-boards",
     "Project Value Boards",
-    getProjectValueBoardService(),
+    getProjectValueBoardService,
   );
-  domain("customers", "Customers", getCustomerService());
-  domain("contacts", "Contacts", getContactService());
-  domain("companies", "Companies", getCompanyService());
-  domain("deals", "Deals", getDealService());
-  domain("finances", "Finances", getFinanceService());
-  domain("habits", "Habits", getHabitService());
-  domain("journal", "Journal", getJournalService());
-  domain("reflections", "Reflections", getReflectionService());
-  domain("investors", "Investors", getInvestorService());
-  domain("invoices", "Invoices", getInvoiceService());
-  domain("payments", "Payments", getPaymentService());
-  domain("quotes", "Quotes", getQuoteService());
-  domain("billing-rates", "Billing Rates", getBillingRateService());
-  domain("brainstorms", "Brainstorms", getBrainstormService());
-  domain("briefs", "Briefs", getBriefService());
-  domain("capacity-plans", "Capacity Plans", getCapacityPlanService());
-  domain("retrospectives", "Retrospectives", getRetrospectiveService());
-  domain("meetings", "Meetings", getMeetingService());
-  domain("lean-canvases", "Lean Canvases", getLeanCanvasService());
-  domain("sticky-boards", "Sticky Boards", getStickyBoardService());
+  domain("customers", "Customers", getCustomerService);
+  domain("contacts", "Contacts", getContactService);
+  domain("companies", "Companies", getCompanyService);
+  domain("deals", "Deals", getDealService);
+  domain("finances", "Finances", getFinanceService);
+  domain("habits", "Habits", getHabitService);
+  domain("journal", "Journal", getJournalService);
+  domain("reflections", "Reflections", getReflectionService);
+  domain("investors", "Investors", getInvestorService);
+  domain("invoices", "Invoices", getInvoiceService);
+  domain("payments", "Payments", getPaymentService);
+  domain("quotes", "Quotes", getQuoteService);
+  domain("billing-rates", "Billing Rates", getBillingRateService);
+  domain("brainstorms", "Brainstorms", getBrainstormService);
+  domain("briefs", "Briefs", getBriefService);
+  domain("capacity-plans", "Capacity Plans", getCapacityPlanService);
+  domain("retrospectives", "Retrospectives", getRetrospectiveService);
+  domain("meetings", "Meetings", getMeetingService);
+  domain("lean-canvases", "Lean Canvases", getLeanCanvasService);
+  domain("sticky-boards", "Sticky Boards", getStickyBoardService);
 }

@@ -4,6 +4,70 @@ title: Backup and Restore
 
 # Backup and Restore
 
+## JSON Backup (v2 UI)
+
+MD Planner v2 includes a built-in JSON backup and restore feature available
+from **Settings → Data**. It exports all 39 domains (tasks, goals, notes,
+contacts, habits, and more) into a single JSON file and can restore from it.
+
+### Export
+
+Navigate to **Settings → Data** and click **Download Backup**. The browser
+downloads a file named `mdplanner-backup-YYYY-MM-DD.json`.
+
+You can also export via the API:
+
+```bash
+curl -o backup.json http://localhost:8003/api/v1/backup/export
+```
+
+The file structure:
+
+```json
+{
+  "version": "2.0.0-alpha",
+  "exportedAt": "2026-05-15T12:00:00.000Z",
+  "domains": {
+    "tasks": [...],
+    "goals": [...],
+    "notes": [...]
+  }
+}
+```
+
+### Import
+
+Navigate to **Settings → Data**, choose a backup `.json` file, and click
+**Restore Backup**. A summary table shows how many records were restored per
+domain and any errors encountered.
+
+You can also import via the API:
+
+```bash
+curl -X POST http://localhost:8003/api/v1/backup/import \
+  -F "file=@backup.json"
+```
+
+Or with a raw JSON body:
+
+```bash
+curl -X POST http://localhost:8003/api/v1/backup/import \
+  -H "Content-Type: application/json" \
+  --data-binary @backup.json
+```
+
+**Import behaviour:**
+
+- Records with the same ID are **upserted** (overwritten).
+- Records not present in the backup are **left untouched**.
+- Import is **not destructive** — it never deletes existing data.
+- If the backup `version` differs from the running server version, a warning
+  is shown in the result but the import still proceeds.
+
+---
+
+## TAR Backup (v1 — encrypted archives)
+
 MD Planner supports TAR archive export/import with optional AES-256-GCM
 encryption using RSA-OAEP-4096 key pairs.
 

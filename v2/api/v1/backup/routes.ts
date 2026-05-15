@@ -81,6 +81,14 @@ backupRouter.post("/import", async (c) => {
     unknown
   >;
 
+  const backupVersion =
+    typeof (parsed as Record<string, unknown>).version === "string"
+      ? ((parsed as Record<string, unknown>).version as string)
+      : null;
+  const versionWarning = backupVersion && backupVersion !== APP_VERSION
+    ? `Backup version ${backupVersion} differs from current version ${APP_VERSION} — some fields may not have been restored correctly.`
+    : null;
+
   const imported: Record<string, ImportDomainResult> = {};
   let totalCount = 0;
   let totalErrors = 0;
@@ -98,5 +106,26 @@ backupRouter.post("/import", async (c) => {
     totalErrors += result.errors.length;
   }
 
-  return c.json({ imported, totalCount, totalErrors }, 200);
+  if (c.req.header("HX-Request")) {
+    const rows = Object.values(imported)
+      .map(
+        (r) =>
+          `<tr><td>${r.label}</td><td>${r.count}</td><td>${
+            r.errors.length > 0 ? r.errors.join(", ") : "—"
+          }</td></tr>`,
+      )
+      .join("");
+    const warning = versionWarning
+      ? `<p class="settings-data__warning">${versionWarning}</p>`
+      : "";
+    const html =
+      `${warning}<p class="settings-data__result-summary">Restored <strong>${totalCount}</strong> records across ${
+        Object.keys(imported).length
+      } domains (${totalErrors} error${
+        totalErrors !== 1 ? "s" : ""
+      }).</p><table class="settings-data__result-table"><thead><tr><th>Domain</th><th>Restored</th><th>Errors</th></tr></thead><tbody>${rows}</tbody></table>`;
+    return c.html(html);
+  }
+
+  return c.json({ imported, totalCount, totalErrors, versionWarning }, 200);
 });
