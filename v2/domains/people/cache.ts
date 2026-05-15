@@ -51,6 +51,8 @@ export function rowToPerson(
   if (row.current_task_id != null) {
     person.currentTaskId = row.current_task_id as string;
   }
+  const accounts = parseJson<Record<string, string>>(row.accounts);
+  if (accounts) person.accounts = accounts;
   if (row.created_at != null) person.createdAt = row.created_at as string;
   if (row.updated_at != null) person.updatedAt = row.updated_at as string;
   if (row.created_by != null) person.createdBy = row.created_by as string;
@@ -68,8 +70,8 @@ export function insertPersonRow(
     `INSERT OR REPLACE INTO ${PEOPLE_TABLE} (id, name, title, role,
        departments, reports_to, email, phone, start_date, hours_per_day,
        working_days, notes, agent_type, skills, models, system_prompt,
-       status, last_seen, current_task_id, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       status, last_seen, current_task_id, accounts, ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(p.id),
       val(p.name),
@@ -90,6 +92,7 @@ export function insertPersonRow(
       val(p.status),
       val(p.lastSeen),
       val(p.currentTaskId),
+      json(p.accounts),
       ...auditVals(p),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -103,6 +106,7 @@ export function registerPeopleEntity(repo: PeopleRepository): void {
     schema: PEOPLE_SCHEMA,
     migrations: [
       "ALTER TABLE people ADD COLUMN reports_to TEXT",
+      "ALTER TABLE people ADD COLUMN accounts TEXT",
     ],
     fts: {
       type: "person",

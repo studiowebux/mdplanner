@@ -25,6 +25,7 @@ export const PEOPLE_SCHEMA = `CREATE TABLE IF NOT EXISTS ${PEOPLE_TABLE} (
   status TEXT,
   last_seen TEXT,
   current_task_id TEXT,
+  accounts TEXT,
   created_at TEXT,
   updated_at TEXT,
   created_by TEXT,

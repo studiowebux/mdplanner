@@ -16,6 +16,18 @@ import { PersonCard } from "../../views/components/person-card.tsx";
 import { PEOPLE_TABLE_COLUMNS, personToRow } from "./constants.tsx";
 import type { FieldDef } from "../../components/ui/form-builder.tsx";
 
+/** Convert array-table rows [{ key, value }] to Record<string, string>. */
+function accountsFromRows(
+  rows: { key?: string; value?: string }[] | null | undefined,
+): Record<string, string> | undefined {
+  if (!Array.isArray(rows) || rows.length === 0) return undefined;
+  const acc: Record<string, string> = {};
+  for (const row of rows) {
+    if (row.key && row.value) acc[row.key] = row.value;
+  }
+  return Object.keys(acc).length > 0 ? acc : undefined;
+}
+
 const FORM_FIELDS: FieldDef[] = [
   { type: "text", name: "name", label: "Name", required: true, maxLength: 200 },
   { type: "text", name: "title", label: "Title" },
@@ -50,6 +62,29 @@ const FORM_FIELDS: FieldDef[] = [
     label: "Skills",
     source: "people-skills",
     placeholder: "Type and press Enter...",
+  },
+  {
+    type: "array-table",
+    name: "accounts",
+    label: "External accounts",
+    section: "accounts",
+    addLabel: "Add account",
+    itemFields: [
+      {
+        type: "select",
+        name: "key",
+        label: "Provider",
+        options: [
+          { value: "github", label: "GitHub" },
+          { value: "gitea", label: "Gitea" },
+          { value: "asana", label: "Asana" },
+          { value: "discord", label: "Discord" },
+          { value: "whimsical", label: "Whimsical" },
+          { value: "google", label: "Google" },
+        ],
+      },
+      { type: "text", name: "value", label: "Username / handle" },
+    ],
   },
 ];
 
@@ -96,12 +131,25 @@ export const peopleConfig: DomainConfig<
 
   Card: ({ item, q }) => <PersonCard person={item} q={q} />,
 
-  parseCreate: (body) => parseFormBody(FORM_FIELDS, body) as CreatePerson,
+  parseCreate: (body) => {
+    const parsed = parseFormBody(FORM_FIELDS, body) as CreatePerson;
+    parsed.accounts = accountsFromRows(
+      parsed.accounts as unknown as { key?: string; value?: string }[],
+    );
+    return parsed;
+  },
 
-  parseUpdate: (body) =>
-    parseFormBody(FORM_FIELDS, body, { clearEmpty: true }) as Partial<
-      UpdatePerson
-    >,
+  parseUpdate: (body) => {
+    const parsed = parseFormBody(FORM_FIELDS, body, {
+      clearEmpty: true,
+    }) as Partial<UpdatePerson>;
+    if (parsed.accounts !== undefined) {
+      parsed.accounts = accountsFromRows(
+        parsed.accounts as unknown as { key?: string; value?: string }[],
+      );
+    }
+    return parsed;
+  },
 
   getService: () => getPeopleService(),
 

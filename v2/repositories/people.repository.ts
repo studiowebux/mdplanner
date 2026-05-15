@@ -159,6 +159,18 @@ export class PeopleRepository extends CachedMarkdownRepository<
     if (fm.currentTaskId != null) {
       person.currentTaskId = String(fm.currentTaskId);
     }
+    if (
+      fm.accounts != null && typeof fm.accounts === "object" &&
+      !Array.isArray(fm.accounts)
+    ) {
+      const acc: Record<string, string> = {};
+      for (
+        const [k, v] of Object.entries(fm.accounts as Record<string, unknown>)
+      ) {
+        if (v != null) acc[k] = String(v);
+      }
+      if (Object.keys(acc).length > 0) person.accounts = acc;
+    }
     if (fm.createdAt != null) person.createdAt = String(fm.createdAt);
     if (fm.updatedAt != null) person.updatedAt = String(fm.updatedAt);
     if (fm.createdBy != null) person.createdBy = String(fm.createdBy);

@@ -188,6 +188,20 @@ export const PersonDetailView: FC<Props> = (
           </section>
         )}
 
+        {person.accounts && Object.keys(person.accounts).length > 0 && (
+          <section class="detail-section person-detail__section">
+            <h2>External accounts</h2>
+            <dl class="person-detail__meta">
+              {Object.entries(person.accounts).map(([provider, username]) => (
+                <>
+                  <dt key={provider}>{provider}</dt>
+                  <dd key={`${provider}-val`}>{username}</dd>
+                </>
+              ))}
+            </dl>
+          </section>
+        )}
+
         {person.notes && (
           <section class="detail-section person-detail__section">
             <h2>Notes</h2>

@@ -159,6 +159,18 @@ export class PeopleService extends CachedService<
     return matches;
   }
 
+  /** Find a person by their external account identity. */
+  async findByAccount(
+    provider: string,
+    username: string,
+  ): Promise<Person | null> {
+    const all = await this.list();
+    const lower = username.toLowerCase();
+    return all.find(
+      (p) => p.accounts?.[provider]?.toLowerCase() === lower,
+    ) ?? null;
+  }
+
   /** Get workload info for a person — capacity and current assignment. */
   async getWorkload(id: string): Promise<PersonWorkload | null> {
     const p = await this.peopleRepo.findById(id);

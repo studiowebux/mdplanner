@@ -4,6 +4,28 @@ import { stringArray } from "./shared.types.ts";
 import type { ViewMode } from "./app.ts";
 
 // ---------------------------------------------------------------------------
+// External account identity
+// ---------------------------------------------------------------------------
+
+export const ACCOUNT_PROVIDERS = [
+  "github",
+  "gitea",
+  "asana",
+  "discord",
+  "whimsical",
+  "google",
+] as const;
+
+export type AccountProvider = (typeof ACCOUNT_PROVIDERS)[number];
+
+/** External identity map — provider name → username/handle. e.g. { github: "octocat" } */
+export const AccountsSchema = z.record(z.string()).nullable().optional()
+  .openapi({
+    description: "External platform identities keyed by provider name",
+    example: { github: "octocat", asana: "tommy.gingras" },
+  });
+
+// ---------------------------------------------------------------------------
 // Agent model — AI agent configuration
 // ---------------------------------------------------------------------------
 
@@ -112,6 +134,7 @@ export const PersonSchema = z.object({
   currentTaskId: z.string().nullable().optional().openapi({
     description: "Task ID the agent is actively working on",
   }),
+  accounts: AccountsSchema,
   createdAt: z.string().nullable().optional().openapi({
     description: "ISO creation timestamp",
   }),
