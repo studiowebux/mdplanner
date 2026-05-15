@@ -107,6 +107,42 @@ export interface NoteStats {
   byProject: Record<string, number>;
 }
 
+export interface InvestorStats {
+  total: number;
+  byStatus: Record<string, number>;
+  totalTargetAmount: number;
+}
+
+export interface FinanceStats {
+  totalIncome: number;
+  totalExpenses: number;
+  balance: number;
+  byType: Record<string, number>;
+}
+
+export interface DealStats {
+  total: number;
+  byStage: Record<string, number>;
+  totalValue: number;
+}
+
+export interface HabitStats {
+  total: number;
+  completionRateThisMonth: number | null;
+}
+
+export interface JournalStats {
+  total: number;
+  thisMonth: number;
+  thisWeek: number;
+  streak: number;
+}
+
+export interface ReflectionStats {
+  total: number;
+  thisMonth: number;
+}
+
 // ---------------------------------------------------------------------------
 // Top-level payload
 // ---------------------------------------------------------------------------
@@ -123,5 +159,11 @@ export interface AnalyticsData {
   meetings: MeetingStats;
   customers: CustomerStats;
   notes: NoteStats;
+  investors: InvestorStats;
+  finances: FinanceStats;
+  deals: DealStats;
+  habits: HabitStats;
+  journal: JournalStats;
+  reflections: ReflectionStats;
   generatedAt: string;
 }

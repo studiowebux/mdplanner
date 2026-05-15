@@ -3,12 +3,18 @@
 import {
   getCapacityPlanService,
   getCustomerService,
+  getDealService,
+  getFinanceService,
   getGoalService,
+  getHabitService,
+  getInvestorService,
   getInvoiceService,
+  getJournalService,
   getMeetingService,
   getMilestoneService,
   getNoteService,
   getQuoteService,
+  getReflectionService,
   getTaskService,
 } from "../singletons/services.ts";
 import type {
@@ -16,12 +22,18 @@ import type {
   AnalyticsFilters,
   CapacityPlanStats,
   CustomerStats,
+  DealStats,
+  FinanceStats,
   GoalStats,
+  HabitStats,
+  InvestorStats,
   InvoiceStats,
+  JournalStats,
   MeetingStats,
   MilestoneStats,
   NoteStats,
   QuoteStats,
+  ReflectionStats,
   TaskStats,
   TimeEntryStats,
 } from "../types/analytics.types.ts";
@@ -282,6 +294,141 @@ async function collectNoteStats(
   return { total: notes.length, byType, byProject };
 }
 
+async function collectInvestorStats(
+  _filters: AnalyticsFilters,
+): Promise<InvestorStats> {
+  const investors = await getInvestorService().list();
+  const byStatus: Record<string, number> = {};
+  let totalTargetAmount = 0;
+  for (const inv of investors) {
+    const s = inv.status ?? "unknown";
+    byStatus[s] = (byStatus[s] ?? 0) + 1;
+    if (inv.status !== "passed") {
+      totalTargetAmount += inv.amountTarget ?? 0;
+    }
+  }
+  return {
+    total: investors.length,
+    byStatus,
+    totalTargetAmount: Math.round(totalTargetAmount * 100) / 100,
+  };
+}
+
+async function collectFinanceStats(
+  _filters: AnalyticsFilters,
+): Promise<FinanceStats> {
+  const entries = await getFinanceService().list();
+  let totalIncome = 0;
+  let totalExpenses = 0;
+  const byType: Record<string, number> = {};
+  for (const f of entries) {
+    byType[f.type] = (byType[f.type] ?? 0) + 1;
+    if (f.type === "income") {
+      totalIncome += f.amount;
+    } else {
+      totalExpenses += f.amount;
+    }
+  }
+  return {
+    totalIncome: Math.round(totalIncome * 100) / 100,
+    totalExpenses: Math.round(totalExpenses * 100) / 100,
+    balance: Math.round((totalIncome - totalExpenses) * 100) / 100,
+    byType,
+  };
+}
+
+async function collectDealStats(
+  _filters: AnalyticsFilters,
+): Promise<DealStats> {
+  const deals = await getDealService().list();
+  const byStage: Record<string, number> = {};
+  let totalValue = 0;
+  for (const d of deals) {
+    const s = d.stage ?? "unknown";
+    byStage[s] = (byStage[s] ?? 0) + 1;
+    totalValue += d.value ?? 0;
+  }
+  return {
+    total: deals.length,
+    byStage,
+    totalValue: Math.round(totalValue * 100) / 100,
+  };
+}
+
+async function collectHabitStats(
+  _filters: AnalyticsFilters,
+): Promise<HabitStats> {
+  const habits = await getHabitService().list();
+  if (habits.length === 0) return { total: 0, completionRateThisMonth: null };
+
+  const now = new Date();
+  const yearMonth = now.toISOString().slice(0, 7); // "YYYY-MM"
+  const daysElapsed = now.getDate();
+
+  let totalCompletions = 0;
+  for (const h of habits) {
+    for (const entry of h.completedDates ?? []) {
+      if (entry.date.startsWith(yearMonth)) totalCompletions++;
+    }
+  }
+
+  const possible = habits.length * daysElapsed;
+  const completionRateThisMonth = possible > 0
+    ? Math.round((totalCompletions / possible) * 100)
+    : null;
+
+  return { total: habits.length, completionRateThisMonth };
+}
+
+async function collectJournalStats(
+  _filters: AnalyticsFilters,
+): Promise<JournalStats> {
+  const entries = await getJournalService().list();
+  const now = new Date();
+  const yearMonth = now.toISOString().slice(0, 7);
+
+  // Week start (Monday)
+  const dayOfWeek = (now.getDay() + 6) % 7; // 0=Mon
+  const weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - dayOfWeek);
+  const weekStartStr = weekStart.toISOString().slice(0, 10);
+  const todayStr = now.toISOString().slice(0, 10);
+
+  let thisMonth = 0;
+  let thisWeek = 0;
+  const datesWithEntry = new Set<string>();
+
+  for (const e of entries) {
+    if (e.date.startsWith(yearMonth)) thisMonth++;
+    if (e.date >= weekStartStr && e.date <= todayStr) thisWeek++;
+    datesWithEntry.add(e.date);
+  }
+
+  // Streak: consecutive days ending today (or yesterday if no entry today)
+  let streak = 0;
+  const cursor = new Date(now);
+  while (true) {
+    const dateStr = cursor.toISOString().slice(0, 10);
+    if (!datesWithEntry.has(dateStr)) break;
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  return { total: entries.length, thisMonth, thisWeek, streak };
+}
+
+async function collectReflectionStats(
+  _filters: AnalyticsFilters,
+): Promise<ReflectionStats> {
+  const reflections = await getReflectionService().list();
+  const yearMonth = new Date().toISOString().slice(0, 7);
+  let thisMonth = 0;
+  for (const r of reflections) {
+    if (r.date.startsWith(yearMonth)) thisMonth++;
+  }
+  return { total: reflections.length, thisMonth };
+}
+
 export async function getProjectAnalytics(
   filters: AnalyticsFilters = {},
 ): Promise<AnalyticsData> {
@@ -296,6 +443,12 @@ export async function getProjectAnalytics(
     meetings,
     customers,
     notes,
+    investors,
+    finances,
+    deals,
+    habits,
+    journal,
+    reflections,
   ] = await Promise.all([
     collectTaskStats(filters),
     collectGoalStats(filters),
@@ -307,6 +460,12 @@ export async function getProjectAnalytics(
     collectMeetingStats(filters),
     collectCustomerStats(filters),
     collectNoteStats(filters),
+    collectInvestorStats(filters),
+    collectFinanceStats(filters),
+    collectDealStats(filters),
+    collectHabitStats(filters),
+    collectJournalStats(filters),
+    collectReflectionStats(filters),
   ]);
 
   return {
@@ -321,6 +480,12 @@ export async function getProjectAnalytics(
     meetings,
     customers,
     notes,
+    investors,
+    finances,
+    deals,
+    habits,
+    journal,
+    reflections,
     generatedAt: new Date().toISOString(),
   };
 }

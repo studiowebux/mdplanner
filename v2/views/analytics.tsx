@@ -34,6 +34,12 @@ export const ALL_SECTIONS: { key: string; label: string }[] = [
   { key: "meetings", label: "Meetings" },
   { key: "customers", label: "Customers" },
   { key: "notes", label: "Notes" },
+  { key: "investors", label: "Investors" },
+  { key: "finances", label: "Finances" },
+  { key: "deals", label: "Deals" },
+  { key: "habits", label: "Habits" },
+  { key: "journal", label: "Journal" },
+  { key: "reflections", label: "Reflections" },
 ];
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -614,6 +620,150 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
                 />
               </details>
             )}
+          </div>
+        </section>
+      )}
+
+      {/* Investors */}
+      {visible("investors") && (
+        <section class="analytics__section">
+          <SectionHeader
+            title="Investors"
+            sectionKey="investors"
+            addLabel="Add Investor"
+            addRoute="/investors/new"
+          />
+          <div class="analytics__stat-grid">
+            <StatCard label="Total" value={data.investors.total} />
+            <StatCard
+              label="Target Amount"
+              value={formatCurrency(data.investors.totalTargetAmount)}
+            />
+          </div>
+          {Object.keys(data.investors.byStatus).length > 0 && (
+            <div class="analytics__col">
+              <h3 class="analytics__col-title">By Status</h3>
+              <ByTable
+                rows={Object.entries(data.investors.byStatus).map(([k, v]) => [
+                  capitalize(k),
+                  v,
+                ])}
+              />
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* Finances */}
+      {visible("finances") && (
+        <section class="analytics__section">
+          <SectionHeader
+            title="Finances"
+            sectionKey="finances"
+            addLabel="Add Entry"
+            addRoute="/finances/new"
+          />
+          <div class="analytics__stat-grid">
+            <StatCard
+              label="Income"
+              value={formatCurrency(data.finances.totalIncome)}
+            />
+            <StatCard
+              label="Expenses"
+              value={formatCurrency(data.finances.totalExpenses)}
+            />
+            <StatCard
+              label="Balance"
+              value={formatCurrency(data.finances.balance)}
+            />
+          </div>
+        </section>
+      )}
+
+      {/* Deals */}
+      {visible("deals") && (
+        <section class="analytics__section">
+          <SectionHeader
+            title="Deals"
+            sectionKey="deals"
+            addLabel="Add Deal"
+            addRoute="/deals/new"
+          />
+          <div class="analytics__stat-grid">
+            <StatCard label="Total" value={data.deals.total} />
+            <StatCard
+              label="Pipeline Value"
+              value={formatCurrency(data.deals.totalValue)}
+            />
+          </div>
+          {Object.keys(data.deals.byStage).length > 0 && (
+            <div class="analytics__col">
+              <h3 class="analytics__col-title">By Stage</h3>
+              <ByTable
+                rows={Object.entries(data.deals.byStage).map(([k, v]) => [
+                  capitalize(k),
+                  v,
+                ])}
+              />
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* Habits */}
+      {visible("habits") && (
+        <section class="analytics__section">
+          <SectionHeader
+            title="Habits"
+            sectionKey="habits"
+            addLabel="Add Habit"
+            addRoute="/habits/new"
+          />
+          <div class="analytics__stat-grid">
+            <StatCard label="Total" value={data.habits.total} />
+            <StatCard
+              label="Completion (this month)"
+              value={data.habits.completionRateThisMonth != null
+                ? `${data.habits.completionRateThisMonth}%`
+                : "—"}
+            />
+          </div>
+        </section>
+      )}
+
+      {/* Journal */}
+      {visible("journal") && (
+        <section class="analytics__section">
+          <SectionHeader
+            title="Journal"
+            sectionKey="journal"
+            addLabel="Add Entry"
+            addRoute="/journal/new"
+          />
+          <div class="analytics__stat-grid">
+            <StatCard label="Total Entries" value={data.journal.total} />
+            <StatCard label="This Month" value={data.journal.thisMonth} />
+            <StatCard label="This Week" value={data.journal.thisWeek} />
+            <StatCard
+              label="Current Streak"
+              value={`${data.journal.streak}d`}
+            />
+          </div>
+        </section>
+      )}
+
+      {/* Reflections */}
+      {visible("reflections") && (
+        <section class="analytics__section">
+          <SectionHeader
+            title="Reflections"
+            sectionKey="reflections"
+            addLabel="Add Reflection"
+            addRoute="/reflections/new"
+          />
+          <div class="analytics__stat-grid">
+            <StatCard label="Total" value={data.reflections.total} />
+            <StatCard label="This Month" value={data.reflections.thisMonth} />
           </div>
         </section>
       )}
