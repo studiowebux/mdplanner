@@ -222,8 +222,8 @@
     dragNote = noteEl;
     dragStartMouseX = clientX;
     dragStartMouseY = clientY;
-    dragStartNoteX = parseFloat(noteEl.style.left) || 0;
-    dragStartNoteY = parseFloat(noteEl.style.top) || 0;
+    dragStartNoteX = parseFloat(noteEl.getAttribute("data-sticky-x")) || 0;
+    dragStartNoteY = parseFloat(noteEl.getAttribute("data-sticky-y")) || 0;
     noteEl.classList.add("is-dragging");
     noteEl.style.setProperty("z-index", "50");
   }
@@ -260,8 +260,10 @@
     resizeNote = noteEl;
     resizeStartMouseX = clientX;
     resizeStartMouseY = clientY;
-    resizeStartW = parseFloat(noteEl.style.width) || NOTE_DEFAULT_W;
-    resizeStartH = parseFloat(noteEl.style.height) || NOTE_DEFAULT_H;
+    resizeStartW = parseFloat(noteEl.getAttribute("data-sticky-w")) ||
+      NOTE_DEFAULT_W;
+    resizeStartH = parseFloat(noteEl.getAttribute("data-sticky-h")) ||
+      NOTE_DEFAULT_H;
     noteEl.classList.add("is-resizing");
   }
 
@@ -382,6 +384,10 @@
     el.className = "sticky-note sticky-note--" + note.color + " is-entering";
     el.setAttribute("data-canvas-note", "");
     el.setAttribute("data-sticky-id", note.id);
+    el.setAttribute("data-sticky-x", String(note.position.x));
+    el.setAttribute("data-sticky-y", String(note.position.y));
+    el.setAttribute("data-sticky-w", String(w));
+    el.setAttribute("data-sticky-h", String(h));
     el.style.setProperty("left", note.position.x + "px");
     el.style.setProperty("top", note.position.y + "px");
     el.style.setProperty("width", w + "px");
@@ -425,10 +431,10 @@
     function overlaps(cx, cy) {
       for (var i = 0; i < notes.length; i++) {
         var n = notes[i];
-        var nx = parseFloat(n.style.left) || 0;
-        var ny = parseFloat(n.style.top) || 0;
-        var nw = parseFloat(n.style.width) || NOTE_DEFAULT_W;
-        var nh = parseFloat(n.style.height) || NOTE_DEFAULT_H;
+        var nx = parseFloat(n.getAttribute("data-sticky-x")) || 0;
+        var ny = parseFloat(n.getAttribute("data-sticky-y")) || 0;
+        var nw = parseFloat(n.getAttribute("data-sticky-w")) || NOTE_DEFAULT_W;
+        var nh = parseFloat(n.getAttribute("data-sticky-h")) || NOTE_DEFAULT_H;
         if (
           cx < nx + nw + GAP &&
           cx + w + GAP > nx &&
@@ -523,10 +529,10 @@
 
     var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     notes.forEach(function (n) {
-      var x = parseFloat(n.style.left) || 0;
-      var y = parseFloat(n.style.top) || 0;
-      var w = parseFloat(n.style.width) || NOTE_DEFAULT_W;
-      var h = parseFloat(n.style.height) || NOTE_DEFAULT_H;
+      var x = parseFloat(n.getAttribute("data-sticky-x")) || 0;
+      var y = parseFloat(n.getAttribute("data-sticky-y")) || 0;
+      var w = parseFloat(n.getAttribute("data-sticky-w")) || NOTE_DEFAULT_W;
+      var h = parseFloat(n.getAttribute("data-sticky-h")) || NOTE_DEFAULT_H;
       if (x < minX) minX = x;
       if (y < minY) minY = y;
       if (x + w > maxX) maxX = x + w;
