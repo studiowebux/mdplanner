@@ -169,7 +169,11 @@ const CommentsSection: FC<{
         hx-swap="none"
         hx-on--after-request="if(event.detail.successful){ this.reset(); }"
       >
+        <label class="sr-only" for={`comment-body-${taskId}`}>
+          Add a comment
+        </label>
         <textarea
+          id={`comment-body-${taskId}`}
           class="form__input task-detail__comment-input"
           name="body"
           rows={3}
