@@ -12,8 +12,9 @@ links:
     title: Discord
   - url: "https://figma.com/file/taskflow"
     title: Figma Designs
-features: [analytics, rate, brainstorm, brief, business_model, c4_component, capacity_plan, company, contact, customer, dashboard, deal, dns_domain, eisenhower, finance, fishbone, github, goal, idea, invoice, lean_canvas, marketing_plan, meeting, milestone, mindmap, moscow, note, payment, person, portfolio, project_value, quote, retrospective, risk, safe, safe_agreement, sticky_note, strategic_builder, swot, task, time_entry, upload, journal, habit, onboarding, investor, brainstorm_template, reflection, onboarding_template, reflection_template, ai_chat]
+features: [ai_chat, analytics, rate, brainstorm, brainstorm_template, brief, business_model, c4_component, capacity_plan, company, contact, customer, dashboard, deal, dns_domain, eisenhower, finance, fishbone, github, goal, habit, idea, investor, invoice, journal, lean_canvas, marketing_plan, meeting, milestone, mindmap, moscow, note, onboarding, onboarding_template, payment, person, portfolio, project_value, quote, reflection, reflection_template, retrospective, risk, safe, safe_agreement, sticky_note, strategic_builder, swot, task, time_entry, upload, me]
 nav_categories:
+  Personal: [me]
   Admin: [upload, analytics]
   CRM: [company, contact, deal]
   Diagrams: [c4_component, mindmap, sticky_note]
@@ -27,7 +28,7 @@ nav_categories:
   Strategy: [business_model, fishbone, lean_canvas, marketing_plan, project_value, risk, strategic_builder, swot]
   Team: [ai_chat, capacity_plan, meeting, person, time_entry]
   Work: [goal, milestone, task]
-last_updated: "2026-05-14T20:13:58.859Z"
+last_updated: "2026-05-15T22:36:51.711Z"
 ---
 
 # MD Planner Demo

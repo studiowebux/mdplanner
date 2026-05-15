@@ -2243,3 +2243,7 @@ div.load-more-sentinel {
   white-space: nowrap;
   border-width: 0;
 }
+
+.is-hidden {
+  display: none;
+}

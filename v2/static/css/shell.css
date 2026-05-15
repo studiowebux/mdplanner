@@ -72,6 +72,11 @@ html.focus-mode .topbar {
   display: none;
 }
 
+.focus-mode-exit,
+.fullscreen-reading-exit {
+  display: none;
+}
+
 html.focus-mode .focus-mode-exit {
   display: flex;
   position: fixed;

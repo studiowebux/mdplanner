@@ -50,7 +50,7 @@ export async function Topbar({ actor }: Props) {
       <div id="topbar-actions" class="topbar__actions">
         <form
           hx-post="/settings/identity"
-          hx-trigger="change"
+          hx-trigger="change from:#identity-select"
           hx-swap="none"
         >
           <select

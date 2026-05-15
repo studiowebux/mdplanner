@@ -121,12 +121,11 @@ export const MeDashboard: FC<MeDashboardProps> = ({
                         </a>
                         <div class="me-dashboard__item-meta">
                           <span class="badge">
-                            🔥 {computeStreak(h.completedDates, h.frequency)}
+                            {computeStreak(h.completedDates, h.frequency)}{" "}
+                            streak
                           </span>
                           <span class="badge">
-                            {isDoneToday(h.completedDates)
-                              ? "✓ Today"
-                              : "— Today"}
+                            {isDoneToday(h.completedDates) ? "Done" : "Pending"}
                           </span>
                         </div>
                       </li>

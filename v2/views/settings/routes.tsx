@@ -369,11 +369,12 @@ settingsViewRouter.post("/identity", async (c) => {
   const personId = String(body.personId ?? "").trim();
 
   const secret = getCookieSecret();
+  const isHttps = c.req.url.startsWith("https://");
   const cookieOpts = {
     path: "/",
     maxAge: 31536000,
     sameSite: "Strict" as const,
-    secure: true,
+    secure: isHttps,
     httpOnly: true,
   };
 
@@ -394,8 +395,6 @@ settingsViewRouter.post("/identity", async (c) => {
     setCookie(c, IDENTITY_COOKIE, value, cookieOpts);
   }
 
-  return new Response(null, {
-    status: 204,
-    headers: { "HX-Refresh": "true" },
-  });
+  c.header("HX-Refresh", "true");
+  return c.body(null, 204);
 });
