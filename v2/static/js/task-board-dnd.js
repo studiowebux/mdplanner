@@ -43,18 +43,19 @@
   }
 
   /**
-   * Find the card to insert the indicator before (null = append after all).
-   * Uses the midpoint of each card to decide above/below.
+   * Return the card element the dragged card should be inserted before,
+   * or null to append at the end. Uses midpoint heuristic.
+   * Must be called while the dragging card still has --dragging class.
    */
-  function findInsertBefore(columnBody, clientY) {
+  function findAfterElement(columnBody, clientY) {
     var cards = visibleCards(columnBody);
     for (var i = 0; i < cards.length; i++) {
       var rect = cards[i].getBoundingClientRect();
       if (clientY < rect.top + rect.height / 2) {
-        return { before: cards[i], index: i };
+        return cards[i];
       }
     }
-    return { before: null, index: cards.length };
+    return null;
   }
 
   function createGhost(card) {
@@ -131,6 +132,18 @@
     );
   }
 
+  /** Update the column count badge after an optimistic DOM move. */
+  function updateColumnCount(section) {
+    var col = document.querySelector(
+      ".task-board__column[data-section='" + section + "']",
+    );
+    if (!col) return;
+    var body = col.querySelector(".task-board__column-body");
+    var count = body ? body.querySelectorAll(".task-board__card").length : 0;
+    var badge = col.querySelector(".task-board__column-count");
+    if (badge) badge.textContent = count;
+  }
+
   // ── API calls ─────────────────────────────────────────────────────────────
 
   function callMove(taskId, targetSection) {
@@ -141,12 +154,52 @@
     }).catch(console.error);
   }
 
-  function callReorder(taskId, index) {
+  function callReorder(taskId, order) {
     fetch("/api/v1/tasks/" + taskId + "/reorder", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ order: index }),
+      body: JSON.stringify({ order: order }),
     }).catch(console.error);
+  }
+
+  /**
+   * Compute an order value that slots the dragged card at the drop point.
+   * Reads data-order from the cards surrounding the cursor and returns a
+   * midpoint so the server's renormalization (×10 gaps) places it correctly.
+   * Must be called while the dragging card still has --dragging class.
+   */
+  function getInsertOrder(columnBody, clientY) {
+    var cards = visibleCards(columnBody);
+    var beforeCard = null;
+    var afterCard = null;
+
+    for (var i = 0; i < cards.length; i++) {
+      var rect = cards[i].getBoundingClientRect();
+      if (clientY < rect.top + rect.height / 2) {
+        afterCard = cards[i];
+        beforeCard = i > 0 ? cards[i - 1] : null;
+        break;
+      }
+      beforeCard = cards[i];
+    }
+
+    var beforeOrder = beforeCard
+      ? parseInt(beforeCard.dataset.order || "0", 10)
+      : 0;
+    var afterOrder = afterCard
+      ? parseInt(afterCard.dataset.order || "0", 10)
+      : null;
+
+    if (afterOrder === null) {
+      // Drop at end — push past the last card.
+      return beforeOrder + 10;
+    }
+    if (beforeCard === null) {
+      // Drop at beginning — slot before the first card.
+      return Math.max(1, Math.floor(afterOrder / 2));
+    }
+    // Drop between two cards — midpoint; renormalization will space them out.
+    return Math.floor((beforeOrder + afterOrder) / 2);
   }
 
   // ── pointerdown — start drag ───────────────────────────────────────────────
@@ -245,33 +298,55 @@
     var d = dragging;
     dragging = null;
 
-    // Clean ghost before hit-testing
+    // Hide ghost for hit-testing, then remove it.
     d.ghost.style.display = "none";
     var below = document.elementFromPoint(clientX, clientY);
     d.ghost.remove();
 
-    // Remove dragging class from the original card
-    var originalCard = document.querySelector(
-      ".task-board__card--dragging[data-task-id='" + d.id + "']",
-    );
-    if (originalCard) {
-      originalCard.classList.remove("task-board__card--dragging");
-    }
-
     clearDragoverClass();
     hideIndicator(d.indicator);
 
+    var originalCard = document.querySelector(
+      ".task-board__card--dragging[data-task-id='" + d.id + "']",
+    );
+
     var columnBody = getColumnBody(below);
-    if (!columnBody) return;
+    if (!columnBody || !originalCard) {
+      if (originalCard) {
+        originalCard.classList.remove("task-board__card--dragging");
+      }
+      return;
+    }
 
     var targetSection = getSection(columnBody);
-    if (!targetSection) return;
+    if (!targetSection) {
+      originalCard.classList.remove("task-board__card--dragging");
+      return;
+    }
+
+    // Compute position BEFORE removing --dragging so visibleCards excludes it.
+    var afterEl = findAfterElement(columnBody, clientY);
+    var order = getInsertOrder(columnBody, clientY);
+
+    // Optimistic DOM move — card is already visually where the user dropped it.
+    originalCard.classList.remove("task-board__card--dragging");
+    if (afterEl) {
+      columnBody.insertBefore(originalCard, afterEl);
+    } else {
+      var emptyState = columnBody.querySelector(".task-board__column-empty");
+      if (emptyState) {
+        columnBody.insertBefore(originalCard, emptyState);
+      } else {
+        columnBody.appendChild(originalCard);
+      }
+    }
 
     if (d.sourceSection !== targetSection) {
+      updateColumnCount(d.sourceSection);
+      updateColumnCount(targetSection);
       callMove(d.id, targetSection);
     } else {
-      var result = findInsertBefore(columnBody, clientY);
-      callReorder(d.id, result.index);
+      callReorder(d.id, order);
     }
   }
 
@@ -296,4 +371,12 @@
       e.preventDefault();
     }
   }, { passive: false });
+
+  // ── suppress native HTML5 drag ghost (safety net) ─────────────────────────
+  // Cards have no draggable attr but browsers may still fire dragstart on
+  // text-selection mousedown. Cancel it so only our pointer-events ghost shows.
+
+  document.addEventListener("dragstart", function (e) {
+    if (getCard(e.target)) e.preventDefault();
+  });
 })();

@@ -37,7 +37,6 @@ const BoardCard: FC<{ task: Task }> = ({ task }) => {
       class={`task-board__card${
         task.completed ? " task-board__card--completed" : ""
       }`}
-      draggable="true"
       data-task-id={task.id}
       data-order={task.order ?? 0}
     >
