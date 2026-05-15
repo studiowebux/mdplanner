@@ -28,6 +28,9 @@ import {
   UpdateTaskSchema,
 } from "../../../types/task.types.ts";
 import { ErrorSchema, IdParam } from "../../../types/api.ts";
+import { sortTasks } from "../../../domains/task/constants.tsx";
+import { getCookie, setCookie } from "hono/cookie";
+import { parseJson } from "../../../database/sqlite/mod.ts";
 import {
   ClaimConflictError,
   ClaimGuardError,
@@ -424,7 +427,7 @@ tasksRouter.openapi(
   }),
   async (c) => {
     const { id } = c.req.valid("param");
-    const { order } = c.req.valid("json");
+    const { afterId } = c.req.valid("json");
 
     const task = await getTaskService().getById(id);
     if (!task) {
@@ -434,21 +437,27 @@ tasksRouter.openapi(
       }, 404);
     }
 
-    const updated = await getTaskService().update(id, { order });
-    if (!updated) {
-      return c.json({
-        error: "TASK_NOT_FOUND",
-        message: `Task ${id} not found`,
-      }, 404);
-    }
-
-    // Renormalize sibling order values to keep gaps sparse (10, 20, 30…)
+    // Build the current display order for the section, then splice the
+    // dragged task to the position indicated by afterId.
     const all = await getTaskService().list();
-    const siblings = all
-      .filter((t) => t.section === updated.section)
-      .sort((a, b) => (a.order ?? 999999) - (b.order ?? 999999));
+    const section = task.section;
+    // Sort by the same logic the view uses: order asc, priority asc, title asc.
+    const sectionTasks = sortTasks(all.filter((t) => t.section === section));
+
+    // Remove the dragged task from its current position.
+    const without = sectionTasks.filter((t) => t.id !== id);
+
+    // Insert after afterId (null = beginning).
+    let insertIdx = 0;
+    if (afterId != null) {
+      const afterIdx = without.findIndex((t) => t.id === afterId);
+      insertIdx = afterIdx === -1 ? without.length : afterIdx + 1;
+    }
+    without.splice(insertIdx, 0, task);
+
+    // Renormalize all tasks in the section to 10, 20, 30, …
     await Promise.all(
-      siblings.map((t, i) => {
+      without.map((t, i) => {
         const normalized = (i + 1) * 10;
         if (t.order !== normalized) {
           return getTaskService().update(t.id, { order: normalized });
@@ -456,6 +465,28 @@ tasksRouter.openapi(
         return Promise.resolve();
       }),
     );
+
+    const updated = await getTaskService().getById(id);
+    if (!updated) {
+      return c.json({
+        error: "TASK_NOT_FOUND",
+        message: `Task ${id} not found`,
+      }, 404);
+    }
+
+    // Clear any column sort from the cookie so F5 respects drag order.
+    const raw = getCookie(c, "ui_state");
+    const allUiState =
+      parseJson<Record<string, Record<string, unknown>>>(raw) ?? {};
+    const taskState = allUiState["tasks"] ?? {};
+    delete taskState["sort"];
+    delete taskState["order"];
+    allUiState["tasks"] = taskState;
+    setCookie(c, "ui_state", JSON.stringify(allUiState), {
+      path: "/",
+      maxAge: 31536000,
+      sameSite: "Lax",
+    });
 
     publish("task.updated");
     return c.json(updated, 200);

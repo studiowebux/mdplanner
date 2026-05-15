@@ -286,6 +286,7 @@
 .task-list__rows {
   display: flex;
   flex-direction: column;
+  position: relative;
   border: var(--border-width) var(--border-style) var(--color-border-default);
   border-top: none;
   border-radius: 0 0 var(--radius-md) var(--radius-md);
@@ -330,6 +331,43 @@
 
 .task-list__row--completed {
   opacity: var(--card-opacity-completed);
+}
+
+/* Drag-to-reorder */
+
+.task-list__row {
+  cursor: grab;
+}
+
+.task-list__row:active {
+  cursor: grabbing;
+}
+
+/* No grab cursor when a non-order sort is active */
+.task-list[data-sort]:not([data-sort=""]):not([data-sort="order"])
+  .task-list__row {
+  cursor: default;
+}
+
+.task-list__row--dragging {
+  opacity: var(--opacity-disabled);
+  cursor: grabbing;
+}
+
+.task-list__drop-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: calc(var(--border-width) * 2);
+  background-color: var(--color-accent);
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+  transform: translateY(-50%);
+  z-index: var(--z-sticky);
+}
+
+.task-list__drop-indicator.is-hidden {
+  display: none;
 }
 
 .task-list__row-main {

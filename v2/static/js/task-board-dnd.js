@@ -154,11 +154,11 @@
     }).catch(console.error);
   }
 
-  function callReorder(taskId, order) {
+  function callReorder(taskId, afterId) {
     fetch("/api/v1/tasks/" + taskId + "/reorder", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ order: order }),
+      body: JSON.stringify({ afterId: afterId }),
     }).catch(console.error);
   }
 
@@ -326,7 +326,21 @@
 
     // Compute position BEFORE removing --dragging so visibleCards excludes it.
     var afterEl = findAfterElement(columnBody, clientY);
-    var order = getInsertOrder(columnBody, clientY);
+    var cards = visibleCards(columnBody);
+    // afterId = the card the dragged card lands AFTER (null = first in column).
+    // afterEl is the card to insert BEFORE, so the one we land after is the
+    // card immediately preceding afterEl.
+    var afterId = null;
+    if (afterEl) {
+      var afterElIdx = cards.indexOf(afterEl);
+      if (afterElIdx > 0) {
+        afterId = cards[afterElIdx - 1].dataset.taskId || null;
+      }
+    } else {
+      afterId = cards.length > 0
+        ? (cards[cards.length - 1].dataset.taskId || null)
+        : null;
+    }
 
     // Optimistic DOM move — card is already visually where the user dropped it.
     originalCard.classList.remove("task-board__card--dragging");
@@ -346,7 +360,7 @@
       updateColumnCount(targetSection);
       callMove(d.id, targetSection);
     } else {
-      callReorder(d.id, order);
+      callReorder(d.id, afterId);
     }
   }
 

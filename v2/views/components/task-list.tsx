@@ -19,14 +19,17 @@ import {
 
 type PeopleOption = { value: string; label: string };
 
-const TaskRow: FC<{ task: Task; peopleOptions?: PeopleOption[] }> = (
-  { task, peopleOptions },
+const TaskRow: FC<
+  { task: Task; peopleOptions?: PeopleOption[]; index: number }
+> = (
+  { task, peopleOptions, index },
 ) => (
   <div
     class={`task-list__row${
       task.completed ? " task-list__row--completed" : ""
     }`}
     data-task-id={task.id}
+    data-order={task.order != null ? task.order : (index + 1) * 10}
     data-tags={JSON.stringify(task.tags ?? [])}
     draggable="true"
   >
@@ -275,7 +278,7 @@ export const TaskListView: FC<ListProps> = (
   const sectionNames = Object.keys(grouped);
 
   return (
-    <div class="task-list" data-column-table="tasks">
+    <div class="task-list" data-column-table="tasks" data-sort={sort ?? ""}>
       <div class="task-list__sticky-header">
         <div class="task-list__header-controls">
           <SectionJumpBar sections={sectionNames} />
@@ -303,9 +306,14 @@ export const TaskListView: FC<ListProps> = (
         return (
           <div key={name} class="task-list__section">
             <SectionHeader name={name} count={sorted.length} />
-            <div class="task-list__rows">
-              {sorted.map((t) => (
-                <TaskRow key={t.id} task={t} peopleOptions={peopleOptions} />
+            <div class="task-list__rows" data-section={name}>
+              {sorted.map((t, i) => (
+                <TaskRow
+                  key={t.id}
+                  task={t}
+                  peopleOptions={peopleOptions}
+                  index={i}
+                />
               ))}
             </div>
           </div>

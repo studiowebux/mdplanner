@@ -663,6 +663,18 @@ export function createDomainPage<T extends Entity>(
                   <span class="domain-toolbar__toggle-label">Show hidden</span>
                 </label>
               )}
+              {state.sort && (
+                <button
+                  type="button"
+                  class="btn btn--tertiary btn--sm"
+                  hx-get={`/${cfg.name}/view?sort=&order=`}
+                  hx-include={`#${cfg.name}-toolbar`}
+                  hx-target={`#${cfg.name}-view`}
+                  hx-swap="outerHTML"
+                >
+                  ✕ Sort
+                </button>
+              )}
             </div>
             <div class="domain-toolbar__right">
               {cfg.toolbarActions && <cfg.toolbarActions />}

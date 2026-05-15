@@ -475,7 +475,12 @@ export const RejectTaskInputSchema = z.object({
 }).openapi("RejectTaskInput");
 
 export const ReorderTaskInputSchema = z.object({
-  order: z.number().int().min(0).openapi({
-    description: "Desired sort order position (0-based index)",
+  afterId: z.string().nullable().optional().openapi({
+    description:
+      "ID of the task to insert after, or null to place at the beginning of the section.",
+  }),
+  order: z.number().int().min(0).optional().openapi({
+    description:
+      "Legacy: desired sort order value (ignored when afterId is present).",
   }),
 }).openapi("ReorderTaskInput");

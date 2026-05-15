@@ -178,11 +178,14 @@ export function createDomainRoutes<T extends Entity, C, U>(
     if (state.sort) {
       const key = state.sort as string;
       const dir = state.order === "desc" ? -1 : 1;
-      result = [...result].sort((a, b) =>
-        String((a as Record<string, unknown>)[key] ?? "")
-          .localeCompare(String((b as Record<string, unknown>)[key] ?? "")) *
-        dir
-      );
+      result = [...result].sort((a, b) => {
+        const av = (a as Record<string, unknown>)[key];
+        const bv = (b as Record<string, unknown>)[key];
+        if (typeof av === "number" && typeof bv === "number") {
+          return (av - bv) * dir;
+        }
+        return String(av ?? "").localeCompare(String(bv ?? "")) * dir;
+      });
     }
 
     return result;

@@ -137,10 +137,14 @@ export function sortTasksInSection(
 ): Task[] {
   if (!sort) return sortTasks(tasks);
   const dir = order === "desc" ? -1 : 1;
-  return [...tasks].sort((a, b) =>
-    String((a as Record<string, unknown>)[sort] ?? "")
-      .localeCompare(String((b as Record<string, unknown>)[sort] ?? "")) * dir
-  );
+  return [...tasks].sort((a, b) => {
+    const av = (a as Record<string, unknown>)[sort];
+    const bv = (b as Record<string, unknown>)[sort];
+    if (typeof av === "number" && typeof bv === "number") {
+      return (av - bv) * dir;
+    }
+    return String(av ?? "").localeCompare(String(bv ?? "")) * dir;
+  });
 }
 
 /** Build section options dynamically from discovered task sections. */

@@ -1,8 +1,10 @@
-// Task list drag-and-drop — drag rows to section headers or bottom drop zones.
-// Auto-scrolls near the top edge of the viewport during drag.
+// Task list drag-and-drop — within-section reorder + cross-section move.
+// Within section: drop between rows → POST /api/v1/tasks/:id/reorder (same order as board).
+// Cross section:  drop on header or bottom strip → POST /tasks/:id/move.
+// Auto-scrolls near the top edge during drag.
 
 (function () {
-  var SCROLL_ZONE = 60; // px from top edge to trigger auto-scroll
+  var SCROLL_ZONE = 60;
   var SCROLL_SPEED = 8;
   var DRAG_CLASS = "task-list--dragging";
   var OVER_CLASS = "task-list__drop-zone--over";
@@ -10,6 +12,7 @@
   var scrollContainer = null;
   var scrollInterval = null;
   var dragTaskId = null;
+  var indicator = null;
 
   function getScrollContainer() {
     if (!scrollContainer) {
@@ -18,7 +21,129 @@
     return scrollContainer;
   }
 
-  // --- Drag start ---
+  // ── drop indicator ─────────────────────────────────────────────────────────
+
+  function getIndicator() {
+    if (!indicator) {
+      indicator = document.createElement("div");
+      indicator.className = "task-list__drop-indicator is-hidden";
+    }
+    return indicator;
+  }
+
+  function placeIndicator(rowsBody, clientY) {
+    var ind = getIndicator();
+    if (ind.parentNode !== rowsBody) rowsBody.appendChild(ind);
+
+    var bodyRect = rowsBody.getBoundingClientRect();
+    var rows = Array.prototype.slice.call(
+      rowsBody.querySelectorAll(
+        ".task-list__row:not(.task-list__row--dragging)",
+      ),
+    );
+    var y;
+    if (rows.length === 0) {
+      y = 8;
+    } else {
+      var placed = false;
+      for (var i = 0; i < rows.length; i++) {
+        var rect = rows[i].getBoundingClientRect();
+        if (clientY < rect.top + rect.height / 2) {
+          y = rect.top - bodyRect.top;
+          placed = true;
+          break;
+        }
+      }
+      if (!placed) {
+        var last = rows[rows.length - 1].getBoundingClientRect();
+        y = last.bottom - bodyRect.top;
+      }
+    }
+    ind.style.setProperty("top", y + "px");
+    ind.classList.remove("is-hidden");
+  }
+
+  function hideIndicator() {
+    var ind = getIndicator();
+    ind.classList.add("is-hidden");
+    if (ind.parentNode) ind.parentNode.removeChild(ind);
+  }
+
+  // ── reorder helpers ────────────────────────────────────────────────────────
+
+  function visibleRows(rowsBody) {
+    return Array.prototype.slice.call(
+      rowsBody.querySelectorAll(
+        ".task-list__row:not(.task-list__row--dragging)",
+      ),
+    );
+  }
+
+  function findAfterRow(rowsBody, clientY) {
+    var rows = visibleRows(rowsBody);
+    for (var i = 0; i < rows.length; i++) {
+      var rect = rows[i].getBoundingClientRect();
+      if (clientY < rect.top + rect.height / 2) return rows[i];
+    }
+    return null;
+  }
+
+  function getInsertOrder(rowsBody, clientY) {
+    var rows = visibleRows(rowsBody);
+    var before = null;
+    var after = null;
+    for (var i = 0; i < rows.length; i++) {
+      var rect = rows[i].getBoundingClientRect();
+      if (clientY < rect.top + rect.height / 2) {
+        after = rows[i];
+        before = i > 0 ? rows[i - 1] : null;
+        break;
+      }
+      before = rows[i];
+    }
+    var bOrd = before ? parseInt(before.dataset.order || "0", 10) : 0;
+    var aOrd = after ? parseInt(after.dataset.order || "0", 10) : null;
+    if (aOrd === null) return bOrd + 10;
+    if (before === null) return Math.max(1, Math.floor(aOrd / 2));
+    return Math.floor((bOrd + aOrd) / 2);
+  }
+
+  function reorderTask(taskId, rowsBody, clientY) {
+    var afterRow = findAfterRow(rowsBody, clientY);
+    // afterId = the task the dragged row should land AFTER (null = first in section).
+    // findAfterRow returns the row to insert BEFORE, so the task we land after is
+    // the one immediately preceding that row.
+    var rows = visibleRows(rowsBody);
+    var afterId = null;
+    if (afterRow) {
+      var afterRowIdx = rows.indexOf(afterRow);
+      if (afterRowIdx > 0) {
+        afterId = rows[afterRowIdx - 1].dataset.taskId || null;
+      }
+      // afterRowIdx === 0 means drop at the very top → afterId stays null
+    } else {
+      // Drop at the bottom — land after the last visible row.
+      afterId = rows.length > 0
+        ? (rows[rows.length - 1].dataset.taskId || null)
+        : null;
+    }
+    // Optimistic DOM move
+    var row = document.querySelector(
+      ".task-list__row[data-task-id='" + taskId + "']",
+    );
+    if (row) {
+      if (afterRow) rowsBody.insertBefore(row, afterRow);
+      else rowsBody.appendChild(row);
+    }
+    fetch("/api/v1/tasks/" + taskId + "/reorder", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ afterId: afterId }),
+    }).catch(console.error);
+  }
+
+  // ── drag start ─────────────────────────────────────────────────────────────
+
   document.addEventListener("dragstart", function (e) {
     var row = e.target.closest(".task-list__row[data-task-id]");
     if (!row) return;
@@ -26,34 +151,29 @@
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", dragTaskId);
     row.classList.add("task-list__row--dragging");
-    // Show drop strip
     var list = row.closest(".task-list");
     if (list) list.classList.add(DRAG_CLASS);
   });
 
-  // --- Drag end (cleanup) ---
+  // ── drag end ───────────────────────────────────────────────────────────────
+
   document.addEventListener("dragend", function (e) {
     var row = e.target.closest(".task-list__row");
     if (row) row.classList.remove("task-list__row--dragging");
-    // Hide drop strip
     var lists = document.querySelectorAll("." + DRAG_CLASS);
     for (var i = 0; i < lists.length; i++) {
       lists[i].classList.remove(DRAG_CLASS);
     }
-    // Clear all highlights
     clearAllHighlights();
+    hideIndicator();
     stopAutoScroll();
     dragTaskId = null;
   });
 
-  // --- Re-apply dragging class after htmx swaps #tasks-view mid-drag ---
-  // SSE can trigger a view swap while a drag is in progress, which replaces
-  // .task-list and removes task-list--dragging, hiding the drop strip.
+  // Re-apply dragging class after htmx swaps mid-drag (SSE can trigger view swap).
   document.addEventListener("htmx:afterSwap", function (e) {
     if (
-      dragTaskId &&
-      e.detail &&
-      e.detail.target &&
+      dragTaskId && e.detail && e.detail.target &&
       e.detail.target.id === "tasks-view"
     ) {
       var list = document.querySelector(".task-list");
@@ -61,29 +181,49 @@
     }
   });
 
-  // --- Drag over (allow drop + auto-scroll) ---
+  // ── drag over ─────────────────────────────────────────────────────────────
+
   document.addEventListener("dragover", function (e) {
     if (!dragTaskId) return;
+
+    // Within-section reorder: hovering over a rows container or row
+    var rowsBody = e.target.closest(".task-list__rows");
+    if (rowsBody) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      placeIndicator(rowsBody, e.clientY);
+      // Auto-scroll
+      var sc = getScrollContainer();
+      if (sc) {
+        var rect = sc.getBoundingClientRect();
+        var mouseY = e.clientY - rect.top;
+        if (mouseY < SCROLL_ZONE && mouseY >= 0) {
+          startAutoScroll(-SCROLL_SPEED, sc);
+        } else stopAutoScroll();
+      }
+      return;
+    }
+
+    // Cross-section: section header or bottom drop strip
     var zone = e.target.closest("[data-drop-section]");
     var header = e.target.closest(".task-list__section-header");
     if (zone || header) {
       e.preventDefault();
       e.dataTransfer.dropEffect = "move";
+      hideIndicator();
     }
-    // Auto-scroll near top edge only (bottom reserved for drop strip)
     var sc = getScrollContainer();
     if (sc) {
       var rect = sc.getBoundingClientRect();
       var mouseY = e.clientY - rect.top;
       if (mouseY < SCROLL_ZONE && mouseY >= 0) {
         startAutoScroll(-SCROLL_SPEED, sc);
-      } else {
-        stopAutoScroll();
-      }
+      } else stopAutoScroll();
     }
   });
 
-  // --- Drag enter/leave for visual highlights ---
+  // ── drag enter / leave ────────────────────────────────────────────────────
+
   document.addEventListener("dragenter", function (e) {
     if (!dragTaskId) return;
     var zone = e.target.closest("[data-drop-section]");
@@ -110,10 +250,21 @@
     }
   });
 
-  // --- Drop ---
+  // ── drop ──────────────────────────────────────────────────────────────────
+
   document.addEventListener("drop", function (e) {
     if (!dragTaskId) return;
     e.preventDefault();
+
+    // Within-section reorder
+    var rowsBody = e.target.closest(".task-list__rows");
+    if (rowsBody) {
+      hideIndicator();
+      reorderTask(dragTaskId, rowsBody, e.clientY);
+      return;
+    }
+
+    // Cross-section move
     var section = null;
     var zone = e.target.closest("[data-drop-section]");
     if (zone) {
@@ -130,14 +281,14 @@
     moveTask(dragTaskId, section);
   });
 
-  // --- Move task via fetch + refresh ---
+  // ── move task (cross-section) ──────────────────────────────────────────────
+
   function moveTask(taskId, section) {
     var body = new FormData();
     body.append("section", section);
     fetch("/tasks/" + taskId + "/move", { method: "POST", body: body })
       .then(function (res) {
         if (!res.ok) throw new Error("Move failed (" + res.status + ")");
-        // Trigger htmx refresh of the task view
         var view = document.getElementById("tasks-view");
         if (view) htmx.trigger(view, "refresh");
       })
@@ -149,7 +300,8 @@
       });
   }
 
-  // --- Auto-scroll helpers ---
+  // ── auto-scroll helpers ────────────────────────────────────────────────────
+
   function startAutoScroll(speed, container) {
     if (scrollInterval) return;
     scrollInterval = setInterval(function () {
