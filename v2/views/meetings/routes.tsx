@@ -97,6 +97,19 @@ domainRouter.post("/:id/links", async (c) => {
   });
 });
 
+// PUT /:id/actions/:actionId/toggle — toggle action status, return updated actions table fragment
+domainRouter.put("/:id/actions/:actionId/toggle", async (c) => {
+  const id = c.req.param("id");
+  const actionId = c.req.param("actionId");
+  const meeting = await getMeetingService().toggleAction(id, actionId);
+  if (!meeting) return c.notFound();
+  publish("meeting.updated");
+  return new Response(renderActionsTable(meeting), {
+    status: 200,
+    headers: { "Content-Type": "text/html" },
+  });
+});
+
 // DELETE /:id/actions/:actionId — remove action item, return updated actions table fragment
 domainRouter.delete("/:id/actions/:actionId", async (c) => {
   const id = c.req.param("id");

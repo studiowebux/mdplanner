@@ -42,7 +42,7 @@ const ActionRow: FC<{ action: MeetingAction; meetingId: string }> = (
         class={`badge badge--${
           action.status === "done" ? "success" : "warning"
         } action-badge`}
-        hx-put={`/api/v1/meetings/${meetingId}/actions/${action.id}/toggle`}
+        hx-put={`/meetings/${meetingId}/actions/${action.id}/toggle`}
         hx-target="#meeting-actions-table"
         hx-swap="outerHTML"
         title="Toggle status"
