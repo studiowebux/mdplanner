@@ -1293,3 +1293,46 @@ a.task-board__card-avatar:hover {
     padding-right: 0;
   }
 }
+
+/* ── Board drag-and-drop (pointer events) ────────────────────────────────── */
+
+.task-board__card {
+  cursor: grab;
+}
+
+.task-board__card--dragging {
+  opacity: var(--opacity-disabled);
+  cursor: grabbing;
+}
+
+/* Fixed-position clone following the pointer */
+.task-board__card--ghost {
+  box-shadow: var(--shadow-lg);
+  cursor: grabbing;
+}
+
+.task-board__column-body--dragover {
+  background-color: var(--color-bg-hover);
+  outline: var(--border-width) dashed var(--color-border-focus);
+  outline-offset: calc(-1 * var(--border-width));
+}
+
+.task-board__column-body {
+  position: relative;
+}
+
+.task-board__drop-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: calc(var(--border-width) * 2);
+  background-color: var(--color-accent);
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+  transform: translateY(-50%);
+  z-index: var(--z-sticky);
+}
+
+.task-board__drop-indicator.is-hidden {
+  display: none;
+}

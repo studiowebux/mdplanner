@@ -97,9 +97,10 @@ function parseYaml(yaml: string): Record<string, unknown> {
           }
           k++;
         }
-        if (isObj) {
-          // First line after - may have key: value too
-          if (item.includes(":")) {
+        const itemIsObj = item.includes(":") && !item.startsWith('"') &&
+          !item.startsWith("'");
+        if (isObj || itemIsObj) {
+          if (itemIsObj) {
             const fc = item.indexOf(":");
             obj[item.slice(0, fc).trim()] = parseScalar(
               item.slice(fc + 1).trim(),
@@ -194,7 +195,8 @@ export function serializeFrontmatter(
         if (v.length === 0) return `${k}: []`;
         if (typeof v[0] === "object") {
           const items = v.map((item) => {
-            const entries = Object.entries(item as Record<string, unknown>);
+            const entries = Object.entries(item as Record<string, unknown>)
+              .filter(([_, rv]) => rv !== undefined && rv !== null);
             const first = entries[0];
             const rest = entries.slice(1);
             let s = `  - ${first[0]}: ${serializeScalar(first[1])}`;

@@ -36,6 +36,7 @@
   --font-size-xxl: 2rem; /* 32px — display numbers, hero values */
 
   /* Spacing scale */
+  --space-2xs: 0.125rem;
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
   --space-md: 1rem;
@@ -277,6 +278,7 @@
   --card-description-max-height: 16rem;
   --card-min-width: 10rem;
   --card-description-fade: 2rem;
+  --finance-summary-tile-min-w: 8rem;
 
   /* Avatar */
   --avatar-size: var(--space-xl);
@@ -374,6 +376,13 @@
 
   /* Swap animation */
   --swap-transition-duration: 0.05s;
+
+  /* Habit views */
+  --habit-cell-size: 1.2rem;
+  --habit-heatmap-label-w: 12rem;
+  --habit-cell-gap: var(--space-2xs);
+  --habit-cell-outline-offset: var(--space-2xs);
+  --habit-done-opacity: var(--opacity-visible);
 
   /* Task views */
   --task-board-col-min-w: 22rem;
@@ -691,6 +700,12 @@ html.font-mono {
   --billing-doc-header-border: 1px solid var(--color-border);
   --billing-doc-header-pb: var(--space-4);
   --billing-doc-header-mb: var(--space-4);
+
+  /* Invoice print view */
+  --invoice-print-max-w: 52rem;
+  --invoice-print-padding: var(--space-xl);
+  --invoice-print-section-gap: var(--space-lg);
+
   --quadrant-card-max-h: 40vh;
 
   /* Capacity grid cell tints — softer than alert bg in dark mode */

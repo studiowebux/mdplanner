@@ -46,6 +46,10 @@
   // Init desktop state from localStorage.
   if (!isMobile()) applyDesktopState();
 
+  // Scroll active nav link into view (instant, minimum scroll).
+  var activeLink = document.querySelector(".sidebar__link--active");
+  if (activeLink) activeLink.scrollIntoView({ block: "nearest", behavior: "instant" });
+
   if (btn) btn.addEventListener("click", toggle);
   if (overlay) overlay.addEventListener("click", closeOverlay);
 
