@@ -2024,6 +2024,44 @@ a.badge:hover {
   color: var(--color-text-primary);
 }
 
+/* -------------------------------------------------------------------------
+   Mention autocomplete dropdown
+   ------------------------------------------------------------------------- */
+
+.mention-autocomplete__list {
+  position: absolute;
+  top: var(--mention-top);
+  left: var(--mention-left);
+  width: var(--mention-width);
+  max-height: var(--mention-dropdown-max-height);
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: var(--space-xs) 0;
+  background: var(--color-bg-primary);
+  border: var(--border-width) var(--border-style) var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  z-index: var(--z-dropdown);
+}
+
+.mention-autocomplete__item {
+  padding: var(--space-xs) var(--space-sm);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+}
+
+.mention-autocomplete__item:hover,
+.mention-autocomplete__item--active {
+  background: var(--color-bg-secondary);
+}
+
+.mention-autocomplete__empty {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
 /* =========================================================================
    Load more sentinel — infinite scroll trigger (htmx revealed)
    ========================================================================= */

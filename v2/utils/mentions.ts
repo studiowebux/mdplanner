@@ -1,11 +1,46 @@
-// Mention rendering — detects task IDs, person IDs, and commit hashes in
-// plain text and replaces them with HTML links or styled badges.
+// Mention rendering — detects task IDs, person IDs, commit hashes, and @name
+// mentions in plain text and replaces them with HTML links or styled badges.
+
+import type { Person } from "../types/person.types.ts";
 
 const TASK_ID_RE = /\b(task_[a-z0-9_]+)\b/g;
 const PERSON_ID_RE = /\b(person_[a-z0-9_]+)\b/g;
 // 7–12 hex chars not preceded/followed by another hex char (avoids matching
 // long hashes mid-string or colliding with CSS colour values).
 const COMMIT_RE = /(?<![0-9a-f])([0-9a-f]{7,12})(?![0-9a-f])/gi;
+
+const AT_NAME_RE = /@([\w-]+)/g;
+
+/**
+ * Extract @name mentions from raw text. Returns an array of matched names
+ * (without the @ prefix).
+ */
+export function parseMentions(text: string): string[] {
+  const matches: string[] = [];
+  let m: RegExpExecArray | null;
+  const re = new RegExp(AT_NAME_RE.source, "g");
+  while ((m = re.exec(text)) !== null) {
+    matches.push(m[1]);
+  }
+  return matches;
+}
+
+/**
+ * Replace @name mentions in raw text with the matching person's ID so that
+ * renderMentions can render them as badges. Unresolved mentions are left as
+ * plain @name. Must run on raw text BEFORE escapeHtml + renderMentions.
+ */
+export function resolveMentions(text: string, people: Person[]): string {
+  return text.replace(AT_NAME_RE, (_match, name: string) => {
+    const lower = name.toLowerCase();
+    const person = people.find((p) => p.name.toLowerCase() === lower) ??
+      people.find((p) =>
+        p.name.toLowerCase().replace(/\s+/g, "-") === lower ||
+        p.name.toLowerCase().replace(/\s+/g, "") === lower
+      );
+    return person ? person.id : `@${name}`;
+  });
+}
 
 export interface MentionOpts {
   /** Map of person ID → display name for resolving person mentions. */

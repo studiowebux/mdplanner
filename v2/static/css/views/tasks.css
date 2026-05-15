@@ -1186,6 +1186,20 @@ a.task-board__card-avatar:hover {
   white-space: pre-wrap;
 }
 
+/* Add comment form */
+
+.task-detail__add-comment {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.task-detail__comment-input {
+  resize: vertical;
+  min-height: calc(var(--space-xl) * 3);
+}
+
 /* Approval */
 
 .task-detail__approval-summary {

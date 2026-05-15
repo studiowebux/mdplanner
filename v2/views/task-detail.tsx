@@ -23,7 +23,12 @@ import {
 import { BackButton } from "./components/back-button.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
-import { type MentionOpts, renderMentions } from "../utils/mentions.ts";
+import {
+  type MentionOpts,
+  parseMentions,
+  renderMentions,
+  resolveMentions,
+} from "../utils/mentions.ts";
 import { escapeHtml } from "../utils/html.ts";
 import { Sidenav } from "../components/ui/sidenav.tsx";
 
@@ -37,6 +42,7 @@ export type TaskDetailProps = {
   milestonEntity: Milestone | null;
   blockedByTasks: Task[];
   mentionOpts: MentionOpts;
+  people: Person[];
 };
 
 type Props = ViewProps & TaskDetailProps;
@@ -50,6 +56,7 @@ export async function resolveTaskDetailProps(task: Task): Promise<{
   milestonEntity: Milestone | null;
   blockedByTasks: Task[];
   mentionOpts: MentionOpts;
+  people: Person[];
 }> {
   const taskSvc = getTaskService();
   const peopleSvc = getPeopleService();
@@ -75,7 +82,13 @@ export async function resolveTaskDetailProps(task: Task): Promise<{
     githubRepo: task.githubRepo ?? undefined,
   };
 
-  return { assigneePerson, milestonEntity, blockedByTasks, mentionOpts };
+  return {
+    assigneePerson,
+    milestonEntity,
+    blockedByTasks,
+    mentionOpts,
+    people: allPeople,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -104,42 +117,70 @@ const MetaField: FC<{ label: string; children: unknown }> = (
 );
 
 const CommentsSection: FC<{
+  taskId: string;
   comments: Task["comments"];
   mentionOpts: MentionOpts;
-}> = ({ comments, mentionOpts }) => {
-  if (!comments?.length) return null;
+  people: Person[];
+}> = ({ taskId, comments, mentionOpts, people }) => {
   return (
     <section class="detail-section task-detail__section">
       <h2>
         Comments
-        <span class="task-detail__count">({comments.length})</span>
+        {comments?.length
+          ? <span class="task-detail__count">({comments.length})</span>
+          : null}
       </h2>
-      <ol class="task-detail__comments">
-        {comments.map((c) => (
-          <li key={c.id} class="task-detail__comment">
-            <div class="task-detail__comment-header">
-              <span class="task-detail__comment-author">
-                {c.author ?? "Unknown"}
-              </span>
-              <time class="task-detail__comment-time">
-                {timeAgo(c.timestamp)}
-              </time>
-            </div>
-            <div
-              class="task-detail__comment-body"
-              dangerouslySetInnerHTML={{
-                __html: renderMentions(escapeHtml(c.body), mentionOpts),
-              }}
-            />
-            {c.metadata && Object.keys(c.metadata).length > 0 && (
-              <details class="task-detail__comment-meta">
-                <summary>Metadata</summary>
-                <pre>{JSON.stringify(c.metadata, null, 2)}</pre>
-              </details>
-            )}
-          </li>
-        ))}
-      </ol>
+      {comments?.length
+        ? (
+          <ol class="task-detail__comments">
+            {comments.map((c) => (
+              <li key={c.id} class="task-detail__comment">
+                <div class="task-detail__comment-header">
+                  <span class="task-detail__comment-author">
+                    {c.author ?? "Unknown"}
+                  </span>
+                  <time class="task-detail__comment-time">
+                    {timeAgo(c.timestamp)}
+                  </time>
+                </div>
+                <div
+                  class="task-detail__comment-body"
+                  dangerouslySetInnerHTML={{
+                    __html: renderMentions(
+                      escapeHtml(resolveMentions(c.body, people)),
+                      mentionOpts,
+                    ),
+                  }}
+                />
+                {c.metadata && Object.keys(c.metadata).length > 0 && (
+                  <details class="task-detail__comment-meta">
+                    <summary>Metadata</summary>
+                    <pre>{JSON.stringify(c.metadata, null, 2)}</pre>
+                  </details>
+                )}
+              </li>
+            ))}
+          </ol>
+        )
+        : null}
+      <form
+        class="task-detail__add-comment"
+        hx-post={`/api/v1/tasks/${taskId}/comments`}
+        hx-swap="none"
+        hx-on--after-request="if(event.detail.successful){ this.reset(); window.location.reload(); }"
+      >
+        <textarea
+          class="form__input task-detail__comment-input"
+          name="body"
+          rows={3}
+          placeholder="Add a comment… type @ to mention someone"
+          data-mentions
+          required
+        />
+        <button type="submit" class="btn btn--primary btn--sm">
+          Comment
+        </button>
+      </form>
     </section>
   );
 };
@@ -344,6 +385,7 @@ export const TaskDetailView: FC<Props> = (
     milestonEntity,
     blockedByTasks,
     mentionOpts,
+    people,
     ...rest
   },
 ) => {
@@ -355,7 +397,7 @@ export const TaskDetailView: FC<Props> = (
       title={task.title}
       {...rest}
       styles={["/css/views/tasks.css", "/css/views/github.css"]}
-      scripts={["/js/fullscreen-reading.js"]}
+      scripts={["/js/fullscreen-reading.js", "/js/mention-autocomplete.js"]}
     >
       <SseRefresh
         getUrl={"/tasks/" + task.id}
@@ -686,7 +728,10 @@ export const TaskDetailView: FC<Props> = (
                     <p
                       key={i}
                       dangerouslySetInnerHTML={{
-                        __html: renderMentions(escapeHtml(p), mentionOpts),
+                        __html: renderMentions(
+                          escapeHtml(resolveMentions(p, people)),
+                          mentionOpts,
+                        ),
                       }}
                     />
                   ))}
@@ -776,7 +821,12 @@ export const TaskDetailView: FC<Props> = (
         {/* Full-width sections below columns */}
         <TimeEntriesSection taskId={task.id} entries={task.time_entries} />
         <ApprovalSection approval={task.approvalRequest} />
-        <CommentsSection comments={task.comments} mentionOpts={mentionOpts} />
+        <CommentsSection
+          taskId={task.id}
+          comments={task.comments}
+          mentionOpts={mentionOpts}
+          people={people}
+        />
 
         {/* Edit + Delete at bottom — matches person-detail pattern */}
         <AuditMeta

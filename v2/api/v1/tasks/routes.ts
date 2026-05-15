@@ -1,7 +1,12 @@
 // Task CRUD + workflow routes — OpenAPIHono router consumed by api/mod.ts.
 
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import { getProjectDir, getTaskService } from "../../../singletons/services.ts";
+import {
+  getPeopleService,
+  getProjectDir,
+  getTaskService,
+} from "../../../singletons/services.ts";
+import { parseMentions, resolveMentions } from "../../../utils/mentions.ts";
 import { publish } from "../../../singletons/event-bus.ts";
 import {
   AddAttachmentsInputSchema,
@@ -522,11 +527,35 @@ tasksRouter.openapi(
   async (c) => {
     const { id } = c.req.valid("param");
     const { body, author, metadata } = c.req.valid("json");
+
+    const names = parseMentions(body);
+    let resolvedMetadata = metadata;
+    if (names.length > 0) {
+      const people = await getPeopleService().list();
+      const resolved = resolveMentions(body, people);
+      const mentionedIds = names
+        .map((name) => {
+          const lower = name.toLowerCase();
+          return people.find((p) => p.name.toLowerCase() === lower) ??
+            people.find(
+              (p) =>
+                p.name.toLowerCase().replace(/\s+/g, "-") === lower ||
+                p.name.toLowerCase().replace(/\s+/g, "") === lower,
+            );
+        })
+        .filter(Boolean)
+        .map((p) => p!.id);
+      if (mentionedIds.length > 0) {
+        resolvedMetadata = { ...metadata, mentionedIds };
+      }
+      void resolved; // pre-pass stored in metadata; rendering handled client-side
+    }
+
     const comment = await getTaskService().addComment(
       id,
       body,
       author,
-      metadata,
+      resolvedMetadata,
     );
     if (!comment) {
       return c.json({

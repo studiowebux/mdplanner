@@ -334,6 +334,12 @@
   --z-drag-ghost: 500;
   --drag-ghost-opacity: 0.85;
 
+  /* Mention autocomplete — set dynamically by mention-autocomplete.js */
+  --mention-top: 0px;
+  --mention-left: 0px;
+  --mention-width: 20rem;
+  --mention-dropdown-max-height: 12rem;
+
   /* Overlay */
   --overlay-bg: rgba(0, 0, 0, 0.4);
 
