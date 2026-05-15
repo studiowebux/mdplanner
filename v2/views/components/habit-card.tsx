@@ -11,14 +11,14 @@ import {
   isDoneToday,
 } from "../../domains/habit/constants.tsx";
 
-type Props = { item: Habit; q?: string };
+type Props = { item: Habit; q?: string; oobSwap?: string };
 
 function daysInCurrentMonth(): number {
   const now = new Date();
   return new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
 }
 
-export const HabitCard: FC<Props> = ({ item, q }) => {
+export const HabitCard: FC<Props> = ({ item, q, oobSwap }) => {
   const streak = computeStreak(item.completedDates, item.frequency);
   const thisMonth = computeThisMonth(item.completedDates);
   const done = isDoneToday(item.completedDates);
@@ -31,6 +31,7 @@ export const HabitCard: FC<Props> = ({ item, q }) => {
       q={q}
       domain="habits"
       id={item.id}
+      oobSwap={oobSwap}
       badge={
         <span class={badgeClass(HABIT_FREQUENCY_VARIANTS, item.frequency)}>
           {HABIT_FREQUENCY_LABELS[item.frequency]}
@@ -44,20 +45,10 @@ export const HabitCard: FC<Props> = ({ item, q }) => {
         <CardMetaItem label="This month">
           {thisMonth} / {daysThisMonth}
         </CardMetaItem>
+        <CardMetaItem label="Today">
+          {done ? "✓" : "—"}
+        </CardMetaItem>
       </CardMeta>
-
-      <button
-        type="button"
-        class={`btn btn--sm habit-log-btn${
-          done ? " btn--success" : " btn--secondary"
-        }`}
-        {...(done
-          ? {}
-          : { "data-action": "log-today", "data-habit-id": item.id })}
-        disabled={done}
-      >
-        {done ? "✓ Done today" : "Log today"}
-      </button>
     </DomainCard>
   );
 };

@@ -1335,7 +1335,6 @@ a.badge:hover {
 .column-toggle {
   position: relative;
   z-index: var(--z-dropdown);
-  transform: translateZ(0);
   margin-right: var(--space-sm);
 }
 
@@ -1648,10 +1647,19 @@ a.badge:hover {
     min-height: var(--input-height-sm);
   }
 
-  /* Allow action buttons to wrap if multiple are present */
+  /* Keep action buttons in a single row — wrapping causes 3-row layout */
   .data-table [data-col="_actions"] .domain-card__actions {
-    flex-wrap: wrap;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
     gap: var(--space-xs);
+  }
+
+  /* Shrink button text + padding so 3 buttons fit in the sticky column */
+  .data-table [data-col="_actions"] .domain-card__actions .btn {
+    font-size: var(--font-size-xs);
+    padding: var(--space-xs) var(--space-sm);
+    white-space: nowrap;
   }
 }
 

@@ -56,36 +56,12 @@ habitRouter.post("/:id/toggle-date/:date", async (c) => {
     return { date: `${year}-${mm}-${String(d).padStart(2, "0")}`, day: d };
   });
   return c.html(
-    renderToString(<HabitHeatmapRow habit={habit} days={days} today={today} />),
+    renderToString(
+      <>
+        <HabitHeatmapRow habit={habit} days={days} today={today} />
+        <HabitCard item={habit} oobSwap="true" />
+      </>,
+    ),
     200,
   );
-});
-
-habitRouter.post("/:id/check-today", async (c) => {
-  const id = c.req.param("id");
-  const body = await c.req.parseBody();
-  const note = typeof body.note === "string" && body.note
-    ? body.note
-    : undefined;
-  const habit = await getHabitService().checkToday(id, note);
-  if (!habit) return c.notFound();
-  publish("habit.updated");
-  const now = new Date();
-  const today = now.toLocaleDateString("en-CA");
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const mm = String(month + 1).padStart(2, "0");
-  const days = Array.from({ length: daysInMonth }, (_, i) => {
-    const d = i + 1;
-    return { date: `${year}-${mm}-${String(d).padStart(2, "0")}`, day: d };
-  });
-  const cardHtml = renderToString(<HabitCard item={habit} />);
-  const rowHtml = renderToString(
-    <HabitHeatmapRow habit={habit} days={days} today={today} />,
-  ).replace(
-    `id="hrow-${habit.id}"`,
-    `id="hrow-${habit.id}" hx-swap-oob="outerHTML:#hrow-${habit.id}"`,
-  );
-  return c.html(cardHtml + rowHtml, 200);
 });

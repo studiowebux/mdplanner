@@ -1,4 +1,5 @@
-// Habit note dialog — JS sets hx-post URL + hx-target, htmx submits the form.
+// Habit note dialog — JS only handles the note dialog for not-done cells.
+// Done (uncheck) cells use native hx-post attributes on the <span> in the TSX.
 
 (function () {
   const dialog = document.getElementById("habit-note-dialog");
@@ -19,39 +20,16 @@
     noteInput.focus();
   }
 
-  function postDirect(postUrl, targetSelector) {
-    htmx.ajax("POST", postUrl, { target: targetSelector, swap: "outerHTML" });
-  }
-
   document.addEventListener("click", (e) => {
     const cell = e.target.closest(".habit-heatmap__cell");
-    if (cell) {
-      const row = cell.closest(".habit-heatmap__row");
-      const habitId = row.dataset.habitId;
-      const date = cell.dataset.date;
-      const isDone = cell.dataset.done === "true";
-      if (isDone) {
-        postDirect(
-          `/habits/${habitId}/toggle-date/${date}`,
-          `#hrow-${habitId}`,
-        );
-      } else {
-        openFor(
-          `/habits/${habitId}/toggle-date/${date}`,
-          `#hrow-${habitId}`,
-        );
-      }
-      return;
-    }
-
-    const btn = e.target.closest("[data-action='log-today']");
-    if (btn) {
-      const habitId = btn.dataset.habitId;
-      openFor(
-        `/habits/${habitId}/check-today`,
-        `[data-id='${habitId}']`,
-      );
-    }
+    if (!cell) return;
+    // Done cells: native hx-post on the element handles the toggle directly.
+    if (cell.dataset.done === "true") return;
+    // Not-done cells: open note dialog, form submits via htmx.
+    const row = cell.closest(".habit-heatmap__row");
+    const habitId = row.dataset.habitId;
+    const date = cell.dataset.date;
+    openFor(`/habits/${habitId}/toggle-date/${date}`, `#hrow-${habitId}`);
   });
 
   form.addEventListener("htmx:afterRequest", (e) => {

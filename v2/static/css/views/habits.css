@@ -215,17 +215,17 @@
   min-width: 0;
 }
 
-/* -- Quick-check button (detail page) ------------------------------------ */
+/* -- Card status indicator (read-only, card/grid views) ------------------- */
 
-.habit-check-btn {
-  width: 100%;
+.habit-card__status {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
   margin-top: var(--space-xs);
 }
 
-.habit-check-btn.is-done-today {
-  background-color: var(--color-success);
-  color: var(--color-text-on-accent);
-  border-color: var(--color-success);
+.habit-card__status--done {
+  color: var(--color-success);
+  font-weight: var(--font-weight-semibold);
 }
 
 /* -- Completion log -------------------------------------------------------- */

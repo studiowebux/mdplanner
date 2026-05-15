@@ -78,6 +78,13 @@ export const HabitHeatmapRow: FC<{
             data-done={done ? "true" : "false"}
             data-date={date}
             title={tooltip}
+            {...(done
+              ? {
+                "hx-post": `/habits/${habit.id}/toggle-date/${date}`,
+                "hx-target": `#hrow-${habit.id}`,
+                "hx-swap": "outerHTML",
+              }
+              : {})}
           />
         );
       })}

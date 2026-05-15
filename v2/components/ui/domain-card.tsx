@@ -26,6 +26,8 @@ type Props = {
   customActions?: unknown;
   /** Domain-specific content between header and actions */
   children?: unknown;
+  /** Set to "true" to add hx-swap-oob="true" for OOB morphing */
+  oobSwap?: string;
 };
 
 export const DomainCard: FC<Props> = ({
@@ -41,11 +43,14 @@ export const DomainCard: FC<Props> = ({
   confirmMessage,
   customActions,
   children,
+  oobSwap,
 }) => (
   <article
+    id={`card-${id}`}
     class={`domain-card${className ? ` ${className}` : ""}`}
     data-filterable-card
     data-id={id}
+    {...(oobSwap ? { "hx-swap-oob": oobSwap } : {})}
   >
     <header class="domain-card__header">
       {leading && <div class="domain-card__leading">{leading}</div>}

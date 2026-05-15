@@ -14,7 +14,7 @@
 .app-shell__main {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  min-height: 0;
 }
 
 .app-shell__content {
@@ -73,6 +73,14 @@ html.focus-mode .topbar {
 }
 
 html.focus-mode .focus-mode-exit {
+  display: flex;
+  position: fixed;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  z-index: var(--z-topbar);
+}
+
+html.fullscreen-reading .fullscreen-reading-exit {
   display: flex;
   position: fixed;
   top: var(--space-sm);
@@ -704,7 +712,7 @@ html.focus-mode .focus-mode-exit {
    ------------------------------------------------------------------------- */
 
 /* At ≤1170px: hide secondary buttons, show ⋮, open panel on toggle. */
-@media (max-width: 1170px) {
+@media (max-width: 1400px) {
   #pomodoro-btn,
   #animations-toggle,
   #font-toggle,

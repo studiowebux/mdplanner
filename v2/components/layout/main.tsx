@@ -84,6 +84,24 @@ export const MainLayout: FC<Props> = (
         >
           {children}
         </AppShell>
+        <button
+          id="focus-mode-exit"
+          class="btn focus-mode-exit is-hidden"
+          type="button"
+          aria-label="Exit focus mode"
+          title="Exit focus mode (Escape)"
+        >
+          ✕ Exit Focus
+        </button>
+        <button
+          id="fullscreen-reading-exit"
+          class="btn fullscreen-reading-exit is-hidden"
+          type="button"
+          aria-label="Exit fullscreen reading"
+          title="Exit fullscreen reading (Escape)"
+        >
+          ✕ Exit Reading
+        </button>
         <script src="/js/vendor/htmx-2.0.8.min.js" />
         <script src="/js/vendor/htmx-ext-sse-2.2.4.min.js" />
         <script src="/js/vendor/idiomorph-ext-0.3.0.min.js" />
