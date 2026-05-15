@@ -135,7 +135,7 @@
       if (afterRow) rowsBody.insertBefore(row, afterRow);
       else rowsBody.appendChild(row);
     }
-    fetch("/api/v1/tasks/" + taskId + "/reorder", {
+    fetch("/tasks/" + taskId + "/reorder", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ afterId: afterId }),
@@ -489,7 +489,7 @@
       return { id: id, updates: { section: section } };
     });
 
-    fetch("/api/v1/tasks/batch", {
+    fetch("/tasks/batch", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updates),
@@ -521,7 +521,7 @@
     var chain = Promise.resolve();
     ids.forEach(function (id) {
       chain = chain.then(function () {
-        return fetch("/api/v1/tasks/" + id, { method: "DELETE" });
+        return fetch("/tasks/" + id, { method: "DELETE" });
       });
     });
 
@@ -565,7 +565,7 @@
       return { id: id, updates: { tags: next } };
     });
 
-    fetch("/api/v1/tasks/batch", {
+    fetch("/tasks/batch", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updates),

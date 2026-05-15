@@ -79,7 +79,7 @@ export const InvoiceDetailView: FC<
               <button
                 class="btn btn--primary btn--sm"
                 type="button"
-                hx-post={`/api/v1/invoices/${invoice.id}/send`}
+                hx-post={`/invoices/${invoice.id}/send`}
                 hx-confirm="Send this invoice?"
                 hx-swap="none"
               >

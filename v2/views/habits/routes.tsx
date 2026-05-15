@@ -26,6 +26,15 @@ habitRouter.get("/:id", async (c) => {
   return renderDetail(c, id);
 });
 
+habitRouter.delete("/:id/completion/:date", async (c) => {
+  const id = c.req.param("id");
+  const date = c.req.param("date");
+  const habit = await getHabitService().deleteCompletion(id, date);
+  if (!habit) return c.notFound();
+  publish("habit.updated");
+  return renderDetail(c, id);
+});
+
 habitRouter.post("/:id/toggle-date/:date", async (c) => {
   const id = c.req.param("id");
   const date = c.req.param("date");

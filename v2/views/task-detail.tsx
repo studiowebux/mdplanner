@@ -199,7 +199,7 @@ export const LogTimeForm: FC<{
     <Sidenav id="task-log-time-form" title="Log Time" open>
       <form
         class="form"
-        hx-post={`/api/v1/tasks/${taskId}/time-entries`}
+        hx-post={`/tasks/${taskId}/time-entries`}
         hx-swap="none"
         hx-on--after-request="if(event.detail.successful){ window.location.reload(); }"
       >
@@ -325,7 +325,7 @@ const TimeEntriesSection: FC<{
                   <button
                     class="btn btn--danger btn--xs"
                     type="button"
-                    hx-delete={`/api/v1/tasks/${taskId}/time-entries/${e.id}`}
+                    hx-delete={`/tasks/${taskId}/time-entries/${e.id}`}
                     hx-confirm="Delete this time entry?"
                     hx-swap="none"
                     hx-on--after-request="if(event.detail.successful) window.location.reload()"
@@ -762,7 +762,7 @@ export const TaskDetailView: FC<Props> = (
                         <button
                           type="button"
                           class="btn btn--ghost btn--sm task-detail__file-delete"
-                          hx-delete={`/api/v1/tasks/${task.id}/upload/${filename}`}
+                          hx-delete={`/tasks/${task.id}/upload/${filename}`}
                           hx-confirm={`Delete ${filename}?`}
                           hx-swap="none"
                         >
@@ -776,7 +776,7 @@ export const TaskDetailView: FC<Props> = (
               <form
                 class="task-detail__upload-form"
                 hx-encoding="multipart/form-data"
-                hx-post={`/api/v1/tasks/${task.id}/upload`}
+                hx-post={`/tasks/${task.id}/upload`}
                 hx-swap="none"
               >
                 <input

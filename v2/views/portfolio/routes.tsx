@@ -640,3 +640,26 @@ portfolioRouter.delete("/:id/status-updates/:updateId", async (c) => {
     },
   });
 });
+
+// PATCH /:id/github/issues/:number — toggle issue open/closed state
+portfolioRouter.patch("/:id/github/issues/:number", async (c) => {
+  const id = c.req.param("id");
+  const number = Number(c.req.param("number"));
+  const item = await getPortfolioService().getById(id);
+  if (!item?.githubRepo) return c.notFound();
+  const body = await c.req.json<{ state?: string }>();
+  const state = body.state === "closed" ? "closed" : "open";
+  try {
+    await getGitHubService().setIssueState(item.githubRepo, number, state);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return new Response(null, {
+      status: 502,
+      headers: { "HX-Trigger": hxTrigger("error", msg) },
+    });
+  }
+  const issues = await getGitHubService().listIssues(item.githubRepo).catch(
+    () => [],
+  );
+  return c.html(<GitHubIssuesTable issues={issues} itemId={id} />);
+});

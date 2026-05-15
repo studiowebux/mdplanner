@@ -9,7 +9,8 @@ import {
   getProjectService,
   getSearchEngine,
 } from "../../singletons/services.ts";
-import { setCookie, setSignedCookie } from "hono/cookie";
+import { getCookie, setCookie, setSignedCookie } from "hono/cookie";
+import { parseJson } from "../../database/sqlite/mod.ts";
 import { IDENTITY_COOKIE } from "../../middleware/identity.ts";
 import { getCookieSecret } from "../../utils/secrets.ts";
 import { getLocale } from "../../utils/format.ts";
@@ -334,6 +335,32 @@ settingsViewRouter.post("/cache/rebuild-fts", (c) => {
       headers: { "HX-Trigger": hxTrigger("error", msg) },
     });
   }
+});
+
+// -- Global filters — JSON POST, writes globalProjects + globalAssignees into ui_state cookie --
+settingsViewRouter.post("/global-filters", async (c) => {
+  const body = await c.req.json<{
+    globalProjects?: string[];
+    globalAssignees?: string[];
+  }>();
+  const UI_STATE_COOKIE = "ui_state";
+  const raw = getCookie(c, UI_STATE_COOKIE);
+  const all = parseJson<Record<string, Record<string, unknown>>>(raw) ?? {};
+  const current = (all["_global"] ?? {}) as {
+    globalProjects?: string[];
+    globalAssignees?: string[];
+  };
+  all["_global"] = {
+    ...current,
+    globalProjects: body.globalProjects ?? current.globalProjects ?? [],
+    globalAssignees: body.globalAssignees ?? current.globalAssignees ?? [],
+  };
+  setCookie(c, UI_STATE_COOKIE, JSON.stringify(all), {
+    path: "/",
+    maxAge: 31536000,
+    sameSite: "Lax",
+  });
+  return new Response(null, { status: 204 });
 });
 
 // -- Identity switch — plain form POST, sets mdp_identity cookie, redirects back --

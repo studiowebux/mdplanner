@@ -582,7 +582,7 @@
     flushFromDOM();
     var data = collectBlocks();
 
-    fetch("/api/v1/notes/" + id, {
+    fetch("/notes/" + id, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

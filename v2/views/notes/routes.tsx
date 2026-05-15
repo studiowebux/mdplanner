@@ -12,6 +12,17 @@ import { markdownToHtml } from "../../utils/markdown.ts";
 
 export const notesRouter = createDomainRoutes(noteConfig);
 
+// PUT /:id — note-editor.js save (JSON body: paragraphs + customSections)
+notesRouter.put("/:id", async (c) => {
+  const id = c.req.param("id")!;
+  const body = await c.req.json<
+    { paragraphs?: unknown[]; customSections?: unknown[] }
+  >();
+  const note = await getNoteService().update(id, body as never);
+  if (!note) return c.notFound();
+  return new Response(null, { status: 204 });
+});
+
 // Detail — enhanced content with paragraphs, tabs, timeline, split-view
 notesRouter.get("/:id", async (c) => {
   const id = c.req.param("id");

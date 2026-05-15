@@ -48,7 +48,6 @@ export async function Topbar({ actor }: Props) {
         &#8942;
       </button>
       <div id="topbar-actions" class="topbar__actions">
-        {/* Identity selector — htmx form-encoded POST to view route, no json-enc */}
         <form
           hx-post="/settings/identity"
           hx-trigger="change"

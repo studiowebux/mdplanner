@@ -141,15 +141,16 @@
   // ── API calls ─────────────────────────────────────────────────────────────
 
   function callMove(taskId, targetSection) {
-    fetch("/api/v1/tasks/" + taskId + "/move", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ section: targetSection }),
+    var body = new FormData();
+    body.append("section", targetSection);
+    fetch("/tasks/" + taskId + "/move", {
+      method: "POST",
+      body: body,
     }).catch(console.error);
   }
 
   function callReorder(taskId, afterId) {
-    fetch("/api/v1/tasks/" + taskId + "/reorder", {
+    fetch("/tasks/" + taskId + "/reorder", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ afterId: afterId }),

@@ -9,7 +9,7 @@
 (function () {
   var COOKIE_NAME = "ui_state";
   var GLOBAL_KEY = "_global";
-  var ENDPOINT = "/api/v1/settings/global-filters";
+  var ENDPOINT = "/settings/global-filters";
 
   // -------------------------------------------------------------------------
   // Cookie helpers

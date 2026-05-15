@@ -252,6 +252,17 @@ capacityPlansViewRouter.get("/:id/members/new", async (c) => {
   );
 });
 
+capacityPlansViewRouter.delete("/:id/members/:memberId", async (c) => {
+  const id = c.req.param("id");
+  const memberId = c.req.param("memberId");
+  await getCapacityPlanService().removeMember(id, memberId);
+  publish("capacity-plan.updated");
+  return new Response(null, {
+    status: 204,
+    headers: { "HX-Redirect": `/capacity-plans/${id}` },
+  });
+});
+
 capacityPlansViewRouter.post("/:id/members", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.parseBody();
@@ -354,6 +365,17 @@ capacityPlansViewRouter.get("/:id/allocations/:allocId/edit", async (c) => {
       values={values}
     />,
   );
+});
+
+capacityPlansViewRouter.delete("/:id/allocations/:allocId", async (c) => {
+  const id = c.req.param("id");
+  const allocId = c.req.param("allocId");
+  await getCapacityPlanService().removeAllocation(id, allocId);
+  publish("capacity-plan.updated");
+  return new Response(null, {
+    status: 204,
+    headers: { "HX-Redirect": `/capacity-plans/${id}` },
+  });
 });
 
 capacityPlansViewRouter.post("/:id/allocations", async (c) => {

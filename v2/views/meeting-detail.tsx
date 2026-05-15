@@ -54,7 +54,7 @@ const ActionRow: FC<{ action: MeetingAction; meetingId: string }> = (
       <button
         type="button"
         class="btn btn--icon btn--danger-ghost action-delete"
-        hx-delete={`/api/v1/meetings/${meetingId}/actions/${action.id}`}
+        hx-delete={`/meetings/${meetingId}/actions/${action.id}`}
         hx-target="#meeting-actions-table"
         hx-swap="outerHTML"
         hx-confirm="Delete this action item?"
@@ -238,7 +238,7 @@ const RelatedMeetingsSectionComponent: FC<
                 <button
                   type="button"
                   class="btn btn--icon btn--danger-ghost meeting-detail__related-remove"
-                  hx-delete={`/api/v1/meetings/${meeting.id}/links/${r.id}`}
+                  hx-delete={`/meetings/${meeting.id}/links/${r.id}`}
                   hx-target="#meeting-related-section"
                   hx-swap="outerHTML"
                   hx-confirm="Remove this link?"

@@ -109,7 +109,7 @@ export const HabitDetailView: FC<ViewProps & { item: Habit }> = (
                   <button
                     type="button"
                     class="btn btn--danger btn--sm"
-                    hx-delete={`/api/v1/habits/${habit.id}/completion/${entry.date}`}
+                    hx-delete={`/habits/${habit.id}/completion/${entry.date}`}
                     hx-target="#habit-detail-root"
                     hx-swap="outerHTML"
                     hx-confirm={`Remove completion for ${entry.date}?`}

@@ -139,7 +139,7 @@ export const GitHubIssuesTable: FC<{
                   <button
                     class="btn btn--secondary btn--sm"
                     type="button"
-                    hx-patch={`/api/v1/portfolio/${itemId}/github/issues/${issue.number}`}
+                    hx-patch={`/portfolio/${itemId}/github/issues/${issue.number}`}
                     hx-vals={JSON.stringify({
                       state: issue.state === "open" ? "closed" : "open",
                     })}

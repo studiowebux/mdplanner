@@ -75,7 +75,7 @@ export const QuoteDetailView: FC<
               <button
                 class="btn btn--primary btn--sm"
                 type="button"
-                hx-post={`/api/v1/quotes/${quote.id}/submit-approval`}
+                hx-post={`/quotes/${quote.id}/submit-approval`}
                 hx-confirm="Submit this quote for internal approval?"
                 hx-swap="none"
               >
@@ -87,7 +87,7 @@ export const QuoteDetailView: FC<
                 <button
                   class="btn btn--success btn--sm"
                   type="button"
-                  hx-post={`/api/v1/quotes/${quote.id}/approve`}
+                  hx-post={`/quotes/${quote.id}/approve`}
                   hx-confirm="Approve this quote?"
                   hx-swap="none"
                 >
@@ -96,7 +96,7 @@ export const QuoteDetailView: FC<
                 <button
                   class="btn btn--warning btn--sm"
                   type="button"
-                  hx-post={`/api/v1/quotes/${quote.id}/reject-approval`}
+                  hx-post={`/quotes/${quote.id}/reject-approval`}
                   hx-confirm="Reject and return to draft?"
                   hx-swap="none"
                 >
@@ -108,7 +108,7 @@ export const QuoteDetailView: FC<
               <button
                 class="btn btn--primary btn--sm"
                 type="button"
-                hx-post={`/api/v1/quotes/${quote.id}/send`}
+                hx-post={`/quotes/${quote.id}/send`}
                 hx-confirm="Send this quote to the customer?"
                 hx-swap="none"
               >
@@ -120,7 +120,7 @@ export const QuoteDetailView: FC<
                 <button
                   class="btn btn--success btn--sm"
                   type="button"
-                  hx-post={`/api/v1/quotes/${quote.id}/accept`}
+                  hx-post={`/quotes/${quote.id}/accept`}
                   hx-confirm="Accept this quote?"
                   hx-swap="none"
                 >
@@ -129,7 +129,7 @@ export const QuoteDetailView: FC<
                 <button
                   class="btn btn--warning btn--sm"
                   type="button"
-                  hx-post={`/api/v1/quotes/${quote.id}/reject`}
+                  hx-post={`/quotes/${quote.id}/reject`}
                   hx-confirm="Reject this quote?"
                   hx-swap="none"
                 >

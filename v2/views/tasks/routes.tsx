@@ -3,10 +3,12 @@
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { createDomainForm } from "../../factories/domain-view.tsx";
 import { TASK_FORM_FIELDS, taskConfig } from "../../domains/task/config.tsx";
+import { sortTasks } from "../../domains/task/constants.tsx";
 import type { AppContext } from "../../types/app.ts";
 import {
   getGitHubService,
   getPortfolioService,
+  getProjectDir,
   getTaskService,
 } from "../../singletons/services.ts";
 import { publish } from "../../singletons/event-bus.ts";
@@ -22,6 +24,8 @@ import {
 } from "../task-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
+import { getCookie, setCookie } from "hono/cookie";
+import { parseJson } from "../../database/sqlite/mod.ts";
 
 export const tasksRouter = createDomainRoutes(taskConfig);
 
@@ -250,6 +254,108 @@ tasksRouter.post("/:id/github/unlink-pr", async (c) => {
   return renderGitHubFragment(c, id);
 });
 
+// POST /:id/reorder — drag-and-drop order within section
+tasksRouter.post("/:id/reorder", async (c) => {
+  const id = c.req.param("id")!;
+  const body = await c.req.json<{ afterId?: string | null }>();
+  const afterId = body.afterId ?? null;
+
+  const task = await getTaskService().getById(id);
+  if (!task) return c.notFound();
+
+  const all = await getTaskService().list();
+  const sectionTasks = sortTasks(all.filter((t) => t.section === task.section));
+  const without = sectionTasks.filter((t) => t.id !== id);
+
+  let insertIdx = 0;
+  if (afterId != null) {
+    const afterIdx = without.findIndex((t) => t.id === afterId);
+    insertIdx = afterIdx === -1 ? without.length : afterIdx + 1;
+  }
+  without.splice(insertIdx, 0, task);
+
+  await Promise.all(
+    without.map((t, i) => {
+      const normalized = (i + 1) * 10;
+      if (t.order !== normalized) {
+        return getTaskService().update(t.id, { order: normalized });
+      }
+      return Promise.resolve();
+    }),
+  );
+
+  // Clear sort state so page refresh respects drag order
+  const raw = getCookie(c, "ui_state");
+  const allUiState = parseJson<Record<string, Record<string, unknown>>>(raw) ??
+    {};
+  const taskState = allUiState["tasks"] ?? {};
+  delete taskState["sort"];
+  delete taskState["order"];
+  allUiState["tasks"] = taskState;
+  setCookie(c, "ui_state", JSON.stringify(allUiState), {
+    path: "/",
+    maxAge: 31536000,
+    sameSite: "Lax",
+  });
+
+  publish("task.updated");
+  return new Response(null, { status: 204 });
+});
+
+// POST /batch — bulk update tasks (move section, tag add/remove)
+tasksRouter.post("/batch", async (c) => {
+  const items = await c.req.json<
+    Array<{ id: string; updates: Record<string, unknown> }>
+  >();
+  if (!Array.isArray(items) || items.length === 0) {
+    return new Response(null, {
+      status: 400,
+      headers: { "HX-Trigger": hxTrigger("error", "No items provided") },
+    });
+  }
+  await getTaskService().batchUpdate(items);
+  publish("task.updated");
+  return new Response(null, { status: 204 });
+});
+
+// POST /:id/time-entries — create time entry, reload detail page
+tasksRouter.post("/:id/time-entries", async (c) => {
+  const id = c.req.param("id");
+  const body = await c.req.parseBody();
+  const hours = Number(body.hours);
+  if (!hours || isNaN(hours)) {
+    return new Response(null, {
+      status: 422,
+      headers: { "HX-Trigger": hxTrigger("error", "Hours is required") },
+    });
+  }
+  const entry = await getTaskService().addTimeEntry(id, {
+    date: String(body.date ?? "").trim() ||
+      new Date().toISOString().slice(0, 10),
+    hours,
+    person: String(body.person ?? "").trim() || undefined,
+    description: String(body.description ?? "").trim() || undefined,
+  });
+  if (!entry) return c.notFound();
+  publish("task.updated");
+  return new Response(null, {
+    status: 204,
+    headers: { "HX-Redirect": `/tasks/${id}` },
+  });
+});
+
+// DELETE /:id/time-entries/:entryId — remove time entry, reload detail page
+tasksRouter.delete("/:id/time-entries/:entryId", async (c) => {
+  const id = c.req.param("id");
+  const entryId = c.req.param("entryId");
+  await getTaskService().deleteTimeEntry(id, entryId);
+  publish("task.updated");
+  return new Response(null, {
+    status: 204,
+    headers: { "HX-Redirect": `/tasks/${id}` },
+  });
+});
+
 // GET /:id/time-entries/new — log time sidenav form
 tasksRouter.get("/:id/time-entries/new", async (c) => {
   const id = c.req.param("id");
@@ -264,4 +370,62 @@ tasksRouter.get("/:id/time-entries/new", async (c) => {
       actorId={isAnon ? undefined : actor.id}
     />,
   );
+});
+
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB
+
+// POST /:id/upload — multipart file upload
+tasksRouter.post("/:id/upload", async (c) => {
+  const id = c.req.param("id")!;
+  const task = await getTaskService().getById(id);
+  if (!task) return c.notFound();
+  const body = await c.req.parseBody();
+  const file = body["file"];
+  if (!file || typeof file === "string") {
+    return new Response(null, {
+      status: 400,
+      headers: { "HX-Trigger": hxTrigger("error", "No file provided") },
+    });
+  }
+  if ((file as File).size > MAX_UPLOAD_BYTES) {
+    return new Response(null, {
+      status: 413,
+      headers: { "HX-Trigger": hxTrigger("error", "Max 10 MB per file") },
+    });
+  }
+  const uploadsDir = `${getProjectDir()}/uploads/${id}`;
+  await Deno.mkdir(uploadsDir, { recursive: true });
+  const safeName = (file as File).name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const bytes = new Uint8Array(await (file as File).arrayBuffer());
+  await Deno.writeFile(`${uploadsDir}/${safeName}`, bytes);
+  const relPath = `uploads/${id}/${safeName}`;
+  await getTaskService().addAttachments(id, [relPath]);
+  publish("task.updated");
+  return new Response(null, {
+    status: 204,
+    headers: { "HX-Redirect": `/tasks/${id}` },
+  });
+});
+
+// DELETE /:id/upload/:filename — remove an uploaded file
+tasksRouter.delete("/:id/upload/:filename", async (c) => {
+  const id = c.req.param("id")!;
+  const safeName = c.req.param("filename").replace(/[^a-zA-Z0-9._-]/g, "_");
+  const filePath = `${getProjectDir()}/uploads/${id}/${safeName}`;
+  try {
+    await Deno.remove(filePath);
+  } catch {
+    return c.notFound();
+  }
+  const task = await getTaskService().getById(id);
+  if (task) {
+    const relPath = `uploads/${id}/${safeName}`;
+    const remaining = (task.attachments ?? []).filter((a) => a !== relPath);
+    await getTaskService().update(id, { attachments: remaining });
+  }
+  publish("task.updated");
+  return new Response(null, {
+    status: 204,
+    headers: { "HX-Redirect": `/tasks/${id}` },
+  });
 });

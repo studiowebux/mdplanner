@@ -39,7 +39,7 @@ const JournalReadView: FC<{ entry: JournalEntry }> = ({ entry }) => (
         <button
           type="button"
           class="btn btn--danger"
-          hx-delete={`/api/v1/journal/${entry.id}`}
+          hx-delete={`/journal/${entry.id}`}
           hx-confirm={`Delete "${entry.title}"?`}
           hx-target="body"
           hx-push-url="/journal"

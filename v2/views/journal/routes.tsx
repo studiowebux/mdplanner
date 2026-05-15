@@ -24,6 +24,16 @@ journalRouter.get("/:id", async (c: AppContext) => {
   );
 });
 
+journalRouter.delete("/:id", async (c: AppContext) => {
+  const id = c.req.param("id");
+  await getJournalService().delete(id!);
+  publish("journal.deleted");
+  return new Response(null, {
+    status: 204,
+    headers: { "HX-Redirect": "/journal" },
+  });
+});
+
 journalRouter.post("/:id/save", async (c: AppContext) => {
   const id = c.req.param("id");
   const body = await c.req.parseBody();

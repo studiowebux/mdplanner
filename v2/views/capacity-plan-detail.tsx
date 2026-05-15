@@ -360,7 +360,7 @@ const MembersTable: FC<{
                   <button
                     class="btn btn--danger btn--xs"
                     type="button"
-                    hx-delete={`/api/v1/capacity-plans/${planId}/members/${m.id}`}
+                    hx-delete={`/capacity-plans/${planId}/members/${m.id}`}
                     hx-confirm={`Remove ${
                       personById[m.personId] ?? m.personId
                     }? Their allocations will also be removed.`}
@@ -520,7 +520,7 @@ const AllocationsConfig: FC<{
                   <button
                     class="btn btn--danger btn--xs"
                     type="button"
-                    hx-delete={`/api/v1/capacity-plans/${a.planId}/allocations/${a.id}`}
+                    hx-delete={`/capacity-plans/${a.planId}/allocations/${a.id}`}
                     hx-confirm="Remove this allocation?"
                     hx-swap="none"
                     hx-on--after-request="if(event.detail.successful) window.location.reload()"

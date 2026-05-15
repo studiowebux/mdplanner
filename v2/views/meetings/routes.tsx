@@ -97,6 +97,38 @@ domainRouter.post("/:id/links", async (c) => {
   });
 });
 
+// DELETE /:id/actions/:actionId — remove action item, return updated actions table fragment
+domainRouter.delete("/:id/actions/:actionId", async (c) => {
+  const id = c.req.param("id");
+  const actionId = c.req.param("actionId");
+  const meeting = await getMeetingService().deleteAction(id, actionId);
+  if (!meeting) return c.notFound();
+  publish("meeting.updated");
+  return new Response(renderActionsTable(meeting), {
+    status: 200,
+    headers: { "Content-Type": "text/html" },
+  });
+});
+
+// DELETE /:id/links/:linkedId — unlink two meetings, return updated related section fragment
+domainRouter.delete("/:id/links/:linkedId", async (c) => {
+  const id = c.req.param("id");
+  const linkedId = c.req.param("linkedId");
+  const result = await getMeetingService().unlinkMeetings(id, linkedId);
+  if (!result) return c.notFound();
+  publish("meeting.updated");
+  const resolved = await Promise.all(
+    (result.a.relatedMeetings ?? []).map((rid) =>
+      getMeetingService().getById(rid)
+    ),
+  );
+  const relatedItems = resolved.filter((m): m is Meeting => m !== null);
+  return new Response(renderRelatedSection(result.a, relatedItems), {
+    status: 200,
+    headers: { "Content-Type": "text/html" },
+  });
+});
+
 // Wrapper router — /new override must be registered before factory /new.
 export const meetingsRouter = new Hono<{ Variables: AppVariables }>();
 
