@@ -182,9 +182,11 @@ export const HABIT_TABLE_COLUMNS: ColumnDef[] = [
     label: "",
     render: (_v, row) => {
       const id = row.id as string;
-      const done = row.doneToday === "true";
       return (
         <div class="domain-card__actions">
+          <a href={`/habits/${id}`} class="btn btn--secondary btn--sm">
+            View
+          </a>
           <button
             type="button"
             class="btn btn--secondary btn--sm"
@@ -193,14 +195,6 @@ export const HABIT_TABLE_COLUMNS: ColumnDef[] = [
             hx-swap="innerHTML"
           >
             Edit
-          </button>
-          <button
-            type="button"
-            class={`btn btn--sm${done ? " btn--success" : " btn--primary"}`}
-            hx-post={`/habits/${id}/check-today`}
-            hx-swap="none"
-          >
-            {done ? "✓ Done" : "Log today"}
           </button>
           <button
             type="button"

@@ -325,13 +325,14 @@
   --z-table-head: 2;
   --z-table-sticky: 3;
   --z-toolbar: 10;
-  --z-dropdown: 250;
-  --z-overlay: 199;
   --z-sticky: 20;
+  --z-overlay: 199;
   --z-sidebar: 200;
-  --z-sidenav: 300;
-  --z-toast: 400;
-  --z-drag-ghost: 500;
+  --z-topbar: 210;
+  --z-dropdown: 320;
+  --z-sidenav: 400;
+  --z-toast: 500;
+  --z-drag-ghost: 600;
   --drag-ghost-opacity: 0.85;
 
   /* Mention autocomplete — set dynamically by mention-autocomplete.js */
