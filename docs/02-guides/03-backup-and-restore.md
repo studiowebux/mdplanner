@@ -63,6 +63,21 @@ curl -X POST http://localhost:8003/api/v1/backup/import \
 - Import is **not destructive** — it never deletes existing data.
 - If the backup `version` differs from the running server version, a warning
   is shown in the result but the import still proceeds.
+- Import is **non-transactional** — each record is written individually. If
+  a domain fails mid-restore, already-imported domains are not rolled back.
+  Check the per-domain error counts in the result table after importing.
+
+### What is not backed up
+
+The following are intentionally excluded:
+
+| Domain | Reason |
+|--------|--------|
+| Project config (`project.md`) | Infrastructure — contains server settings, API keys, and feature flags. Restoring it from a backup could break the running server configuration. |
+| Cloudflare DNS | External sync side-effect — DNS records live in Cloudflare, not in the local data directory. |
+| GitHub integration config | Per-portfolio token and repo settings are stored in `project.md` frontmatter (see above). |
+| Search / FTS cache | Derived data — rebuilt automatically from source records on every full sync. Backing it up would be redundant. |
+| Sticky notes (board-scoped) | Sticky boards **are** included. Individual sticky notes are board-scoped and restored as part of their board. |
 
 ---
 
