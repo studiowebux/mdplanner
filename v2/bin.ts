@@ -72,6 +72,16 @@ app.route("/api", api);
 app.route("/", views);
 
 const staticRoot = join(__dirname, "static");
+// 1-hour browser cache for immutable static assets (CSS/JS).
+// Bump asset filenames (or add ?v=) when breaking changes are needed.
+app.use("/css/*", async (c, next) => {
+  await next();
+  c.header("Cache-Control", "public, max-age=3600");
+});
+app.use("/js/*", async (c, next) => {
+  await next();
+  c.header("Cache-Control", "public, max-age=3600");
+});
 app.use("/css/*", serveStatic({ root: staticRoot }));
 app.use("/js/*", serveStatic({ root: staticRoot }));
 

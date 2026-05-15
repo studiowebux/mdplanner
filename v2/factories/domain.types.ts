@@ -108,6 +108,9 @@ export type DomainConfig<T extends Entity, C, U> = {
   /** Hide the default Grid/Table view toggle buttons. Use when all views are custom. */
   hideDefaultViews?: boolean;
 
+  /** Optional async slot rendered between the toolbar and the view container. */
+  topSlot?: () => Promise<ReturnType<FC>>;
+
   /** Enable server-side pagination. Only the first N items are rendered initially;
    *  scrolling past the sentinel loads the next page via /more?offset=N. */
   pageSize?: number;

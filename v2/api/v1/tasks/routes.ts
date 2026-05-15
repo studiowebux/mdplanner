@@ -17,6 +17,7 @@ import {
   ListTaskOptionsSchema,
   MoveTaskInputSchema,
   RejectTaskInputSchema,
+  ReorderTaskInputSchema,
   RequestApprovalInputSchema,
   SweepStaleClaimsInputSchema,
   SweepStaleClaimsResultSchema,
@@ -392,6 +393,72 @@ tasksRouter.openapi(
     }
     publish("task.updated");
     return c.json(task, 200);
+  },
+);
+
+// POST /:id/reorder
+tasksRouter.openapi(
+  createRoute({
+    method: "post",
+    path: "/{id}/reorder",
+    tags: ["Tasks"],
+    summary: "Reorder task within its section",
+    operationId: "reorderTask",
+    request: {
+      params: IdParam,
+      body: {
+        content: { "application/json": { schema: ReorderTaskInputSchema } },
+        required: true,
+      },
+    },
+    responses: {
+      200: {
+        content: { "application/json": { schema: TaskSchema } },
+        description: "Reordered task",
+      },
+      404: {
+        content: { "application/json": { schema: ErrorSchema } },
+        description: "Not found",
+      },
+    },
+  }),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const { order } = c.req.valid("json");
+
+    const task = await getTaskService().getById(id);
+    if (!task) {
+      return c.json({
+        error: "TASK_NOT_FOUND",
+        message: `Task ${id} not found`,
+      }, 404);
+    }
+
+    const updated = await getTaskService().update(id, { order });
+    if (!updated) {
+      return c.json({
+        error: "TASK_NOT_FOUND",
+        message: `Task ${id} not found`,
+      }, 404);
+    }
+
+    // Renormalize sibling order values to keep gaps sparse (10, 20, 30…)
+    const all = await getTaskService().list();
+    const siblings = all
+      .filter((t) => t.section === updated.section)
+      .sort((a, b) => (a.order ?? 999999) - (b.order ?? 999999));
+    await Promise.all(
+      siblings.map((t, i) => {
+        const normalized = (i + 1) * 10;
+        if (t.order !== normalized) {
+          return getTaskService().update(t.id, { order: normalized });
+        }
+        return Promise.resolve();
+      }),
+    );
+
+    publish("task.updated");
+    return c.json(updated, 200);
   },
 );
 

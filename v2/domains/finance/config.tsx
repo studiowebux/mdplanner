@@ -2,8 +2,8 @@
 
 import type { DomainConfig } from "../../factories/domain.types.ts";
 import type {
-  Finance,
   CreateFinance,
+  Finance,
   UpdateFinance,
 } from "../../types/finance.types.ts";
 import { FINANCE_TYPE_LABELS } from "../../types/finance.types.ts";
@@ -19,7 +19,11 @@ import { FinanceCard } from "../../views/components/finance-card.tsx";
 import { FinanceSummaryBanner } from "../../views/finances/components/finance-summary.tsx";
 import { parseFormBody } from "../../utils/form-parser.ts";
 
-export const financeConfig: DomainConfig<Finance, CreateFinance, UpdateFinance> = {
+export const financeConfig: DomainConfig<
+  Finance,
+  CreateFinance,
+  UpdateFinance
+> = {
   name: "finances",
   singular: "Finance Entry",
   plural: "Finance Entries",

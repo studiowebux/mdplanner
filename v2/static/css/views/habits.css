@@ -41,15 +41,28 @@
   margin-bottom: var(--space-md);
 }
 
+.habit-heatmap__month-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-xs);
+}
+
 .habit-heatmap__row {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
-  min-height: calc(var(--habit-cell-size) + var(--space-xs));
+  margin-bottom: var(--space-xs);
 }
 
 .habit-heatmap__label {
+  position: sticky;
+  left: 0;
+  z-index: 10;
   flex-shrink: 0;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
   width: var(--habit-heatmap-label-w);
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
@@ -57,28 +70,61 @@
   overflow: hidden;
   text-overflow: ellipsis;
   text-decoration: none;
+  padding: var(--space-xs) var(--space-sm);
+  background-color: var(--color-bg-primary);
 }
 
 .habit-heatmap__label:hover {
   color: var(--color-accent);
 }
 
+.habit-heatmap__row--header .habit-heatmap__label {
+  cursor: default;
+}
+
 .habit-heatmap__cells {
   display: flex;
   gap: var(--habit-cell-gap);
-  flex-shrink: 0;
+  flex-wrap: nowrap;
 }
+
+/* -- Day-number header cells ---------------------------------------------- */
+
+.habit-heatmap__cell-num {
+  display: block;
+  width: var(--habit-cell-size);
+  flex-shrink: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-align: center;
+  padding-bottom: var(--space-xs);
+  user-select: none;
+}
+
+.habit-heatmap__cell-num--today {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* -- Data cells (plain squares) ------------------------------------------ */
 
 .habit-heatmap__cell {
   display: block;
   width: var(--habit-cell-size);
   height: var(--habit-cell-size);
+  flex-shrink: 0;
   border-radius: var(--radius-sm);
   border: var(--border-width) solid var(--color-border-default);
   background-color: transparent;
   cursor: pointer;
   flex-shrink: 0;
-  transition: opacity var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.habit-heatmap__cell:hover {
+  border-color: var(--color-accent);
 }
 
 .habit-heatmap__cell[data-done="true"] {
@@ -86,34 +132,90 @@
   border-color: var(--color-success);
 }
 
-.habit-heatmap__cell[data-done="false"] {
-  background-color: transparent;
-}
-
 .habit-heatmap__cell--today {
-  outline: var(--border-width) solid var(--color-accent);
-  outline-offset: var(--habit-cell-outline-offset);
+  border-color: var(--color-accent);
+  border-width: var(--border-width-thick);
 }
 
-/* Month bar — sits above the cell rows, width matches 90 cells */
-.habit-heatmap__month-bar {
+.habit-heatmap__cell--today[data-done="true"] {
+  border-color: var(--color-accent);
+}
+
+/* -- Note dialog --------------------------------------------------------- */
+
+.habit-note-dialog {
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 0;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-lg);
+  max-width: var(--dialog-max-width);
+  width: 90%;
+}
+
+.habit-note-dialog::backdrop {
+  background: var(--overlay-bg);
+}
+
+.habit-note-form {
+  padding: var(--space-md);
   display: flex;
-  justify-content: space-between;
-  width: calc(90 * (var(--habit-cell-size) + var(--habit-cell-gap)) - var(--habit-cell-gap));
-  flex-shrink: 0;
+  flex-direction: column;
+  gap: var(--space-sm);
 }
 
-.habit-heatmap__month-label {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  white-space: nowrap;
+.habit-note-form__title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
 }
 
-.habit-heatmap__row--header .habit-heatmap__label {
-  cursor: default;
+.habit-note-form__textarea {
+  width: 100%;
+  resize: vertical;
 }
 
-/* -- Quick-check button --------------------------------------------------- */
+.habit-note-form__actions {
+  display: flex;
+  gap: var(--space-xs);
+  justify-content: flex-end;
+}
+
+/* -- Log today details/summary toggle ------------------------------------ */
+
+.habit-log-details {
+  margin-top: var(--space-xs);
+}
+
+.habit-log-summary {
+  display: block;
+  list-style: none;
+  width: 100%;
+  text-align: center;
+  cursor: pointer;
+}
+
+.habit-log-summary::-webkit-details-marker,
+.habit-log-summary::marker {
+  display: none;
+}
+
+/* -- Quick-log inline form ----------------------------------------------- */
+
+.habit-quick-log {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: center;
+  margin-top: var(--space-xs);
+}
+
+.habit-quick-log .form-input--sm {
+  flex: 1;
+  min-width: 0;
+}
+
+/* -- Quick-check button (detail page) ------------------------------------ */
 
 .habit-check-btn {
   width: 100%;
@@ -162,4 +264,13 @@
   flex-direction: column;
   gap: var(--space-xs);
   margin-top: var(--space-xs);
+}
+
+.habit-check-form.is-hidden {
+  display: none;
+}
+
+.habit-check-form__actions {
+  display: flex;
+  gap: var(--space-xs);
 }

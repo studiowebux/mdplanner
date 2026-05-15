@@ -1,0 +1,86 @@
+/* Finances view — domain-specific styles only. */
+
+/* ---------------------------------------------------------------------------
+   Summary banner
+--------------------------------------------------------------------------- */
+
+.finance-summary {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+}
+
+.finance-summary__tile {
+  flex: 1;
+  min-width: var(--finance-summary-tile-min-w);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) solid var(--color-border);
+  border-top: var(--border-width-thick) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.finance-summary__tile[data-type="income"] {
+  border-top-color: var(--color-success);
+}
+
+.finance-summary__tile[data-type="expense"] {
+  border-top-color: var(--color-error);
+}
+
+.finance-summary__tile--balance[data-positive="true"] {
+  border-top-color: var(--color-success);
+}
+
+.finance-summary__tile--balance[data-positive="false"] {
+  border-top-color: var(--color-error);
+}
+
+.finance-summary__label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  font-weight: var(--font-weight-medium);
+}
+
+.finance-summary__value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+/* ---------------------------------------------------------------------------
+   Detail view
+--------------------------------------------------------------------------- */
+
+.finance-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.finance-detail__amount {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-primary);
+}
+
+.finance-detail__tags {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.finance-detail__tag {
+  font-size: var(--font-size-xs);
+  padding: var(--badge-padding);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}

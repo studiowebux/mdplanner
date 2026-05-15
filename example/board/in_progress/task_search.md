@@ -1,17 +1,17 @@
 ---
 id: task_search
 completed: false
-revision: 5
-updated_at: "2026-03-20T23:03:07.643Z"
+revision: 7
+updated_at: "2026-05-14T21:22:55.614Z"
 due_date: 2026-04-05
 assignee: diana
 milestone: Public Beta
+planned_start: 2026-03-28
+planned_end: 2026-04-05
 project: TaskFlow Platform
 priority: 1
 effort: 8
-order: 1
-planned_start: 2026-03-28
-planned_end: 2026-04-05
+order: 20
 tags: [search, fts]
 blocked_by: [task_crud]
 ---

@@ -25,6 +25,7 @@ export const ideaConfig: DomainConfig<Idea, CreateIdea, UpdateIdea> = {
   path: "/ideas",
   ssePrefix: "idea",
   styles: ["/css/views/ideas.css"],
+  scripts: ["/js/idea-graph.js"],
   emptyMessage: "No ideas yet. Create one to get started.",
   defaultView: "table",
 
@@ -97,4 +98,43 @@ export const ideaConfig: DomainConfig<Idea, CreateIdea, UpdateIdea> = {
     { type: "string", get: (i) => i.category },
     { type: "string", get: (i) => i.resources },
   ]),
+
+  extraViewModes: [{ key: "graph", label: "Graph" }],
+
+  customViewRenderer: async (_view, _state, items) => {
+    const graphData = items.map((i) => ({
+      id: i.id,
+      title: i.title,
+      status: i.status,
+      links: i.links ?? [],
+    }));
+    return (
+      <div class="idea-graph">
+        <div class="idea-graph__toolbar">
+          <button
+            type="button"
+            class="btn btn--sm idea-graph__reset"
+            data-idea-graph-reset
+          >
+            Reset view
+          </button>
+          <span class="idea-graph__zoom-label" data-idea-graph-zoom>100%</span>
+          <input
+            type="range"
+            class="idea-graph__zoom-slider"
+            data-idea-graph-slider
+            min="0.1"
+            max="2"
+            step="0.05"
+            value="1"
+          />
+        </div>
+        <canvas
+          id="idea-graph-canvas"
+          class="idea-graph__canvas"
+          data-ideas={JSON.stringify(graphData)}
+        />
+      </div>
+    );
+  },
 };

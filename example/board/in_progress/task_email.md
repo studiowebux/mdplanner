@@ -1,21 +1,21 @@
 ---
 id: task_email
 completed: false
-updated_at: "2026-03-15T18:42:54.223Z"
-revision: 2
+revision: 3
+updated_at: "2026-05-14T21:22:55.614Z"
 due_date: 2026-04-01
 assignee: charlie
-priority: 1
-effort: 8
 milestone: Public Beta
-project: TaskFlow Platform
-order: 0
 planned_start: 2026-03-10
 planned_end: 2026-03-28
-tags: [notifications, email]
-blocked_by: [task_auth]
+project: TaskFlow Platform
 claimed_by: charlie
 claimed_at: "2026-03-10T09:00:00.000Z"
+priority: 1
+effort: 8
+order: 10
+tags: [notifications, email]
+blocked_by: [task_auth]
 ---
 
 # Email Notifications

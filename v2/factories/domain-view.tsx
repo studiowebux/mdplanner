@@ -518,7 +518,7 @@ export function createDomainPage<T extends Entity>(
     nextOffset?: number;
   };
 
-  const DomainPage: FC<PageProps> = (
+  const DomainPage: FC<PageProps> = async (
     {
       items,
       totalCount,
@@ -530,185 +530,194 @@ export function createDomainPage<T extends Entity>(
       nextOffset,
       ...viewProps
     },
-  ) => (
-    <MainLayout
-      title={cfg.singular}
-      {...viewProps}
-      styles={cfg.styles}
-      scripts={cfg.scripts ?? []}
-    >
-      <main
-        class="domain-page"
-        data-domain={cfg.name}
-        hx-ext="sse"
-        sse-connect="/sse"
-        hx-get={`/${cfg.name}/view`}
-        hx-trigger={`sse:${cfg.ssePrefix}.created, sse:${cfg.ssePrefix}.updated, sse:${cfg.ssePrefix}.deleted, global-filter:changed from:body`}
-        hx-target={`#${cfg.name}-view`}
-        hx-swap="outerHTML"
-        hx-include={`#${cfg.name}-toolbar`}
+  ) => {
+    const topSlotContent = cfg.topSlot ? await cfg.topSlot() : null;
+    return (
+      <MainLayout
+        title={cfg.singular}
+        {...viewProps}
+        styles={cfg.styles}
+        scripts={cfg.scripts ?? []}
       >
-        <header class="domain-page__header">
-          <h1 class="domain-page__title">{cfg.plural ?? `${cfg.singular}s`}</h1>
-          <span id={`${cfg.name}-count`} class="domain-page__count">
-            {totalCount !== undefined &&
-                (filteredCount ?? items.length) !== totalCount
-              ? `${filteredCount ?? items.length}/${totalCount}`
-              : `${filteredCount ?? items.length} total`}
-          </span>
-          <button
-            class="btn btn--primary"
-            type="button"
-            hx-get={`/${cfg.name}/new`}
-            hx-target={`#${cfg.name}-form-container`}
-            hx-swap="innerHTML"
-            hx-include={`#${cfg.name}-toolbar`}
-          >
-            New
-          </button>
-        </header>
-
-        <div id={`${cfg.name}-toolbar`} class="domain-toolbar">
-          <div class="domain-toolbar__left">
-            <input
-              type="search"
-              class="domain-toolbar__search"
-              name="q"
-              value={state.q ?? ""}
-              placeholder={`Search ${cfg.name}...`}
-              aria-label="Search"
-              hx-get={`/${cfg.name}/view`}
-              hx-trigger="input changed delay:300ms, search"
-              hx-target={`#${cfg.name}-view`}
-              hx-swap="outerHTML"
+        <main
+          class="domain-page"
+          data-domain={cfg.name}
+          hx-ext="sse"
+          sse-connect="/sse"
+          hx-get={`/${cfg.name}/view`}
+          hx-trigger={`sse:${cfg.ssePrefix}.created, sse:${cfg.ssePrefix}.updated, sse:${cfg.ssePrefix}.deleted, global-filter:changed from:body`}
+          hx-target={`#${cfg.name}-view`}
+          hx-swap="outerHTML"
+          hx-include={`#${cfg.name}-toolbar`}
+        >
+          <header class="domain-page__header">
+            <h1 class="domain-page__title">
+              {cfg.plural ?? `${cfg.singular}s`}
+            </h1>
+            <span id={`${cfg.name}-count`} class="domain-page__count">
+              {totalCount !== undefined &&
+                  (filteredCount ?? items.length) !== totalCount
+                ? `${filteredCount ?? items.length}/${totalCount}`
+                : `${filteredCount ?? items.length} total`}
+            </span>
+            <button
+              class="btn btn--primary"
+              type="button"
+              hx-get={`/${cfg.name}/new`}
+              hx-target={`#${cfg.name}-form-container`}
+              hx-swap="innerHTML"
               hx-include={`#${cfg.name}-toolbar`}
-            />
-            {cfg.filters?.map((f) => {
-              const dynamicOpts = dynamicFilterOptions?.[f.name];
-              const options = dynamicOpts
-                ? dynamicOpts.map((v) =>
-                  typeof v === "string" ? { value: v, label: v } : v
-                )
-                : f.options;
-              return (
+            >
+              New
+            </button>
+          </header>
+
+          <div id={`${cfg.name}-toolbar`} class="domain-toolbar">
+            <div class="domain-toolbar__left">
+              <input
+                type="search"
+                class="domain-toolbar__search"
+                name="q"
+                value={state.q ?? ""}
+                placeholder={`Search ${cfg.name}...`}
+                aria-label="Search"
+                hx-get={`/${cfg.name}/view`}
+                hx-trigger="input changed delay:300ms, search"
+                hx-target={`#${cfg.name}-view`}
+                hx-swap="outerHTML"
+                hx-include={`#${cfg.name}-toolbar`}
+              />
+              {cfg.filters?.map((f) => {
+                const dynamicOpts = dynamicFilterOptions?.[f.name];
+                const options = dynamicOpts
+                  ? dynamicOpts.map((v) =>
+                    typeof v === "string" ? { value: v, label: v } : v
+                  )
+                  : f.options;
+                return (
+                  <select
+                    key={f.name}
+                    class="filter-bar__select"
+                    name={f.name}
+                    hx-get={`/${cfg.name}/view`}
+                    hx-trigger="change"
+                    hx-target={`#${cfg.name}-view`}
+                    hx-swap="outerHTML"
+                    hx-include={`#${cfg.name}-toolbar`}
+                  >
+                    <option value="">{f.label}</option>
+                    {options.map((o) => (
+                      <option
+                        key={o.value}
+                        value={o.value}
+                        selected={state[f.name] === o.value}
+                      >
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                );
+              })}
+              {cfg.dateRangeFilter && (
+                <DateRangeFilter
+                  domain={cfg.name}
+                  fromKey={cfg.dateRangeFilter.fromKey ?? "date_from"}
+                  toKey={cfg.dateRangeFilter.toKey ?? "date_to"}
+                  fromLabel={cfg.dateRangeFilter.fromLabel ?? "From"}
+                  toLabel={cfg.dateRangeFilter.toLabel ?? "To"}
+                  state={state}
+                />
+              )}
+              {cfg.hideCompleted && (
+                <label class="domain-toolbar__toggle">
+                  <input
+                    type="checkbox"
+                    name="hideCompleted"
+                    value="true"
+                    checked={state.hideCompleted}
+                    hx-get={`/${cfg.name}/view`}
+                    hx-trigger="change"
+                    hx-target={`#${cfg.name}-view`}
+                    hx-swap="outerHTML"
+                    hx-include={`#${cfg.name}-toolbar`}
+                  />
+                  <span class="domain-toolbar__toggle-label">
+                    Hide completed
+                  </span>
+                </label>
+              )}
+              {cfg.showHiddenToggle && (
+                <label class="domain-toolbar__toggle">
+                  <input
+                    type="checkbox"
+                    name="showHidden"
+                    value="true"
+                    checked={state.showHidden === true ||
+                      state.showHidden === "true"}
+                    hx-get={`/${cfg.name}/view`}
+                    hx-trigger="change"
+                    hx-target={`#${cfg.name}-view`}
+                    hx-swap="outerHTML"
+                    hx-include={`#${cfg.name}-toolbar`}
+                  />
+                  <span class="domain-toolbar__toggle-label">Show hidden</span>
+                </label>
+              )}
+            </div>
+            <div class="domain-toolbar__right">
+              {cfg.toolbarActions && <cfg.toolbarActions />}
+              {cfg.pageSizeOptions && (
                 <select
-                  key={f.name}
                   class="filter-bar__select"
-                  name={f.name}
+                  name="limit"
                   hx-get={`/${cfg.name}/view`}
                   hx-trigger="change"
                   hx-target={`#${cfg.name}-view`}
                   hx-swap="outerHTML"
                   hx-include={`#${cfg.name}-toolbar`}
                 >
-                  <option value="">{f.label}</option>
-                  {options.map((o) => (
+                  {cfg.pageSizeOptions.map((n) => (
                     <option
-                      key={o.value}
-                      value={o.value}
-                      selected={state[f.name] === o.value}
+                      key={String(n)}
+                      value={String(n)}
+                      selected={String(state[`limit`] ?? cfg.pageSize) ===
+                        String(n)}
                     >
-                      {o.label}
+                      {n} / page
                     </option>
                   ))}
                 </select>
-              );
-            })}
-            {cfg.dateRangeFilter && (
-              <DateRangeFilter
-                domain={cfg.name}
-                fromKey={cfg.dateRangeFilter.fromKey ?? "date_from"}
-                toKey={cfg.dateRangeFilter.toKey ?? "date_to"}
-                fromLabel={cfg.dateRangeFilter.fromLabel ?? "From"}
-                toLabel={cfg.dateRangeFilter.toLabel ?? "To"}
-                state={state}
-              />
-            )}
-            {cfg.hideCompleted && (
-              <label class="domain-toolbar__toggle">
-                <input
-                  type="checkbox"
-                  name="hideCompleted"
-                  value="true"
-                  checked={state.hideCompleted}
-                  hx-get={`/${cfg.name}/view`}
-                  hx-trigger="change"
-                  hx-target={`#${cfg.name}-view`}
-                  hx-swap="outerHTML"
-                  hx-include={`#${cfg.name}-toolbar`}
+              )}
+              <div id={`${cfg.name}-column-toggle-wrapper`}>
+                <ColumnToggle
+                  domain={cfg.name}
+                  columns={cfg.columns}
+                  view={state.view}
                 />
-                <span class="domain-toolbar__toggle-label">Hide completed</span>
-              </label>
-            )}
-            {cfg.showHiddenToggle && (
-              <label class="domain-toolbar__toggle">
-                <input
-                  type="checkbox"
-                  name="showHidden"
-                  value="true"
-                  checked={state.showHidden === true ||
-                    state.showHidden === "true"}
-                  hx-get={`/${cfg.name}/view`}
-                  hx-trigger="change"
-                  hx-target={`#${cfg.name}-view`}
-                  hx-swap="outerHTML"
-                  hx-include={`#${cfg.name}-toolbar`}
-                />
-                <span class="domain-toolbar__toggle-label">Show hidden</span>
-              </label>
-            )}
-          </div>
-          <div class="domain-toolbar__right">
-            {cfg.toolbarActions && <cfg.toolbarActions />}
-            {cfg.pageSizeOptions && (
-              <select
-                class="filter-bar__select"
-                name="limit"
-                hx-get={`/${cfg.name}/view`}
-                hx-trigger="change"
-                hx-target={`#${cfg.name}-view`}
-                hx-swap="outerHTML"
-                hx-include={`#${cfg.name}-toolbar`}
-              >
-                {cfg.pageSizeOptions.map((n) => (
-                  <option
-                    key={String(n)}
-                    value={String(n)}
-                    selected={String(state[`limit`] ?? cfg.pageSize) ===
-                      String(n)}
-                  >
-                    {n} / page
-                  </option>
-                ))}
-              </select>
-            )}
-            <div id={`${cfg.name}-column-toggle-wrapper`}>
-              <ColumnToggle
+              </div>
+              <ViewToggleButtons
                 domain={cfg.name}
-                columns={cfg.columns}
                 view={state.view}
+                extraModes={cfg.extraViewModes}
+                hideDefault={cfg.hideDefaultViews}
               />
             </div>
-            <ViewToggleButtons
-              domain={cfg.name}
-              view={state.view}
-              extraModes={cfg.extraViewModes}
-              hideDefault={cfg.hideDefaultViews}
-            />
           </div>
-        </div>
 
-        <ViewContainer
-          items={items}
-          state={state}
-          customContent={customContent}
-          hasMore={hasMore}
-          nextOffset={nextOffset}
-        />
-      </main>
-      <div id={`${cfg.name}-form-container`} />
-    </MainLayout>
-  );
+          {topSlotContent}
+
+          <ViewContainer
+            items={items}
+            state={state}
+            customContent={customContent}
+            hasMore={hasMore}
+            nextOffset={nextOffset}
+          />
+        </main>
+        <div id={`${cfg.name}-form-container`} />
+      </MainLayout>
+    );
+  };
 
   return { DomainPage, DomainViewContainer: ViewContainer };
 }

@@ -107,6 +107,7 @@ export const taskConfig: DomainConfig<Task, CreateTask, UpdateTask> = {
     "/js/task-list.js",
     "/js/task-timeline.js",
     "/js/task-timeline-export.js",
+    "/js/task-board-dnd.js",
   ],
   emptyMessage: "No tasks yet. Create one to get started.",
 

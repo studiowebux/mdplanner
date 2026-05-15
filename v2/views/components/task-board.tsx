@@ -37,7 +37,9 @@ const BoardCard: FC<{ task: Task }> = ({ task }) => {
       class={`task-board__card${
         task.completed ? " task-board__card--completed" : ""
       }`}
+      draggable="true"
       data-task-id={task.id}
+      data-order={task.order ?? 0}
     >
       <a class="task-board__card-title" href={`/tasks/${task.id}`}>
         {task.title}
@@ -121,7 +123,8 @@ const BoardColumn: FC<{ name: string; tasks: Task[] }> = ({ name, tasks }) => (
       <h3 class="task-board__column-title">{name}</h3>
       <span class="task-board__column-count">{tasks.length}</span>
     </div>
-    <div class="task-board__column-body">
+    <div class="task-board__column-body" data-section={name}>
+      <div class="task-board__drop-indicator is-hidden" />
       {tasks.map((t) => <BoardCard key={t.id} task={t} />)}
       {tasks.length === 0 && (
         <div class="task-board__column-empty">No tasks</div>

@@ -92,6 +92,21 @@ import { registerC4Entity } from "../domains/c4/cache.ts";
 import { EisenhowerRepository } from "../repositories/eisenhower.repository.ts";
 import { EisenhowerService } from "../services/eisenhower.service.ts";
 import { registerEisenhowerEntity } from "../domains/eisenhower/cache.ts";
+import { DealRepository } from "../repositories/deal.repository.ts";
+import { DealService } from "../services/deal.service.ts";
+import { registerDealEntity } from "../domains/deal/cache.ts";
+import { FinanceRepository } from "../repositories/finance.repository.ts";
+import { FinanceService } from "../services/finance.service.ts";
+import { registerFinanceEntity } from "../domains/finance/cache.ts";
+import { HabitRepository } from "../repositories/habit.repository.ts";
+import { HabitService } from "../services/habit.service.ts";
+import { registerHabitEntity } from "../domains/habit/cache.ts";
+import { JournalRepository } from "../repositories/journal.repository.ts";
+import { JournalService } from "../services/journal.service.ts";
+import { registerJournalEntity } from "../domains/journal/cache.ts";
+import { ReflectionRepository } from "../repositories/reflection.repository.ts";
+import { ReflectionService } from "../services/reflection.service.ts";
+import { registerReflectionEntity } from "../domains/reflection/cache.ts";
 import { MindmapRepository } from "../repositories/mindmap.repository.ts";
 import { MindmapService } from "../services/mindmap.service.ts";
 import { registerMindmapEntity } from "../domains/mindmap/cache.ts";
@@ -116,6 +131,9 @@ import { registerProjectValueBoardEntity } from "../domains/project-value-board/
 import { CompanyRepository } from "../repositories/company.repository.ts";
 import { CompanyService } from "../services/company.service.ts";
 import { registerCompanyEntity } from "../domains/company/cache.ts";
+import { InvestorRepository } from "../repositories/investor.repository.ts";
+import { InvestorService } from "../services/investor.service.ts";
+import { registerInvestorEntity } from "../domains/investor/cache.ts";
 
 export interface InitOptions {
   cache?: boolean;
@@ -200,10 +218,22 @@ export function initServices(
   );
   const companyRepo = new CompanyRepository(projectDir);
   _set(_svc, "company", new CompanyService(companyRepo));
+  const investorRepo = new InvestorRepository(projectDir);
+  _set(_svc, "investor", new InvestorService(investorRepo));
   const customerRepo = new CustomerRepository(projectDir);
   _set(_svc, "customer", new CustomerService(customerRepo));
   const contactRepo = new ContactRepository(projectDir);
   _set(_svc, "contact", new ContactService(contactRepo));
+  const dealRepo = new DealRepository(projectDir);
+  _set(_svc, "deal", new DealService(dealRepo));
+  const habitRepo = new HabitRepository(projectDir);
+  _set(_svc, "habit", new HabitService(habitRepo));
+  const journalRepo = new JournalRepository(projectDir);
+  _set(_svc, "journal", new JournalService(journalRepo));
+  const reflectionRepo = new ReflectionRepository(projectDir);
+  _set(_svc, "reflection", new ReflectionService(reflectionRepo));
+  const financeRepo = new FinanceRepository(projectDir);
+  _set(_svc, "finance", new FinanceService(financeRepo));
   const billingRateRepo = new BillingRateRepository(projectDir);
   _set(_svc, "billingRate", new BillingRateService(billingRateRepo));
   const quoteRepo = new QuoteRepository(projectDir);
@@ -283,6 +313,12 @@ export function initServices(
     registerC4Entity(c4Repo);
     registerEisenhowerEntity(eisenhowerRepo);
     registerMindmapEntity(mindmapRepo);
+    registerDealEntity(dealRepo);
+    registerHabitEntity(habitRepo);
+    registerJournalEntity(journalRepo);
+    registerReflectionEntity(reflectionRepo);
+    registerFinanceEntity(financeRepo);
+    registerInvestorEntity(investorRepo);
 
     // Pass cacheDb to repos for read-path caching
     milestoneRepo.setCacheDb(cacheDb);
@@ -311,6 +347,11 @@ export function initServices(
     moscowRepo.setCacheDb(cacheDb);
     c4Repo.setCacheDb(cacheDb);
     eisenhowerRepo.setCacheDb(cacheDb);
+    dealRepo.setCacheDb(cacheDb);
+    habitRepo.setCacheDb(cacheDb);
+    journalRepo.setCacheDb(cacheDb);
+    reflectionRepo.setCacheDb(cacheDb);
+    financeRepo.setCacheDb(cacheDb);
     mindmapRepo.setCacheDb(cacheDb);
     fishboneRepo.setCacheDb(cacheDb);
     businessModelRepo.setCacheDb(cacheDb);
@@ -319,6 +360,7 @@ export function initServices(
     safeRepo.setCacheDb(cacheDb);
     projectValueBoardRepo.setCacheDb(cacheDb);
     companyRepo.setCacheDb(cacheDb);
+    investorRepo.setCacheDb(cacheDb);
 
     cacheSync = new CacheSync(cacheDb);
     cacheSync.init();
@@ -435,6 +477,26 @@ export function getContactService(): ContactService {
   return _get<ContactService>(_svc, "contact");
 }
 
+export function getDealService(): DealService {
+  return _get<DealService>(_svc, "deal");
+}
+
+export function getHabitService(): HabitService {
+  return _get<HabitService>(_svc, "habit");
+}
+
+export function getJournalService(): JournalService {
+  return _get<JournalService>(_svc, "journal");
+}
+
+export function getReflectionService(): ReflectionService {
+  return _get<ReflectionService>(_svc, "reflection");
+}
+
+export function getFinanceService(): FinanceService {
+  return _get<FinanceService>(_svc, "finance");
+}
+
 export function getCompanyService(): CompanyService {
   return _get<CompanyService>(_svc, "company");
 }
@@ -499,6 +561,10 @@ export function getDnsService(): DnsService {
 
 export function getGitHubService(): GitHubService {
   return _get<GitHubService>(_svc, "github");
+}
+
+export function getInvestorService(): InvestorService {
+  return _get<InvestorService>(_svc, "investor");
 }
 
 export function getCacheSync(): CacheSync | null {

@@ -12,15 +12,18 @@ import { encryptSecret } from "../utils/secrets.ts";
 
 export class ProjectRepository {
   private filePath: string;
+  private configCache: ProjectConfig | null = null;
 
   constructor(projectDir: string) {
     this.filePath = join(projectDir, "project.md");
   }
 
   async read(): Promise<ProjectConfig> {
+    if (this.configCache) return this.configCache;
     try {
       const content = await Deno.readTextFile(this.filePath);
-      return this.parse(content);
+      this.configCache = await this.parse(content);
+      return this.configCache;
     } catch (err) {
       if (err instanceof Deno.errors.NotFound) {
         return { name: "New Project" };
@@ -30,6 +33,7 @@ export class ProjectRepository {
   }
 
   async write(config: ProjectConfig): Promise<void> {
+    this.configCache = null;
     const fm: Record<string, unknown> = {};
     if (config.startDate) fm.start_date = config.startDate;
     if (config.workingDaysPerWeek !== undefined) {

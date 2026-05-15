@@ -16,7 +16,11 @@ journalRouter.get("/:id", async (c: AppContext) => {
   if (!item) return c.notFound();
   const editMode = c.req.query("edit") === "1";
   return c.html(
-    <JournalDetailView {...viewProps(c, "/journal")} item={item} editMode={editMode} />,
+    <JournalDetailView
+      {...viewProps(c, "/journal")}
+      item={item}
+      editMode={editMode}
+    />,
   );
 });
 
@@ -28,9 +32,17 @@ journalRouter.post("/:id/save", async (c: AppContext) => {
   const mood = String(body.mood ?? "").trim() || undefined;
   const content = String(body.content ?? "").trim() || undefined;
   const tagsRaw = String(body.tags ?? "").trim();
-  const tags = tagsRaw ? tagsRaw.split(",").map((t) => t.trim()).filter(Boolean) : [];
+  const tags = tagsRaw
+    ? tagsRaw.split(",").map((t) => t.trim()).filter(Boolean)
+    : [];
 
-  await getJournalService().update(id!, { title, date, mood: mood as never, content, tags });
+  await getJournalService().update(id!, {
+    title,
+    date,
+    mood: mood as never,
+    content,
+    tags,
+  });
   publish("journal.updated");
   return c.redirect(`/journal/${id}`);
 });

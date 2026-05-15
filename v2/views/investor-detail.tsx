@@ -1,0 +1,92 @@
+import type { FC } from "hono/jsx";
+import { MainLayout } from "../components/layout/main.tsx";
+import { BackButton } from "./components/back-button.tsx";
+import type { Investor } from "../types/investor.types.ts";
+import type { ViewProps } from "../types/app.ts";
+import { MarkdownSection } from "./components/markdown-section.tsx";
+import { DetailActions } from "./components/detail-actions.tsx";
+import { SseRefresh } from "./components/sse-refresh.tsx";
+import { InfoItem } from "./components/info-item.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
+import { badgeClass } from "../components/ui/status-badge.tsx";
+import {
+  INVESTOR_STAGE_VARIANTS,
+  INVESTOR_STATUS_LABELS,
+  INVESTOR_STATUS_VARIANTS,
+  INVESTOR_TYPE_LABELS,
+  INVESTOR_TYPE_VARIANTS,
+} from "../domains/investor/constants.tsx";
+
+export const InvestorDetailView: FC<ViewProps & { item: Investor }> = (
+  { item: investor, ...viewProps },
+) => {
+  return (
+    <MainLayout
+      title={investor.name}
+      {...viewProps}
+      styles={["/css/views/investors.css"]}
+    >
+      <SseRefresh
+        getUrl={"/investors/" + investor.id}
+        trigger="sse:investor.updated"
+        targetId="investor-detail-root"
+      />
+      <main id="investor-detail-root" class="detail-view investor-detail">
+        <BackButton href="/investors" label="Back to Investors" />
+
+        <header class="detail-section investor-detail__header">
+          <div>
+            <h1 class="detail-title">{investor.name}</h1>
+            <div class="investor-detail__badges">
+              <span class={badgeClass(INVESTOR_TYPE_VARIANTS, investor.type)}>
+                {INVESTOR_TYPE_LABELS[investor.type]}
+              </span>
+              <span class={badgeClass(INVESTOR_STAGE_VARIANTS, investor.stage)}>
+                {investor.stage}
+              </span>
+              <span
+                class={badgeClass(INVESTOR_STATUS_VARIANTS, investor.status)}
+              >
+                {INVESTOR_STATUS_LABELS[investor.status]}
+              </span>
+              {investor.tags &&
+                investor.tags.map((tag) => (
+                  <span key={tag} class="badge">{tag}</span>
+                ))}
+            </div>
+          </div>
+          <DetailActions
+            entity="investors"
+            id={investor.id}
+            title={investor.name}
+            formContainerId="investors-form-container"
+          />
+        </header>
+
+        <div class="detail-section detail-info-row">
+          <InfoItem label="Contact">{investor.contact ?? "—"}</InfoItem>
+          <InfoItem label="Target Amount">
+            {investor.amountTarget != null
+              ? `$${investor.amountTarget.toLocaleString()}`
+              : "—"}
+          </InfoItem>
+          <InfoItem label="Intro Date">{investor.introDate ?? "—"}</InfoItem>
+          <InfoItem label="Last Contact">
+            {investor.lastContact ?? "—"}
+          </InfoItem>
+        </div>
+
+        <MarkdownSection title="Notes" markdown={investor.notes} />
+
+        <AuditMeta
+          createdAt={investor.createdAt}
+          updatedAt={investor.updatedAt}
+          createdBy={investor.createdBy}
+          updatedBy={investor.updatedBy}
+        />
+      </main>
+
+      <div id="investors-form-container" />
+    </MainLayout>
+  );
+};

@@ -1,20 +1,20 @@
 ---
 id: task_attachments
 completed: false
-updated_at: "2026-03-15T18:42:54.215Z"
-revision: 2
+revision: 4
+updated_at: "2026-05-14T21:22:55.616Z"
 due_date: 2026-03-25
 assignee: agent_claude
-priority: 2
-effort: 6
 milestone: Public Beta
-project: Analytics Dashboard
-order: 1
 planned_start: 2026-03-12
 planned_end: 2026-03-22
-tags: [storage, uploads]
+project: Analytics Dashboard
 claimed_by: agent_claude
 claimed_at: "2026-03-12T08:00:00.000Z"
+priority: 2
+effort: 6
+order: 40
+tags: [storage, uploads]
 blocked_by: [task_crud]
 ---
 

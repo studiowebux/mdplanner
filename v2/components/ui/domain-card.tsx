@@ -45,6 +45,7 @@ export const DomainCard: FC<Props> = ({
   <article
     class={`domain-card${className ? ` ${className}` : ""}`}
     data-filterable-card
+    data-id={id}
   >
     <header class="domain-card__header">
       {leading && <div class="domain-card__leading">{leading}</div>}

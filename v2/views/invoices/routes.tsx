@@ -3,6 +3,7 @@
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { invoiceConfig } from "../../domains/invoice/config.tsx";
 import {
+  getCustomerService,
   getInvoiceService,
   getProjectService,
 } from "../../singletons/services.ts";
@@ -32,7 +33,7 @@ invoicesRouter.get("/:id", async (c) => {
 });
 
 invoicesRouter.get("/:id/print", async (c) => {
-  const id = c.req.param("id");
+  const id = c.req.param("id")!;
   const service = getInvoiceService();
   const [invoice, billingConfig] = await Promise.all([
     service.getById(id),
@@ -40,11 +41,16 @@ invoicesRouter.get("/:id/print", async (c) => {
   ]);
   if (!invoice) return c.notFound();
 
+  const customer = invoice.customerId
+    ? await getCustomerService().getById(invoice.customerId)
+    : null;
+
   return c.html(
     <InvoicePrintView
       invoice={invoice}
       displayStatus={service.displayStatus(invoice)}
       billingConfig={billingConfig}
+      customer={customer ?? null}
       nonce={c.get("nonce")}
     />,
   );

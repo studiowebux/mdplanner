@@ -27,6 +27,7 @@
   --font-mono: "JetBrains Mono", monospace;
 
   /* Font size scale */
+  --font-size-2xs: 0.625rem; /* 10px — heatmap day numbers, micro annotations */
   --font-size-xs: 0.75rem; /* 12px — minimum floor: badges, micro labels */
   --font-size-sm: 0.875rem; /* 14px — captions, secondary info */
   --font-size-base: 1rem; /* 16px — body text, interactive elements */
@@ -378,8 +379,8 @@
   --swap-transition-duration: 0.05s;
 
   /* Habit views */
-  --habit-cell-size: 1.2rem;
-  --habit-heatmap-label-w: 12rem;
+  --habit-cell-size: 1.5rem;
+  --habit-heatmap-label-w: 10rem;
   --habit-cell-gap: var(--space-2xs);
   --habit-cell-outline-offset: var(--space-2xs);
   --habit-done-opacity: var(--opacity-visible);

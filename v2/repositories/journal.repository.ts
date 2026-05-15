@@ -1,0 +1,106 @@
+// Journal repository — markdown file CRUD under journal/.
+// Entry content lives in the file body; date/mood/tags in frontmatter.
+
+import { serializeFrontmatter } from "../utils/frontmatter.ts";
+import type {
+  CreateJournalEntry,
+  JournalEntry,
+  UpdateJournalEntry,
+} from "../types/journal.types.ts";
+import { CachedMarkdownRepository } from "./cached.repository.ts";
+import { JOURNAL_TABLE, rowToJournalEntry } from "../domains/journal/cache.ts";
+
+export class JournalRepository extends CachedMarkdownRepository<
+  JournalEntry,
+  CreateJournalEntry,
+  UpdateJournalEntry
+> {
+  protected readonly tableName = JOURNAL_TABLE;
+
+  constructor(projectDir: string) {
+    super(projectDir, {
+      directory: "journal",
+      idPrefix: "journal",
+      nameField: "title",
+    });
+  }
+
+  protected rowToEntity(
+    row: Record<string, string | number | null>,
+  ): JournalEntry {
+    return rowToJournalEntry(row);
+  }
+
+  protected fromCreateInput(
+    data: CreateJournalEntry,
+    id: string,
+    now: string,
+  ): JournalEntry {
+    return {
+      ...data,
+      id,
+      date: data.date,
+      tags: data.tags ?? [],
+      createdAt: now,
+      updatedAt: now,
+    };
+  }
+
+  protected parse(
+    filename: string,
+    fm: Record<string, unknown>,
+    body: string,
+  ): JournalEntry | null {
+    if (!fm.id && !fm.title) return null;
+    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+
+    let title = fm.title ? String(fm.title) : "";
+    const contentLines: string[] = [];
+
+    for (const line of body.split("\n")) {
+      if (line.startsWith("# ")) {
+        if (!title) title = line.slice(2).trim();
+        continue;
+      }
+      contentLines.push(line);
+    }
+
+    const content = contentLines.join("\n").trim() || undefined;
+
+    return {
+      id,
+      title: title || "Untitled Entry",
+      content,
+      date: fm.date ? String(fm.date) : new Date().toISOString().slice(0, 10),
+      mood: fm.mood as JournalEntry["mood"] ?? undefined,
+      tags: Array.isArray(fm.tags)
+        ? fm.tags.map(String)
+        : fm.tags != null
+        ? [String(fm.tags)]
+        : [],
+      createdAt: fm.created_at
+        ? String(fm.created_at)
+        : new Date().toISOString(),
+      updatedAt: fm.updated_at
+        ? String(fm.updated_at)
+        : new Date().toISOString(),
+      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
+      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
+    };
+  }
+
+  protected serialize(item: JournalEntry): string {
+    const fm: Record<string, unknown> = {};
+    fm.id = item.id;
+    fm.title = item.title;
+    fm.date = item.date;
+    if (item.mood) fm.mood = item.mood;
+    if (item.tags && item.tags.length > 0) fm.tags = item.tags;
+    fm.created_at = item.createdAt;
+    fm.updated_at = item.updatedAt;
+    if (item.createdBy) fm.created_by = item.createdBy;
+    if (item.updatedBy) fm.updated_by = item.updatedBy;
+
+    return serializeFrontmatter(fm, item.content ?? "");
+  }
+}

@@ -276,7 +276,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
       )
       : undefined;
     return c.html(
-      DomainPage({
+      await DomainPage({
         ...viewProps(c, cfg.path),
         items,
         totalCount: all.length,

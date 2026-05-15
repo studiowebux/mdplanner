@@ -34,14 +34,16 @@ export const StatusBadge: FC<Props> = ({ status, variant = "neutral" }) => (
 );
 
 // Render function compatible with DataTable column definitions.
-// Takes a status→variant map to resolve colors.
+// Takes a status→variant map to resolve colors, and an optional labels map for display text.
 export const statusBadgeRenderer =
-  (variants: Record<string, BadgeVariant>) => (value: unknown) => {
+  (variants: Record<string, BadgeVariant>, labels?: Record<string, string>) =>
+  (value: unknown) => {
     const status = String(value);
     const variant = variants[status.toLowerCase()] ?? "neutral";
+    const label = labels?.[status] ?? status;
     return (
       <span class={`badge badge--${variant}`}>
-        {status}
+        {label}
       </span>
     );
   };

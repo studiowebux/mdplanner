@@ -23,7 +23,10 @@ export const HABIT_FREQUENCY_LABELS: Record<HabitFrequency, string> = {
 };
 
 export const HabitSchema = z.object({
-  id: z.string().openapi({ description: "Habit ID", example: "habit_meditate" }),
+  id: z.string().openapi({
+    description: "Habit ID",
+    example: "habit_meditate",
+  }),
   title: z.string().min(1).max(200).openapi({
     description: "Habit title",
     example: "Morning meditation",
@@ -76,7 +79,9 @@ export const CreateHabitSchema = HabitSchema.pick({
 
 export type CreateHabit = z.infer<typeof CreateHabitSchema>;
 
-export const UpdateHabitSchema = CreateHabitSchema.partial().openapi("UpdateHabit");
+export const UpdateHabitSchema = CreateHabitSchema.partial().openapi(
+  "UpdateHabit",
+);
 export type UpdateHabit = z.infer<typeof UpdateHabitSchema>;
 
 export const ListHabitOptionsSchema = z.object({

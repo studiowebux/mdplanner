@@ -473,3 +473,9 @@ export const RejectTaskInputSchema = z.object({
     description: "Rejection category",
   }),
 }).openapi("RejectTaskInput");
+
+export const ReorderTaskInputSchema = z.object({
+  order: z.number().int().min(0).openapi({
+    description: "Desired sort order position (0-based index)",
+  }),
+}).openapi("ReorderTaskInput");

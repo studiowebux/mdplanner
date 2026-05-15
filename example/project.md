@@ -4,20 +4,20 @@ working_days_per_week: 5
 working_days: [Mon, Tue, Wed, Thu, Fri]
 tags: [feature, bug, enhancement, docs, infra, security, qa]
 links:
-  - title: Repository
-    url: "https://github.com/taskflow/app"
-  - title: Documentation
-    url: "https://docs.taskflow.io"
-  - title: Discord
-    url: "https://discord.gg/taskflow"
-  - title: Figma Designs
-    url: "https://figma.com/file/taskflow"
-features: [analytics, rate, brainstorm, brief, business_model, c4_component, capacity_plan, contact, customer, dashboard, dns_domain, eisenhower, fishbone, github, goal, idea, invoice, lean_canvas, marketing_plan, meeting, milestone, mindmap, moscow, note, payment, person, portfolio, quote, retrospective, risk, sticky_note, swot, task, time_entry, upload, strategic_builder]
+  - url: "https://github.com/taskflow/app"
+    title: Repository
+  - url: "https://docs.taskflow.io"
+    title: Documentation
+  - url: "https://discord.gg/taskflow"
+    title: Discord
+  - url: "https://figma.com/file/taskflow"
+    title: Figma Designs
+features: [analytics, rate, brainstorm, brief, business_model, c4_component, capacity_plan, company, contact, customer, dashboard, deal, dns_domain, eisenhower, finance, fishbone, github, goal, idea, invoice, lean_canvas, marketing_plan, meeting, milestone, mindmap, moscow, note, payment, person, portfolio, project_value, quote, retrospective, risk, safe, safe_agreement, sticky_note, strategic_builder, swot, task, time_entry, upload, journal, habit, onboarding, investor, brainstorm_template, reflection, onboarding_template, reflection_template, ai_chat]
 nav_categories:
   Admin: [upload, analytics]
-  CRM: [company, contact, deal, interaction]
+  CRM: [company, contact, deal]
   Diagrams: [c4_component, mindmap, sticky_note]
-  Finances: [customer, financial_period, investor, invoice, kpi_snapshot, payment, quote, rate, safe_agreement]
+  Finances: [customer, finance, investor, invoice, payment, quote, rate, safe_agreement]
   Infrastructure: [dns_domain, github]
   Notes: [habit, journal, note]
   Onboarding: [onboarding, onboarding_template]
@@ -25,9 +25,9 @@ nav_categories:
   Portfolio: [portfolio]
   Prioritization: [eisenhower, moscow]
   Strategy: [business_model, fishbone, lean_canvas, marketing_plan, project_value, risk, strategic_builder, swot]
-  Team: [ai_chat, capacity_plan, meeting, org_member, person, time_entry]
+  Team: [ai_chat, capacity_plan, meeting, person, time_entry]
   Work: [goal, milestone, task]
-last_updated: "2026-05-14T02:36:30.347Z"
+last_updated: "2026-05-14T20:13:58.859Z"
 ---
 
 # MD Planner Demo

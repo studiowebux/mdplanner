@@ -86,6 +86,7 @@ export const MainLayout: FC<Props> = (
         </AppShell>
         <script src="/js/vendor/htmx-2.0.8.min.js" />
         <script src="/js/vendor/htmx-ext-sse-2.2.4.min.js" />
+        <script src="/js/vendor/htmx-ext-json-enc-2.0.1.js" />
         <script src="/js/theme-toggle.js" />
         <script src="/js/font-toggle.js" />
         <script src="/js/animations-toggle.js" />

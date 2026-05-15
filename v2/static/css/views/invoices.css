@@ -76,128 +76,114 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Print / Save as PDF
+   Print view — /invoices/:id/print IS the print page, no @media print needed
 --------------------------------------------------------------------------- */
 
-@media print {
-  /* ---------- Page setup ---------- */
-  /* Safari ignores var() inside @page descriptors — use literals. */
-  @page {
-    size: letter portrait;
-    margin: 1in;
-  }
+.invoice-print {
+  max-width: var(--invoice-print-max-w);
+  margin: 0 auto;
+  padding: var(--invoice-print-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--invoice-print-section-gap);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+}
 
-  /* ---------- Force black & white ---------- */
-  *,
-  *::before,
-  *::after {
-    color: var(--print-color-fg) !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
+/* 2-col header: sender info LEFT, invoice meta RIGHT */
+.invoice-print__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-xl);
+  padding-bottom: var(--invoice-print-section-gap);
+  border-bottom: var(--border-width) solid var(--color-border-default);
+}
 
-  html,
-  body {
-    background: var(--print-color-bg) !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    font-size: var(--print-font-size-base) !important;
-    font-family: var(--print-font-family) !important;
-  }
+.invoice-print__header-left {
+  flex: 1 1 auto;
+}
 
-  /* Override font-mono toggle in print */
-  html.font-mono,
-  html.font-mono * {
-    font-family: var(--print-font-family) !important;
-  }
+.invoice-print__header-right {
+  flex: 0 0 auto;
+  text-align: right;
+}
 
-  /* ---------- Hide shell chrome ---------- */
-  .sidebar,
-  .topbar,
-  .sidebar-overlay,
-  .detail-view__back,
-  .invoice-detail__actions-row,
-  .invoice-detail__print-btn,
-  #invoices-form-container,
-  .detail-audit {
-    display: none !important;
-  }
+.invoice-print__label {
+  font-size: var(--font-size-xxl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-sm) 0;
+}
 
-  /* ---------- Shell reset (full-flow layout) ---------- */
-  .app-shell {
-    display: block !important;
-    height: auto !important;
-    overflow: visible !important;
-    grid-template-columns: none !important;
-  }
+.invoice-print__meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin: 0;
+}
 
-  .app-shell__main {
-    display: block !important;
-    overflow: visible !important;
-    padding: 0 !important;
-  }
+.invoice-print__meta-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-md);
+}
 
-  .app-shell__content {
-    padding: 0 !important;
-    overflow: visible !important;
-  }
+.invoice-print__meta-label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}
 
-  /* ---------- Flatten detail-section cards ---------- */
-  .detail-section {
-    border: none !important;
-    border-radius: 0 !important;
-    padding: 0 !important;
-    margin: 0 0 var(--print-section-gap) 0 !important;
-    background: transparent !important;
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
+.invoice-print__meta-value {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-align: right;
+}
 
-  /* ---------- Invoice container ---------- */
-  .invoice-detail {
-    max-width: 100% !important;
-    padding: 0 !important;
-    gap: var(--print-section-gap) !important;
-  }
+/* Bill-to block */
+.invoice-print__bill-to {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
 
-  .invoice-detail__header,
-  .invoice-detail__balance,
-  .detail-info-row {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
+.invoice-print__bill-to-heading {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  margin: 0 0 var(--space-xs) 0;
+}
 
-  /* ---------- Visual hierarchy without color ---------- */
-  .badge {
-    border: var(--border-width) solid var(--print-color-fg) !important;
-    border-radius: 0 !important;
-    padding: var(--print-badge-padding) !important;
-    font-weight: var(--font-weight-semibold) !important;
-  }
+.invoice-print__bill-to-address {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-style: normal;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
 
-  .billing-totals__row--total,
-  .billing-totals__row--balance,
-  .invoice-detail__balance-value--due {
-    font-weight: var(--font-weight-bold) !important;
-  }
+.invoice-print__bill-to-name {
+  font-weight: var(--font-weight-semibold);
+}
 
-  /* ---------- Line items table ---------- */
-  .line-items-table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-  }
+/* Line items section */
+.invoice-print__items {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
 
-  .line-items-table th,
-  .line-items-table td {
-    border-bottom: var(--border-width) solid var(--print-color-fg) !important;
-    padding: var(--print-table-cell-padding) !important;
-  }
+/* Footer / terms */
+.invoice-print__footer {
+  border-top: var(--border-width) solid var(--color-border-default);
+  padding-top: var(--space-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
 
-  .line-items-table tr {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
+.invoice-print__footer p {
+  margin: 0;
 }

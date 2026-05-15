@@ -36,7 +36,9 @@
   /** Cards in DOM order, excluding the one being dragged. */
   function visibleCards(columnBody) {
     return Array.prototype.slice.call(
-      columnBody.querySelectorAll(".task-board__card:not(.task-board__card--dragging)")
+      columnBody.querySelectorAll(
+        ".task-board__card:not(.task-board__card--dragging)",
+      ),
     );
   }
 
@@ -123,7 +125,9 @@
   function clearDragoverClass() {
     Array.prototype.forEach.call(
       document.querySelectorAll(".task-board__column-body--dragover"),
-      function (el) { el.classList.remove("task-board__column-body--dragover"); }
+      function (el) {
+        el.classList.remove("task-board__column-body--dragover");
+      },
     );
   }
 
@@ -191,7 +195,13 @@
   document.addEventListener("pointermove", function (e) {
     if (!dragging) return;
 
-    moveGhost(dragging.ghost, e.clientX, e.clientY, dragging.offsetX, dragging.offsetY);
+    moveGhost(
+      dragging.ghost,
+      e.clientX,
+      e.clientY,
+      dragging.offsetX,
+      dragging.offsetY,
+    );
 
     // Hide ghost temporarily so elementFromPoint can see what's underneath
     dragging.ghost.style.display = "none";
@@ -203,7 +213,9 @@
     if (columnBody !== dragging.activeColumn) {
       // Left old column
       if (dragging.activeColumn) {
-        dragging.activeColumn.classList.remove("task-board__column-body--dragover");
+        dragging.activeColumn.classList.remove(
+          "task-board__column-body--dragover",
+        );
       }
       hideIndicator(dragging.indicator);
       dragging.activeColumn = columnBody;
@@ -240,9 +252,11 @@
 
     // Remove dragging class from the original card
     var originalCard = document.querySelector(
-      ".task-board__card--dragging[data-task-id='" + d.id + "']"
+      ".task-board__card--dragging[data-task-id='" + d.id + "']",
     );
-    if (originalCard) originalCard.classList.remove("task-board__card--dragging");
+    if (originalCard) {
+      originalCard.classList.remove("task-board__card--dragging");
+    }
 
     clearDragoverClass();
     hideIndicator(d.indicator);
@@ -266,9 +280,11 @@
     dragging = null;
     d.ghost.remove();
     var originalCard = document.querySelector(
-      ".task-board__card--dragging[data-task-id='" + d.id + "']"
+      ".task-board__card--dragging[data-task-id='" + d.id + "']",
     );
-    if (originalCard) originalCard.classList.remove("task-board__card--dragging");
+    if (originalCard) {
+      originalCard.classList.remove("task-board__card--dragging");
+    }
     clearDragoverClass();
     hideIndicator(d.indicator);
   }
