@@ -178,9 +178,8 @@ export const dealConfig: DomainConfig<Deal, CreateDeal, UpdateDeal> = {
                               type="button"
                               class="deal-pipeline__stage-btn"
                               title={`Move to ${DEAL_STAGE_LABELS[prevStage]}`}
-                              hx-patch={`/api/v1/deals/${deal.id}/stage`}
+                              hx-post={`/deals/${deal.id}/stage`}
                               hx-vals={JSON.stringify({ stage: prevStage })}
-                              hx-ext="json-enc"
                               hx-swap="none"
                             >
                               ←
@@ -191,9 +190,8 @@ export const dealConfig: DomainConfig<Deal, CreateDeal, UpdateDeal> = {
                               type="button"
                               class="deal-pipeline__stage-btn"
                               title={`Move to ${DEAL_STAGE_LABELS[nextStage]}`}
-                              hx-patch={`/api/v1/deals/${deal.id}/stage`}
+                              hx-post={`/deals/${deal.id}/stage`}
                               hx-vals={JSON.stringify({ stage: nextStage })}
-                              hx-ext="json-enc"
                               hx-swap="none"
                             >
                               →

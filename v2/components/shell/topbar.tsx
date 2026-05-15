@@ -48,16 +48,15 @@ export async function Topbar({ actor }: Props) {
         &#8942;
       </button>
       <div id="topbar-actions" class="topbar__actions">
-        {/* Identity selector */}
+        {/* Identity selector — htmx form-encoded POST to view route, no json-enc */}
         <form
-          hx-post="/api/v1/settings/identity"
+          hx-post="/settings/identity"
           hx-trigger="change"
           hx-swap="none"
-          hx-ext="json-enc"
         >
           <select
             id="identity-select"
-            name="name"
+            name="personId"
             class="topbar__identity-select"
             aria-label="Active identity"
           >
@@ -65,9 +64,8 @@ export async function Topbar({ actor }: Props) {
             {people.map((p) => (
               <option
                 key={p.id}
-                value={p.name}
-                selected={actor?.source !== "anonymous" &&
-                  actor?.name === p.name}
+                value={p.id}
+                selected={actor?.source !== "anonymous" && actor?.id === p.id}
               >
                 {p.name}
               </option>

@@ -5,9 +5,13 @@ import { renderToString } from "hono/jsx/dom/server";
 import { SettingsView } from "../settings.tsx";
 import {
   getCacheSync,
+  getPeopleService,
   getProjectService,
   getSearchEngine,
 } from "../../singletons/services.ts";
+import { setCookie, setSignedCookie } from "hono/cookie";
+import { IDENTITY_COOKIE } from "../../middleware/identity.ts";
+import { getCookieSecret } from "../../utils/secrets.ts";
 import { getLocale } from "../../utils/format.ts";
 import { SidebarContent } from "../../components/shell/sidebar.tsx";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
@@ -330,4 +334,41 @@ settingsViewRouter.post("/cache/rebuild-fts", (c) => {
       headers: { "HX-Trigger": hxTrigger("error", msg) },
     });
   }
+});
+
+// -- Identity switch — plain form POST, sets mdp_identity cookie, redirects back --
+settingsViewRouter.post("/identity", async (c) => {
+  const body = await c.req.parseBody();
+  const personId = String(body.personId ?? "").trim();
+
+  const secret = getCookieSecret();
+  const cookieOpts = {
+    path: "/",
+    maxAge: 31536000,
+    sameSite: "Strict" as const,
+    secure: true,
+    httpOnly: true,
+  };
+
+  let name = "";
+  let id = "";
+  if (personId) {
+    const person = await getPeopleService().getById(personId);
+    if (person) {
+      name = person.name;
+      id = person.id;
+    }
+  }
+
+  const value = JSON.stringify({ name, id });
+  if (secret) {
+    await setSignedCookie(c, IDENTITY_COOKIE, value, secret, cookieOpts);
+  } else {
+    setCookie(c, IDENTITY_COOKIE, value, cookieOpts);
+  }
+
+  return new Response(null, {
+    status: 204,
+    headers: { "HX-Refresh": "true" },
+  });
 });

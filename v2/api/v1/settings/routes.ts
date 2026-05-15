@@ -3,7 +3,10 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { getCookie, setCookie, setSignedCookie } from "hono/cookie";
 import { parseJson } from "../../../database/sqlite/mod.ts";
-import { getProjectService } from "../../../singletons/services.ts";
+import {
+  getPeopleService,
+  getProjectService,
+} from "../../../singletons/services.ts";
 import { getCookieSecret } from "../../../utils/secrets.ts";
 import { IDENTITY_COOKIE } from "../../../middleware/identity.ts";
 import { hxTrigger } from "../../../utils/hx-trigger.ts";
@@ -15,6 +18,7 @@ import {
 import {
   SetGlobalFiltersSchema,
   SetIdentitySchema,
+  SetPersonSchema,
 } from "../../../types/settings.types.ts";
 
 export const settingsRouter = new OpenAPIHono();
@@ -210,5 +214,65 @@ settingsRouter.openapi(setGlobalFiltersRoute, (c) => {
     sameSite: "Lax",
   });
 
+  return c.body(null, 204);
+});
+
+// POST /person — switch active person by ID (OpenAPI/REST clients)
+const setPersonRoute = createRoute({
+  method: "post",
+  path: "/person",
+  tags: ["Settings"],
+  summary: "Switch active person by ID",
+  description:
+    "Looks up the person by ID, writes the mdp_identity cookie with name + id. " +
+    "Returns HX-Refresh to trigger a full page reload in htmx clients. " +
+    "Empty personId clears identity (anonymous).",
+  operationId: "setPerson",
+  request: {
+    body: {
+      content: { "application/json": { schema: SetPersonSchema } },
+      required: true,
+    },
+  },
+  responses: {
+    204: { description: "Identity cookie written" },
+    404: { description: "Person not found" },
+  },
+});
+
+settingsRouter.openapi(setPersonRoute, async (c) => {
+  const { personId } = c.req.valid("json");
+
+  const secret = getCookieSecret();
+  const cookieOpts = {
+    path: "/",
+    maxAge: 31536000,
+    sameSite: "Strict" as const,
+    secure: true,
+    httpOnly: true,
+  };
+
+  if (!personId.trim()) {
+    const value = JSON.stringify({ name: "", id: "" });
+    if (secret) {
+      await setSignedCookie(c, IDENTITY_COOKIE, value, secret, cookieOpts);
+    } else {
+      setCookie(c, IDENTITY_COOKIE, value, cookieOpts);
+    }
+    c.header("HX-Refresh", "true");
+    return c.body(null, 204);
+  }
+
+  const person = await getPeopleService().getById(personId.trim());
+  if (!person) return c.json({ error: "Person not found" }, 404);
+
+  const value = JSON.stringify({ name: person.name, id: person.id });
+  if (secret) {
+    await setSignedCookie(c, IDENTITY_COOKIE, value, secret, cookieOpts);
+  } else {
+    setCookie(c, IDENTITY_COOKIE, value, cookieOpts);
+  }
+
+  c.header("HX-Refresh", "true");
   return c.body(null, 204);
 });

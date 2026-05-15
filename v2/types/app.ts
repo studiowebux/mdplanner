@@ -2,6 +2,7 @@
 
 import type { Context } from "hono";
 import type { Actor } from "./actor.ts";
+import type { Person } from "./person.types.ts";
 
 export type AppVariables = {
   nonce: string;
@@ -9,6 +10,7 @@ export type AppVariables = {
   pinnedKeys: string[];
   navCategories?: Record<string, string[]>;
   actor: Actor;
+  activePerson?: Person;
 };
 
 // Base props for all SSR views — every view receives nonce + activePath + sidebar state.
@@ -19,6 +21,7 @@ export type ViewProps = {
   pinnedKeys?: string[];
   navCategories?: Record<string, string[]>;
   actor?: Actor;
+  activePerson?: Person;
 };
 
 /** Typed Hono context with AppVariables. Use in route handlers. */

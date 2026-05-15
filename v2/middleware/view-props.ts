@@ -11,5 +11,6 @@ export function viewProps(c: AppContext, activePath?: string): ViewProps {
     pinnedKeys: c.get("pinnedKeys"),
     navCategories: c.get("navCategories"),
     actor: c.get("actor"),
+    activePerson: c.get("activePerson"),
   };
 }

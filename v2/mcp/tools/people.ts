@@ -237,4 +237,24 @@ export function registerPeopleTools(server: McpServer): void {
       return ok(workload);
     },
   );
+
+  // ── set_identity ────────────────────────────────────────────────────
+  server.registerTool(
+    "set_identity",
+    {
+      description:
+        "Resolve a person by ID and return their full profile (name, accounts, " +
+        "skills, department). Use this to establish which person context the agent " +
+        "is acting as — the returned record includes the accounts map needed for " +
+        "GitHub, Slack, and other integrations.",
+      inputSchema: {
+        personId: PersonSchema.shape.id.describe("Person ID to act as"),
+      },
+    },
+    async ({ personId }) => {
+      const person = await service.getById(personId);
+      if (!person) return err(`Person '${personId}' not found`);
+      return ok(person);
+    },
+  );
 }

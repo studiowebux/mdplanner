@@ -112,10 +112,9 @@ const ActionsTableComponent: FC<{ meeting: Meeting }> = ({ meeting }) => (
     {/* Inline add form */}
     <form
       class="meeting-detail__add-action-form"
-      hx-post={`/api/v1/meetings/${meeting.id}/actions`}
+      hx-post={`/meetings/${meeting.id}/actions`}
       hx-target="#meeting-actions-table"
       hx-swap="outerHTML"
-      hx-ext="json-enc"
       hx-on--htmx:after-request="this.reset()"
     >
       <input
@@ -257,10 +256,9 @@ const RelatedMeetingsSectionComponent: FC<
       {/* Inline link form */}
       <form
         class="meeting-detail__link-form"
-        hx-post={`/api/v1/meetings/${meeting.id}/links`}
+        hx-post={`/meetings/${meeting.id}/links`}
         hx-target="#meeting-related-section"
         hx-swap="outerHTML"
-        hx-ext="json-enc"
         hx-on--htmx:after-request="this.reset()"
       >
         <AutocompleteWidget
