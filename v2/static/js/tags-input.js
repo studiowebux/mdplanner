@@ -64,7 +64,7 @@
     var items = field.querySelectorAll(".form__autocomplete-item");
     for (var i = 0; i < items.length; i++) {
       var val = items[i].getAttribute("data-value") || items[i].textContent;
-      items[i].style.display = tags.indexOf(val) !== -1 ? "none" : "";
+      items[i].classList.toggle("is-hidden", tags.indexOf(val) !== -1);
     }
   }
 

@@ -15,7 +15,7 @@ export const GoalsTab: FC<GoalsTabProps> = ({ config }) => (
       hx-trigger="submit"
       hx-swap="none"
     >
-      <p class="settings-field__hint" style="">
+      <p class="settings-field__hint">
         KPI metric keys available in the goal form. Falls back to defaults when
         empty.
       </p>
