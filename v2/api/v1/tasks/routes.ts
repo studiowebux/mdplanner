@@ -34,15 +34,15 @@ import {
 } from "../../../types/task.types.ts";
 import { ErrorSchema, IdParam } from "../../../types/api.ts";
 import { sortTasks } from "../../../domains/task/constants.tsx";
-import { getCookie, setCookie } from "hono/cookie";
-import { parseJson } from "../../../database/sqlite/mod.ts";
+import { deleteUiStateKeys } from "../../../utils/ui-state.ts";
+import type { AppVariables } from "../../../types/app.ts";
 import {
   ClaimConflictError,
   ClaimGuardError,
   RevisionConflictError,
 } from "../../../services/task.service.ts";
 
-export const tasksRouter = new OpenAPIHono();
+export const tasksRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
 // GET /
 tasksRouter.openapi(
@@ -480,18 +480,7 @@ tasksRouter.openapi(
     }
 
     // Clear any column sort from the cookie so F5 respects drag order.
-    const raw = getCookie(c, "ui_state");
-    const allUiState =
-      parseJson<Record<string, Record<string, unknown>>>(raw) ?? {};
-    const taskState = allUiState["tasks"] ?? {};
-    delete taskState["sort"];
-    delete taskState["order"];
-    allUiState["tasks"] = taskState;
-    setCookie(c, "ui_state", JSON.stringify(allUiState), {
-      path: "/",
-      maxAge: 31536000,
-      sameSite: "Lax",
-    });
+    deleteUiStateKeys(c, "tasks", ["sort", "order"]);
 
     publish("task.updated");
     return c.json(updated, 200);

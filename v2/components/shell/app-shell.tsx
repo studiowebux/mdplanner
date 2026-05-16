@@ -14,6 +14,8 @@ type Props = {
   navCategories?: Record<string, string[]>;
   actor?: Actor;
   activePerson?: Person;
+  globalProjects?: string[];
+  globalAssignees?: string[];
   children?: unknown;
 };
 
@@ -25,6 +27,8 @@ export const AppShell: FC<Props> = (
     navCategories,
     actor,
     activePerson,
+    globalProjects = [],
+    globalAssignees = [],
     children,
   },
 ) => (
@@ -37,7 +41,12 @@ export const AppShell: FC<Props> = (
       navCategories={navCategories}
     />
     <div class="app-shell__main">
-      <Topbar actor={actor} activePerson={activePerson} />
+      <Topbar
+        actor={actor}
+        activePerson={activePerson}
+        globalProjects={globalProjects}
+        globalAssignees={globalAssignees}
+      />
       <div class="app-shell__content">
         {children}
       </div>

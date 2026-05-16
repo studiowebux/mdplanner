@@ -27,6 +27,7 @@ export function writeUiState<T>(c: AppContext, domain: string, state: T): void {
     path: "/",
     maxAge: 31536000,
     sameSite: "Lax",
+    httpOnly: true,
   });
 }
 
@@ -64,6 +65,28 @@ export function readGlobalAssignees(c: AppContext): string[] {
 export function writeGlobalAssignees(c: AppContext, names: string[]): void {
   const g = readUiState<GlobalUiState>(c, GLOBAL_KEY);
   writeUiState(c, GLOBAL_KEY, { ...g, globalAssignees: names });
+}
+
+export function writeGlobalFilters(
+  c: AppContext,
+  projects: string[],
+  assignees: string[],
+): void {
+  writeUiState(c, GLOBAL_KEY, {
+    globalProjects: projects,
+    globalAssignees: assignees,
+  });
+}
+
+// Delete specific keys from a domain's saved UI state, leaving everything else intact.
+export function deleteUiStateKeys(
+  c: AppContext,
+  domain: string,
+  keys: string[],
+): void {
+  const saved = readUiState<Record<string, unknown>>(c, domain);
+  for (const key of keys) delete saved[key];
+  writeUiState(c, domain, saved);
 }
 
 // Merge query params over saved state. Params take precedence when present.

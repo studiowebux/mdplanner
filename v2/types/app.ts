@@ -22,6 +22,8 @@ export type ViewProps = {
   navCategories?: Record<string, string[]>;
   actor?: Actor;
   activePerson?: Person;
+  globalProjects?: string[];
+  globalAssignees?: string[];
 };
 
 /** Typed Hono context with AppVariables. Use in route handlers. */

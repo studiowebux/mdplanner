@@ -8,9 +8,13 @@ import type { Person } from "../../types/person.types.ts";
 type Props = {
   actor?: Actor;
   activePerson?: Person;
+  globalProjects?: string[];
+  globalAssignees?: string[];
 };
 
-export async function Topbar({ actor, activePerson }: Props) {
+export async function Topbar(
+  { actor, activePerson, globalProjects = [], globalAssignees = [] }: Props,
+) {
   const [people, portfolioItems] = await Promise.all([
     getPeopleService().list(),
     getPortfolioService().list(),
@@ -110,6 +114,7 @@ export async function Topbar({ actor, activePerson }: Props) {
             </button>
             <div
               data-global-filter-panel="projects"
+              data-active={JSON.stringify(globalProjects)}
               class="topbar__filter-panel is-hidden"
             >
               {portfolioItems.map((p) => (
@@ -145,6 +150,7 @@ export async function Topbar({ actor, activePerson }: Props) {
             </button>
             <div
               data-global-filter-panel="assignees"
+              data-active={JSON.stringify(globalAssignees)}
               class="topbar__filter-panel is-hidden"
             >
               {people.map((p) => (

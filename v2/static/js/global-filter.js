@@ -7,38 +7,31 @@
 // Same pattern repeated for "assignees".
 
 (function () {
-  var COOKIE_NAME = "ui_state";
-  var GLOBAL_KEY = "_global";
   var ENDPOINT = "/settings/global-filters";
 
   // -------------------------------------------------------------------------
-  // Cookie helpers
+  // Initial state from server-rendered data-active attributes.
+  // ui_state cookie is httpOnly — JS cannot read it.
   // -------------------------------------------------------------------------
 
-  function readCookie(name) {
-    var match = document.cookie.match(
-      new RegExp(
-        "(?:^|; )" + name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "=([^;]*)",
-      ),
+  function readActiveAttr(type) {
+    var panel = document.querySelector(
+      '[data-global-filter-panel="' + type + '"]',
     );
-    return match ? decodeURIComponent(match[1]) : null;
+    if (!panel) return [];
+    try {
+      var val = JSON.parse(panel.getAttribute("data-active") || "[]");
+      return Array.isArray(val) ? val : [];
+    } catch (_) {
+      return [];
+    }
   }
 
   function readGlobalState() {
-    var raw = readCookie(COOKIE_NAME);
-    if (!raw) return { globalProjects: [], globalAssignees: [] };
-    try {
-      var parsed = JSON.parse(raw);
-      var g = (parsed && parsed[GLOBAL_KEY]) || {};
-      return {
-        globalProjects: Array.isArray(g.globalProjects) ? g.globalProjects : [],
-        globalAssignees: Array.isArray(g.globalAssignees)
-          ? g.globalAssignees
-          : [],
-      };
-    } catch (_) {
-      return { globalProjects: [], globalAssignees: [] };
-    }
+    return {
+      globalProjects: readActiveAttr("projects"),
+      globalAssignees: readActiveAttr("assignees"),
+    };
   }
 
   // -------------------------------------------------------------------------

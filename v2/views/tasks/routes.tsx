@@ -24,8 +24,7 @@ import {
 } from "../task-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { hxTrigger } from "../../utils/hx-trigger.ts";
-import { getCookie, setCookie } from "hono/cookie";
-import { parseJson } from "../../database/sqlite/mod.ts";
+import { deleteUiStateKeys } from "../../utils/ui-state.ts";
 
 export const tasksRouter = createDomainRoutes(taskConfig);
 
@@ -285,18 +284,7 @@ tasksRouter.post("/:id/reorder", async (c) => {
   );
 
   // Clear sort state so page refresh respects drag order
-  const raw = getCookie(c, "ui_state");
-  const allUiState = parseJson<Record<string, Record<string, unknown>>>(raw) ??
-    {};
-  const taskState = allUiState["tasks"] ?? {};
-  delete taskState["sort"];
-  delete taskState["order"];
-  allUiState["tasks"] = taskState;
-  setCookie(c, "ui_state", JSON.stringify(allUiState), {
-    path: "/",
-    maxAge: 31536000,
-    sameSite: "Lax",
-  });
+  deleteUiStateKeys(c, "tasks", ["sort", "order"]);
 
   publish("task.updated");
   return new Response(null, { status: 204 });

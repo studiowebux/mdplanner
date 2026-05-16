@@ -2,6 +2,7 @@
 // c.get("enabledFeatures"), c.get("pinnedKeys"), etc. in every route.
 
 import type { AppContext, ViewProps } from "../types/app.ts";
+import { readGlobalAssignees, readGlobalProjects } from "../utils/ui-state.ts";
 
 export function viewProps(c: AppContext, activePath?: string): ViewProps {
   return {
@@ -12,5 +13,7 @@ export function viewProps(c: AppContext, activePath?: string): ViewProps {
     navCategories: c.get("navCategories"),
     actor: c.get("actor"),
     activePerson: c.get("activePerson"),
+    globalProjects: readGlobalProjects(c),
+    globalAssignees: readGlobalAssignees(c),
   };
 }

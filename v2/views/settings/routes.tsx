@@ -11,7 +11,7 @@ import {
 } from "../../singletons/services.ts";
 import { getIntegrityService } from "../../services/integrity.service.ts";
 import { getCookie, setCookie, setSignedCookie } from "hono/cookie";
-import { parseJson } from "../../database/sqlite/mod.ts";
+import { writeGlobalFilters } from "../../utils/ui-state.ts";
 import { IDENTITY_COOKIE } from "../../middleware/identity.ts";
 import { getCookieSecret } from "../../utils/secrets.ts";
 import { getLocale } from "../../utils/format.ts";
@@ -344,23 +344,7 @@ settingsViewRouter.post("/global-filters", async (c) => {
     globalProjects?: string[];
     globalAssignees?: string[];
   }>();
-  const UI_STATE_COOKIE = "ui_state";
-  const raw = getCookie(c, UI_STATE_COOKIE);
-  const all = parseJson<Record<string, Record<string, unknown>>>(raw) ?? {};
-  const current = (all["_global"] ?? {}) as {
-    globalProjects?: string[];
-    globalAssignees?: string[];
-  };
-  all["_global"] = {
-    ...current,
-    globalProjects: body.globalProjects ?? current.globalProjects ?? [],
-    globalAssignees: body.globalAssignees ?? current.globalAssignees ?? [],
-  };
-  setCookie(c, UI_STATE_COOKIE, JSON.stringify(all), {
-    path: "/",
-    maxAge: 31536000,
-    sameSite: "Lax",
-  });
+  writeGlobalFilters(c, body.globalProjects ?? [], body.globalAssignees ?? []);
   return new Response(null, { status: 204 });
 });
 

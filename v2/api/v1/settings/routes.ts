@@ -2,7 +2,8 @@
 
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { getCookie, setCookie, setSignedCookie } from "hono/cookie";
-import { parseJson } from "../../../database/sqlite/mod.ts";
+import { writeGlobalFilters } from "../../../utils/ui-state.ts";
+import type { AppVariables } from "../../../types/app.ts";
 import {
   getPeopleService,
   getProjectService,
@@ -21,7 +22,7 @@ import {
   SetPersonSchema,
 } from "../../../types/settings.types.ts";
 
-export const settingsRouter = new OpenAPIHono();
+export const settingsRouter = new OpenAPIHono<{ Variables: AppVariables }>();
 
 // GET /
 const getSettingsRoute = createRoute({
@@ -194,26 +195,7 @@ const setGlobalFiltersRoute = createRoute({
 
 settingsRouter.openapi(setGlobalFiltersRoute, (c) => {
   const { globalProjects, globalAssignees } = c.req.valid("json");
-
-  // Read existing ui_state, merge _global key, write back — preserves all other domain state.
-  const UI_STATE_COOKIE = "ui_state";
-  const raw = getCookie(c, UI_STATE_COOKIE);
-  const all = parseJson<Record<string, Record<string, unknown>>>(raw) ?? {};
-  const current = (all["_global"] ?? {}) as {
-    globalProjects?: string[];
-    globalAssignees?: string[];
-  };
-  all["_global"] = {
-    ...current,
-    globalProjects: globalProjects ?? current.globalProjects ?? [],
-    globalAssignees: globalAssignees ?? current.globalAssignees ?? [],
-  };
-  setCookie(c, UI_STATE_COOKIE, JSON.stringify(all), {
-    path: "/",
-    maxAge: 31536000,
-    sameSite: "Lax",
-  });
-
+  writeGlobalFilters(c, globalProjects ?? [], globalAssignees ?? []);
   return c.body(null, 204);
 });
 
