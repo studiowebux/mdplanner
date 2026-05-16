@@ -9,6 +9,7 @@
     10,
   ) || 768;
   var COLLAPSED_KEY = "sidebarCollapsed";
+  var WIDTH_KEY = "sidebarWidth";
   var html = document.documentElement;
   var btn = document.getElementById("sidebar-toggle");
   var overlay = document.getElementById("sidebar-overlay");
@@ -43,8 +44,29 @@
     setAriaExpanded(false);
   }
 
+  function applyStoredWidth() {
+    if (html.classList.contains("sidebar-collapsed")) return;
+    var stored = localStorage.getItem(WIDTH_KEY);
+    if (!stored) return;
+    var px = parseInt(stored, 10);
+    if (isNaN(px)) return;
+    var min = parseInt(
+      getComputedStyle(html).getPropertyValue("--sidebar-w-min"),
+      10,
+    ) || 160;
+    var max = parseInt(
+      getComputedStyle(html).getPropertyValue("--sidebar-w-max"),
+      10,
+    ) || 400;
+    px = Math.min(Math.max(px, min), max);
+    html.style.setProperty("--sidebar-width", px + "px");
+  }
+
   // Init desktop state from localStorage.
-  if (!isMobile()) applyDesktopState();
+  if (!isMobile()) {
+    applyDesktopState();
+    applyStoredWidth();
+  }
 
   // Scroll active nav link into view (instant, minimum scroll).
   var activeLink = document.querySelector(".sidebar__link--active");
@@ -99,6 +121,8 @@
       if (!dragging) return;
       dragging = false;
       handle.classList.remove("is-dragging");
+      var current = html.style.getPropertyValue("--sidebar-width");
+      if (current) localStorage.setItem(WIDTH_KEY, parseInt(current, 10));
     }
 
     handle.addEventListener("pointerup", endDrag);
