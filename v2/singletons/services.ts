@@ -274,9 +274,10 @@ export function initServices(
   const quoteRepo = new QuoteRepository(projectDir);
   _set(_svc, "quote", new QuoteService(quoteRepo));
   const invoiceRepo = new InvoiceRepository(projectDir);
-  _set(_svc, "invoice", new InvoiceService(invoiceRepo));
+  const invoiceService = new InvoiceService(invoiceRepo);
+  _set(_svc, "invoice", invoiceService);
   const paymentRepo = new PaymentRepository(projectDir);
-  _set(_svc, "payment", new PaymentService(paymentRepo));
+  _set(_svc, "payment", new PaymentService(paymentRepo, invoiceService));
   const brainstormRepo = new BrainstormRepository(projectDir);
   _set(_svc, "brainstorm", new BrainstormService(brainstormRepo));
   const brainstormTemplateRepo = new BrainstormTemplateRepository(projectDir);

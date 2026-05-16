@@ -1,6 +1,7 @@
 // Payment service — business logic over PaymentRepository.
 // Syncs invoice paidAmount on create/delete.
 
+import type { InvoiceService } from "./invoice.service.ts";
 import type { PaymentRepository } from "../repositories/payment.repository.ts";
 import type {
   CreatePayment,
@@ -17,7 +18,10 @@ export class PaymentService extends BaseService<
   UpdatePayment,
   ListPaymentOptions
 > {
-  constructor(private paymentRepo: PaymentRepository) {
+  constructor(
+    private paymentRepo: PaymentRepository,
+    private invoiceService: InvoiceService,
+  ) {
     super(paymentRepo);
   }
 
@@ -53,12 +57,8 @@ export class PaymentService extends BaseService<
 
   /** Recalculate invoice paidAmount after payment change. */
   private async syncInvoicePaidAmount(invoiceId: string): Promise<void> {
-    // Lazy import to avoid circular dependency
-    const { getInvoiceService } = await import(
-      "../singletons/services.ts"
-    );
     const totalPaid = await this.sumForInvoice(invoiceId);
-    await getInvoiceService().updatePaidAmount(invoiceId, totalPaid);
+    await this.invoiceService.updatePaidAmount(invoiceId, totalPaid);
   }
 
   override async create(data: CreatePayment): Promise<Payment> {
