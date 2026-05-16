@@ -152,8 +152,9 @@ export class QuoteRepository extends CachedMarkdownRepository<
     try {
       const raw = await Deno.readTextFile(this.revisionPath(quoteId));
       return JSON.parse(raw) as QuoteRevision[];
-    } catch {
-      return [];
+    } catch (err) {
+      if (err instanceof Deno.errors.NotFound) return [];
+      throw err;
     }
   }
 
