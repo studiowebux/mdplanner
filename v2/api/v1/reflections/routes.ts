@@ -1,7 +1,10 @@
 // Reflection API routes — OpenAPI CRUD endpoints.
 
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import { getReflectionService } from "../../../singletons/services.ts";
+import {
+  getReflectionService,
+  getReflectionTemplateService,
+} from "../../../singletons/services.ts";
 import { publish } from "../../../singletons/event-bus.ts";
 import {
   CreateReflectionSchema,
@@ -151,4 +154,64 @@ reflectionApiRouter.openapi(deleteReflectionRoute, async (c) => {
   if (!ok) return c.json(notFound("Reflection", id), 404);
   publish("reflection.deleted");
   return new Response(null, { status: 204 });
+});
+
+// POST /:id/apply-template
+const applyTemplateBodySchema = z.object({
+  templateId: z.string().openapi({ description: "Template ID to apply" }),
+});
+
+const applyTemplateRoute = createRoute({
+  method: "post",
+  path: "/{id}/apply-template",
+  tags: ["Reflection"],
+  summary: "Apply a reflection template — prepend prompts as content headings",
+  operationId: "applyReflectionTemplate",
+  request: {
+    params: IdParam,
+    body: {
+      content: { "application/json": { schema: applyTemplateBodySchema } },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: ReflectionSchema } },
+      description: "Updated reflection with template prompts applied",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Reflection or template not found",
+    },
+  },
+});
+
+reflectionApiRouter.openapi(applyTemplateRoute, async (c) => {
+  const { id } = c.req.valid("param");
+  const { templateId } = c.req.valid("json");
+
+  const reflection = await getReflectionService().getById(id);
+  if (!reflection) return c.json(notFound("REFLECTION", id), 404);
+
+  const template = await getReflectionTemplateService().getById(templateId);
+  if (!template) {
+    return c.json(notFound("REFLECTION_TEMPLATE", templateId), 404);
+  }
+
+  const promptBlock = template.prompts
+    .map((p) => `## ${p}\n\n`)
+    .join("");
+  const existingContent = reflection.content ?? "";
+  const newContent = existingContent
+    ? `${promptBlock}\n---\n\n${existingContent}`
+    : promptBlock.trimEnd();
+
+  const updated = await getReflectionService().update(id, {
+    content: newContent,
+    templateId,
+  });
+  if (!updated) return c.json(notFound("REFLECTION", id), 404);
+
+  publish("reflection.updated");
+  return c.json(updated, 200);
 });
