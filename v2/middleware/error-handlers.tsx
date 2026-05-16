@@ -6,6 +6,7 @@ import { ErrorPage } from "../views/components/error-page.tsx";
 import { viewProps } from "./view-props.ts";
 import { log } from "../singletons/logger.ts";
 import type { AppVariables } from "../types/app.ts";
+import { serverError } from "../types/api.ts";
 
 type Env = { Variables: AppVariables };
 
@@ -33,7 +34,7 @@ export const notFoundHandler: NotFoundHandler<Env> = (c) => {
       404,
     );
   }
-  return c.json({ error: "NOT_FOUND", message: "Not found" }, 404);
+  return c.json({ error: "NOT_FOUND", message: "Not found", status: 404 }, 404);
 };
 
 export const errorHandler: ErrorHandler<Env> = (err, c) => {
@@ -56,7 +57,7 @@ export const errorHandler: ErrorHandler<Env> = (err, c) => {
     );
   }
   return c.json(
-    { error: "INTERNAL_ERROR", message: "An unexpected error occurred" },
+    serverError("An unexpected error occurred", { error: "INTERNAL_ERROR" }),
     500,
   );
 };

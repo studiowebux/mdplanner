@@ -1,6 +1,12 @@
 // GitHub route helpers — error mapping and portfolio repo resolution.
 
 import { getPortfolioService } from "../../../singletons/services.ts";
+import {
+  badGateway,
+  badRequest,
+  notFound,
+  unauthorized,
+} from "../../../types/api.ts";
 
 /**
  * Map GitHub service errors to HTTP responses via c.json().
@@ -16,21 +22,23 @@ export function githubError(
     msg.startsWith("GITHUB_REPO_NOT_CONFIGURED") ||
     msg.startsWith("GITHUB_REPO_INVALID")
   ) {
-    return c.json({ error: msg.split(":")[0], message: msg }, 400);
+    return c.json(badRequest(msg, { error: msg.split(":")[0] }), 400);
   }
   if (msg.includes("401")) {
     return c.json(
-      {
+      unauthorized("GitHub token is invalid or expired", {
         error: "GITHUB_UNAUTHORIZED",
-        message: "GitHub token is invalid or expired",
-      },
+      }),
       401,
     );
   }
   if (msg.includes("404")) {
-    return c.json({ error: "GITHUB_NOT_FOUND", message: msg }, 404);
+    return c.json(
+      notFound("GITHUB", msg, { error: "GITHUB_NOT_FOUND", message: msg }),
+      404,
+    );
   }
-  return c.json({ error: "GITHUB_ERROR", message: msg }, 502);
+  return c.json(badGateway(msg, { error: "GITHUB_ERROR" }), 502);
 }
 
 /**
@@ -47,20 +55,14 @@ export async function resolveRepo(
   const portfolioId = c.req.param("id");
   const item = await getPortfolioService().getById(portfolioId);
   if (!item) {
-    return c.json(
-      {
-        error: "PORTFOLIO_NOT_FOUND",
-        message: `Portfolio item ${portfolioId} not found`,
-      },
-      404,
-    );
+    return c.json(notFound("PORTFOLIO", portfolioId), 404);
   }
   if (!item.githubRepo) {
     return c.json(
-      {
-        error: "GITHUB_REPO_NOT_CONFIGURED",
-        message: `Portfolio item "${item.name}" has no githubRepo configured`,
-      },
+      badRequest(
+        `Portfolio item "${item.name}" has no githubRepo configured`,
+        { error: "GITHUB_REPO_NOT_CONFIGURED" },
+      ),
       400,
     );
   }

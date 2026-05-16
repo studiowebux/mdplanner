@@ -11,7 +11,13 @@ import {
   UpdateDnsDomainSchema,
   UpdateDnsRecordSchema,
 } from "../../../types/dns.types.ts";
-import { ErrorSchema, IdParam, IdWithIndexParam } from "../../../types/api.ts";
+import {
+  badGateway,
+  ErrorSchema,
+  IdParam,
+  IdWithIndexParam,
+  notFound,
+} from "../../../types/api.ts";
 
 export const dnsRouter = new OpenAPIHono();
 
@@ -69,10 +75,7 @@ dnsRouter.openapi(getDnsRoute, async (c) => {
     const domain = await getDnsService().getById(id);
     if (!domain) {
       return c.json(
-        {
-          error: "DNS_DOMAIN_NOT_FOUND",
-          message: `DNS domain ${id} not found`,
-        },
+        notFound("DNS_DOMAIN", id, { error: "DNS_DOMAIN_NOT_FOUND" }),
         404,
       );
     }
@@ -147,10 +150,7 @@ dnsRouter.openapi(updateDnsRoute, async (c) => {
     const domain = await getDnsService().update(id, data);
     if (!domain) {
       return c.json(
-        {
-          error: "DNS_DOMAIN_NOT_FOUND",
-          message: `DNS domain ${id} not found`,
-        },
+        notFound("DNS_DOMAIN", id, { error: "DNS_DOMAIN_NOT_FOUND" }),
         404,
       );
     }
@@ -184,10 +184,7 @@ dnsRouter.openapi(deleteDnsRoute, async (c) => {
     const ok = await getDnsService().delete(id);
     if (!ok) {
       return c.json(
-        {
-          error: "DNS_DOMAIN_NOT_FOUND",
-          message: `DNS domain ${id} not found`,
-        },
+        notFound("DNS_DOMAIN", id, { error: "DNS_DOMAIN_NOT_FOUND" }),
         404,
       );
     }
@@ -242,7 +239,7 @@ dnsRouter.openapi(syncCloudflareRoute, async (c) => {
         400,
       );
     }
-    return c.json({ error: "CLOUDFLARE_API_ERROR", message: msg }, 502);
+    return c.json(badGateway(msg, { error: "CLOUDFLARE_API_ERROR" }), 502);
   }
 });
 
@@ -276,10 +273,7 @@ dnsRouter.openapi(listDnsRecordsRoute, async (c) => {
     const domain = await getDnsService().getById(id);
     if (!domain) {
       return c.json(
-        {
-          error: "DNS_DOMAIN_NOT_FOUND",
-          message: `DNS domain ${id} not found`,
-        },
+        notFound("DNS_DOMAIN", id, { error: "DNS_DOMAIN_NOT_FOUND" }),
         404,
       );
     }
@@ -322,10 +316,7 @@ dnsRouter.openapi(addDnsRecordRoute, async (c) => {
     const domain = await getDnsService().addRecord(id, record);
     if (!domain) {
       return c.json(
-        {
-          error: "DNS_DOMAIN_NOT_FOUND",
-          message: `DNS domain ${id} not found`,
-        },
+        notFound("DNS_DOMAIN", id, { error: "DNS_DOMAIN_NOT_FOUND" }),
         404,
       );
     }
@@ -373,10 +364,7 @@ dnsRouter.openapi(updateDnsRecordRoute, async (c) => {
     );
     if (!domain) {
       return c.json(
-        {
-          error: "DNS_DOMAIN_NOT_FOUND",
-          message: `DNS domain ${id} not found`,
-        },
+        notFound("DNS_DOMAIN", id, { error: "DNS_DOMAIN_NOT_FOUND" }),
         404,
       );
     }
@@ -413,10 +401,7 @@ dnsRouter.openapi(deleteDnsRecordRoute, async (c) => {
     const domain = await getDnsService().deleteRecord(id, Number(index));
     if (!domain) {
       return c.json(
-        {
-          error: "DNS_DOMAIN_NOT_FOUND",
-          message: `DNS domain ${id} not found`,
-        },
+        notFound("DNS_DOMAIN", id, { error: "DNS_DOMAIN_NOT_FOUND" }),
         404,
       );
     }

@@ -13,7 +13,12 @@ import {
   QuoteSchema,
   UpdateQuoteSchema,
 } from "../../../types/quote.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  ErrorSchema,
+  IdParam,
+  invalidState,
+  notFound,
+} from "../../../types/api.ts";
 
 export const quotesRouter = new OpenAPIHono();
 
@@ -186,8 +191,8 @@ quotesRouter.post("/:id/submit-approval", async (c) => {
   if (!quote) return c.json(notFound("QUOTE", id), 404);
   if (quote.status !== "draft") {
     return c.json(
-      { error: "Only draft quotes can be submitted for approval" },
-      400,
+      invalidState("Only draft quotes can be submitted for approval"),
+      422,
     );
   }
   const updated = await service.update(id, {
@@ -207,8 +212,8 @@ quotesRouter.post("/:id/approve", async (c) => {
   if (!quote) return c.json(notFound("QUOTE", id), 404);
   if (quote.status !== "pending_approval") {
     return c.json(
-      { error: "Only quotes pending approval can be approved" },
-      400,
+      invalidState("Only quotes pending approval can be approved"),
+      422,
     );
   }
   const body = await c.req.json().catch(() => ({})) as {
@@ -235,8 +240,8 @@ quotesRouter.post("/:id/reject-approval", async (c) => {
   if (!quote) return c.json(notFound("QUOTE", id), 404);
   if (quote.status !== "pending_approval") {
     return c.json(
-      { error: "Only quotes pending approval can be rejected" },
-      400,
+      invalidState("Only quotes pending approval can be rejected"),
+      422,
     );
   }
   const body = await c.req.json().catch(() => ({})) as { notes?: string };
@@ -291,7 +296,7 @@ quotesRouter.post("/:id/send", async (c) => {
   const quote = await service.getById(id);
   if (!quote) return c.json(notFound("QUOTE", id), 404);
   if (quote.status !== "approved") {
-    return c.json({ error: "Only approved quotes can be sent" }, 400);
+    return c.json(invalidState("Only approved quotes can be sent"), 422);
   }
   const updated = await service.sendQuote(quote);
   if (!updated) return c.json(notFound("QUOTE", id), 404);
@@ -306,7 +311,7 @@ quotesRouter.post("/:id/accept", async (c) => {
   const quote = await service.getById(id);
   if (!quote) return c.json(notFound("QUOTE", id), 404);
   if (quote.status !== "sent") {
-    return c.json({ error: "Only sent quotes can be accepted" }, 400);
+    return c.json(invalidState("Only sent quotes can be accepted"), 422);
   }
   const updated = await service.update(id, {
     status: "accepted",
@@ -324,7 +329,7 @@ quotesRouter.post("/:id/reject", async (c) => {
   const quote = await service.getById(id);
   if (!quote) return c.json(notFound("QUOTE", id), 404);
   if (quote.status !== "sent") {
-    return c.json({ error: "Only sent quotes can be rejected" }, 400);
+    return c.json(invalidState("Only sent quotes can be rejected"), 422);
   }
   const updated = await service.update(id, {
     status: "rejected",
@@ -342,10 +347,10 @@ quotesRouter.post("/:id/to-invoice", async (c) => {
   const quote = await service.getById(id);
   if (!quote) return c.json(notFound("QUOTE", id), 404);
   if (quote.status !== "accepted") {
-    return c.json({ error: "Only accepted quotes can be converted" }, 400);
+    return c.json(invalidState("Only accepted quotes can be converted"), 422);
   }
   if (quote.convertedToInvoice) {
-    return c.json({ error: "Quote already converted to invoice" }, 400);
+    return c.json(invalidState("Quote already converted to invoice"), 422);
   }
 
   const nonOptionalItems = quote.lineItems

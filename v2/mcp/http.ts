@@ -6,6 +6,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { createMcpServer } from "./server.ts";
+import { methodNotAllowed, unauthorized } from "../types/api.ts";
 
 export interface McpHttpOptions {
   token?: string;
@@ -21,10 +22,7 @@ export function createMcpHonoRouter(options?: McpHttpOptions): Hono {
     const expected = `Bearer ${options.token}`;
     router.use("*", async (c, next) => {
       if (c.req.header("Authorization") !== expected) {
-        return c.json({
-          error: "UNAUTHORIZED",
-          message: "Invalid or missing token",
-        }, 401);
+        return c.json(unauthorized("Invalid or missing token"), 401);
       }
       await next();
     });
@@ -33,7 +31,9 @@ export function createMcpHonoRouter(options?: McpHttpOptions): Hono {
   if (options?.readOnly) {
     router.post("*", (c) =>
       c.json(
-        { error: "READ_ONLY_MODE", message: "Server is in read-only mode" },
+        methodNotAllowed("Server is in read-only mode", {
+          error: "READ_ONLY_MODE",
+        }),
         405,
       ));
   }

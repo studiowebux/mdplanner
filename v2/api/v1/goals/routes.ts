@@ -9,7 +9,7 @@ import {
   ListGoalOptionsSchema,
   UpdateGoalSchema,
 } from "../../../types/goal.types.ts";
-import { ErrorSchema, IdParam } from "../../../types/api.ts";
+import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
 
 export const goalsRouter = new OpenAPIHono();
 
@@ -65,7 +65,7 @@ goalsRouter.openapi(getGoalRoute, async (c) => {
     const goal = await getGoalService().getById(id);
     if (!goal) {
       return c.json(
-        { error: "GOAL_NOT_FOUND", message: `Goal ${id} not found` },
+        notFound("GOAL", id),
         404,
       );
     }
@@ -140,7 +140,7 @@ goalsRouter.openapi(updateGoalRoute, async (c) => {
     const goal = await getGoalService().update(id, data);
     if (!goal) {
       return c.json(
-        { error: "GOAL_NOT_FOUND", message: `Goal ${id} not found` },
+        notFound("GOAL", id),
         404,
       );
     }
@@ -174,7 +174,7 @@ goalsRouter.openapi(deleteGoalRoute, async (c) => {
     const ok = await getGoalService().delete(id);
     if (!ok) {
       return c.json(
-        { error: "GOAL_NOT_FOUND", message: `Goal ${id} not found` },
+        notFound("GOAL", id),
         404,
       );
     }

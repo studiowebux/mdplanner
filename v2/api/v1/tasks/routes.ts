@@ -32,7 +32,13 @@ import {
   UpdateCommentInputSchema,
   UpdateTaskSchema,
 } from "../../../types/task.types.ts";
-import { ErrorSchema, IdParam } from "../../../types/api.ts";
+import {
+  badRequest,
+  ErrorSchema,
+  IdParam,
+  notFound,
+  payloadTooLarge,
+} from "../../../types/api.ts";
 import { sortTasks } from "../../../domains/task/constants.tsx";
 import { deleteUiStateKeys } from "../../../utils/ui-state.ts";
 import type { AppVariables } from "../../../types/app.ts";
@@ -177,10 +183,7 @@ tasksRouter.openapi(
     const { id } = c.req.valid("param");
     const task = await getTaskService().getById(id);
     if (!task) {
-      return c.json({
-        error: "TASK_NOT_FOUND",
-        message: `Task ${id} not found`,
-      }, 404);
+      return c.json(notFound("TASK", id), 404);
     }
     return c.json(task, 200);
   },
@@ -258,10 +261,7 @@ tasksRouter.openapi(
         agentId,
       );
       if (!task) {
-        return c.json({
-          error: "TASK_NOT_FOUND",
-          message: `Task ${id} not found`,
-        }, 404);
+        return c.json(notFound("TASK", id), 404);
       }
       publish("task.updated");
       return c.json(task, 200);
@@ -269,7 +269,10 @@ tasksRouter.openapi(
       if (
         err instanceof RevisionConflictError || err instanceof ClaimGuardError
       ) {
-        return c.json({ error: err.code, message: err.message }, 409);
+        return c.json(
+          { error: err.code, message: err.message, status: 409 },
+          409,
+        );
       }
       throw err;
     }
@@ -297,10 +300,7 @@ tasksRouter.openapi(
     const { id } = c.req.valid("param");
     const ok = await getTaskService().delete(id);
     if (!ok) {
-      return c.json({
-        error: "TASK_NOT_FOUND",
-        message: `Task ${id} not found`,
-      }, 404);
+      return c.json(notFound("TASK", id), 404);
     }
     publish("task.deleted");
     return new Response(null, { status: 204 });
@@ -347,16 +347,16 @@ tasksRouter.openapi(
         expectedSection,
       );
       if (!task) {
-        return c.json({
-          error: "TASK_NOT_FOUND",
-          message: `Task ${id} not found`,
-        }, 404);
+        return c.json(notFound("TASK", id), 404);
       }
       publish("task.updated");
       return c.json(task, 200);
     } catch (err) {
       if (err instanceof ClaimConflictError) {
-        return c.json({ error: err.code, message: err.message }, 409);
+        return c.json(
+          { error: err.code, message: err.message, status: 409 },
+          409,
+        );
       }
       throw err;
     }
@@ -394,10 +394,7 @@ tasksRouter.openapi(
     const { section } = c.req.valid("json");
     const task = await getTaskService().moveTask(id, section);
     if (!task) {
-      return c.json({
-        error: "TASK_NOT_FOUND",
-        message: `Task ${id} not found`,
-      }, 404);
+      return c.json(notFound("TASK", id), 404);
     }
     publish("task.updated");
     return c.json(task, 200);
@@ -436,10 +433,7 @@ tasksRouter.openapi(
 
     const task = await getTaskService().getById(id);
     if (!task) {
-      return c.json({
-        error: "TASK_NOT_FOUND",
-        message: `Task ${id} not found`,
-      }, 404);
+      return c.json(notFound("TASK", id), 404);
     }
 
     // Build the current display order for the section, then splice the
@@ -473,10 +467,7 @@ tasksRouter.openapi(
 
     const updated = await getTaskService().getById(id);
     if (!updated) {
-      return c.json({
-        error: "TASK_NOT_FOUND",
-        message: `Task ${id} not found`,
-      }, 404);
+      return c.json(notFound("TASK", id), 404);
     }
 
     // Clear any column sort from the cookie so F5 respects drag order.
@@ -545,10 +536,7 @@ tasksRouter.openapi(
       resolvedMetadata,
     );
     if (!comment) {
-      return c.json({
-        error: "TASK_NOT_FOUND",
-        message: `Task ${id} not found`,
-      }, 404);
+      return c.json(notFound("TASK", id), 404);
     }
     publish("task.updated");
     return c.json(comment, 201);
@@ -586,17 +574,11 @@ tasksRouter.openapi(
     const { body } = c.req.valid("json");
     const task = await getTaskService().getById(id);
     if (!task) {
-      return c.json({
-        error: "TASK_NOT_FOUND",
-        message: `Task ${id} not found`,
-      }, 404);
+      return c.json(notFound("TASK", id), 404);
     }
     const comment = task.comments?.find((cm) => cm.id === commentId);
     if (!comment) {
-      return c.json({
-        error: "COMMENT_NOT_FOUND",
-        message: `Comment ${commentId} not found`,
-      }, 404);
+      return c.json(notFound("COMMENT", commentId), 404);
     }
     const updated = { ...comment, body };
     const comments = (task.comments ?? []).map((cm) =>
@@ -629,16 +611,10 @@ tasksRouter.openapi(
     const { id, commentId } = c.req.valid("param");
     const task = await getTaskService().getById(id);
     if (!task) {
-      return c.json({
-        error: "TASK_NOT_FOUND",
-        message: `Task ${id} not found`,
-      }, 404);
+      return c.json(notFound("TASK", id), 404);
     }
     if (!task.comments?.find((cm) => cm.id === commentId)) {
-      return c.json({
-        error: "COMMENT_NOT_FOUND",
-        message: `Comment ${commentId} not found`,
-      }, 404);
+      return c.json(notFound("COMMENT", commentId), 404);
     }
     const comments = (task.comments ?? []).filter((cm) => cm.id !== commentId);
     await getTaskService().update(id, { comments });
@@ -678,10 +654,7 @@ tasksRouter.openapi(
     const { paths } = c.req.valid("json");
     const task = await getTaskService().addAttachments(id, paths);
     if (!task) {
-      return c.json({
-        error: "TASK_NOT_FOUND",
-        message: `Task ${id} not found`,
-      }, 404);
+      return c.json(notFound("TASK", id), 404);
     }
     publish("task.updated");
     return c.json(task, 200);
@@ -727,10 +700,7 @@ tasksRouter.openapi(
       artifactUrls,
     );
     if (!task) {
-      return c.json({
-        error: "TASK_NOT_FOUND",
-        message: `Task ${id} not found`,
-      }, 404);
+      return c.json(notFound("TASK", id), 404);
     }
     publish("task.updated");
     return c.json(task, 200);
@@ -768,10 +738,7 @@ tasksRouter.openapi(
     const { decidedBy, feedback } = c.req.valid("json");
     const task = await getTaskService().approveTask(id, decidedBy, feedback);
     if (!task) {
-      return c.json({
-        error: "TASK_NOT_FOUND",
-        message: `Task ${id} not found`,
-      }, 404);
+      return c.json(notFound("TASK", id), 404);
     }
     publish("task.updated");
     return c.json(task, 200);
@@ -814,10 +781,7 @@ tasksRouter.openapi(
       rejectionType,
     );
     if (!task) {
-      return c.json({
-        error: "TASK_NOT_FOUND",
-        message: `Task ${id} not found`,
-      }, 404);
+      return c.json(notFound("TASK", id), 404);
     }
     publish("task.updated");
     return c.json(task, 200);
@@ -861,10 +825,7 @@ tasksRouter.openapi(
     const data = c.req.valid("json");
     const entry = await getTaskService().addTimeEntry(id, data);
     if (!entry) {
-      return c.json({
-        error: "TASK_NOT_FOUND",
-        message: `Task ${id} not found`,
-      }, 404);
+      return c.json(notFound("TASK", id), 404);
     }
     publish("task.updated");
     return c.json(entry, 201);
@@ -892,10 +853,7 @@ tasksRouter.openapi(
     const { id, entryId } = c.req.valid("param");
     const ok = await getTaskService().deleteTimeEntry(id, entryId);
     if (!ok) {
-      return c.json({
-        error: "NOT_FOUND",
-        message: `Entry ${entryId} not found on task ${id}`,
-      }, 404);
+      return c.json(notFound("TIME_ENTRY", entryId), 404);
     }
     publish("task.updated");
     return new Response(null, { status: 204 });
@@ -913,21 +871,15 @@ tasksRouter.post("/:id/upload", async (c) => {
   const id = c.req.param("id");
   const task = await getTaskService().getById(id);
   if (!task) {
-    return c.json(
-      { error: "TASK_NOT_FOUND", message: `Task ${id} not found` },
-      404,
-    );
+    return c.json(notFound("TASK", id), 404);
   }
   const body = await c.req.parseBody();
   const file = body["file"];
   if (!file || typeof file === "string") {
-    return c.json({ error: "BAD_REQUEST", message: "No file provided" }, 400);
+    return c.json(badRequest("No file provided"), 400);
   }
   if (file.size > MAX_UPLOAD_BYTES) {
-    return c.json(
-      { error: "FILE_TOO_LARGE", message: "Max 10 MB per file" },
-      413,
-    );
+    return c.json(payloadTooLarge("Max 10 MB per file"), 413);
   }
   const uploadsDir = `${getProjectDir()}/uploads/${id}`;
   await Deno.mkdir(uploadsDir, { recursive: true });
@@ -938,10 +890,7 @@ tasksRouter.post("/:id/upload", async (c) => {
   const relPath = `uploads/${id}/${safeName}`;
   const updated = await getTaskService().addAttachments(id, [relPath]);
   if (!updated) {
-    return c.json(
-      { error: "TASK_NOT_FOUND", message: `Task ${id} not found` },
-      404,
-    );
+    return c.json(notFound("TASK", id), 404);
   }
   publish("task.updated");
   return c.json(updated, 200);
@@ -957,7 +906,7 @@ tasksRouter.get("/:id/upload/:filename", async (c) => {
   try {
     bytes = await Deno.readFile(filePath) as Uint8Array<ArrayBuffer>;
   } catch {
-    return c.json({ error: "NOT_FOUND", message: "File not found" }, 404);
+    return c.json(notFound("FILE", "not found"), 404);
   }
   return new Response(bytes, {
     headers: {
@@ -976,7 +925,7 @@ tasksRouter.delete("/:id/upload/:filename", async (c) => {
   try {
     await Deno.remove(filePath);
   } catch {
-    return c.json({ error: "NOT_FOUND", message: "File not found" }, 404);
+    return c.json(notFound("FILE", "not found"), 404);
   }
   const taskAfter = await getTaskService().getById(id);
   if (taskAfter) {

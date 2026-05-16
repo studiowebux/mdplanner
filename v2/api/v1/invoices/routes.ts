@@ -9,7 +9,12 @@ import {
   ListInvoiceOptionsSchema,
   UpdateInvoiceSchema,
 } from "../../../types/invoice.types.ts";
-import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
+import {
+  ErrorSchema,
+  IdParam,
+  invalidState,
+  notFound,
+} from "../../../types/api.ts";
 
 export const invoicesRouter = new OpenAPIHono();
 
@@ -185,7 +190,7 @@ invoicesRouter.post("/:id/send", async (c) => {
   const invoice = await service.getById(id);
   if (!invoice) return c.json(notFound("INVOICE", id), 404);
   if (invoice.status !== "draft") {
-    return c.json({ error: "Only draft invoices can be sent" }, 400);
+    return c.json(invalidState("Only draft invoices can be sent"), 422);
   }
 
   const now = new Date().toISOString();

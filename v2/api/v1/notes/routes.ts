@@ -9,7 +9,7 @@ import {
   NoteSchema,
   UpdateNoteSchema,
 } from "../../../types/note.types.ts";
-import { ErrorSchema, IdParam } from "../../../types/api.ts";
+import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
 
 export const notesRouter = new OpenAPIHono();
 
@@ -69,7 +69,7 @@ notesRouter.openapi(getNoteRoute, async (c) => {
     const note = await getNoteService().getById(id);
     if (!note) {
       return c.json(
-        { error: "NOTE_NOT_FOUND", message: `Note ${id} not found` },
+        notFound("NOTE", id),
         404,
       );
     }
@@ -144,7 +144,7 @@ notesRouter.openapi(updateNoteRoute, async (c) => {
     const note = await getNoteService().update(id, data);
     if (!note) {
       return c.json(
-        { error: "NOTE_NOT_FOUND", message: `Note ${id} not found` },
+        notFound("NOTE", id),
         404,
       );
     }
@@ -180,7 +180,7 @@ notesRouter.openapi(deleteNoteRoute, async (c) => {
     const ok = await getNoteService().delete(id);
     if (!ok) {
       return c.json(
-        { error: "NOTE_NOT_FOUND", message: `Note ${id} not found` },
+        notFound("NOTE", id),
         404,
       );
     }

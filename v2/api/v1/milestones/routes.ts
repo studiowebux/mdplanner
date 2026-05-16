@@ -9,7 +9,7 @@ import {
   MilestoneSchema,
   UpdateMilestoneSchema,
 } from "../../../types/milestone.types.ts";
-import { ErrorSchema, IdParam } from "../../../types/api.ts";
+import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
 
 export const milestonesRouter = new OpenAPIHono();
 
@@ -69,7 +69,7 @@ milestonesRouter.openapi(getMilestoneRoute, async (c) => {
     const m = await getMilestoneService().getById(id);
     if (!m) {
       return c.json(
-        { error: "MILESTONE_NOT_FOUND", message: `Milestone ${id} not found` },
+        notFound("MILESTONE", id),
         404,
       );
     }
@@ -144,7 +144,7 @@ milestonesRouter.openapi(updateMilestoneRoute, async (c) => {
     const m = await getMilestoneService().update(id, data);
     if (!m) {
       return c.json(
-        { error: "MILESTONE_NOT_FOUND", message: `Milestone ${id} not found` },
+        notFound("MILESTONE", id),
         404,
       );
     }
@@ -180,7 +180,7 @@ milestonesRouter.openapi(deleteMilestoneRoute, async (c) => {
     const ok = await getMilestoneService().delete(id);
     if (!ok) {
       return c.json(
-        { error: "MILESTONE_NOT_FOUND", message: `Milestone ${id} not found` },
+        notFound("MILESTONE", id),
         404,
       );
     }

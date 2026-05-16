@@ -10,7 +10,7 @@ import {
   PersonWithChildrenSchema,
   UpdatePersonSchema,
 } from "../../../types/person.types.ts";
-import { ErrorSchema, IdParam } from "../../../types/api.ts";
+import { ErrorSchema, IdParam, notFound } from "../../../types/api.ts";
 import { stringArray } from "../../../types/shared.types.ts";
 
 export const peopleRouter = new OpenAPIHono();
@@ -151,7 +151,7 @@ peopleRouter.openapi(getPersonRoute, async (c) => {
     const person = await getPeopleService().getById(id);
     if (!person) {
       return c.json(
-        { error: "PERSON_NOT_FOUND", message: `Person ${id} not found` },
+        notFound("PERSON", id),
         404,
       );
     }
@@ -187,7 +187,7 @@ peopleRouter.openapi(getReportsRoute, async (c) => {
     const person = await getPeopleService().getById(id);
     if (!person) {
       return c.json(
-        { error: "PERSON_NOT_FOUND", message: `Person ${id} not found` },
+        notFound("PERSON", id),
         404,
       );
     }
@@ -263,7 +263,7 @@ peopleRouter.openapi(updatePersonRoute, async (c) => {
     const person = await getPeopleService().update(id, data);
     if (!person) {
       return c.json(
-        { error: "PERSON_NOT_FOUND", message: `Person ${id} not found` },
+        notFound("PERSON", id),
         404,
       );
     }
@@ -297,7 +297,7 @@ peopleRouter.openapi(deletePersonRoute, async (c) => {
     const ok = await getPeopleService().delete(id);
     if (!ok) {
       return c.json(
-        { error: "PERSON_NOT_FOUND", message: `Person ${id} not found` },
+        notFound("PERSON", id),
         404,
       );
     }
@@ -355,7 +355,7 @@ peopleRouter.openapi(heartbeatRoute, async (c) => {
     const ok = await getPeopleService().heartbeat(id, status, currentTaskId);
     if (!ok) {
       return c.json(
-        { error: "PERSON_NOT_FOUND", message: `Person ${id} not found` },
+        notFound("PERSON", id),
         404,
       );
     }

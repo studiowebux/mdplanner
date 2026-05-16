@@ -115,3 +115,47 @@ export const forbidden = (
   status: 403,
   ...extra,
 });
+
+/** 413 — payload exceeds size limit. */
+export const payloadTooLarge = (
+  msg: string,
+  extra?: Partial<AppError>,
+): AppError => ({
+  error: "PAYLOAD_TOO_LARGE",
+  message: msg,
+  status: 413,
+  ...extra,
+});
+
+/** 502 — upstream/external service error. */
+export const badGateway = (
+  msg: string,
+  extra?: Partial<AppError>,
+): AppError => ({
+  error: "BAD_GATEWAY",
+  message: msg,
+  status: 502,
+  ...extra,
+});
+
+/** 401 — not authenticated. */
+export const unauthorized = (
+  msg: string,
+  extra?: Partial<AppError>,
+): AppError => ({
+  error: "UNAUTHORIZED",
+  message: msg,
+  status: 401,
+  ...extra,
+});
+
+/** 405 — method not allowed (e.g. write on a read-only server). */
+export const methodNotAllowed = (
+  msg: string,
+  extra?: Partial<AppError>,
+): AppError => ({
+  error: "METHOD_NOT_ALLOWED",
+  message: msg,
+  status: 405,
+  ...extra,
+});

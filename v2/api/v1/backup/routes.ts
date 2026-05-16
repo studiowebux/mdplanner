@@ -8,6 +8,7 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import type { Context } from "hono";
 import { APP_VERSION } from "../../../constants/mod.ts";
+import { badRequest } from "../../../types/api.ts";
 import { registerBackupDomains } from "./domains.ts";
 import { getDomain, getDomains, type ImportDomainResult } from "./registry.ts";
 
@@ -15,7 +16,7 @@ function errorResponse(c: Context, message: string) {
   if (c.req.header("HX-Request")) {
     return c.html(`<p class="settings-data__warning">${message}</p>`, 400);
   }
-  return c.json({ error: message }, 400);
+  return c.json(badRequest(message), 400);
 }
 
 registerBackupDomains();

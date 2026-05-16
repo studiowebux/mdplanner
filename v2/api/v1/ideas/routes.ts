@@ -210,7 +210,7 @@ ideasRouter.openapi(linkIdeasRoute, async (c) => {
     const ok = await getIdeaService().linkIdeas(id, targetId);
     if (!ok) {
       return c.json(
-        { error: "IDEA_NOT_FOUND", message: "One or both ideas not found" },
+        notFound("IDEA", id, { message: "One or both ideas not found" }),
         404,
       );
     }
@@ -251,7 +251,7 @@ ideasRouter.openapi(unlinkIdeasRoute, async (c) => {
     const ok = await getIdeaService().unlinkIdeas(id, targetId);
     if (!ok) {
       return c.json(
-        { error: "IDEA_NOT_FOUND", message: "One or both ideas not found" },
+        notFound("IDEA", id, { message: "One or both ideas not found" }),
         404,
       );
     }
