@@ -4,11 +4,6 @@ import { AppShell } from "../shell/app-shell.tsx";
 import type { Actor } from "../../types/actor.ts";
 import type { Person } from "../../types/person.types.ts";
 
-// Runs before CSS loads — must stay inline to prevent FOUC.
-// Kept minimal deliberately; nonce is required for CSP compliance.
-const INIT_SCRIPT =
-  `(function(){var d=document.documentElement;var s=localStorage.getItem("darkMode");var p=window.matchMedia("(prefers-color-scheme: dark)").matches;if(s==="true"||(s===null&&p)){d.classList.add("dark");}if(localStorage.getItem("sidebarCollapsed")==="true"){d.classList.add("sidebar-collapsed");}if(localStorage.getItem("noAnimations")==="true"){d.classList.add("no-animations");}if(localStorage.getItem("fontMono")==="true"){d.classList.add("font-mono");}if(localStorage.getItem("focusMode")==="true"){d.classList.add("focus-mode");}})();`;
-
 type Props = {
   title?: string;
   nonce?: string;
@@ -73,10 +68,7 @@ export const MainLayout: FC<Props> = (
             useTemplateFragments: true,
           })}
         />
-        <script
-          nonce={nonce}
-          dangerouslySetInnerHTML={{ __html: INIT_SCRIPT }}
-        />
+        <script src="/js/init.js" nonce={nonce} />
         <link rel="stylesheet" href="/css/index.css" />
         <link rel="stylesheet" href="/css/shell.css" />
         <link rel="stylesheet" href="/css/components.css" />

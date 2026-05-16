@@ -15,9 +15,6 @@ import { INVOICE_STATUS_VARIANTS } from "../domains/invoice/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { BillingDocumentHeader } from "./components/billing-document-header.tsx";
 
-const PRINT_SCRIPT =
-  `window.addEventListener("load",function(){setTimeout(function(){window.print();},50);});`;
-
 type Props = {
   invoice: Invoice;
   displayStatus: string;
@@ -41,10 +38,7 @@ export const InvoicePrintView: FC<Props> = (
         <link rel="stylesheet" href="/css/components.css" />
         <link rel="stylesheet" href="/css/views/invoices.css" />
         <link rel="stylesheet" href="/css/views/billing.css" />
-        <script
-          nonce={nonce}
-          dangerouslySetInnerHTML={{ __html: PRINT_SCRIPT }}
-        />
+        <script src="/js/invoice-print.js" nonce={nonce} />
       </head>
       <body>
         <main class="invoice-print">
