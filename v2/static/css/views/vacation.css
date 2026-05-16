@@ -1,5 +1,14 @@
 /* Vacation request domain styles */
 
+.vacation-summary {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-sm);
+  border-left: var(--border-width-lg) solid var(--color-accent);
+}
+
 .vacation-card {
   display: flex;
   flex-direction: column;

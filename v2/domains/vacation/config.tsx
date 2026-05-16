@@ -36,6 +36,44 @@ export const vacationConfig: DomainConfig<
   assigneeField: "personId",
   assigneeIsId: true,
 
+  topSlot: async () => {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+      .toISOString()
+      .slice(0, 10);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+      .toISOString()
+      .slice(0, 10);
+    const items = await getVacationService().list();
+    const active = items.filter(
+      (r) =>
+        r.status !== "rejected" &&
+        r.endDate >= monthStart &&
+        r.startDate <= monthEnd,
+    );
+    let teamDays = 0;
+    for (const r of active) {
+      const start = new Date(
+        Math.max(
+          new Date(r.startDate).getTime(),
+          new Date(monthStart).getTime(),
+        ),
+      );
+      const end = new Date(
+        Math.min(new Date(r.endDate).getTime(), new Date(monthEnd).getTime()),
+      );
+      teamDays += Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
+    }
+    return (
+      <p class="vacation-summary">
+        <strong>{teamDays}</strong> team-day{teamDays !== 1 ? "s" : ""}{" "}
+        off this month ({active.length} request{active.length !== 1 ? "s" : ""}
+        {" "}
+        pending or approved)
+      </p>
+    );
+  },
+
   filters: [
     { name: "status", label: "All statuses", options: [] },
     { name: "type", label: "All types", options: [] },

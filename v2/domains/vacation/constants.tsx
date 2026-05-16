@@ -5,7 +5,6 @@ import {
   VACATION_STATUSES,
   VACATION_TYPES,
 } from "../../types/vacation.types.ts";
-import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import {
   type BadgeVariant,
   statusBadgeRenderer,
@@ -24,7 +23,58 @@ function computeDays(startDate: string, endDate: string): number {
   return Math.round((end - start) / 86400000) + 1;
 }
 
-const actionBtns = createActionBtns("vacation", "vacation-form-container");
+function vacationActionBtns(
+  _value: unknown,
+  row: Record<string, unknown>,
+): unknown {
+  return (
+    <div class="domain-card__actions">
+      <a class="btn btn--secondary btn--sm" href={`/vacation/${row.id}`}>
+        View
+      </a>
+      <button
+        class="btn btn--secondary btn--sm"
+        type="button"
+        hx-get={`/vacation/${row.id}/edit`}
+        hx-target="#vacation-form-container"
+        hx-swap="innerHTML"
+      >
+        Edit
+      </button>
+      {row.status === "pending" && (
+        <>
+          <button
+            class="btn btn--success btn--sm"
+            type="button"
+            hx-post={`/vacation/${row.id}/approve`}
+            hx-swap="none"
+            hx-confirm="Approve this request?"
+          >
+            Approve
+          </button>
+          <button
+            class="btn btn--warning btn--sm"
+            type="button"
+            hx-post={`/vacation/${row.id}/reject`}
+            hx-swap="none"
+            hx-confirm="Reject this request?"
+          >
+            Reject
+          </button>
+        </>
+      )}
+      <button
+        class="btn btn--danger btn--sm"
+        type="button"
+        hx-delete={`/vacation/${row.id}`}
+        hx-confirm={`Delete request for "${row.personId}"? This cannot be undone.`}
+        hx-swap="none"
+      >
+        Delete
+      </button>
+    </div>
+  );
+}
 
 export const VACATION_TABLE_COLUMNS: ColumnDef[] = [
   {
@@ -48,7 +98,7 @@ export const VACATION_TABLE_COLUMNS: ColumnDef[] = [
     sortable: true,
     render: statusBadgeRenderer(VACATION_STATUS_VARIANTS),
   },
-  { key: "_actions", label: "", render: actionBtns },
+  { key: "_actions", label: "", render: vacationActionBtns },
 ];
 
 export const VACATION_FORM_FIELDS: FieldDef[] = [
