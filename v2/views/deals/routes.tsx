@@ -28,7 +28,14 @@ dealsRouter.post("/:id/stage", async (c) => {
   publish("deal.updated");
   return new Response(null, {
     status: 204,
-    headers: { "HX-Trigger": hxTrigger("success", `Moved to ${stage}`) },
+    headers: {
+      "HX-Trigger": hxTrigger("success", `Moved to ${stage}`),
+      "HX-Location": JSON.stringify({
+        path: "/deals/view",
+        target: "#deals-view",
+        swap: "outerHTML",
+      }),
+    },
   });
 });
 
