@@ -49,6 +49,7 @@ import { brainstormsRouter } from "./brainstorms/routes.tsx";
 import { brainstormTemplatesRouter } from "./brainstorm-templates/routes.tsx";
 import { reflectionTemplatesRouter } from "./reflection-templates/routes.tsx";
 import { onboardingRouter } from "./onboarding/routes.tsx";
+import { onboardingTemplatesRouter } from "./onboarding-templates/routes.tsx";
 import { briefsRouter } from "./briefs/routes.tsx";
 import { retrospectivesRouter } from "./retrospectives/routes.tsx";
 import { meetingsRouter as meetingsViewRouter } from "./meetings/routes.tsx";
@@ -67,6 +68,7 @@ import { ArrayTableRow } from "../components/ui/form-builder.tsx";
 import { BRAINSTORM_FORM_FIELDS } from "../domains/brainstorm/constants.tsx";
 import { INVOICE_FORM_FIELDS } from "../domains/invoice/constants.tsx";
 import { MKTPLAN_FORM_FIELDS } from "../domains/marketing-plan/constants.tsx";
+import { ONBOARDING_TEMPLATE_FORM_FIELDS } from "../domains/onboarding-template/constants.tsx";
 import { MEETING_FORM_FIELDS } from "../domains/meeting/constants.tsx";
 import { PORTFOLIO_FORM_FIELDS } from "../domains/portfolio/config.tsx";
 import { QUOTE_FORM_FIELDS } from "../domains/quote/constants.tsx";
@@ -414,6 +416,7 @@ views.route("/brainstorms", brainstormsRouter);
 views.route("/brainstorm-templates", brainstormTemplatesRouter);
 views.route("/reflection-templates", reflectionTemplatesRouter);
 views.route("/onboarding", onboardingRouter);
+views.route("/onboarding-templates", onboardingTemplatesRouter);
 views.route("/briefs", briefsRouter);
 views.route("/retrospectives", retrospectivesRouter);
 views.route("/meetings", meetingsViewRouter);
@@ -437,6 +440,7 @@ for (
     BRAINSTORM_FORM_FIELDS,
     PORTFOLIO_FORM_FIELDS,
     PEOPLE_FORM_FIELDS,
+    ONBOARDING_TEMPLATE_FORM_FIELDS,
   ]
 ) {
   for (const field of fields) {

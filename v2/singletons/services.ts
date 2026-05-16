@@ -116,6 +116,9 @@ import { registerReflectionTemplateEntity } from "../domains/reflection-template
 import { OnboardingRepository } from "../repositories/onboarding.repository.ts";
 import { OnboardingService } from "../services/onboarding.service.ts";
 import { registerOnboardingEntity } from "../domains/onboarding/cache.ts";
+import { OnboardingTemplateRepository } from "../repositories/onboarding-template.repository.ts";
+import { OnboardingTemplateService } from "../services/onboarding-template.service.ts";
+import { registerOnboardingTemplateEntity } from "../domains/onboarding-template/cache.ts";
 import { MindmapRepository } from "../repositories/mindmap.repository.ts";
 import { MindmapService } from "../services/mindmap.service.ts";
 import { registerMindmapEntity } from "../domains/mindmap/cache.ts";
@@ -258,6 +261,12 @@ export function initServices(
   );
   const onboardingRepo = new OnboardingRepository(projectDir);
   _set(_svc, "onboarding", new OnboardingService(onboardingRepo));
+  const onboardingTemplateRepo = new OnboardingTemplateRepository(projectDir);
+  _set(
+    _svc,
+    "onboardingTemplate",
+    new OnboardingTemplateService(onboardingTemplateRepo),
+  );
   const financeRepo = new FinanceRepository(projectDir);
   _set(_svc, "finance", new FinanceService(financeRepo));
   const billingRateRepo = new BillingRateRepository(projectDir);
@@ -353,6 +362,7 @@ export function initServices(
     registerReflectionEntity(reflectionRepo);
     registerReflectionTemplateEntity(reflectionTemplateRepo);
     registerOnboardingEntity(onboardingRepo);
+    registerOnboardingTemplateEntity(onboardingTemplateRepo);
     registerFinanceEntity(financeRepo);
     registerInvestorEntity(investorRepo);
 
@@ -390,6 +400,7 @@ export function initServices(
     reflectionRepo.setCacheDb(cacheDb);
     reflectionTemplateRepo.setCacheDb(cacheDb);
     onboardingRepo.setCacheDb(cacheDb);
+    onboardingTemplateRepo.setCacheDb(cacheDb);
     financeRepo.setCacheDb(cacheDb);
     mindmapRepo.setCacheDb(cacheDb);
     fishboneRepo.setCacheDb(cacheDb);
@@ -547,6 +558,10 @@ export function getReflectionTemplateService(): ReflectionTemplateService {
 
 export function getOnboardingService(): OnboardingService {
   return _get<OnboardingService>(_svc, "onboarding");
+}
+
+export function getOnboardingTemplateService(): OnboardingTemplateService {
+  return _get<OnboardingTemplateService>(_svc, "onboardingTemplate");
 }
 
 export function getFinanceService(): FinanceService {
