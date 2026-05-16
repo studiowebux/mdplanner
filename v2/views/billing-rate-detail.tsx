@@ -38,7 +38,7 @@ export const BillingRateDetailView: FC<
         <BackButton href="/billing-rates" label="Back to Billing Rates" />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section billing-rate-detail__header">
+        <header class="detail-section detail-header billing-rate-detail__header">
           <div class="detail-title-row billing-rate-detail__title-row">
             <h1 class="detail-title billing-rate-detail__title">{rate.name}</h1>
             {rate.isDefault && <span class="badge badge--green">Default</span>}

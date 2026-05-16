@@ -47,13 +47,6 @@
    Detail view
    ------------------------------------------------------------------------- */
 
-.person-detail__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-md);
-}
-
 .person-detail__identity {
   display: flex;
   align-items: center;

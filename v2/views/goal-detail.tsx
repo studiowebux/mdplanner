@@ -85,7 +85,7 @@ export const GoalDetailView: FC<
         <BackButton href="/goals" label="Back to Goals" />
 
         {/* ── Header ─────────────────────────────────────────────── */}
-        <header class="detail-section goal-detail__header">
+        <header class="detail-section detail-header goal-detail__header">
           <div class="detail-title-row goal-detail__title-row">
             <h1 class="detail-title goal-detail__title">{goal.title}</h1>
             <span class={badgeClass(GOAL_STATUS_VARIANTS, goal.status)}>

@@ -37,7 +37,7 @@ export const BrainstormDetailView: FC<
         <BackButton href="/brainstorms" label="Back to Brainstorms" />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section brainstorm-detail__header">
+        <header class="detail-section detail-header brainstorm-detail__header">
           <div class="detail-title-row brainstorm-detail__title-row">
             <h1 class="detail-title brainstorm-detail__title">
               {brainstorm.title}

@@ -40,7 +40,7 @@ export const PersonDetailView: FC<Props> = (
         <main id="person-detail" class="detail-view person-detail">
           <BackButton href="/people" label="Back to people" />
 
-          <header class="person-detail__header">
+          <header class="detail-header person-detail__header">
             <div class="person-detail__identity">
               <span
                 class={`person-card__avatar person-card__avatar--${

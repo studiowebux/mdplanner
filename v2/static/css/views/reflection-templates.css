@@ -5,14 +5,6 @@
    Detail view
 --------------------------------------------------------------------------- */
 
-.rtemplate-detail__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-md);
-  flex-wrap: wrap;
-}
-
 .rtemplate-detail__title-row {
   display: flex;
   flex-direction: column;

@@ -328,7 +328,7 @@ export const MeetingDetailView: FC<
         <BackButton href="/meetings" label="Back to Meetings" />
 
         {/* -- Header ----------------------------------------------------- */}
-        <header class="detail-section meeting-detail__header">
+        <header class="detail-section detail-header meeting-detail__header">
           <div class="detail-title-row">
             <h1 class="detail-title">{meeting.title}</h1>
           </div>

@@ -30,7 +30,7 @@ export const ReflectionTemplateDetailView: FC<
         />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section rtemplate-detail__header">
+        <header class="detail-section detail-header rtemplate-detail__header">
           <div class="rtemplate-detail__title-row">
             <h1 class="detail-title rtemplate-detail__title">
               {template.name}

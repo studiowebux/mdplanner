@@ -151,7 +151,7 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
     <main id="dns-detail-root" class="detail-view dns-detail">
       <BackButton href="/dns" label="Back to DNS" />
 
-      <header class="detail-section dns-detail__header">
+      <header class="detail-section detail-header dns-detail__header">
         <div class="detail-title-row dns-detail__title-row">
           <h1 class="detail-title dns-detail__title">{domain.domain}</h1>
           {domain.status && (

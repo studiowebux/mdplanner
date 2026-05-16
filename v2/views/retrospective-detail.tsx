@@ -51,7 +51,7 @@ export const RetrospectiveDetailView: FC<
         <BackButton href="/retrospectives" label="Back to Retrospectives" />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section retro-detail__header">
+        <header class="detail-section detail-header retro-detail__header">
           <div class="detail-title-row">
             <h1 class="detail-title">{retro.title}</h1>
             <span

@@ -32,7 +32,7 @@ export const ReflectionDetailView: FC<ViewProps & { item: Reflection }> = (
       <main id="reflection-detail-root" class="detail-view reflection-detail">
         <BackButton href="/reflections" label="Back to Reflections" />
 
-        <header class="detail-section reflection-detail__header">
+        <header class="detail-section detail-header reflection-detail__header">
           <div>
             <h1 class="detail-title">{reflection.title}</h1>
             <div class="reflection-detail__badges">

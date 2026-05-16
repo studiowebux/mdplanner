@@ -59,7 +59,7 @@ export const BriefDetailView: FC<
         <BackButton href="/briefs" label="Back to Briefs" />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section brief-detail__header">
+        <header class="detail-section detail-header brief-detail__header">
           <div class="detail-title-row brief-detail__title-row">
             <h1 class="detail-title brief-detail__title">{brief.title}</h1>
           </div>

@@ -60,7 +60,7 @@ export const MarketingPlanDetailView: FC<
         <BackButton href="/marketing-plans" label="Back to Marketing Plans" />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section mktplan-detail__header">
+        <header class="detail-section detail-header mktplan-detail__header">
           <div class="detail-title-row mktplan-detail__title-row">
             <h1 class="detail-title mktplan-detail__title">{plan.name}</h1>
             <span class={badgeClass(MKTPLAN_STATUS_VARIANTS, plan.status)}>

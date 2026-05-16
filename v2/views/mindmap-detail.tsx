@@ -35,7 +35,7 @@ export const MindmapDetailView: FC<
       <main id="mindmap-detail-root" class="detail-view mindmap-detail">
         <BackButton href="/mindmaps" label="Back to Mindmaps" />
 
-        <header class="detail-section mindmap-detail__header">
+        <header class="detail-section detail-header mindmap-detail__header">
           <div class="detail-title-row">
             <h1 class="detail-title">{item.title}</h1>
             <a

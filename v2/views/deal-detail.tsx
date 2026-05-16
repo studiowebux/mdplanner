@@ -32,7 +32,7 @@ export const DealDetailView: FC<ViewProps & { item: Deal }> = (
       <main id="deal-detail-root" class="detail-view deal-detail">
         <BackButton href="/deals" label="Back to Deals" />
 
-        <header class="detail-section deal-detail__header">
+        <header class="detail-section detail-header deal-detail__header">
           <div class="detail-title-row">
             <h1 class="detail-title">{deal.title}</h1>
             <span class={badgeClass(DEAL_STAGE_VARIANTS, deal.stage)}>

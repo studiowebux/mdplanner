@@ -114,7 +114,7 @@ export const PortfolioDetailView: FC<Props> = (
       <main id="portfolio-detail-root" class="detail-view portfolio-detail">
         <BackButton href="/portfolio" label="Back to portfolio" />
 
-        <header class="detail-section portfolio-detail__header">
+        <header class="detail-section detail-header portfolio-detail__header">
           <div class="detail-title-row portfolio-detail__title-row">
             <h1 class="detail-title portfolio-detail__title">{item.name}</h1>
             <span class={badgeClass(PORTFOLIO_STATUS_VARIANTS, item.status)}>

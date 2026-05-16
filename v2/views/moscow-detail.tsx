@@ -47,7 +47,7 @@ export const MoscowDetailView: FC<
         <BackButton href="/moscow" label="Back to MoSCoW Analyses" />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section moscow-detail__header">
+        <header class="detail-section detail-header moscow-detail__header">
           <div class="detail-title-row moscow-detail__title-row">
             <h1 class="detail-title moscow-detail__title">{moscow.title}</h1>
             <span class="badge moscow-date-badge">

@@ -50,7 +50,7 @@ export const HabitDetailView: FC<ViewProps & { item: Habit }> = (
       <main id="habit-detail-root" class="detail-view habit-detail">
         <BackButton href="/habits" label="Back to Habits" />
 
-        <header class="detail-section habit-detail__header">
+        <header class="detail-section detail-header habit-detail__header">
           <div>
             <h1 class="detail-title">{habit.title}</h1>
             <div class="habit-detail__badges">

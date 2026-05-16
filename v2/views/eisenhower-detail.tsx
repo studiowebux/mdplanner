@@ -42,7 +42,7 @@ export const EisenhowerDetailView: FC<
         <BackButton href="/eisenhower" label="Back to Eisenhower Matrices" />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section eisenhower-detail__header">
+        <header class="detail-section detail-header eisenhower-detail__header">
           <div class="detail-title-row eisenhower-detail__title-row">
             <h1 class="detail-title eisenhower-detail__title">{e.title}</h1>
             <span class="badge eisenhower-date-badge">

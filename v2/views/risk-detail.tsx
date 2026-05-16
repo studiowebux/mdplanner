@@ -33,7 +33,7 @@ export const RiskDetailView: FC<ViewProps & { item: Risk }> = (
         <BackButton href="/risks" label="Back to Risks" />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section risk-detail__header">
+        <header class="detail-section detail-header risk-detail__header">
           <div>
             <h1 class="detail-title">{risk.title}</h1>
             <div class="risk-detail__badges">

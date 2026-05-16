@@ -68,14 +68,6 @@
    Detail view
 --------------------------------------------------------------------------- */
 
-.goal-detail__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-md);
-  flex-wrap: wrap;
-}
-
 .goal-detail__links {
   display: flex;
   gap: var(--space-sm);

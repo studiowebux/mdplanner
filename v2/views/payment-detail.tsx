@@ -37,7 +37,7 @@ export const PaymentDetailView: FC<
         <BackButton href="/payments" label="Back to Payments" />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section payment-detail__header">
+        <header class="detail-section detail-header payment-detail__header">
           <div class="detail-title-row payment-detail__title-row">
             <h1 class="detail-title payment-detail__title">
               {payment.reference ?? payment.id}

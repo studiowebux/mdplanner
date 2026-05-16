@@ -1,10 +1,7 @@
 /* Business Model Canvas — detail view styles */
 
 .bmc-detail__header {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
   gap: var(--space-sm);
 }
 

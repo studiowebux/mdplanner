@@ -15,14 +15,6 @@
    Detail view
 --------------------------------------------------------------------------- */
 
-.mktplan-detail__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-md);
-  flex-wrap: wrap;
-}
-
 .mktplan-detail__description {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);

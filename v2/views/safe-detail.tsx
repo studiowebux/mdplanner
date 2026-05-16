@@ -28,7 +28,7 @@ export const SafeDetailView: FC<ViewProps & { item: Safe }> = (
         <BackButton href="/safe" label="Back to SAFEs" />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section safe-detail__header">
+        <header class="detail-section detail-header safe-detail__header">
           <div>
             <h1 class="detail-title">{safe.investor}</h1>
             <div class="safe-detail__badges">

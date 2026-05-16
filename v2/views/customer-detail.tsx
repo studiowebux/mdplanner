@@ -222,7 +222,7 @@ export const CustomerDetailView: FC<
         <BackButton href="/customers" label="Back to Customers" />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section customer-detail__header">
+        <header class="detail-section detail-header customer-detail__header">
           <div class="detail-title-row customer-detail__title-row">
             <h1 class="detail-title customer-detail__title">{customer.name}</h1>
           </div>

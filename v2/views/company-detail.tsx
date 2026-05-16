@@ -33,7 +33,7 @@ export const CompanyDetailView: FC<ViewProps & { item: Company }> = (
       <main id="company-detail-root" class="detail-view company-detail">
         <BackButton href="/companies" label="Back to Companies" />
 
-        <header class="detail-section company-detail__header">
+        <header class="detail-section detail-header company-detail__header">
           <div class="detail-title-row">
             <h1 class="detail-title">{company.name}</h1>
             {company.type && (

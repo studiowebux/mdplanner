@@ -4,14 +4,6 @@
    Detail view
 --------------------------------------------------------------------------- */
 
-.onboarding-template-detail__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-md);
-  flex-wrap: wrap;
-}
-
 .onboarding-template-detail__title-row {
   display: flex;
   flex-direction: column;

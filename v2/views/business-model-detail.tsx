@@ -114,7 +114,7 @@ export const BusinessModelDetailView: FC<
         <BackButton href="/business-models" label="Back to Business Models" />
 
         {/* -- Header ------------------------------------------------------- */}
-        <header class="detail-section bmc-detail__header">
+        <header class="detail-section detail-header bmc-detail__header">
           <div class="detail-title-row">
             <h1 class="detail-title">{bmc.title}</h1>
             <span class="badge badge--neutral">{formatDate(bmc.date)}</span>

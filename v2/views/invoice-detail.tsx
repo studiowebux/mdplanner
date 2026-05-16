@@ -50,7 +50,7 @@ export const InvoiceDetailView: FC<
         <BillingDocumentHeader config={billingConfig} />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section invoice-detail__header">
+        <header class="detail-section detail-header invoice-detail__header">
           <div class="detail-title-row invoice-detail__title-row">
             <h1 class="detail-title invoice-detail__title">
               {invoice.number}

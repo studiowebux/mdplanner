@@ -33,7 +33,7 @@ export const ContactDetailView: FC<ViewProps & { item: Contact }> = (
       <main id="contact-detail-root" class="detail-view contact-detail">
         <BackButton href="/contacts" label="Back to Contacts" />
 
-        <header class="detail-section contact-detail__header">
+        <header class="detail-section detail-header contact-detail__header">
           <div class="detail-title-row">
             <h1 class="detail-title">{contact.name}</h1>
             {contact.type && (

@@ -42,7 +42,7 @@ export const OnboardingDetailView: FC<ViewProps & { item: Onboarding }> = (
         <BackButton href="/onboarding" label="Back to Onboarding" />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section onboarding-detail__header">
+        <header class="detail-section detail-header onboarding-detail__header">
           <div class="onboarding-detail__title-row">
             <h1 class="detail-title onboarding-detail__title">
               {item.employeeName}

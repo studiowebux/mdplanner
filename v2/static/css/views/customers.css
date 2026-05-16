@@ -5,14 +5,6 @@
    Detail view
 --------------------------------------------------------------------------- */
 
-.customer-detail__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-md);
-  flex-wrap: wrap;
-}
-
 .customer-detail__address {
   display: flex;
   flex-direction: column;

@@ -34,7 +34,7 @@ export const InvestorDetailView: FC<ViewProps & { item: Investor }> = (
       <main id="investor-detail-root" class="detail-view investor-detail">
         <BackButton href="/investors" label="Back to Investors" />
 
-        <header class="detail-section investor-detail__header">
+        <header class="detail-section detail-header investor-detail__header">
           <div>
             <h1 class="detail-title">{investor.name}</h1>
             <div class="investor-detail__badges">

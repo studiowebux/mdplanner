@@ -19,7 +19,7 @@ const JournalReadView: FC<{ entry: JournalEntry }> = ({ entry }) => (
   <main id="journal-detail-root" class="detail-view journal-detail">
     <BackButton href="/journal" label="Back to Journal" />
 
-    <header class="detail-section journal-detail__header">
+    <header class="detail-section detail-header journal-detail__header">
       <div>
         <h1 class="detail-title">{entry.title}</h1>
         <div class="journal-detail__badges">

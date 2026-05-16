@@ -4,14 +4,6 @@
    Detail view
 --------------------------------------------------------------------------- */
 
-.payment-detail__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-md);
-  flex-wrap: wrap;
-}
-
 .payment-detail__amount-section {
   text-align: center;
 }

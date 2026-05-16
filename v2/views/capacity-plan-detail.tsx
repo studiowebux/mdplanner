@@ -722,7 +722,7 @@ export const CapacityPlanDetailView: FC<
     >
       <BackButton href="/capacity-plans" label="Back to Capacity Plans" />
 
-      <header class="detail-section capacity-plan-detail__header">
+      <header class="detail-section detail-header capacity-plan-detail__header">
         <div class="detail-title-row">
           <h1 class="detail-title">{plan.title}</h1>
         </div>

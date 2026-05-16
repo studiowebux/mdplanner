@@ -58,14 +58,6 @@
    Detail view
 --------------------------------------------------------------------------- */
 
-.finance-detail__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-md);
-  flex-wrap: wrap;
-}
-
 .finance-detail__amount {
   font-size: var(--font-size-lg);
   color: var(--color-text-primary);

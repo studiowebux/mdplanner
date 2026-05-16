@@ -40,7 +40,7 @@ export const StrategicLevelsDetailView: FC<
       >
         <BackButton href="/strategic-levels" label="Back to Strategic Levels" />
 
-        <header class="detail-section sl-detail__header">
+        <header class="detail-section detail-header sl-detail__header">
           <div>
             <h1 class="detail-title">{builder.title}</h1>
             <span class="sl-detail__date">{builder.date}</span>

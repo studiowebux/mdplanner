@@ -53,7 +53,7 @@ export const LeanCanvasDetailView: FC<ViewProps & { item: LeanCanvas }> = (
         <BackButton href="/lean-canvases" label="Back to Lean Canvases" />
 
         {/* -- Header ------------------------------------------------------- */}
-        <header class="detail-section lc-detail__header">
+        <header class="detail-section detail-header lc-detail__header">
           <div class="detail-title-row">
             <h1 class="detail-title">{lc.title}</h1>
             {lc.project && (

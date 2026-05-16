@@ -7,14 +7,6 @@
    Detail view
 --------------------------------------------------------------------------- */
 
-.dns-detail__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-md);
-  flex-wrap: wrap;
-}
-
 .dns-detail__title {
   word-break: break-all;
 }

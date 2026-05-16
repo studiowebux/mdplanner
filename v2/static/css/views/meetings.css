@@ -6,14 +6,6 @@
    Detail view
 --------------------------------------------------------------------------- */
 
-.meeting-detail__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-md);
-  flex-wrap: wrap;
-}
-
 /* -- Action items --------------------------------------------------------- */
 
 .meeting-detail__actions-table {

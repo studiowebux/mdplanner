@@ -134,7 +134,7 @@ export const ProjectValueBoardDetailView: FC<
         <BackButton href="/project-value" label="Back to Value Boards" />
 
         {/* -- Header ------------------------------------------------------- */}
-        <header class="detail-section pv-detail__header">
+        <header class="detail-section detail-header pv-detail__header">
           <div class="detail-title-row">
             <h1 class="detail-title">{board.title}</h1>
             <span class="badge badge--neutral">{formatDate(board.date)}</span>

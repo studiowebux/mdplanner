@@ -30,7 +30,7 @@ export const OnboardingTemplateDetailView: FC<
       />
 
       {/* -- Header -------------------------------------------------------- */}
-      <header class="detail-section onboarding-template-detail__header">
+      <header class="detail-section detail-header onboarding-template-detail__header">
         <div class="onboarding-template-detail__title-row">
           <h1 class="detail-title onboarding-template-detail__title">
             {tmpl.name}

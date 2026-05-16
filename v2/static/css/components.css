@@ -355,6 +355,14 @@ a.badge:hover {
   flex-shrink: 0;
 }
 
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
 .detail-view {
   padding: var(--page-padding);
   max-width: var(--page-max-width);

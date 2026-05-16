@@ -46,7 +46,7 @@ export const QuoteDetailView: FC<
         <BillingDocumentHeader config={billingConfig} />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section quote-detail__header">
+        <header class="detail-section detail-header quote-detail__header">
           <div class="detail-title-row quote-detail__title-row">
             <h1 class="detail-title quote-detail__title">
               {quote.number}

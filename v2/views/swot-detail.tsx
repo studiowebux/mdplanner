@@ -48,7 +48,7 @@ export const SwotDetailView: FC<
         <BackButton href="/swot" label="Back to SWOT Analyses" />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section swot-detail__header">
+        <header class="detail-section detail-header swot-detail__header">
           <div class="detail-title-row swot-detail__title-row">
             <h1 class="detail-title swot-detail__title">{swot.title}</h1>
             <span class="badge swot-date-badge">{formatDate(swot.date)}</span>

@@ -30,7 +30,7 @@ export const BrainstormTemplateDetailView: FC<
         />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section btemplate-detail__header">
+        <header class="detail-section detail-header btemplate-detail__header">
           <div class="btemplate-detail__title-row">
             <h1 class="detail-title btemplate-detail__title">
               {template.name}

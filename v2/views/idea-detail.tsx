@@ -61,7 +61,7 @@ export const IdeaDetailView: FC<
         <BackButton href="/ideas" label="Back to Ideas" />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section idea-detail__header">
+        <header class="detail-section detail-header idea-detail__header">
           <div class="detail-title-row idea-detail__title-row">
             <h1 class="detail-title idea-detail__title">{idea.title}</h1>
             <span class={badgeClass(IDEA_STATUS_VARIANTS, idea.status)}>

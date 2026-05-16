@@ -32,7 +32,7 @@ export const FinanceDetailView: FC<ViewProps & { item: Finance }> = (
       <main id="finance-detail-root" class="detail-view finance-detail">
         <BackButton href="/finances" label="Back to Finances" />
 
-        <header class="detail-section finance-detail__header">
+        <header class="detail-section detail-header finance-detail__header">
           <div class="detail-title-row">
             <h1 class="detail-title">{finance.title}</h1>
             <span class={badgeClass(FINANCE_TYPE_VARIANTS, finance.type)}>

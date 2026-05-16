@@ -28,7 +28,7 @@ export const FishboneDetailView: FC<ViewProps & { item: Fishbone }> = (
         <BackButton href="/fishbones" label="Back to Fishbone Diagrams" />
 
         {/* -- Header ---------------------------------------------------- */}
-        <header class="detail-section fishbone-detail__header">
+        <header class="detail-section detail-header fishbone-detail__header">
           <div>
             <h1 class="detail-title">{fishbone.title}</h1>
             {fishbone.description && (
