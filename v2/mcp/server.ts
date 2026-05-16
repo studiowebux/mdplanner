@@ -38,7 +38,19 @@ import { registerC4Tools } from "./tools/c4.ts";
 import { registerCapacityPlanTools } from "./tools/capacity-plans.ts";
 import { registerStrategicLevelsTools } from "./tools/strategic-levels.ts";
 import { registerSafeTools } from "./tools/safe.ts";
-import { registerProjectValueBoardTools } from "./tools/project-value-board.ts";
+import { registerBrainstormTemplateTools } from "./tools/brainstorm-templates.ts";
+import { registerBusinessModelTools } from "./tools/business-models.ts";
+import { registerDealTools } from "./tools/deals.ts";
+import { registerFinanceTools } from "./tools/finances.ts";
+import { registerFishboneTools } from "./tools/fishbone.ts";
+import { registerHabitTools } from "./tools/habits.ts";
+import { registerInvestorTools } from "./tools/investors.ts";
+import { registerJournalTools } from "./tools/journal.ts";
+import { registerMoscowTools } from "./tools/moscow.ts";
+import { registerOnboardingTools } from "./tools/onboarding.ts";
+import { registerRiskTools } from "./tools/risks.ts";
+import { registerVacationTools } from "./tools/vacation.ts";
+import { registerProjectValueBoardTools } from "./tools/project-value-boards.ts";
 
 export function createMcpServer(): McpServer {
   const server = new McpServer({
@@ -80,6 +92,18 @@ export function createMcpServer(): McpServer {
   registerStrategicLevelsTools(server);
   registerSafeTools(server);
   registerProjectValueBoardTools(server);
+  registerBrainstormTemplateTools(server);
+  registerBusinessModelTools(server);
+  registerDealTools(server);
+  registerFinanceTools(server);
+  registerFishboneTools(server);
+  registerHabitTools(server);
+  registerInvestorTools(server);
+  registerJournalTools(server);
+  registerMoscowTools(server);
+  registerOnboardingTools(server);
+  registerRiskTools(server);
+  registerVacationTools(server);
 
   return server;
 }
