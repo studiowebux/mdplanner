@@ -98,10 +98,7 @@ export class QuoteService extends BaseService<
   }
 
   /** Snapshot the current quote state, then transition to sent. */
-  async sendQuote(id: string, sentBy = "system"): Promise<Quote | null> {
-    const quote = await this.quoteRepo.findById(id);
-    if (!quote) return null;
-
+  async sendQuote(quote: Quote, sentBy = "system"): Promise<Quote | null> {
     const nextRevision = (quote.revision ?? 0) + 1;
     const snapshot: QuoteRevision = {
       revisionNumber: nextRevision,
@@ -112,9 +109,9 @@ export class QuoteService extends BaseService<
       lineItemCount: quote.lineItems.length,
       sentBy,
     };
-    await this.quoteRepo.appendRevision(id, snapshot);
+    await this.quoteRepo.appendRevision(quote.id, snapshot);
 
-    return this.update(id, {
+    return this.update(quote.id, {
       status: "sent",
       sentAt: snapshot.snapshotAt,
       revision: nextRevision,

@@ -132,7 +132,7 @@ quotesRouter.post("/:id/send", async (c) => {
   const sentBy = actor?.source !== "anonymous"
     ? (actor?.name ?? "system")
     : "system";
-  await getQuoteService().sendQuote(id, sentBy);
+  await getQuoteService().sendQuote(quote, sentBy);
   publish("quote.updated");
   return new Response(null, {
     status: 204,

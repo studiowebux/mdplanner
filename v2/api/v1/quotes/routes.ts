@@ -293,7 +293,7 @@ quotesRouter.post("/:id/send", async (c) => {
   if (quote.status !== "approved") {
     return c.json({ error: "Only approved quotes can be sent" }, 400);
   }
-  const updated = await service.sendQuote(id);
+  const updated = await service.sendQuote(quote);
   if (!updated) return c.json(notFound("QUOTE", id), 404);
   publish("quote.updated");
   return c.json(updated, 200);
