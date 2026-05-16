@@ -76,6 +76,7 @@
 #tab-billing:checked ~ .settings-tabs__panel--billing,
 #tab-caching:checked ~ .settings-tabs__panel--caching,
 #tab-data:checked ~ .settings-tabs__panel--data,
+#tab-integrity:checked ~ .settings-tabs__panel--integrity,
 #tab-support:checked ~ .settings-tabs__panel--support {
   display: block;
 }
@@ -694,4 +695,70 @@ html.sidebar-collapsed .settings-page__form-actions {
 .settings-data__result-table th {
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
+}
+
+/* ---------------------------------------------------------------------------
+   Integrity tab
+   --------------------------------------------------------------------------- */
+
+.settings-integrity__desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-md);
+}
+
+.settings-integrity__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.settings-integrity__clean {
+  font-size: var(--font-size-sm);
+  color: var(--color-success-text);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-success-bg);
+  border: var(--border-width) var(--border-style) var(--color-success-border);
+  border-radius: var(--radius-md);
+}
+
+.settings-integrity__summary {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.settings-integrity__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.settings-integrity__cell {
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: var(--border-width) var(--border-style)
+    var(--color-border-default);
+  text-align: left;
+}
+
+.settings-integrity__table thead .settings-integrity__cell {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+.settings-integrity__cell--id {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.settings-integrity__row--error .settings-integrity__cell:first-child {
+  color: var(--color-error-text);
+  font-weight: var(--font-weight-semibold);
+}
+
+.settings-integrity__row--warning .settings-integrity__cell:first-child {
+  color: var(--color-warning-text);
+  font-weight: var(--font-weight-semibold);
 }

@@ -23,6 +23,7 @@ import { NavigationTab } from "./settings/tabs/navigation-tab.tsx";
 import { SectionsTab } from "./settings/tabs/sections-tab.tsx";
 import { LinksTab } from "./settings/tabs/links-tab.tsx";
 import { BillingTab } from "./settings/tabs/billing-tab.tsx";
+import { IntegrityTab } from "./settings/tabs/integrity-tab.tsx";
 
 type SettingsProps = ViewProps & {
   config: ProjectConfig;
@@ -192,6 +193,16 @@ export const SettingsView: FC<SettingsProps> = ({
           <input
             type="radio"
             name="settings-tab"
+            id="tab-integrity"
+            class="settings-tabs__radio"
+          />
+          <label for="tab-integrity" class="settings-tabs__label">
+            Integrity
+          </label>
+
+          <input
+            type="radio"
+            name="settings-tab"
             id="tab-support"
             class="settings-tabs__radio"
           />
@@ -215,6 +226,7 @@ export const SettingsView: FC<SettingsProps> = ({
           <BillingTab config={config} />
           <CachingTab />
           <DataTab />
+          <IntegrityTab />
           <SupportTab />
         </div>
       </div>

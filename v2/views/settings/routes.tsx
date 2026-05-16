@@ -9,6 +9,7 @@ import {
   getProjectService,
   getSearchEngine,
 } from "../../singletons/services.ts";
+import { getIntegrityService } from "../../services/integrity.service.ts";
 import { getCookie, setCookie, setSignedCookie } from "hono/cookie";
 import { parseJson } from "../../database/sqlite/mod.ts";
 import { IDENTITY_COOKIE } from "../../middleware/identity.ts";
@@ -397,4 +398,48 @@ settingsViewRouter.post("/identity", async (c) => {
 
   c.header("HX-Refresh", "true");
   return c.body(null, 204);
+});
+
+// -- Data integrity scan --
+settingsViewRouter.get("/integrity/scan", async (c) => {
+  const result = await getIntegrityService().scan();
+  const { checks, summary, durationMs } = result;
+
+  if (checks.length === 0) {
+    return c.html(
+      `<p class="settings-integrity__clean">No issues found. All references are valid. (${durationMs}ms)</p>`,
+    );
+  }
+
+  const rows = checks
+    .map(
+      (r) =>
+        `<tr class="settings-integrity__row settings-integrity__row--${r.severity}">` +
+        `<td class="settings-integrity__cell">${r.severity}</td>` +
+        `<td class="settings-integrity__cell">${r.entityType}</td>` +
+        `<td class="settings-integrity__cell settings-integrity__cell--id">${r.entityId}</td>` +
+        `<td class="settings-integrity__cell">${r.field}</td>` +
+        `<td class="settings-integrity__cell">${r.issue}</td>` +
+        `</tr>`,
+    )
+    .join("");
+
+  return c.html(
+    `<p class="settings-integrity__summary">${summary.errors} error${
+      summary.errors !== 1 ? "s" : ""
+    }, ` +
+      `${summary.warnings} warning${
+        summary.warnings !== 1 ? "s" : ""
+      } — ${durationMs}ms</p>` +
+      `<table class="settings-integrity__table">` +
+      `<thead><tr>` +
+      `<th class="settings-integrity__cell">Severity</th>` +
+      `<th class="settings-integrity__cell">Type</th>` +
+      `<th class="settings-integrity__cell">ID</th>` +
+      `<th class="settings-integrity__cell">Field</th>` +
+      `<th class="settings-integrity__cell">Issue</th>` +
+      `</tr></thead>` +
+      `<tbody>${rows}</tbody>` +
+      `</table>`,
+  );
 });
