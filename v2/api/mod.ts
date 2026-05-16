@@ -121,6 +121,7 @@ v1.get(
 );
 
 const api = new OpenAPIHono();
+api.get("/health", (c) => c.json({ status: "ok", version: APP_VERSION }));
 api.route("/v1", v1);
 
 export { api };
