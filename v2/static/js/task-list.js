@@ -640,10 +640,15 @@
 
 // ---------------------------------------------------------------------------
 // Task-list-specific shortcuts — x (toggle select), a (select all), Escape.
+// Keys are read from window.keybindings.nav (keybindings.js).
 // j/k/g/G/Enter are handled by table-keyboard-nav.js (shared with all domains).
 // ---------------------------------------------------------------------------
 
 (function () {
+  var nav = (window.keybindings && window.keybindings.nav) || {};
+  var KEY_SELECT = nav.select || "x";
+  var KEY_SELECT_ALL = nav.selectAll || "a";
+
   function inputFocused() {
     var el = document.activeElement;
     if (!el) return false;
@@ -659,8 +664,9 @@
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (!document.querySelector(".task-list__row[data-task-id]")) return;
 
-    switch (e.key) {
-      case "x": {
+    var key = e.key;
+    switch (key) {
+      case KEY_SELECT: {
         e.preventDefault();
         var focused = document.querySelector(".task-list__row--focused");
         if (focused) {
@@ -673,7 +679,7 @@
         break;
       }
 
-      case "a": {
+      case KEY_SELECT_ALL: {
         e.preventDefault();
         var allCbs = Array.from(
           document.querySelectorAll(

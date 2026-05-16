@@ -1,12 +1,15 @@
 // view-mode-shortcuts.js — chord shortcut for switching view modes.
-// Press m, then a mode key within 1500 ms:
+// Chord leader and mode keys are read from window.keybindings (keybindings.js).
+// Defaults: press m, then a mode key within 1500 ms:
 //   m g → grid   m l → table (list)   m t → timeline
 //   m b → board  m o → org            m c → card
 // Works on any domain page that has view toggle buttons.
 
 (function () {
+  var kb = (window.keybindings) || {};
   var CHORD_TIMEOUT = 1500;
-  var MODE_MAP = {
+  var LEADER = (kb.chordLeader) || "m";
+  var MODE_MAP = (kb.modes) || {
     g: "grid",
     l: "table",
     t: "timeline",
@@ -61,7 +64,7 @@
       return;
     }
 
-    if (e.key === "m") {
+    if (e.key === LEADER) {
       e.preventDefault();
       chordActive = true;
       chordTimer = setTimeout(cancelChord, CHORD_TIMEOUT);
