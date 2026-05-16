@@ -64,6 +64,7 @@
     "hono/deno": "npm:hono@4.12.5/deno",
     "hono/body-limit": "npm:hono@4.12.5/body-limit",
     "hono/logger": "npm:hono@4.12.5/logger",
+    "hono/request-id": "npm:hono@4.12.5/request-id",
     "hono/jsx": "npm:hono@4.12.5/jsx",
     "hono/jsx/dom": "npm:hono@4.12.5/jsx/dom",
     "@hono/zod-openapi": "npm:@hono/zod-openapi@0.19.9",

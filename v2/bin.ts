@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
+import { requestId } from "hono/request-id";
 import { serveStatic } from "hono/deno";
 import { dirname, fromFileUrl, join } from "@std/path";
 import { log } from "./singletons/logger.ts";
@@ -57,6 +58,7 @@ if (projectConfig.sectionOrder?.length) {
 
 const app = new Hono<{ Variables: AppVariables }>();
 
+app.use("*", requestId());
 app.use("*", logger((msg: string) => log.info(msg)));
 
 app.use("*", contextMiddleware);
