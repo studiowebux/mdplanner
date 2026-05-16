@@ -50,6 +50,9 @@ export function registerNoteEntity(repo: NoteRepository): void {
   const entity: EntityDef = {
     table: NOTE_TABLE,
     schema: NOTE_SCHEMA,
+    migrations: [
+      `CREATE INDEX IF NOT EXISTS idx_notes_project ON ${NOTE_TABLE} (project)`,
+    ],
     fts: {
       type: "note",
       columns: ["id", "title", "content"],

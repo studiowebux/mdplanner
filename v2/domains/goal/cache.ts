@@ -100,6 +100,10 @@ export function registerGoalEntity(repo: GoalRepository): void {
   const entity: EntityDef = {
     table: GOAL_TABLE,
     schema: GOAL_SCHEMA,
+    migrations: [
+      `CREATE INDEX IF NOT EXISTS idx_goals_project ON ${GOAL_TABLE} (project)`,
+      `CREATE INDEX IF NOT EXISTS idx_goals_status ON ${GOAL_TABLE} (status)`,
+    ],
     fts: {
       type: "goal",
       columns: ["id", "title", "description"],

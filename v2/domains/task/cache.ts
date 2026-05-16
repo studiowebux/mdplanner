@@ -125,6 +125,14 @@ export function registerTaskEntity(repo: TaskRepository): void {
   const entity: EntityDef = {
     table: TASK_TABLE,
     schema: TASK_SCHEMA,
+    migrations: [
+      `CREATE INDEX IF NOT EXISTS idx_tasks_project ON ${TASK_TABLE} (project)`,
+      `CREATE INDEX IF NOT EXISTS idx_tasks_section ON ${TASK_TABLE} (section)`,
+      `CREATE INDEX IF NOT EXISTS idx_tasks_assignee ON ${TASK_TABLE} (assignee)`,
+      `CREATE INDEX IF NOT EXISTS idx_tasks_milestone ON ${TASK_TABLE} (milestone)`,
+      `CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON ${TASK_TABLE} (due_date)`,
+      `CREATE INDEX IF NOT EXISTS idx_tasks_completed ON ${TASK_TABLE} (completed)`,
+    ],
     fts: {
       type: "task",
       columns: ["id", "title", "description"],

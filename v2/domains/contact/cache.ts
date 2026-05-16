@@ -84,6 +84,10 @@ export function registerContactEntity(repo: ContactRepository): void {
   const entity: EntityDef = {
     table: CONTACT_TABLE,
     schema: CONTACT_SCHEMA,
+    migrations: [
+      `CREATE INDEX IF NOT EXISTS idx_contacts_company ON ${CONTACT_TABLE} (company)`,
+      `CREATE INDEX IF NOT EXISTS idx_contacts_type ON ${CONTACT_TABLE} (type)`,
+    ],
     fts: {
       type: "contact",
       columns: ["id", "name", "email", "role", "company", "notes"],

@@ -100,6 +100,8 @@ export function registerMeetingEntity(repo: MeetingRepository): void {
     migrations: [
       `ALTER TABLE ${MEETING_TABLE} ADD COLUMN project TEXT`,
       `ALTER TABLE ${MEETING_TABLE} ADD COLUMN related_meetings_json TEXT`,
+      `CREATE INDEX IF NOT EXISTS idx_meetings_project ON ${MEETING_TABLE} (project)`,
+      `CREATE INDEX IF NOT EXISTS idx_meetings_date ON ${MEETING_TABLE} (date)`,
     ],
     fts: {
       type: "meeting",
