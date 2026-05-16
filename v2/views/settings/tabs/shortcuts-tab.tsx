@@ -10,18 +10,6 @@ const SHORTCUT_GROUPS = [
     ],
   },
   {
-    title: "View mode keys",
-    desc: "Press leader + key to switch view mode.",
-    fields: [
-      { name: "modes.g", label: "Grid", defaultVal: "g" },
-      { name: "modes.l", label: "Table (list)", defaultVal: "l" },
-      { name: "modes.t", label: "Timeline", defaultVal: "t" },
-      { name: "modes.b", label: "Board", defaultVal: "b" },
-      { name: "modes.o", label: "Org chart", defaultVal: "o" },
-      { name: "modes.c", label: "Card", defaultVal: "c" },
-    ],
-  },
-  {
     title: "Navigation keys",
     desc: "Vim-style row navigation in tables and task lists.",
     fields: [

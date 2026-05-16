@@ -122,6 +122,7 @@
     "nav-categories-form": "tab-navigation",
     "kpi-metrics-form": "tab-goals",
     "milestone-statuses-form": "tab-milestones",
+    "shortcuts-form": "tab-shortcuts",
   };
 
   function updateTabIndicator(formId, dirty) {
@@ -164,6 +165,10 @@
       snapshotForm(form.id);
     }
   });
+
+  // Expose trackForm so external scripts (e.g. keybindings-settings.js) can
+  // register after their async populate step.
+  window.settingsTrackForm = trackForm;
 
   // Track all settings forms
   [

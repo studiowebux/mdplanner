@@ -109,6 +109,7 @@
     if (!form) return;
 
     populateInputs();
+    if (window.settingsTrackForm) window.settingsTrackForm("shortcuts-form");
     checkConflicts();
 
     form.addEventListener("input", function () {
