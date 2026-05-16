@@ -31,6 +31,7 @@ services:
     #   MDPLANNER_SECRET_KEY=<64-char hex>   # run: mdplanner keygen-secret
     #   MDPLANNER_BACKUP_PUBLIC_KEY=<PEM>    # run: mdplanner keygen  (public key only)
     environment:
+      - PROJECT_DIR=/data
       - MDPLANNER_CACHE=1
       - MDPLANNER_WEBDAV=1
       - MDPLANNER_WEBDAV_USER=${MDPLANNER_WEBDAV_USER}
