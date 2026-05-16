@@ -24,6 +24,7 @@ import { SectionsTab } from "./settings/tabs/sections-tab.tsx";
 import { LinksTab } from "./settings/tabs/links-tab.tsx";
 import { BillingTab } from "./settings/tabs/billing-tab.tsx";
 import { IntegrityTab } from "./settings/tabs/integrity-tab.tsx";
+import { ShortcutsTab } from "./settings/tabs/shortcuts-tab.tsx";
 
 type SettingsProps = ViewProps & {
   config: ProjectConfig;
@@ -78,7 +79,7 @@ export const SettingsView: FC<SettingsProps> = ({
       enabledFeatures={enabledFeatures}
       activePath="/settings"
       styles={["/css/views/settings.css"]}
-      scripts={["/js/settings.js"]}
+      scripts={["/js/settings.js", "/js/keybindings-settings.js"]}
     >
       <div class="settings-page">
         <h1 class="settings-page__title">Settings</h1>
@@ -203,6 +204,16 @@ export const SettingsView: FC<SettingsProps> = ({
           <input
             type="radio"
             name="settings-tab"
+            id="tab-shortcuts"
+            class="settings-tabs__radio"
+          />
+          <label for="tab-shortcuts" class="settings-tabs__label">
+            Shortcuts
+          </label>
+
+          <input
+            type="radio"
+            name="settings-tab"
             id="tab-support"
             class="settings-tabs__radio"
           />
@@ -227,6 +238,7 @@ export const SettingsView: FC<SettingsProps> = ({
           <CachingTab />
           <DataTab />
           <IntegrityTab />
+          <ShortcutsTab />
           <SupportTab />
         </div>
       </div>
