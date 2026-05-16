@@ -1,0 +1,175 @@
+import type { FC } from "hono/jsx";
+import { MainLayout } from "../components/layout/main.tsx";
+import { BackButton } from "./components/back-button.tsx";
+import type { Onboarding } from "../types/onboarding.types.ts";
+import type { ViewProps } from "../types/app.ts";
+import { DetailActions } from "./components/detail-actions.tsx";
+import { SseRefresh } from "./components/sse-refresh.tsx";
+import { AuditMeta } from "./components/audit-meta.tsx";
+import {
+  STEP_CATEGORY_LABELS,
+  STEP_STATUS_LABELS,
+} from "../domains/onboarding/constants.tsx";
+
+export const OnboardingDetailView: FC<ViewProps & { item: Onboarding }> = (
+  { item, ...viewProps },
+) => {
+  const done = item.steps.filter((s) => s.status === "complete").length;
+  const pct = item.steps.length > 0
+    ? Math.round((done / item.steps.length) * 100)
+    : 0;
+
+  // Group steps by category
+  const byCategory = new Map<string, typeof item.steps>();
+  for (const step of item.steps) {
+    const cat = step.category;
+    if (!byCategory.has(cat)) byCategory.set(cat, []);
+    byCategory.get(cat)!.push(step);
+  }
+
+  return (
+    <MainLayout
+      title={item.employeeName}
+      {...viewProps}
+      styles={["/css/views/onboarding.css"]}
+    >
+      <SseRefresh
+        getUrl={"/onboarding/" + item.id}
+        trigger="sse:onboarding.updated"
+        targetId="onboarding-detail-root"
+      />
+      <main id="onboarding-detail-root" class="detail-view onboarding-detail">
+        <BackButton href="/onboarding" label="Back to Onboarding" />
+
+        {/* -- Header ---------------------------------------------------- */}
+        <header class="detail-section onboarding-detail__header">
+          <div class="onboarding-detail__title-row">
+            <h1 class="detail-title onboarding-detail__title">
+              {item.employeeName}
+            </h1>
+            <p class="onboarding-detail__role">{item.role}</p>
+          </div>
+          <DetailActions
+            entity="onboarding"
+            id={item.id}
+            title={item.employeeName}
+            formContainerId="onboarding-form-container"
+          />
+        </header>
+
+        {/* -- Meta row -------------------------------------------------- */}
+        <div class="detail-section onboarding-detail__meta">
+          {item.startDate && (
+            <div class="onboarding-detail__meta-item">
+              <span class="onboarding-detail__meta-label">Start date</span>
+              <span class="onboarding-detail__meta-value">
+                {item.startDate}
+              </span>
+            </div>
+          )}
+          {item.personId && (
+            <div class="onboarding-detail__meta-item">
+              <span class="onboarding-detail__meta-label">Person ID</span>
+              <span class="onboarding-detail__meta-value">
+                <a href={`/people/${item.personId}`}>{item.personId}</a>
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* -- Progress bar ---------------------------------------------- */}
+        {item.steps.length > 0 && (
+          <div class="detail-section onboarding-detail__progress-section">
+            <div class="onboarding-detail__progress-header">
+              <span class="section-heading">Progress</span>
+              <span class="onboarding-detail__progress-label">
+                {done}/{item.steps.length} steps complete
+              </span>
+            </div>
+            <div
+              class="progress-bar"
+              role="progressbar"
+              aria-valuenow={pct}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            >
+              <div
+                class="progress-bar__fill"
+                data-pct={pct}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* -- Notes ------------------------------------------------------ */}
+        {item.notes && (
+          <div class="detail-section onboarding-detail__notes">
+            <h2 class="section-heading">Notes</h2>
+            <p class="onboarding-detail__notes-text">{item.notes}</p>
+          </div>
+        )}
+
+        {/* -- Steps ------------------------------------------------------ */}
+        {item.steps.length > 0 && (
+          <section class="detail-section onboarding-detail__steps">
+            <h2 class="section-heading">
+              Steps ({item.steps.length})
+            </h2>
+            <div class="onboarding-detail__step-groups">
+              {[...byCategory.entries()].map(([cat, steps]) => (
+                <div key={cat} class="onboarding-detail__step-group">
+                  <h3 class="onboarding-detail__step-group-title">
+                    {STEP_CATEGORY_LABELS[
+                      cat as keyof typeof STEP_CATEGORY_LABELS
+                    ] ?? cat}
+                  </h3>
+                  <ul class="onboarding-detail__step-list">
+                    {steps.map((step) => (
+                      <li
+                        key={step.id}
+                        class={`onboarding-detail__step onboarding-detail__step--${step.status}`}
+                      >
+                        <span
+                          class={`onboarding-detail__step-status badge badge--sm badge--${
+                            step.status === "complete"
+                              ? "success"
+                              : step.status === "in_progress"
+                              ? "accent"
+                              : "neutral"
+                          }`}
+                        >
+                          {STEP_STATUS_LABELS[step.status]}
+                        </span>
+                        <span class="onboarding-detail__step-title">
+                          {step.title}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {item.steps.length === 0 && (
+          <div class="detail-section">
+            <p class="onboarding-detail__empty">
+              No steps defined. Add steps via the API or MCP tools.
+            </p>
+          </div>
+        )}
+
+        {/* -- Audit meta ------------------------------------------------ */}
+        <AuditMeta
+          createdAt={item.createdAt}
+          updatedAt={item.updatedAt}
+          createdBy={item.createdBy}
+          updatedBy={item.updatedBy}
+        />
+      </main>
+
+      <div id="onboarding-form-container" />
+    </MainLayout>
+  );
+};

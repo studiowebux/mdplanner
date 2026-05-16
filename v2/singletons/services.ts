@@ -113,6 +113,9 @@ import { registerReflectionEntity } from "../domains/reflection/cache.ts";
 import { ReflectionTemplateRepository } from "../repositories/reflection-template.repository.ts";
 import { ReflectionTemplateService } from "../services/reflection-template.service.ts";
 import { registerReflectionTemplateEntity } from "../domains/reflection-template/cache.ts";
+import { OnboardingRepository } from "../repositories/onboarding.repository.ts";
+import { OnboardingService } from "../services/onboarding.service.ts";
+import { registerOnboardingEntity } from "../domains/onboarding/cache.ts";
 import { MindmapRepository } from "../repositories/mindmap.repository.ts";
 import { MindmapService } from "../services/mindmap.service.ts";
 import { registerMindmapEntity } from "../domains/mindmap/cache.ts";
@@ -253,6 +256,8 @@ export function initServices(
     "reflectionTemplate",
     new ReflectionTemplateService(reflectionTemplateRepo),
   );
+  const onboardingRepo = new OnboardingRepository(projectDir);
+  _set(_svc, "onboarding", new OnboardingService(onboardingRepo));
   const financeRepo = new FinanceRepository(projectDir);
   _set(_svc, "finance", new FinanceService(financeRepo));
   const billingRateRepo = new BillingRateRepository(projectDir);
@@ -347,6 +352,7 @@ export function initServices(
     registerJournalEntity(journalRepo);
     registerReflectionEntity(reflectionRepo);
     registerReflectionTemplateEntity(reflectionTemplateRepo);
+    registerOnboardingEntity(onboardingRepo);
     registerFinanceEntity(financeRepo);
     registerInvestorEntity(investorRepo);
 
@@ -383,6 +389,7 @@ export function initServices(
     journalRepo.setCacheDb(cacheDb);
     reflectionRepo.setCacheDb(cacheDb);
     reflectionTemplateRepo.setCacheDb(cacheDb);
+    onboardingRepo.setCacheDb(cacheDb);
     financeRepo.setCacheDb(cacheDb);
     mindmapRepo.setCacheDb(cacheDb);
     fishboneRepo.setCacheDb(cacheDb);
@@ -536,6 +543,10 @@ export function getReflectionService(): ReflectionService {
 
 export function getReflectionTemplateService(): ReflectionTemplateService {
   return _get<ReflectionTemplateService>(_svc, "reflectionTemplate");
+}
+
+export function getOnboardingService(): OnboardingService {
+  return _get<OnboardingService>(_svc, "onboarding");
 }
 
 export function getFinanceService(): FinanceService {

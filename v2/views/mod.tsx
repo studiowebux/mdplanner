@@ -48,6 +48,7 @@ import { c4Router } from "./c4/routes.tsx";
 import { brainstormsRouter } from "./brainstorms/routes.tsx";
 import { brainstormTemplatesRouter } from "./brainstorm-templates/routes.tsx";
 import { reflectionTemplatesRouter } from "./reflection-templates/routes.tsx";
+import { onboardingRouter } from "./onboarding/routes.tsx";
 import { briefsRouter } from "./briefs/routes.tsx";
 import { retrospectivesRouter } from "./retrospectives/routes.tsx";
 import { meetingsRouter as meetingsViewRouter } from "./meetings/routes.tsx";
@@ -103,6 +104,16 @@ registerAutocompleteSource("people", {
   },
   displayKey: "name",
   valueKey: "id",
+});
+
+registerAutocompleteSource("people-names", {
+  list: () => getPeopleService().list(),
+  search: async (q) => {
+    const all = await getPeopleService().list();
+    return all.filter((p) => ciIncludes(p.name, q));
+  },
+  displayKey: "name",
+  valueKey: "name",
 });
 
 registerAutocompleteSource("people-skills", {
@@ -402,6 +413,7 @@ views.route("/c4", c4Router);
 views.route("/brainstorms", brainstormsRouter);
 views.route("/brainstorm-templates", brainstormTemplatesRouter);
 views.route("/reflection-templates", reflectionTemplatesRouter);
+views.route("/onboarding", onboardingRouter);
 views.route("/briefs", briefsRouter);
 views.route("/retrospectives", retrospectivesRouter);
 views.route("/meetings", meetingsViewRouter);
