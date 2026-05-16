@@ -38,3 +38,37 @@
   margin: var(--space-sm) 0 0;
   font-style: italic;
 }
+
+/* ---------------------------------------------------------------------------
+   Revision history
+--------------------------------------------------------------------------- */
+
+.quote-detail__revisions-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  list-style: none;
+  user-select: none;
+}
+
+.quote-detail__revisions-summary::-webkit-details-marker {
+  display: none;
+}
+
+.quote-detail__revisions-summary::before {
+  content: "▶";
+  font-size: var(--font-size-xs);
+  transition: transform var(--transition-fast);
+}
+
+details[open] .quote-detail__revisions-summary::before {
+  transform: rotate(90deg);
+}
+
+.quote-detail__revisions-table {
+  margin-top: var(--space-sm);
+}

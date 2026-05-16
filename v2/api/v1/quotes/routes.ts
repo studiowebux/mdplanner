@@ -9,6 +9,7 @@ import { publish } from "../../../singletons/event-bus.ts";
 import {
   CreateQuoteSchema,
   ListQuoteOptionsSchema,
+  QuoteRevisionSchema,
   QuoteSchema,
   UpdateQuoteSchema,
 } from "../../../types/quote.types.ts";
@@ -249,6 +250,40 @@ quotesRouter.post("/:id/reject-approval", async (c) => {
   return c.json(updated, 200);
 });
 
+// GET /{id}/revisions
+const getQuoteRevisionsRoute = createRoute({
+  method: "get",
+  path: "/{id}/revisions",
+  tags: ["Quotes"],
+  summary: "Get revision history for a quote",
+  operationId: "getQuoteRevisions",
+  request: { params: IdParam },
+  responses: {
+    200: {
+      content: {
+        "application/json": { schema: z.array(QuoteRevisionSchema) },
+      },
+      description: "Revision history (oldest first)",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Not found",
+    },
+  },
+});
+
+quotesRouter.openapi(getQuoteRevisionsRoute, async (c) => {
+  try {
+    const { id } = c.req.valid("param");
+    const quote = await getQuoteService().getById(id);
+    if (!quote) return c.json(notFound("QUOTE", id), 404);
+    const revisions = await getQuoteService().getRevisions(id);
+    return c.json(revisions, 200);
+  } catch (err) {
+    throw err;
+  }
+});
+
 // POST /{id}/send
 quotesRouter.post("/:id/send", async (c) => {
   const id = c.req.param("id");
@@ -258,12 +293,7 @@ quotesRouter.post("/:id/send", async (c) => {
   if (quote.status !== "approved") {
     return c.json({ error: "Only approved quotes can be sent" }, 400);
   }
-  const now = new Date().toISOString();
-  const updated = await service.update(id, {
-    status: "sent",
-    sentAt: now,
-    revision: (quote.revision ?? 0) + 1,
-  });
+  const updated = await service.sendQuote(id);
   if (!updated) return c.json(notFound("QUOTE", id), 404);
   publish("quote.updated");
   return c.json(updated, 200);

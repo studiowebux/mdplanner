@@ -186,6 +186,42 @@ export const UpdateQuoteSchema = CreateQuoteSchema.partial().merge(
 export type UpdateQuote = z.infer<typeof UpdateQuoteSchema>;
 
 // ---------------------------------------------------------------------------
+// Revision history
+// ---------------------------------------------------------------------------
+
+export const QuoteRevisionSchema = z.object({
+  revisionNumber: z.number().openapi({
+    description: "Revision number (matches quote.revision at send time)",
+    example: 1,
+  }),
+  snapshotAt: z.string().openapi({
+    description: "ISO timestamp when this revision was snapshotted",
+    example: "2026-05-16T10:00:00.000Z",
+  }),
+  total: z.number().openapi({
+    description: "Grand total at send time",
+    example: 1152,
+  }),
+  subtotal: z.number().openapi({
+    description: "Subtotal at send time",
+    example: 1000,
+  }),
+  currency: z.string().nullable().optional().openapi({
+    description: "Currency at send time",
+  }),
+  lineItemCount: z.number().openapi({
+    description: "Number of line items at send time",
+    example: 3,
+  }),
+  sentBy: z.string().openapi({
+    description: "Actor who triggered the send",
+    example: "system",
+  }),
+}).openapi("QuoteRevision");
+
+export type QuoteRevision = z.infer<typeof QuoteRevisionSchema>;
+
+// ---------------------------------------------------------------------------
 // Query options
 // ---------------------------------------------------------------------------
 

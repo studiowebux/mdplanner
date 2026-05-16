@@ -1,9 +1,11 @@
 // Quote repository — markdown file CRUD under billing/quotes/.
 
+import { join } from "@std/path";
 import type {
   CreateQuote,
   PaymentScheduleItem,
   Quote,
+  QuoteRevision,
   UpdateQuote,
 } from "../types/quote.types.ts";
 import type { LineItem } from "../types/billing.types.ts";
@@ -135,6 +137,36 @@ export class QuoteRepository extends CachedMarkdownRepository<
       createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
       updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
     };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Revision sidecar — {quoteId}.revisions.json, append-only
+  // ---------------------------------------------------------------------------
+
+  private revisionPath(quoteId: string): string {
+    return join(this.dir, `${quoteId}.revisions.json`);
+  }
+
+  async getRevisions(quoteId: string): Promise<QuoteRevision[]> {
+    try {
+      const raw = await Deno.readTextFile(this.revisionPath(quoteId));
+      return JSON.parse(raw) as QuoteRevision[];
+    } catch {
+      return [];
+    }
+  }
+
+  async appendRevision(
+    quoteId: string,
+    revision: QuoteRevision,
+  ): Promise<void> {
+    const existing = await this.getRevisions(quoteId);
+    existing.push(revision);
+    await Deno.mkdir(this.dir, { recursive: true });
+    await Deno.writeTextFile(
+      this.revisionPath(quoteId),
+      JSON.stringify(existing, null, 2),
+    );
   }
 
   protected serialize(item: Quote): string {

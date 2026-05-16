@@ -1,7 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
-import type { Quote } from "../types/quote.types.ts";
+import type { Quote, QuoteRevision } from "../types/quote.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import type { ProjectConfig } from "../types/project.types.ts";
 import { formatDate } from "../utils/time.ts";
@@ -22,9 +22,13 @@ import { BillingDocumentHeader } from "./components/billing-document-header.tsx"
 // ---------------------------------------------------------------------------
 
 export const QuoteDetailView: FC<
-  ViewProps & { item: Quote; billingConfig: ProjectConfig }
+  ViewProps & {
+    item: Quote;
+    billingConfig: ProjectConfig;
+    revisions: QuoteRevision[];
+  }
 > = (
-  { item: quote, billingConfig, ...viewProps },
+  { item: quote, billingConfig, revisions, ...viewProps },
 ) => {
   const hasSchedule = quote.paymentSchedule && quote.paymentSchedule.length > 0;
 
@@ -253,6 +257,42 @@ export const QuoteDetailView: FC<
           createdBy={quote.createdBy}
           updatedBy={quote.updatedBy}
         />
+
+        {/* -- Revision history ------------------------------------------ */}
+        {revisions.length > 0 && (
+          <section class="detail-section quote-detail__revisions">
+            <details>
+              <summary class="quote-detail__revisions-summary">
+                Revision History
+                <span class="badge">{revisions.length}</span>
+              </summary>
+              <table class="data-table quote-detail__revisions-table">
+                <thead>
+                  <tr>
+                    <th>Rev</th>
+                    <th>Sent</th>
+                    <th>Line Items</th>
+                    <th>Subtotal</th>
+                    <th>Total</th>
+                    <th>Sent By</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...revisions].reverse().map((rev) => (
+                    <tr>
+                      <td>v{rev.revisionNumber}</td>
+                      <td>{formatDate(rev.snapshotAt)}</td>
+                      <td>{rev.lineItemCount}</td>
+                      <td>{formatCurrency(rev.subtotal)}</td>
+                      <td>{formatCurrency(rev.total)}</td>
+                      <td>{rev.sentBy}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </details>
+          </section>
+        )}
       </main>
 
       <div id="quotes-form-container" />

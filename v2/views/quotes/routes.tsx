@@ -15,9 +15,11 @@ export const quotesRouter = createDomainRoutes(quoteConfig);
 
 quotesRouter.get("/:id", async (c) => {
   const id = c.req.param("id");
-  const [quote, billingConfig] = await Promise.all([
-    getQuoteService().getById(id),
+  const service = getQuoteService();
+  const [quote, billingConfig, revisions] = await Promise.all([
+    service.getById(id),
     getProjectService().getConfig(),
+    service.getRevisions(id),
   ]);
   if (!quote) return c.notFound();
 
@@ -26,6 +28,7 @@ quotesRouter.get("/:id", async (c) => {
       {...viewProps(c, "/quotes")}
       item={quote}
       billingConfig={billingConfig}
+      revisions={revisions}
     />,
   );
 });
@@ -125,11 +128,11 @@ quotesRouter.post("/:id/send", async (c) => {
       },
     });
   }
-  await getQuoteService().update(id, {
-    status: "sent",
-    sentAt: new Date().toISOString(),
-    revision: (quote.revision ?? 0) + 1,
-  });
+  const actor = c.get("actor");
+  const sentBy = actor?.source !== "anonymous"
+    ? (actor?.name ?? "system")
+    : "system";
+  await getQuoteService().sendQuote(id, sentBy);
   publish("quote.updated");
   return new Response(null, {
     status: 204,

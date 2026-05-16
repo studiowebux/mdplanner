@@ -6,6 +6,7 @@ import type {
   CreateQuote,
   ListQuoteOptions,
   Quote,
+  QuoteRevision,
   UpdateQuote,
 } from "../types/quote.types.ts";
 import { ciIncludes } from "../utils/string.ts";
@@ -94,6 +95,35 @@ export class QuoteService extends BaseService<
     const number = quote.number || await this.generateNumber();
     const withTotals = this.calculateTotals({ ...quote, number });
     return (await this.quoteRepo.update(quote.id, withTotals)) ?? withTotals;
+  }
+
+  /** Snapshot the current quote state, then transition to sent. */
+  async sendQuote(id: string, sentBy = "system"): Promise<Quote | null> {
+    const quote = await this.quoteRepo.findById(id);
+    if (!quote) return null;
+
+    const nextRevision = (quote.revision ?? 0) + 1;
+    const snapshot: QuoteRevision = {
+      revisionNumber: nextRevision,
+      snapshotAt: new Date().toISOString(),
+      total: quote.total,
+      subtotal: quote.subtotal,
+      currency: quote.currency,
+      lineItemCount: quote.lineItems.length,
+      sentBy,
+    };
+    await this.quoteRepo.appendRevision(id, snapshot);
+
+    return this.update(id, {
+      status: "sent",
+      sentAt: snapshot.snapshotAt,
+      revision: nextRevision,
+    });
+  }
+
+  /** Return revision history for a quote. */
+  getRevisions(id: string): Promise<QuoteRevision[]> {
+    return this.quoteRepo.getRevisions(id);
   }
 
   override async update(
