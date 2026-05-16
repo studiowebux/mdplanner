@@ -42,6 +42,8 @@ export const contextMiddleware: MiddlewareHandler<{
       `script-src 'nonce-${nonce}' 'self'; ` +
       `style-src 'nonce-${nonce}' 'self' https://fonts.googleapis.com; ` +
       `font-src https://fonts.gstatic.com; ` +
-      `img-src 'self' https: data:`,
+      `img-src 'self' https: data:; ` +
+      `connect-src 'self'; ` +
+      `frame-ancestors 'none'`,
   );
 };
