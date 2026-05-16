@@ -2,6 +2,7 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { apiReference } from "@scalar/hono-api-reference";
 import { backupRouter } from "./v1/backup/routes.ts";
 import { brainstormsRouter } from "./v1/brainstorms/routes.ts";
+import { brainstormTemplatesRouter } from "./v1/brainstorm-templates/routes.ts";
 import { briefsRouter } from "./v1/briefs/routes.ts";
 import { retrospectivesRouter } from "./v1/retrospectives/routes.ts";
 import { meetingsRouter } from "./v1/meetings/routes.ts";
@@ -48,6 +49,7 @@ import { APP_NAME, APP_VERSION } from "../constants/mod.ts";
 
 const v1 = new OpenAPIHono();
 v1.route("/brainstorms", brainstormsRouter);
+v1.route("/brainstorm-templates", brainstormTemplatesRouter);
 v1.route("/briefs", briefsRouter);
 v1.route("/retrospectives", retrospectivesRouter);
 v1.route("/meetings", meetingsRouter);

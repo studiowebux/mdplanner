@@ -263,6 +263,7 @@ export const ENTITY_TYPE_ROUTES: Record<string, string> = {
   milestone: "/milestones",
   idea: "/ideas",
   brainstorm: "/brainstorms",
+  brainstorm_template: "/brainstorm-templates",
   reflection_template: "/reflection-templates",
   reflection: "/reflections",
   retrospective: "/retrospectives",

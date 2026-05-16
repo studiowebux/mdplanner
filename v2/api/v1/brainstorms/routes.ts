@@ -1,7 +1,10 @@
 // Brainstorm CRUD routes — OpenAPIHono router consumed by api/mod.ts.
 
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import { getBrainstormService } from "../../../singletons/services.ts";
+import {
+  getBrainstormService,
+  getBrainstormTemplateService,
+} from "../../../singletons/services.ts";
 import { publish } from "../../../singletons/event-bus.ts";
 import {
   BrainstormSchema,
@@ -148,4 +151,59 @@ brainstormsRouter.openapi(deleteRoute, async (c) => {
   if (!ok) return c.json(notFound("BRAINSTORM", id), 404);
   publish("brainstorm.deleted");
   return new Response(null, { status: 204 });
+});
+
+// POST /:id/apply-template
+const applyTemplateBodySchema = z.object({
+  templateId: z.string().openapi({ description: "Template ID to apply" }),
+});
+
+const applyTemplateRoute = createRoute({
+  method: "post",
+  path: "/{id}/apply-template",
+  tags: ["Brainstorms"],
+  summary: "Append template questions to a brainstorm session",
+  operationId: "applyBrainstormTemplate",
+  request: {
+    params: IdParam,
+    body: {
+      content: { "application/json": { schema: applyTemplateBodySchema } },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: BrainstormSchema } },
+      description: "Updated brainstorm with appended questions",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Brainstorm or template not found",
+    },
+  },
+});
+
+brainstormsRouter.openapi(applyTemplateRoute, async (c) => {
+  const { id } = c.req.valid("param");
+  const { templateId } = c.req.valid("json");
+
+  const brainstorm = await getBrainstormService().getById(id);
+  if (!brainstorm) return c.json(notFound("BRAINSTORM", id), 404);
+
+  const template = await getBrainstormTemplateService().getById(templateId);
+  if (!template) {
+    return c.json(notFound("BRAINSTORM_TEMPLATE", templateId), 404);
+  }
+
+  const newQuestions = template.questions.map((q) => ({
+    question: q,
+    answer: null,
+  }));
+  const updated = await getBrainstormService().update(id, {
+    questions: [...brainstorm.questions, ...newQuestions],
+  });
+  if (!updated) return c.json(notFound("BRAINSTORM", id), 404);
+
+  publish("brainstorm.updated");
+  return c.json(updated, 200);
 });

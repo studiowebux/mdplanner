@@ -60,6 +60,9 @@ import { registerPaymentEntity } from "../domains/payment/cache.ts";
 import { BrainstormRepository } from "../repositories/brainstorm.repository.ts";
 import { BrainstormService } from "../services/brainstorm.service.ts";
 import { registerBrainstormEntity } from "../domains/brainstorm/cache.ts";
+import { BrainstormTemplateRepository } from "../repositories/brainstorm-template.repository.ts";
+import { BrainstormTemplateService } from "../services/brainstorm-template.service.ts";
+import { registerBrainstormTemplateEntity } from "../domains/brainstorm-template/cache.ts";
 import { BriefRepository } from "../repositories/brief.repository.ts";
 import { BriefService } from "../services/brief.service.ts";
 import { registerBriefEntity } from "../domains/brief/cache.ts";
@@ -253,6 +256,12 @@ export function initServices(
   _set(_svc, "payment", new PaymentService(paymentRepo));
   const brainstormRepo = new BrainstormRepository(projectDir);
   _set(_svc, "brainstorm", new BrainstormService(brainstormRepo));
+  const brainstormTemplateRepo = new BrainstormTemplateRepository(projectDir);
+  _set(
+    _svc,
+    "brainstormTemplate",
+    new BrainstormTemplateService(brainstormTemplateRepo),
+  );
   const briefRepo = new BriefRepository(projectDir);
   _set(_svc, "brief", new BriefService(briefRepo));
   const capacityPlanRepo = new CapacityPlanRepository(projectDir);
@@ -312,6 +321,7 @@ export function initServices(
     registerInvoiceEntity(invoiceRepo);
     registerPaymentEntity(paymentRepo);
     registerBrainstormEntity(brainstormRepo);
+    registerBrainstormTemplateEntity(brainstormTemplateRepo);
     registerBriefEntity(briefRepo);
     registerCapacityPlanEntity(capacityPlanRepo);
     registerRetrospectiveEntity(retrospectiveRepo);
@@ -347,6 +357,7 @@ export function initServices(
     invoiceRepo.setCacheDb(cacheDb);
     paymentRepo.setCacheDb(cacheDb);
     brainstormRepo.setCacheDb(cacheDb);
+    brainstormTemplateRepo.setCacheDb(cacheDb);
     briefRepo.setCacheDb(cacheDb);
     capacityPlanRepo.setCacheDb(cacheDb);
     retrospectiveRepo.setCacheDb(cacheDb);
@@ -538,6 +549,10 @@ export function getPaymentService(): PaymentService {
 
 export function getBrainstormService(): BrainstormService {
   return _get<BrainstormService>(_svc, "brainstorm");
+}
+
+export function getBrainstormTemplateService(): BrainstormTemplateService {
+  return _get<BrainstormTemplateService>(_svc, "brainstormTemplate");
 }
 
 export function getBriefService(): BriefService {

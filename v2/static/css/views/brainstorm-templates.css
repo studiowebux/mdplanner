@@ -1,0 +1,135 @@
+/* Brainstorm Templates view — domain-specific styles only.
+   Card base uses shared .domain-card from components.css. */
+
+/* ---------------------------------------------------------------------------
+   Detail view
+--------------------------------------------------------------------------- */
+
+.btemplate-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.btemplate-detail__title-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  flex: 1;
+  min-width: 0;
+}
+
+.btemplate-detail__categories {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.btemplate-detail__description {
+  padding: var(--space-sm) 0;
+}
+
+.btemplate-detail__desc-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+/* -- Questions -------------------------------------------------------------- */
+
+.btemplate-detail__question-list {
+  list-style: decimal;
+  padding-left: var(--space-lg);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.btemplate-detail__question-item {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-relaxed);
+  padding: var(--space-xs) 0;
+  border-bottom: var(--border-width) solid var(--color-border-default);
+}
+
+.btemplate-detail__question-item:last-child {
+  border-bottom: none;
+}
+
+.btemplate-detail__empty {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+}
+
+/* ---------------------------------------------------------------------------
+   Template picker (sidenav fragment)
+--------------------------------------------------------------------------- */
+
+.btemplate-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md) 0;
+}
+
+.btemplate-picker__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border: var(--border-width) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.btemplate-picker__item:hover {
+  border-color: var(--color-accent);
+  background: var(--color-surface-hover);
+}
+
+.btemplate-picker__item input[type="radio"] {
+  margin-top: var(--space-xs);
+  flex-shrink: 0;
+  accent-color: var(--color-accent);
+}
+
+.btemplate-picker__item-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.btemplate-picker__item-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.btemplate-picker__item-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.btemplate-picker__empty {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: var(--space-lg) 0;
+}
+
+.btemplate-picker__actions {
+  display: flex;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: var(--border-width) solid var(--color-border-default);
+}

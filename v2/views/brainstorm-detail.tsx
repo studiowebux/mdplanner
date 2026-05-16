@@ -56,6 +56,15 @@ export const BrainstormDetailView: FC<
             >
               Focus
             </button>
+            <button
+              type="button"
+              class="btn btn--secondary btn--sm"
+              hx-get={`/brainstorms/${brainstorm.id}/template-picker`}
+              hx-target="#brainstorms-template-picker-container"
+              hx-swap="innerHTML"
+            >
+              Use Template
+            </button>
           </DetailActions>
         </header>
 
@@ -126,6 +135,7 @@ export const BrainstormDetailView: FC<
       </main>
 
       <div id="brainstorms-form-container" />
+      <div id="brainstorms-template-picker-container" />
     </MainLayout>
   );
 };
