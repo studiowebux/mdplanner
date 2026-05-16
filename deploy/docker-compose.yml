@@ -31,28 +31,15 @@ services:
     #   MDPLANNER_SECRET_KEY=<64-char hex>   # run: mdplanner keygen-secret
     #   MDPLANNER_BACKUP_PUBLIC_KEY=<PEM>    # run: mdplanner keygen  (public key only)
     environment:
-      - PROJECT_DIR=/data
-      - MDPLANNER_CACHE=1
-      - MDPLANNER_WEBDAV=1
-      - MDPLANNER_WEBDAV_USER=${MDPLANNER_WEBDAV_USER}
-      - MDPLANNER_WEBDAV_PASS=${MDPLANNER_WEBDAV_PASS}
-      - MDPLANNER_MCP_TOKEN=${MDPLANNER_MCP_TOKEN:-}
-      - MDPLANNER_READ_ONLY=${MDPLANNER_READ_ONLY:-}
-      # Encryption key for integration secrets (e.g. Cloudflare API token stored in project.md).
-      # Generate with: mdplanner keygen-secret
-      # Set to a 32-byte hex string (64 hex chars). Leave empty to store tokens in plaintext.
+      # ── v2 supported env vars ────────────────────────────────────────────────
+      - PROJECT_DIR=/data # absolute path to data directory (mounted volume)
+      - CACHE=${CACHE:-true} # set to "false" to disable SQLite cache
+      - PORT=${PORT:-8003} # HTTP port inside the container
+      - MCP_TOKEN=${MCP_TOKEN:-} # bearer token for MCP API access (leave empty to disable auth)
+      # AES-256-GCM key for encrypting integration secrets (e.g. Cloudflare API token in project.md).
+      # Generate with: openssl rand -hex 32
+      # Leave empty to store tokens in plaintext.
       - MDPLANNER_SECRET_KEY=${MDPLANNER_SECRET_KEY:-}
-      # Backup: output directory for scheduled exports. Mount a volume to persist outside container.
-      - MDPLANNER_BACKUP_DIR=${MDPLANNER_BACKUP_DIR:-}
-      # Backup schedule interval. Accepted values: daily, weekly. Leave empty to disable.
-      - MDPLANNER_BACKUP_INTERVAL=${MDPLANNER_BACKUP_INTERVAL:-}
-      # RSA-OAEP-4096 public key (PEM) for encrypted backups.
-      # Generate keypair with: mdplanner keygen
-      # Store only the PUBLIC key here. Private key stays with you — never in this file.
-      # - MDPLANNER_BACKUP_PUBLIC_KEY=${MDPLANNER_BACKUP_PUBLIC_KEY:-}
-      # Cerveau viewer: path to cerveau directory inside the container.
-      # Mount the cerveau directory as a volume below.
-      - MDPLANNER_CERVEAU_DIR=${MDPLANNER_CERVEAU_DIR:-}
     restart: unless-stopped
     networks:
       - ai-net
