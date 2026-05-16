@@ -531,7 +531,7 @@ export const TaskDetailView: FC<Props> = (
         <div class="task-detail__columns">
           {/* Left column — header + metadata */}
           <div class="task-detail__col-left">
-            <header class="detail-section task-detail__header">
+            <header class="detail-section detail-header task-detail__header">
               <div class="detail-title-row task-detail__title-row">
                 <h1 class="detail-title task-detail__title">
                   {task.completed && (

@@ -61,7 +61,7 @@
   init();
 
   // Re-init after htmx swaps the sidebar (pin toggle).
-  document.body.addEventListener("htmx:afterSwap", function (e) {
+  document.body.addEventListener("htmx:afterSettle", function (e) {
     if (e.detail.target && e.detail.target.id === "app-sidebar") {
       init();
     }

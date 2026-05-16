@@ -36,7 +36,7 @@ export const MilestoneDetailView: FC<Props> = (
       />
       <main id="milestone-detail-root" class="detail-view milestone-detail">
         <BackButton href="/milestones" label="Back to milestones" />
-        <header class="milestone-detail__header">
+        <header class="detail-section detail-header milestone-detail__header">
           <div class="detail-title-row milestone-detail__title-row">
             <h1 class="detail-title milestone-detail__title">
               {milestone.name}

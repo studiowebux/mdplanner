@@ -49,7 +49,7 @@ export const C4DetailView: FC<Props> = ({
           label="Back to canvas"
         />
 
-        <header class="detail-section c4-detail__header">
+        <header class="detail-section detail-header c4-detail__header">
           <div class="detail-title-row">
             <h1 class="detail-title">{component.name}</h1>
             <span class="badge">{component.type}</span>

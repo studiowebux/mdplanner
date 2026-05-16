@@ -76,7 +76,10 @@ export const NoteDetailView: FC<Props> = (props) => {
             </div>
           </div>
 
-          <header class="note-detail__header" id="note-detail-header">
+          <header
+            class="detail-section detail-header note-detail__header"
+            id="note-detail-header"
+          >
             <div class="detail-title-row note-detail__title-row">
               <input
                 type="text"

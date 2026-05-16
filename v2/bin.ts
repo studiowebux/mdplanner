@@ -99,5 +99,10 @@ app.use("/js/*", serveStatic({ root: staticRoot }));
 log.info(`${APP_NAME} v${APP_VERSION}`);
 log.info(`Project: ${projectDir}`);
 log.info(`Server  http://localhost:${port}`);
+if (!Deno.env.get("MDPLANNER_SECRET_KEY")) {
+  log.warn(
+    "MDPLANNER_SECRET_KEY not set — integration tokens stored in plaintext, cookie identity unsecured.",
+  );
+}
 
 Deno.serve({ port }, app.fetch);

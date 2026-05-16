@@ -444,6 +444,8 @@
   --settings-data-form-gap: var(--space-sm);
   --settings-data-result-gap: var(--space-md);
   --settings-data-desc-max-width: 52ch;
+  --settings-grid-col-min: 16rem;
+  --settings-toggle-w: 2.5rem;
 
   /* Layout */
   --prose-width: 52ch;

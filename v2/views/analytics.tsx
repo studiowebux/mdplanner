@@ -169,7 +169,6 @@ const MilestoneBar: FC<
       <div
         class="progress-bar__fill"
         data-pct={progress}
-        style={`width:${progress}%`}
       />
     </div>
   </div>
@@ -476,10 +475,7 @@ export const AnalyticsBody: FC<BodyProps> = (props) => {
                             <div class="progress-bar analytics__util-bar">
                               <div
                                 class="progress-bar__fill"
-                                data-pct={p.utilizationPct}
-                                style={`width:${
-                                  Math.min(p.utilizationPct, 100)
-                                }%`}
+                                data-pct={Math.min(p.utilizationPct, 100)}
                               />
                             </div>
                           )}
@@ -781,6 +777,7 @@ export const AnalyticsView: FC<AnalyticsViewProps> = (props) => {
       {...vp}
       activePath="/analytics"
       styles={["/css/views/analytics.css"]}
+      scripts={["/js/kpi-gauge.js"]}
     >
       <div id="analytics-sidenav-container" />
       <AnalyticsBody

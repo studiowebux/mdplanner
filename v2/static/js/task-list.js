@@ -171,7 +171,7 @@
   });
 
   // Re-apply dragging class after htmx swaps mid-drag (SSE can trigger view swap).
-  document.addEventListener("htmx:afterSwap", function (e) {
+  document.addEventListener("htmx:afterSettle", function (e) {
     if (
       dragTaskId && e.detail && e.detail.target &&
       e.detail.target.id === "tasks-view"

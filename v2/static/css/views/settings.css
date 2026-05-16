@@ -786,7 +786,8 @@ html.sidebar-collapsed .settings-page__form-actions {
 
 .shortcuts-fields {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  grid-template-columns:
+    repeat(auto-fill, minmax(var(--settings-grid-col-min), 1fr));
   gap: var(--space-sm);
 }
 
@@ -803,7 +804,7 @@ html.sidebar-collapsed .settings-page__form-actions {
 }
 
 .shortcuts-input {
-  width: 2.5rem;
+  width: var(--settings-toggle-w);
   text-align: center;
   font-family: var(--font-mono);
   font-size: var(--font-size-md);

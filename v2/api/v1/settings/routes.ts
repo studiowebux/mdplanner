@@ -11,6 +11,7 @@ import {
 import { getCookieSecret } from "../../../utils/secrets.ts";
 import { IDENTITY_COOKIE } from "../../../middleware/identity.ts";
 import { hxTrigger } from "../../../utils/hx-trigger.ts";
+import { notFound } from "../../../types/api.ts";
 import {
   FeaturesListSchema,
   ProjectConfigSchema,
@@ -246,7 +247,7 @@ settingsRouter.openapi(setPersonRoute, async (c) => {
   }
 
   const person = await getPeopleService().getById(personId.trim());
-  if (!person) return c.json({ error: "Person not found" }, 404);
+  if (!person) return c.json(notFound("Person", personId.trim()), 404);
 
   const value = JSON.stringify({ name: person.name, id: person.id });
   if (secret) {
