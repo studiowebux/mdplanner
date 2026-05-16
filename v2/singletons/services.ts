@@ -119,6 +119,9 @@ import { registerBusinessModelEntity } from "../domains/business-model/cache.ts"
 import { RiskRepository } from "../repositories/risk.repository.ts";
 import { RiskService } from "../services/risk.service.ts";
 import { registerRiskEntity } from "../domains/risk/cache.ts";
+import { VacationRepository } from "../repositories/vacation.repository.ts";
+import { VacationService } from "../services/vacation.service.ts";
+import { registerVacationEntity } from "../domains/vacation/cache.ts";
 import { StrategicLevelsRepository } from "../repositories/strategic-levels.repository.ts";
 import { StrategicLevelsService } from "../services/strategic-levels.service.ts";
 import { registerStrategicLevelsEntity } from "../domains/strategic-levels/cache.ts";
@@ -206,6 +209,8 @@ export function initServices(
   _set(_svc, "businessModel", new BusinessModelService(businessModelRepo));
   const riskRepo = new RiskRepository(projectDir);
   _set(_svc, "risk", new RiskService(riskRepo));
+  const vacationRepo = new VacationRepository(projectDir);
+  _set(_svc, "vacation", new VacationService(vacationRepo));
   const strategicLevelsRepo = new StrategicLevelsRepository(projectDir);
   _set(
     _svc,
@@ -295,6 +300,7 @@ export function initServices(
     registerFishboneEntity(fishboneRepo);
     registerBusinessModelEntity(businessModelRepo);
     registerRiskEntity(riskRepo);
+    registerVacationEntity(vacationRepo);
     registerStrategicLevelsEntity(strategicLevelsRepo);
     registerSafeEntity(safeRepo);
     registerProjectValueBoardEntity(projectValueBoardRepo);
@@ -360,6 +366,7 @@ export function initServices(
     fishboneRepo.setCacheDb(cacheDb);
     businessModelRepo.setCacheDb(cacheDb);
     riskRepo.setCacheDb(cacheDb);
+    vacationRepo.setCacheDb(cacheDb);
     strategicLevelsRepo.setCacheDb(cacheDb);
     safeRepo.setCacheDb(cacheDb);
     projectValueBoardRepo.setCacheDb(cacheDb);
@@ -463,6 +470,10 @@ export function getBusinessModelService(): BusinessModelService {
 
 export function getRiskService(): RiskService {
   return _get<RiskService>(_svc, "risk");
+}
+
+export function getVacationService(): VacationService {
+  return _get<VacationService>(_svc, "vacation");
 }
 
 export function getStrategicLevelsService(): StrategicLevelsService {

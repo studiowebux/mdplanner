@@ -47,6 +47,7 @@ import {
   getSwotService,
   getTaskRepository,
   getTaskService,
+  getVacationService,
 } from "../../../singletons/services.ts";
 import { registerDomain } from "./registry.ts";
 
@@ -117,6 +118,7 @@ export function registerBackupDomains(): void {
   domain("fishbone", "Fishbone", getFishboneService);
   domain("business-models", "Business Models", getBusinessModelService);
   domain("risks", "Risks", getRiskService);
+  domain("vacation", "Vacation Requests", getVacationService);
   domain("strategic-levels", "Strategic Levels", getStrategicLevelsService);
   domain("safe", "SAFe", getSafeService);
   domain(
