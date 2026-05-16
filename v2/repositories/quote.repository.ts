@@ -10,6 +10,7 @@ import type {
 } from "../types/quote.types.ts";
 import type { LineItem } from "../types/billing.types.ts";
 import { mapArrayFromFm } from "../utils/frontmatter-mapper.ts";
+import { atomicWrite } from "../utils/safe-io.ts";
 import { CachedMarkdownRepository } from "./cached.repository.ts";
 import { QUOTE_TABLE, rowToQuote } from "../domains/quote/cache.ts";
 import { QUOTE_BODY_KEYS } from "../domains/quote/constants.ts";
@@ -160,13 +161,13 @@ export class QuoteRepository extends CachedMarkdownRepository<
     quoteId: string,
     revision: QuoteRevision,
   ): Promise<void> {
-    const existing = await this.getRevisions(quoteId);
-    existing.push(revision);
-    await Deno.mkdir(this.dir, { recursive: true });
-    await Deno.writeTextFile(
-      this.revisionPath(quoteId),
-      JSON.stringify(existing, null, 2),
-    );
+    const path = this.revisionPath(quoteId);
+    await this.writer.write(quoteId + ".revisions", async () => {
+      const existing = await this.getRevisions(quoteId);
+      existing.push(revision);
+      await Deno.mkdir(this.dir, { recursive: true });
+      await atomicWrite(path, JSON.stringify(existing, null, 2));
+    });
   }
 
   protected serialize(item: Quote): string {
