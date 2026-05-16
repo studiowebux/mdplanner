@@ -11,6 +11,7 @@ import { MILESTONE_STATUS_VARIANTS } from "../domains/milestone/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
+import { MarkdownJsx } from "../utils/markdown-jsx.tsx";
 
 type Props = ViewProps & {
   milestone: Milestone;
@@ -88,12 +89,10 @@ export const MilestoneDetailView: FC<Props> = (
           </div>
         </header>
 
-        {milestone.descriptionHtml && (
-          <div
-            class="milestone-detail__description"
-            dangerouslySetInnerHTML={{ __html: milestone.descriptionHtml }}
-          />
-        )}
+        <MarkdownJsx
+          markdown={milestone.description}
+          class="milestone-detail__description"
+        />
 
         {milestone.links && milestone.links.length > 0 && (
           <section class="detail-section milestone-detail__links">

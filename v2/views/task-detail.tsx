@@ -23,14 +23,9 @@ import {
 import { BackButton } from "./components/back-button.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
-import {
-  type MentionOpts,
-  parseMentions,
-  renderMentions,
-  resolveMentions,
-} from "../utils/mentions.ts";
-import { escapeHtml } from "../utils/html.ts";
+import { type MentionOpts, parseMentions } from "../utils/mentions.ts";
 import { Sidenav } from "../components/ui/sidenav.tsx";
+import { MentionText } from "./components/mention-text.tsx";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -143,15 +138,13 @@ const CommentsSection: FC<{
                     {timeAgo(c.timestamp)}
                   </time>
                 </div>
-                <div
-                  class="task-detail__comment-body"
-                  dangerouslySetInnerHTML={{
-                    __html: renderMentions(
-                      escapeHtml(resolveMentions(c.body, people)),
-                      mentionOpts,
-                    ),
-                  }}
-                />
+                <div class="task-detail__comment-body">
+                  <MentionText
+                    text={c.body}
+                    people={people}
+                    githubRepo={mentionOpts.githubRepo}
+                  />
+                </div>
                 {c.metadata && Object.keys(c.metadata).length > 0 && (
                   <details class="task-detail__comment-meta">
                     <summary>Metadata</summary>
@@ -729,15 +722,13 @@ export const TaskDetailView: FC<Props> = (
                 <h2>Description</h2>
                 <div class="task-detail__description">
                   {task.description.map((p, i) => (
-                    <p
-                      key={i}
-                      dangerouslySetInnerHTML={{
-                        __html: renderMentions(
-                          escapeHtml(resolveMentions(p, people)),
-                          mentionOpts,
-                        ),
-                      }}
-                    />
+                    <p key={i}>
+                      <MentionText
+                        text={p}
+                        people={people}
+                        githubRepo={mentionOpts.githubRepo}
+                      />
+                    </p>
                   ))}
                 </div>
               </section>

@@ -10,7 +10,8 @@ import {
   variance,
   varianceClass,
 } from "../../utils/time.ts";
-import { Highlight, highlightHtml } from "../../utils/highlight.tsx";
+import { Highlight } from "../../utils/highlight.tsx";
+import { markdownToText } from "../../utils/markdown-jsx.tsx";
 import { MILESTONE_STATUS_VARIANTS } from "../../domains/milestone/constants.tsx";
 import { badgeClass } from "../../components/ui/status-badge.tsx";
 import { toKebab } from "../../utils/slug.ts";
@@ -92,13 +93,10 @@ export const MilestoneCard: FC<Props> = ({ milestone, q }) => {
         </span>
       </div>
 
-      {milestone.descriptionHtml && (
-        <div
-          class="milestone-card__description markdown-body"
-          dangerouslySetInnerHTML={{
-            __html: highlightHtml(milestone.descriptionHtml!, q),
-          }}
-        />
+      {milestone.description && (
+        <p class="milestone-card__description">
+          <Highlight text={markdownToText(milestone.description)} q={q} />
+        </p>
       )}
     </DomainCard>
   );

@@ -1,9 +1,10 @@
+import { Fragment } from "hono/jsx";
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { ViewProps } from "../types/app.ts";
 import type { SearchResult } from "../types/search.types.ts";
 import { ENTITY_TYPE_LABELS } from "../constants/mod.ts";
-import { escapeSnippetHtml } from "../utils/html.ts";
+import { parseSnippet } from "../utils/html.ts";
 
 interface SearchViewProps extends ViewProps {
   query: string;
@@ -45,13 +46,13 @@ export const SearchView: FC<SearchViewProps> = ({
                 </span>
                 <div class="search-results__content">
                   <span class="search-results__title">{r.title}</span>
-                  <span
-                    class="search-results__snippet"
-                    // deno-lint-ignore react-no-danger
-                    dangerouslySetInnerHTML={{
-                      __html: escapeSnippetHtml(r.snippet),
-                    }}
-                  />
+                  <span class="search-results__snippet">
+                    {parseSnippet(r.snippet).map((seg, i) =>
+                      seg.mark
+                        ? <mark key={i}>{seg.text}</mark>
+                        : <Fragment key={String(i)}>{seg.text}</Fragment>
+                    )}
+                  </span>
                 </div>
               </li>
             ))}

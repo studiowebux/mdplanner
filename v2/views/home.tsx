@@ -3,7 +3,7 @@ import { MainLayout } from "../components/layout/main.tsx";
 import type { ViewProps } from "../types/app.ts";
 import type { ProjectConfig } from "../types/project.types.ts";
 import { APP_VERSION } from "../constants/mod.ts";
-import { markdownToHtml } from "../utils/markdown.ts";
+import { MarkdownJsx } from "../utils/markdown-jsx.tsx";
 
 type HomeProps = ViewProps & { config: ProjectConfig };
 
@@ -20,14 +20,10 @@ export const HomeView: FC<HomeProps> = ({ config, ...viewProps }) => {
         <h1 class="home-page__title">{config.name}</h1>
         <span class="home-page__version">v{APP_VERSION}</span>
 
-        {config.description && (
-          <div
-            class="home-page__description markdown-body"
-            dangerouslySetInnerHTML={{
-              __html: markdownToHtml(config.description),
-            }}
-          />
-        )}
+        <MarkdownJsx
+          markdown={config.description}
+          class="home-page__description markdown-body"
+        />
 
         {links.length > 0 && (
           <section class="home-page__links">

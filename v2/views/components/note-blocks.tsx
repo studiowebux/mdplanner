@@ -7,7 +7,7 @@ import type {
   Note,
   NoteParagraph,
 } from "../../types/note.types.ts";
-import { markdownToHtml } from "../../utils/markdown.ts";
+import { MarkdownJsx } from "../../utils/markdown-jsx.tsx";
 
 // ---------------------------------------------------------------------------
 // Block types for interleaving
@@ -75,8 +75,7 @@ export const ParagraphBlock: FC<{
     );
   }
 
-  const html = markdownToHtml(paragraph.content);
-  if (!html) return null;
+  if (!paragraph.content) return null;
 
   return (
     <div
@@ -84,8 +83,9 @@ export const ParagraphBlock: FC<{
       {...idAttr}
       data-block-type="text"
       data-block-content={paragraph.content}
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
+    >
+      <MarkdownJsx markdown={paragraph.content} bare />
+    </div>
   );
 };
 

@@ -2,8 +2,8 @@ import type { FC } from "hono/jsx";
 import type { Note } from "../../types/note.types.ts";
 import { DomainCard } from "../../components/ui/domain-card.tsx";
 import { CardMeta, CardMetaItem } from "./card-meta.tsx";
-import { Highlight, highlightHtml } from "../../utils/highlight.tsx";
-import { markdownToHtml } from "../../utils/markdown.ts";
+import { Highlight } from "../../utils/highlight.tsx";
+import { markdownToText } from "../../utils/markdown-jsx.tsx";
 import { timeAgo } from "../../utils/time.ts";
 import { toKebab } from "../../utils/slug.ts";
 
@@ -12,7 +12,7 @@ type Props = { note: Note; q?: string };
 export const NoteCard: FC<Props> = ({ note, q }) => {
   const sectionCount = note.customSections?.length ?? 0;
   const paragraphCount = note.paragraphs?.length ?? 0;
-  const contentHtml = markdownToHtml(note.content?.slice(0, 300));
+  const contentText = markdownToText(note.content?.slice(0, 300));
 
   return (
     <DomainCard
@@ -66,13 +66,10 @@ export const NoteCard: FC<Props> = ({ note, q }) => {
         )}
       </CardMeta>
 
-      {contentHtml && (
-        <div
-          class="note-card__excerpt markdown-body"
-          dangerouslySetInnerHTML={{
-            __html: highlightHtml(contentHtml, q),
-          }}
-        />
+      {contentText && (
+        <p class="note-card__excerpt">
+          <Highlight text={contentText} q={q} />
+        </p>
       )}
     </DomainCard>
   );

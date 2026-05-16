@@ -75,6 +75,9 @@ export function registerBrainstormTemplateEntity(
   const entity: EntityDef = {
     table: BRAINSTORM_TEMPLATE_TABLE,
     schema: BRAINSTORM_TEMPLATE_SCHEMA,
+    migrations: [
+      `ALTER TABLE ${BRAINSTORM_TEMPLATE_TABLE} ADD COLUMN categories TEXT`,
+    ],
     fts: {
       type: "brainstorm_template",
       columns: ["id", "name", "questions_text"],
