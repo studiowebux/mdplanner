@@ -24,7 +24,7 @@ export const onboardingTemplateConfig: DomainConfig<
   name: "onboarding-templates",
   singular: "Onboarding Template",
   path: "/onboarding-templates",
-  ssePrefix: "onboarding_template",
+  ssePrefix: "onboarding-template",
   styles: ["/css/views/onboarding-templates.css"],
   emptyMessage: "No onboarding templates yet. Create one to get started.",
   defaultView: "table",

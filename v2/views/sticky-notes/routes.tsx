@@ -89,7 +89,7 @@ stickyNotesRouter.get("/", async (c) => {
         class="domain-page"
         hx-ext="sse morph"
         sse-connect="/sse"
-        hx-trigger="sse:sticky_note.board.created"
+        hx-trigger="sse:sticky-note.board.created"
         hx-get="/sticky-notes/boards/list"
         hx-target="#board-card-grid"
         hx-swap="morph:outerHTML"
@@ -175,7 +175,7 @@ stickyNotesRouter.post("/boards", async (c) => {
       });
     }
     await getStickyBoardService().create({ title, description, projects: [] });
-    publish("sticky_note.board.created");
+    publish("sticky-note.board.created");
     return new Response(null, {
       status: 204,
       headers: { "HX-Trigger": hxTrigger("success", "Board created") },

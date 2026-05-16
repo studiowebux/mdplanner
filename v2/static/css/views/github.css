@@ -1,12 +1,5 @@
 /* GitHub section — embedded in portfolio detail page */
 
-:root {
-  --github-table-num-w: 3rem;
-  --github-milestone-bar-h: var(--space-sm);
-  --github-tab-border-w: 2px;
-  --github-summary-card-min-w: 20rem;
-}
-
 /* ---- Repo card ---- */
 
 .github-card {

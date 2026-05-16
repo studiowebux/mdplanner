@@ -26,7 +26,7 @@ export const stickyNoteConfig: DomainConfig<
   name: "sticky-notes",
   singular: "Sticky Note",
   path: "/sticky-notes",
-  ssePrefix: "sticky_note",
+  ssePrefix: "sticky-note",
   styles: ["/css/views/sticky-notes.css"],
   scripts: ["/js/sticky-note-canvas.js"],
   emptyMessage: "No sticky notes yet. Double-click the canvas to add one.",

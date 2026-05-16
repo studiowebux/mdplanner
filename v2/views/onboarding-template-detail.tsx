@@ -17,7 +17,7 @@ export const OnboardingTemplateDetailView: FC<
   >
     <SseRefresh
       getUrl={"/onboarding-templates/" + tmpl.id}
-      trigger="sse:onboarding_template.updated"
+      trigger="sse:onboarding-template.updated"
       targetId="onboarding-template-detail-root"
     />
     <main

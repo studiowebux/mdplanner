@@ -26,7 +26,7 @@ export const projectValueBoardConfig: DomainConfig<
   singular: "Project Value Board",
   plural: "Project Value Boards",
   path: "/project-value",
-  ssePrefix: "project_value_board",
+  ssePrefix: "project-value-board",
   styles: ["/css/views/project-value-boards.css"],
   emptyMessage: "No project value boards yet. Create one to get started.",
   defaultView: "card",

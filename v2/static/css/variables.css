@@ -760,6 +760,43 @@ html.font-mono {
 
   --quadrant-card-max-h: 40vh;
 
+  /* Lean canvas */
+  --lc-section-max-h: 20rem;
+
+  /* Deals pipeline */
+  --deal-pipeline-col-w: 18rem;
+
+  /* GitHub view */
+  --github-table-num-w: 3rem;
+  --github-milestone-bar-h: var(--space-sm);
+  --github-tab-border-w: 2px;
+  --github-summary-card-min-w: 20rem;
+
+  /* Uploads view */
+  --uploads-stat-card-min-w: var(--card-min-width);
+  --uploads-stat-value-size: var(--font-size-xl);
+  --uploads-table-actions-w: calc(var(--space-xl) * 3);
+
+  /* Time entries view */
+  --te-recap-label-min-w: var(--sidebar-width);
+  --te-recap-label-max-w: var(--table-compact-cell-max-width);
+  --te-recap-col-min-w: var(--card-min-width);
+  --te-recap-col-gap: var(--space-xl);
+  --te-recap-footer-border: var(--border-width-thick) solid var(
+    --color-border-default
+  );
+
+  /* Analytics view */
+  --analytics-stat-card-min-w: var(--card-min-width);
+  --analytics-stat-value-size: var(--font-size-xl);
+  --analytics-stat-value-line-height: var(--line-height-tight);
+  --analytics-col-min-w: 14rem;
+  --analytics-filter-min-w: 10rem;
+  --analytics-util-bar-h: var(--progress-bar-height);
+  --analytics-by-value-min-w: 8rem;
+  --analytics-customize-panel-min-w: var(--analytics-col-min-w);
+  --analytics-details-content-pad: var(--space-md);
+
   /* Capacity grid cell tints — softer than alert bg in dark mode */
   --cp-grid-cell-free-bg: rgba(74, 222, 128, 0.08);
   --cp-grid-cell-over-bg: rgba(248, 113, 113, 0.12);

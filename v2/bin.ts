@@ -95,6 +95,7 @@ app.use("/js/*", async (c, next) => {
 });
 app.use("/css/*", serveStatic({ root: staticRoot }));
 app.use("/js/*", serveStatic({ root: staticRoot }));
+app.use("/favicon*", serveStatic({ root: staticRoot }));
 
 log.info(`${APP_NAME} v${APP_VERSION}`);
 log.info(`Project: ${projectDir}`);

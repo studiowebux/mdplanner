@@ -1,17 +1,6 @@
 /* Time entries list view. */
 /* All values from variables.css — zero hardcoded values. */
 
-/* Component tokens — derived from variables.css, no raw values below. */
-:root {
-  --te-recap-label-min-w: var(--sidebar-width);
-  --te-recap-label-max-w: var(--table-compact-cell-max-width);
-  --te-recap-col-min-w: var(--card-min-width);
-  --te-recap-col-gap: var(--space-xl);
-  --te-recap-footer-border: var(--border-width-thick) solid var(
-    --color-border-default
-  );
-}
-
 .time-entries {
   padding: var(--page-padding);
   max-width: var(--page-max-width);

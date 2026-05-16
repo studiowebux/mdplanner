@@ -85,7 +85,7 @@ const createBusinessModelRoute = createRoute({
 businessModelApiRouter.openapi(createBusinessModelRoute, async (c) => {
   const data = c.req.valid("json");
   const item = await getBusinessModelService().create(data);
-  publish("business_model.created");
+  publish("business-model.created");
   return c.json(item, 201);
 });
 
@@ -120,7 +120,7 @@ businessModelApiRouter.openapi(updateRoute, async (c) => {
   const data = c.req.valid("json");
   const item = await getBusinessModelService().update(id, data);
   if (!item) return c.json(notFound("BusinessModel", id), 404);
-  publish("business_model.updated");
+  publish("business-model.updated");
   return c.json(item, 200);
 });
 
@@ -145,6 +145,6 @@ businessModelApiRouter.openapi(deleteRoute, async (c) => {
   const { id } = c.req.valid("param");
   const ok = await getBusinessModelService().delete(id);
   if (!ok) return c.json(notFound("BusinessModel", id), 404);
-  publish("business_model.deleted");
+  publish("business-model.deleted");
   return new Response(null, { status: 204 });
 });

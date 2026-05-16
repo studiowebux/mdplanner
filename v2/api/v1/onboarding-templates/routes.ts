@@ -90,7 +90,7 @@ const createRoute_ = createRoute({
 onboardingTemplatesRouter.openapi(createRoute_, async (c) => {
   const data = c.req.valid("json");
   const item = await getOnboardingTemplateService().create(data);
-  publish("onboarding_template.created");
+  publish("onboarding-template.created");
   return c.json(item, 201);
 });
 
@@ -127,7 +127,7 @@ onboardingTemplatesRouter.openapi(updateRoute, async (c) => {
   const data = c.req.valid("json");
   const item = await getOnboardingTemplateService().update(id, data);
   if (!item) return c.json(notFound("ONBOARDING_TEMPLATE", id), 404);
-  publish("onboarding_template.updated");
+  publish("onboarding-template.updated");
   return c.json(item, 200);
 });
 
@@ -152,6 +152,6 @@ onboardingTemplatesRouter.openapi(deleteRoute, async (c) => {
   const { id } = c.req.valid("param");
   const ok = await getOnboardingTemplateService().delete(id);
   if (!ok) return c.json(notFound("ONBOARDING_TEMPLATE", id), 404);
-  publish("onboarding_template.deleted");
+  publish("onboarding-template.deleted");
   return new Response(null, { status: 204 });
 });

@@ -117,7 +117,7 @@ const createBoardRoute = createRoute({
 stickyNotesRouter.openapi(createBoardRoute, async (c) => {
   const data = c.req.valid("json");
   const board = await getStickyBoardService().create(data);
-  publish("sticky_note.board.created");
+  publish("sticky-note.board.created");
   return c.json(board, 201);
 });
 
@@ -151,7 +151,7 @@ stickyNotesRouter.openapi(updateBoardRoute, async (c) => {
   const data = c.req.valid("json");
   const board = await getStickyBoardService().update(boardId, data);
   if (!board) return c.json(notFound("STICKY_BOARD", boardId), 404);
-  publish("sticky_note.board.updated");
+  publish("sticky-note.board.updated");
   return c.json(board, 200);
 });
 
@@ -186,7 +186,7 @@ stickyNotesRouter.openapi(deleteBoardRoute, async (c) => {
   }
   const ok = await getStickyBoardService().delete(boardId);
   if (!ok) return c.json(notFound("STICKY_BOARD", boardId), 404);
-  publish("sticky_note.board.deleted");
+  publish("sticky-note.board.deleted");
   return new Response(null, { status: 204 });
 });
 
@@ -271,7 +271,7 @@ stickyNotesRouter.openapi(createNoteRoute, async (c) => {
   const { boardId } = c.req.valid("param");
   const data = c.req.valid("json");
   const note = await getStickyNoteServiceForBoard(boardId).create(data);
-  publish("sticky_note.created");
+  publish("sticky-note.created");
   return c.json(note, 201);
 });
 
@@ -305,7 +305,7 @@ stickyNotesRouter.openapi(updateNoteRoute, async (c) => {
   const data = c.req.valid("json");
   const note = await getStickyNoteServiceForBoard(boardId).update(id, data);
   if (!note) return c.json(notFound("STICKY_NOTE", id), 404);
-  publish("sticky_note.updated");
+  publish("sticky-note.updated");
   return c.json(note, 200);
 });
 
@@ -342,7 +342,7 @@ stickyNotesRouter.openapi(updatePositionRoute, async (c) => {
     position,
   );
   if (!note) return c.json(notFound("STICKY_NOTE", id), 404);
-  publish("sticky_note.moved", { id, x: note.position.x, y: note.position.y });
+  publish("sticky-note.moved", { id, x: note.position.x, y: note.position.y });
   return c.json(note, 200);
 });
 
@@ -378,7 +378,7 @@ stickyNotesRouter.openapi(updateContentRoute, async (c) => {
     content,
   });
   if (!note) return c.json(notFound("STICKY_NOTE", id), 404);
-  publish("sticky_note.content", { id, content });
+  publish("sticky-note.content", { id, content });
   return c.json(note, 200);
 });
 
@@ -412,7 +412,7 @@ stickyNotesRouter.openapi(updateSizeRoute, async (c) => {
   const size = c.req.valid("json");
   const note = await getStickyNoteServiceForBoard(boardId).updateSize(id, size);
   if (!note) return c.json(notFound("STICKY_NOTE", id), 404);
-  publish("sticky_note.moved", {
+  publish("sticky-note.moved", {
     id,
     width: note.size?.width,
     height: note.size?.height,
@@ -440,6 +440,6 @@ stickyNotesRouter.openapi(deleteNoteRoute, async (c) => {
   const { boardId, id } = c.req.valid("param");
   const ok = await getStickyNoteServiceForBoard(boardId).delete(id);
   if (!ok) return c.json(notFound("STICKY_NOTE", id), 404);
-  publish("sticky_note.deleted");
+  publish("sticky-note.deleted");
   return new Response(null, { status: 204 });
 });

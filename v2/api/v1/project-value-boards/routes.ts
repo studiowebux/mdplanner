@@ -90,7 +90,7 @@ const createRoute_ = createRoute({
 projectValueBoardApiRouter.openapi(createRoute_, async (c) => {
   const data = c.req.valid("json");
   const item = await getProjectValueBoardService().create(data);
-  publish("project_value_board.created");
+  publish("project-value-board.created");
   return c.json(item, 201);
 });
 
@@ -127,7 +127,7 @@ projectValueBoardApiRouter.openapi(updateRoute, async (c) => {
   const data = c.req.valid("json");
   const item = await getProjectValueBoardService().update(id, data);
   if (!item) return c.json(notFound("ProjectValueBoard", id), 404);
-  publish("project_value_board.updated");
+  publish("project-value-board.updated");
   return c.json(item, 200);
 });
 
@@ -152,6 +152,6 @@ projectValueBoardApiRouter.openapi(deleteRoute, async (c) => {
   const { id } = c.req.valid("param");
   const ok = await getProjectValueBoardService().delete(id);
   if (!ok) return c.json(notFound("ProjectValueBoard", id), 404);
-  publish("project_value_board.deleted");
+  publish("project-value-board.deleted");
   return new Response(null, { status: 204 });
 });

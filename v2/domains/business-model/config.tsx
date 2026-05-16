@@ -26,7 +26,7 @@ export const businessModelConfig: DomainConfig<
   singular: "Business Model Canvas",
   plural: "Business Model Canvases",
   path: "/business-models",
-  ssePrefix: "business_model",
+  ssePrefix: "business-model",
   styles: ["/css/views/business-model.css"],
   emptyMessage: "No business model canvases yet. Create one to get started.",
   defaultView: "card",

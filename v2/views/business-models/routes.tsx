@@ -52,7 +52,7 @@ businessModelRouter.post("/:id/:section", async (c) => {
   await getBusinessModelService().update(id, {
     [section]: items,
   });
-  publish("business_model.updated");
+  publish("business-model.updated");
   c.header(
     "HX-Trigger",
     JSON.stringify({ showToast: { type: "success", message: "Item added" } }),
@@ -77,7 +77,7 @@ businessModelRouter.put("/:id/:section/:index", async (c) => {
   if (index >= 0 && index < items.length && text) {
     items[index] = text;
     await getBusinessModelService().update(id, { [section]: items });
-    publish("business_model.updated");
+    publish("business-model.updated");
   }
   c.header(
     "HX-Trigger",
@@ -102,7 +102,7 @@ businessModelRouter.delete("/:id/:section/:index", async (c) => {
   if (index >= 0 && index < items.length) {
     items.splice(index, 1);
     await getBusinessModelService().update(id, { [section]: items });
-    publish("business_model.updated");
+    publish("business-model.updated");
   }
   c.header(
     "HX-Trigger",

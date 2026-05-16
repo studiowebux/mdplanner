@@ -37,8 +37,8 @@
 }
 
 .deal-pipeline__column {
-  flex: 0 0 var(--deal-pipeline-col-w, 18rem);
-  min-width: var(--deal-pipeline-col-w, 18rem);
+  flex: 0 0 var(--deal-pipeline-col-w);
+  min-width: var(--deal-pipeline-col-w);
   background: var(--color-bg-secondary);
   border-radius: var(--radius-lg);
   border: var(--border-width) solid var(--color-border);

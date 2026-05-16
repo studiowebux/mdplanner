@@ -52,7 +52,7 @@ projectValueBoardRouter.post("/:id/:section", async (c) => {
 
   const items = [...item[section as ProjectValueBoardSectionKey], text];
   await getProjectValueBoardService().update(id, { [section]: items });
-  publish("project_value_board.updated");
+  publish("project-value-board.updated");
   c.header(
     "HX-Trigger",
     JSON.stringify({ showToast: { type: "success", message: "Item added" } }),
@@ -77,7 +77,7 @@ projectValueBoardRouter.put("/:id/:section/:index", async (c) => {
   if (index >= 0 && index < items.length && text) {
     items[index] = text;
     await getProjectValueBoardService().update(id, { [section]: items });
-    publish("project_value_board.updated");
+    publish("project-value-board.updated");
   }
   c.header(
     "HX-Trigger",
@@ -100,7 +100,7 @@ projectValueBoardRouter.delete("/:id/:section/:index", async (c) => {
   if (index >= 0 && index < items.length) {
     items.splice(index, 1);
     await getProjectValueBoardService().update(id, { [section]: items });
-    publish("project_value_board.updated");
+    publish("project-value-board.updated");
   }
   c.header(
     "HX-Trigger",

@@ -104,7 +104,7 @@ export const BusinessModelDetailView: FC<
     >
       <SseRefresh
         getUrl={"/business-models/" + bmc.id + editSuffix}
-        trigger="sse:business_model.updated"
+        trigger="sse:business-model.updated"
         targetId="bmc-detail-root"
       />
       <main

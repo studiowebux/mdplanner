@@ -1,19 +1,6 @@
 /* Analytics command center view. */
 /* All values from variables.css — zero hardcoded values. */
 
-/* Component tokens — derived from variables.css, no raw values below. */
-:root {
-  --analytics-stat-card-min-w: var(--card-min-width);
-  --analytics-stat-value-size: var(--font-size-xl);
-  --analytics-stat-value-line-height: var(--line-height-tight, 1.1);
-  --analytics-col-min-w: 14rem;
-  --analytics-filter-min-w: 10rem;
-  --analytics-util-bar-h: var(--progress-bar-height);
-  --analytics-by-value-min-w: 8rem;
-  --analytics-customize-panel-min-w: var(--analytics-col-min-w);
-  --analytics-details-content-pad: var(--space-md);
-}
-
 /* ── layout ─────────────────────────────────────────────────────────────── */
 
 .analytics {

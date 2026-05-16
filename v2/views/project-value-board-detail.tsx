@@ -124,7 +124,7 @@ export const ProjectValueBoardDetailView: FC<
     >
       <SseRefresh
         getUrl={"/project-value/" + board.id + editSuffix}
-        trigger="sse:project_value_board.updated"
+        trigger="sse:project-value-board.updated"
         targetId="pv-detail-root"
       />
       <main

@@ -1,12 +1,6 @@
 /* Uploads management admin view. */
 /* All values from variables.css — zero hardcoded values. */
 
-:root {
-  --uploads-stat-card-min-w: var(--card-min-width);
-  --uploads-stat-value-size: var(--font-size-xl);
-  --uploads-table-actions-w: calc(var(--space-xl) * 3);
-}
-
 /* ── page layout ─────────────────────────────────────────────────────────── */
 
 .uploads {

@@ -55,6 +55,7 @@ export const MainLayout: FC<Props> = (
           content="width=device-width, initial-scale=1.0, viewport-fit=cover"
         />
         <title>{pageTitle}</title>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
