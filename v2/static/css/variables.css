@@ -343,6 +343,9 @@
   --z-toast: 500;
   --z-drag-ghost: 600;
   --drag-ghost-opacity: 0.85;
+  --z-resize-handle: 5;
+  --resize-handle-w: 6px;
+  --resize-handle-opacity: 0.4;
 
   /* Mention autocomplete — set dynamically by mention-autocomplete.js */
   --mention-top: 0px;

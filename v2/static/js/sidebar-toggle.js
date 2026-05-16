@@ -64,4 +64,44 @@
       applyDesktopState();
     }
   });
+
+  // ── Sidebar drag-resize ───────────────────────────────────────────────────
+  var handle = document.querySelector(".sidebar__resize-handle");
+  if (handle) {
+    var wMin = parseInt(
+      getComputedStyle(html).getPropertyValue("--sidebar-w-min"),
+      10,
+    ) || 160;
+    var wMax = parseInt(
+      getComputedStyle(html).getPropertyValue("--sidebar-w-max"),
+      10,
+    ) || 400;
+    var dragging = false;
+
+    handle.addEventListener("pointerdown", function (e) {
+      if (isMobile() || html.classList.contains("sidebar-collapsed")) return;
+      dragging = true;
+      handle.classList.add("is-dragging");
+      handle.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+
+    handle.addEventListener("pointermove", function (e) {
+      if (!dragging) return;
+      var sidebar = document.getElementById("app-sidebar");
+      if (!sidebar) return;
+      var rect = sidebar.getBoundingClientRect();
+      var newW = Math.min(Math.max(e.clientX - rect.left, wMin), wMax);
+      html.style.setProperty("--sidebar-width", newW + "px");
+    });
+
+    function endDrag() {
+      if (!dragging) return;
+      dragging = false;
+      handle.classList.remove("is-dragging");
+    }
+
+    handle.addEventListener("pointerup", endDrag);
+    handle.addEventListener("pointercancel", endDrag);
+  }
 })();

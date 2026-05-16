@@ -126,6 +126,8 @@ export const Sidebar: FC<Props> = (props) => {
           Settings
         </a>
       </div>
+
+      <div class="sidebar__resize-handle" aria-hidden="true" />
     </aside>
   );
 };
