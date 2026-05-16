@@ -141,6 +141,22 @@ export class QuoteRepository extends CachedMarkdownRepository<
   }
 
   // ---------------------------------------------------------------------------
+  // Delete — also removes revision sidecar to avoid orphaned files
+  // ---------------------------------------------------------------------------
+
+  override async delete(id: string): Promise<boolean> {
+    const deleted = await super.delete(id);
+    if (deleted) {
+      try {
+        await Deno.remove(this.revisionPath(id));
+      } catch (err) {
+        if (!(err instanceof Deno.errors.NotFound)) throw err;
+      }
+    }
+    return deleted;
+  }
+
+  // ---------------------------------------------------------------------------
   // Revision sidecar — {quoteId}.revisions.json, append-only
   // ---------------------------------------------------------------------------
 
