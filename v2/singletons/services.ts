@@ -110,6 +110,9 @@ import { registerJournalEntity } from "../domains/journal/cache.ts";
 import { ReflectionRepository } from "../repositories/reflection.repository.ts";
 import { ReflectionService } from "../services/reflection.service.ts";
 import { registerReflectionEntity } from "../domains/reflection/cache.ts";
+import { ReflectionTemplateRepository } from "../repositories/reflection-template.repository.ts";
+import { ReflectionTemplateService } from "../services/reflection-template.service.ts";
+import { registerReflectionTemplateEntity } from "../domains/reflection-template/cache.ts";
 import { MindmapRepository } from "../repositories/mindmap.repository.ts";
 import { MindmapService } from "../services/mindmap.service.ts";
 import { registerMindmapEntity } from "../domains/mindmap/cache.ts";
@@ -244,6 +247,12 @@ export function initServices(
   _set(_svc, "journal", new JournalService(journalRepo));
   const reflectionRepo = new ReflectionRepository(projectDir);
   _set(_svc, "reflection", new ReflectionService(reflectionRepo));
+  const reflectionTemplateRepo = new ReflectionTemplateRepository(projectDir);
+  _set(
+    _svc,
+    "reflectionTemplate",
+    new ReflectionTemplateService(reflectionTemplateRepo),
+  );
   const financeRepo = new FinanceRepository(projectDir);
   _set(_svc, "finance", new FinanceService(financeRepo));
   const billingRateRepo = new BillingRateRepository(projectDir);
@@ -337,6 +346,7 @@ export function initServices(
     registerHabitEntity(habitRepo);
     registerJournalEntity(journalRepo);
     registerReflectionEntity(reflectionRepo);
+    registerReflectionTemplateEntity(reflectionTemplateRepo);
     registerFinanceEntity(financeRepo);
     registerInvestorEntity(investorRepo);
 
@@ -372,6 +382,7 @@ export function initServices(
     habitRepo.setCacheDb(cacheDb);
     journalRepo.setCacheDb(cacheDb);
     reflectionRepo.setCacheDb(cacheDb);
+    reflectionTemplateRepo.setCacheDb(cacheDb);
     financeRepo.setCacheDb(cacheDb);
     mindmapRepo.setCacheDb(cacheDb);
     fishboneRepo.setCacheDb(cacheDb);
@@ -521,6 +532,10 @@ export function getJournalService(): JournalService {
 
 export function getReflectionService(): ReflectionService {
   return _get<ReflectionService>(_svc, "reflection");
+}
+
+export function getReflectionTemplateService(): ReflectionTemplateService {
+  return _get<ReflectionTemplateService>(_svc, "reflectionTemplate");
 }
 
 export function getFinanceService(): FinanceService {
