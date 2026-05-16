@@ -3,12 +3,14 @@ import {
   getPortfolioService,
 } from "../../singletons/services.ts";
 import type { Actor } from "../../types/actor.ts";
+import type { Person } from "../../types/person.types.ts";
 
 type Props = {
   actor?: Actor;
+  activePerson?: Person;
 };
 
-export async function Topbar({ actor }: Props) {
+export async function Topbar({ actor, activePerson }: Props) {
   const [people, portfolioItems] = await Promise.all([
     getPeopleService().list(),
     getPortfolioService().list(),
@@ -37,6 +39,47 @@ export async function Topbar({ actor }: Props) {
         />
         <kbd class="topbar__search-kbd">&#8984;K</kbd>
       </div>
+      <details class="topbar__person-switcher" id="topbar-person-switcher">
+        <summary
+          class="topbar__person-summary"
+          aria-label="Switch active person"
+        >
+          <span class="topbar__person-avatar">
+            {activePerson ? activePerson.name.charAt(0).toUpperCase() : "?"}
+          </span>
+          <span class="topbar__person-name">
+            {activePerson?.name ?? "Guest"}
+          </span>
+        </summary>
+        <ul class="topbar__person-list">
+          <li>
+            <form hx-post="/settings/identity" hx-swap="none">
+              <input type="hidden" name="personId" value="" />
+              <button type="submit" class="topbar__person-item">
+                — Guest —
+              </button>
+            </form>
+          </li>
+          {people.map((p) => (
+            <li key={p.id}>
+              <form hx-post="/settings/identity" hx-swap="none">
+                <input type="hidden" name="personId" value={p.id} />
+                <button
+                  type="submit"
+                  class={`topbar__person-item${
+                    activePerson?.id === p.id
+                      ? " topbar__person-item--active"
+                      : ""
+                  }`}
+                >
+                  {p.name}
+                </button>
+              </form>
+            </li>
+          ))}
+        </ul>
+      </details>
+
       <button
         id="topbar-overflow-btn"
         class="topbar__action-btn topbar__overflow-btn"
@@ -48,30 +91,6 @@ export async function Topbar({ actor }: Props) {
         &#8942;
       </button>
       <div id="topbar-actions" class="topbar__actions">
-        <form
-          hx-post="/settings/identity"
-          hx-trigger="change from:#identity-select"
-          hx-swap="none"
-        >
-          <select
-            id="identity-select"
-            name="personId"
-            class="topbar__identity-select"
-            aria-label="Active identity"
-          >
-            <option value="">— Anonymous —</option>
-            {people.map((p) => (
-              <option
-                key={p.id}
-                value={p.id}
-                selected={actor?.source !== "anonymous" && actor?.id === p.id}
-              >
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </form>
-
         {/* Project filter */}
         {portfolioItems.length > 0 && (
           <div class="topbar__filter-wrap">

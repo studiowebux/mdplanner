@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import { APP_NAME, APP_VERSION } from "../../constants/mod.ts";
 import { AppShell } from "../shell/app-shell.tsx";
 import type { Actor } from "../../types/actor.ts";
+import type { Person } from "../../types/person.types.ts";
 
 // Runs before CSS loads — must stay inline to prevent FOUC.
 // Kept minimal deliberately; nonce is required for CSP compliance.
@@ -16,6 +17,7 @@ type Props = {
   pinnedKeys?: string[];
   navCategories?: Record<string, string[]>;
   actor?: Actor;
+  activePerson?: Person;
   styles?: string[];
   scripts?: string[];
   children?: unknown;
@@ -30,6 +32,7 @@ export const MainLayout: FC<Props> = (
     pinnedKeys = [],
     navCategories,
     actor,
+    activePerson,
     styles = [],
     scripts = [],
     children,
@@ -81,6 +84,7 @@ export const MainLayout: FC<Props> = (
           pinnedKeys={pinnedKeys}
           navCategories={navCategories}
           actor={actor}
+          activePerson={activePerson}
         >
           {children}
         </AppShell>

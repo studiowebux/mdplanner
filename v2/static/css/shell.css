@@ -490,6 +490,103 @@ html.fullscreen-reading .fullscreen-reading-exit {
   display: contents;
 }
 
+/* -------------------------------------------------------------------------
+   Person switcher
+   ------------------------------------------------------------------------- */
+
+.topbar__person-switcher {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.topbar__person-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  list-style: none;
+  user-select: none;
+}
+
+.topbar__person-summary::-webkit-details-marker {
+  display: none;
+}
+
+.topbar__person-summary:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-accent);
+}
+
+.topbar__person-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--avatar-size-sm);
+  height: var(--avatar-size-sm);
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+}
+
+.topbar__person-name {
+  max-width: var(--topbar-person-name-max-w);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar__person-list {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  left: 0;
+  z-index: var(--z-dropdown);
+  min-width: var(--topbar-person-list-min-w);
+  max-height: var(--topbar-person-list-max-h);
+  overflow-y: auto;
+  background: var(--color-bg-secondary);
+  border: var(--border-width) var(--border-style) var(--color-border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-xs) 0;
+  list-style: none;
+  margin: 0;
+}
+
+.topbar__person-item {
+  display: block;
+  width: 100%;
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.topbar__person-item:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.topbar__person-item--active {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-semibold);
+}
+
+.topbar__person-list form {
+  display: contents;
+}
+
 .topbar__identity-select {
   -webkit-appearance: none;
   appearance: none;

@@ -5,6 +5,7 @@ import { ConfirmDialog } from "../ui/confirm-dialog.tsx";
 import { SearchDialog } from "../ui/search-dialog.tsx";
 import { ShortcutsDialog } from "../ui/shortcuts-dialog.tsx";
 import type { Actor } from "../../types/actor.ts";
+import type { Person } from "../../types/person.types.ts";
 
 type Props = {
   activePath?: string;
@@ -12,6 +13,7 @@ type Props = {
   pinnedKeys?: string[];
   navCategories?: Record<string, string[]>;
   actor?: Actor;
+  activePerson?: Person;
   children?: unknown;
 };
 
@@ -22,6 +24,7 @@ export const AppShell: FC<Props> = (
     pinnedKeys = [],
     navCategories,
     actor,
+    activePerson,
     children,
   },
 ) => (
@@ -34,7 +37,7 @@ export const AppShell: FC<Props> = (
       navCategories={navCategories}
     />
     <div class="app-shell__main">
-      <Topbar actor={actor} />
+      <Topbar actor={actor} activePerson={activePerson} />
       <div class="app-shell__content">
         {children}
       </div>

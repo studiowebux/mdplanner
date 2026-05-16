@@ -290,6 +290,7 @@
 
   /* Avatar */
   --avatar-size: var(--space-xl);
+  --avatar-size-sm: var(--space-lg);
   --avatar-font-size: var(--font-size-sm);
 
   /* Form controls */
@@ -324,6 +325,9 @@
   --sidebar-w-max: 25rem;
   --save-bar-h: 3.5rem;
   --topbar-search-max-width: 28rem;
+  --topbar-person-name-max-w: 10rem;
+  --topbar-person-list-min-w: 12rem;
+  --topbar-person-list-max-h: 16rem;
   --topbar-search-min-width: 8rem;
   --topbar-pomodoro-min-width: 6.5rem;
   --pomo-popover-min-w: 15rem;
