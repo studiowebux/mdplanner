@@ -19,7 +19,10 @@ export const ReflectionDetailView: FC<ViewProps & { item: Reflection }> = (
     <MainLayout
       title={reflection.title}
       {...viewProps}
-      styles={["/css/views/reflections.css"]}
+      styles={[
+        "/css/views/reflections.css",
+        "/css/views/reflection-templates.css",
+      ]}
     >
       <SseRefresh
         getUrl={"/reflections/" + reflection.id}
@@ -47,12 +50,23 @@ export const ReflectionDetailView: FC<ViewProps & { item: Reflection }> = (
                 ))}
             </div>
           </div>
-          <DetailActions
-            entity="reflections"
-            id={reflection.id}
-            title={reflection.title}
-            formContainerId="reflections-form-container"
-          />
+          <div class="reflection-detail__header-actions">
+            <button
+              type="button"
+              class="btn btn--secondary btn--sm"
+              hx-get={`/reflections/${reflection.id}/template-picker`}
+              hx-target="#reflections-template-picker-container"
+              hx-swap="innerHTML"
+            >
+              Use Template
+            </button>
+            <DetailActions
+              entity="reflections"
+              id={reflection.id}
+              title={reflection.title}
+              formContainerId="reflections-form-container"
+            />
+          </div>
         </header>
 
         <div class="detail-section detail-info-row">
@@ -73,6 +87,7 @@ export const ReflectionDetailView: FC<ViewProps & { item: Reflection }> = (
       </main>
 
       <div id="reflections-form-container" />
+      <div id="reflections-template-picker-container" />
     </MainLayout>
   );
 };
