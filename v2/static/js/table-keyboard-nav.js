@@ -1,4 +1,5 @@
 // table-keyboard-nav.js — unified vim-style j/k/g/G/Enter row navigation.
+// Nav keys are read from window.keybindings.nav (keybindings.js).
 // Handles both the task list (.task-list__row[data-task-id]) and all domain
 // DataTable views (.data-table__row[data-row-id]).  Only one spec is active
 // per page — whichever has rows in the DOM wins.
@@ -7,6 +8,12 @@
 // Those read the focused row via .task-list__row--focused from the DOM.
 
 (function () {
+  var nav = (window.keybindings && window.keybindings.nav) || {};
+  var KEY_DOWN = nav.down || "j";
+  var KEY_UP = nav.up || "k";
+  var KEY_TOP = nav.top || "g";
+  var KEY_BOTTOM = nav.bottom || "G";
+
   var SPECS = [
     {
       selector: ".task-list__row[data-task-id]",
@@ -105,29 +112,24 @@
     var rows = getRows(spec);
     if (rows.length === 0) return;
 
-    switch (e.key) {
-      case "j":
+    var key = e.key;
+    if (key === KEY_DOWN) {
+      e.preventDefault();
+      setFocus(spec, focusedIndex < 0 ? 0 : focusedIndex + 1);
+    } else if (key === KEY_UP) {
+      e.preventDefault();
+      setFocus(spec, focusedIndex < 0 ? rows.length - 1 : focusedIndex - 1);
+    } else if (key === KEY_TOP) {
+      e.preventDefault();
+      setFocus(spec, 0);
+    } else if (key === KEY_BOTTOM) {
+      e.preventDefault();
+      setFocus(spec, rows.length - 1);
+    } else if (key === "Enter") {
+      if (focusedIndex >= 0 && rows[focusedIndex]) {
         e.preventDefault();
-        setFocus(spec, focusedIndex < 0 ? 0 : focusedIndex + 1);
-        break;
-      case "k":
-        e.preventDefault();
-        setFocus(spec, focusedIndex < 0 ? rows.length - 1 : focusedIndex - 1);
-        break;
-      case "g":
-        e.preventDefault();
-        setFocus(spec, 0);
-        break;
-      case "G":
-        e.preventDefault();
-        setFocus(spec, rows.length - 1);
-        break;
-      case "Enter":
-        if (focusedIndex >= 0 && rows[focusedIndex]) {
-          e.preventDefault();
-          spec.navigate(rows[focusedIndex]);
-        }
-        break;
+        spec.navigate(rows[focusedIndex]);
+      }
     }
   });
 
