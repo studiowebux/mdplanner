@@ -1,53 +1,38 @@
-// preferences-loader.js — load PersonPreferences from server, cache in
-// sessionStorage, expose as window.__preferences. Must load before keybindings.js.
-// Trigger: window.loadPreferences() called after identity change.
+// preferences-loader.js — cache PersonPreferences in sessionStorage, expose as
+// window.__preferences. Populated from the preferencesLoaded HX-Trigger event
+// sent by /settings/identity on person switch — zero extra fetch.
 
 (function () {
-  var STORAGE_KEY = "__preferences";
-  var READY_EVENT = "preferences-ready";
+  var STORAGE_KEY = "__mdp_preferences";
 
-  function dispatch() {
-    document.dispatchEvent(new CustomEvent(READY_EVENT));
-  }
-
-  function parse(raw) {
+  function store(prefs) {
+    window.__preferences = prefs && typeof prefs === "object" ? prefs : {};
     try {
-      var obj = JSON.parse(raw);
-      return obj && typeof obj === "object" ? obj : {};
-    } catch (_e) {
-      return {};
-    }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(window.__preferences));
+    } catch (_e) {}
+    document.dispatchEvent(new CustomEvent("preferences-ready"));
   }
 
-  // On script load: restore from sessionStorage so keybindings.js can read
-  // synchronously without a network round-trip.
-  var cached = sessionStorage.getItem(STORAGE_KEY);
-  window.__preferences = cached ? parse(cached) : {};
+  // On script load: restore from sessionStorage (synchronous — no network).
+  var cached = null;
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) cached = JSON.parse(raw);
+  } catch (_e) {}
+  window.__preferences = cached && typeof cached === "object" ? cached : {};
 
-  // Fetch from server, update sessionStorage + window.__preferences, dispatch ready.
-  window.loadPreferences = function () {
-    fetch("/api/v1/preferences", { credentials: "same-origin" })
-      .then(function (res) {
-        return res.ok ? res.json() : Promise.resolve({ preferences: {} });
-      })
-      .then(function (body) {
-        var prefs = body.preferences || {};
-        window.__preferences = prefs;
-        try {
-          sessionStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
-        } catch (_e) {}
-        dispatch();
-      })
-      .catch(function () {
-        window.__preferences = {};
-        dispatch();
-      });
-  };
+  // preferencesLoaded is sent by /settings/identity via HX-Trigger header.
+  // htmx dispatches it on the body before HX-Refresh triggers the reload,
+  // so sessionStorage is written before the new page load reads it.
+  document.addEventListener("preferencesLoaded", function (e) {
+    var prefs = e.detail && e.detail.value ? e.detail.value : {};
+    store(prefs);
+  });
 
-  // Clear on identity change (logout equivalent).
+  // Clear when identity is removed (anonymous / logout).
   window.clearPreferences = function () {
     try {
-      sessionStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STORAGE_KEY);
     } catch (_e) {}
     window.__preferences = {};
   };

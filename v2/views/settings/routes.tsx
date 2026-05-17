@@ -365,11 +365,13 @@ settingsViewRouter.post("/identity", async (c) => {
 
   let name = "";
   let id = "";
+  let preferences = {};
   if (personId) {
     const person = await getPeopleService().getById(personId);
     if (person) {
       name = person.name;
       id = person.id;
+      preferences = person.preferences ?? {};
     }
   }
 
@@ -380,6 +382,12 @@ settingsViewRouter.post("/identity", async (c) => {
     setCookie(c, IDENTITY_COOKIE, value, cookieOpts);
   }
 
+  // Send preferences in HX-Trigger so the client caches them in sessionStorage
+  // before the page refresh — zero extra network round-trip.
+  c.header(
+    "HX-Trigger",
+    JSON.stringify({ preferencesLoaded: preferences }),
+  );
   c.header("HX-Refresh", "true");
   return c.body(null, 204);
 });
