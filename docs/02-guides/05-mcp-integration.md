@@ -7,31 +7,13 @@ title: MCP Integration
 MD Planner ships a built-in MCP server with 157 tools. Two transport modes are
 available.
 
-## stdio (local binary)
+## HTTP
 
-Compile the MCP binary:
-
-```bash
-deno task compile:mcp:macos-arm    # Apple Silicon
-deno task compile:mcp:macos-intel  # Intel Mac
-deno task compile:mcp:linux        # Linux x86_64
-deno task compile:mcp:windows      # Windows x86_64
-```
-
-Or run directly with Deno:
+The MCP endpoint is at `/mcp` on the running v2 server. Protect it with
+`MCP_TOKEN`:
 
 ```bash
-deno task mcp ./my-project
-deno task mcp --cache ./my-project
-```
-
-## HTTP (remote server)
-
-When running the HTTP server, the MCP endpoint is at `/mcp`. Protect it with
-`--mcp-token`:
-
-```bash
-mdplanner --mcp-token mytoken ./my-project
+MCP_TOKEN=mytoken deno task dev:v2 ./my-project
 ```
 
 ## Claude Desktop configuration

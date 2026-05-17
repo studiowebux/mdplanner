@@ -4,37 +4,24 @@ title: Environment Variables
 
 # Environment Variables
 
-All environment variables use the `MDPLANNER_` prefix. CLI flags take precedence
-when both are set.
+All v2 runtime configuration is done via environment variables. There are no CLI flags.
 
-| Variable                        | CLI equivalent              | Default     | Description                                                |
-| ------------------------------- | --------------------------- | ----------- | ---------------------------------------------------------- |
-| `MDPLANNER_PORT`                | `--port`                    | `8003`      | HTTP server port                                           |
-| `MDPLANNER_CACHE`               | `--cache`                   | disabled    | Set to `1` to enable SQLite cache                          |
-| `MDPLANNER_READ_ONLY`           | `--read-only`               | disabled    | Set to `1` to block all write operations                   |
-| `MDPLANNER_API_TOKEN`           | `--api-token`               | —           | Session token for REST API and UI authentication           |
-| `MDPLANNER_MCP_TOKEN`           | `--mcp-token`               | —           | Bearer token for `/mcp` endpoint                           |
-| `MDPLANNER_WEBDAV`              | `--webdav`                  | disabled    | Set to `1` to enable WebDAV endpoint                       |
-| `MDPLANNER_WEBDAV_USER`         | `--webdav-user`             | —           | WebDAV basic auth username                                 |
-| `MDPLANNER_WEBDAV_PASS`         | `--webdav-pass`             | —           | WebDAV basic auth password                                 |
-| `MDPLANNER_BACKUP_DIR`          | `--backup-dir`              | —           | Directory where scheduled backups are written              |
-| `MDPLANNER_BACKUP_INTERVAL`     | `--backup-interval`         | —           | Backup frequency in hours (requires `MDPLANNER_BACKUP_DIR`) |
-| `MDPLANNER_BACKUP_PUBLIC_KEY`   | `--backup-public-key`       | —           | RSA-OAEP-4096 public key hex for encrypted backups         |
-| `MDPLANNER_SECRET_KEY`          | _(env only)_                | —           | 32-byte hex key for AES-256-GCM integration secret encryption |
-| `MDPLANNER_CERVEAU_DIR`         | `--cerveau-dir`             | `~/.cerveau` | Path to cerveau directory for brain viewer                |
-| `MDPLANNER_CORS_ORIGIN`         | `--cors-origin`             | allow all   | Restrict CORS to a specific origin                         |
-| `MDPLANNER_MAX_BODY_SIZE`       | `--max-body-size`           | `10`        | Max request body size in MB                                |
-| `MDPLANNER_RATE_LIMIT`          | `--rate-limit`              | `200`       | Max requests per minute per IP                             |
+| Variable               | Default | Required | Description                                                                       |
+| ---------------------- | ------- | -------- | --------------------------------------------------------------------------------- |
+| `PROJECT_DIR`          | —       | Yes      | Absolute path to the project data directory.                                      |
+| `PORT`                 | `8003`  | No       | HTTP port the server listens on.                                                  |
+| `CACHE`                | `true`  | No       | Set to `false` to disable the SQLite FTS cache. Full-text search requires `true`. |
+| `MCP_TOKEN`            | —       | No       | Bearer token for MCP API requests (`Authorization: Bearer <token>`). Leave empty to disable auth. |
+| `MDPLANNER_SECRET_KEY` | —       | No       | AES-256-GCM key for encrypting integration secrets stored in `project.md`.        |
 
-## Notes
-
-`MDPLANNER_SECRET_KEY` has no CLI flag equivalent. It encrypts integration
-tokens (Cloudflare API token, GitHub PAT) stored in `project.md` using
-AES-256-GCM. Generate with:
+## Generating a secret key
 
 ```bash
-mdplanner keygen-secret
+openssl rand -hex 32
 ```
 
-Boolean flags (`CACHE`, `READ_ONLY`, `WEBDAV`) are enabled by setting to any
-non-empty value. The convention is `1`.
+Paste the output into your `.env` or service config as `MDPLANNER_SECRET_KEY=<output>`.
+
+Without this key, integration tokens (Cloudflare API key, GitHub PAT) are stored
+in plaintext in `project.md`. Acceptable for local single-user installs; always
+set the key for shared or networked deployments.

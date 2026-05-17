@@ -88,7 +88,7 @@ with what you need, enable the rest when you grow into it.
 | **AI Chat**      | Ollama integration for local LLM conversations     |
 | **Analytics**    | Dashboard with task completion and goal progress   |
 | **Uploads**      | File upload and management                         |
-| **Backup**       | TAR + AES-256-GCM encrypted backup and restore     |
+| **Backup**       | JSON export and import via Settings → Data or REST API |
 
 ## Infrastructure
 
