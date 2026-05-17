@@ -79,6 +79,7 @@
 /* -- Responsive ---------------------------------------------------------- */
 
 @media (max-width: 600px) {
+  /* intentional deviation: brief RACI grid is narrower than --bp-mobile (768px) */
   .brief-detail__raci-grid {
     grid-template-columns: 1fr;
   }

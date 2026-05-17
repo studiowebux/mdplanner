@@ -218,6 +218,7 @@
 /* Responsive */
 
 @media (max-width: 768px) {
+  /* --bp-mobile: see shell.css CANONICAL BREAKPOINTS */
   .portfolio-detail__financials {
     grid-template-columns: 1fr;
   }

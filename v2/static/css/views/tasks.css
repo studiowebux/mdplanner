@@ -1265,6 +1265,7 @@ a.task-board__card-avatar:hover {
    ========================================================================= */
 
 @media (max-width: 768px) {
+  /* --bp-mobile: see shell.css CANONICAL BREAKPOINTS */
   /* List — hide column header, stack rows vertically */
   .task-list__column-header {
     display: none;

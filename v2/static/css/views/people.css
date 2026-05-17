@@ -538,6 +538,7 @@
 /* ── Responsive ───────────────────────────────────────────────────── */
 
 @media (max-width: 768px) {
+  /* --bp-mobile: see shell.css CANONICAL BREAKPOINTS */
   .orgchart-tree {
     padding: var(--space-md);
     overflow-x: auto;

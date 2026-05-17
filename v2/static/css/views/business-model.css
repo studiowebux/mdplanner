@@ -119,6 +119,7 @@
 --------------------------------------------------------------------------- */
 
 @media (max-width: 1100px) {
+  /* intentional deviation: canvas wide-layout collapse (not a mobile breakpoint) */
   .bmc-canvas {
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-areas:
@@ -130,6 +131,7 @@
 }
 
 @media (max-width: 700px) {
+  /* intentional deviation: canvas single-column collapse (dense layout needs earlier reflow than --bp-mobile 768px) */
   .bmc-canvas {
     grid-template-columns: 1fr;
     grid-template-areas:

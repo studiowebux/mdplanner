@@ -97,6 +97,7 @@
 /* -- Responsive ---------------------------------------------------------- */
 
 @media (max-width: 900px) {
+  /* intentional deviation: retro columns reflow earlier than --bp-mobile (768px) for readability */
   .retro-detail__grid {
     grid-template-columns: 1fr;
   }

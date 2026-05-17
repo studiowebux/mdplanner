@@ -156,6 +156,7 @@
 }
 
 @media (max-width: 768px) {
+  /* --bp-mobile: see shell.css CANONICAL BREAKPOINTS */
   .mktplan-detail__table {
     display: block;
     overflow-x: auto;

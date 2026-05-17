@@ -830,6 +830,29 @@ html.fullscreen-reading .fullscreen-reading-exit {
   color: var(--color-text-on-accent);
 }
 
+/* =========================================================================
+   CANONICAL BREAKPOINTS
+   CSS custom properties cannot be used in @media conditions (spec limit),
+   so pixel values are hardcoded. This block is the single source of truth.
+
+   Breakpoint       Value    Usage
+   ─────────────────────────────────────────────────────────────────────────
+   --bp-mobile      768px    App shell collapses to single column; sidebar
+                             hidden; used in shell.css, components.css and
+                             all view CSS files that reflow on mobile.
+   --bp-desktop-sm  1400px   Topbar secondary buttons collapse to overflow
+                             panel (this file only).
+
+   Intentional deviations in view files (domain-specific, not bugs):
+     600px   briefs.css      — brief card reflows at narrower point
+     700px   business-model.css, lean-canvases.css — canvas grid collapses
+     900px   retrospectives.css — retro columns reflow earlier than mobile
+     1100px  business-model.css, lean-canvases.css — wide canvas breakpoint
+     36rem   components.css  — confirm dialog (≈576px, rem-based intentional)
+
+   If the mobile breakpoint ever changes, update all --bp-mobile usages.
+   ========================================================================= */
+
 /* -------------------------------------------------------------------------
    Narrow desktop — hide lowest-priority topbar buttons (1170px, pixel value
    required — CSS vars cannot be used in @media conditions)
@@ -896,6 +919,7 @@ html.fullscreen-reading .fullscreen-reading-exit {
    ------------------------------------------------------------------------- */
 
 @media (max-width: 768px) {
+  /* --bp-mobile: see CANONICAL BREAKPOINTS above */
   .app-shell {
     display: block;
   }

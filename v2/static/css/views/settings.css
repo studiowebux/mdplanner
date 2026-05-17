@@ -566,6 +566,7 @@ html.sidebar-collapsed .settings-page__form-actions {
 }
 
 @media (max-width: 768px) {
+  /* --bp-mobile: see shell.css CANONICAL BREAKPOINTS */
   /* Tab bar — horizontal scroll on mobile (9 tabs won't fit) */
   .settings-tabs {
     overflow-x: auto;

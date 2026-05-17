@@ -662,6 +662,7 @@
 /* ---- Responsive ---- */
 
 @media (max-width: 768px) {
+  /* --bp-mobile: see shell.css CANONICAL BREAKPOINTS */
   .note-detail__split-view {
     grid-template-columns: 1fr;
   }
