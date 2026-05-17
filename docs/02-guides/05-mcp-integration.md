@@ -4,8 +4,7 @@ title: MCP Integration
 
 # MCP Integration
 
-MD Planner ships a built-in MCP server with 157 tools. Two transport modes are
-available.
+MD Planner ships a built-in MCP server. Two transport modes are available.
 
 ## HTTP
 
@@ -18,32 +17,9 @@ MCP_TOKEN=mytoken deno task dev:v2
 
 ## Claude Desktop configuration
 
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
-or the equivalent path on your platform:
-
-```json
-{
-  "mcpServers": {
-    "mdplanner": {
-      "command": "/path/to/mdplanner-mcp-macos-arm",
-      "args": ["/path/to/your/project"]
-    }
-  }
-}
-```
-
-With SQLite cache:
-
-```json
-{
-  "mcpServers": {
-    "mdplanner": {
-      "command": "/path/to/mdplanner-mcp-macos-arm",
-      "args": ["--cache", "/path/to/your/project"]
-    }
-  }
-}
-```
+Claude Desktop does not support HTTP MCP servers directly. Use Claude Code
+(CLI or IDE extension) instead — it connects via the `type: url` transport shown
+below.
 
 ## Claude Code configuration
 

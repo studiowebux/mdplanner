@@ -106,6 +106,7 @@ features:
   - meeting
   - moscow
   - eisenhower
+  - safe_agreement
   - investor
   - onboarding
   - onboarding_template
@@ -121,6 +122,7 @@ features:
   - github
   - upload
   - dashboard
+  - me
 links:
   - title: Repository
     url: "https://github.com/org/repo"
