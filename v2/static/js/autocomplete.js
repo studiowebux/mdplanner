@@ -86,6 +86,18 @@
     return list && list.children.length > 0 ? list : null;
   }
 
+  // Close every open dropdown except the one belonging to `input`.
+  function closeOtherLists(input) {
+    var ownWrapper = input ? input.closest(".form__autocomplete") : null;
+    var ownList = ownWrapper
+      ? ownWrapper.querySelector(".form__autocomplete-list")
+      : null;
+    var lists = document.querySelectorAll(".form__autocomplete-list");
+    for (var i = 0; i < lists.length; i++) {
+      if (lists[i] !== ownList) lists[i].innerHTML = "";
+    }
+  }
+
   function clearActive(list) {
     var prev = list.querySelector("." + ACTIVE_CLASS);
     if (prev) prev.classList.remove(ACTIVE_CLASS);
@@ -124,6 +136,13 @@
     }
   });
 
+  // Opening one dropdown (focusing its input) closes all others.
+  document.addEventListener("focusin", function (e) {
+    var input = e.target.closest("[data-autocomplete-target]");
+    if (!input) return;
+    closeOtherLists(input);
+  });
+
   // Keyboard navigation — arrow keys, enter, escape
   document.addEventListener("keydown", function (e) {
     var input = e.target.closest("[data-autocomplete-target]");
@@ -133,6 +152,12 @@
 
     var items = list.querySelectorAll(".form__autocomplete-item");
     if (items.length === 0) return;
+
+    if (e.key === "Escape") {
+      e.preventDefault();
+      list.innerHTML = "";
+      return;
+    }
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
