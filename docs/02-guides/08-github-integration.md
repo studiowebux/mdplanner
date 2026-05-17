@@ -19,8 +19,8 @@ before being stored in `project.md`. Without the key, it is stored in plaintext.
 ## Generate a secret key
 
 ```bash
-mdplanner keygen-secret
-# Set as MDPLANNER_SECRET_KEY environment variable
+openssl rand -hex 32
+# Paste the output into your .env as: MDPLANNER_SECRET_KEY=<output>
 ```
 
 ## Cloudflare integration
@@ -29,14 +29,8 @@ The DNS Tracker can sync domain expiry and DNS records from Cloudflare
 Registrar. Navigate to Settings > Cloudflare and paste your API token.
 
 ```yaml
-# Docker
-environment:
-  - MDPLANNER_SECRET_KEY=${MDPLANNER_SECRET_KEY}
-```
-
-```bash
-# Generate a key and add to .env
-echo "MDPLANNER_SECRET_KEY=$(mdplanner keygen-secret)" >> .env
+# Docker (deploy/.env)
+MDPLANNER_SECRET_KEY=<your-hex-key>
 ```
 
 ## MCP tools

@@ -4,14 +4,24 @@ title: Project Setup
 
 # Project Setup
 
-## Initialize a project
+## Start a project
+
+v2 has no CLI. Create a project directory manually and add a `project.md` file,
+or use the bundled `./example` directory as a starting point.
 
 ```bash
-mdplanner init ./my-project
-mdplanner ./my-project
+# Clone and run against the example directory (default)
+git clone https://github.com/studiowebux/mdplanner.git
+cd mdplanner
+deno task dev:v2 ./example
+
+# Or point at your own directory
+deno task dev:v2 ./my-project
 ```
 
-`init` creates `project.md` and all standard subdirectories.
+The server reads and writes markdown files in the given directory. No
+initialization command is required — place a `project.md` file in the directory
+and all subdirectories will be created on first write.
 
 ## Directory layout
 
