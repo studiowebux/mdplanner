@@ -64,6 +64,11 @@ export const LEAN_CANVAS_TABLE_COLUMNS: ColumnDef[] = [
 // Form fields
 // ---------------------------------------------------------------------------
 
+// Sidenav handles only simple inputs (create + edit). The 12 canvas sections
+// are bullet-list arrays edited in place on the detail page (?editing=true) —
+// see v2/views/lean-canvases/routes.tsx. Section textareas were removed here
+// because parseFormBody saves them as raw strings, which buildBody then
+// iterates char-by-char, corrupting the data.
 export const LEAN_CANVAS_FORM_FIELDS: FieldDef[] = [
   {
     type: "text",
@@ -81,78 +86,6 @@ export const LEAN_CANVAS_FORM_FIELDS: FieldDef[] = [
     type: "date",
     name: "date",
     label: "Date",
-  },
-  {
-    type: "textarea",
-    name: "problem",
-    label: "Problem",
-    rows: 3,
-  },
-  {
-    type: "textarea",
-    name: "solution",
-    label: "Solution",
-    rows: 3,
-  },
-  {
-    type: "textarea",
-    name: "uniqueValueProp",
-    label: "Unique Value Proposition",
-    rows: 3,
-  },
-  {
-    type: "textarea",
-    name: "unfairAdvantage",
-    label: "Unfair Advantage",
-    rows: 3,
-  },
-  {
-    type: "textarea",
-    name: "customerSegments",
-    label: "Customer Segments",
-    rows: 3,
-  },
-  {
-    type: "textarea",
-    name: "existingAlternatives",
-    label: "Existing Alternatives",
-    rows: 3,
-  },
-  {
-    type: "textarea",
-    name: "keyMetrics",
-    label: "Key Metrics",
-    rows: 3,
-  },
-  {
-    type: "textarea",
-    name: "highLevelConcept",
-    label: "High-Level Concept",
-    rows: 2,
-  },
-  {
-    type: "textarea",
-    name: "channels",
-    label: "Channels",
-    rows: 3,
-  },
-  {
-    type: "textarea",
-    name: "earlyAdopters",
-    label: "Early Adopters",
-    rows: 3,
-  },
-  {
-    type: "textarea",
-    name: "costStructure",
-    label: "Cost Structure",
-    rows: 3,
-  },
-  {
-    type: "textarea",
-    name: "revenueStreams",
-    label: "Revenue Streams",
-    rows: 3,
   },
 ];
 

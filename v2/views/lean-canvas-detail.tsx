@@ -2,7 +2,10 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import type { LeanCanvas } from "../types/lean-canvas.types.ts";
-import { LEAN_CANVAS_SECTIONS } from "../types/lean-canvas.types.ts";
+import {
+  LEAN_CANVAS_SECTIONS,
+  type LeanCanvasSectionKey,
+} from "../types/lean-canvas.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
@@ -13,19 +16,70 @@ import { AuditMeta } from "./components/audit-meta.tsx";
 // Section block
 // ---------------------------------------------------------------------------
 
-const SectionBlock: FC<{ label: string; items: string[] }> = (
-  { label, items },
-) => (
+const SectionBlock: FC<{
+  id: string;
+  sectionKey: LeanCanvasSectionKey;
+  label: string;
+  items: string[];
+  editing: boolean;
+  editSuffix: string;
+}> = ({ id, sectionKey, label, items, editing, editSuffix }) => (
   <div class="lc-section">
     <h3 class="lc-section__title">{label}</h3>
     <div class="lc-section__body">
-      {items.length === 0
+      {items.length === 0 && !editing
         ? <p class="lc-section__empty">Add items…</p>
         : (
           <ul class="lc-section__list">
-            {items.map((item, i) => <li key={i}>{item}</li>)}
+            {items.map((item, idx) =>
+              editing
+                ? (
+                  <li key={idx} class="quadrant-card__item">
+                    <textarea
+                      class="quadrant-card__inline-edit lc-inline-edit"
+                      name="text"
+                      hx-put={`/lean-canvases/${id}/${sectionKey}/${idx}${editSuffix}`}
+                      hx-trigger="change"
+                      hx-swap="none"
+                      hx-include="this"
+                    >
+                      {item}
+                    </textarea>
+                    <button
+                      type="button"
+                      class="quadrant-card__remove"
+                      hx-delete={`/lean-canvases/${id}/${sectionKey}/${idx}${editSuffix}`}
+                      hx-confirm={`Remove "${item}"?`}
+                      hx-target="#lc-detail-root"
+                      hx-select="#lc-detail-root"
+                      hx-swap="outerHTML"
+                      aria-label={`Remove "${item}"`}
+                    >
+                      &times;
+                    </button>
+                  </li>
+                )
+                : <li key={idx}>{item}</li>
+            )}
           </ul>
         )}
+      {editing && (
+        <form
+          class="quadrant-card__add"
+          hx-post={`/lean-canvases/${id}/${sectionKey}${editSuffix}`}
+          hx-target="#lc-detail-root"
+          hx-select="#lc-detail-root"
+          hx-swap="outerHTML"
+        >
+          <input
+            type="text"
+            class="quadrant-card__input"
+            name="text"
+            placeholder={`Add ${label.toLowerCase()}…`}
+            autocomplete="off"
+          />
+        </form>
+      )}
     </div>
   </div>
 );
@@ -34,9 +88,11 @@ const SectionBlock: FC<{ label: string; items: string[] }> = (
 // Main view
 // ---------------------------------------------------------------------------
 
-export const LeanCanvasDetailView: FC<ViewProps & { item: LeanCanvas }> = (
-  { item: lc, ...viewProps },
-) => {
+export const LeanCanvasDetailView: FC<
+  ViewProps & { item: LeanCanvas; editing?: boolean }
+> = ({ item: lc, editing = false, ...viewProps }) => {
+  const editSuffix = editing ? "?editing=true" : "";
+
   return (
     <MainLayout
       title={lc.title}
@@ -45,11 +101,14 @@ export const LeanCanvasDetailView: FC<ViewProps & { item: LeanCanvas }> = (
       scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
-        getUrl={"/lean-canvases/" + lc.id}
+        getUrl={"/lean-canvases/" + lc.id + editSuffix}
         trigger="sse:lean-canvas.updated"
         targetId="lc-detail-root"
       />
-      <main id="lc-detail-root" class="detail-view lc-detail">
+      <main
+        id="lc-detail-root"
+        class={`detail-view lc-detail${editing ? " lc-detail--editing" : ""}`}
+      >
         <BackButton href="/lean-canvases" label="Back to Lean Canvases" />
 
         {/* -- Header ------------------------------------------------------- */}
@@ -73,6 +132,23 @@ export const LeanCanvasDetailView: FC<ViewProps & { item: LeanCanvas }> = (
             >
               Focus
             </button>
+            {editing
+              ? (
+                <a
+                  class="btn btn--secondary btn--sm"
+                  href={`/lean-canvases/${lc.id}`}
+                >
+                  Done Editing
+                </a>
+              )
+              : (
+                <a
+                  class="btn btn--secondary btn--sm"
+                  href={`/lean-canvases/${lc.id}?editing=true`}
+                >
+                  Edit Items
+                </a>
+              )}
           </DetailActions>
         </header>
 
@@ -92,8 +168,12 @@ export const LeanCanvasDetailView: FC<ViewProps & { item: LeanCanvas }> = (
               class={`lc-canvas__cell lc-canvas__cell--${s.key}`}
             >
               <SectionBlock
+                id={lc.id}
+                sectionKey={s.key}
                 label={s.label}
                 items={lc[s.key as keyof LeanCanvas] as string[]}
+                editing={editing}
+                editSuffix={editSuffix}
               />
             </div>
           ))}
