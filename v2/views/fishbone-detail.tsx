@@ -9,22 +9,29 @@ import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 
-export const FishboneDetailView: FC<ViewProps & { item: Fishbone }> = (
-  { item: fishbone, ...viewProps },
-) => {
+export const FishboneDetailView: FC<
+  ViewProps & { item: Fishbone; editing?: boolean }
+> = ({ item: fishbone, editing = false, ...viewProps }) => {
+  const editSuffix = editing ? "?editing=true" : "";
+
   return (
     <MainLayout
       title={fishbone.title}
       {...viewProps}
       styles={["/css/views/fishbone.css"]}
-      scripts={["/js/fullscreen-reading.js"]}
+      scripts={["/js/quadrant-edit.js", "/js/fullscreen-reading.js"]}
     >
       <SseRefresh
-        getUrl={"/fishbones/" + fishbone.id}
+        getUrl={"/fishbones/" + fishbone.id + editSuffix}
         trigger="sse:fishbone.updated"
         targetId="fishbone-detail-root"
       />
-      <main id="fishbone-detail-root" class="detail-view fishbone-detail">
+      <main
+        id="fishbone-detail-root"
+        class={`detail-view fishbone-detail${
+          editing ? " fishbone-detail--editing" : ""
+        }`}
+      >
         <BackButton href="/fishbones" label="Back to Fishbone Diagrams" />
 
         {/* -- Header ---------------------------------------------------- */}
@@ -48,6 +55,23 @@ export const FishboneDetailView: FC<ViewProps & { item: Fishbone }> = (
             >
               Focus
             </button>
+            {editing
+              ? (
+                <a
+                  class="btn btn--secondary btn--sm"
+                  href={`/fishbones/${fishbone.id}`}
+                >
+                  Done Editing
+                </a>
+              )
+              : (
+                <a
+                  class="btn btn--secondary btn--sm"
+                  href={`/fishbones/${fishbone.id}?editing=true`}
+                >
+                  Edit Items
+                </a>
+              )}
           </DetailActions>
         </header>
 
@@ -73,29 +97,129 @@ export const FishboneDetailView: FC<ViewProps & { item: Fishbone }> = (
                   data-quadrant={`cause-${idx % 6}`}
                 >
                   <div class="quadrant-card__header">
-                    <h2 class="quadrant-card__title">{cause.section}</h2>
+                    {editing
+                      ? (
+                        <input
+                          type="text"
+                          class="quadrant-card__inline-edit fishbone-detail__category-name"
+                          name="text"
+                          value={cause.section}
+                          data-quadrant-edit={`/fishbones/${fishbone.id}/category/${idx}${editSuffix}`}
+                          hx-put={`/fishbones/${fishbone.id}/category/${idx}${editSuffix}`}
+                          hx-trigger="quadrant-save"
+                          hx-target="#fishbone-detail-root"
+                          hx-select="#fishbone-detail-root"
+                          hx-swap="outerHTML"
+                          hx-include="this"
+                          aria-label="Category name"
+                        />
+                      )
+                      : <h2 class="quadrant-card__title">{cause.section}</h2>}
                     <span class="badge">{cause.items.length}</span>
+                    {editing && (
+                      <button
+                        type="button"
+                        class="quadrant-card__remove fishbone-detail__category-remove"
+                        hx-delete={`/fishbones/${fishbone.id}/category/${idx}${editSuffix}`}
+                        hx-confirm={`Remove category "${cause.section}" and all its causes?`}
+                        hx-target="#fishbone-detail-root"
+                        hx-select="#fishbone-detail-root"
+                        hx-swap="outerHTML"
+                        aria-label={`Remove category "${cause.section}"`}
+                      >
+                        &times;
+                      </button>
+                    )}
                   </div>
                   {cause.items.length > 0
                     ? (
                       <ul class="quadrant-card__list">
                         {cause.items.map((item, i) => (
                           <li key={i} class="quadrant-card__item">
-                            <span>{item}</span>
+                            {editing
+                              ? (
+                                <input
+                                  type="text"
+                                  class="quadrant-card__inline-edit"
+                                  name="text"
+                                  value={item}
+                                  data-quadrant-edit={`/fishbones/${fishbone.id}/category/${idx}/item/${i}${editSuffix}`}
+                                  hx-put={`/fishbones/${fishbone.id}/category/${idx}/item/${i}${editSuffix}`}
+                                  hx-trigger="quadrant-save"
+                                  hx-target="#fishbone-detail-root"
+                                  hx-select="#fishbone-detail-root"
+                                  hx-swap="outerHTML"
+                                  hx-include="this"
+                                />
+                              )
+                              : <span>{item}</span>}
+                            {editing && (
+                              <button
+                                type="button"
+                                class="quadrant-card__remove"
+                                hx-delete={`/fishbones/${fishbone.id}/category/${idx}/item/${i}${editSuffix}`}
+                                hx-confirm={`Remove "${item}"?`}
+                                hx-target="#fishbone-detail-root"
+                                hx-select="#fishbone-detail-root"
+                                hx-swap="outerHTML"
+                                aria-label={`Remove "${item}"`}
+                              >
+                                &times;
+                              </button>
+                            )}
                           </li>
                         ))}
                       </ul>
                     )
                     : <p class="quadrant-card__empty">No items yet</p>}
+                  {editing && (
+                    <div class="quadrant-card__add">
+                      <input
+                        type="text"
+                        class="quadrant-card__input"
+                        name="text"
+                        placeholder="Add cause..."
+                        data-quadrant-add={`/fishbones/${fishbone.id}/category/${idx}/item${editSuffix}`}
+                        hx-post={`/fishbones/${fishbone.id}/category/${idx}/item${editSuffix}`}
+                        hx-trigger="quadrant-submit"
+                        hx-target="#fishbone-detail-root"
+                        hx-select="#fishbone-detail-root"
+                        hx-swap="outerHTML"
+                        hx-include="this"
+                        autocomplete="off"
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           )
-          : (
+          : (!editing && (
             <div class="detail-section">
               <p class="empty-state__text">No cause sections defined yet.</p>
             </div>
-          )}
+          ))}
+
+        {/* -- Add category (edit mode) ---------------------------------- */}
+        {editing && (
+          <div class="detail-section fishbone-detail__add-category">
+            <input
+              type="text"
+              class="quadrant-card__input"
+              name="text"
+              placeholder="Add a cause category (e.g. People, Process, Machine)…"
+              aria-label="Add cause category"
+              data-quadrant-add={`/fishbones/${fishbone.id}/category${editSuffix}`}
+              hx-post={`/fishbones/${fishbone.id}/category${editSuffix}`}
+              hx-trigger="quadrant-submit"
+              hx-target="#fishbone-detail-root"
+              hx-select="#fishbone-detail-root"
+              hx-swap="outerHTML"
+              hx-include="this"
+              autocomplete="off"
+            />
+          </div>
+        )}
 
         <AuditMeta
           createdAt={fishbone.createdAt}

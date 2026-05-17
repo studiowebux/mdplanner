@@ -43,3 +43,26 @@
 .quadrant-card[data-quadrant="cause-5"] {
   border-top: var(--space-sm) solid var(--color-info);
 }
+
+/* ---------------------------------------------------------------------------
+   Edit mode
+--------------------------------------------------------------------------- */
+
+.fishbone-detail--editing .quadrant-card__item:hover {
+  background: var(--color-bg-tertiary);
+}
+
+/* Category name input — reads like the .quadrant-card__title it replaces. */
+.fishbone-detail__category-name {
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Category remove button — revealed on card hover, like item removal. */
+.quadrant-card:hover .fishbone-detail__category-remove {
+  opacity: 1;
+}
+
+/* Add-category block — sits below the cause grid in edit mode. */
+.fishbone-detail__add-category {
+  margin-top: var(--space-md);
+}
