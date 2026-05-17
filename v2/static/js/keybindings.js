@@ -50,18 +50,46 @@
     return out;
   }
 
-  var userOverrides = {};
+  var localOverrides = {};
   try {
     var raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       var parsed = JSON.parse(raw);
       if (parsed && typeof parsed === "object") {
-        userOverrides = parsed;
+        localOverrides = parsed;
       }
     }
   } catch (_e) {
     // malformed JSON — silently fall back to defaults
   }
 
-  window.keybindings = mergeDeep(DEFAULTS, userOverrides);
+  // Server prefs win over localStorage (cross-device persistence).
+  // window.__preferences is set synchronously by preferences-loader.js.
+  var serverOverrides = {};
+  try {
+    var sp = window.__preferences;
+    if (sp && sp.keybindings && typeof sp.keybindings === "object") {
+      serverOverrides = sp.keybindings;
+    }
+  } catch (_e) {}
+
+  window.keybindings = mergeDeep(
+    mergeDeep(DEFAULTS, localOverrides),
+    serverOverrides,
+  );
+
+  // Re-apply when preferences load after an identity change.
+  document.addEventListener("preferences-ready", function () {
+    var sp2 = {};
+    try {
+      if (
+        window.__preferences &&
+        window.__preferences.keybindings &&
+        typeof window.__preferences.keybindings === "object"
+      ) {
+        sp2 = window.__preferences.keybindings;
+      }
+    } catch (_e) {}
+    window.keybindings = mergeDeep(mergeDeep(DEFAULTS, localOverrides), sp2);
+  });
 })();

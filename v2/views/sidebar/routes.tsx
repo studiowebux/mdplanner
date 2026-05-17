@@ -3,6 +3,7 @@
 import { Hono } from "hono";
 import { SidebarContent } from "../../components/shell/sidebar.tsx";
 import { readUiState, writeUiState } from "../../utils/ui-state.ts";
+import { getPeopleService } from "../../singletons/services.ts";
 import type { AppVariables } from "../../types/app.ts";
 
 type SidebarUiState = { pinned: string[] };
@@ -23,6 +24,14 @@ sidebarRouter.post("/pin", async (c) => {
     pinned.push(key);
   }
   writeUiState(c, "sidebar", { ...state, pinned });
+
+  // Persist pinnedNav to PersonPreferences (fire-and-forget).
+  const actorId = c.get("actor")?.id;
+  if (actorId) {
+    getPeopleService().updatePreferences(actorId, { pinnedNav: pinned }).catch(
+      () => {},
+    );
+  }
 
   const activePath = c.req.header("HX-Current-URL")
     ? new URL(c.req.header("HX-Current-URL")!).pathname

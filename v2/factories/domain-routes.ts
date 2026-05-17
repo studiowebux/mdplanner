@@ -243,7 +243,30 @@ export function createDomainRoutes<T extends Entity, C, U>(
     if (isHtmx && params.hideCompleted === undefined) {
       params.hideCompleted = "false";
     }
-    const state = buildState(mergeParams(params, saved));
+    const merged = mergeParams(params, saved);
+
+    // Apply PersonPreferences as fallback for keys not set by query param or cookie.
+    const personPrefs = (c.get("activePerson" as never) as {
+      preferences?: {
+        viewPrefs?: Record<string, string>;
+        filterDefaults?: Record<string, Record<string, string>>;
+      };
+    } | undefined)?.preferences;
+    if (personPrefs) {
+      if (!merged.view && personPrefs.viewPrefs?.[cfg.name]) {
+        merged.view = personPrefs.viewPrefs[cfg.name];
+      }
+      const domainFilterDefaults = personPrefs.filterDefaults?.[cfg.name];
+      if (domainFilterDefaults) {
+        for (const key of cfg.stateKeys) {
+          if (key !== "view" && !merged[key] && domainFilterDefaults[key]) {
+            merged[key] = domainFilterDefaults[key];
+          }
+        }
+      }
+    }
+
+    const state = buildState(merged);
     c.set("filterState" as never, state as never);
     await next();
     writeUiState(c, cfg.name, state);

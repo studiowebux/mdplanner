@@ -122,6 +122,7 @@ export const MainLayout: FC<Props> = (
         <script src="/js/htmx-triggers.js" />
         <script src="/js/column-toggle.js" />
         <script src="/js/search-modal.js" />
+        <script src="/js/preferences-loader.js" />
         <script src="/js/keybindings.js" />
         <script src="/js/shortcuts-help.js" />
         <script src="/js/table-keyboard-nav.js" />
