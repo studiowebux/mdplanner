@@ -28,5 +28,5 @@ Requires [Deno 2.x](https://deno.land/).
 ```bash
 git clone https://github.com/studiowebux/mdplanner.git
 cd mdplanner
-deno task dev:v2 ./example
+deno task dev:v2
 ```

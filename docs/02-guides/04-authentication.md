@@ -39,7 +39,7 @@ Set `MDPLANNER_SECRET_KEY` to encrypt them at rest with AES-256-GCM:
 openssl rand -hex 32
 
 # Set via environment variable
-MDPLANNER_SECRET_KEY=<hex-key> deno task dev:v2 ./my-project
+MDPLANNER_SECRET_KEY=<hex-key> deno task dev:v2
 ```
 
 Without this key, tokens are stored in plaintext in `project.md`. Acceptable for

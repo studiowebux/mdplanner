@@ -26,10 +26,10 @@ Requires [Deno 2.x](https://deno.land/).
 ```bash
 git clone https://github.com/studiowebux/mdplanner.git
 cd mdplanner
-deno task dev:v2 ./example
+deno task dev:v2
 ```
 
-Open `http://localhost:8003`. The `./example` directory is used as the project data directory.
+Open `http://localhost:8003`. Uses `./example` as the project data directory.
 
 ## Next Steps
 

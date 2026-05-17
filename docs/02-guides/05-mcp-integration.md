@@ -13,7 +13,7 @@ The MCP endpoint is at `/mcp` on the running v2 server. Protect it with
 `MCP_TOKEN`:
 
 ```bash
-MCP_TOKEN=mytoken deno task dev:v2 ./my-project
+MCP_TOKEN=mytoken deno task dev:v2
 ```
 
 ## Claude Desktop configuration
