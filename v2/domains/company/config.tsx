@@ -24,6 +24,7 @@ export const companyConfig: DomainConfig<
 > = {
   name: "companies",
   singular: "Company",
+  plural: "Companies",
   path: "/companies",
   ssePrefix: "company",
   styles: ["/css/views/companies.css"],
