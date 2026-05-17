@@ -542,7 +542,7 @@ export function createDomainPage<T extends Entity>(
         <main
           class="domain-page"
           data-domain={cfg.name}
-          hx-ext="sse morph"
+          hx-ext="sse, morph"
           sse-connect="/sse"
           hx-get={`/${cfg.name}/view`}
           hx-trigger={`sse:${cfg.ssePrefix}.created, sse:${cfg.ssePrefix}.updated, sse:${cfg.ssePrefix}.deleted, global-filter:changed from:body`}

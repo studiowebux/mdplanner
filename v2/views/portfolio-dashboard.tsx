@@ -248,7 +248,7 @@ export const PortfolioDashboardView: FC<Props> = (
       <main
         class="domain-page"
         data-domain="dashboard"
-        hx-ext="sse morph"
+        hx-ext="sse, morph"
         sse-connect="/sse"
         hx-get="/portfolio/dashboard/view"
         hx-trigger="sse:portfolio.created, sse:portfolio.updated, sse:portfolio.deleted"
