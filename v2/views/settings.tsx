@@ -6,10 +6,12 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { ViewProps } from "../types/app.ts";
 import {
+  buildNavLinks,
   DEFAULT_NAV_CATEGORIES,
   ENTITY_TYPE_LABELS,
 } from "../constants/mod.ts";
 import type { ProjectConfig } from "../types/project.types.ts";
+import type { PersonPreferences } from "../types/person.types.ts";
 import { ViewsTab } from "./settings/tabs/views-tab.tsx";
 import { ProjectTab } from "./settings/tabs/project-tab.tsx";
 import { ScheduleTab } from "./settings/tabs/schedule-tab.tsx";
@@ -28,14 +30,17 @@ import { ShortcutsTab } from "./settings/tabs/shortcuts-tab.tsx";
 
 type SettingsProps = ViewProps & {
   config: ProjectConfig;
+  preferences?: PersonPreferences;
 };
 
 export const SettingsView: FC<SettingsProps> = ({
   config,
+  preferences,
   enabledFeatures,
   ...viewProps
 }) => {
   const enabled = new Set(enabledFeatures ?? []);
+  const navLinks = buildNavLinks(enabledFeatures ?? []);
   const allFeatures = Object.entries(ENTITY_TYPE_LABELS).sort(([, a], [, b]) =>
     a.localeCompare(b)
   );
@@ -238,7 +243,7 @@ export const SettingsView: FC<SettingsProps> = ({
           <CachingTab />
           <DataTab />
           <IntegrityTab />
-          <ShortcutsTab />
+          <ShortcutsTab navLinks={navLinks} preferences={preferences} />
           <SupportTab />
         </div>
       </div>

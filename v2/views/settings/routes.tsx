@@ -30,8 +30,16 @@ export const settingsViewRouter = new Hono<{ Variables: AppVariables }>();
 
 settingsViewRouter.get("/", async (c) => {
   const config = await getProjectService().getConfig();
+  const actor = c.get("actor");
+  const preferences = actor?.id
+    ? (await getPeopleService().getById(actor.id))?.preferences
+    : undefined;
   return c.html(
-    <SettingsView {...viewProps(c, "/settings")} config={config} />,
+    <SettingsView
+      {...viewProps(c, "/settings")}
+      config={config}
+      preferences={preferences}
+    />,
   );
 });
 
@@ -389,6 +397,68 @@ settingsViewRouter.post("/identity", async (c) => {
     JSON.stringify({ preferencesLoaded: preferences }),
   );
   c.header("HX-Refresh", "true");
+  return c.body(null, 204);
+});
+
+// -- Preferences: view defaults per domain --
+settingsViewRouter.post("/preferences/view-prefs", async (c) => {
+  const body = await c.req.parseBody({ all: true });
+  const actor = c.get("actor");
+  if (!actor?.id) return c.body(null, 204);
+  if (body._reset) {
+    await getPeopleService().updatePreferences(actor.id, { viewPrefs: {} });
+  } else {
+    const viewPrefs: Record<string, string> = {};
+    for (const [k, v] of Object.entries(body)) {
+      if (k !== "_reset" && typeof v === "string" && v) viewPrefs[k] = v;
+    }
+    await getPeopleService().updatePreferences(actor.id, { viewPrefs });
+  }
+  c.header("HX-Trigger", hxTrigger("success", "View defaults saved"));
+  return c.body(null, 204);
+});
+
+// -- Preferences: pinned nav domains --
+settingsViewRouter.post("/preferences/pinned-nav", async (c) => {
+  const body = await c.req.parseBody({ all: true });
+  const actor = c.get("actor");
+  if (!actor?.id) return c.body(null, 204);
+  let pinned: string[] = [];
+  if (!body._reset) {
+    const raw = body.pinned;
+    pinned = Array.isArray(raw) ? raw.map(String) : raw ? [String(raw)] : [];
+    if (pinned.length > 8) pinned = pinned.slice(0, 8);
+  }
+  await getPeopleService().updatePreferences(actor.id, { pinnedNav: pinned });
+  c.header("HX-Trigger", hxTrigger("success", "Pinned nav saved"));
+  return c.body(null, 204);
+});
+
+// -- Preferences: filter defaults (domain.key=value per line) --
+settingsViewRouter.post("/preferences/filter-defaults", async (c) => {
+  const body = await c.req.parseBody();
+  const actor = c.get("actor");
+  if (!actor?.id) return c.body(null, 204);
+  const filterDefaults: Record<string, Record<string, string>> = {};
+  if (!body._reset) {
+    const text = String(body.filterText ?? "");
+    for (const line of text.split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      const eqIdx = trimmed.indexOf("=");
+      if (eqIdx < 1) continue;
+      const dotKey = trimmed.slice(0, eqIdx).trim();
+      const val = trimmed.slice(eqIdx + 1).trim();
+      const dotIdx = dotKey.indexOf(".");
+      if (dotIdx < 1 || !val) continue;
+      const domain = dotKey.slice(0, dotIdx);
+      const key = dotKey.slice(dotIdx + 1);
+      if (!filterDefaults[domain]) filterDefaults[domain] = {};
+      filterDefaults[domain][key] = val;
+    }
+  }
+  await getPeopleService().updatePreferences(actor.id, { filterDefaults });
+  c.header("HX-Trigger", hxTrigger("success", "Filter defaults saved"));
   return c.body(null, 204);
 });
 
