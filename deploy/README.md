@@ -4,72 +4,46 @@
 
 Requires [Docker](https://docs.docker.com/get-docker/) and Docker Compose.
 
+### Quickstart (v2)
+
 ```bash
-# Initialize a project directory
-mkdir -p data
-docker run --rm -v "$(pwd)/data:/data" $(docker build -q .) init /data
+# 1. Clone the repository
+git clone https://github.com/studiowebux/mdplanner
+cd mdplanner
 
-# Start the server
-docker compose up -d
+# 2. Create your .env file
+cp deploy/.env.example deploy/.env
+# Edit deploy/.env — set MDPLANNER_SECRET_KEY for any networked instance
+
+# 3. Start
+docker compose -f deploy/docker-compose.yml up -d
 ```
 
-Open `http://localhost:8003`. Project files are stored in `./data/` on the host.
+Open `http://localhost:8080` (through Caddy) or `http://localhost:8003`
+(mdplanner direct). Project files persist in the `mdplanner-data` Docker volume.
 
-### Configuration
+### Environment variables (v2)
 
-Edit `docker-compose.yml` or create a `.env` file next to it to configure the
-server.
+Copy `deploy/.env.example` to `deploy/.env` and set values before starting.
 
-| Variable                      | Default  | Description                                                                                        |
-| ----------------------------- | -------- | -------------------------------------------------------------------------------------------------- |
-| Port mapping                  | 8003     | Change `ports` in `docker-compose.yml`                                                             |
-| Data path                     | `./data` | Host directory for project files (bind mount)                                                      |
-| `MDPLANNER_CACHE`             | disabled | Set to `1` to enable SQLite cache                                                                  |
-| `MDPLANNER_WEBDAV`            | disabled | Set to `1` to enable WebDAV endpoint                                                               |
-| `MDPLANNER_WEBDAV_USER`       | —        | WebDAV basic auth username                                                                         |
-| `MDPLANNER_WEBDAV_PASS`       | —        | WebDAV basic auth password                                                                         |
-| `MDPLANNER_MCP_TOKEN`         | —        | Bearer token for MCP HTTP endpoint (`/mcp`)                                                        |
-| `MDPLANNER_READ_ONLY`         | disabled | Set to `1` to block all write operations (public demo mode)                                        |
-| `MDPLANNER_SECRET_KEY`        | —        | 32-byte hex key for AES-256-GCM integration secret encryption. Generate: `mdplanner keygen-secret` |
-| `MDPLANNER_BACKUP_DIR`        | —        | Directory where scheduled backups are written. Mount a volume for persistence                      |
-| `MDPLANNER_BACKUP_INTERVAL`   | —        | Backup frequency: `daily` or `weekly`. Requires `MDPLANNER_BACKUP_DIR`                             |
-| `MDPLANNER_BACKUP_PUBLIC_KEY` | —        | RSA-OAEP-4096 public key (hex) for encrypted backups. Generate: `mdplanner keygen`                 |
+| Variable               | Default | Required | Description                                                                                          |
+| ---------------------- | ------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `PROJECT_DIR`          | —       | Yes      | Absolute path to the data directory inside the container. Use `/data` with the default volume mount. |
+| `PORT`                 | `8003`  | No       | HTTP port the server listens on inside the container.                                                |
+| `CACHE`                | `true`  | No       | Set to `false` to disable the SQLite FTS cache. Full-text search requires `true`.                    |
+| `MCP_TOKEN`            | —       | No       | Bearer token for MCP API requests (`Authorization: Bearer <token>`). Leave empty to disable auth.    |
+| `MDPLANNER_SECRET_KEY` | —       | No       | AES-256-GCM key for encrypting integration secrets stored in `project.md`.                           |
 
-To enable the cache, override the command in `docker-compose.yml`:
+Generate a secret key:
 
-```yaml
-services:
-  mdplanner:
-    build: .
-    image: localhost:5000/mdplanner:latest
-    ports:
-      - "8003:8003"
-    volumes:
-      - ./data:/data
-    restart: unless-stopped
-    healthcheck:
-      test: [
-        "CMD",
-        "wget",
-        "-qO",
-        "/dev/null",
-        "http://127.0.0.1:8003/api/health",
-      ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
-    command: [
-      "run",
-      "--allow-net",
-      "--allow-read",
-      "--allow-write",
-      "--allow-env",
-      "main.ts",
-      "--cache",
-      "/data",
-    ]
+```bash
+openssl rand -hex 32
+# Paste the output into deploy/.env as: MDPLANNER_SECRET_KEY=<output>
 ```
+
+> **Note:** Without `MDPLANNER_SECRET_KEY`, integration tokens (e.g. Cloudflare
+> API key) are stored in plaintext in `project.md`. Acceptable for local
+> single-user installs; always set the key for shared or networked deployments.
 
 ### Management
 
@@ -257,108 +231,33 @@ make -f deploy/Makefile uninstall
 
 ## Backup
 
-### Key generation
+v2 uses a JSON-based backup API — no CLI flags required.
 
-Before using encrypted backups, generate a key pair:
-
-```bash
-mdplanner keygen
-```
-
-Output:
-
-```
-PUBLIC KEY (hex)  — store in --backup-public-key or MDPLANNER_BACKUP_PUBLIC_KEY:
-<long hex string>
-
-PRIVATE KEY (hex) — keep secret, used to decrypt backups (X-Backup-Private-Key header):
-<long hex string>
-```
-
-Store the private key in a password manager or secret store. It cannot be
-recovered if lost. The public key is safe to include in the server
-configuration.
-
-### Server flags
-
-| Flag                        | Env var                       | Description                                                                                       |
-| --------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------- |
-| `--backup-public-key <hex>` | `MDPLANNER_BACKUP_PUBLIC_KEY` | RSA public key hex — enables encrypted exports                                                    |
-| `--backup-dir <path>`       | `MDPLANNER_BACKUP_DIR`        | Directory where scheduled backups are written                                                     |
-| `--backup-interval <hrs>`   | `MDPLANNER_BACKUP_INTERVAL`   | Backup frequency in hours (requires `--backup-dir`)                                               |
-| _(env only)_                | `MDPLANNER_SECRET_KEY`        | 32-byte hex key — encrypts integration tokens (Cloudflare API token, etc.) stored in `project.md` |
-
-### Integration secret encryption
-
-When `MDPLANNER_SECRET_KEY` is set, any integration token saved through the
-Settings UI is encrypted with AES-256-GCM before being written to `project.md`.
-Tokens saved without the key are stored in plain text. The Settings UI shows a
-banner indicating the current encryption status.
-
-Generate a key:
+### Export
 
 ```bash
-mdplanner keygen-secret
-# Outputs a 64-character hex string — set as MDPLANNER_SECRET_KEY
+# Download a full JSON backup
+curl -o backup.json http://localhost:8003/api/v1/backup/export
 ```
 
-In the systemd unit file:
+The response is a JSON file containing all project data. The filename is set to
+`mdplanner-backup-<date>.json` via `Content-Disposition`.
 
-```ini
-[Service]
-Environment=MDPLANNER_SECRET_KEY=<your-64-char-hex-key>
-```
-
-To migrate an existing plain-text token to encrypted storage: set the key, then
-re-save the token through the Settings UI.
-
-### Plain export
+### Import
 
 ```bash
-# Download a plaintext TAR archive via curl
-curl -o backup.tar http://localhost:8003/api/backup/export
+curl -X POST http://localhost:8003/api/v1/backup/import \
+  -H "Content-Type: application/json" \
+  --data-binary @backup.json
 ```
 
-### Encrypted export
+Add `?overwrite=true` to overwrite existing entities on import.
 
-```bash
-# Start server with encryption enabled
-mdplanner --backup-public-key <public-key-hex> ./my-project
-
-# Download encrypted archive
-curl -o backup.tar.enc http://localhost:8003/api/backup/export
-```
-
-### Import (plain)
-
-```bash
-curl -X POST http://localhost:8003/api/backup/import \
-  --data-binary @backup.tar
-```
-
-### Import (encrypted)
-
-```bash
-curl -X POST http://localhost:8003/api/backup/import \
-  -H "X-Backup-Private-Key: <private-key-hex>" \
-  --data-binary @backup.tar.enc
-```
-
-Add `?overwrite=true` to overwrite existing files on import.
-
-### Scheduled backups
-
-```bash
-mdplanner \
-  --backup-dir /var/backups/myproject \
-  --backup-interval 24 \
-  --backup-public-key <public-key-hex> \
-  ./my-project
-```
-
-Backups are written as `backup-YYYY-MM-DD-HH-MM-SS.tar` (plain) or `.tar.enc`
-(encrypted). A manual backup can be triggered at any time via
-`POST /api/backup/trigger`. Status is available at `GET /api/backup/status`.
+> **v1 features (not supported in v2):** CLI flags `--backup-dir`,
+> `--backup-interval`, `--backup-public-key`, `mdplanner keygen`, and
+> RSA-encrypted TAR backups were v1-only features. They are not present in v2.
+> Scheduled backups are not yet implemented — use an external cron job with the
+> export endpoint.
 
 ---
 
