@@ -2,6 +2,7 @@
 // Each domain owns its routes file under views/<domain>/routes.tsx.
 
 import { Hono } from "hono";
+import { identityRouter } from "./identity/routes.tsx";
 import { dnsRouter } from "./dns/routes.tsx";
 import { goalsRouter as goalsViewRouter } from "./goals/routes.tsx";
 import { ideasRouter } from "./ideas/routes.tsx";
@@ -374,6 +375,7 @@ registerAutocompleteSource("capacity-targets", {
 
 export const views = new Hono<{ Variables: AppVariables }>();
 
+views.route("/identity", identityRouter);
 views.route("/", homeViewRouter);
 views.route("/billing-rates", billingRatesRouter);
 views.route("/contacts", contactsRouter);

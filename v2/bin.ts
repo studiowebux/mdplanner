@@ -10,6 +10,7 @@ import { api } from "./api/mod.ts";
 import { views } from "./views/mod.tsx";
 import { createMcpHonoRouter } from "./mcp/mod.ts";
 import { contextMiddleware } from "./middleware/context.ts";
+import { identityGuard } from "./middleware/identity-guard.ts";
 import {
   APP_NAME,
   APP_VERSION,
@@ -62,6 +63,7 @@ app.use("*", requestId());
 app.use("*", logger((msg: string) => log.info(msg)));
 
 app.use("*", contextMiddleware);
+app.use("*", identityGuard);
 
 app.notFound(notFoundHandler);
 
