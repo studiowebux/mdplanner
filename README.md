@@ -4,6 +4,18 @@
 
 # MD Planner
 
+> **⚠️ Heavy work in progress.**
+>
+> The `main` branch currently ships **v1** — a working but older architecture.
+> **v2** is a full rewrite (Hono JSX SSR, clean domain architecture, single SSE
+> bus) that has been developed in parallel *using v1 itself* as the project
+> management tool. Yes, we dogfooded a broken thing for months to build the new
+> thing — and it worked surprisingly well.
+>
+> Once v2 is merged it will **still be WIP**. Core features work, but rough
+> edges remain. Screenshots and demo videos will follow once the dust settles.
+> If you're trying it now, run from source and expect sharp corners.
+
 Markdown-based project management with directory storage.
 
 Bug Tracker:
