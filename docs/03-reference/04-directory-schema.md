@@ -12,23 +12,27 @@ the entity type as a prefix (e.g., `task_auth.md`).
 
 Directory: `board/{section}/`
 
-The subdirectory name is the task's section (status column).
+The subdirectory name is the task's section (status column). IDs use the
+timestamped format `task_<timestamp>_<random>`.
 
 ```yaml
 ---
-id: task_auth
+id: task_1771807748170_5wtz
 completed: false
-tag: [feature, security]
+tags: [feature, security]
 due_date: 2026-03-01
 assignee: alice
 priority: 1
 effort: 5
-milestone: milestone_beta
-blocked_by: [task_database]
+milestone: v1.0.0
+blocked_by: [task_1771807748200_abc1]
 planned_start: 2026-02-20
 planned_end: 2026-02-25
 order: 0
 project: "My Project"
+createdAt: "2026-02-20T00:00:00.000Z"
+updatedAt: "2026-02-20T00:00:00.000Z"
+revision: 1
 ---
 
 # Implement Authentication
@@ -40,19 +44,23 @@ Task description in markdown.
 
 Directory: `notes/`
 
+All notes are enhanced in v2 — there is no `mode` field. Enhanced notes support
+typed block sections: paragraphs, tabs, timelines, and split-views delimited by
+`<!-- block:type -->` markers.
+
 ```yaml
 ---
-id: note_architecture
-created: "2026-01-05T10:00:00Z"
-updated: "2026-02-16T02:39:51.384Z"
+id: note_1771807748170_arch
+title: Architecture Overview
+project: "My Project"
+createdAt: "2026-01-05T10:00:00.000Z"
+updatedAt: "2026-02-16T02:39:51.384Z"
 revision: 7
-mode: simple
 ---
 
 # Architecture Overview
 
-Note content. Enhanced mode supports custom tab sections with
-`<!-- Custom Section: Name -->` delimiters.
+Note content in markdown. Sections are delimited by block markers.
 ```
 
 ## Goals
@@ -453,18 +461,24 @@ Keyword-matched section headings (case-insensitive):
 The following entities follow the same pattern of YAML frontmatter + markdown
 body in their respective directories:
 
-| Entity          | Directory          |
-| --------------- | ------------------ |
-| Canvas          | `canvas/`          |
-| C4 Architecture | `c4/`              |
-| SWOT            | `swot/`            |
-| Risk Analysis   | `risk/`            |
-| Business Model  | `businessmodel/`   |
-| Project Value   | `projectvalue/`    |
-| Brief           | `briefs/`          |
-| Retrospective   | `retrospectives/`  |
-| Strategic Levels| `strategiclevels/` |
-| Billing         | `billing/`         |
+| Entity                  | Directory               |
+| ----------------------- | ----------------------- |
+| Canvas (sticky boards)  | `sticky-notes/`         |
+| C4 Architecture         | `c4/`                   |
+| SWOT                    | `swot/`                 |
+| Risk Analysis           | `risk/`                 |
+| Business Model          | `businessmodel/`        |
+| Project Value           | `projectvalue/`         |
+| Brief                   | `briefs/`               |
+| Retrospective           | `retrospectives/`       |
+| Strategic Levels        | `strategiclevels/`      |
+| Billing                 | `billing/`              |
+| Brainstorms             | `brainstorms/`          |
+| Brainstorm Templates    | `brainstorm-templates/` |
+| Reflections             | `reflections/`          |
+| Reflection Templates    | `reflection-templates/` |
+| SAFE Agreements         | `safe/`                 |
+| Vacations               | `vacation/`             |
 
 ## Customers
 
