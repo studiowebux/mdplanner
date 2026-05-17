@@ -12,7 +12,10 @@ import type {
   Person,
   UpdatePerson,
 } from "../types/person.types.ts";
-import { AgentModelSchema } from "../types/person.types.ts";
+import {
+  AgentModelSchema,
+  PersonPreferencesSchema,
+} from "../types/person.types.ts";
 import { WEEKDAYS } from "../constants/mod.ts";
 import { rowToPerson } from "../domains/people/cache.ts";
 import { PEOPLE_BODY_KEYS, PEOPLE_TABLE } from "../domains/people/constants.ts";
@@ -170,6 +173,15 @@ export class PeopleRepository extends CachedMarkdownRepository<
         if (v != null) acc[k] = String(v);
       }
       if (Object.keys(acc).length > 0) person.accounts = acc;
+    }
+    if (
+      fm.preferences != null && typeof fm.preferences === "object" &&
+      !Array.isArray(fm.preferences)
+    ) {
+      const parsed = PersonPreferencesSchema.safeParse(fm.preferences);
+      if (parsed.success && parsed.data != null) {
+        person.preferences = parsed.data;
+      }
     }
     if (fm.createdAt != null) person.createdAt = String(fm.createdAt);
     if (fm.updatedAt != null) person.updatedAt = String(fm.updatedAt);

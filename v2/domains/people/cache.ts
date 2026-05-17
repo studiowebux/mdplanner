@@ -53,6 +53,8 @@ export function rowToPerson(
   }
   const accounts = parseJson<Record<string, string>>(row.accounts);
   if (accounts) person.accounts = accounts;
+  const preferences = parseJson<Person["preferences"]>(row.preferences);
+  if (preferences) person.preferences = preferences;
   if (row.created_at != null) person.createdAt = row.created_at as string;
   if (row.updated_at != null) person.updatedAt = row.updated_at as string;
   if (row.created_by != null) person.createdBy = row.created_by as string;
@@ -70,8 +72,9 @@ export function insertPersonRow(
     `INSERT OR REPLACE INTO ${PEOPLE_TABLE} (id, name, title, role,
        departments, reports_to, email, phone, start_date, hours_per_day,
        working_days, notes, agent_type, skills, models, system_prompt,
-       status, last_seen, current_task_id, accounts, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       status, last_seen, current_task_id, accounts, preferences,
+       ${auditCols()}, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(p.id),
       val(p.name),
@@ -93,6 +96,7 @@ export function insertPersonRow(
       val(p.lastSeen),
       val(p.currentTaskId),
       json(p.accounts),
+      json(p.preferences),
       ...auditVals(p),
       syncedAt ?? new Date().toISOString(),
     ],
@@ -107,6 +111,7 @@ export function registerPeopleEntity(repo: PeopleRepository): void {
     migrations: [
       "ALTER TABLE people ADD COLUMN reports_to TEXT",
       "ALTER TABLE people ADD COLUMN accounts TEXT",
+      "ALTER TABLE people ADD COLUMN preferences TEXT",
     ],
     fts: {
       type: "person",

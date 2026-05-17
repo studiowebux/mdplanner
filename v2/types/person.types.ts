@@ -61,6 +61,31 @@ export const AGENT_TYPE_OPTIONS = AGENT_TYPES.map((t) => ({
 }));
 
 // ---------------------------------------------------------------------------
+// PersonPreferences — per-user preferences stored in person frontmatter
+// ---------------------------------------------------------------------------
+
+export const PersonPreferencesSchema = z.object({
+  keybindings: z.record(z.unknown()).optional().openapi({
+    description: "Keybinding overrides — shape matches window.keybindings",
+    example: { chordLeader: "z", modes: { g: "grid" } },
+  }),
+  viewPrefs: z.record(z.string()).optional().openapi({
+    description: "Default view mode per domain URL prefix",
+    example: { tasks: "board", goals: "grid" },
+  }),
+  pinnedNav: z.array(z.string()).max(8).optional().openapi({
+    description: "Up to 8 pinned nav hrefs shown at top of sidebar",
+    example: ["/tasks", "/goals"],
+  }),
+  filterDefaults: z.record(z.record(z.string())).optional().openapi({
+    description: "Default filter values per domain (domain → stateKey → value)",
+    example: { tasks: { section: "In Progress" } },
+  }),
+}).optional().openapi("PersonPreferences");
+
+export type PersonPreferences = z.infer<typeof PersonPreferencesSchema>;
+
+// ---------------------------------------------------------------------------
 // Person — base entity as stored on disk
 // ---------------------------------------------------------------------------
 
@@ -135,6 +160,7 @@ export const PersonSchema = z.object({
     description: "Task ID the agent is actively working on",
   }),
   accounts: AccountsSchema,
+  preferences: PersonPreferencesSchema,
   createdAt: z.string().nullable().optional().openapi({
     description: "ISO creation timestamp",
   }),

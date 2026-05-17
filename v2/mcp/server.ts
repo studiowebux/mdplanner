@@ -51,6 +51,7 @@ import { registerOnboardingTools } from "./tools/onboarding.ts";
 import { registerRiskTools } from "./tools/risks.ts";
 import { registerVacationTools } from "./tools/vacation.ts";
 import { registerProjectValueBoardTools } from "./tools/project-value-boards.ts";
+import { registerPreferenceTools } from "./tools/preferences.ts";
 
 export function createMcpServer(): McpServer {
   const server = new McpServer({
@@ -104,6 +105,7 @@ export function createMcpServer(): McpServer {
   registerOnboardingTools(server);
   registerRiskTools(server);
   registerVacationTools(server);
+  registerPreferenceTools(server);
 
   return server;
 }
