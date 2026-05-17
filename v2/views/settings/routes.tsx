@@ -353,7 +353,7 @@ settingsViewRouter.post("/global-filters", async (c) => {
     globalAssignees?: string[];
   }>();
   writeGlobalFilters(c, body.globalProjects ?? [], body.globalAssignees ?? []);
-  return new Response(null, { status: 204 });
+  return c.body(null, 204);
 });
 
 // -- Identity switch — plain form POST, sets mdp_identity cookie, redirects back --
