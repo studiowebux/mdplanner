@@ -49,23 +49,6 @@ The GitHub integration is also available via MCP:
 | `github_list_prs`        | List pull requests (state filter) |
 | `github_merge_pr`        | Merge a pull request              |
 
-## REST API
-
-| Method  | Path                                                     | Description      |
-| ------- | -------------------------------------------------------- | ---------------- |
-| `GET`   | `/api/integrations/github/repos`                         | List repos       |
-| `GET`   | `/api/integrations/github/repo/:owner/:repo`             | Get repo summary |
-| `GET`   | `/api/integrations/github/repo/:owner/:repo/issues`      | List issues      |
-| `GET`   | `/api/integrations/github/repo/:owner/:repo/issues/:n`   | Get issue        |
-| `POST`  | `/api/integrations/github/repo/:owner/:repo/issues`      | Create issue     |
-| `PATCH` | `/api/integrations/github/repo/:owner/:repo/issues/:n`   | Close/reopen     |
-| `GET`   | `/api/integrations/github/repo/:owner/:repo/pulls`       | List PRs         |
-| `GET`   | `/api/integrations/github/repo/:owner/:repo/pulls/:n`    | Get PR           |
-| `PUT`   | `/api/integrations/github/repo/:owner/:repo/pulls/:n/merge` | Merge PR      |
-| `GET`   | `/api/integrations/github/repo/:owner/:repo/releases/latest` | Latest release |
-| `GET`   | `/api/integrations/github/repo/:owner/:repo/milestones`  | List milestones  |
-| `GET`   | `/api/integrations/github/repo/:owner/:repo/actions/runs` | Workflow runs   |
-
 ## GitHub View
 
 The GitHub view in the UI displays all portfolio projects linked to a GitHub

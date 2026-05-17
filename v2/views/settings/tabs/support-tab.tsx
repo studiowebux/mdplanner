@@ -62,6 +62,15 @@ export const SupportTab: FC = () => (
         </li>
       </ul>
 
+      <h3 class="settings-support__subheading">Developer</h3>
+      <ul class="settings-support__links">
+        <li>
+          <a href="/api/v1/reference" target="_blank" rel="noopener">
+            API Reference (OpenAPI)
+          </a>
+        </li>
+      </ul>
+
       <h3 class="settings-support__subheading">Contact</h3>
       <ul class="settings-support__links">
         <li>

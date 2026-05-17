@@ -23,7 +23,7 @@ Protect the `/mcp` endpoint with a bearer token:
 
 ```bash
 # Set via environment variable
-MCP_TOKEN=mysecrettoken deno task dev:v2 ./my-project
+MCP_TOKEN=mysecrettoken deno task dev:v2
 ```
 
 MCP clients send the token as a `Authorization: Bearer <token>` header. See

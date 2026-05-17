@@ -42,10 +42,10 @@ openssl rand -hex 32
 ## Management
 
 ```bash
-docker compose up -d      # Start in background
-docker compose down       # Stop
-docker compose logs -f    # Follow logs
-docker compose pull       # Update image
+docker compose -f deploy/docker-compose.yml up -d      # Start in background
+docker compose -f deploy/docker-compose.yml down       # Stop
+docker compose -f deploy/docker-compose.yml logs -f    # Follow logs
+docker compose -f deploy/docker-compose.yml pull       # Update image
 ```
 
 ## Healthcheck

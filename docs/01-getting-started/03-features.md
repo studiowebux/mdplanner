@@ -85,10 +85,9 @@ with what you need, enable the rest when you grow into it.
 | ---------------- | -------------------------------------------------- |
 | **Portfolio**    | Project showcase with status, timeline, team, KPIs |
 | **Quick Search** | Command palette (Cmd+K) for fast navigation        |
-| **AI Chat**      | Ollama integration for local LLM conversations     |
 | **Analytics**    | Dashboard with task completion and goal progress   |
 | **Uploads**      | File upload and management                         |
-| **Backup**       | JSON export and import via Settings → Data or REST API |
+| **Backup**       | JSON export and import via Settings → Data         |
 
 ## Infrastructure
 
