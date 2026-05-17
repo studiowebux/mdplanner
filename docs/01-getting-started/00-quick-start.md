@@ -16,7 +16,8 @@ cp deploy/.env.example deploy/.env
 docker compose -f deploy/docker-compose.yml up -d
 ```
 
-Open `http://localhost:8003`. Project files persist in the directory set by `PROJECT_DIR`.
+Open `http://localhost:8080` (through Caddy) or `http://localhost:8003` (mdplanner direct).
+Project files persist in the directory set by `PROJECT_DIR`.
 
 ## From Source
 
