@@ -2257,3 +2257,28 @@ div.load-more-sentinel {
 .is-hidden {
   display: none;
 }
+
+/* -- In-place content editing (Edit Mode) -------------------------------- */
+
+.inline-editable {
+  white-space: pre-wrap;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  min-height: var(--space-xl);
+  padding: var(--space-sm) var(--space-md);
+  border: var(--border-width) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-secondary);
+}
+
+.inline-editable:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.inline-editable__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-sm);
+}

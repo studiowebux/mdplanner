@@ -1,4 +1,6 @@
-// Journal view routes — factory-generated list + custom detail with edit-in-place.
+// Journal view routes — factory-generated list + custom detail.
+// Structured fields edit via the factory sidenav (GET/POST /:id/edit);
+// `content` edits in-place via "Edit Mode" (?editing=true, PUT /:id/content).
 
 import type { AppContext } from "../../types/app.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
@@ -10,49 +12,31 @@ import { publish } from "../../singletons/event-bus.ts";
 
 export const journalRouter = createDomainRoutes(journalConfig);
 
-journalRouter.get("/:id", async (c: AppContext) => {
-  const id = c.req.param("id");
-  const item = await getJournalService().getById(id!);
+/** Render the detail page; `?editing=true` enables in-place content editing. */
+async function renderDetail(c: AppContext, id: string) {
+  const item = await getJournalService().getById(id);
   if (!item) return c.notFound();
-  const editMode = c.req.query("edit") === "1";
+  const editing = c.req.query("editing") === "true";
   return c.html(
     <JournalDetailView
       {...viewProps(c, "/journal")}
       item={item}
-      editMode={editMode}
+      editing={editing}
     />,
   );
-});
+}
 
-journalRouter.delete("/:id", async (c: AppContext) => {
-  const id = c.req.param("id");
-  await getJournalService().delete(id!);
-  publish("journal.deleted");
-  return new Response(null, {
-    status: 204,
-    headers: { "HX-Redirect": "/journal" },
-  });
-});
+journalRouter.get(
+  "/:id",
+  (c: AppContext) => renderDetail(c, c.req.param("id")!),
+);
 
-journalRouter.post("/:id/save", async (c: AppContext) => {
-  const id = c.req.param("id");
+// In-place content save (Edit Mode). Factory provides edit/delete routes.
+journalRouter.put("/:id/content", async (c: AppContext) => {
+  const id = c.req.param("id")!;
   const body = await c.req.parseBody();
-  const title = String(body.title ?? "").trim();
-  const date = String(body.date ?? "").trim() || undefined;
-  const mood = String(body.mood ?? "").trim() || undefined;
   const content = String(body.content ?? "").trim() || undefined;
-  const tagsRaw = String(body.tags ?? "").trim();
-  const tags = tagsRaw
-    ? tagsRaw.split(",").map((t) => t.trim()).filter(Boolean)
-    : [];
-
-  await getJournalService().update(id!, {
-    title,
-    date,
-    mood: mood as never,
-    content,
-    tags,
-  });
+  await getJournalService().update(id, { content });
   publish("journal.updated");
-  return c.redirect(`/journal/${id}`);
+  return renderDetail(c, id);
 });

@@ -34,6 +34,8 @@ export const journalConfig: DomainConfig<
   stateKeys: ["view", "mood", "from", "to", "q", "sort", "order"],
   columns: JOURNAL_TABLE_COLUMNS,
   formFields: JOURNAL_FORM_FIELDS,
+  // `content` is edited in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["content"],
 
   filters: [
     {

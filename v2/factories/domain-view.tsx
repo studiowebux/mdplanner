@@ -743,6 +743,8 @@ export function createDomainForm<T extends Entity>(cfg: {
   singular: string;
   fields: FieldDef[];
   idField?: string;
+  /** Field names edited in-place on the detail page — hidden from the edit form. */
+  inlineEditFields?: string[];
 }) {
   const DomainForm: FC<{
     item?: T;
@@ -776,14 +778,21 @@ export function createDomainForm<T extends Entity>(cfg: {
         if (!values[k]) values[k] = v;
       }
     }
+    // In edit mode, drop fields edited in-place on the detail page.
+    const inline = cfg.inlineEditFields;
+    const formFields = isEdit && inline && inline.length > 0
+      ? cfg.fields.filter((f) =>
+        f.type === "hidden" || !inline.includes(f.name)
+      )
+      : cfg.fields;
     // Override select options with config-driven values when provided.
     const fields = dynamicOptions
-      ? cfg.fields.map((f) =>
+      ? formFields.map((f) =>
         f.type === "select" && dynamicOptions[f.name]
           ? { ...f, options: dynamicOptions[f.name] }
           : f
       )
-      : cfg.fields;
+      : formFields;
     return (
       <FormBuilder
         id={`${cfg.domain}-form`}

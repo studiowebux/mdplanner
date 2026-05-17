@@ -67,6 +67,12 @@ export type DomainConfig<T extends Entity, C, U> = {
   stateKeys: readonly string[];
   columns: ColumnDef[];
   formFields: FieldDef[];
+  /**
+   * Field names edited in-place on the detail page (contenteditable, via
+   * "Edit Mode") rather than the sidenav. Excluded from the edit form;
+   * still rendered in the create form.
+   */
+  inlineEditFields?: string[];
   filters?: FilterDef[];
   // Optional: field + value for the "hide completed" toggle.
   // Omit entirely if the domain has no completion concept.

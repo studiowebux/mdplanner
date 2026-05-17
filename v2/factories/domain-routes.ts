@@ -35,6 +35,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
     domain: cfg.name,
     singular: cfg.singular,
     fields: cfg.formFields,
+    inlineEditFields: cfg.inlineEditFields,
   });
 
   // ---------------------------------------------------------------------------
