@@ -26,7 +26,7 @@ export const EisenhowerDetailView: FC<
       title={e.title}
       {...viewProps}
       styles={["/css/views/eisenhower.css"]}
-      scripts={["/js/quadrant-edit.js", "/js/fullscreen-reading.js"]}
+      scripts={["/js/quadrant-edit.js"]}
     >
       <SseRefresh
         getUrl={`/eisenhower/${e.id}${editSuffix}`}
@@ -55,13 +55,6 @@ export const EisenhowerDetailView: FC<
             title={e.title}
             formContainerId="eisenhower-form-container"
           >
-            <button
-              type="button"
-              class="btn btn--secondary btn--sm"
-              data-fullscreen-toggle
-            >
-              Focus
-            </button>
             {editing
               ? (
                 <a

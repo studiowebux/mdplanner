@@ -141,7 +141,6 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
     title={domain.domain}
     {...viewProps}
     styles={["/css/views/dns.css"]}
-    scripts={["/js/fullscreen-reading.js"]}
   >
     <SseRefresh
       getUrl={"/dns/" + domain.id}
@@ -168,15 +167,7 @@ export const DnsDetailView: FC<ViewProps & { item: DnsDomain }> = (
           id={domain.id}
           title={domain.domain}
           formContainerId="dns-form-container"
-        >
-          <button
-            type="button"
-            class="btn btn--secondary btn--sm"
-            data-fullscreen-toggle
-          >
-            Focus
-          </button>
-        </DetailActions>
+        />
       </header>
 
       <div class="detail-section detail-info-row">

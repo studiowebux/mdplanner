@@ -37,7 +37,6 @@ export const QuoteDetailView: FC<
       title={`${quote.number} — ${quote.title}`}
       {...viewProps}
       styles={["/css/views/quotes.css", "/css/views/billing.css"]}
-      scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={"/quotes/" + quote.id}
@@ -68,13 +67,6 @@ export const QuoteDetailView: FC<
               title={quote.title}
               formContainerId="quotes-form-container"
             />
-            <button
-              type="button"
-              class="btn btn--secondary btn--sm"
-              data-fullscreen-toggle
-            >
-              Focus
-            </button>
             {quote.status === "draft" && (
               <button
                 class="btn btn--primary btn--sm"

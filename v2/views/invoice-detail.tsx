@@ -37,7 +37,6 @@ export const InvoiceDetailView: FC<
       title={`${invoice.number} — ${invoice.title}`}
       {...viewProps}
       styles={["/css/views/invoices.css", "/css/views/billing.css"]}
-      scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={"/invoices/" + invoice.id}
@@ -68,13 +67,6 @@ export const InvoiceDetailView: FC<
               title={invoice.title}
               formContainerId="invoices-form-container"
             />
-            <button
-              type="button"
-              class="btn btn--secondary btn--sm"
-              data-fullscreen-toggle
-            >
-              Focus
-            </button>
             {invoice.status === "draft" && (
               <button
                 class="btn btn--primary btn--sm"

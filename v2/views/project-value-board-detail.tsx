@@ -120,7 +120,7 @@ export const ProjectValueBoardDetailView: FC<
       title={board.title}
       {...viewProps}
       styles={["/css/views/project-value-boards.css"]}
-      scripts={["/js/quadrant-edit.js", "/js/fullscreen-reading.js"]}
+      scripts={["/js/quadrant-edit.js"]}
     >
       <SseRefresh
         getUrl={"/project-value/" + board.id + editSuffix}
@@ -145,13 +145,6 @@ export const ProjectValueBoardDetailView: FC<
             title={board.title}
             formContainerId="project-value-form-container"
           >
-            <button
-              type="button"
-              class="btn btn--secondary btn--sm"
-              data-fullscreen-toggle
-            >
-              Focus
-            </button>
             {editing
               ? (
                 <a

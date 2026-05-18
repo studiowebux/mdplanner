@@ -98,7 +98,6 @@ export const LeanCanvasDetailView: FC<
       title={lc.title}
       {...viewProps}
       styles={["/css/views/lean-canvases.css"]}
-      scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={"/lean-canvases/" + lc.id + editSuffix}
@@ -125,13 +124,6 @@ export const LeanCanvasDetailView: FC<
             title={lc.title}
             formContainerId="lean-canvases-form-container"
           >
-            <button
-              type="button"
-              class="btn btn--secondary btn--sm"
-              data-fullscreen-toggle
-            >
-              Focus
-            </button>
             {editing
               ? (
                 <a

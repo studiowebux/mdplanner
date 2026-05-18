@@ -211,7 +211,6 @@ export const CustomerDetailView: FC<
       title={customer.name}
       {...viewProps}
       styles={["/css/views/customers.css"]}
-      scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={"/customers/" + customer.id}
@@ -231,15 +230,7 @@ export const CustomerDetailView: FC<
             id={customer.id}
             title={customer.name}
             formContainerId="customers-form-container"
-          >
-            <button
-              type="button"
-              class="btn btn--secondary btn--sm"
-              data-fullscreen-toggle
-            >
-              Focus
-            </button>
-          </DetailActions>
+          />
         </header>
 
         {/* -- Contact info ----------------------------------------------- */}

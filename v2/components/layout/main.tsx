@@ -96,15 +96,6 @@ export const MainLayout: FC<Props> = (
         >
           ✕ Exit Focus
         </button>
-        <button
-          id="fullscreen-reading-exit"
-          class="btn btn--secondary fullscreen-reading-exit"
-          type="button"
-          aria-label="Exit fullscreen reading"
-          title="Exit fullscreen reading (Escape)"
-        >
-          ✕ Exit Reading
-        </button>
         <script src="/js/vendor/htmx-2.0.8.min.js" />
         <script src="/js/vendor/htmx-ext-sse-2.2.4.min.js" />
         <script src="/js/vendor/idiomorph-ext-0.3.0.min.js" />

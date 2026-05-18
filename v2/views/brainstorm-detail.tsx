@@ -26,7 +26,6 @@ export const BrainstormDetailView: FC<
       title={brainstorm.title}
       {...viewProps}
       styles={["/css/views/brainstorms.css"]}
-      scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={"/brainstorms/" + brainstorm.id}
@@ -49,13 +48,6 @@ export const BrainstormDetailView: FC<
             title={brainstorm.title}
             formContainerId="brainstorms-form-container"
           >
-            <button
-              type="button"
-              class="btn btn--secondary btn--sm"
-              data-fullscreen-toggle
-            >
-              Focus
-            </button>
             <button
               type="button"
               class="btn btn--secondary btn--sm"

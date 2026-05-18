@@ -43,22 +43,6 @@ html.sidebar-collapsed .app-shell {
 }
 
 /* -------------------------------------------------------------------------
-   Fullscreen reading mode — hides sidebar + topbar
-   ------------------------------------------------------------------------- */
-
-html.fullscreen-reading .sidebar {
-  display: none;
-}
-
-html.fullscreen-reading .app-shell {
-  grid-template-columns: 1fr;
-}
-
-html.fullscreen-reading .topbar {
-  display: none;
-}
-
-/* -------------------------------------------------------------------------
    Focus mode — hides sidebar + topbar globally, persisted in localStorage
    ------------------------------------------------------------------------- */
 
@@ -74,20 +58,11 @@ html.focus-mode .topbar {
   display: none;
 }
 
-.btn.focus-mode-exit,
-.btn.fullscreen-reading-exit {
+.btn.focus-mode-exit {
   display: none;
 }
 
 html.focus-mode .focus-mode-exit {
-  display: flex;
-  position: fixed;
-  top: var(--space-sm);
-  right: var(--space-sm);
-  z-index: var(--z-topbar);
-}
-
-html.fullscreen-reading .fullscreen-reading-exit {
   display: flex;
   position: fixed;
   top: var(--space-sm);

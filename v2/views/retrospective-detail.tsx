@@ -29,7 +29,7 @@ export const RetrospectiveDetailView: FC<
       title={retro.title}
       {...viewProps}
       styles={["/css/views/retrospectives.css"]}
-      scripts={["/js/quadrant-edit.js", "/js/fullscreen-reading.js"]}
+      scripts={["/js/quadrant-edit.js"]}
     >
       <SseRefresh
         getUrl={"/retrospectives/" + retro.id +
@@ -63,13 +63,6 @@ export const RetrospectiveDetailView: FC<
             title={retro.title}
             formContainerId="retrospectives-form-container"
           >
-            <button
-              type="button"
-              class="btn btn--secondary btn--sm"
-              data-fullscreen-toggle
-            >
-              Focus
-            </button>
             {editing
               ? (
                 <a

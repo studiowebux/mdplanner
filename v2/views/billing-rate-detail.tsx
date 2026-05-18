@@ -24,7 +24,6 @@ export const BillingRateDetailView: FC<
       title={rate.name}
       {...viewProps}
       styles={["/css/views/billing-rates.css"]}
-      scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={"/billing-rates/" + rate.id}
@@ -48,15 +47,7 @@ export const BillingRateDetailView: FC<
             id={rate.id}
             title={rate.name}
             formContainerId="billing-rates-form-container"
-          >
-            <button
-              type="button"
-              class="btn btn--secondary btn--sm"
-              data-fullscreen-toggle
-            >
-              Focus
-            </button>
-          </DetailActions>
+          />
         </header>
 
         {/* -- Rate info ------------------------------------------------- */}

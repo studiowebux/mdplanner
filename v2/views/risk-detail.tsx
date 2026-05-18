@@ -22,7 +22,6 @@ export const RiskDetailView: FC<ViewProps & { item: Risk }> = (
       title={risk.title}
       {...viewProps}
       styles={["/css/views/risks.css"]}
-      scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={"/risks/" + risk.id}
@@ -54,15 +53,7 @@ export const RiskDetailView: FC<ViewProps & { item: Risk }> = (
             id={risk.id}
             title={risk.title}
             formContainerId="risks-form-container"
-          >
-            <button
-              type="button"
-              class="btn btn--secondary btn--sm"
-              data-fullscreen-toggle
-            >
-              Focus
-            </button>
-          </DetailActions>
+          />
         </header>
 
         {/* -- Info row -------------------------------------------------- */}

@@ -28,7 +28,6 @@ export const MilestoneDetailView: FC<Props> = (
       title={milestone.name}
       {...viewProps}
       styles={["/css/views/milestones.css"]}
-      scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={`/milestones/${milestone.id}`}
@@ -53,15 +52,7 @@ export const MilestoneDetailView: FC<Props> = (
             id={milestone.id}
             title={milestone.name}
             formContainerId="milestones-form-container"
-          >
-            <button
-              type="button"
-              class="btn btn--secondary btn--sm"
-              data-fullscreen-toggle
-            >
-              Focus
-            </button>
-          </DetailActions>
+          />
 
           <div class="milestone-detail__meta">
             {milestone.project && (

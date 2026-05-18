@@ -49,7 +49,7 @@ export const MarketingPlanDetailView: FC<
       title={plan.name}
       {...viewProps}
       styles={["/css/views/marketing-plans.css", "/css/views/goals.css"]}
-      scripts={["/js/kpi-gauge.js", "/js/fullscreen-reading.js"]}
+      scripts={["/js/kpi-gauge.js"]}
     >
       <SseRefresh
         getUrl={"/marketing-plans/" + plan.id}
@@ -72,15 +72,7 @@ export const MarketingPlanDetailView: FC<
             id={plan.id}
             title={plan.name}
             formContainerId="marketing-plans-form-container"
-          >
-            <button
-              type="button"
-              class="btn btn--secondary btn--sm"
-              data-fullscreen-toggle
-            >
-              Focus
-            </button>
-          </DetailActions>
+          />
         </header>
 
         {/* -- Overview -------------------------------------------------- */}

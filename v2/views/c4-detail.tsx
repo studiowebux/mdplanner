@@ -34,7 +34,6 @@ export const C4DetailView: FC<Props> = ({
       title={component.name}
       {...props}
       styles={["/css/views/c4.css"]}
-      scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={`/c4/${component.id}`}
@@ -64,15 +63,7 @@ export const C4DetailView: FC<Props> = ({
             id={component.id}
             title={component.name}
             formContainerId="c4-form-container"
-          >
-            <button
-              type="button"
-              class="btn btn--secondary btn--sm"
-              data-fullscreen-toggle
-            >
-              Focus
-            </button>
-          </DetailActions>
+          />
         </header>
 
         <section class="detail-section">

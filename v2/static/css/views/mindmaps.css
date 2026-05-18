@@ -137,7 +137,7 @@
   color: var(--mm-branch-7);
 }
 
-html.fullscreen-reading .mindmap-detail__canvas {
+html.focus-mode .mindmap-detail__canvas {
   height: calc(100vh - var(--mindmap-fullscreen-offset));
 }
 

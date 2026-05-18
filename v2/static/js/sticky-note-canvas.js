@@ -1049,9 +1049,9 @@
     checkEmpty();
     wire();
     window.addEventListener("resize", sizeCanvas);
-    // Re-size after fullscreen toggle — header hides/shows, changing available height
+    // Re-size after focus-mode toggle — topbar hides/shows, changing available height
     document.addEventListener("click", function (e) {
-      if (e.target.closest("[data-fullscreen-toggle]")) {
+      if (e.target.closest("#focus-mode-btn, #focus-mode-exit")) {
         requestAnimationFrame(sizeCanvas);
       }
     });

@@ -100,7 +100,6 @@ export const BusinessModelDetailView: FC<
       title={bmc.title}
       {...viewProps}
       styles={["/css/views/lean-canvases.css", "/css/views/business-model.css"]}
-      scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={"/business-models/" + bmc.id + editSuffix}
@@ -125,13 +124,6 @@ export const BusinessModelDetailView: FC<
             title={bmc.title}
             formContainerId="business-models-form-container"
           >
-            <button
-              type="button"
-              class="btn btn--secondary btn--sm"
-              data-fullscreen-toggle
-            >
-              Focus
-            </button>
             {editing
               ? (
                 <a

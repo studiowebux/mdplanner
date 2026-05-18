@@ -19,7 +19,7 @@ export const FishboneDetailView: FC<
       title={fishbone.title}
       {...viewProps}
       styles={["/css/views/fishbone.css"]}
-      scripts={["/js/quadrant-edit.js", "/js/fullscreen-reading.js"]}
+      scripts={["/js/quadrant-edit.js"]}
     >
       <SseRefresh
         getUrl={"/fishbones/" + fishbone.id + editSuffix}
@@ -48,13 +48,6 @@ export const FishboneDetailView: FC<
             title={fishbone.title}
             formContainerId="fishbones-form-container"
           >
-            <button
-              type="button"
-              class="btn btn--secondary btn--sm"
-              data-fullscreen-toggle
-            >
-              Focus
-            </button>
             {editing
               ? (
                 <a

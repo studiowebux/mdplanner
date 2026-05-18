@@ -394,7 +394,7 @@ export const TaskDetailView: FC<Props> = (
       title={task.title}
       {...rest}
       styles={["/css/views/tasks.css", "/css/views/github.css"]}
-      scripts={["/js/fullscreen-reading.js", "/js/mention-autocomplete.js"]}
+      scripts={["/js/mention-autocomplete.js"]}
     >
       <SseRefresh
         getUrl={"/tasks/" + task.id}
@@ -510,13 +510,6 @@ export const TaskDetailView: FC<Props> = (
             hx-swap="none"
           >
             Delete
-          </button>
-          <button
-            type="button"
-            class="btn btn--secondary"
-            data-fullscreen-toggle
-          >
-            Focus
           </button>
         </div>
 

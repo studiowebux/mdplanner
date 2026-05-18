@@ -25,7 +25,7 @@ export const MindmapDetailView: FC<
       styles={["/css/views/mindmaps.css"]}
       scripts={editing
         ? ["/js/mindmap.js", "/js/mindmap-editor.js"]
-        : ["/js/mindmap.js", "/js/fullscreen-reading.js"]}
+        : ["/js/mindmap.js"]}
     >
       <SseRefresh
         getUrl={`/mindmaps/${item.id}${editSuffix}`}
@@ -112,13 +112,6 @@ export const MindmapDetailView: FC<
                 >
                   Edit
                 </a>
-                <button
-                  type="button"
-                  class="btn btn--secondary btn--sm"
-                  data-fullscreen-toggle
-                >
-                  Focus
-                </button>
               </div>
 
               <div

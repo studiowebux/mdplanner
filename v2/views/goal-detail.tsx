@@ -74,7 +74,7 @@ export const GoalDetailView: FC<
       title={goal.title}
       {...viewProps}
       styles={["/css/views/goals.css"]}
-      scripts={["/js/kpi-gauge.js", "/js/fullscreen-reading.js"]}
+      scripts={["/js/kpi-gauge.js"]}
     >
       <SseRefresh
         getUrl={"/goals/" + goal.id}
@@ -114,15 +114,7 @@ export const GoalDetailView: FC<
             id={goal.id}
             title={goal.title}
             formContainerId="goals-form-container"
-          >
-            <button
-              type="button"
-              class="btn btn--secondary btn--sm"
-              data-fullscreen-toggle
-            >
-              Focus
-            </button>
-          </DetailActions>
+          />
         </header>
 
         {/* ── Overview row ───────────────────────────────────────── */}

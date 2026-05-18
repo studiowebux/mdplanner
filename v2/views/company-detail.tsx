@@ -23,7 +23,6 @@ export const CompanyDetailView: FC<ViewProps & { item: Company }> = (
       title={company.name}
       {...viewProps}
       styles={["/css/views/companies.css"]}
-      scripts={["/js/fullscreen-reading.js"]}
     >
       <SseRefresh
         getUrl={`/companies/${company.id}`}
@@ -47,15 +46,7 @@ export const CompanyDetailView: FC<ViewProps & { item: Company }> = (
             id={company.id}
             title={company.name}
             formContainerId="companies-form-container"
-          >
-            <button
-              type="button"
-              class="btn btn--secondary btn--sm"
-              data-fullscreen-toggle
-            >
-              Focus
-            </button>
-          </DetailActions>
+          />
         </header>
 
         {hasInfo && (
