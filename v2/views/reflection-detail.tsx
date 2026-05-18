@@ -6,15 +6,60 @@ import { REFLECTION_PERIOD_LABELS } from "../types/reflection.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
 import { REFLECTION_PERIOD_VARIANTS } from "../domains/reflection/constants.tsx";
 
-export const ReflectionDetailView: FC<ViewProps & { item: Reflection }> = (
-  { item: reflection, ...viewProps },
-) => {
+// ---------------------------------------------------------------------------
+// Content — read (markdown) or in-place editable (contenteditable + Save).
+// ---------------------------------------------------------------------------
+
+const ContentSection: FC<{ reflection: Reflection }> = ({ reflection }) => (
+  <section class="detail-section">
+    <h2 class="section-heading">Content</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={reflection.content ?? ""}
+      data-inline-target="reflection-content-value"
+      data-inline-save-btn="reflection-content-save"
+    >
+      {reflection.content ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="reflection-content-value"
+      name="content"
+      value={reflection.content ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="reflection-content-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/reflections/${reflection.id}/content?editing=true`}
+        hx-include="#reflection-content-value"
+        hx-target="#reflection-detail-root"
+        hx-select="#reflection-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
+
+// ---------------------------------------------------------------------------
+// Main export
+// ---------------------------------------------------------------------------
+
+export const ReflectionDetailView: FC<
+  ViewProps & { item: Reflection; editing?: boolean }
+> = ({ item: reflection, editing = false, ...viewProps }) => {
   return (
     <MainLayout
       title={reflection.title}
@@ -23,13 +68,20 @@ export const ReflectionDetailView: FC<ViewProps & { item: Reflection }> = (
         "/css/views/reflections.css",
         "/css/views/reflection-templates.css",
       ]}
+      scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={"/reflections/" + reflection.id}
+        getUrl={"/reflections/" + reflection.id +
+          (editing ? "?editing=true" : "")}
         trigger="sse:reflection.updated"
         targetId="reflection-detail-root"
       />
-      <main id="reflection-detail-root" class="detail-view reflection-detail">
+      <main
+        id="reflection-detail-root"
+        class={`detail-view reflection-detail${
+          editing ? " reflection-detail--editing" : ""
+        }`}
+      >
         <BackButton href="/reflections" label="Back to Reflections" />
 
         <header class="detail-section detail-header reflection-detail__header">
@@ -65,7 +117,12 @@ export const ReflectionDetailView: FC<ViewProps & { item: Reflection }> = (
               id={reflection.id}
               title={reflection.title}
               formContainerId="reflections-form-container"
-            />
+            >
+              <EditModeToggle
+                href={`/reflections/${reflection.id}`}
+                editing={editing}
+              />
+            </DetailActions>
           </div>
         </header>
 
@@ -76,7 +133,9 @@ export const ReflectionDetailView: FC<ViewProps & { item: Reflection }> = (
           <InfoItem label="Date">{reflection.date}</InfoItem>
         </div>
 
-        <MarkdownSection title="Content" markdown={reflection.content} />
+        {editing
+          ? <ContentSection reflection={reflection} />
+          : <MarkdownSection title="Content" markdown={reflection.content} />}
 
         <AuditMeta
           createdAt={reflection.createdAt}

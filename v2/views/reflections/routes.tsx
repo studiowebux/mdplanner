@@ -1,4 +1,6 @@
 // Reflection view routes — factory-generated list + custom detail.
+// Structured fields edit via the factory sidenav (GET/POST /:id/edit);
+// `content` edits in-place via "Edit Mode" (?editing=true, PUT /:id/content).
 
 import type { AppContext } from "../../types/app.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
@@ -15,13 +17,33 @@ import { hxTrigger } from "../../utils/hx-trigger.ts";
 
 export const reflectionRouter = createDomainRoutes(reflectionConfig);
 
-reflectionRouter.get("/:id", async (c: AppContext) => {
-  const id = c.req.param("id");
-  const item = await getReflectionService().getById(id!);
+/** Render the detail page; `?editing=true` enables in-place content editing. */
+async function renderDetail(c: AppContext, id: string) {
+  const item = await getReflectionService().getById(id);
   if (!item) return c.notFound();
+  const editing = c.req.query("editing") === "true";
   return c.html(
-    <ReflectionDetailView {...viewProps(c, "/reflections")} item={item} />,
+    <ReflectionDetailView
+      {...viewProps(c, "/reflections")}
+      item={item}
+      editing={editing}
+    />,
   );
+}
+
+reflectionRouter.get(
+  "/:id",
+  (c: AppContext) => renderDetail(c, c.req.param("id")!),
+);
+
+// In-place content save (Edit Mode). Factory provides edit/delete routes.
+reflectionRouter.put("/:id/content", async (c: AppContext) => {
+  const id = c.req.param("id")!;
+  const body = await c.req.parseBody();
+  const content = String(body.content ?? "").trim() || undefined;
+  await getReflectionService().update(id, { content });
+  publish("reflection.updated");
+  return renderDetail(c, id);
 });
 
 // GET /:id/template-picker — sidenav fragment listing available reflection templates.

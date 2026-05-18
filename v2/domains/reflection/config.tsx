@@ -34,6 +34,8 @@ export const reflectionConfig: DomainConfig<
   stateKeys: ["view", "period", "from", "to", "q", "sort", "order"],
   columns: REFLECTION_TABLE_COLUMNS,
   formFields: REFLECTION_FORM_FIELDS,
+  // `content` is edited in-place on the detail page via "Edit Mode".
+  inlineEditFields: ["content"],
 
   filters: [
     {
