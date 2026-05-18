@@ -14,8 +14,11 @@ import {
   rowToOnboardingTemplate,
 } from "../domains/onboarding-template/cache.ts";
 
-// id and name are derived from filename — exclude from frontmatter body
-const ONBOARDING_TEMPLATE_BODY_KEYS = ["id", "name"] as const;
+// No body fields — the markdown body is empty, every field lives in
+// frontmatter. id and name MUST stay in frontmatter: serializeStandard
+// excludes body keys from frontmatter, and name is not recoverable from the
+// filename, so listing them here drops both on the first update() (404).
+const ONBOARDING_TEMPLATE_BODY_KEYS = [] as const;
 
 const VALID_CATEGORIES = new Set<string>(ONBOARDING_STEP_CATEGORIES);
 
