@@ -76,7 +76,7 @@ export class BrainstormTemplateRepository extends CachedMarkdownRepository<
   /** Parse `## Questions` section — extract bullet list items. */
   private parseQuestions(body: string): string[] {
     const sectionMatch = body.match(
-      /^##\s+Questions\s*$([\s\S]*?)(?:^##\s|$)/m,
+      /^##\s+Questions\s*$([\s\S]*?)(?:^##\s|(?![\s\S]))/m,
     );
     if (!sectionMatch) return [];
     return sectionMatch[1]
