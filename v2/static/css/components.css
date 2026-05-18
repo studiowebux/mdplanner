@@ -816,7 +816,14 @@ a.badge:hover {
   background: var(--color-bg-primary);
 }
 
-.form__select--sm {
+.form__input,
+.form__select {
+  height: var(--input-height);
+}
+
+.form__select--sm,
+.form__input--sm {
+  height: var(--input-height-sm);
   padding: var(--space-xs) var(--space-sm);
   font-size: var(--font-size-xs);
 }

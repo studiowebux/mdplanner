@@ -294,6 +294,7 @@
   --avatar-font-size: var(--font-size-sm);
 
   /* Form controls */
+  --input-height: 2.25rem;
   --input-height-sm: 1.75rem;
 
   /* Badge */
