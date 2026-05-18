@@ -388,6 +388,8 @@
   --progress-bar-inline-width: 5rem;
   --table-compact-cell-max-width: 16rem;
   --table-min-width: 36rem;
+  --table-row-stripe: var(--color-bg-secondary);
+  --table-row-hover: var(--color-bg-active);
 
   /* Toolbar */
   --toolbar-search-min-width: 12rem;

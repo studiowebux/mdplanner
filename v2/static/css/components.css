@@ -1463,12 +1463,12 @@ a.badge:hover {
 }
 
 .data-table__row:nth-child(even) {
-  background: var(--color-bg-secondary);
+  background: var(--table-row-stripe);
 }
 
 .data-table__row:hover,
 .data-table tbody tr:hover {
-  background: var(--color-bg-hover);
+  background: var(--table-row-hover);
 }
 
 .data-table__row--focused {
@@ -1559,7 +1559,7 @@ a.badge:hover {
 
 .data-table--compact .data-table__row:hover,
 .data-table--compact tbody tr:hover {
-  background: var(--color-bg-secondary);
+  background: var(--table-row-hover);
 }
 
 /* Right-aligned columns (currency, numbers) */
