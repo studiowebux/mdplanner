@@ -89,7 +89,7 @@ export const MainLayout: FC<Props> = (
         </AppShell>
         <button
           id="focus-mode-exit"
-          class="btn focus-mode-exit"
+          class="btn btn--secondary focus-mode-exit"
           type="button"
           aria-label="Exit focus mode"
           title="Exit focus mode (Escape)"
@@ -98,7 +98,7 @@ export const MainLayout: FC<Props> = (
         </button>
         <button
           id="fullscreen-reading-exit"
-          class="btn fullscreen-reading-exit"
+          class="btn btn--secondary fullscreen-reading-exit"
           type="button"
           aria-label="Exit fullscreen reading"
           title="Exit fullscreen reading (Escape)"
