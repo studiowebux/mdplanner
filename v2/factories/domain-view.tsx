@@ -649,7 +649,7 @@ export function createDomainPage<T extends Entity>(
                 class="domain-toolbar__search"
                 name="q"
                 value={state.q ?? ""}
-                placeholder={`Search ${cfg.name}...`}
+                placeholder={`Search ${cfg.plural ?? `${cfg.singular}s`}...`}
                 aria-label="Search"
                 hx-get={`/${cfg.name}/view`}
                 hx-trigger="input changed delay:300ms, search"
