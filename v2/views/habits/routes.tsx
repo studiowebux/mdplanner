@@ -8,10 +8,43 @@ import { HabitDetailView } from "../habit-detail.tsx";
 import { viewProps } from "../../middleware/view-props.ts";
 import { renderToString } from "hono/jsx/dom/server";
 import { HabitHeatmapRow } from "./components/habit-heatmap.tsx";
+import { HabitStats } from "./components/habit-stats.tsx";
+import { HabitCompletionLog } from "./components/habit-completion-log.tsx";
 import { HabitCard } from "../components/habit-card.tsx";
+import type { Habit } from "../../types/habit.types.ts";
 import { publish } from "../../singletons/event-bus.ts";
 
 export const habitRouter = createDomainRoutes(habitConfig);
+
+/** Current-month day cells for the heatmap row. */
+function currentMonthDays(): { date: string; day: number }[] {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const mm = String(month + 1).padStart(2, "0");
+  return Array.from({ length: daysInMonth }, (_, i) => {
+    const d = i + 1;
+    return { date: `${year}-${mm}-${String(d).padStart(2, "0")}`, day: d };
+  });
+}
+
+/**
+ * htmx fragment for a habit mutation: swaps the heatmap row and OOB-swaps the
+ * detail-page stats + completion log so the UI stays fresh without a reload.
+ * The HabitCard OOB keeps the list/tracker grid in sync.
+ */
+function habitFragment(habit: Habit): string {
+  const today = new Date().toLocaleDateString("en-CA");
+  return renderToString(
+    <>
+      <HabitHeatmapRow habit={habit} days={currentMonthDays()} today={today} />
+      <HabitStats habit={habit} oob />
+      <HabitCompletionLog habit={habit} oob />
+      <HabitCard item={habit} oobSwap="true" />
+    </>,
+  );
+}
 
 async function renderDetail(c: AppContext, id: string) {
   const item = await getHabitService().getById(id);
@@ -32,7 +65,7 @@ habitRouter.delete("/:id/completion/:date", async (c) => {
   const habit = await getHabitService().deleteCompletion(id, date);
   if (!habit) return c.notFound();
   publish("habit.updated");
-  return renderDetail(c, id);
+  return c.html(habitFragment(habit), 200);
 });
 
 habitRouter.post("/:id/toggle-date/:date", async (c) => {
@@ -45,23 +78,5 @@ habitRouter.post("/:id/toggle-date/:date", async (c) => {
   const habit = await getHabitService().toggleDate(id, date, note);
   if (!habit) return c.notFound();
   publish("habit.updated");
-  const now = new Date();
-  const today = now.toLocaleDateString("en-CA");
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const mm = String(month + 1).padStart(2, "0");
-  const days = Array.from({ length: daysInMonth }, (_, i) => {
-    const d = i + 1;
-    return { date: `${year}-${mm}-${String(d).padStart(2, "0")}`, day: d };
-  });
-  return c.html(
-    renderToString(
-      <>
-        <HabitHeatmapRow habit={habit} days={days} today={today} />
-        <HabitCard item={habit} oobSwap="true" />
-      </>,
-    ),
-    200,
-  );
+  return c.html(habitFragment(habit), 200);
 });
