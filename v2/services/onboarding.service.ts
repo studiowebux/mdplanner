@@ -61,4 +61,45 @@ export class OnboardingService extends BaseService<
     }
     return items;
   }
+
+  /**
+   * Toggle a single step's completion: `complete` <-> `not_started`.
+   * Steps are matched by stable step ID. Returns null if the record or
+   * the step is not found.
+   */
+  async toggleStep(
+    id: string,
+    stepId: string,
+  ): Promise<Onboarding | null> {
+    const item = await this.repo.findById(id);
+    if (!item) return null;
+    if (!item.steps.some((s) => s.id === stepId)) return null;
+    const steps = item.steps.map((s) =>
+      s.id === stepId
+        ? {
+          ...s,
+          status: s.status === "complete"
+            ? "not_started" as const
+            : "complete" as const,
+        }
+        : s
+    );
+    return this.repo.update(id, { steps });
+  }
+
+  /**
+   * Update a single step's title, matched by stable step ID. Returns null
+   * if the record or the step is not found.
+   */
+  async updateStepTitle(
+    id: string,
+    stepId: string,
+    title: string,
+  ): Promise<Onboarding | null> {
+    const item = await this.repo.findById(id);
+    if (!item) return null;
+    if (!item.steps.some((s) => s.id === stepId)) return null;
+    const steps = item.steps.map((s) => s.id === stepId ? { ...s, title } : s);
+    return this.repo.update(id, { steps });
+  }
 }

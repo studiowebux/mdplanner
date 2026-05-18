@@ -32,6 +32,7 @@ export const OnboardingDetailView: FC<ViewProps & { item: Onboarding }> = (
       title={item.employeeName}
       {...viewProps}
       styles={["/css/views/onboarding.css"]}
+      scripts={["/js/inline-edit.js"]}
     >
       <SseRefresh
         getUrl={"/onboarding/" + item.id}
@@ -86,18 +87,7 @@ export const OnboardingDetailView: FC<ViewProps & { item: Onboarding }> = (
                 {done}/{item.steps.length} steps complete
               </span>
             </div>
-            <div
-              class="progress-bar"
-              role="progressbar"
-              aria-valuenow={pct}
-              aria-valuemin={0}
-              aria-valuemax={100}
-            >
-              <div
-                class="progress-bar__fill"
-                data-pct={pct}
-              />
-            </div>
+            <progress class="progress-bar" value={pct} max={100} />
           </div>
         )}
 
@@ -129,6 +119,16 @@ export const OnboardingDetailView: FC<ViewProps & { item: Onboarding }> = (
                         key={step.id}
                         class={`onboarding-detail__step onboarding-detail__step--${step.status}`}
                       >
+                        <input
+                          type="checkbox"
+                          class="onboarding-detail__step-checkbox"
+                          checked={step.status === "complete"}
+                          aria-label={`Mark "${step.title}" complete`}
+                          hx-post={`/onboarding/${item.id}/steps/${step.id}/toggle`}
+                          hx-target="#onboarding-detail-root"
+                          hx-select="#onboarding-detail-root"
+                          hx-swap="outerHTML"
+                        />
                         <span
                           class={`onboarding-detail__step-status badge badge--sm badge--${
                             step.status === "complete"
@@ -140,9 +140,36 @@ export const OnboardingDetailView: FC<ViewProps & { item: Onboarding }> = (
                         >
                           {STEP_STATUS_LABELS[step.status]}
                         </span>
-                        <span class="onboarding-detail__step-title">
-                          {step.title}
-                        </span>
+                        <div class="onboarding-detail__step-title-wrap">
+                          <span
+                            class="onboarding-detail__step-title"
+                            contenteditable
+                            data-inline-edit
+                            data-inline-original={step.title}
+                            data-inline-target={`step-title-value-${step.id}`}
+                            data-inline-save-btn={`step-title-save-${step.id}`}
+                          >
+                            {step.title}
+                          </span>
+                          <input
+                            type="hidden"
+                            id={`step-title-value-${step.id}`}
+                            name="title"
+                            value={step.title}
+                          />
+                          <button
+                            type="button"
+                            id={`step-title-save-${step.id}`}
+                            class="btn btn--primary btn--sm is-hidden"
+                            hx-post={`/onboarding/${item.id}/steps/${step.id}/title`}
+                            hx-include={`#step-title-value-${step.id}`}
+                            hx-target="#onboarding-detail-root"
+                            hx-select="#onboarding-detail-root"
+                            hx-swap="outerHTML"
+                          >
+                            Save
+                          </button>
+                        </div>
                       </li>
                     ))}
                   </ul>
