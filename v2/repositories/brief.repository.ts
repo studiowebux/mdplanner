@@ -49,11 +49,13 @@ export class BriefRepository extends CachedMarkdownRepository<
     fm: Record<string, unknown>,
     body: string,
   ): Brief | null {
-    if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
-
     const bodyText = body.trim();
     const headingMatch = bodyText.match(/^#\s+(.+)$/m);
+    // id/title live in the body (BRIEF_BODY_KEYS) once serialized — accept a
+    // file whose title is only the body `# heading`, else it 404s post-save.
+    if (!fm.id && !fm.title && !headingMatch) return null;
+    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
+
     const title = fm.title
       ? String(fm.title)
       : headingMatch

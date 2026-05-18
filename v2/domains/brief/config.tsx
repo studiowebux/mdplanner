@@ -35,11 +35,15 @@ export const briefConfig: DomainConfig<Brief, CreateBrief, UpdateBrief> = {
 
   Card: ({ item, q }) => <BriefCard item={item} q={q} />,
 
-  parseCreate: (body) => parseFormBody(BRIEF_FORM_FIELDS, body) as CreateBrief,
+  parseCreate: (body) =>
+    parseFormBody(BRIEF_FORM_FIELDS, body, {
+      splitTextarea: true,
+    }) as CreateBrief,
 
   parseUpdate: (body) =>
     parseFormBody(BRIEF_FORM_FIELDS, body, {
       clearEmpty: true,
+      splitTextarea: true,
     }) as Partial<UpdateBrief>,
 
   getService: () => getBriefService(),

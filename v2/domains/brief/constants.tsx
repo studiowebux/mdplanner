@@ -5,6 +5,7 @@ import { BRIEF_SECTIONS } from "../../types/brief.types.ts";
 import { createActionBtns } from "../../components/ui/action-btns.tsx";
 import { Highlight } from "../../utils/highlight.tsx";
 import { formatDate } from "../../utils/time.ts";
+import { BRIEF_RACI_KEYS } from "./constants.ts";
 
 // ---------------------------------------------------------------------------
 // Action buttons
@@ -62,12 +63,23 @@ export const BRIEF_FORM_FIELDS: FieldDef[] = [
     name: "date",
     label: "Date",
   },
-  ...BRIEF_SECTIONS.map((s) => ({
-    type: "textarea" as const,
-    name: s.key,
-    label: s.label,
-    rows: 4,
-  })),
+  // RACI sections use a people-backed tag picker; other sections stay textareas.
+  ...BRIEF_SECTIONS.map((s): FieldDef =>
+    BRIEF_RACI_KEYS.has(s.key)
+      ? {
+        type: "tags",
+        name: s.key,
+        label: s.label,
+        source: "people-names",
+        placeholder: "Search people or type a name...",
+      }
+      : {
+        type: "textarea",
+        name: s.key,
+        label: s.label,
+        rows: 4,
+      }
+  ),
 ];
 
 // ---------------------------------------------------------------------------
