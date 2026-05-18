@@ -108,7 +108,7 @@ const FileRow: FC<{ file: UploadedFile }> = ({ file }) => (
     <td class="uploads__td uploads__td--actions">
       <button
         type="button"
-        class="btn btn--ghost btn--sm uploads__delete-btn"
+        class="btn btn--danger btn--sm"
         hx-delete={`/uploads/files/${file.taskId}/${file.filename}`}
         hx-confirm={`Delete ${file.filename}?`}
         hx-target="closest tr"

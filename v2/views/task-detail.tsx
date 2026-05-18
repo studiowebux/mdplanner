@@ -316,7 +316,7 @@ const TimeEntriesSection: FC<{
                 <td>{e.description ?? "—"}</td>
                 <td class="data-table__td--actions">
                   <button
-                    class="btn btn--danger btn--xs"
+                    class="btn btn--danger btn--sm"
                     type="button"
                     hx-delete={`/tasks/${taskId}/time-entries/${e.id}`}
                     hx-confirm="Delete this time entry?"
@@ -503,7 +503,7 @@ export const TaskDetailView: FC<Props> = (
             Edit
           </button>
           <button
-            class="btn btn--danger"
+            class="btn btn--danger btn--sm"
             type="button"
             hx-delete={`/tasks/${task.id}`}
             hx-confirm={`Delete "${task.title}"? This cannot be undone.`}

@@ -358,7 +358,7 @@ const MembersTable: FC<{
                 </td>
                 <td class="data-table__td data-table__td--actions">
                   <button
-                    class="btn btn--danger btn--xs"
+                    class="btn btn--danger btn--sm"
                     type="button"
                     hx-delete={`/capacity-plans/${planId}/members/${m.id}`}
                     hx-confirm={`Remove ${
@@ -509,7 +509,7 @@ const AllocationsConfig: FC<{
                 <td class="data-table__td">{a.notes ?? "—"}</td>
                 <td class="data-table__td data-table__td--actions">
                   <button
-                    class="btn btn--secondary btn--xs"
+                    class="btn btn--secondary btn--sm"
                     type="button"
                     hx-get={`/capacity-plans/${a.planId}/allocations/${a.id}/edit`}
                     hx-target="#capacity-plans-form-container"
@@ -518,7 +518,7 @@ const AllocationsConfig: FC<{
                     Edit
                   </button>
                   <button
-                    class="btn btn--danger btn--xs"
+                    class="btn btn--danger btn--sm"
                     type="button"
                     hx-delete={`/capacity-plans/${a.planId}/allocations/${a.id}`}
                     hx-confirm="Remove this allocation?"
