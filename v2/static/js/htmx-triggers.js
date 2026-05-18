@@ -17,14 +17,17 @@
   });
 
   // Intercept htmx:confirm and show the custom modal instead of browser confirm().
+  // Per-element overrides: data-confirm-title and data-confirm-label.
+  // Defaults stay delete-oriented so existing delete buttons are unaffected.
   document.addEventListener("htmx:confirm", function (e) {
     var msg = e.detail.question;
     if (!msg) return;
     e.preventDefault();
+    var el = e.detail.elt;
     window.confirmAction({
-      title: "Confirm delete",
+      title: el.getAttribute("data-confirm-title") || "Confirm delete",
       message: msg,
-      confirmLabel: "Delete",
+      confirmLabel: el.getAttribute("data-confirm-label") || "Delete",
     }).then(function (ok) {
       if (ok) e.detail.issueRequest(true);
     });

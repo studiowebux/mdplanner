@@ -73,6 +73,8 @@ export const QuoteDetailView: FC<
                 type="button"
                 hx-post={`/quotes/${quote.id}/submit-approval`}
                 hx-confirm="Submit this quote for internal approval?"
+                data-confirm-title="Submit for Approval"
+                data-confirm-label="Submit"
                 hx-swap="none"
               >
                 Submit for Approval
@@ -85,6 +87,8 @@ export const QuoteDetailView: FC<
                   type="button"
                   hx-post={`/quotes/${quote.id}/approve`}
                   hx-confirm="Approve this quote?"
+                  data-confirm-title="Approve Quote"
+                  data-confirm-label="Approve"
                   hx-swap="none"
                 >
                   Approve
@@ -93,7 +97,9 @@ export const QuoteDetailView: FC<
                   class="btn btn--warning btn--sm"
                   type="button"
                   hx-post={`/quotes/${quote.id}/reject-approval`}
-                  hx-confirm="Reject and return to draft?"
+                  hx-confirm="This quote will be returned to draft."
+                  data-confirm-title="Reject Quote"
+                  data-confirm-label="Reject"
                   hx-swap="none"
                 >
                   Reject
@@ -106,6 +112,8 @@ export const QuoteDetailView: FC<
                 type="button"
                 hx-post={`/quotes/${quote.id}/send`}
                 hx-confirm="Send this quote to the customer?"
+                data-confirm-title="Send Quote"
+                data-confirm-label="Send"
                 hx-swap="none"
               >
                 Send
@@ -118,6 +126,8 @@ export const QuoteDetailView: FC<
                   type="button"
                   hx-post={`/quotes/${quote.id}/accept`}
                   hx-confirm="Accept this quote?"
+                  data-confirm-title="Accept Quote"
+                  data-confirm-label="Accept"
                   hx-swap="none"
                 >
                   Accept
@@ -126,7 +136,9 @@ export const QuoteDetailView: FC<
                   class="btn btn--warning btn--sm"
                   type="button"
                   hx-post={`/quotes/${quote.id}/reject`}
-                  hx-confirm="Reject this quote?"
+                  hx-confirm="This quote will be marked as rejected."
+                  data-confirm-title="Reject Quote"
+                  data-confirm-label="Reject"
                   hx-swap="none"
                 >
                   Reject
