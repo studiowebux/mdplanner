@@ -74,6 +74,7 @@ import { MEETING_FORM_FIELDS } from "../domains/meeting/constants.tsx";
 import { PORTFOLIO_FORM_FIELDS } from "../domains/portfolio/config.tsx";
 import { QUOTE_FORM_FIELDS } from "../domains/quote/constants.tsx";
 import { PEOPLE_FORM_FIELDS } from "../domains/people/config.tsx";
+import { SETTINGS_FORM_FIELDS } from "./settings/tabs/shortcuts-tab.tsx";
 import type { FieldDef } from "../components/ui/form-builder.tsx";
 import {
   getBillingRateService,
@@ -443,6 +444,7 @@ for (
     PORTFOLIO_FORM_FIELDS,
     PEOPLE_FORM_FIELDS,
     ONBOARDING_TEMPLATE_FORM_FIELDS,
+    SETTINGS_FORM_FIELDS,
   ]
 ) {
   for (const field of fields) {

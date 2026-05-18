@@ -25,6 +25,8 @@ import {
 } from "../../constants/mod.ts";
 import type { AppVariables } from "../../types/app.ts";
 import type { ProjectLink } from "../../types/project.types.ts";
+import { parseFormBody } from "../../utils/form-parser.ts";
+import { SETTINGS_FORM_FIELDS } from "./tabs/shortcuts-tab.tsx";
 
 export const settingsViewRouter = new Hono<{ Variables: AppVariables }>();
 
@@ -434,25 +436,23 @@ settingsViewRouter.post("/preferences/pinned-nav", async (c) => {
   return c.body(null, 204);
 });
 
-// -- Preferences: filter defaults (domain.key=value per line) --
+// -- Preferences: filter defaults (array-table of domain/filterKey/value rows) --
 settingsViewRouter.post("/preferences/filter-defaults", async (c) => {
   const body = await c.req.parseBody();
   const actor = c.get("actor");
   if (!actor?.id) return c.body(null, 204);
   const filterDefaults: Record<string, Record<string, string>> = {};
   if (!body._reset) {
-    const text = String(body.filterText ?? "");
-    for (const line of text.split("\n")) {
-      const trimmed = line.trim();
-      if (!trimmed) continue;
-      const eqIdx = trimmed.indexOf("=");
-      if (eqIdx < 1) continue;
-      const dotKey = trimmed.slice(0, eqIdx).trim();
-      const val = trimmed.slice(eqIdx + 1).trim();
-      const dotIdx = dotKey.indexOf(".");
-      if (dotIdx < 1 || !val) continue;
-      const domain = dotKey.slice(0, dotIdx);
-      const key = dotKey.slice(dotIdx + 1);
+    const parsed = parseFormBody(
+      SETTINGS_FORM_FIELDS,
+      body as Record<string, string | File>,
+    );
+    const entries = (parsed.entries as Record<string, unknown>[]) ?? [];
+    for (const entry of entries) {
+      const domain = String(entry.domain ?? "").trim();
+      const key = String(entry.filterKey ?? "").trim();
+      const val = String(entry.value ?? "").trim();
+      if (!domain || !key || !val) continue;
       if (!filterDefaults[domain]) filterDefaults[domain] = {};
       filterDefaults[domain][key] = val;
     }

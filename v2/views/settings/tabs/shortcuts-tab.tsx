@@ -1,6 +1,33 @@
 import type { FC } from "hono/jsx";
 import type { NavLink } from "../../../constants/mod.ts";
 import type { PersonPreferences } from "../../../types/person.types.ts";
+import { ArrayTable } from "../../../components/ui/form-builder.tsx";
+import type { FieldDef } from "../../../components/ui/form-builder.tsx";
+
+// Filter-defaults array-table field — one row per `domain.filterKey=value`
+// entry. `section` keys the input names and the /forms/array-row endpoint.
+export const FILTER_DEFAULTS_FIELD: Extract<
+  FieldDef,
+  { type: "array-table" }
+> = {
+  type: "array-table",
+  name: "entries",
+  label: "Filter default",
+  section: "filterDefaults",
+  itemFields: [
+    { type: "text", name: "domain", label: "Domain", placeholder: "tasks" },
+    {
+      type: "text",
+      name: "filterKey",
+      label: "Filter key",
+      placeholder: "section",
+    },
+    { type: "text", name: "value", label: "Value", placeholder: "In Progress" },
+  ],
+};
+
+// Registered with the array-table row endpoint in views/mod.tsx.
+export const SETTINGS_FORM_FIELDS: FieldDef[] = [FILTER_DEFAULTS_FIELD];
 
 const SHORTCUT_GROUPS = [
   {
@@ -32,19 +59,19 @@ type Props = {
   preferences?: PersonPreferences;
 };
 
-// Serialize filterDefaults → one "domain.key=value" per line.
-function filterDefaultsToText(
+// Flatten filterDefaults → one { domain, filterKey, value } row per entry.
+function filterDefaultsToRows(
   fd: Record<string, Record<string, string>> | undefined,
-): string {
-  if (!fd) return "";
-  const lines: string[] = [];
+): Record<string, unknown>[] {
+  if (!fd) return [];
+  const rows: Record<string, unknown>[] = [];
   for (const domain of Object.keys(fd)) {
-    for (const key of Object.keys(fd[domain] ?? {})) {
-      const val = fd[domain][key];
-      if (val) lines.push(`${domain}.${key}=${val}`);
+    for (const filterKey of Object.keys(fd[domain] ?? {})) {
+      const value = fd[domain][filterKey];
+      if (value) rows.push({ domain, filterKey, value });
     }
   }
-  return lines.join("\n");
+  return rows;
 }
 
 export const ShortcutsTab: FC<Props> = (
@@ -52,7 +79,7 @@ export const ShortcutsTab: FC<Props> = (
 ) => {
   const viewPrefs = preferences.viewPrefs ?? {};
   const pinnedNav = new Set(preferences.pinnedNav ?? []);
-  const filterText = filterDefaultsToText(preferences.filterDefaults);
+  const filterRows = filterDefaultsToRows(preferences.filterDefaults);
 
   return (
     <div class="settings-tabs__panel settings-tabs__panel--shortcuts">
@@ -165,24 +192,23 @@ export const ShortcutsTab: FC<Props> = (
         <h2 class="shortcuts-group__title">Filter defaults</h2>
         <p class="shortcuts-group__desc">
           Pre-apply filters when visiting a domain with no active filters. One
-          entry per line: <code>domain.filterKey=value</code> — e.g.{" "}
-          <code>tasks.section=In Progress</code>.
+          row per filter: <code>domain</code> + <code>filter key</code> +{" "}
+          <code>value</code> — e.g. <code>tasks</code> / <code>section</code> /
+          {" "}
+          <code>In Progress</code>.
         </p>
         <form
           hx-post="/settings/preferences/filter-defaults"
           hx-swap="none"
           hx-target="this"
         >
-          <textarea
-            name="filterText"
-            class="shortcuts-input filter-defaults-textarea"
-            rows={6}
-            placeholder="tasks.section=In Progress&#10;goals.status=active"
-            autocomplete="off"
-            spellcheck={false}
-          >
-            {filterText}
-          </textarea>
+          <ArrayTable
+            section={FILTER_DEFAULTS_FIELD.section}
+            itemFields={FILTER_DEFAULTS_FIELD.itemFields}
+            rows={filterRows}
+            rowsId="filter-defaults-rows"
+            addLabel="Add filter default"
+          />
           <div class="settings-page__form-actions shortcuts-form-actions">
             <button type="submit" class="btn btn--primary">
               Save filter defaults

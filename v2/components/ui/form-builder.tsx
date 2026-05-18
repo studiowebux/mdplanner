@@ -219,8 +219,43 @@ const ArrayTableRow: FC<
   </div>
 );
 
-/** Exported for use by the array-row server endpoint (task 2). */
-export { ArrayTableRow, ArrayTableRowField };
+/** Editable rows + Add button for a structured object array. */
+const ArrayTable: FC<
+  {
+    section: string;
+    itemFields: ArrayTableItemField[];
+    rows: Record<string, unknown>[];
+    rowsId: string;
+    addLabel: string;
+  }
+> = ({ section, itemFields, rows, rowsId, addLabel }) => (
+  <div class="array-table" data-array-table={section}>
+    <div class="array-table__rows" id={rowsId}>
+      {rows.map((rowData, idx) => (
+        <ArrayTableRow
+          key={idx}
+          section={section}
+          idx={idx}
+          itemFields={itemFields}
+          rowData={rowData}
+        />
+      ))}
+    </div>
+    <button
+      type="button"
+      class="btn btn--secondary btn--sm array-table__add"
+      hx-get={`/forms/array-row/${section}`}
+      hx-target={`#${rowsId}`}
+      hx-swap="beforeend"
+    >
+      {addLabel}
+    </button>
+  </div>
+);
+
+/** ArrayTable + ArrayTableRow exported for the array-row server endpoint
+    and for callers (e.g. settings) that render the table outside FormBuilder. */
+export { ArrayTable, ArrayTableRow, ArrayTableRowField };
 
 const Field: FC<
   { formId: string; def: FieldDef; value?: string; displayValue?: string }
@@ -378,35 +413,15 @@ const Field: FC<
           </div>
         );
       })()}
-      {def.type === "array-table" && (() => {
-        const items: Record<string, unknown>[] =
-          parseJson<Record<string, unknown>[]>(value) ?? [];
-        const rowsId = `${id}-rows`;
-        return (
-          <div class="array-table" data-array-table={def.section}>
-            <div class="array-table__rows" id={rowsId}>
-              {items.map((rowData, idx) => (
-                <ArrayTableRow
-                  key={idx}
-                  section={def.section}
-                  idx={idx}
-                  itemFields={def.itemFields}
-                  rowData={rowData}
-                />
-              ))}
-            </div>
-            <button
-              type="button"
-              class="btn btn--secondary btn--sm array-table__add"
-              hx-get={`/forms/array-row/${def.section}`}
-              hx-target={`#${rowsId}`}
-              hx-swap="beforeend"
-            >
-              {def.addLabel ?? `Add ${def.label}`}
-            </button>
-          </div>
-        );
-      })()}
+      {def.type === "array-table" && (
+        <ArrayTable
+          section={def.section}
+          itemFields={def.itemFields}
+          rows={parseJson<Record<string, unknown>[]>(value) ?? []}
+          rowsId={`${id}-rows`}
+          addLabel={def.addLabel ?? `Add ${def.label}`}
+        />
+      )}
     </div>
   );
 };
