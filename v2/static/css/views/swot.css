@@ -52,7 +52,7 @@
 }
 
 .swot-detail__section {
-  margin-top: var(--space-lg);
+  margin-top: var(--section-gap);
 }
 
 /* -- Edit mode ------------------------------------------------------------ */

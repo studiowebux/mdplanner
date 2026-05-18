@@ -86,7 +86,7 @@
 }
 
 .moscow-detail__section {
-  margin-top: var(--space-lg);
+  margin-top: var(--section-gap);
 }
 
 .moscow-detail__meta {

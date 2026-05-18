@@ -369,7 +369,7 @@ a.badge:hover {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: var(--section-gap);
 }
 
 .detail-section {

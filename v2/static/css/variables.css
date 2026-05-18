@@ -49,6 +49,8 @@
   --space-lg: 1.5rem;
   --space-xl: 2rem;
   --space-xxl: 3rem;
+  /* canonical gap between detail-page sections */
+  --section-gap: var(--space-md);
 
   /* Letter spacing */
   --letter-spacing-tight: 0.01em;
@@ -441,7 +443,7 @@
   --settings-input-narrow-max: var(--toolbar-search-min-width);
   --settings-textarea-min-height: var(--autocomplete-max-height);
   --settings-tab-indicator: var(--sidebar-active-border-width);
-  --settings-data-section-gap: var(--space-lg);
+  --settings-data-section-gap: var(--section-gap);
   --settings-data-title-gap: var(--space-xs);
   --settings-data-desc-gap: var(--space-md);
   --settings-data-form-gap: var(--space-sm);
@@ -471,7 +473,7 @@
   --meeting-carryover-source-gap: var(--space-xs);
 
   /* Capacity plan detail */
-  --cp-detail-gap: var(--space-xl);
+  --cp-detail-gap: var(--section-gap);
   --cp-section-inner-gap: var(--space-md);
   --cp-section-header-gap: var(--space-sm);
   --cp-bw-list-gap: var(--space-md);
