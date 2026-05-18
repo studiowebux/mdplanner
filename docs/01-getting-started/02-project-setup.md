@@ -113,6 +113,7 @@ features:
   - finance
   - payment
   - time_entry
+  - vacation
   - journal
   - habit
   - dns_domain
@@ -147,6 +148,6 @@ Feature keys: `task`, `note`, `goal`, `milestone`, `idea`, `brainstorm`,
 `business_model`, `project_value`, `brief`, `capacity_plan`, `strategic_builder`,
 `customer`, `rate`, `quote`, `invoice`, `company`, `contact`, `deal`, `portfolio`,
 `person`, `meeting`, `moscow`, `eisenhower`, `safe_agreement`, `investor`,
-`onboarding`, `onboarding_template`, `finance`, `payment`, `time_entry`, `journal`,
-`habit`, `dns_domain`, `fishbone`, `marketing_plan`, `analytics`,
-`github`, `upload`, `dashboard`, `me`.
+`onboarding`, `onboarding_template`, `finance`, `payment`, `time_entry`,
+`vacation`, `journal`, `habit`, `dns_domain`, `fishbone`, `marketing_plan`,
+`analytics`, `github`, `upload`, `dashboard`, `me`.
