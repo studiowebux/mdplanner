@@ -74,8 +74,8 @@ html.focus-mode .topbar {
   display: none;
 }
 
-.focus-mode-exit,
-.fullscreen-reading-exit {
+.btn.focus-mode-exit,
+.btn.fullscreen-reading-exit {
   display: none;
 }
 
