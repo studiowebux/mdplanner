@@ -147,9 +147,15 @@ export const MeDashboard: FC<MeDashboardProps> = ({
                     </a>
                   )
                   : (
-                    <a href="/journal/new" class="btn btn--secondary btn--sm">
+                    <button
+                      type="button"
+                      class="btn btn--secondary btn--sm"
+                      hx-get="/journal/new"
+                      hx-target="#journal-form-container"
+                      hx-swap="innerHTML"
+                    >
                       Write today's entry
-                    </a>
+                    </button>
                   )}
               </section>
 
@@ -202,6 +208,7 @@ export const MeDashboard: FC<MeDashboardProps> = ({
             </div>
           )}
       </main>
+      <div id="journal-form-container" />
     </MainLayout>
   );
 };
