@@ -18,11 +18,11 @@
    --------------------------------------------------------------------------- */
 
 .settings-tabs {
-  display: grid;
-  /* 12 label columns (auto-sized to content) + 1fr filler to absorb extra space.
-     Update the repeat count when tabs are added or removed. */
-  grid-template-columns: repeat(12, auto) 1fr;
-  grid-template-rows: auto 1fr;
+  /* Wrapping flex strip — tab count is irrelevant, labels wrap before they
+     can overflow the viewport. The visible panel (width: 100%) wraps onto
+     its own row below the labels. */
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .settings-tabs__radio {
@@ -32,7 +32,6 @@
 }
 
 .settings-tabs__label {
-  grid-row: 1;
   padding: var(--space-sm) var(--space-lg);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
@@ -59,8 +58,7 @@
 
 .settings-tabs__panel {
   display: none;
-  grid-row: 2;
-  grid-column: 1 / -1;
+  width: 100%;
   padding-top: var(--space-lg);
 }
 
@@ -567,11 +565,6 @@ html.sidebar-collapsed .settings-page__form-actions {
 
 @media (max-width: 768px) {
   /* --bp-mobile: see shell.css CANONICAL BREAKPOINTS */
-  /* Tab bar — horizontal scroll on mobile (9 tabs won't fit) */
-  .settings-tabs {
-    overflow-x: auto;
-  }
-
   /* Two-column form rows — stack to single column */
   .settings-field--row {
     grid-template-columns: 1fr;
