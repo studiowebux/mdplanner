@@ -77,7 +77,7 @@ export class ReflectionTemplateRepository extends CachedMarkdownRepository<
   /** Parse `## Prompts` section — extract bullet list items. */
   private parsePrompts(body: string): string[] {
     const sectionMatch = body.match(
-      /^##\s+Prompts\s*$([\s\S]*?)(?:^##\s|$)/m,
+      /^##\s+Prompts\s*$([\s\S]*?)(?:^##\s|(?![\s\S]))/m,
     );
     if (!sectionMatch) return [];
     return sectionMatch[1]

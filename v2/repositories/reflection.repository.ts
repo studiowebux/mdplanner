@@ -76,21 +76,17 @@ export class ReflectionRepository extends CachedMarkdownRepository<
       title: title || "Untitled Reflection",
       period: (fm.period as Reflection["period"]) ?? "weekly",
       date: fm.date ? String(fm.date) : new Date().toISOString().slice(0, 10),
-      templateId: fm.template_id != null ? String(fm.template_id) : undefined,
+      templateId: fm.templateId != null ? String(fm.templateId) : undefined,
       content,
       tags: Array.isArray(fm.tags)
         ? fm.tags.map(String)
         : fm.tags != null
         ? [String(fm.tags)]
         : [],
-      createdAt: fm.created_at
-        ? String(fm.created_at)
-        : new Date().toISOString(),
-      updatedAt: fm.updated_at
-        ? String(fm.updated_at)
-        : new Date().toISOString(),
-      createdBy: fm.created_by != null ? String(fm.created_by) : undefined,
-      updatedBy: fm.updated_by != null ? String(fm.updated_by) : undefined,
+      createdAt: fm.createdAt ? String(fm.createdAt) : new Date().toISOString(),
+      updatedAt: fm.updatedAt ? String(fm.updatedAt) : new Date().toISOString(),
+      createdBy: fm.createdBy != null ? String(fm.createdBy) : undefined,
+      updatedBy: fm.updatedBy != null ? String(fm.updatedBy) : undefined,
     };
   }
 
