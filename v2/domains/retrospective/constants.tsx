@@ -68,6 +68,10 @@ export const RETROSPECTIVE_TABLE_COLUMNS: ColumnDef[] = [
 // Form fields
 // ---------------------------------------------------------------------------
 
+// Continue / Stop / Start are edited inline on the detail page (SWOT-style
+// quadrant editing) — not via this sidenav form. parseFormBody saves a
+// textarea as a raw string, which the repository serializer would corrupt
+// into single-character bullets, so they must not appear here.
 export const RETROSPECTIVE_FORM_FIELDS: FieldDef[] = [
   {
     type: "text",
@@ -91,28 +95,11 @@ export const RETROSPECTIVE_FORM_FIELDS: FieldDef[] = [
     ],
   },
   {
-    type: "textarea",
-    name: "continue",
-    label: "Continue (Went Well)",
-    rows: 4,
-  },
-  {
-    type: "textarea",
-    name: "stop",
-    label: "Stop (Needs Improvement)",
-    rows: 4,
-  },
-  {
-    type: "textarea",
-    name: "start",
-    label: "Start (Actions)",
-    rows: 4,
-  },
-  {
-    type: "textarea",
+    type: "tags",
     name: "participants",
-    label: "Participants (one per line)",
-    rows: 3,
+    label: "Participants",
+    source: "people",
+    placeholder: "Search people...",
   },
 ];
 

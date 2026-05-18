@@ -59,11 +59,17 @@ export class RetrospectiveRepository extends CachedMarkdownRepository<
     fm: Record<string, unknown>,
     body: string,
   ): Retrospective | null {
-    if (!fm.id && !fm.title) return null;
-    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
-
     const bodyText = body.trim();
     const headingMatch = bodyText.match(/^#\s+(.+)$/m);
+
+    // id and title live in RETROSPECTIVE_BODY_KEYS — serialize() writes the id
+    // via the filename and the title as the body `# heading`, never to
+    // frontmatter. A re-read of a freshly written file therefore has neither
+    // in fm; identify it by the body heading instead. Guarding on fm alone
+    // made every retrospective unreadable after its first update.
+    if (!fm.id && !fm.title && !headingMatch) return null;
+
+    const id = fm.id ? String(fm.id) : filename.replace(/\.md$/, "");
     const title = fm.title
       ? String(fm.title)
       : headingMatch

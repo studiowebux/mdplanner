@@ -8,46 +8,41 @@ import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
-
-// ---------------------------------------------------------------------------
-// Section renderer
-// ---------------------------------------------------------------------------
-
-const SectionBlock: FC<{ label: string; items: string[] }> = (
-  { label, items },
-) => (
-  <div class="retro-detail__section">
-    <h3 class="retro-detail__section-title">{label}</h3>
-    {items.length === 0
-      ? <p class="retro-detail__empty">Nothing added yet.</p>
-      : (
-        <ul class="retro-detail__list">
-          {items.map((item, i) => <li key={i}>{item}</li>)}
-        </ul>
-      )}
-  </div>
-);
+import { QuadrantEditGrid } from "./components/quadrant-edit-grid.tsx";
 
 // ---------------------------------------------------------------------------
 // Main view
 // ---------------------------------------------------------------------------
 
 export const RetrospectiveDetailView: FC<
-  ViewProps & { item: Retrospective }
-> = ({ item: retro, ...viewProps }) => {
+  ViewProps & {
+    item: Retrospective;
+    editing?: boolean;
+    /** Name → person ID lookup for linking participants to People. */
+    personByName?: Record<string, string>;
+  }
+> = (
+  { item: retro, editing = false, personByName = {}, ...viewProps },
+) => {
   return (
     <MainLayout
       title={retro.title}
       {...viewProps}
       styles={["/css/views/retrospectives.css"]}
-      scripts={["/js/fullscreen-reading.js"]}
+      scripts={["/js/quadrant-edit.js", "/js/fullscreen-reading.js"]}
     >
       <SseRefresh
-        getUrl={"/retrospectives/" + retro.id}
+        getUrl={"/retrospectives/" + retro.id +
+          (editing ? "?editing=true" : "")}
         trigger="sse:retrospective.updated"
         targetId="retro-detail-root"
       />
-      <main id="retro-detail-root" class="detail-view retro-detail">
+      <main
+        id="retro-detail-root"
+        class={`detail-view retro-detail${
+          editing ? " retro-detail--editing" : ""
+        }`}
+      >
         <BackButton href="/retrospectives" label="Back to Retrospectives" />
 
         {/* -- Header ---------------------------------------------------- */}
@@ -75,6 +70,23 @@ export const RetrospectiveDetailView: FC<
             >
               Focus
             </button>
+            {editing
+              ? (
+                <a
+                  class="btn btn--secondary btn--sm"
+                  href={`/retrospectives/${retro.id}`}
+                >
+                  Done Editing
+                </a>
+              )
+              : (
+                <a
+                  class="btn btn--secondary btn--sm"
+                  href={`/retrospectives/${retro.id}?editing=true`}
+                >
+                  Edit Items
+                </a>
+              )}
           </DetailActions>
         </header>
 
@@ -91,22 +103,33 @@ export const RetrospectiveDetailView: FC<
             <h3 class="retro-detail__participants-label">Participants</h3>
             <ul class="retro-detail__participants-list">
               {retro.participants.map((p, i) => (
-                <li key={i} class="badge">{p}</li>
+                <li key={i}>
+                  {personByName[p]
+                    ? (
+                      <a href={`/people/${personByName[p]}`} class="badge">
+                        {p}
+                      </a>
+                    )
+                    : <span class="badge">{p}</span>}
+                </li>
               ))}
             </ul>
           </div>
         )}
 
         {/* -- Sections -------------------------------------------------- */}
-        <div class="retro-detail__grid">
-          {RETROSPECTIVE_SECTIONS.map((s) => (
-            <SectionBlock
-              key={s.key}
-              label={s.label}
-              items={retro[s.key as keyof Retrospective] as string[]}
-            />
-          ))}
-        </div>
+        <QuadrantEditGrid
+          basePath="/retrospectives"
+          id={retro.id}
+          rootId="retro-detail-root"
+          editing={editing}
+          threeCol
+          sections={RETROSPECTIVE_SECTIONS.map((s) => ({
+            key: s.key,
+            label: s.label,
+            items: retro[s.key] as string[],
+          }))}
+        />
 
         {/* -- Meta ------------------------------------------------------- */}
         <AuditMeta
