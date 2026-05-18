@@ -1337,6 +1337,42 @@ a.badge:hover {
 }
 
 /* -------------------------------------------------------------------------
+   Collapsible filter panel
+   ------------------------------------------------------------------------- */
+
+.domain-toolbar__filters {
+  flex-basis: 100%;
+}
+
+.domain-toolbar__filters-summary {
+  gap: var(--space-xs);
+  width: max-content;
+  list-style: none;
+}
+
+.domain-toolbar__filters-summary::-webkit-details-marker {
+  display: none;
+}
+
+.domain-toolbar__filters-summary::after {
+  content: "▾";
+  font-size: var(--font-size-xs);
+  transition: transform var(--transition-fast);
+}
+
+.domain-toolbar__filters[open] .domain-toolbar__filters-summary::after {
+  transform: rotate(180deg);
+}
+
+.domain-toolbar__filters-panel {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+/* -------------------------------------------------------------------------
    Column toggle
    ------------------------------------------------------------------------- */
 

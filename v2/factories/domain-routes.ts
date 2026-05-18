@@ -38,14 +38,24 @@ export function createDomainRoutes<T extends Entity, C, U>(
     inlineEditFields: cfg.inlineEditFields,
   });
 
+  // Collapsible-filters UI preference — persisted per domain alongside the
+  // filter state. Injected here so every domain gets it without editing 40
+  // domain configs' stateKeys arrays.
+  const stateKeys = cfg.stateKeys.includes("filtersCollapsed")
+    ? cfg.stateKeys
+    : [...cfg.stateKeys, "filtersCollapsed"];
+
   // ---------------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------------
 
   function buildCanonicalUrl(state: DomainFilterState): string {
     const params = new URLSearchParams();
-    for (const key of cfg.stateKeys) {
-      if (key === "view") {
+    for (const key of stateKeys) {
+      if (key === "filtersCollapsed") {
+        // UI preference — persisted in the cookie, never in the URL.
+        continue;
+      } else if (key === "view") {
         if (state.view && state.view !== (cfg.defaultView || "grid")) {
           params.set("view", state.view);
         }
@@ -72,8 +82,9 @@ export function createDomainRoutes<T extends Entity, C, U>(
       sort: merged.sort || undefined,
       order: (merged.order || "asc") as "asc" | "desc",
     };
-    // Copy domain-specific filter keys (status, project, etc.)
-    for (const key of cfg.stateKeys) {
+    // Copy domain-specific filter keys (status, project, etc.) plus the
+    // injected filtersCollapsed UI preference.
+    for (const key of stateKeys) {
       if (
         key !== "view" && key !== "q" && key !== "hideCompleted" &&
         key !== "sort" && key !== "order"
@@ -238,7 +249,7 @@ export function createDomainRoutes<T extends Entity, C, U>(
     const isHtmx = c.req.header("HX-Request") === "true";
     const saved = readUiState<DomainFilterState>(c, cfg.name);
     const params: Record<string, string | undefined> = {};
-    for (const key of cfg.stateKeys) {
+    for (const key of stateKeys) {
       params[key] = c.req.query(key);
     }
     if (isHtmx && params.hideCompleted === undefined) {
@@ -355,6 +366,12 @@ export function createDomainRoutes<T extends Entity, C, U>(
       { "HX-Replace-Url": buildCanonicalUrl(state) },
     );
   });
+
+  // Persist the collapsible-filters UI preference. The `*` middleware reads
+  // `?filtersCollapsed=` into the filter state and writeUiState persists it to
+  // the ui_state cookie; this handler just acknowledges with 204. Used by
+  // filter-collapse.js on the <details> toggle event.
+  router.get("/filters-collapsed", (c) => c.body(null, 204));
 
   // ---------------------------------------------------------------------------
   // Pagination — load next page of items (table rows or grid cards)

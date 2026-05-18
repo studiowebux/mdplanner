@@ -196,6 +196,63 @@ export function createMoreFragment<T extends Entity>(cfg: {
 }
 
 // ---------------------------------------------------------------------------
+// Collapsible filter helpers
+// ---------------------------------------------------------------------------
+
+/** True when the domain has at least one filter control worth collapsing. */
+function hasFilterControls<T extends Entity>(
+  cfg: DomainConfig<T, unknown, unknown>,
+): boolean {
+  return (cfg.filters?.length ?? 0) > 0 || !!cfg.dateRangeFilter ||
+    !!cfg.hideCompleted || !!cfg.showHiddenToggle;
+}
+
+/** Count the filter controls that currently hold a non-default value. */
+function countActiveFilters<T extends Entity>(
+  cfg: DomainConfig<T, unknown, unknown>,
+  state: DomainFilterState,
+): number {
+  let count = 0;
+  for (const f of cfg.filters ?? []) {
+    const val = state[f.name];
+    if (typeof val === "string" && val !== "") count++;
+  }
+  if (cfg.dateRangeFilter) {
+    const fromKey = cfg.dateRangeFilter.fromKey ?? "date_from";
+    const toKey = cfg.dateRangeFilter.toKey ?? "date_to";
+    if (state[fromKey]) count++;
+    if (state[toKey]) count++;
+  }
+  if (cfg.hideCompleted && state.hideCompleted) count++;
+  if (
+    cfg.showHiddenToggle &&
+    (state.showHidden === true || state.showHidden === "true")
+  ) {
+    count++;
+  }
+  return count;
+}
+
+/**
+ * Active-filter count badge shown in the "Filters" summary. Rendered once in
+ * the toolbar and re-pushed as an OOB swap from the view fragment so it stays
+ * fresh after a filter change.
+ */
+function FilterCountBadge(
+  { domain, count, oob }: { domain: string; count: number; oob?: boolean },
+) {
+  return (
+    <span
+      id={`${domain}-filter-count`}
+      class={`badge badge--accent${count > 0 ? "" : " is-hidden"}`}
+      {...(oob ? { "hx-swap-oob": "true" } : {})}
+    >
+      {count > 0 ? String(count) : ""}
+    </span>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Date range filter inputs
 // ---------------------------------------------------------------------------
 
@@ -436,6 +493,13 @@ export function createDomainViewContainer<T extends Entity>(
           />
         </div>
       )}
+      {fragment && hasFilterControls(cfg) && (
+        <FilterCountBadge
+          domain={cfg.name}
+          count={countActiveFilters(cfg, state)}
+          oob
+        />
+      )}
       <div id={`${cfg.name}-view`} class="view-container">
         <input type="hidden" name="view" value={state.view} />
         {customContent
@@ -532,6 +596,12 @@ export function createDomainPage<T extends Entity>(
     },
   ) => {
     const topSlotContent = cfg.topSlot ? await cfg.topSlot() : null;
+    const showFilters = hasFilterControls(cfg);
+    const activeFilterCount = countActiveFilters(cfg, state);
+    // Open when the user expanded it explicitly, or — absent a saved
+    // preference — when filters are active. Collapsed otherwise.
+    const filtersOpen = state.filtersCollapsed === "false" ||
+      (state.filtersCollapsed === undefined && activeFilterCount > 0);
     return (
       <MainLayout
         title={cfg.singular}
@@ -587,82 +657,6 @@ export function createDomainPage<T extends Entity>(
                 hx-swap="outerHTML"
                 hx-include={`#${cfg.name}-toolbar`}
               />
-              {cfg.filters?.map((f) => {
-                const dynamicOpts = dynamicFilterOptions?.[f.name];
-                const options = dynamicOpts
-                  ? dynamicOpts.map((v) =>
-                    typeof v === "string" ? { value: v, label: v } : v
-                  )
-                  : f.options;
-                return (
-                  <select
-                    key={f.name}
-                    class="filter-bar__select"
-                    name={f.name}
-                    hx-get={`/${cfg.name}/view`}
-                    hx-trigger="change"
-                    hx-target={`#${cfg.name}-view`}
-                    hx-swap="outerHTML"
-                    hx-include={`#${cfg.name}-toolbar`}
-                  >
-                    <option value="">{f.label}</option>
-                    {options.map((o) => (
-                      <option
-                        key={o.value}
-                        value={o.value}
-                        selected={state[f.name] === o.value}
-                      >
-                        {o.label}
-                      </option>
-                    ))}
-                  </select>
-                );
-              })}
-              {cfg.dateRangeFilter && (
-                <DateRangeFilter
-                  domain={cfg.name}
-                  fromKey={cfg.dateRangeFilter.fromKey ?? "date_from"}
-                  toKey={cfg.dateRangeFilter.toKey ?? "date_to"}
-                  fromLabel={cfg.dateRangeFilter.fromLabel ?? "From"}
-                  toLabel={cfg.dateRangeFilter.toLabel ?? "To"}
-                  state={state}
-                />
-              )}
-              {cfg.hideCompleted && (
-                <label class="domain-toolbar__toggle">
-                  <input
-                    type="checkbox"
-                    name="hideCompleted"
-                    value="true"
-                    checked={state.hideCompleted}
-                    hx-get={`/${cfg.name}/view`}
-                    hx-trigger="change"
-                    hx-target={`#${cfg.name}-view`}
-                    hx-swap="outerHTML"
-                    hx-include={`#${cfg.name}-toolbar`}
-                  />
-                  <span class="domain-toolbar__toggle-label">
-                    Hide completed
-                  </span>
-                </label>
-              )}
-              {cfg.showHiddenToggle && (
-                <label class="domain-toolbar__toggle">
-                  <input
-                    type="checkbox"
-                    name="showHidden"
-                    value="true"
-                    checked={state.showHidden === true ||
-                      state.showHidden === "true"}
-                    hx-get={`/${cfg.name}/view`}
-                    hx-trigger="change"
-                    hx-target={`#${cfg.name}-view`}
-                    hx-swap="outerHTML"
-                    hx-include={`#${cfg.name}-toolbar`}
-                  />
-                  <span class="domain-toolbar__toggle-label">Show hidden</span>
-                </label>
-              )}
               {state.sort && (
                 <button
                   type="button"
@@ -714,6 +708,101 @@ export function createDomainPage<T extends Entity>(
                 hideDefault={cfg.hideDefaultViews}
               />
             </div>
+            {showFilters && (
+              <details
+                class="domain-toolbar__filters"
+                data-filter-collapse={cfg.name}
+                open={filtersOpen}
+              >
+                <summary class="domain-toolbar__filters-summary btn btn--secondary btn--sm">
+                  <span>Filters</span>
+                  <FilterCountBadge
+                    domain={cfg.name}
+                    count={activeFilterCount}
+                  />
+                </summary>
+                <div class="domain-toolbar__filters-panel">
+                  {cfg.filters?.map((f) => {
+                    const dynamicOpts = dynamicFilterOptions?.[f.name];
+                    const options = dynamicOpts
+                      ? dynamicOpts.map((v) =>
+                        typeof v === "string" ? { value: v, label: v } : v
+                      )
+                      : f.options;
+                    return (
+                      <select
+                        key={f.name}
+                        class="filter-bar__select"
+                        name={f.name}
+                        hx-get={`/${cfg.name}/view`}
+                        hx-trigger="change"
+                        hx-target={`#${cfg.name}-view`}
+                        hx-swap="outerHTML"
+                        hx-include={`#${cfg.name}-toolbar`}
+                      >
+                        <option value="">{f.label}</option>
+                        {options.map((o) => (
+                          <option
+                            key={o.value}
+                            value={o.value}
+                            selected={state[f.name] === o.value}
+                          >
+                            {o.label}
+                          </option>
+                        ))}
+                      </select>
+                    );
+                  })}
+                  {cfg.dateRangeFilter && (
+                    <DateRangeFilter
+                      domain={cfg.name}
+                      fromKey={cfg.dateRangeFilter.fromKey ?? "date_from"}
+                      toKey={cfg.dateRangeFilter.toKey ?? "date_to"}
+                      fromLabel={cfg.dateRangeFilter.fromLabel ?? "From"}
+                      toLabel={cfg.dateRangeFilter.toLabel ?? "To"}
+                      state={state}
+                    />
+                  )}
+                  {cfg.hideCompleted && (
+                    <label class="domain-toolbar__toggle">
+                      <input
+                        type="checkbox"
+                        name="hideCompleted"
+                        value="true"
+                        checked={state.hideCompleted}
+                        hx-get={`/${cfg.name}/view`}
+                        hx-trigger="change"
+                        hx-target={`#${cfg.name}-view`}
+                        hx-swap="outerHTML"
+                        hx-include={`#${cfg.name}-toolbar`}
+                      />
+                      <span class="domain-toolbar__toggle-label">
+                        Hide completed
+                      </span>
+                    </label>
+                  )}
+                  {cfg.showHiddenToggle && (
+                    <label class="domain-toolbar__toggle">
+                      <input
+                        type="checkbox"
+                        name="showHidden"
+                        value="true"
+                        checked={state.showHidden === true ||
+                          state.showHidden === "true"}
+                        hx-get={`/${cfg.name}/view`}
+                        hx-trigger="change"
+                        hx-target={`#${cfg.name}-view`}
+                        hx-swap="outerHTML"
+                        hx-include={`#${cfg.name}-toolbar`}
+                      />
+                      <span class="domain-toolbar__toggle-label">
+                        Show hidden
+                      </span>
+                    </label>
+                  )}
+                </div>
+              </details>
+            )}
           </div>
 
           {topSlotContent}
