@@ -14,11 +14,12 @@ import {
 import { hxTrigger } from "../utils/hx-trigger.ts";
 import { viewProps } from "../middleware/view-props.ts";
 import type { AppContext, AppVariables, ViewMode } from "../types/app.ts";
-import type {
-  DomainConfig,
-  DomainFilterState,
-  DynamicFilterOptions,
-  Entity,
+import {
+  type DomainConfig,
+  type DomainFilterState,
+  type DynamicFilterOptions,
+  effectiveDateRangeFilter,
+  type Entity,
 } from "./domain.types.ts";
 import {
   createDomainForm,
@@ -38,12 +39,17 @@ export function createDomainRoutes<T extends Entity, C, U>(
     inlineEditFields: cfg.inlineEditFields,
   });
 
-  // Collapsible-filters UI preference — persisted per domain alongside the
-  // filter state. Injected here so every domain gets it without editing 40
-  // domain configs' stateKeys arrays.
-  const stateKeys = cfg.stateKeys.includes("filtersCollapsed")
-    ? cfg.stateKeys
-    : [...cfg.stateKeys, "filtersCollapsed"];
+  // Injected state keys — added here so every domain gets them without editing
+  // 40+ domain configs' stateKeys arrays:
+  //  - filtersCollapsed: collapsible-filters UI preference, persisted per domain.
+  //  - date range from/to keys: the universal date range filter.
+  const dateRange = effectiveDateRangeFilter(cfg);
+  const stateKeys = [
+    ...cfg.stateKeys,
+    ...(cfg.stateKeys.includes("filtersCollapsed") ? [] : ["filtersCollapsed"]),
+    ...(cfg.stateKeys.includes(dateRange.fromKey) ? [] : [dateRange.fromKey]),
+    ...(cfg.stateKeys.includes(dateRange.toKey) ? [] : [dateRange.toKey]),
+  ];
 
   // ---------------------------------------------------------------------------
   // Helpers
@@ -148,24 +154,16 @@ export function createDomainRoutes<T extends Entity, C, U>(
       }
     }
 
-    // Date range filter
-    if (cfg.dateRangeFilter) {
-      const { field, fromKey = "date_from", toKey = "date_to" } =
-        cfg.dateRangeFilter;
+    // Date range filter. Compare only the YYYY-MM-DD portion so a full ISO
+    // timestamp field (e.g. createdAt) bounds inclusively against a date input.
+    {
+      const { field, fromKey, toKey } = dateRange;
       const from = state[fromKey] as string | undefined;
       const to = state[toKey] as string | undefined;
-      if (from) {
-        result = result.filter(
-          (item) =>
-            String((item as Record<string, unknown>)[field] ?? "") >= from,
-        );
-      }
-      if (to) {
-        result = result.filter(
-          (item) =>
-            String((item as Record<string, unknown>)[field] ?? "") <= to,
-        );
-      }
+      const dateOf = (item: T) =>
+        String((item as Record<string, unknown>)[field] ?? "").slice(0, 10);
+      if (from) result = result.filter((item) => dateOf(item) >= from);
+      if (to) result = result.filter((item) => dateOf(item) <= to);
     }
 
     // Text search

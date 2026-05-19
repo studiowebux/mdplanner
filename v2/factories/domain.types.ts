@@ -156,11 +156,12 @@ export type DomainConfig<T extends Entity, C, U> = {
   // Optional: extra buttons rendered in the toolbar right area (before view toggles).
   toolbarActions?: FC;
 
-  // Optional: date range filter. When set, renders two date inputs (from/to) in the
-  // toolbar and applies server-side filtering against the specified entity field.
-  // field: entity property holding an ISO YYYY-MM-DD string.
+  // Optional: date range filter override. The factory renders a date range
+  // filter on EVERY domain by default (see DEFAULT_DATE_RANGE_FILTER); set this
+  // only to filter on a different entity field or use different query keys.
+  // field: entity property holding an ISO date or timestamp string.
   // fromKey/toKey: query param + stateKey names (default: "date_from" / "date_to").
-  // The domain's stateKeys array must include these keys.
+  // The factory injects fromKey/toKey into stateKeys automatically.
   dateRangeFilter?: {
     field: string;
     fromKey?: string;
@@ -177,3 +178,39 @@ export type DomainConfig<T extends Entity, C, U> = {
   // Pair with customFilter to let users temporarily reveal hidden items.
   showHiddenToggle?: boolean;
 };
+
+// Default date range filter applied to every factory-driven domain. Filters on
+// the `createdAt` audit field present on every persisted entity. Domains may
+// override via DomainConfig.dateRangeFilter (e.g. meeting filters on `date`).
+export const DEFAULT_DATE_RANGE_FILTER = {
+  field: "createdAt",
+  fromKey: "date_from",
+  toKey: "date_to",
+  fromLabel: "Created after",
+  toLabel: "Created before",
+} as const;
+
+// Fully-resolved date range filter — the per-domain override or the default,
+// with fromKey/toKey/labels filled in. Used by the route + view factories.
+export type ResolvedDateRangeFilter = {
+  field: string;
+  fromKey: string;
+  toKey: string;
+  fromLabel: string;
+  toLabel: string;
+};
+
+/** Resolve the effective date range filter for a domain: override or default. */
+export function effectiveDateRangeFilter<T extends Entity>(
+  cfg: DomainConfig<T, unknown, unknown>,
+): ResolvedDateRangeFilter {
+  const d = cfg.dateRangeFilter;
+  if (!d) return { ...DEFAULT_DATE_RANGE_FILTER };
+  return {
+    field: d.field,
+    fromKey: d.fromKey ?? "date_from",
+    toKey: d.toKey ?? "date_to",
+    fromLabel: d.fromLabel ?? "From",
+    toLabel: d.toLabel ?? "To",
+  };
+}

@@ -10,11 +10,12 @@ import { EmptyState } from "../components/ui/empty-state.tsx";
 import { FormBuilder } from "../components/ui/form-builder.tsx";
 import type { FieldDef } from "../components/ui/form-builder.tsx";
 import type { ViewMode, ViewProps } from "../types/app.ts";
-import type {
-  DomainConfig,
-  DomainFilterState,
-  DynamicFilterOptions,
-  Entity,
+import {
+  type DomainConfig,
+  type DomainFilterState,
+  type DynamicFilterOptions,
+  effectiveDateRangeFilter,
+  type Entity,
 } from "./domain.types.ts";
 
 // ---------------------------------------------------------------------------
@@ -199,12 +200,15 @@ export function createMoreFragment<T extends Entity>(cfg: {
 // Collapsible filter helpers
 // ---------------------------------------------------------------------------
 
-/** True when the domain has at least one filter control worth collapsing. */
+/**
+ * Whether to render the collapsible filter panel. Always true — every domain
+ * carries the universal date range filter (see effectiveDateRangeFilter), so
+ * the panel always has at least one control.
+ */
 function hasFilterControls<T extends Entity>(
-  cfg: DomainConfig<T, unknown, unknown>,
+  _cfg: DomainConfig<T, unknown, unknown>,
 ): boolean {
-  return (cfg.filters?.length ?? 0) > 0 || !!cfg.dateRangeFilter ||
-    !!cfg.hideCompleted || !!cfg.showHiddenToggle;
+  return true;
 }
 
 /** Count the filter controls that currently hold a non-default value. */
@@ -217,9 +221,8 @@ function countActiveFilters<T extends Entity>(
     const val = state[f.name];
     if (typeof val === "string" && val !== "") count++;
   }
-  if (cfg.dateRangeFilter) {
-    const fromKey = cfg.dateRangeFilter.fromKey ?? "date_from";
-    const toKey = cfg.dateRangeFilter.toKey ?? "date_to";
+  {
+    const { fromKey, toKey } = effectiveDateRangeFilter(cfg);
     if (state[fromKey]) count++;
     if (state[toKey]) count++;
   }
@@ -755,16 +758,19 @@ export function createDomainPage<T extends Entity>(
                       </select>
                     );
                   })}
-                  {cfg.dateRangeFilter && (
-                    <DateRangeFilter
-                      domain={cfg.name}
-                      fromKey={cfg.dateRangeFilter.fromKey ?? "date_from"}
-                      toKey={cfg.dateRangeFilter.toKey ?? "date_to"}
-                      fromLabel={cfg.dateRangeFilter.fromLabel ?? "From"}
-                      toLabel={cfg.dateRangeFilter.toLabel ?? "To"}
-                      state={state}
-                    />
-                  )}
+                  {(() => {
+                    const dr = effectiveDateRangeFilter(cfg);
+                    return (
+                      <DateRangeFilter
+                        domain={cfg.name}
+                        fromKey={dr.fromKey}
+                        toKey={dr.toKey}
+                        fromLabel={dr.fromLabel}
+                        toLabel={dr.toLabel}
+                        state={state}
+                      />
+                    );
+                  })()}
                   {cfg.hideCompleted && (
                     <label class="domain-toolbar__toggle">
                       <input
