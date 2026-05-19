@@ -3,7 +3,6 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { ViewProps } from "../types/app.ts";
-import { BackButton } from "./components/back-button.tsx";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -170,7 +169,6 @@ export const UploadsView: FC<UploadsViewProps> = (
     >
       <div class="uploads">
         <div class="uploads__header">
-          <BackButton href="/" label="Back" />
           <h1 class="uploads__title">Uploads</h1>
         </div>
 
