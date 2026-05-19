@@ -25,7 +25,6 @@ export const PORTFOLIO_STATUS_VARIANTS: Record<string, BadgeVariant> = {
 
 const actionBtns = createActionBtns("portfolio", "portfolio-form-container", {
   nameField: "name",
-  actionsClass: "portfolio-card__actions",
 });
 
 const progressRenderer = (v: unknown) => {
