@@ -56,8 +56,8 @@ export const OnboardingTemplateDetailView: FC<
 
       {/* -- Description --------------------------------------------------- */}
       {tmpl.description && (
-        <div class="detail-section onboarding-template-detail__description">
-          <p class="onboarding-template-detail__desc-text">
+        <div class="detail-section">
+          <p class="detail-description">
             {tmpl.description}
           </p>
         </div>

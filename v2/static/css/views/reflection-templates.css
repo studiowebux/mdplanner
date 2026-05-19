@@ -19,16 +19,6 @@
   flex-wrap: wrap;
 }
 
-.rtemplate-detail__description {
-  padding: var(--space-sm) 0;
-}
-
-.rtemplate-detail__desc-text {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  line-height: var(--line-height-relaxed);
-}
-
 /* -- Prompts --------------------------------------------------------------- */
 
 .rtemplate-detail__prompt-list {

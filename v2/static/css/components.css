@@ -379,6 +379,13 @@ a.badge:hover {
   padding: var(--card-padding);
 }
 
+/* Shared description text — secondary, relaxed. Used in detail sections. */
+.detail-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
 .detail-title-row {
   display: flex;
   align-items: center;

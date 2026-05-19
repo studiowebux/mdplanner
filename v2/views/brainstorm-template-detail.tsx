@@ -55,8 +55,8 @@ export const BrainstormTemplateDetailView: FC<
 
         {/* -- Description ----------------------------------------------- */}
         {template.description && (
-          <div class="detail-section btemplate-detail__description">
-            <p class="btemplate-detail__desc-text">{template.description}</p>
+          <div class="detail-section">
+            <p class="detail-description">{template.description}</p>
           </div>
         )}
 

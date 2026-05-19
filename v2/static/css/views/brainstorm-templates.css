@@ -19,16 +19,6 @@
   flex-wrap: wrap;
 }
 
-.btemplate-detail__description {
-  padding: var(--space-sm) 0;
-}
-
-.btemplate-detail__desc-text {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  line-height: var(--line-height-relaxed);
-}
-
 /* -- Questions -------------------------------------------------------------- */
 
 .btemplate-detail__question-list {

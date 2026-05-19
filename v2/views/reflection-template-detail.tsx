@@ -59,8 +59,8 @@ export const ReflectionTemplateDetailView: FC<
 
         {/* -- Description ----------------------------------------------- */}
         {template.description && (
-          <div class="detail-section rtemplate-detail__description">
-            <p class="rtemplate-detail__desc-text">{template.description}</p>
+          <div class="detail-section">
+            <p class="detail-description">{template.description}</p>
           </div>
         )}
 
