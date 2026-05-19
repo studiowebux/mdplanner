@@ -507,7 +507,7 @@ html.focus-mode .focus-mode-exit {
   height: var(--avatar-size-sm);
   border-radius: var(--radius-full);
   background: var(--color-accent);
-  color: var(--color-bg);
+  color: var(--color-text-on-accent);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   flex-shrink: 0;
