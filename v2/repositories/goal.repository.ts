@@ -68,7 +68,7 @@ export class GoalRepository extends CachedMarkdownRepository<
       kpiTarget: fm.kpiTarget != null ? Number(fm.kpiTarget) : undefined,
       kpiValue: fm.kpiValue != null ? Number(fm.kpiValue) : undefined,
       startDate: String(fm.start_date ?? ""),
-      endDate: String(fm.endDate ?? ""),
+      endDate: String(fm.end_date ?? ""),
       status: (fm.status as Goal["status"]) ?? "planning",
       githubRepo: fm.githubRepo != null ? String(fm.githubRepo) : undefined,
       githubMilestone: fm.githubMilestone != null

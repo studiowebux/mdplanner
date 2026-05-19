@@ -4,8 +4,8 @@ type: enterprise
 kpi: "Churn below 3%"
 kpi_metric: churn_rate
 kpi_target: 3
-start: 2026-03-01
-end: 2026-09-30
+start_date: 2026-03-01
+end_date: 2026-09-30
 status: success
 ---
 

@@ -28,6 +28,9 @@ export function rowToGoal(row: Record<string, string | number | null>): Goal {
     startDate: (row.start_date as string) ?? "",
     endDate: (row.end_date as string) ?? "",
     status: (row.status as Goal["status"]) ?? "planning",
+    owner: row.owner as string | undefined,
+    priority: row.priority != null ? Number(row.priority) : undefined,
+    progress: row.progress != null ? Number(row.progress) : undefined,
     githubRepo: row.github_repo as string | undefined,
     githubMilestone: row.github_milestone != null
       ? Number(row.github_milestone)
@@ -52,6 +55,9 @@ const GOAL_SCHEMA = `CREATE TABLE IF NOT EXISTS ${GOAL_TABLE} (
   start_date TEXT,
   end_date TEXT,
   status TEXT,
+  owner TEXT,
+  priority INTEGER,
+  progress INTEGER,
   github_repo TEXT,
   github_milestone INTEGER,
   linked_portfolio_items TEXT,
@@ -71,9 +77,10 @@ function insertGoalRow(
   db.execute(
     `INSERT OR REPLACE INTO ${GOAL_TABLE} (id, title, description, type,
        kpi, kpi_metric, kpi_target, start_date, end_date, status,
+       owner, priority, progress,
        github_repo, github_milestone, linked_portfolio_items,
        project, ${auditCols()}, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       val(g.id),
       val(g.title),
@@ -85,6 +92,9 @@ function insertGoalRow(
       val(g.startDate),
       val(g.endDate),
       val(g.status),
+      val(g.owner),
+      val(g.priority),
+      val(g.progress),
       val(g.githubRepo),
       g.githubMilestone ?? null,
       jsonVal(g.linkedPortfolioItems),
@@ -101,6 +111,9 @@ export function registerGoalEntity(repo: GoalRepository): void {
     table: GOAL_TABLE,
     schema: GOAL_SCHEMA,
     migrations: [
+      `ALTER TABLE ${GOAL_TABLE} ADD COLUMN owner TEXT`,
+      `ALTER TABLE ${GOAL_TABLE} ADD COLUMN priority INTEGER`,
+      `ALTER TABLE ${GOAL_TABLE} ADD COLUMN progress INTEGER`,
       `CREATE INDEX IF NOT EXISTS idx_goals_project ON ${GOAL_TABLE} (project)`,
       `CREATE INDEX IF NOT EXISTS idx_goals_status ON ${GOAL_TABLE} (status)`,
     ],
