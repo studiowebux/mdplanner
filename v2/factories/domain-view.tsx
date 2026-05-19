@@ -387,7 +387,9 @@ function ColumnToggle(
       class={`column-toggle${view !== "table" ? " is-hidden" : ""}`}
       data-column-toggle={domain}
     >
-      <summary class="btn btn--secondary btn--sm">Columns</summary>
+      <summary class="btn btn--secondary btn--sm">
+        Columns<span class="column-toggle__count" data-column-count></span>
+      </summary>
       <div class="column-toggle__panel">
         {toggleable.map((col) => (
           <label key={col.key} class="column-toggle__item">

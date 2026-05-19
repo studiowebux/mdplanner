@@ -47,6 +47,28 @@
     }
   }
 
+  // Update the "(N/total)" indicator on the toggle button. Empty when all
+  // toggleable columns are visible.
+  function updateCount(domain) {
+    var toggles = document.querySelectorAll(
+      '[data-column-toggle="' + domain + '"]',
+    );
+    for (var t = 0; t < toggles.length; t++) {
+      var boxes = toggles[t].querySelectorAll("[data-column-key]");
+      var total = boxes.length;
+      var visible = 0;
+      for (var i = 0; i < boxes.length; i++) {
+        if (boxes[i].checked) visible++;
+      }
+      var countEl = toggles[t].querySelector("[data-column-count]");
+      if (countEl) {
+        countEl.textContent = visible === total
+          ? ""
+          : " (" + visible + "/" + total + ")";
+      }
+    }
+  }
+
   // Checkbox change — toggle column visibility instantly.
   document.addEventListener("change", function (e) {
     var box = e.target.closest("[data-column-key]");
@@ -61,6 +83,7 @@
     if (!box.checked && idx < 0) hidden.push(key);
     setHidden(domain, hidden);
     applyCols(domain);
+    updateCount(domain);
   });
 
   // Apply on page load and after htmx swaps (table re-renders).
@@ -73,6 +96,7 @@
       seen[domain] = true;
       syncCheckboxes(domain);
       applyCols(domain);
+      updateCount(domain);
     }
   }
 
