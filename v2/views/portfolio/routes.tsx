@@ -552,11 +552,14 @@ portfolioRouter.get("/:id", async (c) => {
   if (!item) return c.notFound();
 
   const teamIds = new Set((item.team ?? []).map((m) => m.personId));
-  const [allGoals, allPeople, customer] = await Promise.all([
+  const [allGoals, allPeople, customer, clientCustomer] = await Promise.all([
     getGoalService().list(),
     teamIds.size > 0 ? getPeopleService().list() : Promise.resolve([]),
     item.billingCustomerId
       ? getCustomerService().getById(item.billingCustomerId)
+      : Promise.resolve(null),
+    item.client
+      ? getCustomerService().getById(item.client)
       : Promise.resolve(null),
   ]);
   const linkedById = new Set(item.linkedGoals ?? []);
@@ -575,6 +578,7 @@ portfolioRouter.get("/:id", async (c) => {
       goals={goals}
       personById={personById}
       customer={customer ?? null}
+      clientCustomer={clientCustomer ?? null}
     />,
   );
 });

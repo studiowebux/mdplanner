@@ -25,6 +25,7 @@ type Props = ViewProps & {
   goals?: Goal[];
   personById?: Record<string, string>;
   customer?: Customer | null;
+  clientCustomer?: Customer | null;
 };
 
 /** Single status update row — reused by detail page and fragment routes. */
@@ -89,7 +90,14 @@ export const StatusUpdateEditRow: FC<{
 );
 
 export const PortfolioDetailView: FC<Props> = (
-  { item, goals = [], personById = {}, customer = null, ...viewProps },
+  {
+    item,
+    goals = [],
+    personById = {},
+    customer = null,
+    clientCustomer = null,
+    ...viewProps
+  },
 ) => {
   const profit = (item.revenue ?? 0) - (item.expenses ?? 0);
   const pct = item.progress ?? 0;
@@ -139,7 +147,17 @@ export const PortfolioDetailView: FC<Props> = (
           />
           <p class="portfolio-detail__meta">
             {item.category}
-            {item.client && <>{" "}&middot; {item.client}</>}
+            {(clientCustomer || item.client) && (
+              <>
+                {" "}&middot; {clientCustomer
+                  ? (
+                    <a href={`/customers/${clientCustomer.id}`}>
+                      {clientCustomer.name}
+                    </a>
+                  )
+                  : item.client}
+              </>
+            )}
             {item.startDate && <>{" "}&middot; {item.startDate}</>}
             {item.endDate && <>{" "}to {item.endDate}</>}
             {item.license && <>{" "}&middot; {item.license}</>}
