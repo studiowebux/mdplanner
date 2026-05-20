@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { Person } from "../types/person.types.ts";
+import type { Retrospective } from "../types/retrospective.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatDate, timeAgo } from "../utils/time.ts";
 import { BackButton } from "./components/back-button.tsx";
@@ -17,10 +18,11 @@ type Props = ViewProps & {
   person: Person;
   reports: Person[];
   manager: Person | null;
+  retrospectives?: Retrospective[];
 };
 
 export const PersonDetailView: FC<Props> = (
-  { person, reports, manager, ...viewProps },
+  { person, reports, manager, retrospectives = [], ...viewProps },
 ) => {
   const initials = person.name
     .split(/\s+/)
@@ -221,6 +223,29 @@ export const PersonDetailView: FC<Props> = (
                     {r.title && (
                       <span class="person-detail__report-title">
                         &nbsp;&mdash; {r.title}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {retrospectives.length > 0 && (
+            <section class="detail-section person-detail__section">
+              <h2>
+                Retrospectives
+                <span class="person-detail__count">
+                  ({retrospectives.length})
+                </span>
+              </h2>
+              <ul class="person-detail__retros">
+                {retrospectives.map((r) => (
+                  <li key={r.id}>
+                    <a href={`/retrospectives/${r.id}`}>{r.title}</a>
+                    {r.date && (
+                      <span class="person-detail__retro-date">
+                        &nbsp;&mdash; {formatDate(r.date)}
                       </span>
                     )}
                   </li>

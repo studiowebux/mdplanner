@@ -10,6 +10,7 @@ import {
 } from "../../singletons/services.ts";
 import { RetrospectiveDetailView } from "../retrospective-detail.tsx";
 import { RETROSPECTIVE_SECTIONS } from "../../types/retrospective.types.ts";
+import { buildPersonByNameMap } from "../../utils/person-name-match.ts";
 
 export const retrospectivesRouter = createDomainRoutes(retrospectiveConfig);
 
@@ -20,15 +21,12 @@ registerSectionEditRoutes(retrospectivesRouter, {
   getService: getRetrospectiveService,
   DetailView: RetrospectiveDetailView,
   // Build a name → person ID lookup so the detail view can link participants
-  // to their People page — same pattern as goal contributors (goals/routes.tsx).
+  // to their People page. Tolerant matching (exact → ci → first-word) handles
+  // common drift between full-name participants and short-name Person records.
   resolveViewProps: async (retro) => {
     if (retro.participants.length === 0) return { personByName: {} };
-    const names = new Set(retro.participants);
     const people = await getPeopleService().list();
-    const personByName: Record<string, string> = {};
-    for (const p of people) {
-      if (names.has(p.name)) personByName[p.name] = p.id;
-    }
+    const personByName = buildPersonByNameMap(retro.participants, people);
     return { personByName };
   },
 });

@@ -123,7 +123,8 @@
   color: var(--color-text-secondary);
 }
 
-.person-detail__reports {
+.person-detail__reports,
+.person-detail__retros {
   list-style: none;
   padding: 0;
   display: flex;
@@ -131,23 +132,27 @@
   gap: var(--space-xs);
 }
 
-.person-detail__reports li {
+.person-detail__reports li,
+.person-detail__retros li {
   padding: var(--space-sm) var(--space-md);
   background: var(--color-bg-secondary);
   border-radius: var(--radius-md);
 }
 
-.person-detail__reports a {
+.person-detail__reports a,
+.person-detail__retros a {
   color: var(--color-accent);
   text-decoration: none;
   font-weight: var(--font-weight-medium);
 }
 
-.person-detail__reports a:hover {
+.person-detail__reports a:hover,
+.person-detail__retros a:hover {
   text-decoration: underline;
 }
 
-.person-detail__report-title {
+.person-detail__report-title,
+.person-detail__retro-date {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
