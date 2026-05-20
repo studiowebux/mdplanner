@@ -57,6 +57,15 @@
   margin-bottom: var(--space-sm);
 }
 
+.portfolio-detail__logo {
+  width: var(--space-xxl);
+  height: var(--space-xxl);
+  border-radius: var(--radius-md);
+  object-fit: contain;
+  flex-shrink: 0;
+  align-self: center;
+}
+
 .portfolio-detail__meta {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);

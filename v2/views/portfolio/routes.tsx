@@ -4,6 +4,7 @@ import { log } from "../../singletons/logger.ts";
 import { createDomainRoutes } from "../../factories/domain-routes.ts";
 import { portfolioConfig } from "../../domains/portfolio/config.tsx";
 import {
+  getCustomerService,
   getGitHubService,
   getGoalService,
   getMilestoneService,
@@ -551,9 +552,12 @@ portfolioRouter.get("/:id", async (c) => {
   if (!item) return c.notFound();
 
   const teamIds = new Set((item.team ?? []).map((m) => m.personId));
-  const [allGoals, allPeople] = await Promise.all([
+  const [allGoals, allPeople, customer] = await Promise.all([
     getGoalService().list(),
     teamIds.size > 0 ? getPeopleService().list() : Promise.resolve([]),
+    item.billingCustomerId
+      ? getCustomerService().getById(item.billingCustomerId)
+      : Promise.resolve(null),
   ]);
   const linkedById = new Set(item.linkedGoals ?? []);
   const goals = allGoals.filter((g) =>
@@ -570,6 +574,7 @@ portfolioRouter.get("/:id", async (c) => {
       item={item}
       goals={goals}
       personById={personById}
+      customer={customer ?? null}
     />,
   );
 });

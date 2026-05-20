@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import { MainLayout } from "../components/layout/main.tsx";
 import type { PortfolioItem } from "../types/portfolio.types.ts";
 import type { Goal } from "../types/goal.types.ts";
+import type { Customer } from "../types/customer.types.ts";
 import type { ViewProps } from "../types/app.ts";
 import { formatCurrency } from "../utils/format.ts";
 import { formatDate } from "../utils/time.ts";
@@ -11,6 +12,7 @@ import { KpiGauge } from "../components/ui/kpi-gauge.tsx";
 import { BackButton } from "./components/back-button.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
+import { InfoItem } from "./components/info-item.tsx";
 import { PORTFOLIO_STATUS_VARIANTS } from "../domains/portfolio/constants.tsx";
 import { GOAL_STATUS_VARIANTS } from "../domains/goal/constants.tsx";
 import { badgeClass } from "../components/ui/status-badge.tsx";
@@ -22,6 +24,7 @@ type Props = ViewProps & {
   item: PortfolioItem;
   goals?: Goal[];
   personById?: Record<string, string>;
+  customer?: Customer | null;
 };
 
 /** Single status update row — reused by detail page and fragment routes. */
@@ -86,10 +89,11 @@ export const StatusUpdateEditRow: FC<{
 );
 
 export const PortfolioDetailView: FC<Props> = (
-  { item, goals = [], personById = {}, ...viewProps },
+  { item, goals = [], personById = {}, customer = null, ...viewProps },
 ) => {
   const profit = (item.revenue ?? 0) - (item.expenses ?? 0);
   const pct = item.progress ?? 0;
+  const hasExtraInfo = !!item.billingCustomerId || item.brainManaged != null;
 
   return (
     <MainLayout
@@ -115,6 +119,13 @@ export const PortfolioDetailView: FC<Props> = (
 
         <header class="detail-section detail-header portfolio-detail__header">
           <div class="detail-title-row portfolio-detail__title-row">
+            {item.logo && (
+              <img
+                class="portfolio-detail__logo"
+                src={item.logo}
+                alt={`${item.name} logo`}
+              />
+            )}
             <h1 class="detail-title portfolio-detail__title">{item.name}</h1>
             <span class={badgeClass(PORTFOLIO_STATUS_VARIANTS, item.status)}>
               {item.status}
@@ -144,6 +155,23 @@ export const PortfolioDetailView: FC<Props> = (
             </div>
           </div>
         </header>
+
+        {hasExtraInfo && (
+          <div class="detail-section detail-info-row">
+            {item.billingCustomerId && (
+              <InfoItem label="Billing customer">
+                {customer
+                  ? <a href={`/customers/${customer.id}`}>{customer.name}</a>
+                  : item.billingCustomerId}
+              </InfoItem>
+            )}
+            {item.brainManaged != null && (
+              <InfoItem label="Brain managed">
+                {item.brainManaged ? "Yes" : "No"}
+              </InfoItem>
+            )}
+          </div>
+        )}
 
         {(item.revenue != null || item.expenses != null) && (
           <div class="portfolio-detail__financials">
