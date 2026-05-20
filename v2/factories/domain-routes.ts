@@ -120,6 +120,10 @@ export function createDomainRoutes<T extends Entity, C, U>(
     // Dynamic filters (status, project, etc.)
     if (cfg.filters) {
       for (const f of cfg.filters) {
+        // Computed filters defer to the domain's customFilter — the dropdown
+        // value is still read into state, but applyFilters does not match it
+        // against an entity field.
+        if (f.computed) continue;
         const val = state[f.name];
         if (val && typeof val === "string") {
           const field = f.field ?? f.name;

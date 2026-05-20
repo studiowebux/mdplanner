@@ -28,6 +28,14 @@ export type FilterDef = {
   options: { value: string; label: string }[];
   /** Item field to filter on. Defaults to `name` if omitted. Supports array fields. */
   field?: string;
+  /**
+   * When true, the factory renders the dropdown and reads the value into
+   * filterState, but skips entity-field matching in applyFilters. The domain's
+   * `customFilter` is responsible for narrowing items. Use for derived/computed
+   * filters (period status, array-of-object lookups) that cannot be expressed
+   * as a simple `item[field] === value` comparison.
+   */
+  computed?: boolean;
 };
 
 // Domain filter state — generic across all domains.
