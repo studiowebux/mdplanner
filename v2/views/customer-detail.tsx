@@ -85,36 +85,38 @@ const BillingSection: FC<{
               ({quotes.length})
             </span>
           </h3>
-          <table class="data-table data-table--compact">
-            <thead>
-              <tr>
-                <th>Number</th>
-                <th>Title</th>
-                <th>Status</th>
-                <th class="data-table__th--right">Total</th>
-                <th>Expires</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentQuotes.map((q) => (
-                <tr key={q.id}>
-                  <td>
-                    <a href={`/quotes/${q.id}`}>{q.number}</a>
-                  </td>
-                  <td>{q.title}</td>
-                  <td>
-                    <span class={badgeClass(QUOTE_STATUS_VARIANTS, q.status)}>
-                      {q.status}
-                    </span>
-                  </td>
-                  <td class="data-table__td--right">
-                    {formatCurrency(q.total) || "$0"}
-                  </td>
-                  <td>{q.expiresAt ?? ""}</td>
+          <div class="data-table-wrapper">
+            <table class="data-table data-table--compact">
+              <thead class="data-table__head">
+                <tr>
+                  <th class="data-table__th">Number</th>
+                  <th class="data-table__th">Title</th>
+                  <th class="data-table__th" data-col="status">Status</th>
+                  <th class="data-table__th data-table__th--right">Total</th>
+                  <th class="data-table__th">Expires</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody class="data-table__body">
+                {recentQuotes.map((q) => (
+                  <tr key={q.id}>
+                    <td>
+                      <a href={`/quotes/${q.id}`}>{q.number}</a>
+                    </td>
+                    <td>{q.title}</td>
+                    <td data-col="status">
+                      <span class={badgeClass(QUOTE_STATUS_VARIANTS, q.status)}>
+                        {q.status}
+                      </span>
+                    </td>
+                    <td class="data-table__td--right">
+                      {formatCurrency(q.total) || "$0"}
+                    </td>
+                    <td>{q.expiresAt ?? ""}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           {quotes.length > CUSTOMER_BILLING_MAX_ROWS && (
             <a
               class="customer-detail__view-all"
@@ -135,45 +137,47 @@ const BillingSection: FC<{
               ({invoices.length})
             </span>
           </h3>
-          <table class="data-table data-table--compact">
-            <thead>
-              <tr>
-                <th>Number</th>
-                <th>Title</th>
-                <th>Status</th>
-                <th class="data-table__th--right">Total</th>
-                <th class="data-table__th--right">Paid</th>
-                <th>Due</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentInvoices.map((inv) => (
-                <tr key={inv.id}>
-                  <td>
-                    <a href={`/invoices/${inv.id}`}>{inv.number}</a>
-                  </td>
-                  <td>{inv.title}</td>
-                  <td>
-                    <span
-                      class={badgeClass(
-                        INVOICE_STATUS_VARIANTS,
-                        inv.displayStatus,
-                      )}
-                    >
-                      {inv.displayStatus}
-                    </span>
-                  </td>
-                  <td class="data-table__td--right">
-                    {formatCurrency(inv.total) || "$0"}
-                  </td>
-                  <td class="data-table__td--right">
-                    {formatCurrency(inv.paidAmount) || "$0"}
-                  </td>
-                  <td>{inv.dueDate ?? ""}</td>
+          <div class="data-table-wrapper">
+            <table class="data-table data-table--compact">
+              <thead class="data-table__head">
+                <tr>
+                  <th class="data-table__th">Number</th>
+                  <th class="data-table__th">Title</th>
+                  <th class="data-table__th" data-col="status">Status</th>
+                  <th class="data-table__th data-table__th--right">Total</th>
+                  <th class="data-table__th data-table__th--right">Paid</th>
+                  <th class="data-table__th">Due</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody class="data-table__body">
+                {recentInvoices.map((inv) => (
+                  <tr key={inv.id}>
+                    <td>
+                      <a href={`/invoices/${inv.id}`}>{inv.number}</a>
+                    </td>
+                    <td>{inv.title}</td>
+                    <td data-col="status">
+                      <span
+                        class={badgeClass(
+                          INVOICE_STATUS_VARIANTS,
+                          inv.displayStatus,
+                        )}
+                      >
+                        {inv.displayStatus}
+                      </span>
+                    </td>
+                    <td class="data-table__td--right">
+                      {formatCurrency(inv.total) || "$0"}
+                    </td>
+                    <td class="data-table__td--right">
+                      {formatCurrency(inv.paidAmount) || "$0"}
+                    </td>
+                    <td>{inv.dueDate ?? ""}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           {invoices.length > CUSTOMER_BILLING_MAX_ROWS && (
             <a
               class="customer-detail__view-all"

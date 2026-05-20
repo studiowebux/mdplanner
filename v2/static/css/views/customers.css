@@ -82,3 +82,15 @@
   margin-top: var(--space-sm);
   font-size: var(--font-size-sm);
 }
+
+/* Status column inside billing tables: align the badge with its centered
+   header label. Without this, the badge's own internal padding offsets its
+   text right of the column's edge, making the header look misaligned with
+   the data row. */
+.customer-detail__billing-group [data-col="status"] {
+  text-align: center;
+}
+
+.customer-detail__billing-group td[data-col="status"] .badge {
+  display: inline-block;
+}
