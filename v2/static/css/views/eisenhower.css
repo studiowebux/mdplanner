@@ -59,9 +59,3 @@
   display: block;
   margin-top: var(--space-xxs);
 }
-
-/* -- Edit mode ------------------------------------------------------------ */
-
-.eisenhower-detail--editing .quadrant-card__item:hover {
-  background: var(--color-bg-tertiary);
-}

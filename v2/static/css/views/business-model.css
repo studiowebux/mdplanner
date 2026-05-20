@@ -68,50 +68,14 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Edit mode
+   Edit mode — hover bg, ghost input (.quadrant-card__input--ghost), and
+   textarea (.quadrant-card__textarea) come from components.css.
 --------------------------------------------------------------------------- */
-
-.bmc-detail--editing .quadrant-card__item:hover {
-  background: var(--color-bg-tertiary);
-}
 
 /* Strip quadrant-card__add double-padding; lc-section already pads the card. */
 .bmc-canvas .quadrant-card__add {
   padding: var(--space-xs) 0 0;
   border-top: none;
-}
-
-/* Ghost input — bottom underline only, matches inline-edit style. */
-.bmc-canvas .quadrant-card__input {
-  border: none;
-  border-bottom: var(--border-width) solid var(--color-border-default);
-  border-radius: 0;
-  background: transparent;
-  padding: var(--space-xs) 0;
-  transition: border-color var(--transition-fast);
-}
-
-.bmc-canvas .quadrant-card__input:focus {
-  outline: none;
-  border-bottom-color: var(--color-accent);
-}
-
-/* Textarea inline-edit: auto-size to content, no resize handle. */
-.bmc-inline-edit {
-  field-sizing: content;
-  resize: none;
-  min-height: var(--space-lg);
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* Flex items need min-width: 0 to shrink within constrained grid cells. */
-.bmc-canvas .quadrant-card__item {
-  min-width: 0;
-}
-
-.bmc-canvas .quadrant-card__inline-edit {
-  min-width: 0;
 }
 
 /* ---------------------------------------------------------------------------

@@ -122,46 +122,9 @@
   flex-shrink: 0;
 }
 
-.pv-board .quadrant-card__input {
-  width: var(--full-width);
-  border: none;
-  border-bottom: var(--border-width) solid var(--color-border-default);
-  border-radius: 0;
-  background: transparent;
-  padding: var(--space-xs) 0;
-  font-size: var(--font-size-sm);
-  transition: border-color var(--transition-fast);
-}
-
-.pv-board .quadrant-card__input:focus {
-  outline: none;
-  border-bottom-color: var(--color-accent);
-}
-
-.pv-board .quadrant-card__inline-edit {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  border-bottom: var(--border-width) solid var(--color-border-default);
-  border-radius: 0;
-  background: transparent;
-  padding: var(--space-xs) 0;
-  font-size: var(--font-size-sm);
-  transition: border-color var(--transition-fast);
-}
-
-.pv-board .quadrant-card__inline-edit:focus {
-  outline: none;
-  border-bottom-color: var(--color-accent);
-}
-
-/* ---------------------------------------------------------------------------
-   Edit mode
---------------------------------------------------------------------------- */
-
-.pv-detail--editing .pv-board .quadrant-card__item:hover {
-  background: var(--color-bg-tertiary);
-}
+/* Inputs/inline-edit + edit-mode hover come from components.css
+   (.quadrant-card__input--ghost modifier on add inputs; canonical
+   .quadrant-card__inline-edit covers row editing). */
 
 /* ---------------------------------------------------------------------------
    Card list view

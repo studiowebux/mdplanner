@@ -45,9 +45,3 @@
 .quadrant-card[data-quadrant="start"] {
   border-top: var(--border-width-thick) solid var(--color-accent);
 }
-
-/* -- Edit mode ------------------------------------------------------------ */
-
-.retro-detail--editing .quadrant-card__item:hover {
-  background: var(--color-bg-tertiary);
-}

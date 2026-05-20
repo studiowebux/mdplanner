@@ -45,12 +45,8 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Edit mode
+   Edit mode — domain-specific only; hover bg comes from components.css
 --------------------------------------------------------------------------- */
-
-.fishbone-detail--editing .quadrant-card__item:hover {
-  background: var(--color-bg-tertiary);
-}
 
 /* Category name input — reads like the .quadrant-card__title it replaces. */
 .fishbone-detail__category-name {

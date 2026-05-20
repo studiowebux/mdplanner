@@ -54,9 +54,3 @@
 .swot-detail__section {
   margin-top: var(--section-gap);
 }
-
-/* -- Edit mode ------------------------------------------------------------ */
-
-.swot-detail--editing .quadrant-card__item:hover {
-  background: var(--color-bg-tertiary);
-}

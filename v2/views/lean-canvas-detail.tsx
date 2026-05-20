@@ -36,7 +36,7 @@ const SectionBlock: FC<{
                 ? (
                   <li key={idx} class="quadrant-card__item">
                     <textarea
-                      class="quadrant-card__inline-edit lc-inline-edit"
+                      class="quadrant-card__inline-edit quadrant-card__textarea"
                       name="text"
                       hx-put={`/lean-canvases/${id}/${sectionKey}/${idx}${editSuffix}`}
                       hx-trigger="change"
@@ -73,7 +73,7 @@ const SectionBlock: FC<{
         >
           <input
             type="text"
-            class="quadrant-card__input"
+            class="quadrant-card__input quadrant-card__input--ghost"
             name="text"
             placeholder={`Add ${label.toLowerCase()}…`}
             autocomplete="off"

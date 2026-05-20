@@ -89,7 +89,7 @@ const SectionBlock: FC<{
       <div class="quadrant-card__add">
         <input
           type="text"
-          class="quadrant-card__input"
+          class="quadrant-card__input quadrant-card__input--ghost"
           name="text"
           placeholder={`Add ${singular}…`}
           data-quadrant-add={`/project-value/${boardId}/${sectionKey}${editSuffix}`}

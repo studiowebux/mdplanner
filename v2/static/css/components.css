@@ -1983,6 +1983,7 @@ a.badge:hover {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
+  min-width: 0;
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-sm);
   transition: background var(--transition-fast);
@@ -2024,6 +2025,7 @@ a.badge:hover {
 
 .quadrant-card__inline-edit {
   flex: 1;
+  min-width: 0;
   border: none;
   border-bottom: var(--border-width) solid var(--color-border);
   border-radius: 0;
@@ -2066,6 +2068,35 @@ a.badge:hover {
 .quadrant-card__input:focus {
   outline: none;
   border-color: var(--color-accent);
+}
+
+/* Ghost input variant — borderless with underline. For canvases (LC, BMC) and
+   value boards (PV) where the bordered default competes with the cell border. */
+.quadrant-card__input--ghost {
+  border: none;
+  border-bottom: var(--border-width) solid var(--color-border-default);
+  border-radius: 0;
+  background: transparent;
+  padding: var(--space-xs) 0;
+  transition: border-color var(--transition-fast);
+}
+
+.quadrant-card__input--ghost:focus {
+  border-bottom-color: var(--color-accent);
+}
+
+/* Auto-sizing textarea for inline quadrant editing (LC, BMC long-form items). */
+.quadrant-card__textarea {
+  field-sizing: content;
+  resize: none;
+  min-height: var(--space-lg);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Edit-mode hover — any `*-detail--editing` ancestor highlights items on hover. */
+[class*="-detail--editing"] .quadrant-card__item:hover {
+  background: var(--color-bg-tertiary);
 }
 
 /* -------------------------------------------------------------------------
