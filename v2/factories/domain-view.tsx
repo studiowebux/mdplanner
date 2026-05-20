@@ -665,13 +665,15 @@ export function createDomainPage<T extends Entity>(
               {state.sort && (
                 <button
                   type="button"
-                  class="btn btn--tertiary btn--sm"
+                  class="btn btn--ghost btn--sm"
                   hx-get={`/${cfg.name}/view?sort=&order=`}
                   hx-include={`#${cfg.name}-toolbar`}
                   hx-target={`#${cfg.name}-view`}
                   hx-swap="outerHTML"
+                  aria-label="Clear sort"
+                  title="Clear sort"
                 >
-                  ✕ Sort
+                  ↺ Clear sort
                 </button>
               )}
             </div>
