@@ -760,6 +760,7 @@ html.font-mono {
   --invoice-print-section-gap: var(--space-lg);
 
   --quadrant-card-max-h: 40vh;
+  --lc-section-edit-max-h: 40vh;
 
   /* Deals pipeline */
   --deal-pipeline-col-w: 18rem;

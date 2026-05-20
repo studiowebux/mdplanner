@@ -159,6 +159,24 @@
   border-top: none;
 }
 
+/* Bound section height in edit mode so long lists scroll internally and the
+   add-item input stays anchored at the bottom. Uses the canonical
+   `[class*="-detail--editing"]` ancestor selector (see
+   `[architecture] MD Planner — Quadrant edit-mode shared CSS`). Applies to
+   both Lean Canvas (`lc-detail--editing`) and Business Model
+   (`bmc-detail--editing`) detail views — both share `.lc-section`. */
+[class*="-detail--editing"] .lc-section {
+  max-height: var(--lc-section-edit-max-h);
+}
+
+[class*="-detail--editing"] .lc-section__list {
+  overflow-y: auto;
+}
+
+[class*="-detail--editing"] .lc-section .quadrant-card__add {
+  flex-shrink: 0;
+}
+
 /* -- Responsive ------------------------------------------------------------ */
 
 @media (max-width: 1100px) {
