@@ -20,6 +20,7 @@ import {
   renderCarryoverSection,
   renderRelatedSection,
 } from "../../../views/meeting-detail.tsx";
+import { buildActionPersonById } from "../../../domains/meeting/owners.ts";
 
 export const meetingsRouter = new OpenAPIHono();
 
@@ -199,7 +200,10 @@ meetingsRouter.openapi(
     const meeting = await getMeetingService().getById(id);
     if (!meeting) return c.json(notFound("MEETING", id), 404);
     const entries = await getMeetingService().getOpenActions(meeting.date);
-    return c.html(renderCarryoverSection(entries), 200);
+    const personById = await buildActionPersonById(
+      entries.map((e) => e.action),
+    );
+    return c.html(renderCarryoverSection(entries, personById), 200);
   },
 );
 
@@ -239,7 +243,8 @@ meetingsRouter.openapi(
     const meeting = await getMeetingService().addAction(id, data);
     if (!meeting) return c.json(notFound("MEETING", id), 404);
     publish("meeting.updated");
-    return c.html(renderActionsTable(meeting), 200);
+    const personById = await buildActionPersonById(meeting.actions);
+    return c.html(renderActionsTable(meeting, personById), 200);
   },
 );
 
@@ -268,7 +273,8 @@ meetingsRouter.openapi(
     const meeting = await getMeetingService().toggleAction(id, actionId);
     if (!meeting) return c.json(notFound("MEETING", id), 404);
     publish("meeting.updated");
-    return c.html(renderActionsTable(meeting), 200);
+    const personById = await buildActionPersonById(meeting.actions);
+    return c.html(renderActionsTable(meeting, personById), 200);
   },
 );
 
@@ -297,7 +303,8 @@ meetingsRouter.openapi(
     const meeting = await getMeetingService().deleteAction(id, actionId);
     if (!meeting) return c.json(notFound("MEETING", id), 404);
     publish("meeting.updated");
-    const res = c.html(renderActionsTable(meeting), 200);
+    const personById = await buildActionPersonById(meeting.actions);
+    const res = c.html(renderActionsTable(meeting, personById), 200);
     res.headers.set(
       "HX-Trigger",
       JSON.stringify({ showToast: "Action deleted" }),

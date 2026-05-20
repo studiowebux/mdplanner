@@ -8,6 +8,7 @@ import { MEETING_FORM_FIELDS } from "../../domains/meeting/constants.tsx";
 import type { Meeting } from "../../types/meeting.types.ts";
 import { getMeetingService } from "../../singletons/services.ts";
 import { generateId } from "../../utils/id.ts";
+import { buildActionPersonById } from "../../domains/meeting/owners.ts";
 import {
   MeetingDetailView,
   renderActionsTable,
@@ -37,12 +38,14 @@ domainRouter.get("/:id", async (c) => {
     (item.relatedMeetings ?? []).map((rid) => getMeetingService().getById(rid)),
   );
   const relatedItems = resolved.filter((m): m is Meeting => m !== null);
+  const personById = await buildActionPersonById(item.actions);
 
   return c.html(
     <MeetingDetailView
       {...viewProps(c, "/meetings")}
       item={item}
       relatedItems={relatedItems}
+      personById={personById}
     />,
   );
 });
@@ -65,7 +68,8 @@ domainRouter.post("/:id/actions", async (c) => {
   });
   if (!meeting) return c.notFound();
   publish("meeting.updated");
-  return new Response(renderActionsTable(meeting), {
+  const personById = await buildActionPersonById(meeting.actions);
+  return new Response(renderActionsTable(meeting, personById), {
     status: 200,
     headers: { "Content-Type": "text/html" },
   });
@@ -104,7 +108,8 @@ domainRouter.put("/:id/actions/:actionId/toggle", async (c) => {
   const meeting = await getMeetingService().toggleAction(id, actionId);
   if (!meeting) return c.notFound();
   publish("meeting.updated");
-  return new Response(renderActionsTable(meeting), {
+  const personById = await buildActionPersonById(meeting.actions);
+  return new Response(renderActionsTable(meeting, personById), {
     status: 200,
     headers: { "Content-Type": "text/html" },
   });
@@ -117,7 +122,8 @@ domainRouter.delete("/:id/actions/:actionId", async (c) => {
   const meeting = await getMeetingService().deleteAction(id, actionId);
   if (!meeting) return c.notFound();
   publish("meeting.updated");
-  return new Response(renderActionsTable(meeting), {
+  const personById = await buildActionPersonById(meeting.actions);
+  return new Response(renderActionsTable(meeting, personById), {
     status: 200,
     headers: { "Content-Type": "text/html" },
   });

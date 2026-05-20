@@ -21,17 +21,27 @@ import { MarkdownSection } from "./components/markdown-section.tsx";
 // Action item row
 // ---------------------------------------------------------------------------
 
-const ActionRow: FC<{ action: MeetingAction; meetingId: string }> = (
-  { action, meetingId },
+const ActionRow: FC<
+  {
+    action: MeetingAction;
+    meetingId: string;
+    personById: Record<string, string>;
+  }
+> = (
+  { action, meetingId, personById },
 ) => (
   <tr class="data-table__row">
     <td class="data-table__td">{action.description}</td>
     <td class="data-table__td">
       {action.owner
         ? (
-          <a href={`/people?q=${encodeURIComponent(action.owner)}`}>
-            {action.owner}
-          </a>
+          personById[action.owner]
+            ? (
+              <a href={`/people/${action.owner}`}>
+                {personById[action.owner]}
+              </a>
+            )
+            : <span>{action.owner}</span>
         )
         : "—"}
     </td>
@@ -71,15 +81,17 @@ const ActionRow: FC<{ action: MeetingAction; meetingId: string }> = (
 // Actions table fragment — exported for API fragment responses
 // ---------------------------------------------------------------------------
 
-const ActionsTableComponent: FC<{ meeting: Meeting }> = ({ meeting }) => (
+const ActionsTableComponent: FC<
+  { meeting: Meeting; personById: Record<string, string> }
+> = ({ meeting, personById }) => (
   <section id="meeting-actions-table" class="detail-section">
     <h2 class="section-heading">
       Action Items
       {meeting.actions.length > 0 && (
         <span class="badge badge--neutral meeting-detail__actions-count">
-          {meeting.actions.filter((a) => a.status === "open").length} open /
-          {" "}
-          {meeting.actions.length} total
+          {meeting.actions.filter((a) =>
+            a.status === "open"
+          ).length} open / {meeting.actions.length} total
         </span>
       )}
     </h2>
@@ -102,6 +114,7 @@ const ActionsTableComponent: FC<{ meeting: Meeting }> = ({ meeting }) => (
                 key={action.id}
                 action={action}
                 meetingId={meeting.id}
+                personById={personById}
               />
             ))}
           </tbody>
@@ -124,10 +137,10 @@ const ActionsTableComponent: FC<{ meeting: Meeting }> = ({ meeting }) => (
         placeholder="Add action item…"
         required
       />
-      <input
-        class="input meeting-detail__add-action-input meeting-detail__add-action-input--sm"
-        type="text"
+      <AutocompleteWidget
+        id={`meeting-action-owner-${meeting.id}`}
         name="owner"
+        source="people"
         placeholder="Owner"
       />
       <input
@@ -141,16 +154,23 @@ const ActionsTableComponent: FC<{ meeting: Meeting }> = ({ meeting }) => (
 );
 
 /** Render the actions table section as an HTML string for fragment responses. */
-export function renderActionsTable(meeting: Meeting): string {
-  return renderToString(<ActionsTableComponent meeting={meeting} />);
+export function renderActionsTable(
+  meeting: Meeting,
+  personById: Record<string, string>,
+): string {
+  return renderToString(
+    <ActionsTableComponent meeting={meeting} personById={personById} />,
+  );
 }
 
 // ---------------------------------------------------------------------------
 // Carry-over section — open actions from prior meetings
 // ---------------------------------------------------------------------------
 
-const CarryoverSectionContent: FC<{ entries: OpenActionEntry[] }> = (
-  { entries },
+const CarryoverSectionContent: FC<
+  { entries: OpenActionEntry[]; personById: Record<string, string> }
+> = (
+  { entries, personById },
 ) => (
   <div id="meeting-carryover-content">
     {entries.length === 0
@@ -172,9 +192,20 @@ const CarryoverSectionContent: FC<{ entries: OpenActionEntry[] }> = (
                 {e.action.description}
               </span>
               {e.action.owner && (
-                <span class="badge badge--neutral">
-                  {e.action.owner}
-                </span>
+                personById[e.action.owner]
+                  ? (
+                    <a
+                      href={`/people/${e.action.owner}`}
+                      class="badge badge--neutral"
+                    >
+                      {personById[e.action.owner]}
+                    </a>
+                  )
+                  : (
+                    <span class="badge badge--neutral">
+                      {e.action.owner}
+                    </span>
+                  )
               )}
             </li>
           ))}
@@ -184,8 +215,13 @@ const CarryoverSectionContent: FC<{ entries: OpenActionEntry[] }> = (
 );
 
 /** Render the carry-over section content as an HTML string for fragment responses. */
-export function renderCarryoverSection(entries: OpenActionEntry[]): string {
-  return renderToString(<CarryoverSectionContent entries={entries} />);
+export function renderCarryoverSection(
+  entries: OpenActionEntry[],
+  personById: Record<string, string>,
+): string {
+  return renderToString(
+    <CarryoverSectionContent entries={entries} personById={personById} />,
+  );
 }
 
 const CarryoverSection: FC<{ meetingId: string }> = ({ meetingId }) => (
@@ -306,9 +342,13 @@ export function renderRelatedSection(
 // ---------------------------------------------------------------------------
 
 export const MeetingDetailView: FC<
-  ViewProps & { item: Meeting; relatedItems: Meeting[] }
+  ViewProps & {
+    item: Meeting;
+    relatedItems: Meeting[];
+    personById: Record<string, string>;
+  }
 > = (
-  { item: meeting, relatedItems, ...viewProps },
+  { item: meeting, relatedItems, personById, ...viewProps },
 ) => {
   const attendees = meeting.attendees ?? [];
 
@@ -376,7 +416,7 @@ export const MeetingDetailView: FC<
         <MarkdownSection title="Notes" markdown={meeting.notes} />
 
         {/* -- Action items ----------------------------------------------- */}
-        <ActionsTableComponent meeting={meeting} />
+        <ActionsTableComponent meeting={meeting} personById={personById} />
 
         {/* -- Related meetings ------------------------------------------- */}
         <RelatedMeetingsSectionComponent

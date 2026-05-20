@@ -166,9 +166,10 @@ export const MEETING_FORM_FIELDS: FieldDef[] = [
         placeholder: "What needs to be done?",
       },
       {
-        type: "text",
+        type: "autocomplete",
         name: "owner",
         label: "Owner",
+        source: "people",
         placeholder: "Person responsible",
       },
       {
