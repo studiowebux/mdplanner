@@ -2,6 +2,10 @@
 // Read-only: uses existing service list() methods, never writes.
 
 import {
+  getCompanyService,
+  getContactService,
+  getCustomerService,
+  getDealService,
   getGoalService,
   getMeetingService,
   getMilestoneService,
@@ -49,20 +53,36 @@ export class IntegrityService {
     const start = performance.now();
     const checks: CheckResult[] = [];
 
-    const [tasks, people, milestones, goals, meetings, portfolio] =
-      await Promise.all([
-        getTaskService().list(),
-        getPeopleService().list(),
-        getMilestoneService().list(),
-        getGoalService().list(),
-        getMeetingService().list(),
-        getPortfolioService().list(),
-      ]);
+    const [
+      tasks,
+      people,
+      milestones,
+      goals,
+      meetings,
+      portfolio,
+      companies,
+      contacts,
+      deals,
+      customers,
+    ] = await Promise.all([
+      getTaskService().list(),
+      getPeopleService().list(),
+      getMilestoneService().list(),
+      getGoalService().list(),
+      getMeetingService().list(),
+      getPortfolioService().list(),
+      getCompanyService().list(),
+      getContactService().list(),
+      getDealService().list(),
+      getCustomerService().list(),
+    ]);
 
     const taskIds = new Set(tasks.map((t) => t.id));
     const personIds = new Set(people.map((p) => p.id));
     const milestoneNames = new Set(milestones.map((m) => m.name));
     const portfolioNames = new Set(portfolio.map((p) => p.name));
+    const companyNames = new Set(companies.map((c) => c.name));
+    const contactNames = new Set(contacts.map((c) => c.name));
 
     // Duplicate ID detection per entity type
     const seen = new Map<string, Set<string>>();
@@ -83,6 +103,10 @@ export class IntegrityService {
     checkDuplicates("goal", goals.map((g) => g.id));
     checkDuplicates("meeting", meetings.map((m) => m.id));
     checkDuplicates("portfolio", portfolio.map((p) => p.id));
+    checkDuplicates("company", companies.map((c) => c.id));
+    checkDuplicates("contact", contacts.map((c) => c.id));
+    checkDuplicates("deal", deals.map((d) => d.id));
+    checkDuplicates("customer", customers.map((c) => c.id));
 
     // Tasks
     for (const t of tasks) {
@@ -149,6 +173,38 @@ export class IntegrityService {
             ),
           );
         }
+      }
+    }
+
+    // Contacts
+    for (const c of contacts) {
+      if (c.company && !companyNames.has(c.company)) {
+        checks.push(
+          err("contact", c.id, "company", `Unknown company "${c.company}"`),
+        );
+      }
+    }
+
+    // Deals
+    for (const d of deals) {
+      if (d.company && !companyNames.has(d.company)) {
+        checks.push(
+          err("deal", d.id, "company", `Unknown company "${d.company}"`),
+        );
+      }
+      if (d.contact && !contactNames.has(d.contact)) {
+        checks.push(
+          warn("deal", d.id, "contact", `Unknown contact "${d.contact}"`),
+        );
+      }
+    }
+
+    // Customers
+    for (const c of customers) {
+      if (c.company && !companyNames.has(c.company)) {
+        checks.push(
+          warn("customer", c.id, "company", `Unknown company "${c.company}"`),
+        );
       }
     }
 
