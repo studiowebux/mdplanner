@@ -1466,6 +1466,7 @@ a.badge:hover {
 .data-table__head {
   position: sticky;
   top: 0;
+  z-index: var(--z-table-head);
   background: var(--color-bg-primary);
 }
 
