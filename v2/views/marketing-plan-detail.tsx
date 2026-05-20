@@ -8,6 +8,7 @@ import { formatDate } from "../utils/time.ts";
 import { toKebab } from "../utils/slug.ts";
 import { MarkdownSection } from "./components/markdown-section.tsx";
 import { DetailActions } from "./components/detail-actions.tsx";
+import { EditModeToggle } from "./components/edit-mode-toggle.tsx";
 import { SseRefresh } from "./components/sse-refresh.tsx";
 import { InfoItem } from "./components/info-item.tsx";
 import {
@@ -20,13 +21,93 @@ import { badgeClass } from "../components/ui/status-badge.tsx";
 import { AuditMeta } from "./components/audit-meta.tsx";
 
 // ---------------------------------------------------------------------------
+// Description — read (<p>) or in-place editable (contenteditable + Save).
+// ---------------------------------------------------------------------------
+
+const DescriptionSection: FC<{ plan: MarketingPlan }> = ({ plan }) => (
+  <section class="detail-section mktplan-detail__section">
+    <h2 class="section-heading">Description</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={plan.description ?? ""}
+      data-inline-target="mktplan-description-value"
+      data-inline-save-btn="mktplan-description-save"
+    >
+      {plan.description ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="mktplan-description-value"
+      name="description"
+      value={plan.description ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="mktplan-description-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/marketing-plans/${plan.id}/description?editing=true`}
+        hx-include="#mktplan-description-value"
+        hx-target="#mktplan-detail-root"
+        hx-select="#mktplan-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
+
+// ---------------------------------------------------------------------------
+// Notes — read (markdown) or in-place editable (raw markdown + Save).
+// ---------------------------------------------------------------------------
+
+const NotesSection: FC<{ plan: MarketingPlan }> = ({ plan }) => (
+  <section class="detail-section mktplan-detail__section">
+    <h2 class="section-heading">Notes</h2>
+    <div
+      class="inline-editable"
+      contenteditable
+      data-inline-edit
+      data-inline-original={plan.notes ?? ""}
+      data-inline-target="mktplan-notes-value"
+      data-inline-save-btn="mktplan-notes-save"
+    >
+      {plan.notes ?? ""}
+    </div>
+    <input
+      type="hidden"
+      id="mktplan-notes-value"
+      name="notes"
+      value={plan.notes ?? ""}
+    />
+    <div class="inline-editable__actions">
+      <button
+        type="button"
+        id="mktplan-notes-save"
+        class="btn btn--primary btn--sm is-hidden"
+        hx-put={`/marketing-plans/${plan.id}/notes?editing=true`}
+        hx-include="#mktplan-notes-value"
+        hx-target="#mktplan-detail-root"
+        hx-select="#mktplan-detail-root"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </div>
+  </section>
+);
+
+// ---------------------------------------------------------------------------
 // Main view
 // ---------------------------------------------------------------------------
 
 export const MarketingPlanDetailView: FC<
-  ViewProps & { item: MarketingPlan; goals?: Goal[] }
+  ViewProps & { item: MarketingPlan; goals?: Goal[]; editing?: boolean }
 > = (
-  { item: plan, goals = [], ...viewProps },
+  { item: plan, goals = [], editing = false, ...viewProps },
 ) => {
   const budget = plan.budgetTotal != null
     ? `${plan.budgetCurrency ?? ""} ${plan.budgetTotal.toLocaleString()}`
@@ -49,14 +130,20 @@ export const MarketingPlanDetailView: FC<
       title={plan.name}
       {...viewProps}
       styles={["/css/views/marketing-plans.css", "/css/views/goals.css"]}
-      scripts={["/js/kpi-gauge.js"]}
+      scripts={["/js/kpi-gauge.js", "/js/inline-edit.js"]}
     >
       <SseRefresh
-        getUrl={"/marketing-plans/" + plan.id}
+        getUrl={"/marketing-plans/" + plan.id +
+          (editing ? "?editing=true" : "")}
         trigger="sse:marketing-plan.updated"
         targetId="mktplan-detail-root"
       />
-      <main id="mktplan-detail-root" class="detail-view mktplan-detail">
+      <main
+        id="mktplan-detail-root"
+        class={`detail-view mktplan-detail${
+          editing ? " mktplan-detail--editing" : ""
+        }`}
+      >
         <BackButton href="/marketing-plans" label="Back to Marketing Plans" />
 
         {/* -- Header ---------------------------------------------------- */}
@@ -72,7 +159,12 @@ export const MarketingPlanDetailView: FC<
             id={plan.id}
             title={plan.name}
             formContainerId="marketing-plans-form-container"
-          />
+          >
+            <EditModeToggle
+              href={`/marketing-plans/${plan.id}`}
+              editing={editing}
+            />
+          </DetailActions>
         </header>
 
         {/* -- Overview -------------------------------------------------- */}
@@ -119,12 +211,14 @@ export const MarketingPlanDetailView: FC<
         )}
 
         {/* -- Description ----------------------------------------------- */}
-        {plan.description && (
-          <section class="detail-section mktplan-detail__section">
-            <h2 class="section-heading">Description</h2>
-            <p class="mktplan-detail__description">{plan.description}</p>
-          </section>
-        )}
+        {editing
+          ? <DescriptionSection plan={plan} />
+          : plan.description && (
+            <section class="detail-section mktplan-detail__section">
+              <h2 class="section-heading">Description</h2>
+              <p class="mktplan-detail__description">{plan.description}</p>
+            </section>
+          )}
 
         {/* -- Target Audiences ------------------------------------------ */}
         {hasAudiences && (
@@ -346,7 +440,9 @@ export const MarketingPlanDetailView: FC<
         )}
 
         {/* -- Notes ----------------------------------------------------- */}
-        <MarkdownSection title="Notes" markdown={plan.notes} />
+        {editing
+          ? <NotesSection plan={plan} />
+          : <MarkdownSection title="Notes" markdown={plan.notes} />}
 
         <AuditMeta
           createdAt={plan.createdAt}

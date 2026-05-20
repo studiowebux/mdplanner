@@ -47,6 +47,9 @@ export const marketingPlanConfig: DomainConfig<
   ],
   columns: MKTPLAN_TABLE_COLUMNS,
   formFields: MKTPLAN_FORM_FIELDS,
+  // `description` and `notes` are edited in-place on the detail page via
+  // "Edit Mode". The factory drops them from the edit sidenav, keeps in create.
+  inlineEditFields: ["description", "notes"],
 
   filters: [
     {
