@@ -49,27 +49,11 @@
   grid-area: re;
 }
 
-/* Fill the full grid cell height; default flex-start keeps title+list at top. */
-.bmc-canvas .lc-section {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-  padding: var(--space-sm);
-}
-
-/* List grows to fill available space, pinning the add form to the bottom. */
-.bmc-canvas .lc-section__list,
-.bmc-canvas .lc-section__empty {
-  flex: 1;
-}
-
-.bmc-canvas .lc-section__title {
-  margin-bottom: var(--space-xs);
-}
-
 /* ---------------------------------------------------------------------------
    Edit mode — hover bg, ghost input (.quadrant-card__input--ghost), and
    textarea (.quadrant-card__textarea) come from components.css.
+   .lc-section layout (padding, flex fill, overflow) lives in lean-canvases.css
+   and is shared with the Lean Canvas detail view.
 --------------------------------------------------------------------------- */
 
 /* Strip quadrant-card__add double-padding; lc-section already pads the card. */

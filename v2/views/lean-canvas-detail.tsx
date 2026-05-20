@@ -26,61 +26,59 @@ const SectionBlock: FC<{
 }> = ({ id, sectionKey, label, items, editing, editSuffix }) => (
   <div class="lc-section">
     <h3 class="lc-section__title">{label}</h3>
-    <div class="lc-section__body">
-      {items.length === 0 && !editing
-        ? <p class="lc-section__empty">Add items…</p>
-        : (
-          <ul class="lc-section__list">
-            {items.map((item, idx) =>
-              editing
-                ? (
-                  <li key={idx} class="quadrant-card__item">
-                    <textarea
-                      class="quadrant-card__inline-edit quadrant-card__textarea"
-                      name="text"
-                      hx-put={`/lean-canvases/${id}/${sectionKey}/${idx}${editSuffix}`}
-                      hx-trigger="change"
-                      hx-swap="none"
-                      hx-include="this"
-                    >
-                      {item}
-                    </textarea>
-                    <button
-                      type="button"
-                      class="quadrant-card__remove"
-                      hx-delete={`/lean-canvases/${id}/${sectionKey}/${idx}${editSuffix}`}
-                      hx-confirm={`Remove "${item}"?`}
-                      hx-target="#lc-detail-root"
-                      hx-select="#lc-detail-root"
-                      hx-swap="outerHTML"
-                      aria-label={`Remove "${item}"`}
-                    >
-                      &times;
-                    </button>
-                  </li>
-                )
-                : <li key={idx}>{item}</li>
-            )}
-          </ul>
-        )}
-      {editing && (
-        <form
-          class="quadrant-card__add"
-          hx-post={`/lean-canvases/${id}/${sectionKey}${editSuffix}`}
-          hx-target="#lc-detail-root"
-          hx-select="#lc-detail-root"
-          hx-swap="outerHTML"
-        >
-          <input
-            type="text"
-            class="quadrant-card__input quadrant-card__input--ghost"
-            name="text"
-            placeholder={`Add ${label.toLowerCase()}…`}
-            autocomplete="off"
-          />
-        </form>
+    {items.length === 0 && !editing
+      ? <p class="lc-section__empty">Add items…</p>
+      : (
+        <ul class="lc-section__list">
+          {items.map((item, idx) =>
+            editing
+              ? (
+                <li key={idx} class="quadrant-card__item">
+                  <textarea
+                    class="quadrant-card__inline-edit quadrant-card__textarea"
+                    name="text"
+                    hx-put={`/lean-canvases/${id}/${sectionKey}/${idx}${editSuffix}`}
+                    hx-trigger="change"
+                    hx-swap="none"
+                    hx-include="this"
+                  >
+                    {item}
+                  </textarea>
+                  <button
+                    type="button"
+                    class="quadrant-card__remove"
+                    hx-delete={`/lean-canvases/${id}/${sectionKey}/${idx}${editSuffix}`}
+                    hx-confirm={`Remove "${item}"?`}
+                    hx-target="#lc-detail-root"
+                    hx-select="#lc-detail-root"
+                    hx-swap="outerHTML"
+                    aria-label={`Remove "${item}"`}
+                  >
+                    &times;
+                  </button>
+                </li>
+              )
+              : <li key={idx}>{item}</li>
+          )}
+        </ul>
       )}
-    </div>
+    {editing && (
+      <form
+        class="quadrant-card__add"
+        hx-post={`/lean-canvases/${id}/${sectionKey}${editSuffix}`}
+        hx-target="#lc-detail-root"
+        hx-select="#lc-detail-root"
+        hx-swap="outerHTML"
+      >
+        <input
+          type="text"
+          class="quadrant-card__input quadrant-card__input--ghost"
+          name="text"
+          placeholder={`Add ${label.toLowerCase()}…`}
+          autocomplete="off"
+        />
+      </form>
+    )}
   </div>
 );
 

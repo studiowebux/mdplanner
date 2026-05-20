@@ -101,9 +101,6 @@
   --sl-border-accent-w: 3px;
   --sl-pyramid-max-w: 56rem;
 
-  /* Lean Canvas tokens */
-  --lc-section-min-h: 10rem;
-
   /* Org chart tokens */
   --orgchart-canvas-height: 70vh;
   --orgchart-min-height: 25rem;
@@ -763,9 +760,6 @@ html.font-mono {
   --invoice-print-section-gap: var(--space-lg);
 
   --quadrant-card-max-h: 40vh;
-
-  /* Lean canvas */
-  --lc-section-max-h: 20rem;
 
   /* Deals pipeline */
   --deal-pipeline-col-w: 18rem;
