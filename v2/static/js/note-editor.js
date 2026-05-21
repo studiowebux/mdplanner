@@ -226,9 +226,61 @@
 
       if (section.dataset.sectionType === "tabs") {
         makeTabTitlesEditable(section);
+      } else if (section.dataset.sectionType === "timeline") {
+        makeTimelineHeadersEditable(section);
       }
 
       addSectionAddButtons(section);
+    });
+  }
+
+  // Wire title/status/date inputs into each existing timeline item header so
+  // the user can edit them while in edit mode. Mirrors the header controls
+  // createTimelineItemElement builds for newly added items — pre-existing
+  // items rendered as static spans by note-blocks.tsx had no editor wiring,
+  // so collectSection read stale dataset values on save.
+  function makeTimelineHeadersEditable(section) {
+    qsa("[data-timeline-item-id]", section).forEach(function (item) {
+      if (item.dataset.headerEditable) return;
+      item.dataset.headerEditable = "true";
+
+      var header = qs(".note-detail__timeline-header", item);
+      if (!header) return;
+
+      var title = item.dataset.timelineTitle || "";
+      var status = item.dataset.timelineStatus || "pending";
+      var date = item.dataset.timelineDate || "";
+
+      // Replace the static spans with the same controls
+      // createTimelineItemElement uses for new items.
+      header.textContent = "";
+      header.innerHTML =
+        '<input type="text" class="note-editor__timeline-title-input" value="' +
+        escapeHtml(title) + '" placeholder="Title">' +
+        '<select class="note-editor__status-select">' +
+        '<option value="pending"' + (status === "pending" ? " selected" : "") +
+        ">Pending</option>" +
+        '<option value="success"' + (status === "success" ? " selected" : "") +
+        ">Success</option>" +
+        '<option value="failed"' + (status === "failed" ? " selected" : "") +
+        ">Failed</option>" +
+        "</select>" +
+        '<input type="date" class="note-editor__date-input" value="' +
+        escapeHtml(date) + '">' +
+        '<button type="button" class="btn btn--danger btn--sm" data-action="delete-timeline-item">Del</button>';
+
+      qs("input[type=text]", header).addEventListener("input", function () {
+        item.dataset.timelineTitle = this.value;
+        markDirty();
+      });
+      qs("select", header).addEventListener("change", function () {
+        item.dataset.timelineStatus = this.value;
+        markDirty();
+      });
+      qs("input[type=date]", header).addEventListener("input", function () {
+        item.dataset.timelineDate = this.value;
+        markDirty();
+      });
     });
   }
 
